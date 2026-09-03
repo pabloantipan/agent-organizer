@@ -2,7 +2,7 @@
 
 Wails v2 desktop app plus CLI, Go backend, React + TypeScript frontend. It scans
 configured roots for `working-on/initiative.yaml`, reads the Kanban cards next to
-it, pushes one snapshot per machine to Datastore, pulls every machine's, and shows
+it, pushes one snapshot per machine to Firestore under the signed-in user, pulls every machine's, and shows
 one merged board. It is read-only over the card files.
 
 ## Initiative

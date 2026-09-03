@@ -40,7 +40,7 @@ due: 2026-09-16        # optional, only when a real date exists
 Agents (Claude Code sessions) create and update these cards by following the
 `working-on` skill, which sets the format and a strict verbosity contract. The
 organizer scans them, enriches them with git, shows them, and syncs a snapshot
-per machine through Google Cloud Datastore so every machine sees the whole map.
+per machine through Firestore, under your account, so every machine sees the whole map.
 
 The app is read-only over the files. People and agents write cards; the app
 reads. The only state it owns is the manual priority order.
@@ -124,7 +124,7 @@ organizer config --init          # write ~/.config/organizer/config.yaml with de
 
 | Key | Default | Meaning |
 |---|---|---|
-| `machine` | short hostname | key prefix in Datastore; must differ per machine |
+| `machine` | short hostname | document id under `users/<uid>/machines`; must differ per machine |
 | `roots` | `~` | directories scanned for `working-on/initiative.yaml`; add the folders that hold your initiatives |
 | `max_depth` | 3 | how deep below each root to look |
 | `ignore_dirs` | node_modules, vendor, Library, ... | directory names never entered |
@@ -212,7 +212,7 @@ wails generate module                          # after changing any bound Go typ
 binary on exit. Run `wails build` again before launching from Finder.
 
 Layout: `internal/scan` finds initiatives, parses cards, runs git, and discovers
-agents; `internal/merge` builds the board; `internal/sync` talks to Datastore;
+agents; `internal/merge` builds the board; `internal/sync` talks to Firestore over REST;
 `internal/service` sequences them for both the CLI (`internal/cli`) and the
 Wails bindings (`app.go`). The frontend is React with a zustand store, plain
 CSS tokens, and `@hello-pangea/dnd` for drag.
