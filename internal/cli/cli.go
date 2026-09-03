@@ -14,6 +14,10 @@ import (
 	"time"
 
 	"context"
+	"errors"
+	"syscall"
+
+	"golang.org/x/term"
 
 	"organizer/internal/cache"
 	"organizer/internal/config"
@@ -21,14 +25,13 @@ import (
 	"organizer/internal/model"
 	"organizer/internal/scan"
 	"organizer/internal/service"
-	dsync "organizer/internal/sync"
 )
 
 // Version is set by main from the build.
 var Version = "dev"
 
 // Subcommands the binary recognises. Anything else launches the GUI.
-var Subcommands = []string{"status", "board", "sync", "prompt", "agents", "doctor", "config", "version", "--version", "help"}
+var Subcommands = []string{"status", "board", "sync", "prompt", "agents", "login", "logout", "whoami", "doctor", "config", "version", "--version", "help"}
 
 // IsSubcommand reports whether arg names a CLI subcommand.
 func IsSubcommand(arg string) bool {
@@ -66,6 +69,24 @@ func runWith(args []string, stdout, stderr io.Writer, now func() time.Time) int 
 		return promptCmd(cfg, args[1:], stdout, stderr, now)
 	case "agents":
 		return agentsCmd(cfg, stdout, now)
+	case "login":
+		return loginCmd(cfg, args[1:], stdout, stderr, now)
+	case "logout":
+		svc := service.NewWith(cfg, cache.State{}, now)
+		if err := svc.Auth.SignOut(); err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		fmt.Fprintln(stdout, "signed out on this machine")
+		return 0
+	case "whoami":
+		acc := service.NewWith(cfg, cache.State{}, now).Auth.Account()
+		if !acc.SignedIn {
+			fmt.Fprintln(stdout, "not signed in (organizer login)")
+			return 1
+		}
+		fmt.Fprintf(stdout, "%s (%s)\n", acc.Email, acc.UID)
+		return 0
 	case "doctor":
 		return doctor(cfg, args[1:], stdout, stderr, now)
 	case "config":
@@ -87,6 +108,8 @@ func usage(w io.Writer) {
 
   organizer status [--all] [--json]   open cards per initiative (now, blocked, next)
   organizer board [--json]            merged view: this machine live + last pull from others
+  organizer login [email]             sign in to the cloud (password prompted) and remember it here
+  organizer logout | whoami           forget the session on this machine | show who is signed in
   organizer sync [--no-push|--no-pull] scan, push this machine, pull all, refresh the cache
   organizer prompt <initiative> [--run] print the agent review prompt; --run opens a terminal running the agent with it
   organizer agents                    agent processes and sessions grouped per initiative
@@ -197,7 +220,12 @@ func doctor(cfg config.Config, args []string, stdout, stderr io.Writer, now func
 	if cfg.GCPProject == "" {
 		fmt.Fprintln(stdout, "gcp_project: not set (sync disabled)")
 	} else {
-		fmt.Fprintf(stdout, "gcp_project: %s  namespace: %s\n", cfg.GCPProject, cfg.Namespace)
+		fmt.Fprintf(stdout, "gcp_project: %s  database: %s  api key: %s\n", cfg.GCPProject, cfg.FirestoreDatabase, map[bool]string{true: "set", false: "MISSING"}[cfg.FirebaseAPIKey != ""])
+	}
+	if acc := service.NewWith(cfg, cache.State{}, now).Auth.Account(); acc.SignedIn {
+		fmt.Fprintf(stdout, "account: %s\n", acc.Email)
+	} else {
+		fmt.Fprintln(stdout, "account: not signed in (organizer login)")
 	}
 
 	started := now()
@@ -250,8 +278,8 @@ func configCmd(cfg config.Config, args []string, stdout, stderr io.Writer) int {
 			fmt.Fprintln(stdout, "written:", config.Path())
 		}
 	}
-	fmt.Fprintf(stdout, "machine: %s\nroots: %s\nmax_depth: %d\ngcp_project: %q\nnamespace: %s\neditor: %s\n",
-		cfg.Machine, strings.Join(cfg.Roots, ", "), cfg.MaxDepth, cfg.GCPProject, cfg.Namespace, cfg.Editor)
+	fmt.Fprintf(stdout, "machine: %s\nroots: %s\nmax_depth: %d\ngcp_project: %q\nfirestore_database: %s\nfirebase_api_key: %s\neditor: %s\n",
+		cfg.Machine, strings.Join(cfg.Roots, ", "), cfg.MaxDepth, cfg.GCPProject, cfg.FirestoreDatabase, map[bool]string{true: "set", false: ""}[cfg.FirebaseAPIKey != ""], cfg.Editor)
 	return 0
 }
 
@@ -339,22 +367,21 @@ func syncCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now fun
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
-	if cfg.GCPProject == "" {
-		fmt.Fprintln(stderr, dsync.ErrNoProject.Error())
-		fmt.Fprintln(stderr, "set gcp_project in", config.Path())
-		return 2
-	}
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 	st, _ := cache.Load()
 	svc := service.NewWith(cfg, st, now)
 	res, err := svc.Sync(ctx, !*noPush, !*noPull)
+	if errors.Is(err, service.ErrNotSignedIn) || (err == nil && res.Skipped != "") {
+		fmt.Fprintln(stdout, "sync skipped:", res.Skipped+". Run: organizer login")
+		return 0
+	}
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1
 	}
 	if !*noPush {
-		fmt.Fprintf(stdout, "pushed %d initiatives as %s to %s/%s (%d retired)\n", res.Pushed, cfg.Machine, cfg.GCPProject, cfg.Namespace, res.Retired)
+		fmt.Fprintf(stdout, "pushed %d initiatives as %s to %s/%s (%d retired)\n", res.Pushed, cfg.Machine, cfg.GCPProject, cfg.FirestoreDatabase, res.Retired)
 	}
 	if !*noPull {
 		fmt.Fprintf(stdout, "pulled %d machines: %s\n", len(res.Machines), strings.Join(res.Machines, ", "))
@@ -428,5 +455,36 @@ func agentsCmd(cfg config.Config, stdout io.Writer, now func() time.Time) int {
 		fmt.Fprintln(stdout, "no agents found (process name:", cfg.AgentBinary+")")
 	}
 	fmt.Fprintln(stdout, "working = CPU time grew since the previous sample; the first sample cannot tell.")
+	return 0
+}
+
+func loginCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now func() time.Time) int {
+	if cfg.FirebaseAPIKey == "" {
+		fmt.Fprintln(stderr, "firebase_api_key is not set in", config.Path())
+		return 2
+	}
+	email := ""
+	if len(args) > 0 {
+		email = args[0]
+	} else {
+		fmt.Fprint(stdout, "email: ")
+		fmt.Fscanln(os.Stdin, &email)
+	}
+	fmt.Fprint(stdout, "password: ")
+	pw, err := term.ReadPassword(int(syscall.Stdin))
+	fmt.Fprintln(stdout)
+	if err != nil {
+		fmt.Fprintln(stderr, "cannot read password:", err)
+		return 1
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	svc := service.NewWith(cfg, cache.State{}, now)
+	acc, err := svc.SignIn(ctx, strings.TrimSpace(email), string(pw))
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	fmt.Fprintf(stdout, "signed in as %s; remembered in the keychain on %s\n", acc.Email, cfg.Machine)
 	return 0
 }

@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { Save } from "lucide-react";
 import { api, type Config } from "../hooks/useWails";
+import { PasscodeBlock } from "./PasscodeBlock";
 import { useBoard } from "../stores/board.store";
 
 export function Settings() {
   const [cfg, setCfg] = useState<Config | null>(null);
   const [path, setPath] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
-  const refresh = useBoard((s) => s.refresh);
+  const { refresh, account, setAccount, setOfflineChoice } = useBoard();
 
   useEffect(() => {
     api.getConfig().then(setCfg);
@@ -32,6 +33,38 @@ export function Settings() {
 
   return (
     <div className="settings">
+      <div className="settings-block">
+        <div className="section-label">Account</div>
+        {account?.signed_in ? (
+          <div className="row">
+            <span className="mono">{account.email}</span>
+            <span className="meta mono">{account.uid}</span>
+            <span className="spacer" />
+            <button onClick={async () => { await api.signOut(); setAccount(await api.getAccount()); }}>Sign out</button>
+          </div>
+        ) : (
+          <div className="row">
+            <span className="meta">not signed in; sync is paused</span>
+            <span className="spacer" />
+            <button className="primary" onClick={() => setOfflineChoice(false)}>Sign in</button>
+          </div>
+        )}
+      </div>
+      <PasscodeBlock />
+      <div className="section-label">Cloud</div>
+      <label>
+        GCP project (Firestore native database below; empty disables sync)
+        <input value={cfg.gcp_project} onChange={(e) => set("gcp_project", e.target.value)} placeholder="my-project" />
+      </label>
+      <label>
+        Firebase web API key (public; the security rules do the protecting)
+        <input value={cfg.firebase_api_key} onChange={(e) => set("firebase_api_key", e.target.value)} placeholder="AIza…" />
+      </label>
+      <label>
+        Firestore database id
+        <input value={cfg.firestore_database} onChange={(e) => set("firestore_database", e.target.value)} placeholder="organizer" />
+      </label>
+      <div className="section-label">Scan</div>
       <label>
         machine name (key prefix in Datastore; must differ per machine)
         <input value={cfg.machine} onChange={(e) => set("machine", e.target.value)} />
@@ -47,14 +80,6 @@ export function Settings() {
       <label>
         ignored directory names, one per line
         <textarea rows={4} value={lines(cfg.ignore_dirs)} onChange={(e) => set("ignore_dirs", fromLines(e.target.value))} />
-      </label>
-      <label>
-        GCP project (empty disables sync). Auth is Application Default Credentials.
-        <input value={cfg.gcp_project} onChange={(e) => set("gcp_project", e.target.value)} placeholder="pablo-organizer" />
-      </label>
-      <label>
-        Datastore namespace
-        <input value={cfg.namespace} onChange={(e) => set("namespace", e.target.value)} />
       </label>
       <label>
         sync interval (minutes, 0 disables auto-sync)

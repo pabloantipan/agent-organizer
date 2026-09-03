@@ -1,11 +1,19 @@
 import { create } from "zustand";
-import { api, type AgentsView, type BoardView } from "../hooks/useWails";
+import { api, type Account, type AgentsView, type BoardView, type LockState } from "../hooks/useWails";
 import type { merge } from "../../wailsjs/go/models";
 
 export type Tab = "board" | "agents" | "roadmap" | "calendar" | "initiatives" | "settings";
 
 type State = {
   view: BoardView | null;
+  account: Account | null;
+  lock: LockState | null;
+  offlineChoice: boolean;
+  syncNote: string | null;
+  loadSession: () => Promise<void>;
+  setAccount: (a: Account | null) => void;
+  setLock: (l: LockState) => void;
+  setOfflineChoice: (v: boolean) => void;
   agents: AgentsView | null;
   applyAgents: (v: AgentsView) => void;
   loading: boolean;
@@ -31,6 +39,21 @@ type State = {
 
 export const useBoard = create<State>((set, get) => ({
   view: null,
+  account: null,
+  lock: null,
+  offlineChoice: false,
+  syncNote: null,
+  loadSession: async () => {
+    try {
+      const [account, lock] = await Promise.all([api.getAccount(), api.getLock()]);
+      set({ account, lock });
+    } catch (e) {
+      set({ error: String(e) });
+    }
+  },
+  setAccount: (account) => set({ account }),
+  setLock: (lock) => set({ lock }),
+  setOfflineChoice: (offlineChoice) => set({ offlineChoice }),
   agents: null,
   applyAgents: (agents) =>
     set((st) => {
@@ -74,13 +97,24 @@ export const useBoard = create<State>((set, get) => ({
     set({ syncing: true, lastMessage: null });
     try {
       const r = await api.syncNow();
+      if (r.skipped) {
+        set({ syncing: false, syncNote: r.skipped, lastMessage: null });
+        return;
+      }
       set({
         syncing: false,
+        syncNote: null,
         lastMessage: `pushed ${r.pushed}, pulled ${r.machines?.length ?? 0} machine(s)`,
       });
       await get().refresh();
     } catch (e) {
-      set({ syncing: false, error: String(e) });
+      const msg = String(e);
+      if (/not signed in|signed out|session expired/i.test(msg)) {
+        set({ syncing: false, syncNote: msg.replace(/^Error:\s*/, "") });
+        get().loadSession();
+      } else {
+        set({ syncing: false, error: msg });
+      }
     }
   },
 

@@ -6,6 +6,10 @@ export function AttachSession(arg1) {
   return window['go']['main']['App']['AttachSession'](arg1);
 }
 
+export function ClearPasscode(arg1) {
+  return window['go']['main']['App']['ClearPasscode'](arg1);
+}
+
 export function ConfigPath() {
   return window['go']['main']['App']['ConfigPath']();
 }
@@ -16,6 +20,10 @@ export function CopyReviewPrompt(arg1) {
 
 export function CreateAgent(arg1, arg2) {
   return window['go']['main']['App']['CreateAgent'](arg1, arg2);
+}
+
+export function GetAccount() {
+  return window['go']['main']['App']['GetAccount']();
 }
 
 export function GetAgents() {
@@ -30,12 +38,20 @@ export function GetConfig() {
   return window['go']['main']['App']['GetConfig']();
 }
 
+export function GetLock() {
+  return window['go']['main']['App']['GetLock']();
+}
+
 export function GetOrder() {
   return window['go']['main']['App']['GetOrder']();
 }
 
 export function KillAgent(arg1) {
   return window['go']['main']['App']['KillAgent'](arg1);
+}
+
+export function LockNow() {
+  return window['go']['main']['App']['LockNow']();
 }
 
 export function MilestoneType() {
@@ -48,6 +64,10 @@ export function OpenInEditor(arg1) {
 
 export function OpenTerminal(arg1) {
   return window['go']['main']['App']['OpenTerminal'](arg1);
+}
+
+export function ResetPassword(arg1) {
+  return window['go']['main']['App']['ResetPassword'](arg1);
 }
 
 export function Reveal(arg1) {
@@ -74,12 +94,32 @@ export function SetInitiativeOrder(arg1) {
   return window['go']['main']['App']['SetInitiativeOrder'](arg1);
 }
 
+export function SetPasscode(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SetPasscode'](arg1, arg2, arg3);
+}
+
+export function SignIn(arg1, arg2) {
+  return window['go']['main']['App']['SignIn'](arg1, arg2);
+}
+
+export function SignOut() {
+  return window['go']['main']['App']['SignOut']();
+}
+
+export function SignUp(arg1, arg2) {
+  return window['go']['main']['App']['SignUp'](arg1, arg2);
+}
+
 export function StopAgent(arg1) {
   return window['go']['main']['App']['StopAgent'](arg1);
 }
 
 export function SyncNow() {
   return window['go']['main']['App']['SyncNow']();
+}
+
+export function Unlock(arg1) {
+  return window['go']['main']['App']['Unlock'](arg1);
 }
 
 export function Version() {

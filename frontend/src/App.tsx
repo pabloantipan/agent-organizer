@@ -7,6 +7,7 @@ import { Settings } from "./components/Settings";
 import { Calendar } from "./components/Calendar";
 import { RoadmapView } from "./components/RoadmapView";
 import { AgentsView } from "./components/AgentsView";
+import { Gate } from "./components/Gate";
 import { CardDrawer } from "./components/CardDrawer";
 import { useBoard } from "./stores/board.store";
 import { api, type AgentsView as AgentsPayload } from "./hooks/useWails";
@@ -37,6 +38,7 @@ export default function App() {
   }, [refresh, sync, applyAgents]);
 
   return (
+    <Gate>
     <div className="shell">
       <TopBar />
       <main className={["board", "calendar", "roadmap", "agents"].includes(tab) ? "content with-rail" : "content"}>
@@ -69,5 +71,6 @@ export default function App() {
       </main>
       <CardDrawer />
     </div>
+    </Gate>
   );
 }

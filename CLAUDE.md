@@ -23,9 +23,9 @@ This directory is an initiative root: it holds copies of the repos listed in
 - `internal/service` sequences scan, cache, sync, merge. CLI and app both use it.
 - `internal/scan` finds initiatives and parses cards. The reference behaviour is
   `~/.claude/skills/working-on/hooks/working-on-session`.
-- Manual priority is `model.Order` (initiative ids, card slugs per initiative). It is app state in the cache and one Datastore entity `Order/global` (last writer wins), never a card field. `merge` applies it to the board and to `organizer status`.
-- `internal/sync` is Datastore: kind `Snapshot`, key `<machine>/<initiative-id>`, each
-  machine writes only its own keys. `internal/merge` builds the board; local wins.
+- Manual priority is `model.Order` (initiative ids, card slugs per initiative). It is app state in the cache and one Firestore document `users/{uid}/meta/order` (last writer wins), never a card field. `merge` applies it to the board and to `organizer status`.
+- Identity: `internal/auth` is Firebase Authentication over REST (sign in, sign up, refresh, reset); `auth.Manager` keeps the ID token in memory and the refresh token in the Keychain (`internal/keychain`, service `cl.antipan.organizer`, items `refresh_token`, `account_email`, `passcode`). The refresh token is never written anywhere else. `internal/lock` is the local passcode (argon2id, 5 failures then 30 s cooldown); a cloud sign-in also unlocks and may reset it.
+- `internal/sync` is Firestore native over REST (`BaseURL` swappable for tests): `users/{uid}/machines/{machine}/initiatives/{id}` with a JSON `payload` field, `users/{uid}/meta/order`. Rules in `firestore.rules`, database `organizer` (a second named database; the project's default one is Datastore mode and stays untouched). Each machine writes only its own subtree. Signed out is a skip, not an error. `internal/merge` builds the board; local wins.
 - Board interaction model is Trello's, not its code: a left rail of initiatives (boards) by priority with drag to reorder, three fixed columns, card drag within a column only when one initiative is selected, and a centered card back. Drag is `@hello-pangea/dnd`. Cross-column drag stays disabled because it would write a status. A fourth Done column appears only with one initiative selected, collapsed, newest first, capped at 10, read-only.
 - Visual direction (Pablo's pick): dark only, warm near-black with a purple cast (#1a1523), one solid electric purple accent (#8a3ffc), magenta as a tone, red for blocked. No gradients, no two-tone buttons, no white cards, no light theme. Statuses: now light purple, blocked rose, next periwinkle, done dim. Manrope Variable bundled via fontsource. Tokens in `frontend/src/styles/tokens.css`.
 - `frontend/src`: zustand store, plain CSS tokens, `hooks/useWails.ts` wraps the
@@ -47,7 +47,7 @@ go run . prompt <initiative-id> [--run]        # agent review prompt, or open a 
 wails dev                                      # app + http://localhost:34115 for browser dev
 wails build                                    # build/bin/organizer.app
 wails generate module                          # regenerate frontend/wailsjs after changing bound types
-DATASTORE_EMULATOR_HOST=localhost:8081 go test -tags datastore_emulator ./internal/sync/
+firebase deploy --only firestore:rules --project <p> # after editing firestore.rules
 ```
 
 ## Conventions

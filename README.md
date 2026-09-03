@@ -112,7 +112,8 @@ organizer status                 # open cards per initiative, in priority order
 organizer board                  # merged view across machines (from the last pull)
 organizer agents                 # agent processes grouped per initiative
 organizer prompt <initiative>    # the review prompt for an agent; --run opens it in a terminal
-organizer sync                   # push this machine, pull all
+organizer login | logout | whoami   # cloud session on this machine
+organizer sync                   # push this machine, pull all (skipped when signed out)
 organizer doctor                 # roots, initiatives found, cards rejected and why
 organizer config --init          # write ~/.config/organizer/config.yaml with defaults
 ```
@@ -127,8 +128,9 @@ organizer config --init          # write ~/.config/organizer/config.yaml with de
 | `roots` | `~` | directories scanned for `working-on/initiative.yaml`; add the folders that hold your initiatives |
 | `max_depth` | 3 | how deep below each root to look |
 | `ignore_dirs` | node_modules, vendor, Library, ... | directory names never entered |
-| `gcp_project` | empty | Datastore project; empty disables sync |
-| `namespace` | `organizer` | Datastore namespace |
+| `gcp_project` | empty | Firebase / GCP project; empty disables sync |
+| `firebase_api_key` | empty | web API key of the Firebase project (public by design) |
+| `firestore_database` | `organizer` | Firestore database id, native mode |
 | `sync_interval_minutes` | 15 | automatic sync while the app is open; 0 disables |
 | `editor` | `code` | command for "open in editor" |
 | `agent` | `claude` | command run by "Review with agent" |
@@ -136,24 +138,45 @@ organizer config --init          # write ~/.config/organizer/config.yaml with de
 | `probe_state_dir` | `~/.local/state/probe` | where `probe` keeps its session layouts |
 | `zellij` | `/opt/homebrew/bin/zellij` | zellij binary, for session state |
 
-## Sync across machines
+## Accounts, sync, and the app lock
 
-Each machine pushes one Datastore entity per initiative under its own machine
-name and reads everyone's. Nothing merges at write time, so there is nothing to
-conflict. The manual priority order is one shared document, last writer wins.
+Sync is per account. You sign in once per machine with email and password
+(Firebase Authentication); the app keeps the refresh token in the macOS
+Keychain and nothing else on disk. Every machine pushes its snapshot under
+`users/<uid>/machines/<machine>` in a Firestore database and reads the other
+machines back. Security rules restrict each user to their own tree. Nothing
+merges at write time, so nothing conflicts; the manual priority order is one
+shared document, last writer wins.
 
-One-time setup, with a personal GCP project:
+A local **passcode** can gate the app on each machine. It is an argon2id hash
+in the Keychain, verified at launch, with a 30-second cooldown after five wrong
+tries. It also lets the app open offline on the last pull. If you forget it,
+signing in to the cloud proves it is you and lets you set a new one.
+
+"Continue offline" and "Use without an account" keep everything local: the
+board still works from the files; only sync is paused.
+
+### One-time project setup
+
+You need a Firebase project (a GCP project with Firebase added), the
+email/password provider enabled, a web API key, and a Firestore database in
+native mode. All of it is free-tier at this scale.
 
 ```bash
-gcloud services enable firestore.googleapis.com --project <project>
-gcloud firestore databases create --project <project> --location=<region> --type=datastore-mode
-gcloud auth application-default login
-organizer config --init && sed -i '' "s/^gcp_project: \"\"/gcp_project: <project>/" ~/.config/organizer/config.yaml
-organizer sync
+P=<your-project>
+firebase projects:addfirebase $P
+gcloud services enable identitytoolkit.googleapis.com firestore.googleapis.com --project $P
+# Enable Email/Password: Firebase console → Authentication → Sign-in method,
+# or the Identity Toolkit admin API once Authentication has been initialized.
+firebase apps:create WEB organizer --project $P
+firebase apps:sdkconfig WEB --project $P | grep apiKey        # -> firebase_api_key
+gcloud firestore databases create --database=organizer --location=<region> --type=firestore-native --project $P
+firebase deploy --only firestore:rules --project $P            # rules in this repo
 ```
 
-Auth is Application Default Credentials. Usage at this scale stays inside the
-free tier.
+Then in Settings, or in `~/.config/organizer/config.yaml`: `gcp_project`,
+`firebase_api_key`, `firestore_database: organizer`. Create the account from
+the sign-in screen or with `organizer login`.
 
 ## Agents
 

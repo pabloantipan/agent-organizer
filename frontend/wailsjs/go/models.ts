@@ -1,3 +1,24 @@
+export namespace auth {
+	
+	export class Account {
+	    signed_in: boolean;
+	    email: string;
+	    uid: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Account(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.signed_in = source["signed_in"];
+	        this.email = source["email"];
+	        this.uid = source["uid"];
+	    }
+	}
+
+}
+
 export namespace config {
 	
 	export class Config {
@@ -6,7 +27,8 @@ export namespace config {
 	    max_depth: number;
 	    ignore_dirs: string[];
 	    gcp_project: string;
-	    namespace: string;
+	    firebase_api_key: string;
+	    firestore_database: string;
 	    sync_interval_minutes: number;
 	    editor: string;
 	    git_timeout_seconds: number;
@@ -26,7 +48,8 @@ export namespace config {
 	        this.max_depth = source["max_depth"];
 	        this.ignore_dirs = source["ignore_dirs"];
 	        this.gcp_project = source["gcp_project"];
-	        this.namespace = source["namespace"];
+	        this.firebase_api_key = source["firebase_api_key"];
+	        this.firestore_database = source["firestore_database"];
 	        this.sync_interval_minutes = source["sync_interval_minutes"];
 	        this.editor = source["editor"];
 	        this.git_timeout_seconds = source["git_timeout_seconds"];
@@ -482,6 +505,24 @@ export namespace service {
 		    }
 		    return a;
 		}
+	}
+	export class LockState {
+	    enabled: boolean;
+	    unlocked: boolean;
+	    cooldown_secs: number;
+	    failures_left: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new LockState(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.enabled = source["enabled"];
+	        this.unlocked = source["unlocked"];
+	        this.cooldown_secs = source["cooldown_secs"];
+	        this.failures_left = source["failures_left"];
+	    }
 	}
 	export class SyncResult {
 	    pushed: number;

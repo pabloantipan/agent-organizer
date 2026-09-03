@@ -17,8 +17,11 @@ import (
 	"syscall"
 	"time"
 
+	"organizer/internal/auth"
 	"organizer/internal/cache"
 	"organizer/internal/config"
+	"organizer/internal/keychain"
+	"organizer/internal/lock"
 	"organizer/internal/merge"
 	"organizer/internal/model"
 	"organizer/internal/prompt"
@@ -33,6 +36,12 @@ type Service struct {
 	now     func() time.Time
 	prevCPU map[int]float64
 	prevAt  time.Time
+
+	Auth *auth.Manager
+	Lock *lock.Lock
+	// unlocked is per process: true once the passcode was verified, or when
+	// no passcode is set.
+	unlocked bool
 }
 
 type SyncResult struct {
@@ -54,12 +63,15 @@ func New() (*Service, error) {
 		// A corrupt cache is discarded, not fatal.
 		st = cache.State{}
 	}
-	return &Service{cfg: cfg, state: st, now: time.Now}, nil
+	return NewWith(cfg, st, time.Now), nil
 }
 
 // NewWith is for tests and the CLI's injected clock.
 func NewWith(cfg config.Config, st cache.State, now func() time.Time) *Service {
-	return &Service{cfg: cfg, state: st, now: now}
+	kc := keychain.Default()
+	s := &Service{cfg: cfg, state: st, now: now, Auth: auth.NewManager(cfg.FirebaseAPIKey, kc), Lock: lock.New(kc)}
+	s.unlocked = !s.Lock.Enabled()
+	return s
 }
 
 func (s *Service) Config() config.Config {
@@ -81,7 +93,115 @@ func (s *Service) SaveConfig(cfg config.Config) error {
 	s.mu.Lock()
 	s.cfg = cfg
 	s.mu.Unlock()
+	s.Auth.SetAPIKey(cfg.FirebaseAPIKey)
 	return nil
+}
+
+// ---- session and lock ----
+
+// LockState is what the gate renders.
+type LockState struct {
+	Enabled      bool `json:"enabled"`
+	Unlocked     bool `json:"unlocked"`
+	CooldownSecs int  `json:"cooldown_secs"`
+	FailuresLeft int  `json:"failures_left"`
+}
+
+func (s *Service) LockState() LockState {
+	st := s.Lock.Status()
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if !st.Enabled {
+		s.unlocked = true
+	}
+	return LockState{Enabled: st.Enabled, Unlocked: s.unlocked, CooldownSecs: st.CooldownSecs, FailuresLeft: st.FailuresLeft}
+}
+
+// Unlock verifies the passcode for this process.
+func (s *Service) Unlock(passcode string) (LockState, error) {
+	ok, err := s.Lock.Verify(passcode)
+	if err != nil {
+		return s.LockState(), err
+	}
+	if ok {
+		s.mu.Lock()
+		s.unlocked = true
+		s.mu.Unlock()
+	}
+	return s.LockState(), nil
+}
+
+// RelockNow locks the running app without touching the passcode.
+func (s *Service) RelockNow() LockState {
+	s.mu.Lock()
+	if s.Lock.Enabled() {
+		s.unlocked = false
+	}
+	s.mu.Unlock()
+	return s.LockState()
+}
+
+// SetPasscode sets or changes the passcode. Changing requires the current one
+// unless the caller is a fresh cloud sign-in (force).
+func (s *Service) SetPasscode(current, next string, force bool) (LockState, error) {
+	if s.Lock.Enabled() && !force {
+		ok, err := s.Lock.Verify(current)
+		if err != nil {
+			return s.LockState(), err
+		}
+		if !ok {
+			return s.LockState(), errors.New("current passcode is wrong")
+		}
+	}
+	if err := s.Lock.Set(next); err != nil {
+		return s.LockState(), err
+	}
+	s.mu.Lock()
+	s.unlocked = true
+	s.mu.Unlock()
+	return s.LockState(), nil
+}
+
+// ClearPasscode removes the lock; needs the current passcode.
+func (s *Service) ClearPasscode(current string) (LockState, error) {
+	if s.Lock.Enabled() {
+		ok, err := s.Lock.Verify(current)
+		if err != nil {
+			return s.LockState(), err
+		}
+		if !ok {
+			return s.LockState(), errors.New("current passcode is wrong")
+		}
+	}
+	if err := s.Lock.Clear(); err != nil {
+		return s.LockState(), err
+	}
+	s.mu.Lock()
+	s.unlocked = true
+	s.mu.Unlock()
+	return s.LockState(), nil
+}
+
+// SignIn to the cloud; a successful sign-in also unlocks this process, which
+// is the recovery path for a forgotten passcode.
+func (s *Service) SignIn(ctx context.Context, email, password string) (auth.Account, error) {
+	acc, err := s.Auth.SignIn(ctx, email, password)
+	if err == nil {
+		s.mu.Lock()
+		s.unlocked = true
+		s.mu.Unlock()
+	}
+	return acc, err
+}
+
+func (s *Service) SignUp(ctx context.Context, email, password string) (auth.Account, error) {
+	acc, err := s.Auth.SignUp(ctx, email, password)
+	if err == nil {
+		s.mu.Lock()
+		s.unlocked = true
+		s.mu.Unlock()
+	}
+	return acc, err
 }
 
 func (s *Service) scanOptions(git bool) scan.Options {
@@ -361,13 +481,20 @@ func (s *Service) PulledAt() time.Time {
 	return s.state.PulledAt
 }
 
+// ErrNotSignedIn: sync was skipped because there is no cloud session.
+var ErrNotSignedIn = errors.New("not signed in")
+
 // Sync scans, pushes this machine, pulls all machines, saves the cache.
+// Signed out is a skip, not a failure: the cached remote stays visible.
 func (s *Service) Sync(ctx context.Context, push, pull bool) (SyncResult, error) {
 	cfg := s.Config()
 	if cfg.GCPProject == "" {
-		return SyncResult{Skipped: dsync.ErrNoProject.Error()}, dsync.ErrNoProject
+		return SyncResult{Skipped: "gcp_project is not set in the config"}, nil
 	}
-	store, err := dsync.Open(ctx, cfg.GCPProject, cfg.Namespace)
+	if !s.Auth.Account().SignedIn {
+		return SyncResult{Skipped: "not signed in"}, ErrNotSignedIn
+	}
+	store, err := dsync.Open(cfg.GCPProject, cfg.FirestoreDatabase, s.Auth)
 	if err != nil {
 		return SyncResult{}, err
 	}
@@ -377,6 +504,9 @@ func (s *Service) Sync(ctx context.Context, push, pull bool) (SyncResult, error)
 	var res SyncResult
 	if push {
 		res.Pushed, res.Retired, err = store.Push(ctx, local)
+		if errors.Is(err, auth.ErrSignedOut) {
+			return SyncResult{Skipped: "session expired, sign in again"}, ErrNotSignedIn
+		}
 		if err != nil {
 			return res, fmt.Errorf("push: %w", err)
 		}

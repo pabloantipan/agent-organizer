@@ -12,15 +12,18 @@ import (
 )
 
 type Config struct {
-	Machine             string   `yaml:"machine" json:"machine"`
-	Roots               []string `yaml:"roots" json:"roots"`
-	MaxDepth            int      `yaml:"max_depth" json:"max_depth"`
-	IgnoreDirs          []string `yaml:"ignore_dirs" json:"ignore_dirs"`
-	GCPProject          string   `yaml:"gcp_project" json:"gcp_project"`
-	Namespace           string   `yaml:"namespace" json:"namespace"`
-	SyncIntervalMinutes int      `yaml:"sync_interval_minutes" json:"sync_interval_minutes"`
-	Editor              string   `yaml:"editor" json:"editor"`
-	GitTimeoutSeconds   int      `yaml:"git_timeout_seconds" json:"git_timeout_seconds"`
+	Machine    string   `yaml:"machine" json:"machine"`
+	Roots      []string `yaml:"roots" json:"roots"`
+	MaxDepth   int      `yaml:"max_depth" json:"max_depth"`
+	IgnoreDirs []string `yaml:"ignore_dirs" json:"ignore_dirs"`
+	GCPProject string   `yaml:"gcp_project" json:"gcp_project"`
+	// FirebaseAPIKey is the web API key of the Firebase project (public by design).
+	FirebaseAPIKey string `yaml:"firebase_api_key" json:"firebase_api_key"`
+	// FirestoreDatabase is the named Firestore database in native mode.
+	FirestoreDatabase   string `yaml:"firestore_database" json:"firestore_database"`
+	SyncIntervalMinutes int    `yaml:"sync_interval_minutes" json:"sync_interval_minutes"`
+	Editor              string `yaml:"editor" json:"editor"`
+	GitTimeoutSeconds   int    `yaml:"git_timeout_seconds" json:"git_timeout_seconds"`
 	// Agent is the command run by "review in terminal". Default claude.
 	Agent string `yaml:"agent" json:"agent"`
 	// ProbeStateDir holds the probe layouts (one .kdl per session). Empty disables.
@@ -46,7 +49,7 @@ func Default() Config {
 			"Library", "Applications", "Movies", "Music", "Pictures", "Public",
 			"Downloads", "Desktop", "Documents", "go", "flutter", "google-cloud-sdk",
 		},
-		Namespace:           "organizer",
+		FirestoreDatabase:   "organizer",
 		SyncIntervalMinutes: 15,
 		Editor:              "code",
 		GitTimeoutSeconds:   5,

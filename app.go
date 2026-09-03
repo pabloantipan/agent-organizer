@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"organizer/internal/auth"
 	"organizer/internal/cli"
 
 	wruntime "github.com/wailsapp/wails/v2/pkg/runtime"
@@ -153,6 +154,84 @@ func (a *App) SetCardOrder(initiativeID string, slugs []string) error {
 func (a *App) OpenInEditor(path string) error { return a.svc.OpenInEditor(path) }
 func (a *App) OpenTerminal(dir string) error  { return a.svc.OpenTerminal(dir) }
 func (a *App) Reveal(path string) error       { return a.svc.Reveal(path) }
+
+// ---- session and lock ----
+
+func (a *App) GetAccount() auth.Account {
+	if a.svc == nil {
+		return auth.Account{}
+	}
+	return a.svc.Auth.Account()
+}
+
+func (a *App) SignIn(email, password string) (auth.Account, error) {
+	if a.svc == nil {
+		return auth.Account{}, errString(a.err)
+	}
+	ctx, cancel := context.WithTimeout(a.ctx, 30*time.Second)
+	defer cancel()
+	return a.svc.SignIn(ctx, email, password)
+}
+
+func (a *App) SignUp(email, password string) (auth.Account, error) {
+	if a.svc == nil {
+		return auth.Account{}, errString(a.err)
+	}
+	ctx, cancel := context.WithTimeout(a.ctx, 30*time.Second)
+	defer cancel()
+	return a.svc.SignUp(ctx, email, password)
+}
+
+func (a *App) SignOut() error {
+	if a.svc == nil {
+		return errString(a.err)
+	}
+	return a.svc.Auth.SignOut()
+}
+
+func (a *App) ResetPassword(email string) error {
+	if a.svc == nil {
+		return errString(a.err)
+	}
+	ctx, cancel := context.WithTimeout(a.ctx, 30*time.Second)
+	defer cancel()
+	return a.svc.Auth.ResetPassword(ctx, email)
+}
+
+func (a *App) GetLock() service.LockState {
+	if a.svc == nil {
+		return service.LockState{Unlocked: true}
+	}
+	return a.svc.LockState()
+}
+
+func (a *App) Unlock(passcode string) (service.LockState, error) {
+	if a.svc == nil {
+		return service.LockState{Unlocked: true}, nil
+	}
+	return a.svc.Unlock(passcode)
+}
+
+func (a *App) LockNow() service.LockState {
+	if a.svc == nil {
+		return service.LockState{Unlocked: true}
+	}
+	return a.svc.RelockNow()
+}
+
+func (a *App) SetPasscode(current, next string, force bool) (service.LockState, error) {
+	if a.svc == nil {
+		return service.LockState{}, errString(a.err)
+	}
+	return a.svc.SetPasscode(current, next, force)
+}
+
+func (a *App) ClearPasscode(current string) (service.LockState, error) {
+	if a.svc == nil {
+		return service.LockState{}, errString(a.err)
+	}
+	return a.svc.ClearPasscode(current)
+}
 
 // GetAgents re-samples agent processes and sessions, grouped per initiative.
 func (a *App) GetAgents() service.AgentsView {

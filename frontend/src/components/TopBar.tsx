@@ -1,4 +1,4 @@
-import { Bot, Calendar, ChartGantt, Kanban, ListTree, RefreshCw, RefreshCcwDot, Settings } from "lucide-react";
+import { Bot, Calendar, ChartGantt, Kanban, ListTree, Lock, LogOut, RefreshCw, RefreshCcwDot, Settings, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "../hooks/useWails";
 import { useBoard, type Tab } from "../stores/board.store";
@@ -14,7 +14,8 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
 ];
 
 export function TopBar() {
-  const { tab, setTab, view, loading, syncing, refresh, sync, error, lastMessage } = useBoard();
+  const { tab, setTab, view, loading, syncing, refresh, sync, error, lastMessage, account, syncNote, setAccount, setLock, setOfflineChoice } = useBoard();
+  const [menu, setMenu] = useState(false);
   const machines = view?.board.machines ?? [];
   const [version, setVersion] = useState("");
   useEffect(() => { api.version().then(setVersion, () => undefined); }, []);
@@ -30,7 +31,8 @@ export function TopBar() {
       </nav>
       <span className="spacer" />
       {error && <span className="meta err">{error}</span>}
-      {!error && lastMessage && <span className="meta">{lastMessage}</span>}
+      {!error && syncNote && <span className="meta warn" title="Sync is paused; showing the last pull">{syncNote}</span>}
+      {!error && !syncNote && lastMessage && <span className="meta">{lastMessage}</span>}
       {!error && !lastMessage && view && (
         <span className="meta">
           {machines.length} machine{machines.length === 1 ? "" : "s"} · remote {since(view.pulled_at)}
@@ -42,6 +44,25 @@ export function TopBar() {
       <button className="primary" onClick={sync} disabled={syncing} title="Push this machine, pull all">
         <RefreshCcwDot size={14} className={syncing ? "spin" : ""} /> {syncing ? "syncing…" : "Sync"}
       </button>
+      <span className="account">
+        <button className="ghost" onClick={() => setMenu(!menu)} title={account?.signed_in ? account.email : "not signed in"}>
+          <UserRound size={14} /> {account?.signed_in ? account.email : "sign in"}
+        </button>
+        {menu && (
+          <div className="menu" onMouseLeave={() => setMenu(false)}>
+            {account?.signed_in ? (
+              <>
+                <div className="menu-head mono">{account.email}</div>
+                <button className="ghost" onClick={async () => { await api.signOut(); setAccount(await api.getAccount()); setOfflineChoice(false); setMenu(false); }}><LogOut size={13} /> Sign out</button>
+              </>
+            ) : (
+              <button className="ghost" onClick={() => { setOfflineChoice(false); setMenu(false); }}><UserRound size={13} /> Sign in</button>
+            )}
+            <button className="ghost" onClick={async () => { setLock(await api.lockNow()); setMenu(false); }}><Lock size={13} /> Lock now</button>
+            <button className="ghost" onClick={() => { setTab("settings"); setMenu(false); }}><Settings size={13} /> Settings</button>
+          </div>
+        )}
+      </span>
     </header>
   );
 }

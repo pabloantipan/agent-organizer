@@ -1,0 +1,5 @@
+{
+  "firestore": [
+    { "database": "organizer", "rules": "firestore.rules" }
+  ]
+}
