@@ -73,6 +73,7 @@ export function Settings() {
         {msg && <span className="meta">{msg}</span>}
       </div>
       <div className="hint mono">{path}</div>
+      <div className="hint mono">log: ~/.local/share/organizer/organizer.log</div>
     </div>
   );
 }

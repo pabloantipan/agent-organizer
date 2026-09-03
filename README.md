@@ -68,6 +68,24 @@ open it in the editor, a terminal at the initiative, or reveal it in Finder.
 
 ## Install
 
+### From a release
+
+Download `organizer-<version>.dmg` from the Releases page, open it, and drag
+`organizer.app` to Applications. Releases are built unsigned, so the first
+launch is blocked by Gatekeeper. Right-click the app and choose Open, or run:
+
+```bash
+xattr -d com.apple.quarantine /Applications/organizer.app
+```
+
+Optional CLI on your PATH:
+
+```bash
+ln -sf /Applications/organizer.app/Contents/MacOS/organizer ~/.local/bin/organizer
+```
+
+### From source
+
 Requirements: Go 1.25+, Node 20+, pnpm, and the Wails v2 CLI
 (`go install github.com/wailsapp/wails/v2/cmd/wails@latest`). macOS is the
 primary target; Linux paths exist but are less exercised.
@@ -75,9 +93,16 @@ primary target; Linux paths exist but are less exercised.
 ```bash
 git clone <this repo> ~/organizer
 cd ~/organizer
-wails build                      # -> build/bin/organizer.app
-open build/bin/organizer.app
+make install        # builds, copies to /Applications, links ~/.local/bin/organizer
+make dmg            # or: package build/bin/organizer-<version>.dmg for another machine
 ```
+
+The version comes from the git tag (`make version`). A tag `v*` pushed to
+GitHub runs the release workflow, which builds a universal binary, packages the
+DMG, and attaches it to a GitHub Release. If Developer ID secrets are configured
+the app is signed and notarized; otherwise it ships unsigned as above.
+
+Logs go to `~/.local/share/organizer/organizer.log`.
 
 The same binary is a CLI:
 

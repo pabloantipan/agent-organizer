@@ -44,3 +44,5 @@ export function SetInitiativeOrder(arg1:Array<string>):Promise<void>;
 export function StopAgent(arg1:number):Promise<void>;
 
 export function SyncNow():Promise<service.SyncResult>;
+
+export function Version():Promise<string>;

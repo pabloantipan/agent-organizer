@@ -16,6 +16,7 @@ export const api = {
   getConfig: (): Promise<Config> => App.GetConfig(),
   saveConfig: (c: Config): Promise<void> => App.SaveConfig(c),
   configPath: (): Promise<string> => App.ConfigPath(),
+  version: (): Promise<string> => App.Version(),
   openInEditor: (p: string): Promise<void> => App.OpenInEditor(p),
   openTerminal: (p: string): Promise<void> => App.OpenTerminal(p),
   reveal: (p: string): Promise<void> => App.Reveal(p),

@@ -9,5 +9,12 @@
   "author": {
     "name": "Pablo Antipan",
     "email": "antipan.pablo@gmail.com"
+  },
+  "info": {
+    "companyName": "Pablo Antipan",
+    "productName": "Organizer",
+    "productVersion": "0.1.0",
+    "copyright": "Copyright 2026 Pablo Antipan. MIT License.",
+    "comments": "Initiatives, cards, and agents across machines."
   }
 }

@@ -1,0 +1,50 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-go@v5
+        with: { go-version-file: go.mod }
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm, cache-dependency-path: frontend/pnpm-lock.yaml }
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.15.0
+      - name: Test
+        run: go vet ./... && go test ./...
+      - name: Build universal app
+        run: |
+          VERSION="${GITHUB_REF_NAME:-dev}"
+          wails build -clean -platform darwin/universal -ldflags "-X main.version=$VERSION"
+      # Signing and notarization run only when the secrets exist. Without them
+      # the DMG is unsigned and the READ ME inside explains the quarantine step.
+      - name: Sign and notarize
+        if: ${{ secrets.MACOS_CERT_P12 != '' }}
+        env:
+          MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: scripts/sign-and-notarize.sh build/bin/organizer.app
+      - name: Package DMG
+        run: scripts/make-dmg.sh build/bin/organizer.app "build/bin/organizer-${GITHUB_REF_NAME:-dev}.dmg"
+      - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            build/bin/*.dmg
+            build/bin/*.dmg.sha256
+          generate_release_notes: true

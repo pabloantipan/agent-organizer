@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"organizer/internal/cli"
+
 	wruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
 	"organizer/internal/config"
@@ -39,6 +41,11 @@ func (a *App) startup(ctx context.Context) {
 // agentTicker re-samples agents and pushes the view to the frontend as the
 // "agents" event, so every tab updates without focus or a manual rescan.
 func (a *App) agentTicker(ctx context.Context) {
+	defer func() {
+		if r := recover(); r != nil {
+			wruntime.LogErrorf(ctx, "agent ticker stopped: %v", r)
+		}
+	}()
 	// First sample right away so the UI does not wait a full period; the
 	// second one, ten seconds later, is the first that can tell working from idle.
 	a.svc.Scan(false)
@@ -93,6 +100,9 @@ func (a *App) SaveConfig(cfg config.Config) error {
 }
 
 func (a *App) ConfigPath() string { return config.Path() }
+
+// Version reports the build version shown in the UI.
+func (a *App) Version() string { return cli.Version }
 
 // ReviewPrompt returns the agent prompt for an initiative.
 func (a *App) ReviewPrompt(initiativeID string) (string, error) {

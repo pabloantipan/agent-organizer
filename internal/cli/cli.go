@@ -24,8 +24,11 @@ import (
 	dsync "organizer/internal/sync"
 )
 
+// Version is set by main from the build.
+var Version = "dev"
+
 // Subcommands the binary recognises. Anything else launches the GUI.
-var Subcommands = []string{"status", "board", "sync", "prompt", "agents", "doctor", "config", "help"}
+var Subcommands = []string{"status", "board", "sync", "prompt", "agents", "doctor", "config", "version", "--version", "help"}
 
 // IsSubcommand reports whether arg names a CLI subcommand.
 func IsSubcommand(arg string) bool {
@@ -67,6 +70,9 @@ func runWith(args []string, stdout, stderr io.Writer, now func() time.Time) int 
 		return doctor(cfg, args[1:], stdout, stderr, now)
 	case "config":
 		return configCmd(cfg, args[1:], stdout, stderr)
+	case "version", "--version":
+		fmt.Fprintln(stdout, "organizer", Version)
+		return 0
 	case "help":
 		usage(stdout)
 		return 0
@@ -172,6 +178,7 @@ func WriteStatus(w io.Writer, snap model.Snapshot, now time.Time, all bool) {
 
 func doctor(cfg config.Config, args []string, stdout, stderr io.Writer, now func() time.Time) int {
 	_, exists, _ := config.Load()
+	fmt.Fprintf(stdout, "organizer %s\n", Version)
 	fmt.Fprintf(stdout, "config: %s", config.Path())
 	if !exists {
 		fmt.Fprint(stdout, " (not present, using defaults; `organizer config --init` writes it)")

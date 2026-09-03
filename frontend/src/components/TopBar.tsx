@@ -1,4 +1,6 @@
 import { Bot, Calendar, ChartGantt, Kanban, ListTree, RefreshCw, RefreshCcwDot, Settings } from "lucide-react";
+import { useEffect, useState } from "react";
+import { api } from "../hooks/useWails";
 import { useBoard, type Tab } from "../stores/board.store";
 import { since } from "../lib";
 
@@ -14,9 +16,11 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
 export function TopBar() {
   const { tab, setTab, view, loading, syncing, refresh, sync, error, lastMessage } = useBoard();
   const machines = view?.board.machines ?? [];
+  const [version, setVersion] = useState("");
+  useEffect(() => { api.version().then(setVersion, () => undefined); }, []);
   return (
     <header className="topbar">
-      <span className="brand">organizer</span>
+      <span className="brand" title={version ? `organizer ${version}` : "organizer"}>organizer{version && <span className="brand-version">{version}</span>}</span>
       <nav className="tabs">
         {TABS.map((t) => (
           <button key={t.id} className={t.id === tab ? "active" : ""} onClick={() => setTab(t.id)}>

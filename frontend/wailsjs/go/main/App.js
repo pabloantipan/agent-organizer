@@ -81,3 +81,7 @@ export function StopAgent(arg1) {
 export function SyncNow() {
   return window['go']['main']['App']['SyncNow']();
 }
+
+export function Version() {
+  return window['go']['main']['App']['Version']();
+}
