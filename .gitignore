@@ -1,0 +1,5 @@
+build/bin
+node_modules
+frontend/dist
+# personal state of this checkout (cards, machine names, project ids)
+working-on/

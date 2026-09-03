@@ -1,0 +1,39 @@
+/* Dark only. Warm near-black with a purple cast, an electric purple accent,
+   magenta as a tone. No gradients, no two-tone buttons. */
+:root {
+  color-scheme: dark;
+  --bg: #1a1523;
+  --bg-deep: #14101b;
+  --rail: #17121f;
+  --panel: #221b2e;
+  --panel-2: #2a2239;
+  --card: #251e33;
+  --card-hover: #2d2540;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(160, 110, 255, 0.40);
+  --text: #f1ecf7;
+  --muted: #a599b8;
+  --dim: #6f6484;
+  --accent: #8a3ffc;
+  --accent-hover: #9d5dff;
+  --accent-soft: rgba(138, 63, 252, 0.18);
+  --pink: #d946ef;
+  --pink-soft: rgba(217, 70, 239, 0.14);
+  --now: #b06cff;
+  --now-soft: rgba(176, 108, 255, 0.16);
+  --blocked: #ff4d63;
+  --blocked-soft: rgba(255, 77, 99, 0.14);
+  --next: #a9a0ff;
+  --next-soft: rgba(169, 160, 255, 0.14);
+  --done: #625876;
+  --local: #5fe3b0;
+  --remote: #e88cff;
+  --stale: #ff4d63;
+  --shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  --shadow-lift: 0 18px 44px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border-strong);
+  --r: 12px;
+  --r-lg: 16px;
+  --r-pill: 999px;
+  --font: "Manrope Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono Variable", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+}

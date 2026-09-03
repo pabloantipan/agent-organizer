@@ -1,0 +1,513 @@
+// Package service is the one place that sequences scan, cache, sync and merge.
+// The CLI and the desktop app both call it, so they cannot drift.
+package service
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"regexp"
+	"runtime"
+	"strconv"
+	"strings"
+	"sync"
+	"syscall"
+	"time"
+
+	"organizer/internal/cache"
+	"organizer/internal/config"
+	"organizer/internal/merge"
+	"organizer/internal/model"
+	"organizer/internal/prompt"
+	"organizer/internal/scan"
+	dsync "organizer/internal/sync"
+)
+
+type Service struct {
+	mu      sync.Mutex
+	cfg     config.Config
+	state   cache.State
+	now     func() time.Time
+	prevCPU map[int]float64
+	prevAt  time.Time
+}
+
+type SyncResult struct {
+	Pushed   int       `json:"pushed"`
+	Retired  int       `json:"retired"`
+	Machines []string  `json:"machines"`
+	PulledAt time.Time `json:"pulled_at"`
+	Skipped  string    `json:"skipped,omitempty"`
+}
+
+// New loads config and cache. A missing config file is not an error.
+func New() (*Service, error) {
+	cfg, _, err := config.Load()
+	if err != nil {
+		return nil, err
+	}
+	st, err := cache.Load()
+	if err != nil {
+		// A corrupt cache is discarded, not fatal.
+		st = cache.State{}
+	}
+	return &Service{cfg: cfg, state: st, now: time.Now}, nil
+}
+
+// NewWith is for tests and the CLI's injected clock.
+func NewWith(cfg config.Config, st cache.State, now func() time.Time) *Service {
+	return &Service{cfg: cfg, state: st, now: now}
+}
+
+func (s *Service) Config() config.Config {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.cfg
+}
+
+func (s *Service) SaveConfig(cfg config.Config) error {
+	if cfg.MaxDepth <= 0 {
+		cfg.MaxDepth = 3
+	}
+	if strings.TrimSpace(cfg.Machine) == "" {
+		return errors.New("machine name cannot be empty")
+	}
+	if err := config.Save(cfg); err != nil {
+		return err
+	}
+	s.mu.Lock()
+	s.cfg = cfg
+	s.mu.Unlock()
+	return nil
+}
+
+func (s *Service) scanOptions(git bool) scan.Options {
+	return scan.Options{
+		Roots:      s.cfg.ExpandedRoots(),
+		MaxDepth:   s.cfg.MaxDepth,
+		IgnoreDirs: s.cfg.IgnoreDirs,
+		Git:        git,
+		GitTimeout: time.Duration(s.cfg.GitTimeoutSeconds) * time.Second,
+		Now:        s.now,
+		Agents:     s.agentOptions(),
+	}
+}
+
+func (s *Service) agentOptions() *scan.AgentOptions {
+	return &scan.AgentOptions{
+		ProbeStateDir: config.Expand(s.cfg.ProbeStateDir),
+		Zellij:        s.cfg.Zellij,
+		AgentBinary:   s.cfg.AgentBinary,
+		Timeout:       time.Duration(s.cfg.GitTimeoutSeconds) * time.Second,
+		PrevCPU:       s.prevCPU,
+		PrevAt:        s.prevAt,
+	}
+}
+
+// rememberCPU stores this sample's CPU seconds so the next one can tell
+// working from idle.
+func (s *Service) rememberCPU(snap model.Snapshot) {
+	m := map[int]float64{}
+	for _, si := range snap.Initiatives {
+		for _, a := range si.Agents {
+			if a.PID > 0 {
+				m[a.PID] = a.CPUSeconds
+			}
+		}
+	}
+	for _, a := range snap.Unassigned {
+		if a.PID > 0 {
+			m[a.PID] = a.CPUSeconds
+		}
+	}
+	s.prevCPU = m
+	s.prevAt = time.Now()
+}
+
+// ---- agent lifecycle: through probe, so layouts, markers and iTerm profiles stay in step ----
+
+var nameRe = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,40}$`)
+
+func probeBin() string {
+	home, _ := os.UserHomeDir()
+	return filepath.Join(home, "bin", "probe")
+}
+
+func sanitize(s string) string {
+	s = strings.ToLower(s)
+	s = regexp.MustCompile(`[^a-z0-9]+`).ReplaceAllString(s, "-")
+	return strings.Trim(s, "-")
+}
+
+// CreateAgent starts a new probe in the initiative directory, in the family
+// named after the initiative. An empty name lets probe pick an animal name.
+// Opens iTerm2 (Terminal as fallback) so the session is visible immediately.
+func (s *Service) CreateAgent(initiativeID, name string) error {
+	var dir string
+	s.mu.Lock()
+	for _, si := range s.state.Local.Initiatives {
+		if si.ID == initiativeID {
+			dir = si.Path
+		}
+	}
+	s.mu.Unlock()
+	if dir == "" {
+		return fmt.Errorf("initiative %q not found on this machine", initiativeID)
+	}
+	if _, err := os.Stat(probeBin()); err != nil {
+		return fmt.Errorf("probe not found at %s", probeBin())
+	}
+	family := sanitize(initiativeID)
+	name = sanitize(name)
+	if name != "" && !nameRe.MatchString(name) {
+		return errors.New("name must be lowercase letters, digits and dashes")
+	}
+	// Idempotent: creates ~/bin/<family>-probe if missing.
+	if out, err := exec.Command(probeBin(), "--wrap", family).CombinedOutput(); err != nil {
+		return fmt.Errorf("probe --wrap: %s", strings.TrimSpace(string(out)))
+	}
+	wrapper := filepath.Join(filepath.Dir(probeBin()), family+"-probe")
+	var cmd string
+	if name == "" {
+		cmd = fmt.Sprintf("cd %s && %s -t", shellQuote(dir), shellQuote(wrapper))
+	} else {
+		cmd = fmt.Sprintf("%s %s %s", shellQuote(wrapper), shellQuote(name), shellQuote(dir))
+	}
+	return openInTerminal(cmd)
+}
+
+// KillAgent removes a probe session: zellij session, layout, marker, iTerm
+// profile. The claude conversation itself survives and can be resumed by name.
+func (s *Service) KillAgent(session string) error {
+	if !nameRe.MatchString(session) {
+		return errors.New("invalid session name")
+	}
+	out, err := exec.Command(probeBin(), "-k", session).CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("probe -k: %s", strings.TrimSpace(string(out)))
+	}
+	return nil
+}
+
+// StopAgent sends SIGTERM to a plain-terminal agent process, after checking
+// the pid still runs the agent binary.
+func (s *Service) StopAgent(pid int) error {
+	if pid <= 1 {
+		return errors.New("invalid pid")
+	}
+	out, err := exec.Command("ps", "-o", "command=", "-p", strconv.Itoa(pid)).Output()
+	if err != nil {
+		return fmt.Errorf("pid %d is not running", pid)
+	}
+	bin := s.Config().AgentBinary
+	if bin == "" {
+		bin = "claude"
+	}
+	first := strings.Fields(string(out))
+	if len(first) == 0 || filepath.Base(first[0]) != bin {
+		return fmt.Errorf("pid %d is not a %s process anymore", pid, bin)
+	}
+	return syscall.Kill(pid, syscall.SIGTERM)
+}
+
+// openInTerminal runs a shell command in a new iTerm2 window, or Terminal.
+func openInTerminal(cmd string) error {
+	if runtime.GOOS != "darwin" {
+		return exec.Command("x-terminal-emulator", "-e", "bash", "-lc", cmd+"; exec bash").Start()
+	}
+	script := fmt.Sprintf(`tell application "iTerm2"
+	activate
+	set w to (create window with default profile)
+	tell current session of w to write text %s
+end tell`, appleScriptString(cmd))
+	if err := exec.Command("osascript", "-e", script).Run(); err == nil {
+		return nil
+	}
+	script = fmt.Sprintf(`tell application "Terminal"
+	activate
+	do script %s
+end tell`, appleScriptString(cmd))
+	return exec.Command("osascript", "-e", script).Start()
+}
+
+// AgentGroup is the agents of one initiative, for the Agents view.
+type AgentGroup struct {
+	ID      string        `json:"id"`
+	Title   string        `json:"title"`
+	Client  string        `json:"client"`
+	Path    string        `json:"path"`
+	Agents  []model.Agent `json:"agents"`
+	Live    int           `json:"live"`
+	Working int           `json:"working"`
+}
+
+type AgentsView struct {
+	Groups     []AgentGroup  `json:"groups"`
+	Unassigned []model.Agent `json:"unassigned"`
+	SampledAt  time.Time     `json:"sampled_at"`
+}
+
+// RefreshAgents re-samples processes and sessions only (no git, no card
+// parsing), regroups them onto the cached local snapshot, and returns the view.
+func (s *Service) RefreshAgents() AgentsView {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	agents := scan.Agents(*s.agentOptions())
+	s.state.Local.Unassigned = scan.AssignAgents(s.state.Local.Initiatives, agents)
+	s.rememberCPU(s.state.Local)
+	_ = cache.Save(s.state)
+	return s.agentsViewLocked()
+}
+
+func (s *Service) agentsViewLocked() AgentsView {
+	v := AgentsView{SampledAt: s.now(), Unassigned: s.state.Local.Unassigned}
+	for _, si := range s.state.Local.Initiatives {
+		live, working := si.LiveAgents()
+		v.Groups = append(v.Groups, AgentGroup{ID: si.ID, Title: si.Title, Client: si.Client, Path: si.Path, Agents: si.Agents, Live: live, Working: working})
+	}
+	return v
+}
+
+// AttachSession opens the session in iTerm2 through the dynamic profile that
+// probe generates (profile name == session name). Falls back to Terminal
+// running `probe <name>`.
+func (s *Service) AttachSession(name string) error {
+	if strings.ContainsAny(name, "\"'\\\n") {
+		return errors.New("invalid session name")
+	}
+	if runtime.GOOS == "darwin" {
+		script := fmt.Sprintf(`tell application "iTerm2"
+	activate
+	create window with profile "%s"
+end tell`, name)
+		if err := exec.Command("osascript", "-e", script).Run(); err == nil {
+			return nil
+		}
+		home, _ := os.UserHomeDir()
+		cmd := fmt.Sprintf("%s %s", shellQuote(filepath.Join(home, "bin", "probe")), shellQuote(name))
+		script = fmt.Sprintf(`tell application "Terminal"
+	activate
+	do script %s
+end tell`, appleScriptString(cmd))
+		return exec.Command("osascript", "-e", script).Start()
+	}
+	return exec.Command("x-terminal-emulator", "-e", "bash", "-lc", "probe "+shellQuote(name)).Start()
+}
+
+// Scan reads the local disk and refreshes the cached local snapshot.
+func (s *Service) Scan(git bool) model.Snapshot {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	snap := scan.Run(s.scanOptions(git))
+	snap.Machine = s.cfg.Machine
+	s.state.Local = snap
+	s.rememberCPU(snap)
+	_ = cache.Save(s.state)
+	return snap
+}
+
+// Board rescans locally and merges with the last remote pull.
+func (s *Service) Board() merge.Board {
+	local := s.Scan(true)
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return merge.Build(local, s.state.Remote, s.state.Order, s.now())
+}
+
+// Status is the CLI view: the local scan sorted by the manual order.
+func (s *Service) Status(git bool) model.Snapshot {
+	snap := s.Scan(git)
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	merge.ApplyOrder(&snap, s.state.Order)
+	return snap
+}
+
+// Order returns the current manual order.
+func (s *Service) Order() model.Order {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.state.Order
+}
+
+// SetInitiativeOrder replaces the initiative ranking.
+func (s *Service) SetInitiativeOrder(ids []string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.state.Order.Initiatives = ids
+	s.state.Order.UpdatedAt = s.now()
+	return cache.Save(s.state)
+}
+
+// SetCardOrder replaces the card ranking of one initiative.
+func (s *Service) SetCardOrder(initiativeID string, slugs []string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.state.Order.Cards == nil {
+		s.state.Order.Cards = map[string][]string{}
+	}
+	s.state.Order.Cards[initiativeID] = slugs
+	s.state.Order.UpdatedAt = s.now()
+	return cache.Save(s.state)
+}
+
+// PulledAt is when remote snapshots were last fetched; zero if never.
+func (s *Service) PulledAt() time.Time {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.state.PulledAt
+}
+
+// Sync scans, pushes this machine, pulls all machines, saves the cache.
+func (s *Service) Sync(ctx context.Context, push, pull bool) (SyncResult, error) {
+	cfg := s.Config()
+	if cfg.GCPProject == "" {
+		return SyncResult{Skipped: dsync.ErrNoProject.Error()}, dsync.ErrNoProject
+	}
+	store, err := dsync.Open(ctx, cfg.GCPProject, cfg.Namespace)
+	if err != nil {
+		return SyncResult{}, err
+	}
+	defer store.Close()
+
+	local := s.Scan(true)
+	var res SyncResult
+	if push {
+		res.Pushed, res.Retired, err = store.Push(ctx, local)
+		if err != nil {
+			return res, fmt.Errorf("push: %w", err)
+		}
+		if err := store.PushOrder(ctx, s.Order()); err != nil {
+			return res, fmt.Errorf("push order: %w", err)
+		}
+		s.mu.Lock()
+		s.state.PushedAt = s.now()
+		s.mu.Unlock()
+	}
+	if pull {
+		remote, err := store.Pull(ctx)
+		if err != nil {
+			return res, fmt.Errorf("pull: %w", err)
+		}
+		remoteOrder, err := store.PullOrder(ctx)
+		if err != nil {
+			return res, fmt.Errorf("pull order: %w", err)
+		}
+		s.mu.Lock()
+		if remoteOrder.UpdatedAt.After(s.state.Order.UpdatedAt) {
+			s.state.Order = remoteOrder
+		}
+		s.state.Remote = remote
+		s.state.PulledAt = s.now()
+		res.PulledAt = s.state.PulledAt
+		s.mu.Unlock()
+		for _, r := range remote {
+			res.Machines = append(res.Machines, r.Machine)
+		}
+	}
+	s.mu.Lock()
+	err = cache.Save(s.state)
+	s.mu.Unlock()
+	return res, err
+}
+
+// OpenInEditor launches the configured editor on a path.
+func (s *Service) OpenInEditor(path string) error {
+	editor := s.Config().Editor
+	if editor == "" {
+		editor = "code"
+	}
+	parts := strings.Fields(editor)
+	return exec.Command(parts[0], append(parts[1:], path)...).Start()
+}
+
+// OpenTerminal opens a terminal at a directory.
+func (s *Service) OpenTerminal(dir string) error {
+	switch runtime.GOOS {
+	case "darwin":
+		return exec.Command("open", "-a", "Terminal", dir).Start()
+	default:
+		return exec.Command("x-terminal-emulator", "--working-directory="+dir).Start()
+	}
+}
+
+// Reveal shows a path in the file manager.
+func (s *Service) Reveal(path string) error {
+	switch runtime.GOOS {
+	case "darwin":
+		return exec.Command("open", "-R", path).Start()
+	default:
+		return exec.Command("xdg-open", path).Start()
+	}
+}
+
+// ReviewPrompt renders the agent prompt for one initiative from a fresh scan.
+func (s *Service) ReviewPrompt(initiativeID string) (string, error) {
+	snap := s.Scan(true)
+	for _, si := range snap.Initiatives {
+		if si.ID == initiativeID {
+			return prompt.Review(si, s.now()), nil
+		}
+	}
+	return "", fmt.Errorf("initiative %q not found on this machine", initiativeID)
+}
+
+// promptPath is where a generated prompt is kept for the terminal to read.
+func promptPath(initiativeID string) string {
+	base := os.Getenv("XDG_DATA_HOME")
+	if base == "" {
+		home, _ := os.UserHomeDir()
+		base = filepath.Join(home, ".local", "share")
+	}
+	return filepath.Join(base, "organizer", "prompts", initiativeID+".md")
+}
+
+// RunReview writes the prompt to a file and opens a terminal in the
+// initiative directory running the agent with it. The agent command is
+// configurable; the default is claude.
+func (s *Service) RunReview(initiativeID string) error {
+	text, err := s.ReviewPrompt(initiativeID)
+	if err != nil {
+		return err
+	}
+	var dir string
+	for _, si := range s.state.Local.Initiatives {
+		if si.ID == initiativeID {
+			dir = si.Path
+		}
+	}
+	p := promptPath(initiativeID)
+	if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+		return err
+	}
+	if err := os.WriteFile(p, []byte(text), 0o600); err != nil {
+		return err
+	}
+	agent := s.Config().Agent
+	if agent == "" {
+		agent = "claude"
+	}
+	// The prompt goes through a file so no quoting of its content is needed.
+	cmd := fmt.Sprintf("cd %s && %s \"$(cat %s)\"", shellQuote(dir), agent, shellQuote(p))
+	switch runtime.GOOS {
+	case "darwin":
+		script := fmt.Sprintf(`tell application "Terminal"
+	activate
+	do script %s
+end tell`, appleScriptString(cmd))
+		return exec.Command("osascript", "-e", script).Start()
+	default:
+		return exec.Command("x-terminal-emulator", "-e", "bash", "-lc", cmd+"; exec bash").Start()
+	}
+}
+
+func shellQuote(s string) string { return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'" }
+
+func appleScriptString(s string) string {
+	s = strings.ReplaceAll(s, `\`, `\\`)
+	s = strings.ReplaceAll(s, `"`, `\"`)
+	return `"` + s + `"`
+}

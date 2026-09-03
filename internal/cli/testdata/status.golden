@@ -1,0 +1,10 @@
+init-a  (acme)  ~/init-a  1 now, 1 blocked, 2 next
+  now      alpha   feat/alpha  3d   Finish alpha
+  blocked  gamma   none        1d   Wait for gamma owner
+  next     beta    feat/beta   13d  Start beta
+  next     nonext              1mo  
+  ! ~/init-a/working-on/broken.md: no frontmatter: file must start with ---
+  ! ~/init-a/working-on/nonext.md: open card without next action
+
+init-b  (personal)  ~/work/init-b  0 now, 0 blocked, 1 next
+  next  only-next  main  today  Do the thing
