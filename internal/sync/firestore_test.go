@@ -64,6 +64,15 @@ func (f *fakeFirestore) handler() http.Handler {
 				}
 			}
 			_ = json.NewEncoder(w).Encode(rows)
+		case r.Method == http.MethodGet && strings.HasSuffix(p, "/machines"):
+			var docs []document
+			for name, d := range f.docs {
+				rest := strings.TrimPrefix(name, p+"/")
+				if rest != name && !strings.Contains(rest, "/") {
+					docs = append(docs, d)
+				}
+			}
+			_ = json.NewEncoder(w).Encode(map[string]any{"documents": docs})
 		case r.Method == http.MethodGet && strings.HasSuffix(p, "/initiatives"):
 			var docs []document
 			for name, d := range f.docs {

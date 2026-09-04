@@ -80,10 +80,18 @@ func runWith(args []string, stdout, stderr io.Writer, now func() time.Time) int 
 		fmt.Fprintln(stdout, "signed out on this machine")
 		return 0
 	case "whoami":
-		acc := service.NewWith(cfg, cache.State{}, now).Auth.Account()
+		svc := service.NewWith(cfg, cache.State{}, now)
+		acc := svc.Auth.Account()
 		if !acc.SignedIn {
 			fmt.Fprintln(stdout, "not signed in (organizer login)")
 			return 1
+		}
+		// A session restored from the keychain knows the email but not the uid
+		// until the first token refresh; do that here so the output is complete.
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if uid, err := svc.Auth.UID(ctx); err == nil {
+			acc.UID = uid
 		}
 		fmt.Fprintf(stdout, "%s (%s)\n", acc.Email, acc.UID)
 		return 0

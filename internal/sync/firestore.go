@@ -96,7 +96,14 @@ func (s *Store) do(ctx context.Context, method, path string, body any, out any) 
 				Status  string `json:"status"`
 			} `json:"error"`
 		}
-		_ = json.Unmarshal(data, &e)
+		trimmed := bytes.TrimSpace(data)
+		if len(trimmed) > 0 && trimmed[0] == '[' { // runQuery streams: errors come wrapped in an array
+			var arr []json.RawMessage
+			if json.Unmarshal(trimmed, &arr) == nil && len(arr) > 0 {
+				trimmed = arr[0]
+			}
+		}
+		_ = json.Unmarshal(trimmed, &e)
 		if e.Error.Message == "" {
 			e.Error.Message = res.Status
 		}
@@ -218,28 +225,43 @@ func (s *Store) Push(ctx context.Context, snap model.Snapshot) (pushed int, reti
 }
 
 func (s *Store) listInitiativeIDs(ctx context.Context, machinePath string) ([]string, error) {
-	var ids []string
+	docs, err := s.listDocuments(ctx, machinePath+"/initiatives", "present")
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]string, 0, len(docs))
+	for _, d := range docs {
+		ids = append(ids, lastSegment(d.Name))
+	}
+	return ids, nil
+}
+
+// listDocuments pages through a collection. mask limits the fields returned
+// (empty = all). A missing collection is an empty list.
+func (s *Store) listDocuments(ctx context.Context, collection, mask string) ([]document, error) {
+	var out []document
 	pageToken := ""
 	for {
 		var res struct {
 			Documents     []document `json:"documents"`
 			NextPageToken string     `json:"nextPageToken"`
 		}
-		q := "?mask.fieldPaths=present&pageSize=300"
+		q := "?pageSize=300"
+		if mask != "" {
+			q += "&mask.fieldPaths=" + url.QueryEscape(mask)
+		}
 		if pageToken != "" {
 			q += "&pageToken=" + url.QueryEscape(pageToken)
 		}
-		if err := s.do(ctx, http.MethodGet, machinePath+"/initiatives"+q, nil, &res); err != nil {
+		if err := s.do(ctx, http.MethodGet, collection+q, nil, &res); err != nil {
 			if errors.Is(err, errNotFound) {
 				return nil, nil
 			}
 			return nil, err
 		}
-		for _, d := range res.Documents {
-			ids = append(ids, lastSegment(d.Name))
-		}
+		out = append(out, res.Documents...)
 		if res.NextPageToken == "" {
-			return ids, nil
+			return out, nil
 		}
 		pageToken = res.NextPageToken
 	}
@@ -257,22 +279,24 @@ func (s *Store) Pull(ctx context.Context) ([]model.Snapshot, error) {
 	if err != nil {
 		return nil, err
 	}
-	body := map[string]any{"structuredQuery": map[string]any{
-		"from":  []map[string]any{{"collectionId": "initiatives", "allDescendants": true}},
-		"where": map[string]any{"fieldFilter": map[string]any{"field": map[string]any{"fieldPath": "present"}, "op": "EQUAL", "value": vBool(true)}},
-	}}
-	var rows []struct {
-		Document *document `json:"document"`
+	machines, err := s.listDocuments(ctx, s.userPath(uid)+"/machines", "machine")
+	if err != nil {
+		return nil, fmt.Errorf("list machines: %w", err)
 	}
-	if err := s.do(ctx, http.MethodPost, s.userPath(uid)+":runQuery", body, &rows); err != nil {
-		return nil, fmt.Errorf("query: %w", err)
+	var docs []document
+	for _, m := range machines {
+		part, err := s.listDocuments(ctx, m.Name+"/initiatives", "")
+		if err != nil {
+			return nil, fmt.Errorf("list initiatives: %w", err)
+		}
+		docs = append(docs, part...)
 	}
 	byMachine := map[string]*model.Snapshot{}
-	for _, r := range rows {
-		if r.Document == nil {
+	for _, d := range docs {
+		if !boolean(d.Fields, "present") {
 			continue
 		}
-		f := r.Document.Fields
+		f := d.Fields
 		machine := str(f, "machine")
 		snap := byMachine[machine]
 		if snap == nil {
