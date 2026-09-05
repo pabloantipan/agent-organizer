@@ -72,6 +72,48 @@ func factoryKey(ctx context.Context, cfg config.Config, token func(context.Conte
 	return factory, nil
 }
 
+// registerCell is the record side of bringing a crew up. It writes the
+// cell's push flag from the initiative's cell.json into projects.json,
+// which is local and always happens, then registers the cell with the
+// record when this laptop is a factory (record_url set, push.key present).
+// Missing either is a skip: the record accepts and holds events for a cell
+// it does not know yet, and bootstrap.sh may register too. A failure once
+// both exist is returned, because a developer who configured a record and
+// holds a key means the cell to be visible there.
+//
+// It takes what it needs rather than the initiative, so the record side
+// stays testable and independent of the scan.
+func registerCell(ctx context.Context, cfg config.Config, root string, cell record.Cell) error {
+	dir := discussStateDir(cfg)
+	push, err := record.CellPush(root)
+	if err != nil {
+		return err
+	}
+	if err := record.SetPush(dir, cell.Cell, push); err != nil {
+		return err
+	}
+	if strings.TrimSpace(cfg.RecordURL) == "" {
+		return nil
+	}
+	key, err := record.ReadKey(dir)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	factory, err := record.Factory(dir)
+	if errors.Is(err, os.ErrNotExist) {
+		factory = cfg.Machine
+	} else if err != nil {
+		return err
+	}
+	if err := record.New(cfg.RecordURL).RegisterCell(ctx, key, factory, cell); err != nil {
+		return fmt.Errorf("register cell %s with %s: %w", cell.Cell, cfg.RecordURL, err)
+	}
+	return nil
+}
+
 // discussStateDir is where discuss-api keeps its socket, tokens and the
 // pusher's files.
 func discussStateDir(cfg config.Config) string {
