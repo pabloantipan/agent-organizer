@@ -32,6 +32,13 @@ type Config struct {
 	Zellij string `yaml:"zellij" json:"zellij"`
 	// AgentBinary is the process name that counts as an agent. Default claude.
 	AgentBinary string `yaml:"agent_binary" json:"agent_binary"`
+	// DiscussStateDir holds the discuss socket and token registry, and the
+	// files the pusher reads: push.key, factory, projects.json.
+	DiscussStateDir string `yaml:"discuss_state_dir" json:"discuss_state_dir"`
+	// RecordURL is the origin of discuss-record, the service a factory pushes
+	// its cell events to. Empty means this laptop is not a factory yet:
+	// `organizer factory-key` refuses and the crew skips registration.
+	RecordURL string `yaml:"record_url" json:"record_url"`
 }
 
 // Default returns the config used when no file exists yet.
@@ -57,6 +64,7 @@ func Default() Config {
 		ProbeStateDir:       "~/.local/state/probe",
 		Zellij:              "/opt/homebrew/bin/zellij",
 		AgentBinary:         "claude",
+		DiscussStateDir:     "~/.local/state/discuss",
 	}
 }
 
