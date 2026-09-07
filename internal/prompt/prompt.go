@@ -124,3 +124,23 @@ func age(t, now time.Time) string {
 		return fmt.Sprintf("%d days ago", days)
 	}
 }
+
+// Persona is the opening prompt of a crew seat: who the session is, where
+// the roster lives, and what to do first. It restates nothing the
+// persona-agents and discuss skills own; it only points at them.
+func Persona(cell model.Cell, seat, root string) string {
+	var b strings.Builder
+	w := func(format string, a ...any) { fmt.Fprintf(&b, format, a...) }
+	w("You are the persona %q of the %q cell, working in %s.\n\n", seat, cell.Project, root)
+	w("Follow the persona-agents skill's session start: read agents/README.md, then agents/%s.md, then the roster entries of whoever you will work with, and the frontmatter of the open working-on/ cards.\n", seat)
+	w("Load the discuss skill before posting anything. Your inbox drains on every stop and prompt; the discuss-hook wiring is already installed in this directory.\n")
+	if cell.Reconciler != "" {
+		if cell.Reconciler == seat {
+			w("You are the cell's reconciler: threads without a decision are yours to close.\n")
+		} else {
+			w("The reconciler is %s; decisions go through that seat.\n", cell.Reconciler)
+		}
+	}
+	w("\nThen say in two lines who you are and what is waiting for you (undelivered threads, cards that name you), and stop. Do not start work nobody asked for.\n")
+	return b.String()
+}
