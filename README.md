@@ -112,11 +112,41 @@ organizer status                 # open cards per initiative, in priority order
 organizer board                  # merged view across machines (from the last pull)
 organizer agents                 # agent processes grouped per initiative
 organizer prompt <initiative>    # the review prompt for an agent; --run opens it in a terminal
+organizer run <initiative> <card>   # hand a card to a builder; --print shows the launch line
+organizer runs [initiative]      # every recorded agent session per card: wall time, context, cost; --json
 organizer login | logout | whoami   # cloud session on this machine
 organizer sync                   # push this machine, pull all (skipped when signed out)
 organizer doctor                 # roots, initiatives found, cards rejected and why
 organizer config --init          # write ~/.config/organizer/config.yaml with defaults
 ```
+
+## Launching a card, and what it cost
+
+A card is launchable when it carries the three build fields the `working-on`
+skill calls the delegation contract: `spec`, `gate` and `boundary`. `organizer
+run <initiative> <card>` refuses with exit 2 and names the missing ones, because
+a builder handed a card without a gate reports "done" by feel. With all three it
+opens the launch line of the `supervise` skill's step 4 in an iTerm tab, or
+prints it with `--print`:
+
+```
+PROBE_PRELUDE_FILE=~/.local/share/organizer/prompts/opus.prelude.sh \
+PROBE_PROMPT_FILE=~/.local/share/organizer/prompts/<initiative>-<card>.md \
+<family>-probe <card> <dir>
+```
+
+`<dir>` is the card's worktree under `.wt/` when one exists, else the initiative
+root. The task prompt has to be there already; writing it is the supervisor's
+job.
+
+While an agent runs, `organizer statusline` keeps a record of its context fill
+and its bill in `~/.local/share/organizer/sessions/<pid>.json`. That record is
+deleted when the process dies, so it is first appended to
+`~/.local/share/organizer/runs.jsonl`, with the card it ran against — matched by
+worktree path, else by the checkout's branch, and left blank when more than one
+card would answer. `organizer runs` is that log as a table: card, session,
+model, started, ended, wall, context at the end, cost, newest first. It is the
+factory's productivity baseline; `--json` gives the records.
 
 ## Configuration
 
