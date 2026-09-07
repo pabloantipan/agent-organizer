@@ -11,6 +11,7 @@ func cardFixtures() []CardRef {
 	return []CardRef{
 		{Initiative: "organizer", Slug: "run-gate", Branch: "run-gate", Root: "/home/p/organizer"},
 		{Initiative: "organizer", Slug: "crew", Branch: "crew-and-context", Root: "/home/p/organizer"},
+		{Initiative: "organizer", Slug: "polish", Branch: "crew-and-context", Root: "/home/p/organizer"},
 		{Initiative: "slack", Slug: "ui", Branch: "ui", Root: "/home/p/organizer/agent-slack"},
 	}
 }
@@ -24,7 +25,8 @@ func TestMatchCard(t *testing.T) {
 	}{
 		{"worktree named after the branch", "/home/p/organizer/.wt/run-gate", "", "organizer/run-gate"},
 		{"deeper inside the worktree", "/home/p/organizer/.wt/run-gate/internal/cli", "", "organizer/run-gate"},
-		{"branch of the checkout", "/home/p/organizer", "crew-and-context", "organizer/crew"},
+		{"two cards on one branch is not a match", "/home/p/organizer", "crew-and-context", ""},
+		{"branch of the checkout", "/home/p/organizer", "run-gate", "organizer/run-gate"},
 		{"path beats branch", "/home/p/organizer/.wt/run-gate", "crew-and-context", "organizer/run-gate"},
 		{"longest root wins", "/home/p/organizer/agent-slack/.wt/ui", "", "slack/ui"},
 		{"no card claims it", "/home/p/organizer", "", ""},

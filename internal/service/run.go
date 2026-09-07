@@ -203,7 +203,51 @@ func (s *Service) branchOf(cwd string) string {
 			}
 		}
 	}
+	if branch == "" {
+		// An initiative whose root is itself the repo lists no repos, so the
+		// scan has no branch for it. Read HEAD rather than shell out.
+		branch = headBranch(cwd)
+	}
 	return branch
+}
+
+// headBranch is the branch of the nearest git checkout at or above dir, read
+// from .git/HEAD. Worktrees keep a `gitdir:` pointer file instead of a
+// directory; both are handled. Empty for a detached HEAD or no checkout.
+func headBranch(dir string) string {
+	d := filepath.Clean(dir)
+	for i := 0; i < 12; i++ {
+		gitPath := filepath.Join(d, ".git")
+		fi, err := os.Stat(gitPath)
+		if err == nil {
+			if !fi.IsDir() {
+				b, err := os.ReadFile(gitPath)
+				if err != nil {
+					return ""
+				}
+				p := strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(string(b)), "gitdir:"))
+				if !filepath.IsAbs(p) {
+					p = filepath.Join(d, p)
+				}
+				gitPath = p
+			}
+			b, err := os.ReadFile(filepath.Join(gitPath, "HEAD"))
+			if err != nil {
+				return ""
+			}
+			ref := strings.TrimSpace(string(b))
+			if !strings.HasPrefix(ref, "ref: refs/heads/") {
+				return "" // detached: a sha names no card
+			}
+			return strings.TrimPrefix(ref, "ref: refs/heads/")
+		}
+		parent := filepath.Dir(d)
+		if parent == d {
+			return ""
+		}
+		d = parent
+	}
+	return ""
 }
 
 // ArchiveRuns folds the statusline records into runs.jsonl and deletes the

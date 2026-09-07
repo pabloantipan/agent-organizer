@@ -69,6 +69,8 @@ func runWith(args []string, stdout, stderr io.Writer, now func() time.Time) int 
 		return promptCmd(cfg, args[1:], stdout, stderr, now)
 	case "run":
 		return runCmd(cfg, args[1:], stdout, stderr, now)
+	case "runs":
+		return runsCmd(cfg, args[1:], stdout, stderr, now)
 	case "agents":
 		return agentsCmd(cfg, stdout, now)
 	case "factory-key":
@@ -125,6 +127,7 @@ func usage(w io.Writer) {
   organizer sync [--no-push|--no-pull] scan, push this machine, pull all, refresh the cache
   organizer prompt <initiative> [--run] print the agent review prompt; --run opens a terminal running the agent with it
   organizer run <initiative> <card> [--print] hand a card to a builder; refuses a card without spec, gate and boundary. --print shows the launch line
+  organizer runs [initiative] [--json] every agent session recorded, per card: model, wall time, context at end, cost
   organizer agents                    agent processes and sessions grouped per initiative
   organizer factory-key [--rotate]    issue this laptop's factory key from discuss-record into ~/.local/state/discuss/push.key; --rotate issues a new one, then revokes the old
   organizer doctor                    roots, initiatives found, cards rejected and why

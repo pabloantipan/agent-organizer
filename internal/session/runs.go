@@ -141,7 +141,9 @@ type CardRef struct {
 // the longest root that prefixes the directory. Inside it, a worktree path
 // wins: a directory element equal to the card's branch or slug (the .wt/
 // convention the supervise skill launches with). Failing that, the checkout's
-// branch, when the caller knows it. No git is run here.
+// branch, when the caller knows it. An ambiguous answer is no answer: two
+// cards on main leave the run unattributed rather than guessing. No git is
+// run here.
 func MatchCard(cwd, branch string, cards []CardRef) (CardRef, bool) {
 	cwd = filepath.Clean(cwd)
 	var best []CardRef
@@ -166,24 +168,41 @@ func MatchCard(cwd, branch string, cards []CardRef) (CardRef, bool) {
 		rel = ""
 	}
 	elems := strings.Split(rel, string(filepath.Separator))
-	for _, c := range best {
+	byPath := filterCards(best, func(c CardRef) bool {
 		for _, e := range elems {
 			if e == "" || e == "." {
 				continue
 			}
 			if e == c.Branch || e == c.Slug {
-				return c, true
+				return true
 			}
 		}
+		return false
+	})
+	if len(byPath) == 1 {
+		return byPath[0], true
 	}
-	if branch != "" {
-		for _, c := range best {
-			if c.Branch == branch {
-				return c, true
-			}
+	if branch != "" && len(byPath) == 0 {
+		byBranch := filterCards(best, func(c CardRef) bool { return c.Branch == branch })
+		if len(byBranch) == 1 {
+			return byBranch[0], true
 		}
 	}
+	// More than one card answers to this directory — several cards on main is
+	// the usual reason. Guessing would put a real cost under the wrong card,
+	// which is worse than leaving it unattributed: give the card a branch or
+	// a worktree, the way the supervise skill launches builders.
 	return CardRef{}, false
+}
+
+func filterCards(cards []CardRef, keep func(CardRef) bool) []CardRef {
+	var out []CardRef
+	for _, c := range cards {
+		if keep(c) {
+			out = append(out, c)
+		}
+	}
+	return out
 }
 
 func underRoot(path, root string) bool {
