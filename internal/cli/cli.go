@@ -31,7 +31,7 @@ import (
 var Version = "dev"
 
 // Subcommands the binary recognises. Anything else launches the GUI.
-var Subcommands = []string{"status", "board", "sync", "prompt", "agents", "factory-key", "login", "logout", "whoami", "doctor", "config", "version", "--version", "help"}
+var Subcommands = []string{"status", "board", "sync", "prompt", "run", "runs", "agents", "factory-key", "login", "logout", "whoami", "doctor", "config", "version", "--version", "help"}
 
 // IsSubcommand reports whether arg names a CLI subcommand.
 func IsSubcommand(arg string) bool {
@@ -67,6 +67,8 @@ func runWith(args []string, stdout, stderr io.Writer, now func() time.Time) int 
 		return syncCmd(cfg, args[1:], stdout, stderr, now)
 	case "prompt":
 		return promptCmd(cfg, args[1:], stdout, stderr, now)
+	case "run":
+		return runCmd(cfg, args[1:], stdout, stderr, now)
 	case "agents":
 		return agentsCmd(cfg, stdout, now)
 	case "factory-key":
@@ -122,6 +124,7 @@ func usage(w io.Writer) {
   organizer logout | whoami           forget the session on this machine | show who is signed in
   organizer sync [--no-push|--no-pull] scan, push this machine, pull all, refresh the cache
   organizer prompt <initiative> [--run] print the agent review prompt; --run opens a terminal running the agent with it
+  organizer run <initiative> <card> [--print] hand a card to a builder; refuses a card without spec, gate and boundary. --print shows the launch line
   organizer agents                    agent processes and sessions grouped per initiative
   organizer factory-key [--rotate]    issue this laptop's factory key from discuss-record into ~/.local/state/discuss/push.key; --rotate issues a new one, then revokes the old
   organizer doctor                    roots, initiatives found, cards rejected and why
