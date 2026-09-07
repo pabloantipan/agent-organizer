@@ -1,0 +1,7 @@
+{
+  "project": "alpha",
+  "workdir": "/h/init-a",
+  "agents": ["po_ana", "dev_bruno"],
+  "human": "pablo",
+  "reconciler": "po_ana"
+}

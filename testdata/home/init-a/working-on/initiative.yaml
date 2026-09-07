@@ -1,0 +1,16 @@
+id: init-a
+title: Initiative A
+client: acme
+status: active
+started: 2026-08-01
+machine: testbox
+repos:
+  - repo-one
+  - repo-missing
+ports_to: none
+target: 2026-10-01
+milestones:
+  - date: 2026-09-10
+    title: QA sign-off
+  - date: 2026-09-20
+    title: Port to canonical
