@@ -5,18 +5,21 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"organizer/internal/model"
+	"organizer/internal/scan"
+	"organizer/internal/session"
 )
 
 // launchLine is the one shape a probe is started with: the prelude the pane
 // sources, the prompt sent on the first run only, and the family wrapper with
 // a session name and a directory. Crew seats and card builders share it so
 // there is one place to change when probe's contract moves.
-func launchLine(preludePath, promptPath, wrapper, session, dir string) string {
+func launchLine(preludePath, promptPath, wrapper, name, dir string) string {
 	return fmt.Sprintf("PROBE_PRELUDE_FILE=%s PROBE_PROMPT_FILE=%s %s %s %s",
 		shellQuote(preludePath), shellQuote(promptPath), shellQuote(wrapper),
-		shellQuote(session), shellQuote(dir))
+		shellQuote(name), shellQuote(dir))
 }
 
 // NotLaunchable is the refusal: a card that does not carry the delegation
@@ -158,4 +161,86 @@ func (s *Service) RunCard(initiativeID, slug string) (Launch, error) {
 		return l, fmt.Errorf("probe not found at %s", probeBin())
 	}
 	return l, openInTerminalTabs([]string{l.Command})
+}
+
+// ---- the productivity baseline: what each card's sessions cost ----
+
+// runGrace matches the scan's: a record younger than this survives a pass in
+// which its process was not seen, because the sample may predate it.
+const runGrace = 2 * time.Minute
+
+// cardRefs is every card on this machine, as the archiver needs to see them.
+func (s *Service) cardRefs() []session.CardRef {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var out []session.CardRef
+	for _, si := range s.state.Local.Initiatives {
+		for _, c := range si.Cards {
+			out = append(out, session.CardRef{
+				Initiative: si.ID, Slug: c.Slug, Branch: c.Branch, Root: si.Path,
+			})
+		}
+	}
+	return out
+}
+
+// branchOf answers which branch a directory is on from the scan's repo
+// states, so the archiver never has to shell out to git. The longest repo
+// path that contains the directory wins.
+func (s *Service) branchOf(cwd string) string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	cwd = filepath.Clean(cwd)
+	best, branch := -1, ""
+	for _, si := range s.state.Local.Initiatives {
+		for _, r := range si.RepoStates {
+			p := filepath.Clean(r.Path)
+			if p == "" || r.Branch == "" {
+				continue
+			}
+			if (cwd == p || strings.HasPrefix(cwd, p+string(filepath.Separator))) && len(p) > best {
+				best, branch = len(p), r.Branch
+			}
+		}
+	}
+	return branch
+}
+
+// ArchiveRuns folds the statusline records into runs.jsonl and deletes the
+// ones whose process is gone. It has to run before anything prunes those
+// records: they are the only place the context fill and the bill of a
+// finished session exist. Returns how many runs were closed.
+func (s *Service) ArchiveRuns() (int, error) {
+	s.mu.Lock()
+	opts := *s.agentOptions()
+	s.mu.Unlock()
+	agents := scan.Agents(opts)
+	alive := map[int]bool{}
+	for _, a := range agents {
+		if a.PID > 0 {
+			alive[a.PID] = true
+		}
+	}
+	return session.Retire(session.Dir(), session.RunsPath(), alive, runGrace, s.now(), s.cardRefs(), s.branchOf)
+}
+
+// Runs is the archive, newest last-seen first, optionally one initiative
+// only. It archives first, so a session that just ended is already in the
+// table.
+func (s *Service) Runs(initiativeID string) []session.Run {
+	if _, err := s.ArchiveRuns(); err != nil {
+		// A broken archive must not hide the history already written.
+		_ = err
+	}
+	all := session.LoadRuns(session.RunsPath())
+	if initiativeID == "" {
+		return all
+	}
+	out := make([]session.Run, 0, len(all))
+	for _, r := range all {
+		if r.Initiative == initiativeID {
+			out = append(out, r)
+		}
+	}
+	return out
 }
