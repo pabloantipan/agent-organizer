@@ -1,5 +1,7 @@
 build/bin
 node_modules
 frontend/dist
+# git worktrees for builder sessions (supervise skill)
+.wt/
 # personal state of this checkout (cards, machine names, project ids)
 working-on/
