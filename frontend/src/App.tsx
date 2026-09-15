@@ -7,6 +7,8 @@ import { Settings } from "./components/Settings";
 import { Calendar } from "./components/Calendar";
 import { RoadmapView } from "./components/RoadmapView";
 import { AgentsView } from "./components/AgentsView";
+import { SlackView } from "./components/SlackView";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Gate } from "./components/Gate";
 import { CardDrawer } from "./components/CardDrawer";
 import { useBoard } from "./stores/board.store";
@@ -14,7 +16,7 @@ import { api, type AgentsView as AgentsPayload } from "./hooks/useWails";
 import { EventsOn } from "../wailsjs/runtime/runtime";
 
 export default function App() {
-  const { tab, refresh, sync, applyAgents } = useBoard();
+  const { tab, refresh, sync, applyAgents, railCollapsed } = useBoard();
 
   useEffect(() => {
     refresh();
@@ -41,33 +43,39 @@ export default function App() {
     <Gate>
     <div className="shell">
       <TopBar />
-      <main className={["board", "calendar", "roadmap", "agents"].includes(tab) ? "content with-rail" : "content"}>
+      <main className={["board", "calendar", "roadmap", "agents", "slack"].includes(tab) ? `content with-rail ${railCollapsed ? "rail-strip" : ""}` : "content"}>
         {tab === "board" && (
           <>
             <Rail />
-            <Board />
+            <ErrorBoundary name="Board"><Board /></ErrorBoundary>
           </>
         )}
-        {tab === "initiatives" && <Initiatives />}
+        {tab === "initiatives" && <ErrorBoundary name="Initiatives"><Initiatives /></ErrorBoundary>}
         {tab === "agents" && (
           <>
             <Rail />
-            <div className="board-wrap"><AgentsView /></div>
+            <div className="board-wrap"><ErrorBoundary name="AgentsView"><AgentsView /></ErrorBoundary></div>
+          </>
+        )}
+        {tab === "slack" && (
+          <>
+            <Rail />
+            <div className="board-wrap slack-wrap"><ErrorBoundary name="SlackView"><SlackView /></ErrorBoundary></div>
           </>
         )}
         {tab === "roadmap" && (
           <>
             <Rail />
-            <div className="board-wrap"><RoadmapView /></div>
+            <div className="board-wrap"><ErrorBoundary name="RoadmapView"><RoadmapView /></ErrorBoundary></div>
           </>
         )}
         {tab === "calendar" && (
           <>
             <Rail />
-            <div className="board-wrap"><Calendar /></div>
+            <div className="board-wrap"><ErrorBoundary name="Calendar"><Calendar /></ErrorBoundary></div>
           </>
         )}
-        {tab === "settings" && <Settings />}
+        {tab === "settings" && <ErrorBoundary name="Settings"><Settings /></ErrorBoundary>}
       </main>
       <CardDrawer />
     </div>

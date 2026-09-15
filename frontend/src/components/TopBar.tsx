@@ -1,12 +1,14 @@
-import { Bot, Calendar, ChartGantt, Kanban, ListTree, Lock, LogOut, RefreshCw, RefreshCcwDot, Settings, UserRound } from "lucide-react";
+import { Bot, Calendar, ChartGantt, Kanban, ListTree, Lock, LogOut, MessagesSquare, RefreshCw, RefreshCcwDot, Settings, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "../hooks/useWails";
 import { useBoard, type Tab } from "../stores/board.store";
 import { since } from "../lib";
+import { queueOf } from "../lib/queue";
 
 const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "board", label: "Board", icon: <Kanban size={14} /> },
   { id: "agents", label: "Agents", icon: <Bot size={14} /> },
+  { id: "slack", label: "Slack", icon: <MessagesSquare size={14} /> },
   { id: "roadmap", label: "Roadmap", icon: <ChartGantt size={14} /> },
   { id: "calendar", label: "Calendar", icon: <Calendar size={14} /> },
   { id: "initiatives", label: "Initiatives", icon: <ListTree size={14} /> },
@@ -14,7 +16,10 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
 ];
 
 export function TopBar() {
-  const { tab, setTab, view, loading, syncing, refresh, sync, error, lastMessage, account, syncNote, setAccount, setLock, setOfflineChoice } = useBoard();
+  const { tab, setTab, view, loading, syncing, refresh, sync, error, lastMessage, account, syncNote, setAccount, setLock, setOfflineChoice, agents } = useBoard();
+  // The human's queue plus seats not picking up, across every cell; one
+  // definition shared with the Slack tab so the numbers agree.
+  const needsMe = (agents?.groups ?? []).filter((g) => g.cell).reduce((n, g) => { const q = queueOf(g, view); return n + q.total + q.deaf; }, 0);
   const [menu, setMenu] = useState(false);
   const machines = view?.board.machines ?? [];
   const [version, setVersion] = useState("");
@@ -25,7 +30,7 @@ export function TopBar() {
       <nav className="tabs">
         {TABS.map((t) => (
           <button key={t.id} className={t.id === tab ? "active" : ""} onClick={() => setTab(t.id)}>
-            {t.icon} {t.label}
+            {t.icon} {t.label}{t.id === "slack" && needsMe > 0 && <span className="tab-badge" title="things asked of you (threads and cards), plus seats not picking up">{needsMe}</span>}
           </button>
         ))}
       </nav>

@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Square, SquareTerminal, Trash2 } from "lucide-react";
+import { MessageSquare, Square, SquareTerminal, Trash2 } from "lucide-react";
 import { api, type Agent } from "../hooks/useWails";
 import { shortHome } from "../lib";
+import { ContextBar, WatcherBadge } from "./ContextBar";
 
 const STATE_LABEL: Record<string, string> = { working: "working", running: "idle", shell: "shell", exited: "exited" };
 
@@ -9,7 +10,7 @@ const STATE_LABEL: Record<string, string> = { working: "working", running: "idle
  *  probe profile. Kill removes a probe (session, layout, profile; the
  *  conversation survives). Stop sends SIGTERM to a plain-terminal agent.
  *  Both destructive actions ask inline first. */
-export function AgentList({ agents, root, local = true }: { agents: Agent[]; root?: string; local?: boolean }) {
+export function AgentList({ agents, root, local = true, onMessage }: { agents: Agent[]; root?: string; local?: boolean; onMessage?: (persona: string) => void }) {
   const [confirm, setConfirm] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
   if (!agents || agents.length === 0) return <div className="meta">No agents here.</div>;
@@ -31,10 +32,14 @@ export function AgentList({ agents, root, local = true }: { agents: Agent[]; roo
                 {a.family && <span className="a-family">{a.family}</span>}
                 <span className="ident">{a.short || a.name}</span>
               </span>
+              {a.persona && <span className="badge persona" title={a.cell ? `${a.cell} cell` : "persona"}>{a.persona}</span>}
+              <WatcherBadge watcher={a.watcher} deaf={a.deaf} undelivered={a.undelivered} />
               <span className={`badge kind ${a.kind}`}>{a.kind}</span>
+              <ContextBar c={a.context} />
               <span className="meta mono a-proc">{a.pid > 0 ? `${a.tty} · up ${a.uptime}` : a.created ? `session ${a.created}` : "layout only"}</span>
               <span className="meta mono a-dir" title={a.dir}>{sub}</span>
               <span className="a-actions">
+                {onMessage && a.persona && !asking && <button className="tiny-btn" onClick={() => onMessage(a.persona)} title={`write to ${a.persona}`}><MessageSquare size={13} /> Message</button>}
                 {local && asking && a.session && (
                   <>
                     <span className="meta">remove session, layout and profile? conversation stays resumable</span>

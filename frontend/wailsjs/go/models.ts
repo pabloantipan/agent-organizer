@@ -36,6 +36,9 @@ export namespace config {
 	    probe_state_dir: string;
 	    zellij: string;
 	    agent_binary: string;
+	    discuss_state_dir: string;
+	    crew_model: string;
+	    record_url: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -57,6 +60,90 @@ export namespace config {
 	        this.probe_state_dir = source["probe_state_dir"];
 	        this.zellij = source["zellij"];
 	        this.agent_binary = source["agent_binary"];
+	        this.discuss_state_dir = source["discuss_state_dir"];
+	        this.crew_model = source["crew_model"];
+	        this.record_url = source["record_url"];
+	    }
+	}
+
+}
+
+export namespace discuss {
+	
+	export class Message {
+	    id: string;
+	    thread_id: string;
+	    parent_id: string;
+	    from: string;
+	    to: string;
+	    kind: string;
+	    subject: string;
+	    body: string;
+	    created_at: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Message(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.thread_id = source["thread_id"];
+	        this.parent_id = source["parent_id"];
+	        this.from = source["from"];
+	        this.to = source["to"];
+	        this.kind = source["kind"];
+	        this.subject = source["subject"];
+	        this.body = source["body"];
+	        this.created_at = source["created_at"];
+	    }
+	}
+	export class PostResult {
+	    id: string;
+	    thread_id: string;
+	    created_at: number;
+	    stalled: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new PostResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.thread_id = source["thread_id"];
+	        this.created_at = source["created_at"];
+	        this.stalled = source["stalled"];
+	    }
+	}
+	export class Thread {
+	    id: string;
+	    subject: string;
+	    status: string;
+	    kind: string;
+	    participants: string[];
+	    messages: number;
+	    since_decision: number;
+	    undecided: boolean;
+	    quiet_seconds: number;
+	    age_seconds: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Thread(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.subject = source["subject"];
+	        this.status = source["status"];
+	        this.kind = source["kind"];
+	        this.participants = source["participants"];
+	        this.messages = source["messages"];
+	        this.since_decision = source["since_decision"];
+	        this.undecided = source["undecided"];
+	        this.quiet_seconds = source["quiet_seconds"];
+	        this.age_seconds = source["age_seconds"];
 	    }
 	}
 
@@ -66,6 +153,7 @@ export namespace main {
 	
 	export class BoardView {
 	    board: merge.Board;
+	    order: model.Order;
 	    // Go type: time
 	    pulled_at: any;
 	    error?: string;
@@ -77,6 +165,7 @@ export namespace main {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.board = this.convertValues(source["board"], merge.Board);
+	        this.order = this.convertValues(source["order"], model.Order);
 	        this.pulled_at = this.convertValues(source["pulled_at"], null);
 	        this.error = source["error"];
 	    }
@@ -237,6 +326,9 @@ export namespace merge {
 	    next: string;
 	    due: string;
 	    start: string;
+	    threads: string[];
+	    seat: string;
+	    thread_state: model.ThreadState[];
 	    branch_start: string;
 	    branch_last: string;
 	    path: string;
@@ -266,6 +358,9 @@ export namespace merge {
 	        this.next = source["next"];
 	        this.due = source["due"];
 	        this.start = source["start"];
+	        this.threads = source["threads"];
+	        this.seat = source["seat"];
+	        this.thread_state = this.convertValues(source["thread_state"], model.ThreadState);
 	        this.branch_start = source["branch_start"];
 	        this.branch_last = source["branch_last"];
 	        this.path = source["path"];
@@ -303,6 +398,51 @@ export namespace merge {
 
 export namespace model {
 	
+	export class ContextStatus {
+	    session_id: string;
+	    model: string;
+	    used_percent: number;
+	    input_tokens: number;
+	    window_size: number;
+	    cost_usd: number;
+	    transcript: string;
+	    // Go type: time
+	    updated_at: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new ContextStatus(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.session_id = source["session_id"];
+	        this.model = source["model"];
+	        this.used_percent = source["used_percent"];
+	        this.input_tokens = source["input_tokens"];
+	        this.window_size = source["window_size"];
+	        this.cost_usd = source["cost_usd"];
+	        this.transcript = source["transcript"];
+	        this.updated_at = this.convertValues(source["updated_at"], null);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class Agent {
 	    name: string;
 	    session: string;
@@ -316,6 +456,12 @@ export namespace model {
 	    cpu_seconds: number;
 	    dir: string;
 	    created: string;
+	    persona: string;
+	    cell: string;
+	    context?: ContextStatus;
+	    watcher: string;
+	    deaf: boolean;
+	    undelivered: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Agent(source);
@@ -335,6 +481,81 @@ export namespace model {
 	        this.cpu_seconds = source["cpu_seconds"];
 	        this.dir = source["dir"];
 	        this.created = source["created"];
+	        this.persona = source["persona"];
+	        this.cell = source["cell"];
+	        this.context = this.convertValues(source["context"], ContextStatus);
+	        this.watcher = source["watcher"];
+	        this.deaf = source["deaf"];
+	        this.undelivered = source["undelivered"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Blocker {
+	    seat: string;
+	    reason: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Blocker(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.seat = source["seat"];
+	        this.reason = source["reason"];
+	    }
+	}
+	export class Cell {
+	    project: string;
+	    workdir: string;
+	    agents: string[];
+	    human: string;
+	    reconciler: string;
+	    model?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Cell(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.project = source["project"];
+	        this.workdir = source["workdir"];
+	        this.agents = source["agents"];
+	        this.human = source["human"];
+	        this.reconciler = source["reconciler"];
+	        this.model = source["model"];
+	    }
+	}
+	
+	export class Group {
+	    name: string;
+	    initiatives: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Group(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.initiatives = source["initiatives"];
 	    }
 	}
 	export class Milestone {
@@ -351,9 +572,49 @@ export namespace model {
 	        this.title = source["title"];
 	    }
 	}
+	export class Note {
+	    id: string;
+	    by: string;
+	    // Go type: time
+	    at: any;
+	    text: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Note(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.by = source["by"];
+	        this.at = this.convertValues(source["at"], null);
+	        this.text = source["text"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class Order {
 	    initiatives: string[];
 	    cards: Record<string, Array<string>>;
+	    groups?: Group[];
+	    notes?: Record<string, Array<Note>>;
+	    resolved?: Record<string, string>;
 	    // Go type: time
 	    updated_at: any;
 	
@@ -365,6 +626,9 @@ export namespace model {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.initiatives = source["initiatives"];
 	        this.cards = source["cards"];
+	        this.groups = this.convertValues(source["groups"], Group);
+	        this.notes = this.convertValues(source["notes"], Array<Note>, true);
+	        this.resolved = source["resolved"];
 	        this.updated_at = this.convertValues(source["updated_at"], null);
 	    }
 	
@@ -424,11 +688,175 @@ export namespace model {
 	        this.err = source["err"];
 	    }
 	}
+	export class ThreadState {
+	    id: string;
+	    subject: string;
+	    status: string;
+	    messages: number;
+	    since_decision: number;
+	    quiet_seconds: number;
+	    missing: boolean;
+	    blocked_on: Blocker[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ThreadState(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.subject = source["subject"];
+	        this.status = source["status"];
+	        this.messages = source["messages"];
+	        this.since_decision = source["since_decision"];
+	        this.quiet_seconds = source["quiet_seconds"];
+	        this.missing = source["missing"];
+	        this.blocked_on = this.convertValues(source["blocked_on"], Blocker);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 
 }
 
 export namespace service {
 	
+	export class CellThread {
+	    id: string;
+	    subject: string;
+	    status: string;
+	    kind: string;
+	    participants: string[];
+	    messages: number;
+	    since_decision: number;
+	    undecided: boolean;
+	    quiet_seconds: number;
+	    age_seconds: number;
+	    cards: string[];
+	    opener: string;
+	    to: string;
+	    asked_of_me: number;
+	    asked_by: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CellThread(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.subject = source["subject"];
+	        this.status = source["status"];
+	        this.kind = source["kind"];
+	        this.participants = source["participants"];
+	        this.messages = source["messages"];
+	        this.since_decision = source["since_decision"];
+	        this.undecided = source["undecided"];
+	        this.quiet_seconds = source["quiet_seconds"];
+	        this.age_seconds = source["age_seconds"];
+	        this.cards = source["cards"];
+	        this.opener = source["opener"];
+	        this.to = source["to"];
+	        this.asked_of_me = source["asked_of_me"];
+	        this.asked_by = source["asked_by"];
+	    }
+	}
+	export class CardWait {
+	    slug: string;
+	    title: string;
+	    status: string;
+	    thread: model.ThreadState;
+	
+	    static createFrom(source: any = {}) {
+	        return new CardWait(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.slug = source["slug"];
+	        this.title = source["title"];
+	        this.status = source["status"];
+	        this.thread = this.convertValues(source["thread"], model.ThreadState);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Seat {
+	    name: string;
+	    session: string;
+	    agent?: model.Agent;
+	    watcher: string;
+	    deaf: boolean;
+	    capped: boolean;
+	    undelivered: number;
+	    owes: model.ThreadState[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Seat(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.session = source["session"];
+	        this.agent = this.convertValues(source["agent"], model.Agent);
+	        this.watcher = source["watcher"];
+	        this.deaf = source["deaf"];
+	        this.capped = source["capped"];
+	        this.undelivered = source["undelivered"];
+	        this.owes = this.convertValues(source["owes"], model.ThreadState);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class AgentGroup {
 	    id: string;
 	    title: string;
@@ -437,6 +865,17 @@ export namespace service {
 	    agents: model.Agent[];
 	    live: number;
 	    working: number;
+	    cell?: model.Cell;
+	    crew: Seat[];
+	    discuss: string;
+	    waiting: CardWait[];
+	    project: string;
+	    human: string;
+	    can_post: boolean;
+	    threads: CellThread[];
+	    needs_me: number;
+	    needs_reconciler: number;
+	    retirable: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new AgentGroup(source);
@@ -451,6 +890,17 @@ export namespace service {
 	        this.agents = this.convertValues(source["agents"], model.Agent);
 	        this.live = source["live"];
 	        this.working = source["working"];
+	        this.cell = this.convertValues(source["cell"], model.Cell);
+	        this.crew = this.convertValues(source["crew"], Seat);
+	        this.discuss = source["discuss"];
+	        this.waiting = this.convertValues(source["waiting"], CardWait);
+	        this.project = source["project"];
+	        this.human = source["human"];
+	        this.can_post = source["can_post"];
+	        this.threads = this.convertValues(source["threads"], CellThread);
+	        this.needs_me = source["needs_me"];
+	        this.needs_reconciler = source["needs_reconciler"];
+	        this.retirable = source["retirable"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -506,6 +956,125 @@ export namespace service {
 		    return a;
 		}
 	}
+	
+	export class CellPost {
+	    thread_id: string;
+	    parent_id: string;
+	    to: string;
+	    kind: string;
+	    subject: string;
+	    body: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CellPost(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.thread_id = source["thread_id"];
+	        this.parent_id = source["parent_id"];
+	        this.to = source["to"];
+	        this.kind = source["kind"];
+	        this.subject = source["subject"];
+	        this.body = source["body"];
+	    }
+	}
+	
+	export class CellThreadView {
+	    id: string;
+	    subject: string;
+	    status: string;
+	    since_decision: number;
+	    messages: discuss.Message[];
+	    cards: string[];
+	    wakes_on_broadcast: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new CellThreadView(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.subject = source["subject"];
+	        this.status = source["status"];
+	        this.since_decision = source["since_decision"];
+	        this.messages = this.convertValues(source["messages"], discuss.Message);
+	        this.cards = source["cards"];
+	        this.wakes_on_broadcast = source["wakes_on_broadcast"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class CellView {
+	    id: string;
+	    title: string;
+	    project: string;
+	    human: string;
+	    can_post: boolean;
+	    cell?: model.Cell;
+	    crew: Seat[];
+	    threads: CellThread[];
+	    closed: CellThread[];
+	    waiting: CardWait[];
+	    discuss: string;
+	    // Go type: time
+	    read_at: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new CellView(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.title = source["title"];
+	        this.project = source["project"];
+	        this.human = source["human"];
+	        this.can_post = source["can_post"];
+	        this.cell = this.convertValues(source["cell"], model.Cell);
+	        this.crew = this.convertValues(source["crew"], Seat);
+	        this.threads = this.convertValues(source["threads"], CellThread);
+	        this.closed = this.convertValues(source["closed"], CellThread);
+	        this.waiting = this.convertValues(source["waiting"], CardWait);
+	        this.discuss = source["discuss"];
+	        this.read_at = this.convertValues(source["read_at"], null);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class LockState {
 	    enabled: boolean;
 	    unlocked: boolean;
@@ -524,6 +1093,83 @@ export namespace service {
 	        this.failures_left = source["failures_left"];
 	    }
 	}
+	export class RetireOptions {
+	    initiative_id: string;
+	    seats: string[];
+	    retirable: boolean;
+	    force: boolean;
+	    wave_threads: boolean;
+	    sessions: string[];
+	    close_threads: boolean;
+	    revoke_tokens: boolean;
+	    commit_cell: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new RetireOptions(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.initiative_id = source["initiative_id"];
+	        this.seats = source["seats"];
+	        this.retirable = source["retirable"];
+	        this.force = source["force"];
+	        this.wave_threads = source["wave_threads"];
+	        this.sessions = source["sessions"];
+	        this.close_threads = source["close_threads"];
+	        this.revoke_tokens = source["revoke_tokens"];
+	        this.commit_cell = source["commit_cell"];
+	    }
+	}
+	export class RetirePlan {
+	    initiative_id: string;
+	    project: string;
+	    seats: string[];
+	    keep: string[];
+	    sessions: string[];
+	    tokens: string[];
+	    threads: string[];
+	    files: string[];
+	    cell_path: string;
+	    cell_is_git: boolean;
+	    restart_api: boolean;
+	    problems: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new RetirePlan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.initiative_id = source["initiative_id"];
+	        this.project = source["project"];
+	        this.seats = source["seats"];
+	        this.keep = source["keep"];
+	        this.sessions = source["sessions"];
+	        this.tokens = source["tokens"];
+	        this.threads = source["threads"];
+	        this.files = source["files"];
+	        this.cell_path = source["cell_path"];
+	        this.cell_is_git = source["cell_is_git"];
+	        this.restart_api = source["restart_api"];
+	        this.problems = source["problems"];
+	    }
+	}
+	export class RetireReport {
+	    steps: string[];
+	    errors: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new RetireReport(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.steps = source["steps"];
+	        this.errors = source["errors"];
+	    }
+	}
+	
 	export class SyncResult {
 	    pushed: number;
 	    retired: number;

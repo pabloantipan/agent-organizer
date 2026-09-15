@@ -46,3 +46,13 @@ export function move<T>(list: T[], from: number, to: number): T[] {
 export function uniq<T>(list: T[]): T[] {
   return Array.from(new Set(list));
 }
+
+/** The human's comments on a card as the opening context of a conversation. */
+export function notesAsContext(notes: { by: string; at: unknown; text: string }[] | undefined, human: string): string {
+  if (!notes || notes.length === 0) return "";
+  const lines = notes.map((n) => {
+    const d = typeof n.at === "string" ? n.at.slice(0, 10) : "";
+    return `- ${d ? d + " " : ""}${n.by || human}: ${n.text}`;
+  });
+  return `Context from ${human}:\n${lines.join("\n")}\n\n`;
+}

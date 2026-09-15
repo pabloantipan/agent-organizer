@@ -1,16 +1,31 @@
 // Thin wrapper over the generated Wails bindings so components import one
 // module and tests can stub it. Mirrors Bitacora's useTauri.ts.
 import * as App from "../../wailsjs/go/main/App";
-import { auth, config, main, model, service } from "../../wailsjs/go/models";
+import { auth, config, discuss, main, model, service } from "../../wailsjs/go/models";
 export type Account = auth.Account;
 export type LockState = service.LockState;
 export type AgentsView = service.AgentsView;
+export type AgentGroup = service.AgentGroup;
+export type Seat = service.Seat;
+export type CardWait = service.CardWait;
+export type ThreadState = model.ThreadState;
 export type Agent = model.Agent;
+export type ContextStatus = model.ContextStatus;
 
 export type BoardView = main.BoardView;
 export type Config = config.Config;
 export type SyncResult = service.SyncResult;
 export type Order = model.Order;
+export type Note = model.Note;
+export type RetireOptions = service.RetireOptions;
+export type RetirePlan = service.RetirePlan;
+export type RetireReport = service.RetireReport;
+export type CellView = service.CellView;
+export type CellThread = service.CellThread;
+export type CellThreadView = service.CellThreadView;
+export type CellPost = service.CellPost;
+export type CellMessage = discuss.Message;
+export type Group = model.Group;
 
 export const api = {
   getBoard: (): Promise<BoardView> => App.GetBoard(),
@@ -39,8 +54,22 @@ export const api = {
   attachSession: (name: string): Promise<void> => App.AttachSession(name),
   getAgents: (): Promise<AgentsView> => App.GetAgents(),
   createAgent: (id: string, name: string): Promise<void> => App.CreateAgent(id, name),
+  createCrew: (id: string): Promise<string[]> => App.CreateCrew(id),
+  getCell: (id: string): Promise<CellView> => App.GetCell(id),
+  getCellThread: (id: string, tid: string): Promise<CellThreadView> => App.GetCellThread(id, tid),
+  postToCell: (id: string, p: CellPost): Promise<discuss.PostResult> => App.PostToCell(id, p as service.CellPost),
+  setCellThreadStatus: (id: string, tid: string, status: string): Promise<void> => App.SetCellThreadStatus(id, tid, status),
+  searchCell: (id: string, q: string): Promise<CellMessage[]> => App.SearchCell(id, q),
+  pickUp: (id: string): Promise<number> => App.PickUp(id),
+  addNote: (id: string, slug: string, text: string): Promise<model.Note> => App.AddNote(id, slug, text),
+  editNote: (id: string, slug: string, noteId: string, text: string): Promise<void> => App.EditNote(id, slug, noteId, text),
+  setResolved: (key: string, resolved: boolean): Promise<void> => App.SetResolved(key, resolved),
+  planRetire: (o: RetireOptions): Promise<RetirePlan> => App.PlanRetire(o as service.RetireOptions),
+  retire: (o: RetireOptions): Promise<RetireReport> => App.Retire(o as service.RetireOptions),
+  clean: (): Promise<RetireReport> => App.Clean(),
   killAgent: (session: string): Promise<void> => App.KillAgent(session),
   stopAgent: (pid: number): Promise<void> => App.StopAgent(pid),
   setInitiativeOrder: (ids: string[]): Promise<void> => App.SetInitiativeOrder(ids),
+  setGroups: (groups: Group[]): Promise<void> => App.SetGroups(groups),
   setCardOrder: (id: string, slugs: string[]): Promise<void> => App.SetCardOrder(id, slugs),
 };
