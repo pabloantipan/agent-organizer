@@ -19,11 +19,23 @@ import (
 
 // AgentHealth is one roster row of GET /projects/{project}/health.
 type AgentHealth struct {
-	Agent            string `json:"agent"`
-	Watcher          string `json:"watcher"` // alive | stale | never
-	SecondsSinceWait int64  `json:"seconds_since_wait"`
-	Undelivered      int    `json:"undelivered"`
-	Deaf             bool   `json:"deaf"`
+	Agent              string `json:"agent"`
+	Watcher            string `json:"watcher"` // alive | stale | never
+	SecondsSinceWait   int64  `json:"seconds_since_wait"`
+	SecondsSinceDrain  int64  `json:"seconds_since_drain"`
+	Undelivered        int    `json:"undelivered"`
+	OldestUndeliveredS int64  `json:"oldest_undelivered_seconds"`
+	Deaf               bool   `json:"deaf"`
+}
+
+// Capped tells a seat that cannot receive from one that is not listening.
+// Deaf is the server's verdict on old undelivered mail, whatever the cause.
+// When a drain ran after the oldest undelivered message arrived and left it
+// undelivered, the drain delivered nothing on purpose: the session hit the
+// mailbox's drain ceiling, and mail waits for a new session. The seat is
+// alive and posting; it just cannot be reached until it is restarted.
+func (h AgentHealth) Capped() bool {
+	return h.Deaf && h.Undelivered > 0 && h.SecondsSinceDrain > 0 && h.OldestUndeliveredS > h.SecondsSinceDrain
 }
 
 // Thread is one live-thread row of the same payload. The endpoint has always
@@ -37,8 +49,11 @@ type Thread struct {
 	Participants  []string `json:"participants"`
 	Messages      int      `json:"messages"`
 	SinceDecision int      `json:"since_decision"`
-	QuietSeconds  int64    `json:"quiet_seconds"`
-	AgeSeconds    int64    `json:"age_seconds"`
+	// Undecided: the last word was an answer and the thread has rested on it
+	// for an hour. The reconciler's work, invisible until silence names it.
+	Undecided    bool  `json:"undecided"`
+	QuietSeconds int64 `json:"quiet_seconds"`
+	AgeSeconds   int64 `json:"age_seconds"`
 }
 
 // Snapshot is one read of the health endpoint: who is reachable, and what is

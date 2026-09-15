@@ -28,6 +28,7 @@ type Seat struct {
 	// Watcher is alive, stale or never; empty when discuss is unreachable.
 	Watcher     string `json:"watcher"`
 	Deaf        bool   `json:"deaf"`
+	Capped      bool   `json:"capped"` // deaf because of the drain ceiling: alive, posting, unreachable until restarted
 	Undelivered int    `json:"undelivered"`
 	// Owes is the live threads this seat has spoken in that are still open
 	// with no decision. What the cell is waiting on this seat for.
@@ -65,7 +66,7 @@ func buildCrew(si *model.ScannedInitiative, snap discuss.Snapshot) []Seat {
 	for _, name := range si.Cell.Agents {
 		s := Seat{Name: name, Session: crewSession(si.ID, name)}
 		if h, ok := snap.Agents[name]; ok {
-			s.Watcher, s.Deaf, s.Undelivered = h.Watcher, h.Deaf, h.Undelivered
+			s.Watcher, s.Deaf, s.Capped, s.Undelivered = h.Watcher, h.Deaf, h.Capped(), h.Undelivered
 		}
 		for _, t := range snap.Threads {
 			if t.Status == "open" && t.SinceDecision > 0 && slices.Contains(t.Participants, name) {
@@ -109,6 +110,8 @@ func threadState(t discuss.Thread, snap discuss.Snapshot) model.ThreadState {
 			continue
 		}
 		switch {
+		case h.Capped():
+			ts.BlockedOn = append(ts.BlockedOn, model.Blocker{Seat: p, Reason: "hit the drain ceiling, restart its session"})
 		case h.Deaf:
 			ts.BlockedOn = append(ts.BlockedOn, model.Blocker{Seat: p, Reason: "not picking up"})
 		case h.Watcher == "never":
@@ -347,4 +350,39 @@ func preludeFor(api string, cell model.Cell, seat, crewModel string) string {
 		"# arrives, and takes the lock first so the Stop hook's watcher yields. Nothing to re-arm.\n"+
 		"%s watch --external --parent $$ >/dev/null 2>&1 &\n",
 		cell.Project, seat, shellQuote(api), shellQuote(cell.Project), shellQuote(seat), shellQuote(m), shellQuote(hook))
+}
+
+// Retirable is the seats of a cell that a wave is done with: not the human
+// or the reconciler, named by no open card, and with no working session.
+// Idle and off both count as done; a seat mid-task is never retirable.
+func Retirable(si *model.ScannedInitiative) []string {
+	if si.Cell == nil {
+		return nil
+	}
+	busy := map[string]bool{}
+	for _, c := range si.Cards {
+		if c.Seat != "" && !c.Archived && c.Status != model.StatusDone {
+			busy[c.Seat] = true
+		}
+	}
+	for _, a := range si.Agents {
+		if a.State == model.AgentWorking {
+			if a.Persona != "" {
+				busy[a.Persona] = true
+			}
+			for _, seat := range si.Cell.Agents {
+				if a.Session == crewSession(si.ID, seat) {
+					busy[seat] = true
+				}
+			}
+		}
+	}
+	var out []string
+	for _, seat := range si.Cell.Agents {
+		if seat == si.Cell.Human || seat == si.Cell.Reconciler || busy[seat] {
+			continue
+		}
+		out = append(out, seat)
+	}
+	return out
 }

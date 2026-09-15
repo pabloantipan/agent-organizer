@@ -90,3 +90,17 @@ func TestTokenAndHealthOverUnixSocket(t *testing.T) {
 		t.Error("wrong token should be a 401 error")
 	}
 }
+
+func TestCapped(t *testing.T) {
+	// A drain 20 s ago that left a 600 s old message undelivered is the ceiling.
+	if !(AgentHealth{Deaf: true, Undelivered: 3, SecondsSinceDrain: 20, OldestUndeliveredS: 600}).Capped() {
+		t.Error("recent drain, old mail: capped")
+	}
+	// No drain since the mail arrived: nobody is picking up, not capped.
+	if (AgentHealth{Deaf: true, Undelivered: 3, SecondsSinceDrain: 900, OldestUndeliveredS: 600}).Capped() {
+		t.Error("stale drain: deaf, not capped")
+	}
+	if (AgentHealth{Deaf: false, Undelivered: 1, SecondsSinceDrain: 5, OldestUndeliveredS: 30}).Capped() {
+		t.Error("not deaf: not capped")
+	}
+}

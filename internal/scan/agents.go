@@ -13,20 +13,32 @@ import (
 	"time"
 
 	"organizer/internal/model"
+	"organizer/internal/session"
 )
 
 var (
 	cwdRe     = regexp.MustCompile(`(?m)^\s*cwd\s+"([^"]+)"`)
 	sessionRe = regexp.MustCompile(`^(\S+)\s+\[Created\s+(.*?)\s+ago\]\s*(\(EXITED.*\))?`)
 	nameArgRe = regexp.MustCompile(`(?:^|\s)(?:-n|--resume)\s+'?"?([^'"\s]+)`)
+	// The process environment follows the arguments in `ps -E` output. Only
+	// these three names are read; the discuss token beside them never is.
+	personaRe = regexp.MustCompile(`(?:^|\s)AGENT_NAME=(\S+)`)
+	cellRe    = regexp.MustCompile(`(?:^|\s)PROJECT_ID=(\S+)`)
+	sessEnvRe = regexp.MustCompile(`(?:^|\s)AGENT_SESSION=(\S+)`)
 )
+
+// sessionGrace keeps a statusline record whose pid is not (yet) in the
+// process table for this long before pruning it.
+const sessionGrace = 2 * time.Minute
 
 // AgentOptions configures agent discovery.
 type AgentOptions struct {
 	ProbeStateDir string
 	Zellij        string
 	AgentBinary   string // basename of the agent command, default claude
-	Timeout       time.Duration
+	// SessionsDir holds the statusline records (session.Dir()). Empty disables.
+	SessionsDir string
+	Timeout     time.Duration
 	// PrevCPU holds CPU seconds per pid from the previous sample and PrevAt
 	// its time. A pid whose CPU rate over the interval exceeds WorkingRate
 	// (fraction of one core, default 0.01) is working.
@@ -149,9 +161,10 @@ func zellijSessions(o AgentOptions) map[string]zsession {
 }
 
 // agentProcesses reads the process table for the agent binary and resolves
-// each process's working directory in one lsof call.
+// each process's working directory in one lsof call. `-E` appends each
+// process's environment, which is where a persona's identity lives.
 func agentProcesses(o AgentOptions) []model.Agent {
-	out := runCmd("ps", o.Timeout, "-axo", "pid=,etime=,tty=,time=,command=")
+	out := runCmd("ps", o.Timeout, "-axEo", "pid=,etime=,tty=,time=,command=")
 	var procs []model.Agent
 	for _, line := range strings.Split(out, "\n") {
 		f := strings.Fields(line)
@@ -168,10 +181,10 @@ func agentProcesses(o AgentOptions) []model.Agent {
 		}
 		args := strings.Join(f[5:], " ")
 		a := model.Agent{PID: pid, Uptime: f[1], TTY: f[2], CPUSeconds: parseCPUTime(f[3]), State: model.AgentRunning}
-		if m := nameArgRe.FindStringSubmatch(" " + args); m != nil {
-			a.Session = m[1]
-			a.Name = m[1]
-			a.Family, a.Short = splitProbe(m[1])
+		a.Session, a.Persona, a.Cell = identity(args)
+		if a.Session != "" {
+			a.Name = a.Session
+			a.Family, a.Short = splitProbe(a.Session)
 		}
 		if prev, ok := o.PrevCPU[pid]; ok && !o.PrevAt.IsZero() {
 			elapsed := time.Since(o.PrevAt).Seconds()
@@ -208,7 +221,52 @@ func agentProcesses(o AgentOptions) []model.Agent {
 	for i := range procs {
 		procs[i].Dir = cwds[procs[i].PID]
 	}
+	attachSessions(o, procs)
 	return procs
+}
+
+// identity reads the session name (-n or --resume, else AGENT_SESSION), the
+// persona (AGENT_NAME) and the cell (PROJECT_ID) from a ps command column
+// that has the environment appended.
+func identity(args string) (sess, persona, cell string) {
+	s := " " + args
+	if m := nameArgRe.FindStringSubmatch(s); m != nil {
+		sess = m[1]
+	} else if m := sessEnvRe.FindStringSubmatch(s); m != nil {
+		sess = m[1]
+	}
+	if m := personaRe.FindStringSubmatch(s); m != nil {
+		persona = m[1]
+	}
+	if m := cellRe.FindStringSubmatch(s); m != nil {
+		cell = m[1]
+	}
+	return
+}
+
+// attachSessions joins the statusline records to the processes by pid and
+// prunes the records of processes that are gone.
+func attachSessions(o AgentOptions, procs []model.Agent) {
+	if o.SessionsDir == "" {
+		return
+	}
+	recs := session.Load(o.SessionsDir)
+	alive := make(map[int]bool, len(procs))
+	for i := range procs {
+		alive[procs[i].PID] = true
+		r, ok := recs[procs[i].PID]
+		if !ok {
+			continue
+		}
+		procs[i].Context = r.Status()
+		if procs[i].Persona == "" {
+			procs[i].Persona, procs[i].Cell = r.Persona, r.Cell
+		}
+		if procs[i].Session == "" && r.Session != "" {
+			procs[i].Session = r.Session
+		}
+	}
+	session.Prune(o.SessionsDir, alive, sessionGrace, time.Now())
 }
 
 // parseCPUTime handles ps TIME like "1:02.33", "12:34:56", "3-01:02:03".

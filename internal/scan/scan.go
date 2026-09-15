@@ -3,6 +3,7 @@
 package scan
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/fs"
 	"os"
@@ -140,6 +141,7 @@ func ReadInitiative(root string, opts Options) model.ScannedInitiative {
 	si.Cards, si.Problems = readCards(wo, false, si.Cards, si.Problems)
 	si.Cards, si.Problems = readCards(filepath.Join(wo, doneDir), true, si.Cards, si.Problems)
 	sortCards(si.Cards)
+	si.Cell, si.Problems = readCell(root, si.Problems)
 
 	if opts.Git {
 		si.RepoStates = gitStates(root, si.Initiative.Repos, opts.GitTimeout)
@@ -202,7 +204,31 @@ func readCard(path string, archived bool) (model.Card, []model.Problem) {
 	if c.Due != "" && c.DueTime().IsZero() {
 		problems = append(problems, model.Problem{Path: path, Msg: fmt.Sprintf("due %q is not YYYY-MM-DD", c.Due)})
 	}
+	for _, t := range c.Threads {
+		if !validULID(t) {
+			problems = append(problems, model.Problem{Path: path, Msg: fmt.Sprintf("thread %q is not a discuss thread id", t)})
+		}
+	}
 	return c, problems
+}
+
+// validULID reports whether s is a 26-character Crockford base32 ULID, the id
+// shape discuss stamps on a thread. Reported as a problem rather than dropped:
+// a card naming a thread that cannot exist is waiting on nothing, and that is
+// worth seeing.
+func validULID(s string) bool {
+	if len(s) != 26 {
+		return false
+	}
+	for _, r := range s {
+		switch {
+		case r >= '0' && r <= '9':
+		case r >= 'A' && r <= 'Z' && r != 'I' && r != 'L' && r != 'O' && r != 'U':
+		default:
+			return false
+		}
+	}
+	return true
 }
 
 func sortCards(cards []model.Card) {
@@ -224,4 +250,25 @@ func sortCards(cards []model.Card) {
 func validDate(s string) bool {
 	_, err := time.Parse("2006-01-02", s)
 	return err == nil
+}
+
+// cellFile is the persona roster spec, beside the seat files (persona-agents skill).
+const cellFile = "agents/cell.json"
+
+// readCell reads agents/cell.json when present. A missing file is the normal
+// case; a malformed one is a problem, not a fatal error.
+func readCell(root string, problems []model.Problem) (*model.Cell, []model.Problem) {
+	p := filepath.Join(root, filepath.FromSlash(cellFile))
+	b, err := os.ReadFile(p)
+	if err != nil {
+		return nil, problems
+	}
+	var c model.Cell
+	if err := json.Unmarshal(b, &c); err != nil {
+		return nil, append(problems, model.Problem{Path: p, Msg: "cell.json: " + err.Error()})
+	}
+	if c.Project == "" || len(c.Agents) == 0 {
+		return nil, append(problems, model.Problem{Path: p, Msg: "cell.json: project and agents are required"})
+	}
+	return &c, problems
 }

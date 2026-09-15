@@ -20,22 +20,26 @@ import (
 	"organizer/internal/auth"
 	"organizer/internal/cache"
 	"organizer/internal/config"
+	"organizer/internal/discuss"
 	"organizer/internal/keychain"
 	"organizer/internal/lock"
 	"organizer/internal/merge"
 	"organizer/internal/model"
 	"organizer/internal/prompt"
 	"organizer/internal/scan"
+	"organizer/internal/session"
 	dsync "organizer/internal/sync"
 )
 
 type Service struct {
-	mu      sync.Mutex
-	cfg     config.Config
-	state   cache.State
-	now     func() time.Time
-	prevCPU map[int]float64
-	prevAt  time.Time
+	mu        sync.Mutex
+	cfg       config.Config
+	state     cache.State
+	now       func() time.Time
+	prevCPU   map[int]float64
+	prevAt    time.Time
+	openersMu sync.Mutex
+	openers   map[string]facts
 
 	Auth *auth.Manager
 	Lock *lock.Lock
@@ -221,6 +225,7 @@ func (s *Service) agentOptions() *scan.AgentOptions {
 		ProbeStateDir: config.Expand(s.cfg.ProbeStateDir),
 		Zellij:        s.cfg.Zellij,
 		AgentBinary:   s.cfg.AgentBinary,
+		SessionsDir:   session.Dir(),
 		Timeout:       time.Duration(s.cfg.GitTimeoutSeconds) * time.Second,
 		PrevCPU:       s.prevCPU,
 		PrevAt:        s.prevAt,
@@ -362,6 +367,30 @@ type AgentGroup struct {
 	Agents  []model.Agent `json:"agents"`
 	Live    int           `json:"live"`
 	Working int           `json:"working"`
+	// Cell and Crew exist when the initiative has an agents/cell.json:
+	// one Seat per roster entry. Discuss says why health is missing, if it is.
+	Cell    *model.Cell `json:"cell"`
+	Crew    []Seat      `json:"crew"`
+	Discuss string      `json:"discuss"`
+	// Waiting is the open cards held up by an undecided thread. Read it with
+	// Crew: a card waiting on a thread whose seats are not running is work
+	// nobody is going to unblock.
+	Waiting []CardWait `json:"waiting"`
+	// The mailbox, on the same feed as the processes: an agent is something
+	// that runs and something that talks, and the view shows both in one
+	// place. Threads is the live list; Human is the seat the app reads and
+	// posts as; CanPost says it holds a token. NeedsMe counts threads that
+	// are escalated, stalled or undecided.
+	Project string       `json:"project"`
+	Human   string       `json:"human"`
+	CanPost bool         `json:"can_post"`
+	Threads []CellThread `json:"threads"`
+	NeedsMe int          `json:"needs_me"`
+	// NeedsReconciler counts stalled or undecided threads: the reconciler's
+	// backlog, shown so the human can see it without owning it.
+	NeedsReconciler int `json:"needs_reconciler"`
+	// Retirable is the seats a wave is done with; see Retirable().
+	Retirable []string `json:"retirable"`
 }
 
 type AgentsView struct {
@@ -384,9 +413,29 @@ func (s *Service) RefreshAgents() AgentsView {
 
 func (s *Service) agentsViewLocked() AgentsView {
 	v := AgentsView{SampledAt: s.now(), Unassigned: s.state.Local.Unassigned}
-	for _, si := range s.state.Local.Initiatives {
-		live, working := si.LiveAgents()
-		v.Groups = append(v.Groups, AgentGroup{ID: si.ID, Title: si.Title, Client: si.Client, Path: si.Path, Agents: si.Agents, Live: live, Working: working})
+	for i := range s.state.Local.Initiatives {
+		si := &s.state.Local.Initiatives[i]
+		g := AgentGroup{ID: si.ID, Title: si.Title, Client: si.Client, Path: si.Path}
+		if si.Cell != nil {
+			snap, why := s.cellHealth(si.Cell)
+			g.Cell, g.Crew, g.Discuss = si.Cell, buildCrew(si, snap), why
+			g.Waiting = cardsWaiting(si, snap)
+			g.Project, g.Human = si.Cell.Project, si.Cell.Human
+			g.Threads, g.NeedsMe = s.liveThreads(s.cfg, si, snap)
+			g.Retirable = Retirable(si)
+			for _, t := range snap.Threads {
+				if t.Kind != "journal" && needsReconciler(t) {
+					g.NeedsReconciler++
+				}
+			}
+			if si.Cell.Human != "" {
+				_, err := discuss.Token(discussStateDir(s.cfg), si.Cell.Project, si.Cell.Human)
+				g.CanPost = err == nil
+			}
+		}
+		g.Agents = si.Agents
+		g.Live, g.Working = si.LiveAgents()
+		v.Groups = append(v.Groups, g)
 	}
 	return v
 }
@@ -434,7 +483,43 @@ func (s *Service) Board() merge.Board {
 	local := s.Scan(true)
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	return merge.Build(local, s.state.Remote, s.state.Order, s.now())
+	b := merge.Build(local, s.state.Remote, s.state.Order, s.now())
+	s.stampThreadsLocked(&b)
+	return b
+}
+
+// stampThreadsLocked resolves each local card's named discuss threads against
+// the live cell.
+//
+// It runs on the merged board and never on the scanned snapshot on purpose:
+// cell liveness comes from a discuss instance on this machine and is stale the
+// moment it is written, so it must not reach the cache or the Firestore sync,
+// where another machine would read it as fact.
+func (s *Service) stampThreadsLocked(b *merge.Board) {
+	snaps := make(map[string]discuss.Snapshot)
+	for i := range s.state.Local.Initiatives {
+		si := &s.state.Local.Initiatives[i]
+		if si.Cell == nil {
+			continue
+		}
+		if snap, why := s.cellHealth(si.Cell); why == "" {
+			snaps[si.ID] = snap
+		}
+	}
+	if len(snaps) == 0 {
+		return
+	}
+	for _, cards := range b.Columns {
+		for i := range cards {
+			c := &cards[i]
+			if !c.Local || len(c.Threads) == 0 {
+				continue
+			}
+			if snap, ok := snaps[c.InitiativeID]; ok {
+				c.ThreadState = threadStates(c.Threads, snap)
+			}
+		}
+	}
 }
 
 // Status is the CLI view: the local scan sorted by the manual order.
@@ -453,11 +538,96 @@ func (s *Service) Order() model.Order {
 	return s.state.Order
 }
 
-// SetInitiativeOrder replaces the initiative ranking.
+// SetInitiativeOrder replaces the initiative ranking; groups follow it.
 func (s *Service) SetInitiativeOrder(ids []string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.state.Order.Initiatives = ids
+	s.state.Order.Reprioritize(ids)
+	s.state.Order.UpdatedAt = s.now()
+	return cache.Save(s.state)
+}
+
+// noteAuthor is who a comment is signed by: the account email when signed
+// in, else the machine name.
+func (s *Service) noteAuthor() string {
+	if acc := s.Auth.Account(); acc.SignedIn && acc.Email != "" {
+		return acc.Email
+	}
+	return s.cfg.Machine
+}
+
+// AddNote appends a comment to a card. Returns the note as stored.
+func (s *Service) AddNote(initiativeID, slug, text string) (model.Note, error) {
+	text = strings.TrimSpace(text)
+	if text == "" {
+		return model.Note{}, errors.New("a comment needs text")
+	}
+	by := s.noteAuthor()
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	key := initiativeID + "/" + slug
+	if s.state.Order.Notes == nil {
+		s.state.Order.Notes = map[string][]model.Note{}
+	}
+	now := s.now()
+	n := model.Note{ID: now.UTC().Format("20060102T150405.000000000Z"), By: by, At: now, Text: text}
+	s.state.Order.Notes[key] = append(s.state.Order.Notes[key], n)
+	s.state.Order.UpdatedAt = now
+	return n, cache.Save(s.state)
+}
+
+// EditNote rewrites one comment's text; empty text deletes it.
+func (s *Service) EditNote(initiativeID, slug, id, text string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	key := initiativeID + "/" + slug
+	list := s.state.Order.Notes[key]
+	out := list[:0]
+	found := false
+	for _, n := range list {
+		if n.ID == id {
+			found = true
+			if strings.TrimSpace(text) == "" {
+				continue
+			}
+			n.Text = strings.TrimSpace(text)
+		}
+		out = append(out, n)
+	}
+	if !found {
+		return errors.New("no such comment")
+	}
+	if len(out) == 0 {
+		delete(s.state.Order.Notes, key)
+	} else {
+		s.state.Order.Notes[key] = out
+	}
+	s.state.Order.UpdatedAt = s.now()
+	return cache.Save(s.state)
+}
+
+// SetResolved marks or unmarks an item of the human's queue as solved.
+func (s *Service) SetResolved(key string, resolved bool) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.state.Order.Resolved == nil {
+		s.state.Order.Resolved = map[string]string{}
+	}
+	if resolved {
+		s.state.Order.Resolved[key] = s.now().Format("2006-01-02")
+	} else {
+		delete(s.state.Order.Resolved, key)
+	}
+	s.state.Order.UpdatedAt = s.now()
+	return cache.Save(s.state)
+}
+
+// SetGroups replaces the rail groups and derives the ranking from them. An
+// empty list returns the rail to a flat priority list.
+func (s *Service) SetGroups(groups []model.Group) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.state.Order.Regroup(groups)
 	s.state.Order.UpdatedAt = s.now()
 	return cache.Save(s.state)
 }

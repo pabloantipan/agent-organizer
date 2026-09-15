@@ -183,3 +183,44 @@ func TestGitStateOnRealRepo(t *testing.T) {
 	}
 	_ = model.StatusNow
 }
+
+func TestCardThreadsAreReadAndValidated(t *testing.T) {
+	home := fixtureHome(t)
+	si := ReadInitiative(filepath.Join(home, "init-a"), opts(home))
+
+	var alpha *model.Card
+	for i := range si.Cards {
+		if si.Cards[i].Slug == "alpha" {
+			alpha = &si.Cards[i]
+		}
+	}
+	if alpha == nil {
+		t.Fatal("alpha card missing from the fixture")
+	}
+	if len(alpha.Threads) != 1 || alpha.Threads[0] != "01M1N893SRYKX2F6H6G9WCCCMA" {
+		t.Errorf("threads=%v", alpha.Threads)
+	}
+	if alpha.ThreadState != nil {
+		t.Error("thread state is resolved against the live cell, never by the scan")
+	}
+}
+
+func TestValidULID(t *testing.T) {
+	cases := []struct {
+		in   string
+		want bool
+	}{
+		{"01M1N893SRYKX2F6H6G9WCCCMA", true},
+		{"", false},
+		{"not-a-ulid", false},
+		{"01M1N893SRYKX2F6H6G9WCCCM", false},   // 25 chars
+		{"01M1N893SRYKX2F6H6G9WCCCMAB", false}, // 27 chars
+		{"01M1N893SRYKX2F6H6G9WCCCMI", false},  // I is not in Crockford base32
+		{"01m1n893srykx2f6h6g9wcccma", false},  // lowercase
+	}
+	for _, c := range cases {
+		if got := validULID(c.in); got != c.want {
+			t.Errorf("validULID(%q)=%v want %v", c.in, got, c.want)
+		}
+	}
+}

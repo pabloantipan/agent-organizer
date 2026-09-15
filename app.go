@@ -10,6 +10,7 @@ import (
 	wruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
 	"organizer/internal/config"
+	"organizer/internal/discuss"
 	"organizer/internal/merge"
 	"organizer/internal/model"
 	"organizer/internal/service"
@@ -66,6 +67,7 @@ func (a *App) agentTicker(ctx context.Context) {
 // BoardView is what the UI renders: the merged board plus sync metadata.
 type BoardView struct {
 	Board    merge.Board `json:"board"`
+	Order    model.Order `json:"order"`
 	PulledAt time.Time   `json:"pulled_at"`
 	Error    string      `json:"error,omitempty"`
 }
@@ -74,7 +76,7 @@ func (a *App) GetBoard() BoardView {
 	if a.svc == nil {
 		return BoardView{Error: a.err}
 	}
-	return BoardView{Board: a.svc.Board(), PulledAt: a.svc.PulledAt()}
+	return BoardView{Board: a.svc.Board(), Order: a.svc.Order(), PulledAt: a.svc.PulledAt()}
 }
 
 func (a *App) SyncNow() (service.SyncResult, error) {
@@ -142,6 +144,35 @@ func (a *App) SetInitiativeOrder(ids []string) error {
 		return errString(a.err)
 	}
 	return a.svc.SetInitiativeOrder(ids)
+}
+
+func (a *App) AddNote(initiativeID, slug, text string) (model.Note, error) {
+	if a.svc == nil {
+		return model.Note{}, errString(a.err)
+	}
+	return a.svc.AddNote(initiativeID, slug, text)
+}
+
+func (a *App) EditNote(initiativeID, slug, id, text string) error {
+	if a.svc == nil {
+		return errString(a.err)
+	}
+	return a.svc.EditNote(initiativeID, slug, id, text)
+}
+
+func (a *App) SetResolved(key string, resolved bool) error {
+	if a.svc == nil {
+		return errString(a.err)
+	}
+	return a.svc.SetResolved(key, resolved)
+}
+
+// SetGroups replaces the rail groups; the ranking follows them.
+func (a *App) SetGroups(groups []model.Group) error {
+	if a.svc == nil {
+		return errString(a.err)
+	}
+	return a.svc.SetGroups(groups)
 }
 
 func (a *App) SetCardOrder(initiativeID string, slugs []string) error {
@@ -247,6 +278,96 @@ func (a *App) CreateAgent(initiativeID, name string) error {
 		return errString(a.err)
 	}
 	return a.svc.CreateAgent(initiativeID, name)
+}
+
+// CreateCrew launches every seat of the initiative's cell: one probe per
+// persona in one iTerm2 window. Returns the launch lines it ran.
+func (a *App) CreateCrew(initiativeID string) ([]string, error) {
+	if a.svc == nil {
+		return nil, errString(a.err)
+	}
+	return a.svc.CreateCrew(initiativeID, true)
+}
+
+// ---- the Cell tab: one initiative's mailbox, read and written as the human ----
+
+func (a *App) GetCell(initiativeID string) (service.CellView, error) {
+	if a.svc == nil {
+		return service.CellView{}, errString(a.err)
+	}
+	return a.svc.Cell(initiativeID)
+}
+
+func (a *App) GetCellThread(initiativeID, threadID string) (service.CellThreadView, error) {
+	if a.svc == nil {
+		return service.CellThreadView{}, errString(a.err)
+	}
+	return a.svc.CellThread(initiativeID, threadID)
+}
+
+func (a *App) PostToCell(initiativeID string, p service.CellPost) (discuss.PostResult, error) {
+	if a.svc == nil {
+		return discuss.PostResult{}, errString(a.err)
+	}
+	return a.svc.PostToCell(initiativeID, p)
+}
+
+func (a *App) SetCellThreadStatus(initiativeID, threadID, status string) error {
+	if a.svc == nil {
+		return errString(a.err)
+	}
+	return a.svc.SetCellThreadStatus(initiativeID, threadID, status)
+}
+
+func (a *App) SearchCell(initiativeID, q string) ([]discuss.Message, error) {
+	if a.svc == nil {
+		return nil, errString(a.err)
+	}
+	return a.svc.SearchCell(initiativeID, q)
+}
+
+// PlanRetire shows what retiring seats of a cell would do; Retire does it.
+func (a *App) PlanRetire(o service.RetireOptions) (service.RetirePlan, error) {
+	if a.svc == nil {
+		return service.RetirePlan{}, errString(a.err)
+	}
+	return a.svc.PlanRetire(o)
+}
+
+func (a *App) Retire(o service.RetireOptions) (service.RetireReport, error) {
+	if a.svc == nil {
+		return service.RetireReport{}, errString(a.err)
+	}
+	r, err := a.svc.Retire(o)
+	if err == nil {
+		wruntime.EventsEmit(a.ctx, "agents", a.svc.RefreshAgents())
+	}
+	return r, err
+}
+
+// Clean removes exited probe sessions and stale statusline records.
+func (a *App) Clean() (service.RetireReport, error) {
+	if a.svc == nil {
+		return service.RetireReport{}, errString(a.err)
+	}
+	r, err := a.svc.Clean()
+	if err == nil {
+		wruntime.EventsEmit(a.ctx, "agents", a.svc.RefreshAgents())
+	}
+	return r, err
+}
+
+// PickUp marks the human's mail in a cell as delivered: the mailbox was read.
+func (a *App) PickUp(initiativeID string) (int, error) {
+	if a.svc == nil {
+		return 0, errString(a.err)
+	}
+	return a.svc.PickUp(initiativeID)
+}
+
+// CellTypes exists only so the Wails generator emits the nested discuss types.
+func (a *App) CellTypes() (discuss.Thread, discuss.Message) {
+	return discuss.Thread{}, discuss.Message{}
 }
 
 // KillAgent removes a probe session via `probe -k`.

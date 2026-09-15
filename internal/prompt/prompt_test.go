@@ -47,3 +47,16 @@ func TestReviewMentionsEverythingThatMatters(t *testing.T) {
 		t.Error("archived card should not be listed as open")
 	}
 }
+
+func TestPersonaNamesSeatAndRoster(t *testing.T) {
+	cell := model.Cell{Project: "camp", Agents: []string{"po_andrea", "tech_lead_nicolas"}, Human: "pablo", Reconciler: "po_andrea"}
+	got := Persona(cell, "tech_lead_nicolas", "/w/camp")
+	for _, want := range []string{`"tech_lead_nicolas"`, `"camp"`, "/w/camp", "agents/tech_lead_nicolas.md", "persona-agents", "discuss skill", "reconciler is po_andrea"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("missing %q in:\n%s", want, got)
+		}
+	}
+	if !strings.Contains(Persona(cell, "po_andrea", "/w/camp"), "You are the cell's reconciler") {
+		t.Error("reconciler seat should be told so")
+	}
+}

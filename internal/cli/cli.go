@@ -31,7 +31,7 @@ import (
 var Version = "dev"
 
 // Subcommands the binary recognises. Anything else launches the GUI.
-var Subcommands = []string{"status", "board", "sync", "prompt", "agents", "factory-key", "login", "logout", "whoami", "doctor", "config", "version", "--version", "help"}
+var Subcommands = []string{"status", "board", "sync", "prompt", "agents", "crew", "retire", "clean", "statusline", "factory-key", "login", "logout", "whoami", "doctor", "config", "version", "--version", "help"}
 
 // IsSubcommand reports whether arg names a CLI subcommand.
 func IsSubcommand(arg string) bool {
@@ -69,6 +69,14 @@ func runWith(args []string, stdout, stderr io.Writer, now func() time.Time) int 
 		return promptCmd(cfg, args[1:], stdout, stderr, now)
 	case "agents":
 		return agentsCmd(cfg, stdout, now)
+	case "crew":
+		return crewCmd(cfg, args[1:], stdout, stderr, now)
+	case "retire":
+		return retireCmd(cfg, args[1:], stdout, stderr, now)
+	case "clean":
+		return cleanCmd(cfg, stdout, stderr, now)
+	case "statusline":
+		return statuslineCmd(cfg, os.Stdin, stdout, stderr, now)
 	case "factory-key":
 		return factoryKeyCmd(cfg, args[1:], stdout, stderr, now)
 	case "login":
@@ -123,6 +131,10 @@ func usage(w io.Writer) {
   organizer sync [--no-push|--no-pull] scan, push this machine, pull all, refresh the cache
   organizer prompt <initiative> [--run] print the agent review prompt; --run opens a terminal running the agent with it
   organizer agents                    agent processes and sessions grouped per initiative
+  organizer crew <initiative> [--print] bring the initiative's persona cell up, one probe per seat; --print shows the lines
+  organizer retire <initiative> [--retirable | --keep a,b] [--kill session] [--run]  end a wave: retire seats, kill sessions, close the mailbox, revoke tokens, rewrite cell.json (dry unless --run)
+  organizer clean                     delete exited probe sessions and stale statusline records
+  organizer statusline                Claude Code statusLine command: records context fill per agent and prints it
   organizer factory-key [--rotate]    issue this laptop's factory key from discuss-record into ~/.local/state/discuss/push.key; --rotate issues a new one, then revokes the old
   organizer doctor                    roots, initiatives found, cards rejected and why
   organizer config [--init]           show the config; --init writes the defaults file
@@ -238,6 +250,8 @@ func doctor(cfg config.Config, args []string, stdout, stderr io.Writer, now func
 	} else {
 		fmt.Fprintln(stdout, "account: not signed in (organizer login)")
 	}
+	fmt.Fprintf(stdout, "statusline: %s\n", statuslineStatus())
+	fmt.Fprintf(stdout, "discuss: %s\n", discussStatus(cfg))
 
 	started := now()
 	snap := scan.Run(scanOptions(cfg, now, true))
@@ -254,6 +268,9 @@ func doctor(cfg config.Config, args []string, stdout, stderr io.Writer, now func
 			}
 		}
 		fmt.Fprintf(tw, "  %s\t%s\t%d open, %d done\t%d repos\n", si.ID, shortPath(si.Path, home), open, archived, len(si.RepoStates))
+		if si.Cell != nil {
+			fmt.Fprintf(tw, "    cell\t%s\t%d seats: %s\n", si.Cell.Project, len(si.Cell.Agents), strings.Join(si.Cell.Agents, ", "))
+		}
 		for _, r := range si.RepoStates {
 			switch {
 			case r.Missing:
@@ -443,14 +460,37 @@ func agentsCmd(cfg config.Config, stdout io.Writer, now func() time.Time) int {
 		if a.PID > 0 {
 			pid = fmt.Sprintf("pid %d", a.PID)
 		}
-		fmt.Fprintf(tw, "  %s\t%s\t%s\t%s\t%s\t%s\n", a.State, a.Name, a.Kind, pid, a.Uptime, shortPath(a.Dir, home))
+		fmt.Fprintf(tw, "  %s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", a.State, a.Name, personaLabel(a), contextLabel(a.Context), a.Kind, pid, a.Uptime, shortPath(a.Dir, home))
 		total++
 	}
 	for _, g := range v.Groups {
-		if len(g.Agents) == 0 {
+		if len(g.Agents) == 0 && g.Cell == nil {
 			continue
 		}
 		fmt.Fprintf(tw, "%s\t%d agents, %d live, %d working\n", g.ID, len(g.Agents), g.Live, g.Working)
+		if g.Cell != nil {
+			up := 0
+			for _, seat := range g.Crew {
+				if seat.Agent != nil && seat.Agent.Live() {
+					up++
+				}
+			}
+			why := ""
+			if g.Discuss != "" {
+				why = "; " + g.Discuss
+			}
+			fmt.Fprintf(tw, "  crew %s\t%d/%d seats live%s\n", g.Cell.Project, up, len(g.Crew), why)
+			for _, seat := range g.Crew {
+				state, ctx := "off", ""
+				if seat.Agent != nil {
+					state, ctx = seat.Agent.State, contextLabel(seat.Agent.Context)
+				}
+				fmt.Fprintf(tw, "    %s\t%s\t%s\t%s\n", seat.Name, state, watcherLabel(seat.Watcher, seat.Deaf, seat.Undelivered), ctx)
+			}
+			for _, w := range g.Waiting {
+				fmt.Fprintf(tw, "    ! %s\twaits on\t%s\t%s\n", w.Slug, threadLabel(w.Thread), blockedLabel(w.Thread))
+			}
+		}
 		for _, a := range g.Agents {
 			row(a)
 		}
@@ -467,6 +507,65 @@ func agentsCmd(cfg config.Config, stdout io.Writer, now func() time.Time) int {
 	}
 	fmt.Fprintln(stdout, "working = CPU time grew since the previous sample; the first sample cannot tell.")
 	return 0
+}
+
+// threadLabel names the discuss thread a card waits on, with how close it is
+// to the stall guard the server enforces at twelve.
+func threadLabel(t model.ThreadState) string {
+	if t.Missing {
+		return "a thread the cell no longer lists"
+	}
+	subject := t.Subject
+	if subject == "" {
+		subject = t.ID
+	}
+	return fmt.Sprintf("%s (%s, %d/12 since a decision)", subject, t.Status, t.SinceDecision)
+}
+
+// blockedLabel names the seats in that thread nobody can wake. Empty is not
+// good news on its own: the seat that owes the reply is often the one that has
+// never spoken, so it is not a participant and cannot appear here. Read it
+// with the seat rows above.
+func blockedLabel(t model.ThreadState) string {
+	if len(t.BlockedOn) == 0 {
+		return ""
+	}
+	parts := make([]string, 0, len(t.BlockedOn))
+	for _, b := range t.BlockedOn {
+		parts = append(parts, b.Seat+" "+b.Reason)
+	}
+	return strings.Join(parts, ", ")
+}
+
+func personaLabel(a model.Agent) string {
+	if a.Persona == "" {
+		return ""
+	}
+	return a.Persona + " " + watcherLabel(a.Watcher, a.Deaf, a.Undelivered)
+}
+
+func watcherLabel(watcher string, deaf bool, undelivered int) string {
+	if watcher == "" {
+		return ""
+	}
+	s := watcher
+	if deaf {
+		s += " DEAF"
+	}
+	if undelivered > 0 {
+		s += fmt.Sprintf(" (%d waiting)", undelivered)
+	}
+	return s
+}
+
+func contextLabel(c *model.ContextStatus) string {
+	if c == nil {
+		return ""
+	}
+	if c.WindowSize == 0 {
+		return "ctx ?"
+	}
+	return fmt.Sprintf("ctx %d%%", int(c.UsedPercent+0.5))
 }
 
 func loginCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now func() time.Time) int {

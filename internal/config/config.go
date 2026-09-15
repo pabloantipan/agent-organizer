@@ -35,6 +35,10 @@ type Config struct {
 	// DiscussStateDir holds the discuss socket and token registry, and the
 	// files the pusher reads: push.key, factory, projects.json.
 	DiscussStateDir string `yaml:"discuss_state_dir" json:"discuss_state_dir"`
+	// CrewModel is the model crew seats start with (ANTHROPIC_MODEL in the
+	// prelude, which beats the settings file). A cell.json "model" overrides
+	// it. Default opus: personas reason and talk, they do not need the top tier.
+	CrewModel string `yaml:"crew_model" json:"crew_model"`
 	// RecordURL is the origin of discuss-record, the service a factory pushes
 	// its cell events to. Empty means this laptop is not a factory yet:
 	// `organizer factory-key` refuses and the crew skips registration.
@@ -65,6 +69,7 @@ func Default() Config {
 		Zellij:              "/opt/homebrew/bin/zellij",
 		AgentBinary:         "claude",
 		DiscussStateDir:     "~/.local/state/discuss",
+		CrewModel:           "opus",
 	}
 }
 

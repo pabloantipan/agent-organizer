@@ -2,8 +2,10 @@ package scan
 
 import (
 	"testing"
+	"time"
 
 	"organizer/internal/model"
+	"organizer/internal/session"
 )
 
 func TestParseCPUTime(t *testing.T) {
@@ -64,5 +66,43 @@ func TestAssignAgents(t *testing.T) {
 	live, working := inits[0].LiveAgents()
 	if live != 1 || working != 1 {
 		t.Errorf("live=%d working=%d", live, working)
+	}
+}
+
+func TestIdentityFromPsLine(t *testing.T) {
+	sess, persona, cell := identity("-n camp-probe-po-andrea PATH=/usr/bin PROJECT_ID=camp AGENT_NAME=po_andrea DISCUSS_TOKEN=secret AGENT_SESSION=camp-probe-po-andrea")
+	if sess != "camp-probe-po-andrea" || persona != "po_andrea" || cell != "camp" {
+		t.Errorf("got %q %q %q", sess, persona, cell)
+	}
+	// No -n: the probe env still names the session; a plain agent has nothing.
+	if sess, _, _ := identity("AGENT_SESSION=probe-fox-1 HOME=/h"); sess != "probe-fox-1" {
+		t.Errorf("env session %q", sess)
+	}
+	if sess, persona, cell := identity("HOME=/h"); sess != "" || persona != "" || cell != "" {
+		t.Error("plain agent should have no identity")
+	}
+}
+
+func TestAttachSessions(t *testing.T) {
+	dir := t.TempDir()
+	now := time.Now()
+	for _, r := range []session.Record{
+		{PID: 5, SessionID: "s5", Persona: "po_andrea", Cell: "camp", Session: "camp-probe-po-andrea", UsedPercent: 37, WindowSize: 200000, UpdatedAt: now},
+		{PID: 6, SessionID: "gone", UpdatedAt: now.Add(-time.Hour)},
+	} {
+		if err := session.Write(dir, r); err != nil {
+			t.Fatal(err)
+		}
+	}
+	procs := []model.Agent{{PID: 5}, {PID: 7}}
+	attachSessions(AgentOptions{SessionsDir: dir}, procs)
+	if procs[0].Context == nil || procs[0].Context.UsedPercent != 37 || procs[0].Persona != "po_andrea" || procs[0].Session != "camp-probe-po-andrea" {
+		t.Errorf("pid 5: %+v", procs[0])
+	}
+	if procs[1].Context != nil {
+		t.Error("pid 7 has no record")
+	}
+	if _, ok := session.Load(dir)[6]; ok {
+		t.Error("stale record for a dead pid should be pruned")
 	}
 }
