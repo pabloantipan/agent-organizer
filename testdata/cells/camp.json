@@ -1,0 +1,15 @@
+{
+  "project": "camp",
+  "workdir": "/Users/pabloantipan/ccint/ccint-camp-monorepo",
+  "note": "The camp roster as it stood for the 2026-09-16 wave, copied from ~/ccint/ccint-camp-monorepo/agents/cell.json. The five seats are the five sessions that had to be killed by hand.",
+  "agents": [
+    "po_andrea",
+    "tech_lead_nicolas",
+    "fullstack_dev_francisco",
+    "designer_javiera",
+    "designer_mauricio"
+  ],
+  "human": "pablo",
+  "reconciler": "po_andrea",
+  "push": true
+}

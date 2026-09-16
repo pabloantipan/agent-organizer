@@ -126,9 +126,16 @@ func (s *Service) PlanRetire(o RetireOptions) (RetirePlan, error) {
 	}
 
 	// Sessions: the crew session of each retired seat, plus what was named.
-	live := liveSessions(s.cfg.Zellij)
+	// A seat whose name zellij cannot hold is a problem on the plan, not a
+	// silent miss — that is the seat whose session is killed by hand.
+	live := sessionLister(s.cfg.Zellij)
 	for _, a := range p.Seats {
-		if sess := crewSession(si.ID, a); live[sess] {
+		sess, err := crewSession(cell, a)
+		if err != nil {
+			p.Problems = append(p.Problems, err.Error())
+			continue
+		}
+		if live[sess] {
 			p.Sessions = append(p.Sessions, sess)
 		}
 	}
@@ -189,6 +196,11 @@ func (s *Service) PlanRetire(o RetireOptions) (RetirePlan, error) {
 	}
 	return p, nil
 }
+
+// sessionLister is liveSessions, swapped in tests for a fixed list: the plan
+// is about which names are looked for, and shelling out to zellij to find
+// that out would make the test depend on this machine's live sessions.
+var sessionLister = liveSessions
 
 // liveSessions is the zellij session names that exist, exited included:
 // probe -k deletes both.
