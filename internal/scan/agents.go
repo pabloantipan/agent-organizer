@@ -350,9 +350,14 @@ func AssignAgents(inits []model.ScannedInitiative, agents []model.Agent) []model
 				}
 			}
 		}
+		// A session with no directory of its own is placed by its probe
+		// family: the initiative's id, or the cell's project, because a crew
+		// seat's session is named after the cell (camp-probe-andrea) while the
+		// initiative it belongs to is ccint-camp-monorepo.
 		if best < 0 && a.Family != "" {
 			for i := range inits {
-				if inits[i].ID == a.Family {
+				if strings.EqualFold(inits[i].ID, a.Family) ||
+					(inits[i].Cell != nil && strings.EqualFold(inits[i].Cell.Project, a.Family)) {
 					best = i
 					break
 				}

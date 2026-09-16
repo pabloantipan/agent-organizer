@@ -50,18 +50,26 @@ func TestNameArg(t *testing.T) {
 }
 
 func TestAssignAgents(t *testing.T) {
-	inits := []model.ScannedInitiative{{}, {}}
+	inits := []model.ScannedInitiative{{}, {}, {}}
 	inits[0].ID, inits[0].Path = "shop", "/h/work/shop"
 	inits[1].ID, inits[1].Path = "traces", "/h/traces"
+	// A cell's seats run in sessions named after the cell's project, not
+	// after the initiative: camp-probe-andrea belongs to ccint-camp-monorepo.
+	inits[2].ID, inits[2].Path = "ccint-camp-monorepo", "/h/ccint/ccint-camp-monorepo"
+	inits[2].Cell = &model.Cell{Project: "camp", Agents: []string{"po_andrea"}}
 	agents := []model.Agent{
 		{Name: "a", Dir: "/h/work/shop/3.0/x", State: model.AgentWorking},
 		{Name: "b", Dir: "/h/traces", State: model.AgentRunning},
 		{Name: "c", Dir: "/h/other"},
 		{Name: "d", Family: "traces", Dir: ""},
+		{Name: "camp-probe-andrea", Family: "camp", Short: "andrea", Dir: ""},
 	}
 	un := AssignAgents(inits, agents)
 	if len(inits[0].Agents) != 1 || len(inits[1].Agents) != 2 || len(un) != 1 {
 		t.Fatalf("shop=%d traces=%d un=%d", len(inits[0].Agents), len(inits[1].Agents), len(un))
+	}
+	if len(inits[2].Agents) != 1 || inits[2].Agents[0].Name != "camp-probe-andrea" {
+		t.Errorf("a crew session should reach its initiative by the cell's project: %+v", inits[2].Agents)
 	}
 	live, working := inits[0].LiveAgents()
 	if live != 1 || working != 1 {
