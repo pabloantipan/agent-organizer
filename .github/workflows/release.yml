@@ -11,6 +11,9 @@ permissions:
 jobs:
   macos:
     runs-on: macos-14
+    env:
+      # secrets are not readable from a step's `if`; only a job-level env can see them
+      HAS_SIGNING: ${{ secrets.MACOS_CERT_P12 != '' }}
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
@@ -31,7 +34,7 @@ jobs:
       # Signing and notarization run only when the secrets exist. Without them
       # the DMG is unsigned and the READ ME inside explains the quarantine step.
       - name: Sign and notarize
-        if: ${{ secrets.MACOS_CERT_P12 != '' }}
+        if: env.HAS_SIGNING == 'true'
         env:
           MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
           MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
