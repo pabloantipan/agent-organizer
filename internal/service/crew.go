@@ -35,11 +35,48 @@ type Seat struct {
 	Owes []model.ThreadState `json:"owes"`
 }
 
-// crewSession is the probe session name of a seat: family after the
-// initiative, name after the seat, so it sorts with the initiative's other
-// probes and resumes by the same name on every launch.
-func crewSession(initiativeID, seat string) string {
-	return sanitize(initiativeID) + "-probe-" + sanitize(seat)
+// maxSessionName is what zellij will hold. macOS caps a unix socket path at
+// 104 bytes and zellij spends 79 of them on its own prefix, so a session name
+// over about 22 characters is refused at launch. The ceiling moves only when
+// probe sets ZELLIJ_SOCK_DIR; until then it is a fact this code obeys.
+const maxSessionName = 22
+
+// seatShort is the seat name after its role prefix. The roster convention is
+// <role>_<name>, and the role itself may hold underscores, so the name is the
+// last token: po_andrea -> andrea, tech_lead_nicolas -> nicolas,
+// fullstack_dev_francisco -> francisco. A seat with no underscore is already
+// its short name.
+func seatShort(seat string) string {
+	if i := strings.LastIndex(seat, "_"); i >= 0 {
+		return seat[i+1:]
+	}
+	return seat
+}
+
+// crewSession is the probe session name of a seat: the cell's project as the
+// probe family, the seat's short name after it — camp-probe-andrea, which is
+// what the sessions that actually ran were called.
+//
+// Named after the cell and not after the initiative because
+// <initiative>-probe-<seat> is 49 characters for ccint-camp-monorepo and
+// zellij refuses it, while the cell's project is the short name the seats
+// already answer to. Over the budget this is an error naming the length,
+// never a truncation: a truncated name is a session that the launch, the
+// join and the retire each guess differently.
+func crewSession(cell *model.Cell, seat string) (string, error) {
+	if cell == nil {
+		return "", errors.New("no cell: a crew session is named after the cell's project")
+	}
+	family, short := sanitize(cell.Project), sanitize(seatShort(seat))
+	if family == "" || short == "" {
+		return "", fmt.Errorf("cannot name a session for seat %q of project %q", seat, cell.Project)
+	}
+	name := family + "-probe-" + short
+	if len(name) > maxSessionName {
+		return "", fmt.Errorf("session name %q is %d characters; zellij holds at most %d (shorten the cell's project or the seat's name)",
+			name, len(name), maxSessionName)
+	}
+	return name, nil
 }
 
 func agentRank(a *model.Agent) int {
@@ -64,7 +101,12 @@ func buildCrew(si *model.ScannedInitiative, snap discuss.Snapshot) []Seat {
 	}
 	seats := make([]Seat, 0, len(si.Cell.Agents))
 	for _, name := range si.Cell.Agents {
-		s := Seat{Name: name, Session: crewSession(si.ID, name)}
+		s := Seat{Name: name}
+		// A seat whose name does not fit zellij's budget has no session to
+		// join by; it still shows, and still matches a process by persona.
+		if sess, err := crewSession(si.Cell, name); err == nil {
+			s.Session = sess
+		}
 		if h, ok := snap.Agents[name]; ok {
 			s.Watcher, s.Deaf, s.Capped, s.Undelivered = h.Watcher, h.Deaf, h.Capped(), h.Undelivered
 		}
@@ -76,7 +118,7 @@ func buildCrew(si *model.ScannedInitiative, snap discuss.Snapshot) []Seat {
 		var best *model.Agent
 		for i := range si.Agents {
 			a := &si.Agents[i]
-			if a.Persona != name && !(a.Persona == "" && a.Session == s.Session) {
+			if a.Persona != name && !(a.Persona == "" && s.Session != "" && a.Session == s.Session) {
 				continue
 			}
 			a.Watcher, a.Deaf, a.Undelivered = s.Watcher, s.Deaf, s.Undelivered
@@ -253,7 +295,19 @@ func (s *Service) CreateCrew(initiativeID string, open bool) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	family := sanitize(initiativeID)
+	// Every seat's session name is resolved before anything is created: a
+	// name zellij will refuse is a refusal here, not a pane that never comes
+	// up. The family is the cell's project, so the wrapper probe builds is
+	// the one the names belong to.
+	sessions := make([]string, len(si.Cell.Agents))
+	for i, seat := range si.Cell.Agents {
+		sess, err := crewSession(si.Cell, seat)
+		if err != nil {
+			return nil, err
+		}
+		sessions[i] = sess
+	}
+	family := sanitize(si.Cell.Project)
 	if out, err := exec.Command(probeBin(), "--wrap", family).CombinedOutput(); err != nil {
 		return nil, fmt.Errorf("probe --wrap: %s", strings.TrimSpace(string(out)))
 	}
@@ -264,14 +318,14 @@ func (s *Service) CreateCrew(initiativeID string, open bool) ([]string, error) {
 	}
 
 	var cmds []string
-	for _, seat := range si.Cell.Agents {
+	for i, seat := range si.Cell.Agents {
 		// Preflight: the identity must already hold a token, or the pane would
 		// open on an error. The bootstrap issues tokens; this never does.
 		if out, err := exec.Command(api, "token", "env", si.Cell.Project, seat).CombinedOutput(); err != nil {
 			return nil, fmt.Errorf("%s/%s has no discuss token (%s); run ~/agent-slack/ops/bootstrap.sh %s first",
 				si.Cell.Project, seat, strings.TrimSpace(string(out)), si.Cell.Project)
 		}
-		prelude := preludeFor(api, *si.Cell, seat, s.Config().CrewModel)
+		prelude := preludeFor(api, *si.Cell, seat, sessions[i], s.Config().CrewModel)
 		preludePath := filepath.Join(dir, seat+".sh")
 		promptPath := filepath.Join(dir, seat+".md")
 		if err := os.WriteFile(preludePath, []byte(prelude), 0o600); err != nil {
@@ -280,7 +334,9 @@ func (s *Service) CreateCrew(initiativeID string, open bool) ([]string, error) {
 		if err := os.WriteFile(promptPath, []byte(prompt.Persona(*si.Cell, seat, si.Path)), 0o600); err != nil {
 			return nil, err
 		}
-		cmds = append(cmds, launchLine(preludePath, promptPath, wrapper, sanitize(seat), si.Path))
+		// probe prepends the family, so it is handed the short name: the
+		// session it opens is exactly sessions[i].
+		cmds = append(cmds, launchLine(preludePath, promptPath, wrapper, sanitize(seatShort(seat)), si.Path))
 	}
 	// The record side: push flag into projects.json, cell registered when
 	// this laptop is a factory. See registerCrew for what is a skip and what
@@ -332,10 +388,14 @@ func openInTerminalTabs(cmds []string) error {
 }
 
 // preludeFor is the shell snippet a seat's pane sources before the agent
-// starts: the discuss identity, fetched at launch so no token is stored, and
-// the model. ANTHROPIC_MODEL outranks the settings file, so a crew runs on
-// the crew model whatever the machine's default is.
-func preludeFor(api string, cell model.Cell, seat, crewModel string) string {
+// starts: the discuss identity, fetched at launch so no token is stored, the
+// session name, and the model. ANTHROPIC_MODEL outranks the settings file, so
+// a crew runs on the crew model whatever the machine's default is.
+//
+// AGENT_SESSION is exported here as well as by probe, and with the same name
+// the pane was launched under: it is what the process scan reads to join a
+// seat to what runs for it, so the launch and the join cannot drift.
+func preludeFor(api string, cell model.Cell, seat, session, crewModel string) string {
 	m := cell.Model
 	if m == "" {
 		m = crewModel
@@ -344,11 +404,11 @@ func preludeFor(api string, cell model.Cell, seat, crewModel string) string {
 		m = "opus"
 	}
 	hook := filepath.Join(filepath.Dir(api), "discuss-hook")
-	return fmt.Sprintf("# discuss identity of %s/%s, sourced by the probe pane before the agent starts\nexport $(%s token env %s %s | sed 's/ claude$//')\nexport ANTHROPIC_MODEL=%s\n"+
+	return fmt.Sprintf("# discuss identity of %s/%s, sourced by the probe pane before the agent starts\nexport $(%s token env %s %s | sed 's/ claude$//')\nexport AGENT_SESSION=%s\nexport ANTHROPIC_MODEL=%s\n"+
 		"# the external watcher: lives as long as this pane, wakes the seat by typing into it when mail\n"+
 		"# arrives, and takes the lock first so the Stop hook's watcher yields. Nothing to re-arm.\n"+
 		"%s watch --external --parent $$ >/dev/null 2>&1 &\n",
-		cell.Project, seat, shellQuote(api), shellQuote(cell.Project), shellQuote(seat), shellQuote(m), shellQuote(hook))
+		cell.Project, seat, shellQuote(api), shellQuote(cell.Project), shellQuote(seat), shellQuote(session), shellQuote(m), shellQuote(hook))
 }
 
 // Retirable is the seats of a cell that a wave is done with: not the human
@@ -370,7 +430,7 @@ func Retirable(si *model.ScannedInitiative) []string {
 				busy[a.Persona] = true
 			}
 			for _, seat := range si.Cell.Agents {
-				if a.Session == crewSession(si.ID, seat) {
+				if sess, err := crewSession(si.Cell, seat); err == nil && a.Session == sess {
 					busy[seat] = true
 				}
 			}
