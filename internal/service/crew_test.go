@@ -1,6 +1,7 @@
 package service
 
 import (
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -166,5 +167,33 @@ func TestPreludeSetsIdentityAndModel(t *testing.T) {
 	}
 	if !strings.Contains(preludeFor("/x/discuss-api", model.Cell{}, "s", "x-probe-s", ""), "ANTHROPIC_MODEL='opus'") {
 		t.Error("empty everything falls back to opus")
+	}
+}
+
+// Gate 2, as far as a test can go without opening a pane: what CreateCrew
+// hands probe — the wrapper of the cell's project and the seat's short name —
+// is the session crewSession promises, and the prelude that pane sources
+// exports AGENT_SESSION with that same name.
+func TestCrewLaunchOpensTheSessionCrewSessionNames(t *testing.T) {
+	cell := model.Cell{Project: "camp", Agents: []string{"po_andrea", "tech_lead_nicolas", "fullstack_dev_francisco"}}
+	family := sanitize(cell.Project)
+	wrapper := filepath.Join("/h/bin", family+"-probe")
+	for _, seat := range cell.Agents {
+		sess, err := crewSession(&cell, seat)
+		if err != nil {
+			t.Fatalf("%s: %v", seat, err)
+		}
+		short := sanitize(seatShort(seat))
+		// probe prepends its family to the name it is given.
+		if opened := family + "-probe-" + short; opened != sess {
+			t.Errorf("probe would open %q, crewSession says %q", opened, sess)
+		}
+		line := launchLine("/p/"+seat+".sh", "/p/"+seat+".md", wrapper, short, "/h/root")
+		if !strings.Contains(line, "'"+wrapper+"' '"+short+"'") {
+			t.Errorf("launch line %q does not run %s with %q", line, wrapper, short)
+		}
+		if !strings.Contains(preludeFor("/x/discuss-api", cell, seat, sess, "opus"), "export AGENT_SESSION='"+sess+"'") {
+			t.Errorf("the prelude of %s does not export AGENT_SESSION=%s", seat, sess)
+		}
 	}
 }
