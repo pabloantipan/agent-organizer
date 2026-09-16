@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { KeyRound, LogIn, Mail, ShieldCheck, WifiOff } from "lucide-react";
+import { KeyRound, LogIn, Mail, RotateCw, ShieldCheck, TriangleAlert, WifiOff } from "lucide-react";
 import { api, type Account, type LockState } from "../hooks/useWails";
 import { useBoard, type AuthMode } from "../stores/board.store";
 
@@ -18,14 +18,34 @@ export function gateStep(mode: AuthMode | null, lock: LockState | null, account:
 /** Full-window gate: the passcode lock first, then — with auth: firebase —
  *  cloud sign-in unless the user chooses to continue offline. */
 export function Gate({ children }: { children: React.ReactNode }) {
-  const { account, lock, authMode, offlineChoice, loadSession } = useBoard();
+  const { account, lock, authMode, offlineChoice, loadSession, error } = useBoard();
   useEffect(() => { loadSession(); }, [loadSession]);
-  switch (gateStep(authMode, lock, account, offlineChoice)) {
-    case "loading": return <div className="gate"><div className="gate-card"><span className="meta">Starting…</span></div></div>;
+  const step = gateStep(authMode, lock, account, offlineChoice);
+  switch (step) {
+    // A backend call that failed leaves the session unknown; say so and offer
+    // the retry instead of sitting on "Starting…" forever.
+    case "loading": return error ? <StartupError message={error} retry={loadSession} /> : <div className="gate"><div className="gate-card"><span className="meta">Starting…</span></div></div>;
     case "lock": return <LockScreen />;
     case "signin": return <SignInScreen />;
     default: return <>{children}</>;
   }
+}
+
+function StartupError({ message, retry }: { message: string; retry: () => Promise<void> }) {
+  const [busy, setBusy] = useState(false);
+  return (
+    <div className="gate">
+      <div className="gate-card">
+        <div className="gate-icon"><TriangleAlert size={22} /></div>
+        <h1>Cannot start</h1>
+        <p className="meta">The session and the config could not be read.</p>
+        <div className="err">{message.replace(/^Error:\s*/, "")}</div>
+        <button className="primary" type="button" disabled={busy} onClick={async () => { setBusy(true); try { await retry(); } finally { setBusy(false); } }}>
+          <RotateCw size={14} className={busy ? "spin" : ""} /> {busy ? "retrying…" : "Retry"}
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function LockScreen() {
