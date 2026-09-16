@@ -1,17 +1,17 @@
-# crew-session-names — progress
+# no-sign-in — progress
 
-Card: `~/organizer/working-on/crew-session-names.md`. Branch `crew-names` in
-`.wt/crew-names`, from main after the run-gate merge.
+Card: `~/organizer/working-on/no-sign-in.md`. Branch `no-sign-in` in
+`.wt/no-sign-in`, from main after the crew-session-names merge.
 
-The rule being built: a crew session is `<cell project>-probe-<seat short
-name>` (`camp-probe-andrea`), the name the sessions that actually ran had;
-`<initiative>-probe-<seat>` is 49 characters for ccint-camp-monorepo and
-zellij refuses anything over ~22.
+The rule being built: `auth: off` (the default) means the organizer has no
+identity — no sign-in screen, no account UI, sync is a silent skip — while
+`auth: firebase` keeps today's behaviour exactly. The lock is independent of
+both.
 
 | # | Phase | Gate item | State |
 |---|---|---|---|
-| 1 | `crewSession(cell, seat)`: cell project, short seat, 22-character budget as an error | 1 | done |
-| 2 | `CreateCrew` launches with that name; the prelude exports `AGENT_SESSION` to match | 2 | done |
-| 3 | The joins: `buildCrew`, `Retirable`, `PlanRetire` sessions, `scan.AssignAgents` family | 3 | done |
-| 4 | Camp fixture (five seats, five sessions) → the five names the run passed by hand | 3, 4 | done |
-| 5 | `go test ./...`, the status golden, CLAUDE.md | 5 | done |
+| 1 | `auth: off \| firebase` in config, default off; regenerated bindings | 1 | todo |
+| 2 | The account view and `Sync` answer to the mode | 1, 2, 3 | todo |
+| 3 | `login`, `logout`, `whoami`, `sync`, `doctor` with auth off | 2 | todo |
+| 4 | The gate, the top bar and the store; forgot-passcode recovery | 1, 2, 4 | todo |
+| 5 | README, `go test ./...`, `tsc --noEmit`, golden untouched | 5 | todo |
