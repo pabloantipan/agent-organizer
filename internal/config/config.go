@@ -11,12 +11,23 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Auth modes. Identity is opt-in: the organizer runs without one, and when
+// it gets one it is Azure Entra ID, not this Firebase email flow.
+const (
+	AuthOff      = "off"
+	AuthFirebase = "firebase"
+)
+
 type Config struct {
 	Machine    string   `yaml:"machine" json:"machine"`
 	Roots      []string `yaml:"roots" json:"roots"`
 	MaxDepth   int      `yaml:"max_depth" json:"max_depth"`
 	IgnoreDirs []string `yaml:"ignore_dirs" json:"ignore_dirs"`
 	GCPProject string   `yaml:"gcp_project" json:"gcp_project"`
+	// Auth is the identity mode: "off" (the default) means no sign-in
+	// anywhere — no gate, no account UI, sync skipped; "firebase" is the
+	// email flow of internal/auth.
+	Auth string `yaml:"auth" json:"auth"`
 	// FirebaseAPIKey is the web API key of the Firebase project (public by design).
 	FirebaseAPIKey string `yaml:"firebase_api_key" json:"firebase_api_key"`
 	// FirestoreDatabase is the named Firestore database in native mode.
@@ -60,6 +71,7 @@ func Default() Config {
 			"Library", "Applications", "Movies", "Music", "Pictures", "Public",
 			"Downloads", "Desktop", "Documents", "go", "flutter", "google-cloud-sdk",
 		},
+		Auth:                AuthOff,
 		FirestoreDatabase:   "organizer",
 		SyncIntervalMinutes: 15,
 		Editor:              "code",
@@ -71,6 +83,16 @@ func Default() Config {
 		DiscussStateDir:     "~/.local/state/discuss",
 		CrewModel:           "opus",
 	}
+}
+
+// AuthMode is the identity mode this config asks for. Anything other than an
+// explicit "firebase" is off: a typo must not put a sign-in screen back in
+// front of the board.
+func (c Config) AuthMode() string {
+	if strings.EqualFold(strings.TrimSpace(c.Auth), AuthFirebase) {
+		return AuthFirebase
+	}
+	return AuthOff
 }
 
 // Path is where the config file lives.

@@ -27,6 +27,7 @@ export namespace config {
 	    max_depth: number;
 	    ignore_dirs: string[];
 	    gcp_project: string;
+	    auth: string;
 	    firebase_api_key: string;
 	    firestore_database: string;
 	    sync_interval_minutes: number;
@@ -51,6 +52,7 @@ export namespace config {
 	        this.max_depth = source["max_depth"];
 	        this.ignore_dirs = source["ignore_dirs"];
 	        this.gcp_project = source["gcp_project"];
+	        this.auth = source["auth"];
 	        this.firebase_api_key = source["firebase_api_key"];
 	        this.firestore_database = source["firestore_database"];
 	        this.sync_interval_minutes = source["sync_interval_minutes"];
@@ -328,6 +330,11 @@ export namespace merge {
 	    start: string;
 	    threads: string[];
 	    seat: string;
+	    depends_on: string[];
+	    boundary: string[];
+	    spec: string;
+	    gate: string;
+	    review: string;
 	    thread_state: model.ThreadState[];
 	    branch_start: string;
 	    branch_last: string;
@@ -360,6 +367,11 @@ export namespace merge {
 	        this.start = source["start"];
 	        this.threads = source["threads"];
 	        this.seat = source["seat"];
+	        this.depends_on = source["depends_on"];
+	        this.boundary = source["boundary"];
+	        this.spec = source["spec"];
+	        this.gate = source["gate"];
+	        this.review = source["review"];
 	        this.thread_state = this.convertValues(source["thread_state"], model.ThreadState);
 	        this.branch_start = source["branch_start"];
 	        this.branch_last = source["branch_last"];
