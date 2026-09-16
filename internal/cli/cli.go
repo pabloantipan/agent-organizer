@@ -82,6 +82,12 @@ func runWith(args []string, stdout, stderr io.Writer, now func() time.Time) int 
 	case "statusline":
 		return statuslineCmd(cfg, os.Stdin, stdout, stderr, now)
 	case "factory-key":
+		// With auth off there is no developer token to sign this request
+		// with, and falling through would prompt for a password nobody has.
+		if cfg.AuthMode() == config.AuthOff {
+			fmt.Fprintln(stderr, "auth is off: issue factory keys with the record's CLI (see ops/README.md, `--role key`)")
+			return 2
+		}
 		return factoryKeyCmd(cfg, args[1:], stdout, stderr, now)
 	case "login":
 		return loginCmd(cfg, args[1:], stdout, stderr, now)

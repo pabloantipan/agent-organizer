@@ -34,6 +34,19 @@ func TestIdentityVerbsWithAuthOff(t *testing.T) {
 		}
 	}
 
+	// factory-key is the one identity verb that refuses: its key is signed
+	// with a developer token, and there is none to sign with.
+	var fout, ferr bytes.Buffer
+	if code := runWith([]string{"factory-key"}, &fout, &ferr, now); code != 2 {
+		t.Errorf("factory-key exit = %d, want 2", code)
+	}
+	if fout.Len() != 0 {
+		t.Errorf("factory-key wrote to stdout: %q", fout.String())
+	}
+	if got := strings.TrimSpace(ferr.String()); got != "auth is off: issue factory keys with the record's CLI (see ops/README.md, `--role key`)" {
+		t.Errorf("factory-key printed %q", got)
+	}
+
 	var out, errb bytes.Buffer
 	if code := runWith([]string{"sync"}, &out, &errb, now); code != 0 {
 		t.Errorf("sync exit = %d, want 0 (stderr %q)", code, errb.String())
