@@ -68,6 +68,10 @@ open it in the editor, a terminal at the initiative, or reveal it in Finder.
 
 ## Install
 
+Nothing asks you to sign in. Identity is off by default (`auth: off`), so the
+app opens on the board and the CLI works with no account at all; see
+[Identity, sync, and the app lock](#identity-sync-and-the-app-lock).
+
 ### From a release
 
 Download `organizer-<version>.dmg` from the Releases page, open it, and drag
@@ -114,8 +118,8 @@ organizer agents                 # agent processes grouped per initiative
 organizer prompt <initiative>    # the review prompt for an agent; --run opens it in a terminal
 organizer run <initiative> <card>   # hand a card to a builder; --print shows the launch line
 organizer runs [initiative]      # every recorded agent session per card: wall time, context, cost; --json
-organizer login | logout | whoami   # cloud session on this machine
-organizer sync                   # push this machine, pull all (skipped when signed out)
+organizer login | logout | whoami   # cloud session on this machine (only with auth: firebase)
+organizer sync                   # push this machine, pull all (skipped when auth is off or signed out)
 organizer doctor                 # roots, initiatives found, cards rejected and why
 organizer config --init          # write ~/.config/organizer/config.yaml with defaults
 ```
@@ -158,6 +162,7 @@ factory's productivity baseline; `--json` gives the records.
 | `roots` | `~` | directories scanned for `working-on/initiative.yaml`; add the folders that hold your initiatives |
 | `max_depth` | 3 | how deep below each root to look |
 | `ignore_dirs` | node_modules, vendor, Library, ... | directory names never entered |
+| `auth` | `off` | identity mode: `off` is no sign-in anywhere; `firebase` is the email flow below |
 | `gcp_project` | empty | Firebase / GCP project; empty disables sync |
 | `firebase_api_key` | empty | web API key of the Firebase project (public by design) |
 | `firestore_database` | `organizer` | Firestore database id, native mode |
@@ -168,25 +173,41 @@ factory's productivity baseline; `--json` gives the records.
 | `probe_state_dir` | `~/.local/state/probe` | where `probe` keeps its session layouts |
 | `zellij` | `/opt/homebrew/bin/zellij` | zellij binary, for session state |
 
-## Accounts, sync, and the app lock
+## Identity, sync, and the app lock
 
-Sync is per account. You sign in once per machine with email and password
-(Firebase Authentication); the app keeps the refresh token in the macOS
-Keychain and nothing else on disk. Every machine pushes its snapshot under
+**`auth: off` is the default and means there is no identity.** No sign-in
+screen, no account menu, no email anywhere in the window; `organizer login`,
+`logout` and `whoami` say auth is off and exit 0, and `organizer sync` prints
+`sync skipped: auth off`. `organizer doctor` reports the mode. The board reads
+the card files on this machine, which needs no account.
+
+When identity does come it is **Azure Entra ID**, not the email flow below.
+The Firebase code stays in place behind `auth: firebase` so nothing that Entra
+replaces is thrown away first.
+
+**`auth: firebase`** turns the email flow back on, unchanged: sync is per
+account, you sign in once per machine with email and password (Firebase
+Authentication), and the app keeps the refresh token in the macOS Keychain and
+nothing else on disk. Every machine pushes its snapshot under
 `users/<uid>/machines/<machine>` in a Firestore database and reads the other
 machines back. Security rules restrict each user to their own tree. Nothing
 merges at write time, so nothing conflicts; the manual priority order is one
-shared document, last writer wins.
+shared document, last writer wins. "Continue offline" and "Use without an
+account" keep everything local: the board still works from the files; only
+sync is paused.
 
-A local **passcode** can gate the app on each machine. It is an argon2id hash
-in the Keychain, verified at launch, with a 30-second cooldown after five wrong
-tries. It also lets the app open offline on the last pull. If you forget it,
-signing in to the cloud proves it is you and lets you set a new one.
+A local **passcode** is independent of all of that and works in either mode. It
+is an argon2id hash in the Keychain, verified at launch, with a 30-second
+cooldown after five wrong tries. If you forget it with `auth: firebase`,
+signing in to the cloud proves it is you and lets you set a new one. With auth
+off there is nobody to prove it to, so the recovery is local — delete the item
+and set a new passcode in Settings:
 
-"Continue offline" and "Use without an account" keep everything local: the
-board still works from the files; only sync is paused.
+```bash
+security delete-generic-password -s cl.antipan.organizer -a passcode
+```
 
-### One-time project setup
+### One-time project setup (only for `auth: firebase`)
 
 You need a Firebase project (a GCP project with Firebase added), the
 email/password provider enabled, a web API key, and a Firestore database in
@@ -204,9 +225,10 @@ gcloud firestore databases create --database=organizer --location=<region> --typ
 firebase deploy --only firestore:rules --project $P            # rules in this repo
 ```
 
-Then in Settings, or in `~/.config/organizer/config.yaml`: `gcp_project`,
-`firebase_api_key`, `firestore_database: organizer`. Create the account from
-the sign-in screen or with `organizer login`.
+Then in `~/.config/organizer/config.yaml`: `auth: firebase`, plus
+`gcp_project`, `firebase_api_key` and `firestore_database: organizer` (the
+last three are also in Settings). Create the account from the sign-in screen
+or with `organizer login`.
 
 ## Agents
 
