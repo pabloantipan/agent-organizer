@@ -31,7 +31,7 @@ import (
 var Version = "dev"
 
 // Subcommands the binary recognises. Anything else launches the GUI.
-var Subcommands = []string{"status", "board", "sync", "prompt", "agents", "crew", "retire", "clean", "statusline", "factory-key", "login", "logout", "whoami", "doctor", "config", "version", "--version", "help"}
+var Subcommands = []string{"status", "board", "sync", "prompt", "run", "runs", "agents", "crew", "retire", "clean", "statusline", "factory-key", "login", "logout", "whoami", "doctor", "config", "version", "--version", "help"}
 
 // IsSubcommand reports whether arg names a CLI subcommand.
 func IsSubcommand(arg string) bool {
@@ -67,6 +67,10 @@ func runWith(args []string, stdout, stderr io.Writer, now func() time.Time) int 
 		return syncCmd(cfg, args[1:], stdout, stderr, now)
 	case "prompt":
 		return promptCmd(cfg, args[1:], stdout, stderr, now)
+	case "run":
+		return runCmd(cfg, args[1:], stdout, stderr, now)
+	case "runs":
+		return runsCmd(cfg, args[1:], stdout, stderr, now)
 	case "agents":
 		return agentsCmd(cfg, stdout, now)
 	case "crew":
@@ -130,6 +134,8 @@ func usage(w io.Writer) {
   organizer logout | whoami           forget the session on this machine | show who is signed in
   organizer sync [--no-push|--no-pull] scan, push this machine, pull all, refresh the cache
   organizer prompt <initiative> [--run] print the agent review prompt; --run opens a terminal running the agent with it
+  organizer run <initiative> <card> [--print] hand a card to a builder; refuses a card without spec, gate and boundary. --print shows the launch line
+  organizer runs [initiative] [--json] every agent session recorded, per card: model, wall time, context at end, cost
   organizer agents                    agent processes and sessions grouped per initiative
   organizer crew <initiative> [--print] bring the initiative's persona cell up, one probe per seat; --print shows the lines
   organizer retire <initiative> [--retirable | --keep a,b] [--kill session] [--run]  end a wave: retire seats, kill sessions, close the mailbox, revoke tokens, rewrite cell.json (dry unless --run)

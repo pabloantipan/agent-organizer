@@ -5,3 +5,5 @@ frontend/dist
 .wt/
 # personal state of this checkout (cards, machine names, project ids)
 working-on/
+# ...except the scan fixtures, which are the test suite's, not this checkout's
+!testdata/home/**/working-on/

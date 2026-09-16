@@ -280,8 +280,7 @@ func (s *Service) CreateCrew(initiativeID string, open bool) ([]string, error) {
 		if err := os.WriteFile(promptPath, []byte(prompt.Persona(*si.Cell, seat, si.Path)), 0o600); err != nil {
 			return nil, err
 		}
-		cmds = append(cmds, fmt.Sprintf("PROBE_PRELUDE_FILE=%s PROBE_PROMPT_FILE=%s %s %s %s",
-			shellQuote(preludePath), shellQuote(promptPath), shellQuote(wrapper), shellQuote(sanitize(seat)), shellQuote(si.Path)))
+		cmds = append(cmds, launchLine(preludePath, promptPath, wrapper, sanitize(seat), si.Path))
 	}
 	// The record side: push flag into projects.json, cell registered when
 	// this laptop is a factory. See registerCrew for what is a skip and what

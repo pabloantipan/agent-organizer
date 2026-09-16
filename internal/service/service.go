@@ -229,6 +229,8 @@ func (s *Service) agentOptions() *scan.AgentOptions {
 		Timeout:       time.Duration(s.cfg.GitTimeoutSeconds) * time.Second,
 		PrevCPU:       s.prevCPU,
 		PrevAt:        s.prevAt,
+		Cards:         s.cardRefsLocked(),
+		BranchOf:      branchIn(s.repoBranchesLocked()),
 	}
 }
 

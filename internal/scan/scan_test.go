@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -222,5 +223,42 @@ func TestValidULID(t *testing.T) {
 		if got := validULID(c.in); got != c.want {
 			t.Errorf("validULID(%q)=%v want %v", c.in, got, c.want)
 		}
+	}
+}
+
+func TestReadCardBuildFields(t *testing.T) {
+	home := fixtureHome(t)
+	si := ReadInitiative(filepath.Join(home, "init-a"), opts(home))
+
+	byslug := map[string]model.Card{}
+	for _, c := range si.Cards {
+		byslug[c.Slug] = c
+	}
+	alpha, ok := byslug["alpha"]
+	if !ok {
+		t.Fatal("alpha card not read")
+	}
+	tests := []struct {
+		field string
+		got   string
+		want  string
+	}{
+		{"depends_on", strings.Join(alpha.DependsOn, ","), "beta"},
+		{"boundary", strings.Join(alpha.Boundary, ","), "repo-one/src/,repo-one/README.md"},
+		{"spec", alpha.Spec, "docs/alpha.md#shape"},
+		{"gate", alpha.Gate, "go test ./... green and the golden refreshed"},
+		{"review", alpha.Review, "tech lead reads the diff before merge"},
+	}
+	for _, tt := range tests {
+		if tt.got != tt.want {
+			t.Errorf("alpha %s = %q, want %q", tt.field, tt.got, tt.want)
+		}
+	}
+	if m := alpha.MissingLaunchFields(); len(m) != 0 {
+		t.Errorf("alpha should be launchable, missing %v", m)
+	}
+	// A card without the build fields is the common case and stays legal.
+	if m := byslug["gamma"].MissingLaunchFields(); len(m) != 3 {
+		t.Errorf("gamma missing = %v, want all three", m)
 	}
 }

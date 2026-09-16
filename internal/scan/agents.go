@@ -45,6 +45,11 @@ type AgentOptions struct {
 	PrevCPU     map[int]float64
 	PrevAt      time.Time
 	WorkingRate float64
+	// Cards and BranchOf let the archive pass attribute a dying session's
+	// record to a card before the record is deleted (session.Retire). nil
+	// means path matching only.
+	Cards    []session.CardRef
+	BranchOf func(cwd string) string
 }
 
 type zsession struct {
@@ -266,7 +271,10 @@ func attachSessions(o AgentOptions, procs []model.Agent) {
 			procs[i].Session = r.Session
 		}
 	}
-	session.Prune(o.SessionsDir, alive, sessionGrace, time.Now())
+	// Archive, then delete: a record is the only place a finished session's
+	// context fill and bill exist. A failed archive must not stop the sample;
+	// `organizer runs` surfaces it on its own pass.
+	_, _ = session.Retire(o.SessionsDir, session.RunsPath(), alive, sessionGrace, time.Now(), o.Cards, o.BranchOf)
 }
 
 // parseCPUTime handles ps TIME like "1:02.33", "12:34:56", "3-01:02:03".

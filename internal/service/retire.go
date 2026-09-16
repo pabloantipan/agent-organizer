@@ -14,7 +14,6 @@ import (
 
 	"organizer/internal/discuss"
 	"organizer/internal/model"
-	"organizer/internal/session"
 )
 
 // Retiring a cell is what the end of a wave needs and what was being done
@@ -321,8 +320,10 @@ func (s *Service) Retire(o RetireOptions) (RetireReport, error) {
 
 	// The organizer's own state: statusline records of dead pids, and a
 	// fresh scan so the feed reflects the roster.
-	if n := session.Prune(session.Dir(), livePids(), 0, time.Now()); n > 0 {
-		r.step("pruned %d statusline records", n)
+	if n, err := s.archiveRuns(0); err != nil {
+		r.fail("archive runs: %v", err)
+	} else if n > 0 {
+		r.step("archived %d statusline records", n)
 	}
 	s.Scan(false)
 	s.mu.Lock()
@@ -379,8 +380,10 @@ func (s *Service) Clean() (RetireReport, error) {
 			r.step("%s", line)
 		}
 	}
-	if n := session.Prune(session.Dir(), livePids(), 0, time.Now()); n > 0 {
-		r.step("pruned %d statusline records", n)
+	if n, err := s.archiveRuns(0); err != nil {
+		r.fail("archive runs: %v", err)
+	} else if n > 0 {
+		r.step("archived %d statusline records", n)
 	}
 	if len(r.Steps) == 0 {
 		r.step("nothing to clean")

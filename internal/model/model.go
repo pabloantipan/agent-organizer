@@ -2,7 +2,10 @@
 // the CLI and the UI. Nothing here does I/O.
 package model
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 // Card statuses. The set is closed on purpose; see the working-on skill.
 const (
@@ -100,6 +103,22 @@ type Card struct {
 	// Seat is optional: the cell seat that builds this card. A seat with no
 	// open card naming it is finished, which is what retiring reads.
 	Seat string `yaml:"seat" json:"seat"`
+
+	// The build fields (working-on skill, Vocabulary). A supervisor reads
+	// them to launch a builder against the card and to sequence waves; a card
+	// without Spec, Gate and Boundary is a note with a next action, not
+	// something `organizer run` will launch. All optional on the file.
+	//
+	// DependsOn names cards whose done/ unblocks this one.
+	DependsOn []string `yaml:"depends_on" json:"depends_on"`
+	// Boundary is the paths a builder may touch. Disjoint across a wave.
+	Boundary []string `yaml:"boundary" json:"boundary"`
+	// Spec is where the work is specified, "<path>#<section>".
+	Spec string `yaml:"spec" json:"spec"`
+	// Gate is the verification that defines done.
+	Gate string `yaml:"gate" json:"gate"`
+	// Review is who or what checks the result before it merges.
+	Review string `yaml:"review" json:"review"`
 	// ThreadState is those threads resolved against the live cell. Derived,
 	// like BranchStart below, and empty when discuss is unreachable.
 	ThreadState []ThreadState `yaml:"-" json:"thread_state"`
@@ -114,6 +133,28 @@ type Card struct {
 	Body string `yaml:"-" json:"body"`
 	// Archived is true for cards under working-on/done/.
 	Archived bool `yaml:"-" json:"archived"`
+}
+
+// LaunchFields are the card fields a builder cannot be launched without: the
+// spec it works from, the gate that says it is done, and the boundary it may
+// not cross. Order is the order the refusal names them in.
+var LaunchFields = []string{"spec", "gate", "boundary"}
+
+// MissingLaunchFields lists the LaunchFields this card does not carry. Empty
+// means the card is launchable. This is the whole of the delegation contract
+// the organizer enforces; everything else on a card is advice.
+func (c Card) MissingLaunchFields() []string {
+	var missing []string
+	if strings.TrimSpace(c.Spec) == "" {
+		missing = append(missing, "spec")
+	}
+	if strings.TrimSpace(c.Gate) == "" {
+		missing = append(missing, "gate")
+	}
+	if len(c.Boundary) == 0 {
+		missing = append(missing, "boundary")
+	}
+	return missing
 }
 
 // UpdatedTime parses the card's updated date. Zero time when absent or malformed.

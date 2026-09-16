@@ -1,0 +1,5 @@
+card                           session                   model      started           ended             wall    context  cost
+organizer/run-gate             organizer-probe-run-gate  Opus 5     2026-09-06 10:00  2026-09-06 11:30  1h30m   58%      $41.25
+agent-slack/factory-alignment  slack-probe-builder3      Fable 5.1  2026-09-05 21:05  running           11h35m  18%      $7.57
+-                              a9e8c6c0                  -          2026-09-03 14:00  2026-09-03 14:00  -       10%      $2.22
+3 runs                                                                                                                   $51.04
