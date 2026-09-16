@@ -86,6 +86,9 @@ func runWith(args []string, stdout, stderr io.Writer, now func() time.Time) int 
 	case "login":
 		return loginCmd(cfg, args[1:], stdout, stderr, now)
 	case "logout":
+		if cfg.AuthMode() == config.AuthOff {
+			return authOffLine(stdout)
+		}
 		svc := service.NewWith(cfg, cache.State{}, now)
 		if err := svc.Auth.SignOut(); err != nil {
 			fmt.Fprintln(stderr, err)
@@ -94,6 +97,9 @@ func runWith(args []string, stdout, stderr io.Writer, now func() time.Time) int 
 		fmt.Fprintln(stdout, "signed out on this machine")
 		return 0
 	case "whoami":
+		if cfg.AuthMode() == config.AuthOff {
+			return authOffLine(stdout)
+		}
 		svc := service.NewWith(cfg, cache.State{}, now)
 		acc := svc.Auth.Account()
 		if !acc.SignedIn {
@@ -130,7 +136,7 @@ func usage(w io.Writer) {
 
   organizer status [--all] [--json]   open cards per initiative (now, blocked, next)
   organizer board [--json]            merged view: this machine live + last pull from others
-  organizer login [email]             sign in to the cloud (password prompted) and remember it here
+  organizer login [email]             sign in to the cloud (only with auth: firebase; password prompted)
   organizer logout | whoami           forget the session on this machine | show who is signed in
   organizer sync [--no-push|--no-pull] scan, push this machine, pull all, refresh the cache
   organizer prompt <initiative> [--run] print the agent review prompt; --run opens a terminal running the agent with it
@@ -251,10 +257,13 @@ func doctor(cfg config.Config, args []string, stdout, stderr io.Writer, now func
 	} else {
 		fmt.Fprintf(stdout, "gcp_project: %s  database: %s  api key: %s\n", cfg.GCPProject, cfg.FirestoreDatabase, map[bool]string{true: "set", false: "MISSING"}[cfg.FirebaseAPIKey != ""])
 	}
-	if acc := service.NewWith(cfg, cache.State{}, now).Auth.Account(); acc.SignedIn {
-		fmt.Fprintf(stdout, "account: %s\n", acc.Email)
-	} else {
-		fmt.Fprintln(stdout, "account: not signed in (organizer login)")
+	fmt.Fprintf(stdout, "auth: %s\n", cfg.AuthMode())
+	if cfg.AuthMode() == config.AuthFirebase {
+		if acc := service.NewWith(cfg, cache.State{}, now).Auth.Account(); acc.SignedIn {
+			fmt.Fprintf(stdout, "account: %s\n", acc.Email)
+		} else {
+			fmt.Fprintln(stdout, "account: not signed in (organizer login)")
+		}
 	}
 	fmt.Fprintf(stdout, "statusline: %s\n", statuslineStatus())
 	fmt.Fprintf(stdout, "discuss: %s\n", discussStatus(cfg))
@@ -406,6 +415,10 @@ func syncCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now fun
 	st, _ := cache.Load()
 	svc := service.NewWith(cfg, st, now)
 	res, err := svc.Sync(ctx, !*noPush, !*noPull)
+	if err == nil && res.Skipped == "auth off" {
+		fmt.Fprintln(stdout, "sync skipped: auth off")
+		return 0
+	}
 	if errors.Is(err, service.ErrNotSignedIn) || (err == nil && res.Skipped != "") {
 		fmt.Fprintln(stdout, "sync skipped:", res.Skipped+". Run: organizer login")
 		return 0
@@ -574,7 +587,17 @@ func contextLabel(c *model.ContextStatus) string {
 	return fmt.Sprintf("ctx %d%%", int(c.UsedPercent+0.5))
 }
 
+// authOffLine is the one line login, logout and whoami print while auth is
+// off, and the exit code that goes with it: nothing is wrong.
+func authOffLine(stdout io.Writer) int {
+	fmt.Fprintf(stdout, "auth is off; the organizer runs without signing in (set `auth: firebase` in %s to turn it on)\n", config.Path())
+	return 0
+}
+
 func loginCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now func() time.Time) int {
+	if cfg.AuthMode() == config.AuthOff {
+		return authOffLine(stdout)
+	}
 	if cfg.FirebaseAPIKey == "" {
 		fmt.Fprintln(stderr, "firebase_api_key is not set in", config.Path())
 		return 2
