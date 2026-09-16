@@ -1,21 +1,35 @@
 import { useEffect, useState } from "react";
 import { KeyRound, LogIn, Mail, ShieldCheck, WifiOff } from "lucide-react";
-import { api } from "../hooks/useWails";
-import { useBoard } from "../stores/board.store";
+import { api, type Account, type LockState } from "../hooks/useWails";
+import { useBoard, type AuthMode } from "../stores/board.store";
 
-/** Full-window gate: the passcode lock first, then cloud sign-in unless the
- *  user chooses to continue offline. Children render once both are satisfied. */
+export type GateStep = "loading" | "lock" | "signin" | "app";
+
+/** What the gate shows, as one decision. With auth off there is no sign-in
+ *  step at all and the offline choice is not consulted: the lock, if the user
+ *  set one, is the only thing between the window and the board. */
+export function gateStep(mode: AuthMode | null, lock: LockState | null, account: Account | null, offlineChoice: boolean): GateStep {
+  if (!lock || account === null || mode === null) return "loading";
+  if (lock.enabled && !lock.unlocked) return "lock";
+  if (mode === "firebase" && !account.signed_in && !offlineChoice) return "signin";
+  return "app";
+}
+
+/** Full-window gate: the passcode lock first, then — with auth: firebase —
+ *  cloud sign-in unless the user chooses to continue offline. */
 export function Gate({ children }: { children: React.ReactNode }) {
-  const { account, lock, offlineChoice, loadSession } = useBoard();
+  const { account, lock, authMode, offlineChoice, loadSession } = useBoard();
   useEffect(() => { loadSession(); }, [loadSession]);
-  if (!lock || account === null) return <div className="gate"><div className="gate-card"><span className="meta">Starting…</span></div></div>;
-  if (lock.enabled && !lock.unlocked) return <LockScreen />;
-  if (!account.signed_in && !offlineChoice) return <SignInScreen />;
-  return <>{children}</>;
+  switch (gateStep(authMode, lock, account, offlineChoice)) {
+    case "loading": return <div className="gate"><div className="gate-card"><span className="meta">Starting…</span></div></div>;
+    case "lock": return <LockScreen />;
+    case "signin": return <SignInScreen />;
+    default: return <>{children}</>;
+  }
 }
 
 function LockScreen() {
-  const { setLock, lock } = useBoard();
+  const { setLock, lock, authMode } = useBoard();
   const [code, setCode] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [forgot, setForgot] = useState(false);
@@ -37,7 +51,7 @@ function LockScreen() {
       }
     } catch (e) { setErr(String(e).replace(/^Error:\s*/, "")); }
   };
-  if (forgot) return <SignInScreen resetPasscodeAfter onBack={() => setForgot(false)} />;
+  if (forgot) return authMode === "firebase" ? <SignInScreen resetPasscodeAfter onBack={() => setForgot(false)} /> : <ForgotPasscode onBack={() => setForgot(false)} />;
   return (
     <div className="gate">
       <form className="gate-card" onSubmit={(e) => { e.preventDefault(); unlock(); }}>
@@ -47,8 +61,30 @@ function LockScreen() {
         <input autoFocus type="password" placeholder="passcode" value={code} onChange={(e) => setCode(e.target.value)} disabled={cooldown > 0} />
         {err && <div className="err">{err}</div>}
         <button className="primary" type="submit" disabled={cooldown > 0 || code.length === 0}>{cooldown > 0 ? `wait ${cooldown}s` : "Unlock"}</button>
-        <button type="button" className="ghost" onClick={() => setForgot(true)}>Forgot it? Sign in to reset</button>
+        <button type="button" className="ghost" onClick={() => setForgot(true)}>{authMode === "firebase" ? "Forgot it? Sign in to reset" : "Forgot it?"}</button>
       </form>
+    </div>
+  );
+}
+
+/** With auth off there is no sign-in to prove who you are, so the recovery is
+ *  local: delete the passcode item from the Keychain and set a new one. */
+function ForgotPasscode({ onBack }: { onBack: () => void }) {
+  return (
+    <div className="gate">
+      <div className="gate-card">
+        <div className="gate-icon"><KeyRound size={22} /></div>
+        <h1>Forgot the passcode</h1>
+        <p className="meta">
+          This machine has no account to sign in with — the passcode is the only
+          secret, and it is stored as a hash, so it cannot be read back. Remove
+          it in Terminal and the app opens unlocked; set a new one in Settings.
+        </p>
+        <code className="mono" style={{ wordBreak: "break-all", userSelect: "all" }}>security delete-generic-password -s cl.antipan.organizer -a passcode</code>
+        <div className="gate-links">
+          <button type="button" className="ghost" onClick={onBack}>Back</button>
+        </div>
+      </div>
     </div>
   );
 }

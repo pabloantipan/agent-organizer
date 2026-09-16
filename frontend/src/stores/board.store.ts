@@ -4,10 +4,19 @@ import type { merge } from "../../wailsjs/go/models";
 
 export type Tab = "board" | "agents" | "slack" | "roadmap" | "calendar" | "initiatives" | "settings";
 
+/** The identity mode of the backend. "off" is the default and means there is
+ *  no sign-in anywhere: no gate, no account UI, sync skipped. */
+export type AuthMode = "off" | "firebase";
+
+/** Mirror of config.AuthMode in Go: anything but an explicit firebase is off. */
+export const authModeOf = (raw: string | undefined): AuthMode => (raw?.trim().toLowerCase() === "firebase" ? "firebase" : "off");
+
 type State = {
   view: BoardView | null;
   account: Account | null;
   lock: LockState | null;
+  // null until loadSession has answered; the gate waits for it.
+  authMode: AuthMode | null;
   offlineChoice: boolean;
   syncNote: string | null;
   loadSession: () => Promise<void>;
@@ -61,12 +70,13 @@ export const useBoard = create<State>((set, get) => ({
   view: null,
   account: null,
   lock: null,
+  authMode: null,
   offlineChoice: false,
   syncNote: null,
   loadSession: async () => {
     try {
-      const [account, lock] = await Promise.all([api.getAccount(), api.getLock()]);
-      set({ account, lock });
+      const [account, lock, cfg] = await Promise.all([api.getAccount(), api.getLock(), api.getConfig()]);
+      set({ account, lock, authMode: authModeOf(cfg.auth) });
     } catch (e) {
       set({ error: String(e) });
     }
@@ -161,6 +171,11 @@ export const useBoard = create<State>((set, get) => ({
     set({ syncing: true, lastMessage: null });
     try {
       const r = await api.syncNow();
+      if (r.skipped === "auth off") {
+        // The app is meant to run this way; a skip nobody can act on is noise.
+        set({ syncing: false, syncNote: null, lastMessage: null });
+        return;
+      }
       if (r.skipped) {
         set({ syncing: false, syncNote: r.skipped, lastMessage: null });
         return;

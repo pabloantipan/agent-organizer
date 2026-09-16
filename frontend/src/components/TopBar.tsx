@@ -16,7 +16,10 @@ const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
 ];
 
 export function TopBar() {
-  const { tab, setTab, view, loading, syncing, refresh, sync, error, lastMessage, account, syncNote, setAccount, setLock, setOfflineChoice, agents } = useBoard();
+  const { tab, setTab, view, loading, syncing, refresh, sync, error, lastMessage, account, lock, authMode, syncNote, setAccount, setLock, setOfflineChoice, agents } = useBoard();
+  // With auth off there is no identity: no account menu, no Sign in, no email,
+  // and no Sync button either, since sync is a skip nobody can act on.
+  const identity = authMode === "firebase";
   // The human's queue plus seats not picking up, across every cell; one
   // definition shared with the Slack tab so the numbers agree.
   const needsMe = (agents?.groups ?? []).filter((g) => g.cell).reduce((n, g) => { const q = queueOf(g, view); return n + q.total + q.deaf; }, 0);
@@ -46,10 +49,17 @@ export function TopBar() {
       <button className="ghost" onClick={refresh} disabled={loading} title="Rescan local disk">
         <RefreshCw size={14} className={loading ? "spin" : ""} /> {loading ? "scanning…" : "Rescan"}
       </button>
-      <button className="primary" onClick={sync} disabled={syncing} title="Push this machine, pull all">
-        <RefreshCcwDot size={14} className={syncing ? "spin" : ""} /> {syncing ? "syncing…" : "Sync"}
-      </button>
-      <span className="account">
+      {identity && (
+        <button className="primary" onClick={sync} disabled={syncing} title="Push this machine, pull all">
+          <RefreshCcwDot size={14} className={syncing ? "spin" : ""} /> {syncing ? "syncing…" : "Sync"}
+        </button>
+      )}
+      {!identity && lock?.enabled && (
+        <button className="ghost" onClick={async () => setLock(await api.lockNow())} title="Lock this window">
+          <Lock size={14} /> Lock
+        </button>
+      )}
+      {identity && <span className="account">
         <button className="ghost" onClick={() => setMenu(!menu)} title={account?.signed_in ? account.email : "not signed in"}>
           <UserRound size={14} /> {account?.signed_in ? account.email : "sign in"}
         </button>
@@ -67,7 +77,7 @@ export function TopBar() {
             <button className="ghost" onClick={() => { setTab("settings"); setMenu(false); }}><Settings size={13} /> Settings</button>
           </div>
         )}
-      </span>
+      </span>}
     </header>
   );
 }
