@@ -188,11 +188,13 @@ func (a *App) Reveal(path string) error       { return a.svc.Reveal(path) }
 
 // ---- session and lock ----
 
+// GetAccount is the account view: the empty account while auth is off, which
+// is what tells the frontend there is no identity to show.
 func (a *App) GetAccount() auth.Account {
 	if a.svc == nil {
 		return auth.Account{}
 	}
-	return a.svc.Auth.Account()
+	return a.svc.Account()
 }
 
 func (a *App) SignIn(email, password string) (auth.Account, error) {
@@ -217,12 +219,18 @@ func (a *App) SignOut() error {
 	if a.svc == nil {
 		return errString(a.err)
 	}
+	if a.svc.AuthMode() == config.AuthOff {
+		return service.ErrAuthOff
+	}
 	return a.svc.Auth.SignOut()
 }
 
 func (a *App) ResetPassword(email string) error {
 	if a.svc == nil {
 		return errString(a.err)
+	}
+	if a.svc.AuthMode() == config.AuthOff {
+		return service.ErrAuthOff
 	}
 	ctx, cancel := context.WithTimeout(a.ctx, 30*time.Second)
 	defer cancel()

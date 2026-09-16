@@ -186,9 +186,29 @@ func (s *Service) ClearPasscode(current string) (LockState, error) {
 	return s.LockState(), nil
 }
 
+// ErrAuthOff is returned by every identity operation while auth is off.
+var ErrAuthOff = errors.New("auth is off")
+
+// AuthMode is the identity mode in force: config.AuthOff or AuthFirebase.
+func (s *Service) AuthMode() string { return s.Config().AuthMode() }
+
+// Account is the account view the app and the CLI render. With auth off the
+// organizer has no identity at all, whatever session a previous mode left in
+// the keychain, so the answer is the empty account.
+func (s *Service) Account() auth.Account {
+	if s.AuthMode() == config.AuthOff {
+		return auth.Account{}
+	}
+	return s.Auth.Account()
+}
+
 // SignIn to the cloud; a successful sign-in also unlocks this process, which
-// is the recovery path for a forgotten passcode.
+// is the recovery path for a forgotten passcode. With auth off there is no
+// sign-in to do: the lock's recovery is deleting its keychain item.
 func (s *Service) SignIn(ctx context.Context, email, password string) (auth.Account, error) {
+	if s.AuthMode() == config.AuthOff {
+		return auth.Account{}, ErrAuthOff
+	}
 	acc, err := s.Auth.SignIn(ctx, email, password)
 	if err == nil {
 		s.mu.Lock()
@@ -199,6 +219,9 @@ func (s *Service) SignIn(ctx context.Context, email, password string) (auth.Acco
 }
 
 func (s *Service) SignUp(ctx context.Context, email, password string) (auth.Account, error) {
+	if s.AuthMode() == config.AuthOff {
+		return auth.Account{}, ErrAuthOff
+	}
 	acc, err := s.Auth.SignUp(ctx, email, password)
 	if err == nil {
 		s.mu.Lock()
@@ -550,12 +573,12 @@ func (s *Service) SetInitiativeOrder(ids []string) error {
 }
 
 // noteAuthor is who a comment is signed by: the account email when signed
-// in, else the machine name.
+// in, else the machine name. With auth off it is always the machine.
 func (s *Service) noteAuthor() string {
-	if acc := s.Auth.Account(); acc.SignedIn && acc.Email != "" {
+	if acc := s.Account(); acc.SignedIn && acc.Email != "" {
 		return acc.Email
 	}
-	return s.cfg.Machine
+	return s.Config().Machine
 }
 
 // AddNote appends a comment to a card. Returns the note as stored.
@@ -657,9 +680,14 @@ func (s *Service) PulledAt() time.Time {
 var ErrNotSignedIn = errors.New("not signed in")
 
 // Sync scans, pushes this machine, pulls all machines, saves the cache.
-// Signed out is a skip, not a failure: the cached remote stays visible.
+// Signed out is a skip, not a failure: the cached remote stays visible. So is
+// auth off, and that one is not a warning either — the app is meant to run
+// that way.
 func (s *Service) Sync(ctx context.Context, push, pull bool) (SyncResult, error) {
 	cfg := s.Config()
+	if cfg.AuthMode() == config.AuthOff {
+		return SyncResult{Skipped: "auth off"}, nil
+	}
 	if cfg.GCPProject == "" {
 		return SyncResult{Skipped: "gcp_project is not set in the config"}, nil
 	}
