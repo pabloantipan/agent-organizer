@@ -8,7 +8,7 @@ export function Settings() {
   const [cfg, setCfg] = useState<Config | null>(null);
   const [path, setPath] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
-  const { refresh, account, setAccount, setOfflineChoice } = useBoard();
+  const { refresh, account, authMode, setAccount, setOfflineChoice } = useBoard();
 
   useEffect(() => {
     api.getConfig().then(setCfg);
@@ -33,6 +33,14 @@ export function Settings() {
 
   return (
     <div className="settings">
+      {authMode !== "firebase" ? (
+        <div className="settings-block">
+          <div className="section-label">Identity</div>
+          <div className="row">
+            <span className="meta">Identity is off; Azure Entra ID is planned (identity-entra card)</span>
+          </div>
+        </div>
+      ) : (
       <div className="settings-block">
         <div className="section-label">Account</div>
         {account?.signed_in ? (
@@ -50,6 +58,7 @@ export function Settings() {
           </div>
         )}
       </div>
+      )}
       <PasscodeBlock />
       <div className="section-label">Cloud</div>
       <label>
