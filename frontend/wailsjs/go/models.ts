@@ -205,6 +205,9 @@ export namespace merge {
 	    repos: string[];
 	    ports_to: string;
 	    notes: string[];
+	    description: string;
+	    specs: string[];
+	    spec_files: Record<string, Array<string>>;
 	    target: string;
 	    milestones: model.Milestone[];
 	    path: string;
@@ -240,6 +243,9 @@ export namespace merge {
 	        this.repos = source["repos"];
 	        this.ports_to = source["ports_to"];
 	        this.notes = source["notes"];
+	        this.description = source["description"];
+	        this.specs = source["specs"];
+	        this.spec_files = source["spec_files"];
 	        this.target = source["target"];
 	        this.milestones = this.convertValues(source["milestones"], model.Milestone);
 	        this.path = source["path"];
