@@ -140,6 +140,7 @@ function Row({ i, rank, isOpen, onToggle, handle }: RowProps) {
       {isOpen && (
         <div className="init-body">
           {i.title && <p className="init-title">{i.title}</p>}
+          {i.description && <p className="init-desc">{i.description}</p>}
           <div className="init-grid">
             <section>
               <div className="section-label">Repos</div>
@@ -169,12 +170,56 @@ function Row({ i, rank, isOpen, onToggle, handle }: RowProps) {
                 </>
               )}
             </section>
+            <Specs i={i} />
           </div>
           <Actions id={i.id} path={i.path} local={i.local} />
         </div>
       )}
     </>
   );
+}
+
+// Specs is where the initiative is specified, one group per specs: entry with
+// the files the scanner resolved under it. An entry that resolved to nothing
+// says so and the reason is in Problems. Nothing renders without specs.
+function Specs({ i }: { i: merge.BoardInitiative }) {
+  const entries = i.specs ?? [];
+  if (entries.length === 0) return null;
+  return (
+    <section>
+      <div className="section-label">Specs</div>
+      {entries.map((entry) => {
+        const files = i.spec_files?.[entry] ?? [];
+        return (
+          <div key={entry} className="spec-group">
+            <div className="spec-entry mono">{entry}</div>
+            {files.length === 0 ? (
+              <div className="meta">unresolved, see problems</div>
+            ) : (
+              <ul className="spec-files">
+                {files.map((f) => (
+                  <li key={f} title={f}>
+                    {i.local ? (
+                      <button className="linkish" onClick={() => api.openInEditor(`${i.path}/${f}`)}>{specLabel(entry, f)}</button>
+                    ) : (
+                      <span>{specLabel(entry, f)}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        );
+      })}
+    </section>
+  );
+}
+
+// specLabel drops the entry the file is listed under, so a folder shows its
+// file names and a file entry shows its own.
+function specLabel(entry: string, file: string): string {
+  const rest = file.startsWith(entry) ? file.slice(entry.length).replace(/^\//, "") : "";
+  return rest || file.split("/").pop() || file;
 }
 
 function Actions({ id, path, local }: { id: string; path: string; local: boolean }) {
