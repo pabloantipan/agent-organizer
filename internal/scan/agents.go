@@ -185,6 +185,9 @@ func agentProcesses(o AgentOptions) []model.Agent {
 			continue
 		}
 		args := strings.Join(f[5:], " ")
+		if helperProcess(args) {
+			continue
+		}
 		a := model.Agent{PID: pid, Uptime: f[1], TTY: f[2], CPUSeconds: parseCPUTime(f[3]), State: model.AgentRunning}
 		a.Session, a.Persona, a.Cell = identity(args)
 		if a.Session != "" {
@@ -228,6 +231,18 @@ func agentProcesses(o AgentOptions) []model.Agent {
 	}
 	attachSessions(o, procs)
 	return procs
+}
+
+// helperProcess reports Claude Code's own background plumbing: the daemon
+// and the warm spares it keeps (a spare, or the pty host wrapping one). They
+// run the agent binary but hold no conversation, and they inherit the
+// session name of the shell that started the daemon. A pty host that carries
+// a --session-id is a real background session and stays.
+func helperProcess(args string) bool {
+	if args == "daemon" || strings.HasPrefix(args, "daemon ") {
+		return true
+	}
+	return strings.Contains(" "+args+" ", " --bg-spare ")
 }
 
 // identity reads the session name (-n or --resume, else AGENT_SESSION), the
