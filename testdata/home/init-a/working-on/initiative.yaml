@@ -4,6 +4,10 @@ client: acme
 status: active
 started: 2026-08-01
 machine: testbox
+description: A fixture initiative with two repos, one of them missing, and a spec folder.
+specs:
+  - specs/
+  - docs/one-spec.md
 repos:
   - repo-one
   - repo-missing

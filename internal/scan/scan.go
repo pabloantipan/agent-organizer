@@ -138,6 +138,8 @@ func ReadInitiative(root string, opts Options) model.ScannedInitiative {
 		}
 	}
 
+	si.SpecFiles, si.Problems = resolveSpecs(root, si.Specs, initPath, si.Problems)
+
 	si.Cards, si.Problems = readCards(wo, false, si.Cards, si.Problems)
 	si.Cards, si.Problems = readCards(filepath.Join(wo, doneDir), true, si.Cards, si.Problems)
 	sortCards(si.Cards)
@@ -245,6 +247,70 @@ func sortCards(cards []model.Card) {
 		}
 		return a.Slug < b.Slug
 	})
+}
+
+// resolveSpecs expands the initiative's specs: entries against its root. A
+// folder becomes the *.md files directly inside it, sorted, never recursively;
+// a file stays itself. An entry that is absolute, that climbs out of the root,
+// or that names nothing readable is a Problem naming it and is not read: a
+// spec list is a pointer into the initiative, not a way to open the disk.
+// Files come back relative to the root, keyed by the entry as it was written.
+func resolveSpecs(root string, entries []string, initPath string, problems []model.Problem) (map[string][]string, []model.Problem) {
+	if len(entries) == 0 {
+		return nil, problems
+	}
+	bad := func(entry, why string) {
+		problems = append(problems, model.Problem{Path: initPath, Msg: fmt.Sprintf("specs %q %s", entry, why)})
+	}
+	out := map[string][]string{}
+	for _, entry := range entries {
+		key := strings.TrimSpace(entry)
+		if key == "" {
+			bad(entry, "is empty")
+			continue
+		}
+		if filepath.IsAbs(key) {
+			bad(key, "is absolute; specs entries are relative to the initiative root")
+			continue
+		}
+		rel := filepath.Clean(filepath.FromSlash(key))
+		if rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+			bad(key, "is outside the initiative root")
+			continue
+		}
+		full := filepath.Join(root, rel)
+		st, err := os.Stat(full)
+		if err != nil {
+			bad(key, "does not exist")
+			continue
+		}
+		if !st.IsDir() {
+			out[key] = []string{filepath.ToSlash(rel)}
+			continue
+		}
+		list, err := os.ReadDir(full)
+		if err != nil {
+			bad(key, "cannot be read: "+err.Error())
+			continue
+		}
+		var files []string
+		for _, e := range list {
+			if e.IsDir() || !strings.EqualFold(filepath.Ext(e.Name()), ".md") {
+				continue
+			}
+			files = append(files, filepath.ToSlash(filepath.Join(rel, e.Name())))
+		}
+		if len(files) == 0 {
+			bad(key, "holds no .md files")
+			continue
+		}
+		sort.Strings(files)
+		out[key] = files
+	}
+	if len(out) == 0 {
+		return nil, problems
+	}
+	return out, problems
 }
 
 func validDate(s string) bool {
