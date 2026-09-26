@@ -10,12 +10,12 @@ restating it (the discuss skill).
 - **Waiting on Pablo:** the intake, thread 01M3FAWKV2159MCSH0AZZJWE08.
   When he answers, write `agents/people.md` in his words and commit it in
   the `agents/` repo.
-- **Open, Pablo's:** 0017 (who makes the mockup page; the redesign spec
-  waits on it), 0005 (FSE authority; `~/agent-slack/docs/decisions.md` cites
-  topology §12, the spec ends at §11), 0004, 0002.
-- **Next action once 0017 is ruled and the page exists:** the redesign spec
-  from 0013, 0014, 0016 (spec-craft), under `docs/specs/` as proposed; cut
-  cards; spawn sup1 (0015).
+- **Ruled:** 0017 — the session that reviewed the UI makes the mockup page.
+- **Open, Pablo's:** 0005 (FSE authority; `~/agent-slack/docs/decisions.md`
+  cites topology §12, the spec ends at §11), 0004, 0002.
+- **Next action:** when a commit brings the mockup page, write the redesign
+  spec from 0013, 0014, 0016 (spec-craft) under `docs/specs/` as proposed;
+  cut cards; spawn sup1 (0015). Asked Pablo where the page will land.
 - **Rejected:** opening a card for 0012 — the Decisions tab was built
   directly (a6ebd4d..280f58c), so there is nothing to open.
 

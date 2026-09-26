@@ -1,13 +1,13 @@
 ---
 title: Who makes the redesign's mockup page
-status: proposed
+status: ruled
 raised: 2026-09-26
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-26
+ruled_by: pablo
 options: [the session that reviewed the UI, a builder card under a supervisor, the FSE]
-chosen:
+chosen: the session that reviewed the UI
 cards: []
 threads: []
 supersedes: []
@@ -48,7 +48,8 @@ spec, not the build; the pilot's first supervised task is the redesign itself
 
 ## Ruling
 
-
+Pablo, 2026-09-26, in the FSE's session (organizer-probe-fse): "do as
+recommended". The session that reviewed the UI makes the mockup page.
 
 ## Consequences
 
