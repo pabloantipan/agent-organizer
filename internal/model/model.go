@@ -264,7 +264,9 @@ type Problem struct {
 // ScannedInitiative is an initiative with everything read from disk.
 type ScannedInitiative struct {
 	Initiative
-	Cards      []Card      `json:"cards"`
+	Cards []Card `json:"cards"`
+	// Decisions are working-on/decisions/ records, in number order.
+	Decisions  []Decision  `json:"decisions"`
 	RepoStates []RepoState `json:"repos_state"`
 	Problems   []Problem   `json:"problems"`
 	Agents     []Agent     `json:"agents"`
