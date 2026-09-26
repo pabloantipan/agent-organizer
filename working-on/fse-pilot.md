@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-26
-next: "Launch the seat (organizer crew organizer) and confirm its watch --external pane wakes on a card commit; then Pablo rules the proposed FSE entry in ~/agent-slack/docs/decisions.md"
+next: "decide: rule the proposed FSE entry in ~/agent-slack/docs/decisions.md (keep the authority as drafted, may the FSE ever start a supervisor, which as-built row it reverses)"
 ---
 
 ## Context
@@ -31,13 +31,14 @@ pattern: `~/agent-slack/docs/patterns.md`, "The FSE seat".
   without a card posts nothing; with the API unreachable the commit succeeds
   silently
 - Launched 2026-09-26 13:01 as `organizer-probe-fse` (Opus, 6% at start);
-  its first turn read the persona and stopped, as the opening prompt says
+  its first turn read the persona and stopped, as the opening prompt says.
+  Gate 6: a card commit at 13:02 woke the idle pane through `watch --external`
+  in about 2 s; it handled both hook messages and closed their threads
 
 ## Next
 
-1. Launch the seat and watch the pane wake on a card commit (gate 6)
-2. Pablo rules the decisions entry, and names the as-built row it reverses
-3. Two waves with the run record's new columns filled, then keep or drop
+1. Pablo rules the decisions entry, and names the as-built row it reverses
+2. Two waves with the run record's new columns filled, then keep or drop
 
 ## Blockers
 
