@@ -29,7 +29,9 @@ pattern: `~/agent-slack/docs/patterns.md`, "The FSE seat".
 
 - Gate 2026-09-26: a card commit posts one `status` to `fse`; a commit
   without a card posts nothing; with the API unreachable the commit succeeds
-  silently. Gate 6 (the pane wakes) waits on a launch
+  silently
+- Launched 2026-09-26 13:01 as `organizer-probe-fse` (Opus, 6% at start);
+  its first turn read the persona and stopped, as the opening prompt says
 
 ## Next
 
