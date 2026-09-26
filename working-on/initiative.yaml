@@ -1,0 +1,14 @@
+id: organizer
+title: Organizer — working-on cards across initiatives and machines
+client: personal
+status: active
+started: 2026-09-02
+machine: lodestar
+repos: []
+ports_to: none
+notes:
+  - /Users/pabloantipan/.claude/plans/temporal-doodling-shell.md
+target: 2026-09-16
+milestones:
+  - date: 2026-09-16
+    title: Two weeks of use, decide phase 4
