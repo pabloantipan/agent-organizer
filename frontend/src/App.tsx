@@ -6,6 +6,7 @@ import { Initiatives } from "./components/Initiatives";
 import { Settings } from "./components/Settings";
 import { Calendar } from "./components/Calendar";
 import { RoadmapView } from "./components/RoadmapView";
+import { DecisionsView } from "./components/DecisionsView";
 import { AgentsView } from "./components/AgentsView";
 import { SlackView } from "./components/SlackView";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -43,7 +44,7 @@ export default function App() {
     <Gate>
     <div className="shell">
       <TopBar />
-      <main className={["board", "calendar", "roadmap", "agents", "slack"].includes(tab) ? `content with-rail ${railCollapsed ? "rail-strip" : ""}` : "content"}>
+      <main className={["board", "calendar", "roadmap", "decisions", "agents", "slack"].includes(tab) ? `content with-rail ${railCollapsed ? "rail-strip" : ""}` : "content"}>
         {tab === "board" && (
           <>
             <Rail />
@@ -73,6 +74,12 @@ export default function App() {
           <>
             <Rail />
             <div className="board-wrap"><ErrorBoundary name="Calendar"><Calendar /></ErrorBoundary></div>
+          </>
+        )}
+        {tab === "decisions" && (
+          <>
+            <Rail />
+            <div className="board-wrap"><ErrorBoundary name="DecisionsView"><DecisionsView /></ErrorBoundary></div>
           </>
         )}
         {tab === "settings" && <ErrorBoundary name="Settings"><Settings /></ErrorBoundary>}

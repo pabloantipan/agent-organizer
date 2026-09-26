@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { api, type Account, type AgentsView, type BoardView, type Group, type LockState, type Note } from "../hooks/useWails";
 import type { merge } from "../../wailsjs/go/models";
 
-export type Tab = "board" | "agents" | "slack" | "roadmap" | "calendar" | "initiatives" | "settings";
+export type Tab = "board" | "agents" | "slack" | "roadmap" | "calendar" | "decisions" | "initiatives" | "settings";
 
 /** The identity mode of the backend. "off" is the default and means there is
  *  no sign-in anywhere: no gate, no account UI, sync skipped. */

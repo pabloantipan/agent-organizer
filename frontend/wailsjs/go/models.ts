@@ -221,6 +221,7 @@ export namespace merge {
 	    repos_state: model.RepoState[];
 	    problems: model.Problem[];
 	    agents: model.Agent[];
+	    decisions: model.Decision[];
 	    live: number;
 	    working: number;
 	    also_on: string[];
@@ -254,6 +255,7 @@ export namespace merge {
 	        this.repos_state = this.convertValues(source["repos_state"], model.RepoState);
 	        this.problems = this.convertValues(source["problems"], model.Problem);
 	        this.agents = this.convertValues(source["agents"], model.Agent);
+	        this.decisions = this.convertValues(source["decisions"], model.Decision);
 	        this.live = source["live"];
 	        this.working = source["working"];
 	        this.also_on = source["also_on"];
@@ -556,6 +558,50 @@ export namespace model {
 	    }
 	}
 	
+	export class Decision {
+	    number: string;
+	    slug: string;
+	    path: string;
+	    title: string;
+	    status: string;
+	    raised: string;
+	    raised_by: string;
+	    owner: string;
+	    ruled: string;
+	    ruled_by: string;
+	    options: string[];
+	    chosen: string;
+	    cards: string[];
+	    threads: string[];
+	    supersedes: string[];
+	    superseded_by: string;
+	    body: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Decision(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.number = source["number"];
+	        this.slug = source["slug"];
+	        this.path = source["path"];
+	        this.title = source["title"];
+	        this.status = source["status"];
+	        this.raised = source["raised"];
+	        this.raised_by = source["raised_by"];
+	        this.owner = source["owner"];
+	        this.ruled = source["ruled"];
+	        this.ruled_by = source["ruled_by"];
+	        this.options = source["options"];
+	        this.chosen = source["chosen"];
+	        this.cards = source["cards"];
+	        this.threads = source["threads"];
+	        this.supersedes = source["supersedes"];
+	        this.superseded_by = source["superseded_by"];
+	        this.body = source["body"];
+	    }
+	}
 	export class Group {
 	    name: string;
 	    initiatives: string[];
