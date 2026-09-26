@@ -33,6 +33,7 @@ type BoardInitiative struct {
 	RepoStates  []model.RepoState `json:"repos_state"`
 	Problems    []model.Problem   `json:"problems"`
 	Agents      []model.Agent     `json:"agents"`
+	Decisions   []model.Decision  `json:"decisions"`
 	Live        int               `json:"live"`
 	Working     int               `json:"working"`
 	// AlsoOn lists other machines reporting the same initiative id.
@@ -93,6 +94,7 @@ func Build(local model.Snapshot, remote []model.Snapshot, order model.Order, now
 				Now:         n, Blocked: bl, Next: x, Done: done,
 				RepoStates: si.RepoStates,
 				Problems:   si.Problems,
+				Decisions:  si.Decisions,
 			}
 			for _, m := range machinesByID[si.ID] {
 				if m != s.Machine {
