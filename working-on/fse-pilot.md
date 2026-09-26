@@ -27,6 +27,10 @@ pattern: `~/agent-slack/docs/patterns.md`, "The FSE seat".
 - Docs: patterns section, a proposed decisions entry (`ruled-by:` empty),
   Pablo's-side columns in `docs/runs/TEMPLATE.md`
 
+- Gate 2026-09-26: a card commit posts one `status` to `fse`; a commit
+  without a card posts nothing; with the API unreachable the commit succeeds
+  silently. Gate 6 (the pane wakes) waits on a launch
+
 ## Next
 
 1. Launch the seat and watch the pane wake on a card commit (gate 6)
