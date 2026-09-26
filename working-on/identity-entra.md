@@ -3,8 +3,8 @@ title: Identity is Azure Entra ID, when identity comes
 status: next
 repos: [organizer]
 branch: main
-updated: 2026-09-16
-next: "decide: keep Firebase Auth as the broker with Entra as its OIDC provider (Firestore rules and the record's verifier keep working on the Firebase uid), or replace Firebase with Entra end to end (Firestore rules, the organizer's auth manager, the record's developer verifier and key issuance all change)"
+updated: 2026-09-26
+next: "decide: 0004 keep Firebase Auth as the broker with Entra as its OIDC provider (Firestore rules and the record's verifier keep working on the Firebase uid), or replace Firebase with Entra end to end (Firestore rules, the organizer's auth manager, the record's developer verifier and key issuance all change)"
 ---
 
 ## Goal

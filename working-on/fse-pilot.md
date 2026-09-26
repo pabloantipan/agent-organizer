@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-26
-next: "decide: rule the rest of the proposed FSE entry in ~/agent-slack/docs/decisions.md (the authority as drafted, which as-built row it reverses); then give the FSE its first task to hand to a supervisor"
+next: "decide: 0005 the FSE pilot with the authority as drafted, and which as-built row it reverses; then the FSE runs its intake with Pablo"
 ---
 
 ## Context

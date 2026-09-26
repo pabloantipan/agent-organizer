@@ -3,8 +3,8 @@ title: Phase 4 polish, only after two weeks of real use
 status: next
 repos: []
 branch: none
-updated: 2026-09-02
-next: "Decide which of tray, fsnotify, launch-at-login, or status drag earned its place after two weeks of use"
+updated: 2026-09-26
+next: "decide: 0002 which of tray, fsnotify, launch-at-login, or status drag earned its place after two weeks of use"
 due: 2026-09-16
 ---
 
