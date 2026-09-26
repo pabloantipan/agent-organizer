@@ -4,15 +4,18 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
-## HAND-OFF — 2026-09-26, before the first session
+## HAND-OFF — 2026-09-26 14:10
 
-Nothing done yet: the seat was set up today and has not run. On the first
-wake, read `agents/fse.md` and do what the wake table says.
-
-- **Next action:** none until a wake.
-- **Ruled 2026-09-26:** I spawn a supervisor per defined task and am never
-  one; the cell has no reconciler. `agents/fse.md` carries it. The rest of the
-  proposed FSE entry in `~/agent-slack/docs/decisions.md` is still Pablo's.
+- **Last SHA seen:** 2c526a5 (working-on/).
+- **Waiting on Pablo:** the intake, thread 01M3FAWKV2159MCSH0AZZJWE08.
+  When he answers, write `agents/people.md` in his words and commit it in
+  the `agents/` repo. Nothing else before that.
+- **Open, Pablo's:** 0005 (FSE authority as drafted, and the as-built row it
+  reverses; `~/agent-slack/docs/decisions.md` cites §12, the topology spec
+  ends at §11), 0004, 0002.
+- **After the intake:** 0012 is ruled with `cards: []`; its consequence is
+  an organizer Decisions tab and nothing on the board carries it. Per the
+  wake table that is a card to open (spec-craft), not started yet.
 
 ## Open questions
 
