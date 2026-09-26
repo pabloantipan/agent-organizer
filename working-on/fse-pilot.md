@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-26
-next: "decide: rule the proposed FSE entry in ~/agent-slack/docs/decisions.md (keep the authority as drafted, may the FSE ever start a supervisor, which as-built row it reverses)"
+next: "decide: rule the rest of the proposed FSE entry in ~/agent-slack/docs/decisions.md (the authority as drafted, which as-built row it reverses); then give the FSE its first task to hand to a supervisor"
 ---
 
 ## Context
@@ -34,6 +34,10 @@ pattern: `~/agent-slack/docs/patterns.md`, "The FSE seat".
   its first turn read the persona and stopped, as the opening prompt says.
   Gate 6: a card commit at 13:02 woke the idle pane through `watch --external`
   in about 2 s; it handled both hook messages and closed their threads
+
+- Ruled by Pablo 2026-09-26: the FSE spawns a supervisor per defined task
+  and is never one; it stays clean of orchestration and of reconciling, so
+  the cell has no reconciler (`agents/fse.md`, `cell.json`)
 
 ## Next
 
