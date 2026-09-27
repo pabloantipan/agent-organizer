@@ -1,39 +1,202 @@
-/* Dark only. Warm near-black with a purple cast, an electric purple accent,
-   magenta as a tone. No gradients, no two-tone buttons. */
+/* The organizer's design tokens. Dark only (Pablo's pick): a warm near-black
+   with a purple cast, one solid electric purple accent, magenta as a tone, red
+   for blocked. No gradients, no two-tone buttons, no light theme.
+
+   Three tiers, and components use only the second and third:
+   1. primitives  — two 12-step scales (plum neutral, violet accent) and a few
+                    status hues. Never referenced by a component directly.
+   2. semantic    — roles: surfaces, text, borders, accent, status, decisions.
+   3. component   — only where a component truly diverges (buttons, controls).
+   Plus scales for type, space, radius, size, motion and elevation.
+
+   Every colour is a precomputed hex: the app runs in WKWebView and must work on
+   macOS 12's Safari 15.0, which has no oklch(), color-mix() or relative colours.
+   Scales were derived in OKLCH (hue 300 neutral, 295 violet) and checked for
+   WCAG contrast; the numbers are in docs/design-system.md. The step roles follow
+   Radix Colors: 1-2 app backgrounds, 3-5 component states, 6-8 borders,
+   9-10 solid fills, 11-12 text. */
 :root {
   color-scheme: dark;
-  --bg: #1a1523;
-  --bg-deep: #14101b;
-  --rail: #17121f;
-  --panel: #221b2e;
-  --panel-2: #2a2239;
-  --card: #251e33;
-  --card-hover: #2d2540;
-  --border: rgba(255, 255, 255, 0.07);
-  --border-strong: rgba(160, 110, 255, 0.40);
-  --text: #f1ecf7;
-  --muted: #a599b8;
-  --dim: #6f6484;
-  --accent: #8a3ffc;
-  --accent-hover: #9d5dff;
-  --accent-soft: rgba(138, 63, 252, 0.18);
-  --pink: #d946ef;
-  --pink-soft: rgba(217, 70, 239, 0.14);
-  --now: #b06cff;
-  --now-soft: rgba(176, 108, 255, 0.16);
-  --blocked: #ff4d63;
-  --blocked-soft: rgba(255, 77, 99, 0.14);
-  --next: #a9a0ff;
-  --next-soft: rgba(169, 160, 255, 0.14);
-  --done: #625876;
-  --local: #5fe3b0;
-  --remote: #e88cff;
-  --stale: #ff4d63;
-  --shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-  --shadow-lift: 0 18px 44px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border-strong);
-  --r: 12px;
-  --r-lg: 16px;
-  --r-pill: 999px;
+
+  /* ---------- 1. primitives ---------- */
+  --plum-1: #120e19;
+  --plum-2: #1a1523;   /* the ground */
+  --plum-3: #201b2b;
+  --plum-4: #272033;
+  --plum-5: #2e273c;
+  --plum-6: #372f46;
+  --plum-7: #463d56;
+  --plum-8: #5e566e;
+  --plum-9: #6f677f;
+  --plum-10: #958ea2;  /* lifted from the curve so subtle text passes 4.5:1 on overlays */
+  --plum-11: #b5afc3;
+  --plum-12: #eeebf4;
+
+  --violet-1: #161125;
+  --violet-2: #1e1534;
+  --violet-3: #2f1b55;
+  --violet-4: #3b206c;
+  --violet-5: #472581;
+  --violet-6: #522d94;
+  --violet-7: #6137ab;
+  --violet-8: #7442cb;
+  --violet-9: #8a3ffc;  /* the accent: fills only, 3.6:1 as text fails */
+  --violet-10: #7f30ed; /* solid hover: white on it is 5.9:1 */
+  --violet-11: #c0abfe; /* accent text: 8.9:1 on the ground */
+  --violet-12: #e9e4fe;
+
+  --lilac-9: #b06cff;   /* now */
+  --periwinkle-9: #a9a0ff; /* next */
+  --red-9: #ff4d63;     /* blocked, danger */
+  --magenta-9: #d946ef; /* the tone */
+  --fuchsia-9: #e879f9; /* a decision waiting */
+  --indigo-9: #7c4dff;  /* a decision ruled (fill) */
+  --sky-9: #7dd3fc;     /* in review */
+  --mint-9: #5fe3b0;    /* live, local, ok */
+  --amber-9: #ffb020;   /* warning, context past 50% */
+  --orchid-9: #e88cff;  /* remote machine */
+
+  /* ---------- 2. semantic ---------- */
+  /* surfaces: lighter as they rise, never a shadow alone (Atlassian, Linear) */
+  --bg-sunken: var(--plum-1);        /* rail, inset wells */
+  --bg: var(--plum-2);               /* the app ground */
+  --surface: var(--plum-3);          /* panels, columns, sections */
+  --surface-raised: var(--plum-4);   /* cards, rows that are objects */
+  --surface-overlay: var(--plum-5);  /* menus, drawers, dialogs */
+  --surface-hover: var(--plum-5);
+  --surface-pressed: var(--plum-6);
+  --surface-selected: var(--violet-3);
+
+  /* text: four steps, each checked on --surface-raised and --surface-overlay */
+  --fg: var(--plum-12);              /* 13.3:1 on raised */
+  --fg-muted: var(--plum-11);        /* 7.4:1 — secondary text, meta that matters */
+  --fg-subtle: var(--plum-10);       /* 4.5:1 on overlay — tertiary text, timestamps */
+  --fg-disabled: var(--plum-8);      /* decoration and disabled only, never read text */
+  --fg-on-accent: #ffffff;
+
+  /* borders: felt, not seen (Linear); structure comes from spacing first */
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --border-accent: rgba(160, 110, 255, 0.45); /* selected, hover on interactive objects */
+  --focus-ring: var(--violet-9);
+
+  /* accent: one solid action per view */
+  --accent: var(--violet-9);
+  --accent-hover: var(--violet-10);
+  --accent-muted: rgba(138, 63, 252, 0.18);   /* tinted backgrounds */
+  --accent-fg: var(--violet-11);              /* accent-coloured text and links */
+
+  /* status: a hue for text/marks and a tint for backgrounds, always with a word */
+  --status-now: var(--lilac-9);        --status-now-bg: rgba(176, 108, 255, 0.16);
+  --status-blocked: var(--red-9);      --status-blocked-bg: rgba(255, 77, 99, 0.14);
+  --status-next: var(--periwinkle-9);  --status-next-bg: rgba(169, 160, 255, 0.14);
+  --status-done: var(--plum-8);        --status-done-bg: rgba(255, 255, 255, 0.05);
+  --status-review: var(--sky-9);       --status-review-bg: rgba(125, 211, 252, 0.13);
+
+  /* decisions: waiting is fuchsia and dashed, ruled is indigo; pair validated for
+     colour vision (dataviz validator, 2026-09-26) */
+  --decision-waiting: var(--fuchsia-9); --decision-waiting-bg: rgba(232, 121, 249, 0.14);
+  --decision-ruled: var(--indigo-9);    --decision-ruled-bg: rgba(124, 77, 255, 0.18);
+  --decision-ruled-fg: #b9a3ff;
+
+  /* signals */
+  --tone: var(--magenta-9);   --tone-bg: rgba(217, 70, 239, 0.14);
+  --live: var(--mint-9);      --live-bg: rgba(95, 227, 176, 0.14);
+  --warning: var(--amber-9);  --warning-bg: rgba(255, 176, 32, 0.14);
+  --danger: var(--red-9);     --danger-bg: rgba(255, 77, 99, 0.14);
+  --remote: var(--orchid-9);
+
+  /* ---------- type ---------- */
   --font: "Manrope Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --mono: "JetBrains Mono Variable", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  /* seven sizes; UI default is md, reading text lg */
+  --font-size-xs: 11px;   --line-xs: 16px;   /* labels, sparingly */
+  --font-size-sm: 12px;   --line-sm: 16px;   /* meta, mono data */
+  --font-size-md: 13px;   --line-md: 20px;   /* UI default */
+  --font-size-lg: 14px;   --line-lg: 20px;   /* reading: card backs, messages */
+  --font-size-xl: 16px;   --line-xl: 22px;   /* section titles */
+  --font-size-2xl: 20px;  --line-2xl: 26px;  /* page titles */
+  --font-size-3xl: 24px;  --line-3xl: 30px;  /* hero numbers */
+  --weight-regular: 400;
+  --weight-medium: 500;    /* UI default for controls */
+  --weight-semibold: 600;  /* titles, emphasis */
+  --weight-bold: 700;      /* hero numbers only */
+  --tracking-label: 0.06em; /* uppercase labels */
+
+  /* ---------- space: a 4px grid ---------- */
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-1-5: 6px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* ---------- radius ---------- */
+  --radius-xs: 4px;    /* badges, tags, small marks */
+  --radius-sm: 6px;    /* buttons, inputs, rail items, menu items */
+  --radius-md: 8px;    /* cards, rows that are objects */
+  --radius-lg: 12px;   /* columns, panels, dialogs */
+  --radius-full: 999px;/* pills, avatars, dots */
+
+  /* ---------- size ---------- */
+  --control-sm: 24px;
+  --control-md: 28px;  /* default button and input height */
+  --control-lg: 32px;
+  --icon-sm: 12px;
+  --icon-md: 16px;
+  --rail-width: 248px;
+  --rail-strip: 46px;
+
+  /* ---------- motion (Atlassian's durations and curves) ---------- */
+  --dur-fast: 100ms;   /* hover, press */
+  --dur-base: 200ms;   /* panels, drawers */
+  --dur-slow: 300ms;
+  --ease-out: cubic-bezier(0, 0.4, 0, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0, 1);
+  --ease-exit: cubic-bezier(0.6, 0, 0.8, 0.6);
+
+  /* ---------- elevation: a light hairline plus a dark drop ---------- */
+  --shadow-raised: 0 1px 2px rgba(0, 0, 0, 0.30);
+  --shadow-overlay: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 12px 32px rgba(0, 0, 0, 0.50);
+  --shadow-drag: 0 0 0 1px var(--border-accent), 0 18px 44px rgba(0, 0, 0, 0.55);
+
+  /* ---------- component ---------- */
+  --button-bg: var(--surface-raised);
+  --button-bg-hover: var(--surface-hover);
+  --button-border: var(--border);
+  --input-bg: var(--bg-sunken);
+
+  /* ---------- legacy aliases: old names mapped onto the roles above. New code
+     uses the semantic names; these go as components migrate. ---------- */
+  --bg-deep: var(--bg-sunken);
+  --rail: var(--bg-sunken);
+  --panel: var(--surface);
+  --panel-2: var(--surface-raised);
+  --card: var(--surface-raised);
+  --card-hover: var(--surface-hover);
+  --text: var(--fg);
+  --muted: var(--fg-muted);
+  --dim: var(--fg-subtle);
+  --accent-soft: var(--accent-muted);
+  --pink: var(--tone);
+  --pink-soft: var(--tone-bg);
+  --now: var(--status-now);         --now-soft: var(--status-now-bg);
+  --blocked: var(--status-blocked); --blocked-soft: var(--status-blocked-bg);
+  --next: var(--status-next);       --next-soft: var(--status-next-bg);
+  --done: var(--status-done);
+  --local: var(--live);
+  --stale: var(--danger);
+  --dec-waiting: var(--decision-waiting);  --dec-waiting-soft: var(--decision-waiting-bg);
+  --dec-ruled: var(--decision-ruled);      --dec-ruled-soft: var(--decision-ruled-bg);
+  --shadow: var(--shadow-raised);
+  --shadow-lift: var(--shadow-drag);
+  --r: var(--radius-md);
+  --r-lg: var(--radius-lg);
+  --r-pill: var(--radius-full);
 }
