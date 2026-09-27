@@ -32,6 +32,12 @@ restating it (the discuss skill).
   not word-split, so a loop over a space-separated variable writes one file
   named after all of them. sup2 cleaned it up in 713d2aa. Loop over a literal
   list or `${=VAR}`.
+- **The blacksmith (2026-09-27):** the pair session posts as `pablo` with the
+  prefix `[blacksmith, for pablo]`; a relay, a ruling only where it quotes
+  Pablo and says where (fse skill). Its unprefixed earlier messages: the
+  redesign task, the two FSE rulings, the design-system amendment; their
+  rulings stand as relays. Records 0021 and 0022 were written there and
+  quote Pablo's choice.
 - **Rejected:** opening a card for 0012 (the Decisions tab was built
   directly, a6ebd4d..280f58c).
 
