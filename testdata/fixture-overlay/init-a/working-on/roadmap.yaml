@@ -1,0 +1,37 @@
+# The fixture roadmap. It is deliberately malformed in four ways, one per
+# FR-5 case of docs/specs/redesign.md: stage "joins" is declared twice, it
+# gates on decision 0099 which does not exist, one of its exit items carries a
+# met that is not a date, and beta.md joins a stage that is not here. The rest
+# of the board must still scan.
+stages:
+  - id: foundations
+    title: Foundations
+    outcome: the scanner reads every file the initiative has
+    exit:
+      - text: initiative.yaml is read
+        met: 2026-08-10
+      - text: the cards are read
+        met: 2026-08-12
+    gates: ["0001"]
+    target: 2026-08-15
+    done: 2026-08-15
+  - id: joins
+    title: The joins
+    outcome: every card says who is on it
+    exit:
+      - an agent is joined to a card
+      - text: a wave is grouped
+        met: soon
+    gates: ["0001", "0002", "0099"]
+    appetite: two waves
+  - id: joins
+    title: The joins, written twice by hand
+    outcome: a duplicate id is one problem, not a failed scan
+    exit:
+      - nothing
+  - id: views
+    title: The views
+    outcome: acme opens the app instead of asking where it is
+    exit:
+      - every screen is drawn from the design system
+    appetite: a week
