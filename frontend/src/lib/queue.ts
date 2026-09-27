@@ -10,6 +10,19 @@ import { parseISO } from "./dates";
  *  posting, only unreachable until restarted. */
 export const ASKED_RE = /^\s*(pablo|decide)\b/i;
 
+/** A1: the lead is the cell's human, else "pablo", as ASKED_RE assumes.
+ *  Identity (stage 6) replaces this. */
+export const DEFAULT_LEAD = "pablo";
+
+export const leadOf = (group: AgentGroup | undefined) => (group?.cell?.human || DEFAULT_LEAD).trim().toLowerCase();
+
+/** A decision record asks the lead when its owner is the lead or nobody
+ *  (FR-8, 0034); one owned by business or the FSE stays on its Decisions tab. */
+const ownedByLead = (d: model.Decision, lead: string) => {
+  const o = (d.owner ?? "").trim().toLowerCase();
+  return o === "" || o === lead;
+};
+
 export const needsMeThread = (t: CellThread) => t.status === "escalated" || (t.asked_of_me ?? 0) > 0;
 
 export function askedCards(view: BoardView | null, initiativeId: string) {
@@ -41,17 +54,19 @@ export type NeedsMeRow =
 const day = (s: string | undefined) => parseISO(s?.slice(0, 10));
 
 /** Needs me (FR-15): queueOf over every cell plus the decision records
- *  waiting on a ruling, one list, oldest first. The top bar's one badge is
+ *  waiting on the lead's ruling (FR-8), one list, oldest first. The top bar's one badge is
  *  its length, so the count always equals the rows. */
 export function needsMeRows(view: BoardView | null, agents: AgentsView | null, now = new Date()): NeedsMeRow[] {
   const rows: NeedsMeRow[] = [];
   // An initiative on two machines reports its records twice; the local scan wins.
   const seen = new Set<string>();
+  const groups = new Map((agents?.groups ?? []).map((g) => [g.id, g]));
   for (const i of [...(view?.board.initiatives ?? [])].sort((a, b) => Number(b.local) - Number(a.local))) {
     if (seen.has(i.id)) continue;
     seen.add(i.id);
+    const lead = leadOf(groups.get(i.id));
     for (const d of i.decisions ?? []) {
-      if (d.status === "proposed") rows.push({ kind: "decision", key: `decision:${i.id}/${d.number}`, initiative: i.id, since: day(d.raised), decision: d });
+      if (d.status === "proposed" && ownedByLead(d, lead)) rows.push({ kind: "decision", key: `decision:${i.id}/${d.number}`, initiative: i.id, since: day(d.raised), decision: d });
     }
   }
   for (const g of agents?.groups ?? []) {

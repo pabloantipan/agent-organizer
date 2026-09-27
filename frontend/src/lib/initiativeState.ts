@@ -1,11 +1,12 @@
 import type { AgentGroup, AgentsView, BoardView } from "../hooks/useWails";
 import type { merge, model } from "../../wailsjs/go/models";
-import { needsMeRows, type NeedsMeRow } from "./queue";
+import { leadOf, needsMeRows } from "./queue";
 
 /** One state per initiative, what Home says at a glance (FR-6 of
  *  docs/specs/twenty-at-a-glance.md). First match wins, in this order:
  *
- *  1. waits on you: it has rows in Needs me (needsMeRows, the one queue);
+ *  1. waits on you: it has rows in Needs me (needsMeRows, the one queue,
+ *     which holds only the lead's records, FR-8);
  *  2. executing: a wave has a card building, or a live agent is joined to
  *     one of its cards (A3: `now` cards with nobody on them are quiet);
  *  3. waits on business: a `proposed` record whose owner is neither the
@@ -25,24 +26,9 @@ export const STATE_WORD: Record<InitiativeState, string> = {
   quiet: "quiet",
 };
 
-/** A1: the lead is the cell's human, else "pablo", as ASKED_RE assumes.
- *  Identity (stage 6) replaces this. */
-export const DEFAULT_LEAD = "pablo";
 const FSE = "fse";
 
-export const leadOf = (group: AgentGroup | undefined) => (group?.cell?.human || DEFAULT_LEAD).toLowerCase();
-
 const owner = (d: model.Decision) => (d.owner ?? "").trim().toLowerCase();
-
-/** A Needs me row asks the lead unless it is a decision record someone else
- *  owns. needsMeRows lists every proposed record whoever owns it; counting a
- *  business-owned one here would make "waits on business" unreachable, since
- *  "waits on you" is tried first. */
-function asksLead(r: NeedsMeRow, lead: string) {
-  if (r.kind !== "decision") return true;
-  const o = owner(r.decision);
-  return o === "" || o === lead;
-}
 
 const executing = (group: AgentGroup | undefined) =>
   !!group && (
@@ -67,7 +53,7 @@ export function initiativeStates(view: BoardView | null, agents: AgentsView | nu
     const group = groups.get(i.id);
     const lead = leadOf(group);
     let state: InitiativeState = "quiet";
-    if (rows.some((r) => r.initiative === i.id && asksLead(r, lead))) state = "you";
+    if (rows.some((r) => r.initiative === i.id)) state = "you";
     else if (executing(group)) state = "executing";
     else if (waitsOnBusiness(i, lead)) state = "business";
     out.set(i.id, state);
