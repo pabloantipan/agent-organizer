@@ -4,6 +4,7 @@ import { api, type RunsView } from "../hooks/useWails";
 import { parseISO, today, daysBetween } from "../lib/dates";
 import { useBoard } from "../stores/board.store";
 import { FsePanel } from "./FsePanel";
+import { gateKey, recordsByGate } from "./StageRoadmap";
 import "../styles/overview.css";
 
 type BoardInitiative = merge.BoardInitiative;
@@ -86,7 +87,7 @@ function StageGates({ initiative: i }: { initiative: BoardInitiative }) {
     return <div className="panel empty-state"><div>Every stage is done.</div><div className="sub">The roadmap has no stage left without a done date.</div></div>;
   }
   const s = stages[k];
-  const byNumber = new Map((i.decisions ?? []).map((d) => [d.number, d]));
+  const byGate = recordsByGate(i.decisions);
   const gates = s.gates ?? [];
   const exit = s.exit ?? [];
   return (
@@ -101,7 +102,7 @@ function StageGates({ initiative: i }: { initiative: BoardInitiative }) {
         {gates.length === 0 ? (
           <div className="gl-none">No decision gates this stage.</div>
         ) : (
-          <ul className="gl-rows">{gates.map((g) => <GateRow key={g} initiative={i.id} number={g} record={byNumber.get(g)} />)}</ul>
+          <ul className="gl-rows">{gates.map((g) => <GateRow key={g} initiative={i.id} number={g} record={byGate.get(gateKey(g))} />)}</ul>
         )}
         <div className="gl-label">Exit <span className="num">{exit.filter((x) => parseISO(x.met)).length}/{exit.length}</span></div>
         {exit.length === 0 ? (

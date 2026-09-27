@@ -3,6 +3,17 @@ import type { ReactNode } from "react";
 import { addDays, daysBetween, parseISO, shortDate, today, toISO } from "../lib/dates";
 import "../styles/roadmap.css";
 
+/** A gate's key for finding its record (FR-5): a number compares by value, so
+ *  `4`, `04` and `0004` all name record 0004, as the scan's check does. */
+export function gateKey(n: string): string {
+  const t = n.trim();
+  return /^\d+$/.test(t) ? String(Number(t)) : t;
+}
+
+/** An initiative's decision records keyed by gateKey of their number. */
+export const recordsByGate = (decisions: model.Decision[] | undefined) =>
+  new Map((decisions ?? []).map((d) => [gateKey(d.number), d]));
+
 /** Where undated stages start, as a share of the lane, and the widest one slot
  *  may take. Undated stages are only order: equal slots after the last date. */
 const SLOT_MAX = 16;
@@ -28,13 +39,13 @@ type Row = {
 export function StageRoadmap({ initiative }: { initiative: merge.BoardInitiative }) {
   const now = today();
   const stages = initiative.stages ?? [];
-  const records = new Map((initiative.decisions ?? []).map((d) => [d.number, d]));
+  const records = recordsByGate(initiative.decisions);
 
   let slots = 0;
   let prevEnd: Date | null = null;
   const rows: Row[] = stages.map((s, i) => {
     const gates: Gate[] = (s.gates ?? []).map((id) => {
-      const record = records.get(id);
+      const record = records.get(gateKey(id));
       return { id, record, raised: parseISO(record?.raised), ruled: record?.status === "ruled" ? parseISO(record?.ruled) : null };
     });
     const end = parseISO(s.done) ?? parseISO(s.target);
