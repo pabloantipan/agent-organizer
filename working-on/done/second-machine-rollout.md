@@ -1,10 +1,10 @@
 ---
 title: Roll the workstation and organizer out to the second Mac
-status: now
+status: done
 repos: []
 branch: none
-updated: 2026-09-16
-next: "Push claudecode; on the other Mac follow docs/second-laptop.md from the agent-slack root repo — no organizer sign-in (auth: off, decided 2026-09-16)"
+updated: 2026-09-27
+next: "none: the factory runs on the second Mac (Pablo, 2026-09-27)"
 ---
 
 ## Goal
@@ -38,3 +38,8 @@ none
 - Plan of record: ~/.claude/plans/temporal-doodling-shell.md
 - Gotchas that cost time: rules must be released to `cloud.firestore/organizer` (first deploy silently did not); Firestore forbids collection-group queries below the root, pull walks machines/*/initiatives; `wails dev` deletes the release binary on exit
 - 2026-09-15 organizer main pushed at d5654c8, untagged; the v0.2.0 tag and the claudecode push are still open
+
+## Review
+- Verdict: done. Pablo, 2026-09-27: "in practice factory was already rolled to the other mac". Evidence on this side: the other Mac pushed `fix/agents-dedupe` (2026-09-23) and the working-on `description`/`specs` skill change.
+- Unmet: nothing on this card. The agent-slack `second-laptop-factory` card still asks for the post-to-wake time measured there.
+- Reviewer: Pablo, recorded by the blacksmith, 2026-09-27
