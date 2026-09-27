@@ -421,6 +421,16 @@ func (a *App) Runs(initiativeID string) service.RunsView {
 	return a.svc.InitiativeRuns(initiativeID)
 }
 
+// RuleDecision writes the owner's ruling into a proposed decision record and
+// commits that one file (FR-13, 0019). It is the app's only write over a
+// record, and it refuses anything but the owner's own ruling of a proposed one.
+func (a *App) RuleDecision(initiativeID, number, chosen, words string) error {
+	if a.svc == nil {
+		return errString(a.err)
+	}
+	return a.svc.RuleDecision(initiativeID, number, chosen, words)
+}
+
 // MilestoneType exists only so the Wails generator emits model.Milestone in
 // models.ts; nested slice element types are otherwise skipped.
 func (a *App) MilestoneType() model.Milestone { return model.Milestone{} }

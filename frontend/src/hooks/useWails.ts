@@ -76,4 +76,7 @@ export const api = {
   setGroups: (groups: Group[]): Promise<void> => App.SetGroups(groups),
   setCardOrder: (id: string, slugs: string[]): Promise<void> => App.SetCardOrder(id, slugs),
   runs: (id: string): Promise<RunsView> => App.Runs(id),
+  // The one write over a decision record: the owner's own ruling (FR-13, 0019).
+  ruleDecision: (id: string, number: string, chosen: string, words: string): Promise<void> =>
+    App.RuleDecision(id, number, chosen, words),
 };

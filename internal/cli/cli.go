@@ -31,7 +31,7 @@ import (
 var Version = "dev"
 
 // Subcommands the binary recognises. Anything else launches the GUI.
-var Subcommands = []string{"status", "board", "sync", "prompt", "run", "runs", "decisions", "agents", "crew", "retire", "clean", "statusline", "factory-key", "login", "logout", "whoami", "doctor", "config", "version", "--version", "help"}
+var Subcommands = []string{"status", "board", "sync", "prompt", "run", "runs", "decisions", "rule", "agents", "crew", "retire", "clean", "statusline", "factory-key", "login", "logout", "whoami", "doctor", "config", "version", "--version", "help"}
 
 // IsSubcommand reports whether arg names a CLI subcommand.
 func IsSubcommand(arg string) bool {
@@ -73,6 +73,8 @@ func runWith(args []string, stdout, stderr io.Writer, now func() time.Time) int 
 		return runsCmd(cfg, args[1:], stdout, stderr, now)
 	case "decisions":
 		return decisionsCmd(cfg, args[1:], stdout, stderr, now)
+	case "rule":
+		return ruleCmd(cfg, args[1:], stdout, stderr, now)
 	case "agents":
 		return agentsCmd(cfg, stdout, now)
 	case "crew":
@@ -151,6 +153,7 @@ func usage(w io.Writer) {
   organizer run <initiative> <card> [--print] hand a card to a builder; refuses a card without spec, gate and boundary. --print shows the launch line
   organizer runs [initiative] [--json] every agent session recorded, per card: model, wall time, context at end, cost
   organizer decisions [initiative] [--json] decision records: the open queue by age, rulings with turnaround
+  organizer rule <initiative> <NNNN> --chosen <option> --words <text>  write the owner's ruling into a proposed record and commit that one file
   organizer agents                    agent processes and sessions grouped per initiative
   organizer crew <initiative> [--print] bring the initiative's persona cell up, one probe per seat; --print shows the lines
   organizer retire <initiative> [--retirable | --keep a,b] [--kill session] [--run]  end a wave: retire seats, kill sessions, close the mailbox, revoke tokens, rewrite cell.json (dry unless --run)
