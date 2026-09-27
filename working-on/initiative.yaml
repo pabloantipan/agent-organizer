@@ -12,3 +12,4 @@ target: 2026-09-16
 milestones:
   - date: 2026-09-16
     title: Two weeks of use, decide phase 4
+goal: "A UI that helps a developer leading the factory handle up to 20 initiatives at the same time: around 4 to 6 executing in parallel over weeks, the rest sequential, each with about 4 business people discovering, deciding and expanding it; agents communicate so the initiative's decision making is recovered and optimized on that data. Secondary: honest, transparent and intuitive about how the machine works (mailbox, slack), so a developer can become its mechanic fast."
