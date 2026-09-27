@@ -1,0 +1,10 @@
+{
+  "project": "onboarding-fixture",
+  "workdir": "/h/onboarding-flow",
+  "agents": [
+    "fse",
+    "po_lia"
+  ],
+  "human": "pablo",
+  "reconciler": "po_lia"
+}
