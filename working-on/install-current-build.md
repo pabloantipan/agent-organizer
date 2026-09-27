@@ -6,6 +6,7 @@ branch: main
 updated: 2026-09-27
 next: "make install from main, then confirm the installed app and the organizer on PATH report main's git describe and the app opens"
 depends_on: []
+seat: wave1-install
 boundary: ["build/ (the build output)", "/Applications/organizer.app (install target)", "~/.local/bin/organizer (the symlink make install writes)", "no source file in the repo"]
 spec: "Pablo, 2026-09-27, in the FSE's session: \"send someone to do so please\" (rebuild and reinstall); CLAUDE.md, Packaging"
 gate: "the Gate section below"
