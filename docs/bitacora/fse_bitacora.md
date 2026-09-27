@@ -48,7 +48,7 @@ restating it (the discuss skill).
   scope (Pablo) and goals on active initiatives (owners), then an "exit met"
   record. The blacksmith is now Hephaistos: its posts start `[hephaistos, for pablo]`; reach it by posting to pablo with a subject starting `[for hephaistos]`.
 - **2026-09-27 later:** sup5 done and retired itself. 0034, 0035, 0036 ruled;
-  sup6 runs glance-needs-me-lead then glance-inactive-fold. Terminating the
+  sup6 ran glance-needs-me-lead and glance-inactive-fold; both passed review. Terminating the
   seven PLV initiatives went to Hephaistos (thread 01M3HZSXFQ1EV5BFH8ARSZ71JR);
   the organizer keeps camp, organizer, agent-slack. `app-review-with-pablo`
   holds his three findings from the installed app (long header, no Rule on
