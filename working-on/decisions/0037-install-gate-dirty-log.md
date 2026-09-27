@@ -1,6 +1,6 @@
 ---
 title: The install's gate item 1 is met by the binary's clean version
-status: proposed
+status: withdrawn
 raised: 2026-09-27
 raised_by: fse
 owner: pablo
@@ -47,7 +47,10 @@ build; the dirty suffix is in the log line, not in the app.
 
 ## Ruling
 
-
+Withdrawn by the FSE, 2026-09-27: a second review passed the card before
+Pablo ruled (a2ee7ad). Both binaries carry the clean describe; the dirty
+suffix came from make re-evaluating VERSION after the build. Nothing is
+left to decide. The Makefile item is in the FSE's open questions.
 
 ## Consequences
 

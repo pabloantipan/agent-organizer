@@ -53,6 +53,7 @@ restating it (the discuss skill).
   the organizer keeps camp, organizer, agent-slack. `app-review-with-pablo`
   holds his three findings from the installed app (long header, no Rule on
   the Decisions tab, no scroll): review with him soon, then spec.
+- **Installed:** v0.2.0-229-g3472f6b (sup7, install-current-build passed).
 - **Waiting on Pablo:** the intake (thread 01M3FAWKV2159MCSH0AZZJWE08); 0021, 0022, 0005, 0004, 0002. No card carries `stage:` until the
   organizer has a roadmap, which waits on the intake.
 - **Learned:** this session hit the drain ceiling (8 per session) at about
@@ -79,6 +80,14 @@ restating it (the discuss skill).
   directly, a6ebd4d..280f58c).
 
 ## Open questions
+
+- The Makefile's `VERSION` is a lazy `=`, so `make install`'s closing line can
+  print `-dirty` while the binaries are clean; and `wails build` flips
+  `frontend/wailsjs/go/main/App.{d.ts,js}` to 100755 (done/install-current-build.md,
+  Notes). Candidate card: `VERSION :=` and restoring the mode. Not raised.
+- **Lesson:** my install gate did not say which of two checks proved the
+  version; the reviewer failed it, then a second review passed it (0037,
+  withdrawn). Name the one piece of evidence that decides each row.
 
 - **Repetition (2):** zsh does not word-split an unquoted variable. It bit me
   (8d42553), and the fixture doc's `kill $FIXTURE_AGENT_PIDS` (review of
