@@ -1,9 +1,10 @@
 ---
 title: Ruling from Needs me writes the record, end to end
-status: next
+status: done
 repos: [organizer]
 branch: main
 updated: 2026-09-26
+review: pass
 seat: wave2-rulebox
 next: "review: redesign-rule-box, gate G15, G16, G18 met, 903c6ce 0851396"
 depends_on: ["redesign-overview", "redesign-work", "redesign-roadmap"]
@@ -24,6 +25,16 @@ The redesign, wave 2 of 2: FR-22 of `docs/specs/redesign.md`. Decisions 0013–0
 - 2026-09-26 cut from the redesign spec by the FSE
 - 2026-09-26 wave2-rulebox: the rule box (224d4b4 `RuleDecisionBox.tsx`, `rule-box.css`; b0f2d13 Home's Rule opens it). G15 met in `wails dev` on the fixture: `.wt-notes/wave2-rulebox/G15-box.png` (0002, one-machine, words), `G15-after.png` (0002 gone, badge 3 → 2); `git -C $FIXTURE_HOME/init-a log -1 --stat` → `docs(decisions): rule 0002 where-the-fixture-runs (one-machine)`, `1 file changed, 6 insertions(+), 4 deletions(-)`; `git show` touches only status, ruled, ruled_by, chosen and the Ruling line (`git-show-dev.txt`). Rule is disabled until option and words; a refusal shows in the box with both kept (`rb-refused.png`). G18: the grep over `main...redesign-rule-box` prints nothing; `npm run build` ✓. G16 partly: walk Home → init-a → Overview → Work → Roadmap → rule 0002 done in `wails dev` (`dev-1-home` … `dev-5-roadmap.png`, then G15-*); console: one error only, the Wails runtime's (Notes); `wails build` ✓, the built app ran on the fixture and was quit by pid, but G16-1…6 could not be taken from it (Blockers)
 - 2026-09-26 wave2-rulebox: G16 met. Pablo walked the built app (`wails build` of this worktree, pid 19847, fixture `organizer-fixture.GWYoaw`) because this seat could not click (Blockers); his screenshots in `.wt-notes/wave2-rulebox/`: `G16-1b-home-pablo.png`, `G16-2-3-init-a-overview-pablo.png`, `G16-4-work-pablo.png`, `G16-5-roadmap-pablo.png`, `G16-6a-box-pablo.png` (the box on 0002), `G16-6-ruled-pablo.png` (0002 gone, Needs me 2). Mine from the same builds: `G16-1-home.png` (pid 97585) and `G16-6-ruled.png` (screencapture of pid 19847's window, 0002 gone, badge 2). `git -C …/init-a log -1 --stat` → c2aa41c `docs(decisions): rule 0002 where-the-fixture-runs (one-machine)`, `1 file changed, 6 insertions(+), 4 deletions(-)`; `git show` touches only status, ruled, ruled_by, chosen and the Ruling line (`git-show-built.txt`). Console: the one error is Wails' dev runtime (Notes). Rebased on main: 903c6ce, 0851396 (were 224d4b4, b0f2d13); `npm run build` ✓; G18 grep empty
+
+## Review
+- Verdict: pass. G15, G16 and G18 are met by 903c6ce and 0851396 and the screenshots.
+- Unmet gate items: none.
+- Reviewer: wave2-review-rulebox, 2026-09-26.
+- G15: I ruled 0002 again from Needs me in `wails dev` on a fresh fixture (two-machines). The result was 69cac8b, one file, 6 insertions and 4 deletions, touching only status, ruled, ruled_by, chosen and the Ruling line. The row left the queue and the badge went from 3 to 2 (`.playwright-mcp/review-rulebox-box.png`, `review-rulebox-after.png`).
+- G16: Pablo's built-app screenshots show Home, init-a Overview, Work, Roadmap, the box and the ruled state, and they match `git-show-built.txt` (c2aa41c). The console showed two errors, and neither comes from `frontend/src`. One is `/wails/ipc.js`, byte-identical (sha256 3c3b999d…) to wails v2.15.0 `ipc_websocket.js`, which compiles only under `//go:build dev`, so the built app never loads it. The other is a `favicon.ico` 404 from the dev server; main has no favicon either.
+- G18: the grep printed nothing and `npm run build` passed.
+- FR-23: no legacy aliases, only the seven sizes, `tabular-nums` on the record number, and the focus ring kept (restored on the textarea). The diff stays inside the boundary (3 files).
+- Outside the gate, left to Pablo: G16's "no console errors" should exclude the Wails dev runtime, or say to capture the console in the built app. `global.css:39` still removes the focus ring from every other input. The CLAUDE.md Navigation bullet ("Rule opens the record in … Decisions") is stale.
 
 ## Next
 1. review: redesign-rule-box, gate G15, G16, G18 met, 903c6ce 0851396
