@@ -1,11 +1,12 @@
 ---
 title: A seat keeps getting its mail past eight drains
-status: next
+status: done
 repos: [agent-slack]
 branch: main
 updated: 2026-09-26
 next: "review: main in agent-slack/api and agent-slack/specs, gate 1-7 met, api 8991640 0c9f33e, specs aac17ee"
 depends_on: []
+review: pass
 seat: w1b
 boundary: ["/Users/pabloantipan/agent-slack/api/internal/api/handlers.go (postDrain)", "/Users/pabloantipan/agent-slack/api/internal/store/store.go (session_drains)", "/Users/pabloantipan/agent-slack/api/internal/api/api_test.go", "/Users/pabloantipan/agent-slack/api/internal/store/store_test.go", "/Users/pabloantipan/agent-slack/api/internal/api/cell_test.go", "/Users/pabloantipan/agent-slack/api/cmd/discuss-hook/main.go (the drain reason)", "/Users/pabloantipan/agent-slack/specs/discuss-spec.md (the drain ceiling section and the env table)", "/Users/pabloantipan/.local/bin/discuss-api (install)"]
 spec: "decision 0024; the Goal and Facts below; ~/agent-slack/specs/discuss-spec.md, the drain ceiling"
@@ -47,6 +48,11 @@ starvation.
 - 2026-09-26 cut by the FSE from Pablo's ruling (0024)
 - 2026-09-26 21:42 w1b: gate 1-6 met. api `8991640` (postDrain: `event` field; UserPromptSubmit/SessionStart reset the count via new `store.ResetDrains` and are never counted or refused; a refusal answers `{block:false, reason:"drain_ceiling"}`; no `event` counts as before), `0c9f33e` (discuss-hook sends `event`, logs the refusal reason); specs `aac17ee` (new "The drain ceiling counts per stop cycle" subsection, /drain pseudocode and table row, env table `DISCUSS_MAX_DRAINS`). Evidence: 1 `TestPromptDrainsDeliverPastTheCeiling` (20 prompt/session-start deliveries to one session past a spent ceiling, then 3 Stop deliveries and a refusal, then an empty prompt resets) + `TestResetDrainsStartsTheCycleOver`; 2 `TestDrainCeilingIsAHardStop` PASS, diff to it empty; 3 built hook against a stub server: hook.log `event=Stop exit=0 reason=drain_ceiling`, and `reason=nothing_to_deliver` for a reasonless block:false; 4 `TestPauseReachesASeatAtTheDrainCeiling` PASS; 5 spec as above; 6 `make test` green, `make install` put both binaries (vcs.revision 0c9f33e, unmodified) in ~/.local/bin, `launchctl kickstart -k` at 21:41:36, /healthz 200. Gate 7 baseline after install 21:41:58: fse undelivered 4, deaf true, watcher alive, last drain 21:36:36 (Stop, old binary)
 - 2026-09-26 21:44 w1b: gate 7 met. The fse session 91db5bd3 took its next prompt on its own (not forced): hook.log `21:44:30.169 drain session=91db5bd3-… event=UserPromptSubmit exit=0 mode=context delivered=4 bytes=3199`; organizer /health at 21:44:34: fse undelivered 0, deaf false, last drain 4s ago, watcher alive
+
+## Review
+- Verdict: pass. Unmet gate items: none. Reviewer r1b, 2026-09-26.
+- Checked: api diff 6a52699..0c9f33e and specs aac17ee read; `TestDrainCeilingIsAHardStop` untouched by the diff; `go test -race -count=1 ./...` green; installed discuss-api and discuss-hook carry vcs.revision 0c9f33e unmodified, and the installed hook and a fresh build of main both send `event` and log `reason=drain_ceiling` against a stub; organizer /health 21:46:22: fse undelivered 0, deaf false, last drain 2 s ago.
+- Not covered by the gate: nothing tests that an agent-to-agent wake loop stays bounded now that every asyncRewake resets the ceiling (see Notes); the running discuss-api started 21:44:57, after the recorded 21:41:36 kickstart, cause not recorded; the review brief's spec diff (`c5635f8` in ~/agent-slack) names a commit the specs repo does not have.
 
 ## Next
 1. Count the ceiling per stop cycle, not per session
