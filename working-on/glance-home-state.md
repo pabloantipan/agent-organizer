@@ -1,6 +1,6 @@
 ---
 title: Home says each initiative's phase and state, for twenty
-status: next
+status: now
 repos: [organizer]
 branch: glance-home-state
 seat: wave1-home
