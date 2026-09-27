@@ -6,6 +6,7 @@ branch: main
 updated: 2026-09-26
 next: "Count the drain ceiling per stop cycle, not per session: a prompt or session start delivers and resets it, a Stop-block chain still stops at the ceiling, and a refused drain says so"
 depends_on: []
+seat: w1b
 boundary: ["/Users/pabloantipan/agent-slack/api/internal/api/handlers.go (postDrain)", "/Users/pabloantipan/agent-slack/api/internal/store/store.go (session_drains)", "/Users/pabloantipan/agent-slack/api/internal/api/api_test.go", "/Users/pabloantipan/agent-slack/api/internal/store/store_test.go", "/Users/pabloantipan/agent-slack/api/internal/api/cell_test.go", "/Users/pabloantipan/agent-slack/api/cmd/discuss-hook/main.go (the drain reason)", "/Users/pabloantipan/agent-slack/specs/discuss-spec.md (the drain ceiling section and the env table)", "/Users/pabloantipan/.local/bin/discuss-api (install)"]
 spec: "decision 0024; the Goal and Facts below; ~/agent-slack/specs/discuss-spec.md, the drain ceiling"
 gate: "the Gate section below"

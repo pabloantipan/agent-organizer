@@ -6,6 +6,7 @@ branch: main
 updated: 2026-09-26
 next: "Point probe's zellij at a short socket dir so a 40-character session name starts, lists, attaches and dies; derive the organizer's ceiling from it in one constant"
 depends_on: []
+seat: w1a
 boundary: ["/Users/pabloantipan/claudecode/bin/probe", "/Users/pabloantipan/claudecode/bin/gen-probe-profiles", "/Users/pabloantipan/claudecode/bin/files", "internal/service/crew.go (maxSessionName, crewSession)", "internal/service/run.go (the length warning)", "internal/service/crew_test.go", "internal/service/retire_test.go", "internal/service/run_test.go", "CLAUDE.md (the Crew session names paragraph, the Run gate paragraph)"]
 spec: "decision 0024; the Goal and Facts below; CLAUDE.md Crew session names"
 gate: "the Gate section below"
