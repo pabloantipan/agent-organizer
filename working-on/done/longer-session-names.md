@@ -1,11 +1,12 @@
 ---
 title: Session names longer than 22 characters
-status: next
+status: done
 repos: [organizer, claudecode]
 branch: main
 updated: 2026-09-26
 next: "review: main in claudecode and organizer, gate 1-6 met, claudecode baa1c7c 7ecdfa1, organizer 25046ec 2a9e669"
 depends_on: []
+review: pass
 seat: w1a
 boundary: ["/Users/pabloantipan/claudecode/bin/probe", "/Users/pabloantipan/claudecode/bin/gen-probe-profiles", "/Users/pabloantipan/claudecode/bin/files", "internal/service/crew.go (maxSessionName, crewSession)", "internal/service/run.go (the length warning)", "internal/service/crew_test.go", "internal/service/retire_test.go", "internal/service/run_test.go", "CLAUDE.md (the Crew session names paragraph, the Run gate paragraph)"]
 spec: "decision 0024; the Goal and Facts below; CLAUDE.md Crew session names"
@@ -46,6 +47,13 @@ builders and crew seats on long families get unreadable names (0024).
   4. `maxSessionName = 103 - len("/tmp/zellij-501/contract_version_1/")` (68) with its derivation; `sessionNameTooLong` used by `crewSession` and `PrepareLaunch`; the warning reads "… zellij holds at most 68; probe refuses it". Tests: TestMaxSessionNameIsProbesSocketBudget, crew table (ccint-camp-monorepo and the 40-char name fit, 74 refused), retire (73), TestPrepareLaunchWarnsOnlyOverTheSessionCeiling. `go vet ./...` clean; `go test ./...` green with HOME=temp; under the real HOME only internal/scan TestAttachSessions fails (pre-existing, untouched package, card retire-keeps-the-cell)
   5. CLAUDE.md Crew session names: 68, the socket path arithmetic, the 0.44.3 measurement, probe refuses, legacy sessions; Run gate: warns over `maxSessionName` (68), which probe refuses
   6. `go run . run organizer redesign-goal-stages --print` prints only the missing-prompt warning, no session-length one
+
+## Review
+- Verdict: pass. Unmet gate items: none. Reviewer r1a, 2026-09-26.
+- 1: `organizer-probe abcdefghijklmnopqrstuvwx /tmp` in a new iTerm tab came up (server `--server /tmp/zellij-501/contract_version_1/organizer-probe-abcdefghijklmnopqrstuvwx`, client attached), listed in `organizer-probe -l`, `-k` printed "deleted …", no server, socket or state left.
+- 2: legacy organizer-probe-fse (socket under DARWIN_USER_TEMP_DIR) lists live in `-l`; -k/-r/attach go through `zj_tmpdir`; kill evidence is the builder's told2.
+- 3: gen-probe-profiles and files use the same /tmp plus legacy rule. 4: one derived constant, `sessionNameTooLong` in crewSession and PrepareLaunch; vet clean, `go test ./...` green with a temp HOME (real HOME: only the pre-existing internal/scan TestAttachSessions). 5: CLAUDE.md matches. 6: only the missing-prompt warning.
+- Not covered by the gate: `Launch.Warnings` doc comment (run.go:50) still says "probe will truncate"; the constant hard-codes uid 501.
 
 ## Next
 1. Review main in claudecode (baa1c7c, 7ecdfa1) and organizer (25046ec, 2a9e669)
