@@ -59,6 +59,9 @@ type Initiative struct {
 	// the root: a folder of *.md or one file. This is what a card's Spec field
 	// points into.
 	Specs []string `yaml:"specs" json:"specs"`
+	// Scope is what the initiative takes on and what it leaves out, in the
+	// owner's words. Optional; no scope is two empty lists, not a problem.
+	Scope Scope `yaml:"scope" json:"scope"`
 
 	// Stages are working-on/roadmap.yaml, in order, and do not come from
 	// initiative.yaml: the scanner fills them from the other file. No roadmap
@@ -69,15 +72,31 @@ type Initiative struct {
 	Path string `yaml:"-" json:"path"`
 }
 
+// Scope is initiative.yaml's scope: {in, out}.
+type Scope struct {
+	In  []string `yaml:"in" json:"in"`
+	Out []string `yaml:"out" json:"out"`
+}
+
+// Stage phases (the working-on skill, Roadmap): discovery finds the edge of the
+// problem and ends in decisions; building is specs, cards and waves. Any other
+// value is reported by the scan and dropped.
+const (
+	PhaseDiscovery = "discovery"
+	PhaseBuilding  = "building"
+)
+
 // Stage is one entry of working-on/roadmap.yaml: an outcome, exit items that
 // can each be checked, and the decisions that gate it. Dates are optional and
 // only ever real ones; an appetite is a size, never a date (the roadmapping
 // skill).
 type Stage struct {
-	ID      string     `yaml:"id" json:"id"`
-	Title   string     `yaml:"title" json:"title"`
-	Outcome string     `yaml:"outcome" json:"outcome"`
-	Exit    []ExitItem `yaml:"exit" json:"exit"`
+	ID      string `yaml:"id" json:"id"`
+	Title   string `yaml:"title" json:"title"`
+	Outcome string `yaml:"outcome" json:"outcome"`
+	// Phase is PhaseDiscovery or PhaseBuilding, else empty.
+	Phase string     `yaml:"phase" json:"phase"`
+	Exit  []ExitItem `yaml:"exit" json:"exit"`
 	// Gates are decision record numbers that must be ruled before the stage
 	// starts, as they are written on the file: "0004".
 	Gates []string `yaml:"gates" json:"gates"`

@@ -99,6 +99,14 @@ func Build(local model.Snapshot, remote []model.Snapshot, order model.Order, now
 				Decisions:  si.Decisions,
 				FSE:        si.FSE,
 			}
+			// No scope is two empty lists on the board, also for a snapshot
+			// written before scope existed.
+			if bi.Scope.In == nil {
+				bi.Scope.In = []string{}
+			}
+			if bi.Scope.Out == nil {
+				bi.Scope.Out = []string{}
+			}
 			for _, m := range machinesByID[si.ID] {
 				if m != s.Machine {
 					bi.AlsoOn = append(bi.AlsoOn, m)

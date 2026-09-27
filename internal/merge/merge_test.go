@@ -1,6 +1,8 @@
 package merge
 
 import (
+	"encoding/json"
+	"strings"
 	"testing"
 	"time"
 
@@ -93,15 +95,16 @@ func TestBuildHonoursOrder(t *testing.T) {
 // FR-1 to FR-3: the goal, the measure, the specs and the stages of the scan
 // reach the board initiative, with the current stage still marked. G1, the
 // merge half.
-func TestBuildCarriesGoalMeasureSpecsAndStages(t *testing.T) {
+func TestBuildCarriesGoalMeasureSpecsScopeAndStages(t *testing.T) {
 	now := time.Date(2026, 9, 2, 12, 0, 0, 0, time.UTC)
 	withGoal := si("goals", "acme", model.Card{Slug: "c1", Status: "now", Updated: "2026-09-01", Next: "a", Stage: "two"})
 	withGoal.Goal = "acme signs off on one run"
 	withGoal.Measure = "no manual step is left"
 	withGoal.Specs = []string{"specs/", "docs/one.md"}
+	withGoal.Scope = model.Scope{In: []string{"the scan", "the board"}, Out: []string{"identity"}}
 	withGoal.Stages = []model.Stage{
-		{ID: "one", Title: "First", Done: "2026-08-01", Exit: []model.ExitItem{{Text: "done", Met: "2026-08-01"}}},
-		{ID: "two", Title: "Second", Current: true, Gates: []string{"0004"}, Appetite: "two waves"},
+		{ID: "one", Title: "First", Phase: "discovery", Done: "2026-08-01", Exit: []model.ExitItem{{Text: "done", Met: "2026-08-01"}}},
+		{ID: "two", Title: "Second", Phase: "building", Current: true, Gates: []string{"0004"}, Appetite: "two waves"},
 	}
 	bare := si("bare", "personal", model.Card{Slug: "c2", Status: "next", Updated: "2026-09-01", Next: "b"})
 
@@ -124,6 +127,20 @@ func TestBuildCarriesGoalMeasureSpecsAndStages(t *testing.T) {
 	cur, ok := model.CurrentStage(got.Stages)
 	if !ok || cur.ID != "two" || !got.Stages[1].Current {
 		t.Errorf("current stage=%+v ok=%v", cur, ok)
+	}
+	if got.Stages[0].Phase != "discovery" || got.Stages[1].Phase != "building" {
+		t.Errorf("phases=%q,%q", got.Stages[0].Phase, got.Stages[1].Phase)
+	}
+	if strings.Join(got.Scope.In, ",") != "the scan,the board" || strings.Join(got.Scope.Out, ",") != "identity" {
+		t.Errorf("scope=%+v", got.Scope)
+	}
+	// No scope is two empty lists, never null, so the header can say
+	// "no scope yet" without a nil check.
+	if bare := byID["bare"]; bare.Scope.In == nil || bare.Scope.Out == nil || len(bare.Scope.In)+len(bare.Scope.Out) != 0 {
+		t.Errorf("bare scope=%#v", bare.Scope)
+	}
+	if j, _ := json.Marshal(byID["bare"].Scope); string(j) != `{"in":[],"out":[]}` {
+		t.Errorf("bare scope json=%s", j)
 	}
 	// An initiative with no goal and no roadmap carries neither, and that is
 	// not an error anywhere on the board.
