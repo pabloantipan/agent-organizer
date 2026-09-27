@@ -1,12 +1,13 @@
 ---
 title: Retiring every seat must not erase the cell, and tests stay out of the real home
-status: next
+status: now
 repos: [organizer]
 branch: main
-updated: 2026-09-16
+updated: 2026-09-26
 next: "scan.readCell accepts an empty roster (a cell with no seats is a cell between waves, not a malformed file); retire writes [] not null; TestAttachSessions and any test reaching session.Dir() set XDG_DATA_HOME to a temp dir"
 depends_on: []
-boundary: ["internal/scan/scan.go (readCell)", "internal/scan/scan_test.go", "internal/scan/agents_test.go", "internal/service/retire.go (the cell.json write)", "internal/service/retire_test.go", "testdata/"]
+seat: wave1-retire
+boundary: ["internal/scan/scan.go (readCell)", "internal/scan/scan_test.go", "internal/scan/agents_test.go", "internal/service/retire.go (the cell.json write)", "internal/service/retire_test.go", "testdata/", "frontend/src/components/Crew.tsx (Bring crew up inert at zero seats)"]
 spec: "CLAUDE.md Crew paragraph; ~/agent-slack/ops/cells/camp.json"
 gate: "the four items under Gate below"
 ---
@@ -34,3 +35,6 @@ its cell. Separately, `TestAttachSessions` archives into the real
 ## Blockers
 none
 - 2026-09-26 sup4 runs this card (organizer-probe-sup4), spawned by the FSE (0025)
+
+## Notes
+- 2026-09-26 sup4: boundary widened by one file, `frontend/src/components/Crew.tsx`: with zero seats the button reads "Bring crew up" and is enabled (`off === seats.length` is 0 === 0), so gate 1's "inert" needs it. Builder seat `wave1-retire`, branch and worktree `.wt/retire-keeps-the-cell`.
