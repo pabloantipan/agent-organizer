@@ -1,10 +1,10 @@
 ---
 title: The installed organizer is the current main
-status: next
+status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-27
-next: "make install from main, then confirm the installed app and the organizer on PATH report main's git describe and the app opens"
+next: "make install from main (running, wave1-install), then the version and screenshot checks"
 depends_on: []
 seat: wave1-install
 boundary: ["build/ (the build output)", "/Applications/organizer.app (install target)", "~/.local/bin/organizer (the symlink make install writes)", "no source file in the repo"]
