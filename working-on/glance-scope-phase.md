@@ -1,6 +1,6 @@
 ---
 title: Initiatives carry a scope, and stages a phase
-status: next
+status: now
 repos: [organizer]
 branch: glance-scope-phase
 seat: wave1-scope
