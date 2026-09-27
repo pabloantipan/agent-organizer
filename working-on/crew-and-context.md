@@ -3,8 +3,8 @@ title: Spawn a persona crew and show each agent's context fill
 status: now
 repos: []
 branch: main
-updated: 2026-09-15
-next: "Resume the camp cell first (agent-slack cell-pause card), then open needs me on ccint-camp-monorepo, Rule one row (decision + next action) and confirm the seat wakes and the ruling shows under Solved"
+updated: 2026-09-27
+next: "When a camp seat asks Pablo something, Rule that row from Needs me (decision + next action) and confirm the seat wakes and the ruling shows under Solved; then this card goes to review"
 ---
 
 ## Goal
@@ -30,6 +30,8 @@ running, whether discuss can wake it, and how full its context window is.
 - 2026-09-06 Rule on a needs-me row: an inline box (decision, one-line next action, recipient) posts one `decision` into the thread (reopening an escalated one first) or a new thread named after the card, marks the row solved, and the Solved list reads the ruling back from the thread. The card file stays the agents'; the next action reaches the seat as the decision's last line
 - 2026-09-15 committed and pushed: main 14c16d5..d5654c8 (four commits by layer: chore, Go, frontend, CLAUDE.md), build, vet, tests and tsc green; run-gate branch pushed too, still unmerged
 - 2026-09-15 v0.2.0 tagged, pushed, built and installed to /Applications; the CLI symlink and the statusLine follow it; app relaunched
+
+- 2026-09-27 camp revived (agent-slack decisions.md): roster restored from agents/cell.json at HEAD, tokens reissued, the 09-06 backlog marked read, cell resumed (after reopening its pause thread: agent-slack resume-after-retire card), five seats up fresh through `organizer crew`, watchers alive
 
 ## Next
 1. Relaunch and rule one real row; reply on a real thread from Slack and confirm the wake; then phase 2: thread members in the discuss API (agent-slack card: a membership table, the inbox query, one line in the discuss skill) so a subgroup chat exists; then a member picker on the new-conversation form; start a thread from a card
