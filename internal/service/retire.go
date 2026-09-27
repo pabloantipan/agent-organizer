@@ -345,8 +345,12 @@ func (s *Service) Retire(o RetireOptions) (RetireReport, error) {
 }
 
 // writeCell rewrites agents/cell.json with a new seat list, keeping every
-// other field as it was.
+// other field as it was. No seats left is `[]`, never `null`: the cell stays
+// a cell between waves.
 func writeCell(path string, agents []string) error {
+	if agents == nil {
+		agents = []string{}
+	}
 	b, err := os.ReadFile(path)
 	if err != nil {
 		return err
