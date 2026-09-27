@@ -25,19 +25,21 @@ func ValidDecisionStatus(s string) bool {
 // record is never edited; a reversal is a new record that supersedes it.
 type Decision struct {
 	// Number and Slug come from the file name, not the frontmatter.
-	Number       string   `yaml:"-" json:"number"`
-	Slug         string   `yaml:"-" json:"slug"`
-	Path         string   `yaml:"-" json:"path"`
-	Title        string   `yaml:"title" json:"title"`
-	Status       string   `yaml:"status" json:"status"`
-	Raised       string   `yaml:"raised" json:"raised"`
-	RaisedBy     string   `yaml:"raised_by" json:"raised_by"`
-	Owner        string   `yaml:"owner" json:"owner"`
-	Ruled        string   `yaml:"ruled" json:"ruled"`
-	RuledBy      string   `yaml:"ruled_by" json:"ruled_by"`
-	Options      []string `yaml:"options" json:"options"`
-	Chosen       string   `yaml:"chosen" json:"chosen"`
-	Cards        []string `yaml:"cards" json:"cards"`
+	Number   string   `yaml:"-" json:"number"`
+	Slug     string   `yaml:"-" json:"slug"`
+	Path     string   `yaml:"-" json:"path"`
+	Title    string   `yaml:"title" json:"title"`
+	Status   string   `yaml:"status" json:"status"`
+	Raised   string   `yaml:"raised" json:"raised"`
+	RaisedBy string   `yaml:"raised_by" json:"raised_by"`
+	Owner    string   `yaml:"owner" json:"owner"`
+	Ruled    string   `yaml:"ruled" json:"ruled"`
+	RuledBy  string   `yaml:"ruled_by" json:"ruled_by"`
+	Options  []string `yaml:"options" json:"options"`
+	Chosen   string   `yaml:"chosen" json:"chosen"`
+	Cards    []string `yaml:"cards" json:"cards"`
+	// Stage is optional: the roadmap stage id this record belongs to.
+	Stage        string   `yaml:"stage" json:"stage"`
 	Threads      []string `yaml:"threads" json:"threads"`
 	Supersedes   []string `yaml:"supersedes" json:"supersedes"`
 	SupersededBy string   `yaml:"superseded_by" json:"superseded_by"`
