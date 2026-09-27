@@ -124,6 +124,7 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
 .rail-counts .n { color: var(--now); } .rail-counts .b { color: var(--blocked); } .rail-counts .x { color: var(--next); }
 /* Not active (FR-9): the last group, opens only; the status is a word, never colour alone */
 .rail-group.folded { margin-top: var(--space-2); border-top: 1px solid var(--border-subtle); padding-top: var(--space-1); }
+.rail-item.folded:hover { border-color: transparent; background: var(--surface); }
 .rail-item.folded .rail-title { color: var(--fg-muted); font-weight: var(--weight-regular); }
 .rail-item.folded .rail-status { color: var(--fg-subtle); }
 
