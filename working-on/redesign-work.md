@@ -5,7 +5,7 @@ repos: [organizer]
 branch: main
 updated: 2026-09-27
 seat: wave2-work
-next: "review: redesign-work, gate G13, G18 met, 357971f"
+next: "review: redesign-work, gate G13, G18 met, 72cb9d8"
 depends_on: ["redesign-shell-home"]
 boundary: ["frontend/src/components/Board.tsx", "frontend/src/components/CardItem.tsx", "frontend/src/components/WaveStrip.tsx (new)", "frontend/src/styles/work.css (new)"]
 spec: "docs/specs/redesign.md (FR-23, FR-19); visual: docs/specs/redesign-mockups.html; values: docs/design-system.md"
@@ -21,10 +21,10 @@ The redesign, wave 2 of 2: FR-19 of `docs/specs/redesign.md`. Decisions 0013–0
 
 ## Done
 - 2026-09-26 cut from the redesign spec by the FSE
-- 2026-09-27 wave2-work: Work is Next · Now · Blocked · In review (lane from `next: review:`) · Done, a wave strip per running wave with a tile per card opening its back, and each open card's agent line or "nobody on it" plus its runs tokens (357971f on `redesign-work`, rebased on main 49ccdd5). G13: `.wt-notes/wave2-work/G13-work.png` (five columns, w-review in In review, wave 1 strip: 0 building, 1 in review, 2 queued, gate rows 3/4, w-nogate "gate —", "no supervisor", every card "nobody on it") and `G13-tile.png` (w-review tile opens its card back), from `wails dev` on `scripts/fixture-home.sh`. G18: the `git diff main...redesign-work … | grep -E …` of the spec prints nothing (grep exit 1). `npm run build` passes; `wails build` rebuilt. Choices in `.wt-notes/wave2-work/progress.md`
+- 2026-09-27 wave2-work: Work is Next · Now · Blocked · In review (lane from `next: review:`) · Done, a wave strip per running wave with a tile per card opening its back, and each open card's agent line or "nobody on it" plus its runs tokens (72cb9d8 on `redesign-work`, rebased on main 219ca85). G13: `.wt-notes/wave2-work/G13-work.png` (five columns, w-review in In review, wave 1 strip: 0 building, 1 in review, 2 queued, gate rows 3/4, w-nogate "gate —", "no supervisor", every card "nobody on it") and `G13-tile.png` (w-review tile opens its card back), from `wails dev` on `scripts/fixture-home.sh`. G18: the `git diff main...redesign-work … | grep -E …` of the spec prints nothing (grep exit 1). `npm run build` passes; `wails build` rebuilt. Choices in `.wt-notes/wave2-work/progress.md`
 
 ## Next
-1. review: redesign-work, gate G13, G18 met, 357971f
+1. review: redesign-work, gate G13, G18 met, 72cb9d8
 
 ## Blockers
 none
