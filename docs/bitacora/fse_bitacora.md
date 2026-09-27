@@ -47,6 +47,12 @@ restating it (the discuss skill).
   is done; the stage's exit also needs the organizer's
   scope (Pablo) and goals on active initiatives (owners), then an "exit met"
   record. The blacksmith is now Hephaistos: its posts start `[hephaistos, for pablo]`; reach it by posting to pablo with a subject starting `[for hephaistos]`.
+- **2026-09-27 later:** sup5 done and retired itself. 0034, 0035, 0036 ruled;
+  sup6 runs glance-needs-me-lead then glance-inactive-fold. Terminating the
+  seven PLV initiatives went to Hephaistos (thread 01M3HZSXFQ1EV5BFH8ARSZ71JR);
+  the organizer keeps camp, organizer, agent-slack. `app-review-with-pablo`
+  holds his three findings from the installed app (long header, no Rule on
+  the Decisions tab, no scroll): review with him soon, then spec.
 - **Waiting on Pablo:** the intake (thread 01M3FAWKV2159MCSH0AZZJWE08); 0021, 0022, 0005, 0004, 0002. No card carries `stage:` until the
   organizer has a roadmap, which waits on the intake.
 - **Learned:** this session hit the drain ceiling (8 per session) at about
