@@ -142,6 +142,8 @@ func ReadInitiative(root string, opts Options) model.ScannedInitiative {
 	si.Cards, si.Problems = readCards(filepath.Join(wo, doneDir), true, si.Cards, si.Problems)
 	sortCards(si.Cards)
 	si.Decisions, si.Problems = readDecisions(filepath.Join(wo, decisionsDir), si.Problems)
+	si.Stages, si.Problems = readRoadmap(wo, si.Problems)
+	si.Problems = append(si.Problems, checkStageLinks(wo, si.Stages, si.Cards, si.Decisions)...)
 	si.Cell, si.Problems = readCell(root, si.Problems)
 
 	if opts.Git {
