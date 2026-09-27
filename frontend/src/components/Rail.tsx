@@ -118,7 +118,7 @@ export function Rail() {
   const current = selectedInitiative ? byId.get(selectedInitiative) : null;
   const hero = current
     ? { eyebrow: current.client || "initiative", name: current.id, now: current.now, blocked: current.blocked, next: current.next }
-    : { eyebrow: "Working on", name: "Everything", ...totals };
+    : { eyebrow: "Working on", name: "Home", ...totals };
 
   const item = (id: string, idx: number) => {
     const e = byId.get(id)!;
@@ -196,7 +196,7 @@ export function Rail() {
     return (
       <nav className="rail strip">
         <button className="rail-icon strip-toggle" onClick={() => setRailCollapsed(false)} title="expand the rail"><PanelLeftOpen size={14} /></button>
-        <button className={`strip-all ${selectedInitiative === null ? "active" : ""}`} onClick={() => setSelectedInitiative(null)} title={`Everything: ${totals.now} now, ${totals.blocked} blocked, ${totals.next} next`}>all</button>
+        <button className={`strip-all ${selectedInitiative === null ? "active" : ""}`} onClick={() => setSelectedInitiative(null)} title={`Home: ${totals.now} now, ${totals.blocked} blocked, ${totals.next} next`}>all</button>
         {entries.map((e) => (
           <button
             key={e.id}
@@ -218,7 +218,7 @@ export function Rail() {
       <button
         className={`rail-hero ${selectedInitiative === null ? "active" : ""}`}
         onClick={() => setSelectedInitiative(null)}
-        title={selectedInitiative ? "Show all initiatives" : "Showing all initiatives"}
+        title={selectedInitiative ? "Back to Home" : "Home: what needs you, and every initiative"}
       >
         <div className="eyebrow">{hero.eyebrow}</div>
         <div className="name">{hero.name}</div>
@@ -227,7 +227,7 @@ export function Rail() {
           <div className="stat"><b>{hero.blocked}</b><span>blocked</span></div>
           <div className="stat"><b>{hero.next}</b><span>next</span></div>
         </div>
-        {selectedInitiative && <div className="hero-back"><ArrowLeft size={12} /> all initiatives</div>}
+        {selectedInitiative && <div className="hero-back"><ArrowLeft size={12} /> Home</div>}
       </button>
       <div className="rail-list">
         <div className="rail-label">
