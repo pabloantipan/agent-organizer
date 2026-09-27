@@ -30,6 +30,7 @@ The redesign, wave 2 of 2: FR-22 of `docs/specs/redesign.md`. Decisions 0013–0
 none
 
 ## Notes
+- 2026-09-27 sup3: three builders saw one console error on every browser load of `wails dev`, before any view mounts: `Cannot read properties of null (reading 'nodes')` in `/wails/ipc.js`, plus a 404. G16 says "no console errors": report every error seen with its source, and do not count as met an error you cannot trace to Wails' runtime rather than `frontend/src`; if it is the runtime, say so with the evidence and let the review judge the gate
 - 2026-09-27 sup3: the gate screenshots run against `eval "$(scripts/fixture-home.sh)"` (1993e12): a temp copy of `testdata/home` with `testdata/fixture-overlay` laid over it: init-a a git repo with two FSE-signed commits, proposed records 0002 (the fixture record G15/G16 rule) and 0003 raised by the FSE and owned by pablo, the current stage gated on 0002, three cards seated `wave1-*`, and a cell `organizer-fixture` whose `fse` seat has one question thread open to pablo in the mailbox. `testdata/home` and `status.golden` are unchanged
 - `stage:` is left out: the organizer has no roadmap yet (it waits on Pablo's intake); the FSE adds it once one is ruled
 - 2026-09-27 sup3 runs this card (organizer-probe-sup3), spawned by the FSE after wave 1 passed
