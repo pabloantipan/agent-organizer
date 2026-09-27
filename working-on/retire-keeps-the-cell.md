@@ -33,3 +33,4 @@ its cell. Separately, `TestAttachSessions` archives into the real
 
 ## Blockers
 none
+- 2026-09-26 sup4 runs this card (organizer-probe-sup4), spawned by the FSE (0025)
