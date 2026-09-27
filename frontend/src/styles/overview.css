@@ -115,3 +115,7 @@ button.gl-row:hover { background: var(--surface-hover); border: 0; }
 .fse-feed li { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: var(--space-2); align-items: baseline; }
 .fse-when { font-size: var(--font-size-sm); color: var(--fg-subtle); }
 .fse-subj { font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* The current stage's phase as a word in its title (twenty-at-a-glance FR-4):
+   sentence case inside the uppercase section title. */
+.sec-title .lz.phase { align-self: center; text-transform: none; letter-spacing: 0; }

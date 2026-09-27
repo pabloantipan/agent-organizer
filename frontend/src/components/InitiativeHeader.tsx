@@ -1,6 +1,7 @@
 import type { merge, model } from "../../wailsjs/go/models";
 import { parseISO, today } from "../lib/dates";
 import { useBoard, type Sub } from "../stores/board.store";
+import "../styles/header.css";
 
 /** A stage's state for the stepper: done when ruled so, current as the scan
  *  stamped it (the first without done), planned otherwise. */
@@ -35,6 +36,13 @@ export function nextDate(i: merge.BoardInitiative, cards: merge.BoardCard[]): { 
   return all[0] ?? null;
 }
 
+/** A stage's phase as a word (FR-4), never a colour alone; nothing when the
+ *  stage has none. */
+export function PhaseWord({ phase }: { phase?: string }) {
+  if (!phase) return null;
+  return <span className="lz phase" title={`phase: ${phase}`}>{phase}</span>;
+}
+
 /** The stage stepper (design system, Stage stepper): number and state,
  *  title, exit in one line; done, current (named in words) or planned.
  *  Only for three or more stages; fewer are one line of words. */
@@ -43,7 +51,7 @@ export function StageStepper({ stages }: { stages: model.Stage[] }) {
   if (stages.length < 3) {
     const cur = stages.findIndex((s) => s.current);
     const s = stages[cur >= 0 ? cur : stages.length - 1];
-    return <div className="stages-none">stage <span className="num">{(cur >= 0 ? cur : stages.length - 1) + 1} of {stages.length}</span> · {s.title}{cur >= 0 ? " · now" : " · done"}</div>;
+    return <div className="stages-none">stage <span className="num">{(cur >= 0 ? cur : stages.length - 1) + 1} of {stages.length}</span> · {s.title}{cur >= 0 ? " · now" : " · done"} <PhaseWord phase={s.phase} /></div>;
   }
   return (
     <ol className="stepper-full">
@@ -51,7 +59,10 @@ export function StageStepper({ stages }: { stages: model.Stage[] }) {
         const st = stageState(s);
         return (
           <li key={k} className={`stg ${st}`} aria-current={st === "current" ? "step" : undefined} title={s.outcome}>
-            <span className="stg-n num">{k + 1}{st === "done" ? " · done" : st === "current" ? " · now" : ""}</span>
+            <span className="stg-head">
+              <span className="stg-n num">{k + 1}{st === "done" ? " · done" : st === "current" ? " · now" : ""}</span>
+              <PhaseWord phase={s.phase} />
+            </span>
             <span className="stg-t">{s.title || s.id}</span>
             <span className="stg-x">{exitLine(s)}</span>
           </li>

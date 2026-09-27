@@ -4,6 +4,7 @@ import { api, type RunsView } from "../hooks/useWails";
 import { parseISO, today, daysBetween } from "../lib/dates";
 import { useBoard } from "../stores/board.store";
 import { FsePanel } from "./FsePanel";
+import { PhaseWord } from "./InitiativeHeader";
 import { gateKey, recordsByGate } from "./StageRoadmap";
 import "../styles/overview.css";
 
@@ -94,6 +95,7 @@ function StageGates({ initiative: i }: { initiative: BoardInitiative }) {
     <section className="ov-sec">
       <h2 className="sec-title">
         Stage <span className="sec-count">{k + 1}</span> · {s.title || s.id}
+        <PhaseWord phase={s.phase} />
         <span className="sec-sub">what stands between it and its exit</span>
       </h2>
       <div className="panel gate-list">

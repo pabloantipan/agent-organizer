@@ -1,6 +1,7 @@
 import type { merge, model } from "../../wailsjs/go/models";
 import type { ReactNode } from "react";
 import { addDays, daysBetween, parseISO, shortDate, today, toISO } from "../lib/dates";
+import { PhaseWord } from "./InitiativeHeader";
 import "../styles/roadmap.css";
 
 /** A gate's key for finding its record (FR-5): a number compares by value, so
@@ -156,7 +157,10 @@ function StageRow({ r, now, pct, slotLeft, slot, grid }: {
   return (
     <div className={`srm-row ${r.state}`}>
       <div className="srm-label">
-        <span className="srm-n num">{r.n}{state && ` · ${state}`}</span>
+        <span className="srm-head">
+          <span className="srm-n num">{r.n}{state && ` · ${state}`}</span>
+          <PhaseWord phase={s.phase} />
+        </span>
         <span className="srm-title" title={s.outcome || s.title || s.id}>{s.title || s.id}</span>
         <span className="srm-sub num">{sub}</span>
         {missing.length > 0 && (

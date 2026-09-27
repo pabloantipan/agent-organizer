@@ -1,0 +1,8 @@
+/* The initiative header's additions (docs/specs/twenty-at-a-glance.md FR-4):
+   each stage's phase as a word on the stepper. The header's base rules stay in shell.css. Tier-2 role tokens and
+   the seven type sizes only; no nesting, @layer or color-mix (Safari 15.0). */
+
+/* The stepper's first line: number and state, then the phase word. */
+.stg-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-width: 0; }
+.stg-head .lz { flex: none; }
+.stages-none .lz { margin-left: var(--space-1); }
