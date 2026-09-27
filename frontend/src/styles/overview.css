@@ -1,0 +1,117 @@
+/* Overview (docs/specs/redesign.md FR-18, FR-12; mockup O4, O5): the current
+   stage's gates and exit items, the work summary in tokens, the FSE panel.
+   Tier-2 role tokens and the seven type sizes only (FR-23); no nesting,
+   @layer or color-mix (Safari 15.0). .lz, .sec-title and .panel come from
+   shell.css. */
+
+.ov { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: var(--space-4); align-items: start; max-width: 1240px; }
+.ov-main { display: grid; gap: var(--space-6); min-width: 0; }
+.ov-sec { display: grid; gap: var(--space-2); min-width: 0; }
+.ov .panel { background: var(--surface); border-radius: var(--radius-lg); }
+@media (max-width: 900px) { .ov { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- the current stage: gates and exit ---------- */
+.gate-list { display: grid; gap: var(--space-2); padding: var(--space-3) var(--space-4) var(--space-4); }
+.gl-outcome { font-size: var(--font-size-lg); line-height: var(--line-lg); color: var(--fg-muted); }
+.gl-label {
+  display: flex; align-items: baseline; gap: var(--space-2); margin-top: var(--space-2);
+  font-size: var(--font-size-xs); line-height: var(--line-xs); font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--fg-subtle);
+}
+.gl-label .num { font-family: var(--mono); color: var(--fg-muted); letter-spacing: 0; }
+.gl-label .sec-sub { text-transform: none; letter-spacing: 0; }
+.gl-none { font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-subtle); }
+.gl-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-0-5); }
+.gl-row {
+  display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: var(--space-3); align-items: center;
+  width: 100%; min-height: var(--control-md); padding: var(--space-1) var(--space-2);
+  border: 0; border-radius: var(--radius-sm); background: transparent; text-align: left;
+  font: inherit; font-size: var(--font-size-md); line-height: var(--line-md); color: var(--fg);
+}
+button.gl-row { cursor: pointer; transition: background var(--dur-fast) var(--ease-out); }
+button.gl-row:hover { background: var(--surface-hover); border: 0; }
+.gl-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gl-text .mono { font-size: var(--font-size-sm); color: var(--fg-muted); }
+.gl-row.missing .gl-text { color: var(--fg-subtle); font-style: italic; }
+.gl-row.exit .gl-text { white-space: normal; }
+.gl-row.exit.met .gl-text { color: var(--fg-muted); }
+
+/* Decisions are diamonds: hollow fuchsia and dashed waiting, solid indigo ruled
+   (design system, Timeline and Decision record). */
+.diamond { width: 10px; height: 10px; transform: rotate(45deg); border-radius: 2px; justify-self: center; box-sizing: border-box; }
+.diamond.waiting { background: transparent; border: 2px dashed var(--decision-waiting); }
+.diamond.ruled { background: var(--decision-ruled); }
+.diamond.other { background: transparent; border: 2px solid var(--fg-disabled); }
+.diamond.missing { background: transparent; border: 1px dashed var(--fg-subtle); }
+.lz.ruled { background: var(--decision-ruled-bg); color: var(--decision-ruled-fg); }
+
+/* An exit item: a box, filled when met. */
+.check { width: 12px; height: 12px; border-radius: var(--radius-xs); justify-self: center; box-sizing: border-box; border: 2px solid var(--fg-subtle); position: relative; }
+.check.ok { background: var(--live); border-color: var(--live); }
+.check.ok::after {
+  content: ""; position: absolute; left: 2px; top: 0; width: 3px; height: 6px;
+  border: solid var(--bg); border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+
+/* ---------- work now ---------- */
+.work-sum { display: grid; gap: var(--space-3); padding: var(--space-3) var(--space-4) var(--space-4); }
+.ws-counts { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); font-size: var(--font-size-md); line-height: var(--line-md); color: var(--fg-muted); }
+.ws-count { display: inline-flex; align-items: baseline; gap: var(--space-1-5); }
+.ws-count::before { content: ""; width: 6px; height: 6px; border-radius: var(--radius-full); background: var(--fg-disabled); align-self: center; }
+.ws-count.now::before { background: var(--status-now); }
+.ws-count.blocked::before { background: var(--status-blocked); }
+.ws-count.next::before { background: var(--status-next); }
+.ws-count.review::before { background: var(--status-review); }
+.ws-count.done::before { background: var(--status-done); }
+.ws-count b { font-size: var(--font-size-xl); line-height: var(--line-xl); font-weight: var(--weight-semibold); color: var(--fg); }
+.ws-tokens { display: grid; gap: var(--space-1-5); }
+.ws-total { font-size: var(--font-size-md); color: var(--fg-muted); }
+.ws-total b { font-size: var(--font-size-2xl); line-height: var(--line-2xl); font-weight: var(--weight-bold); color: var(--fg); margin-right: var(--space-1); }
+.ws-cards { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-0-5); }
+.ws-cards li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: var(--space-3); align-items: center; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); padding: var(--space-0-5) 0; }
+.ws-cards li > .mono:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ws-cards .unattributed { color: var(--fg-subtle); font-style: italic; }
+.ws-n { color: var(--fg); text-align: right; min-width: 56px; }
+
+/* ---------- the FSE panel ---------- */
+.fse-panel { display: grid; }
+.fse-head {
+  display: flex; align-items: center; gap: var(--space-2); width: 100%;
+  min-height: var(--control-lg); padding: var(--space-2) var(--space-4);
+  background: transparent; border: 0; border-radius: var(--radius-lg); text-align: left;
+  font-size: var(--font-size-md); color: var(--fg-muted);
+}
+.fse-head:hover { background: var(--surface-hover); border: 0; }
+.fse-name { font-weight: var(--weight-semibold); color: var(--fg); }
+.fse-ctx { font-size: var(--font-size-sm); color: var(--fg-subtle); }
+.fse-count { margin-left: auto; }
+.fse-body { display: grid; gap: var(--space-4); padding: var(--space-1) var(--space-4) var(--space-4); }
+.fse-sec { display: grid; gap: var(--space-1-5); }
+.fse-label {
+  font-size: var(--font-size-xs); line-height: var(--line-xs); font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--fg-subtle);
+}
+.fse-none { font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-subtle); }
+.fse-wait { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-0-5); }
+.fse-item {
+  display: grid; grid-template-columns: 16px minmax(0, 1fr) auto 44px; gap: var(--space-2); align-items: center;
+  width: 100%; min-height: var(--control-md); padding: var(--space-1) var(--space-2);
+  background: var(--surface-raised); border: 0; border-radius: var(--radius-md); text-align: left;
+  font-size: var(--font-size-md); line-height: var(--line-md); color: var(--fg); cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.fse-item:hover { background: var(--surface-hover); border: 0; }
+.fse-what { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fse-what .mono { font-size: var(--font-size-sm); color: var(--fg-muted); }
+.fse-age { font-size: var(--font-size-sm); color: var(--fg-subtle); text-align: right; }
+/* A question from the FSE: a tone dot, since the reason is a thread, not a record. */
+.fse-q { width: 8px; height: 8px; border-radius: var(--radius-full); background: var(--tone); justify-self: center; }
+.fse-handoff { display: grid; gap: var(--space-1); padding-left: var(--space-3); box-shadow: inset 2px 0 0 var(--accent); }
+.fse-handoff-h { font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-subtle); }
+.fse-handoff p { margin: 0; font-size: var(--font-size-md); line-height: var(--line-md); color: var(--fg-muted); }
+.fse-handoff b { color: var(--fg); font-weight: var(--weight-semibold); }
+.fse-handoff code { font-family: var(--mono); font-size: var(--font-size-sm); color: var(--fg); }
+.fse-feed { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-1-5); }
+.fse-feed li { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: var(--space-2); align-items: baseline; }
+.fse-when { font-size: var(--font-size-sm); color: var(--fg-subtle); }
+.fse-subj { font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
