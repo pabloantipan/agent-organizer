@@ -1,13 +1,13 @@
 ---
 title: What the FSE panel on Overview shows beyond a feed
-status: proposed
+status: ruled
 raised: 2026-09-26
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-27
+ruled_by: pablo
 options: [feed only, feed and what the FSE waits on, feed and hand-off only]
-chosen:
+chosen: feed and what the FSE waits on
 cards: []
 threads: [01M3G3SE8B4QAK39G6JY2W8ZH8]
 supersedes: []
@@ -41,6 +41,7 @@ the list cannot, because it is derived.
 
 ## Ruling
 
+Pablo, 2026-09-27, in the UI review session, choosing among the options as laid out there: "Feed + waits on": up to five items, the FSE's proposed records he owns and its unanswered questions to him, each linking to its Needs me row, derived and never stored. The panel header carries the count ("waiting on you: N") so it shows when the list is collapsed.
 
 
 ## Consequences

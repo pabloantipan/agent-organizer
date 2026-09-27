@@ -1,13 +1,13 @@
 ---
 title: A stage may carry an appetite in place of a date
-status: proposed
+status: ruled
 raised: 2026-09-26
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-27
+ruled_by: pablo
 options: [appetite allowed, a date required, neither]
-chosen:
+chosen: appetite allowed
 cards: []
 threads: [01M3G3SE8B4QAK39G6JY2W8ZH8]
 supersedes: []
@@ -39,6 +39,7 @@ The FSE's: appetite allowed. No objection to the format as written.
 
 ## Ruling
 
+Pablo, 2026-09-27, in the UI review session, choosing among the options as laid out there: "Appetite allowed": a stage without a real date draws as a dashed bar labelled with its appetite; a real date stays a date; no date is ever computed from an appetite.
 
 
 ## Consequences
