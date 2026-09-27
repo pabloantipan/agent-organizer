@@ -5,7 +5,7 @@ repos: [organizer]
 branch: main
 updated: 2026-09-26
 seat: wave2-rulebox
-next: "pablo: grant iTerm2 Screen Recording and Accessibility (System Settings, Privacy), or run the G16 built-app walk yourself; then G16-1…6 from the built app and review: redesign-rule-box (G15, G18 met; 224d4b4 b0f2d13)"
+next: "restart the wave2-rulebox session so it picks up the Accessibility grant (this process still gets -1719), then take G16-2…6 from the built app; G16-1-home.png taken; then review: redesign-rule-box (G15, G18 met; 224d4b4 b0f2d13)"
 depends_on: ["redesign-overview", "redesign-work", "redesign-roadmap"]
 boundary: ["frontend/src/components/RuleDecisionBox.tsx (new)", "frontend/src/components/Home.tsx (the decision row's Rule action)", "frontend/src/styles/rule-box.css (new)"]
 spec: "docs/specs/redesign.md (FR-23, FR-22); visual: docs/specs/redesign-mockups.html; values: docs/design-system.md"
@@ -30,6 +30,7 @@ The redesign, wave 2 of 2: FR-22 of `docs/specs/redesign.md`. Decisions 0013–0
 
 ## Blockers
 - G16's built-app walk: this session has no macOS Accessibility (`osascript is not allowed assistive access (-1719)`, so no click in the native window) and no Screen Recording (`screencapture -x -l <window>` → "could not create image from window", `-R` → "could not create image from rect"). Only Pablo can grant either
+- 2026-09-26 23:20, after Pablo's grant: Screen Recording works in this process (`G16-1-home.png` from the built app); Accessibility does not (`-1719`), since a running process keeps its old permission. A fresh session takes G16-2…6
 
 ## Notes
 - 2026-09-26 wave2-rulebox: the console error is Wails' runtime, not `frontend/src`. `Cannot read properties of null (reading 'nodes')`, frames `Fe`, `bn`, `new In` all in `/wails/ipc.js`, which is byte-identical (sha256 3c3b999d…) to wails v2.15.0's `internal/frontend/runtime/ipc_websocket.js`; `In` is its Svelte dev overlay mounted on DOMContentLoaded at `#wails-spinner`. It reproduces on a page holding only `ipc.js`, `runtime.js` and that div, no app code, so main has it too (`.wt-notes/wave2-rulebox/ipc-blank.log`). No 404 appeared in these runs. It is a `wails dev` page only; the built app does not serve `ipc_websocket.js`
