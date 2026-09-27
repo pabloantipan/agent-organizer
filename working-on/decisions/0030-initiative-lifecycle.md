@@ -1,13 +1,13 @@
 ---
 title: An initiative has a goal and a scope, and moves from discovery to building
-status: proposed
+status: ruled
 raised: 2026-09-27
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-27
+ruled_by: pablo
 options: [as read, amend the reading, not now]
-chosen:
+chosen: as read
 cards: []
 threads: []
 supersedes: []
@@ -73,7 +73,7 @@ prompt from.
 
 ## Ruling
 
-
+Pablo, 2026-09-27, in the blacksmith session, choosing "As read": scope next to goal; discovery in a persona cell, then building through the FSE, with a ruled gate between; cells drafted from the initiative; docs that grow with complexity; a seventh sub-goal. The blacksmith writes the format change (scope, the phase label) into the working-on and roadmapping skills.
 
 ## Consequences
 
