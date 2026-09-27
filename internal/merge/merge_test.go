@@ -135,3 +135,39 @@ func TestBuildCarriesGoalMeasureSpecsAndStages(t *testing.T) {
 		t.Errorf("now column=%+v", c)
 	}
 }
+
+// FR-11, G7, the board half: the FSE's activity rides from the scan to the
+// board, and an initiative without an FSE carries an empty one.
+func TestBuildCarriesFSEActivity(t *testing.T) {
+	now := time.Date(2026, 9, 2, 12, 0, 0, 0, time.UTC)
+	withFSE := si("fse", "acme", model.Card{Slug: "c1", Status: "now", Updated: "2026-09-01", Next: "a"})
+	withFSE.FSE = model.FSEActivity{
+		Path:        "/tmp/init/docs/bitacora/fse_bitacora.md",
+		HandOff:     "HAND-OFF — 2026-09-02, the spec is out",
+		HandOffBody: "- **Waiting on Pablo:** the intake.",
+		Commits: []model.FSECommit{
+			{SHA: "aaa1111", At: "2026-09-02T09:02:00Z", Subject: "docs(fse): signed 2"},
+			{SHA: "bbb2222", At: "2026-09-02T09:01:00Z", Subject: "docs(fse): signed 1"},
+		},
+	}
+	bare := si("bare", "acme", model.Card{Slug: "c2", Status: "now", Updated: "2026-09-01", Next: "b"})
+	b := Build(model.Snapshot{Machine: "here", Initiatives: []model.ScannedInitiative{withFSE, bare}}, nil, model.Order{}, now)
+
+	byID := map[string]BoardInitiative{}
+	for _, bi := range b.Initiatives {
+		byID[bi.ID] = bi
+	}
+	got := byID["fse"].FSE
+	if got.HandOff != withFSE.FSE.HandOff || got.HandOffBody != withFSE.FSE.HandOffBody || got.Path != withFSE.FSE.Path {
+		t.Errorf("hand-off=%+v", got)
+	}
+	if len(got.Commits) != 2 || got.Commits[0].Subject != "docs(fse): signed 2" {
+		t.Fatalf("commits=%+v", got.Commits)
+	}
+	if got.Empty() {
+		t.Error("activity with a hand-off and commits reads as empty")
+	}
+	if !byID["bare"].FSE.Empty() {
+		t.Errorf("initiative with no FSE: %+v", byID["bare"].FSE)
+	}
+}

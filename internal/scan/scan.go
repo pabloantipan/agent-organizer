@@ -145,6 +145,7 @@ func ReadInitiative(root string, opts Options) model.ScannedInitiative {
 	si.Stages, si.Problems = readRoadmap(wo, si.Problems)
 	si.Problems = append(si.Problems, checkStageLinks(wo, si.Stages, si.Cards, si.Decisions)...)
 	si.Cell, si.Problems = readCell(root, si.Problems)
+	si.FSE = readFSE(root, opts)
 
 	if opts.Git {
 		si.RepoStates = gitStates(root, si.Initiative.Repos, opts.GitTimeout)

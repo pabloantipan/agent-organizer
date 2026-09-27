@@ -365,6 +365,39 @@ type Problem struct {
 	Msg  string `json:"msg"`
 }
 
+// FSEActivity is what the board carries about an initiative's Forward Software
+// Engineer: the hand-off it left for its next session and the commits it signed
+// (FR-11). Derived on every scan, never stored. An initiative with no bitácora
+// has no activity and that is the normal case, not a problem.
+//
+// The FSE's open threads, FR-11's third part, are not here: they come from the
+// discuss API, which only internal/service reaches.
+type FSEActivity struct {
+	// Path is the bitácora that was read, absolute, empty when there is none.
+	Path string `json:"path"`
+	// HandOff is the HAND-OFF heading as written ("HAND-OFF — 2026-09-26, the
+	// redesign spec is out") and HandOffBody the section under it, verbatim
+	// markdown.
+	HandOff     string `json:"hand_off"`
+	HandOffBody string `json:"hand_off_body"`
+	// Commits are the last ten commits with a Committed-by: FSE trailer,
+	// newest first.
+	Commits []FSECommit `json:"commits"`
+}
+
+// Empty reports whether there is no FSE activity to show.
+func (a FSEActivity) Empty() bool {
+	return a.HandOff == "" && a.HandOffBody == "" && len(a.Commits) == 0
+}
+
+// FSECommit is one commit the FSE signed: its time (RFC 3339, so a view can
+// show the hour) and subject, with the short sha to point at it.
+type FSECommit struct {
+	SHA     string `json:"sha"`
+	At      string `json:"at"`
+	Subject string `json:"subject"`
+}
+
 // ScannedInitiative is an initiative with everything read from disk.
 type ScannedInitiative struct {
 	Initiative
@@ -375,8 +408,11 @@ type ScannedInitiative struct {
 	Problems   []Problem   `json:"problems"`
 	Agents     []Agent     `json:"agents"`
 	// Cell is the persona roster when agents/cell.json exists at the root.
-	Cell      *Cell     `json:"cell"`
-	ScannedAt time.Time `json:"scanned_at"`
+	Cell *Cell `json:"cell"`
+	// FSE is the initiative's Forward Software Engineer activity, read from
+	// the bitácora and git. Empty when there is no FSE.
+	FSE       FSEActivity `json:"fse"`
+	ScannedAt time.Time   `json:"scanned_at"`
 }
 
 // LiveAgents counts agents with a running process; Working counts those busy.
