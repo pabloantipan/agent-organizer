@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-26
-next: "decide: 0005 the FSE pilot with the authority as drafted, and which as-built row it reverses; then the FSE runs its intake with Pablo"
+next: "pablo: report your minutes on each redesign wave (run records); then the FSE proposes keep or drop on pablo_minutes, gate_rework and decide_turnaround"
 ---
 
 ## Context

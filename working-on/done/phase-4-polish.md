@@ -1,10 +1,10 @@
 ---
 title: Phase 4 polish, only after two weeks of real use
-status: next
+status: done
 repos: []
 branch: none
 updated: 2026-09-26
-next: "decide: 0002 which of tray, fsnotify, launch-at-login, or status drag earned its place after two weeks of use"
+next: "none: 0002 ruled none for now; revisit after a week of using the redesign"
 due: 2026-09-16
 ---
 
@@ -26,3 +26,8 @@ Add only what daily use proves missing.
 
 ## Blockers
 - Two weeks of use. Owner: Pablo. The due date is two weeks after 2026-09-02, when the app first ran.
+
+## Review
+- Verdict: closed by ruling, not built. Pablo, 2026-09-26: "None for now" (decision 0002).
+- Unmet: nothing; tray, fsnotify, launch-at-login and status drag return as cards only if a week of use asks for them.
+- Reviewer: Pablo, recorded by the blacksmith, 2026-09-26
