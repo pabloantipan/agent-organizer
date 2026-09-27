@@ -1,0 +1,7 @@
+{
+  "project": "organizer-fixture",
+  "workdir": "/h/init-a",
+  "agents": ["fse", "po_ana", "dev_bruno"],
+  "human": "pablo",
+  "reconciler": "po_ana"
+}
