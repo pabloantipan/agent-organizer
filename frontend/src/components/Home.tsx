@@ -6,6 +6,7 @@ import { uniq } from "../lib";
 import { useBoard } from "../stores/board.store";
 import { nextDate, stageState, waitingDecisions } from "./InitiativeHeader";
 import { InitiativeDetail } from "./Initiatives";
+import { RuleDecisionBox } from "./RuleDecisionBox";
 
 /** Home: what needs me, and where every initiative stands (FR-15, FR-16).
  *  Needs me is one list, oldest first, one verb per row; its length is the
@@ -105,23 +106,27 @@ function InboxRow({ row }: { row: NeedsMeRow }) {
   }
 }
 
-/** A decision waiting on a ruling. Its action is a slot: the rule-box card
- *  replaces RuleAction with the box that writes the ruling; until then Rule
- *  opens the record in the initiative's Decisions view. */
+/** A decision waiting on a ruling. Its action is a slot: RuleAction opens
+ *  the box that writes the ruling (FR-22). */
 function DecisionRow({ row, decision: d }: { row: NeedsMeRow; decision: model.Decision }) {
   const opts = d.options ?? [];
   return (
     <Shell row={row} reason="decision" tone="waiting"
       subject={<><span className="mono">{row.initiative} {d.number}</span> · {d.title}</>}
       context={<>owner {d.owner || "—"} · raised <span className="num">{d.raised || "—"}</span>{d.raised_by ? ` by ${d.raised_by}` : ""}{opts.length > 0 ? ` · options: ${opts.join(", ")}` : ""}</>}>
-      <RuleAction initiative={row.initiative} />
+      <RuleAction initiative={row.initiative} decision={d} />
     </Shell>
   );
 }
 
-function RuleAction({ initiative }: { initiative: string }) {
-  const { openInitiative } = useBoard();
-  return <button className="act primary" onClick={() => openInitiative(initiative, "decisions")}>Rule</button>;
+function RuleAction({ initiative, decision }: { initiative: string; decision: model.Decision }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <span className="rb-anchor">
+      <button className="act primary" aria-expanded={open} onClick={() => setOpen(!open)}>Rule</button>
+      {open && <RuleDecisionBox initiative={initiative} decision={decision} onClose={() => setOpen(false)} />}
+    </span>
+  );
 }
 
 /** The initiatives by priority, one row each (H3): goal or "no goal yet",
