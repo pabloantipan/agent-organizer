@@ -237,11 +237,11 @@ the package's `_test.go` with testdata under `testdata/home`.
   Portfolio exist. Reuse them inside the new shell, and change only what the
   FRs name.
 - **Supervisor liveness beyond the session name.** A1 is enough.
-- **Session names on this initiative.** `organizer-probe-` leaves six
-  characters under probe's 22 (`organizer run … --print` warns on every card
-  here), so a builder's session cannot be its slug or `wave1-<name>`. The
-  card's `seat:` may still be `wave<N>-<name>` (FR-9 groups by seat, not
-  session); the session name is the supervisor's, six characters or fewer.
+- **Session names on this initiative.** Since `longer-session-names`
+  (done, 2026-09-27) a probe session name may be 68 characters
+  (`maxSessionName`, `internal/service/crew.go:46`), so a builder's session
+  can be its slug. The card's `seat:` is `wave<N>-<name>` (FR-9 groups by
+  seat, not session).
 
 ## Open questions
 
@@ -292,3 +292,4 @@ three that depend on them. Wave 2 starts once wave 1's review passes.
 
 - 2026-09-26: FR-23 and gate rows G17, G18 added at Pablo's request (thread 01M3G4W66JB0YXBG0TW795WQ6W): the views build on the design system (ac0d15a..ef1b980). Before acceptance; 0023 accepted this version.
 - 2026-09-27: 0021 and 0022 ruled. FR-12 is now a requirement (in `redesign-overview`, gate G19); FR-21 always labels the appetite. The build proved nothing wrong; the open questions closed.
+- 2026-09-27: the session-name rabbit hole now states the 68-character ceiling from `longer-session-names`.

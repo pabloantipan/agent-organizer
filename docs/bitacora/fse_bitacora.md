@@ -11,9 +11,10 @@ restating it (the discuss skill).
   Delivered: `docs/specs/redesign.md` (proposed), cards `redesign-*` (11, two
   waves, all pass `organizer run organizer <card> --print`), records 0021
   (Q4), 0022 (Q5), 0023 (accept the spec).
-- **Running:** sup1 (organizer-probe-sup1, started 2026-09-26 ~21:45) owns
-  `longer-session-names` and `drain-ceiling` (0024). I hear about it only
-  through card commits; I do not read its pane.
+- **Done:** sup1's task (0024): drain-ceiling and longer-session-names both
+  passed review 2026-09-27. The installed app (`/Applications/organizer.app`,
+  the `organizer` on PATH) predates it and still warns at 22; `make install`
+  is Pablo's.
 - **Running:** sup2 (organizer-probe-sup2) owns the redesign's wave 1, the
   six backend cards (0023 accepted 2026-09-26 with the design-system
   amendment FR-23, G17, G18). Next for me: when wave 1's last card lands in
