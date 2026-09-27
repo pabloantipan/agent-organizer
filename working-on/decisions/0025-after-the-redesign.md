@@ -1,7 +1,7 @@
 ---
 title: The organizer's next task after the redesign
 status: proposed
-raised: 2026-09-27
+raised: 2026-09-26
 raised_by: fse
 owner: pablo
 ruled:
@@ -17,7 +17,7 @@ stage:
 
 ## Question
 
-The redesign landed on 2026-09-27: 11 cards, two waves, all passed review
+The redesign landed on 2026-09-26: 11 cards, two waves, all passed review
 (`docs/specs/redesign.md`). What does the organizer build next? Picking a
 task is priority, and priority is Pablo's.
 

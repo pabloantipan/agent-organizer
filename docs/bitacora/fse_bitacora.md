@@ -12,10 +12,10 @@ restating it (the discuss skill).
   waves, all pass `organizer run organizer <card> --print`), records 0021
   (Q4), 0022 (Q5), 0023 (accept the spec).
 - **Done:** sup1's task (0024): drain-ceiling and longer-session-names both
-  passed review 2026-09-27. The installed app (`/Applications/organizer.app`,
+  passed review 2026-09-26. The installed app (`/Applications/organizer.app`,
   the `organizer` on PATH) predates it and still warns at 22; `make install`
   is Pablo's.
-- **Done 2026-09-27:** the redesign (0015, 0023): wave 1 (sup2) and wave 2
+- **Done 2026-09-26:** the redesign (0015, 0023): wave 1 (sup2) and wave 2
   (sup3), 11 cards, all passed review. The installed app still predates it;
   `make install` is Pablo's. Next task: 0025 (proposed).
 - **Observed:** sup1 seated `w1a`/`w1b`, not `wave<N>-*` (short because of
@@ -31,13 +31,13 @@ restating it (the discuss skill).
   not word-split, so a loop over a space-separated variable writes one file
   named after all of them. sup2 cleaned it up in 713d2aa. Loop over a literal
   list or `${=VAR}`.
-- **The blacksmith (2026-09-27):** the pair session posts as `pablo` with the
+- **The blacksmith (2026-09-26):** the pair session posts as `pablo` with the
   prefix `[blacksmith, for pablo]`; a relay, a ruling only where it quotes
   Pablo and says where (fse skill). Its unprefixed earlier messages: the
   redesign task, the two FSE rulings, the design-system amendment; their
   rulings stand as relays. Records 0021 and 0022 were written there and
   quote Pablo's choice.
-- **Learned (2026-09-27):** sup2 launched deaf: `opus.prelude.sh` exports only
+- **Learned (2026-09-26):** sup2 launched deaf: `opus.prelude.sh` exports only
   the model. Fixed with its own prelude and `probe -r`; the recipe is now in
   the stand-up reference (claudecode 29a8aac).
 - **Rejected:** opening a card for 0012 (the Decisions tab was built
