@@ -126,6 +126,10 @@ export function RunReview(arg1) {
   return window['go']['main']['App']['RunReview'](arg1);
 }
 
+export function Runs(arg1) {
+  return window['go']['main']['App']['Runs'](arg1);
+}
+
 export function SaveConfig(arg1) {
   return window['go']['main']['App']['SaveConfig'](arg1);
 }

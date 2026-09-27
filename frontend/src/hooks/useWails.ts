@@ -26,6 +26,9 @@ export type CellThreadView = service.CellThreadView;
 export type CellPost = service.CellPost;
 export type CellMessage = discuss.Message;
 export type Group = model.Group;
+export type RunsView = service.RunsView;
+export type CardRuns = service.CardRuns;
+export type RunInfo = service.RunInfo;
 
 export const api = {
   getBoard: (): Promise<BoardView> => App.GetBoard(),
@@ -72,4 +75,5 @@ export const api = {
   setInitiativeOrder: (ids: string[]): Promise<void> => App.SetInitiativeOrder(ids),
   setGroups: (groups: Group[]): Promise<void> => App.SetGroups(groups),
   setCardOrder: (id: string, slugs: string[]): Promise<void> => App.SetCardOrder(id, slugs),
+  runs: (id: string): Promise<RunsView> => App.Runs(id),
 };
