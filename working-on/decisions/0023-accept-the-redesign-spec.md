@@ -1,13 +1,13 @@
 ---
 title: Accept the redesign spec, and launch its wave 1
-status: proposed
+status: ruled
 raised: 2026-09-26
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-26
+ruled_by: pablo
 options: [accept as written, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [redesign-goal-stages, redesign-agent-card, redesign-runs-binding, redesign-waves, redesign-fse-activity, redesign-rule-record, redesign-shell-home, redesign-overview, redesign-work, redesign-roadmap, redesign-rule-box]
 threads: [01M3G3SE8B4QAK39G6JY2W8ZH8]
 supersedes: []
@@ -42,7 +42,10 @@ the spec made that you have not ruled:
 
 ## Ruling
 
-
+Pablo, 2026-09-26, in the FSE's session (organizer-probe-fse): "I accept
+0023". The version accepted carries the design-system amendment he asked for
+in thread 01M3G4W66JB0YXBG0TW795WQ6W (FR-23, G17, G18), applied before the
+ruling was recorded.
 
 ## Consequences
 

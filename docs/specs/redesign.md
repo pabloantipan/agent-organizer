@@ -1,9 +1,10 @@
 # The organizer, organized around the initiative
 
-status: proposed
+status: ruled (0023, 2026-09-26)
 owner: pablo
 decisions: [0013 ruled, 0014 ruled, 0015 ruled, 0016 ruled, 0017 ruled, 0018 ruled, 0019 ruled, 0020 ruled, 0021 proposed, 0022 proposed]
 visual reference: `docs/specs/redesign-mockups.html` (bf0e085), pins H1–H3, O1–O5, W1–W4, R1–R2
+design system: `docs/design-system.md` and `frontend/src/styles/tokens.css` (ac0d15a..ef1b980); the mockups show layout, the design system decides every value
 
 ## Problem
 
@@ -114,6 +115,22 @@ was wrong; stop and amend it.
 
 ### Wave 2 — views
 
+- **FR-23** Every view in this wave shall be built from the design system
+  (`docs/design-system.md`):
+  - tier-2 role tokens only (surfaces, text, borders, accent, status,
+    decisions, signals), never a raw hex, rgba or legacy alias
+    (`--panel`, `--muted`, `--dim`, `--r`, …) in a component touched here;
+  - the seven type sizes (`--font-size-xs` … `--font-size-3xl`) and nothing
+    else, with tabular numerals on every count, date and token figure;
+  - the component anatomy of its Components section for the rail item,
+    board column and card, inbox row, stage stepper, timeline, decision
+    record and agent row;
+  - its CSS rules: the Safari 15.0 floor (no `oklch()`, `color-mix()`,
+    relative colours, native nesting or `@layer`) and a `:focus-visible`
+    ring that is never removed.
+  Where the mockup page and the design system disagree on a value, the
+  design system wins.
+
 - **FR-14** Navigation shall be Home, plus one initiative with six sub-views
   under one header: Overview, Work, Roadmap, Decisions, Conversations,
   Agents.
@@ -174,6 +191,8 @@ the package's `_test.go` with testdata under `testdata/home`.
 | G13 | 19 | Work shows five columns, a wave strip for the fixture wave, and each card's agent line or "nobody on it" | screenshot | matches W1–W4 |
 | G14 | 20,21 | Roadmap shows one row per fixture stage, gate diamonds, and a dashed bar for a stage with no target; Cards and Calendar switch | screenshot | matches R1, R2 |
 | G15 | 22 | Ruling the fixture record from Needs me writes it (G8's checks on the temp copy) and the row leaves the queue | screenshot and `git -C <tmp> log -1 --stat` | one file, one commit |
+| G17 | — | Wave 1 changes no stylesheet | `git diff --name-only main...<branch> -- '*.css'` | empty |
+| G18 | 23 | Wave 2 adds no raw colour or font size outside `tokens.css` | `git diff main...<branch> -- 'frontend/src/**/*.css' 'frontend/src/**/*.tsx' ':!frontend/src/styles/tokens.css' \| grep -E '^\+.*(#[0-9a-fA-F]{3,8}\b\|rgba?\(\|font-size:[[:space:]]*[0-9])'` | empty |
 | G16 | — | End to end: `wails build`; run the app with `ORGANIZER_CONFIG` set to a temp config whose roots are a temp copy of `testdata/home` (a git repo); walk Home → init-a → Overview → Work → Roadmap → rule the fixture record | screenshots of each, plus `cd frontend && npm run build` | every screen renders, the record is ruled, no console errors |
 
 ## Boundary
@@ -254,18 +273,18 @@ three that depend on them. Wave 2 starts once wave 1's review passes.
 
 | Card | Gate rows | Depends on |
 |---|---|---|
-| `redesign-goal-stages` | G1, G2, G3, G9 | — |
-| `redesign-agent-card` | G4, G9 | — |
-| `redesign-runs-binding` | G6, G9 | — |
-| `redesign-waves` | G5, G9 | goal-stages, agent-card |
-| `redesign-fse-activity` | G7, G9 | goal-stages |
-| `redesign-rule-record` | G8, G9 | runs-binding |
-| `redesign-shell-home` | G10, G11, G12 (Home, header) | wave 1 |
-| `redesign-overview` | G12 (Overview) | shell-home |
-| `redesign-work` | G13 | shell-home |
-| `redesign-roadmap` | G14 | shell-home |
-| `redesign-rule-box` | G15, G16 | overview, work, roadmap |
+| `redesign-goal-stages` | G1, G2, G3, G9, G17 | — |
+| `redesign-agent-card` | G4, G9, G17 | — |
+| `redesign-runs-binding` | G6, G9, G17 | — |
+| `redesign-waves` | G5, G9, G17 | goal-stages, agent-card |
+| `redesign-fse-activity` | G7, G9, G17 | goal-stages |
+| `redesign-rule-record` | G8, G9, G17 | runs-binding |
+| `redesign-shell-home` | G10, G11, G12 (Home, header), G18 | wave 1 |
+| `redesign-overview` | G12 (Overview), G18 | shell-home |
+| `redesign-work` | G13, G18 | shell-home |
+| `redesign-roadmap` | G14, G18 | shell-home |
+| `redesign-rule-box` | G15, G16, G18 | overview, work, roadmap |
 
 ## Amendments
 
-- none yet
+- 2026-09-26: FR-23 and gate rows G17, G18 added at Pablo's request (thread 01M3G4W66JB0YXBG0TW795WQ6W): the views build on the design system (ac0d15a..ef1b980). Before acceptance; 0023 accepted this version.

@@ -1,0 +1,1 @@
+- 2026-09-26 sup2 runs this card (organizer-probe-sup2), spawned by the FSE after 0023

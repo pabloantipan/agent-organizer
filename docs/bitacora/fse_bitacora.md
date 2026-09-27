@@ -14,14 +14,14 @@ restating it (the discuss skill).
 - **Running:** sup1 (organizer-probe-sup1, started 2026-09-26 ~21:45) owns
   `longer-session-names` and `drain-ceiling` (0024). I hear about it only
   through card commits; I do not read its pane.
-- **Next action:** when 0023 is ruled accepted, set the spec's status, write
-  `~/.local/share/organizer/prompts/organizer-sup2.md` (sup1 is taken) for the six wave-1
-  cards (their order is the spec's Cards table; builder sessions six
-  characters or fewer unless `longer-session-names` has landed; then amend the spec's Rabbit holes line), start sup2 per
-  `~/.claude/skills/fse/references/standing-up.md`, note `sup2` on those
-  cards, commit, let go.
-- **Waiting on Pablo:** the intake (thread 01M3FAWKV2159MCSH0AZZJWE08); 0023,
-  0021, 0022, 0005, 0004, 0002. No card carries `stage:` until the
+- **Running:** sup2 (organizer-probe-sup2) owns the redesign's wave 1, the
+  six backend cards (0023 accepted 2026-09-26 with the design-system
+  amendment FR-23, G17, G18). Next for me: when wave 1's last card lands in
+  `done/`, write sup3's prompt for wave 2 (the five view cards) and spawn it.
+- **Observed:** sup1 seated `w1a`/`w1b`, not `wave<N>-*` (short because of
+  the name ceiling). sup2 was told to seat `wave1-<name>`. If a third
+  supervisor does it again, that goes in the repetition log.
+- **Waiting on Pablo:** the intake (thread 01M3FAWKV2159MCSH0AZZJWE08); 0021, 0022, 0005, 0004, 0002. No card carries `stage:` until the
   organizer has a roadmap, which waits on the intake.
 - **Learned:** this session hit the drain ceiling (8 per session) at about
   21:20: `health` shows fse undelivered 2 while the hook logs
