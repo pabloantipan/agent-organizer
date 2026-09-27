@@ -4,6 +4,8 @@ import { useBoard } from "../stores/board.store";
 
 export function CardItem({ card, compact = false }: { card: merge.BoardCard; compact?: boolean }) {
   const select = useBoard((s) => s.select);
+  // The machine is noise when there is only one; a remote card always says where it lives.
+  const machines = useBoard((s) => s.view?.board.machines?.length ?? 1);
   return (
     <article
       className={`card ${card.status}`}
@@ -39,7 +41,7 @@ export function CardItem({ card, compact = false }: { card: merge.BoardCard; com
       )}
       <div className="foot">
         {card.archived && <span className="badge done">done</span>}
-        <span className={`badge machine ${card.local ? "local" : "remote"}`}>{card.machine}</span>
+        {(machines > 1 || !card.local) && <span className={`badge machine ${card.local ? "local" : "remote"}`}>{card.machine}</span>}
         {card.branch && <span className="mono">{card.branch}</span>}
         <span className={isStale(card.updated) ? "stale" : ""}>{ageLabel(card.updated)}</span>
         {!compact && card.client && <span className="badge client">{card.client}</span>}
