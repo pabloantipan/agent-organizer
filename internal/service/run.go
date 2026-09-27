@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -318,4 +319,166 @@ func (s *Service) Runs(initiativeID string) []session.Run {
 		}
 	}
 	return out
+}
+
+// ---- FR-10: what the app reads, tokens only ----
+
+// RunInfo is one run as the app sees it: session.Run without the bill.
+// Decision 0020 keeps dollars in `organizer runs`, so there is no cost field
+// here and none in the generated bindings — the app cannot show one by
+// accident.
+type RunInfo struct {
+	SessionID string `json:"session_id"`
+	// Session is the probe session name (AGENT_SESSION), empty for a plain
+	// terminal; Persona and Cell are set for a crew seat.
+	Session string `json:"session,omitempty"`
+	Persona string `json:"persona,omitempty"`
+	Cell    string `json:"cell,omitempty"`
+	Cwd     string `json:"cwd"`
+	Model   string `json:"model"`
+	// The context window as of LastSeen.
+	UsedPercent float64 `json:"used_percent"`
+	InputTokens int     `json:"input_tokens"`
+	WindowSize  int     `json:"window_size"`
+	Initiative  string  `json:"initiative,omitempty"`
+	Card        string  `json:"card,omitempty"`
+	Branch      string  `json:"branch,omitempty"`
+
+	FirstSeen time.Time `json:"first_seen"`
+	LastSeen  time.Time `json:"last_seen"`
+	// Ended is true once the process is gone and the numbers are final; Live
+	// is its complement, read from a statusline record still on disk.
+	Ended bool `json:"ended"`
+	Live  bool `json:"live"`
+}
+
+// runInfo drops the bill and says whether the numbers can still move.
+func runInfo(r session.Run, live bool) RunInfo {
+	return RunInfo{
+		SessionID: r.SessionID, Session: r.Session, Persona: r.Persona, Cell: r.Cell,
+		Cwd: r.Cwd, Model: r.Model, UsedPercent: r.UsedPercent,
+		InputTokens: r.InputTokens, WindowSize: r.WindowSize,
+		Initiative: r.Initiative, Card: r.Card, Branch: r.Branch,
+		FirstSeen: r.FirstSeen, LastSeen: r.LastSeen, Ended: r.Ended, Live: live,
+	}
+}
+
+// CardRuns is one card's sessions and what they consumed. Card is empty for
+// the runs no card claimed, which is honest: a directory two cards answer to
+// leaves its run unattributed rather than charging the wrong one.
+type CardRuns struct {
+	Card        string    `json:"card"`
+	InputTokens int       `json:"input_tokens"`
+	Live        int       `json:"live"`
+	Runs        []RunInfo `json:"runs"`
+}
+
+// RunsView is FR-10's answer for one initiative: its runs grouped by card,
+// with the input tokens summed over the archive and the sessions still
+// running, and a total for the initiative.
+type RunsView struct {
+	Initiative  string     `json:"initiative"`
+	InputTokens int        `json:"input_tokens"`
+	Cards       []CardRuns `json:"cards"`
+}
+
+// InitiativeRuns is what the app binds: one initiative's runs, tokens summed
+// per card over the archive in runs.jsonl and the statusline records of the
+// sessions still running. It does not archive — a read must not depend on a
+// process sample, and `organizer runs`, the agent ticker and retire already
+// keep runs.jsonl current — so a live session is read from its record, whose
+// numbers are the fresh ones anyway.
+func (s *Service) InitiativeRuns(initiativeID string) RunsView {
+	return runsView(initiativeID, session.LoadRuns(session.RunsPath()), s.liveRuns())
+}
+
+// liveRuns is every statusline record on disk as a run, with the card matched
+// the way the archiver matches it. A record exists only while its session
+// does, so these are the runs whose numbers can still move.
+func (s *Service) liveRuns() []session.Run {
+	s.mu.Lock()
+	cards := s.cardRefsLocked()
+	branchOf := branchIn(s.repoBranchesLocked())
+	s.mu.Unlock()
+	records := session.Load(session.Dir())
+	out := make([]session.Run, 0, len(records))
+	for _, rec := range records {
+		r := session.Run{
+			PID: rec.PID, SessionID: rec.SessionID, Session: rec.Session,
+			Persona: rec.Persona, Cell: rec.Cell, Cwd: rec.Cwd, Model: rec.Model,
+			UsedPercent: rec.UsedPercent, InputTokens: rec.InputTokens,
+			WindowSize: rec.WindowSize,
+			FirstSeen:  rec.UpdatedAt, LastSeen: rec.UpdatedAt,
+		}
+		if c, ok := session.MatchCard(rec.Cwd, branchOf(rec.Cwd), cards); ok {
+			r.Initiative, r.Card, r.Branch = c.Initiative, c.Slug, c.Branch
+		}
+		out = append(out, r)
+	}
+	return out
+}
+
+// runsView folds the archive and the live records into one view. A session
+// appears in both — the archiver writes an open line the first time it sees
+// one — so they are folded by the archive's key and the live record wins: its
+// numbers are the newer ones, and the token sum must not count it twice.
+func runsView(initiativeID string, archived, live []session.Run) RunsView {
+	folded := make(map[string]RunInfo, len(archived)+len(live))
+	keep := func(r session.Run, isLive bool) {
+		if initiativeID != "" && r.Initiative != initiativeID {
+			return
+		}
+		folded[r.Key()] = runInfo(r, isLive)
+	}
+	for _, r := range archived {
+		keep(r, false)
+	}
+	for _, r := range live {
+		if prev, ok := folded[r.Key()]; ok && prev.FirstSeen.Before(r.FirstSeen) {
+			r.FirstSeen = prev.FirstSeen // the archive remembers when it started
+		}
+		keep(r, true)
+	}
+
+	view := RunsView{Initiative: initiativeID}
+	byCard := map[string]*CardRuns{}
+	for _, r := range folded {
+		c, ok := byCard[r.Card]
+		if !ok {
+			c = &CardRuns{Card: r.Card}
+			byCard[r.Card] = c
+		}
+		c.Runs = append(c.Runs, r)
+		c.InputTokens += r.InputTokens
+		if r.Live {
+			c.Live++
+		}
+		view.InputTokens += r.InputTokens
+	}
+	for _, c := range byCard {
+		sort.Slice(c.Runs, func(i, j int) bool { return laterRun(c.Runs[i], c.Runs[j]) })
+		view.Cards = append(view.Cards, *c)
+	}
+	// Busiest first, by the card's most recent session, so what is running now
+	// is at the top; the unattributed runs trail, they are nobody's work.
+	sort.Slice(view.Cards, func(i, j int) bool {
+		a, b := view.Cards[i], view.Cards[j]
+		if (a.Card == "") != (b.Card == "") {
+			return b.Card == ""
+		}
+		if len(a.Runs) > 0 && len(b.Runs) > 0 && !a.Runs[0].LastSeen.Equal(b.Runs[0].LastSeen) {
+			return a.Runs[0].LastSeen.After(b.Runs[0].LastSeen)
+		}
+		return a.Card < b.Card
+	})
+	return view
+}
+
+// laterRun orders runs newest last-seen first, the session id breaking a tie
+// so the table never reshuffles between reads.
+func laterRun(a, b RunInfo) bool {
+	if !a.LastSeen.Equal(b.LastSeen) {
+		return a.LastSeen.After(b.LastSeen)
+	}
+	return a.SessionID < b.SessionID
 }
