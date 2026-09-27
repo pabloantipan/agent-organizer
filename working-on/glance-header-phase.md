@@ -27,4 +27,7 @@ Roadmap stage twenty-at-a-glance (0032): FR-4, FR-5 of `docs/specs/twenty-at-a-g
 1. Show scope in and out under the goal, the phase on the stepper and Roadmap rows, and match gate numbers with zero-padding
 
 ## Blockers
-- waits on Pablo accepting the spec (decision 0033)
+none
+
+## Notes
+- 2026-09-27 sup5 runs this card (organizer-probe-sup5), spawned by the FSE after 0033

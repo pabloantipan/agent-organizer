@@ -1,13 +1,13 @@
 ---
 title: Accept the twenty-at-a-glance spec, and launch it
-status: proposed
+status: ruled
 raised: 2026-09-27
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-27
+ruled_by: pablo
 options: [accept as written, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [glance-scope-phase, glance-header-phase, glance-home-state]
 threads: []
 supersedes: []
@@ -42,7 +42,7 @@ choice you have not ruled:
 
 ## Ruling
 
-
+Pablo, 2026-09-27, in the FSE's session (organizer-probe-fse): "accepted".
 
 ## Consequences
 

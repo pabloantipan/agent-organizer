@@ -1,8 +1,8 @@
 # Twenty at a glance
 
-status: proposed
+status: ruled (0033, 2026-09-27)
 owner: pablo
-decisions: [0029 ruled, 0030 ruled, 0032 ruled]
+decisions: [0029 ruled, 0030 ruled, 0032 ruled, 0033 ruled]
 roadmap: stage `twenty-at-a-glance` (appetite: one wave)
 
 ## Problem

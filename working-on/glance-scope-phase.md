@@ -28,4 +28,7 @@ Roadmap stage twenty-at-a-glance (0032): FR-1, FR-2, FR-3 of `docs/specs/twenty-
 1. Read scope in/out and each stage's phase into the board; report a bad phase and an ungated first building stage after discovery
 
 ## Blockers
-- waits on Pablo accepting the spec (decision 0033)
+none
+
+## Notes
+- 2026-09-27 sup5 runs this card (organizer-probe-sup5), spawned by the FSE after 0033

@@ -28,4 +28,7 @@ Roadmap stage twenty-at-a-glance (0032): FR-6, FR-7 of `docs/specs/twenty-at-a-g
 1. Show each Home row's phase and one state (waits on you, executing, waits on business, quiet); a --twenty fixture; the timed end-to-end
 
 ## Blockers
-- waits on Pablo accepting the spec (decision 0033)
+none
+
+## Notes
+- 2026-09-27 sup5 runs this card (organizer-probe-sup5), spawned by the FSE after 0033
