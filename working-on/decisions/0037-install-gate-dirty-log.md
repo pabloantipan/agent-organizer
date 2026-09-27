@@ -50,7 +50,8 @@ build; the dirty suffix is in the log line, not in the app.
 Withdrawn by the FSE, 2026-09-27: a second review passed the card before
 Pablo ruled (a2ee7ad). Both binaries carry the clean describe; the dirty
 suffix came from make re-evaluating VERSION after the build. Nothing is
-left to decide. The Makefile item is in the FSE's open questions.
+left to decide. sup7 later reported that the failing check was in its review
+prompt, not in the gate (thread 01M3J29YBHEVGYG277K7WTD696). The Makefile item is in the FSE's open questions.
 
 ## Consequences
 

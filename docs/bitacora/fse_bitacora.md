@@ -81,13 +81,14 @@ restating it (the discuss skill).
 
 ## Open questions
 
-- The Makefile's `VERSION` is a lazy `=`, so `make install`'s closing line can
-  print `-dirty` while the binaries are clean; and `wails build` flips
-  `frontend/wailsjs/go/main/App.{d.ts,js}` to 100755 (done/install-current-build.md,
-  Notes). Candidate card: `VERSION :=` and restoring the mode. Not raised.
-- **Lesson:** my install gate did not say which of two checks proved the
-  version; the reviewer failed it, then a second review passed it (0037,
-  withdrawn). Name the one piece of evidence that decides each row.
+- The Makefile's `VERSION ?=` re-runs `git describe --dirty` after
+  `wails build` flips `frontend/wailsjs/go/main/App.{d.ts,js}` to 100755, so
+  every `make install` ends with `-dirty` while the binary is clean (sup7,
+  thread 01M3J29YBHEVGYG277K7WTD696). Candidate card: pin VERSION before
+  the build and keep the modes. Not raised.
+- **Corrected (sup7):** the install's failed review came from a `no -dirty`
+  check in sup7's review prompt, not from my gate. The gate stood; 0037 was
+  moot. My earlier belief that the gate was ambiguous was wrong.
 
 - **Repetition (2):** zsh does not word-split an unquoted variable. It bit me
   (8d42553), and the fixture doc's `kill $FIXTURE_AGENT_PIDS` (review of
