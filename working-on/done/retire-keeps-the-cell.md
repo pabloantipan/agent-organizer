@@ -1,11 +1,12 @@
 ---
 title: Retiring every seat must not erase the cell, and tests stay out of the real home
-status: now
+status: done
 repos: [organizer]
 branch: retire-keeps-the-cell
 updated: 2026-09-26
 next: "review: retire-keeps-the-cell, gate 1-4 met, f5675fe cd4ebce 7aa6230 4e18e76"
 depends_on: []
+review: pass
 seat: wave1-retire
 boundary: ["internal/scan/scan.go (readCell)", "internal/scan/scan_test.go", "internal/scan/agents_test.go", "internal/service/retire.go (the cell.json write)", "internal/service/retire_test.go", "testdata/", "frontend/src/components/Crew.tsx (Bring crew up inert at zero seats)"]
 spec: "CLAUDE.md Crew paragraph; ~/agent-slack/ops/cells/camp.json"
@@ -40,6 +41,14 @@ its cell. Separately, `TestAttachSessions` archives into the real
 ## Blockers
 none
 - 2026-09-26 sup4 runs this card (organizer-probe-sup4), spawned by the FSE (0025)
+
+## Review
+- Verdict: pass. Unmet gate items: none. Reviewer wave1-review-retire, 2026-09-26.
+- 1: `TestReadCellAcceptsAnEmptyRoster` passes (empty, null, noproject); `Crew.tsx` keeps the button with `disabled={busy || seats.length === 0}`, header and `AgentsView.tsx` read "0 seats"; `npx tsc --noEmit` OK.
+- 2: `TestRetireOfTheLastSeatKeepsTheCell` passes; `writeCell` maps nil to `[]`, and `PlanRetire`'s `Keep` is nil for the last seat, so the test fails without the fix.
+- 3: every test reaching `session.Dir()`/`RunsPath()` (attachSessions, service scans, cardjoin, rule, runs, cli fixtureEnv) sets a temp `XDG_DATA_HOME` or HOME. Real-HOME run: only `state.json` (organizer.app pid 71147) and `sessions/23702.json` (this review session's statusline) changed; no runs.jsonl.
+- 4: `go vet ./... && go test -count=1 ./...` green; `internal/cli/testdata` untouched. Diff within boundary.
+- Not gated: `organizer crew` on an empty roster still runs `probe --wrap` and opens a window with no tabs; Retire's step reads "cell.json now lists " with nothing after it.
 
 ## Notes
 - 2026-09-26 sup4: boundary widened by one file, `frontend/src/components/Crew.tsx`: with zero seats the button reads "Bring crew up" and is enabled (`off === seats.length` is 0 === 0), so gate 1's "inert" needs it. Builder seat `wave1-retire`, branch and worktree `.wt/retire-keeps-the-cell`.
