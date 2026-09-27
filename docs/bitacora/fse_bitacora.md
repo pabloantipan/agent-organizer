@@ -15,12 +15,11 @@ restating it (the discuss skill).
   passed review 2026-09-27. The installed app (`/Applications/organizer.app`,
   the `organizer` on PATH) predates it and still warns at 22; `make install`
   is Pablo's.
-- **Running:** sup2 (organizer-probe-sup2) owns the redesign's wave 1, the
-  six backend cards (0023 accepted 2026-09-26 with the design-system
-  amendment FR-23, G17, G18). Next for me: when wave 1's last card lands in
-  `done/`, write sup3's prompt for wave 2 (the five view cards) and spawn it with its
-  own identity prelude (fse skill, references/standing-up.md; check
-  `discuss-api token list` for organizer/sup3 first).
+- **Running:** sup3 (organizer-probe-sup3, identity prelude) owns the
+  redesign's wave 2, the five view cards. Wave 1 (sup2) passed review
+  2026-09-27, all six. When wave 2's last card lands, the redesign task is
+  over: propose the next task from the rulings on hand, or raise what it
+  needs.
 - **Observed:** sup1 seated `w1a`/`w1b`, not `wave<N>-*` (short because of
   the name ceiling). sup2 was told to seat `wave1-<name>`. If a third
   supervisor does it again, that goes in the repetition log.
@@ -47,5 +46,9 @@ restating it (the discuss skill).
   directly, a6ebd4d..280f58c).
 
 ## Open questions
+
+- `organizer rule` writes and commits with no dry run, unlike `retire --run`,
+  `crew --print`, `run --print` (review note, `done/redesign-rule-record.md`).
+  Not raised yet; a candidate `proposed` record if it bites.
 
 - none yet
