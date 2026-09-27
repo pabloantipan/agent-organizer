@@ -74,6 +74,14 @@ restating it (the discuss skill).
 
 ## Open questions
 
+- **Repetition (2):** zsh does not word-split an unquoted variable. It bit me
+  (8d42553), and the fixture doc's `kill $FIXTURE_AGENT_PIDS` (review of
+  glance-home-state). A third time means proposing a line in a shared skill.
+- `queueOf` reads `pablo:` cards only in initiatives with a cell; such a card
+  elsewhere never reaches Needs me (glance-home-state Notes). Candidate card.
+- G9 was timed by a model (5 s); stage 2's exit wants Pablo reading the real
+  Home in under a minute. The exit-met record asks him to time it.
+
 - Found by sup4, not asked (thread 01M3GCSAS9H71K58HZQG5JEY6K): `organizer crew`
   on an empty roster still opens an empty iTerm window; retire's plan text is
   blank after the last seat. Candidate cards; not raised yet.
