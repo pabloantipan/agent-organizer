@@ -1,6 +1,6 @@
 ---
 title: Initiatives that are not active fold into one rail group
-status: next
+status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-27
