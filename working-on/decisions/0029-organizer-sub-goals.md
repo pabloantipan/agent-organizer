@@ -1,13 +1,13 @@
 ---
 title: The organizer's sub-goals under its goal
-status: proposed
+status: ruled
 raised: 2026-09-27
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-27
+ruled_by: pablo
 options: [the six as proposed, a subset or reorder, rewrite]
-chosen:
+chosen: the six as proposed
 cards: []
 threads: []
 supersedes: []
@@ -91,7 +91,12 @@ The FSE's: all six, ordered 1, 4, 3, 2, 6, 5.
 
 ## Ruling
 
-
+Pablo, 2026-09-27, in the FSE's session (organizer-probe-fse): "It's fine",
+then added: persona cells being defined should be visible, with help
+prompting roles from the initiative's details; initiatives have a goal and
+an "alcance"; discovery is where a cell fed with business context helps,
+then the building stage estimates cards and roadmap; docs, specs and
+diagrams grow with the initiative's complexity. The additions are 0030.
 
 ## Consequences
 
