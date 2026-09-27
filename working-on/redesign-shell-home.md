@@ -32,3 +32,6 @@ none
 ## Notes
 - `stage:` is left out: the organizer has no roadmap yet (it waits on Pablo's intake); the FSE adds it once one is ruled
 - 2026-09-27 sup3 runs this card (organizer-probe-sup3), spawned by the FSE after wave 1 passed
+- 2026-09-26 from wave 1 (sup2): `frontend/wailsjs` is stale on main: `Initiative` (goal, measure, specs, stages), `Card`/`Decision` (stage), `Agent.card`, `AgentGroup.waves` and `ScannedInitiative.fse` are not in `models.ts`. Run `wails generate module` first, before any view reads them (reviews of goal-stages, agent-card, waves)
+- 2026-09-26 from wave 1: the agent-card join runs only on the 10 s `RefreshAgents` tick, not in `Service.Scan`, so a fresh board has no card per agent until the first tick (agent-card review)
+- 2026-09-26 from wave 1: `status.golden` carries four `!` lines from init-a's deliberately broken roadmap; a clean second fixture root is Pablo's call (goal-stages review)

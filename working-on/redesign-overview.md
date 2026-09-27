@@ -31,3 +31,6 @@ none
 ## Notes
 - `stage:` is left out: the organizer has no roadmap yet (it waits on Pablo's intake); the FSE adds it once one is ruled
 - 2026-09-27 sup3 runs this card (organizer-probe-sup3), spawned by the FSE after wave 1 passed
+- 2026-09-26 from wave 1 (sup2): FR-11's third bullet, the FSE's open threads, was not built by redesign-fse-activity (threads live behind the discuss API in `internal/service`, outside that boundary) and no card owns it now; it needs Pablo's call: this card takes it beside FR-12, or a card of its own (fse-activity review)
+- 2026-09-26 from wave 1: `model.FSECommit` is a nested type no binding reaches, so Wails will not emit it; use the `App.MilestoneType` trick or a hand-written type (fse-activity notes)
+- 2026-09-26 from wave 1: `Wave.InputTokens` is the live statusline sum, not FR-10's archive+live total (the lock `agentsViewLocked` holds); the work summary in tokens should read `Runs` for the archive (waves review)
