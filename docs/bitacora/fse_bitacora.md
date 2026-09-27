@@ -24,6 +24,13 @@ restating it (the discuss skill).
 - **Observed:** sup1 seated `w1a`/`w1b`, not `wave<N>-*` (short because of
   the name ceiling). sup2 was told to seat `wave1-<name>`. If a third
   supervisor does it again, that goes in the repetition log.
+- **Goal work (2026-09-27):** goal and measure in `initiative.yaml`; 0029
+  (six sub-goals) and 0030 (scope, discovery to building, cells drafted from
+  the initiative, a seventh sub-goal) ruled. Next: when the blacksmith's
+  format change for `scope` and the stage phase label lands in the
+  working-on and roadmapping skills, and Pablo gives the organizer's scope,
+  propose `working-on/roadmap.yaml` as a record: one stage per sub-goal,
+  order 1, 4, 3, 2, 7, 6, 5.
 - **Waiting on Pablo:** the intake (thread 01M3FAWKV2159MCSH0AZZJWE08); 0021, 0022, 0005, 0004, 0002. No card carries `stage:` until the
   organizer has a roadmap, which waits on the intake.
 - **Learned:** this session hit the drain ceiling (8 per session) at about
