@@ -10,6 +10,7 @@ boundary: ["frontend/src/lib/queue.ts (needsMeRows)", "frontend/src/components/T
 spec: "docs/specs/twenty-at-a-glance.md (FR-8); values: docs/design-system.md"
 gate: "docs/specs/twenty-at-a-glance.md Acceptance, rows G11, G10; the Gate section below"
 stage: twenty-at-a-glance
+seat: wave1-lead
 ---
 
 ## Goal
