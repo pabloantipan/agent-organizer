@@ -95,6 +95,8 @@ export function SignOut():Promise<void>;
 
 export function SignUp(arg1:string,arg2:string):Promise<auth.Account>;
 
+export function StageType():Promise<model.Stage>;
+
 export function StopAgent(arg1:number):Promise<void>;
 
 export function SyncNow():Promise<service.SyncResult>;

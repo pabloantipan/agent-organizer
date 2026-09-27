@@ -178,6 +178,10 @@ export function SignUp(arg1, arg2) {
   return window['go']['main']['App']['SignUp'](arg1, arg2);
 }
 
+export function StageType() {
+  return window['go']['main']['App']['StageType']();
+}
+
 export function StopAgent(arg1) {
   return window['go']['main']['App']['StopAgent'](arg1);
 }
