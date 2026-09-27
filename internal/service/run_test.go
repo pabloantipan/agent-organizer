@@ -3,8 +3,10 @@ package service
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
+	"organizer/internal/cache"
 	"organizer/internal/model"
 )
 
@@ -80,5 +82,44 @@ func TestHeadBranch(t *testing.T) {
 	}
 	if got := headBranch(t.TempDir()); got != "" {
 		t.Errorf("no checkout = %q, want empty", got)
+	}
+}
+
+// The session-length warning reads the one ceiling and says what probe does:
+// it refuses a name over zellij's socket budget, it never truncates one.
+func TestPrepareLaunchWarnsOnlyOverTheSessionCeiling(t *testing.T) {
+	t.Setenv("XDG_DATA_HOME", t.TempDir())
+	card := func(slug string) model.Card {
+		return model.Card{Slug: slug, Spec: "s", Gate: "g", Boundary: []string{"b"}}
+	}
+	long := "a-card-slug-long-enough-to-overflow-the-socket-budget-x" // organizer-probe- + 55 = 71
+	si := model.ScannedInitiative{}
+	si.ID, si.Path = "organizer", t.TempDir()
+	si.Cards = []model.Card{card("redesign-goal-stages"), card(long)}
+	s := &Service{state: cache.State{Local: model.Snapshot{Initiatives: []model.ScannedInitiative{si}}}}
+
+	lengthWarnings := func(slug string) []string {
+		t.Helper()
+		l, err := s.PrepareLaunch("organizer", slug)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var out []string
+		for _, w := range l.Warnings {
+			if strings.Contains(w, "characters") {
+				out = append(out, w)
+			}
+		}
+		return out
+	}
+	if w := lengthWarnings("redesign-goal-stages"); len(w) != 0 {
+		t.Errorf("organizer-probe-redesign-goal-stages fits, got %v", w)
+	}
+	w := lengthWarnings(long)
+	if len(w) != 1 || !strings.Contains(w[0], "is 71 characters; zellij holds at most 68") || !strings.Contains(w[0], "probe refuses it") {
+		t.Errorf("warnings %v, want the length, the ceiling and that probe refuses", w)
+	}
+	if len(w) == 1 && strings.Contains(w[0], "truncat") {
+		t.Errorf("probe does not truncate: %q", w[0])
 	}
 }

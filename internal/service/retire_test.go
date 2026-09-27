@@ -114,7 +114,7 @@ func TestPlanRetireReportsASeatItCannotName(t *testing.T) {
 
 	si := model.ScannedInitiative{}
 	si.ID, si.Path = "ccint-camp-monorepo", t.TempDir()
-	si.Cell = &model.Cell{Project: "ccint-camp-monorepo", Agents: []string{"po_andrea", "dev_bruno"}, Human: "pablo", Reconciler: "po_andrea"}
+	si.Cell = &model.Cell{Project: "ccint-camp-monorepo-and-a-project-name-no-socket-dir-can-hold", Agents: []string{"po_andrea", "dev_bruno"}, Human: "pablo", Reconciler: "po_andrea"}
 	s := &Service{state: cache.State{Local: model.Snapshot{Initiatives: []model.ScannedInitiative{si}}}}
 
 	p, err := s.PlanRetire(RetireOptions{InitiativeID: si.ID})
@@ -124,7 +124,7 @@ func TestPlanRetireReportsASeatItCannotName(t *testing.T) {
 	if len(p.Sessions) != 0 {
 		t.Errorf("sessions %v", p.Sessions)
 	}
-	if len(p.Problems) != 1 || !strings.Contains(p.Problems[0], "31 characters") {
-		t.Errorf("problems %v, want the length of ccint-camp-monorepo-probe-bruno", p.Problems)
+	if len(p.Problems) != 1 || !strings.Contains(p.Problems[0], "73 characters") {
+		t.Errorf("problems %v, want the length of ccint-camp-monorepo-and-a-project-name-no-socket-dir-can-hold-probe-bruno", p.Problems)
 	}
 }

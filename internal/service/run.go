@@ -133,10 +133,10 @@ func (s *Service) PrepareLaunch(initiativeID, slug string) (Launch, error) {
 	wrapper := filepath.Join(filepath.Dir(probeBin()), family+"-probe")
 	l.Command = launchLine(l.Prelude, l.Prompt, wrapper, l.Session, l.Dir)
 
-	// probe cannot hold a long session name until it sets ZELLIJ_SOCK_DIR;
-	// say so rather than launching something that will not come up.
-	if full := family + "-probe-" + l.Session; len(full) > 22 {
-		l.Warnings = append(l.Warnings, fmt.Sprintf("session name %q is %d characters; probe truncates over 22", full, len(full)))
+	// probe refuses a name over zellij's socket budget; say so rather than
+	// launching something that will not come up.
+	if err := sessionNameTooLong(family + "-probe-" + l.Session); err != nil {
+		l.Warnings = append(l.Warnings, err.Error()+"; probe refuses it")
 	}
 	if _, err := os.Stat(l.Prompt); err != nil {
 		l.Warnings = append(l.Warnings, "no task prompt at "+l.Prompt+" yet (supervise skill, step 2)")
