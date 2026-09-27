@@ -1,0 +1,517 @@
+<title>Organizer Redesign Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Single dark look on purpose: the organizer is dark-only (Pablo's pick), and
+   these mockups use its own tokens (frontend/src/styles/tokens.css). */
+:root {
+  color-scheme: dark;
+  --bg: #1a1523; --bg-deep: #14101b; --rail: #17121f; --panel: #221b2e; --panel-2: #2a2239;
+  --card: #251e33; --border: rgba(255,255,255,0.07); --border-strong: rgba(160,110,255,0.40);
+  --text: #f1ecf7; --muted: #a599b8; --dim: #6f6484;
+  --accent: #8a3ffc; --accent-hover: #9d5dff; --accent-soft: rgba(138,63,252,0.18);
+  --pink: #d946ef; --pink-soft: rgba(217,70,239,0.14);
+  --now: #b06cff; --now-soft: rgba(176,108,255,0.16);
+  --blocked: #ff4d63; --blocked-soft: rgba(255,77,99,0.14);
+  --next: #a9a0ff; --next-soft: rgba(169,160,255,0.14);
+  --done: #625876; --local: #5fe3b0; --capped: #d946ef;
+  --wait: #e879f9; --wait-soft: rgba(232,121,249,0.14); --ruled: #7c4dff;
+  --review: #7dd3fc; --review-soft: rgba(125,211,252,0.13);
+  --note: #ffd166;
+  --font: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, monospace;
+  --r: 10px; --r-lg: 14px;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg-deep); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.5; padding-inline: 16px; padding-block: 28px 64px; }
+.doc { max-width: 1320px; margin: 0 auto; display: grid; gap: 40px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+.mono { font-family: var(--mono); }
+.muted { color: var(--muted); } .dim { color: var(--dim); }
+
+/* page header */
+.intro { display: grid; gap: 14px; max-width: 78ch; }
+.eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.intro h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; }
+.intro p { margin: 0; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 12.5px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.toc { display: flex; flex-wrap: wrap; gap: 8px; }
+.toc a { font-size: 12.5px; color: var(--text); text-decoration: none; border: 1px solid var(--border); padding: 5px 11px; border-radius: 999px; background: var(--panel); }
+.toc a:hover, .toc a:focus-visible { border-color: var(--border-strong); outline: none; }
+
+/* screen section */
+.screen { display: grid; gap: 14px; }
+.screen-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 16px; }
+.screen-head h2 { font-size: 19px; font-weight: 600; }
+.screen-head .q { color: var(--muted); font-size: 13.5px; }
+.frame-scroll { overflow-x: auto; border-radius: var(--r-lg); border: 1px solid var(--border); }
+.frame { min-width: 1180px; background: var(--bg); display: grid; grid-template-rows: auto 1fr; }
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px 22px; }
+.note { display: grid; grid-template-columns: auto 1fr; gap: 10px; font-size: 13px; color: var(--muted); align-items: start; }
+.note b { color: var(--text); font-weight: 600; }
+
+/* pins: the numbers are what feedback refers to */
+.pin { display: inline-grid; place-items: center; min-width: 24px; height: 18px; padding: 0 5px; border-radius: 5px; background: var(--note); color: #1a1523; font-family: var(--mono); font-size: 10.5px; font-weight: 500; flex-shrink: 0; }
+.pinned { position: relative; }
+.pinned > .pin { position: absolute; top: -8px; right: -8px; z-index: 2; box-shadow: 0 0 0 3px var(--bg); }
+
+/* app chrome */
+.topbar { display: flex; align-items: center; gap: 18px; padding: 10px 18px; border-bottom: 1px solid var(--border); background: var(--bg); }
+.brand { font-weight: 700; display: inline-flex; align-items: center; gap: 8px; }
+.brand::before { content: ""; width: 9px; height: 9px; border-radius: 2px; background: var(--accent); }
+.crumbs { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.crumbs b { color: var(--text); font-family: var(--mono); font-weight: 500; }
+.spacer { flex: 1; }
+.tb-btn { font-size: 12.5px; color: var(--muted); border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; display: inline-flex; gap: 6px; align-items: center; }
+.tb-btn.hot { color: var(--text); border-color: var(--border-strong); }
+.count { font-family: var(--mono); font-size: 10.5px; background: var(--blocked); color: #fff; border-radius: 999px; padding: 0 6px; }
+.count.wait { background: var(--wait); color: #1a1523; }
+.body { display: grid; grid-template-columns: 220px 1fr; min-height: 560px; }
+.rail { background: var(--rail); border-right: 1px solid var(--border); padding: 14px 10px; display: grid; align-content: start; gap: 4px; }
+.rail-group { font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--dim); padding: 10px 8px 4px; }
+.ri { display: grid; grid-template-columns: 18px 1fr auto; gap: 8px; align-items: center; padding: 7px 8px; border-radius: 8px; }
+.ri.sel { background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--border-strong); }
+.ri .rk { font-family: var(--mono); font-size: 10.5px; color: var(--dim); }
+.ri .nm { font-family: var(--mono); font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ri .st { font-size: 10.5px; color: var(--muted); display: block; font-family: var(--font); }
+.ri .flag { width: 8px; height: 8px; border-radius: 50%; }
+.flag.wait { background: var(--wait); } .flag.blk { background: var(--blocked); } .flag.run { background: var(--local); } .flag.none { background: transparent; }
+.main { padding: 18px 22px 26px; display: grid; gap: 18px; align-content: start; min-width: 0; }
+
+/* shared primitives */
+.sec-title { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 10px; }
+.sec-title .ct { font-family: var(--mono); color: var(--text); letter-spacing: 0; }
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r-lg); }
+.chip { font-family: var(--mono); font-size: 10.5px; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
+.chip.wait { background: var(--wait-soft); color: var(--wait); border-color: transparent; }
+.chip.blk { background: var(--blocked-soft); color: var(--blocked); border-color: transparent; }
+.chip.now { background: var(--now-soft); color: var(--now); border-color: transparent; }
+.chip.rev { background: var(--review-soft); color: var(--review); border-color: transparent; }
+.chip.ok { color: var(--local); border-color: rgba(95,227,176,.3); }
+.chip.pk { background: var(--pink-soft); color: var(--pink); border-color: transparent; }
+.dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.dot.work { background: var(--local); box-shadow: 0 0 0 3px rgba(95,227,176,.18); }
+.dot.idle { background: var(--muted); }
+.bar { height: 5px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; width: 64px; display: inline-block; vertical-align: middle; }
+.bar i { display: block; height: 100%; background: var(--accent); }
+.bar.hot i { background: #ffb020; }
+
+/* HOME */
+.inbox { padding: 14px 16px; display: grid; gap: 2px; }
+.ib-row { display: grid; grid-template-columns: 120px 1fr auto auto; gap: 14px; align-items: center; padding: 9px 4px; border-top: 1px solid var(--border); }
+.ib-row:first-of-type { border-top: 0; }
+.ib-kind { font-size: 11.5px; display: inline-flex; gap: 7px; align-items: center; }
+.ib-what { font-size: 13.5px; }
+.ib-what small { display: block; color: var(--muted); font-size: 12px; }
+.ib-age { font-family: var(--mono); font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.act { font-size: 12px; color: var(--text); border: 1px solid var(--border-strong); border-radius: 7px; padding: 4px 10px; background: var(--accent-soft); white-space: nowrap; }
+.act.q { background: none; border-color: var(--border); color: var(--muted); }
+.port { display: grid; }
+.p-head, .p-row { display: grid; grid-template-columns: 28px 1.35fr 1.6fr 1fr 1fr 150px; gap: 16px; align-items: center; padding: 11px 16px; }
+.p-head { font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--dim); border-bottom: 1px solid var(--border); }
+.p-row + .p-row { border-top: 1px solid var(--border); }
+.p-rank { font-family: var(--mono); color: var(--dim); font-size: 11px; }
+.p-id { font-family: var(--mono); font-size: 13px; }
+.p-goal { font-size: 12.5px; color: var(--muted); }
+.stepper { display: flex; gap: 3px; align-items: center; }
+.stepper i { height: 6px; flex: 1; border-radius: 3px; background: rgba(255,255,255,.08); }
+.stepper i.done { background: var(--ruled); } .stepper i.cur { background: var(--now); box-shadow: 0 0 0 2px var(--now-soft); }
+.stage-lbl { font-size: 12px; margin-top: 5px; display: block; }
+.p-sig { display: flex; flex-wrap: wrap; gap: 5px; }
+.p-next { font-size: 12px; }
+.p-next .mono { color: var(--muted); }
+
+/* INITIATIVE HEADER */
+.ihead { display: grid; grid-template-columns: 1fr auto; gap: 10px 24px; padding: 16px 18px; }
+.ihead h3 { font-family: var(--mono); font-size: 20px; font-weight: 500; letter-spacing: -0.02em; display: flex; align-items: center; gap: 10px; }
+.goal { font-size: 14.5px; max-width: 70ch; }
+.goal .lbl { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-right: 8px; }
+.measure { font-size: 12.5px; color: var(--muted); }
+.ih-right { display: grid; justify-items: end; gap: 6px; align-content: start; }
+.target { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.target b { color: var(--text); font-weight: 500; }
+.stages { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 4px; }
+.stg { padding: 9px 11px; border-radius: 9px; background: var(--card); border: 1px solid var(--border); display: grid; gap: 3px; }
+.stg .n { font-family: var(--mono); font-size: 10.5px; color: var(--dim); }
+.stg .t { font-size: 12.5px; font-weight: 600; }
+.stg .x { font-size: 11.5px; color: var(--muted); }
+.stg.done { opacity: .75; } .stg.done .n { color: var(--ruled); }
+.stg.cur { border-color: var(--border-strong); background: var(--accent-soft); }
+.stg.cur .n { color: var(--now); }
+.subtabs { display: flex; gap: 4px; padding: 0 18px; border-bottom: 1px solid var(--border); }
+.subtabs span { font-size: 13px; padding: 9px 12px; color: var(--muted); border-bottom: 2px solid transparent; }
+.subtabs span.on { color: var(--text); border-bottom-color: var(--accent); }
+.subtabs .count { margin-left: 5px; }
+
+/* OVERVIEW */
+.ov { display: grid; grid-template-columns: 1.55fr 1fr; gap: 16px; align-items: start; }
+.gate-list { display: grid; gap: 8px; padding: 14px 16px; }
+.gl-stage { display: grid; gap: 8px; }
+.gl-row { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: center; font-size: 13px; }
+.diamond { width: 11px; height: 11px; transform: rotate(45deg); border-radius: 2px; justify-self: center; }
+.diamond.wait { background: transparent; border: 2px solid var(--wait); }
+.diamond.ruled { background: var(--ruled); }
+.check { width: 13px; height: 13px; border-radius: 3px; border: 1.5px solid var(--muted); justify-self: center; }
+.check.ok { background: var(--local); border-color: var(--local); }
+.fse { padding: 14px 16px; display: grid; gap: 12px; }
+.fse-h { display: flex; align-items: center; gap: 10px; }
+.fse-h b { font-family: var(--mono); }
+.handoff { font-size: 13px; border-left: 2px solid var(--accent); padding-left: 10px; }
+.feed { display: grid; gap: 8px; }
+.fi { display: grid; grid-template-columns: 58px 1fr; gap: 10px; font-size: 12.5px; }
+.fi .when { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+.work-sum { padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 12.5px; color: var(--muted); }
+.work-sum b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* WORK */
+.wave { padding: 12px 16px; display: grid; gap: 10px; }
+.wave-h { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; font-size: 13px; }
+.wave-h .wn { font-family: var(--mono); font-weight: 500; }
+.wave-track { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.wt { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; display: grid; gap: 5px; font-size: 12px; }
+.wt .top { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.wt .slug { font-family: var(--mono); font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.phases { display: flex; gap: 3px; }
+.phases i { flex: 1; height: 4px; border-radius: 2px; background: rgba(255,255,255,.09); }
+.phases i.d { background: var(--local); } .phases i.c { background: var(--now); }
+.cols { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; align-items: start; }
+.col { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 10px; display: grid; gap: 8px; }
+.col-h { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; padding: 2px 4px; }
+.col-h .n { font-family: var(--mono); color: var(--muted); font-weight: 400; }
+.col-h small { color: var(--dim); font-weight: 400; font-size: 11px; margin-left: auto; }
+.cd { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 10px 11px; display: grid; gap: 7px; }
+.cd.blocked { box-shadow: inset 3px 0 0 var(--blocked); }
+.cd .t { font-size: 13px; font-weight: 600; line-height: 1.35; }
+.cd .nx { font-size: 12px; color: var(--muted); }
+.cd .nx::before { content: "→ "; color: var(--pink); }
+.cd .ag { display: flex; align-items: center; gap: 7px; font-size: 11.5px; font-family: var(--mono); color: var(--muted); flex-wrap: wrap; }
+.cd .meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.cd .gate { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+/* ROADMAP */
+.rm { padding: 14px 16px 16px; display: grid; gap: 4px; }
+.rm-axis, .rm-row { display: grid; grid-template-columns: 230px 1fr; align-items: center; }
+.rm-axis { height: 34px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+.lane { position: relative; height: 100%; min-height: 40px; }
+.rm-axis .lane { min-height: 34px; }
+.tick { position: absolute; top: 0; bottom: 0; border-left: 1px dashed var(--border); }
+.tick span { position: absolute; top: 6px; left: 5px; font-size: 10.5px; color: var(--dim); white-space: nowrap; font-family: var(--mono); }
+.rm-lbl { display: grid; gap: 1px; padding-right: 12px; }
+.rm-lbl .n { font-family: var(--mono); font-size: 10.5px; color: var(--dim); }
+.rm-lbl .t { font-size: 13px; font-weight: 600; }
+.rm-lbl .x { font-size: 11px; color: var(--muted); }
+.sbar { position: absolute; top: 12px; height: 16px; border-radius: 5px; }
+.sbar.done { background: var(--ruled); opacity: .75; }
+.sbar.cur { background: var(--now); }
+.sbar.plan { background: transparent; border: 1.5px dashed var(--next); }
+.gem { position: absolute; top: 14px; width: 12px; height: 12px; transform: translateX(-50%) rotate(45deg); border-radius: 2px; box-shadow: 0 0 0 3px var(--bg); }
+.gem.wait { background: var(--bg); border: 2px solid var(--wait); }
+.gem.ruled { background: var(--ruled); }
+.gem-l { position: absolute; top: 30px; transform: translateX(-50%); font-family: var(--mono); font-size: 10px; color: var(--muted); white-space: nowrap; }
+.today { position: absolute; top: 0; bottom: 0; border-left: 2px solid var(--accent); }
+.today span { position: absolute; bottom: -18px; left: -14px; font-size: 10.5px; color: var(--accent-hover); }
+.rm-foot { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 11.5px; color: var(--muted); padding: 10px 16px 14px; border-top: 1px solid var(--border); }
+.rm-foot span { display: inline-flex; gap: 7px; align-items: center; }
+.k { display: inline-block; width: 16px; height: 9px; border-radius: 3px; }
+
+.questions { display: grid; gap: 12px; max-width: 86ch; }
+.questions h2 { font-size: 19px; font-weight: 600; }
+.questions ol { margin: 0; padding-left: 20px; display: grid; gap: 8px; color: var(--muted); }
+.questions li b { color: var(--text); font-weight: 600; }
+
+@media (max-width: 640px) {
+  .intro h1 { font-size: 24px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dot.work { animation: pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 5px rgba(95,227,176,.05); } }
+}
+</style>
+
+<div class="doc">
+
+<header class="intro">
+  <span class="eyebrow">organizer · redesign · mockups for review</span>
+  <h1>One app, organized around the initiative</h1>
+  <p>Four screens: Home, an initiative's Overview, its Work, and its Roadmap. They follow decisions 0013–0016: initiative-first, roadmaps as stages, the FSE builds it, mockups before code. They use the app's own tokens. The organizer's data is real where it exists today: its cards, decisions 0002–0016, the FSE's intake. Its goal and stages are <b>examples</b>, because the FSE proposes those and you rule them.</p>
+  <div class="legend">
+    <span><span class="pin">H1</span> a numbered note; answer by number, e.g. "W3: yes, R2: no"</span>
+    <span><span class="chip wait">waiting</span> a decision waiting on you</span>
+    <span><span class="dot work"></span> an agent working now</span>
+  </div>
+  <nav class="toc" aria-label="Screens">
+    <a href="#home">Home</a><a href="#overview">Overview</a><a href="#work">Work</a><a href="#roadmap">Roadmap</a><a href="#questions">Questions</a>
+  </nav>
+</header>
+
+<!-- ============================ HOME ============================ -->
+<section class="screen" id="home">
+  <div class="screen-head"><h2>Home</h2><span class="q">What needs me, and where is every initiative?</span></div>
+  <div class="frame-scroll"><div class="frame">
+    <div class="topbar">
+      <span class="brand">organizer</span>
+      <span class="crumbs"><b>Home</b></span>
+      <span class="spacer"></span>
+      <span class="tb-btn hot pinned">Needs me <span class="count">6</span><span class="pin">H1</span></span>
+      <span class="tb-btn">Rescan</span><span class="tb-btn">⚙</span>
+    </div>
+    <div class="body">
+      <aside class="rail">
+        <div class="rail-group">Personal</div>
+        <div class="ri"><span class="rk">2</span><span class="nm">organizer<span class="st">stage 2 of 4 · 3 waiting</span></span><span class="flag wait"></span></div>
+        <div class="ri"><span class="rk">3</span><span class="nm">agent-slack<span class="st">stage 3 of 5</span></span><span class="flag run"></span></div>
+        <div class="rail-group">CCINT</div>
+        <div class="ri"><span class="rk">1</span><span class="nm">ccint-camp-monorepo<span class="st">3 blocked</span></span><span class="flag blk"></span></div>
+        <div class="rail-group">PLV</div>
+        <div class="ri"><span class="rk">5</span><span class="nm">rpex<span class="st">wave 2 running</span></span><span class="flag run"></span></div>
+        <div class="ri"><span class="rk">4</span><span class="nm">auth-orchestrator-traces<span class="st">no roadmap yet</span></span><span class="flag none"></span></div>
+        <div class="ri"><span class="rk">6</span><span class="nm">pwa-auth-monorepo<span class="st">24d quiet</span></span><span class="flag none"></span></div>
+      </aside>
+      <div class="main">
+        <div class="sec-title">Needs me <span class="ct">6</span> <span class="dim">· one list: decisions, threads, cards, deaf seats</span></div>
+        <div class="panel inbox pinned"><span class="pin">H2</span>
+          <div class="ib-row"><span class="ib-kind"><span class="chip wait">decision</span></span><span class="ib-what">organizer 0002 · Which phase 4 polish earned its place<small>owner you · raised 2026-09-02 · options: tray, fsnotify, launch-at-login, status drag, none</small></span><span class="ib-age">24d</span><span class="act">Rule</span></div>
+          <div class="ib-row"><span class="ib-kind"><span class="chip wait">decision</span></span><span class="ib-what">organizer 0004 · The shape of Entra identity<small>gates stage 4 · Firebase brokers Entra, or Entra end to end</small></span><span class="ib-age">10d</span><span class="act">Rule</span></div>
+          <div class="ib-row"><span class="ib-kind"><span class="chip pk">question</span></span><span class="ib-what">fse asks you · intake: pablo on the organizer<small>five questions; your answers become agents/people.md</small></span><span class="ib-age">today</span><span class="act">Answer</span></div>
+          <div class="ib-row"><span class="ib-kind"><span class="chip blk">card</span></span><span class="ib-what">ccint-camp-monorepo · Product calls only Pablo can make<small>decide, one sitting: who "Legal" is, the delta-5 upload, the venue name</small></span><span class="ib-age">20d</span><span class="act q">Open</span></div>
+          <div class="ib-row"><span class="ib-kind"><span class="chip wait">decision</span></span><span class="ib-what">organizer 0005 · A standing FSE seat, with the authority as drafted<small>the rest of the FSE entry; parts already ruled in 0006, 0010, 0011</small></span><span class="ib-age">0d</span><span class="act">Rule</span></div>
+          <div class="ib-row"><span class="ib-kind"><span class="chip blk">deaf seat</span></span><span class="ib-what">rpex · reviewer has not picked up mail for 2h<small>hit the drain ceiling; restart its session with probe -r</small></span><span class="ib-age">2h</span><span class="act q">Agents</span></div>
+        </div>
+
+        <div class="sec-title">Initiatives <span class="dim">· by priority</span></div>
+        <div class="panel port pinned"><span class="pin">H3</span>
+          <div class="p-head"><span>#</span><span>initiative</span><span>goal</span><span>stage</span><span>signals</span><span>next date</span></div>
+          <div class="p-row"><span class="p-rank">1</span><span class="p-id">ccint-camp-monorepo</span><span class="p-goal">Volunteers register attendees for the camp without training (example)</span><span><span class="stepper"><i class="done"></i><i class="cur"></i><i></i></span><span class="stage-lbl">2 · Staff flows</span></span><span class="p-sig"><span class="chip blk">3 blocked</span><span class="chip">cell retired</span></span><span class="p-next"><span class="mono">no date</span></span></div>
+          <div class="p-row"><span class="p-rank">2</span><span class="p-id">organizer</span><span class="p-goal">One place that says what every initiative is for, where it is, and who is on it (example)</span><span><span class="stepper"><i class="done"></i><i class="cur"></i><i></i><i></i></span><span class="stage-lbl">2 · The FSE runs the redesign</span></span><span class="p-sig"><span class="chip wait">3 waiting</span><span class="chip ok">fse idle</span></span><span class="p-next"><span class="mono">—</span></span></div>
+          <div class="p-row"><span class="p-rank">3</span><span class="p-id">agent-slack</span><span class="p-goal">A cell of agents talks, wakes and records without a human polling (example)</span><span><span class="stepper"><i class="done"></i><i class="done"></i><i class="cur"></i><i></i><i></i></span><span class="stage-lbl">3 · Second laptop</span></span><span class="p-sig"><span class="chip now">1 now</span></span><span class="p-next"><span class="mono">—</span></span></div>
+          <div class="p-row"><span class="p-rank">5</span><span class="p-id">rpex</span><span class="p-goal">The app builds for targetSdk 36 on Capacitor 6 (example)</span><span><span class="stepper"><i class="done"></i><i class="cur"></i><i></i></span><span class="stage-lbl">2 · Wave 2</span></span><span class="p-sig"><span class="chip ok">wave 2 · 2 building</span><span class="chip blk">8 blocked</span></span><span class="p-next"><span class="mono">—</span></span></div>
+          <div class="p-row"><span class="p-rank">4</span><span class="p-id">auth-orchestrator-traces</span><span class="p-goal dim">no goal yet · the FSE asks for one</span><span><span class="stage-lbl dim">no roadmap</span></span><span class="p-sig"><span class="chip now">2 now</span></span><span class="p-next"><span class="mono">—</span></span></div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <div class="notes">
+    <div class="note"><span class="pin">H1</span><span><b>One Needs me, one badge.</b> It replaces the Slack badge and the Decisions badge. It uses the same queue definition as today (<span class="mono">queueOf</span>), plus decisions waiting on you.</span></div>
+    <div class="note"><span class="pin">H2</span><span><b>Each row is something you act on,</b> oldest first, with the action on the row: Rule, Answer or Open. Rule opens a box for your words and the option you choose; the app writes them into the record (0019).</span></div>
+    <div class="note"><span class="pin">H3</span><span><b>This replaces the Initiatives tab and the Portfolio chart.</b> Each row shows the goal, the stage, and the signals that matter. An initiative with no goal says so, and the FSE asks for one.</span></div>
+  </div>
+</section>
+
+<!-- ============================ OVERVIEW ============================ -->
+<section class="screen" id="overview">
+  <div class="screen-head"><h2>Initiative · Overview</h2><span class="q">What is it for, where are we, what is being decided, what did the FSE do?</span></div>
+  <div class="frame-scroll"><div class="frame">
+    <div class="topbar">
+      <span class="brand">organizer</span>
+      <span class="crumbs">Home <span>/</span> <b>organizer</b></span>
+      <span class="spacer"></span>
+      <span class="tb-btn">Needs me <span class="count">6</span></span>
+      <span class="tb-btn">Rescan</span><span class="tb-btn">⚙</span>
+    </div>
+    <div class="body">
+      <aside class="rail">
+        <div class="rail-group">Personal</div>
+        <div class="ri sel"><span class="rk">2</span><span class="nm">organizer<span class="st">stage 2 of 4 · 3 waiting</span></span><span class="flag wait"></span></div>
+        <div class="ri"><span class="rk">3</span><span class="nm">agent-slack<span class="st">stage 3 of 5</span></span><span class="flag run"></span></div>
+        <div class="rail-group">CCINT</div>
+        <div class="ri"><span class="rk">1</span><span class="nm">ccint-camp-monorepo<span class="st">3 blocked</span></span><span class="flag blk"></span></div>
+        <div class="rail-group">PLV</div>
+        <div class="ri"><span class="rk">5</span><span class="nm">rpex<span class="st">wave 2 running</span></span><span class="flag run"></span></div>
+      </aside>
+      <div style="display:grid;align-content:start;min-width:0">
+        <div class="ihead pinned"><span class="pin">O1</span>
+          <div style="display:grid;gap:6px">
+            <h3>organizer <span class="chip pk">personal</span></h3>
+            <div class="goal"><span class="lbl">Goal</span>One place that says what every initiative is for, where it stands, what waits on Pablo, and who is building what.</div>
+            <div class="measure">You'll know it works when Pablo opens it instead of asking a session "where was I". Example goal: intake question 3 fills it.</div>
+          </div>
+          <div class="ih-right"><span class="target">target <b>—</b></span><span class="chip wait">3 decisions waiting</span></div>
+          <div class="stages pinned"><span class="pin">O2</span>
+            <div class="stg done"><span class="n">1 · done</span><span class="t">Board across machines</span><span class="x">cards, rail, sync, crew</span></div>
+            <div class="stg cur"><span class="n">2 · now</span><span class="t">The FSE runs the redesign</span><span class="x">exit: Home, Overview, Work ship through a supervisor</span></div>
+            <div class="stg"><span class="n">3</span><span class="t">Waves are visible</span><span class="x">exit: a wave strip reads progress.md and posts</span></div>
+            <div class="stg"><span class="n">4</span><span class="t">Identity</span><span class="x">gated by 0004 · Entra shape</span></div>
+          </div>
+        </div>
+        <div class="subtabs pinned"><span class="on">Overview</span><span>Work</span><span>Roadmap</span><span>Decisions<span class="count wait">3</span></span><span>Conversations</span><span>Agents</span><span class="pin">O3</span></div>
+        <div class="main">
+          <div class="ov">
+            <div style="display:grid;gap:16px">
+              <div>
+                <div class="sec-title">Stage 2 · what stands between us and its exit</div>
+                <div class="panel gate-list pinned"><span class="pin">O4</span>
+                  <div class="gl-stage">
+                    <div class="gl-row"><span class="diamond ruled"></span><span>0013 Initiative-first · 0014 Stages · 0015 FSE builds it · 0016 Mockups first</span><span class="chip">ruled</span></div>
+                    <div class="gl-row"><span class="diamond wait"></span><span>0005 The FSE pilot, authority as drafted</span><span class="chip wait">0d waiting</span></div>
+                    <div class="gl-row"><span class="check ok"></span><span>Mockups reviewed by Pablo</span><span class="chip dim">this page</span></div>
+                    <div class="gl-row"><span class="check"></span><span>Spec written with spec-craft; cards launchable</span><span class="chip">fse</span></div>
+                    <div class="gl-row"><span class="check"></span><span>Wave 1 (backend joins) lands and is reviewed</span><span class="chip">sup1</span></div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div class="sec-title">Work now</div>
+                <div class="panel work-sum"><span><b>3</b> now</span><span><b>0</b> blocked</span><span><b>1</b> in review</span><span><b>4</b> next</span><span><b>1</b> wave running · sup1</span><span><b>1.6M</b> tokens this week (example)</span></div>
+              </div>
+            </div>
+            <div>
+              <div class="sec-title">FSE · what it did lately</div>
+              <div class="panel fse pinned"><span class="pin">O5</span>
+                <div class="fse-h"><span class="dot idle"></span><b>fse</b><span class="chip ok">alive</span><span class="bar"><i style="width:10%"></i></span><span class="mono dim" style="font-size:11px">10%</span></div>
+                <div class="handoff"><span class="muted" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase">hand-off</span><br>Intake sent; waiting on Pablo's answers. 0012 has no card yet. Next: after the intake, propose the organizer's stages as a decision.</div>
+                <div class="feed">
+                  <div class="fi"><span class="when">14:06</span><span>committed <span class="mono">docs(bitacora): intake sent, 0012 has no card yet</span></span></div>
+                  <div class="fi"><span class="when">14:05</span><span>asked you the intake · <span class="chip pk">5 questions</span></span></div>
+                  <div class="fi"><span class="when">13:38</span><span>acked your ruling: spawns supervisors, never supervises</span></div>
+                  <div class="fi"><span class="when">13:02</span><span>closed 2 hook threads · nothing to do for <span class="mono">fse-pilot</span></span></div>
+                </div>
+                <div class="muted" style="font-size:12px">people.md: <span class="chip wait">intake pending</span> · proposals open: 0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <div class="notes">
+    <div class="note"><span class="pin">O1</span><span><b>Every initiative screen opens with its goal and how you'll know it worked.</b> This is the new <span class="mono">goal</span> in <span class="mono">initiative.yaml</span>. It's empty until someone writes it, and the FSE asks.</span></div>
+    <div class="note"><span class="pin">O2</span><span><b>The stage stepper is the answer to "where are we".</b> Stages come from <span class="mono">working-on/roadmap.yaml</span>, each with an exit you can check. The current stage is the first whose exit isn't met.</span></div>
+    <div class="note"><span class="pin">O3</span><span><b>Six views under one header.</b> Calendar moves into Roadmap, Initiatives into Home, Settings behind ⚙. "Slack" becomes Conversations.</span></div>
+    <div class="note"><span class="pin">O4</span><span><b>This is how decisions show up without you looking for them.</b> The current stage lists its gates: the decisions it waits on (diamonds) and its exit checks (boxes).</span></div>
+    <div class="note"><span class="pin">O5</span><span><b>The FSE's hand-off and a feed of what it did,</b> built from its bitácora, its <span class="mono">Committed-by: FSE</span> commits, and its threads. Nothing new is stored.</span></div>
+  </div>
+</section>
+
+<!-- ============================ WORK ============================ -->
+<section class="screen" id="work">
+  <div class="screen-head"><h2>Initiative · Work</h2><span class="q">What is being executed, by which agent, and what is the wave doing?</span></div>
+  <div class="frame-scroll"><div class="frame">
+    <div class="topbar">
+      <span class="brand">organizer</span>
+      <span class="crumbs">Home <span>/</span> <b>organizer</b> <span>/</span> Work</span>
+      <span class="spacer"></span>
+      <span class="tb-btn">Needs me <span class="count">6</span></span>
+      <span class="tb-btn">Rescan</span><span class="tb-btn">⚙</span>
+    </div>
+    <div class="body" style="grid-template-columns:1fr">
+      <div class="main">
+        <div class="panel wave pinned"><span class="pin">W1</span>
+          <div class="wave-h">
+            <span class="dot work"></span><span class="wn">wave 1 · backend joins</span>
+            <span class="chip">supervisor sup1</span><span class="muted">spawned by fse · 13:40 · 1h12m</span>
+            <span class="spacer"></span>
+            <span class="muted">gate rows <b style="color:var(--text)">7/12</b></span><span class="chip ok">2 building</span><span class="chip rev">1 in review</span><span class="chip">1 queued</span><span class="mono dim" style="font-size:11.5px">1.1M tokens</span>
+          </div>
+          <div class="wave-track pinned"><span class="pin">W2</span>
+            <div class="wt"><div class="top"><span class="slug">initiative-goal-and-stages</span><span class="chip rev">review</span></div><div class="phases"><i class="d"></i><i class="d"></i><i class="d"></i></div><span class="mono dim" style="font-size:11px">wave1-ana · gate 4/4 · reviewer on it</span></div>
+            <div class="wt"><div class="top"><span class="slug">agent-card-join</span><span class="chip ok">building</span></div><div class="phases"><i class="d"></i><i class="c"></i><i></i></div><span class="mono dim" style="font-size:11px">wave1-bruno · phase 2/3 · <span class="bar"><i style="width:41%"></i></span> 41%</span></div>
+            <div class="wt"><div class="top"><span class="slug">wave-grouping</span><span class="chip ok">building</span></div><div class="phases"><i class="d"></i><i></i><i></i></div><span class="mono dim" style="font-size:11px">wave1-carla · phase 1/3 · <span class="bar hot"><i style="width:58%"></i></span> 58%</span></div>
+            <div class="wt"><div class="top"><span class="slug">runs-binding</span><span class="chip">queued</span></div><div class="phases"><i></i><i></i><i></i></div><span class="mono dim" style="font-size:11px">depends on agent-card-join</span></div>
+          </div>
+        </div>
+        <div class="cols">
+          <div class="col"><div class="col-h"><span class="dot" style="background:var(--next)"></span>Next <span class="n">4</span><small>not started</small></div>
+            <div class="cd"><span class="t">Identity is Azure Entra ID, when identity comes</span><span class="nx">decide: 0004 Firebase brokers Entra, or Entra end to end</span><div class="meta"><span class="chip wait">waits on 0004</span><span class="chip">stage 4</span></div></div>
+            <div class="cd"><span class="t">Retiring every seat must not erase the cell</span><span class="nx">scan.readCell accepts an empty roster; retire writes []</span><div class="meta"><span class="chip ok">launchable</span><span class="gate">gate 0/4</span><span class="act" style="padding:2px 8px;font-size:11px">Launch</span></div></div>
+          </div>
+          <div class="col"><div class="col-h"><span class="dot" style="background:var(--now)"></span>Now <span class="n">3</span><small>being built</small></div>
+            <div class="cd pinned"><span class="pin">W3</span><span class="t">Show which agent works each card</span><span class="nx">join live agents to cards by worktree, branch and seat</span><div class="ag"><span class="dot work"></span>wave1-bruno <span class="bar"><i style="width:41%"></i></span> 41% · 38m · 212k tok</div><div class="meta"><span class="chip">wave 1</span><span class="gate">gate 2/3</span><span class="mono dim" style="font-size:11px">wave/agent-card-join</span></div></div>
+            <div class="cd"><span class="t">Group cards into waves</span><span class="nx">seat: wave&lt;N&gt;-name, progress.md phases, posts to the supervisor</span><div class="ag"><span class="dot work"></span>wave1-carla <span class="bar hot"><i style="width:58%"></i></span> 58% · 51m · 340k tok</div><div class="meta"><span class="chip">wave 1</span><span class="gate">gate 1/3</span></div></div>
+            <div class="cd"><span class="t">Roll the workstation out to the second Mac</span><span class="nx">push claudecode; follow docs/second-laptop.md</span><div class="ag"><span class="dot idle"></span>nobody on it · 10d</div></div>
+          </div>
+          <div class="col"><div class="col-h"><span class="dot" style="background:var(--blocked)"></span>Blocked <span class="n">1</span><small>names who unblocks</small></div>
+            <div class="cd blocked"><span class="t">Organizer as the factory's registrar</span><span class="nx">record_url and a record that verifies a Firebase token</span><div class="ag"><span class="dot idle"></span>waits on: the record · 21d</div><div class="meta"><span class="chip">stage 4</span></div></div>
+          </div>
+          <div class="col pinned"><span class="pin">W4</span><div class="col-h"><span class="dot" style="background:var(--review)"></span>In review <span class="n">1</span><small>next: review…</small></div>
+            <div class="cd"><span class="t">Goal and stages in the scan</span><span class="nx">review: wave/initiative-goal-and-stages, gate met</span><div class="ag"><span class="dot work"></span>reviewer <span class="bar"><i style="width:22%"></i></span> 22% · 9m</div><div class="meta"><span class="chip">wave 1</span><span class="gate">gate 4/4</span></div></div>
+          </div>
+          <div class="col"><div class="col-h"><span class="dot" style="background:var(--done)"></span>Done <span class="n">4</span><small>this week</small></div>
+            <div class="cd" style="opacity:.75"><span class="t">No sign-in by default</span><div class="meta"><span class="chip ok">review pass</span><span class="mono dim" style="font-size:11px">2.4M tok · 3 sessions</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <div class="notes">
+    <div class="note"><span class="pin">W1</span><span><b>The wave strip shows what the wave is doing.</b> Its supervisor, who spawned it, how long it has run, gate rows passed out of total, cards building, in review and queued, and the tokens it has used. Cards are grouped by <span class="mono">seat: wave&lt;N&gt;-…</span>. The wave and its content here are an example.</span></div>
+    <div class="note"><span class="pin">W2</span><span><b>One tile per card in the wave.</b> Phases come from the builder's <span class="mono">progress.md</span>, context from the statusline, and a card's state from its done/status posts to the supervisor.</span></div>
+    <div class="note"><span class="pin">W3</span><span><b>Every card says who is on it,</b> with the live agent, its context, how long it has run and the tokens it has used, plus gate progress, wave and branch. A card with nobody on it says so.</span></div>
+    <div class="note"><span class="pin">W4</span><span><b>"In review" is a lane, not a status.</b> It holds cards whose <span class="mono">next</span> starts with <span class="mono">review:</span>. The four statuses stay closed. Blocked keeps its own column (0018).</span></div>
+  </div>
+</section>
+
+<!-- ============================ ROADMAP ============================ -->
+<section class="screen" id="roadmap">
+  <div class="screen-head"><h2>Initiative · Roadmap</h2><span class="q">Where are we going, stage by stage, and which decisions gate each stage?</span></div>
+  <div class="frame-scroll"><div class="frame">
+    <div class="topbar">
+      <span class="brand">organizer</span>
+      <span class="crumbs">Home <span>/</span> <b>organizer</b> <span>/</span> Roadmap</span>
+      <span class="spacer"></span>
+      <span class="tb-btn hot">Stages</span><span class="tb-btn">Cards</span><span class="tb-btn">Calendar</span>
+    </div>
+    <div class="body" style="grid-template-columns:1fr">
+      <div class="main">
+        <div class="panel" style="overflow:hidden">
+          <div class="rm pinned"><span class="pin">R1</span>
+            <div class="rm-axis"><span></span><div class="lane">
+              <span class="tick" style="left:0%"><span>Sep 1</span></span>
+              <span class="tick" style="left:20%"><span>Sep 15</span></span>
+              <span class="tick" style="left:40%"><span>Oct 1</span></span>
+              <span class="tick" style="left:60%"><span>Oct 15</span></span>
+              <span class="tick" style="left:80%"><span>Nov 1</span></span>
+              <span class="today" style="left:35%"><span>today</span></span>
+            </div></div>
+            <div class="rm-row"><div class="rm-lbl"><span class="n">1 · done</span><span class="t">Board across machines</span><span class="x">exit met 2026-09-16</span></div><div class="lane">
+              <span class="tick" style="left:20%"></span><span class="tick" style="left:40%"></span><span class="tick" style="left:60%"></span><span class="tick" style="left:80%"></span>
+              <span class="sbar done" style="left:1%;width:21%"></span>
+              <span class="gem ruled" style="left:1.5%"></span><span class="gem-l" style="left:1.5%">0001</span>
+              <span class="gem ruled" style="left:21%"></span><span class="gem-l" style="left:21%">0003</span>
+            </div></div>
+            <div class="rm-row"><div class="rm-lbl"><span class="n">2 · now</span><span class="t">The FSE runs the redesign</span><span class="x">exit: Home, Overview, Work shipped</span></div><div class="lane">
+              <span class="tick" style="left:20%"></span><span class="tick" style="left:40%"></span><span class="tick" style="left:60%"></span><span class="tick" style="left:80%"></span>
+              <span class="sbar cur" style="left:22%;width:13%"></span><span class="sbar plan" style="left:35%;width:12%"></span>
+              <span class="gem ruled" style="left:34%"></span><span class="gem-l" style="left:30%">0013–16</span>
+              <span class="gem wait" style="left:36.5%"></span><span class="gem-l" style="left:39.5%;top:30px">0005</span>
+            </div></div>
+            <div class="rm-row"><div class="rm-lbl"><span class="n">3</span><span class="t">Waves are visible</span><span class="x">exit: wave strip reads posts</span></div><div class="lane">
+              <span class="tick" style="left:20%"></span><span class="tick" style="left:40%"></span><span class="tick" style="left:60%"></span><span class="tick" style="left:80%"></span>
+              <span class="sbar plan" style="left:47%;width:16%"></span>
+            </div></div>
+            <div class="rm-row"><div class="rm-lbl"><span class="n">4</span><span class="t">Identity</span><span class="x">gated by 0004</span></div><div class="lane">
+              <span class="tick" style="left:20%"></span><span class="tick" style="left:40%"></span><span class="tick" style="left:60%"></span><span class="tick" style="left:80%"></span>
+              <span class="gem wait" style="left:24%"></span><span class="gem-l" style="left:24%">0004 · 10d</span>
+              <span class="sbar plan" style="left:63%;width:22%;opacity:.55"></span>
+            </div></div>
+          </div>
+          <div class="rm-foot pinned"><span class="pin">R2</span>
+            <span><i class="k" style="background:var(--ruled);opacity:.75"></i> stage done</span>
+            <span><i class="k" style="background:var(--now)"></i> current stage, to today</span>
+            <span><i class="k" style="border:1.5px dashed var(--next)"></i> planned (no date unless a real one exists)</span>
+            <span><i class="diamond wait" style="display:inline-block"></i> decision waiting</span>
+            <span><i class="diamond ruled" style="display:inline-block"></i> decision ruled</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <div class="notes">
+    <div class="note"><span class="pin">R1</span><span><b>One row per stage, not per card.</b> Each stage carries its decisions as diamonds: raised, and ruled once it is. A waiting diamond sits where the decision was raised and shows its age. "Cards" switches to today's card Gantt, and "Calendar" to the month grid.</span></div>
+    <div class="note"><span class="pin">R2</span><span><b>Planned stages have no invented dates.</b> Without a real date, a dashed bar is only order and rough size (appetite). The FSE proposes stages and stage moves, and you rule them as decision records.</span></div>
+  </div>
+</section>
+
+<section class="questions" id="questions">
+  <h2>Questions for you</h2>
+  <ol>
+    <li><b>Blocked</b>: stays a column. <span class="chip">ruled 0018</span></li>
+    <li><b>Ruling from Needs me</b>: a box writes your words into the record. <span class="chip">ruled 0019</span></li>
+    <li><b>Cost on cards</b>: token consumption, not dollars. <span class="chip">ruled 0020</span></li>
+    <li><b>The FSE feed</b> (O5): is a list of recent actions enough, or should it also show what the FSE is waiting on from you?</li>
+    <li><b>Stage dates</b> (R2): may a stage carry an appetite (e.g. "two waves") in place of a date?</li>
+  </ol>
+</section>
+
+</div>
