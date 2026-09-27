@@ -27,3 +27,6 @@ Roadmap stage twenty-at-a-glance: FR-8 of `docs/specs/twenty-at-a-glance.md`.
 
 ## Blockers
 none
+
+## Notes
+- 2026-09-27 sup6 runs this card (organizer-probe-sup6), spawned by the FSE after 0034 and 0036
