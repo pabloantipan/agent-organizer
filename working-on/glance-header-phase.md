@@ -1,6 +1,6 @@
 ---
 title: The header shows scope, and every stage shows its phase
-status: next
+status: now
 repos: [organizer]
 branch: glance-header-phase
 seat: wave1-header
