@@ -15,11 +15,9 @@ restating it (the discuss skill).
   passed review 2026-09-27. The installed app (`/Applications/organizer.app`,
   the `organizer` on PATH) predates it and still warns at 22; `make install`
   is Pablo's.
-- **Running:** sup3 (organizer-probe-sup3, identity prelude) owns the
-  redesign's wave 2, the five view cards. Wave 1 (sup2) passed review
-  2026-09-27, all six. When wave 2's last card lands, the redesign task is
-  over: propose the next task from the rulings on hand, or raise what it
-  needs.
+- **Done 2026-09-27:** the redesign (0015, 0023): wave 1 (sup2) and wave 2
+  (sup3), 11 cards, all passed review. The installed app still predates it;
+  `make install` is Pablo's. Next task: 0025 (proposed).
 - **Observed:** sup1 seated `w1a`/`w1b`, not `wave<N>-*` (short because of
   the name ceiling). sup2 was told to seat `wave1-<name>`. If a third
   supervisor does it again, that goes in the repetition log.
