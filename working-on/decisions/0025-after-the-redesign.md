@@ -1,13 +1,13 @@
 ---
 title: The organizer's next task after the redesign
-status: proposed
+status: ruled
 raised: 2026-09-26
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-26
+ruled_by: pablo
 options: [the roadmap first, retire-keeps-the-cell now, both, pause for use]
-chosen:
+chosen: both
 cards: [retire-keeps-the-cell]
 threads: []
 supersedes: []
@@ -44,7 +44,7 @@ needs a supervisor and not Pablo, so neither waits on the other.
 
 ## Ruling
 
-
+Pablo, 2026-09-26, in the blacksmith session, choosing "Both": a supervisor runs retire-keeps-the-cell while the intake and the roadmap go through Pablo.
 
 ## Consequences
 

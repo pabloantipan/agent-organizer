@@ -1,6 +1,6 @@
 ---
 title: The shape of Entra identity
-status: proposed
+status: withdrawn
 raised: 2026-09-16
 raised_by: pablo
 owner: pablo
@@ -28,7 +28,7 @@ When identity comes, does Firebase stay as the broker with Entra as its OIDC pro
 
 ## Ruling
 
-
+Pablo, 2026-09-26, in the blacksmith session: "Not now". Withdrawn, not ruled: auth stays off (0003) until identity is actually needed. Reopen as a new record when a second person or the record's key issuance needs it.
 
 ## Consequences
 

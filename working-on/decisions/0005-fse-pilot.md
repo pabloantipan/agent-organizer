@@ -1,13 +1,13 @@
 ---
 title: A standing FSE seat, with the authority as drafted
-status: proposed
+status: ruled
 raised: 2026-09-26
 raised_by: pablo
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-26
+ruled_by: pablo
 options: [pilot the FSE as drafted, pair session alone, Draft v0.1 FSE with escalation authority]
-chosen:
+chosen: pilot the FSE as drafted
 cards: [fse-pilot]
 supersedes: []
 superseded_by:
@@ -29,7 +29,7 @@ The drafter's: pilot as drafted, judged after two waves on `pablo_minutes`, `gat
 
 ## Ruling
 
-
+Pablo, 2026-09-26, in the blacksmith session: "Accept, drop §12". The pilot runs with the authority as drafted plus 0010 and 0011; the clause "reverses as-built §12 row 1" is dropped, because `specs/factory-topology-spec.md` has no §12. The pilot is judged keep or drop after the two redesign waves, on pablo_minutes, gate_rework and decide_turnaround.
 
 ## Consequences
 
