@@ -23,6 +23,27 @@ const ownedByLead = (d: model.Decision, lead: string) => {
   return o === "" || o === lead;
 };
 
+/** FR-9 (0036): an initiative is active when its `status` is `active`, or
+ *  empty, since older initiative.yaml files carry none. Anything else
+ *  (paused, archived, …) leaves Home, the rail's groups and Needs me. */
+export const isActive = (i: { status?: string } | undefined) => {
+  const s = (i?.status ?? "").trim().toLowerCase();
+  return s === "" || s === "active";
+};
+
+/** The ids of initiatives that are not active. An initiative on two machines
+ *  is judged by its local row, as everywhere else. */
+export function inactiveIds(view: BoardView | null) {
+  const out = new Set<string>();
+  const seen = new Set<string>();
+  for (const i of [...(view?.board.initiatives ?? [])].sort((a, b) => Number(b.local) - Number(a.local))) {
+    if (seen.has(i.id)) continue;
+    seen.add(i.id);
+    if (!isActive(i)) out.add(i.id);
+  }
+  return out;
+}
+
 export const needsMeThread = (t: CellThread) => t.status === "escalated" || (t.asked_of_me ?? 0) > 0;
 
 export function askedCards(view: BoardView | null, initiativeId: string) {
@@ -54,23 +75,26 @@ export type NeedsMeRow =
 const day = (s: string | undefined) => parseISO(s?.slice(0, 10));
 
 /** Needs me (FR-15): queueOf over every cell plus the decision records
- *  waiting on the lead's ruling (FR-8), one list, oldest first. The top bar's one badge is
+ *  waiting on the lead's ruling (FR-8), one list, oldest first, of active
+ *  initiatives only (FR-9). The top bar's one badge is
  *  its length, so the count always equals the rows. */
 export function needsMeRows(view: BoardView | null, agents: AgentsView | null, now = new Date()): NeedsMeRow[] {
   const rows: NeedsMeRow[] = [];
   // An initiative on two machines reports its records twice; the local scan wins.
   const seen = new Set<string>();
   const groups = new Map((agents?.groups ?? []).map((g) => [g.id, g]));
+  const folded = inactiveIds(view);
   for (const i of [...(view?.board.initiatives ?? [])].sort((a, b) => Number(b.local) - Number(a.local))) {
     if (seen.has(i.id)) continue;
     seen.add(i.id);
+    if (folded.has(i.id)) continue;
     const lead = leadOf(groups.get(i.id));
     for (const d of i.decisions ?? []) {
       if (d.status === "proposed" && ownedByLead(d, lead)) rows.push({ kind: "decision", key: `decision:${i.id}/${d.number}`, initiative: i.id, since: day(d.raised), decision: d });
     }
   }
   for (const g of agents?.groups ?? []) {
-    if (!g.cell) continue;
+    if (!g.cell || folded.has(g.id)) continue;
     const q = queueOf(g, view);
     for (const t of q.threads) rows.push({ kind: "thread", key: `thread:${t.id}`, initiative: g.id, since: new Date(now.getTime() - (t.age_seconds ?? 0) * 1000), thread: t });
     for (const c of q.cards) rows.push({ kind: "card", key: `card:${g.id}/${c.slug}`, initiative: g.id, since: day(c.updated), card: c });
