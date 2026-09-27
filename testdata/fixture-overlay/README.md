@@ -13,3 +13,9 @@ here), so `status.golden` and G9 are untouched.
   gate heading (G13)
 - a cell whose project is `organizer-fixture` with an `fse` seat, so the FSE
   thread the script posts reaches Needs me (G19)
+- phases on the roadmap's stages, foundations in discovery and the rest in
+  building, for the header's stepper and Roadmap rows (twenty-at-a-glance G5)
+- the views stage gates on `4`, which is record 0004 (ruled), so a gate
+  without zero-padding resolves (twenty-at-a-glance G6)
+- init-a's scope in and out lives in `testdata/home/init-a/working-on/initiative.yaml`
+  and init-b has none, so the header shows both cases (twenty-at-a-glance G5)
