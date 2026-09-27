@@ -4,15 +4,18 @@ import { DragDropContext, Draggable, Droppable, type DraggableProvidedDragHandle
 import type { merge } from "../../wailsjs/go/models";
 import type { Group } from "../hooks/useWails";
 import { move, uniq } from "../lib";
+import { inactiveIds } from "../lib/queue";
 import { useBoard } from "../stores/board.store";
 
-type Entry = { id: string; title: string; client: string; now: number; blocked: number; next: number; machines: string[]; live: number; working: number };
+type Entry = { id: string; title: string; client: string; status: string; now: number; blocked: number; next: number; machines: string[]; live: number; working: number };
 
 /** Left rail: initiatives by priority, optionally partitioned into named
  *  groups. Priority is the flat order and the rank numbers stay global; a
  *  group is a visual section of it. Groups live in the manual order, so
  *  they sync with it. Drag an initiative within or across groups, drag a
- *  group header to reorder groups, click a name to rename it. */
+ *  group header to reorder groups, click a name to rename it. Initiatives
+ *  that are not active (FR-9) leave every group and sit in one last
+ *  "Not active" group, collapsed by default, that only opens them. */
 export function Rail() {
   const { view, selectedInitiative, setSelectedInitiative, reorderInitiatives, setGroups, railCollapsed, setRailCollapsed } = useBoard();
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() => {
@@ -29,6 +32,7 @@ export function Rail() {
       id,
       title: first.title,
       client: first.client,
+      status: (rows.find((r) => r.local) ?? first).status,
       now: rows.reduce((a, r) => a + r.now, 0),
       blocked: rows.reduce((a, r) => a + r.blocked, 0),
       next: rows.reduce((a, r) => a + r.next, 0),
@@ -38,7 +42,13 @@ export function Rail() {
     });
   }
   const entries = ids.map((id) => byId.get(id)!);
-  const totals = entries.reduce(
+  // Folded initiatives stay in the stored groups and the flat priority, so
+  // reactivating one restores its place; the rail only leaves them out.
+  const folded = inactiveIds(view);
+  const activeIds = ids.filter((id) => !folded.has(id));
+  const foldedIds = ids.filter((id) => folded.has(id));
+  const active = activeIds.map((id) => byId.get(id)!);
+  const totals = active.reduce(
     (a, e) => ({ now: a.now + e.now, blocked: a.blocked + e.blocked, next: a.next + e.next }),
     { now: 0, blocked: 0, next: 0 },
   );
@@ -49,17 +59,20 @@ export function Rail() {
   const stored: Group[] = view?.order?.groups ?? [];
   const grouped = stored.length > 0;
   const placed = new Set(stored.flatMap((g) => g.initiatives ?? []));
-  const rest = ids.filter((id) => !placed.has(id));
+  const rest = activeIds.filter((id) => !placed.has(id));
   const sections: { key: string; name: string; ids: string[]; fixed: boolean }[] = grouped
     ? [
-        ...stored.map((g, i) => ({ key: `g${i}`, name: g.name, ids: (g.initiatives ?? []).filter((id) => byId.has(id)), fixed: false })),
+        ...stored.map((g, i) => ({ key: `g${i}`, name: g.name, ids: (g.initiatives ?? []).filter((id) => byId.has(id) && !folded.has(id)), fixed: false })),
         ...(rest.length ? [{ key: "rest", name: "ungrouped", ids: rest, fixed: true }] : []),
       ]
-    : [{ key: "rest", name: "", ids, fixed: true }];
-  const rank = new Map(ids.map((id, i) => [id, i + 1]));
+    : [{ key: "rest", name: "", ids: activeIds, fixed: true }];
+  // Ranks count active initiatives only; a folded one has none until it is
+  // active again, and then its stored place gives it back.
+  const rank = new Map(activeIds.map((id, i) => [id, i + 1]));
 
+  const isCollapsed = (key: string) => (key === FOLD ? collapsed[key] ?? true : !!collapsed[key]);
   const toggle = (key: string) => {
-    const next = { ...collapsed, [key]: !collapsed[key] };
+    const next = { ...collapsed, [key]: !isCollapsed(key) };
     setCollapsed(next);
     try { localStorage.setItem("rail.collapsed", JSON.stringify(next)); } catch { /* per-viewer convenience only */ }
   };
@@ -75,7 +88,7 @@ export function Rail() {
     }
     if (!grouped) {
       if (r.destination.index === r.source.index) return;
-      reorderInitiatives(move(ids, r.source.index, r.destination.index));
+      reorderInitiatives(keepHidden(ids, move(activeIds, r.source.index, r.destination.index), folded));
       return;
     }
     // Grouped: rebuild every section's member list, then store the named
@@ -85,13 +98,15 @@ export function Rail() {
     const [id] = from.splice(r.source.index, 1);
     const to = lists.get(r.destination.droppableId)!;
     to.splice(r.destination.index, 0, id);
-    const next: Group[] = stored.map((g, i) => ({ ...g, initiatives: lists.get(`g${i}`)! }));
+    const next: Group[] = stored.map((g, i) => ({ ...g, initiatives: keepHidden(g.initiatives ?? [], lists.get(`g${i}`)!, folded) }));
     if (r.destination.droppableId === "rest" || r.source.droppableId === "rest") {
       // Membership changed against the remainder; the flat order must place
       // the remainder after the groups, which Regroup does from the stored lists.
       persist(next);
       if (r.destination.droppableId === "rest" && r.source.droppableId === "rest") {
-        reorderInitiatives([...next.flatMap((g) => g.initiatives ?? []), ...lists.get("rest")!]);
+        const inGroups = next.flatMap((g) => g.initiatives ?? []);
+        const placedNext = new Set(inGroups);
+        reorderInitiatives([...inGroups, ...keepHidden(ids.filter((id) => !placedNext.has(id)), lists.get("rest")!, folded)]);
       }
       return;
     }
@@ -165,7 +180,7 @@ export function Rail() {
     const isEditing = editing === i && !s.fixed;
     return (
       <div className={`rail-group-head ${s.fixed ? "fixed" : ""}`} {...(handle ?? {})}>
-        <button className="rail-chevron" onClick={() => toggle(s.key)} title={collapsed[s.key] ? "expand" : "collapse"}>
+        <button className="rail-chevron" onClick={() => toggle(s.key)} aria-expanded={!collapsed[s.key]} title={collapsed[s.key] ? "expand" : "collapse"}>
           {collapsed[s.key] ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
         </button>
         {isEditing ? (
@@ -197,7 +212,7 @@ export function Rail() {
       <nav className="rail strip">
         <button className="rail-icon strip-toggle" onClick={() => setRailCollapsed(false)} title="expand the rail"><PanelLeftOpen size={14} /></button>
         <button className={`strip-all ${selectedInitiative === null ? "active" : ""}`} onClick={() => setSelectedInitiative(null)} title={`Home: ${totals.now} now, ${totals.blocked} blocked, ${totals.next} next`}>all</button>
-        {entries.map((e) => (
+        {active.map((e) => (
           <button
             key={e.id}
             className={`strip-item ${selectedInitiative === e.id ? "active" : ""} ${e.blocked > 0 ? "blocked" : e.now > 0 ? "now" : ""}`}
@@ -233,7 +248,7 @@ export function Rail() {
         <div className="rail-label">
           <span>By priority{grouped ? ", grouped" : ""}</span>
           <span className="spacer" />
-          {!grouped && ids.length > 0 && <button className="rail-icon" onClick={groupByClient} title="Group by client"><Layers size={12} /></button>}
+          {!grouped && activeIds.length > 0 && <button className="rail-icon" onClick={groupByClient} title="Group by client"><Layers size={12} /></button>}
           {ids.length > 0 && <button className="rail-icon" onClick={addGroup} title="New group"><FolderPlus size={12} /></button>}
           {grouped && <button className="rail-icon" onClick={() => persist([])} title="Ungroup: back to one flat list"><X size={12} /></button>}
         </div>
@@ -265,9 +280,54 @@ export function Rail() {
             </section>
           ))}
         </DragDropContext>
+        {foldedIds.length > 0 && (
+          <section className="rail-group folded" aria-label="Not active">
+            <div className="rail-group-head fixed">
+              <button className="rail-chevron" onClick={() => toggle(FOLD)} aria-expanded={!isCollapsed(FOLD)} title={isCollapsed(FOLD) ? "expand" : "collapse"}>
+                {isCollapsed(FOLD) ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+              </button>
+              <span className="rail-group-name" title="paused, archived or otherwise not active; opens, never drags">Not active ({foldedIds.length})</span>
+            </div>
+            {!isCollapsed(FOLD) && (
+              <div className="rail-group-list">
+                {foldedIds.map((id) => {
+                  const e = byId.get(id)!;
+                  return (
+                    <button key={id} type="button" className={`rail-item folded ${selectedInitiative === id ? "active" : ""}`} onClick={() => setSelectedInitiative(id)} title={e.title}>
+                      <span className="rail-rank" aria-hidden="true" />
+                      <span className="rail-main">
+                        <span className="rail-title">{e.id}</span>
+                        <span className="rail-meta">
+                          <span className="badge rail-status">{e.status}</span>
+                          {e.client && <span className="badge client">{e.client}</span>}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        )}
       </div>
     </nav>
   );
+}
+
+/** The per-viewer collapse key of the Not active group; it is not a stored group. */
+const FOLD = "inactive";
+
+/** Lays `visible` over `stored`, in its new order, leaving every hidden id
+ *  of `stored` in its slot, so storing what the rail shows never drops a
+ *  folded initiative from its group or from the priority (FR-9). */
+function keepHidden(stored: string[], visible: string[], hidden: Set<string>) {
+  const q = visible.slice();
+  const out: string[] = [];
+  for (const id of stored) {
+    if (hidden.has(id)) out.push(id);
+    else if (q.length) out.push(q.shift()!);
+  }
+  return [...out, ...q];
 }
 
 function Counts({ now, blocked, next }: { now: number; blocked: number; next: number }) {
