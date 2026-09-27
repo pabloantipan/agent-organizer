@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Briefcase, ChevronDown, ChevronRight, CircleDashed, Compass, Hammer, Hand, Play } from "lucide-react";
 import type { merge, model, service } from "../../wailsjs/go/models";
-import { needsMeRows, type NeedsMeRow } from "../lib/queue";
+import { inactiveIds, needsMeRows, type NeedsMeRow } from "../lib/queue";
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
 import { useBoard } from "../stores/board.store";
@@ -12,7 +12,8 @@ import "../styles/home.css";
 
 /** Home: what needs me, and where every initiative stands (FR-15, FR-16).
  *  Needs me is one list, oldest first, one verb per row; its length is the
- *  top bar's one badge. Below it, the initiatives in the rail's order. */
+ *  top bar's one badge. Below it, the active initiatives in the rail's order;
+ *  the rest sit in the rail's Not active group (FR-9). */
 export function Home() {
   const { view, agents } = useBoard();
   if (!view) return <div className="empty">Loading…</div>;
@@ -139,14 +140,15 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
   const { agents, openInitiative } = useBoard();
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const all = view.board.initiatives ?? [];
-  const ids = uniq(all.map((i) => i.id));
+  const folded = inactiveIds(view);
+  const ids = uniq(all.map((i) => i.id)).filter((id) => !folded.has(id));
   const cols = view.board.columns ?? {};
   const states = initiativeStates(view, agents);
   if (ids.length === 0) {
     return (
       <div className="panel empty-state">
-        <div>No initiatives found.</div>
-        <div className="sub">Add a root that holds a working-on/initiative.yaml in Settings.</div>
+        <div>{folded.size > 0 ? "No active initiatives." : "No initiatives found."}</div>
+        <div className="sub">{folded.size > 0 ? "The rest sit under Not active at the bottom of the rail." : "Add a root that holds a working-on/initiative.yaml in Settings."}</div>
       </div>
     );
   }
