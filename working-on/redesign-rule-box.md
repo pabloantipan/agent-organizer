@@ -1,11 +1,11 @@
 ---
 title: Ruling from Needs me writes the record, end to end
-status: blocked
+status: next
 repos: [organizer]
 branch: main
 updated: 2026-09-26
 seat: wave2-rulebox
-next: "sup3: Pablo granted Accessibility to /opt/homebrew/bin/zellij (2026-09-27); restart the wave2-rulebox session (probe -k, then relaunch; a new zellij server picks up the grant) so the builder takes G16-2…6 from the built app, then review: redesign-rule-box (G15, G18 met; G16-1 taken; 224d4b4 b0f2d13)"
+next: "review: redesign-rule-box, gate G15, G16, G18 met, 903c6ce 0851396"
 depends_on: ["redesign-overview", "redesign-work", "redesign-roadmap"]
 boundary: ["frontend/src/components/RuleDecisionBox.tsx (new)", "frontend/src/components/Home.tsx (the decision row's Rule action)", "frontend/src/styles/rule-box.css (new)"]
 spec: "docs/specs/redesign.md (FR-23, FR-22); visual: docs/specs/redesign-mockups.html; values: docs/design-system.md"
@@ -17,21 +17,19 @@ The redesign, wave 2 of 2: FR-22 of `docs/specs/redesign.md`. Decisions 0013–0
 
 ## Gate
 - [x] G15: see `docs/specs/redesign.md`, Acceptance
-- [ ] G16: see `docs/specs/redesign.md`, Acceptance
+- [x] G16: see `docs/specs/redesign.md`, Acceptance
 - [x] G18: see `docs/specs/redesign.md`, Acceptance
 
 ## Done
 - 2026-09-26 cut from the redesign spec by the FSE
 - 2026-09-26 wave2-rulebox: the rule box (224d4b4 `RuleDecisionBox.tsx`, `rule-box.css`; b0f2d13 Home's Rule opens it). G15 met in `wails dev` on the fixture: `.wt-notes/wave2-rulebox/G15-box.png` (0002, one-machine, words), `G15-after.png` (0002 gone, badge 3 → 2); `git -C $FIXTURE_HOME/init-a log -1 --stat` → `docs(decisions): rule 0002 where-the-fixture-runs (one-machine)`, `1 file changed, 6 insertions(+), 4 deletions(-)`; `git show` touches only status, ruled, ruled_by, chosen and the Ruling line (`git-show-dev.txt`). Rule is disabled until option and words; a refusal shows in the box with both kept (`rb-refused.png`). G18: the grep over `main...redesign-rule-box` prints nothing; `npm run build` ✓. G16 partly: walk Home → init-a → Overview → Work → Roadmap → rule 0002 done in `wails dev` (`dev-1-home` … `dev-5-roadmap.png`, then G15-*); console: one error only, the Wails runtime's (Notes); `wails build` ✓, the built app ran on the fixture and was quit by pid, but G16-1…6 could not be taken from it (Blockers)
+- 2026-09-26 wave2-rulebox: G16 met. Pablo walked the built app (`wails build` of this worktree, pid 19847, fixture `organizer-fixture.GWYoaw`) because this seat could not click (Blockers); his screenshots in `.wt-notes/wave2-rulebox/`: `G16-1b-home-pablo.png`, `G16-2-3-init-a-overview-pablo.png`, `G16-4-work-pablo.png`, `G16-5-roadmap-pablo.png`, `G16-6a-box-pablo.png` (the box on 0002), `G16-6-ruled-pablo.png` (0002 gone, Needs me 2). Mine from the same builds: `G16-1-home.png` (pid 97585) and `G16-6-ruled.png` (screencapture of pid 19847's window, 0002 gone, badge 2). `git -C …/init-a log -1 --stat` → c2aa41c `docs(decisions): rule 0002 where-the-fixture-runs (one-machine)`, `1 file changed, 6 insertions(+), 4 deletions(-)`; `git show` touches only status, ruled, ruled_by, chosen and the Ruling line (`git-show-built.txt`). Console: the one error is Wails' dev runtime (Notes). Rebased on main: 903c6ce, 0851396 (were 224d4b4, b0f2d13); `npm run build` ✓; G18 grep empty
 
 ## Next
-1. Pablo grants iTerm2 Screen Recording and Accessibility, or runs the built-app walk himself: `wails build`, run the app on `eval "$(scripts/fixture-home.sh)"`, Home → init-a → Overview → Work → Roadmap → rule 0002, `G16-1-home.png` … `G16-6-ruled.png`
-2. Then review: redesign-rule-box, gate G15, G16, G18
+1. review: redesign-rule-box, gate G15, G16, G18 met, 903c6ce 0851396
 
 ## Blockers
-- G16's built-app walk: this session has no macOS Accessibility (`osascript is not allowed assistive access (-1719)`, so no click in the native window) and no Screen Recording (`screencapture -x -l <window>` → "could not create image from window", `-R` → "could not create image from rect"). Only Pablo can grant either
-- 2026-09-26 23:20, after Pablo's grant: Screen Recording works in this process (`G16-1-home.png` from the built app); Accessibility does not (`-1719`), since a running process keeps its old permission. A fresh session takes G16-2…6
-- 2026-09-26, after `probe -r`: still `-1719`; `AXIsProcessTrusted()` is false in this process. Its chain is zsh → claude → zsh → `/opt/homebrew/bin/zellij` (ppid 1): the zellij server is the responsible process, not iTerm2
+none (the Accessibility block is recorded in progress.md; Pablo walked the built app instead)
 
 ## Notes
 - 2026-09-26 wave2-rulebox: the console error is Wails' runtime, not `frontend/src`. `Cannot read properties of null (reading 'nodes')`, frames `Fe`, `bn`, `new In` all in `/wails/ipc.js`, which is byte-identical (sha256 3c3b999d…) to wails v2.15.0's `internal/frontend/runtime/ipc_websocket.js`; `In` is its Svelte dev overlay mounted on DOMContentLoaded at `#wails-spinner`. It reproduces on a page holding only `ipc.js`, `runtime.js` and that div, no app code, so main has it too (`.wt-notes/wave2-rulebox/ipc-blank.log`). No 404 appeared in these runs. It is a `wails dev` page only; the built app does not serve `ipc_websocket.js`
