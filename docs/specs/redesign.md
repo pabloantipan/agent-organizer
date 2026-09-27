@@ -2,7 +2,7 @@
 
 status: ruled (0023, 2026-09-26)
 owner: pablo
-decisions: [0013 ruled, 0014 ruled, 0015 ruled, 0016 ruled, 0017 ruled, 0018 ruled, 0019 ruled, 0020 ruled, 0021 ruled, 0022 ruled]
+decisions: [0013 ruled, 0014 ruled, 0015 ruled, 0016 ruled, 0017 ruled, 0018 ruled, 0019 ruled, 0020 ruled, 0021 ruled, 0022 ruled, 0026 ruled, 0027 ruled, 0028 ruled]
 visual reference: `docs/specs/redesign-mockups.html` (bf0e085), pins H1–H3, O1–O5, W1–W4, R1–R2
 design system: `docs/design-system.md` and `frontend/src/styles/tokens.css` (ac0d15a..ef1b980); the mockups show layout, the design system decides every value
 
@@ -74,8 +74,10 @@ was wrong; stop and amend it.
 
   Keys 1 and 2 are the ones `session.MatchCard` and `Service.branchOf`
   already use.
-- **FR-7** If two cards answer to one agent, then the agent shall be joined
-  to none. This is `MatchCard`'s rule: a wrong card is worse than no card.
+- **FR-7** If two cards answer to one agent by place or branch, then the
+  agent shall be joined to none, unless exactly one of those cards names the
+  agent's seat, in which case it joins that card (0027). A wrong card is
+  worse than no card; the seat is the one key that names the builder.
 - **FR-8** Each joined agent shall carry its state, context percentage,
   input tokens and start time.
 - **FR-9** Cards whose `seat` matches `wave<N>-<name>` shall form wave N. For
@@ -91,10 +93,11 @@ was wrong; stop and amend it.
 - **FR-11** The board shall carry the FSE's activity for an initiative:
   - the HAND-OFF section of `docs/bitacora/fse_bitacora.md`;
   - the last 10 commits under the initiative root with a
-    `Committed-by: FSE` trailer (time and subject);
-  - the FSE's open threads.
+    `Committed-by: FSE` trailer (time and subject).
 
-  Without a bitácora there is no activity and no problem.
+  With no bitácora the hand-off is empty; FSE-signed commits still show. The
+  FSE's threads are not listed here: FR-12's waiting list covers the ones that
+  ask the human, and the rest are in Conversations (0026).
 - **FR-12** (built in wave 2, `redesign-overview`) The FSE panel shall also list what the FSE waits on from the
   owner, up to five items, derived and never stored:
   - the initiative's `proposed` records raised by the FSE and owned by the
@@ -295,3 +298,4 @@ three that depend on them. Wave 2 starts once wave 1's review passes.
 - 2026-09-26: the session-name rabbit hole now states the 68-character ceiling from `longer-session-names`.
 - 2026-09-26, after wave 1 (all six passed review): as built, a wave's token count (FR-9) sums its joined agents' live statusline tokens, not the archive; archived tokens reach Work per card through the runs binding (FR-10). FR-11 as built reports FSE-signed commits even where there is no bitácora (only the hand-off is empty). Both are what wave 2 renders; the gate rows stand (see `done/redesign-waves.md`, `done/redesign-fse-activity.md`).
 - 2026-09-26, after wave 2 (all five passed review; the redesign is built): one line outside wave 2's `frontend/src` boundary, `app.go`'s `StageType` (so Wails emits the nested type, like `MilestoneType`), taken by `redesign-shell-home` with sup3's boundary change (45cb7b9). G16 ran in the built app; macOS Accessibility had to be granted to `/opt/homebrew/bin/zellij`, not iTerm2, because probe's seats run under a detached zellij server.
+- 2026-09-27: FR-11 drops the FSE's open threads, per 0026 (the waiting list and Conversations cover them). FR-7: the seat breaks a tie, per 0027. 0028 keeps the status golden's fixture problem lines, with no spec change.
