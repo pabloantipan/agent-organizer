@@ -439,6 +439,10 @@ func (a *App) MilestoneType() model.Milestone { return model.Milestone{} }
 // ExitItem it holds) in models.ts, for the same reason as MilestoneType.
 func (a *App) StageType() model.Stage { return model.Stage{} }
 
+// ScopeType exists only so the Wails generator emits model.Scope in models.ts,
+// for the same reason as MilestoneType.
+func (a *App) ScopeType() model.Scope { return model.Scope{} }
+
 type errString string
 
 func (e errString) Error() string { return string(e) }

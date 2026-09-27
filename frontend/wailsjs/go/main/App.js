@@ -138,6 +138,10 @@ export function SaveConfig(arg1) {
   return window['go']['main']['App']['SaveConfig'](arg1);
 }
 
+export function ScopeType() {
+  return window['go']['main']['App']['ScopeType']();
+}
+
 export function SearchCell(arg1, arg2) {
   return window['go']['main']['App']['SearchCell'](arg1, arg2);
 }

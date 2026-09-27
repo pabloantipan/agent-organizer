@@ -210,6 +210,7 @@ export namespace merge {
 	    goal: string;
 	    measure: string;
 	    specs: string[];
+	    scope: model.Scope;
 	    stages: model.Stage[];
 	    path: string;
 	    machine: string;
@@ -251,6 +252,7 @@ export namespace merge {
 	        this.goal = source["goal"];
 	        this.measure = source["measure"];
 	        this.specs = source["specs"];
+	        this.scope = this.convertValues(source["scope"], model.Scope);
 	        this.stages = this.convertValues(source["stages"], model.Stage);
 	        this.path = source["path"];
 	        this.machine = source["machine"];
@@ -875,10 +877,25 @@ export namespace model {
 	        this.err = source["err"];
 	    }
 	}
+	export class Scope {
+	    in: string[];
+	    out: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Scope(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.in = source["in"];
+	        this.out = source["out"];
+	    }
+	}
 	export class Stage {
 	    id: string;
 	    title: string;
 	    outcome: string;
+	    phase: string;
 	    exit: ExitItem[];
 	    gates: string[];
 	    appetite: string;
@@ -895,6 +912,7 @@ export namespace model {
 	        this.id = source["id"];
 	        this.title = source["title"];
 	        this.outcome = source["outcome"];
+	        this.phase = source["phase"];
 	        this.exit = this.convertValues(source["exit"], ExitItem);
 	        this.gates = source["gates"];
 	        this.appetite = source["appetite"];
