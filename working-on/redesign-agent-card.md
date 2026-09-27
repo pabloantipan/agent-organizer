@@ -2,9 +2,10 @@
 title: Each live agent is joined to the card it works
 status: next
 repos: [organizer]
-branch: main
+branch: redesign-agent-card
 updated: 2026-09-26
 next: "Join each live agent to at most one open card by worktree path, branch, then seat; none when two cards answer"
+seat: wave1-agentcard
 depends_on: []
 boundary: ["internal/model/model.go (Agent: its card; nothing else)", "internal/service/cardjoin.go (new)", "internal/service/cardjoin_test.go (new)", "internal/service/service.go (agentOptions, RefreshAgents wiring)"]
 spec: "docs/specs/redesign.md (FR-6 to FR-8); visual: docs/specs/redesign-mockups.html"
@@ -30,3 +31,4 @@ none
 
 ## Notes
 - `stage:` is left out: the organizer has no roadmap yet (it waits on Pablo's intake); the FSE adds it once one is ruled
+- 2026-09-26 sup2 runs this card (organizer-probe-sup2), spawned by the FSE after 0023; seat wave1-agentcard, worktree .wt/redesign-agent-card, branch redesign-agent-card

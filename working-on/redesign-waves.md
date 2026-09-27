@@ -2,9 +2,10 @@
 title: Cards seated wave<N>-* form a wave with its progress and tokens
 status: next
 repos: [organizer]
-branch: main
+branch: redesign-waves
 updated: 2026-09-26
 next: "Group cards by seat wave<N>-<name> into building, in review, queued and done, with gate rows (A2), tokens and supervisor (A1)"
+seat: wave1-waves
 depends_on: ["redesign-goal-stages", "redesign-agent-card"]
 boundary: ["internal/model/model.go (AgentGroup: waves; nothing else)", "internal/service/waves.go (new)", "internal/service/waves_test.go (new)", "internal/service/service.go (the agents feed: attach waves)"]
 spec: "docs/specs/redesign.md (FR-9); visual: docs/specs/redesign-mockups.html"
@@ -30,3 +31,4 @@ none
 
 ## Notes
 - `stage:` is left out: the organizer has no roadmap yet (it waits on Pablo's intake); the FSE adds it once one is ruled
+- 2026-09-26 sup2 runs this card (organizer-probe-sup2), spawned by the FSE after 0023; seat wave1-waves, worktree .wt/redesign-waves, branch redesign-waves

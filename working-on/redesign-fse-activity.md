@@ -2,9 +2,10 @@
 title: The board carries the FSE's hand-off and recent commits
 status: next
 repos: [organizer]
-branch: main
+branch: redesign-fse-activity
 updated: 2026-09-26
 next: "Read the bit\u00e1cora HAND-OFF and the last 10 Committed-by: FSE commits under the initiative root onto the board"
+seat: wave1-fse
 depends_on: ["redesign-goal-stages"]
 boundary: ["internal/model/model.go (BoardInitiative: fse activity; nothing else)", "internal/scan/fse.go (new)", "internal/scan/fse_test.go (new)", "internal/merge/ (carry it)", "testdata/home/init-a/docs/bitacora/"]
 spec: "docs/specs/redesign.md (FR-11); visual: docs/specs/redesign-mockups.html"
@@ -30,3 +31,4 @@ none
 
 ## Notes
 - `stage:` is left out: the organizer has no roadmap yet (it waits on Pablo's intake); the FSE adds it once one is ruled
+- 2026-09-26 sup2 runs this card (organizer-probe-sup2), spawned by the FSE after 0023; seat wave1-fse, worktree .wt/redesign-fse-activity, branch redesign-fse-activity
