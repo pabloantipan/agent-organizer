@@ -67,6 +67,8 @@ export function Reveal(arg1:string):Promise<void>;
 
 export function ReviewPrompt(arg1:string):Promise<string>;
 
+export function RuleDecision(arg1:string,arg2:string,arg3:string,arg4:string):Promise<void>;
+
 export function RunReview(arg1:string):Promise<void>;
 
 export function Runs(arg1:string):Promise<service.RunsView>;
