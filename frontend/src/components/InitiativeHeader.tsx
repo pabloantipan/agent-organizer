@@ -43,6 +43,32 @@ export function PhaseWord({ phase }: { phase?: string }) {
   return <span className="lz phase" title={`phase: ${phase}`}>{phase}</span>;
 }
 
+/** Scope in and out under the goal (FR-4), in the owner's words, or "no scope
+ *  yet" when both lists are empty. */
+function ScopeLines({ scope }: { scope?: model.Scope }) {
+  const inScope = scope?.in ?? [];
+  const outScope = scope?.out ?? [];
+  if (inScope.length === 0 && outScope.length === 0) {
+    return <div className="ihead-scope missing"><span className="lbl">Scope</span>no scope yet</div>;
+  }
+  const line = (label: string, items: string[]) => (
+    <div className="ihead-scope">
+      <span className="lbl">{label}</span>
+      {items.length === 0 ? (
+        <span className="none">none written</span>
+      ) : (
+        <ul>{items.map((x, k) => <li key={k}>{x}</li>)}</ul>
+      )}
+    </div>
+  );
+  return (
+    <>
+      {line("In scope", inScope)}
+      {line("Out of scope", outScope)}
+    </>
+  );
+}
+
 /** The stage stepper (design system, Stage stepper): number and state,
  *  title, exit in one line; done, current (named in words) or planned.
  *  Only for three or more stages; fewer are one line of words. */
@@ -99,6 +125,7 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
             <span className="lbl">Goal</span>
             {i.goal || "no goal yet"}
           </div>
+          <ScopeLines scope={i.scope} />
           {i.measure && <div className="ihead-measure"><span className="lbl">Measure</span>{i.measure}</div>}
         </div>
         <div className="ihead-side">

@@ -1,6 +1,13 @@
 /* The initiative header's additions (docs/specs/twenty-at-a-glance.md FR-4):
-   each stage's phase as a word on the stepper. The header's base rules stay in shell.css. Tier-2 role tokens and
+   scope in and out under the goal, and each stage's phase as a word on the
+   stepper. The header's base rules stay in shell.css. Tier-2 role tokens and
    the seven type sizes only; no nesting, @layer or color-mix (Safari 15.0). */
+
+/* Scope: a label and the owner's words, one line per side, flowing like prose. */
+.ihead-scope { font-size: var(--font-size-md); line-height: var(--line-md); color: var(--fg-muted); max-width: 72ch; }
+.ihead-scope ul, .ihead-scope li { display: inline; margin: 0; padding: 0; }
+.ihead-scope li + li::before { content: " · "; color: var(--fg-subtle); }
+.ihead-scope .none, .ihead-scope.missing { color: var(--fg-subtle); font-style: italic; }
 
 /* The stepper's first line: number and state, then the phase word. */
 .stg-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-width: 0; }
