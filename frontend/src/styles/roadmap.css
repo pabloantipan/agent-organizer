@@ -1,0 +1,56 @@
+/* Roadmap, Stages (FR-20, FR-21): one row per stage over a shared axis, gates
+   as diamonds. Tier-2 tokens only (docs/design-system.md, Timeline). */
+.srm { display: grid; gap: var(--space-1); padding: var(--space-3) var(--space-4) var(--space-4); background: var(--surface); border-radius: var(--radius-lg); font-variant-numeric: tabular-nums; }
+.srm-row { display: grid; grid-template-columns: 240px 1fr; align-items: stretch; min-height: 56px; border-radius: var(--radius-md); }
+.srm-row.current { background: var(--surface-selected); }
+.srm-axis { min-height: 32px; border-bottom: 1px solid var(--border); margin-bottom: var(--space-1); }
+
+.srm-label { display: grid; align-content: center; gap: var(--space-0-5); padding: var(--space-2) var(--space-3) var(--space-2) var(--space-2); min-width: 0; }
+.srm-n { font-family: var(--mono); font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-subtle); }
+.srm-row.current .srm-n { color: var(--status-now); font-weight: var(--weight-semibold); }
+.srm-row.done .srm-n { color: var(--fg-subtle); }
+.srm-title { font-size: var(--font-size-md); line-height: var(--line-md); font-weight: var(--weight-semibold); color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.srm-row.done .srm-title { color: var(--fg-muted); }
+.srm-sub { font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); }
+.srm-missing { font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--warning); }
+
+.srm-lane { position: relative; min-height: 32px; }
+.srm-tick { position: absolute; top: 0; bottom: 0; border-left: 1px dashed var(--border-subtle); }
+.srm-axis .srm-tick { border-left-color: var(--border); }
+.srm-tick span, .srm-undated-edge span { position: absolute; top: var(--space-1-5); left: var(--space-1); font-family: var(--mono); font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-subtle); white-space: nowrap; }
+.srm-undated-edge { position: absolute; top: 0; bottom: 0; border-left: 1px solid var(--border-strong); }
+.srm-undated-edge span { font-family: var(--font); }
+.srm-today { position: absolute; top: 0; bottom: 0; border-left: 2px solid var(--accent); z-index: 1; }
+.srm-today span { position: absolute; top: var(--space-1-5); right: var(--space-1-5); font-size: var(--font-size-xs); line-height: var(--line-xs); font-weight: var(--weight-semibold); color: var(--accent-fg); }
+
+.srm-bar { position: absolute; top: 20px; height: 16px; border-radius: var(--radius-xs); box-sizing: border-box; }
+.srm-bar.done { background: var(--status-done); }
+.srm-bar.current { background: var(--status-now); }
+.srm-bar.planned { background: transparent; border: 1.5px dashed var(--status-next); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.srm-bar.planned.current { border-color: var(--status-now); }
+.srm-appetite { font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 var(--space-1); }
+.srm-dot { position: absolute; top: 22px; width: 12px; height: 12px; margin-left: -6px; border-radius: var(--radius-full); }
+.srm-dot.done { background: var(--status-done); }
+.srm-dot.current, .srm-dot.planned { background: var(--status-now); }
+
+/* Gates: hollow fuchsia waiting at raised; solid indigo ruled at ruled, with a
+   hollow indigo mark at raised and a line between the two. */
+.srm-gem { position: absolute; top: 22px; width: 12px; height: 12px; box-sizing: border-box; transform: translateX(-50%) rotate(45deg); border-radius: 2px; box-shadow: 0 0 0 3px var(--bg); z-index: 2; }
+.srm-row.current .srm-gem { box-shadow: 0 0 0 3px var(--surface-selected); }
+.srm-gem.waiting { background: var(--bg); border: 2px solid var(--decision-waiting); }
+.srm-gem.ruled { background: var(--decision-ruled); }
+.srm-gem.raised { background: var(--bg); border: 2px solid var(--decision-ruled); }
+.srm-gem.inline { position: static; display: inline-block; transform: rotate(45deg); box-shadow: none; }
+.srm-link { position: absolute; top: 27px; height: 2px; background: var(--decision-ruled); z-index: 2; }
+.srm-gem-label { position: absolute; top: 38px; transform: translateX(-50%); font-family: var(--mono); font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--decision-ruled-fg); white-space: nowrap; z-index: 2; }
+.srm-gem-label.waiting { color: var(--decision-waiting); }
+.srm-gem-label.lift-1 { top: 2px; }
+
+.srm-foot { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); padding-top: var(--space-3); margin-top: var(--space-1); border-top: 1px solid var(--border); font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); }
+.srm-foot > span { display: inline-flex; align-items: center; gap: var(--space-2); }
+.srm-key { display: inline-block; width: 18px; height: 10px; border-radius: var(--radius-xs); box-sizing: border-box; }
+.srm-key.done { background: var(--status-done); }
+.srm-key.current { background: var(--status-now); }
+.srm-key.planned { border: 1.5px dashed var(--status-next); }
+
+.srm-empty { display: grid; gap: var(--space-1); padding: var(--space-6); background: var(--surface); border-radius: var(--radius-lg); font-size: var(--font-size-md); color: var(--fg); }
