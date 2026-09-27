@@ -411,6 +411,16 @@ func (a *App) AttachSession(name string) error {
 	return a.svc.AttachSession(name)
 }
 
+// Runs is one initiative's agent sessions grouped by card, with the input
+// tokens summed over the archive and the sessions still running. No dollars:
+// decision 0020 keeps the bill in `organizer runs`.
+func (a *App) Runs(initiativeID string) service.RunsView {
+	if a.svc == nil {
+		return service.RunsView{}
+	}
+	return a.svc.InitiativeRuns(initiativeID)
+}
+
 // MilestoneType exists only so the Wails generator emits model.Milestone in
 // models.ts; nested slice element types are otherwise skipped.
 func (a *App) MilestoneType() model.Milestone { return model.Milestone{} }

@@ -1014,6 +1014,104 @@ export namespace service {
 		    return a;
 		}
 	}
+	export class RunInfo {
+	    session_id: string;
+	    session?: string;
+	    persona?: string;
+	    cell?: string;
+	    cwd: string;
+	    model: string;
+	    used_percent: number;
+	    input_tokens: number;
+	    window_size: number;
+	    initiative?: string;
+	    card?: string;
+	    branch?: string;
+	    // Go type: time
+	    first_seen: any;
+	    // Go type: time
+	    last_seen: any;
+	    ended: boolean;
+	    live: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new RunInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.session_id = source["session_id"];
+	        this.session = source["session"];
+	        this.persona = source["persona"];
+	        this.cell = source["cell"];
+	        this.cwd = source["cwd"];
+	        this.model = source["model"];
+	        this.used_percent = source["used_percent"];
+	        this.input_tokens = source["input_tokens"];
+	        this.window_size = source["window_size"];
+	        this.initiative = source["initiative"];
+	        this.card = source["card"];
+	        this.branch = source["branch"];
+	        this.first_seen = this.convertValues(source["first_seen"], null);
+	        this.last_seen = this.convertValues(source["last_seen"], null);
+	        this.ended = source["ended"];
+	        this.live = source["live"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class CardRuns {
+	    card: string;
+	    input_tokens: number;
+	    live: number;
+	    runs: RunInfo[];
+	
+	    static createFrom(source: any = {}) {
+	        return new CardRuns(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.card = source["card"];
+	        this.input_tokens = source["input_tokens"];
+	        this.live = source["live"];
+	        this.runs = this.convertValues(source["runs"], RunInfo);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	
 	export class CellPost {
 	    thread_id: string;
@@ -1226,6 +1324,41 @@ export namespace service {
 	        this.steps = source["steps"];
 	        this.errors = source["errors"];
 	    }
+	}
+	
+	export class RunsView {
+	    initiative: string;
+	    input_tokens: number;
+	    cards: CardRuns[];
+	
+	    static createFrom(source: any = {}) {
+	        return new RunsView(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.initiative = source["initiative"];
+	        this.input_tokens = source["input_tokens"];
+	        this.cards = this.convertValues(source["cards"], CardRuns);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	
 	export class SyncResult {
