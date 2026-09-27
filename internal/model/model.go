@@ -218,6 +218,31 @@ type Agent struct {
 	Watcher     string `json:"watcher"`
 	Deaf        bool   `json:"deaf"`
 	Undelivered int    `json:"undelivered"`
+	// Card is the open card this agent works, nil when no card answers to it
+	// or two do. Joined by the agents feed, never by the scan of a card file.
+	Card *CardJoin `json:"card"`
+}
+
+// CardJoin is the answer to "which card is this agent on": the card it was
+// joined to, and the numbers a card line shows next to it — how the agent is
+// doing, how full its context is, what it has spent and when it started.
+// Copied onto the join on purpose: a view that has the card has the whole
+// line without walking back to the agent.
+type CardJoin struct {
+	Initiative string `json:"initiative"`
+	Slug       string `json:"slug"`
+	Title      string `json:"title"`
+	// Key is "<initiative>/<slug>", the id a view groups cards by.
+	Key string `json:"key"`
+	// State is the agent's: working, running, shell or exited.
+	State string `json:"state"`
+	// UsedPercent and InputTokens are the statusline's last word, zero when
+	// the hook has not fired for this process.
+	UsedPercent float64 `json:"used_percent"`
+	InputTokens int     `json:"input_tokens"`
+	// StartedAt is when the agent process started, from ps elapsed time.
+	// Zero for a session with no process of its own.
+	StartedAt time.Time `json:"started_at"`
 }
 
 const (
