@@ -18,7 +18,9 @@ restating it (the discuss skill).
 - **Running:** sup2 (organizer-probe-sup2) owns the redesign's wave 1, the
   six backend cards (0023 accepted 2026-09-26 with the design-system
   amendment FR-23, G17, G18). Next for me: when wave 1's last card lands in
-  `done/`, write sup3's prompt for wave 2 (the five view cards) and spawn it.
+  `done/`, write sup3's prompt for wave 2 (the five view cards) and spawn it with its
+  own identity prelude (fse skill, references/standing-up.md; check
+  `discuss-api token list` for organizer/sup3 first).
 - **Observed:** sup1 seated `w1a`/`w1b`, not `wave<N>-*` (short because of
   the name ceiling). sup2 was told to seat `wave1-<name>`. If a third
   supervisor does it again, that goes in the repetition log.
@@ -38,6 +40,9 @@ restating it (the discuss skill).
   redesign task, the two FSE rulings, the design-system amendment; their
   rulings stand as relays. Records 0021 and 0022 were written there and
   quote Pablo's choice.
+- **Learned (2026-09-27):** sup2 launched deaf: `opus.prelude.sh` exports only
+  the model. Fixed with its own prelude and `probe -r`; the recipe is now in
+  the stand-up reference (claudecode 29a8aac).
 - **Rejected:** opening a card for 0012 (the Decisions tab was built
   directly, a6ebd4d..280f58c).
 
