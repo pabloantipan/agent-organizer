@@ -89,3 +89,49 @@ func TestBuildHonoursOrder(t *testing.T) {
 		t.Errorf("ApplyOrder: %s %s", local.Initiatives[0].ID, local.Initiatives[1].Cards[0].Slug)
 	}
 }
+
+// FR-1 to FR-3: the goal, the measure, the specs and the stages of the scan
+// reach the board initiative, with the current stage still marked. G1, the
+// merge half.
+func TestBuildCarriesGoalMeasureSpecsAndStages(t *testing.T) {
+	now := time.Date(2026, 9, 2, 12, 0, 0, 0, time.UTC)
+	withGoal := si("goals", "acme", model.Card{Slug: "c1", Status: "now", Updated: "2026-09-01", Next: "a", Stage: "two"})
+	withGoal.Goal = "acme signs off on one run"
+	withGoal.Measure = "no manual step is left"
+	withGoal.Specs = []string{"specs/", "docs/one.md"}
+	withGoal.Stages = []model.Stage{
+		{ID: "one", Title: "First", Done: "2026-08-01", Exit: []model.ExitItem{{Text: "done", Met: "2026-08-01"}}},
+		{ID: "two", Title: "Second", Current: true, Gates: []string{"0004"}, Appetite: "two waves"},
+	}
+	bare := si("bare", "personal", model.Card{Slug: "c2", Status: "next", Updated: "2026-09-01", Next: "b"})
+
+	b := Build(model.Snapshot{Machine: "here", Initiatives: []model.ScannedInitiative{withGoal, bare}}, nil, model.Order{}, now)
+
+	byID := map[string]BoardInitiative{}
+	for _, bi := range b.Initiatives {
+		byID[bi.ID] = bi
+	}
+	got := byID["goals"]
+	if got.Goal != "acme signs off on one run" || got.Measure != "no manual step is left" {
+		t.Errorf("goal=%q measure=%q", got.Goal, got.Measure)
+	}
+	if len(got.Specs) != 2 || got.Specs[1] != "docs/one.md" {
+		t.Errorf("specs=%v", got.Specs)
+	}
+	if len(got.Stages) != 2 || got.Stages[1].Appetite != "two waves" || got.Stages[0].Exit[0].Met != "2026-08-01" {
+		t.Fatalf("stages=%+v", got.Stages)
+	}
+	cur, ok := model.CurrentStage(got.Stages)
+	if !ok || cur.ID != "two" || !got.Stages[1].Current {
+		t.Errorf("current stage=%+v ok=%v", cur, ok)
+	}
+	// An initiative with no goal and no roadmap carries neither, and that is
+	// not an error anywhere on the board.
+	if bare := byID["bare"]; bare.Goal != "" || len(bare.Stages) != 0 {
+		t.Errorf("bare initiative=%+v", bare.Initiative)
+	}
+	// The card's stage rides to the board card.
+	if c := b.Columns["now"]; len(c) != 1 || c[0].Stage != "two" {
+		t.Errorf("now column=%+v", c)
+	}
+}

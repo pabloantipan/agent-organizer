@@ -8,6 +8,11 @@ repos:
   - repo-one
   - repo-missing
 ports_to: none
+goal: Initiative A ships the thing acme asked for
+measure: acme signs off on one run with no manual step
+specs:
+  - specs/
+  - docs/one-spec.md
 target: 2026-10-01
 milestones:
   - date: 2026-09-10

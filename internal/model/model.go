@@ -5,6 +5,8 @@ package model
 import (
 	"strings"
 	"time"
+
+	"gopkg.in/yaml.v3"
 )
 
 // Card statuses. The set is closed on purpose; see the working-on skill.
@@ -48,8 +50,82 @@ type Initiative struct {
 	// Milestones are dated checkpoints. Optional, few.
 	Milestones []Milestone `yaml:"milestones" json:"milestones"`
 
+	// Goal is the outcome in one line and Measure is how the owner will know
+	// it worked, both in the owner's words. Optional; an initiative without a
+	// goal is one nobody has written down yet, not a malformed one.
+	Goal    string `yaml:"goal" json:"goal"`
+	Measure string `yaml:"measure" json:"measure"`
+	// Specs are the paths the initiative's specification lives in, relative to
+	// the root: a folder of *.md or one file. This is what a card's Spec field
+	// points into.
+	Specs []string `yaml:"specs" json:"specs"`
+
+	// Stages are working-on/roadmap.yaml, in order, and do not come from
+	// initiative.yaml: the scanner fills them from the other file. No roadmap
+	// means no stages, which is the normal case.
+	Stages []Stage `yaml:"-" json:"stages"`
+
 	// Path is the initiative root directory (the parent of working-on/).
 	Path string `yaml:"-" json:"path"`
+}
+
+// Stage is one entry of working-on/roadmap.yaml: an outcome, exit items that
+// can each be checked, and the decisions that gate it. Dates are optional and
+// only ever real ones; an appetite is a size, never a date (the roadmapping
+// skill).
+type Stage struct {
+	ID      string     `yaml:"id" json:"id"`
+	Title   string     `yaml:"title" json:"title"`
+	Outcome string     `yaml:"outcome" json:"outcome"`
+	Exit    []ExitItem `yaml:"exit" json:"exit"`
+	// Gates are decision record numbers that must be ruled before the stage
+	// starts, as they are written on the file: "0004".
+	Gates []string `yaml:"gates" json:"gates"`
+	// Appetite is how much the stage is worth ("two waves", "a week"). Never
+	// turned into a date.
+	Appetite string `yaml:"appetite" json:"appetite"`
+	// Target is the date the stage is meant to land; Done the date its exit
+	// was met and its owner ruled it so. Both optional, both real dates.
+	Target string `yaml:"target" json:"target"`
+	Done   string `yaml:"done" json:"done"`
+
+	// Current is stamped by the scanner on the first stage without Done.
+	Current bool `yaml:"-" json:"current"`
+}
+
+// ExitItem is one condition a stage is done by. On the file it is a bare
+// string, or a mapping {text, met} once someone verified it; in memory and in
+// JSON it is always this shape, so every reader has one.
+type ExitItem struct {
+	Text string `yaml:"text" json:"text"`
+	// Met is the date the item was verified. Empty means still open.
+	Met string `yaml:"met" json:"met"`
+}
+
+// UnmarshalYAML accepts either form the working-on skill allows.
+func (e *ExitItem) UnmarshalYAML(n *yaml.Node) error {
+	if n.Kind == yaml.ScalarNode {
+		return n.Decode(&e.Text)
+	}
+	type plain ExitItem
+	var p plain
+	if err := n.Decode(&p); err != nil {
+		return err
+	}
+	*e = ExitItem(p)
+	return nil
+}
+
+// CurrentStage returns the first stage without a Done date — where the
+// initiative is now — and false when there is no roadmap or every stage is
+// done.
+func CurrentStage(stages []Stage) (Stage, bool) {
+	for _, s := range stages {
+		if strings.TrimSpace(s.Done) == "" {
+			return s, true
+		}
+	}
+	return Stage{}, false
 }
 
 // Milestone is a dated checkpoint on an initiative roadmap.
@@ -103,6 +179,9 @@ type Card struct {
 	// Seat is optional: the cell seat that builds this card. A seat with no
 	// open card naming it is finished, which is what retiring reads.
 	Seat string `yaml:"seat" json:"seat"`
+	// Stage is optional: the roadmap stage id this card belongs to. A card
+	// without one is outside the roadmap, which is fine for chores.
+	Stage string `yaml:"stage" json:"stage"`
 
 	// The build fields (working-on skill, Vocabulary). A supervisor reads
 	// them to launch a builder against the card and to sequence waves; a card
