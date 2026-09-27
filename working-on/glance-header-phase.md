@@ -2,7 +2,8 @@
 title: The header shows scope, and every stage shows its phase
 status: next
 repos: [organizer]
-branch: main
+branch: glance-header-phase
+seat: wave1-header
 updated: 2026-09-27
 next: "Show scope in and out under the goal, the phase on the stepper and Roadmap rows, and match gate numbers with zero-padding"
 depends_on: ["glance-scope-phase"]
@@ -31,3 +32,5 @@ none
 
 ## Notes
 - 2026-09-27 sup5 runs this card (organizer-probe-sup5), spawned by the FSE after 0033
+- 2026-09-27 sup5: seat wave1-header, branch glance-header-phase in .wt/glance-header-phase; evidence under .wt-notes/wave1-header/
+- 2026-09-27 sup5: header and Home both draw from shell.css; neither card edits it. New rules go in a new file per card (styles/header.css here), so the two branches merge clean

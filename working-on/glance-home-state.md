@@ -2,7 +2,8 @@
 title: Home says each initiative's phase and state, for twenty
 status: next
 repos: [organizer]
-branch: main
+branch: glance-home-state
+seat: wave1-home
 updated: 2026-09-27
 next: "Show each Home row's phase and one state (waits on you, executing, waits on business, quiet); a --twenty fixture; the timed end-to-end"
 depends_on: ["glance-scope-phase"]
@@ -32,3 +33,6 @@ none
 
 ## Notes
 - 2026-09-27 sup5 runs this card (organizer-probe-sup5), spawned by the FSE after 0033
+- 2026-09-27 sup5: seat wave1-home, branch glance-home-state in .wt/glance-home-state; evidence under .wt-notes/wave1-home/
+- 2026-09-27 sup5: G9 is the reviewer's row, not the builder's: the builder leaves the screenshot (G9-home-1440x900.png) and the key (which initiative is in which state) in a separate file the reviewer opens only after answering; the reviewer times itself and flips G9
+- 2026-09-27 sup5: new rules go in styles/home.css (new), not shell.css, which the header card also draws from

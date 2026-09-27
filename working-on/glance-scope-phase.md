@@ -2,7 +2,8 @@
 title: Initiatives carry a scope, and stages a phase
 status: next
 repos: [organizer]
-branch: main
+branch: glance-scope-phase
+seat: wave1-scope
 updated: 2026-09-27
 next: "Read scope in/out and each stage's phase into the board; report a bad phase and an ungated first building stage after discovery"
 depends_on: []
@@ -32,3 +33,5 @@ none
 
 ## Notes
 - 2026-09-27 sup5 runs this card (organizer-probe-sup5), spawned by the FSE after 0033
+- 2026-09-27 sup5: seat wave1-scope, branch glance-scope-phase in .wt/glance-scope-phase; evidence under .wt-notes/wave1-scope/
+- 2026-09-27 sup5: the G5 and G6 fixture material is this card's (testdata): scope on init-a and none on init-b, phases on the overlay roadmap's stages, and a gate written `4` naming a record 0004 in the overlay
