@@ -43,8 +43,8 @@ restating it (the discuss skill).
 - **Stage 2 (twenty-at-a-glance):** roadmap written (0032, aebee4f). Spec
   `docs/specs/twenty-at-a-glance.md` and cards glance-scope-phase,
   glance-header-phase, glance-home-state (bb47225); 0033 accepted 2026-09-27;
-  sup5 (organizer-probe-sup5, own identity) runs it. When its last card
-  lands, stage 2's code is done; the stage's exit also needs the organizer's
+  sup5 ran it: all three cards passed review 2026-09-27, so stage 2's code
+  is done; the stage's exit also needs the organizer's
   scope (Pablo) and goals on active initiatives (owners), then an "exit met"
   record. The blacksmith is now Hephaistos: its posts start `[hephaistos, for pablo]`; reach it by posting to pablo with a subject starting `[for hephaistos]`.
 - **Waiting on Pablo:** the intake (thread 01M3FAWKV2159MCSH0AZZJWE08); 0021, 0022, 0005, 0004, 0002. No card carries `stage:` until the
