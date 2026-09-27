@@ -416,6 +416,10 @@ type AgentGroup struct {
 	NeedsReconciler int `json:"needs_reconciler"`
 	// Retirable is the seats a wave is done with; see Retirable().
 	Retirable []string `json:"retirable"`
+	// Waves is the initiative's cards grouped by their `wave<N>-` seat, with
+	// the gate rows, tokens and supervisor of each wave (FR-9, waves.go).
+	// Empty when no card names a wave.
+	Waves []Wave `json:"waves"`
 }
 
 type AgentsView struct {
@@ -466,6 +470,9 @@ func (s *Service) agentsViewLocked() AgentsView {
 		}
 		g.Agents = si.Agents
 		g.Live, g.Working = si.LiveAgents()
+		// After the agents: a wave reads the card-agent join stamped on them
+		// by the same feed, so the strip and the Agents rows never disagree.
+		g.Waves = waves(si)
 		v.Groups = append(v.Groups, g)
 	}
 	return v
