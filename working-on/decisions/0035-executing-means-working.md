@@ -1,13 +1,13 @@
 ---
 title: What "executing" counts on Home
-status: proposed
+status: ruled
 raised: 2026-09-27
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-27
+ruled_by: pablo
 options: [a working agent or a running wave, any live agent on a card]
-chosen:
+chosen: any live agent on a card
 cards: []
 threads: []
 supersedes: []
@@ -42,7 +42,8 @@ it".
 
 ## Ruling
 
-
+Pablo, 2026-09-27, in the FSE's session (organizer-probe-fse): "recomention
+for 0035 accepted".
 
 ## Consequences
 

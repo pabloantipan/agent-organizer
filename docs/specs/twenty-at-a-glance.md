@@ -2,7 +2,7 @@
 
 status: ruled (0033, 2026-09-27)
 owner: pablo
-decisions: [0029 ruled, 0030 ruled, 0032 ruled, 0033 ruled]
+decisions: [0029 ruled, 0030 ruled, 0032 ruled, 0033 ruled, 0035 ruled]
 roadmap: stage `twenty-at-a-glance` (appetite: one wave)
 
 ## Problem
@@ -139,10 +139,9 @@ without opening one. Today (read 2026-09-27):
   "pablo", as `ASKED_RE` assumes today. Identity (stage 6) replaces this.
 - **A2** The state order in FR-6 puts "waits on you" first, because the
   lead's queue is what Home is for.
-- **A3** "Executing" means a wave is running or an agent is working on a
-  card of the initiative, from the live agents feed. An initiative with
-  `now` cards and nobody on them is not executing; it is quiet, and its
-  signals say so.
+- **A3** "Executing" means a wave is running or a live agent is joined to a
+  card of the initiative, idle or working (0035: "working" flickers with the
+  CPU sample). An initiative with `now` cards and nobody on them is quiet.
 
 ## Cards
 
@@ -154,4 +153,4 @@ without opening one. Today (read 2026-09-27):
 
 ## Amendments
 
-- none yet
+- 2026-09-27: A3 amended per 0035 (any live agent on a card), matching the build (`done/glance-home-state.md` review, finding 3).
