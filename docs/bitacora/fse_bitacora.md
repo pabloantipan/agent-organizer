@@ -31,6 +31,15 @@ restating it (the discuss skill).
   working-on and roadmapping skills, and Pablo gives the organizer's scope,
   propose `working-on/roadmap.yaml` as a record: one stage per sub-goal,
   order 1, 4, 3, 2, 7, 6, 5.
+- **The Help's source (0031):** `~/agent-slack/docs/how-we-build.md` (agent-slack
+  a5465b3), per the blacksmith, thread 01M3HTFVT8VXSMXQDV9N7NBP6H: who is
+  involved, who talks to whom, the life of an initiative (discovery to
+  building), idea to running software, inside one agent's work, glossary.
+  patterns.md, workflow.md and one-pager.md are engineering-facing, not for
+  the Help. The blacksmith's view: the Help renders the file and never copies
+  it; a missing diagram is asked of the blacksmith and added there. That is a
+  design proposal, not a ruling: the stage-3 spec cites it as an assumption
+  (the app reads a file outside its repo).
 - **Waiting on Pablo:** the intake (thread 01M3FAWKV2159MCSH0AZZJWE08); 0021, 0022, 0005, 0004, 0002. No card carries `stage:` until the
   organizer has a roadmap, which waits on the intake.
 - **Learned:** this session hit the drain ceiling (8 per session) at about
