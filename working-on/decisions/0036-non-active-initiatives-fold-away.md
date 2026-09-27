@@ -1,13 +1,13 @@
 ---
 title: Initiatives that are not active fold away from Home, the rail and Needs me
-status: proposed
+status: ruled
 raised: 2026-09-27
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-27
+ruled_by: pablo
 options: [fold into one collapsed group, hide entirely, as today]
-chosen:
+chosen: fold into one collapsed group
 cards: []
 threads: [01M3HZSXFQ1EV5BFH8ARSZ71JR]
 supersedes: []
@@ -44,7 +44,7 @@ are the record 0012 wanted kept).
 
 ## Ruling
 
-
+Pablo, 2026-09-27, in the FSE's session (organizer-probe-fse): "accepted both. 0034 0036".
 
 ## Consequences
 

@@ -2,7 +2,7 @@
 
 status: ruled (0033, 2026-09-27)
 owner: pablo
-decisions: [0029 ruled, 0030 ruled, 0032 ruled, 0033 ruled, 0035 ruled]
+decisions: [0029 ruled, 0030 ruled, 0032 ruled, 0033 ruled, 0035 ruled, 0034 ruled, 0036 ruled]
 roadmap: stage `twenty-at-a-glance` (appetite: one wave)
 
 ## Problem
@@ -76,6 +76,14 @@ without opening one. Today (read 2026-09-27):
     3 waiting on you;
   - the rest quiet;
   - through `scripts/fixture-home.sh --twenty`.
+- **FR-8** Needs me and its badge shall list only proposed records whose
+  `owner` is the lead or empty (A1). Records owned by others stay on their
+  initiative's Decisions tab and make its Home state "waits on business"
+  (0034).
+- **FR-9** Initiatives whose `status` is not `active` shall leave Home's
+  list, the rail's groups, and Needs me (rows and badge). They sit in one
+  collapsed "Not active (n)" group at the bottom of the rail and open
+  read-only (0036).
 
 ## Acceptance → gate
 
@@ -90,7 +98,9 @@ without opening one. Today (read 2026-09-27):
 | G7 | 6 | Each Home row shows its phase and exactly one state word, following FR-6's order | screenshot on `--twenty` | each state appears as specified |
 | G8 | 7 | `scripts/fixture-home.sh --twenty` lays out 20 initiatives in the stated mix | run it, then `go run . status` against its config | 20 initiatives, the mix |
 | G9 | — | End to end: `wails build`, run the app on `--twenty`, screenshot Home at 1440×900. A reviewer who did not build it answers from that screenshot alone, timed: which initiatives execute, which are in discovery, which wait on business, which wait on you | the screenshot and the reviewer's timed answers in the review | all four right, under a minute |
-| G10 | 4–7 | The frontend builds, and no raw colour or font size is added outside `tokens.css` (FR-23 of the redesign) | `cd frontend && npm run build`; the redesign's G18 grep | pass, empty |
+| G11 | 8 | On `--twenty`, Needs me lists no record owned by business or the FSE, and the badge equals the count of rows that say "waits on you" | screenshot; the badge count against the Home rows | equal |
+| G12 | 9 | A fixture initiative with `status: archived` is missing from Home and from Needs me, and appears under "Not active (1)" at the bottom of the rail, collapsed, and opens | screenshots | as stated |
+| G10 | 4–9 | The frontend builds, and no raw colour or font size is added outside `tokens.css` (FR-23 of the redesign) | `cd frontend && npm run build`; the redesign's G18 grep | pass, empty |
 
 ## Boundary
 
@@ -150,7 +160,10 @@ without opening one. Today (read 2026-09-27):
 | `glance-scope-phase` | G1, G2, G3, G4 | — |
 | `glance-header-phase` | G5, G6, G10 | glance-scope-phase |
 | `glance-home-state` | G7, G8, G9, G10 | glance-scope-phase |
+| `glance-needs-me-lead` | G11, G10 | — |
+| `glance-inactive-fold` | G12, G10 | glance-needs-me-lead |
 
 ## Amendments
 
 - 2026-09-27: A3 amended per 0035 (any live agent on a card), matching the build (`done/glance-home-state.md` review, finding 3).
+- 2026-09-27: FR-8 (0034) and FR-9 (0036) added, with gate rows G11 and G12 and two cards; both ruled after the wave landed.

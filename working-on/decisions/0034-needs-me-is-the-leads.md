@@ -1,13 +1,13 @@
 ---
 title: Needs me lists only the lead's decisions
-status: proposed
+status: ruled
 raised: 2026-09-27
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-27
+ruled_by: pablo
 options: [only the lead's, every proposed record, the lead's plus a waits-on-business section]
-chosen:
+chosen: only the lead's
 cards: []
 threads: []
 supersedes: []
@@ -44,7 +44,7 @@ surface as the initiative's state, "waits on business".
 
 ## Ruling
 
-
+Pablo, 2026-09-27, in the FSE's session (organizer-probe-fse): "accepted both. 0034 0036".
 
 ## Consequences
 
