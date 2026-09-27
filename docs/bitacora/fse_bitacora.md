@@ -40,6 +40,11 @@ restating it (the discuss skill).
   it; a missing diagram is asked of the blacksmith and added there. That is a
   design proposal, not a ruling: the stage-3 spec cites it as an assumption
   (the app reads a file outside its repo).
+- **Stage 2 (twenty-at-a-glance):** roadmap written (0032, aebee4f). Spec
+  `docs/specs/twenty-at-a-glance.md` and cards glance-scope-phase,
+  glance-header-phase, glance-home-state (bb47225); 0033 asks Pablo to
+  accept. On acceptance: sup5 with its own token and prelude (the recipe),
+  then let go. The blacksmith is now called Hefesto (skill `hefesto`).
 - **Waiting on Pablo:** the intake (thread 01M3FAWKV2159MCSH0AZZJWE08); 0021, 0022, 0005, 0004, 0002. No card carries `stage:` until the
   organizer has a roadmap, which waits on the intake.
 - **Learned:** this session hit the drain ceiling (8 per session) at about
