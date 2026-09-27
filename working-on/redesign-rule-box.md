@@ -5,7 +5,7 @@ repos: [organizer]
 branch: main
 updated: 2026-09-26
 seat: wave2-rulebox
-next: "sup3: restart the wave2-rulebox session (probe -r) so it picks up the Accessibility grant (this process still gets -1719); the builder then takes G16-2…6 from the built app (G16-1-home.png taken), then review: redesign-rule-box (G15, G18 met; 224d4b4 b0f2d13)"
+next: "pablo: grant Accessibility to /opt/homebrew/bin/zellij (this seat runs under a detached zellij server, ppid 1, not under iTerm2, so the iTerm2 grant does not reach it), or run the G16-2…6 walk from a plain iTerm2 shell; then review: redesign-rule-box (G15, G18 met; G16-1 taken; 224d4b4 b0f2d13)"
 depends_on: ["redesign-overview", "redesign-work", "redesign-roadmap"]
 boundary: ["frontend/src/components/RuleDecisionBox.tsx (new)", "frontend/src/components/Home.tsx (the decision row's Rule action)", "frontend/src/styles/rule-box.css (new)"]
 spec: "docs/specs/redesign.md (FR-23, FR-22); visual: docs/specs/redesign-mockups.html; values: docs/design-system.md"
@@ -31,6 +31,7 @@ The redesign, wave 2 of 2: FR-22 of `docs/specs/redesign.md`. Decisions 0013–0
 ## Blockers
 - G16's built-app walk: this session has no macOS Accessibility (`osascript is not allowed assistive access (-1719)`, so no click in the native window) and no Screen Recording (`screencapture -x -l <window>` → "could not create image from window", `-R` → "could not create image from rect"). Only Pablo can grant either
 - 2026-09-26 23:20, after Pablo's grant: Screen Recording works in this process (`G16-1-home.png` from the built app); Accessibility does not (`-1719`), since a running process keeps its old permission. A fresh session takes G16-2…6
+- 2026-09-26, after `probe -r`: still `-1719`; `AXIsProcessTrusted()` is false in this process. Its chain is zsh → claude → zsh → `/opt/homebrew/bin/zellij` (ppid 1): the zellij server is the responsible process, not iTerm2
 
 ## Notes
 - 2026-09-26 wave2-rulebox: the console error is Wails' runtime, not `frontend/src`. `Cannot read properties of null (reading 'nodes')`, frames `Fe`, `bn`, `new In` all in `/wails/ipc.js`, which is byte-identical (sha256 3c3b999d…) to wails v2.15.0's `internal/frontend/runtime/ipc_websocket.js`; `In` is its Svelte dev overlay mounted on DOMContentLoaded at `#wails-spinner`. It reproduces on a page holding only `ipc.js`, `runtime.js` and that div, no app code, so main has it too (`.wt-notes/wave2-rulebox/ipc-blank.log`). No 404 appeared in these runs. It is a `wails dev` page only; the built app does not serve `ipc_websocket.js`
