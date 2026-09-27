@@ -13,6 +13,12 @@ measure: acme signs off on one run with no manual step
 specs:
   - specs/
   - docs/one-spec.md
+scope:
+  in:
+    - the scanner and the board acme opens every morning
+    - one merged view across both machines
+  out:
+    - writing to acme's card files
 target: 2026-10-01
 milestones:
   - date: 2026-09-10

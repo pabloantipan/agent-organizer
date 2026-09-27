@@ -241,3 +241,146 @@ func TestCheckStageLinks(t *testing.T) {
 		t.Errorf("no stages should report nothing: %+v", ps)
 	}
 }
+
+// twenty-at-a-glance FR-1: scope in and out come off initiative.yaml; an
+// initiative without one has empty lists and no problem. G1, the scan half.
+func TestReadInitiativeScope(t *testing.T) {
+	si := initA(t)
+	wantIn := "the scanner and the board acme opens every morning|one merged view across both machines"
+	if got := strings.Join(si.Scope.In, "|"); got != wantIn {
+		t.Errorf("scope in=%q want %q", got, wantIn)
+	}
+	if got := strings.Join(si.Scope.Out, "|"); got != "writing to acme's card files" {
+		t.Errorf("scope out=%q", got)
+	}
+
+	home := fixtureHome(t)
+	b := ReadInitiative(filepath.Join(home, "work", "init-b"), opts(home))
+	if len(b.Scope.In) != 0 || len(b.Scope.Out) != 0 {
+		t.Errorf("init-b scope=%+v, want none", b.Scope)
+	}
+	if len(b.Problems) != 0 {
+		t.Errorf("no scope is not a problem: %+v", b.Problems)
+	}
+}
+
+// twenty-at-a-glance FR-2: a stage carries its phase; any value but discovery
+// or building is one problem, and the stage is kept with no phase. G2.
+func TestReadRoadmapPhase(t *testing.T) {
+	cases := []struct {
+		name       string
+		yaml       string
+		wantPhases []string
+		wantProbs  []string
+	}{
+		{
+			name:       "both phases",
+			yaml:       "stages:\n  - id: a\n    phase: discovery\n  - id: b\n    phase: building\n",
+			wantPhases: []string{"discovery", "building"},
+		},
+		{
+			name:       "no phase is not a problem",
+			yaml:       "stages:\n  - id: a\n",
+			wantPhases: []string{""},
+		},
+		{
+			name:       "a phase that is neither",
+			yaml:       "stages:\n  - id: a\n    phase: later\n  - id: b\n    phase: building\n",
+			wantPhases: []string{"", "building"},
+			wantProbs:  []string{`stage a phase "later" is neither discovery nor building`},
+		},
+		{
+			name:       "the case counts",
+			yaml:       "stages:\n  - id: a\n    phase: Building\n",
+			wantPhases: []string{""},
+			wantProbs:  []string{`stage a phase "Building" is neither discovery nor building`},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			sandbox(t)
+			wo := t.TempDir()
+			if err := os.WriteFile(filepath.Join(wo, roadmapFile), []byte(tc.yaml), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			stages, problems := readRoadmap(wo, nil)
+			if len(stages) != len(tc.wantPhases) {
+				t.Fatalf("stages=%+v, a stage with a bad phase is kept", stages)
+			}
+			for i, want := range tc.wantPhases {
+				if stages[i].Phase != want {
+					t.Errorf("stage %d phase=%q want %q", i, stages[i].Phase, want)
+				}
+			}
+			if len(problems) != len(tc.wantProbs) {
+				t.Fatalf("problems=%+v want %d", problems, len(tc.wantProbs))
+			}
+			for i, want := range tc.wantProbs {
+				if problems[i].Msg != want {
+					t.Errorf("problem[%d]=%q want %q", i, problems[i].Msg, want)
+				}
+			}
+		})
+	}
+}
+
+// twenty-at-a-glance FR-3: the first building stage after discovery is gated by
+// a record, matched by number with zero-padding. G3.
+func TestCheckStageLinksBuildingAfterDiscovery(t *testing.T) {
+	decisions := []model.Decision{{Number: "0004", Path: "d4"}}
+	const ungated = "starts building after discovery with no gate naming a decision record"
+	cases := []struct {
+		name   string
+		stages []model.Stage
+		want   []string
+	}{
+		{
+			name:   "discovery then ungated building",
+			stages: []model.Stage{{ID: "find", Phase: "discovery"}, {ID: "make", Phase: "building"}},
+			want:   []string{"stage make " + ungated},
+		},
+		{
+			name:   "gated by a record written 4",
+			stages: []model.Stage{{ID: "find", Phase: "discovery"}, {ID: "make", Phase: "building", Gates: []string{"4"}}},
+		},
+		{
+			name:   "gated by a record written 0004",
+			stages: []model.Stage{{ID: "find", Phase: "discovery"}, {ID: "make", Phase: "building", Gates: []string{"0004"}}},
+		},
+		{
+			name:   "starts in building",
+			stages: []model.Stage{{ID: "make", Phase: "building"}, {ID: "more", Phase: "building"}},
+		},
+		{
+			name:   "building after building after a gated start",
+			stages: []model.Stage{{ID: "find", Phase: "discovery"}, {ID: "make", Phase: "building", Gates: []string{"4"}}, {ID: "more", Phase: "building"}},
+		},
+		{
+			name:   "a gate naming no record is its own problem and does not gate",
+			stages: []model.Stage{{ID: "find", Phase: "discovery"}, {ID: "make", Phase: "building", Gates: []string{"0099"}}},
+			want:   []string{"stage make gates on decision 0099, which does not exist", "stage make " + ungated},
+		},
+		{
+			name:   "a stage without a phase in between",
+			stages: []model.Stage{{ID: "find", Phase: "discovery"}, {ID: "pause"}, {ID: "make", Phase: "building"}},
+			want:   []string{"stage make " + ungated},
+		},
+		{
+			name:   "back to discovery, then building again",
+			stages: []model.Stage{{ID: "make", Phase: "building"}, {ID: "rethink", Phase: "discovery"}, {ID: "remake", Phase: "building"}},
+			want:   []string{"stage remake " + ungated},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			ps := checkStageLinks("wo", tc.stages, nil, decisions)
+			var got []string
+			for _, p := range ps {
+				got = append(got, p.Msg)
+			}
+			if strings.Join(got, "\n") != strings.Join(tc.want, "\n") {
+				t.Errorf("problems=%q want %q", got, tc.want)
+			}
+		})
+	}
+}

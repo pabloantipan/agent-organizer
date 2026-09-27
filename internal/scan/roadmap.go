@@ -32,6 +32,11 @@ func readRoadmap(wo string, problems []model.Problem) ([]model.Stage, []model.Pr
 	stages := doc.Stages
 	problems = append(problems, checkStages(p, stages)...)
 	for i := range stages {
+		if !validPhase(stages[i].Phase) {
+			stages[i].Phase = "" // reported by checkStages; the stage is kept without one
+		}
+	}
+	for i := range stages {
 		if strings.TrimSpace(stages[i].Done) == "" {
 			stages[i].Current = true // FR-3; model.CurrentStage reads the same rule
 			break
@@ -41,7 +46,8 @@ func readRoadmap(wo string, problems []model.Problem) ([]model.Stage, []model.Pr
 }
 
 // checkStages holds a roadmap to the format: a stage has an id, no two share
-// one, and every date on it is a real date. A broken stage is kept, like a
+// one, its phase is discovery or building if it has one, and every date on it
+// is a real date. A broken stage is kept, like a
 // broken decision record: the board shows what is on disk and the problem says
 // what to fix.
 func checkStages(path string, stages []model.Stage) []model.Problem {
@@ -60,6 +66,9 @@ func checkStages(path string, stages []model.Stage) []model.Problem {
 			add("stage id %q is used twice", id)
 		}
 		seen[id] = true
+		if !validPhase(s.Phase) {
+			add("stage %s phase %q is neither discovery nor building", name, s.Phase)
+		}
 		if s.Target != "" && !validDate(s.Target) {
 			add("stage %s target %q is not YYYY-MM-DD", name, s.Target)
 		}
@@ -75,9 +84,16 @@ func checkStages(path string, stages []model.Stage) []model.Problem {
 	return ps
 }
 
-// checkStageLinks reports the two references a roadmap cannot resolve on its
-// own: a stage gating on a decision record that is not there, and a card or
-// record joining a stage that does not exist (FR-5). It needs the decisions and
+// validPhase is an empty phase or one of the two the working-on skill names.
+func validPhase(ph string) bool {
+	return ph == "" || ph == model.PhaseDiscovery || ph == model.PhaseBuilding
+}
+
+// checkStageLinks reports the references a roadmap cannot resolve on its own:
+// a stage gating on a decision record that is not there, a card or record
+// joining a stage that does not exist (FR-5), and a building stage after a
+// discovery stage that no record gates (twenty-at-a-glance FR-3: the skill's
+// "the system is defined enough to build" is a ruling, not a feeling). It needs the decisions and
 // the cards, so it runs after all three are read.
 func checkStageLinks(wo string, stages []model.Stage, cards []model.Card, decisions []model.Decision) []model.Problem {
 	var ps []model.Problem
@@ -102,6 +118,19 @@ func checkStageLinks(wo string, stages []model.Stage, cards []model.Card, decisi
 			}
 		}
 	}
+	prev := "" // the phase of the nearest earlier stage that has one
+	for i, s := range stages {
+		if s.Phase == model.PhaseBuilding && prev == model.PhaseDiscovery && !gatedByRecord(s, records) {
+			name := strings.TrimSpace(s.ID)
+			if name == "" {
+				name = fmt.Sprintf("stage %d", i+1)
+			}
+			ps = append(ps, model.Problem{Path: rp, Msg: fmt.Sprintf("stage %s starts building after discovery with no gate naming a decision record", name)})
+		}
+		if s.Phase != "" {
+			prev = s.Phase
+		}
+	}
 	for _, c := range cards {
 		if st := strings.TrimSpace(c.Stage); st != "" && !ids[st] {
 			ps = append(ps, model.Problem{Path: c.Path, Msg: fmt.Sprintf("stage %q is not on the roadmap", st)})
@@ -113,6 +142,16 @@ func checkStageLinks(wo string, stages []model.Stage, cards []model.Card, decisi
 		}
 	}
 	return ps
+}
+
+// gatedByRecord is whether one of the stage's gates names a record that exists.
+func gatedByRecord(s model.Stage, records map[string]bool) bool {
+	for _, g := range s.Gates {
+		if records[gateNumber(g)] {
+			return true
+		}
+	}
+	return false
 }
 
 // gateNumber is a gate as a decision record number: the file name's four
