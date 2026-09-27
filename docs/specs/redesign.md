@@ -2,7 +2,7 @@
 
 status: ruled (0023, 2026-09-26)
 owner: pablo
-decisions: [0013 ruled, 0014 ruled, 0015 ruled, 0016 ruled, 0017 ruled, 0018 ruled, 0019 ruled, 0020 ruled, 0021 proposed, 0022 proposed]
+decisions: [0013 ruled, 0014 ruled, 0015 ruled, 0016 ruled, 0017 ruled, 0018 ruled, 0019 ruled, 0020 ruled, 0021 ruled, 0022 ruled]
 visual reference: `docs/specs/redesign-mockups.html` (bf0e085), pins H1–H3, O1–O5, W1–W4, R1–R2
 design system: `docs/design-system.md` and `frontend/src/styles/tokens.css` (ac0d15a..ef1b980); the mockups show layout, the design system decides every value
 
@@ -95,9 +95,15 @@ was wrong; stop and amend it.
   - the FSE's open threads.
 
   Without a bitácora there is no activity and no problem.
-- **FR-12** [NEEDS CLARIFICATION: does the FSE panel also list what the FSE
-  waits on from Pablo? — pablo] (0021, proposed). Not in any card until it
-  is ruled.
+- **FR-12** (built in wave 2, `redesign-overview`) The FSE panel shall also list what the FSE waits on from the
+  owner, up to five items, derived and never stored:
+  - the initiative's `proposed` records raised by the FSE and owned by the
+    human;
+  - threads the FSE opened to the human that still ask the human
+    (`CellThread.AskedOfMe`).
+
+  Each item links to its Needs me row. The panel header shows the count,
+  "waiting on you: N", so it reads when the list is collapsed (0021).
 - **FR-13** When the owner rules a `proposed` record from the app with a
   chosen option and their words, the service shall:
   - set `status: ruled`, `ruled` (today), `ruled_by` and `chosen`;
@@ -162,9 +168,8 @@ was wrong; stop and amend it.
   placed at the date raised and, once ruled, at the date ruled. It shall
   switch to Cards (today's Gantt) and Calendar (today's month grid) (R1).
 - **FR-21** A stage without a `target` shall draw as a dashed bar sized by
-  order only, labelled with its `appetite` when it has one. No date is ever
-  computed from an appetite (R2, 0022 proposed; until 0022 is ruled, the
-  bar is drawn with no label).
+  order only, labelled with its `appetite`. A `target` stays a date, and no
+  date is ever computed from an appetite (R2, 0022).
 - **FR-22** From a decision row in Needs me, a box shall take the chosen
   option and the owner's words and call FR-13. The row shall then leave the
   queue (0019).
@@ -189,6 +194,7 @@ the package's `_test.go` with testdata under `testdata/home`.
 | G11 | 15 | Needs me shows the fixture's waiting decision and queue rows in one list with one badge; the Slack and Decisions badges are gone | screenshot | one badge, count = rows |
 | G12 | 16,17,18 | Home rows, the header and Overview show the fixture goal, stepper, gates and exits; an initiative with no goal says "no goal yet" | screenshots | matches H3, O1, O2, O4 |
 | G13 | 19 | Work shows five columns, a wave strip for the fixture wave, and each card's agent line or "nobody on it" | screenshot | matches W1–W4 |
+| G19 | 12 | Given the fixture initiative with two FSE-raised proposed records and one FSE thread asking the human, the FSE panel lists three items linking to Needs me, and its header reads "waiting on you: 3" when collapsed | screenshot | matches O5 plus the count |
 | G14 | 20,21 | Roadmap shows one row per fixture stage, gate diamonds, and a dashed bar for a stage with no target; Cards and Calendar switch | screenshot | matches R1, R2 |
 | G15 | 22 | Ruling the fixture record from Needs me writes it (G8's checks on the temp copy) and the row leaves the queue | screenshot and `git -C <tmp> log -1 --stat` | one file, one commit |
 | G17 | — | Wave 1 changes no stylesheet | `git diff --name-only main...<branch> -- '*.css'` | empty |
@@ -239,10 +245,7 @@ the package's `_test.go` with testdata under `testdata/home`.
 
 ## Open questions
 
-- [NEEDS CLARIFICATION: the FSE panel beyond a feed — pablo] (0021, proposed).
-  FR-12 only.
-- [NEEDS CLARIFICATION: a stage's appetite in place of a date — pablo] (0022,
-  proposed). FR-21's label only; the dashed bar ships either way.
+- none; 0021 and 0022 were ruled 2026-09-27
 
 ## Assumptions
 
@@ -280,7 +283,7 @@ three that depend on them. Wave 2 starts once wave 1's review passes.
 | `redesign-fse-activity` | G7, G9, G17 | goal-stages |
 | `redesign-rule-record` | G8, G9, G17 | runs-binding |
 | `redesign-shell-home` | G10, G11, G12 (Home, header), G18 | wave 1 |
-| `redesign-overview` | G12 (Overview), G18 | shell-home |
+| `redesign-overview` | G12 (Overview), G19, G18 | shell-home |
 | `redesign-work` | G13, G18 | shell-home |
 | `redesign-roadmap` | G14, G18 | shell-home |
 | `redesign-rule-box` | G15, G16, G18 | overview, work, roadmap |
@@ -288,3 +291,4 @@ three that depend on them. Wave 2 starts once wave 1's review passes.
 ## Amendments
 
 - 2026-09-26: FR-23 and gate rows G17, G18 added at Pablo's request (thread 01M3G4W66JB0YXBG0TW795WQ6W): the views build on the design system (ac0d15a..ef1b980). Before acceptance; 0023 accepted this version.
+- 2026-09-27: 0021 and 0022 ruled. FR-12 is now a requirement (in `redesign-overview`, gate G19); FR-21 always labels the appetite. The build proved nothing wrong; the open questions closed.
