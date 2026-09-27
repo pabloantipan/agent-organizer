@@ -107,6 +107,9 @@ func TestIdentityFromPsLine(t *testing.T) {
 }
 
 func TestAttachSessions(t *testing.T) {
+	// attachSessions archives into session.RunsPath(), beside session.Dir():
+	// keep it out of the real ~/.local/share/organizer.
+	t.Setenv("XDG_DATA_HOME", t.TempDir())
 	dir := t.TempDir()
 	now := time.Now()
 	for _, r := range []session.Record{
