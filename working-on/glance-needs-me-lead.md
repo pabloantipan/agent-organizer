@@ -1,6 +1,6 @@
 ---
 title: Needs me holds only the lead's decisions
-status: next
+status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-27
