@@ -1,0 +1,7 @@
+id: warehouse-sync
+title: Warehouse sync
+client: acme
+status: active
+started: 2026-07-01
+machine: fixture
+repos: []

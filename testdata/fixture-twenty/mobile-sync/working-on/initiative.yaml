@@ -1,0 +1,8 @@
+id: mobile-sync
+title: Mobile sync
+client: acme
+status: active
+started: 2026-07-01
+machine: fixture
+repos: []
+goal: Phones and the web agree within a minute

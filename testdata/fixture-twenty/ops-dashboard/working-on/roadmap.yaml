@@ -1,0 +1,21 @@
+stages:
+  - id: metrics
+    title: Metrics
+    phase: discovery
+    outcome: metrics is in place
+    exit:
+      - metrics is checked
+    done: 2026-08-18
+  - id: panels
+    title: Panels
+    phase: building
+    outcome: panels is in place
+    exit:
+      - panels is checked
+    gates: ["0001"]
+  - id: alerts
+    title: Alerts
+    phase: building
+    outcome: alerts is in place
+    exit:
+      - alerts is checked

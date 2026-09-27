@@ -1,0 +1,8 @@
+id: data-lake
+title: Data lake
+client: northwind
+status: active
+started: 2026-07-01
+machine: fixture
+repos: []
+goal: Finance reads one table instead of six exports

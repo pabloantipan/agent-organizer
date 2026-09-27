@@ -1,0 +1,8 @@
+id: claims-portal
+title: Claims portal
+client: northwind
+status: active
+started: 2026-07-01
+machine: fixture
+repos: []
+goal: A claim is filed and tracked in one place

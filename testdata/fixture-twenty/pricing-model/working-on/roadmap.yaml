@@ -1,0 +1,20 @@
+stages:
+  - id: discovery
+    title: Discovery
+    phase: discovery
+    outcome: discovery is in place
+    exit:
+      - discovery is checked
+  - id: model
+    title: The model
+    phase: building
+    outcome: the model is in place
+    exit:
+      - the model is checked
+    gates: ["0001"]
+  - id: tool
+    title: Quote tool
+    phase: building
+    outcome: quote tool is in place
+    exit:
+      - quote tool is checked

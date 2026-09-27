@@ -1,0 +1,8 @@
+id: support-bot
+title: Support bot
+client: personal
+status: active
+started: 2026-07-01
+machine: fixture
+repos: []
+goal: Half the tickets answer themselves

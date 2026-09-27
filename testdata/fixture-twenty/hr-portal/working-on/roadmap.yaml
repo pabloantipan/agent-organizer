@@ -1,0 +1,21 @@
+stages:
+  - id: forms
+    title: Forms
+    phase: discovery
+    outcome: forms is in place
+    exit:
+      - forms is checked
+    done: 2026-07-20
+  - id: approvals
+    title: Approvals
+    phase: building
+    outcome: approvals is in place
+    exit:
+      - approvals is checked
+    gates: ["0001"]
+  - id: payroll
+    title: Payroll link
+    phase: building
+    outcome: payroll link is in place
+    exit:
+      - payroll link is checked

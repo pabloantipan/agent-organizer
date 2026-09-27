@@ -1,0 +1,20 @@
+stages:
+  - id: interviews
+    title: Interviews
+    phase: discovery
+    outcome: interviews is in place
+    exit:
+      - interviews is checked
+  - id: pilot
+    title: Pilot
+    phase: building
+    outcome: pilot is in place
+    exit:
+      - pilot is checked
+    gates: ["0001"]
+  - id: fleet
+    title: Whole fleet
+    phase: building
+    outcome: whole fleet is in place
+    exit:
+      - whole fleet is checked

@@ -1,0 +1,21 @@
+stages:
+  - id: spike
+    title: Spike
+    phase: discovery
+    outcome: spike is in place
+    exit:
+      - spike is checked
+    done: 2026-08-12
+  - id: sync
+    title: Sync engine
+    phase: building
+    outcome: sync engine is in place
+    exit:
+      - sync engine is checked
+    gates: ["0001"]
+  - id: conflicts
+    title: Conflicts
+    phase: building
+    outcome: conflicts is in place
+    exit:
+      - conflicts is checked

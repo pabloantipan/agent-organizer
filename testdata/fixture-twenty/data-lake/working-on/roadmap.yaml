@@ -1,0 +1,21 @@
+stages:
+  - id: sources
+    title: Sources
+    phase: discovery
+    outcome: sources is in place
+    exit:
+      - sources is checked
+    done: 2026-07-30
+  - id: pipes
+    title: Pipelines
+    phase: building
+    outcome: pipelines is in place
+    exit:
+      - pipelines is checked
+    gates: ["0001"]
+  - id: reports
+    title: Reports
+    phase: building
+    outcome: reports is in place
+    exit:
+      - reports is checked

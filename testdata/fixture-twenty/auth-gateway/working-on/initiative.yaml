@@ -1,0 +1,8 @@
+id: auth-gateway
+title: Auth gateway
+client: planta
+status: active
+started: 2026-07-01
+machine: fixture
+repos: []
+goal: Every app signs in through one gateway

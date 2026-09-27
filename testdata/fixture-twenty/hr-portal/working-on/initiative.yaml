@@ -1,0 +1,8 @@
+id: hr-portal
+title: HR portal
+client: planta
+status: active
+started: 2026-07-01
+machine: fixture
+repos: []
+goal: Leave requests are approved in the portal
