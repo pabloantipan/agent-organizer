@@ -5,7 +5,7 @@ repos: [organizer]
 branch: main
 updated: 2026-09-27
 seat: wave2-roadmap
-next: "review: redesign-roadmap, gate G14, G18 met, 26a11e7 5e39fda"
+next: "review: redesign-roadmap, gate G14, G18 met, 7bf24ae a2dae6d"
 depends_on: ["redesign-shell-home"]
 boundary: ["frontend/src/components/RoadmapView.tsx", "frontend/src/components/StageRoadmap.tsx (new)", "frontend/src/components/Calendar.tsx (embedding only)", "frontend/src/styles/roadmap.css (new)"]
 spec: "docs/specs/redesign.md (FR-23, FR-20, FR-21); visual: docs/specs/redesign-mockups.html; values: docs/design-system.md"
@@ -21,10 +21,10 @@ The redesign, wave 2 of 2: FR-20, FR-21 of `docs/specs/redesign.md`. Decisions 0
 
 ## Done
 - 2026-09-26 cut from the redesign spec by the FSE
-- 2026-09-26 wave2-roadmap: `StageRoadmap.tsx`, `roadmap.css` (26a11e7) and the Stages | Cards | Calendar switch in `RoadmapView.tsx` (5e39fda) on `redesign-roadmap`, on main 49ccdd5. G14: `.wt-notes/wave2-roadmap/G14-stages.png` (foundations done; joins current with 0001 at raised and ruled, 0002 at raised, "0099 names no record, not drawn"; views dashed "a week"), `G14-cards.png`, `G14-calendar.png`, from `wails dev -devserver localhost:34118` on `fixture-home.sh`. G18: the grep prints nothing (exit 1). `npm run build` passes; `wails build` done. Choices in `.wt-notes/wave2-roadmap/progress.md`
+- 2026-09-26 wave2-roadmap: `StageRoadmap.tsx`, `roadmap.css` (7bf24ae) and the Stages | Cards | Calendar switch in `RoadmapView.tsx` (a2dae6d) on `redesign-roadmap`, rebased on main 9bb5afe. G14: `.wt-notes/wave2-roadmap/G14-stages.png` (foundations done; joins current with 0001 at raised and ruled, 0002 at raised, "0099 names no record, not drawn"; views dashed "a week"), `G14-cards.png`, `G14-calendar.png`, from `wails dev -devserver localhost:34118` on `fixture-home.sh`. G18: the grep prints nothing (exit 1). `npm run build` passes; `wails build` done. Choices in `.wt-notes/wave2-roadmap/progress.md`
 
 ## Next
-1. review: redesign-roadmap, gate G14, G18 met, 26a11e7 5e39fda
+1. review: redesign-roadmap, gate G14, G18 met, 7bf24ae a2dae6d
 
 ## Blockers
 none
