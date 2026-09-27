@@ -1,9 +1,10 @@
 ---
 title: Overview shows the current stage's gates, the work summary and the FSE panel
-status: next
+status: done
 repos: [organizer]
 branch: main
 updated: 2026-09-27
+review: pass
 seat: wave2-overview
 next: "review: redesign-overview, gate G12 (Overview), G19, G18 met, 047e960"
 depends_on: ["redesign-shell-home"]
@@ -29,6 +30,14 @@ The redesign, wave 2 of 2: FR-18 of `docs/specs/redesign.md`. Decisions 0013–0
 
 ## Blockers
 none
+
+## Review
+- Verdict: pass. G12 (Overview), G19 and G18 are all met by 047e960.
+- Unmet gate items: none.
+- G18: the grep prints nothing; `npm run build` (tsc + vite) is green in the worktree. The diff touches the three boundary files only. It uses no legacy alias (`--bg`, `--live`, `--tone` and `--mono` are tier-2) and no size outside the seven, every figure is `.num` or `.mono` (tabular), and no focus ring is removed.
+- G12/G19: the builder's screenshots match the diff's strings and classes. Layout matches O4/O5.
+- Not covered by the gate: the tokens figure is only shown at 0, because the fixture has no attributed runs. FR-11's "FSE's open threads" is still unowned: the panel lists only the threads that ask the human. The panel counts threads where the FSE is `asked_by` as well as `opener`, which is broader than FR-12's "opened". `.ov-stub` in shell.css is dead.
+- Reviewer: wave2-review-overview, 2026-09-27
 
 ## Notes
 - 2026-09-27 wave2-overview: `model.FSECommit` is emitted in `wailsjs/go/models.ts` after all (nested in FSEActivity); FsePanel keeps a hand-written type as asked. `wails dev`/`wails build` flip `wailsjs/go/main/App.{d.ts,js}` to mode 755 (reverted, not committed). A console error on every browser load, `reading 'nodes'` in `/wails/ipc.js`, is Wails' runtime, not a view. `.ov-stub` in shell.css is dead now. Choices: `.wt-notes/wave2-overview/progress.md`
