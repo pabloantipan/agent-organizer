@@ -1,9 +1,10 @@
 ---
 title: Each live agent is joined to the card it works
-status: next
+status: done
 repos: [organizer]
 branch: redesign-agent-card
 updated: 2026-09-26
+review: pass
 next: "review: redesign-agent-card, gate G4, G9, G17 met, a21793a dccaa85"
 seat: wave1-agentcard
 depends_on: []
@@ -19,6 +20,20 @@ The redesign, wave 1 of 2: FR-6 to FR-8 of `docs/specs/redesign.md`. Decisions 0
 - [x] G4: see `docs/specs/redesign.md`, Acceptance
 - [x] G9: see `docs/specs/redesign.md`, Acceptance
 - [x] G17: see `docs/specs/redesign.md`, Acceptance
+
+## Review
+- 2026-09-26 **pass**. Gate G4, G9, G17 all met by the diff (`a21793a`, `dccaa85`).
+  - **G4** re-run: `XDG_DATA_HOME=$(mktemp -d) go test ./internal/service/ -run 'Join|OpenCards|ParseETime' -v` → all PASS, `ok organizer/internal/service 0.278s`. The three keys are in FR-6's order (`matchByPlace` calls `session.MatchCard`, which tries the path element then the branch, before `matchBySeat`), FR-7's two-cards-is-no-card holds at both key kinds (`TestJoinAgentTwoCardsAnswer`), and FR-8's four numbers ride on `model.CardJoin` (`TestJoinAgentCardsCarriesStateContextAndStart`: state, 41 %, 212000 tokens, start = sample less ps elapsed).
+  - **G9** re-run in the worktree: `XDG_DATA_HOME=$(mktemp -d) make test` → `go vet` clean, every package `ok` or no test files. No `status.golden` refresh, and none needed: the join reaches no CLI output.
+  - **G17** re-run: `git diff --name-only main...redesign-agent-card -- '*.css'` → empty.
+  - **Boundary** clean: the branch touches exactly the four files it names. `model.go` adds one field to `Agent` and the new `CardJoin` it points at; no other struct changed.
+  - Main moved to `1092f6e` (redesign-runs-binding merged) after the branch was cut; `git merge-tree` merges clean and the two branches' files are disjoint.
+- Unmet gate items: none.
+- Not in the gate, for whoever comes next:
+  - `Service.Scan` does not join, so the cached and synced `model.Snapshot` carries no card until the first 10 s `RefreshAgents` tick. The card's Notes say so; one line in `Scan` closes it.
+  - FR-7 is applied per key, not per agent: an agent whose place matches two cards but whose seat matches one is joined to the seat's card. Defensible, and `session.MatchCard` cannot express the difference, but FR-7 read strictly says none. A ruling for Pablo, not a change to make here.
+  - `frontend/wailsjs` is not regenerated, so the TS `model.Agent` has no `card`. Wave 2 must run `wails generate module` before a view reads the join.
+- Reviewer: `wave1-review-agentcard`, 2026-09-26.
 
 ## Done
 - 2026-09-26 cut from the redesign spec by the FSE
