@@ -1,0 +1,10 @@
+{
+  "project": "legacy-fixture",
+  "workdir": "/h/legacy-intranet",
+  "agents": [
+    "fse",
+    "po_lia"
+  ],
+  "human": "pablo",
+  "reconciler": "po_lia"
+}

@@ -1,8 +1,8 @@
 # fixture-twenty
 
-What `scripts/fixture-home.sh --twenty` lays out: twenty initiatives in the
-mix of FR-7 of `docs/specs/twenty-at-a-glance.md`, so Home can be read at a
-glance (G7–G9). Nothing from `testdata/home` is copied. It is never scanned by
+What `scripts/fixture-home.sh --twenty` lays out: twenty active initiatives
+in the mix of FR-7 of `docs/specs/twenty-at-a-glance.md`, so Home can be read
+at a glance (G7–G9), plus one archived (G12, below). Nothing from `testdata/home` is copied. It is never scanned by
 the Go tests (no root points here), so `status.golden` is untouched.
 
 How each state arises, from files except where noted:
@@ -28,3 +28,10 @@ How each state arises, from files except where noted:
 Phases: 5 in discovery, 10 building, 5 with no roadmap. Every staged
 initiative has a ruled `0001-the-roadmap` record that gates its first
 building stage, so no row carries a phase problem.
+
+The 21st, `legacy-intranet`, is `status: archived` (FR-9, G12). Were it
+active it would add two Needs me rows: its proposed record 0001 owned by
+`pablo`, and its card `page-inventory`, whose next action starts `pablo:`
+and which the queue reads through its cell. Being archived, it is missing
+from Home and from Needs me and sits alone under "Not active (1)" at the
+bottom of the rail. It has no roadmap and is not counted in the mix above.
