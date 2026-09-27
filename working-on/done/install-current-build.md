@@ -1,11 +1,11 @@
 ---
 title: The installed organizer is the current main
-status: now
+status: done
 repos: [organizer]
 branch: main
 updated: 2026-09-27
-next: "gate 1: make-install.log must end with the installed version and no -dirty; it ends (v0.2.0-229-g3472f6b-dirty). Pablo: accept the binary's clean describe as proof, or pin VERSION with := in the Makefile and reinstall"
-review: fail
+next: "none: reviewed pass by wave1-review-install; installed v0.2.0-229-g3472f6b"
+review: pass
 depends_on: []
 seat: wave1-install
 boundary: ["build/ (the build output)", "/Applications/organizer.app (install target)", "~/.local/bin/organizer (the symlink make install writes)", "no source file in the repo"]
@@ -29,13 +29,13 @@ and reinstalled so he sees what landed.
 - 2026-09-27 wave1-install: gate 1-4 met, installed v0.2.0-229-g3472f6b. (1) `make install` from clean main at v0.2.0-229-g3472f6b (card commit 3472f6b) exited 0, tail "installed /Applications/organizer.app and ~/.local/bin/organizer": `.wt-notes/wave1-install/make-install.log`. (2) `/Applications/organizer.app/Contents/MacOS/organizer version` and `organizer version` (`~/.local/bin/organizer` -> `/Applications/organizer.app/Contents/MacOS/organizer`) both print `organizer v0.2.0-229-g3472f6b`, equal to the describe read before the build: `versions.txt`. (3) The app opened on Home against the real home: the top bar shows v0.2.0-229-g3472f6b, "Not active (7)" sits collapsed at the bottom of the rail under Everything/Pro/Ungrouped, and the Needs me badge is 19, the same as the list's "NEEDS ME 19" header: `home.png` (window region). For "lead's rows only", I compared the list with `organizer decisions`. Of the five proposed records, the four owned by pablo (knowledge-collector 0002-0005) are Rule rows, and ccint-camp 0005 (owner alejandro) is not in the list. No row comes from the seven non-active initiatives (rpex, facial, pwa-auth… whose `decide:`/Pablo cards `organizer status` still lists). (4) `git status --short` afterwards shows only the baseline untracked dirs: `status.txt`.
 
 ## Review
-- Verdict: fail (wave1-review-install, 2026-09-27)
-- Unmet: 1. `make-install.log` ends `installed /Applications/organizer.app and ~/.local/bin/organizer (v0.2.0-229-g3472f6b-dirty)`, so the check "no -dirty" fails on the evidence as written. Its substance holds: no error in the log, the describe before the build was clean, and ldflags carry `v0.2.0-229-g3472f6b`. The `-dirty` comes from the Makefile's recursive `VERSION ?=` re-running `git describe --dirty` after `wails build` flips the mode of `frontend/wailsjs/go/main/App.{d.ts,js}`. Either the gate or the Makefile is wrong; that is Pablo's call.
-- Met: 2 (both binaries print `organizer v0.2.0-229-g3472f6b`, the PATH one is `~/.local/bin/organizer` -> the app binary, 3472f6b is on main, and 3472f6b..main is only 641cf97, which touches only this card). Met: 3 (running app pid 32149 started 15:30:32, after the binary was written at 15:30:20. My capture `.wt-notes/wave1-review-install/window.png` shows v0.2.0-229-g3472f6b, "Not active (7)" collapsed at the bottom of the rail, and badge 19. Someone was using it on ccint Decisions, so I did not navigate. Home comes from the builder's `home.png`, which is tied by the top-bar version: Needs me 19 = badge 19, and ccint 0005 (owner alejandro) is absent. Rows 16-19 remain unseen by either seat). Met: 4 (status shows only the three baseline dirs).
-- Not covered by the gate: every future `make install` will print `-dirty` until `wails build` stops flipping the wailsjs modes or VERSION is pinned with `:=`. And badge = list header is tautological (both come from `needsMeRows`); "only the lead's rows" needs a stated oracle.
+- Verdict: pass (wave1-review-install, 2026-09-27; re-judged after sup7 withdrew the "no -dirty" condition, which is not in the gate)
+- Unmet: none
+- 1: met. main was clean before the build (the describe recorded at 15:29:57 was `v0.2.0-229-g3472f6b`, with no --dirty suffix). `make install` succeeded: no error in the log, and the tail is `installed /Applications/organizer.app and ~/.local/bin/organizer (…)` (`.wt-notes/wave1-install/make-install.log`). 2: met. Both binaries print `organizer v0.2.0-229-g3472f6b`; the PATH one is `~/.local/bin/organizer` -> the app binary. 3472f6b is on main, and the only commit after it touches only this card. 3: met. The running app (pid 32149) started 15:30:32, after the binary was written at 15:30:20. My capture `.wt-notes/wave1-review-install/window.png` shows v0.2.0-229-g3472f6b, "Not active (7)" collapsed at the bottom of the rail, and badge 19. The app was in use on ccint Decisions, so I did not navigate. Home comes from the builder's `home.png`, which is tied by the top-bar version: Needs me 19 = badge 19, and ccint 0005 (owner alejandro) is absent. Rows 16-19 remain unseen by either seat. 4: met. `git status --short` shows only the three baseline untracked dirs.
+- Not covered by the gate: the tail's echo says `v0.2.0-229-g3472f6b-dirty` while the binary carries the clean describe. The Makefile's recursive `VERSION ?=` re-runs `git describe --dirty` after `wails build` flips the mode of `frontend/wailsjs/go/main/App.{d.ts,js}`. Every `make install` will print this until VERSION is pinned with `:=` or the mode flip stops. Also, badge = list header is tautological (both come from `needsMeRows`), so "only the lead's rows" needs a stated oracle.
 
 ## Next
-1. gate 1: Pablo accepts the clean-binary evidence, or VERSION is pinned with := and make install reruns clean
+none
 
 ## Blockers
 none
