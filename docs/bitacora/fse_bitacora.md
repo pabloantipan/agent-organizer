@@ -27,6 +27,10 @@ restating it (the discuss skill).
   21:20: `health` shows fse undelivered 2 while the hook logs
   nothing_to_deliver. Read threads with GET `/threads/<id>` (it does not
   advance the cursor). A fresh session (`probe -r organizer-probe-fse`) clears it.
+- **Learned (my error, 8d42553):** the shell is zsh; `for c in $VAR` does
+  not word-split, so a loop over a space-separated variable writes one file
+  named after all of them. sup2 cleaned it up in 713d2aa. Loop over a literal
+  list or `${=VAR}`.
 - **Rejected:** opening a card for 0012 (the Decisions tab was built
   directly, a6ebd4d..280f58c).
 
