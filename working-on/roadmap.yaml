@@ -1,34 +1,5 @@
----
-title: The organizer's roadmap
-status: ruled
-raised: 2026-09-27
-raised_by: fse
-owner: pablo
-ruled: 2026-09-27
-ruled_by: pablo
-options: [as proposed, reorder or merge, rewrite]
-chosen: as proposed
-cards: []
-threads: []
-supersedes: []
-superseded_by:
-stage:
----
-
-## Question
-
-0029 (seven sub-goals with 0030) and 0030 (scope, phases) are ruled. The
-roadmapping skill wants three to six stages. Is this the organizer's
-`working-on/roadmap.yaml`? Once ruled, the FSE writes the file as below and
-sets `done` on the first stage (this ruling is its "exit met").
-
-## Options
-
-- **as proposed**: the YAML below.
-- **reorder or merge**: say which.
-- **rewrite**: say what is wrong.
-
-```yaml
+# The organizer's stages, in order (decision 0032). The current stage is the
+# first without `done`. Method: the roadmapping skill. Dates only when real.
 stages:
   - id: foundations
     title: The board and the redesign
@@ -37,7 +8,7 @@ stages:
     exit:
       - text: the redesign's 11 cards and retire-keeps-the-cell passed review
         met: 2026-09-26
-    done:                 # 2026-09-27, when this record is ruled
+    done: 2026-09-27      # exit met, ruled in 0032
   - id: twenty-at-a-glance
     title: Twenty at a glance
     phase: building
@@ -46,7 +17,7 @@ stages:
       - initiative.yaml carries scope (in/out) and the organizer shows goal and scope on the header (0030)
       - each stage shows its phase; Home shows each initiative's current phase
       - every active initiative has a goal
-      - "what needs me" answered from Home in under a minute, 20 initiatives loaded (fixture)
+      - '"what needs me" answered from Home in under a minute, 20 initiatives loaded (fixture)'
     gates: ["0029", "0030"]
     appetite: one wave
   - id: machine-explains-itself
@@ -77,34 +48,4 @@ stages:
     exit:
       - records owned by someone other than the lead exist on at least one initiative
       - one change traced to decision data
-    gates: []             # identity: a new record reopening 0004, not raised yet
-```
-
-## Recommendation
-
-The FSE's: as proposed.
-
-- **Scope and phase open stage 2.** They are small, and the format is
-  already in the skills.
-- **The machine explains itself is third.** Pablo said "Intuitiveness is a
-  first", and the Help (0031) lives there.
-- **Cheap execution is fourth.** It waits on Pablo's minutes, not on a build.
-- **Discovery in a cell before owned decisions.** camp is in discovery now
-  with its own FSE, so it is the live case.
-- **Owned decisions last.** They need identity: four business people per
-  initiative is the second person 0004 was withdrawn to wait for.
-
-All stages are `building`, because the organizer is software being built.
-Its discovery happened in 0029 and 0030. Stage 2's gate is those two rulings.
-
-## Ruling
-
-Pablo, 2026-09-27, in the FSE's session (organizer-probe-fse), after the
-FSE explained the proposal: "do".
-
-## Consequences
-
-Once ruled:
-- The FSE writes `working-on/roadmap.yaml`.
-- It asks Pablo for the organizer's scope (stage 2's first exit item).
-- It specs stage 2 (spec-craft) and spawns its supervisor.
+    gates: []             # identity: a new record reopening 0004, raised when this stage comes up
