@@ -435,6 +435,10 @@ func (a *App) RuleDecision(initiativeID, number, chosen, words string) error {
 // models.ts; nested slice element types are otherwise skipped.
 func (a *App) MilestoneType() model.Milestone { return model.Milestone{} }
 
+// StageType exists only so the Wails generator emits model.Stage (and the
+// ExitItem it holds) in models.ts, for the same reason as MilestoneType.
+func (a *App) StageType() model.Stage { return model.Stage{} }
+
 type errString string
 
 func (e errString) Error() string { return string(e) }

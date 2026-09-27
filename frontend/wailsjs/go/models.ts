@@ -207,6 +207,10 @@ export namespace merge {
 	    notes: string[];
 	    target: string;
 	    milestones: model.Milestone[];
+	    goal: string;
+	    measure: string;
+	    specs: string[];
+	    stages: model.Stage[];
 	    path: string;
 	    machine: string;
 	    local: boolean;
@@ -222,6 +226,7 @@ export namespace merge {
 	    problems: model.Problem[];
 	    agents: model.Agent[];
 	    decisions: model.Decision[];
+	    fse: model.FSEActivity;
 	    live: number;
 	    working: number;
 	    also_on: string[];
@@ -243,6 +248,10 @@ export namespace merge {
 	        this.notes = source["notes"];
 	        this.target = source["target"];
 	        this.milestones = this.convertValues(source["milestones"], model.Milestone);
+	        this.goal = source["goal"];
+	        this.measure = source["measure"];
+	        this.specs = source["specs"];
+	        this.stages = this.convertValues(source["stages"], model.Stage);
 	        this.path = source["path"];
 	        this.machine = source["machine"];
 	        this.local = source["local"];
@@ -256,6 +265,7 @@ export namespace merge {
 	        this.problems = this.convertValues(source["problems"], model.Problem);
 	        this.agents = this.convertValues(source["agents"], model.Agent);
 	        this.decisions = this.convertValues(source["decisions"], model.Decision);
+	        this.fse = this.convertValues(source["fse"], model.FSEActivity);
 	        this.live = source["live"];
 	        this.working = source["working"];
 	        this.also_on = source["also_on"];
@@ -332,6 +342,7 @@ export namespace merge {
 	    start: string;
 	    threads: string[];
 	    seat: string;
+	    stage: string;
 	    depends_on: string[];
 	    boundary: string[];
 	    spec: string;
@@ -369,6 +380,7 @@ export namespace merge {
 	        this.start = source["start"];
 	        this.threads = source["threads"];
 	        this.seat = source["seat"];
+	        this.stage = source["stage"];
 	        this.depends_on = source["depends_on"];
 	        this.boundary = source["boundary"];
 	        this.spec = source["spec"];
@@ -412,6 +424,51 @@ export namespace merge {
 
 export namespace model {
 	
+	export class CardJoin {
+	    initiative: string;
+	    slug: string;
+	    title: string;
+	    key: string;
+	    state: string;
+	    used_percent: number;
+	    input_tokens: number;
+	    // Go type: time
+	    started_at: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new CardJoin(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.initiative = source["initiative"];
+	        this.slug = source["slug"];
+	        this.title = source["title"];
+	        this.key = source["key"];
+	        this.state = source["state"];
+	        this.used_percent = source["used_percent"];
+	        this.input_tokens = source["input_tokens"];
+	        this.started_at = this.convertValues(source["started_at"], null);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class ContextStatus {
 	    session_id: string;
 	    model: string;
@@ -476,6 +533,7 @@ export namespace model {
 	    watcher: string;
 	    deaf: boolean;
 	    undelivered: number;
+	    card?: CardJoin;
 	
 	    static createFrom(source: any = {}) {
 	        return new Agent(source);
@@ -501,6 +559,7 @@ export namespace model {
 	        this.watcher = source["watcher"];
 	        this.deaf = source["deaf"];
 	        this.undelivered = source["undelivered"];
+	        this.card = this.convertValues(source["card"], CardJoin);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -535,6 +594,7 @@ export namespace model {
 	        this.reason = source["reason"];
 	    }
 	}
+	
 	export class Cell {
 	    project: string;
 	    workdir: string;
@@ -572,6 +632,7 @@ export namespace model {
 	    options: string[];
 	    chosen: string;
 	    cards: string[];
+	    stage: string;
 	    threads: string[];
 	    supersedes: string[];
 	    superseded_by: string;
@@ -596,12 +657,80 @@ export namespace model {
 	        this.options = source["options"];
 	        this.chosen = source["chosen"];
 	        this.cards = source["cards"];
+	        this.stage = source["stage"];
 	        this.threads = source["threads"];
 	        this.supersedes = source["supersedes"];
 	        this.superseded_by = source["superseded_by"];
 	        this.body = source["body"];
 	    }
 	}
+	export class ExitItem {
+	    text: string;
+	    met: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ExitItem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.text = source["text"];
+	        this.met = source["met"];
+	    }
+	}
+	export class FSECommit {
+	    sha: string;
+	    at: string;
+	    subject: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new FSECommit(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.sha = source["sha"];
+	        this.at = source["at"];
+	        this.subject = source["subject"];
+	    }
+	}
+	export class FSEActivity {
+	    path: string;
+	    hand_off: string;
+	    hand_off_body: string;
+	    commits: FSECommit[];
+	
+	    static createFrom(source: any = {}) {
+	        return new FSEActivity(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.hand_off = source["hand_off"];
+	        this.hand_off_body = source["hand_off_body"];
+	        this.commits = this.convertValues(source["commits"], FSECommit);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
 	export class Group {
 	    name: string;
 	    initiatives: string[];
@@ -746,6 +875,52 @@ export namespace model {
 	        this.err = source["err"];
 	    }
 	}
+	export class Stage {
+	    id: string;
+	    title: string;
+	    outcome: string;
+	    exit: ExitItem[];
+	    gates: string[];
+	    appetite: string;
+	    target: string;
+	    done: string;
+	    current: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Stage(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.title = source["title"];
+	        this.outcome = source["outcome"];
+	        this.exit = this.convertValues(source["exit"], ExitItem);
+	        this.gates = source["gates"];
+	        this.appetite = source["appetite"];
+	        this.target = source["target"];
+	        this.done = source["done"];
+	        this.current = source["current"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class ThreadState {
 	    id: string;
 	    subject: string;
@@ -795,6 +970,106 @@ export namespace model {
 
 export namespace service {
 	
+	export class WaveCard {
+	    slug: string;
+	    title: string;
+	    seat: string;
+	    status: string;
+	    next: string;
+	    group: string;
+	    gate_passed: number;
+	    gate_total: number;
+	    has_gate: boolean;
+	    input_tokens: number;
+	    agent?: model.CardJoin;
+	
+	    static createFrom(source: any = {}) {
+	        return new WaveCard(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.slug = source["slug"];
+	        this.title = source["title"];
+	        this.seat = source["seat"];
+	        this.status = source["status"];
+	        this.next = source["next"];
+	        this.group = source["group"];
+	        this.gate_passed = source["gate_passed"];
+	        this.gate_total = source["gate_total"];
+	        this.has_gate = source["has_gate"];
+	        this.input_tokens = source["input_tokens"];
+	        this.agent = this.convertValues(source["agent"], model.CardJoin);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Wave {
+	    n: number;
+	    label: string;
+	    building: WaveCard[];
+	    in_review: WaveCard[];
+	    queued: WaveCard[];
+	    done: WaveCard[];
+	    gate_passed: number;
+	    gate_total: number;
+	    has_gate: boolean;
+	    input_tokens: number;
+	    supervisor: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Wave(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.n = source["n"];
+	        this.label = source["label"];
+	        this.building = this.convertValues(source["building"], WaveCard);
+	        this.in_review = this.convertValues(source["in_review"], WaveCard);
+	        this.queued = this.convertValues(source["queued"], WaveCard);
+	        this.done = this.convertValues(source["done"], WaveCard);
+	        this.gate_passed = source["gate_passed"];
+	        this.gate_total = source["gate_total"];
+	        this.has_gate = source["has_gate"];
+	        this.input_tokens = source["input_tokens"];
+	        this.supervisor = source["supervisor"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class CellThread {
 	    id: string;
 	    subject: string;
@@ -934,6 +1209,7 @@ export namespace service {
 	    needs_me: number;
 	    needs_reconciler: number;
 	    retirable: string[];
+	    waves: Wave[];
 	
 	    static createFrom(source: any = {}) {
 	        return new AgentGroup(source);
@@ -959,6 +1235,7 @@ export namespace service {
 	        this.needs_me = source["needs_me"];
 	        this.needs_reconciler = source["needs_reconciler"];
 	        this.retirable = source["retirable"];
+	        this.waves = this.convertValues(source["waves"], Wave);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -1400,6 +1677,7 @@ export namespace service {
 		    return a;
 		}
 	}
+	
 
 }
 

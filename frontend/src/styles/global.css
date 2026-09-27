@@ -54,10 +54,6 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
 .topbar * { -webkit-app-region: no-drag; }
 .brand { font-weight: 600; font-size: var(--font-size-lg); letter-spacing: .01em; }
 .brand::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: var(--radius-xs); background: var(--accent); margin-right: 8px; vertical-align: 1px; }
-.tabs { display: flex; gap: 2px; margin-left: 6px; }
-.tabs button { border: none; background: transparent; color: var(--fg-muted); padding: 3px 10px; }
-.tabs button:hover { color: var(--fg); background: var(--surface-hover); }
-.tabs button.active { color: var(--fg); background: var(--surface-raised); box-shadow: inset 0 0 0 1px var(--border); }
 .content { overflow: auto; padding: 16px; }
 .content.with-rail { display: grid; grid-template-columns: 250px 1fr; padding: 0; overflow: hidden; }
 
@@ -496,9 +492,7 @@ button.counts.linkish { font-family: var(--mono); }
 .settings-block .section-label:first-child { margin-top: 0; }
 .settings-block .row input { width: auto; flex: 1; }
 
-/* the Cell tab: one initiative's mailbox */
-.tab-badge { display: inline-block; min-width: 16px; padding: 0 5px; margin-left: 6px; border-radius: var(--r-pill); background: var(--blocked); color: #fff; font-size: var(--font-size-xs); font-weight: 700; line-height: 16px; text-align: center; vertical-align: 1px; }
-/* the Slack tab */
+/* Conversations (the Slack view) */
 .slack-wrap { display: flex; flex-direction: column; min-height: 0; }
 .slack { display: flex; flex-direction: column; height: 100%; min-height: 0; }
 .cells { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }

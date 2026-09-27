@@ -1,32 +1,18 @@
-import { Bot, Calendar, ChartGantt, Kanban, Scale, ListTree, Lock, LogOut, MessagesSquare, RefreshCw, RefreshCcwDot, Settings, UserRound } from "lucide-react";
+import { Inbox, Lock, LogOut, RefreshCw, RefreshCcwDot, Settings, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "../hooks/useWails";
-import { useBoard, type Tab } from "../stores/board.store";
+import { useBoard } from "../stores/board.store";
 import { since } from "../lib";
-import { queueOf } from "../lib/queue";
-
-const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
-  { id: "board", label: "Board", icon: <Kanban size={14} /> },
-  { id: "agents", label: "Agents", icon: <Bot size={14} /> },
-  { id: "slack", label: "Slack", icon: <MessagesSquare size={14} /> },
-  { id: "roadmap", label: "Roadmap", icon: <ChartGantt size={14} /> },
-  { id: "calendar", label: "Calendar", icon: <Calendar size={14} /> },
-  { id: "decisions", label: "Decisions", icon: <Scale size={14} /> },
-  { id: "initiatives", label: "Initiatives", icon: <ListTree size={14} /> },
-  { id: "settings", label: "Settings", icon: <Settings size={14} /> },
-];
+import { needsMeRows } from "../lib/queue";
 
 export function TopBar() {
-  const { tab, setTab, view, loading, syncing, refresh, sync, error, lastMessage, account, lock, authMode, syncNote, setAccount, setLock, setOfflineChoice, agents } = useBoard();
+  const { screen, selectedInitiative, goHome, openSettings, view, loading, syncing, refresh, sync, error, lastMessage, account, lock, authMode, syncNote, setAccount, setLock, setOfflineChoice, agents } = useBoard();
   // With auth off there is no identity: no account menu, no Sign in, no email,
   // and no Sync button either, since sync is a skip nobody can act on.
   const identity = authMode === "firebase";
-  // The human's queue plus seats not picking up, across every cell; one
-  // definition shared with the Slack tab so the numbers agree.
-  const needsMe = (agents?.groups ?? []).filter((g) => g.cell).reduce((n, g) => { const q = queueOf(g, view); return n + q.total + q.deaf; }, 0);
-  // Decision records waiting on a ruling, counted once per initiative even
-  // when two machines report it.
-  const waiting = Array.from(new Map((view?.board.initiatives ?? []).map((i) => [i.id, (i.decisions ?? []).filter((d) => d.status === "proposed").length])).values()).reduce((a, b) => a + b, 0);
+  // The one badge (FR-15): the rows of Needs me on Home, so the count is
+  // always the rows.
+  const needsMe = needsMeRows(view, agents).length;
   const [menu, setMenu] = useState(false);
   const machines = view?.board.machines ?? [];
   const [version, setVersion] = useState("");
@@ -34,12 +20,10 @@ export function TopBar() {
   return (
     <header className="topbar">
       <span className="brand" title={version ? `organizer ${version}` : "organizer"}>organizer{version && <span className="brand-version">{version}</span>}</span>
-      <nav className="tabs">
-        {TABS.map((t) => (
-          <button key={t.id} className={t.id === tab ? "active" : ""} onClick={() => setTab(t.id)}>
-            {t.icon} {t.label}{t.id === "slack" && needsMe > 0 && <span className="tab-badge" title="things asked of you (threads and cards), plus seats not picking up">{needsMe}</span>}{t.id === "decisions" && waiting > 0 && <span className="tab-badge" title="decision records waiting on a ruling">{waiting}</span>}
-          </button>
-        ))}
+      <nav className="crumbs" aria-label="where you are">
+        {screen === "home" ? <b>Home</b> : <button className="crumb" onClick={goHome}>Home</button>}
+        {screen === "initiative" && selectedInitiative && <><span className="crumb-sep">/</span><b className="mono">{selectedInitiative}</b></>}
+        {screen === "settings" && <><span className="crumb-sep">/</span><b>Settings</b></>}
       </nav>
       <span className="spacer" />
       {error && <span className="meta err">{error}</span>}
@@ -50,6 +34,9 @@ export function TopBar() {
           {machines.length} machine{machines.length === 1 ? "" : "s"} · remote {since(view.pulled_at)}
         </span>
       )}
+      <button className={`needs-me ${screen === "home" ? "on" : ""}`} onClick={goHome} title="things waiting on you: decisions, threads, cards and seats">
+        <Inbox size={14} /> Needs me{needsMe > 0 && <span className="badge-count num">{needsMe}</span>}
+      </button>
       <button className="ghost" onClick={refresh} disabled={loading} title="Rescan local disk">
         <RefreshCw size={14} className={loading ? "spin" : ""} /> {loading ? "scanning…" : "Rescan"}
       </button>
@@ -78,10 +65,10 @@ export function TopBar() {
               <button className="ghost" onClick={() => { setOfflineChoice(false); setMenu(false); }}><UserRound size={13} /> Sign in</button>
             )}
             <button className="ghost" onClick={async () => { setLock(await api.lockNow()); setMenu(false); }}><Lock size={13} /> Lock now</button>
-            <button className="ghost" onClick={() => { setTab("settings"); setMenu(false); }}><Settings size={13} /> Settings</button>
           </div>
         )}
       </span>}
+      <button className={`ghost gear ${screen === "settings" ? "on" : ""}`} onClick={openSettings} title="Settings" aria-label="Settings"><Settings size={14} /></button>
     </header>
   );
 }
