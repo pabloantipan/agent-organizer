@@ -5,7 +5,7 @@ repos: [organizer]
 branch: main
 updated: 2026-09-26
 seat: wave2-rulebox
-next: "pablo: grant Accessibility to /opt/homebrew/bin/zellij (this seat runs under a detached zellij server, ppid 1, not under iTerm2, so the iTerm2 grant does not reach it), or run the G16-2…6 walk from a plain iTerm2 shell; then review: redesign-rule-box (G15, G18 met; G16-1 taken; 224d4b4 b0f2d13)"
+next: "sup3: Pablo granted Accessibility to /opt/homebrew/bin/zellij (2026-09-27); restart the wave2-rulebox session (probe -k, then relaunch; a new zellij server picks up the grant) so the builder takes G16-2…6 from the built app, then review: redesign-rule-box (G15, G18 met; G16-1 taken; 224d4b4 b0f2d13)"
 depends_on: ["redesign-overview", "redesign-work", "redesign-roadmap"]
 boundary: ["frontend/src/components/RuleDecisionBox.tsx (new)", "frontend/src/components/Home.tsx (the decision row's Rule action)", "frontend/src/styles/rule-box.css (new)"]
 spec: "docs/specs/redesign.md (FR-23, FR-22); visual: docs/specs/redesign-mockups.html; values: docs/design-system.md"
