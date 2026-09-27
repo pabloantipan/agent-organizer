@@ -1,9 +1,10 @@
 ---
 title: Home and the initiative header replace the eight tabs
-status: next
+status: done
 repos: [organizer]
 branch: main
-updated: 2026-09-27
+updated: 2026-09-26
+review: pass
 seat: wave2-shell
 next: "review: redesign-shell-home, gate G10, G11, G12 (Home rows and header), G18 met, 4cec480, f8dd02b, 72136a6, df4b284, 5a13333"
 depends_on: ["redesign-goal-stages", "redesign-agent-card", "redesign-runs-binding", "redesign-waves", "redesign-fse-activity", "redesign-rule-record"]
@@ -24,6 +25,14 @@ The redesign, wave 2 of 2: FR-14 to FR-17 (Home and header) of `docs/specs/redes
 ## Done
 - 2026-09-26 cut from the redesign spec by the FSE
 - 2026-09-27 wave2-shell: built on `redesign-shell-home` (4cec480, f8dd02b, 72136a6, df4b284, 5a13333), rebased on main, unmerged. G10: `G10-home.png` (opens on Home), `G10-init-a-overview.png` (header over Overview, Work, Roadmap, Decisions, Conversations, Agents), `G10-roadmap-calendar.png`, `G10-settings.png` (from ⚙). G11: `G11-needs-me.png`, rows 0002 (6d), 0003 (2d), `w-queued: which repo…` (12m), oldest first; the page reported badge 3 = rows 3, no other badge. G12: `G12-home-rows.png` (init-a goal and stepper, init-b "no goal yet"), `G12-header.png` (goal, measure, target 2026-10-01, 2 decisions waiting, `joins` marked now). G18: the grep prints nothing (exit 1). `npm run build` passes; `wails build` done. Screenshots in `.wt-notes/wave2-shell/`, choices in its progress.md
+
+## Review
+- Verdict: pass. G10, G11, G12 (Home rows, header) and G18 are met by the diff and the screenshots.
+- Unmet gate items: none.
+- G18: the grep prints nothing (exit 1); `npm run build` (tsc && vite build) is green in the worktree at 5a13333. Beyond the grep: no legacy alias, every `var(--…)` the diff adds is defined in tokens.css, sizes are the seven, counts, ages, dates and ranks carry `.num` or mono, no rule touches `outline` (the `:focus-visible` ring stands).
+- Boundary: all 17 changed files are inside it, `app.go` only the StageType line sup3 accepted.
+- Not covered by the gate: Rule opens the Decisions sub-view, not the record (the rule-box card's); Home's Needs me has no Solved rows, which the design system's Inbox row asks for; card and seat rows carry a non-primary verb; `G10-home.png` predates the "1 message" plural fix (`G11-needs-me.png` has it); dead `.inits`/`.init-*` rules in global.css; Portfolio.tsx unmounted.
+- Reviewer: wave2-review-shell, 2026-09-26
 
 ## Next
 1. Build Home (Needs me with decisions, initiatives by priority) and the initiative header over six sub-views; fold Calendar, Initiatives, Settings; rename Slack to Conversations
