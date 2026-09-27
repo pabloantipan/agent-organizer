@@ -34,8 +34,10 @@ type BoardInitiative struct {
 	Problems    []model.Problem   `json:"problems"`
 	Agents      []model.Agent     `json:"agents"`
 	Decisions   []model.Decision  `json:"decisions"`
-	Live        int               `json:"live"`
-	Working     int               `json:"working"`
+	// FSE is the initiative's Forward Software Engineer activity (FR-11).
+	FSE     model.FSEActivity `json:"fse"`
+	Live    int               `json:"live"`
+	Working int               `json:"working"`
 	// AlsoOn lists other machines reporting the same initiative id.
 	AlsoOn []string `json:"also_on"`
 }
@@ -95,6 +97,7 @@ func Build(local model.Snapshot, remote []model.Snapshot, order model.Order, now
 				RepoStates: si.RepoStates,
 				Problems:   si.Problems,
 				Decisions:  si.Decisions,
+				FSE:        si.FSE,
 			}
 			for _, m := range machinesByID[si.ID] {
 				if m != s.Machine {
