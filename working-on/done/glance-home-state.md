@@ -1,6 +1,6 @@
 ---
 title: Home says each initiative's phase and state, for twenty
-status: now
+status: done
 repos: [organizer]
 branch: glance-home-state
 seat: wave1-home
@@ -11,6 +11,7 @@ boundary: ["frontend/src/components/Home.tsx", "frontend/src/lib/initiativeState
 spec: "docs/specs/twenty-at-a-glance.md (FR-6, FR-7); values: docs/design-system.md"
 gate: "docs/specs/twenty-at-a-glance.md Acceptance, rows G7, G8, G9, G10; the Gate section below"
 stage: twenty-at-a-glance
+review: pass
 ---
 
 ## Goal
@@ -19,7 +20,7 @@ Roadmap stage twenty-at-a-glance (0032): FR-6, FR-7 of `docs/specs/twenty-at-a-g
 ## Gate
 - [x] G7: see `docs/specs/twenty-at-a-glance.md`, Acceptance
 - [x] G8: see `docs/specs/twenty-at-a-glance.md`, Acceptance
-- [ ] G9: see `docs/specs/twenty-at-a-glance.md`, Acceptance
+- [x] G9: see `docs/specs/twenty-at-a-glance.md`, Acceptance
 - [x] G10: see `docs/specs/twenty-at-a-glance.md`, Acceptance
 
 ## Done
@@ -41,3 +42,13 @@ none
 - 2026-09-27 wave1-home: FR-6 read literally leaves "waits on business" unreachable, since `needsMeRows` lists every proposed record whoever owns it and "waits on you" is tried first. `initiativeState.ts` counts a decision row as the lead's only when its owner is empty or the lead; queue.ts is untouched.
 - 2026-09-27 wave1-home: decide: should Needs me (and its badge) keep listing proposed records owned by business or the FSE? Today it does (6 rows in the --twenty fixture for 3 initiatives that wait on you); dropping them is a change to `needsMeRows` in queue.ts.
 - 2026-09-27 wave1-home: the queue reads `pablo:` cards only in initiatives with a cell (`queueOf` skips groups without one), so such a card elsewhere never reaches Needs me.
+
+## Review
+- Verdict: pass. Reviewer wave1-review-home, 2026-09-27, on f0256f2.
+- Unmet gate items: none.
+- G9: `G9-home-1440x900.png` is 1440x900 (sips), native window of the built app, columns and icons match 662ff32. Answered from it alone (`.wt-notes/wave1-review-home/G9-answers.md`), 1790528900 to 1790528905, 5 s. Executing: auth-gateway, billing-api, field-app, ops-dashboard (key: right). Discovery: field-app, onboarding-flow, pricing-model, risk-scoring, search-index (right). Waits on business: data-lake, pricing-model (right). Waits on you: claims-portal, onboarding-flow, vendor-audit (right).
+- G7: `initiativeState.ts` applies FR-6's order over `needsMeRows` (not a copy); executing reads waves and live agents joined to a card, so mobile-sync's two unmanned `now` cards read quiet (A3); business excludes the lead and `fse` (email-digest is quiet). Each state is a word with its own icon, each phase a word with an icon or "no roadmap". One deviation from FR-6 read literally: a Needs me row that is a record owned by someone else does not count as "waits on you", because FR-6 step 1 read literally makes step 3 unreachable. The spec contradicts itself here and the builder's reading is the only one that meets FR-7; the spec needs an amendment.
+- G8: `--twenty` then `go run . status` gives 20 initiatives with no problems; `go run . agents` joins four running stand-ins, `decisions` shows proposed owners pablo x2, carla, rodrigo, fse. The mix is 4 executing, 5 discovery, 2 business, 3 you, 11 quiet. Without `--twenty`, `status` is byte-identical to main's script (temp paths normalised).
+- G10: `npm run build` finished (`built in 1.09s`), the G18 grep printed nothing (exit 1), and every token home.css uses exists in tokens.css.
+- Boundary: diff touches only Home.tsx, lib/initiativeState.ts, styles/home.css, scripts/fixture-home.sh, testdata/fixture-twenty/; shell.css and the store untouched.
+- Outside the gate: (1) Needs me says 6 while three rows say "waits on you". The decide: in Notes about this still needs an answer, and this card is now done. (2) The documented `kill $FIXTURE_AGENT_PIDS` fails in zsh (one word). Use `kill ${=FIXTURE_AGENT_PIDS}`. (3) Stand-ins are `running`, never `working`, so "executing" here counts any live agent on a card. (4) A G9 timed by a model says little about a human reader.
