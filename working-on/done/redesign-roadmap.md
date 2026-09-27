@@ -1,9 +1,10 @@
 ---
 title: Roadmap draws stages with their gating decisions
-status: next
+status: done
 repos: [organizer]
 branch: main
-updated: 2026-09-27
+updated: 2026-09-26
+review: pass
 seat: wave2-roadmap
 next: "review: redesign-roadmap, gate G14, G18 met, 7bf24ae a2dae6d"
 depends_on: ["redesign-shell-home"]
@@ -28,6 +29,13 @@ The redesign, wave 2 of 2: FR-20, FR-21 of `docs/specs/redesign.md`. Decisions 0
 
 ## Blockers
 none
+
+## Review
+- Verdict: pass. Unmet gate items: none.
+- G14: `G14-stages.png` ties to 7bf24ae (legend and labels verbatim): four rows for the four fixture stages, 0001 hollow at raised and solid at ruled, waiting 0002 at raised with its age, 0099 reported not drawn, dashed "two waves", "no appetite", "a week" bars in an undated region with no computed date; Stages | Cards | Calendar switch (a2dae6d), Cards and Calendar screenshots show today's Gantt and month grid. Layout matches R1, R2.
+- G18: the grep prints nothing (exit 1); `npm run build` green in `.wt/redesign-roadmap` at a2dae6d. Every `var()` in `roadmap.css` is defined in `tokens.css`, no legacy alias, only the seven sizes, `tabular-nums` on `.srm`, no focus ring removed. Boundary: 3 files, all inside it.
+- Outside the gate: `.srm-gem` uses `border-radius: 2px`, off the radius scale (4 for small marks); the design system's Timeline asks for a "today" control, absent here (the lane fits, so nothing scrolls); the header stepper says "now" where Stages says "current".
+- Reviewer: wave2-review-roadmap, 2026-09-26
 
 ## Notes
 - 2026-09-27 sup3: the gate screenshots run against `eval "$(scripts/fixture-home.sh)"` (1993e12): a temp copy of `testdata/home` with `testdata/fixture-overlay` laid over it: init-a a git repo with two FSE-signed commits, proposed records 0002 (the fixture record G15/G16 rule) and 0003 raised by the FSE and owned by pablo, the current stage gated on 0002, three cards seated `wave1-*`, and a cell `organizer-fixture` whose `fse` seat has one question thread open to pablo in the mailbox. `testdata/home` and `status.golden` are unchanged
