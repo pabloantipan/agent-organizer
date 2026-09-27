@@ -17,8 +17,8 @@ restating it (the discuss skill).
   is Pablo's.
 - **Done 2026-09-26:** the redesign (0015, 0023): wave 1 (sup2) and wave 2
   (sup3), 11 cards, all passed review. The installed app still predates it;
-  `make install` is Pablo's. Next task: 0025 ruled "both": sup4 runs
-  retire-keeps-the-cell; the intake and the roadmap wait on Pablo. 0005 ruled
+  `make install` is Pablo's. Next task: 0025 ruled "both": sup4 ran
+  retire-keeps-the-cell (passed review, in done/); the intake and the roadmap wait on Pablo. 0005 ruled
   (as drafted, §12 dropped); 0002 none for now; 0004 withdrawn. fse-pilot:
   when Pablo reports his minutes per wave, propose keep or drop.
 - **Observed:** sup1 seated `w1a`/`w1b`, not `wave<N>-*` (short because of
