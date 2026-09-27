@@ -43,10 +43,17 @@ restating it (the discuss skill).
 - **Learned (2026-09-26):** sup2 launched deaf: `opus.prelude.sh` exports only
   the model. Fixed with its own prelude and `probe -r`; the recipe is now in
   the stand-up reference (claudecode 29a8aac).
+- **Cleanup 2026-09-27:** sup1–3 killed, `organizer clean` run, sup3 token
+  revoked; organizer holds tokens for fse and pablo only. For the next
+  supervisor: add its token first (the recipe).
 - **Rejected:** opening a card for 0012 (the Decisions tab was built
   directly, a6ebd4d..280f58c).
 
 ## Open questions
+
+- Found by sup4, not asked (thread 01M3GCSAS9H71K58HZQG5JEY6K): `organizer crew`
+  on an empty roster still opens an empty iTerm window; retire's plan text is
+  blank after the last seat. Candidate cards; not raised yet.
 
 - `organizer rule` writes and commits with no dry run, unlike `retire --run`,
   `crew --print`, `run --print` (review note, `done/redesign-rule-record.md`).
