@@ -31,3 +31,4 @@ none
 
 ## Notes
 - 2026-09-27 sup6 runs this card (organizer-probe-sup6), spawned by the FSE after 0034 and 0036
+- 2026-09-27 sup6: boundary widened to `frontend/src/lib/initiativeState.ts`, only to import the lead (`DEFAULT_LEAD`, `leadOf`) from `queue.ts` and drop `asksLead`, which FR-8 makes redundant
