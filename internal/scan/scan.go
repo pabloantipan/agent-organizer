@@ -260,7 +260,9 @@ func validDate(s string) bool {
 const cellFile = "agents/cell.json"
 
 // readCell reads agents/cell.json when present. A missing file is the normal
-// case; a malformed one is a problem, not a fatal error.
+// case; a malformed one is a problem, not a fatal error. An empty roster,
+// `[]` or `null`, is a cell between waves (retire took the last seat), not a
+// malformed file: only the project is required.
 func readCell(root string, problems []model.Problem) (*model.Cell, []model.Problem) {
 	p := filepath.Join(root, filepath.FromSlash(cellFile))
 	b, err := os.ReadFile(p)
@@ -271,8 +273,11 @@ func readCell(root string, problems []model.Problem) (*model.Cell, []model.Probl
 	if err := json.Unmarshal(b, &c); err != nil {
 		return nil, append(problems, model.Problem{Path: p, Msg: "cell.json: " + err.Error()})
 	}
-	if c.Project == "" || len(c.Agents) == 0 {
-		return nil, append(problems, model.Problem{Path: p, Msg: "cell.json: project and agents are required"})
+	if c.Project == "" {
+		return nil, append(problems, model.Problem{Path: p, Msg: "cell.json: project is required"})
+	}
+	if c.Agents == nil {
+		c.Agents = []string{}
 	}
 	return &c, problems
 }
