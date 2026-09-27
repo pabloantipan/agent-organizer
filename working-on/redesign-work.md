@@ -3,7 +3,8 @@ title: Work shows five columns, the wave strip and who is on each card
 status: next
 repos: [organizer]
 branch: main
-updated: 2026-09-26
+updated: 2026-09-27
+seat: wave2-work
 next: "Turn Board into Work: Next, Now, Blocked, In review (a lane from next: review:), Done; the wave strip; each card's agent line or nobody on it"
 depends_on: ["redesign-shell-home"]
 boundary: ["frontend/src/components/Board.tsx", "frontend/src/components/CardItem.tsx", "frontend/src/components/WaveStrip.tsx (new)", "frontend/src/styles/work.css (new)"]
@@ -28,5 +29,6 @@ The redesign, wave 2 of 2: FR-19 of `docs/specs/redesign.md`. Decisions 0013–0
 none
 
 ## Notes
+- 2026-09-27 sup3: the gate screenshots run against `eval "$(scripts/fixture-home.sh)"` (1993e12): a temp copy of `testdata/home` with `testdata/fixture-overlay` laid over it: init-a a git repo with two FSE-signed commits, proposed records 0002 (the fixture record G15/G16 rule) and 0003 raised by the FSE and owned by pablo, the current stage gated on 0002, three cards seated `wave1-*`, and a cell `organizer-fixture` whose `fse` seat has one question thread open to pablo in the mailbox. `testdata/home` and `status.golden` are unchanged
 - `stage:` is left out: the organizer has no roadmap yet (it waits on Pablo's intake); the FSE adds it once one is ruled
 - 2026-09-27 sup3 runs this card (organizer-probe-sup3), spawned by the FSE after wave 1 passed
