@@ -5,7 +5,7 @@ repos: [organizer]
 branch: main
 updated: 2026-09-26
 seat: wave2-rulebox
-next: "restart the wave2-rulebox session so it picks up the Accessibility grant (this process still gets -1719), then take G16-2…6 from the built app; G16-1-home.png taken; then review: redesign-rule-box (G15, G18 met; 224d4b4 b0f2d13)"
+next: "sup3: restart the wave2-rulebox session (probe -r) so it picks up the Accessibility grant (this process still gets -1719); the builder then takes G16-2…6 from the built app (G16-1-home.png taken), then review: redesign-rule-box (G15, G18 met; 224d4b4 b0f2d13)"
 depends_on: ["redesign-overview", "redesign-work", "redesign-roadmap"]
 boundary: ["frontend/src/components/RuleDecisionBox.tsx (new)", "frontend/src/components/Home.tsx (the decision row's Rule action)", "frontend/src/styles/rule-box.css (new)"]
 spec: "docs/specs/redesign.md (FR-23, FR-22); visual: docs/specs/redesign-mockups.html; values: docs/design-system.md"
