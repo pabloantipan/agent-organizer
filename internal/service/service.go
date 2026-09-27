@@ -429,8 +429,14 @@ type AgentsView struct {
 func (s *Service) RefreshAgents() AgentsView {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	agents := scan.Agents(*s.agentOptions())
+	opts := s.agentOptions()
+	agents := scan.Agents(*opts)
 	s.state.Local.Unassigned = scan.AssignAgents(s.state.Local.Initiatives, agents)
+	// Which card each agent is on is answered here, on the 10 s feed, and not
+	// in the scan: the join reads only the cached cards, so it costs no disk
+	// and every consumer of the feed — the rail, Work, the wave strip and the
+	// Agents tab — sees the same answer without a rescan (FR-6 to FR-8).
+	joinAgentCards(s.state.Local.Initiatives, opts.BranchOf, s.now())
 	s.rememberCPU(s.state.Local)
 	_ = cache.Save(s.state)
 	return s.agentsViewLocked()
