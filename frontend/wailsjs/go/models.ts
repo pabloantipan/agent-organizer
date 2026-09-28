@@ -616,6 +616,7 @@ export namespace model {
 	    human: string;
 	    reconciler: string;
 	    model?: string;
+	    state?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Cell(source);
@@ -629,6 +630,7 @@ export namespace model {
 	        this.human = source["human"];
 	        this.reconciler = source["reconciler"];
 	        this.model = source["model"];
+	        this.state = source["state"];
 	    }
 	}
 	
