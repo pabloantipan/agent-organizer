@@ -97,9 +97,11 @@ restating it (the discuss skill).
 - **Rule from now on (Pablo, 2026-09-28: "you have to kill supervisor window
   and clean up"):** when a task's last card lands, read the closing report,
   then `probe -k` the supervisor and any seat it left, revoke their tokens,
-  restart the API once, `organizer clean`. Launch supervisors as tabs in one
-  window. End a supervisor whose task is superseded. The skill fix is
-  Hephaistos's (relayed 2026-09-28). Cleaned today: sup5 to sup10 and
+  restart the API once, `organizer clean`. One new iTerm window per supervisor
+  is what Pablo wants (his amendment via Hephaistos, 2026-09-28); its crew
+  are tabs in it. End a supervisor whose task is superseded. In the skills:
+  claudecode 88e1fcb, fse skill "Letting go ends when the task does",
+  standing-up.md "Ending a supervisor". Cleaned today: sup5 to sup10 and
   install2-build; sup11 still runs.
 - **Rejected:** opening a card for 0012 (the Decisions tab was built
   directly, a6ebd4d..280f58c).
