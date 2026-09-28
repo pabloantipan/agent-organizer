@@ -1,6 +1,6 @@
 ---
 title: An archived initiative opens read-only and leaves every count
-status: next
+status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-28
