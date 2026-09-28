@@ -104,7 +104,7 @@ restating it (the discuss skill).
   standing-up.md "Ending a supervisor". Cleaned today: sup5 to sup10 and
   install2-build; sup11 still runs.
 - **2026-09-28 later:** 0045 (anyone may rule; ruled_by is the ruler;
-  alejandro is Pablo). sup14 runs rule-anyone then install-current-build-5;
+  alejandro is Pablo). sup14 ran rule-anyone and install-current-build-5 (v0.2.0-348, both pass) and was ended;
   sup13 ended as superseded (its card 4 failed review on my wrong gate 3).
   I wrote two gates wrong on install cards: name the exact command and
   output that decides each row. And never build a card by copying another:
@@ -132,6 +132,11 @@ restating it (the discuss skill).
   directly, a6ebd4d..280f58c).
 
 ## Open questions
+
+- From sup14 (found, not asked): the Rule box lowercases the cell human while
+  ruled_by keeps its spelling; no test of the Decisions tab's Rule condition;
+  `wails build` dirties frontend/wailsjs/runtime on every install (with the
+  VERSION item, a Makefile card). Candidates, not raised.
 
 - The header's "N decisions waiting" still counts an archived initiative's
   records (sup12, found not asked; FR-13 named only the pill and
