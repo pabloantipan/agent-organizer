@@ -52,7 +52,7 @@ type View = "channel" | "journal" | "archive" | "needs" | "reconciler";
  *  timeline on the right, one message box at the bottom. A chat's timeline
  *  is its threads oldest first, each under a subject divider, messages in
  *  time order. The box posts into the thread last touched, or starts one. */
-export function Conversation({ group, focus, onFocus }: { group: AgentGroup; focus: string | null; onFocus: (agent: string | null) => void }) {
+export function Conversation({ group, focus, onFocus, readOnly = null }: { group: AgentGroup; focus: string | null; onFocus: (agent: string | null) => void; readOnly?: string | null }) {
   const initiativeId = group.id;
   const [view, setView] = useState<View>("channel");
   const [closed, setClosed] = useState<CellThread[] | null>(null);
@@ -82,18 +82,21 @@ export function Conversation({ group, focus, onFocus }: { group: AgentGroup; foc
   // again as new ones arrive while it stays open. Then the feed is refreshed
   // so the roster and the cards stop calling the human deaf.
   const undelivered = (group.crew ?? []).find((s) => s.name === human)?.undelivered ?? 0;
+  // A cell that is not active (FR-13) is read, not drained: its mail stays.
+  const canPost = group.can_post && !readOnly;
   useEffect(() => {
-    if (!group.can_post) return;
+    if (!canPost) return;
     api.pickUp(initiativeId).then((n) => { if (n > 0) api.getAgents().then(applyAgents, () => undefined); }, () => undefined);
-  }, [initiativeId, group.can_post, undelivered, tick]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [initiativeId, canPost, undelivered, tick]); // eslint-disable-line react-hooks/exhaustive-deps
   const all = group.threads ?? [];
   const chatOf = (t: CellThread) => directWith(t, human);
-  const isNew = (t: CellThread) => t.kind !== "journal" && lastActivity(t) > (seen[t.id] ?? 0) + 1000;
+  const isNew = (t: CellThread) => !readOnly && t.kind !== "journal" && lastActivity(t) > (seen[t.id] ?? 0) + 1000;
 
   // The queue: threads asking the human or escalated, and cards addressed
   // to the human, minus Solved marks. Declared before anything reads it.
-  const openThreads = all.filter((t) => needsMe(t) && !resolved[`thread:${t.id}`]);
-  const openCards = askedCards(boardView, initiativeId).filter((c) => !resolved[`card:${initiativeId}/${c.slug}`]);
+  // A cell that is not active asks nothing (FR-13), so it counts nothing.
+  const openThreads = readOnly ? [] : all.filter((t) => needsMe(t) && !resolved[`thread:${t.id}`]);
+  const openCards = readOnly ? [] : askedCards(boardView, initiativeId).filter((c) => !resolved[`card:${initiativeId}/${c.slug}`]);
 
   const chatThreads = (): CellThread[] => {
     if (focus) return all.filter((t) => chatOf(t) === focus);
@@ -207,7 +210,7 @@ export function Conversation({ group, focus, onFocus }: { group: AgentGroup; foc
         <div className="chats-label">
           <span>Chats</span>
           <span className="spacer" />
-          <button className="rail-icon" onClick={() => { setTarget(null); setDraftSubject(""); }} disabled={!group.can_post} title={group.can_post ? (focus ? `new thread with ${focus}` : "new thread") : "no token to post with"}><Plus size={13} /></button>
+          {!readOnly && <button className="rail-icon" onClick={() => { setTarget(null); setDraftSubject(""); }} disabled={!canPost} title={canPost ? (focus ? `new thread with ${focus}` : "new thread") : "no token to post with"}><Plus size={13} /></button>}
         </div>
         <div className="cell-search">
           <Search size={12} />
@@ -236,7 +239,7 @@ export function Conversation({ group, focus, onFocus }: { group: AgentGroup; foc
         <div className="chat-head">
           {focus ? <AtSign size={14} /> : <Hash size={14} />}
           <span className="chat-title">{chatTitle}</span>
-          <span className="meta">{threads.length} thread{threads.length === 1 ? "" : "s"}{group.project ? ` · as ${human}${group.can_post ? "" : " · no token, read only"}` : ""}{group.discuss ? ` · ${group.discuss}` : ""}</span>
+          <span className="meta">{threads.length} thread{threads.length === 1 ? "" : "s"}{group.project ? ` · as ${human}${readOnly ? ` · ${readOnly}: read-only` : group.can_post ? "" : " · no token, read only"}` : ""}{group.discuss ? ` · ${group.discuss}` : ""}</span>
           <span className="spacer" />
           {(group.waiting?.length ?? 0) > 0 && <span className="badge thread blocked" title={group.waiting.map((w) => `${w.slug} waits on ${w.thread.subject || w.thread.id}`).join("\n")}>{group.waiting.length} card{group.waiting.length === 1 ? "" : "s"} waiting</span>}
         </div>
@@ -253,7 +256,7 @@ export function Conversation({ group, focus, onFocus }: { group: AgentGroup; foc
               resolved={resolved}
               initiativeId={initiativeId}
               allThreads={[...all, ...(closed ?? [])]}
-              canPost={group.can_post}
+              canPost={canPost}
               onRuled={reload}
               onDiscussThread={(id) => goTo(id)}
               onDiscussCard={(c) => {
@@ -302,11 +305,11 @@ export function Conversation({ group, focus, onFocus }: { group: AgentGroup; foc
                     {branches.map((b) => <button key={b.id} className="badge branch" onClick={(e) => { e.stopPropagation(); goTo(b.id); }} title={b.subject}><GitBranch size={10} /> {chatOf(b) ?? "side"}</button>)}
                   </span>
                   <span className="spacer" />
-                  <span className="a-actions" onClick={(e) => e.stopPropagation()}>
+                  {!readOnly && <span className="a-actions" onClick={(e) => e.stopPropagation()}>
                     {status !== "open" && <button className="rail-icon" onClick={() => setStatus(t.id, "open")} title="reopen: the thread accepts posts again"><Unlock size={12} /></button>}
                     {status === "open" && <button className="rail-icon" onClick={() => setStatus(t.id, "escalated")} title="escalate: on your queue, no agent can post"><ArrowUpRight size={12} /></button>}
                     {status !== "closed" && <button className="rail-icon" onClick={() => setStatus(t.id, "closed")} title="close"><Lock size={12} /></button>}
-                  </span>
+                  </span>}
                 </div>
                 {decision && <div className="decision-banner"><Gavel size={13} /><span><b>{decision.from}</b> decided: {decision.body}</span></div>}
                 {!d && <div className="meta">opening…</div>}
@@ -316,8 +319,8 @@ export function Conversation({ group, focus, onFocus }: { group: AgentGroup; foc
                     m={m}
                     parent={m.parent_id ? byId.get(m.parent_id) : undefined}
                     human={human}
-                    onReply={writable && group.can_post ? () => { setTarget(t.id); setBranchFrom(null); setReplyTo(m); } : undefined}
-                    onBranch={group.can_post && m.from !== human ? () => { setTarget(t.id); setReplyTo(null); setBranchFrom(m); } : undefined}
+                    onReply={writable && canPost ? () => { setTarget(t.id); setBranchFrom(null); setReplyTo(m); } : undefined}
+                    onBranch={canPost && m.from !== human ? () => { setTarget(t.id); setReplyTo(null); setBranchFrom(m); } : undefined}
                   />
                 ))}
               </section>
@@ -326,7 +329,9 @@ export function Conversation({ group, focus, onFocus }: { group: AgentGroup; foc
         </div>
 
         <div className="dock">
-          {branchFrom && targetThread ? (
+          {readOnly ? (
+            <div className="empty"><Lock size={13} aria-hidden /> {readOnly}: read-only. Nothing can be posted here.</div>
+          ) : branchFrom && targetThread ? (
             <NewThread
               initiativeId={initiativeId}
               seats={seats}
