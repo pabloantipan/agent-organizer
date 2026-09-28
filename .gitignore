@@ -8,3 +8,8 @@ agents/
 # discuss hook wiring, installed by ~/agent-slack/ops/bootstrap.sh
 .claude/settings.json
 .claude/settings.json.bak
+
+# agent working files, unversioned (supervise skill; Hephaistos cleanup 2026-09-28)
+runs/
+.wt-notes/
+.playwright-mcp/
