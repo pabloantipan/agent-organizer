@@ -12,8 +12,10 @@ restating it (the discuss skill).
   `discovery-in-a-cell`.** Spec `docs/specs/discovery-in-a-cell.md`, cards
   cell-in-definition, cell-persona-check, discovery-gate-shown; 0048 ruled by Pablo
   from the app (rule-anyone works); sup15 runs the three cards. When its
-  done message arrives: read it, end sup15. 0047 (roster drafting) waits on
-  Pablo. Supervisor recipe (own window, identity prelude, recipe in
+  done message arrives: read it, end sup15. 0047 ruled "a drafting session" (from the
+  app). Next: amend discovery-in-a-cell FR-3 and G4, cut the drafting card
+  with depends on Hephaistos's persona-agents drafting procedure (asked
+  2026-09-28). Supervisor recipe (own window, identity prelude, recipe in
   the fse skill's references/standing-up.md). Camp is the live case; its
   roadmap lacks a gate on its first building stage (camp's FSE owns that).
 - **Also open (2026-09-28, Pablo from v0.2.0-348):** `header-review-2` (header
