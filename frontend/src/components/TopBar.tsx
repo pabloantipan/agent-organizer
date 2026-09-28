@@ -1,9 +1,10 @@
-import { Inbox, Lock, LogOut, RefreshCw, RefreshCcwDot, Settings, UserRound } from "lucide-react";
-import { useEffect, useState } from "react";
+import { CircleHelp, Inbox, Lock, LogOut, RefreshCw, RefreshCcwDot, Settings, UserRound } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../hooks/useWails";
 import { useBoard } from "../stores/board.store";
 import { since } from "../lib";
 import { needsMeRows } from "../lib/queue";
+import { HelpView } from "./HelpView";
 
 export function TopBar() {
   const { screen, selectedInitiative, goHome, openSettings, view, loading, syncing, refresh, sync, error, lastMessage, account, lock, authMode, syncNote, setAccount, setLock, setOfflineChoice, agents } = useBoard();
@@ -17,13 +18,21 @@ export function TopBar() {
   const machines = view?.board.machines ?? [];
   const [version, setVersion] = useState("");
   useEffect(() => { api.version().then(setVersion, () => undefined); }, []);
+  // The Help (A2) is the factory's, not an initiative's: it lies over
+  // whatever screen is open, under this bar, and closing it returns there.
+  // Each open reads help_doc again.
+  const bar = useRef<HTMLElement>(null);
+  const [helpTop, setHelpTop] = useState<number | null>(null);
+  const toggleHelp = () => setHelpTop(helpTop === null ? bar.current?.getBoundingClientRect().bottom ?? 0 : null);
+  const closeHelp = useCallback(() => setHelpTop(null), []);
   return (
-    <header className="topbar">
+    <header className="topbar" ref={bar}>
       <span className="brand" title={version ? `organizer ${version}` : "organizer"}>organizer{version && <span className="brand-version">{version}</span>}</span>
       <nav className="crumbs" aria-label="where you are">
-        {screen === "home" ? <b>Home</b> : <button className="crumb" onClick={goHome}>Home</button>}
+        {screen === "home" ? <b>Home</b> : <button className="crumb" onClick={() => { closeHelp(); goHome(); }}>Home</button>}
         {screen === "initiative" && selectedInitiative && <><span className="crumb-sep">/</span><b className="mono">{selectedInitiative}</b></>}
         {screen === "settings" && <><span className="crumb-sep">/</span><b>Settings</b></>}
+        {helpTop !== null && <><span className="crumb-sep">/</span><b>Help</b></>}
       </nav>
       <span className="spacer" />
       {error && <span className="meta err">{error}</span>}
@@ -34,7 +43,7 @@ export function TopBar() {
           {machines.length} machine{machines.length === 1 ? "" : "s"} · remote {since(view.pulled_at)}
         </span>
       )}
-      <button className={`needs-me ${screen === "home" ? "on" : ""}`} onClick={goHome} title="things waiting on you: decisions, threads, cards and seats">
+      <button className={`needs-me ${screen === "home" ? "on" : ""}`} onClick={() => { closeHelp(); goHome(); }} title="things waiting on you: decisions, threads, cards and seats">
         <Inbox size={14} /> Needs me{needsMe > 0 && <span className="badge-count num">{needsMe}</span>}
       </button>
       <button className="ghost" onClick={refresh} disabled={loading} title="Rescan local disk">
@@ -68,7 +77,9 @@ export function TopBar() {
           </div>
         )}
       </span>}
-      <button className={`ghost gear ${screen === "settings" ? "on" : ""}`} onClick={openSettings} title="Settings" aria-label="Settings"><Settings size={14} /></button>
+      <button className={`ghost gear ${helpTop !== null ? "on" : ""}`} onClick={toggleHelp} title="Help: how we build, from help_doc" aria-label="Help" aria-pressed={helpTop !== null}><CircleHelp size={14} /></button>
+      <button className={`ghost gear ${screen === "settings" && helpTop === null ? "on" : ""}`} onClick={() => { closeHelp(); openSettings(); }} title="Settings" aria-label="Settings"><Settings size={14} /></button>
+      {helpTop !== null && <HelpView top={helpTop} onClose={closeHelp} />}
     </header>
   );
 }
