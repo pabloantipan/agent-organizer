@@ -9,6 +9,7 @@ depends_on: [explain-finish]
 boundary: ["build/ (the build output)", "/Applications/organizer.app (install target)", "~/.local/bin/organizer (the symlink make install writes)", "no source file in the repo"]
 spec: "Pablo, 2026-09-28, in the FSE's session: \"do as recommended. Reinstall\" (0041); CLAUDE.md, Packaging"
 gate: "the Gate section below"
+seat: stage3b-install
 ---
 
 ## Goal

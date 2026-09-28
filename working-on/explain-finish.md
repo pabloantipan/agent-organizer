@@ -10,6 +10,7 @@ boundary: ["frontend/src/components/Crew.tsx", "frontend/src/components/AgentLis
 spec: "docs/specs/machine-explains-itself.md (FR-8, FR-9); values: docs/design-system.md"
 gate: "docs/specs/machine-explains-itself.md Acceptance, rows G8, G9, G6; the Gate section below"
 stage: machine-explains-itself
+seat: stage3b-finish
 ---
 
 ## Goal
