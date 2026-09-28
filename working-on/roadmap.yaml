@@ -36,6 +36,7 @@ stages:
     outcome: waves run through supervisors and the lead only rules
     exit:
       - the FSE pilot is judged keep or drop on pablo_minutes, gate_rework and decide_turnaround (0005)
+    done: 2026-09-28      # exit met, ruled in 0046
   - id: discovery-in-a-cell
     title: Discovery has a shape and runs in a cell
     phase: building

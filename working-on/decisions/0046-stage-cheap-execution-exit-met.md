@@ -1,13 +1,13 @@
 ---
 title: "Stage cheap-execution: exit met"
-status: proposed
+status: ruled
 raised: 2026-09-28
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-28
+ruled_by: pablo
 options: [exit met, sharpen the exit first]
-chosen:
+chosen: exit met
 cards: []
 threads: []
 supersedes: []
@@ -51,7 +51,7 @@ Stage 5 (camp in discovery with its own FSE) is where the next outcome is.
 
 ## Ruling
 
-
+Pablo, 2026-09-28, in the FSE's session (organizer-probe-fse): "do".
 
 ## Consequences
 
