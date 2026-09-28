@@ -1,11 +1,11 @@
 ---
 title: A cell being defined reads as in definition
-status: now
+status: done
 repos: [organizer]
 branch: main
 updated: 2026-09-28
 next: "review: cell-in-definition, branch cell-in-definition, gate G1, G5 met, a87292e 94350ec eb49c81 efe4d97 e32d539 48ff00a"
-review: fail
+review: pass
 depends_on: []
 boundary: ["internal/service/crew.go (the derived state; not CreateCrew)", "internal/model/model.go (Cell: state)", "frontend/src/components/Crew.tsx", "frontend/src/components/AgentsView.tsx", "frontend/src/components/Home.tsx (the signal only)", "testdata/ (a cell with no sessions)", "internal/service/crew_test.go", "frontend/src/styles/ (those components' CSS only)"]
 spec: "docs/specs/discovery-in-a-cell.md (FR-1); values: docs/design-system.md"
@@ -30,15 +30,24 @@ Roadmap stage discovery-in-a-cell: FR-1 of `docs/specs/discovery-in-a-cell.md`.
 1. review: cell-in-definition, branch cell-in-definition, gate G1, G5 met
 
 ## Review
-- Verdict: **fail**
-- Unmet gate items: G1 (the fixture's cell is not on the branch)
-- G1: the logic is met. `go test ./internal/service -run TestCellInDefinitionUntilASeatHasRun -v -count=1` gives 9/9 PASS (`/Users/pabloantipan/organizer/.wt-notes/cell-indef-review/g1-test.txt`): no sessions or runs, runs of other cells, a live seat, an exited layout, and past runs by persona and by session, plus the runs.jsonl read. The builder's three screenshots show what the card says: Home's init-define reads "cell in definition" and init-a does not; the Crew header and the Agents tab read "in definition" with "no seat has run yet; waits on its first launch"; init-a's live cell shows no word. The fixture, however, is not in the diff. 1cafa8e adds only `init-define/working-on/initiative.yaml`. `testdata/fixture-overlay/init-define/agents/cell.json` is untracked, because `.gitignore` ignores `agents/` (`git check-ignore -v`: `.gitignore:7:agents/`), and every other fixture cell.json was force-added. `git ls-tree -r cell-in-definition` lists no cell for init-define. On a merge or a fresh checkout, init-define has no cell, so it can never read "in definition": the screenshots cannot be reproduced from the branch.
-- G5: met. `XDG_DATA_HOME=$(mktemp -d) make test` exits 0 with 0 FAIL (`/Users/pabloantipan/organizer/.wt-notes/cell-indef-review/g5-make-test.txt`). `npm run build` gives `✓ built` and exits 0 (`/Users/pabloantipan/organizer/.wt-notes/cell-indef-review/g5-npm-build.txt`). The G18 grep over `main...cell-in-definition` returns 0 lines (`/Users/pabloantipan/organizer/.wt-notes/cell-indef-review/g5-g18-grep.txt`).
+- Verdict: **pass** (second review; the first failed on G1 because the fixture was missing)
+- Unmet gate items: none
+- G1: met.
+  - `go test -race -count=1 -v ./internal/service -run 'TestCellInDefinitionUntilASeatHasRun|TestCellStateRidesACopyNotTheCache'` passes, exit 0 (`/Users/pabloantipan/organizer/.wt-notes/cell-indef-review/r2/g1-test-race.txt`). The cases: no sessions or runs gives in definition; runs of other cells don't count; a live seat, an exited layout, and past runs by persona and by session each end it; runs.jsonl is read. The views get the state on a copy, and the cached cell and state.json stay without it.
+  - The fixture is now on the branch: e32d539 force-adds `testdata/fixture-overlay/init-define/agents/cell.json` (`git ls-tree` lists it).
+  - The screenshots were retaken at 18:58, after 48ff00a, on a fresh fixture (`/Users/pabloantipan/organizer/.wt-notes/cell-indef/g1-home.png`, `g1-crew-in-definition.png`, `g1-crew-live.png`). init-define reads "cell in definition" on Home, and "in definition" plus "no seat has run yet; waits on its first launch" on the Crew header and the Agents tab. init-a's live cell shows no word.
+- G5: met.
+  - `XDG_DATA_HOME=$(mktemp -d) make test` exits 0 with 0 FAIL (`.../cell-indef-review/r2/g5-make-test.txt`).
+  - `npm run build` gives `✓ built` and exits 0 (`.../r2/g5-npm-build.txt`).
+  - The G18 grep over `main...cell-in-definition` returns 0 lines (`.../r2/g5-g18-grep.txt`).
+  - main's only commit not on the branch is ba68906 (this card).
 - Not covered by the gate:
-  - (a) A cell in definition still offers "N retirable" (visible in g1-crew-in-definition.png).
-  - (b) `buildCrew` writes `Cell.State` onto the shared cached `*model.Cell` from `Service.Cell` outside `s.mu`, a data race `-race` could flag. The value also leaks into state.json and the sync payload.
-  - (c) The spec's Goals name the rail, FR-1 does not, and nothing shows there. Pablo should say whether the spec's Goals or FR-1 wins.
-  - (d) Home's STATE column says "quiet" beside "cell in definition".
+  - Finding (b), the write outside the lock, is fixed in 48ff00a. The `service.go` and `cell.go` diffs are the two call-site lines sup15 approved, nothing more.
+  - The card Notes cite 2cbf83b for the fixture; after the rebase it is e32d539.
+  - Still open for Pablo:
+    - (a) a cell in definition offers "N retirable";
+    - (c) the spec's Goals name the rail, FR-1 does not;
+    - (d) Home's STATE column says "quiet" beside "cell in definition".
 - Reviewer: cell-indef-review, 2026-09-28
 
 ## Blockers
