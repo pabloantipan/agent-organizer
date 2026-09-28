@@ -74,6 +74,10 @@ export function GetOrder() {
   return window['go']['main']['App']['GetOrder']();
 }
 
+export function Help() {
+  return window['go']['main']['App']['Help']();
+}
+
 export function KillAgent(arg1) {
   return window['go']['main']['App']['KillAgent'](arg1);
 }

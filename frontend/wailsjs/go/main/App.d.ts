@@ -43,6 +43,8 @@ export function GetLock():Promise<service.LockState>;
 
 export function GetOrder():Promise<model.Order>;
 
+export function Help():Promise<service.HelpDoc>;
+
 export function KillAgent(arg1:string):Promise<void>;
 
 export function LockNow():Promise<service.LockState>;
