@@ -53,6 +53,10 @@ restating it (the discuss skill).
   the organizer keeps camp, organizer, agent-slack. `app-review-with-pablo`
   holds his three findings from the installed app (long header, no Rule on
   the Decisions tab, no scroll): review with him soon, then spec.
+- **Stage 2 exit (2026-09-27):** 2 met (phase), 3 met (goals on organizer,
+  camp, agent-slack da6bde8), 4 met on the fixture by a model (5 s). Left: 1,
+  the organizer's scope in Pablo's words. Then propose "stage
+  twenty-at-a-glance: exit met" as a record.
 - **Installed:** v0.2.0-229-g3472f6b (sup7, install-current-build passed).
 - **Waiting on Pablo:** the intake (thread 01M3FAWKV2159MCSH0AZZJWE08); 0021, 0022, 0005, 0004, 0002. No card carries `stage:` until the
   organizer has a roadmap, which waits on the intake.
