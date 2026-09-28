@@ -112,6 +112,10 @@ restating it (the discuss skill).
   .gitignore. Then tell Pablo the repo is even with origin.
 - **2026-09-28:** 0042 ruled, sup12 ran glance-archived-read-only (pass, 2bffd31); sup12 ended. 0043: the FSE
   pilot is kept.
+- **Learned (2026-09-28):** my commits wake nobody, so a supervisor parked on a
+  `decide:` never sees Pablo's answer on the card. sup11 sat idle 9 h. When
+  Pablo answers a card's decide:, relay his answer to the card's supervisor
+  as a `decision` message quoting him.
 - **Rejected:** opening a card for 0012 (the Decisions tab was built
   directly, a6ebd4d..280f58c).
 
