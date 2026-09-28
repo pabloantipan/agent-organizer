@@ -6,6 +6,7 @@ branch: main
 updated: 2026-09-28
 next: "make install from main, then confirm the installed app and the organizer on PATH report main's git describe, the header clamps and the Decisions tab offers Rule"
 depends_on: []
+seat: install2-build
 boundary: ["build/ (the build output)", "/Applications/organizer.app (install target)", "~/.local/bin/organizer (the symlink make install writes)", "no source file in the repo"]
 spec: "Pablo, 2026-09-28, in the FSE's session: \"do\" (reinstall after glance-header-scroll and glance-rule-in-decisions); CLAUDE.md, Packaging"
 gate: "the Gate section below"
@@ -35,4 +36,4 @@ none
 - Build with `make install`, never `wails dev`; `wails build` flips the wailsjs modes, restore them with `git checkout --`
 - Screenshots of the native window need Screen Recording, granted to `/opt/homebrew/bin/zellij`
 - Pablo may be using the app; quit it only if it is not in the foreground, otherwise ask him through the card
-- 2026-09-28 sup9 runs this card (organizer-probe-sup9), spawned by the FSE
+- 2026-09-28 sup9 runs this card (organizer-probe-sup9), spawned by the FSE; builder seat install2-build, reviewer seat install2-review
