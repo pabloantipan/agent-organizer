@@ -2,11 +2,22 @@ import { useMemo, useState } from "react";
 import { marked } from "marked";
 import type { merge, model } from "../../wailsjs/go/models";
 import { addDays, daysBetween, parseISO, shortDate, today, toISO } from "../lib/dates";
+import { leadOf } from "../lib/queue";
 import { useBoard } from "../stores/board.store";
+import { RuleDecisionBox } from "./RuleDecisionBox";
+import "../styles/decisions.css";
 
 type Row = { d: model.Decision; initiative: string; machine: string; key: string };
 
 const LABEL: Record<string, string> = { proposed: "waiting", ruled: "ruled", superseded: "superseded", withdrawn: "withdrawn" };
+
+/** FR-12 (0038): the same rule Needs me uses (`ownedByLead` in lib/queue.ts,
+ *  not exported): a record asks the lead when its owner is the lead or nobody.
+ *  One owned by business or the FSE waits on them (FR-8) and offers no Rule. */
+const ownedByLead = (d: model.Decision, lead: string) => {
+  const o = (d.owner ?? "").trim().toLowerCase();
+  return o === "" || o === lead;
+};
 
 const median = (xs: number[]) => {
   if (xs.length === 0) return null;
@@ -16,11 +27,13 @@ const median = (xs: number[]) => {
 
 /** The decisions tab: working-on/decisions/ records across initiatives, or
  *  the one selected in the rail. What waits on a ruling, how long rulings
- *  take, and the history from raised to ruled. The app only reads; the
- *  owner rules in the record (working-on skill, Decisions). */
+ *  take, and the history from raised to ruled. A proposed record the lead
+ *  owns can be ruled from its expanded row with Needs me's box (FR-12);
+ *  everything else is read-only. */
 export function DecisionsView() {
-  const { view, selectedInitiative, select } = useBoard();
+  const { view, agents, selectedInitiative, select } = useBoard();
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [ruling, setRuling] = useState<string | null>(null);
   const [showClosed, setShowClosed] = useState(false);
   const now = today();
 
@@ -59,7 +72,7 @@ export function DecisionsView() {
   const head = (
     <div className="board-head">
       <h1>{selectedInitiative ?? "All initiatives"}</h1>
-      <span className="meta">decision records in working-on/decisions/ · the owner rules in the record, the app only reads</span>
+      <span className="meta">decision records in working-on/decisions/ · the owner rules in the record, or here when it is you</span>
     </div>
   );
   if (rows.length === 0) {
@@ -71,13 +84,21 @@ export function DecisionsView() {
     );
   }
 
-  const Record = ({ r }: { r: Row }) => {
+  const leadFor = (initiative: string) => leadOf((agents?.groups ?? []).find((g) => g.id === initiative));
+  const toggle = (key: string) => { setExpanded(expanded === key ? null : key); setRuling(null); };
+
+  // A render function, not a component: a component declared here would be a
+  // new type on every store update (the agents feed, every 10 s) and remount,
+  // dropping what was typed into the rule box.
+  const record = (r: Row) => {
     const d = r.d;
     const isOpen = expanded === r.key;
     const t = turnaround(d);
+    const canRule = d.status === "proposed" && ownedByLead(d, leadFor(r.initiative));
+    const isRuling = canRule && ruling === r.key;
     return (
-      <div className={`dec ${d.status} ${isOpen ? "expanded" : ""}`}>
-        <button className="dec-line" onClick={() => setExpanded(isOpen ? null : r.key)} title={isOpen ? "collapse" : "show the record"}>
+      <div key={r.key} className={`dec ${d.status} ${isOpen ? "expanded" : ""}`}>
+        <button className="dec-line" onClick={() => toggle(r.key)} title={isOpen ? "collapse" : "show the record"}>
           <span className="dec-num mono">{d.number}</span>
           <span className="dec-title">{d.title}</span>
           {all && <span className="badge">{r.initiative}</span>}
@@ -103,6 +124,14 @@ export function DecisionsView() {
                   : <span key={slug} className="mono dim">{slug}</span>;
               })}
             </div>
+            {canRule && (
+              <div className="dec-actions">
+                <span className="rb-anchor">
+                  <button className="primary" aria-expanded={isRuling} onClick={() => setRuling(isRuling ? null : r.key)}>Rule</button>
+                  {isRuling && <RuleDecisionBox initiative={r.initiative} decision={d} onClose={() => setRuling(null)} />}
+                </span>
+              </div>
+            )}
             <div className="markdown dec-text" dangerouslySetInnerHTML={{ __html: marked.parse(d.body || "") as string }} />
             <div className="dec-path mono">{d.path}</div>
           </div>
@@ -143,7 +172,7 @@ export function DecisionsView() {
 
       <section className="dec-section">
         <h2>Waiting on a ruling <span className="meta">oldest first</span></h2>
-        {open.length === 0 ? <div className="meta">Nothing waits on a ruling.</div> : open.map((r) => <Record key={r.key} r={r} />)}
+        {open.length === 0 ? <div className="meta">Nothing waits on a ruling.</div> : open.map(record)}
       </section>
 
       <section className="dec-section">
@@ -173,7 +202,7 @@ export function DecisionsView() {
             const tip = `${d.number} ${d.title}\n${LABEL[d.status] ?? d.status} · raised ${d.raised}${d.ruled ? ` · ruled ${d.ruled} by ${d.ruled_by}` : ""}${d.owner ? ` · owner ${d.owner}` : ""}`;
             return (
               <div key={r.key} className={`g-row dec-row ${d.status}`}>
-                <button className="g-label link" onClick={() => setExpanded(expanded === r.key ? null : r.key)} title={tip}>
+                <button className="g-label link" onClick={() => toggle(r.key)} title={tip}>
                   <span className="g-title"><span className="mono dim">{d.number}</span> {d.title}</span>
                   <span className="g-branch">{all ? `${r.initiative} · ` : ""}{LABEL[d.status] ?? d.status}</span>
                 </button>
@@ -198,11 +227,11 @@ export function DecisionsView() {
 
       <section className="dec-section">
         <h2>Ruled <span className="meta">newest first</span></h2>
-        {ruled.map((r) => <Record key={r.key} r={r} />)}
+        {ruled.map(record)}
         {closed.length > 0 && (
           <>
             <h3 className="meta">Superseded or withdrawn</h3>
-            {closed.map((r) => <Record key={r.key} r={r} />)}
+            {closed.map(record)}
           </>
         )}
       </section>
