@@ -1,10 +1,12 @@
 package service
 
 import (
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"organizer/internal/config"
 	"organizer/internal/discuss"
 	"organizer/internal/model"
 )
@@ -115,6 +117,118 @@ func TestBuildCrewJoinsRosterProcessesAndHealth(t *testing.T) {
 	seats := buildCrew(long, discuss.Snapshot{})
 	if len(seats) != 1 || seats[0].Session != "" || seats[0].Agent != nil {
 		t.Errorf("unnameable seat should join nothing: %+v", seats)
+	}
+}
+
+// G4 (FR-6): health reaches every live agent discuss knows by name, not only
+// roster seats: a seat by persona, a supervisor and a builder by their
+// session's short name, capped included. A persona outside the roster keeps
+// its row and its health.
+func TestHealthIsStampedOnEveryAgentWithAName(t *testing.T) {
+	si := &model.ScannedInitiative{}
+	si.Cell = &model.Cell{Project: "organizer", Agents: []string{"fse", "po_ana"}, Human: "pablo"}
+	si.Agents = []model.Agent{
+		{Name: "seat", Session: "organizer-probe-ana", Short: "ana", Persona: "po_ana", State: model.AgentRunning, PID: 11},
+		{Name: "sup", Session: "organizer-probe-sup10", Short: "sup10", State: model.AgentWorking, PID: 12},
+		{Name: "builder", Session: "organizer-probe-stage3-agents", Short: "stage3-agents", Persona: "stage3-agents", State: model.AgentRunning, PID: 13},
+		{Name: "stranger", Session: "organizer-probe-guest", Short: "guest", Persona: "guest_reviewer", State: model.AgentRunning, PID: 14},
+		{Name: "plain", Session: "organizer-probe-otter", Short: "otter", State: model.AgentRunning, PID: 15},
+	}
+	snap := discuss.Snapshot{Agents: map[string]discuss.AgentHealth{
+		"po_ana": {Agent: "po_ana", Watcher: "alive"},
+		"sup10":  {Agent: "sup10", Watcher: "stale", Undelivered: 1},
+		// capped: deaf, and a drain ran after the oldest message arrived.
+		"stage3-agents":  {Agent: "stage3-agents", Watcher: "alive", Deaf: true, Undelivered: 2, SecondsSinceDrain: 30, OldestUndeliveredS: 900},
+		"guest_reviewer": {Agent: "guest_reviewer", Watcher: "alive", Deaf: true, Undelivered: 4, SecondsSinceDrain: 1200, OldestUndeliveredS: 900},
+	}}
+	crew := buildCrew(si, snap)
+	type want struct {
+		watcher            string
+		deaf, capped, noID bool
+		undelivered        int
+	}
+	for i, w := range []want{
+		{watcher: "alive"},
+		{watcher: "stale", undelivered: 1},
+		{watcher: "alive", deaf: true, capped: true, undelivered: 2},
+		{watcher: "alive", deaf: true, undelivered: 4},
+		{},
+	} {
+		a := si.Agents[i]
+		if a.Watcher != w.watcher || a.Deaf != w.deaf || a.Capped != w.capped || a.NoIdentity != w.noID || a.Undelivered != w.undelivered {
+			t.Errorf("%s: watcher=%q deaf=%v capped=%v no_identity=%v undelivered=%d, want %+v",
+				a.Name, a.Watcher, a.Deaf, a.Capped, a.NoIdentity, a.Undelivered, w)
+		}
+	}
+	if len(crew) != 2 || crew[1].Agent == nil || crew[1].Agent.Watcher != "alive" {
+		t.Errorf("the roster seat's copy of its agent carries the health: %+v", crew)
+	}
+	// Stamped state is recomputed: a name discuss no longer has loses it.
+	stampHealth(si, discuss.Snapshot{})
+	if si.Agents[2].Capped || si.Agents[1].Watcher != "" {
+		t.Errorf("a second sample without health must clear it: %+v %+v", si.Agents[1], si.Agents[2])
+	}
+}
+
+// G5 (FR-7): sup9 has never polled and has mail, and a live session named
+// <family>-probe-sup9 runs with no AGENT_NAME: that session is sup9 without
+// its identity. With AGENT_NAME=sup9 it is not, and neither is a session with
+// no process, nor one whose mailbox has nothing waiting.
+func TestNoIdentityIsASessionUnderASeatsNameWithoutItsIdentity(t *testing.T) {
+	cases := []struct {
+		name  string
+		agent model.Agent
+		h     discuss.AgentHealth
+		want  bool
+	}{
+		{"no AGENT_NAME", model.Agent{Session: "organizer-fixture-probe-sup9", Short: "sup9", PID: 21, State: model.AgentRunning},
+			discuss.AgentHealth{Agent: "sup9", Watcher: "never", Undelivered: 3}, true},
+		{"AGENT_NAME=sup9", model.Agent{Session: "organizer-fixture-probe-sup9", Short: "sup9", Persona: "sup9", PID: 21, State: model.AgentRunning},
+			discuss.AgentHealth{Agent: "sup9", Watcher: "never", Undelivered: 3}, false},
+		{"no process", model.Agent{Session: "organizer-fixture-probe-sup9", Short: "sup9", State: model.AgentShell},
+			discuss.AgentHealth{Agent: "sup9", Watcher: "never", Undelivered: 3}, false},
+		{"nothing waiting", model.Agent{Session: "organizer-fixture-probe-sup9", Short: "sup9", PID: 21, State: model.AgentRunning},
+			discuss.AgentHealth{Agent: "sup9", Watcher: "never"}, false},
+		{"watcher alive", model.Agent{Session: "organizer-fixture-probe-sup9", Short: "sup9", PID: 21, State: model.AgentRunning},
+			discuss.AgentHealth{Agent: "sup9", Watcher: "alive", Undelivered: 3}, false},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			si := &model.ScannedInitiative{}
+			si.Cell = &model.Cell{Project: "organizer-fixture", Agents: []string{"fse"}}
+			si.Agents = []model.Agent{c.agent}
+			buildCrew(si, discuss.Snapshot{Agents: map[string]discuss.AgentHealth{"sup9": c.h}})
+			a := si.Agents[0]
+			if a.NoIdentity != c.want {
+				t.Errorf("no_identity=%v, want %v (%+v)", a.NoIdentity, c.want, a)
+			}
+			if a.Watcher != c.h.Watcher || a.Undelivered != c.h.Undelivered {
+				t.Errorf("the health still shows: %+v", a)
+			}
+		})
+	}
+}
+
+// A3: the canned source is the endpoint's shape per project, read in place of
+// discuss only when canned_health is set.
+func TestCannedHealthReadsOneProject(t *testing.T) {
+	p := filepath.Join(t.TempDir(), "health.json")
+	if err := os.WriteFile(p, []byte(`{"camp":{"agents":[{"agent":"sup9","watcher":"never","undelivered":3}],"threads":[]}}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	snap, why := cannedHealth(p, "camp")
+	if why != "" || snap.Agents["sup9"].Undelivered != 3 || snap.Agents["sup9"].Watcher != "never" {
+		t.Errorf("snap=%+v why=%q", snap, why)
+	}
+	if _, why := cannedHealth(p, "other"); !strings.Contains(why, `no project "other"`) {
+		t.Errorf("a project the file lacks says so: %q", why)
+	}
+	if _, why := cannedHealth(filepath.Join(t.TempDir(), "gone.json"), "camp"); !strings.Contains(why, "canned health") {
+		t.Errorf("a missing file says so: %q", why)
+	}
+	s := &Service{cfg: config.Config{CannedHealth: p}}
+	if snap, why := s.cellHealth(&model.Cell{Project: "camp"}); why != "" || len(snap.Agents) != 1 {
+		t.Errorf("canned_health set: cellHealth reads the file, got %+v %q", snap, why)
 	}
 }
 

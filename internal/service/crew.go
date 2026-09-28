@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -28,7 +29,7 @@ type Seat struct {
 	// Watcher is alive, stale or never; empty when discuss is unreachable.
 	Watcher     string `json:"watcher"`
 	Deaf        bool   `json:"deaf"`
-	Capped      bool   `json:"capped"` // deaf because of the drain ceiling: alive, posting, unreachable until restarted
+	Capped      bool   `json:"capped"` // deaf because of the drain ceiling: alive, posting; its next prompt delivers the mail
 	Undelivered int    `json:"undelivered"`
 	// Owes is the live threads this seat has spoken in that are still open
 	// with no decision. What the cell is waiting on this seat for.
@@ -105,11 +106,13 @@ func agentRank(a *model.Agent) int {
 // buildCrew joins the roster to the initiative's agents and the discuss
 // health. A seat matches an agent by persona (from the process environment)
 // or, for a session without a live process, by the crew session name. The
-// health is also stamped onto the matching agent rows.
+// health is stamped onto every agent row that has it first (stampHealth), so
+// a seat's copy of its agent carries it too.
 func buildCrew(si *model.ScannedInitiative, snap discuss.Snapshot) []Seat {
 	if si.Cell == nil {
 		return nil
 	}
+	stampHealth(si, snap)
 	seats := make([]Seat, 0, len(si.Cell.Agents))
 	for _, name := range si.Cell.Agents {
 		s := Seat{Name: name}
@@ -132,7 +135,6 @@ func buildCrew(si *model.ScannedInitiative, snap discuss.Snapshot) []Seat {
 			if a.Persona != name && !(a.Persona == "" && s.Session != "" && a.Session == s.Session) {
 				continue
 			}
-			a.Watcher, a.Deaf, a.Undelivered = s.Watcher, s.Deaf, s.Undelivered
 			if best == nil || agentRank(a) < agentRank(best) {
 				best = a
 			}
@@ -144,6 +146,41 @@ func buildCrew(si *model.ScannedInitiative, snap discuss.Snapshot) []Seat {
 		seats = append(seats, s)
 	}
 	return seats
+}
+
+// stampHealth puts the discuss health on every agent of the initiative whose
+// name discuss knows, roster seat or not: supervisors and builders have
+// health too (FR-6). The name is the persona from the process environment,
+// else the roster seat whose crew session this is, else the session's short
+// name (organizer-probe-sup10 is sup10).
+//
+// NoIdentity is FR-7 and only FR-7: a live process whose session's short
+// name is an agent discuss has never seen poll, with mail waiting, while the
+// process carries no AGENT_NAME. Nothing else is inferred about "never".
+func stampHealth(si *model.ScannedInitiative, snap discuss.Snapshot) {
+	seatOf := map[string]string{}
+	for _, seat := range si.Cell.Agents {
+		if sess, err := crewSession(si.Cell, seat); err == nil {
+			seatOf[sess] = seat
+		}
+	}
+	for i := range si.Agents {
+		a := &si.Agents[i]
+		a.Watcher, a.Deaf, a.Capped, a.Undelivered, a.NoIdentity = "", false, false, 0, false
+		name := a.Persona
+		if name == "" {
+			name = seatOf[a.Session]
+		}
+		if name == "" {
+			name = a.Short
+		}
+		h, ok := snap.Agents[name]
+		if name == "" || !ok {
+			continue
+		}
+		a.Watcher, a.Deaf, a.Capped, a.Undelivered = h.Watcher, h.Deaf, h.Capped(), h.Undelivered
+		a.NoIdentity = a.Persona == "" && a.PID > 0 && name == a.Short && h.Watcher == "never" && h.Undelivered > 0
+	}
 }
 
 // threadState resolves one live thread into what the board needs, including
@@ -230,6 +267,9 @@ func cardsWaiting(si *model.ScannedInitiative, snap discuss.Snapshot) []CardWait
 // cellHealth asks discuss for the roster health, as the human first and the
 // reconciler second. The second return is why it is missing, for the UI.
 func (s *Service) cellHealth(cell *model.Cell) (discuss.Snapshot, string) {
+	if p := config.Expand(s.cfg.CannedHealth); p != "" {
+		return cannedHealth(p, cell.Project)
+	}
 	dir := config.Expand(s.cfg.DiscussStateDir)
 	if dir == "" {
 		dir = discuss.DefaultStateDir()
@@ -251,6 +291,33 @@ func (s *Service) cellHealth(cell *model.Cell) (discuss.Snapshot, string) {
 		why = err.Error()
 	}
 	return discuss.Snapshot{}, why
+}
+
+// cannedHealth reads one project's health from the canned file the config's
+// canned_health names, in place of the discuss API (spec A3: deaf and capped
+// cannot be made on demand, so the fixture carries them). Read on every call,
+// like the API, so an edit to the file shows on the next sample.
+func cannedHealth(path, project string) (discuss.Snapshot, string) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return discuss.Snapshot{}, "canned health: " + err.Error()
+	}
+	var doc map[string]struct {
+		Agents  []discuss.AgentHealth `json:"agents"`
+		Threads []discuss.Thread      `json:"threads"`
+	}
+	if err := json.Unmarshal(b, &doc); err != nil {
+		return discuss.Snapshot{}, "canned health: " + err.Error()
+	}
+	p, ok := doc[project]
+	if !ok {
+		return discuss.Snapshot{}, fmt.Sprintf("canned health: no project %q in %s", project, path)
+	}
+	snap := discuss.Snapshot{Agents: make(map[string]discuss.AgentHealth, len(p.Agents)), Threads: p.Threads}
+	for _, h := range p.Agents {
+		snap.Agents[h.Agent] = h
+	}
+	return snap, ""
 }
 
 // discussAPIBin finds discuss-api: PATH first, then ~/.local/bin where

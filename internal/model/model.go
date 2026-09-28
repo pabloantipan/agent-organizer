@@ -311,11 +311,17 @@ type Agent struct {
 	// Context is the last statusline record for this process, nil when the
 	// statusline hook is not installed or has not fired yet.
 	Context *ContextStatus `json:"context"`
-	// Watcher is the discuss health of the persona: alive, stale, never; empty
-	// when the process is not a persona or discuss is unreachable.
+	// Watcher is the discuss health of the agent's name (its persona, else its
+	// crew seat, else its session's short name): alive, stale, never; empty
+	// when discuss has no such name or is unreachable.
 	Watcher     string `json:"watcher"`
 	Deaf        bool   `json:"deaf"`
+	Capped      bool   `json:"capped"` // deaf because of the drain ceiling; the next prompt delivers the mail
 	Undelivered int    `json:"undelivered"`
+	// NoIdentity: discuss has this session's short name with watcher never
+	// and mail waiting, while the process carries no AGENT_NAME. The session
+	// runs under a seat's name without its mailbox identity (FR-7).
+	NoIdentity bool `json:"no_identity"`
 	// Card is the open card this agent works, nil when no card answers to it
 	// or two do. Joined by the agents feed, never by the scan of a card file.
 	Card *CardJoin `json:"card"`

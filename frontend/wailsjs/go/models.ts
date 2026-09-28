@@ -38,6 +38,7 @@ export namespace config {
 	    zellij: string;
 	    agent_binary: string;
 	    discuss_state_dir: string;
+	    canned_health: string;
 	    crew_model: string;
 	    record_url: string;
 	    help_doc: string;
@@ -64,6 +65,7 @@ export namespace config {
 	        this.zellij = source["zellij"];
 	        this.agent_binary = source["agent_binary"];
 	        this.discuss_state_dir = source["discuss_state_dir"];
+	        this.canned_health = source["canned_health"];
 	        this.crew_model = source["crew_model"];
 	        this.record_url = source["record_url"];
 	        this.help_doc = source["help_doc"];
@@ -536,7 +538,9 @@ export namespace model {
 	    context?: ContextStatus;
 	    watcher: string;
 	    deaf: boolean;
+	    capped: boolean;
 	    undelivered: number;
+	    no_identity: boolean;
 	    card?: CardJoin;
 	
 	    static createFrom(source: any = {}) {
@@ -562,7 +566,9 @@ export namespace model {
 	        this.context = this.convertValues(source["context"], ContextStatus);
 	        this.watcher = source["watcher"];
 	        this.deaf = source["deaf"];
+	        this.capped = source["capped"];
 	        this.undelivered = source["undelivered"];
+	        this.no_identity = source["no_identity"];
 	        this.card = this.convertValues(source["card"], CardJoin);
 	    }
 	

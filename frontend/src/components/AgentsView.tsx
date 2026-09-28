@@ -54,8 +54,11 @@ export function AgentsView() {
             {g.cell && queueOf(g, board).total > 0 && <button className="tiny-btn ghost hot" onClick={() => openSlack(g.id, null)} title="escalated to you, or asked of you: threads and cards">{queueOf(g, board).total} need you</button>}
             <NewAgent initiativeId={g.id} />
           </header>
+          {/* A roster seat's agent shows in the crew block above; an agent
+              with a persona outside the roster (a supervisor, a builder, a
+              guest) has no seat there, so it is listed here (FR-6). */}
           {g.cell && <Crew group={g} onMessage={g.can_post ? (seat) => openSlack(g.id, seat) : undefined} />}
-          <AgentList agents={(g.agents ?? []).filter((a) => !g.cell || !a.persona)} root={g.path} onMessage={g.cell && g.can_post ? (p) => openSlack(g.id, p) : undefined} />
+          <AgentList agents={(g.agents ?? []).filter((a) => !a.persona || !g.cell?.agents?.includes(a.persona))} root={g.path} onMessage={g.cell && g.can_post ? (p) => openSlack(g.id, p) : undefined} />
         </section>
       ))}
       {!selectedInitiative && (view.unassigned?.length ?? 0) > 0 && (
