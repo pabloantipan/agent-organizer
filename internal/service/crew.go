@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -230,6 +231,9 @@ func cardsWaiting(si *model.ScannedInitiative, snap discuss.Snapshot) []CardWait
 // cellHealth asks discuss for the roster health, as the human first and the
 // reconciler second. The second return is why it is missing, for the UI.
 func (s *Service) cellHealth(cell *model.Cell) (discuss.Snapshot, string) {
+	if p := config.Expand(s.cfg.CannedHealth); p != "" {
+		return cannedHealth(p, cell.Project)
+	}
 	dir := config.Expand(s.cfg.DiscussStateDir)
 	if dir == "" {
 		dir = discuss.DefaultStateDir()
@@ -251,6 +255,33 @@ func (s *Service) cellHealth(cell *model.Cell) (discuss.Snapshot, string) {
 		why = err.Error()
 	}
 	return discuss.Snapshot{}, why
+}
+
+// cannedHealth reads one project's health from the canned file the config's
+// canned_health names, in place of the discuss API (spec A3: deaf and capped
+// cannot be made on demand, so the fixture carries them). Read on every call,
+// like the API, so an edit to the file shows on the next sample.
+func cannedHealth(path, project string) (discuss.Snapshot, string) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return discuss.Snapshot{}, "canned health: " + err.Error()
+	}
+	var doc map[string]struct {
+		Agents  []discuss.AgentHealth `json:"agents"`
+		Threads []discuss.Thread      `json:"threads"`
+	}
+	if err := json.Unmarshal(b, &doc); err != nil {
+		return discuss.Snapshot{}, "canned health: " + err.Error()
+	}
+	p, ok := doc[project]
+	if !ok {
+		return discuss.Snapshot{}, fmt.Sprintf("canned health: no project %q in %s", project, path)
+	}
+	snap := discuss.Snapshot{Agents: make(map[string]discuss.AgentHealth, len(p.Agents)), Threads: p.Threads}
+	for _, h := range p.Agents {
+		snap.Agents[h.Agent] = h
+	}
+	return snap, ""
 }
 
 // discussAPIBin finds discuss-api: PATH first, then ~/.local/bin where

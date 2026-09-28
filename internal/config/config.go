@@ -46,6 +46,12 @@ type Config struct {
 	// DiscussStateDir holds the discuss socket and token registry, and the
 	// files the pusher reads: push.key, factory, projects.json.
 	DiscussStateDir string `yaml:"discuss_state_dir" json:"discuss_state_dir"`
+	// CannedHealth names a JSON file read in place of the discuss health
+	// endpoint: {"<project>": {"agents": [...], "threads": [...]}}, the
+	// endpoint's own shape per project. A test seam for the fixture, where
+	// deaf and capped cannot be made on demand; empty (the default) asks
+	// discuss as always.
+	CannedHealth string `yaml:"canned_health" json:"canned_health"`
 	// CrewModel is the model crew seats start with (ANTHROPIC_MODEL in the
 	// prelude, which beats the settings file). A cell.json "model" overrides
 	// it. Default opus: personas reason and talk, they do not need the top tier.
