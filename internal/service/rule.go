@@ -11,20 +11,22 @@ import (
 	"organizer/internal/model"
 )
 
-// RuleDecision writes the owner's ruling into a `proposed` decision record and
-// commits that one file (FR-13, 0019). It is the only path by which the
-// organizer writes a record, and it writes nothing but the four fields and the
-// Ruling section: the record is edited as text, so every other byte survives.
+// RuleDecision writes a ruling into a `proposed` decision record and commits
+// that one file (FR-13, 0019). It is the only path by which the organizer
+// writes a record, and it writes nothing but the four fields and the Ruling
+// section: the record is edited as text, so every other byte survives.
+//
+// Anyone may rule, whoever owns the record, and `ruled_by` is the person who
+// ruled, not the owner (0045, FR-14 of twenty-at-a-glance): see ruler.
 //
 // It refuses a record that is not proposed, a chosen value that is not one of
 // the record's options, and empty words. It also refuses, before touching the
-// file, a record with no owner (`ruled_by` is the owner, A4) and a record
-// outside a git repository (the commit could not happen). A refusal writes
-// nothing and commits nothing.
+// file, a record outside a git repository (the commit could not happen). A
+// refusal writes nothing and commits nothing.
 func (s *Service) RuleDecision(initiativeID, number, chosen, words string) error {
 	words = strings.TrimSpace(words)
 	if words == "" {
-		return fmt.Errorf("a ruling needs the owner's words")
+		return fmt.Errorf("a ruling needs the ruler's words")
 	}
 	si, err := s.initiative(initiativeID)
 	if err != nil {
@@ -42,9 +44,6 @@ func (s *Service) RuleDecision(initiativeID, number, chosen, words string) error
 	if !slices.Contains(d.Options, chosen) {
 		return fmt.Errorf("chosen %q is not one of decision %s's options (%s)", chosen, d.Number, strings.Join(d.Options, ", "))
 	}
-	if strings.TrimSpace(d.Owner) == "" {
-		return fmt.Errorf("decision %s names no owner, and the ruling is signed by the owner", d.Number)
-	}
 	dir := filepath.Dir(d.Path)
 	if out, err := exec.Command("git", "-C", dir, "rev-parse", "--git-dir").CombinedOutput(); err != nil {
 		return fmt.Errorf("%s is not in a git repository, so the ruling cannot be committed: %s", dir, strings.TrimSpace(string(out)))
@@ -55,7 +54,7 @@ func (s *Service) RuleDecision(initiativeID, number, chosen, words string) error
 	}
 	cfg := s.Config()
 	ruled := s.now().Format("2006-01-02")
-	out, err := writeRuling(string(src), ruled, d.Owner, chosen, words, cfg.Machine)
+	out, err := writeRuling(string(src), ruled, ruler(si), d.Owner, chosen, words, cfg.Machine)
 	if err != nil {
 		return fmt.Errorf("%s: %w", filepath.Base(d.Path), err)
 	}
@@ -78,6 +77,22 @@ func (s *Service) RuleDecision(initiativeID, number, chosen, words string) error
 	return nil
 }
 
+// defaultRuler signs a ruling in an initiative without a cell. Until identity
+// exists (0004 withdrawn) the organizer's one human is Pablo (A1).
+const defaultRuler = "pablo"
+
+// ruler is who rules from this organizer: the cell's human seat when the
+// initiative has a cell, else defaultRuler (0045, A1). The frontend's leadOf
+// in lib/queue.ts reads the same two sources.
+func ruler(si *model.ScannedInitiative) string {
+	if si.Cell != nil {
+		if h := strings.TrimSpace(si.Cell.Human); h != "" {
+			return h
+		}
+	}
+	return defaultRuler
+}
+
 // padNumber accepts `19` for `0019`; the record's number is four digits.
 func padNumber(n string) string {
 	n = strings.TrimSpace(n)
@@ -93,7 +108,7 @@ const rulingHeading = "## Ruling"
 // `chosen` set and the words under `## Ruling`, and nothing else changed. The
 // file is edited line by line rather than re-serialised so comments, key
 // order, blank lines and every other section stay exactly as they were.
-func writeRuling(src, ruled, owner, chosen, words, machine string) (string, error) {
+func writeRuling(src, ruled, ruler, owner, chosen, words, machine string) (string, error) {
 	lines := strings.Split(src, "\n")
 	end := frontmatterEnd(lines)
 	if end < 0 {
@@ -102,13 +117,13 @@ func writeRuling(src, ruled, owner, chosen, words, machine string) (string, erro
 	set := [][2]string{
 		{"status", model.DecisionRuled},
 		{"ruled", ruled},
-		{"ruled_by", owner},
+		{"ruled_by", ruler},
 		{"chosen", chosen},
 	}
 	for _, kv := range set {
 		lines, end = setFrontmatterKey(lines, end, kv[0], kv[1])
 	}
-	return strings.Join(insertRuling(lines, end, rulingLines(ruled, owner, words, machine)), "\n"), nil
+	return strings.Join(insertRuling(lines, end, rulingLines(ruled, ruler, owner, words, machine)), "\n"), nil
 }
 
 // frontmatterEnd is the index of the `---` that closes the frontmatter, or -1.
@@ -154,14 +169,19 @@ func yamlScalar(v string) string {
 }
 
 // rulingLines is the ruling as it is written under the heading: who ruled,
-// when, and where it was said (A4), then the words.
-func rulingLines(ruled, owner, words, machine string) []string {
+// when, the owner when someone else ruled, and where it was said (0045), then
+// the words: `pablo, 2026-09-28, owner alejandro, in the organizer on m: …`.
+func rulingLines(ruled, ruler, owner, words, machine string) []string {
+	who := ruler + ", " + ruled
+	if o := strings.TrimSpace(owner); o != "" && !strings.EqualFold(o, ruler) {
+		who += ", owner " + o
+	}
 	where := "in the organizer"
 	if strings.TrimSpace(machine) != "" {
 		where += " on " + machine
 	}
 	said := strings.Split(words, "\n")
-	out := []string{fmt.Sprintf("%s, %s, %s: %s", owner, ruled, where, said[0])}
+	out := []string{fmt.Sprintf("%s, %s: %s", who, where, said[0])}
 	return append(out, said[1:]...)
 }
 
