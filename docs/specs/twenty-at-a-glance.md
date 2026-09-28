@@ -183,3 +183,8 @@ without opening one. Today (read 2026-09-27):
 - 2026-09-27: FR-8 (0034) and FR-9 (0036) added, with gate rows G11 and G12 and two cards; both ruled after the wave landed.
 
 - 2026-09-28: FR-10 to FR-12, gate rows G13 to G15 and two cards, from Pablo's review of the installed app (0038).
+- 2026-09-28, from the supervisors' closing reports (threads 01M3HXM8B4S4P0NN128F2W8M8C, 01M3J1WGG3D15AS77Q8119V146):
+  - FR-6's "waits on you" reads "has rows in Needs me". Since FR-8 (0034), those rows are only records the lead owns (or nobody), plus the queue. So "waits on business" is reachable, as built in `initiativeState.ts`.
+  - G6 cannot be reproduced on the fixture, because the stage gated on record 4 is not current; the card passed on a unit check.
+  - G11 compares the badge with rows, not with initiatives.
+  - FR-9's "open read-only" was not built: the gate (G12) checked the rail only. Whether to build it is 0042.
