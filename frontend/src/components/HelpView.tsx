@@ -13,7 +13,6 @@ type Section = { id: string; depth: number; title: string };
 export function HelpView({ top, onClose }: { top: number; onClose: () => void }) {
   const [doc, setDoc] = useState<service.HelpDoc | null>(null);
   const [failed, setFailed] = useState("");
-  const [sections, setSections] = useState<Section[]>([]);
   const body = useRef<HTMLDivElement>(null);
   const close = useRef<HTMLButtonElement>(null);
 
@@ -28,26 +27,30 @@ export function HelpView({ top, onClose }: { top: number; onClose: () => void })
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const html = useMemo(() => (doc?.text ? (marked.parse(doc.text) as string) : ""), [doc]);
-
-  // Name the rendered headings so the sections list can reach them, and let
-  // a diagram take focus so the keyboard can scroll it sideways.
-  useEffect(() => {
-    const el = body.current;
-    if (!el) return;
+  // Name the headings and let a diagram take focus (so the keyboard can
+  // scroll it sideways) in the HTML string itself, not on the rendered DOM:
+  // React owns the article's innerHTML and may set it again after an effect,
+  // which dropped ids added afterwards, so the section list found nothing to
+  // scroll to (FR-9).
+  const { html, sections } = useMemo(() => {
+    if (!doc?.text) return { html: "", sections: [] as Section[] };
+    const tpl = document.createElement("template");
+    tpl.innerHTML = marked.parse(doc.text) as string;
     const found: Section[] = [];
-    el.querySelectorAll<HTMLHeadingElement>("h1, h2, h3").forEach((h, i) => {
+    tpl.content.querySelectorAll<HTMLHeadingElement>("h1, h2, h3").forEach((h, i) => {
       h.id = `help-section-${i}`;
       found.push({ id: h.id, depth: Number(h.tagName[1]), title: h.textContent ?? "" });
     });
-    el.querySelectorAll("pre").forEach((pre) => {
-      pre.tabIndex = 0;
+    tpl.content.querySelectorAll("pre").forEach((pre) => {
+      pre.setAttribute("tabindex", "0");
       pre.setAttribute("aria-label", "diagram, scrolls sideways");
     });
-    setSections(found);
-  }, [html]);
+    return { html: tpl.innerHTML, sections: found };
+  }, [doc]);
 
-  const go = (id: string) => document.getElementById(id)?.scrollIntoView({ block: "start" });
+  // The article (.help-doc, overflow-y: auto) is the element that scrolls;
+  // the fixed overlay around it does not, so the heading moves into its view.
+  const go = (id: string) => body.current?.querySelector<HTMLElement>(`#${id}`)?.scrollIntoView({ block: "start" });
 
   return (
     <section className="help" style={{ top }} role="dialog" aria-label="Help">

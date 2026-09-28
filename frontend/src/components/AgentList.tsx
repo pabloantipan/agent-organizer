@@ -87,8 +87,9 @@ export function AgentList({ agents, root, local = true, onMessage }: { agents: A
 
 /** Why a row's health word is what it is and what to do about it, from the
  *  one table in lib/health, shown on the row rather than only in the badge's
- *  tooltip: the row is where someone looks when a seat is not hearing. */
-function HealthWhy({ state }: { state: HealthState }) {
+ *  tooltip: the row is where someone looks when a seat is not hearing. A
+ *  roster seat's row in Crew shows the same line. */
+export function HealthWhy({ state }: { state: HealthState }) {
   const w = HEALTH[state];
   return <span className="meta a-health">{w.label}: {w.why} What to do: {w.what}</span>;
 }
