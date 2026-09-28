@@ -5,6 +5,7 @@ import { ChevronDown, ChevronRight, FolderOpen } from "lucide-react";
 import { api, type CardRuns } from "../hooks/useWails";
 import { move, uniq } from "../lib";
 import { useBoard } from "../stores/board.store";
+import { readOnlyOf } from "../lib/queue";
 import { CardItem, inReview } from "./CardItem";
 import { WaveStrip, running } from "./WaveStrip";
 import "../styles/work.css";
@@ -64,8 +65,9 @@ export function Board() {
   for (const a of group?.agents ?? []) if (a.card?.slug) agentOf[a.card.slug] = a;
 
   // Cards are draggable only inside one initiative: an order across
-  // initiatives is the rail's job, not the column's.
-  const canDrag = selectedInitiative !== null;
+  // initiatives is the rail's job, not the column's. One that is not active
+  // is read-only (FR-13) and takes no drag either.
+  const canDrag = selectedInitiative !== null && !readOnlyOf(view, selectedInitiative);
 
   const onDragEnd = (r: DropResult) => {
     if (!canDrag || !r.destination) return;

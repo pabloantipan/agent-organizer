@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { marked } from "marked";
 import type { merge, model } from "../../wailsjs/go/models";
 import { addDays, daysBetween, parseISO, shortDate, today, toISO } from "../lib/dates";
-import { leadOf } from "../lib/queue";
+import { leadOf, readOnlyOf } from "../lib/queue";
 import { useBoard } from "../stores/board.store";
 import { RuleDecisionBox } from "./RuleDecisionBox";
 import "../styles/decisions.css";
@@ -94,7 +94,8 @@ export function DecisionsView() {
     const d = r.d;
     const isOpen = expanded === r.key;
     const t = turnaround(d);
-    const canRule = d.status === "proposed" && ownedByLead(d, leadFor(r.initiative));
+    // FR-13: a record of an initiative that is not active offers no Rule.
+    const canRule = d.status === "proposed" && !readOnlyOf(view, r.initiative) && ownedByLead(d, leadFor(r.initiative));
     const isRuling = canRule && ruling === r.key;
     return (
       <div key={r.key} className={`dec ${d.status} ${isOpen ? "expanded" : ""}`}>
