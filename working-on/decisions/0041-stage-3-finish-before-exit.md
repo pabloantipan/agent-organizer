@@ -1,14 +1,14 @@
 ---
 title: "Stage machine-explains-itself: fix two findings, then exit met"
-status: proposed
+status: ruled
 raised: 2026-09-28
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-28
+ruled_by: pablo
 options: [fix two findings first, exit met now]
-chosen:
-cards: []
+chosen: fix two findings first
+cards: [explain-finish, install-current-build-3]
 threads: []
 supersedes: []
 superseded_by:
@@ -50,7 +50,8 @@ close.
 
 ## Ruling
 
-
+Pablo, 2026-09-28, in the FSE's session (organizer-probe-fse): "do as
+recommended. Reinstall".
 
 ## Consequences
 

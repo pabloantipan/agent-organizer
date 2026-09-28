@@ -63,8 +63,9 @@ restating it (the discuss skill).
 - **Stage 3 (machine-explains-itself), current since 0039:** spec
   `docs/specs/machine-explains-itself.md`, cards explain-help,
   explain-health-words, explain-health-all-agents (643469e); 0040 accepted
-  2026-09-28; sup10 ran it: all three passed review; G7 all right in 70 s. 0041 asks
-  whether to fix two review findings before exit met. Found: the capped remedy is wrong since agent-slack 8991640
+  2026-09-28; sup10 ran it: all three passed review; G7 all right in 70 s. 0041 ruled: fix
+  first. sup11 runs explain-finish then install-current-build-3. After both
+  land: propose stage 3 exit met. Found: the capped remedy is wrong since agent-slack 8991640
   (the next prompt delivers), fixed by FR-5.
 - **Installed:** v0.2.0-229-g3472f6b (sup7, install-current-build passed).
 - **Waiting on Pablo:** the intake (thread 01M3FAWKV2159MCSH0AZZJWE08); 0021, 0022, 0005, 0004, 0002. No card carries `stage:` until the

@@ -2,7 +2,7 @@
 
 status: ruled (0040, 2026-09-28)
 owner: pablo
-decisions: [0029 ruled, 0031 ruled, 0032 ruled, 0040 ruled]
+decisions: [0029 ruled, 0031 ruled, 0032 ruled, 0040 ruled, 0041 ruled]
 roadmap: stage `machine-explains-itself` (appetite: one wave)
 
 ## Problem
@@ -79,6 +79,11 @@ the work" (Pablo, 0029). Today (read 2026-09-28):
   carries no `AGENT_NAME`, then that row shall show "no identity". Its what
   to do: relaunch with an identity prelude (the fse skill's
   `references/standing-up.md`).
+- **FR-8** A roster seat's Agents and Crew row shall show its health's why
+  and what to do as a visible line, as supervisors' and builders' rows do,
+  not only as a tooltip (0041).
+- **FR-9** Choosing a section in the Help's section list shall scroll the
+  document so that section's heading is in view (0041).
 
 ## Acceptance → gate
 
@@ -90,6 +95,8 @@ the work" (Pablo, 0029). Today (read 2026-09-28):
 | G4 | 6 | Given canned health for a roster seat, a supervisor and a builder (one capped), each Agents row shows its badge with why and what to do; a persona outside the roster is listed | a test on the health join (Go); screenshot on the fixture (A3) | as stated |
 | G5 | 7 | Given canned health `sup9: never, 3 undelivered` and a live session `<family>-probe-sup9` with no `AGENT_NAME`, its row says "no identity" and what to do; with `AGENT_NAME=sup9` it does not | a test; screenshot on the fixture (A3) | as stated |
 | G6 | 1–7 | Nothing else broke | `XDG_DATA_HOME=$(mktemp -d) make test`; `cd frontend && npm run build`; the redesign's G18 grep (no raw colour or font size) | pass |
+| G8 | 8 | On the fixture, the deaf roster seat's row shows its why and what-to-do line without hovering | screenshot | visible |
+| G9 | 9 | Choosing the fourth section in the Help's list brings its heading into view | screenshots before and after | in view |
 | G7 | — | End to end: `wails build`, run on the fixture. A reviewer who did not build it answers from the app alone, timed: for three fixture seats (deaf, capped, no identity), why is it not hearing and what do I do; and from the Help, who decides what in an initiative's discovery | screenshots and the reviewer's timed answers | all right |
 
 ## Boundary
@@ -157,7 +164,8 @@ the work" (Pablo, 0029). Today (read 2026-09-28):
 | `explain-help` | G1, G2, G6 | — |
 | `explain-health-words` | G3, G6 | — |
 | `explain-health-all-agents` | G4, G5, G6, G7 | explain-health-words |
+| `explain-finish` | G8, G9, G6 | — |
 
 ## Amendments
 
-- none yet
+- 2026-09-28: FR-8 and FR-9 (gate rows G8, G9, card explain-finish) from the review of explain-health-all-agents, ruled in 0041.
