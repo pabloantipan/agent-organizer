@@ -10,6 +10,7 @@ boundary: ["internal/service/crew.go (health on non-roster agents, and capped; n
 spec: "docs/specs/machine-explains-itself.md (FR-6, FR-7); values: docs/design-system.md"
 gate: "docs/specs/machine-explains-itself.md Acceptance, rows G4, G5, G6, G7; the Gate section below"
 stage: machine-explains-itself
+seat: stage3-agents
 ---
 
 ## Goal

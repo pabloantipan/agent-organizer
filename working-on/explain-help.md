@@ -10,6 +10,7 @@ boundary: ["internal/config/config.go (help_doc)", "internal/service/help.go (ne
 spec: "docs/specs/machine-explains-itself.md (FR-1, FR-2, FR-3); values: docs/design-system.md"
 gate: "docs/specs/machine-explains-itself.md Acceptance, rows G1, G2, G6; the Gate section below"
 stage: machine-explains-itself
+seat: stage3-help
 ---
 
 ## Goal

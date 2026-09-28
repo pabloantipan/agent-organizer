@@ -10,6 +10,7 @@ boundary: ["frontend/src/lib/health.ts (new)", "frontend/src/components/ContextB
 spec: "docs/specs/machine-explains-itself.md (FR-4, FR-5); values: docs/design-system.md"
 gate: "docs/specs/machine-explains-itself.md Acceptance, rows G3, G6; the Gate section below"
 stage: machine-explains-itself
+seat: stage3-words
 ---
 
 ## Goal
