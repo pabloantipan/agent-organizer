@@ -1,0 +1,4 @@
+/* The Decisions tab's Rule action (FR-12 of twenty-at-a-glance): one button
+   at the top of an expanded proposed record the lead owns; the box itself is
+   rule-box.css, dropping under it. Tier-2 tokens only. */
+.dec-actions { display: flex; justify-content: flex-end; padding: var(--space-1) 0 var(--space-2); }
