@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-28
-next: "cell-indef: G1, commit the fixture cell: git add -f testdata/fixture-overlay/init-define/agents/cell.json on branch cell-in-definition (ignored by agents/ in .gitignore, so the branch has no cell for init-define), then back to review"
+next: "decide: sup15, finding (b) cannot be fixed inside crew.go alone; allow one line each in internal/service/service.go:468 and internal/service/cell.go:232-235 (the view takes crewCell(si.Cell, crew), a copy with State; buildCrew stops writing)?"
 review: fail
 depends_on: []
 boundary: ["internal/service/crew.go (the derived state; not CreateCrew)", "internal/model/model.go (Cell: state)", "frontend/src/components/Crew.tsx", "frontend/src/components/AgentsView.tsx", "frontend/src/components/Home.tsx (the signal only)", "testdata/ (a cell with no sessions)", "internal/service/crew_test.go", "frontend/src/styles/ (those components' CSS only)"]
@@ -48,3 +48,4 @@ none
 - 2026-09-28 cell-indef: `buildCrew` stamps the state on the shared `*model.Cell` (how it reaches `AgentGroup.Cell` without touching service.go); `Service.Cell` calls it outside `s.mu`, and the value reaches state.json and the sync payload until the next rescan clears it. The merged board has no Cell, so the agents feed carries it.
 - 2026-09-28 cell-indef: a cell in definition still offers "N retirable" on Crew for seats that never ran; the spec did not say.
 - 2026-09-28 cell-indef: the spec's Goals name "the rail", FR-1 does not; built FR-1 (Crew, Agents tab, Home).
+- 2026-09-28 cell-indef, after the review: G1's missing fixture is fixed (2cbf83b, `git add -f` of `init-define/agents/cell.json`; branch rebased on main). Finding (b) cannot be fixed in crew.go alone. The two views take the cell pointer before or beside `buildCrew`: `cell.go:232` builds `CellView{Cell: si.Cell}` and only then calls `buildCrew`, and `service.go:468` is `g.Cell, g.Crew, g.Discuss = si.Cell, buildCrew(si, snap), why`, where Go leaves the order of reading `si.Cell` and making the call unspecified. A copy made inside `buildCrew` cannot reach either view, and replacing `si.Cell` in place puts the copy into the cache. Proposed fix: `buildCrew` stops writing, and crew.go gets `crewCell(cell, seats) *model.Cell`, a copy with `State`. The two call sites become `g.Cell = crewCell(si.Cell, g.Crew)` and `v.Cell = crewCell(si.Cell, v.Crew)`, one line each. Add a `-race` test that runs `Service.Cell` against `agentsViewLocked`, and check that state.json has no `state`. Waiting on sup15 before touching `service.go` and `cell.go`.
