@@ -10,9 +10,10 @@ restating it (the discuss skill).
   supervisor"), `working-on/roadmap.yaml`, `agents/people.md`.
 - **Roadmap (0032):** stages 1–4 done (0039, 0044, 0046). **Current: stage 5
   `discovery-in-a-cell`.** Spec `docs/specs/discovery-in-a-cell.md`, cards
-  cell-in-definition, cell-persona-check, discovery-gate-shown; 0047 (how a
-  roster is drafted) and 0048 (accept) wait on Pablo. On 0048, spawn a
-  supervisor (own window, identity prelude, recipe in
+  cell-in-definition, cell-persona-check, discovery-gate-shown; 0048 ruled by Pablo
+  from the app (rule-anyone works); sup15 runs the three cards. When its
+  done message arrives: read it, end sup15. 0047 (roster drafting) waits on
+  Pablo. Supervisor recipe (own window, identity prelude, recipe in
   the fse skill's references/standing-up.md). Camp is the live case; its
   roadmap lacks a gate on its first building stage (camp's FSE owns that).
 - **Also open (2026-09-28, Pablo from v0.2.0-348):** `header-review-2` (header

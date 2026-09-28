@@ -26,4 +26,7 @@ Roadmap stage discovery-in-a-cell: FR-2 of `docs/specs/discovery-in-a-cell.md`.
 1. Refuse organizer crew and Bring crew up when agents/<seat>.md is missing, naming each file; mark the seat row
 
 ## Blockers
-- waits on Pablo accepting the spec (decision 0048)
+none
+
+## Notes
+- 2026-09-28 sup15 runs this card (organizer-probe-sup15), spawned by the FSE after 0048

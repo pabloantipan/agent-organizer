@@ -1,8 +1,8 @@
 # Discovery has a shape and runs in a cell
 
-status: proposed
+status: ruled (0048, 2026-09-28)
 owner: pablo
-decisions: [0029 ruled, 0030 ruled, 0032 ruled]
+decisions: [0029 ruled, 0030 ruled, 0032 ruled, 0048 ruled]
 roadmap: stage `discovery-in-a-cell` (appetite: one wave, set by this spec)
 
 ## Problem

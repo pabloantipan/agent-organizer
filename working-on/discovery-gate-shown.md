@@ -26,4 +26,7 @@ Roadmap stage discovery-in-a-cell: FR-4 of `docs/specs/discovery-in-a-cell.md`.
 1. On an initiative in discovery, show the first building stage's gate record as waiting or ruled, or no gate record yet
 
 ## Blockers
-- waits on Pablo accepting the spec (decision 0048)
+none
+
+## Notes
+- 2026-09-28 sup15 runs this card (organizer-probe-sup15), spawned by the FSE after 0048

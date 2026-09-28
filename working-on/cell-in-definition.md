@@ -26,4 +26,7 @@ Roadmap stage discovery-in-a-cell: FR-1 of `docs/specs/discovery-in-a-cell.md`.
 1. Derive in definition for a cell whose seats never ran, and show it on Crew, the Agents tab and Home (0030)
 
 ## Blockers
-- waits on Pablo accepting the spec (decision 0048)
+none
+
+## Notes
+- 2026-09-28 sup15 runs this card (organizer-probe-sup15), spawned by the FSE after 0048
