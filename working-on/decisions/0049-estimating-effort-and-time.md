@@ -1,13 +1,13 @@
 ---
 title: A method to estimate effort and time ahead, next to real dates
-status: proposed
+status: ruled
 raised: 2026-09-28
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-28
+ruled_by: pablo
 options: [forecast from run records, appetite only, estimate per card by the FSE]
-chosen:
+chosen: forecast from run records
 cards: []
 threads: []
 supersedes: []
@@ -55,7 +55,9 @@ records, which exist.
 
 ## Ruling
 
-
+Pablo, 2026-09-28, in the FSE's session (organizer-probe-fse): "0049.
+Accepted. Just, place a clear methodology of how FSE estimates". The method
+is `docs/estimating.md`.
 
 ## Consequences
 

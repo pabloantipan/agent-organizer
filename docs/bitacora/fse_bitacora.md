@@ -32,6 +32,9 @@ restating it (the discuss skill).
   goal/scope in the app) needs a spec amendment and records; 0049 (estimating
   effort and time: forecast from run records vs appetite vs FSE estimates)
   waits on Pablo, and on "forecast" goes to Hephaistos for the skill.
+- **0049 ruled (forecast from run records):** method in `docs/estimating.md`;
+  relayed to Hephaistos for the skills. Next: from now on each accept record
+  carries a forecast line; spec the roadmap's forecast display (a card).
 - **Running:** nothing but Pablo's `organizer-probe-builder` and me. Tokens:
   fse, pablo. `main` pushed, even with origin at a5c75f8 or later.
 - **Installed:** v0.2.0-348 (rule-anyone, read-only archived, stage 3).
