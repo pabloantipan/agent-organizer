@@ -146,8 +146,20 @@ func buildCrew(si *model.ScannedInitiative, snap discuss.Snapshot) []Seat {
 		}
 		seats = append(seats, s)
 	}
-	si.Cell.State = cellState(si.Cell, seats, loadRuns)
 	return seats
+}
+
+// crewCell is the cell a view shows: a copy of the roster with its derived
+// State. The copy is the point: the scanned cell is shared with the cache,
+// state.json and the sync payload, and read by Service.Cell outside the
+// lock, so the derived state is never written onto it.
+func crewCell(cell *model.Cell, seats []Seat) *model.Cell {
+	if cell == nil {
+		return nil
+	}
+	c := *cell
+	c.State = cellState(cell, seats, loadRuns)
+	return &c
 }
 
 // loadRuns is the run archive the cell state reads; a variable so a test

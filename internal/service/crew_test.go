@@ -1,11 +1,14 @@
 package service
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
+	"organizer/internal/cache"
 	"organizer/internal/config"
 	"organizer/internal/discuss"
 	"organizer/internal/model"
@@ -366,9 +369,12 @@ func TestCellInDefinitionUntilASeatHasRun(t *testing.T) {
 			loadRuns = func() []session.Run { return runs }
 			si := cellOf()
 			si.Agents = tt.agents
-			buildCrew(si, discuss.Snapshot{})
-			if si.Cell.State != tt.want {
-				t.Errorf("state %q, want %q", si.Cell.State, tt.want)
+			got := crewCell(si.Cell, buildCrew(si, discuss.Snapshot{}))
+			if got.State != tt.want {
+				t.Errorf("state %q, want %q", got.State, tt.want)
+			}
+			if si.Cell.State != "" || got == si.Cell {
+				t.Errorf("the scanned cell must stay as read: %q", si.Cell.State)
 			}
 		})
 	}
@@ -377,9 +383,11 @@ func TestCellInDefinitionUntilASeatHasRun(t *testing.T) {
 		loadRuns = func() []session.Run { return nil }
 		si := &model.ScannedInitiative{}
 		si.Cell = &model.Cell{Project: "between-waves"}
-		buildCrew(si, discuss.Snapshot{})
-		if si.Cell.State != "" {
-			t.Errorf("an empty roster is between waves, not in definition: %q", si.Cell.State)
+		if got := crewCell(si.Cell, buildCrew(si, discuss.Snapshot{})); got.State != "" {
+			t.Errorf("an empty roster is between waves, not in definition: %q", got.State)
+		}
+		if crewCell(nil, nil) != nil {
+			t.Error("no cell, no copy")
 		}
 	})
 
@@ -387,9 +395,8 @@ func TestCellInDefinitionUntilASeatHasRun(t *testing.T) {
 		loadRuns = func() []session.Run { return session.LoadRuns(session.RunsPath()) }
 		t.Setenv("XDG_DATA_HOME", t.TempDir())
 		si := cellOf()
-		buildCrew(si, discuss.Snapshot{})
-		if si.Cell.State != model.CellInDefinition {
-			t.Fatalf("no runs.jsonl: state %q", si.Cell.State)
+		if got := crewCell(si.Cell, buildCrew(si, discuss.Snapshot{})); got.State != model.CellInDefinition {
+			t.Fatalf("no runs.jsonl: state %q", got.State)
 		}
 		if err := os.MkdirAll(filepath.Dir(session.RunsPath()), 0o755); err != nil {
 			t.Fatal(err)
@@ -398,9 +405,55 @@ func TestCellInDefinitionUntilASeatHasRun(t *testing.T) {
 		if err := os.WriteFile(session.RunsPath(), []byte(line), 0o644); err != nil {
 			t.Fatal(err)
 		}
-		buildCrew(si, discuss.Snapshot{})
-		if si.Cell.State != model.CellActive {
-			t.Errorf("a run in runs.jsonl: state %q", si.Cell.State)
+		if got := crewCell(si.Cell, buildCrew(si, discuss.Snapshot{})); got.State != model.CellActive {
+			t.Errorf("a run in runs.jsonl: state %q", got.State)
 		}
 	})
+}
+
+// Review finding (b): the state reaches both views on a copy, and the cached
+// cell, which state.json and the sync payload carry, is never written. Run
+// with -race: Service.Cell reads the cell outside the lock while the agents
+// view is built under it.
+func TestCellStateRidesACopyNotTheCache(t *testing.T) {
+	defer func(f func() []session.Run) { loadRuns = f }(loadRuns)
+	loadRuns = func() []session.Run { return nil }
+	si := model.ScannedInitiative{}
+	si.ID = "init-define"
+	si.Cell = &model.Cell{Project: "define-fixture", Agents: []string{"po_carla", "dev_diego"}, Human: "pablo"}
+	s := &Service{
+		cfg:   config.Config{CannedHealth: filepath.Join(t.TempDir(), "none.json"), DiscussStateDir: t.TempDir()},
+		state: cache.State{Local: model.Snapshot{Initiatives: []model.ScannedInitiative{si}}},
+		now:   time.Now,
+	}
+	done := make(chan CellView)
+	go func() {
+		v, err := s.Cell("init-define")
+		if err != nil {
+			t.Error(err)
+		}
+		done <- v
+	}()
+	s.mu.Lock()
+	av := s.agentsViewLocked()
+	s.mu.Unlock()
+	cv := <-done
+
+	if len(av.Groups) != 1 || av.Groups[0].Cell.State != model.CellInDefinition {
+		t.Fatalf("the agents view should carry in definition: %+v", av.Groups)
+	}
+	if cv.Cell == nil || cv.Cell.State != model.CellInDefinition {
+		t.Fatalf("the cell view should carry in definition: %+v", cv.Cell)
+	}
+	cached := s.state.Local.Initiatives[0].Cell
+	if cached.State != "" || av.Groups[0].Cell == cached || cv.Cell == cached {
+		t.Errorf("the cached cell must stay as read, got state %q", cached.State)
+	}
+	b, err := json.Marshal(s.state)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(b), `"state"`) {
+		t.Error("state.json would carry the derived state")
+	}
 }

@@ -229,10 +229,11 @@ func (s *Service) Cell(initiativeID string) (CellView, error) {
 	if si.Cell == nil {
 		return CellView{}, errNoCell
 	}
-	v := CellView{ID: si.ID, Title: si.Title, Project: si.Cell.Project, Human: si.Cell.Human, Cell: si.Cell, ReadAt: s.now()}
+	v := CellView{ID: si.ID, Title: si.Title, Project: si.Cell.Project, Human: si.Cell.Human, ReadAt: s.now()}
 	snap, why := s.cellHealth(si.Cell)
 	v.Discuss = why
 	v.Crew = buildCrew(si, snap)
+	v.Cell = crewCell(si.Cell, v.Crew)
 	v.Waiting = cardsWaiting(si, snap)
 	v.Threads, _ = s.liveThreads(s.Config(), si, snap)
 	if why != "" {

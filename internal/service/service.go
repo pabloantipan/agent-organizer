@@ -465,7 +465,8 @@ func (s *Service) agentsViewLocked() AgentsView {
 		g := AgentGroup{ID: si.ID, Title: si.Title, Client: si.Client, Path: si.Path}
 		if si.Cell != nil {
 			snap, why := s.cellHealth(si.Cell)
-			g.Cell, g.Crew, g.Discuss = si.Cell, buildCrew(si, snap), why
+			g.Crew, g.Discuss = buildCrew(si, snap), why
+			g.Cell = crewCell(si.Cell, g.Crew)
 			g.Waiting = cardsWaiting(si, snap)
 			g.Project, g.Human = si.Cell.Project, si.Cell.Human
 			g.Threads, g.NeedsMe = s.liveThreads(s.cfg, si, snap)
