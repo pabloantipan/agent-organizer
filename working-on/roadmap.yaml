@@ -20,6 +20,7 @@ stages:
       - '"what needs me" answered from Home in under a minute, 20 initiatives loaded (fixture)'
     gates: ["0029", "0030"]
     appetite: one wave
+    done: 2026-09-28      # exit met, ruled in 0039
   - id: machine-explains-itself
     title: The machine explains itself
     phase: building

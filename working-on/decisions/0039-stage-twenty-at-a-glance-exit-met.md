@@ -1,13 +1,13 @@
 ---
 title: "Stage twenty-at-a-glance: exit met"
-status: proposed
+status: ruled
 raised: 2026-09-28
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-28
+ruled_by: pablo
 options: [exit met, not yet]
-chosen:
+chosen: exit met
 cards: []
 threads: []
 supersedes: []
@@ -55,7 +55,8 @@ lead little".
 
 ## Ruling
 
-
+Pablo, 2026-09-28, in the FSE's session (organizer-probe-fse), answering
+"is stage 2 done?": "Exit met".
 
 ## Consequences
 
