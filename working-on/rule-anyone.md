@@ -10,6 +10,7 @@ boundary: ["internal/service/rule.go", "internal/service/rule_test.go", "interna
 spec: "docs/specs/twenty-at-a-glance.md (FR-12, FR-14); values: docs/design-system.md"
 gate: "docs/specs/twenty-at-a-glance.md Acceptance, rows G17, G10; the Gate section below"
 stage: twenty-at-a-glance
+seat: rule-build
 ---
 
 ## Goal
@@ -30,3 +31,4 @@ none
 
 ## Notes
 - 2026-09-28 sup14 runs this card (organizer-probe-sup14), spawned by the FSE
+- 2026-09-28 sup14: builder seat rule-build in worktree .wt/rule-anyone (branch rule-anyone); sup14 merges after review
