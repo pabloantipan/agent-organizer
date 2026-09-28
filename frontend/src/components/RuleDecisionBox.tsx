@@ -1,15 +1,21 @@
 import { useEffect, useId, useRef, useState } from "react";
 import type { model } from "../../wailsjs/go/models";
 import { api } from "../hooks/useWails";
+import { leadOf } from "../lib/queue";
 import { useBoard } from "../stores/board.store";
 import "../styles/rule-box.css";
 
-/** The owner's ruling of a proposed record, from its Needs me row (FR-22).
+/** A ruling of a proposed record, from its Needs me row (FR-22) or its row on
+ *  the Decisions tab (FR-12). The ruler signs it, not the owner (0045): the
+ *  cell's human, else pablo, the same rule as `ruler` in service/rule.go.
  *  One option and the words, then RuleDecision (FR-13) writes the record and
  *  commits it; the rescan that follows drops the row from the queue. A refusal
  *  is the service's own sentence, shown here with what was typed kept. */
 export function RuleDecisionBox({ initiative, decision: d, onClose }: { initiative: string; decision: model.Decision; onClose: () => void }) {
-  const { refresh } = useBoard();
+  const { refresh, agents } = useBoard();
+  const ruler = leadOf((agents?.groups ?? []).find((g) => g.id === initiative));
+  const owner = (d.owner ?? "").trim();
+  const forOwner = owner !== "" && owner.toLowerCase() !== ruler ? ` · owner ${owner}` : "";
   const options = d.options ?? [];
   const [chosen, setChosen] = useState("");
   const [words, setWords] = useState("");
@@ -64,7 +70,7 @@ export function RuleDecisionBox({ initiative, decision: d, onClose }: { initiati
       </label>
       {error && <div className="rb-error" role="alert">{error}</div>}
       <div className="rb-foot">
-        <span className="rb-sign">signed {d.owner || "—"} · commits one file</span>
+        <span className="rb-sign">signed {ruler}{forOwner} · commits one file</span>
         <button className="ghost" onClick={onClose} disabled={busy}>Cancel</button>
         <button className="primary" onClick={() => void rule()} disabled={!ready}>{busy ? "Ruling…" : "Rule"}</button>
       </div>
