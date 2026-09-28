@@ -107,7 +107,8 @@ restating it (the discuss skill).
   alejandro is Pablo). sup14 runs rule-anyone then install-current-build-5;
   sup13 ended as superseded (its card 4 failed review on my wrong gate 3).
   I wrote two gates wrong on install cards: name the exact command and
-  output that decides each row.
+  output that decides each row. And never build a card by copying another:
+  install-current-build-5 carried card 4's state until sup14 reset it (512b2cd).
 - **Done 2026-09-28:** sup11 ended (no closing message; run record
   runs/2026-09-28-explain-finish-and-reinstall.md); worktrees removed;
   .gitignore takes runs/, .wt-notes/, .playwright-mcp/ (6ad2c71); origin/main
