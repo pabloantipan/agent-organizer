@@ -1,6 +1,6 @@
 ---
 title: Roster seats show why and what visibly, and the Help's sections scroll
-status: next
+status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-28
