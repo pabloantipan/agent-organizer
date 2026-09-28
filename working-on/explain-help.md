@@ -1,6 +1,6 @@
 ---
 title: The Help shows how we follow the flow
-status: next
+status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-28
