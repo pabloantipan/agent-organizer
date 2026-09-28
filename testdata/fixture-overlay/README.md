@@ -31,3 +31,6 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
   Overview shows the gate into building as waiting and as "no gate record yet"
   (discovery-in-a-cell G3); init-c is only this overlay's, and the scan
   reports its ungated stage
+- `init-define`, an initiative whose cell (`define-fixture`) has three
+  seats and no session or run, so it reads "in definition" on Crew, the
+  Agents tab and Home beside init-a's live cell (discovery-in-a-cell G1)
