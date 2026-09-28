@@ -1,10 +1,11 @@
 ---
 title: The Help shows how we follow the flow
-status: now
+status: done
 repos: [organizer]
 branch: main
 updated: 2026-09-28
-next: "review: explain-help, branch explain-help, gate G1, G2, G6 met, 458427f 380b858 e65b77f"
+review: pass
+next: "merge explain-help (458427f 380b858 e65b77f) into main: review passed"
 depends_on: []
 boundary: ["internal/config/config.go (help_doc)", "internal/service/help.go (new)", "internal/service/help_test.go (new)", "app.go (one Help method)", "frontend/wailsjs/ (regenerated)", "frontend/src/components/HelpView.tsx (new)", "frontend/src/components/TopBar.tsx (the Help entry)", "frontend/src/styles/ (the Help's CSS only)"]
 spec: "docs/specs/machine-explains-itself.md (FR-1, FR-2, FR-3); values: docs/design-system.md"
@@ -35,3 +36,11 @@ none
 - 2026-09-28 sup10 runs this card (organizer-probe-sup10), spawned by the FSE after 0040
 - 2026-09-28 the Help is an overlay under the top bar that TopBar owns (the store is outside the boundary). It is reached by the ? before the gear and left by Close, Esc, Home, Needs me or the gear. help_doc has no Settings field (Settings.tsx is outside the boundary), so it is set in config.yaml only
 - 2026-09-28 the frontend is pnpm (no package-lock.json), so `npm ci` fails; `wails generate module` needs frontend/dist built first
+
+## Review
+- Verdict: pass. G1, G2 and G6 are met by the diff at e65b77f.
+- Unmet gate items: none
+- Reviewer: stage3-review-help
+- Date: 2026-09-28
+- Evidence is in .wt-notes/stage3-review-help/. checks.txt: the four Help tests pass, make test exits 0, the G18 grep is empty. npm-build.txt: exit 0. g2-pre-metrics-640.json and g2-diagram4-640.png come from wails dev with the real how-we-build.md. The sections list names all 7 headings. Each of the 4 fenced blocks has white-space pre, overflow-x auto and the mono font. At a 640px window every block is wider than its box (scroll widths 549 to 627 px in a 339 px box), and each block's height equals its line count, so none of them wraps.
+- The gate does not check this: the overlay's top is measured once, when the Help opens. If the window narrows while the Help is open, the top bar wraps onto a second line and covers the Help's header.
