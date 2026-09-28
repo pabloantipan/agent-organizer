@@ -72,6 +72,44 @@ function ExitRow({ item }: { item: model.ExitItem }) {
   );
 }
 
+/** The phase an initiative is in at stage k: the stage's own, else the
+ *  nearest earlier stage's that has one, as the scan's phase check reads it. */
+function phaseAt(stages: model.Stage[], k: number): string {
+  for (let j = k; j >= 0; j--) if (stages[j].phase) return stages[j].phase!;
+  return "";
+}
+
+/** The gate into building (discovery-in-a-cell FR-4): while the current stage
+ *  is in discovery, the first building stage after it and the records its
+ *  gates name, each waiting or ruled and linked like a gate of the current
+ *  stage, or "no gate record yet" when none names a record. The scan reports
+ *  that stage as a problem; nothing here moves a stage. */
+function BuildingGate({ initiative, stages, current, byGate }: {
+  initiative: string; stages: model.Stage[]; current: number; byGate: Map<string, model.Decision>;
+}) {
+  if (phaseAt(stages, current) !== "discovery") return null;
+  const b = stages.findIndex((s, j) => j > current && s.phase === "building");
+  if (b < 0) return null;
+  const s = stages[b];
+  const gates = (s.gates ?? []).filter((g) => byGate.has(gateKey(g)));
+  return (
+    <>
+      <div className="gl-label">Gate into building <span className="sec-sub">stage <span className="num">{b + 1}</span> · {s.title || s.id}</span></div>
+      {gates.length === 0 ? (
+        <ul className="gl-rows">
+          <li className="gl-row missing" title={`stage ${s.id} names no decision record in working-on/decisions/ among its gates`}>
+            <span className="diamond missing" aria-hidden />
+            <span className="gl-text">no gate record yet</span>
+            <span className="lz">no record</span>
+          </li>
+        </ul>
+      ) : (
+        <ul className="gl-rows">{gates.map((g) => <GateRow key={g} initiative={initiative} number={g} record={byGate.get(gateKey(g))} />)}</ul>
+      )}
+    </>
+  );
+}
+
 /** The current stage (FR-18, O4): its gates as decision records, then its exit items. */
 function StageGates({ initiative: i }: { initiative: BoardInitiative }) {
   const stages = i.stages ?? [];
@@ -112,6 +150,7 @@ function StageGates({ initiative: i }: { initiative: BoardInitiative }) {
         ) : (
           <ul className="gl-rows">{exit.map((x, n) => <ExitRow key={n} item={x} />)}</ul>
         )}
+        <BuildingGate initiative={i.id} stages={stages} current={k} byGate={byGate} />
       </div>
     </section>
   );
