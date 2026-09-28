@@ -1,6 +1,6 @@
 ---
 title: Bring crew up refuses a seat without its persona file
-status: next
+status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-28
