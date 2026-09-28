@@ -26,4 +26,7 @@ Roadmap stage machine-explains-itself (0032): FR-4, FR-5 of `docs/specs/machine-
 1. One table of why and what-to-do per health state; capped says the next prompt delivers the mail, never restart
 
 ## Blockers
-- waits on Pablo accepting the spec (decision 0040)
+none
+
+## Notes
+- 2026-09-28 sup10 runs this card (organizer-probe-sup10), spawned by the FSE after 0040

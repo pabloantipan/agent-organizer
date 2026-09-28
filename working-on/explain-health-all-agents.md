@@ -28,4 +28,7 @@ Roadmap stage machine-explains-itself (0032): FR-6, FR-7 of `docs/specs/machine-
 1. Stamp health (with capped) on every live agent that has it, list personas outside the roster, flag a session running without its mailbox identity; then the timed end to end
 
 ## Blockers
-- waits on Pablo accepting the spec (decision 0040)
+none
+
+## Notes
+- 2026-09-28 sup10 runs this card (organizer-probe-sup10), spawned by the FSE after 0040

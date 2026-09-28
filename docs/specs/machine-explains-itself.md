@@ -1,8 +1,8 @@
 # The machine explains itself
 
-status: proposed
+status: ruled (0040, 2026-09-28)
 owner: pablo
-decisions: [0029 ruled, 0031 ruled, 0032 ruled]
+decisions: [0029 ruled, 0031 ruled, 0032 ruled, 0040 ruled]
 roadmap: stage `machine-explains-itself` (appetite: one wave)
 
 ## Problem

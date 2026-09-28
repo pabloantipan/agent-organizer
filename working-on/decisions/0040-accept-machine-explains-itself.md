@@ -1,13 +1,13 @@
 ---
 title: Accept the machine-explains-itself spec, and launch it
-status: proposed
+status: ruled
 raised: 2026-09-28
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-28
+ruled_by: pablo
 options: [accept as written, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [explain-help, explain-health-words, explain-health-all-agents]
 threads: []
 supersedes: []
@@ -48,7 +48,8 @@ restarting, but since the drain fix the next prompt delivers its mail.
 
 ## Ruling
 
-
+Pablo, 2026-09-28, in the FSE's session (organizer-probe-fse):
+"recommendation accepted".
 
 ## Consequences
 

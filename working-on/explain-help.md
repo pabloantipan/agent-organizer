@@ -27,4 +27,7 @@ Roadmap stage machine-explains-itself (0032): FR-1, FR-2, FR-3 of `docs/specs/ma
 1. Read help_doc (default ~/agent-slack/docs/how-we-build.md) at open and render it with its sections and monospace diagrams; say which path and key when missing
 
 ## Blockers
-- waits on Pablo accepting the spec (decision 0040)
+none
+
+## Notes
+- 2026-09-28 sup10 runs this card (organizer-probe-sup10), spawned by the FSE after 0040
