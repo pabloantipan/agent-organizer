@@ -3,6 +3,7 @@ import { MessageSquare, Square, SquareTerminal, Trash2 } from "lucide-react";
 import { api, type Agent } from "../hooks/useWails";
 import { shortHome } from "../lib";
 import { ContextBar, WatcherBadge } from "./ContextBar";
+import { HEALTH, healthState, healthTitle, type HealthState } from "../lib/health";
 
 const STATE_LABEL: Record<string, string> = { working: "working", running: "idle", shell: "shell", exited: "exited" };
 
@@ -27,6 +28,7 @@ export function AgentList({ agents, root, local = true, onMessage }: { agents: A
           // pid disambiguates; a layout-only row has pid 0 and a unique session.
           const key = `${a.session}#${a.pid}`;
           const asking = confirm === key;
+          const health = healthState({ watcher: a.watcher, deaf: a.deaf, capped: a.capped, noIdentity: a.no_identity });
           return (
             <li key={key} className={a.state}>
               <span className={`a-state ${a.state}`}><i />{STATE_LABEL[a.state] ?? a.state}</span>
@@ -35,7 +37,9 @@ export function AgentList({ agents, root, local = true, onMessage }: { agents: A
                 <span className="ident">{a.short || a.name}</span>
               </span>
               {a.persona && <span className="badge persona" title={a.cell ? `${a.cell} cell` : "persona"}>{a.persona}</span>}
-              <WatcherBadge watcher={a.watcher} deaf={a.deaf} undelivered={a.undelivered} />
+              {health === "no identity"
+                ? <span className="badge watcher no-identity" title={healthTitle(health, a.undelivered)}>{HEALTH[health].label}{a.undelivered > 0 ? ` · ${a.undelivered} waiting` : ""}</span>
+                : <WatcherBadge watcher={a.watcher} deaf={a.deaf} capped={a.capped} undelivered={a.undelivered} />}
               <span className={`badge kind ${a.kind}`}>{a.kind}</span>
               <ContextBar c={a.context} />
               <span className="meta mono a-proc">{a.pid > 0 ? `${a.tty} · up ${a.uptime}` : a.created ? `session ${a.created}` : "layout only"}</span>
@@ -72,10 +76,19 @@ export function AgentList({ agents, root, local = true, onMessage }: { agents: A
                   </button>
                 )}
               </span>
+              {health && health !== "alive" && <HealthWhy state={health} />}
             </li>
           );
         })}
       </ul>
     </>
   );
+}
+
+/** Why a row's health word is what it is and what to do about it, from the
+ *  one table in lib/health, shown on the row rather than only in the badge's
+ *  tooltip: the row is where someone looks when a seat is not hearing. */
+function HealthWhy({ state }: { state: HealthState }) {
+  const w = HEALTH[state];
+  return <span className="meta a-health">{w.label}: {w.why} What to do: {w.what}</span>;
 }
