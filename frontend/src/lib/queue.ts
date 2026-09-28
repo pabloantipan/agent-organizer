@@ -7,7 +7,8 @@ import { parseISO } from "./dates";
  *  A thread needs the human when it is escalated or asks them; a card when
  *  its next action is addressed to them; a Solved mark removes either. Deaf
  *  seats are counted apart, and a capped seat is not deaf: it is alive and
- *  posting, only unreachable until restarted. */
+ *  posting, only unreachable until restarted. An initiative that is not
+ *  active counts nothing (FR-13). */
 export const ASKED_RE = /^\s*(pablo|decide)\b/i;
 
 /** A1: the lead is the cell's human, else "pablo", as ASKED_RE assumes.
@@ -44,6 +45,19 @@ export function inactiveIds(view: BoardView | null) {
   return out;
 }
 
+/** FR-13 (0042): the one read-only flag. An initiative that is not active
+ *  opens read-only: null when it is writable, else its status word
+ *  ("archived", "paused", …) for the header's "<status>: read-only". Each
+ *  view derives it here once and passes it down; no component reads a
+ *  status itself. Judged by the local row, as inactiveIds is. */
+export function readOnlyOf(view: BoardView | null, id: string | null | undefined): string | null {
+  if (!id) return null;
+  const rows = (view?.board.initiatives ?? []).filter((i) => i.id === id);
+  const row = rows.find((i) => i.local) ?? rows[0];
+  if (!row || isActive(row)) return null;
+  return (row.status ?? "").trim().toLowerCase();
+}
+
 export const needsMeThread = (t: CellThread) => t.status === "escalated" || (t.asked_of_me ?? 0) > 0;
 
 export function askedCards(view: BoardView | null, initiativeId: string) {
@@ -52,7 +66,10 @@ export function askedCards(view: BoardView | null, initiativeId: string) {
     .filter((c) => c.initiative_id === initiativeId && c.local && ASKED_RE.test(c.next || ""));
 }
 
+/** The cells of an initiative that is not active leave every count (FR-13):
+ *  its queue is empty, so the Agents pill and Conversations say nothing. */
 export function queueOf(group: AgentGroup, view: BoardView | null) {
+  if (readOnlyOf(view, group.id)) return { threads: [] as CellThread[], cards: [] as merge.BoardCard[], deaf: 0, capped: 0, total: 0 };
   const resolved = view?.order?.resolved ?? {};
   const threads = (group.threads ?? []).filter((t) => needsMeThread(t) && !resolved[`thread:${t.id}`]);
   const cards = askedCards(view, group.id).filter((c) => !resolved[`card:${group.id}/${c.slug}`]);
