@@ -1,11 +1,16 @@
 package service
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+	"time"
 
+	"organizer/internal/cache"
 	"organizer/internal/model"
+	"organizer/internal/session"
 )
 
 func TestLaunchDir(t *testing.T) {
@@ -80,5 +85,128 @@ func TestHeadBranch(t *testing.T) {
 	}
 	if got := headBranch(t.TempDir()); got != "" {
 		t.Errorf("no checkout = %q, want empty", got)
+	}
+}
+
+// The session-length warning reads the one ceiling and says what probe does:
+// it refuses a name over zellij's socket budget, it never truncates one.
+func TestPrepareLaunchWarnsOnlyOverTheSessionCeiling(t *testing.T) {
+	t.Setenv("XDG_DATA_HOME", t.TempDir())
+	card := func(slug string) model.Card {
+		return model.Card{Slug: slug, Spec: "s", Gate: "g", Boundary: []string{"b"}}
+	}
+	long := "a-card-slug-long-enough-to-overflow-the-socket-budget-x" // organizer-probe- + 55 = 71
+	si := model.ScannedInitiative{}
+	si.ID, si.Path = "organizer", t.TempDir()
+	si.Cards = []model.Card{card("redesign-goal-stages"), card(long)}
+	s := &Service{state: cache.State{Local: model.Snapshot{Initiatives: []model.ScannedInitiative{si}}}}
+
+	lengthWarnings := func(slug string) []string {
+		t.Helper()
+		l, err := s.PrepareLaunch("organizer", slug)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var out []string
+		for _, w := range l.Warnings {
+			if strings.Contains(w, "characters") {
+				out = append(out, w)
+			}
+		}
+		return out
+	}
+	if w := lengthWarnings("redesign-goal-stages"); len(w) != 0 {
+		t.Errorf("organizer-probe-redesign-goal-stages fits, got %v", w)
+	}
+	w := lengthWarnings(long)
+	if len(w) != 1 || !strings.Contains(w[0], "is 71 characters; zellij holds at most 68") || !strings.Contains(w[0], "probe refuses it") {
+		t.Errorf("warnings %v, want the length, the ceiling and that probe refuses", w)
+	}
+	if len(w) == 1 && strings.Contains(w[0], "truncat") {
+		t.Errorf("probe does not truncate: %q", w[0])
+	}
+}
+
+// G6: the app's runs for one initiative sum input tokens per card over the
+// archive and the sessions still running — and carry no dollar figure, which
+// decision 0020 keeps in `organizer runs`. Everything reads from a temp
+// XDG_DATA_HOME, so the real runs.jsonl is neither read nor written.
+func TestInitiativeRunsSumsTokensPerCard(t *testing.T) {
+	t.Setenv("XDG_DATA_HOME", t.TempDir())
+	root := t.TempDir()
+	worktree := filepath.Join(root, ".wt", "redesign-runs-binding")
+	if err := os.MkdirAll(worktree, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	si := model.ScannedInitiative{}
+	si.ID, si.Path = "organizer", root
+	si.Cards = []model.Card{
+		{Slug: "redesign-runs-binding", Branch: "redesign-runs-binding"},
+		{Slug: "retire-keeps-the-cell", Branch: "retire-keeps-the-cell"},
+	}
+	other := model.ScannedInitiative{}
+	other.ID, other.Path = "agent-slack", t.TempDir()
+	s := &Service{state: cache.State{Local: model.Snapshot{Initiatives: []model.ScannedInitiative{si, other}}}}
+
+	day := func(d int) time.Time { return time.Date(2026, 9, d, 10, 0, 0, 0, time.UTC) }
+	archived := []session.Run{
+		// Two finished runs on the card.
+		{PID: 1, SessionID: "s1", Cwd: worktree, Model: "opus", InputTokens: 12_000, WindowSize: 200_000,
+			CostUSD: 1.5, Initiative: "organizer", Card: "redesign-runs-binding", Branch: "redesign-runs-binding",
+			FirstSeen: day(20), LastSeen: day(21), Ended: true},
+		{PID: 2, SessionID: "s2", Cwd: worktree, Model: "opus", InputTokens: 30_000, WindowSize: 200_000,
+			CostUSD: 4.25, Initiative: "organizer", Card: "redesign-runs-binding", Branch: "redesign-runs-binding",
+			FirstSeen: day(22), LastSeen: day(23), Ended: true},
+		// The open line of the session that is still running: stale numbers the
+		// live record must replace, not be added to.
+		{PID: 3, SessionID: "s3", Cwd: worktree, Model: "opus", InputTokens: 5_000, WindowSize: 200_000,
+			CostUSD: 0.4, Initiative: "organizer", Card: "redesign-runs-binding", Branch: "redesign-runs-binding",
+			FirstSeen: day(25), LastSeen: day(25)},
+		// Another initiative's run is not this initiative's business.
+		{PID: 4, SessionID: "s4", Cwd: other.Path, Model: "opus", InputTokens: 99_000,
+			Initiative: "agent-slack", Card: "cell-pause", FirstSeen: day(24), LastSeen: day(24), Ended: true},
+	}
+	if err := session.AppendRuns(session.RunsPath(), archived); err != nil {
+		t.Fatal(err)
+	}
+	live := session.Record{PID: 3, SessionID: "s3", Session: "organizer-probe-sup2", Cwd: worktree,
+		Model: "opus", UsedPercent: 20, InputTokens: 40_000, WindowSize: 200_000, CostUSD: 6.75,
+		UpdatedAt: day(26)}
+	if err := session.Write(session.Dir(), live); err != nil {
+		t.Fatal(err)
+	}
+
+	view := s.InitiativeRuns("organizer")
+	const want = 12_000 + 30_000 + 40_000
+	if view.Initiative != "organizer" || view.InputTokens != want {
+		t.Errorf("view = %q %d tokens, want organizer %d", view.Initiative, view.InputTokens, want)
+	}
+	if len(view.Cards) != 1 {
+		t.Fatalf("cards = %+v, want one (the other initiative's run filtered out)", view.Cards)
+	}
+	c := view.Cards[0]
+	if c.Card != "redesign-runs-binding" || c.InputTokens != want {
+		t.Errorf("card %q = %d tokens, want redesign-runs-binding %d", c.Card, c.InputTokens, want)
+	}
+	if len(c.Runs) != 3 || c.Live != 1 {
+		t.Fatalf("runs = %d (%d live), want 3 folded runs, one live", len(c.Runs), c.Live)
+	}
+	// Newest last-seen first, and the live session's numbers are the record's
+	// while its start is the one the archive remembers.
+	r := c.Runs[0]
+	if !r.Live || r.SessionID != "s3" || r.InputTokens != 40_000 || r.Ended {
+		t.Errorf("newest run = %+v, want the live s3 at 40000 tokens", r)
+	}
+	if !r.FirstSeen.Equal(day(25)) || !r.LastSeen.Equal(day(26)) {
+		t.Errorf("live run seen %s..%s, want %s..%s", r.FirstSeen, r.LastSeen, day(25), day(26))
+	}
+
+	// 0020: no dollar figure crosses into the app, whatever the archive holds.
+	b, err := json.Marshal(view)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(strings.ToLower(string(b)), "cost") {
+		t.Errorf("the bound view names a cost: %s", b)
 	}
 }

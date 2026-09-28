@@ -1,0 +1,21 @@
+stages:
+  - id: audit
+    title: Audit
+    phase: discovery
+    outcome: audit is in place
+    exit:
+      - audit is checked
+    done: 2026-08-08
+  - id: cuts
+    title: Cuts
+    phase: building
+    outcome: cuts is in place
+    exit:
+      - cuts is checked
+    gates: ["0001"]
+  - id: guard
+    title: Guardrails
+    phase: building
+    outcome: guardrails is in place
+    exit:
+      - guardrails is checked

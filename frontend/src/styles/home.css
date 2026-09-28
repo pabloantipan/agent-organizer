@@ -1,0 +1,40 @@
+/* Home's initiative rows at twenty (docs/specs/twenty-at-a-glance.md, FR-6):
+   each row adds its state and its phase, and the row stays one line so twenty
+   fit a 900-high window. The base row lives in shell.css; these rules are
+   scoped under .home and only add or tighten. Tier-2 role tokens and the
+   seven type sizes only; no nesting, no @layer, no color-mix (Safari 15.0). */
+
+.home .p-head, .home .p-row {
+  grid-template-columns: 24px minmax(0, 0.9fr) 144px 96px minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.5fr) 96px 24px;
+  gap: var(--space-3);
+  padding: var(--space-1-5) var(--space-3);
+}
+.home .p-head { padding-top: var(--space-2); padding-bottom: var(--space-2); }
+
+/* controls at the small height so a row is one 24px line plus padding */
+.home .p-id, .home .p-more { min-height: var(--control-sm); height: var(--control-sm); }
+
+/* one line: goal, stage and next date truncate, the full text is on hover */
+.home .p-goal { -webkit-line-clamp: 1; }
+.home .p-stage { display: flex; align-items: center; gap: var(--space-2); }
+.home .p-stage .stepper { flex: 0 0 40px; }
+.home .p-stage .stage-lbl { flex: 1 1 auto; min-width: 0; }
+.home .p-next { display: flex; gap: var(--space-2); align-items: baseline; min-width: 0; }
+
+/* State: a lozenge with its own icon and word, one per row (never colour
+   alone, design system Principles 4). */
+.p-state { display: flex; min-width: 0; }
+.lz.st-you { background: var(--decision-waiting-bg); color: var(--decision-waiting); }
+.lz.st-executing { background: var(--live-bg); color: var(--live); }
+.lz.st-business { background: var(--status-next-bg); color: var(--status-next); }
+.lz.st-quiet { background: transparent; color: var(--fg-subtle); padding-left: 0; }
+.lz[class*="st-"] svg { flex: 0 0 auto; }
+
+/* Phase: a word, with a compass for discovery and a hammer for building */
+.p-phase {
+  display: inline-flex; align-items: center; gap: var(--space-1); min-width: 0;
+  font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.p-phase svg { flex: 0 0 auto; color: var(--fg-subtle); }
+.p-phase.missing { color: var(--fg-subtle); font-style: italic; }

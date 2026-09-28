@@ -1,6 +1,8 @@
 package merge
 
 import (
+	"encoding/json"
+	"strings"
 	"testing"
 	"time"
 
@@ -87,5 +89,102 @@ func TestBuildHonoursOrder(t *testing.T) {
 	ApplyOrder(&local, order)
 	if local.Initiatives[0].ID != "c" || local.Initiatives[1].Cards[0].Slug != "a2" {
 		t.Errorf("ApplyOrder: %s %s", local.Initiatives[0].ID, local.Initiatives[1].Cards[0].Slug)
+	}
+}
+
+// FR-1 to FR-3: the goal, the measure, the specs and the stages of the scan
+// reach the board initiative, with the current stage still marked. G1, the
+// merge half.
+func TestBuildCarriesGoalMeasureSpecsScopeAndStages(t *testing.T) {
+	now := time.Date(2026, 9, 2, 12, 0, 0, 0, time.UTC)
+	withGoal := si("goals", "acme", model.Card{Slug: "c1", Status: "now", Updated: "2026-09-01", Next: "a", Stage: "two"})
+	withGoal.Goal = "acme signs off on one run"
+	withGoal.Measure = "no manual step is left"
+	withGoal.Specs = []string{"specs/", "docs/one.md"}
+	withGoal.Scope = model.Scope{In: []string{"the scan", "the board"}, Out: []string{"identity"}}
+	withGoal.Stages = []model.Stage{
+		{ID: "one", Title: "First", Phase: "discovery", Done: "2026-08-01", Exit: []model.ExitItem{{Text: "done", Met: "2026-08-01"}}},
+		{ID: "two", Title: "Second", Phase: "building", Current: true, Gates: []string{"0004"}, Appetite: "two waves"},
+	}
+	bare := si("bare", "personal", model.Card{Slug: "c2", Status: "next", Updated: "2026-09-01", Next: "b"})
+
+	b := Build(model.Snapshot{Machine: "here", Initiatives: []model.ScannedInitiative{withGoal, bare}}, nil, model.Order{}, now)
+
+	byID := map[string]BoardInitiative{}
+	for _, bi := range b.Initiatives {
+		byID[bi.ID] = bi
+	}
+	got := byID["goals"]
+	if got.Goal != "acme signs off on one run" || got.Measure != "no manual step is left" {
+		t.Errorf("goal=%q measure=%q", got.Goal, got.Measure)
+	}
+	if len(got.Specs) != 2 || got.Specs[1] != "docs/one.md" {
+		t.Errorf("specs=%v", got.Specs)
+	}
+	if len(got.Stages) != 2 || got.Stages[1].Appetite != "two waves" || got.Stages[0].Exit[0].Met != "2026-08-01" {
+		t.Fatalf("stages=%+v", got.Stages)
+	}
+	cur, ok := model.CurrentStage(got.Stages)
+	if !ok || cur.ID != "two" || !got.Stages[1].Current {
+		t.Errorf("current stage=%+v ok=%v", cur, ok)
+	}
+	if got.Stages[0].Phase != "discovery" || got.Stages[1].Phase != "building" {
+		t.Errorf("phases=%q,%q", got.Stages[0].Phase, got.Stages[1].Phase)
+	}
+	if strings.Join(got.Scope.In, ",") != "the scan,the board" || strings.Join(got.Scope.Out, ",") != "identity" {
+		t.Errorf("scope=%+v", got.Scope)
+	}
+	// No scope is two empty lists, never null, so the header can say
+	// "no scope yet" without a nil check.
+	if bare := byID["bare"]; bare.Scope.In == nil || bare.Scope.Out == nil || len(bare.Scope.In)+len(bare.Scope.Out) != 0 {
+		t.Errorf("bare scope=%#v", bare.Scope)
+	}
+	if j, _ := json.Marshal(byID["bare"].Scope); string(j) != `{"in":[],"out":[]}` {
+		t.Errorf("bare scope json=%s", j)
+	}
+	// An initiative with no goal and no roadmap carries neither, and that is
+	// not an error anywhere on the board.
+	if bare := byID["bare"]; bare.Goal != "" || len(bare.Stages) != 0 {
+		t.Errorf("bare initiative=%+v", bare.Initiative)
+	}
+	// The card's stage rides to the board card.
+	if c := b.Columns["now"]; len(c) != 1 || c[0].Stage != "two" {
+		t.Errorf("now column=%+v", c)
+	}
+}
+
+// FR-11, G7, the board half: the FSE's activity rides from the scan to the
+// board, and an initiative without an FSE carries an empty one.
+func TestBuildCarriesFSEActivity(t *testing.T) {
+	now := time.Date(2026, 9, 2, 12, 0, 0, 0, time.UTC)
+	withFSE := si("fse", "acme", model.Card{Slug: "c1", Status: "now", Updated: "2026-09-01", Next: "a"})
+	withFSE.FSE = model.FSEActivity{
+		Path:        "/tmp/init/docs/bitacora/fse_bitacora.md",
+		HandOff:     "HAND-OFF — 2026-09-02, the spec is out",
+		HandOffBody: "- **Waiting on Pablo:** the intake.",
+		Commits: []model.FSECommit{
+			{SHA: "aaa1111", At: "2026-09-02T09:02:00Z", Subject: "docs(fse): signed 2"},
+			{SHA: "bbb2222", At: "2026-09-02T09:01:00Z", Subject: "docs(fse): signed 1"},
+		},
+	}
+	bare := si("bare", "acme", model.Card{Slug: "c2", Status: "now", Updated: "2026-09-01", Next: "b"})
+	b := Build(model.Snapshot{Machine: "here", Initiatives: []model.ScannedInitiative{withFSE, bare}}, nil, model.Order{}, now)
+
+	byID := map[string]BoardInitiative{}
+	for _, bi := range b.Initiatives {
+		byID[bi.ID] = bi
+	}
+	got := byID["fse"].FSE
+	if got.HandOff != withFSE.FSE.HandOff || got.HandOffBody != withFSE.FSE.HandOffBody || got.Path != withFSE.FSE.Path {
+		t.Errorf("hand-off=%+v", got)
+	}
+	if len(got.Commits) != 2 || got.Commits[0].Subject != "docs(fse): signed 2" {
+		t.Fatalf("commits=%+v", got.Commits)
+	}
+	if got.Empty() {
+		t.Error("activity with a hand-off and commits reads as empty")
+	}
+	if !byID["bare"].FSE.Empty() {
+		t.Errorf("initiative with no FSE: %+v", byID["bare"].FSE)
 	}
 }

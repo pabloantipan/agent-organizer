@@ -1,0 +1,8 @@
+id: search-index
+title: Search index
+client: northwind
+status: active
+started: 2026-07-01
+machine: fixture
+repos: []
+goal: Staff find a record by any field in a second

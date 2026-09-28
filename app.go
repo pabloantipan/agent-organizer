@@ -411,9 +411,37 @@ func (a *App) AttachSession(name string) error {
 	return a.svc.AttachSession(name)
 }
 
+// Runs is one initiative's agent sessions grouped by card, with the input
+// tokens summed over the archive and the sessions still running. No dollars:
+// decision 0020 keeps the bill in `organizer runs`.
+func (a *App) Runs(initiativeID string) service.RunsView {
+	if a.svc == nil {
+		return service.RunsView{}
+	}
+	return a.svc.InitiativeRuns(initiativeID)
+}
+
+// RuleDecision writes the owner's ruling into a proposed decision record and
+// commits that one file (FR-13, 0019). It is the app's only write over a
+// record, and it refuses anything but the owner's own ruling of a proposed one.
+func (a *App) RuleDecision(initiativeID, number, chosen, words string) error {
+	if a.svc == nil {
+		return errString(a.err)
+	}
+	return a.svc.RuleDecision(initiativeID, number, chosen, words)
+}
+
 // MilestoneType exists only so the Wails generator emits model.Milestone in
 // models.ts; nested slice element types are otherwise skipped.
 func (a *App) MilestoneType() model.Milestone { return model.Milestone{} }
+
+// StageType exists only so the Wails generator emits model.Stage (and the
+// ExitItem it holds) in models.ts, for the same reason as MilestoneType.
+func (a *App) StageType() model.Stage { return model.Stage{} }
+
+// ScopeType exists only so the Wails generator emits model.Scope in models.ts,
+// for the same reason as MilestoneType.
+func (a *App) ScopeType() model.Scope { return model.Scope{} }
 
 type errString string
 

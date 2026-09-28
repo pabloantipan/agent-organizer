@@ -1,0 +1,8 @@
+id: billing-api
+title: Billing API
+client: acme
+status: active
+started: 2026-07-01
+machine: fixture
+repos: []
+goal: Invoices go out the day the job closes

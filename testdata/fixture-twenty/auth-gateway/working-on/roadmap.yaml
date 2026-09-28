@@ -1,0 +1,27 @@
+stages:
+  - id: threat
+    title: Threat model
+    phase: discovery
+    outcome: threat model is in place
+    exit:
+      - threat model is checked
+    done: 2026-08-05
+  - id: gateway
+    title: Gateway
+    phase: building
+    outcome: gateway is in place
+    exit:
+      - gateway is checked
+    gates: ["0001"]
+  - id: migrate
+    title: Migrate apps
+    phase: building
+    outcome: migrate apps is in place
+    exit:
+      - migrate apps is checked
+  - id: retire
+    title: Retire old login
+    phase: building
+    outcome: retire old login is in place
+    exit:
+      - retire old login is checked

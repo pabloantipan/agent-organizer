@@ -1,0 +1,8 @@
+id: email-digest
+title: Email digest
+client: personal
+status: active
+started: 2026-07-01
+machine: fixture
+repos: []
+goal: One morning email instead of twelve alerts

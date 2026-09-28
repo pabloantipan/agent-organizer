@@ -67,9 +67,15 @@ export function Reveal(arg1:string):Promise<void>;
 
 export function ReviewPrompt(arg1:string):Promise<string>;
 
+export function RuleDecision(arg1:string,arg2:string,arg3:string,arg4:string):Promise<void>;
+
 export function RunReview(arg1:string):Promise<void>;
 
+export function Runs(arg1:string):Promise<service.RunsView>;
+
 export function SaveConfig(arg1:config.Config):Promise<void>;
+
+export function ScopeType():Promise<model.Scope>;
 
 export function SearchCell(arg1:string,arg2:string):Promise<Array<discuss.Message>>;
 
@@ -90,6 +96,8 @@ export function SignIn(arg1:string,arg2:string):Promise<auth.Account>;
 export function SignOut():Promise<void>;
 
 export function SignUp(arg1:string,arg2:string):Promise<auth.Account>;
+
+export function StageType():Promise<model.Stage>;
 
 export function StopAgent(arg1:number):Promise<void>;
 

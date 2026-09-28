@@ -1,0 +1,14 @@
+stages:
+  - id: needs
+    title: What people search
+    phase: discovery
+    outcome: what people search is in place
+    exit:
+      - what people search is checked
+  - id: index
+    title: The index
+    phase: building
+    outcome: the index is in place
+    exit:
+      - the index is checked
+    gates: ["0001"]

@@ -43,7 +43,7 @@ export function Crew({ group, onMessage }: { group: AgentGroup; onMessage?: (sea
         {!asking && <button className={`tiny-btn ${(group.retirable?.length ?? 0) > 0 ? "" : "ghost"}`} onClick={() => setRetiring(true)} title={(group.retirable?.length ?? 0) > 0 ? `wave done with ${group.retirable.join(", ")}: organizer retire ${group.id} --retirable` : `organizer retire ${group.id}: end a wave`}><UserRoundX size={13} /> {(group.retirable?.length ?? 0) > 0 ? `${group.retirable.length} retirable` : "Retire…"}</button>}
         {retiring && <Retire group={group} onClose={() => setRetiring(false)} />}
         {!asking && (
-          <button className="tiny-btn primary" onClick={() => setAsking(true)} title={`organizer crew ${group.id}`} disabled={busy}>
+          <button className="tiny-btn primary" onClick={() => setAsking(true)} title={seats.length === 0 ? "no seats: the roster is empty between waves" : `organizer crew ${group.id}`} disabled={busy || seats.length === 0}>
             <Users size={13} /> {off === seats.length ? "Bring crew up" : off > 0 ? `Bring ${off} up` : "Reattach all"}
           </button>
         )}

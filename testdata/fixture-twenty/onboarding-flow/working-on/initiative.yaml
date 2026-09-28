@@ -1,0 +1,8 @@
+id: onboarding-flow
+title: Onboarding flow
+client: planta
+status: active
+started: 2026-07-01
+machine: fixture
+repos: []
+goal: A new client is live in a day, not a week

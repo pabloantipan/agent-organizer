@@ -1,0 +1,20 @@
+stages:
+  - id: signals
+    title: Signals
+    phase: discovery
+    outcome: signals is in place
+    exit:
+      - signals is checked
+  - id: score
+    title: The score
+    phase: building
+    outcome: the score is in place
+    exit:
+      - the score is checked
+    gates: ["0001"]
+  - id: rollout
+    title: Rollout
+    phase: building
+    outcome: rollout is in place
+    exit:
+      - rollout is checked

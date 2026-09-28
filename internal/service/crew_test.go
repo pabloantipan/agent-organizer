@@ -23,10 +23,14 @@ func TestCrewSessionNamesTheCellAndTheSeat(t *testing.T) {
 		{name: "the longest real seat still fits", cell: camp, seat: "fullstack_dev_francisco", want: "camp-probe-francisco"},
 		{name: "a seat with no role is its own name", cell: camp, seat: "reviewer", want: "camp-probe-reviewer"},
 		{name: "project and seat are sanitized", cell: &model.Cell{Project: "Camp Mono"}, seat: "po_Andrea", want: "camp-mono-probe-andrea"},
-		{name: "over the budget is an error naming the length", cell: &model.Cell{Project: "ccint-camp-monorepo"}, seat: "po_andrea",
-			err: "is 32 characters"},
-		{name: "and never a truncation", cell: &model.Cell{Project: "ccint-camp-monorepo"}, seat: "po_andrea",
-			err: "ccint-camp-monorepo-probe-andrea"},
+		{name: "a long project fits under /tmp's budget", cell: &model.Cell{Project: "ccint-camp-monorepo"}, seat: "po_andrea",
+			want: "ccint-camp-monorepo-probe-andrea"},
+		{name: "the card's 40-character name fits", cell: &model.Cell{Project: "organizer"}, seat: "w_abcdefghijklmnopqrstuvwx",
+			want: "organizer-probe-abcdefghijklmnopqrstuvwx"},
+		{name: "over the budget is an error naming the length", cell: &model.Cell{Project: "ccint-camp-monorepo-and-a-project-name-no-socket-dir-can-hold"}, seat: "po_andrea",
+			err: "is 74 characters; zellij holds at most 68"},
+		{name: "and never a truncation", cell: &model.Cell{Project: "ccint-camp-monorepo-and-a-project-name-no-socket-dir-can-hold"}, seat: "po_andrea",
+			err: "ccint-camp-monorepo-and-a-project-name-no-socket-dir-can-hold-probe-andrea"},
 		{name: "a seat that is only a role has no name", cell: camp, seat: "po_", err: "cannot name a session"},
 		{name: "no cell, no session", seat: "po_andrea", err: "no cell"},
 	}
@@ -55,6 +59,14 @@ func TestCrewSessionNamesTheCellAndTheSeat(t *testing.T) {
 				t.Errorf("%q is %d characters, over the budget of %d", got, len(got), maxSessionName)
 			}
 		})
+	}
+}
+
+// The ceiling is derived, not typed: 103 usable bytes of a macOS socket path
+// minus probe's socket dir for uid 501, which zellij 0.44.3 was measured at.
+func TestMaxSessionNameIsProbesSocketBudget(t *testing.T) {
+	if maxSessionName != 68 {
+		t.Errorf("maxSessionName = %d, want 68 (103 - len(\"/tmp/zellij-501/contract_version_1/\"))", maxSessionName)
 	}
 }
 
@@ -98,7 +110,7 @@ func TestBuildCrewJoinsRosterProcessesAndHealth(t *testing.T) {
 	// A seat whose name zellij cannot hold joins by persona and by nothing
 	// else: an empty session must never match a process without one.
 	long := &model.ScannedInitiative{}
-	long.Cell = &model.Cell{Project: "ccint-camp-monorepo", Agents: []string{"po_andrea"}}
+	long.Cell = &model.Cell{Project: "ccint-camp-monorepo-and-a-project-name-no-socket-dir-can-hold", Agents: []string{"po_andrea"}}
 	long.Agents = []model.Agent{{Name: "stray", Session: "", State: model.AgentShell}}
 	seats := buildCrew(long, discuss.Snapshot{})
 	if len(seats) != 1 || seats[0].Session != "" || seats[0].Agent != nil {

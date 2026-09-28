@@ -1,0 +1,7 @@
+# One stand-in agent per line: <initiative> <card slug>. fixture-home.sh
+# --twenty starts each as organizer-fixture-agent with its cwd in the card's
+# .wt/<slug>, which is how the scan joins an agent to a card (cardjoin.go).
+billing-api invoice-run
+field-app offline-probe
+auth-gateway token-cache
+ops-dashboard stuck-jobs

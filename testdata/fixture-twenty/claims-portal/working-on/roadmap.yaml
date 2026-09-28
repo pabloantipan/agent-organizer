@@ -1,0 +1,21 @@
+stages:
+  - id: intake
+    title: Intake
+    phase: discovery
+    outcome: intake is in place
+    exit:
+      - intake is checked
+    done: 2026-08-01
+  - id: portal
+    title: The portal
+    phase: building
+    outcome: the portal is in place
+    exit:
+      - the portal is checked
+    gates: ["0001"]
+  - id: handoff
+    title: Hand-off
+    phase: building
+    outcome: hand-off is in place
+    exit:
+      - hand-off is checked

@@ -49,6 +49,21 @@ func TestNameArg(t *testing.T) {
 	}
 }
 
+func TestHelperProcess(t *testing.T) {
+	for args, want := range map[string]bool{
+		"daemon run --origin transient --spawned-by {}":                                               true,
+		"bg-spare --bg-spare /tmp/cc-daemon-502/1/spare/a.claim.sock HOME=/x":                         true,
+		"bg-pty-host --bg-pty-host /tmp/s.pty.sock 200 50 -- /v/2.1.280 --bg-spare /tmp/a.claim.sock": true,
+		"--bg-pty-host /tmp/p.sock 157 55 -- /v/2.1.280 --session-id b31a --agent claude":             false,
+		"-n darkfactory-probe-supervisor You are the supervisor":                                      false,
+		"": false,
+	} {
+		if got := helperProcess(args); got != want {
+			t.Errorf("%q -> %v want %v", args, got, want)
+		}
+	}
+}
+
 func TestAssignAgents(t *testing.T) {
 	inits := []model.ScannedInitiative{{}, {}, {}}
 	inits[0].ID, inits[0].Path = "shop", "/h/work/shop"
@@ -92,6 +107,9 @@ func TestIdentityFromPsLine(t *testing.T) {
 }
 
 func TestAttachSessions(t *testing.T) {
+	// attachSessions archives into session.RunsPath(), beside session.Dir():
+	// keep it out of the real ~/.local/share/organizer.
+	t.Setenv("XDG_DATA_HOME", t.TempDir())
 	dir := t.TempDir()
 	now := time.Now()
 	for _, r := range []session.Record{

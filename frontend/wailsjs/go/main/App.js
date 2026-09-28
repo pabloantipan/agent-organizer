@@ -122,12 +122,24 @@ export function ReviewPrompt(arg1) {
   return window['go']['main']['App']['ReviewPrompt'](arg1);
 }
 
+export function RuleDecision(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['RuleDecision'](arg1, arg2, arg3, arg4);
+}
+
 export function RunReview(arg1) {
   return window['go']['main']['App']['RunReview'](arg1);
 }
 
+export function Runs(arg1) {
+  return window['go']['main']['App']['Runs'](arg1);
+}
+
 export function SaveConfig(arg1) {
   return window['go']['main']['App']['SaveConfig'](arg1);
+}
+
+export function ScopeType() {
+  return window['go']['main']['App']['ScopeType']();
 }
 
 export function SearchCell(arg1, arg2) {
@@ -168,6 +180,10 @@ export function SignOut() {
 
 export function SignUp(arg1, arg2) {
   return window['go']['main']['App']['SignUp'](arg1, arg2);
+}
+
+export function StageType() {
+  return window['go']['main']['App']['StageType']();
 }
 
 export function StopAgent(arg1) {

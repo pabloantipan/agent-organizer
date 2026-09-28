@@ -35,11 +35,24 @@ type Seat struct {
 	Owes []model.ThreadState `json:"owes"`
 }
 
-// maxSessionName is what zellij will hold. macOS caps a unix socket path at
-// 104 bytes and zellij spends 79 of them on its own prefix, so a session name
-// over about 22 characters is refused at launch. The ceiling moves only when
-// probe sets ZELLIJ_SOCK_DIR; until then it is a fact this code obeys.
-const maxSessionName = 22
+// maxSessionName is the longest probe session name zellij will hold. zellij
+// puts a session's socket at $TMPDIR/zellij-<uid>/contract_version_1/<name>
+// and macOS caps a unix socket path at 103 characters (sun_path is 104 bytes
+// with the NUL). probe exports TMPDIR=/tmp, so with uid 501 the prefix is 35
+// characters and a name may be 68: measured on zellij 0.44.3, 68 starts and
+// 69 is refused (~/claudecode bin/probe, which refuses over the same budget).
+// Under the per-user default TMPDIR the prefix was 79 and the ceiling 22;
+// the ceiling moves again only if probe's socket dir does.
+const maxSessionName = 103 - len("/tmp/zellij-501/contract_version_1/")
+
+// sessionNameTooLong names the length and the ceiling of a session name
+// zellij would refuse, or is nil. Launch, join and retire read one ceiling.
+func sessionNameTooLong(name string) error {
+	if len(name) > maxSessionName {
+		return fmt.Errorf("session name %q is %d characters; zellij holds at most %d", name, len(name), maxSessionName)
+	}
+	return nil
+}
 
 // seatShort is the seat name after its role prefix. The roster convention is
 // <role>_<name>, and the role itself may hold underscores, so the name is the
@@ -57,10 +70,9 @@ func seatShort(seat string) string {
 // probe family, the seat's short name after it — camp-probe-andrea, which is
 // what the sessions that actually ran were called.
 //
-// Named after the cell and not after the initiative because
-// <initiative>-probe-<seat> is 49 characters for ccint-camp-monorepo and
-// zellij refuses it, while the cell's project is the short name the seats
-// already answer to. Over the budget this is an error naming the length,
+// Named after the cell and not after the initiative because the cell's
+// project is the short name the seats already answer to (the rule dates from
+// a ceiling of 22, when <initiative>-probe-<seat> was refused). Over the budget this is an error naming the length,
 // never a truncation: a truncated name is a session that the launch, the
 // join and the retire each guess differently.
 func crewSession(cell *model.Cell, seat string) (string, error) {
@@ -72,9 +84,8 @@ func crewSession(cell *model.Cell, seat string) (string, error) {
 		return "", fmt.Errorf("cannot name a session for seat %q of project %q", seat, cell.Project)
 	}
 	name := family + "-probe-" + short
-	if len(name) > maxSessionName {
-		return "", fmt.Errorf("session name %q is %d characters; zellij holds at most %d (shorten the cell's project or the seat's name)",
-			name, len(name), maxSessionName)
+	if err := sessionNameTooLong(name); err != nil {
+		return "", fmt.Errorf("%w (shorten the cell's project or the seat's name)", err)
 	}
 	return name, nil
 }

@@ -5,6 +5,8 @@ package model
 import (
 	"strings"
 	"time"
+
+	"gopkg.in/yaml.v3"
 )
 
 // Card statuses. The set is closed on purpose; see the working-on skill.
@@ -59,8 +61,97 @@ type Initiative struct {
 	// Milestones are dated checkpoints. Optional, few.
 	Milestones []Milestone `yaml:"milestones" json:"milestones"`
 
+	// Goal is the outcome in one line and Measure is how the owner will know
+	// it worked, both in the owner's words. Optional; an initiative without a
+	// goal is one nobody has written down yet, not a malformed one.
+	Goal    string `yaml:"goal" json:"goal"`
+	Measure string `yaml:"measure" json:"measure"`
+	// Scope is what the initiative takes on and what it leaves out, in the
+	// owner's words. Optional; no scope is two empty lists, not a problem.
+	Scope Scope `yaml:"scope" json:"scope"`
+
+	// Stages are working-on/roadmap.yaml, in order, and do not come from
+	// initiative.yaml: the scanner fills them from the other file. No roadmap
+	// means no stages, which is the normal case.
+	Stages []Stage `yaml:"-" json:"stages"`
+
 	// Path is the initiative root directory (the parent of working-on/).
 	Path string `yaml:"-" json:"path"`
+}
+
+// Scope is initiative.yaml's scope: {in, out}.
+type Scope struct {
+	In  []string `yaml:"in" json:"in"`
+	Out []string `yaml:"out" json:"out"`
+}
+
+// Stage phases (the working-on skill, Roadmap): discovery finds the edge of the
+// problem and ends in decisions; building is specs, cards and waves. Any other
+// value is reported by the scan and dropped.
+const (
+	PhaseDiscovery = "discovery"
+	PhaseBuilding  = "building"
+)
+
+// Stage is one entry of working-on/roadmap.yaml: an outcome, exit items that
+// can each be checked, and the decisions that gate it. Dates are optional and
+// only ever real ones; an appetite is a size, never a date (the roadmapping
+// skill).
+type Stage struct {
+	ID      string `yaml:"id" json:"id"`
+	Title   string `yaml:"title" json:"title"`
+	Outcome string `yaml:"outcome" json:"outcome"`
+	// Phase is PhaseDiscovery or PhaseBuilding, else empty.
+	Phase string     `yaml:"phase" json:"phase"`
+	Exit  []ExitItem `yaml:"exit" json:"exit"`
+	// Gates are decision record numbers that must be ruled before the stage
+	// starts, as they are written on the file: "0004".
+	Gates []string `yaml:"gates" json:"gates"`
+	// Appetite is how much the stage is worth ("two waves", "a week"). Never
+	// turned into a date.
+	Appetite string `yaml:"appetite" json:"appetite"`
+	// Target is the date the stage is meant to land; Done the date its exit
+	// was met and its owner ruled it so. Both optional, both real dates.
+	Target string `yaml:"target" json:"target"`
+	Done   string `yaml:"done" json:"done"`
+
+	// Current is stamped by the scanner on the first stage without Done.
+	Current bool `yaml:"-" json:"current"`
+}
+
+// ExitItem is one condition a stage is done by. On the file it is a bare
+// string, or a mapping {text, met} once someone verified it; in memory and in
+// JSON it is always this shape, so every reader has one.
+type ExitItem struct {
+	Text string `yaml:"text" json:"text"`
+	// Met is the date the item was verified. Empty means still open.
+	Met string `yaml:"met" json:"met"`
+}
+
+// UnmarshalYAML accepts either form the working-on skill allows.
+func (e *ExitItem) UnmarshalYAML(n *yaml.Node) error {
+	if n.Kind == yaml.ScalarNode {
+		return n.Decode(&e.Text)
+	}
+	type plain ExitItem
+	var p plain
+	if err := n.Decode(&p); err != nil {
+		return err
+	}
+	*e = ExitItem(p)
+	return nil
+}
+
+// CurrentStage returns the first stage without a Done date — where the
+// initiative is now — and false when there is no roadmap or every stage is
+// done.
+func CurrentStage(stages []Stage) (Stage, bool) {
+	for _, s := range stages {
+		if strings.TrimSpace(s.Done) == "" {
+			return s, true
+		}
+	}
+	return Stage{}, false
 }
 
 // Milestone is a dated checkpoint on an initiative roadmap.
@@ -114,6 +205,9 @@ type Card struct {
 	// Seat is optional: the cell seat that builds this card. A seat with no
 	// open card naming it is finished, which is what retiring reads.
 	Seat string `yaml:"seat" json:"seat"`
+	// Stage is optional: the roadmap stage id this card belongs to. A card
+	// without one is outside the roadmap, which is fine for chores.
+	Stage string `yaml:"stage" json:"stage"`
 
 	// The build fields (working-on skill, Vocabulary). A supervisor reads
 	// them to launch a builder against the card and to sequence waves; a card
@@ -229,6 +323,31 @@ type Agent struct {
 	Watcher     string `json:"watcher"`
 	Deaf        bool   `json:"deaf"`
 	Undelivered int    `json:"undelivered"`
+	// Card is the open card this agent works, nil when no card answers to it
+	// or two do. Joined by the agents feed, never by the scan of a card file.
+	Card *CardJoin `json:"card"`
+}
+
+// CardJoin is the answer to "which card is this agent on": the card it was
+// joined to, and the numbers a card line shows next to it — how the agent is
+// doing, how full its context is, what it has spent and when it started.
+// Copied onto the join on purpose: a view that has the card has the whole
+// line without walking back to the agent.
+type CardJoin struct {
+	Initiative string `json:"initiative"`
+	Slug       string `json:"slug"`
+	Title      string `json:"title"`
+	// Key is "<initiative>/<slug>", the id a view groups cards by.
+	Key string `json:"key"`
+	// State is the agent's: working, running, shell or exited.
+	State string `json:"state"`
+	// UsedPercent and InputTokens are the statusline's last word, zero when
+	// the hook has not fired for this process.
+	UsedPercent float64 `json:"used_percent"`
+	InputTokens int     `json:"input_tokens"`
+	// StartedAt is when the agent process started, from ps elapsed time.
+	// Zero for a session with no process of its own.
+	StartedAt time.Time `json:"started_at"`
 }
 
 const (
@@ -272,16 +391,54 @@ type Problem struct {
 	Msg  string `json:"msg"`
 }
 
+// FSEActivity is what the board carries about an initiative's Forward Software
+// Engineer: the hand-off it left for its next session and the commits it signed
+// (FR-11). Derived on every scan, never stored. An initiative with no bitácora
+// has no activity and that is the normal case, not a problem.
+//
+// The FSE's open threads, FR-11's third part, are not here: they come from the
+// discuss API, which only internal/service reaches.
+type FSEActivity struct {
+	// Path is the bitácora that was read, absolute, empty when there is none.
+	Path string `json:"path"`
+	// HandOff is the HAND-OFF heading as written ("HAND-OFF — 2026-09-26, the
+	// redesign spec is out") and HandOffBody the section under it, verbatim
+	// markdown.
+	HandOff     string `json:"hand_off"`
+	HandOffBody string `json:"hand_off_body"`
+	// Commits are the last ten commits with a Committed-by: FSE trailer,
+	// newest first.
+	Commits []FSECommit `json:"commits"`
+}
+
+// Empty reports whether there is no FSE activity to show.
+func (a FSEActivity) Empty() bool {
+	return a.HandOff == "" && a.HandOffBody == "" && len(a.Commits) == 0
+}
+
+// FSECommit is one commit the FSE signed: its time (RFC 3339, so a view can
+// show the hour) and subject, with the short sha to point at it.
+type FSECommit struct {
+	SHA     string `json:"sha"`
+	At      string `json:"at"`
+	Subject string `json:"subject"`
+}
+
 // ScannedInitiative is an initiative with everything read from disk.
 type ScannedInitiative struct {
 	Initiative
-	Cards      []Card      `json:"cards"`
+	Cards []Card `json:"cards"`
+	// Decisions are working-on/decisions/ records, in number order.
+	Decisions  []Decision  `json:"decisions"`
 	RepoStates []RepoState `json:"repos_state"`
 	Problems   []Problem   `json:"problems"`
 	Agents     []Agent     `json:"agents"`
 	// Cell is the persona roster when agents/cell.json exists at the root.
-	Cell      *Cell     `json:"cell"`
-	ScannedAt time.Time `json:"scanned_at"`
+	Cell *Cell `json:"cell"`
+	// FSE is the initiative's Forward Software Engineer activity, read from
+	// the bitácora and git. Empty when there is no FSE.
+	FSE       FSEActivity `json:"fse"`
+	ScannedAt time.Time   `json:"scanned_at"`
 }
 
 // LiveAgents counts agents with a running process; Working counts those busy.

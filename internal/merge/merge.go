@@ -33,8 +33,11 @@ type BoardInitiative struct {
 	RepoStates  []model.RepoState `json:"repos_state"`
 	Problems    []model.Problem   `json:"problems"`
 	Agents      []model.Agent     `json:"agents"`
-	Live        int               `json:"live"`
-	Working     int               `json:"working"`
+	Decisions   []model.Decision  `json:"decisions"`
+	// FSE is the initiative's Forward Software Engineer activity (FR-11).
+	FSE     model.FSEActivity `json:"fse"`
+	Live    int               `json:"live"`
+	Working int               `json:"working"`
 	// AlsoOn lists other machines reporting the same initiative id.
 	AlsoOn []string `json:"also_on"`
 }
@@ -93,6 +96,16 @@ func Build(local model.Snapshot, remote []model.Snapshot, order model.Order, now
 				Now:         n, Blocked: bl, Next: x, Done: done,
 				RepoStates: si.RepoStates,
 				Problems:   si.Problems,
+				Decisions:  si.Decisions,
+				FSE:        si.FSE,
+			}
+			// No scope is two empty lists on the board, also for a snapshot
+			// written before scope existed.
+			if bi.Scope.In == nil {
+				bi.Scope.In = []string{}
+			}
+			if bi.Scope.Out == nil {
+				bi.Scope.Out = []string{}
 			}
 			for _, m := range machinesByID[si.ID] {
 				if m != s.Machine {

@@ -2,10 +2,12 @@ import { useEffect } from "react";
 import { TopBar } from "./components/TopBar";
 import { Board } from "./components/Board";
 import { Rail } from "./components/Rail";
-import { Initiatives } from "./components/Initiatives";
+import { Home } from "./components/Home";
+import { Overview } from "./components/Overview";
+import { InitiativeHeader } from "./components/InitiativeHeader";
 import { Settings } from "./components/Settings";
-import { Calendar } from "./components/Calendar";
 import { RoadmapView } from "./components/RoadmapView";
+import { DecisionsView } from "./components/DecisionsView";
 import { AgentsView } from "./components/AgentsView";
 import { SlackView } from "./components/SlackView";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -14,9 +16,10 @@ import { CardDrawer } from "./components/CardDrawer";
 import { useBoard } from "./stores/board.store";
 import { api, type AgentsView as AgentsPayload } from "./hooks/useWails";
 import { EventsOn } from "../wailsjs/runtime/runtime";
+import "./styles/shell.css";
 
 export default function App() {
-  const { tab, refresh, sync, applyAgents, railCollapsed } = useBoard();
+  const { screen, refresh, sync, applyAgents, railCollapsed } = useBoard();
 
   useEffect(() => {
     refresh();
@@ -43,42 +46,50 @@ export default function App() {
     <Gate>
     <div className="shell">
       <TopBar />
-      <main className={["board", "calendar", "roadmap", "agents", "slack"].includes(tab) ? `content with-rail ${railCollapsed ? "rail-strip" : ""}` : "content"}>
-        {tab === "board" && (
-          <>
-            <Rail />
-            <ErrorBoundary name="Board"><Board /></ErrorBoundary>
-          </>
-        )}
-        {tab === "initiatives" && <ErrorBoundary name="Initiatives"><Initiatives /></ErrorBoundary>}
-        {tab === "agents" && (
-          <>
-            <Rail />
-            <div className="board-wrap"><ErrorBoundary name="AgentsView"><AgentsView /></ErrorBoundary></div>
-          </>
-        )}
-        {tab === "slack" && (
-          <>
-            <Rail />
-            <div className="board-wrap slack-wrap"><ErrorBoundary name="SlackView"><SlackView /></ErrorBoundary></div>
-          </>
-        )}
-        {tab === "roadmap" && (
-          <>
-            <Rail />
-            <div className="board-wrap"><ErrorBoundary name="RoadmapView"><RoadmapView /></ErrorBoundary></div>
-          </>
-        )}
-        {tab === "calendar" && (
-          <>
-            <Rail />
-            <div className="board-wrap"><ErrorBoundary name="Calendar"><Calendar /></ErrorBoundary></div>
-          </>
-        )}
-        {tab === "settings" && <ErrorBoundary name="Settings"><Settings /></ErrorBoundary>}
-      </main>
+      {screen === "settings" ? (
+        <main className="content"><ErrorBoundary name="Settings"><Settings /></ErrorBoundary></main>
+      ) : (
+        <main className={`content with-rail ${railCollapsed ? "rail-strip" : ""}`}>
+          <Rail />
+          {screen === "home" ? <div className="board-wrap"><ErrorBoundary name="Home"><Home /></ErrorBoundary></div> : <InitiativeScreen />}
+        </main>
+      )}
       <CardDrawer />
     </div>
     </Gate>
+  );
+}
+
+/** One initiative: its header over the six sub-views (FR-14). Each sub-view
+ *  mounts the view that existed before the redesign; Conversations is the
+ *  Slack view renamed, Calendar lives inside Roadmap. */
+function InitiativeScreen() {
+  const { view, selectedInitiative, sub, goHome } = useBoard();
+  if (!view) return <div className="board-wrap"><div className="empty">Loading…</div></div>;
+  const rows = (view.board.initiatives ?? []).filter((i) => i.id === selectedInitiative);
+  const initiative = rows.find((i) => i.local) ?? rows[0];
+  if (!initiative) {
+    return (
+      <div className="board-wrap">
+        <div className="panel empty-state">
+          <div>{selectedInitiative} is not on the board any more.</div>
+          <div className="sub">A rescan no longer finds its working-on/initiative.yaml.</div>
+          <button onClick={goHome}>Back to Home</button>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="initiative-screen">
+      <InitiativeHeader initiative={initiative} />
+      <div className={`board-wrap ${sub === "conversations" ? "slack-wrap" : ""}`}>
+        {sub === "overview" && <ErrorBoundary name="Overview"><Overview initiative={initiative} /></ErrorBoundary>}
+        {sub === "work" && <ErrorBoundary name="Board"><Board /></ErrorBoundary>}
+        {sub === "roadmap" && <ErrorBoundary name="RoadmapView"><RoadmapView /></ErrorBoundary>}
+        {sub === "decisions" && <ErrorBoundary name="DecisionsView"><DecisionsView /></ErrorBoundary>}
+        {sub === "conversations" && <ErrorBoundary name="SlackView"><SlackView /></ErrorBoundary>}
+        {sub === "agents" && <ErrorBoundary name="AgentsView"><AgentsView /></ErrorBoundary>}
+      </div>
+    </div>
   );
 }

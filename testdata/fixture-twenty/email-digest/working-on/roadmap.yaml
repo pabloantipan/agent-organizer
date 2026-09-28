@@ -1,0 +1,21 @@
+stages:
+  - id: draft
+    title: Draft
+    phase: discovery
+    outcome: draft is in place
+    exit:
+      - draft is checked
+    done: 2026-08-25
+  - id: send
+    title: Send it
+    phase: building
+    outcome: send it is in place
+    exit:
+      - send it is checked
+    gates: ["0001"]
+  - id: tune
+    title: Tune
+    phase: building
+    outcome: tune is in place
+    exit:
+      - tune is checked

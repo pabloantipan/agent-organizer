@@ -2,7 +2,10 @@ import { create } from "zustand";
 import { api, type Account, type AgentsView, type BoardView, type Group, type LockState, type Note } from "../hooks/useWails";
 import type { merge } from "../../wailsjs/go/models";
 
-export type Tab = "board" | "agents" | "slack" | "roadmap" | "calendar" | "initiatives" | "settings";
+/** Navigation is Home, one initiative under its header with six sub-views,
+ *  or Settings behind the gear (FR-14). */
+export type Screen = "home" | "initiative" | "settings";
+export type Sub = "overview" | "work" | "roadmap" | "decisions" | "conversations" | "agents";
 
 /** The identity mode of the backend. "off" is the default and means there is
  *  no sign-in anywhere: no gate, no account UI, sync skipped. */
@@ -25,17 +28,17 @@ type State = {
   setOfflineChoice: (v: boolean) => void;
   agents: AgentsView | null;
   applyAgents: (v: AgentsView) => void;
-  // slackFocus is the agent the Slack tab is narrowed to, set from an agent
-  // row's Message button; openSlack switches tab and initiative with it.
+  // slackFocus is the agent the Conversations sub-view is narrowed to, set from an agent
+  // row's Message button; openSlack switches to it and to the initiative.
   // railCollapsed narrows the rail to a strip of ranks; remembered per machine.
   railCollapsed: boolean;
   setRailCollapsed: (v: boolean) => void;
   slackFocus: string | null;
   setSlackFocus: (agent: string | null) => void;
   openSlack: (initiativeId: string, agent: string | null) => void;
-  // slackDraft is a one-shot instruction for the Slack tab from elsewhere
+  // slackDraft is a one-shot instruction for Conversations from elsewhere
   // in the app: open this thread, or start a conversation with this subject.
-  // The tab consumes it and clears it.
+  // The sub-view consumes it and clears it.
   slackDraft: { threadId?: string; subject?: string; body?: string } | null;
   openSlackThread: (initiativeId: string, threadId: string) => void;
   openSlackDraft: (initiativeId: string, agent: string | null, subject: string, body?: string) => void;
@@ -48,16 +51,23 @@ type State = {
   syncing: boolean;
   error: string | null;
   lastMessage: string | null;
-  tab: Tab;
+  screen: Screen;
+  sub: Sub;
+  // needsMeFocus is the Needs me row Home scrolls to and highlights, set by
+  // openNeedsMe: decision:<initiative>/<NNNN>, thread:<id>, card:<initiative>/<slug>.
+  needsMeFocus: string | null;
+  goHome: () => void;
+  openInitiative: (id: string, sub: Sub) => void;
+  openNeedsMe: (key: string) => void;
+  openSettings: () => void;
   selected: merge.BoardCard | null;
   filterMachine: string | null;
   filterClient: string | null;
-  // null = every initiative (the merged board); otherwise one initiative id.
+  // The initiative on screen; null on Home and Settings.
   selectedInitiative: string | null;
   setSelectedInitiative: (id: string | null) => void;
   refresh: () => Promise<void>;
   sync: () => Promise<void>;
-  setTab: (t: Tab) => void;
   select: (c: merge.BoardCard | null) => void;
   setFilterMachine: (m: string | null) => void;
   setFilterClient: (c: string | null) => void;
@@ -104,10 +114,10 @@ export const useBoard = create<State>((set, get) => ({
   setRailCollapsed: (railCollapsed) => { try { localStorage.setItem("rail.collapsed.strip", railCollapsed ? "1" : "0"); } catch { /* per-viewer */ } set({ railCollapsed }); },
   slackFocus: null,
   setSlackFocus: (slackFocus) => set({ slackFocus }),
-  openSlack: (selectedInitiative, slackFocus) => set({ tab: "slack", selectedInitiative, slackFocus, slackDraft: null }),
+  openSlack: (selectedInitiative, slackFocus) => set({ screen: "initiative", sub: "conversations", selectedInitiative, slackFocus, slackDraft: null, needsMeFocus: null }),
   slackDraft: null,
-  openSlackThread: (selectedInitiative, threadId) => set({ tab: "slack", selectedInitiative, selected: null, slackDraft: { threadId } }),
-  openSlackDraft: (selectedInitiative, slackFocus, subject, body) => set({ tab: "slack", selectedInitiative, selected: null, slackFocus, slackDraft: { subject, body } }),
+  openSlackThread: (selectedInitiative, threadId) => set({ screen: "initiative", sub: "conversations", selectedInitiative, selected: null, slackDraft: { threadId }, needsMeFocus: null }),
+  openSlackDraft: (selectedInitiative, slackFocus, subject, body) => set({ screen: "initiative", sub: "conversations", selectedInitiative, selected: null, slackFocus, slackDraft: { subject, body }, needsMeFocus: null }),
   clearSlackDraft: () => set({ slackDraft: null }),
   addNote: async (initiativeId, slug, text) => {
     const key = `${initiativeId}/${slug}`;
@@ -148,12 +158,19 @@ export const useBoard = create<State>((set, get) => ({
   syncing: false,
   error: null,
   lastMessage: null,
-  tab: "board",
+  screen: "home",
+  sub: "overview",
+  needsMeFocus: null,
+  goHome: () => set({ screen: "home", selectedInitiative: null, needsMeFocus: null }),
+  openInitiative: (selectedInitiative, sub) => set({ screen: "initiative", selectedInitiative, sub, needsMeFocus: null }),
+  openNeedsMe: (needsMeFocus) => set({ screen: "home", selectedInitiative: null, selected: null, needsMeFocus }),
+  openSettings: () => set({ screen: "settings", selectedInitiative: null, needsMeFocus: null }),
   selected: null,
   filterMachine: null,
   filterClient: null,
   selectedInitiative: null,
-  setSelectedInitiative: (selectedInitiative) => set({ selectedInitiative }),
+  // Picking an initiative keeps the sub-view you are on; clearing it is Home.
+  setSelectedInitiative: (id) => (id === null ? get().goHome() : get().openInitiative(id, get().screen === "initiative" ? get().sub : "overview")),
 
   refresh: async () => {
     if (get().loading) return;
@@ -197,7 +214,6 @@ export const useBoard = create<State>((set, get) => ({
     }
   },
 
-  setTab: (tab) => set({ tab }),
   select: (selected) => set({ selected }),
   setFilterMachine: (filterMachine) => set({ filterMachine }),
   setFilterClient: (filterClient) => set({ filterClient }),

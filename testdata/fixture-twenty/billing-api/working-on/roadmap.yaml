@@ -1,0 +1,21 @@
+stages:
+  - id: shape
+    title: The shape
+    phase: discovery
+    outcome: the shape is in place
+    exit:
+      - the shape is checked
+    done: 2026-08-20
+  - id: core
+    title: Core invoicing
+    phase: building
+    outcome: core invoicing is in place
+    exit:
+      - core invoicing is checked
+    gates: ["0001"]
+  - id: rollout
+    title: Rollout
+    phase: building
+    outcome: rollout is in place
+    exit:
+      - rollout is checked

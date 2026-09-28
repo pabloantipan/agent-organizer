@@ -1,0 +1,21 @@
+stages:
+  - id: corpus
+    title: Corpus
+    phase: discovery
+    outcome: corpus is in place
+    exit:
+      - corpus is checked
+    done: 2026-08-02
+  - id: bot
+    title: The bot
+    phase: building
+    outcome: the bot is in place
+    exit:
+      - the bot is checked
+    gates: ["0001"]
+  - id: handover
+    title: Human handover
+    phase: building
+    outcome: human handover is in place
+    exit:
+      - human handover is checked

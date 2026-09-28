@@ -1,0 +1,20 @@
+stages:
+  - id: map
+    title: Map the steps
+    phase: discovery
+    outcome: map the steps is in place
+    exit:
+      - map the steps is checked
+  - id: build
+    title: Build it
+    phase: building
+    outcome: build it is in place
+    exit:
+      - build it is checked
+    gates: ["0001"]
+  - id: measure
+    title: Measure
+    phase: building
+    outcome: measure is in place
+    exit:
+      - measure is checked

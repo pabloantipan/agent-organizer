@@ -1,0 +1,8 @@
+id: risk-scoring
+title: Risk scoring
+client: northwind
+status: active
+started: 2026-07-01
+machine: fixture
+repos: []
+goal: Underwriters see one score per claim

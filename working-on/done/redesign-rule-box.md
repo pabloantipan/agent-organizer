@@ -1,0 +1,51 @@
+---
+title: Ruling from Needs me writes the record, end to end
+status: done
+repos: [organizer]
+branch: main
+updated: 2026-09-26
+review: pass
+seat: wave2-rulebox
+next: "review: redesign-rule-box, gate G15, G16, G18 met, 903c6ce 0851396"
+depends_on: ["redesign-overview", "redesign-work", "redesign-roadmap"]
+boundary: ["frontend/src/components/RuleDecisionBox.tsx (new)", "frontend/src/components/Home.tsx (the decision row's Rule action)", "frontend/src/styles/rule-box.css (new)"]
+spec: "docs/specs/redesign.md (FR-23, FR-22); visual: docs/specs/redesign-mockups.html; values: docs/design-system.md"
+gate: "docs/specs/redesign.md Acceptance, rows G15, G16, G18; the Gate section below"
+---
+
+## Goal
+The redesign, wave 2 of 2: FR-22 of `docs/specs/redesign.md`. Decisions 0013–0020.
+
+## Gate
+- [x] G15: see `docs/specs/redesign.md`, Acceptance
+- [x] G16: see `docs/specs/redesign.md`, Acceptance
+- [x] G18: see `docs/specs/redesign.md`, Acceptance
+
+## Done
+- 2026-09-26 cut from the redesign spec by the FSE
+- 2026-09-26 wave2-rulebox: the rule box (224d4b4 `RuleDecisionBox.tsx`, `rule-box.css`; b0f2d13 Home's Rule opens it). G15 met in `wails dev` on the fixture: `.wt-notes/wave2-rulebox/G15-box.png` (0002, one-machine, words), `G15-after.png` (0002 gone, badge 3 → 2); `git -C $FIXTURE_HOME/init-a log -1 --stat` → `docs(decisions): rule 0002 where-the-fixture-runs (one-machine)`, `1 file changed, 6 insertions(+), 4 deletions(-)`; `git show` touches only status, ruled, ruled_by, chosen and the Ruling line (`git-show-dev.txt`). Rule is disabled until option and words; a refusal shows in the box with both kept (`rb-refused.png`). G18: the grep over `main...redesign-rule-box` prints nothing; `npm run build` ✓. G16 partly: walk Home → init-a → Overview → Work → Roadmap → rule 0002 done in `wails dev` (`dev-1-home` … `dev-5-roadmap.png`, then G15-*); console: one error only, the Wails runtime's (Notes); `wails build` ✓, the built app ran on the fixture and was quit by pid, but G16-1…6 could not be taken from it (Blockers)
+- 2026-09-26 wave2-rulebox: G16 met. Pablo walked the built app (`wails build` of this worktree, pid 19847, fixture `organizer-fixture.GWYoaw`) because this seat could not click (Blockers); his screenshots in `.wt-notes/wave2-rulebox/`: `G16-1b-home-pablo.png`, `G16-2-3-init-a-overview-pablo.png`, `G16-4-work-pablo.png`, `G16-5-roadmap-pablo.png`, `G16-6a-box-pablo.png` (the box on 0002), `G16-6-ruled-pablo.png` (0002 gone, Needs me 2). Mine from the same builds: `G16-1-home.png` (pid 97585) and `G16-6-ruled.png` (screencapture of pid 19847's window, 0002 gone, badge 2). `git -C …/init-a log -1 --stat` → c2aa41c `docs(decisions): rule 0002 where-the-fixture-runs (one-machine)`, `1 file changed, 6 insertions(+), 4 deletions(-)`; `git show` touches only status, ruled, ruled_by, chosen and the Ruling line (`git-show-built.txt`). Console: the one error is Wails' dev runtime (Notes). Rebased on main: 903c6ce, 0851396 (were 224d4b4, b0f2d13); `npm run build` ✓; G18 grep empty
+
+## Review
+- Verdict: pass. G15, G16 and G18 are met by 903c6ce and 0851396 and the screenshots.
+- Unmet gate items: none.
+- Reviewer: wave2-review-rulebox, 2026-09-26.
+- G15: I ruled 0002 again from Needs me in `wails dev` on a fresh fixture (two-machines). The result was 69cac8b, one file, 6 insertions and 4 deletions, touching only status, ruled, ruled_by, chosen and the Ruling line. The row left the queue and the badge went from 3 to 2 (`.playwright-mcp/review-rulebox-box.png`, `review-rulebox-after.png`).
+- G16: Pablo's built-app screenshots show Home, init-a Overview, Work, Roadmap, the box and the ruled state, and they match `git-show-built.txt` (c2aa41c). The console showed two errors, and neither comes from `frontend/src`. One is `/wails/ipc.js`, byte-identical (sha256 3c3b999d…) to wails v2.15.0 `ipc_websocket.js`, which compiles only under `//go:build dev`, so the built app never loads it. The other is a `favicon.ico` 404 from the dev server; main has no favicon either.
+- G18: the grep printed nothing and `npm run build` passed.
+- FR-23: no legacy aliases, only the seven sizes, `tabular-nums` on the record number, and the focus ring kept (restored on the textarea). The diff stays inside the boundary (3 files).
+- Outside the gate, left to Pablo: G16's "no console errors" should exclude the Wails dev runtime, or say to capture the console in the built app. `global.css:39` still removes the focus ring from every other input. The CLAUDE.md Navigation bullet ("Rule opens the record in … Decisions") is stale.
+
+## Next
+1. review: redesign-rule-box, gate G15, G16, G18 met, 903c6ce 0851396
+
+## Blockers
+none (the Accessibility block is recorded in progress.md; Pablo walked the built app instead)
+
+## Notes
+- 2026-09-26 wave2-rulebox: the console error is Wails' runtime, not `frontend/src`. `Cannot read properties of null (reading 'nodes')`, frames `Fe`, `bn`, `new In` all in `/wails/ipc.js`, which is byte-identical (sha256 3c3b999d…) to wails v2.15.0's `internal/frontend/runtime/ipc_websocket.js`; `In` is its Svelte dev overlay mounted on DOMContentLoaded at `#wails-spinner`. It reproduces on a page holding only `ipc.js`, `runtime.js` and that div, no app code, so main has it too (`.wt-notes/wave2-rulebox/ipc-blank.log`). No 404 appeared in these runs. It is a `wails dev` page only; the built app does not serve `ipc_websocket.js`
+- 2026-09-26 wave2-rulebox: `global.css:39` `input:focus, textarea:focus { outline: none }` outranks `:focus-visible`, so every input and textarea loses the ring FR-23 keeps; `rule-box.css` restores it for the box only. CLAUDE.md's Navigation bullet ("Rule opens the record in the initiative's Decisions for now") is stale after this card and outside its boundary
+- 2026-09-27 sup3: three builders saw one console error on every browser load of `wails dev`, before any view mounts: `Cannot read properties of null (reading 'nodes')` in `/wails/ipc.js`, plus a 404. G16 says "no console errors": report every error seen with its source, and do not count as met an error you cannot trace to Wails' runtime rather than `frontend/src`; if it is the runtime, say so with the evidence and let the review judge the gate
+- 2026-09-27 sup3: the gate screenshots run against `eval "$(scripts/fixture-home.sh)"` (1993e12): a temp copy of `testdata/home` with `testdata/fixture-overlay` laid over it: init-a a git repo with two FSE-signed commits, proposed records 0002 (the fixture record G15/G16 rule) and 0003 raised by the FSE and owned by pablo, the current stage gated on 0002, three cards seated `wave1-*`, and a cell `organizer-fixture` whose `fse` seat has one question thread open to pablo in the mailbox. `testdata/home` and `status.golden` are unchanged
+- `stage:` is left out: the organizer has no roadmap yet (it waits on Pablo's intake); the FSE adds it once one is ruled
+- 2026-09-27 sup3 runs this card (organizer-probe-sup3), spawned by the FSE after wave 1 passed

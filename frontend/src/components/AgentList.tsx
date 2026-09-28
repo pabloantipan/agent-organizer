@@ -23,7 +23,9 @@ export function AgentList({ agents, root, local = true, onMessage }: { agents: A
       <ul className="agents">
         {agents.map((a) => {
           const sub = root && a.dir && a.dir !== root ? `./${a.dir.slice(root.length + 1)}` : root ? "" : shortHome(a.dir || "");
-          const key = a.session || `${a.pid}`;
+          // Processes can share a session name (children inherit it), so the
+          // pid disambiguates; a layout-only row has pid 0 and a unique session.
+          const key = `${a.session}#${a.pid}`;
           const asking = confirm === key;
           return (
             <li key={key} className={a.state}>

@@ -3,7 +3,8 @@ node_modules
 frontend/dist
 # git worktrees for builder sessions (supervise skill)
 .wt/
-# personal state of this checkout (cards, machine names, project ids)
-working-on/
-# ...except the scan fixtures, which are the test suite's, not this checkout's
-!testdata/home/**/working-on/
+# the organizer cell: its own repo (persona-agents convention)
+agents/
+# discuss hook wiring, installed by ~/agent-slack/ops/bootstrap.sh
+.claude/settings.json
+.claude/settings.json.bak

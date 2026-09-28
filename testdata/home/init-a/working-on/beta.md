@@ -5,4 +5,5 @@ repos: [repo-one]
 branch: feat/beta
 updated: 2026-08-20
 next: "Start beta"
+stage: no-such-stage
 ---

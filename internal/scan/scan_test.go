@@ -382,3 +382,39 @@ func TestSpecsEntriesCannotEscapeTheRoot(t *testing.T) {
 		}
 	}
 }
+
+// A roster retire emptied is a cell between waves: `[]` and `null` both read
+// as a cell with no seats. Only the project is required.
+func TestReadCellAcceptsAnEmptyRoster(t *testing.T) {
+	for _, tc := range []struct {
+		fixture  string
+		wantCell bool
+	}{
+		{"empty", true},
+		{"null", true},
+		{"noproject", false},
+	} {
+		t.Run(tc.fixture, func(t *testing.T) {
+			b, err := os.ReadFile(filepath.Join("..", "..", "testdata", "cells", tc.fixture+".json"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			root := t.TempDir()
+			os.MkdirAll(filepath.Join(root, "agents"), 0o755)
+			os.WriteFile(filepath.Join(root, "agents", "cell.json"), b, 0o644)
+			c, problems := readCell(root, nil)
+			if !tc.wantCell {
+				if c != nil || len(problems) != 1 {
+					t.Errorf("cell %+v problems %v, want no cell and one problem", c, problems)
+				}
+				return
+			}
+			if c == nil || len(problems) != 0 {
+				t.Fatalf("cell %+v problems %v, want a cell and no problem", c, problems)
+			}
+			if c.Project != "camp" || c.Reconciler != "po_andrea" || c.Agents == nil || len(c.Agents) != 0 {
+				t.Errorf("cell %+v, want camp with zero seats as an empty list", c)
+			}
+		})
+	}
+}
