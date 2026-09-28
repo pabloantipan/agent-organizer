@@ -210,3 +210,28 @@ func TestInitiativeRunsSumsTokensPerCard(t *testing.T) {
 		t.Errorf("the bound view names a cost: %s", b)
 	}
 }
+
+// A card of an initiative with a cell launches under the cell's wrapper:
+// caro-stuff's cell is `caro`, so caro-probe, never caro-stuff-probe.
+func TestPrepareLaunchUsesTheCellFamily(t *testing.T) {
+	t.Setenv("XDG_DATA_HOME", t.TempDir())
+	card := model.Card{Slug: "tr2-fix", Spec: "s", Gate: "g", Boundary: []string{"b"}}
+	withCell := model.ScannedInitiative{}
+	withCell.ID, withCell.Path = "caro-stuff", t.TempDir()
+	withCell.Cell = &model.Cell{Project: "caro"}
+	withCell.Cards = []model.Card{card}
+	noCell := model.ScannedInitiative{}
+	noCell.ID, noCell.Path = "qa-automation", t.TempDir()
+	noCell.Cards = []model.Card{card}
+	s := &Service{state: cache.State{Local: model.Snapshot{Initiatives: []model.ScannedInitiative{withCell, noCell}}}}
+
+	for id, want := range map[string]string{"caro-stuff": "/caro-probe'", "qa-automation": "/qa-automation-probe'"} {
+		l, err := s.PrepareLaunch(id, "tr2-fix")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(l.Command, want) {
+			t.Errorf("%s: command %q, want the wrapper %q", id, l.Command, want)
+		}
+	}
+}

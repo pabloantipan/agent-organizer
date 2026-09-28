@@ -286,21 +286,34 @@ func probeBin() string {
 	return filepath.Join(home, "bin", "probe")
 }
 
+// probeFamily is the probe wrapper an initiative's sessions run under: the
+// cell's project when the initiative has a cell (crew seats are named after
+// it, and supervisors and builders join them), else the initiative's id.
+// caro-stuff's cell is `caro`, so its wrapper is caro-probe, not
+// caro-stuff-probe (seen twice by the FSEs, 2026-09-28).
+func probeFamily(si *model.ScannedInitiative) string {
+	if si.Cell != nil && si.Cell.Project != "" {
+		return sanitize(si.Cell.Project)
+	}
+	return sanitize(si.ID)
+}
+
 func sanitize(s string) string {
 	s = strings.ToLower(s)
 	s = regexp.MustCompile(`[^a-z0-9]+`).ReplaceAllString(s, "-")
 	return strings.Trim(s, "-")
 }
 
-// CreateAgent starts a new probe in the initiative directory, in the family
-// named after the initiative. An empty name lets probe pick an animal name.
-// Opens iTerm2 (Terminal as fallback) so the session is visible immediately.
+// CreateAgent starts a new probe in the initiative directory, in the
+// initiative's probe family (probeFamily). An empty name lets probe pick an
+// animal name. Opens iTerm2 (Terminal as fallback) so the session is visible
+// immediately.
 func (s *Service) CreateAgent(initiativeID, name string) error {
-	var dir string
+	var dir, family string
 	s.mu.Lock()
-	for _, si := range s.state.Local.Initiatives {
-		if si.ID == initiativeID {
-			dir = si.Path
+	for i := range s.state.Local.Initiatives {
+		if si := &s.state.Local.Initiatives[i]; si.ID == initiativeID {
+			dir, family = si.Path, probeFamily(si)
 		}
 	}
 	s.mu.Unlock()
@@ -310,7 +323,6 @@ func (s *Service) CreateAgent(initiativeID, name string) error {
 	if _, err := os.Stat(probeBin()); err != nil {
 		return fmt.Errorf("probe not found at %s", probeBin())
 	}
-	family := sanitize(initiativeID)
 	name = sanitize(name)
 	if name != "" && !nameRe.MatchString(name) {
 		return errors.New("name must be lowercase letters, digits and dashes")

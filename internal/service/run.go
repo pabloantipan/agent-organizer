@@ -122,7 +122,7 @@ func (s *Service) PrepareLaunch(initiativeID, slug string) (Launch, error) {
 		return Launch{}, &NotLaunchable{Initiative: initiativeID, Slug: slug, Missing: missing, Path: card.Path}
 	}
 
-	family := sanitize(initiativeID)
+	family := probeFamily(si)
 	l := Launch{
 		Initiative: initiativeID,
 		Slug:       slug,
