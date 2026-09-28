@@ -43,7 +43,7 @@ func TestRunCmd(t *testing.T) {
 				"opus.prelude.sh",
 				"PROBE_PROMPT_FILE=",
 				"init-a-alpha.md",
-				"init-a-probe",
+				"/alpha-probe'",
 				"'alpha'",
 			},
 		},
@@ -51,7 +51,7 @@ func TestRunCmd(t *testing.T) {
 			name:       "flag before the positionals reads the same",
 			args:       []string{"run", "--print", "init-a", "alpha"},
 			wantCode:   0,
-			wantStdout: []string{"init-a-probe", "'alpha'"},
+			wantStdout: []string{"/alpha-probe'", "'alpha'"},
 		},
 		{
 			name:       "card without the contract is refused",
