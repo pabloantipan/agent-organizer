@@ -6,7 +6,7 @@
  *
  *  Capped (FR-5): since agent-slack 8991640 the drain ceiling counts per stop
  *  cycle, and a drain on the seat's next prompt delivers everything waiting.
- *  Nothing is restarted for it. */
+ *  The session stays as it is. */
 
 export type HealthState = "alive" | "never" | "stale" | "deaf" | "capped" | "no identity";
 
@@ -45,7 +45,7 @@ export const HEALTH: Record<HealthState, HealthWords> = {
   capped: {
     label: "capped",
     why: "Alive and posting, but its session reached the mailbox's drain ceiling for this stop cycle, so waiting mail is held.",
-    what: "Nothing to restart: the mail arrives with the seat's next prompt, the watcher's wake or anything typed into its pane.",
+    what: "Wait for its next prompt, which delivers the mail: the watcher's wake, or anything typed into its pane.",
     blocker: "capped, mail waits for its next prompt",
   },
   "no identity": {
