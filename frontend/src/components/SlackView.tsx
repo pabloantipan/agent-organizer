@@ -4,6 +4,7 @@ import type { Seat } from "../hooks/useWails";
 import { useBoard } from "../stores/board.store";
 import { queueOf } from "../lib/queue";
 import { ContextBar, WatcherBadge } from "./ContextBar";
+import { HEALTH } from "../lib/health";
 import { Conversation } from "./Conversation";
 
 const PEOPLE_KEY = "slack.people";
@@ -47,7 +48,7 @@ export function SlackView() {
                   <b>{g.needs_reconciler ?? 0}</b><span>need {g.cell?.reconciler || "the reconciler"}</span>
                   <b>{open}</b><span>open</span>
                   <b>{g.waiting?.length ?? 0}</b><span>cards waiting</span>
-                  <b className={deaf > 0 ? "hot" : ""}>{reachable}/{seats.length}</b><span>reachable{q.capped > 0 ? `, ${q.capped} capped` : ""}{deaf > 0 ? `, ${deaf} deaf` : ""}</span>
+                  <b className={deaf > 0 ? "hot" : ""}>{reachable}/{seats.length}</b><span>reachable{q.capped > 0 ? <span title={HEALTH.capped.why}>, {q.capped} {HEALTH.capped.label}</span> : ""}{deaf > 0 ? <span title={HEALTH.deaf.why}>, {deaf} {HEALTH.deaf.label}</span> : ""}</span>
                 </span>
                 {g.discuss && <span className="badge watcher stale">{g.discuss}</span>}
               </li>
@@ -80,7 +81,7 @@ export function SlackView() {
         <span className="spacer" />
         {slackFocus && <span className="badge persona focus">with {slackFocus} <button className="rail-icon" onClick={() => setSlackFocus(null)} title="back to the channel"><X size={11} /></button></span>}
         <button className={`tiny-btn ${people ? "primary" : "ghost"} ${deaf > 0 ? "hot" : ""}`} onClick={togglePeople} title={people ? "hide people" : "show people"}>
-          <Users size={13} /> {seats.length}{live > 0 ? ` · ${live} live` : ""}{capped > 0 ? ` · ${capped} capped` : ""}{deaf > 0 ? ` · ${deaf} deaf` : ""}
+          <Users size={13} /> {seats.length}{live > 0 ? ` · ${live} live` : ""}{capped > 0 ? ` · ${capped} ${HEALTH.capped.label}` : ""}{deaf > 0 ? ` · ${deaf} ${HEALTH.deaf.label}` : ""}
         </button>
       </div>
       <div className={`slack-body ${people ? "with-people" : ""}`}>
