@@ -3,6 +3,8 @@ import { MessageSquare, SquareTerminal, Trash2, UserRoundX, Users } from "lucide
 import { Retire } from "./Retire";
 import { api, type AgentGroup, type Seat } from "../hooks/useWails";
 import { ContextBar, WatcherBadge } from "./ContextBar";
+import { HealthWhy } from "./AgentList";
+import { healthState } from "../lib/health";
 
 const STATE_LABEL: Record<string, string> = { working: "working", running: "idle", shell: "shell", exited: "exited" };
 
@@ -67,6 +69,7 @@ function SeatRow({ seat, confirm, setConfirm, flash, onMessage }: { seat: Seat; 
   const state = a?.state ?? "off";
   const session = a?.session || "";
   const asking = confirm === seat.name;
+  const health = healthState({ watcher: seat.watcher, deaf: seat.deaf, capped: seat.capped });
   return (
     <li className={state}>
       <span className={`a-state ${state}`}><i />{STATE_LABEL[state] ?? state}</span>
@@ -91,6 +94,7 @@ function SeatRow({ seat, confirm, setConfirm, flash, onMessage }: { seat: Seat; 
           </>
         )}
       </span>
+      {health && health !== "alive" && <HealthWhy state={health} />}
     </li>
   );
 }
