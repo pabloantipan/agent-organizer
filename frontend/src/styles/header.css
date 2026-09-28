@@ -13,3 +13,17 @@
 .stg-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-width: 0; }
 .stg-head .lz { flex: none; }
 .stages-none .lz { margin-left: var(--space-1); }
+
+/* Goal and measure clamp to two lines (FR-10, 0038). The control shows only
+   when the text is clamped or unfolded, and is a real button: the global
+   :focus-visible ring applies and is never removed. */
+.clamp-line { display: grid; justify-items: start; gap: var(--space-0-5); }
+.clamp-text { max-width: 100%; }
+.clamp-text.clamped { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.clamp-more {
+  min-height: 0; padding: 0 var(--space-1); margin-left: calc(-1 * var(--space-1));
+  background: transparent; border: 0; border-radius: var(--radius-xs);
+  font-size: var(--font-size-sm); line-height: var(--line-sm); font-weight: var(--weight-medium); font-style: normal;
+  color: var(--accent-fg); cursor: pointer;
+}
+.clamp-more:hover { background: var(--surface-hover); color: var(--fg); border: 0; }

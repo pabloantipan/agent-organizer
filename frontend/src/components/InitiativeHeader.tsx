@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import type { merge, model } from "../../wailsjs/go/models";
 import { parseISO, today } from "../lib/dates";
 import { useBoard, type Sub } from "../stores/board.store";
@@ -98,6 +99,34 @@ export function StageStepper({ stages }: { stages: model.Stage[] }) {
   );
 }
 
+/** A header line clamped to two lines (FR-10): "more" shows the rest and
+ *  "less" folds it again; no control when the text fits. Whether it is
+ *  clamped is measured, so it follows the window width. */
+function Clamped({ className, children }: { className: string; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const [clamped, setClamped] = useState(false);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || open) return;
+    const measure = () => setClamped(el.scrollHeight > el.clientHeight + 1);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [open, children]);
+  return (
+    <div className={`clamp-line ${className}`}>
+      <div ref={ref} className={`clamp-text ${open ? "" : "clamped"}`}>{children}</div>
+      {(clamped || open) && (
+        <button className="clamp-more" aria-expanded={open} onClick={() => setOpen(!open)}>
+          {open ? "less" : "more"}
+        </button>
+      )}
+    </div>
+  );
+}
+
 const SUBS: { id: Sub; label: string }[] = [
   { id: "overview", label: "Overview" },
   { id: "work", label: "Work" },
@@ -121,12 +150,12 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
             {i.id}
             {i.client && <span className="lz tone">{i.client}</span>}
           </h1>
-          <div className={`ihead-goal ${i.goal ? "" : "missing"}`}>
+          <Clamped key={`goal-${i.id}`} className={`ihead-goal ${i.goal ? "" : "missing"}`}>
             <span className="lbl">Goal</span>
             {i.goal || "no goal yet"}
-          </div>
+          </Clamped>
           <ScopeLines scope={i.scope} />
-          {i.measure && <div className="ihead-measure"><span className="lbl">Measure</span>{i.measure}</div>}
+          {i.measure && <Clamped key={`measure-${i.id}`} className="ihead-measure"><span className="lbl">Measure</span>{i.measure}</Clamped>}
         </div>
         <div className="ihead-side">
           <span className="ihead-target">target <b className="num">{i.target || "—"}</b></span>
