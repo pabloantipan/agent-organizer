@@ -27,11 +27,23 @@ Pablo, 2026-09-28, in the FSE's session, from the installed app v0.2.0-348
    The app never writes initiative.yaml; editing goal and scope in the app
    would be a new write path (like 0019's for records), Pablo's to rule.
 
+5. (screenshot of the stage strip) "why chip says buildgin and marked as
+   done also?" The strip shows two things with the same weight: the stage's
+   phase ("building", 0030) and its state ("1 · done"). Every organizer stage
+   is building, so the phase chip repeats six times and reads as a status.
+6. "If I click I have no deatil of the wave." The tiles are roadmap stages,
+   not waves, and clicking one opens nothing.
+
 ## Candidates (not decided)
 - The header folds to one line (name, phase, stage, waiting chip) with a
   toggle, remembered per initiative; scope clamps like goal.
 - The chip opens Decisions, waiting first.
 - The strip gets a label: a roadmap icon and "Roadmap · stage 5 of 6".
+- The phase shows once, where it changes (a divider between discovery and
+  building stages), not as a chip on every tile; state stays the tile's word.
+- Clicking a stage opens its detail: outcome, exit items with their evidence
+  or record, gates, and its cards (a stage panel, or the Roadmap tab focused
+  on it).
 - Edit goal, measure and scope in the app, committing the file, or keep
   file-only editing.
 
