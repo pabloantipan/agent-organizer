@@ -1,14 +1,14 @@
 ---
 title: An archived initiative opens read-only and leaves every count
-status: proposed
+status: ruled
 raised: 2026-09-28
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-28
+ruled_by: pablo
 options: [read-only and out of every count, rail only as built]
-chosen:
-cards: []
+chosen: read-only and out of every count
+cards: [glance-archived-read-only]
 threads: [01M3J1WGG3D15AS77Q8119V146]
 supersedes: []
 superseded_by:
@@ -41,7 +41,8 @@ against that.
 
 ## Ruling
 
-
+Pablo, 2026-09-28, in the FSE's session (organizer-probe-fse): "do
+recommendation".
 
 ## Consequences
 

@@ -103,6 +103,15 @@ restating it (the discuss skill).
   claudecode 88e1fcb, fse skill "Letting go ends when the task does",
   standing-up.md "Ending a supervisor". Cleaned today: sup5 to sup10 and
   install2-build; sup11 still runs.
+- **When sup11 lands** (Hephaistos, thread 01M3K60BV5B85ZA42YW0ZS77KG, Pablo:
+  "finish the cleaning"), as part of ending sup11, once no seat is working:
+  (1) `git pull --rebase` and push `main` (ahead 100, behind 6 of origin; odyssey
+  pushed 106681b), settling conflicts with the owning supervisor; (2) `git
+  worktree remove` .wt/explain-finish, glance-header-phase, glance-home-state,
+  glance-scope-phase; (3) add `runs/`, `.wt-notes/`, `.playwright-mcp/` to
+  .gitignore. Then tell Pablo the repo is even with origin.
+- **2026-09-28:** 0042 ruled, sup12 runs glance-archived-read-only. 0043: the FSE
+  pilot is kept.
 - **Rejected:** opening a card for 0012 (the Decisions tab was built
   directly, a6ebd4d..280f58c).
 
