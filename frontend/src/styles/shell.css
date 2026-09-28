@@ -129,7 +129,12 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .init-detail .init-actions { margin-top: var(--space-2); }
 
 /* ---------- one initiative: header over six sub-views ---------- */
+/* The body under the tabs is the page's one scroll container (FR-11, 0038):
+   the rows are explicit so no engine sizes them from the content, the header
+   and tabs take what they need and the body the rest, down to zero. */
+.content.with-rail { grid-template-rows: minmax(0, 1fr); }
 .initiative-screen { display: grid; grid-template-rows: auto minmax(0, 1fr); min-width: 0; min-height: 0; overflow: hidden; }
+.initiative-screen > .board-wrap { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
 .ihead { display: grid; gap: var(--space-3); padding: var(--space-4) var(--space-5) 0; background: var(--bg); }
 .ihead-top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2) var(--space-6); }
 .ihead-main { display: grid; gap: var(--space-1-5); min-width: 0; }
