@@ -10,6 +10,7 @@ seat: install4-build
 boundary: ["build/ (the build output)", "/Applications/organizer.app (install target)", "~/.local/bin/organizer (the symlink make install writes)", "no source file in the repo"]
 spec: "Pablo, 2026-09-28: \"Reinstall\" (0041), then \"I see nothing happening?\" after the read-only card merged past the installed v0.2.0-301; CLAUDE.md, Packaging"
 gate: "the Gate section below"
+review: fail
 ---
 
 ## Goal
@@ -25,6 +26,13 @@ merge of odyssey's initiative description and specs (fc26867). Install main.
 ## Done
 - 2026-09-28 opened by the FSE
 - 2026-09-28 install4-build: installed v0.2.0-332-g7897165 (main, fc26867 is an ancestor, tree clean). Gate 1: make-install.log tail `installed /Applications/organizer.app and ~/.local/bin/organizer (v0.2.0-332-g7897165-dirty)`, exit 0. Gate 2: versions.txt, describe before build v0.2.0-332-g7897165; the app binary and `organizer` on PATH (~/.local/bin/organizer -> /Applications/organizer.app/Contents/MacOS/organizer) both print `organizer v0.2.0-332-g7897165`. Gate 3 not met: status-archived.txt lists apimgmnt-auth-go, private-lgin-refactor, private-flutter, pwa-auth-monorepo, facial, auth-orchestrator-traces and rpex (all `status: archived`, archived-initiatives.txt) with no archived mark; `WriteStatus` in internal/cli/cli.go prints no initiative status and 2bffd31 changed only frontend/. Gate 4: git-status.txt is empty after restoring frontend/wailsjs. Evidence in .wt-notes/install4-build/
+
+## Review
+- Verdict: fail
+- Unmet gate items: 3
+- Findings outside the gate: gate 3 asks for something no installed build can show, since `organizer status` has no archived mark (and `--all` adds none) and 2bffd31 changed only frontend/; that is a gate defect, left to Pablo's decide. Gate 2 has no check that the running app instance is the new one: the builder's shell-launched pid 27143 is still up. Gate 1's `-dirty` comes from `wails build` rewriting frontend/wailsjs, which the gate tolerates but nothing restores by itself
+- Evidence: 1 make-install.log has no error, tail `installed … (v0.2.0-332-g7897165-dirty)`, fc26867 is an ancestor of 7897165; 2 both binaries print `organizer v0.2.0-332-g7897165`, ~/.local/bin/organizer links to the app, 7897165 is on main and was main's tip from 11:25:57 to 11:30:34, the binary is stamped 11:26:58; 3 .wt-notes/install4-review/status.txt lists the seven archived initiatives with card counts and no archived mark; 4 `git status --short` empty
+- Reviewer: install4-review, 2026-09-28
 
 ## Next
 1. sup13 rules gate 3 (see next)
