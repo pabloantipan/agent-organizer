@@ -1,6 +1,6 @@
 ---
 title: Anyone may rule a proposed record, and the record notes who did
-status: next
+status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-28
