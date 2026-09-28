@@ -2,7 +2,7 @@
 
 status: ruled (0033, 2026-09-27)
 owner: pablo
-decisions: [0029 ruled, 0030 ruled, 0032 ruled, 0033 ruled, 0035 ruled, 0034 ruled, 0036 ruled]
+decisions: [0029 ruled, 0030 ruled, 0032 ruled, 0033 ruled, 0035 ruled, 0034 ruled, 0036 ruled, 0038 ruled]
 roadmap: stage `twenty-at-a-glance` (appetite: one wave)
 
 ## Problem
@@ -84,6 +84,15 @@ without opening one. Today (read 2026-09-27):
   list, the rail's groups, and Needs me (rows and badge). They sit in one
   collapsed "Not active (n)" group at the bottom of the rail and open
   read-only (0036).
+- **FR-10** The initiative header shall show goal and measure clamped to two
+  lines each, with a "more" toggle that shows the rest (0038).
+- **FR-11** The page body under the initiative's tabs shall scroll on its
+  own while the header and the tabs stay in place, so every tab's content
+  can be reached at any window height (0038).
+- **FR-12** An expanded record on the Decisions tab that is `proposed` and
+  owned by the lead shall offer the same Rule box as Needs me
+  (`RuleDecisionBox.tsx`, the redesign's FR-13 write path). A ruled,
+  withdrawn or superseded record shall offer no Rule action (0038).
 
 ## Acceptance → gate
 
@@ -100,7 +109,10 @@ without opening one. Today (read 2026-09-27):
 | G9 | — | End to end: `wails build`, run the app on `--twenty`, screenshot Home at 1440×900. A reviewer who did not build it answers from that screenshot alone, timed: which initiatives execute, which are in discovery, which wait on business, which wait on you | the screenshot and the reviewer's timed answers in the review | all four right, under a minute |
 | G11 | 8 | On `--twenty`, Needs me lists no record owned by business or the FSE, and the badge equals the count of rows that say "waits on you" | screenshot; the badge count against the Home rows | equal |
 | G12 | 9 | A fixture initiative with `status: archived` is missing from Home and from Needs me, and appears under "Not active (1)" at the bottom of the rail, collapsed, and opens | screenshots | as stated |
-| G10 | 4–9 | The frontend builds, and no raw colour or font size is added outside `tokens.css` (FR-23 of the redesign) | `cd frontend && npm run build`; the redesign's G18 grep | pass, empty |
+| G13 | 10 | On the fixture initiative with a long goal and measure, the header shows two lines of each plus "more", and "more" shows the rest | screenshots, before and after "more" | as stated |
+| G14 | 11 | At a 1280×720 window, the last row of the Decisions tab (one record expanded) and the bottom of Overview are reached by scrolling the body; the header and tabs stay | screenshots at the top and the bottom | as stated |
+| G15 | 12 | Ruling a proposed fixture record from its expanded row on the Decisions tab writes it (the redesign's G8 checks, on a temp copy of the fixture) and the row shows as ruled; a ruled record shows no Rule action | screenshot and `git -C $FIXTURE_HOME/init-a log -1 --stat` | one file, one commit |
+| G10 | 4–12 | The frontend builds, and no raw colour or font size is added outside `tokens.css` (FR-23 of the redesign) | `cd frontend && npm run build`; the redesign's G18 grep | pass, empty |
 
 ## Boundary
 
@@ -162,8 +174,12 @@ without opening one. Today (read 2026-09-27):
 | `glance-home-state` | G7, G8, G9, G10 | glance-scope-phase |
 | `glance-needs-me-lead` | G11, G10 | — |
 | `glance-inactive-fold` | G12, G10 | glance-needs-me-lead |
+| `glance-header-scroll` | G13, G14, G10 | — |
+| `glance-rule-in-decisions` | G15, G10 | — |
 
 ## Amendments
 
 - 2026-09-27: A3 amended per 0035 (any live agent on a card), matching the build (`done/glance-home-state.md` review, finding 3).
 - 2026-09-27: FR-8 (0034) and FR-9 (0036) added, with gate rows G11 and G12 and two cards; both ruled after the wave landed.
+
+- 2026-09-28: FR-10 to FR-12, gate rows G13 to G15 and two cards, from Pablo's review of the installed app (0038).

@@ -14,3 +14,13 @@ milestones:
     title: Two weeks of use, decide phase 4
 goal: "A UI that helps a developer leading the factory handle up to 20 initiatives at the same time: around 4 to 6 executing in parallel over weeks, the rest sequential, each with about 4 business people discovering, deciding and expanding it; agents communicate so the initiative's decision making is recovered and optimized on that data. Secondary: honest, transparent and intuitive about how the machine works (mailbox, slack), so a developer can become its mechanic fast."
 measure: "The six sub-goals of decision 0029, each checked by its own measure: 20 initiatives on one Home with what needs the lead answered in under a minute; the lead's minutes per wave, gate rework and decision turnaround; every active initiative with a goal, a roadmap and a current stage; the share of decisions recorded and owned by business people; a new developer diagnosing a deaf seat from the UI alone; one change a month traced to decision data."
+# scope: Pablo accepted the FSE's draft as his words, 2026-09-28, in the FSE's session (decision 0038)
+scope:
+  in:
+    - the lead's view of up to 20 initiatives
+    - decisions and their owners
+    - agents, the mailbox and the Help
+  out:
+    - never writes cards
+    - does not replace Jira
+    - business people do not log in yet

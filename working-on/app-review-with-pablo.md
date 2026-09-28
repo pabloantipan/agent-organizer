@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: main
 updated: 2026-09-27
-next: "pablo: sit with the FSE on the installed app (Decisions tab of the organizer) and walk the three findings below; the FSE turns what he rules into a spec amendment and cards"
+next: "reviewed with Pablo 2026-09-28 (0038); the work is in glance-header-scroll and glance-rule-in-decisions, run by sup8; this note closes when they land"
 stage: twenty-at-a-glance
 ---
 
@@ -35,7 +35,7 @@ rule these at organizar app. Place a note we need to review this soon."
 - 2026-09-27 opened by the FSE from Pablo's report
 
 ## Next
-1. pablo: the review above
+1. reviewed (0038); closes with glance-header-scroll and glance-rule-in-decisions
 
 ## Blockers
 none
