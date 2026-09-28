@@ -15,6 +15,11 @@ restating it (the discuss skill).
   supervisor (own window, identity prelude, recipe in
   the fse skill's references/standing-up.md). Camp is the live case; its
   roadmap lacks a gate on its first building stage (camp's FSE owns that).
+- **Also open (2026-09-28, Pablo from v0.2.0-348):** `header-review-2` (header
+  fold, the waiting chip opens Decisions, a label on the stage strip, editing
+  goal/scope in the app) needs a spec amendment and records; 0049 (estimating
+  effort and time: forecast from run records vs appetite vs FSE estimates)
+  waits on Pablo, and on "forecast" goes to Hephaistos for the skill.
 - **Running:** nothing but Pablo's `organizer-probe-builder` and me. Tokens:
   fse, pablo. `main` pushed, even with origin at a5c75f8 or later.
 - **Installed:** v0.2.0-348 (rule-anyone, read-only archived, stage 3).
