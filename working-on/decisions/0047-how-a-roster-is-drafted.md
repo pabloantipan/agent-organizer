@@ -1,13 +1,13 @@
 ---
 title: How the organizer helps draft a cell's roster
-status: proposed
+status: ruled
 raised: 2026-09-28
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-28
+ruled_by: pablo
 options: [a drafting session, a role checklist, the FSE drafts it]
-chosen:
+chosen: a drafting session
 cards: []
 threads: []
 supersedes: []
@@ -52,7 +52,7 @@ can already use.
 
 ## Ruling
 
-
+pablo, 2026-09-28, in the organizer on lodestar: That
 
 ## Consequences
 
