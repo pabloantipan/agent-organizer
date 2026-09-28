@@ -2,8 +2,8 @@
 
 What `scripts/fixture-home.sh` lays over a temp copy of `testdata/home` so the
 redesign's wave 2 gate rows (G11–G16, G19 of `docs/specs/redesign.md`) have
-something to show. It is never scanned by the Go tests (no `initiative.yaml`
-here), so `status.golden` and G9 are untouched.
+something to show. The Go tests never scan it (they read `testdata/home`), so
+`status.golden` and G9 are untouched.
 
 - two proposed records raised by the FSE and owned by the human (G11, G15,
   G19); 0002 is "the fixture record" that G15 and G16 rule
@@ -19,3 +19,7 @@ here), so `status.golden` and G9 are untouched.
   without zero-padding resolves (twenty-at-a-glance G6)
 - init-a's scope in and out lives in `testdata/home/init-a/working-on/initiative.yaml`
   and init-b has none, so the header shows both cases (twenty-at-a-glance G5)
+- `init-a/working-on/initiative.yaml` replaces that file with the same fields
+  and a goal and a measure each longer than two lines at 1280 px, so the
+  header's clamp and "more" have something to fold (twenty-at-a-glance G13);
+  keep its other fields in step with the one in `testdata/home`
