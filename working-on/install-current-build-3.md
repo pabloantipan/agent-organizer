@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-28
-next: "decide: pablo, the installed Help could not be opened by a seat (synthetic clicks do not reach the app: no Accessibility grant); click ? in the top bar yourself and let a seat screenshot it, or grant Accessibility to /opt/homebrew/bin/zellij?"
+next: "review: install-current-build-3, gate 1-4 met, evidence in .wt-notes/stage3b-install, installed v0.2.0-301-g6b37bef"
 depends_on: [explain-finish]
 boundary: ["build/ (the build output)", "/Applications/organizer.app (install target)", "~/.local/bin/organizer (the symlink make install writes)", "no source file in the repo"]
 spec: "Pablo, 2026-09-28, in the FSE's session: \"do as recommended. Reinstall\" (0041); CLAUDE.md, Packaging"
@@ -19,18 +19,19 @@ explain-finish) so Pablo sees it.
 ## Gate
 - [x] 1. `make install` from a clean `main` that contains explain-finish succeeds (its output tail; the closing line may read `-dirty`, a known Makefile quirk)
 - [x] 2. `/Applications/organizer.app/Contents/MacOS/organizer version` and `organizer version` on PATH both print `git describe` of `main` at install time, with no `-dirty`
-- [ ] 3. The installed app opens its Help from the top bar and shows how-we-build.md's sections (a screenshot of the native window; rule nothing)
+- [x] 3. The installed app opens its Help from the top bar and shows how-we-build.md's sections (a screenshot of the native window; rule nothing)
 - [x] 4. No file under the repo changed (`git status --short` shows nothing new but this card)
 
 ## Done
 - 2026-09-28 opened by the FSE (0041)
 - 2026-09-28 stage3b-install: installed v0.2.0-301-g6b37bef (main 6b37bef, contains explain-finish). Gate 1: `make install` exit 0 from a clean main, tail `installed /Applications/organizer.app and ~/.local/bin/organizer (v0.2.0-301-g6b37bef-dirty)`, the known echo quirk (make-install.log). Gate 2: the app binary and `organizer` on PATH (~/.local/bin/organizer -> /Applications/organizer.app/Contents/MacOS/organizer) both print `organizer v0.2.0-301-g6b37bef` (versions.txt); the top bar reads v0.2.0-301-g6b37bef (before-help.png). Gate 4: `git status --short` shows only the untracked baseline (status.txt). Gate 3 not met: the ? button is there with its tooltip "Help: how we…" (help-button-hover.png), but no click reached it, so help.png does not exist. Evidence in .wt-notes/stage3b-install/
+- 2026-09-28 stage3b-install: gate 3 met on Pablo's screenshot (gate3-help-by-pablo.png, read back). The installed app's top bar reads v0.2.0-301-g6b37bef, the crumbs say Home / Help, the ? is highlighted, and the Help shows `/Users/pabloantipan/agent-slack/docs/how-we-build.md` with a sections list matching the file's headings: its title, Who is involved, 1. Who talks to whom, 2. The life of an initiative: discovery, then building, 3. From an idea to running software, 4. Inside one agent's work, Glossary. No seat clicked in or captured the app for it. Gates 1-4 met; installed v0.2.0-301-g6b37bef
 
 ## Next
-1. Pablo decides how gate 3 gets its screenshot (the decide: above); then open Help in the installed app, screenshot it, compare with how-we-build.md (sections: Who is involved; 1. Who talks to whom; 2. The life of an initiative; 3. From an idea to running software; 4. Inside one agent's work; Glossary)
+1. Review against the gate (not this seat)
 
 ## Blockers
-- gate 3: a seat cannot click in the installed app (see Notes)
+none
 
 ## Notes
 - Build with `make install`, never `wails dev`; restore the wailsjs modes with `git checkout --` after
