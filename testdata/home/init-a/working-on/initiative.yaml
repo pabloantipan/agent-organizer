@@ -4,15 +4,16 @@ client: acme
 status: active
 started: 2026-08-01
 machine: testbox
+description: A fixture initiative with two repos, one of them missing, and a spec folder.
+specs:
+  - specs/
+  - docs/one-spec.md
 repos:
   - repo-one
   - repo-missing
 ports_to: none
 goal: Initiative A ships the thing acme asked for
 measure: acme signs off on one run with no manual step
-specs:
-  - specs/
-  - docs/one-spec.md
 scope:
   in:
     - the scanner and the board acme opens every morning

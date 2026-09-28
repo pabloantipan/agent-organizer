@@ -45,6 +45,17 @@ type Initiative struct {
 	Repos     []string `yaml:"repos" json:"repos"`
 	PortsTo   string   `yaml:"ports_to" json:"ports_to"`
 	Notes     []string `yaml:"notes" json:"notes"`
+	// Description is one paragraph saying what this initiative is. Optional.
+	Description string `yaml:"description" json:"description"`
+	// Specs are where the initiative is specified: each entry is a folder of
+	// *.md files or one file, relative to the root. Optional. Notes stay what
+	// they are — prose to read; specs is what a card's spec field points into.
+	Specs []string `yaml:"specs" json:"specs"`
+	// SpecFiles is Specs resolved against the root by the scanner: each entry
+	// as written mapped to the files it names, relative to the root and
+	// sorted. Derived, like Path; an entry that resolves to nothing is a
+	// Problem and is absent here.
+	SpecFiles map[string][]string `yaml:"-" json:"spec_files"`
 	// Target is the date the initiative is meant to land. Optional.
 	Target string `yaml:"target" json:"target"`
 	// Milestones are dated checkpoints. Optional, few.
@@ -55,10 +66,6 @@ type Initiative struct {
 	// goal is one nobody has written down yet, not a malformed one.
 	Goal    string `yaml:"goal" json:"goal"`
 	Measure string `yaml:"measure" json:"measure"`
-	// Specs are the paths the initiative's specification lives in, relative to
-	// the root: a folder of *.md or one file. This is what a card's Spec field
-	// points into.
-	Specs []string `yaml:"specs" json:"specs"`
 	// Scope is what the initiative takes on and what it leaves out, in the
 	// owner's words. Optional; no scope is two empty lists, not a problem.
 	Scope Scope `yaml:"scope" json:"scope"`

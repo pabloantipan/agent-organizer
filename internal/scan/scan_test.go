@@ -263,6 +263,126 @@ func TestReadCardBuildFields(t *testing.T) {
 	}
 }
 
+func TestInitiativeDescriptionAndSpecs(t *testing.T) {
+	home := fixtureHome(t)
+	si := ReadInitiative(filepath.Join(home, "init-a"), opts(home))
+
+	if !strings.HasPrefix(si.Description, "A fixture initiative") {
+		t.Errorf("description=%q", si.Description)
+	}
+	if strings.Join(si.Specs, ",") != "specs/,docs/one-spec.md" {
+		t.Errorf("specs=%v", si.Specs)
+	}
+	// A folder is the *.md files directly inside it, sorted: notes.txt and
+	// deep/deep.md are not spec files of this entry.
+	if got := strings.Join(si.SpecFiles["specs/"], ","); got != "specs/01-shape.md,specs/02-gate.md" {
+		t.Errorf("specs/ resolved to %q", got)
+	}
+	// A file entry is itself.
+	if got := strings.Join(si.SpecFiles["docs/one-spec.md"], ","); got != "docs/one-spec.md" {
+		t.Errorf("docs/one-spec.md resolved to %q", got)
+	}
+	for _, p := range si.Problems {
+		if strings.Contains(p.Msg, "specs") {
+			t.Errorf("valid specs entries made a problem: %+v", p)
+		}
+	}
+}
+
+func TestInitiativeWithoutDescriptionOrSpecs(t *testing.T) {
+	home := fixtureHome(t)
+	si := ReadInitiative(filepath.Join(home, "work", "init-b"), opts(home))
+
+	if si.ID != "init-b" {
+		t.Fatalf("initiative: %+v", si.Initiative)
+	}
+	if si.Description != "" || si.Specs != nil || si.SpecFiles != nil {
+		t.Errorf("neither field set, got description=%q specs=%v files=%v", si.Description, si.Specs, si.SpecFiles)
+	}
+	if len(si.Problems) != 0 {
+		t.Errorf("an initiative with neither field gains no problem: %+v", si.Problems)
+	}
+	if len(si.Cards) == 0 {
+		t.Error("cards should still be read")
+	}
+}
+
+// writeInitiative builds a throwaway initiative root with the given
+// initiative.yaml body and one card, for the specs entries the fixture home
+// must not carry (they would show up in the CLI golden as problems).
+func writeInitiative(t *testing.T, yaml string) string {
+	t.Helper()
+	root := t.TempDir()
+	wo := filepath.Join(root, "working-on")
+	if err := os.MkdirAll(wo, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	head := "id: tmp\ntitle: Temp\nstatus: active\nmachine: testbox\n"
+	if err := os.WriteFile(filepath.Join(wo, "initiative.yaml"), []byte(head+yaml), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	card := "---\ntitle: One\nstatus: now\nupdated: 2026-09-01\nnext: \"Do it\"\n---\n\n## Goal\nOne.\n"
+	if err := os.WriteFile(filepath.Join(wo, "one.md"), []byte(card), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	return root
+}
+
+func TestSpecsEntriesThatResolveToNothing(t *testing.T) {
+	root := writeInitiative(t, "specs:\n  - missing/\n  - empty/\n  - gone.md\n")
+	if err := os.MkdirAll(filepath.Join(root, "empty"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	si := ReadInitiative(root, opts(root))
+
+	if len(si.SpecFiles) != 0 {
+		t.Errorf("nothing resolved, got %v", si.SpecFiles)
+	}
+	if len(si.Cards) != 1 {
+		t.Errorf("the initiative is still read whole: %d cards", len(si.Cards))
+	}
+	want := map[string]string{
+		"missing/": "does not exist",
+		"empty/":   "holds no .md files",
+		"gone.md":  "does not exist",
+	}
+	for entry, why := range want {
+		found := false
+		for _, p := range si.Problems {
+			if strings.Contains(p.Msg, entry) && strings.Contains(p.Msg, why) {
+				found = true
+			}
+		}
+		if !found {
+			t.Errorf("no problem naming %q (%s) in %+v", entry, why, si.Problems)
+		}
+	}
+}
+
+func TestSpecsEntriesCannotEscapeTheRoot(t *testing.T) {
+	root := writeInitiative(t, "specs:\n  - ../outside.md\n  - /etc/hosts\n  - specs/../../outside.md\n")
+	outside := filepath.Join(filepath.Dir(root), "outside.md")
+	if err := os.WriteFile(outside, []byte("# outside\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	si := ReadInitiative(root, opts(root))
+
+	if len(si.SpecFiles) != 0 {
+		t.Fatalf("an escaping entry must not be read: %v", si.SpecFiles)
+	}
+	if len(si.Problems) != 3 {
+		t.Fatalf("want one problem per refused entry, got %+v", si.Problems)
+	}
+	for _, p := range si.Problems {
+		if !strings.Contains(p.Msg, "outside the initiative root") && !strings.Contains(p.Msg, "is absolute") {
+			t.Errorf("problem should say why it was refused: %+v", p)
+		}
+		if filepath.Base(p.Path) != "initiative.yaml" {
+			t.Errorf("problem path should be the file that carries the entry: %+v", p)
+		}
+	}
+}
+
 // A roster retire emptied is a cell between waves: `[]` and `null` both read
 // as a cell with no seats. Only the project is required.
 func TestReadCellAcceptsAnEmptyRoster(t *testing.T) {
