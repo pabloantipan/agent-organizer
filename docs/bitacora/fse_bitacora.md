@@ -4,7 +4,31 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
-## HAND-OFF — 2026-09-26, the redesign spec is out
+## HAND-OFF — 2026-09-28, stage 5 starting
+
+- **Read first:** `agents/fse.md`, the fse skill (authority table, "Ending a
+  supervisor"), `working-on/roadmap.yaml`, `agents/people.md`.
+- **Roadmap (0032):** stages 1–4 done (0039, 0044, 0046). **Current: stage 5
+  `discovery-in-a-cell`.** Next action: write its spec from the survey (cells,
+  CreateCrew, camp's cell and roadmap, the persona-agents/roadmapping/fse
+  skills' discovery sections), cut cards, raise the accept record, and on
+  acceptance spawn a supervisor (own window, identity prelude, recipe in
+  the fse skill's references/standing-up.md). Camp is the live case; its
+  roadmap lacks a gate on its first building stage (camp's FSE owns that).
+- **Running:** nothing but Pablo's `organizer-probe-builder` and me. Tokens:
+  fse, pablo. `main` pushed, even with origin at a5c75f8 or later.
+- **Installed:** v0.2.0-348 (rule-anyone, read-only archived, stage 3).
+- **Waiting on Pablo:** move to done/: install-current-build-2 and -4
+  (superseded), app-review-with-pablo, fse-pilot (0043 kept it).
+- **Rules I keep:** end every supervisor when its last card lands (read its
+  closing report; probe -k; revoke tokens; organizer clean); relay Pablo's
+  answers to the supervisor waiting on them; gate rows name the exact
+  command and output; never build a card by copying another; cross-initiative
+  actions go to Hephaistos (`[for hephaistos]` subject, to pablo).
+- **Older detail** below is history; the lines above supersede it.
+
+## HAND-OFF history (2026-09-26 to 2026-09-28)
+### — 2026-09-26, the redesign spec is out
 
 - **Last SHA seen:** bf0e085 (the mockups in `docs/specs/redesign-mockups.html`).
 - **Task:** the UI redesign, thread 01M3G3SE8B4QAK39G6JY2W8ZH8 (Pablo, 0015).
