@@ -1,13 +1,13 @@
 ---
 title: "Stage machine-explains-itself: exit met"
-status: proposed
+status: ruled
 raised: 2026-09-28
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-28
+ruled_by: pablo
 options: [exit met, not yet]
-chosen:
+chosen: exit met
 cards: []
 threads: []
 supersedes: []
@@ -49,7 +49,8 @@ The FSE's: exit met.
 
 ## Ruling
 
-
+Pablo, 2026-09-28, in the FSE's session (organizer-probe-fse): "0044 do as
+recommended".
 
 ## Consequences
 

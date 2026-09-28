@@ -29,6 +29,7 @@ stages:
       - the Help shows how we follow the flow, from the business plain-text diagrams (0031)
       - a deaf or capped seat says why and what to restart, in the UI
     appetite: one wave
+    done: 2026-09-28      # exit met, ruled in 0044
   - id: cheap-execution
     title: Execution costs the lead little
     phase: building
