@@ -1,6 +1,6 @@
 ---
 title: The installed organizer is the current main, again
-status: next
+status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-28
