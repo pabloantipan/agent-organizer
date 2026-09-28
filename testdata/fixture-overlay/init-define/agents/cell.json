@@ -1,0 +1,7 @@
+{
+  "project": "define-fixture",
+  "workdir": "",
+  "agents": ["po_carla", "designer_diego", "tech_lead_elena"],
+  "human": "pablo",
+  "reconciler": "po_carla"
+}
