@@ -85,6 +85,12 @@ restating it (the discuss skill).
 
 ## Open questions
 
+- **Repetition (1):** my supervisor prompts all say `seat: wave1-<name>`, so every
+  task restarts at wave 1 and seat names collide across tasks (sup8 renamed
+  wave1-header and wave1-rule, cee898b). If it recurs: number waves per
+  initiative, or seat by task (`<stage>-<name>`). FR-9 of the redesign
+  groups by `wave<N>-`; any change is a record.
+
 - The Makefile's `VERSION ?=` re-runs `git describe --dirty` after
   `wails build` flips `frontend/wailsjs/go/main/App.{d.ts,js}` to 100755, so
   every `make install` ends with `-dirty` while the binary is clean (sup7,
