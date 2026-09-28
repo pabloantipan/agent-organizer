@@ -21,10 +21,15 @@ restating it (the discuss skill).
   "quiet" beside "cell in definition"; (4) Bring crew up is enabled on a seat
   with no persona file and refuses only after the click; (5) no unit test for
   Overview's gate-into-building logic. Stage 5's exits are not met yet: (a)
-  needs the drafting card (0047), (b) is camp's move into building. 0047 ruled "a drafting session" (from the
-  app). Next: amend discovery-in-a-cell FR-3 and G4, cut the drafting card
-  with depends on Hephaistos's persona-agents drafting procedure (asked
-  2026-09-28). Supervisor recipe (own window, identity prelude, recipe in
+  needs the drafting card (0047), (b) is camp's move into building. 0047 ruled "a drafting session". The
+  procedure now exists (claudecode 807cd47: persona-agents "Drafting a roster
+  from an initiative", references/drafting.md; draft markers `"draft": true`
+  in cell.json; accept record NNNN-the-cell-roster). **Next session, first:**
+  amend discovery-in-a-cell FR-3/G4 and cut the drafting card: a "Draft the
+  cell" button whose prompt is "load persona-agents, follow
+  references/drafting.md at this root"; the organizer shows the draft as in
+  definition and refuses to launch a crew while `draft: true`. Fold sup15's
+  five open points into the same amendment. Supervisor recipe (own window, identity prelude, recipe in
   the fse skill's references/standing-up.md). Camp is the live case; its
   roadmap lacks a gate on its first building stage (camp's FSE owns that).
 - **Also open (2026-09-28, Pablo from v0.2.0-348):** `header-review-2` (header
@@ -33,8 +38,11 @@ restating it (the discuss skill).
   effort and time: forecast from run records vs appetite vs FSE estimates)
   waits on Pablo, and on "forecast" goes to Hephaistos for the skill.
 - **0049 ruled (forecast from run records):** method in `docs/estimating.md`;
-  relayed to Hephaistos for the skills. Next: from now on each accept record
-  carries a forecast line; spec the roadmap's forecast display (a card).
+  relayed to Hephaistos for the skills. It is now the factory's
+  (roadmapping/references/estimating.md, claudecode bb12016): a per-stage
+  `forecast:` block in roadmap.yaml (range, waves, waits, basis, as_of;
+  recomputed, never hand-set). Next: every accept record carries a forecast
+  line; spec the roadmap's forecast display reading that block.
 - **Running:** nothing but Pablo's `organizer-probe-builder` and me. Tokens:
   fse, pablo. `main` pushed, even with origin at a5c75f8 or later.
 - **Installed:** v0.2.0-348 (rule-anyone, read-only archived, stage 3).
