@@ -1,0 +1,18 @@
+# init-c is in discovery with no gate into building (FR-4 of
+# docs/specs/discovery-in-a-cell.md, G3): the build stage names no record, so
+# the Overview says "no gate record yet" and the scan reports the stage.
+stages:
+  - id: learn
+    title: Learn the ask
+    outcome: the owner can say what C is for in one line
+    phase: discovery
+    exit:
+      - the goal is written
+    appetite: a week
+  - id: build
+    title: Build C
+    outcome: C does the one thing it is for
+    phase: building
+    exit:
+      - the first card is done
+    appetite: two waves

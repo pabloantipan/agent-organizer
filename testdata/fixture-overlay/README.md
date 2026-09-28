@@ -26,3 +26,8 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
   and a goal and a measure each longer than two lines at 1280 px, so the
   header's clamp and "more" have something to fold (twenty-at-a-glance G13);
   keep its other fields in step with the one in `testdata/home`
+- init-b and init-c are in discovery, each with a building stage next: init-b's
+  is gated by 0001, a proposed record, and init-c's names no record, so the
+  Overview shows the gate into building as waiting and as "no gate record yet"
+  (discovery-in-a-cell G3); init-c is only this overlay's, and the scan
+  reports its ungated stage

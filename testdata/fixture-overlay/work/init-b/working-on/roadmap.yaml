@@ -1,0 +1,20 @@
+# init-b is in discovery (FR-4 of docs/specs/discovery-in-a-cell.md, G3): its
+# current stage is discovery and the first building stage is gated by 0001,
+# a proposed record, so the Overview shows the gate into building as waiting.
+stages:
+  - id: learn
+    title: Learn the ask
+    outcome: the owner can say what B is for in one line
+    phase: discovery
+    exit:
+      - the goal is written
+    gates: []
+    appetite: a week
+  - id: build
+    title: Build B
+    outcome: B does the one thing it is for
+    phase: building
+    exit:
+      - the first card is done
+    gates: ["0001"]
+    appetite: two waves
