@@ -57,6 +57,9 @@ restating it (the discuss skill).
   camp, agent-slack da6bde8), 4 met on the fixture by a model (5 s). Left: 1,
   the organizer's scope in Pablo's words. Then propose "stage
   twenty-at-a-glance: exit met" as a record.
+- **sup8 done (2026-09-28):** glance-header-scroll and glance-rule-in-decisions
+  passed review. `app-review-with-pablo` has no gate; closing it (done/) is not
+  the FSE's. Installed app predates both.
 - **Installed:** v0.2.0-229-g3472f6b (sup7, install-current-build passed).
 - **Waiting on Pablo:** the intake (thread 01M3FAWKV2159MCSH0AZZJWE08); 0021, 0022, 0005, 0004, 0002. No card carries `stage:` until the
   organizer has a roadmap, which waits on the intake.
