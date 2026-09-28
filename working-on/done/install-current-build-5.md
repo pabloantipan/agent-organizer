@@ -1,6 +1,6 @@
 ---
 title: The installed organizer is main, with rule-anyone
-status: now
+status: done
 repos: [organizer]
 branch: main
 updated: 2026-09-28
@@ -10,6 +10,7 @@ boundary: ["build/ (the build output)", "/Applications/organizer.app (install ta
 spec: "Pablo, 2026-09-28: \"Reinstall\" (0041), then \"I see nothing happening?\" after the read-only card merged past the installed v0.2.0-301; CLAUDE.md, Packaging"
 gate: "the Gate section below"
 seat: install5-build
+review: pass
 ---
 
 ## Goal
@@ -25,6 +26,16 @@ merge of odyssey's initiative description and specs (fc26867). Install main.
 ## Done
 - 2026-09-28 opened by the FSE
 - 2026-09-28 install5-build: installed v0.2.0-348-gf324257 (main f324257, `merge-base --is-ancestor rule-anyone main` ok, tree clean before the build). 1: make-install.log ends `installed … (v0.2.0-348-gf324257-dirty)`, exit 0 (the -dirty is the wailsjs flip). 2: app binary and `organizer` on PATH (~/.local/bin/organizer -> /Applications/organizer.app/Contents/MacOS/organizer) both print `organizer v0.2.0-348-gf324257` (versions.txt). 3: status-archived.txt lists the seven PLV initiatives `archived`, camp, organizer, agent-slack `active` (status-json.txt). 4: git-status.txt shows nothing after the wailsjs restore and the card commit
+
+## Review
+- Verdict: pass. Unmet gate items: none.
+- 1: make-install.log has no error line and ends `installed … (v0.2.0-348-gf324257-dirty)`; `merge-base --is-ancestor rule-anyone f324257` ok.
+- 2: app binary and ~/.local/bin/organizer (symlink to the app binary) both print `organizer v0.2.0-348-gf324257`, no -dirty; f324257 is on main and was main's tip 11:44:58–11:46:19, the build ran 11:45:43–11:45:53 (reflog, binary mtime).
+- 3: `~/.local/bin/organizer status --json`, run by the reviewer, lists the seven PLV initiatives archived; camp, organizer, agent-slack active.
+- 4: `git status --short` empty after the card commit.
+- Outside the gate: `wails build` still rewrites frontend/wailsjs/runtime on every install, which is what makes the Makefile's closing line read -dirty; a later card could stop that at the source instead of restoring by hand. Gate 1 reads "at that contains", a typo.
+- Evidence: .wt-notes/install5-review/ (checks.txt, status-json.txt, status-archived.txt).
+- Reviewer install5-review, 2026-09-28.
 
 ## Next
 1. Review the gate evidence in .wt-notes/install5-build
