@@ -9,6 +9,7 @@ import { useBoard } from "../stores/board.store";
 import { nextDate, stageState, waitingDecisions } from "./InitiativeHeader";
 import { InitiativeDetail } from "./Initiatives";
 import { RuleDecisionBox } from "./RuleDecisionBox";
+import { CellStateLz } from "./Crew";
 import "../styles/home.css";
 
 /** Home: what needs me, and where every initiative stands (FR-15, FR-16).
@@ -173,7 +174,7 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
               <Phase stages={i.stages ?? []} />
               <span title={i.goal || undefined} className={`p-goal ${i.goal ? "" : "missing"}`}>{i.goal || "no goal yet"}</span>
               <MiniStepper stages={i.stages ?? []} />
-              <Signals i={i} rows={rows} cards={cards} waves={group?.waves ?? []} />
+              <Signals i={i} rows={rows} cards={cards} waves={group?.waves ?? []} cell={group?.cell} />
               <NextDate i={i} cards={cards} />
               <button className="p-more ghost" onClick={() => setOpen({ ...open, [id]: !open[id] })} aria-expanded={!!open[id]} title={open[id] ? "hide details" : "repos, problems and actions"}>
                 {open[id] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -205,7 +206,7 @@ function MiniStepper({ stages }: { stages: model.Stage[] }) {
   );
 }
 
-function Signals({ i, rows, cards, waves }: { i: merge.BoardInitiative; rows: merge.BoardInitiative[]; cards: merge.BoardCard[]; waves: service.Wave[] }) {
+function Signals({ i, rows, cards, waves, cell }: { i: merge.BoardInitiative; rows: merge.BoardInitiative[]; cards: merge.BoardCard[]; waves: service.Wave[]; cell?: model.Cell | null }) {
   const waiting = waitingDecisions(i);
   const blocked = cards.filter((c) => c.status === "blocked").length;
   const now = cards.filter((c) => c.status === "now").length;
@@ -213,7 +214,8 @@ function Signals({ i, rows, cards, waves }: { i: merge.BoardInitiative; rows: me
   const working = rows.reduce((a, r) => a + (r.working ?? 0), 0);
   const running = waves.filter((w) => (w.building?.length ?? 0) > 0);
   const problems = i.problems?.length ?? 0;
-  const none = !waiting && !blocked && !now && !live && !running.length && !problems;
+  const defining = cell?.state === "in_definition";
+  const none = !waiting && !blocked && !now && !live && !running.length && !problems && !defining;
   return (
     <span className="p-sig">
       {waiting > 0 && <span className="lz waiting"><span className="num">{waiting}</span> waiting</span>}
@@ -221,6 +223,7 @@ function Signals({ i, rows, cards, waves }: { i: merge.BoardInitiative; rows: me
       {now > 0 && <span className="lz now"><span className="num">{now}</span> now</span>}
       {running.map((w) => <span key={w.n} className="lz live">wave <span className="num">{w.n}</span> · <span className="num">{w.building!.length}</span> building</span>)}
       {live > 0 && <span className="lz">{working > 0 ? <><span className="num">{working}</span> working</> : <><span className="num">{live}</span> live</>}</span>}
+      <CellStateLz cell={cell} label="cell in definition" />
       {problems > 0 && <span className="lz warning"><span className="num">{problems}</span> problem{problems === 1 ? "" : "s"}</span>}
       {none && <span className="p-quiet" title="no signals">—</span>}
     </span>

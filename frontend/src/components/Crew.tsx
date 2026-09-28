@@ -1,12 +1,28 @@
 import { useState } from "react";
-import { MessageSquare, SquareTerminal, Trash2, UserRoundX, Users } from "lucide-react";
+import { MessageSquare, PencilRuler, SquareTerminal, Trash2, UserRoundX, Users } from "lucide-react";
 import { Retire } from "./Retire";
 import { api, type AgentGroup, type Seat } from "../hooks/useWails";
+import type { model } from "../../wailsjs/go/models";
 import { ContextBar, WatcherBadge } from "./ContextBar";
 import { HealthWhy } from "./AgentList";
 import { healthState } from "../lib/health";
 
 const STATE_LABEL: Record<string, string> = { working: "working", running: "idle", shell: "shell", exited: "exited" };
+
+/** What a cell in definition waits on (decision 0030): no seat has had a
+ *  session or a run, so the roster is still being written. */
+export const IN_DEFINITION_WAITS = "no seat has run yet; waits on its first launch";
+
+/** The cell's derived state as a lozenge, word and icon, or nothing. One
+ *  source for Crew, the Agents tab and Home's signals. */
+export function CellStateLz({ cell, label = "in definition" }: { cell?: model.Cell | null; label?: string }) {
+  if (cell?.state !== "in_definition") return null;
+  return (
+    <span className="lz tone" title={`${cell.project}: ${IN_DEFINITION_WAITS} (Bring crew up)`}>
+      <PencilRuler size={12} strokeWidth={2} aria-hidden="true" />{label}
+    </span>
+  );
+}
 
 /** The persona cell of an initiative: one row per seat of agents/cell.json,
  *  joined to whatever process runs for it, its discuss watcher and its
@@ -38,6 +54,8 @@ export function Crew({ group, readOnly = false, onMessage }: { group: AgentGroup
       <div className="crew-head">
         <Users size={14} />
         <span className="ident">{cell.project}</span>
+        <CellStateLz cell={cell} />
+        {cell.state === "in_definition" && <span className="meta">{IN_DEFINITION_WAITS}</span>}
         <span className="meta">{seats.length} seats · {live} live · {off} off{cell.reconciler ? ` · reconciler ${cell.reconciler}` : ""}</span>
         {group.discuss && <span className="badge watcher stale" title="crew health comes from the discuss API">{group.discuss}</span>}
         <span className="spacer" />
