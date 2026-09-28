@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MessageSquare, PencilRuler, SquareTerminal, Trash2, UserRoundX, Users } from "lucide-react";
+import { FileXCorner, MessageSquare, PencilRuler, SquareTerminal, Trash2, UserRoundX, Users } from "lucide-react";
 import { Retire } from "./Retire";
 import { api, type AgentGroup, type Seat } from "../hooks/useWails";
 import type { model } from "../../wailsjs/go/models";
@@ -92,6 +92,11 @@ function SeatRow({ seat, readOnly, confirm, setConfirm, flash, onMessage }: { se
     <li className={state}>
       <span className={`a-state ${state}`}><i />{STATE_LABEL[state] ?? state}</span>
       <span className="a-name"><span className="ident">{seat.name}</span></span>
+      {seat.no_persona && (
+        <span className="lz warning" title={`agents/${seat.name}.md is missing: Bring crew up refuses until it is written`}>
+          <FileXCorner size={12} strokeWidth={2} aria-hidden="true" />no persona file
+        </span>
+      )}
       <WatcherBadge watcher={seat.watcher} deaf={seat.deaf} capped={seat.capped} undelivered={seat.undelivered} />
       {(seat.owes?.length ?? 0) > 0 && <span className="badge owes" title={seat.owes.map((o) => o.subject || o.id).join("\n")}>owes {seat.owes.length}</span>}
       <ContextBar c={a?.context} />
