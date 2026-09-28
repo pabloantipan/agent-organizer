@@ -11,7 +11,7 @@ const STATE_LABEL: Record<string, string> = { working: "working", running: "idle
  *  probe profile. Kill removes a probe (session, layout, profile; the
  *  conversation survives). Stop sends SIGTERM to a plain-terminal agent.
  *  Both destructive actions ask inline first. */
-export function AgentList({ agents, root, local = true, onMessage }: { agents: Agent[]; root?: string; local?: boolean; onMessage?: (persona: string) => void }) {
+export function AgentList({ agents, root, local = true, readOnly = false, onMessage }: { agents: Agent[]; root?: string; local?: boolean; readOnly?: boolean; onMessage?: (persona: string) => void }) {
   const [confirm, setConfirm] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
   if (!agents || agents.length === 0) return <div className="meta">No agents here.</div>;
@@ -44,7 +44,7 @@ export function AgentList({ agents, root, local = true, onMessage }: { agents: A
               <ContextBar c={a.context} />
               <span className="meta mono a-proc">{a.pid > 0 ? `${a.tty} · up ${a.uptime}` : a.created ? `session ${a.created}` : "layout only"}</span>
               <span className="meta mono a-dir" title={a.dir}>{sub}</span>
-              <span className="a-actions">
+              {!readOnly && <span className="a-actions">
                 {onMessage && a.persona && !asking && <button className="tiny-btn" onClick={() => onMessage(a.persona)} title={`write to ${a.persona}`}><MessageSquare size={13} /> Message</button>}
                 {local && asking && a.session && (
                   <>
@@ -75,7 +75,7 @@ export function AgentList({ agents, root, local = true, onMessage }: { agents: A
                     <Square size={13} /> Stop
                   </button>
                 )}
-              </span>
+              </span>}
               {health && health !== "alive" && <HealthWhy state={health} />}
             </li>
           );

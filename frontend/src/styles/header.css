@@ -27,3 +27,7 @@
   color: var(--accent-fg); cursor: pointer;
 }
 .clamp-more:hover { background: var(--surface-hover); color: var(--fg); border: 0; }
+
+/* Not active opens read-only (FR-13, 0042): the words say it, with a lock;
+   neutral on purpose, since nothing here waits on anyone. */
+.lz.read-only { border: 1px solid var(--border-strong); color: var(--fg-muted); max-width: none; }

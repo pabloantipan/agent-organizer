@@ -12,7 +12,7 @@ const STATE_LABEL: Record<string, string> = { working: "working", running: "idle
  *  joined to whatever process runs for it, its discuss watcher and its
  *  context fill. "Bring crew up" opens one probe per seat in one iTerm2
  *  window; seats already running just reattach. */
-export function Crew({ group, onMessage }: { group: AgentGroup; onMessage?: (seat: string) => void }) {
+export function Crew({ group, readOnly = false, onMessage }: { group: AgentGroup; readOnly?: boolean; onMessage?: (seat: string) => void }) {
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
@@ -42,9 +42,9 @@ export function Crew({ group, onMessage }: { group: AgentGroup; onMessage?: (sea
         {group.discuss && <span className="badge watcher stale" title="crew health comes from the discuss API">{group.discuss}</span>}
         <span className="spacer" />
         {note && <span className="meta">{note}</span>}
-        {!asking && <button className={`tiny-btn ${(group.retirable?.length ?? 0) > 0 ? "" : "ghost"}`} onClick={() => setRetiring(true)} title={(group.retirable?.length ?? 0) > 0 ? `wave done with ${group.retirable.join(", ")}: organizer retire ${group.id} --retirable` : `organizer retire ${group.id}: end a wave`}><UserRoundX size={13} /> {(group.retirable?.length ?? 0) > 0 ? `${group.retirable.length} retirable` : "Retire…"}</button>}
+        {!readOnly && !asking && <button className={`tiny-btn ${(group.retirable?.length ?? 0) > 0 ? "" : "ghost"}`} onClick={() => setRetiring(true)} title={(group.retirable?.length ?? 0) > 0 ? `wave done with ${group.retirable.join(", ")}: organizer retire ${group.id} --retirable` : `organizer retire ${group.id}: end a wave`}><UserRoundX size={13} /> {(group.retirable?.length ?? 0) > 0 ? `${group.retirable.length} retirable` : "Retire…"}</button>}
         {retiring && <Retire group={group} onClose={() => setRetiring(false)} />}
-        {!asking && (
+        {!readOnly && !asking && (
           <button className="tiny-btn primary" onClick={() => setAsking(true)} title={seats.length === 0 ? "no seats: the roster is empty between waves" : `organizer crew ${group.id}`} disabled={busy || seats.length === 0}>
             <Users size={13} /> {off === seats.length ? "Bring crew up" : off > 0 ? `Bring ${off} up` : "Reattach all"}
           </button>
@@ -58,13 +58,13 @@ export function Crew({ group, onMessage }: { group: AgentGroup; onMessage?: (sea
         )}
       </div>
       <ul className="agents crew-seats">
-        {seats.map((s) => <SeatRow key={s.name} seat={s} confirm={confirmKill} setConfirm={setConfirmKill} flash={flash} onMessage={onMessage} />)}
+        {seats.map((s) => <SeatRow key={s.name} seat={s} readOnly={readOnly} confirm={confirmKill} setConfirm={setConfirmKill} flash={flash} onMessage={onMessage} />)}
       </ul>
     </div>
   );
 }
 
-function SeatRow({ seat, confirm, setConfirm, flash, onMessage }: { seat: Seat; confirm: string | null; setConfirm: (s: string | null) => void; flash: (m: string) => void; onMessage?: (seat: string) => void }) {
+function SeatRow({ seat, readOnly, confirm, setConfirm, flash, onMessage }: { seat: Seat; readOnly: boolean; confirm: string | null; setConfirm: (s: string | null) => void; flash: (m: string) => void; onMessage?: (seat: string) => void }) {
   const a = seat.agent;
   const state = a?.state ?? "off";
   const session = a?.session || "";
@@ -78,7 +78,7 @@ function SeatRow({ seat, confirm, setConfirm, flash, onMessage }: { seat: Seat; 
       {(seat.owes?.length ?? 0) > 0 && <span className="badge owes" title={seat.owes.map((o) => o.subject || o.id).join("\n")}>owes {seat.owes.length}</span>}
       <ContextBar c={a?.context} />
       <span className="meta mono a-proc">{a && a.pid > 0 ? `${a.tty} · up ${a.uptime}` : a?.created ? `session ${a.created}` : a ? "layout only" : seat.session}</span>
-      <span className="a-actions">
+      {!readOnly && <span className="a-actions">
         {onMessage && !asking && <button className="tiny-btn" onClick={() => onMessage(seat.name)} title={`write to ${seat.name}`}><MessageSquare size={13} /> Message</button>}
         {asking && session && (
           <>
@@ -93,7 +93,7 @@ function SeatRow({ seat, confirm, setConfirm, flash, onMessage }: { seat: Seat; 
             <button className="tiny-btn ghost" onClick={() => setConfirm(seat.name)} title={`probe -k ${session}`}><Trash2 size={13} /> Kill</button>
           </>
         )}
-      </span>
+      </span>}
       {health && health !== "alive" && <HealthWhy state={health} />}
     </li>
   );

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { MessagesSquare, Users, X } from "lucide-react";
 import type { Seat } from "../hooks/useWails";
 import { useBoard } from "../stores/board.store";
-import { queueOf } from "../lib/queue";
+import { queueOf, readOnlyOf } from "../lib/queue";
 import { ContextBar, WatcherBadge } from "./ContextBar";
 import { HEALTH } from "../lib/health";
 import { Conversation } from "./Conversation";
@@ -70,8 +70,10 @@ export function SlackView() {
   }
   const seats = g.crew ?? [];
   const live = seats.filter((s) => s.agent && (s.agent.state === "working" || s.agent.state === "running")).length;
-  const deaf = seats.filter((s) => s.deaf && !s.capped).length;
-  const capped = seats.filter((s) => s.capped).length;
+  // Deaf and capped come from the queue, so a cell that is not active counts
+  // none (FR-13); the read-only flag goes down to the conversation.
+  const { deaf, capped } = queueOf(g, board);
+  const readOnly = readOnlyOf(board, g.id);
   return (
     <div className="slack">
       <div className="board-head">
@@ -85,7 +87,7 @@ export function SlackView() {
         </button>
       </div>
       <div className={`slack-body ${people ? "with-people" : ""}`}>
-        <Conversation key={g.id} group={g} focus={slackFocus} onFocus={setSlackFocus} />
+        <Conversation key={g.id} group={g} focus={slackFocus} onFocus={setSlackFocus} readOnly={readOnly} />
         {people && <People seats={seats} human={g.human} focus={slackFocus} onFocus={setSlackFocus} onClose={togglePeople} />}
       </div>
     </div>

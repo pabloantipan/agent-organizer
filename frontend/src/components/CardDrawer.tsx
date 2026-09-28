@@ -5,11 +5,12 @@ import { api } from "../hooks/useWails";
 import type { merge } from "../../wailsjs/go/models";
 import { ageLabel, notesAsContext, shortHome, since } from "../lib";
 import { useBoard } from "../stores/board.store";
+import { readOnlyOf } from "../lib/queue";
 
 // Trello-style card back: centered, description in the main column, labels
 // and actions in the side column.
 export function CardDrawer() {
-  const { selected, select } = useBoard();
+  const { selected, select, view } = useBoard();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && select(null);
     window.addEventListener("keydown", onKey);
@@ -18,6 +19,9 @@ export function CardDrawer() {
   const html = useMemo(() => (selected ? (marked.parse(selected.body || "") as string) : ""), [selected]);
   if (!selected) return null;
   const c = selected;
+  // FR-13: a card of an initiative that is not active takes no comment and
+  // starts no conversation; what is there stays readable.
+  const readOnly = readOnlyOf(view, c.initiative_id);
   const dir = c.path.replace(/\/working-on\/.*$/, "");
   return (
     <div className="modal-backdrop" onClick={() => select(null)}>
@@ -46,7 +50,7 @@ export function CardDrawer() {
                 <div>{c.next}</div>
               </div>
             )}
-            <MyNotes card={c} />
+            <MyNotes card={c} readOnly={readOnly} />
             <div className="markdown" dangerouslySetInnerHTML={{ __html: html }} />
           </div>
           <aside className="modal-side">
@@ -65,7 +69,7 @@ export function CardDrawer() {
             ) : (
               <div className="meta">On {c.machine}. Actions work only on the local machine.</div>
             )}
-            <Discuss card={c} />
+            <Discuss card={c} readOnly={readOnly} />
             <div className="section-label">Path</div>
             <div className="mono meta wrap">{shortHome(c.path)}</div>
           </aside>
@@ -80,7 +84,7 @@ export function CardDrawer() {
  *  to a seat with the card slug as the subject, which is what links the new
  *  conversation back to this card. Only when the initiative has a mailbox
  *  and the human seat holds a token. */
-function Discuss({ card: c }: { card: merge.BoardCard }) {
+function Discuss({ card: c, readOnly }: { card: merge.BoardCard; readOnly: string | null }) {
   const { agents, openSlackThread, openSlackDraft, view } = useBoard();
   const [seat, setSeat] = useState("");
   const notes = view?.order?.notes?.[`${c.initiative_id}/${c.slug}`] ?? [];
@@ -99,7 +103,9 @@ function Discuss({ card: c }: { card: merge.BoardCard }) {
             <MessagesSquare size={14} /> <span>{t.missing ? "thread closed" : `Slack: ${t.subject || t.id.slice(0, 8)}`}</span>
           </button>
         ))}
-        {group.can_post ? (
+        {readOnly ? (
+          <div className="meta">{readOnly}: read-only</div>
+        ) : group.can_post ? (
           <div className="discuss-write">
             <select value={to} onChange={(e) => setSeat(e.target.value)} title="who to write to">
               {seats.map((a) => <option key={a} value={a}>{a}</option>)}
@@ -121,7 +127,7 @@ function Discuss({ card: c }: { card: merge.BoardCard }) {
  *  dated entries and a box to add one. They are the human's, kept in the
  *  app's synced state and never in the card file, so agents keep the file.
  *  "Write about this card" and the queue carry them into the conversation. */
-function MyNotes({ card: c }: { card: merge.BoardCard }) {
+function MyNotes({ card: c, readOnly }: { card: merge.BoardCard; readOnly: string | null }) {
   const { view, addNote, editNote, account } = useBoard();
   const key = `${c.initiative_id}/${c.slug}`;
   const notes = view?.order?.notes?.[key] ?? [];
@@ -139,23 +145,25 @@ function MyNotes({ card: c }: { card: merge.BoardCard }) {
   return (
     <div className="comments">
       <div className="section-label"><MessageSquareText size={12} /> Comments <span className="meta">{notes.length || ""}</span> <span className="meta hint-inline">yours; synced with the app, not in the card file; carried into "Write about this card"</span></div>
-      <div className="comment-new">
+      {readOnly ? (
+        notes.length === 0 && <div className="meta">No comments. {readOnly}: read-only.</div>
+      ) : <div className="comment-new">
         <span className="avatar" title={me || "you"}>{initial(me)}</span>
         <div className="comment-box">
           <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Write a comment…  (Enter to save, Shift+Enter for a new line)" rows={text ? 3 : 1} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); submit(); } }} />
           {text && <div className="comment-actions"><button className="tiny-btn primary" onClick={submit} disabled={busy}><Send size={12} /> Save</button><button className="tiny-btn ghost" onClick={() => setText("")}>Cancel</button></div>}
         </div>
-      </div>
+      </div>}
       <ul className="comment-list">
         {[...notes].reverse().map((n) => (
           <li key={n.id} className="comment">
             <span className="avatar" title={n.by}>{initial(n.by)}</span>
             <div className="comment-main">
               <div className="comment-head"><b>{n.by?.replace(/@.*$/, "") || "you"}</b> <span className="meta" title={String(n.at)}>{since(n.at)}</span>
-                <span className="comment-tools">
+                {!readOnly && <span className="comment-tools">
                   <button className="rail-icon" onClick={() => { setEditing(n.id); setDraft(n.text); }} title="edit"><Pencil size={11} /></button>
                   <button className="rail-icon" onClick={() => editNote(c.initiative_id, c.slug, n.id, "")} title="delete"><Trash2 size={11} /></button>
-                </span>
+                </span>}
               </div>
               {editing === n.id ? (
                 <div className="comment-box">

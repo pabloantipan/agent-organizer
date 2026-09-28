@@ -5,7 +5,7 @@ import { since } from "../lib";
 import { useBoard } from "../stores/board.store";
 import { AgentList } from "./AgentList";
 import { Crew } from "./Crew";
-import { queueOf } from "../lib/queue";
+import { queueOf, readOnlyOf } from "../lib/queue";
 import { CleanButton } from "./Retire";
 
 const REFRESH_MS = 10_000;
@@ -21,6 +21,9 @@ export function AgentsView() {
   }, [view, applyAgents]);
 
   if (!view) return <div className="empty">Sampling processes…</div>;
+  // FR-13: an initiative that is not active is watched, not driven; the flag
+  // goes down to its crew block and agent rows.
+  const readOnly = readOnlyOf(board, selectedInitiative);
 
   const groups = (view.groups ?? []).filter((g) => (!selectedInitiative || g.id === selectedInitiative) && ((g.agents?.length ?? 0) > 0 || !!g.cell || g.id === selectedInitiative));
   const totals = (view.groups ?? []).reduce(
@@ -37,10 +40,13 @@ export function AgentsView() {
           sampled {since(view.sampled_at)} · every {REFRESH_MS / 1000}s
         </span>
         <span className="spacer" />
-        <CleanButton />
+        {readOnly ? <span className="meta">{readOnly}: read-only</span> : <CleanButton />}
       </div>
       {groups.length === 0 && <div className="empty">No agents{selectedInitiative ? " in this initiative" : ""}.</div>}
-      {groups.map((g) => (
+      {groups.map((g) => {
+        const q = queueOf(g, board);
+        const ro = readOnlyOf(board, g.id);
+        return (
         <section key={g.id} className="agent-group">
           <header className={`agent-group-head ${selectedInitiative ? "static" : ""}`}>
             <span className="agent-group-title" onClick={() => !selectedInitiative && setSelectedInitiative(g.id)} title={selectedInitiative ? "" : "Show only this initiative"}>
@@ -51,16 +57,17 @@ export function AgentsView() {
               {g.cell && <span className="meta">· {g.crew?.length ?? 0} seats</span>}
             </span>
             <span className="spacer" />
-            {g.cell && queueOf(g, board).total > 0 && <button className="tiny-btn ghost hot" onClick={() => openSlack(g.id, null)} title="escalated to you, or asked of you: threads and cards">{queueOf(g, board).total} need you</button>}
-            <NewAgent initiativeId={g.id} />
+            {g.cell && q.total > 0 && <button className="tiny-btn ghost hot" onClick={() => openSlack(g.id, null)} title="escalated to you, or asked of you: threads and cards">{q.total} need you</button>}
+            {!ro && <NewAgent initiativeId={g.id} />}
           </header>
           {/* A roster seat's agent shows in the crew block above; an agent
               with a persona outside the roster (a supervisor, a builder, a
               guest) has no seat there, so it is listed here (FR-6). */}
-          {g.cell && <Crew group={g} onMessage={g.can_post ? (seat) => openSlack(g.id, seat) : undefined} />}
-          <AgentList agents={(g.agents ?? []).filter((a) => !a.persona || !g.cell?.agents?.includes(a.persona))} root={g.path} onMessage={g.cell && g.can_post ? (p) => openSlack(g.id, p) : undefined} />
+          {g.cell && <Crew group={g} readOnly={!!ro} onMessage={g.can_post && !ro ? (seat) => openSlack(g.id, seat) : undefined} />}
+          <AgentList agents={(g.agents ?? []).filter((a) => !a.persona || !g.cell?.agents?.includes(a.persona))} root={g.path} readOnly={!!ro} onMessage={g.cell && g.can_post && !ro ? (p) => openSlack(g.id, p) : undefined} />
         </section>
-      ))}
+        );
+      })}
       {!selectedInitiative && (view.unassigned?.length ?? 0) > 0 && (
         <section className="agent-group">
           <header className="agent-group-head static">

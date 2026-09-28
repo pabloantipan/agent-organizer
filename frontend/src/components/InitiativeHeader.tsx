@@ -1,6 +1,8 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { Lock } from "lucide-react";
 import type { merge, model } from "../../wailsjs/go/models";
 import { parseISO, today } from "../lib/dates";
+import { readOnlyOf } from "../lib/queue";
 import { useBoard, type Sub } from "../stores/board.store";
 import "../styles/header.css";
 
@@ -140,8 +142,10 @@ const SUBS: { id: Sub; label: string }[] = [
  *  waiting, and the stages with the current one marked; then the six
  *  sub-views. No badge on a sub-view: Needs me is the one count. */
 export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardInitiative }) {
-  const { sub, openInitiative } = useBoard();
+  const { sub, openInitiative, view } = useBoard();
   const waiting = waitingDecisions(i);
+  // FR-13: not active means read-only, said in words beside the id.
+  const readOnly = readOnlyOf(view, i.id);
   return (
     <header className="ihead">
       <div className="ihead-top">
@@ -149,6 +153,7 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
           <h1 className="ihead-id">
             {i.id}
             {i.client && <span className="lz tone">{i.client}</span>}
+            {readOnly && <span className="lz read-only" title="not active: nothing here can be ruled, moved, commented, posted or started"><Lock size={12} aria-hidden /> {readOnly}: read-only</span>}
           </h1>
           <Clamped key={`goal-${i.id}`} className={`ihead-goal ${i.goal ? "" : "missing"}`}>
             <span className="lbl">Goal</span>
