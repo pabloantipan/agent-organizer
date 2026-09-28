@@ -9,12 +9,24 @@
 #   wails dev -devserver localhost:34115
 #
 #   eval "$(scripts/fixture-home.sh --twenty)"   # twenty initiatives instead
+#   eval "$(scripts/fixture-home.sh --live-mailbox)"  # init-a's health from discuss
+#
+# Mailbox health (docs/specs/machine-explains-itself.md, A3): deaf and capped
+# cannot be made on demand, so the config's canned_health points at a copy of
+# testdata/fixture-health.json, read in place of the discuss API: a roster seat
+# alive (po_ana), one deaf (dev_bruno), a supervisor capped (sup10), a builder
+# stale (build-help), and sup9 never with 3 undelivered. One stand-in agent per
+# standin line at the end runs in init-a with the environment a probe launch
+# would give it; organizer-fixture-probe-sup9 has no AGENT_NAME, so its row
+# says "no identity". --live-mailbox drops canned_health, which brings back
+# the FSE thread of G19 (the canned file has no threads). Either way the
+# stand-ins are in FIXTURE_AGENT_PIDS; `kill $FIXTURE_AGENT_PIDS` ends them.
 #
 # --twenty lays out testdata/fixture-twenty (docs/specs/twenty-at-a-glance.md,
 # FR-7): twenty initiatives in the spec's mix and nothing from testdata/home.
 # Executing cannot come from files: the scan reads it from the process table.
 # So the script starts one stand-in agent per line of fixture-twenty/agents.txt,
-# a sleep whose process name is the config's agent_binary, with its cwd in the
+# a process named after the config's agent_binary, with its cwd in the
 # card's .wt/<slug>, and the real scan joins it to the card. It also exports
 # FIXTURE_AGENT_PIDS; `kill $FIXTURE_AGENT_PIDS` ends them (they sleep 6 h).
 # zellij, the probe layouts and discuss are pointed away in that config, so
@@ -25,11 +37,31 @@
 # touches this temp copy.
 set -euo pipefail
 
+# standin <dir> [VAR=value ...]: one stand-in agent, a process named after
+# the fixture's agent_binary that sleeps 6 h, in <dir>, with only the identity
+# given. It is testdata/fixture-agent built into the temp dir, not /bin/sleep:
+# macOS hides a platform binary's environment from ps -E, where the scan reads
+# the identity. The caller's own identity is dropped first: a seat running
+# this script carries AGENT_NAME, and the scan would read it as the stand-in's.
+standin() {
+  local dir="$1"; shift
+  mkdir -p "$dir"
+  (
+    cd "$dir"
+    unset AGENT_NAME PROJECT_ID AGENT_SESSION DISCUSS_TOKEN
+    for kv in "$@"; do export "$kv"; done
+    exec "$tmp/bin/organizer-fixture-agent" 21600
+  ) </dev/null >/dev/null 2>&1 &
+  pids="$pids $!"
+}
+pids=""
+
 repo="$(cd "$(dirname "$0")/.." && pwd)"
 tmp="$(mktemp -d "${TMPDIR:-/tmp}/organizer-fixture.XXXXXX")"
 home="$tmp/home"
 
-mkdir -p "$home"
+mkdir -p "$home" "$tmp/bin"
+(cd "$repo/testdata/fixture-agent" && go build -o "$tmp/bin/organizer-fixture-agent" main.go) >&2
 
 if [ "${1:-}" = "--twenty" ]; then
   # lsof reports an agent's cwd with symlinks resolved (/tmp is /private/tmp
@@ -55,13 +87,9 @@ zellij: /usr/bin/true
 probe_state_dir: ""
 discuss_state_dir: $tmp/discuss
 EOF
-  pids=""
   while read -r init card; do
     case "$init" in ''|'#'*) continue ;; esac
-    dir="$home/$init/.wt/$card"
-    mkdir -p "$dir"
-    (cd "$dir" && exec -a organizer-fixture-agent sleep 21600) </dev/null >/dev/null 2>&1 &
-    pids="$pids $!"
+    standin "$home/$init/.wt/$card"
   done < "$src/agents.txt"
   echo "$pids" > "$tmp/agents.pid"
   echo "export ORGANIZER_CONFIG='$tmp/config.yaml'"
@@ -70,6 +98,11 @@ EOF
   echo "export FIXTURE_AGENT_PIDS='${pids# }'"
   exit 0
 fi
+live_mailbox=""
+[ "${1:-}" = "--live-mailbox" ] && live_mailbox=1
+# lsof resolves symlinks in an agent's cwd, as in --twenty above.
+tmp="$(cd "$tmp" && pwd -P)"
+home="$tmp/home"
 # node_modules and Library are ignore-dir fixtures; they are not needed here.
 (cd "$repo/testdata/home" && tar --exclude=./node_modules --exclude=./Library -cf - .) | (cd "$home" && tar -xf -)
 (cd "$repo/testdata/fixture-overlay" && tar --exclude=./README.md -cf - .) | (cd "$home" && tar -xf -)
@@ -85,6 +118,7 @@ g commit -q -am "docs(bitacora): the fixture wave" -m "Committed-by: FSE"
 echo "- 0002 and 0003 raised" >> "$a/docs/bitacora/fse_bitacora.md"
 g commit -q -am "docs(decisions): raise 0002 and 0003" -m "Committed-by: FSE"
 
+cp "$repo/testdata/fixture-health.json" "$tmp/health.json"
 cat > "$tmp/config.yaml" <<EOF
 machine: fixture
 roots:
@@ -92,9 +126,24 @@ roots:
 max_depth: 3
 ignore_dirs: [node_modules, Library]
 auth: off
+agent_binary: organizer-fixture-agent
+zellij: /usr/bin/true
+probe_state_dir: ""
 EOF
+[ -n "$live_mailbox" ] || echo "canned_health: $tmp/health.json" >> "$tmp/config.yaml"
 mkdir -p "$tmp/data"
+
+# The live agents of init-a, as probe would launch them: the family is the
+# cell's project, so each session is organizer-fixture-probe-<short>.
+f=organizer-fixture
+standin "$a" AGENT_NAME=po_ana PROJECT_ID=$f AGENT_SESSION=$f-probe-ana
+standin "$a" AGENT_NAME=dev_bruno PROJECT_ID=$f AGENT_SESSION=$f-probe-bruno
+standin "$a" AGENT_NAME=sup10 PROJECT_ID=$f AGENT_SESSION=$f-probe-sup10
+standin "$a/.wt/build-help" AGENT_NAME=build-help PROJECT_ID=$f AGENT_SESSION=$f-probe-build-help
+standin "$a" AGENT_SESSION=$f-probe-sup9
+echo "${pids# }" > "$tmp/agents.pid"
 
 echo "export ORGANIZER_CONFIG='$tmp/config.yaml'"
 echo "export XDG_DATA_HOME='$tmp/data'"
 echo "export FIXTURE_HOME='$home'"
+echo "export FIXTURE_AGENT_PIDS='${pids# }'"

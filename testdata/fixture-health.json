@@ -1,0 +1,14 @@
+{
+  "organizer-fixture": {
+    "agents": [
+      {"agent": "pablo", "watcher": "alive", "seconds_since_wait": 5, "seconds_since_drain": 5, "undelivered": 0, "oldest_undelivered_seconds": 0, "deaf": false},
+      {"agent": "fse", "watcher": "alive", "seconds_since_wait": 12, "seconds_since_drain": 40, "undelivered": 0, "oldest_undelivered_seconds": 0, "deaf": false},
+      {"agent": "po_ana", "watcher": "alive", "seconds_since_wait": 8, "seconds_since_drain": 30, "undelivered": 0, "oldest_undelivered_seconds": 0, "deaf": false},
+      {"agent": "dev_bruno", "watcher": "stale", "seconds_since_wait": 5400, "seconds_since_drain": 7200, "undelivered": 2, "oldest_undelivered_seconds": 3600, "deaf": true},
+      {"agent": "sup10", "watcher": "alive", "seconds_since_wait": 20, "seconds_since_drain": 60, "undelivered": 3, "oldest_undelivered_seconds": 1800, "deaf": true},
+      {"agent": "build-help", "watcher": "stale", "seconds_since_wait": 900, "seconds_since_drain": 120, "undelivered": 1, "oldest_undelivered_seconds": 60, "deaf": false},
+      {"agent": "sup9", "watcher": "never", "seconds_since_wait": 0, "seconds_since_drain": 0, "undelivered": 3, "oldest_undelivered_seconds": 1500, "deaf": false}
+    ],
+    "threads": []
+  }
+}
