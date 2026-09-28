@@ -60,6 +60,11 @@ restating it (the discuss skill).
 - **sup8 done (2026-09-28):** glance-header-scroll and glance-rule-in-decisions
   passed review. `app-review-with-pablo` has no gate; closing it (done/) is not
   the FSE's. Installed app predates both.
+- **Stage 3 (machine-explains-itself), current since 0039:** spec
+  `docs/specs/machine-explains-itself.md`, cards explain-help,
+  explain-health-words, explain-health-all-agents (643469e); 0040 asks Pablo
+  to accept. Found: the capped remedy is wrong since agent-slack 8991640
+  (the next prompt delivers), fixed by FR-5.
 - **Installed:** v0.2.0-229-g3472f6b (sup7, install-current-build passed).
 - **Waiting on Pablo:** the intake (thread 01M3FAWKV2159MCSH0AZZJWE08); 0021, 0022, 0005, 0004, 0002. No card carries `stage:` until the
   organizer has a roadmap, which waits on the intake.
