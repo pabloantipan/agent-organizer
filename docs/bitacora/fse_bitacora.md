@@ -9,10 +9,10 @@ restating it (the discuss skill).
 - **Read first:** `agents/fse.md`, the fse skill (authority table, "Ending a
   supervisor"), `working-on/roadmap.yaml`, `agents/people.md`.
 - **Roadmap (0032):** stages 1–4 done (0039, 0044, 0046). **Current: stage 5
-  `discovery-in-a-cell`.** Next action: write its spec from the survey (cells,
-  CreateCrew, camp's cell and roadmap, the persona-agents/roadmapping/fse
-  skills' discovery sections), cut cards, raise the accept record, and on
-  acceptance spawn a supervisor (own window, identity prelude, recipe in
+  `discovery-in-a-cell`.** Spec `docs/specs/discovery-in-a-cell.md`, cards
+  cell-in-definition, cell-persona-check, discovery-gate-shown; 0047 (how a
+  roster is drafted) and 0048 (accept) wait on Pablo. On 0048, spawn a
+  supervisor (own window, identity prelude, recipe in
   the fse skill's references/standing-up.md). Camp is the live case; its
   roadmap lacks a gate on its first building stage (camp's FSE owns that).
 - **Running:** nothing but Pablo's `organizer-probe-builder` and me. Tokens:
