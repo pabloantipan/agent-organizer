@@ -1,16 +1,17 @@
 ---
 title: Roster seats show why and what visibly, and the Help's sections scroll
-status: now
+status: done
 repos: [organizer]
 branch: main
 updated: 2026-09-28
-next: "review: explain-finish, branch explain-finish, gate G8, G9, G6 met, 53ca359 c8c430c"
+next: "merge explain-finish (53ca359 c8c430c) to main"
 depends_on: []
 boundary: ["frontend/src/components/Crew.tsx", "frontend/src/components/AgentList.tsx (the roster seat's line only)", "frontend/src/components/HelpView.tsx (the section list's scroll)", "frontend/src/styles/ (those components' CSS only)"]
 spec: "docs/specs/machine-explains-itself.md (FR-8, FR-9); values: docs/design-system.md"
 gate: "docs/specs/machine-explains-itself.md Acceptance, rows G8, G9, G6; the Gate section below"
 stage: machine-explains-itself
 seat: stage3b-finish
+review: pass
 ---
 
 ## Goal
@@ -27,6 +28,12 @@ Two findings from the review of explain-health-all-agents, ruled to fix before s
   - G8: `.wt-notes/stage3b-finish/g8-agents-roster-seat.png`, fixture Agents tab, dev_bruno row reads "deaf: Mail has waited past the stale window… What to do: Check the seat's session runs…" with no hover
   - G9: `.wt-notes/stage3b-finish/g9-before.png` (document at top), `g9-after.png` after choosing the fourth section, "2. The life of an initiative: discovery, then building", heading at the top of the document (scrollTop 1466, heading 16 px below the document's top)
   - G6: `.wt-notes/stage3b-finish/g6.txt`: `XDG_DATA_HOME=$(mktemp -d) make test` exit 0 (13 packages ok); `npm run build` exit 0 ("built in 1.09s"); G18 grep on `main...explain-finish` empty (grep exit 1)
+
+## Review
+- Verdict: pass. G8 (fixture Agents tab, dev_bruno's Crew row shows "deaf: … What to do: …" without hover), G9 (fourth section "2. The life of an initiative" at the top of the document after choosing it, scrollTop 0 → 1466, heading inside the article's view), G6 (`make test` exit 0, `npm run build` exit 0, G18 grep empty) all met, evidence in `.wt-notes/stage3b-review-finish/`.
+- Unmet gate items: none
+- Reviewer: stage3b-review-finish
+- Date: 2026-09-28
 
 ## Next
 1. Review by someone who did not build it
