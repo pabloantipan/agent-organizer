@@ -53,6 +53,12 @@ Whatever is chosen becomes a card.
 // ruleFixture is an initiative root in a temp git repo with one proposed
 // record, and a service scanned over it.
 func ruleFixture(t *testing.T, now time.Time) (*Service, string) {
+	return ruleFixtureWith(t, now, proposedRecord, "")
+}
+
+// ruleFixtureWith is ruleFixture with the record's text given, and with an
+// agents/cell.json when cell is not empty.
+func ruleFixtureWith(t *testing.T, now time.Time, recordText, cell string) (*Service, string) {
 	t.Helper()
 	t.Setenv("XDG_DATA_HOME", t.TempDir())
 	t.Setenv("HOME", t.TempDir())
@@ -68,12 +74,18 @@ func ruleFixture(t *testing.T, now time.Time) (*Service, string) {
 	}
 	write(filepath.Join(root, "working-on", "initiative.yaml"), "id: fix\ntitle: Fixture\nstatus: active\nmachine: testbox\nrepos: []\n")
 	record := filepath.Join(wo, "0002-phase-4-polish.md")
-	write(record, proposedRecord)
+	write(record, recordText)
+	if cell != "" {
+		if err := os.MkdirAll(filepath.Join(root, "agents"), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		write(filepath.Join(root, "agents", "cell.json"), cell)
+	}
 	for _, args := range [][]string{
 		{"init", "-q"},
 		{"config", "user.email", "seat@example.test"},
 		{"config", "user.name", "Seat"},
-		{"add", "--", "working-on"},
+		{"add", "--", "."},
 		{"commit", "-q", "-m", "fixture"},
 	} {
 		if out, err := exec.Command("git", append([]string{"-C", root}, args...)...).CombinedOutput(); err != nil {
@@ -194,7 +206,7 @@ func TestRuleDecisionRefusals(t *testing.T) {
 		{name: "ruling it again", number: "0002", chosen: "fsnotify", words: "on reflection, fsnotify.", wantErr: "not proposed", ruleFirst: true},
 		{name: "a chosen value not in options", number: "0002", chosen: "menu bar", words: "menu bar it is.", wantErr: "is not one of"},
 		{name: "no chosen value at all", number: "0002", chosen: "", words: "tray it is.", wantErr: "is not one of"},
-		{name: "empty words", number: "0002", chosen: "tray", words: "   \n  ", wantErr: "needs the owner's words"},
+		{name: "empty words", number: "0002", chosen: "tray", words: "   \n  ", wantErr: "needs the ruler's words"},
 		{name: "a record that is not there", number: "0099", chosen: "tray", words: "tray it is.", wantErr: "no decision 0099"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -223,6 +235,69 @@ func TestRuleDecisionRefusals(t *testing.T) {
 			}
 			if at := strings.TrimSpace(git(t, root, "rev-parse", "HEAD")); at != head {
 				t.Errorf("a commit was made: %s", at)
+			}
+			if st := git(t, root, "status", "--porcelain"); strings.TrimSpace(st) != "" {
+				t.Errorf("working tree not clean:\n%s", st)
+			}
+		})
+	}
+}
+
+// TestRuleDecisionAnyOwner is G17 (0045, FR-14): a record owned by someone
+// else is ruled and signed by the ruler, with the owner named in the Ruling
+// line; a record with no owner is ruled; a cell's human is the ruler.
+func TestRuleDecisionAnyOwner(t *testing.T) {
+	now := time.Date(2026, 9, 28, 9, 0, 0, 0, time.UTC)
+	for _, tc := range []struct {
+		name, owner, cell, wantBy, wantLine string
+	}{
+		{
+			name: "owned by alejandro, no cell", owner: "owner: alejandro", wantBy: "ruled_by: pablo",
+			wantLine: "pablo, 2026-09-28, owner alejandro, in the organizer on lodestar: tray it is.",
+		},
+		{
+			name: "no owner", owner: "owner:", wantBy: "ruled_by: pablo",
+			wantLine: "pablo, 2026-09-28, in the organizer on lodestar: tray it is.",
+		},
+		{
+			name: "no owner key at all", owner: "", wantBy: "ruled_by: pablo",
+			wantLine: "pablo, 2026-09-28, in the organizer on lodestar: tray it is.",
+		},
+		{
+			name: "the cell's human rules", owner: "owner: alejandro", cell: `{"project": "fix", "agents": ["po_ana"], "human": "maria"}`,
+			wantBy: "ruled_by: maria", wantLine: "maria, 2026-09-28, owner alejandro, in the organizer on lodestar: tray it is.",
+		},
+		{
+			name: "the ruler owns it", owner: "owner: Pablo", wantBy: "ruled_by: pablo",
+			wantLine: "pablo, 2026-09-28, in the organizer on lodestar: tray it is.",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			text := strings.Replace(proposedRecord, "owner: pablo\n", tc.owner+"\n", 1)
+			if tc.owner == "" {
+				text = strings.Replace(proposedRecord, "owner: pablo\n", "", 1)
+			}
+			s, record := ruleFixtureWith(t, now, text, tc.cell)
+			root := filepath.Dir(filepath.Dir(filepath.Dir(record)))
+			before := strings.TrimSpace(git(t, root, "rev-parse", "HEAD"))
+
+			if err := s.RuleDecision("fix", "2", "tray", "tray it is."); err != nil {
+				t.Fatalf("rule: %v", err)
+			}
+			out, err := os.ReadFile(record)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, want := range []string{"status: ruled\n", tc.wantBy + "\n", "chosen: tray\n", "## Ruling\n\n" + tc.wantLine + "\n\n## Consequences"} {
+				if !strings.Contains(string(out), want) {
+					t.Errorf("want %q in:\n%s", want, out)
+				}
+			}
+			if n := strings.Count(git(t, root, "log", "--oneline", before+"..HEAD"), "\n"); n != 1 {
+				t.Errorf("commits after the ruling = %d, want 1", n)
+			}
+			if files := strings.Fields(git(t, root, "show", "--name-only", "--format=", "HEAD")); len(files) != 1 || files[0] != "working-on/decisions/0002-phase-4-polish.md" {
+				t.Errorf("commit touched %v, want the record only", files)
 			}
 			if st := git(t, root, "status", "--porcelain"); strings.TrimSpace(st) != "" {
 				t.Errorf("working tree not clean:\n%s", st)
@@ -264,7 +339,7 @@ func TestWriteRulingShapes(t *testing.T) {
 			if strings.Contains(tc.name, "several lines") {
 				words = "because.\nand also this."
 			}
-			got, err := writeRuling(tc.src, "2026-09-26", "pablo", "a", words, "lodestar")
+			got, err := writeRuling(tc.src, "2026-09-26", "pablo", "pablo", "a", words, "lodestar")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -275,7 +350,7 @@ func TestWriteRulingShapes(t *testing.T) {
 			}
 		})
 	}
-	if _, err := writeRuling("no frontmatter here\n", "2026-09-26", "pablo", "a", "because.", "lodestar"); err == nil {
+	if _, err := writeRuling("no frontmatter here\n", "2026-09-26", "pablo", "pablo", "a", "because.", "lodestar"); err == nil {
 		t.Error("a record without frontmatter must refuse")
 	}
 }

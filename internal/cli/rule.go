@@ -13,14 +13,16 @@ import (
 
 const ruleUsage = `usage: organizer rule <initiative> <NNNN> --chosen <option> --words <text>
 
-Write the owner's ruling into a proposed decision record and commit that one
-file: status: ruled, ruled, ruled_by, chosen and a ## Ruling section. Every
-other byte of the record is left as it was.
+Write a ruling into a proposed decision record, whoever owns it, and commit
+that one file: status: ruled, ruled, ruled_by, chosen and a ## Ruling section.
+ruled_by is the person who rules, the cell's human else pablo, not the owner;
+the Ruling line names the owner when someone else ruled (0045). Every other
+byte of the record is left as it was.
 
   <initiative>   an initiative id (organizer status)
   <NNNN>         a record number (organizer decisions <initiative>)
   --chosen       one of the record's options, spelled as the record spells it
-  --words        the ruling in the owner's own words
+  --words        the ruling in the ruler's own words
 
 It refuses a record that is not proposed, a chosen value that is not one of
 the options, and empty words, and writes nothing when it does.`

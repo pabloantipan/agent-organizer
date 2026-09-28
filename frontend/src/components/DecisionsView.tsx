@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { marked } from "marked";
 import type { merge, model } from "../../wailsjs/go/models";
 import { addDays, daysBetween, parseISO, shortDate, today, toISO } from "../lib/dates";
-import { leadOf, readOnlyOf } from "../lib/queue";
+import { readOnlyOf } from "../lib/queue";
 import { useBoard } from "../stores/board.store";
 import { RuleDecisionBox } from "./RuleDecisionBox";
 import "../styles/decisions.css";
@@ -10,14 +10,6 @@ import "../styles/decisions.css";
 type Row = { d: model.Decision; initiative: string; machine: string; key: string };
 
 const LABEL: Record<string, string> = { proposed: "waiting", ruled: "ruled", superseded: "superseded", withdrawn: "withdrawn" };
-
-/** FR-12 (0038): the same rule Needs me uses (`ownedByLead` in lib/queue.ts,
- *  not exported): a record asks the lead when its owner is the lead or nobody.
- *  One owned by business or the FSE waits on them (FR-8) and offers no Rule. */
-const ownedByLead = (d: model.Decision, lead: string) => {
-  const o = (d.owner ?? "").trim().toLowerCase();
-  return o === "" || o === lead;
-};
 
 const median = (xs: number[]) => {
   if (xs.length === 0) return null;
@@ -27,11 +19,12 @@ const median = (xs: number[]) => {
 
 /** The decisions tab: working-on/decisions/ records across initiatives, or
  *  the one selected in the rail. What waits on a ruling, how long rulings
- *  take, and the history from raised to ruled. A proposed record the lead
- *  owns can be ruled from its expanded row with Needs me's box (FR-12);
- *  everything else is read-only. */
+ *  take, and the history from raised to ruled. Any proposed record can be
+ *  ruled from its expanded row with Needs me's box, whoever owns it, and the
+ *  ruling is signed by the ruler (FR-12, FR-14, 0045); everything else is
+ *  read-only. Needs me still lists only the lead's records (0034). */
 export function DecisionsView() {
-  const { view, agents, selectedInitiative, select } = useBoard();
+  const { view, selectedInitiative, select } = useBoard();
   const [expanded, setExpanded] = useState<string | null>(null);
   const [ruling, setRuling] = useState<string | null>(null);
   const [showClosed, setShowClosed] = useState(false);
@@ -72,7 +65,7 @@ export function DecisionsView() {
   const head = (
     <div className="board-head">
       <h1>{selectedInitiative ?? "All initiatives"}</h1>
-      <span className="meta">decision records in working-on/decisions/ · the owner rules in the record, or here when it is you</span>
+      <span className="meta">decision records in working-on/decisions/ · anyone may rule a waiting record here, and it notes who did</span>
     </div>
   );
   if (rows.length === 0) {
@@ -84,7 +77,6 @@ export function DecisionsView() {
     );
   }
 
-  const leadFor = (initiative: string) => leadOf((agents?.groups ?? []).find((g) => g.id === initiative));
   const toggle = (key: string) => { setExpanded(expanded === key ? null : key); setRuling(null); };
 
   // A render function, not a component: a component declared here would be a
@@ -94,8 +86,9 @@ export function DecisionsView() {
     const d = r.d;
     const isOpen = expanded === r.key;
     const t = turnaround(d);
-    // FR-13: a record of an initiative that is not active offers no Rule.
-    const canRule = d.status === "proposed" && !readOnlyOf(view, r.initiative) && ownedByLead(d, leadFor(r.initiative));
+    // FR-12, 0045: every proposed record offers Rule, whoever owns it.
+    // FR-13: a record of an initiative that is not active offers none.
+    const canRule = d.status === "proposed" && !readOnlyOf(view, r.initiative);
     const isRuling = canRule && ruling === r.key;
     return (
       <div key={r.key} className={`dec ${d.status} ${isOpen ? "expanded" : ""}`}>
