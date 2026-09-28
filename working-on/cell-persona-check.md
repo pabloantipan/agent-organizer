@@ -10,6 +10,7 @@ boundary: ["internal/service/crew.go (CreateCrew's preflight only)", "internal/c
 spec: "docs/specs/discovery-in-a-cell.md (FR-2); values: docs/design-system.md"
 gate: "docs/specs/discovery-in-a-cell.md Acceptance, rows G2, G5; the Gate section below"
 stage: discovery-in-a-cell
+seat: cell-persona
 ---
 
 ## Goal

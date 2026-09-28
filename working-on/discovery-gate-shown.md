@@ -10,6 +10,7 @@ boundary: ["frontend/src/components/Overview.tsx (StageGates)", "testdata/fixtur
 spec: "docs/specs/discovery-in-a-cell.md (FR-4); values: docs/design-system.md"
 gate: "docs/specs/discovery-in-a-cell.md Acceptance, rows G3, G5; the Gate section below"
 stage: discovery-in-a-cell
+seat: cell-gate
 ---
 
 ## Goal

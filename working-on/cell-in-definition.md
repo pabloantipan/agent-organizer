@@ -10,6 +10,7 @@ boundary: ["internal/service/crew.go (the derived state; not CreateCrew)", "inte
 spec: "docs/specs/discovery-in-a-cell.md (FR-1); values: docs/design-system.md"
 gate: "docs/specs/discovery-in-a-cell.md Acceptance, rows G1, G5; the Gate section below"
 stage: discovery-in-a-cell
+seat: cell-indef
 ---
 
 ## Goal
