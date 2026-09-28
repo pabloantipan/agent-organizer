@@ -7,6 +7,9 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
 
 - two proposed records raised by the FSE and owned by the human (G11, G15,
   G19); 0002 is "the fixture record" that G15 and G16 rule
+- a proposed record owned by `alejandro` (0005), who is not the human, so
+  the Decisions tab offers Rule on it and the ruling is signed by the ruler
+  with the owner named (twenty-at-a-glance G17, 0045); it is not in Needs me
 - the roadmap gates the current stage on 0002 as well, so the gate diamonds
   show one ruled and one waiting (G12, G14)
 - three cards seated `wave1-*`: one queued, one in review, one queued with no
