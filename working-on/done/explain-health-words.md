@@ -1,6 +1,6 @@
 ---
 title: Every health word says why and what to do
-status: now
+status: done
 repos: [organizer]
 branch: main
 updated: 2026-09-28
@@ -11,6 +11,7 @@ spec: "docs/specs/machine-explains-itself.md (FR-4, FR-5); values: docs/design-s
 gate: "docs/specs/machine-explains-itself.md Acceptance, rows G3, G6; the Gate section below"
 stage: machine-explains-itself
 seat: stage3-words
+review: pass
 ---
 
 ## Goal
@@ -35,3 +36,9 @@ none
 - 2026-09-28 stage3-words: comments still say capped is "unreachable until restarted" outside this boundary: `internal/service/crew.go:31` (the `Capped` field, not a blocker reason), `frontend/src/lib/queue.ts:10`, `internal/discuss/discuss.go:35-37` ("mail waits for a new session"). Not UI; for explain-health-all-agents or a follow-up.
 - 2026-09-28 stage3-words: the frontend's lockfile is pnpm's; `npm ci` fails (EUSAGE), `pnpm install --frozen-lockfile` works. Task prompts should say so.
 - 2026-09-28 stage3-words: "no identity" has no badge CSS yet (class `no-identity`); the next card styles it when it shows it.
+
+## Review
+- Verdict: pass. G3: `lib/health.ts` gives label, why, what to do for never, stale, deaf, capped, no identity; WatcherBadge, Home's seat rows and the Conversations counts read it; `crew.go`'s blocker reasons equal the table's `blocker` words (CardItem shows those); capped says the next prompt delivers it; the G3 grep is empty (exit 1), no "restart" for capped in UI or `crew.go` reasons. G6: `make test` ok, `npm run build` built, G18 grep empty. Evidence: `.wt-notes/stage3-review-words/checks.txt`.
+- Unmet gate items: none
+- Reviewer: stage3-review-words
+- Date: 2026-09-28
