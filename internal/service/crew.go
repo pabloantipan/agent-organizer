@@ -18,6 +18,7 @@ import (
 	"organizer/internal/model"
 	"organizer/internal/prompt"
 	"organizer/internal/record"
+	"organizer/internal/session"
 )
 
 // Seat is one persona of a cell as the Agents view shows it: the roster
@@ -145,7 +146,39 @@ func buildCrew(si *model.ScannedInitiative, snap discuss.Snapshot) []Seat {
 		}
 		seats = append(seats, s)
 	}
+	si.Cell.State = cellState(si.Cell, seats, loadRuns)
 	return seats
+}
+
+// loadRuns is the run archive the cell state reads; a variable so a test
+// can hand it runs without a runs.jsonl.
+var loadRuns = func() []session.Run { return session.LoadRuns(session.RunsPath()) }
+
+// cellState derives what decision 0030 calls a cell in definition: seats in
+// the roster and not one of them has run. A seat has run when a session is
+// joined to it (buildCrew's Agent, in any state: an exited layout was a
+// launch) or when runs.jsonl holds a run of it, by persona within the cell's
+// project or by its crew session name (the spec's assumption A1). The
+// archive is read only when no seat has a session, so a live cell costs no
+// disk. A roster with no seats is between waves, not being defined: "".
+func cellState(cell *model.Cell, seats []Seat, runs func() []session.Run) string {
+	if cell == nil || len(seats) == 0 {
+		return ""
+	}
+	for _, s := range seats {
+		if s.Agent != nil {
+			return model.CellActive
+		}
+	}
+	for _, r := range runs() {
+		for _, s := range seats {
+			byPersona := r.Persona == s.Name && (r.Cell == "" || strings.EqualFold(r.Cell, cell.Project))
+			if byPersona || (r.Session != "" && r.Session == s.Session) {
+				return model.CellActive
+			}
+		}
+	}
+	return model.CellInDefinition
 }
 
 // stampHealth puts the discuss health on every agent of the initiative whose

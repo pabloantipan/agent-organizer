@@ -386,7 +386,18 @@ type Cell struct {
 	Reconciler string   `json:"reconciler"`
 	// Model overrides the crew_model config for this cell (alias or id).
 	Model string `json:"model,omitempty"`
+	// State is derived, never read from cell.json: CellInDefinition while no
+	// seat has a session or a run, CellActive once one has, empty for a
+	// roster with no seats (decision 0030; service.cellState).
+	State string `json:"state,omitempty"`
 }
+
+// The states of a cell (decision 0030). A cell is in definition while its
+// roster is being written: seats, and not one of them has run.
+const (
+	CellInDefinition = "in_definition"
+	CellActive       = "active"
+)
 
 // Live reports whether an agent process exists.
 func (a Agent) Live() bool { return a.State == AgentWorking || a.State == AgentRunning }

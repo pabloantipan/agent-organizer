@@ -9,6 +9,7 @@ import (
 	"organizer/internal/config"
 	"organizer/internal/discuss"
 	"organizer/internal/model"
+	"organizer/internal/session"
 )
 
 func TestCrewSessionNamesTheCellAndTheSeat(t *testing.T) {
@@ -322,4 +323,84 @@ func TestCrewLaunchOpensTheSessionCrewSessionNames(t *testing.T) {
 			t.Errorf("the prelude of %s does not export AGENT_SESSION=%s", seat, sess)
 		}
 	}
+}
+
+// G1 (discovery-in-a-cell, FR-1): a cell whose seats have no session and no
+// run is in definition (0030); one seat live, one seat with a past run (by
+// persona or by crew session), or an exited layout, and it is not. The
+// state rides the cell the board carries.
+func TestCellInDefinitionUntilASeatHasRun(t *testing.T) {
+	defer func(f func() []session.Run) { loadRuns = f }(loadRuns)
+	cellOf := func() *model.ScannedInitiative {
+		si := &model.ScannedInitiative{}
+		si.Cell = &model.Cell{Project: "fixture-define", Agents: []string{"po_carla", "dev_diego"}, Human: "pablo"}
+		return si
+	}
+	tests := []struct {
+		name   string
+		agents []model.Agent
+		runs   []session.Run
+		want   string
+	}{
+		{name: "no sessions, no runs", want: model.CellInDefinition},
+		{name: "runs of other cells only", runs: []session.Run{
+			{PID: 1, SessionID: "a", Persona: "po_carla", Cell: "camp"},
+			{PID: 2, SessionID: "b", Session: "camp-probe-diego"},
+		}, want: model.CellInDefinition},
+		{name: "one seat live", agents: []model.Agent{
+			{Name: "p", Persona: "po_carla", Cell: "fixture-define", State: model.AgentRunning, PID: 7},
+		}, want: model.CellActive},
+		{name: "one seat's layout exited", agents: []model.Agent{
+			{Name: "l", Session: "fixture-define-probe-diego", State: model.AgentExited},
+		}, want: model.CellActive},
+		{name: "one seat with a past run by persona", runs: []session.Run{
+			{PID: 3, SessionID: "c", Persona: "dev_diego", Cell: "fixture-define", Ended: true},
+		}, want: model.CellActive},
+		{name: "one seat with a past run by session", runs: []session.Run{
+			{PID: 4, SessionID: "d", Session: "fixture-define-probe-carla", Ended: true},
+		}, want: model.CellActive},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			runs := tt.runs
+			loadRuns = func() []session.Run { return runs }
+			si := cellOf()
+			si.Agents = tt.agents
+			buildCrew(si, discuss.Snapshot{})
+			if si.Cell.State != tt.want {
+				t.Errorf("state %q, want %q", si.Cell.State, tt.want)
+			}
+		})
+	}
+
+	t.Run("no seats is no state", func(t *testing.T) {
+		loadRuns = func() []session.Run { return nil }
+		si := &model.ScannedInitiative{}
+		si.Cell = &model.Cell{Project: "between-waves"}
+		buildCrew(si, discuss.Snapshot{})
+		if si.Cell.State != "" {
+			t.Errorf("an empty roster is between waves, not in definition: %q", si.Cell.State)
+		}
+	})
+
+	t.Run("the archive is read from runs.jsonl", func(t *testing.T) {
+		loadRuns = func() []session.Run { return session.LoadRuns(session.RunsPath()) }
+		t.Setenv("XDG_DATA_HOME", t.TempDir())
+		si := cellOf()
+		buildCrew(si, discuss.Snapshot{})
+		if si.Cell.State != model.CellInDefinition {
+			t.Fatalf("no runs.jsonl: state %q", si.Cell.State)
+		}
+		if err := os.MkdirAll(filepath.Dir(session.RunsPath()), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		line := `{"pid":9,"session_id":"e","session":"fixture-define-probe-diego","persona":"dev_diego","cell":"fixture-define","ended":true}` + "\n"
+		if err := os.WriteFile(session.RunsPath(), []byte(line), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		buildCrew(si, discuss.Snapshot{})
+		if si.Cell.State != model.CellActive {
+			t.Errorf("a run in runs.jsonl: state %q", si.Cell.State)
+		}
+	})
 }
