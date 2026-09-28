@@ -457,3 +457,66 @@ func TestCellStateRidesACopyNotTheCache(t *testing.T) {
 		t.Error("state.json would carry the derived state")
 	}
 }
+
+// G2 (discovery-in-a-cell, FR-2): a seat without agents/<seat>.md refuses
+// the whole crew before anything is created, naming every missing file, and
+// its Crew row carries the mark.
+func TestCreateCrewRefusesASeatWithoutItsPersonaFile(t *testing.T) {
+	t.Setenv("XDG_DATA_HOME", t.TempDir())
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "agents"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "agents", "po_carla.md"), []byte("# po_carla\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	// A directory under the seat's name is not its persona file.
+	if err := os.MkdirAll(filepath.Join(root, "agents", "tech_lead_elena.md"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	si := model.ScannedInitiative{}
+	si.ID, si.Path = "init-define", root
+	si.Cell = &model.Cell{Project: "define-fixture", Agents: []string{"po_carla", "designer_diego", "tech_lead_elena"}, Human: "pablo"}
+	s := &Service{state: cache.State{Local: model.Snapshot{Initiatives: []model.ScannedInitiative{si}}}, now: time.Now}
+
+	cmds, err := s.CreateCrew("init-define", false)
+	if err == nil {
+		t.Fatalf("CreateCrew launched %v with two persona files missing", cmds)
+	}
+	for _, seat := range []string{"designer_diego", "tech_lead_elena"} {
+		if want := filepath.Join(root, "agents", seat+".md"); !strings.Contains(err.Error(), want) {
+			t.Errorf("the refusal does not name %s:\n%v", want, err)
+		}
+	}
+	if strings.Contains(err.Error(), "po_carla.md") {
+		t.Errorf("the refusal names a file that exists:\n%v", err)
+	}
+	if !strings.Contains(err.Error(), "2 of 3 seats have no persona file") {
+		t.Errorf("the refusal does not count the seats:\n%v", err)
+	}
+	if _, statErr := os.Stat(crewDir("init-define")); !os.IsNotExist(statErr) {
+		t.Errorf("a refused crew created %s", crewDir("init-define"))
+	}
+
+	marks := map[string]bool{}
+	for _, seat := range buildCrew(&si, discuss.Snapshot{}) {
+		marks[seat.Name] = seat.NoPersona
+	}
+	want := map[string]bool{"po_carla": false, "designer_diego": true, "tech_lead_elena": true}
+	for seat, w := range want {
+		if marks[seat] != w {
+			t.Errorf("%s: no_persona %v, want %v", seat, marks[seat], w)
+		}
+	}
+
+	for _, seat := range []string{"designer_diego", "tech_lead_elena"} {
+		p := filepath.Join(root, "agents", seat+".md")
+		_ = os.Remove(p)
+		if err := os.WriteFile(p, []byte("# "+seat+"\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := missingPersonas(root, si.Cell); err != nil {
+		t.Errorf("every file written, still refused: %v", err)
+	}
+}

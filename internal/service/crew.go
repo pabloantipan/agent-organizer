@@ -35,6 +35,9 @@ type Seat struct {
 	// Owes is the live threads this seat has spoken in that are still open
 	// with no decision. What the cell is waiting on this seat for.
 	Owes []model.ThreadState `json:"owes"`
+	// NoPersona is true when agents/<seat>.md is missing at the initiative
+	// root: CreateCrew refuses the cell until it is written (FR-2).
+	NoPersona bool `json:"no_persona"`
 }
 
 // maxSessionName is the longest probe session name zellij will hold. zellij
@@ -116,7 +119,7 @@ func buildCrew(si *model.ScannedInitiative, snap discuss.Snapshot) []Seat {
 	stampHealth(si, snap)
 	seats := make([]Seat, 0, len(si.Cell.Agents))
 	for _, name := range si.Cell.Agents {
-		s := Seat{Name: name}
+		s := Seat{Name: name, NoPersona: si.Path != "" && !hasPersonaFile(si.Path, name)}
 		// A seat whose name does not fit zellij's budget has no session to
 		// join by; it still shows, and still matches a process by persona.
 		if sess, err := crewSession(si.Cell, name); err == nil {
@@ -365,6 +368,34 @@ func cannedHealth(path, project string) (discuss.Snapshot, string) {
 	return snap, ""
 }
 
+// personaFile is where a seat's persona lives: agents/<seat>.md at the
+// initiative root, the file the opening prompt tells the seat to read.
+func personaFile(root, seat string) string {
+	return filepath.Join(root, "agents", seat+".md")
+}
+
+func hasPersonaFile(root, seat string) bool {
+	fi, err := os.Stat(personaFile(root, seat))
+	return err == nil && !fi.IsDir()
+}
+
+// missingPersonas refuses a cell with a seat that has no persona file, naming
+// every missing file, not the first: a seat launched without one opens empty
+// (discovery-in-a-cell FR-2).
+func missingPersonas(root string, cell *model.Cell) error {
+	var missing []string
+	for _, seat := range cell.Agents {
+		if !hasPersonaFile(root, seat) {
+			missing = append(missing, personaFile(root, seat))
+		}
+	}
+	if len(missing) == 0 {
+		return nil
+	}
+	return fmt.Errorf("%s: %d of %d seats have no persona file; write each before bringing the crew up:\n  %s",
+		cell.Project, len(missing), len(cell.Agents), strings.Join(missing, "\n  "))
+}
+
 // discussAPIBin finds discuss-api: PATH first, then ~/.local/bin where
 // `make install` puts it.
 func discussAPIBin() (string, error) {
@@ -411,6 +442,11 @@ func (s *Service) CreateCrew(initiativeID string, open bool) ([]string, error) {
 	}
 	if si.Cell == nil {
 		return nil, fmt.Errorf("initiative %q has no agents/cell.json", initiativeID)
+	}
+	// Every seat's persona file, before anything else is looked up or
+	// created: a seat without one would open on an empty role.
+	if err := missingPersonas(si.Path, si.Cell); err != nil {
+		return nil, err
 	}
 	if _, err := os.Stat(probeBin()); err != nil {
 		return nil, fmt.Errorf("probe not found at %s", probeBin())

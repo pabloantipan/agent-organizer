@@ -1187,6 +1187,7 @@ export namespace service {
 	    capped: boolean;
 	    undelivered: number;
 	    owes: model.ThreadState[];
+	    no_persona: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Seat(source);
@@ -1202,6 +1203,7 @@ export namespace service {
 	        this.capped = source["capped"];
 	        this.undelivered = source["undelivered"];
 	        this.owes = this.convertValues(source["owes"], model.ThreadState);
+	        this.no_persona = source["no_persona"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
