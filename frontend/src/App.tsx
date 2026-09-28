@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { TopBar } from "./components/TopBar";
 import { Board } from "./components/Board";
 import { Rail } from "./components/Rail";
@@ -65,6 +65,10 @@ export default function App() {
  *  Slack view renamed, Calendar lives inside Roadmap. */
 function InitiativeScreen() {
   const { view, selectedInitiative, sub, goHome } = useBoard();
+  // The body under the tabs is the one scroll container (FR-11); another tab
+  // or initiative opens at its top, not at the scroll the last one left.
+  const body = useRef<HTMLDivElement>(null);
+  useEffect(() => { body.current?.scrollTo(0, 0); }, [selectedInitiative, sub]);
   if (!view) return <div className="board-wrap"><div className="empty">Loading…</div></div>;
   const rows = (view.board.initiatives ?? []).filter((i) => i.id === selectedInitiative);
   const initiative = rows.find((i) => i.local) ?? rows[0];
@@ -82,7 +86,7 @@ function InitiativeScreen() {
   return (
     <div className="initiative-screen">
       <InitiativeHeader initiative={initiative} />
-      <div className={`board-wrap ${sub === "conversations" ? "slack-wrap" : ""}`}>
+      <div ref={body} className={`board-wrap ${sub === "conversations" ? "slack-wrap" : ""}`}>
         {sub === "overview" && <ErrorBoundary name="Overview"><Overview initiative={initiative} /></ErrorBoundary>}
         {sub === "work" && <ErrorBoundary name="Board"><Board /></ErrorBoundary>}
         {sub === "roadmap" && <ErrorBoundary name="RoadmapView"><RoadmapView /></ErrorBoundary>}
