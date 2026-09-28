@@ -1,6 +1,6 @@
 ---
 title: Supervisors and builders show their mailbox health
-status: next
+status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-28
