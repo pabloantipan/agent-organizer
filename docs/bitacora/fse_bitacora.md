@@ -94,6 +94,13 @@ restating it (the discuss skill).
   me, and it can carry items "open for the FSE" (sup5, sup6). I missed two for a
   day. When a task's last card lands, read its supervisor's closing thread
   (health's thread list, GET the thread) before proposing the next step.
+- **Rule from now on (Pablo, 2026-09-28: "you have to kill supervisor window
+  and clean up"):** when a task's last card lands, read the closing report,
+  then `probe -k` the supervisor and any seat it left, revoke their tokens,
+  restart the API once, `organizer clean`. Launch supervisors as tabs in one
+  window. End a supervisor whose task is superseded. The skill fix is
+  Hephaistos's (relayed 2026-09-28). Cleaned today: sup5 to sup10 and
+  install2-build; sup11 still runs.
 - **Rejected:** opening a card for 0012 (the Decisions tab was built
   directly, a6ebd4d..280f58c).
 
