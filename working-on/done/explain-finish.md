@@ -4,7 +4,7 @@ status: done
 repos: [organizer]
 branch: main
 updated: 2026-09-28
-next: "merge explain-finish (53ca359 c8c430c) to main"
+next: "review: explain-finish, branch explain-finish, gate G8, G9, G6 met, 53ca359 c8c430c"
 depends_on: []
 boundary: ["frontend/src/components/Crew.tsx", "frontend/src/components/AgentList.tsx (the roster seat's line only)", "frontend/src/components/HelpView.tsx (the section list's scroll)", "frontend/src/styles/ (those components' CSS only)"]
 spec: "docs/specs/machine-explains-itself.md (FR-8, FR-9); values: docs/design-system.md"
