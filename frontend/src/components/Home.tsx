@@ -4,6 +4,7 @@ import type { merge, model, service } from "../../wailsjs/go/models";
 import { inactiveIds, needsMeRows, type NeedsMeRow } from "../lib/queue";
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
+import { HEALTH, messages } from "../lib/health";
 import { useBoard } from "../stores/board.store";
 import { nextDate, stageState, waitingDecisions } from "./InitiativeHeader";
 import { InitiativeDetail } from "./Initiatives";
@@ -98,10 +99,11 @@ function InboxRow({ row }: { row: NeedsMeRow }) {
     }
     case "seat": {
       const s = row.seat;
+      const h = HEALTH[s.capped ? "capped" : "deaf"];
       return (
-        <Shell row={row} reason={s.capped ? "capped seat" : "deaf seat"} tone={s.capped ? "tone" : "danger"}
-          subject={<><span className="mono">{row.initiative}</span> · <span className="mono">{s.name}</span> {s.capped ? "hit the drain ceiling" : "is not picking up mail"}</>}
-          context={s.capped ? "restart its session with probe -r" : `${s.undelivered} undelivered`}>
+        <Shell row={row} reason={`${h.label} seat`} tone={s.capped ? "tone" : "danger"}
+          subject={<><span className="mono">{row.initiative}</span> · <span className="mono">{s.name}</span> {h.blocker}{s.undelivered > 0 ? ` · ${messages(s.undelivered)} waiting` : ""}</>}
+          context={`${h.why} ${h.what}`}>
           <button className="act" onClick={() => openInitiative(row.initiative, "agents")}>Agents</button>
         </Shell>
       );

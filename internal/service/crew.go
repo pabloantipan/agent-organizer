@@ -147,7 +147,8 @@ func buildCrew(si *model.ScannedInitiative, snap discuss.Snapshot) []Seat {
 }
 
 // threadState resolves one live thread into what the board needs, including
-// which of its participants cannot be reached.
+// which of its participants cannot be reached. The reasons are the
+// `blocker` words of frontend/src/lib/health.ts; change both together.
 func threadState(t discuss.Thread, snap discuss.Snapshot) model.ThreadState {
 	ts := model.ThreadState{
 		ID:            t.ID,
@@ -164,7 +165,7 @@ func threadState(t discuss.Thread, snap discuss.Snapshot) model.ThreadState {
 		}
 		switch {
 		case h.Capped():
-			ts.BlockedOn = append(ts.BlockedOn, model.Blocker{Seat: p, Reason: "hit the drain ceiling, restart its session"})
+			ts.BlockedOn = append(ts.BlockedOn, model.Blocker{Seat: p, Reason: "capped, mail waits for its next prompt"})
 		case h.Deaf:
 			ts.BlockedOn = append(ts.BlockedOn, model.Blocker{Seat: p, Reason: "not picking up"})
 		case h.Watcher == "never":
