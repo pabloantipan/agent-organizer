@@ -103,7 +103,13 @@ restating it (the discuss skill).
   claudecode 88e1fcb, fse skill "Letting go ends when the task does",
   standing-up.md "Ending a supervisor". Cleaned today: sup5 to sup10 and
   install2-build; sup11 still runs.
-- **When sup11 lands** (Hephaistos, thread 01M3K60BV5B85ZA42YW0ZS77KG, Pablo:
+- **Done 2026-09-28:** sup11 ended (no closing message; run record
+  runs/2026-09-28-explain-finish-and-reinstall.md); worktrees removed;
+  .gitignore takes runs/, .wt-notes/, .playwright-mcp/ (6ad2c71); origin/main
+  (odyssey's initiative description and specs) merged clean, tests and
+  frontend build green, pushed fc26867, even with origin. 0044 proposes
+  stage 3 exit met; sup13 reinstalls.
+- **Was: when sup11 lands** (Hephaistos, thread 01M3K60BV5B85ZA42YW0ZS77KG, Pablo:
   "finish the cleaning"), as part of ending sup11, once no seat is working:
   (1) `git pull --rebase` and push `main` (ahead 100, behind 6 of origin; odyssey
   pushed 106681b), settling conflicts with the owning supervisor; (2) `git
