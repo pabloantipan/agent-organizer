@@ -1,13 +1,13 @@
 ---
 title: Accept the discovery-in-a-cell spec, and launch its first three cards
-status: proposed
+status: ruled
 raised: 2026-09-28
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-28
+ruled_by: pablo
 options: [accept as written, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [cell-in-definition, cell-persona-check, discovery-gate-shown]
 threads: []
 supersedes: []
@@ -38,7 +38,7 @@ that has ever run leaves "in definition".
 
 ## Ruling
 
-
+pablo, 2026-09-28, in the organizer on lodestar: accepted
 
 ## Consequences
 
