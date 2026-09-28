@@ -63,7 +63,8 @@ restating it (the discuss skill).
 - **Stage 3 (machine-explains-itself), current since 0039:** spec
   `docs/specs/machine-explains-itself.md`, cards explain-help,
   explain-health-words, explain-health-all-agents (643469e); 0040 accepted
-  2026-09-28; sup10 (own identity) runs it, seats `stage3-*`. Found: the capped remedy is wrong since agent-slack 8991640
+  2026-09-28; sup10 ran it: all three passed review; G7 all right in 70 s. 0041 asks
+  whether to fix two review findings before exit met. Found: the capped remedy is wrong since agent-slack 8991640
   (the next prompt delivers), fixed by FR-5.
 - **Installed:** v0.2.0-229-g3472f6b (sup7, install-current-build passed).
 - **Waiting on Pablo:** the intake (thread 01M3FAWKV2159MCSH0AZZJWE08); 0021, 0022, 0005, 0004, 0002. No card carries `stage:` until the
@@ -92,6 +93,9 @@ restating it (the discuss skill).
   directly, a6ebd4d..280f58c).
 
 ## Open questions
+
+- Home's live-agent count dropped once after the first 10 s sample in the built
+  app (review of explain-health-all-agents). Seen once, not investigated.
 
 - **Repetition (1):** my supervisor prompts all say `seat: wave1-<name>`, so every
   task restarts at wave 1 and seat names collide across tasks (sup8 renamed
