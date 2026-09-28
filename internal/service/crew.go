@@ -29,7 +29,7 @@ type Seat struct {
 	// Watcher is alive, stale or never; empty when discuss is unreachable.
 	Watcher     string `json:"watcher"`
 	Deaf        bool   `json:"deaf"`
-	Capped      bool   `json:"capped"` // deaf because of the drain ceiling: alive, posting, unreachable until restarted
+	Capped      bool   `json:"capped"` // deaf because of the drain ceiling: alive, posting; its next prompt delivers the mail
 	Undelivered int    `json:"undelivered"`
 	// Owes is the live threads this seat has spoken in that are still open
 	// with no decision. What the cell is waiting on this seat for.
@@ -106,11 +106,13 @@ func agentRank(a *model.Agent) int {
 // buildCrew joins the roster to the initiative's agents and the discuss
 // health. A seat matches an agent by persona (from the process environment)
 // or, for a session without a live process, by the crew session name. The
-// health is also stamped onto the matching agent rows.
+// health is stamped onto every agent row that has it first (stampHealth), so
+// a seat's copy of its agent carries it too.
 func buildCrew(si *model.ScannedInitiative, snap discuss.Snapshot) []Seat {
 	if si.Cell == nil {
 		return nil
 	}
+	stampHealth(si, snap)
 	seats := make([]Seat, 0, len(si.Cell.Agents))
 	for _, name := range si.Cell.Agents {
 		s := Seat{Name: name}
@@ -133,7 +135,6 @@ func buildCrew(si *model.ScannedInitiative, snap discuss.Snapshot) []Seat {
 			if a.Persona != name && !(a.Persona == "" && s.Session != "" && a.Session == s.Session) {
 				continue
 			}
-			a.Watcher, a.Deaf, a.Undelivered = s.Watcher, s.Deaf, s.Undelivered
 			if best == nil || agentRank(a) < agentRank(best) {
 				best = a
 			}
@@ -145,6 +146,41 @@ func buildCrew(si *model.ScannedInitiative, snap discuss.Snapshot) []Seat {
 		seats = append(seats, s)
 	}
 	return seats
+}
+
+// stampHealth puts the discuss health on every agent of the initiative whose
+// name discuss knows, roster seat or not: supervisors and builders have
+// health too (FR-6). The name is the persona from the process environment,
+// else the roster seat whose crew session this is, else the session's short
+// name (organizer-probe-sup10 is sup10).
+//
+// NoIdentity is FR-7 and only FR-7: a live process whose session's short
+// name is an agent discuss has never seen poll, with mail waiting, while the
+// process carries no AGENT_NAME. Nothing else is inferred about "never".
+func stampHealth(si *model.ScannedInitiative, snap discuss.Snapshot) {
+	seatOf := map[string]string{}
+	for _, seat := range si.Cell.Agents {
+		if sess, err := crewSession(si.Cell, seat); err == nil {
+			seatOf[sess] = seat
+		}
+	}
+	for i := range si.Agents {
+		a := &si.Agents[i]
+		a.Watcher, a.Deaf, a.Capped, a.Undelivered, a.NoIdentity = "", false, false, 0, false
+		name := a.Persona
+		if name == "" {
+			name = seatOf[a.Session]
+		}
+		if name == "" {
+			name = a.Short
+		}
+		h, ok := snap.Agents[name]
+		if name == "" || !ok {
+			continue
+		}
+		a.Watcher, a.Deaf, a.Capped, a.Undelivered = h.Watcher, h.Deaf, h.Capped(), h.Undelivered
+		a.NoIdentity = a.Persona == "" && a.PID > 0 && name == a.Short && h.Watcher == "never" && h.Undelivered > 0
+	}
 }
 
 // threadState resolves one live thread into what the board needs, including
