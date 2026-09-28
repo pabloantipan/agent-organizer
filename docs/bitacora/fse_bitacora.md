@@ -90,6 +90,10 @@ restating it (the discuss skill).
 - **Cleanup 2026-09-27:** sup1–3 killed, `organizer clean` run, sup3 token
   revoked; organizer holds tokens for fse and pablo only. For the next
   supervisor: add its token first (the recipe).
+- **Learned (2026-09-28):** a supervisor's closing report goes to pablo, not to
+  me, and it can carry items "open for the FSE" (sup5, sup6). I missed two for a
+  day. When a task's last card lands, read its supervisor's closing thread
+  (health's thread list, GET the thread) before proposing the next step.
 - **Rejected:** opening a card for 0012 (the Decisions tab was built
   directly, a6ebd4d..280f58c).
 
