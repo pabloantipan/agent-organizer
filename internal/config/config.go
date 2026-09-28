@@ -54,7 +54,13 @@ type Config struct {
 	// its cell events to. Empty means this laptop is not a factory yet:
 	// `organizer factory-key` refuses and the crew skips registration.
 	RecordURL string `yaml:"record_url" json:"record_url"`
+	// HelpDoc is the markdown file the Help renders, read each time the Help
+	// opens and never copied. Hephaistos owns its content.
+	HelpDoc string `yaml:"help_doc" json:"help_doc"`
 }
+
+// DefaultHelpDoc is the Help's source when help_doc is not set.
+const DefaultHelpDoc = "~/agent-slack/docs/how-we-build.md"
 
 // Default returns the config used when no file exists yet.
 func Default() Config {
@@ -82,6 +88,7 @@ func Default() Config {
 		AgentBinary:         "claude",
 		DiscussStateDir:     "~/.local/state/discuss",
 		CrewModel:           "opus",
+		HelpDoc:             DefaultHelpDoc,
 	}
 }
 
@@ -93,6 +100,15 @@ func (c Config) AuthMode() string {
 		return AuthFirebase
 	}
 	return AuthOff
+}
+
+// HelpDocPath is help_doc with ~ expanded, the default when it is empty.
+func (c Config) HelpDocPath() string {
+	p := strings.TrimSpace(c.HelpDoc)
+	if p == "" {
+		p = DefaultHelpDoc
+	}
+	return Expand(p)
 }
 
 // Path is where the config file lives.

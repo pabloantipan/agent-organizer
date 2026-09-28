@@ -40,6 +40,7 @@ export namespace config {
 	    discuss_state_dir: string;
 	    crew_model: string;
 	    record_url: string;
+	    help_doc: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -65,6 +66,7 @@ export namespace config {
 	        this.discuss_state_dir = source["discuss_state_dir"];
 	        this.crew_model = source["crew_model"];
 	        this.record_url = source["record_url"];
+	        this.help_doc = source["help_doc"];
 	    }
 	}
 
@@ -1525,6 +1527,24 @@ export namespace service {
 		    }
 		    return a;
 		}
+	}
+	export class HelpDoc {
+	    path: string;
+	    key: string;
+	    text: string;
+	    problem: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new HelpDoc(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.key = source["key"];
+	        this.text = source["text"];
+	        this.problem = source["problem"];
+	    }
 	}
 	export class LockState {
 	    enabled: boolean;

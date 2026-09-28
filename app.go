@@ -446,3 +446,11 @@ func (a *App) ScopeType() model.Scope { return model.Scope{} }
 type errString string
 
 func (e errString) Error() string { return string(e) }
+
+// Help reads the Help's file (help_doc) at the moment the Help opens.
+func (a *App) Help() (service.HelpDoc, error) {
+	if a.svc == nil {
+		return service.HelpDoc{}, errString(a.err)
+	}
+	return a.svc.Help(), nil
+}
