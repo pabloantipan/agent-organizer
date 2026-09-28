@@ -103,6 +103,11 @@ restating it (the discuss skill).
   claudecode 88e1fcb, fse skill "Letting go ends when the task does",
   standing-up.md "Ending a supervisor". Cleaned today: sup5 to sup10 and
   install2-build; sup11 still runs.
+- **2026-09-28 later:** 0045 (anyone may rule; ruled_by is the ruler;
+  alejandro is Pablo). sup14 runs rule-anyone then install-current-build-5;
+  sup13 ended as superseded (its card 4 failed review on my wrong gate 3).
+  I wrote two gates wrong on install cards: name the exact command and
+  output that decides each row.
 - **Done 2026-09-28:** sup11 ended (no closing message; run record
   runs/2026-09-28-explain-finish-and-reinstall.md); worktrees removed;
   .gitignore takes runs/, .wt-notes/, .playwright-mcp/ (6ad2c71); origin/main

@@ -2,7 +2,7 @@
 
 status: ruled (0033, 2026-09-27)
 owner: pablo
-decisions: [0029 ruled, 0030 ruled, 0032 ruled, 0033 ruled, 0035 ruled, 0034 ruled, 0036 ruled, 0038 ruled, 0042 ruled]
+decisions: [0029 ruled, 0030 ruled, 0032 ruled, 0033 ruled, 0035 ruled, 0034 ruled, 0036 ruled, 0038 ruled, 0042 ruled, 0045 ruled]
 roadmap: stage `twenty-at-a-glance` (appetite: one wave)
 
 ## Problem
@@ -89,14 +89,18 @@ without opening one. Today (read 2026-09-27):
 - **FR-11** The page body under the initiative's tabs shall scroll on its
   own while the header and the tabs stay in place, so every tab's content
   can be reached at any window height (0038).
-- **FR-12** An expanded record on the Decisions tab that is `proposed` and
-  owned by the lead shall offer the same Rule box as Needs me
+- **FR-12** An expanded record on the Decisions tab that is `proposed`,
+  whoever owns it (0045), shall offer the same Rule box as Needs me
   (`RuleDecisionBox.tsx`, the redesign's FR-13 write path). A ruled,
   withdrawn or superseded record shall offer no Rule action (0038).
 - **FR-13** In an initiative whose `status` is not `active`, the app shall
   hide Rule, card drag, comments, posting and agent actions, and show
   "archived: read-only" (or "paused: read-only") in its header. Its cells
   shall leave the Agents pill's counts and Conversations' counts (0042).
+- **FR-14** A ruling written from the app shall set `ruled_by` to the person
+  who ruled (A1: the cell's `human`, else "pablo"), not the record's owner.
+  The Ruling line names the ruler, the owner when different, and where. A
+  record with no owner can be ruled (0045).
 
 ## Acceptance → gate
 
@@ -117,7 +121,8 @@ without opening one. Today (read 2026-09-27):
 | G14 | 11 | At a 1280×720 window, the last row of the Decisions tab (one record expanded) and the bottom of Overview are reached by scrolling the body; the header and tabs stay | screenshots at the top and the bottom | as stated |
 | G15 | 12 | Ruling a proposed fixture record from its expanded row on the Decisions tab writes it (the redesign's G8 checks, on a temp copy of the fixture) and the row shows as ruled; a ruled record shows no Rule action | screenshot and `git -C $FIXTURE_HOME/init-a log -1 --stat` | one file, one commit |
 | G16 | 13 | On the fixture's archived initiative, opened: no Rule box, no drag, no comment or post box, no agent actions, the header says read-only; the Agents pill and Conversations counts leave out its cells | screenshots; counts before and after archiving the fixture initiative | as stated |
-| G10 | 4–13 | The frontend builds, and no raw colour or font size is added outside `tokens.css` (FR-23 of the redesign) | `cd frontend && npm run build`; the redesign's G18 grep | pass, empty |
+| G17 | 12, 14 | A fixture record owned by `alejandro` shows Rule on the Decisions tab; ruling it writes `ruled_by: pablo` and a Ruling line naming pablo and alejandro, one file, one commit; a record with no owner can be ruled | a test in `internal/service`; screenshot; `git -C $FIXTURE_HOME/init-a log -1 --stat` | as stated |
+| G10 | 4–14 | The frontend builds, and no raw colour or font size is added outside `tokens.css` (FR-23 of the redesign) | `cd frontend && npm run build`; the redesign's G18 grep | pass, empty |
 
 ## Boundary
 
@@ -182,6 +187,7 @@ without opening one. Today (read 2026-09-27):
 | `glance-header-scroll` | G13, G14, G10 | — |
 | `glance-rule-in-decisions` | G15, G10 | — |
 | `glance-archived-read-only` | G16, G10 | — |
+| `rule-anyone` | G17, G10 | — |
 
 ## Amendments
 
@@ -195,3 +201,4 @@ without opening one. Today (read 2026-09-27):
   - G11 compares the badge with rows, not with initiatives.
   - FR-9's "open read-only" was not built: the gate (G12) checked the rail only. Whether to build it is 0042.
 - 2026-09-28: FR-13 and G16 (0042): archived initiatives open read-only and leave every count.
+- 2026-09-28: FR-12 widened to any proposed record, FR-14 and G17 added (0045); the redesign's A4 (ruled_by is the owner) is superseded.
