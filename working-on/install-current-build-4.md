@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-28
-next: "decide: sup13 (or pablo), gate 3 cannot hold as written: organizer status prints no initiative status, so the seven archived initiatives are listed like active ones (read-only, 2bffd31, is frontend-only); accept the installed commit containing 2bffd31 plus the initiative.yaml list as gate 3, or open a card for an archived mark in organizer status?"
+next: "decide: pablo, gate 3 cannot hold as written: organizer status prints no initiative status, so the seven archived initiatives are listed like active ones (read-only, 2bffd31, is frontend-only); accept the installed commit containing 2bffd31 plus the initiative.yaml list as gate 3, or open a card for an archived mark in organizer status?"
 depends_on: []
 seat: install4-build
 boundary: ["build/ (the build output)", "/Applications/organizer.app (install target)", "~/.local/bin/organizer (the symlink make install writes)", "no source file in the repo"]
@@ -36,6 +36,7 @@ none
 - Build with `make install`, never `wails dev`; restore the wailsjs modes with `git checkout --` after
 - Pablo may be using the app; do not rule anything in it, and quit it only if it is not in the foreground
 - 2026-09-28 sup13 runs this card (organizer-probe-sup13), spawned by the FSE
+- 2026-09-28 sup13: gate 3 is a question about the gate itself, so it is Pablo's; the supervisor does not rule it. Review launched on the gate as written
 - 2026-09-28 install4-build: the app (pid 94731) was running, MSTeams frontmost; quit answered "User canceled (-128)" but the process was gone
 - 2026-09-28 install4-build: this time `wails build` left `frontend/wailsjs/runtime/{package.json,runtime.d.ts,runtime.js}` modified, not App.{d.ts,js}; restored with `git checkout -- frontend/wailsjs`
 - 2026-09-28 install4-build: my mistake, a bare `organizer` (to read its usage) launched the installed app as pid 27143 from my shell instead of `open -a`; my kill of it was refused by the permission layer, so that instance is the one left running (v0.2.0-332) and I did not open a second. Nothing was pressed, ruled or posted in it. Quit it from the menu if a Finder-launched instance is wanted
