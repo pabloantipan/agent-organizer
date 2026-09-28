@@ -110,12 +110,16 @@ restating it (the discuss skill).
   worktree remove` .wt/explain-finish, glance-header-phase, glance-home-state,
   glance-scope-phase; (3) add `runs/`, `.wt-notes/`, `.playwright-mcp/` to
   .gitignore. Then tell Pablo the repo is even with origin.
-- **2026-09-28:** 0042 ruled, sup12 runs glance-archived-read-only. 0043: the FSE
+- **2026-09-28:** 0042 ruled, sup12 ran glance-archived-read-only (pass, 2bffd31); sup12 ended. 0043: the FSE
   pilot is kept.
 - **Rejected:** opening a card for 0012 (the Decisions tab was built
   directly, a6ebd4d..280f58c).
 
 ## Open questions
+
+- The header's "N decisions waiting" still counts an archived initiative's
+  records (sup12, found not asked; FR-13 named only the pill and
+  Conversations). May explain Needs me 18 in Pablo's screenshot. Candidate card.
 
 - Home's live-agent count dropped once after the first 10 s sample in the built
   app (review of explain-health-all-agents). Seen once, not investigated.
