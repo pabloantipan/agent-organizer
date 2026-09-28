@@ -34,3 +34,8 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
 - `init-define`, an initiative whose cell (`define-fixture`) has three
   seats and no session or run, so it reads "in definition" on Crew, the
   Agents tab and Home beside init-a's live cell (discovery-in-a-cell G1)
+- persona files for every overlay seat but `designer_diego` of `init-define`,
+  so `organizer crew init-define --print` refuses naming
+  `agents/designer_diego.md` and its Crew row says "no persona file", while
+  init-a's seats carry no mark (discovery-in-a-cell G2); `agents/` is in
+  `.gitignore`, so these are force-added
