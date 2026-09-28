@@ -11,8 +11,17 @@ restating it (the discuss skill).
 - **Roadmap (0032):** stages 1–4 done (0039, 0044, 0046). **Current: stage 5
   `discovery-in-a-cell`.** Spec `docs/specs/discovery-in-a-cell.md`, cards
   cell-in-definition, cell-persona-check, discovery-gate-shown; 0048 ruled by Pablo
-  from the app (rule-anyone works); sup15 runs the three cards. When its
-  done message arrives: read it, end sup15. 0047 ruled "a drafting session" (from the
+  from the app; sup15 landed all three (discovery-gate-shown,
+  cell-in-definition, cell-persona-check; run record
+  runs/2026-09-28-discovery-in-a-cell.md, gate_rework 0) and was ended.
+  sup15's open points for a follow-up amendment and card: (1) the spec's
+  Goals name the rail for "in definition" but FR-1 does not, and the rail
+  shows nothing (my inconsistency: pick one, likely FR-1 plus the rail);
+  (2) a cell in definition still offers "N retirable"; (3) Home's state says
+  "quiet" beside "cell in definition"; (4) Bring crew up is enabled on a seat
+  with no persona file and refuses only after the click; (5) no unit test for
+  Overview's gate-into-building logic. Stage 5's exits are not met yet: (a)
+  needs the drafting card (0047), (b) is camp's move into building. 0047 ruled "a drafting session" (from the
   app). Next: amend discovery-in-a-cell FR-3 and G4, cut the drafting card
   with depends on Hephaistos's persona-agents drafting procedure (asked
   2026-09-28). Supervisor recipe (own window, identity prelude, recipe in
