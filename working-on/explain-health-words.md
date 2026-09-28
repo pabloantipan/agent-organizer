@@ -1,6 +1,6 @@
 ---
 title: Every health word says why and what to do
-status: next
+status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-28
