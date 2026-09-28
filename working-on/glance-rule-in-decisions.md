@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: main
 updated: 2026-09-28
-next: "review: glance-rule-in-decisions, gate G15, G10 met, af049dd"
+next: "review: glance-rule-in-decisions, gate G15, G10 met, 718d69e"
 depends_on: []
 boundary: ["frontend/src/components/DecisionsView.tsx", "frontend/src/components/RuleDecisionBox.tsx (reuse; props only if needed)", "frontend/src/styles/ (the Decisions tab's CSS only)"]
 spec: "docs/specs/twenty-at-a-glance.md (FR-12); values: docs/design-system.md"
@@ -22,12 +22,12 @@ Pablo's review of the installed app (0038): FR-12 of `docs/specs/twenty-at-a-gla
 
 ## Done
 - 2026-09-28 cut from the spec by the FSE
-- 2026-09-28 wave1-decrule: an expanded proposed record the lead owns (or nobody) shows Rule, which opens `RuleDecisionBox` unchanged; ruled, withdrawn, superseded and business-owned records show none (af049dd on `glance-rule-in-decisions`, rebased on main 7d052b9). Evidence in `.wt-notes/wave1-decrule/`:
+- 2026-09-28 wave1-decrule: an expanded proposed record the lead owns (or nobody) shows Rule, which opens `RuleDecisionBox` unchanged; ruled, withdrawn, superseded and business-owned records show none (718d69e on `glance-rule-in-decisions`, rebased on main 8133c91). Evidence in `.wt-notes/wave1-decrule/`:
   - G15: `G15-box.png` (0002 expanded, box open with one-machine and words), `G15-ruled.png` (0002 under Ruled, no Rule), `G15-no-rule.png` (0004 expanded, no Rule; no `.dec-actions` in the DOM after the ruling). On `FIXTURE_HOME=/tmp/organizer-fixture.zWVwUR/home`: `git -C "$FIXTURE_HOME/init-a" log -1 --stat` → `dbdf235 docs(decisions): rule 0002 where-the-fixture-runs (one-machine)`, `working-on/decisions/0002-where-the-fixture-runs.md | 10 ++++++----`, `1 file changed, 6 insertions(+), 4 deletions(-)`. `git show` changes only `status: proposed→ruled`, `ruled: 2026-09-28`, `ruled_by: pablo`, `chosen: one-machine`, and one line under `## Ruling` ("pablo, 2026-09-28, in the organizer on fixture: One machine is enough…").
   - G10: `cd frontend && npm run build` → `✓ built in 1.08s` after the rebase; the G18 grep over `main...glance-rule-in-decisions` printed nothing (exit 1). `wails build` run after `wails dev`.
 
 ## Next
-1. review: glance-rule-in-decisions, gate G15, G10 met, af049dd
+1. review: glance-rule-in-decisions, gate G15, G10 met, 718d69e
 
 ## Blockers
 none
