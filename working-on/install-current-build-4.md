@@ -6,6 +6,7 @@ branch: main
 updated: 2026-09-28
 next: "make install from main (fc26867 or later), then confirm the installed version and that an archived initiative opens read-only"
 depends_on: []
+seat: install4-build
 boundary: ["build/ (the build output)", "/Applications/organizer.app (install target)", "~/.local/bin/organizer (the symlink make install writes)", "no source file in the repo"]
 spec: "Pablo, 2026-09-28: \"Reinstall\" (0041), then \"I see nothing happening?\" after the read-only card merged past the installed v0.2.0-301; CLAUDE.md, Packaging"
 gate: "the Gate section below"
