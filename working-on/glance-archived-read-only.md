@@ -10,6 +10,7 @@ boundary: ["frontend/src/components/InitiativeHeader.tsx (the read-only label)",
 spec: "docs/specs/twenty-at-a-glance.md (FR-13); values: docs/design-system.md"
 gate: "docs/specs/twenty-at-a-glance.md Acceptance, rows G16, G10; the Gate section below"
 stage: twenty-at-a-glance
+seat: readonly-build
 ---
 
 ## Goal
@@ -31,3 +32,4 @@ none
 ## Notes
 - One read-only flag derived once (the initiative's status) and passed down; not a check per component
 - 2026-09-28 sup12 runs this card (organizer-probe-sup12), spawned by the FSE after 0042
+- 2026-09-28 sup12: builder seat readonly-build, reviewer readonly-review; worktree .wt/glance-archived-read-only, branch glance-archived-read-only; fixture is `scripts/fixture-home.sh --twenty` (legacy-intranet is archived and has a cell)
