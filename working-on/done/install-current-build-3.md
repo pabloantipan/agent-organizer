@@ -1,15 +1,16 @@
 ---
 title: The installed organizer is main, with stage 3
-status: now
+status: done
 repos: [organizer]
 branch: main
 updated: 2026-09-28
-next: "review: install-current-build-3, gate 1-4 met, evidence in .wt-notes/stage3b-install, installed v0.2.0-301-g6b37bef"
+next: "none: reviewed pass 2026-09-28"
 depends_on: [explain-finish]
 boundary: ["build/ (the build output)", "/Applications/organizer.app (install target)", "~/.local/bin/organizer (the symlink make install writes)", "no source file in the repo"]
 spec: "Pablo, 2026-09-28, in the FSE's session: \"do as recommended. Reinstall\" (0041); CLAUDE.md, Packaging"
 gate: "the Gate section below"
 seat: stage3b-install
+review: pass
 ---
 
 ## Goal
@@ -43,3 +44,13 @@ none
 - 2026-09-28 FSE: Accessibility was already granted to `/opt/homebrew/bin/zellij` on 2026-09-27 (see done/redesign-rule-box.md and 4876756), and the stage-3 reviewer saw the built app refuse synthetic clicks while that grant held (done/explain-health-all-agents.md, Review, G7 caveat). A second grant is unlikely to help; Pablo clicking ? once while a seat screenshots is the reliable path. The decide: above stays Pablo's.
 - 2026-09-28 sup11: the diagnosis above may be wrong. From sup11's pane (zellij 0.44.3, same binary), a System Events read that needs Accessibility (Finder's menu bar items) succeeds, so the grant looks present; what fails is a synthetic click reaching the WKWebView. The decide: stays Pablo's
 - 2026-09-28 FSE: Pablo opened the Help himself in the installed app (v0.2.0-301-g6b37bef, header shows it) and sent a screenshot: `.wt-notes/stage3b-install/gate3-help-by-pablo.png` (Home / Help, `/Users/pabloantipan/agent-slack/docs/how-we-build.md`, its sections listed). That is his answer to the decide: above, evidence for gate 3.
+
+## Review
+- Verdict: pass
+- Unmet gate items: none
+- 1. make-install.log has no error or fail line and ends `installed /Applications/organizer.app and ~/.local/bin/organizer (v0.2.0-301-g6b37bef-dirty)`; `merge-base --is-ancestor explain-finish 6b37bef` succeeds
+- 2. the app binary and `organizer` on PATH (~/.local/bin/organizer -> /Applications/organizer.app/Contents/MacOS/organizer) both print `organizer v0.2.0-301-g6b37bef`, no -dirty, rerun by the reviewer; 6b37bef is on main, and the reflog has it as main's tip from 01:31:53 to 01:35:20 while the log and the installed binary are stamped 01:32:42
+- 3. gate3-help-by-pablo.png is the native window (title bar "organizer", top bar v0.2.0-301-g6b37bef, crumbs Home / Help, ? highlighted), path ~/agent-slack/docs/how-we-build.md, and its sections list matches the file's seven headings exactly
+- 4. `git status --short` shows only `.playwright-mcp/`, `.wt-notes/`, `runs/`
+- Not covered by the gate: the Makefile's closing line reads -dirty because `wails build` flips `frontend/wailsjs/go/main/App.{d.ts,js}` to 100755; gate 4 held only because the builder ran `git checkout -- frontend/wailsjs` by hand. `make install` should restore it (or compute the describe once) so the next install is clean without a manual step. Gate 3's evidence is Pablo's screenshot relayed by the FSE, not a seat's capture; synthetic clicks still cannot reach the WKWebView, which will block the next UI gate the same way
+- Reviewer: stage3b-review-install, 2026-09-28
