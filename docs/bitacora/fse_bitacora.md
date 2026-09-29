@@ -22,7 +22,11 @@ restating it (the discuss skill).
   ~/.local/share/organizer/prompts/organizer-sup16.*). FR-7 left out: 0051 is
   open; when ruled, FR-7 gets its own card. **Next:** when both cards land,
   read sup16's closing report and end it (standing-up.md, "Ending a
-  supervisor"). Last SHA seen: 62f0a8b.
+  supervisor").
+- **0051 ruled (d10c0d0, "a Launch row in Needs me"):** FR-7 and G7 written
+  into the spec and cell-definition-finish before it launched (065dbcc);
+  sup16 told in thread 01M3PSKFXGCD889WBEG7D0GW2X. Last SHA seen: 065dbcc.
+- **Waiting on Pablo:** 0052 (frontend test runner).
   On 0052 "vitest over lib/", cut its card.
 - **Checked:** camp's six seats all have `agents/<seat>.md`, so FR-2 does not
   refuse camp (cell-persona-check's review point 2).
