@@ -1,10 +1,10 @@
 ---
 title: Needs me verbs and blocked reasons follow the design system; waiting says whose
-status: now
+status: done
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "review: conform-and-waiting, branch conform-and-waiting, gate pass, 327fcd9 601623d f72d7cc e20dbd9 6be6a5a"
+next: "merged in d4f5658; UI sev 2-1 findings C1-C6 are the FSE's"
 depends_on: ["home-rule-and-rows", "cell-screens-fix"]
 boundary: ["frontend/src/components/Home.tsx (the waiting signal; the row verbs' class)", "frontend/src/components/InitiativeHeader.tsx (waitingDecisions may move to lib, same count)", "frontend/src/components/Conversation.tsx (the worklist's Rule toggle; the chat list's no-token line)", "frontend/src/components/CardDrawer.tsx (Write about this card)", "frontend/src/components/AgentsView.tsx and Crew.tsx (aria-describedby only)", "frontend/src/lib/ (the owner list and its test)", "CSS", "testdata/"]
 spec: "docs/specs/lead-side-fixes.md (FR-10, FR-11, FR-12; amendments 1 and 2; decisions 0056, 0057); the rules: docs/design-system.md principle 3, Inbox row, Disabled actions (7b6afd4)"
