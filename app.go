@@ -297,6 +297,16 @@ func (a *App) CreateCrew(initiativeID string) ([]string, error) {
 	return a.svc.CreateCrew(initiativeID, true)
 }
 
+// DraftCell opens a drafting session for an initiative without a cell; with
+// open false it opens nothing and only reports why it cannot, which is the
+// Draft the cell button's disabled hover.
+func (a *App) DraftCell(initiativeID string, open bool) (string, error) {
+	if a.svc == nil {
+		return "", errString(a.err)
+	}
+	return a.svc.DraftCell(initiativeID, open)
+}
+
 // ---- the Cell tab: one initiative's mailbox, read and written as the human ----
 
 func (a *App) GetCell(initiativeID string) (service.CellView, error) {

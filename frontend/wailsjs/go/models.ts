@@ -616,6 +616,8 @@ export namespace model {
 	    human: string;
 	    reconciler: string;
 	    model?: string;
+	    draft?: boolean;
+	    drafted?: string;
 	    state?: string;
 	
 	    static createFrom(source: any = {}) {
@@ -630,6 +632,8 @@ export namespace model {
 	        this.human = source["human"];
 	        this.reconciler = source["reconciler"];
 	        this.model = source["model"];
+	        this.draft = source["draft"];
+	        this.drafted = source["drafted"];
 	        this.state = source["state"];
 	    }
 	}

@@ -39,3 +39,12 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
   `agents/designer_diego.md` and its Crew row says "no persona file", while
   init-a's seats carry no mark (discovery-in-a-cell G2); `agents/` is in
   `.gitignore`, so these are force-added
+- three initiatives for "Draft the cell" (discovery-in-a-cell G4):
+  `init-draftable` has a goal, `agents/people.md` and no cell, so
+  `organizer draft-cell init-draftable --print` prints the prompt and the
+  button is enabled; `init-nopeople` has a goal and no `people.md`, so both
+  refuse naming it (init-b and init-c, with no goal, refuse naming that);
+  init-a's cell makes draft-cell refuse; `init-drafted`'s cell is
+  `draft: true` with a proposed `0001-the-cell-roster`, so it reads "in
+  definition" waiting on that record and `organizer crew init-drafted --print`
+  refuses naming it

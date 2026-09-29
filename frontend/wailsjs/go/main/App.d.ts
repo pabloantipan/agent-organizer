@@ -25,6 +25,8 @@ export function CreateAgent(arg1:string,arg2:string):Promise<void>;
 
 export function CreateCrew(arg1:string):Promise<Array<string>>;
 
+export function DraftCell(arg1:string,arg2:boolean):Promise<string>;
+
 export function EditNote(arg1:string,arg2:string,arg3:string,arg4:string):Promise<void>;
 
 export function GetAccount():Promise<auth.Account>;
