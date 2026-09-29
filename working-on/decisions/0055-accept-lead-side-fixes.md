@@ -1,13 +1,13 @@
 ---
 title: Accept the lead-side-fixes spec, and launch its two cards
-status: proposed
+status: ruled
 raised: 2026-09-29
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-29
+ruled_by: pablo
 options: [accept as written, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [home-rule-and-rows, cell-screens-fix]
 threads: [01M3PVQZ7JS5F40030Z09M2NMS, 01M3PVTCBV0NSN9XZ8MBAFV5A7]
 supersedes: []
@@ -56,7 +56,7 @@ disabled pattern wait on 0054).
 
 ## Ruling
 
-
+pablo, 2026-09-29, in the organizer on lodestar: Do
 
 ## Consequences
 
