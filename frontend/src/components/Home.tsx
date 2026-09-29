@@ -9,7 +9,7 @@ import { useBoard } from "../stores/board.store";
 import { nextDate, stageState, waitingDecisions } from "./InitiativeHeader";
 import { InitiativeDetail } from "./Initiatives";
 import { RuleDecisionBox } from "./RuleDecisionBox";
-import { CellStateLz } from "./Crew";
+import { CellStateLz, IN_DEFINITION_WAITS } from "./Crew";
 import "../styles/home.css";
 
 /** Home: what needs me, and where every initiative stands (FR-15, FR-16).
@@ -106,6 +106,16 @@ function InboxRow({ row }: { row: NeedsMeRow }) {
           subject={<><span className="mono">{row.initiative}</span> · <span className="mono">{s.name}</span> {h.blocker}{s.undelivered > 0 ? ` · ${messages(s.undelivered)} waiting` : ""}</>}
           context={`${h.why} ${h.what}`}>
           <button className="act" onClick={() => openInitiative(row.initiative, "agents")}>Agents</button>
+        </Shell>
+      );
+    }
+    case "launch": {
+      const n = row.cell.agents?.length ?? 0;
+      return (
+        <Shell row={row} reason="cell" tone="tone"
+          subject={<><span className="mono">{row.initiative}</span> · <span className="mono">{row.cell.project}</span> in definition</>}
+          context={`${n} seat${n === 1 ? "" : "s"}; ${IN_DEFINITION_WAITS}`}>
+          <button className="act primary" onClick={() => openInitiative(row.initiative, "agents")} title="open its Agents, where Bring crew up is">Launch</button>
         </Shell>
       );
     }
