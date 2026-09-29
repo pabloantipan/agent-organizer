@@ -4,6 +4,25 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-09-29, lead-side-fixes raised; sup17's card landed
+
+- **Last SHA seen:** 57fcea3. `frontend-tests` in done/, review pass;
+  **sup17's closing report not in yet**: on it, read it, end sup17
+  (standing-up.md "Ending a supervisor"). From then on `make test` runs
+  `npm test`.
+- **Raised, waiting on Pablo:** 0054 (who owns docs/design-system.md,
+  recommend Aglaea), 0055 (accept `docs/specs/lead-side-fixes.md`: cards
+  home-rule-and-rows and cell-screens-fix, parallel, both `ui_review: true`,
+  forecast 20–36 min over 1 wave), 0056 (F3, "quiet" beside a signal;
+  recommend "waiting says whose").
+- **On 0055 accepted:** one supervisor, both cards in parallel, a UI reviewer
+  per card (aglaea references/ui-review.md); amend nothing else. On 0056
+  "waiting says whose": an FR in lead-side-fixes if not launched, else a card.
+- **Aglaea** told where her findings went (thread
+  01M3PW6Z2H9YV25E6GQG7CJWVE). Not carried: F4–F6, F8, C9, C10.
+- **Stage 5 exit (a):** a draft on a real initiative (Pablo presses Draft
+  the cell); (b) camp's.
+
 ## HAND-OFF — 2026-09-29, stage 5's build landed; sup17 on frontend-tests
 
 - **Last SHA seen:** 42c63b8 plus sup16's run record
