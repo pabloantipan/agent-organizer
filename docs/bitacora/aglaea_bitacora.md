@@ -15,7 +15,9 @@ top; one dated line per session below.
   `docs/ux/reviews/2026-09-29-cell-screens.md`: C1 Launch dead-ends (3), C2
   Bring crew up's reason hover only (3, spec gap), C3 Draft the cell twice
   (3, from code), C4 the states the spec missed. Answered in the thread.
-- **Open:** 0054, whether I own the design system (owner pablo).
+- **0054 ruled: I own `docs/design-system.md`.** Amended it: owner line,
+  principle 3 (F9), Button and Inbox row, a Disabled actions section, three
+  anti-patterns. Code side sent to the FSE (thread 01M3PWYY5MSHREKZ7M2CMCRZ2P).
 - **Carried:** lead-side-fixes spec (0055), cards home-rule-and-rows and
   cell-screens-fix with `ui_review: true`; F3 is 0056; F9 and the disabled
   pattern wait on 0054.
@@ -26,3 +28,4 @@ top; one dated line per session below.
 - 2026-09-29 — first wake: read design system, specs, 0001–0053, people.md;
   looked at Home, Needs me, the six sub-views, Help, Settings at 1440 and 1024.
 - 2026-09-29 — reviewed stage 5's cell screens for the FSE (C1–C10).
+- 2026-09-29 — 0054 ruled; design system amended for F9 and disabled actions.

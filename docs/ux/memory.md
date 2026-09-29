@@ -43,6 +43,13 @@ line carries its source. Updated at the end of every session.
 - A cell accepted but never launched is a Launch row in Needs me, not a
   fifth state (0051).
 - Aglaea sits beside the FSE, not in the cell (0053).
+- **I own `docs/design-system.md` on the organizer** (0054, Pablo: "in this
+  initative, as it's our new product, she owns"). The code changes only
+  through the FSE's cards; a ruled brand choice still needs Pablo's record.
+- Design system, amended by me 2026-09-29: principle 3 means the committing
+  action; a list's row verbs are default buttons, never accent (F9). Disabled
+  actions have four reasons (busy, incomplete, blocked, never here), one
+  treatment each; a blocked reason is visible text, never hover only.
 
 ## Open findings not yet carded
 
@@ -81,10 +88,7 @@ From `reviews/2026-09-29-cell-screens.md` (stage 5, for the FSE's thread
 
 ## Open questions
 
-- Whether I own `docs/design-system.md` or only review against it: record
-  **0054** (proposed, owner pablo; my proposal is option one, the FSE
-  recommends it; hephaistos's skill also claims the design system). Until
-  ruled, I propose, never edit.
+- none open.
 
 ## How I look at it
 

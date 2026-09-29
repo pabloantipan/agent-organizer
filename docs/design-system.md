@@ -6,6 +6,10 @@ components are built from them, and why. The redesign (`docs/specs/redesign.md`)
 builds on it. When this file and the code disagree, fix one of them in the
 same change.
 
+Owner: Aglaea, the Product Designer seat (0054). She amends this file; the
+code changes only through the FSE's cards; a change to a ruled brand choice
+(below) needs Pablo's ruling as a record.
+
 Brand, fixed by Pablo: **dark only**, a warm near-black with a purple cast, one
 solid electric purple accent, magenta as a tone, red for blocked. No gradients,
 no two-tone buttons, no white cards, no light theme. Manrope for the UI,
@@ -17,6 +21,9 @@ JetBrains Mono for data.
    borders are faint and few; a separator is the last resort (Linear, 2026 refresh).
 2. **The content leads.** The rail is dimmer than the page; chrome recedes.
 3. **One solid accent action per view.** Everything else is a quiet button.
+   The accent marks the action that commits (Rule in its box, Send, Open in
+   a confirm, Bring crew up). In a list, each row's verb is a default
+   button: twenty accent buttons say nothing about which one matters.
 4. **Never colour alone.** Every status carries a word, a shape or a position
    as well as a hue (Atlassian lozenges, WCAG 1.4.1).
 5. **Summary before detail.** A card shows its title, next action and two or
@@ -142,7 +149,9 @@ comes from.
 Height 28, radius 6, `sm`–`md` text at weight 500, icon 16 left. Variants:
 **primary** (accent fill, white label — one per view), **default** (raised
 surface, faint border), **ghost** (text only, hover fills). Disabled at 45%
-opacity. Never a pill, never two-tone. *Primer, Geist.*
+opacity for every size and variant, `.tiny-btn` included; the rest of
+disabling is under *Disabled actions*. Never a pill, never two-tone.
+*Primer, Geist.*
 
 ### Badge (lozenge)
 `xs` text, weight 600, padding 1×7, radius 4, **no border**; a neutral tint by
@@ -169,8 +178,10 @@ WIP: a count, never a block. *Linear board, GitHub Projects, Trello badges.*
 
 ### Inbox row (Needs me)
 One row per thing asked of the human: a **reason** lozenge (decision, question,
-card, deaf seat), the subject with one line of context, the age, and one
-primary verb on the row (Rule, Answer, Open). Oldest first. Solved rows stay
+card, deaf seat, cell), the subject with one line of context, the age, and
+one verb on the row (Rule, Answer, Open, Launch) as a **default** button,
+never the accent (principle 3). The accent belongs to the commit inside what
+the verb opens: Rule in the rule box. Oldest first. Solved rows stay
 reachable. A row whose flow ended replaces its buttons with a one-line record
 of the outcome. *Linear Inbox and Triage, GitHub notifications, Slack Block Kit.*
 
@@ -216,12 +227,32 @@ One line of what is missing, one line of how to get it, one action. Errors say
 what went wrong and how to fix it; never "there was a problem", never playful.
 *Primer Blankslate.*
 
+### Disabled actions
+An action is unavailable for one of four reasons, and each has one treatment.
+Look is the same for all: the control at 45% opacity, `cursor: default`,
+same variant and colour as when enabled (a disabled primary stays a primary
+shape; it never turns grey or changes hue).
+
+| why | treatment | examples |
+|---|---|---|
+| **busy**: the action is running | disabled, its label becomes the gerund with an ellipsis ("Opening…", "Ruling…"); nothing else | Open, Rule, Save |
+| **incomplete**: the form lacks what the action needs | submit disabled; the fields say what they need in their labels or placeholders. No reason text: the missing input is in view | Rule until an option and words; Send until a body |
+| **blocked**: something outside the form stops it (a file, a record, a token, a precondition) | disabled, and **the reason as visible text** beside or under the control, `sm` `--fg-muted`: what is missing, and who or what fixes it ("no agents/people.md; the FSE's intake writes it"). Linked with `aria-describedby` to the control. **Never only a hover**: a disabled button takes no focus and no WebKit mouse events, so a title reaches nobody but a guessing mouse | Draft the cell, Bring crew up, the + for a new thread without a token |
+| **never here**: the action cannot apply in this context at all | not drawn. The context says why once, not per control ("archived: read-only" in the header) | archived initiatives (0042) |
+
+A blocked action that the human can fix in the app names that place ("waits
+on 0001 the-cell-roster" as a link). A reason that goes stale (the world
+changed) is refreshed on the next scan, not on click. *WCAG 1.3.1, 2.1.1,
+4.1.2.*
+
 ## Anti-patterns
 
 Coloured side bars on rounded cards; pill buttons; outlined badges in a
 different colour each; accent-coloured small text; descriptions on cards;
 colour-only status; hard WIP blocking; invented dates; a stepper for fewer
-than three steps; stale buttons on a resolved message; gradients of any kind.
+than three steps; stale buttons on a resolved message; gradients of any kind;
+an accent button on every row of a list; a disabled control whose reason is
+only in a hover; a disabled look that differs by button size.
 
 ## Sources
 
