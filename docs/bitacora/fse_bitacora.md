@@ -43,7 +43,11 @@ restating it (the discuss skill).
   ask to Pablo for a severe finding; read `docs/ux/memory.md` before asking
   her (none here yet); who owns the design system is a proposed record the
   first time I work with her. sup16's and frontend-tests' cards predate it:
-  no `ui_review` flag (frontend-tests has no UI). When sup16's cards land, ask it to review
+  no `ui_review` flag (frontend-tests has no UI). **0053 (4ca1b37):** the organizer has an
+  `aglaea` seat beside me (token organizer/aglaea, agents/aglaea.md; not in
+  cell.json); I mail `aglaea` directly. No session running at 2026-09-29
+  (`organizer-probe-aglaea` absent); launching it was not named as mine.
+  The design-system ownership record is raised with her on the first ask. When sup16's cards land, ask it to review
   cell-draft's and cell-definition-finish's screens (amendment 1 named no
   loading or error state for Draft the cell).
 - **Still open from the 09-28 hand-off:** header-review-2 (spec and
