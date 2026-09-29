@@ -34,6 +34,10 @@ restating it (the discuss skill).
   On 0052 "vitest over lib/", cut its card.
 - **Checked:** camp's six seats all have `agents/<seat>.md`, so FR-2 does not
   refuse camp (cell-persona-check's review point 2).
+- **Daedalus (2026-09-29, Hephaistos relay):** UX/UI pair role; ask with
+  `[for daedalus]` to pablo. When sup16's cards land, ask it to review
+  cell-draft's and cell-definition-finish's screens (amendment 1 named no
+  loading or error state for Draft the cell).
 - **Still open from the 09-28 hand-off:** header-review-2 (spec and
   records), the roadmap's forecast display card (0049), Pablo's moves to
   done/ (install-current-build-2 and -4, app-review-with-pablo, fse-pilot).
