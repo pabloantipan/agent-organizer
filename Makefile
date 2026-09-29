@@ -27,8 +27,9 @@ install: build ## copy to /Applications and link the CLI into ~/.local/bin
 uninstall:
 	rm -rf /Applications/organizer.app $(HOME)/.local/bin/organizer
 
-test:
+test: ## go vet, go test, then the frontend's vitest run
 	go vet ./... && go test ./...
+	cd frontend && npm test
 
 version:
 	@echo $(VERSION)
