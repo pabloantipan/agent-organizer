@@ -1,0 +1,10 @@
+{
+  "project": "drafted-fixture",
+  "workdir": "",
+  "agents": ["po_rosa", "tech_lead_tomas"],
+  "human": "pablo",
+  "reconciler": "po_rosa",
+  "push": false,
+  "draft": true,
+  "drafted": "2026-09-28"
+}

@@ -1,0 +1,8 @@
+id: init-nopeople
+title: Initiative No People
+client: personal
+status: active
+started: 2026-09-25
+machine: testbox
+goal: A goal is written but nobody has run the intake, so there is no people.md
+repos: []
