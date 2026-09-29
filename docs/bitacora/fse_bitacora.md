@@ -4,6 +4,29 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-09-29, stage 5's amendment raised
+
+- **Last SHA seen:** 02f5652 (no `working-on/` change after it before this
+  session; no mail on wake).
+- **Done this session:** amendment 1 of `docs/specs/discovery-in-a-cell.md`
+  (FR-3 from 0047 and drafting.md, G4; FR-1 adds the rail; FR-5 no
+  "N retirable" in definition; FR-6 Bring crew up says why; FR-7 open).
+  Cards `cell-draft`, then `cell-definition-finish`; both pass
+  `organizer run organizer <card> --print` (the task prompts are the
+  supervisor's). Records: **0050** accept the amendment (forecast 40–65 min
+  over 2 waves), **0051** Home's state for a cell in definition (recommend a
+  Launch row in Needs me), **0052** a frontend test runner (repetition 3,
+  below). Stage forecast block written in `roadmap.yaml`.
+- **Next:** when 0050 is ruled, start one supervisor for both cards in order
+  (fse skill, references/standing-up.md). If 0051 is ruled first, write FR-7
+  and its gate row into the spec and cell-definition-finish before launch.
+  On 0052 "vitest over lib/", cut its card.
+- **Checked:** camp's six seats all have `agents/<seat>.md`, so FR-2 does not
+  refuse camp (cell-persona-check's review point 2).
+- **Still open from the 09-28 hand-off:** header-review-2 (spec and
+  records), the roadmap's forecast display card (0049), Pablo's moves to
+  done/ (install-current-build-2 and -4, app-review-with-pablo, fse-pilot).
+
 ## HAND-OFF — 2026-09-28, stage 5 starting
 
 - **Read first:** `agents/fse.md`, the fse skill (authority table, "Ending a
@@ -211,6 +234,11 @@ restating it (the discuss skill).
 - **Corrected (sup7):** the install's failed review came from a `no -dirty`
   check in sup7's review prompt, not from my gate. The gate stood; 0037 was
   moot. My earlier belief that the gate was ambiguous was wrong.
+
+- **Repetition (3), generalized as 0052:** frontend logic with no test,
+  because there is no frontend test runner: sup14 (the Decisions tab's Rule
+  condition) and sup15 (Overview's gate into building). Second occurrence,
+  so proposed, not built.
 
 - **Repetition (2):** zsh does not word-split an unquoted variable. It bit me
   (8d42553), and the fixture doc's `kill $FIXTURE_AGENT_PIDS` (review of
