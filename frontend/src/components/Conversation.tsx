@@ -619,7 +619,7 @@ function NeedsMe(p: {
             {note && <div className="q-note"><StickyNote size={11} /> {note}</div>}
             <div className="q-actions">
               <button className="tiny-btn primary" onClick={() => p.onDiscussCard(c)}><MessagesSquare size={12} /> Discuss</button>
-              <button className={`tiny-btn ${ruling === `card:${c.slug}` ? "primary" : "ghost"}`} onClick={() => { setRuleErr(null); setRuling(ruling === `card:${c.slug}` ? null : `card:${c.slug}`); }} disabled={!p.canPost} title={p.canPost ? "settle it here: a decision to the seat, with the next action, in a new thread named after the card" : "no token to post with"}><Gavel size={12} /> Rule</button>
+              <button className="tiny-btn" aria-pressed={ruling === `card:${c.slug}`} onClick={() => { setRuleErr(null); setRuling(ruling === `card:${c.slug}` ? null : `card:${c.slug}`); }} disabled={!p.canPost} title={p.canPost ? "settle it here: a decision to the seat, with the next action, in a new thread named after the card" : "no token to post with"}><Gavel size={12} /> Rule</button>
               <button className="tiny-btn ghost" onClick={() => openCard(c.slug)}>Open card</button>
               <span className="spacer" />
               <button className="tiny-btn ghost" onClick={() => p.onResolve(`card:${p.initiativeId}/${c.slug}`, true)} title="take it off your queue; the card itself is the agents' to update"><Check size={12} /> Mark solved</button>
@@ -649,7 +649,7 @@ function NeedsMe(p: {
           {(t.cards ?? []).map((slug) => { const l = p.notes[`${p.initiativeId}/${slug}`] ?? []; return l.length ? <div key={slug} className="q-note"><StickyNote size={11} /> {l[l.length - 1].text}{l.length > 1 ? `  (+${l.length - 1} more)` : ""}</div> : null; })}
           <div className="q-actions">
             <button className="tiny-btn primary" onClick={() => p.onDiscussThread(t.id)}><MessagesSquare size={12} /> {t.status === "escalated" ? "Open" : "Answer"}</button>
-            <button className={`tiny-btn ${ruling === `thread:${t.id}` ? "primary" : "ghost"}`} onClick={() => { setRuleErr(null); setRuling(ruling === `thread:${t.id}` ? null : `thread:${t.id}`); }} disabled={!p.canPost} title={p.canPost ? (t.status === "escalated" ? "settle it here: reopen, then a decision with the next action" : "settle it here: a decision into the thread, with the next action") : "no token to post with"}><Gavel size={12} /> Rule</button>
+            <button className="tiny-btn" aria-pressed={ruling === `thread:${t.id}`} onClick={() => { setRuleErr(null); setRuling(ruling === `thread:${t.id}` ? null : `thread:${t.id}`); }} disabled={!p.canPost} title={p.canPost ? (t.status === "escalated" ? "settle it here: reopen, then a decision with the next action" : "settle it here: a decision into the thread, with the next action") : "no token to post with"}><Gavel size={12} /> Rule</button>
             <span className="spacer" />
             <button className="tiny-btn ghost" onClick={() => p.onResolve(`thread:${t.id}`, true)} title="take it off your queue without posting"><Check size={12} /> Mark solved</button>
           </div>

@@ -30,6 +30,8 @@ button.primary { background: var(--accent); color: var(--fg-on-accent); border-c
 button.primary:hover { background: var(--accent-hover); }
 button.ghost { background: transparent; border-color: transparent; color: var(--muted); }
 button.ghost:hover { color: var(--fg); background: var(--surface-hover); }
+/* A toggle that is on is selected, never the accent (principle 3). */
+.tiny-btn[aria-pressed="true"] { background: var(--surface-selected); border-color: var(--border-strong); color: var(--fg); }
 :focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 input, textarea {
   font: inherit; color: var(--text);

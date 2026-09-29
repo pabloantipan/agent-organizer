@@ -85,7 +85,7 @@ function InboxRow({ row }: { row: NeedsMeRow }) {
         <Shell row={row} reason={escalated ? "escalated" : "question"} tone={escalated ? "danger" : "tone"}
           subject={<><span className="mono">{row.initiative}</span> · {t.subject}</>}
           context={`${escalated ? "escalated to you" : `${t.asked_by || "a seat"} asks you`} · ${t.messages} message${t.messages === 1 ? "" : "s"}`}>
-          <button className="act primary" onClick={() => openSlackThread(row.initiative, t.id)}>Answer</button>
+          <button className="act" onClick={() => openSlackThread(row.initiative, t.id)}>Answer</button>
         </Shell>
       );
     }
@@ -119,7 +119,7 @@ function InboxRow({ row }: { row: NeedsMeRow }) {
           context={blocker ? <><span className="mono">{row.missing}</span> has no persona file</> : `${n} seat${n === 1 ? "" : "s"}; ${IN_DEFINITION_WAITS}`}>
           {verb === "Open"
             ? <button className="act" onClick={() => openInitiative(row.initiative, "agents")} title={`open its Agents: agents/${row.missing}.md is missing`}>Open</button>
-            : <button className="act primary" onClick={() => openInitiative(row.initiative, "agents")} title="open its Agents, where Bring crew up is">Launch</button>}
+            : <button className="act" onClick={() => openInitiative(row.initiative, "agents")} title="open its Agents, where Bring crew up is">Launch</button>}
         </Shell>
       );
     }
@@ -143,7 +143,7 @@ function RuleAction({ initiative, decision }: { initiative: string; decision: mo
   const [open, setOpen] = useState(false);
   return (
     <span className="rb-anchor">
-      <button className="act primary" aria-expanded={open} onClick={() => setOpen(!open)}>Rule</button>
+      <button className="act" aria-expanded={open} onClick={() => setOpen(!open)}>Rule</button>
       {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord onClose={() => setOpen(false)} />}
     </span>
   );
