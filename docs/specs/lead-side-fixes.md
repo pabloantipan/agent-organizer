@@ -1,6 +1,6 @@
 # What the lead sees and presses works as it reads
 
-status: accepted (0055, 2026-09-29); amendment 1 from 0056
+status: accepted (0055, 2026-09-29); amendment 1 from 0056; amendment 2 proposed (0057)
 owner: pablo
 decisions: [0019 ruled, 0034 ruled, 0047 ruled, 0051 ruled, 0053 ruled, 0055 ruled, 0056 ruled]
 roadmap: stage `discovery-in-a-cell` (its cell screens) and fixes to stage 2's Home; appetite one wave
@@ -54,9 +54,8 @@ them. The ones carried here, most severe first:
 
 - F3's blocked half ("quiet" beside "1 blocked"): the state rule stays as
   ruled (0056); a blocked card does not say whom it waits on.
-- F9 (a solid accent on every Needs me row, against principle 3), and a
-  general rule for disabled actions: they go to the design system's owner
-  (0054).
+- F9 and the general rule for disabled actions went to the design system's
+  owner (0054); Aglaea wrote them (7b6afd4), and amendment 2 carries the code.
 - F4, F5, F6, F8, C9, C10: recorded in the reviews, not carried.
 - A Go-side refusal of a second draft: nothing tells the service a drafting
   session is still running. The guard lives in the view (FR-5).
@@ -110,6 +109,22 @@ them. The ones carried here, most severe first:
   header's "N decisions waiting" (`InitiativeHeader.tsx:146`) is left as it
   is.
 
+- **FR-11** (F9; design system principle 3 and Inbox row, 7b6afd4;
+  amendment 2) Every row verb in Needs me shall be a default button, not
+  `act primary`: Answer, Launch/Open and Rule on Home, and the Rule toggle
+  of Conversations' needs-me worklist. An open Rule toggle is marked with
+  `aria-pressed` and `--surface-selected`, never the accent. The accent stays
+  on the action that commits, inside the Rule box.
+- **FR-12** (design system "Disabled actions", amendment 2) A blocked
+  action's reason shall be visible text tied to the control with
+  `aria-describedby`, never a hover alone:
+  - Draft the cell and Bring crew up (with FR-4);
+  - Conversations' + for a new thread when there is no token to post with:
+    one line of text in the chat list, not per control;
+  - Write about this card on the card back: hidden when the initiative has
+    no cell (never here); "no seat to write to" as text when the cell has no
+    seats (blocked).
+
 ## Acceptance → gate
 
 | # | FR | Given / When / Then | Check | Expected |
@@ -121,6 +136,7 @@ them. The ones carried here, most severe first:
 | G5 | 5 | Draft the cell's six states. Checking and refused are screenshots on the fixture. Opened and error come from a test double for the Open call, not a real session | screenshots per state | as the table |
 | G6 | 9 | `accept_record` on the fixture's drafted cell, a test in `internal/service`; `organizer retire init-define --retirable` prints "the cell is in definition" | test output; command output | as stated |
 | G8 | 10 | On `--twenty`, email-digest's row reads "1 waiting · fse"; a fixture initiative with records of two owners names both, oldest first; one with no owner reads "no owner" | a test in `frontend/src/lib` for the owner list; a screenshot of Home | as stated |
+| G9 | 11, 12 | Needs me rows on `--twenty` show no accent button; the open Rule toggle in Conversations is marked by `aria-pressed` and the selected surface; each blocked control of FR-12 has its reason as visible text and an `aria-describedby` pointing at it; Write about this card is absent without a cell and says "no seat to write to" with an empty roster | screenshots; the DOM attributes | as stated |
 | G7 | all | Nothing else broke | `XDG_DATA_HOME=$(mktemp -d) make test` (it runs `npm test` once frontend-tests lands); `cd frontend && npm run build`; the redesign's G18 grep | pass |
 
 ## Boundary
@@ -140,11 +156,15 @@ them. The ones carried here, most severe first:
   - `internal/model/model.go` (Cell: `accept_record`), `internal/service/`
     (`draft.go`, `crew.go`, `retire.go`), `frontend/wailsjs` (generated);
   - tests, fixtures.
-- **waiting-says-whose card** (amendment 1):
-  - `Home.tsx` (the waiting signal only);
+- **conform-and-waiting card** (amendments 1 and 2), after both cards above:
+  - `Home.tsx` (the waiting signal; the row verbs' class);
   - `InitiativeHeader.tsx` (`waitingDecisions` may move to `lib`, same
     count);
-  - a `lib` function and its test; fixtures.
+  - `Conversation.tsx` (the worklist's Rule toggle; the chat list's
+    no-token line);
+  - `CardDrawer.tsx` (Write about this card);
+  - `AgentsView.tsx`, `Crew.tsx` (`aria-describedby` only);
+  - a `lib` function and its test; CSS; fixtures.
 - **Must not touch:**
   - `docs/design-system.md` (0054);
   - camp or any other initiative's files;
@@ -173,10 +193,14 @@ them. The ones carried here, most severe first:
 |---|---|---|---|
 | `home-rule-and-rows` | G1, G2, G3, G7 | — | true |
 | `cell-screens-fix` | G4, G5, G6, G7 | — | true |
-| `waiting-says-whose` | G8, G7 | home-rule-and-rows (both touch `Home.tsx`) | false |
+| `conform-and-waiting` | G8, G9, G7 | home-rule-and-rows, cell-screens-fix (it touches their files) | true |
 
 ## Amendments
 
 - **1, 2026-09-29, from 0056** ("waiting says whose", ruled after the wave
   of 0055 launched): FR-10, G8, card `waiting-says-whose`, after
-  home-rule-and-rows. A signal's words, so no UI reviewer.
+  home-rule-and-rows.
+- **2, 2026-09-29, proposed (0057):** Aglaea's design-system rewrite
+  (7b6afd4, 0054) made F9 and the disabled-action rule; FR-11, FR-12, G9.
+  FR-10 and amendment 2 are one card, `conform-and-waiting`, replacing
+  `waiting-says-whose`, after both first cards, with a UI reviewer.

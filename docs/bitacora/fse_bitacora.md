@@ -24,8 +24,11 @@ restating it (the discuss skill).
   token organizer/sup18, prompts in ~/.local/share/organizer/prompts/
   organizer-sup18.*. End it when both land.
 - **0056 ruled ("waiting says whose", baa5c81) after sup18 launched:**
-  lead-side-fixes amendment 1 (FR-10, G8), card `waiting-says-whose`, depends
-  on home-rule-and-rows; next supervisor after sup18, one small card.
+  lead-side-fixes amendment 1 (FR-10, G8).
+- **Aglaea's design-system rewrite (7b6afd4)** → amendment 2 (FR-11, FR-12,
+  G9) and **0057** (proposed). One card `conform-and-waiting` (FR-10–12,
+  ui_review) replaces waiting-says-whose; depends on both sup18 cards. Next
+  supervisor after sup18, on 0057 ruled.
 - **Aglaea** told where her findings went (thread
   01M3PW6Z2H9YV25E6GQG7CJWVE). Not carried: F4–F6, F8, C9, C10.
 - **Stage 5 exit (a):** a draft on a real initiative (Pablo presses Draft
