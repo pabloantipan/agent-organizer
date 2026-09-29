@@ -18,27 +18,21 @@ export const IN_DEFINITION_WAITS = "no seat has run yet; waits on its first laun
  *  (discovery-in-a-cell FR-3e). */
 export const DRAFT_WAITS = "draft roster; nothing launches until its accept record is ruled";
 
-/** The accept record of a drafted roster: the initiative's proposed record
- *  whose slug is the-cell-roster (persona-agents, references/drafting.md §5),
- *  the highest number when a redraft raised another. */
-export function acceptRecord(decisions?: model.Decision[] | null): model.Decision | undefined {
-  return (decisions ?? []).filter((d) => d.slug === "the-cell-roster" && d.status === "proposed").pop();
-}
-
 /** What a cell in definition waits on, as the Crew header says it: a
- *  draft's accept record, linked to Decisions, or its first launch. */
+ *  draft's accept record, linked to Decisions with the record expanded
+ *  (lead-side-fixes FR-6), or its first launch. The record is the service's
+ *  (`accept_record`, FR-9); the rule is not repeated here. */
 function DefinitionWaits({ id, cell }: { id: string; cell: model.Cell }) {
-  const { view, openInitiative } = useBoard();
+  const openDecision = useBoard((s) => s.openDecision);
   if (cell.state !== "in_definition") return null;
   if (!cell.draft) return <span className="meta">{IN_DEFINITION_WAITS}</span>;
-  const rows = (view?.board.initiatives ?? []).filter((i) => i.id === id);
-  const record = acceptRecord((rows.find((i) => i.local) ?? rows[0])?.decisions);
+  const record = cell.accept_record;
   const drafted = cell.drafted ? `drafted ${cell.drafted}; ` : "";
   if (!record) return <span className="meta" title={DRAFT_WAITS}>{drafted}no accept record yet</span>;
   return (
     <span className="meta" title={DRAFT_WAITS}>
       {drafted}waits on{" "}
-      <button className="linkish meta" onClick={() => openInitiative(id, "decisions")} title="Open in Decisions">
+      <button className="linkish meta" onClick={() => openDecision(id, record.number)} title="Open in Decisions">
         <span className="num">{record.number}</span> {record.slug}
       </button>
     </span>
@@ -59,13 +53,13 @@ export function CellStateLz({ cell, label = "in definition" }: { cell?: model.Ce
 /** Why Bring crew up cannot run, before the click (discovery-in-a-cell
  *  FR-6): the seats with no persona file, and a draft's accept record. Null
  *  when it can. CreateCrew still refuses both, for the CLI and a stale view. */
-export function crewBlocked(seats: Seat[], cell: model.Cell, decisions?: model.Decision[] | null): string | null {
+export function crewBlocked(seats: Seat[], cell: model.Cell): string | null {
   const why: string[] = [];
   const missing = seats.filter((s) => s.no_persona).map((s) => `agents/${s.name}.md`);
   if (missing.length > 0) why.push(`no persona file: ${missing.join(", ")}`);
   if (cell.draft) {
-    const record = acceptRecord(decisions);
-    why.push(record ? `draft roster: nothing launches until ${record.number} ${record.slug} is ruled` : "draft roster: no accept record yet");
+    const record = cell.accept_record;
+    why.push(record ? `draft roster: nothing launches until ${record.number} is ruled` : "draft roster: no accept record yet");
   }
   return why.length > 0 ? why.join("; ") : null;
 }
@@ -80,12 +74,10 @@ export function Crew({ group, readOnly = false, onMessage }: { group: AgentGroup
   const [note, setNote] = useState<string | null>(null);
   const [confirmKill, setConfirmKill] = useState<string | null>(null);
   const [retiring, setRetiring] = useState(false);
-  const view = useBoard((s) => s.view);
   const cell = group.cell;
   if (!cell) return null;
   const seats = group.crew ?? [];
-  const rows = (view?.board.initiatives ?? []).filter((i) => i.id === group.id);
-  const blocked = seats.length === 0 ? "no seats: the roster is empty between waves" : crewBlocked(seats, cell, (rows.find((i) => i.local) ?? rows[0])?.decisions);
+  const blocked = seats.length === 0 ? "no seats: the roster is empty between waves" : crewBlocked(seats, cell);
   const live = seats.filter((s) => s.agent && (s.agent.state === "working" || s.agent.state === "running")).length;
   const off = seats.filter((s) => !s.agent || s.agent.state === "exited").length;
   const flash = (m: string) => { setNote(m); window.setTimeout(() => setNote(null), 5000); };
@@ -111,6 +103,10 @@ export function Crew({ group, readOnly = false, onMessage }: { group: AgentGroup
         {note && <span className="meta">{note}</span>}
         {!readOnly && !asking && <button className={`tiny-btn ${(group.retirable?.length ?? 0) > 0 ? "" : "ghost"}`} onClick={() => setRetiring(true)} title={(group.retirable?.length ?? 0) > 0 ? `wave done with ${group.retirable.join(", ")}: organizer retire ${group.id} --retirable` : `organizer retire ${group.id}: end a wave`}><UserRoundX size={13} /> {(group.retirable?.length ?? 0) > 0 ? `${group.retirable.length} retirable` : "Retire…"}</button>}
         {retiring && <Retire group={group} onClose={() => setRetiring(false)} />}
+        {/* The reason is text beside the button, not only its hover: a
+            disabled button takes no focus and no WebKit mouse events
+            (lead-side-fixes FR-4). */}
+        {!readOnly && !asking && blocked && <span className="meta">{blocked}</span>}
         {!readOnly && !asking && (
           <span title={blocked ?? `organizer crew ${group.id}`}>
             <button className="tiny-btn primary" onClick={() => setAsking(true)} disabled={busy || !!blocked}>
