@@ -1,13 +1,13 @@
 ---
 title: Who owns docs/design-system.md
-status: proposed
+status: ruled
 raised: 2026-09-29
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-29
+ruled_by: pablo
 options: [Aglaea owns the document, Hephaistos keeps it and Aglaea reviews, split by scope]
-chosen:
+chosen: Aglaea owns the document
 cards: []
 threads: [01M3PVTCBV0NSN9XZ8MBAFV5A7]
 supersedes: []
@@ -55,7 +55,7 @@ choose it, Hephaistos amends its skill's lane; I relay.
 
 ## Ruling
 
-
+pablo, 2026-09-29, in the organizer on lodestar: in this initative, as it's our new product, she owns
 
 ## Consequences
 
