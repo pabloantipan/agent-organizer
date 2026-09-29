@@ -4,13 +4,13 @@ status: next
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "sup16: after cell-draft (0050 ruled 2026-09-29)"
+next: "sup16: launches after cell-draft merges (both touch Crew.tsx and crew.go); 0051 still proposed, so no FR-7"
 depends_on: ["cell-draft"]
 boundary: ["frontend/src/components/Rail.tsx (the mark)", "frontend/src/components/Crew.tsx (the Bring crew up and Retire buttons only)", "internal/service/crew.go (Retirable only)", "FR-7's files, only if 0051 is ruled before launch", "testdata/", "tests", "CSS"]
 spec: "docs/specs/discovery-in-a-cell.md (FR-1 rail, FR-5, FR-6, amendment 1); values: docs/design-system.md"
 gate: "docs/specs/discovery-in-a-cell.md Acceptance, rows G6, G5; the Gate section below"
 stage: discovery-in-a-cell
-seat:
+seat: draft-finish
 ---
 
 ## Goal

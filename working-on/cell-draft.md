@@ -4,13 +4,13 @@ status: next
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "sup16: builds it first (0050 ruled 2026-09-29)"
+next: "draft-cell (sup16): build FR-3, gate G4, G5, on branch cell-draft"
 depends_on: []
 boundary: ["internal/model/model.go (Cell: draft, drafted)", "internal/scan/scan.go (readCell only)", "internal/service/crew.go (cellState; CreateCrew's draft refusal)", "internal/service/draft.go (new)", "internal/prompt/ (the draft prompt)", "internal/cli/ (draft-cell)", "app.go (one binding)", "frontend/wailsjs (generated)", "frontend/src/hooks/useWails.ts", "frontend/src/components/AgentsView.tsx (the button, for an initiative without a cell)", "frontend/src/components/Crew.tsx (the waits text only)", "CLAUDE.md (one sentence in the Crew paragraph)", "testdata/", "tests"]
 spec: "docs/specs/discovery-in-a-cell.md (FR-3, amendment 1); the procedure the prompt points at: ~/.claude/skills/persona-agents/references/drafting.md (read, never edit); values: docs/design-system.md"
 gate: "docs/specs/discovery-in-a-cell.md Acceptance, rows G4, G5; the Gate section below"
 stage: discovery-in-a-cell
-seat:
+seat: draft-cell
 ---
 
 ## Goal
