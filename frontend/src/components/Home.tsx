@@ -143,7 +143,7 @@ function RuleAction({ initiative, decision }: { initiative: string; decision: mo
   return (
     <span className="rb-anchor">
       <button className="act primary" aria-expanded={open} onClick={() => setOpen(!open)}>Rule</button>
-      {open && <RuleDecisionBox initiative={initiative} decision={decision} onClose={() => setOpen(false)} />}
+      {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord onClose={() => setOpen(false)} />}
     </span>
   );
 }

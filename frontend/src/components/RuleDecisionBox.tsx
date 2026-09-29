@@ -1,4 +1,5 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { marked } from "marked";
 import type { model } from "../../wailsjs/go/models";
 import { api } from "../hooks/useWails";
 import { leadOf } from "../lib/queue";
@@ -10,8 +11,11 @@ import "../styles/rule-box.css";
  *  cell's human, else pablo, the same rule as `ruler` in service/rule.go.
  *  One option and the words, then RuleDecision (FR-13) writes the record and
  *  commits it; the rescan that follows drops the row from the queue. A refusal
- *  is the service's own sentence, shown here with what was typed kept. */
-export function RuleDecisionBox({ initiative, decision: d, onClose }: { initiative: string; decision: model.Decision; onClose: () => void }) {
+ *  is the service's own sentence, shown here with what was typed kept.
+ *  `withRecord` (Needs me, lead-side-fixes FR-1) puts the record's body above
+ *  the options, clamped, with a link to it in Decisions; the Decisions tab
+ *  leaves it off, since the body is already under the row there. */
+export function RuleDecisionBox({ initiative, decision: d, withRecord = false, onClose }: { initiative: string; decision: model.Decision; withRecord?: boolean; onClose: () => void }) {
   const { refresh, agents } = useBoard();
   const ruler = leadOf((agents?.groups ?? []).find((g) => g.id === initiative));
   const owner = (d.owner ?? "").trim();
@@ -42,12 +46,13 @@ export function RuleDecisionBox({ initiative, decision: d, onClose }: { initiati
   };
 
   return (
-    <div className="rb" role="dialog" aria-label={`Rule ${initiative} ${d.number}`}
+    <div className={`rb ${withRecord ? "with-record" : ""}`} role="dialog" aria-label={`Rule ${initiative} ${d.number}`}
       onKeyDown={(e) => { if (e.key === "Escape" && !busy) onClose(); }}>
       <div className="rb-head">
         <span className="rb-num">{d.number}</span>
         <span className="rb-title">{d.title}</span>
       </div>
+      {withRecord && <RecordBody initiative={initiative} decision={d} />}
       {options.length === 0 ? (
         <div className="rb-error">This record lists no options, so it cannot be ruled here. Add `options:` to the record.</div>
       ) : (
@@ -73,6 +78,34 @@ export function RuleDecisionBox({ initiative, decision: d, onClose }: { initiati
         <span className="rb-sign">signed {ruler}{forOwner} · commits one file</span>
         <button className="ghost" onClick={onClose} disabled={busy}>Cancel</button>
         <button className="primary" onClick={() => void rule()} disabled={!ready}>{busy ? "Ruling…" : "Rule"}</button>
+      </div>
+    </div>
+  );
+}
+
+/** The record as the Decisions tab renders it, clamped to about eight lines
+ *  with "show all" when it runs longer, and a link to the record there. The
+ *  link opens the initiative's Decisions; landing on the record expanded is
+ *  the store's, not this box's. */
+function RecordBody({ initiative, decision: d }: { initiative: string; decision: model.Decision }) {
+  const { openInitiative } = useBoard();
+  const [all, setAll] = useState(false);
+  const [long, setLong] = useState(false);
+  const body = useRef<HTMLDivElement>(null);
+  const id = useId();
+  const html = marked.parse(d.body || "") as string;
+  useLayoutEffect(() => {
+    const el = body.current;
+    if (el && !all) setLong(el.scrollHeight > el.clientHeight + 1);
+  }, [html, all]);
+  return (
+    <div className="rb-record">
+      {d.body?.trim()
+        ? <div id={id} ref={body} className={`markdown dec-text rb-body ${all ? "all" : ""}`} dangerouslySetInnerHTML={{ __html: html }} />
+        : <div className="rb-body empty">This record has no body.</div>}
+      <div className="rb-record-foot">
+        {long && <button className="link" aria-expanded={all} aria-controls={id} onClick={() => setAll(!all)}>{all ? "show less" : "show all"}</button>}
+        <button className="link" onClick={() => openInitiative(initiative, "decisions")}>{d.number} in Decisions</button>
       </div>
     </div>
   );
