@@ -26,7 +26,11 @@ restating it (the discuss skill).
 - **0051 ruled (d10c0d0, "a Launch row in Needs me"):** FR-7 and G7 written
   into the spec and cell-definition-finish before it launched (065dbcc);
   sup16 told in thread 01M3PSKFXGCD889WBEG7D0GW2X. Last SHA seen: 065dbcc.
-- **Waiting on Pablo:** 0052 (frontend test runner).
+- **0052 ruled ("vitest over lib/", "Do"):** card `frontend-tests` cut, depends
+  on cell-definition-finish (it changes lib/queue.ts); **next:** when sup16's
+  task ends, start one supervisor for it. From now on every spec's G5 includes
+  `cd frontend && npm test`. 0052 carried no forecast line (my miss: the
+  rule covers every accept record); the forecast is on the card's Notes.
   On 0052 "vitest over lib/", cut its card.
 - **Checked:** camp's six seats all have `agents/<seat>.md`, so FR-2 does not
   refuse camp (cell-persona-check's review point 2).
