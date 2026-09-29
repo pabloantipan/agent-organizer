@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "sup16: launches after cell-draft merges (both touch Crew.tsx and crew.go); 0051 still proposed, so no FR-7"
+next: "sup16: launches after cell-draft merges (both touch Crew.tsx and crew.go); FR-7 (0051, G7) is in"
 depends_on: ["cell-draft"]
 boundary: ["frontend/src/components/Rail.tsx (the mark)", "frontend/src/components/Crew.tsx (the Bring crew up and Retire buttons only)", "internal/service/crew.go (Retirable only)", "frontend/src/lib/queue.ts (needsMeRows, the launch row)", "frontend/src/components/Home.tsx (the Launch row and verb)", "CLAUDE.md (Launch among the Needs me verbs)", "testdata/", "tests", "CSS"]
 spec: "docs/specs/discovery-in-a-cell.md (FR-1 rail, FR-5, FR-6, FR-7, amendment 1); values: docs/design-system.md"
