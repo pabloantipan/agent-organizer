@@ -49,7 +49,11 @@ line carries its source. Updated at the end of every session.
 - Design system, amended by me 2026-09-29: principle 3 means the committing
   action; a list's row verbs are default buttons, never accent (F9). Disabled
   actions have four reasons (busy, incomplete, blocked, never here), one
-  treatment each; a blocked reason is visible text, never hover only.
+  treatment each; a blocked reason is visible text, never hover only, said
+  once per view, never raw errors or the danger role. Focus and names
+  (2026-09-29, triage): focus into what opens, back on close, onto what a
+  navigation names; row verbs carry their row in the accessible name;
+  disclosure state marked the same everywhere.
 
 ## Open findings not yet carded
 
@@ -89,6 +93,11 @@ From `reviews/2026-09-29-cell-screens.md` (stage 5, for the FSE's thread
   aria-describedby, Write about with no seat) are lead-side-fixes amendment 2
   (FR-11, FR-12, G9), card `conform-and-waiting`, `ui_review: true`, after
   sup18's two cards; record 0057 asks Pablo.
+
+Triage of the three UI reviews' leftovers (2026-09-29,
+`reviews/2026-09-29-triage-ui-leftovers.md`): 14 rows, 2 need Pablo (Home's
+reading width at 1024; "you" or his name), fixture gaps V1–V3 (no thread
+asks the human, so Answer was never seen).
 
 ## Open questions
 

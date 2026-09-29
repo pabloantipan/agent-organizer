@@ -22,7 +22,10 @@ top; one dated line per session below.
 - **Carried:** lead-side-fixes spec (0055), cards home-rule-and-rows and
   cell-screens-fix with `ui_review: true`; F3 is 0056; F9 and the disabled
   pattern wait on 0054.
-- **Next:** nothing asked; wait for mail (likely the UI review of that wave).
+- **Triage done** for the FSE (thread 01M3Q04G1TTG9JX71GA5CKMWBW):
+  `docs/ux/reviews/2026-09-29-triage-ui-leftovers.md`; design system gained
+  Focus and names.
+- **Next:** nothing asked; wait for mail.
 
 ## Log
 
@@ -30,3 +33,4 @@ top; one dated line per session below.
   looked at Home, Needs me, the six sub-views, Help, Settings at 1440 and 1024.
 - 2026-09-29 — reviewed stage 5's cell screens for the FSE (C1–C10).
 - 2026-09-29 — 0054 ruled; design system amended for F9 and disabled actions.
+- 2026-09-29 — triaged the three UI reviews' leftovers into 14 rows; DS: Focus and names.

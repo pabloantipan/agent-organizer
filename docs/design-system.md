@@ -242,8 +242,34 @@ shape; it never turns grey or changes hue).
 
 A blocked action that the human can fix in the app names that place ("waits
 on 0001 the-cell-roster" as a link). A reason that goes stale (the world
-changed) is refreshed on the next scan, not on click. *WCAG 1.3.1, 2.1.1,
-4.1.2.*
+changed) is refreshed on the next scan, not on click. A blocked reason is
+said **once per view**, nearest the action it blocks; the other controls it
+blocks point there or are not drawn. Never a raw error, a path or the danger
+role for it: danger is for something that failed, not for something missing.
+*WCAG 1.3.1, 2.1.1, 4.1.2.*
+
+### Focus and names
+Where the keyboard goes decides whether a keyboard or screen-reader user
+keeps their place.
+
+- **Opening inline** (a box, a confirm): focus moves into it. A box that
+  shows a record puts focus on its title, with the body tied to the box by
+  `aria-describedby`; a confirm puts focus on its commit.
+- **Closing** (Cancel, Escape, the commit done): focus returns to the control
+  that opened it, or to what replaced it. Escape closes every inline box and
+  confirm.
+- **Navigating** (a row verb, a link to a record): focus lands on the thing
+  named: the record's row, the blocked seat, Bring crew up. Never on the
+  page body.
+- **A control that unmounts on press** hands focus to what took its place.
+- **Names**: a verb repeated on every row carries its row in its accessible
+  name ("Rule init-a 0002", "Open onboarding-flow Step map"), through
+  `aria-label` or `aria-describedby` on the row's subject.
+- **Disclosure state**: a control that opens something stays marked while it
+  is open (`aria-expanded` or `aria-pressed`, and `--surface-selected`), the
+  same way everywhere.
+
+*WCAG 2.4.3, 2.4.4, 2.4.6, 2.4.7, 3.2.1.*
 
 ## Anti-patterns
 
