@@ -20,10 +20,14 @@ How each state arises, from files except where noted:
   (`field-app`, `ops-dashboard`).
 - **waits on business** (2): a proposed record owned by someone who is
   neither the lead nor the FSE (`data-lake` owner carla, `pricing-model`
-  owner rodrigo).
+  owner rodrigo). `data-lake` has three, owned by carla, rodrigo, carla in
+  the order raised, so its signal reads "3 waiting · carla, rodrigo"
+  (lead-side-fixes FR-10, G8).
 - **quiet** (11): the rest. Two on purpose: `mobile-sync` has two `now`
   cards with nobody on them (A3), and `email-digest` has a proposed record
-  owned by `fse`, which is neither the lead's nor business's.
+  owned by `fse`, which is neither the lead's nor business's. `docs-site`
+  has a proposed record with no owner, which waits on nobody and reads
+  "1 waiting · no owner" (FR-10, G8).
 
 Phases: 5 in discovery, 10 building, 5 with no roadmap. Every staged
 initiative has a ruled `0001-the-roadmap` record that gates its first
