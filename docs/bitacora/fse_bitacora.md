@@ -224,6 +224,16 @@ restating it (the discuss skill).
 
 ## Open questions
 
+- From cell-draft's review (b6862dd, found not asked): the accept-record rule
+  (slug the-cell-roster, proposed, highest number) is written twice,
+  `acceptRecord` in draft.go and in Crew.tsx; `openAgentTerminal` repeats
+  RunReview's terminal half; the button's Open (writes the prompt, opens a
+  terminal) was never pressed by any gate; fixture persona files are thinner
+  than drafting.md §3–4. Its point (1), a draft offering "1 retirable" and an
+  enabled Bring crew up, is already FR-5/FR-6 of cell-definition-finish (a
+  draft is in definition, FR-3e). Candidates for after the task; the Open path
+  is the first thing to show Pablo or Aglaea on a real initiative.
+
 - From sup14 (found, not asked): the Rule box lowercases the cell human while
   ruled_by keeps its spelling; no test of the Decisions tab's Rule condition;
   `wails build` dirties frontend/wailsjs/runtime on every install (with the
