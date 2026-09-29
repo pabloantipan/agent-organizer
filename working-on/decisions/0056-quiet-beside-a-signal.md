@@ -1,13 +1,13 @@
 ---
 title: Home says "quiet" on a row that also says "1 blocked" or "1 waiting"
-status: proposed
+status: ruled
 raised: 2026-09-29
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-29
+ruled_by: pablo
 options: [keep as ruled, waiting says whose, a blocked card counts as business]
-chosen:
+chosen: waiting says whose
 cards: []
 threads: [01M3PVTCBV0NSN9XZ8MBAFV5A7]
 supersedes: []
@@ -48,7 +48,7 @@ for when blocked cards name their owner.
 
 ## Ruling
 
-
+pablo, 2026-09-29, in the organizer on lodestar: rules
 
 ## Consequences
 
