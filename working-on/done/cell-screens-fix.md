@@ -1,10 +1,10 @@
 ---
 title: Draft the cell and Bring crew up say what they are doing and why
-status: now
+status: done
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "review: cell-screens-fix, branch cell-screens-fix, gate G4 G5 G6 G7 pass, c86cfcc 419f67f 835a16a 2e8d469 16ef8f3 5296bb0 a835399"
+next: "none: merged, code and UI reviews pass (sup18)"
 depends_on: []
 boundary: ["frontend/src/components/AgentsView.tsx (Draft the cell's states)", "frontend/src/components/Crew.tsx (the visible reason, the roster link)", "frontend/src/components/DecisionsView.tsx and frontend/src/stores/board.store.ts (landing on a record expanded)", "frontend/src/styles/global.css (.tiny-btn:disabled only)", "internal/model/model.go (Cell: accept_record)", "internal/service/ (draft.go, crew.go, retire.go)", "frontend/wailsjs (generated)", "tests", "testdata/"]
 spec: "docs/specs/lead-side-fixes.md (FR-4, FR-5, FR-6, FR-8, FR-9); the findings: docs/ux/reviews/2026-09-29-cell-screens.md C2 C3 C4 C5 C8; values: docs/design-system.md"
