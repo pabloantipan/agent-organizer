@@ -1,0 +1,7 @@
+{
+  "project": "ready-fixture",
+  "workdir": "",
+  "agents": ["po_lucia", "dev_mateo"],
+  "human": "pablo",
+  "reconciler": "po_lucia"
+}

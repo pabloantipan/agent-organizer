@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Briefcase, ChevronDown, ChevronRight, CircleDashed, Compass, Hammer, Hand, Play } from "lucide-react";
 import type { merge, model, service } from "../../wailsjs/go/models";
-import { inactiveIds, needsMeRows, type NeedsMeRow } from "../lib/queue";
+import { inactiveIds, launchVerb, needsMeRows, type NeedsMeRow } from "../lib/queue";
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
 import { HEALTH, messages } from "../lib/health";
@@ -111,11 +111,14 @@ function InboxRow({ row }: { row: NeedsMeRow }) {
     }
     case "launch": {
       const n = row.cell.agents?.length ?? 0;
+      const { verb, blocker } = launchVerb(row);
       return (
         <Shell row={row} reason="cell" tone="tone"
           subject={<><span className="mono">{row.initiative}</span> · <span className="mono">{row.cell.project}</span> in definition</>}
-          context={`${n} seat${n === 1 ? "" : "s"}; ${IN_DEFINITION_WAITS}`}>
-          <button className="act primary" onClick={() => openInitiative(row.initiative, "agents")} title="open its Agents, where Bring crew up is">Launch</button>
+          context={blocker ? <><span className="mono">{row.missing}</span> has no persona file</> : `${n} seat${n === 1 ? "" : "s"}; ${IN_DEFINITION_WAITS}`}>
+          {verb === "Open"
+            ? <button className="act" onClick={() => openInitiative(row.initiative, "agents")} title={`open its Agents: agents/${row.missing}.md is missing`}>Open</button>
+            : <button className="act primary" onClick={() => openInitiative(row.initiative, "agents")} title="open its Agents, where Bring crew up is">Launch</button>}
         </Shell>
       );
     }
