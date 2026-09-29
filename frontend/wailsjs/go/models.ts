@@ -609,6 +609,20 @@ export namespace model {
 	    }
 	}
 	
+	export class RecordRef {
+	    number: string;
+	    slug: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RecordRef(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.number = source["number"];
+	        this.slug = source["slug"];
+	    }
+	}
 	export class Cell {
 	    project: string;
 	    workdir: string;
@@ -619,6 +633,7 @@ export namespace model {
 	    draft?: boolean;
 	    drafted?: string;
 	    state?: string;
+	    accept_record?: RecordRef;
 	
 	    static createFrom(source: any = {}) {
 	        return new Cell(source);
@@ -635,7 +650,26 @@ export namespace model {
 	        this.draft = source["draft"];
 	        this.drafted = source["drafted"];
 	        this.state = source["state"];
+	        this.accept_record = this.convertValues(source["accept_record"], RecordRef);
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	
 	export class Decision {
@@ -871,6 +905,7 @@ export namespace model {
 	        this.msg = source["msg"];
 	    }
 	}
+	
 	export class RepoState {
 	    name: string;
 	    path: string;

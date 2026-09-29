@@ -369,7 +369,7 @@ func TestCellInDefinitionUntilASeatHasRun(t *testing.T) {
 			loadRuns = func() []session.Run { return runs }
 			si := cellOf()
 			si.Agents = tt.agents
-			got := crewCell(si.Cell, buildCrew(si, discuss.Snapshot{}))
+			got := crewCell(si.Cell, si.Decisions, buildCrew(si, discuss.Snapshot{}))
 			if got.State != tt.want {
 				t.Errorf("state %q, want %q", got.State, tt.want)
 			}
@@ -383,10 +383,10 @@ func TestCellInDefinitionUntilASeatHasRun(t *testing.T) {
 		loadRuns = func() []session.Run { return nil }
 		si := &model.ScannedInitiative{}
 		si.Cell = &model.Cell{Project: "between-waves"}
-		if got := crewCell(si.Cell, buildCrew(si, discuss.Snapshot{})); got.State != "" {
+		if got := crewCell(si.Cell, si.Decisions, buildCrew(si, discuss.Snapshot{})); got.State != "" {
 			t.Errorf("an empty roster is between waves, not in definition: %q", got.State)
 		}
-		if crewCell(nil, nil) != nil {
+		if crewCell(nil, nil, nil) != nil {
 			t.Error("no cell, no copy")
 		}
 	})
@@ -395,7 +395,7 @@ func TestCellInDefinitionUntilASeatHasRun(t *testing.T) {
 		loadRuns = func() []session.Run { return session.LoadRuns(session.RunsPath()) }
 		t.Setenv("XDG_DATA_HOME", t.TempDir())
 		si := cellOf()
-		if got := crewCell(si.Cell, buildCrew(si, discuss.Snapshot{})); got.State != model.CellInDefinition {
+		if got := crewCell(si.Cell, si.Decisions, buildCrew(si, discuss.Snapshot{})); got.State != model.CellInDefinition {
 			t.Fatalf("no runs.jsonl: state %q", got.State)
 		}
 		if err := os.MkdirAll(filepath.Dir(session.RunsPath()), 0o755); err != nil {
@@ -405,7 +405,7 @@ func TestCellInDefinitionUntilASeatHasRun(t *testing.T) {
 		if err := os.WriteFile(session.RunsPath(), []byte(line), 0o644); err != nil {
 			t.Fatal(err)
 		}
-		if got := crewCell(si.Cell, buildCrew(si, discuss.Snapshot{})); got.State != model.CellActive {
+		if got := crewCell(si.Cell, si.Decisions, buildCrew(si, discuss.Snapshot{})); got.State != model.CellActive {
 			t.Errorf("a run in runs.jsonl: state %q", got.State)
 		}
 	})

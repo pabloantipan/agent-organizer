@@ -42,17 +42,31 @@ func TestDraftCellIsInDefinitionAndRefusedNamingItsAcceptRecord(t *testing.T) {
 		t.Fatalf("accept record %+v, want 0001 the-cell-roster", rec)
 	}
 
+	// lead-side-fixes G6 (FR-9): the service sends the accept record on the
+	// cell once, number and slug, and nothing when there is none.
+	if got := crewCell(si.Cell, si.Decisions, nil).AcceptRecord; got == nil || *got != (model.RecordRef{Number: "0001", Slug: "the-cell-roster"}) {
+		t.Errorf("accept_record %+v, want 0001 the-cell-roster", got)
+	}
+	ruled := []model.Decision{{Number: "0001", Slug: "the-cell-roster", Status: "ruled"}}
+	if got := crewCell(si.Cell, ruled, nil).AcceptRecord; got != nil {
+		t.Errorf("accept_record with the roster ruled: %+v, want none", got)
+	}
+	redraft := append(ruled, model.Decision{Number: "0003", Slug: "the-cell-roster", Status: "proposed"}, model.Decision{Number: "0002", Slug: "another-question", Status: "proposed"})
+	if got := crewCell(si.Cell, redraft, nil).AcceptRecord; got == nil || got.Number != "0003" {
+		t.Errorf("accept_record on a redraft: %+v, want 0003", got)
+	}
+
 	// A seat that has run leaves an accepted cell's definition, not a draft's.
 	loadRuns = func() []session.Run {
 		return []session.Run{{PID: 1, SessionID: "a", Persona: "po_rosa", Cell: "drafted-fixture", Ended: true}}
 	}
 	seats := buildCrew(&si, discuss.Snapshot{})
-	if got := crewCell(si.Cell, seats).State; got != model.CellInDefinition {
+	if got := crewCell(si.Cell, si.Decisions, seats).State; got != model.CellInDefinition {
 		t.Errorf("draft with a past run: state %q, want %q", got, model.CellInDefinition)
 	}
 	accepted := *si.Cell
 	accepted.Draft = false
-	if got := crewCell(&accepted, seats).State; got != model.CellActive {
+	if got := crewCell(&accepted, si.Decisions, seats).State; got != model.CellActive {
 		t.Errorf("accepted with a past run: state %q, want %q", got, model.CellActive)
 	}
 

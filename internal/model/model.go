@@ -396,6 +396,16 @@ type Cell struct {
 	// draft or while no seat has a session or a run, CellActive once one has, empty for a
 	// roster with no seats (decision 0030; service.cellState).
 	State string `json:"state,omitempty"`
+	// AcceptRecord is derived like State: the initiative's proposed
+	// the-cell-roster record, the one a draft waits on, or nil
+	// (service.acceptRecord, lead-side-fixes FR-9).
+	AcceptRecord *RecordRef `json:"accept_record,omitempty"`
+}
+
+// RecordRef names a decision record by its number and slug.
+type RecordRef struct {
+	Number string `json:"number"`
+	Slug   string `json:"slug"`
 }
 
 // The states of a cell (decision 0030). A cell is in definition while its

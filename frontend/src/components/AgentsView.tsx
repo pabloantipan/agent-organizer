@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Bot, PencilRuler, Plus } from "lucide-react";
 import { api } from "../hooks/useWails";
 import { since } from "../lib";
@@ -123,32 +123,65 @@ function NewAgent({ initiativeId }: { initiativeId: string }) {
   );
 }
 
+/** Initiatives whose drafting Terminal this app opened. Module state on
+ *  purpose: Draft the cell stays "Drafting…" across navigation until
+ *  agents/cell.json appears or the app reloads (lead-side-fixes FR-5, A2),
+ *  since nothing tells the service a drafting session still runs. */
+const drafting = new Set<string>();
+
 /** "Draft the cell" for an initiative without agents/cell.json
  *  (discovery-in-a-cell FR-3): opens a Terminal at the root running the
  *  agent told to follow the persona-agents skill's drafting procedure. The
  *  Go side is asked, opening nothing, whether it can run; its refusal is the
- *  disabled button's hover. Accepting the draft is its record's ruling, so
- *  there is no accept button here or anywhere. */
+ *  reason beside the disabled button. Accepting the draft is its record's
+ *  ruling, so there is no accept button here or anywhere.
+ *
+ *  States (lead-side-fixes FR-5): checking (disabled, no reason until the
+ *  preflight answers), ready, confirm and opening, opened ("Drafting…",
+ *  disabled), error on Open (in the danger role, the confirm kept for a
+ *  retry), refused (the preflight's reason). */
 function DraftCell({ initiativeId }: { initiativeId: string }) {
   const board = useBoard((s) => s.view);
-  const [blocked, setBlocked] = useState<string | null>(null);
+  // The preflight's answer and the initiative it is for: checking until the
+  // first answer for this initiative; later rechecks keep the last answer.
+  const [answer, setAnswer] = useState<{ id: string; blocked: string | null } | null>(null);
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [note, setNote] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [opened, setOpened] = useState(() => drafting.has(initiativeId));
 
+  // An answer is kept whenever it is for the initiative on screen: a board
+  // update reissues the preflight, and dropping the one in flight would
+  // leave the button checking while updates come faster than answers.
+  const current = useRef(initiativeId);
+  current.current = initiativeId;
   useEffect(() => {
-    let live = true;
-    api.draftCell(initiativeId, false).then(() => live && setBlocked(null), (e) => live && setBlocked(String(e).replace(/^Error:\s*/, "")));
-    return () => { live = false; };
+    const live = () => current.current === initiativeId;
+    setOpened(drafting.has(initiativeId));
+    api.draftCell(initiativeId, false).then(
+      () => live() && setAnswer({ id: initiativeId, blocked: null }),
+      (e) => {
+        if (!live()) return;
+        const why = String(e).replace(/^Error:\s*/, "");
+        // The draft's cell.json is there: the session wrote it.
+        if (why.includes("agents/cell.json exists")) { drafting.delete(initiativeId); setOpened(false); }
+        setAnswer({ id: initiativeId, blocked: why });
+      },
+    );
   }, [initiativeId, board]);
+
+  const checking = answer?.id !== initiativeId;
+  const blocked = checking ? null : answer.blocked;
 
   const open = () => {
     setBusy(true);
+    setError(null);
     api.draftCell(initiativeId, true).then(
-      () => { setNote("terminal opened: the session writes a draft roster and raises its accept record"); setAsking(false); },
-      (e) => setNote(String(e)),
+      () => { drafting.add(initiativeId); setOpened(true); setAsking(false); },
+      (e) => setError(String(e).replace(/^Error:\s*/, "").replace(/\.$/, "")),
     ).finally(() => setBusy(false));
   };
+  const cancel = () => { setAsking(false); setError(null); };
 
   return (
     <div className="crew">
@@ -156,22 +189,24 @@ function DraftCell({ initiativeId }: { initiativeId: string }) {
         <PencilRuler size={14} aria-hidden="true" />
         <span className="meta">no cell: no <code>agents/cell.json</code> at the root</span>
         <span className="spacer" />
-        {note && <span className="meta">{note}</span>}
-        {!asking && blocked && <span className="meta">{blocked}</span>}
+        {opened && !blocked && <span className="meta">Drafting in a Terminal: the draft shows here as <em>in definition</em>, and its accept record in Needs me.</span>}
+        {!asking && !opened && blocked && <span className="meta">{blocked}</span>}
         {/* The hover sits on a wrapper: a disabled button gets no mouse
-            events in WebKit, and its title is the only place the reason is. */}
+            events in WebKit. The reason is the text beside it. */}
         {!asking && (
-          <span title={blocked ?? `organizer draft-cell ${initiativeId}: a session drafts the roster from the goal, scope and agents/people.md`}>
-            <button className="tiny-btn primary" onClick={() => setAsking(true)} disabled={!!blocked}>
-              <PencilRuler size={13} /> Draft the cell
+          <span title={blocked ?? (opened ? "a drafting session is open in a Terminal" : `organizer draft-cell ${initiativeId}: a session drafts the roster from the goal, scope and agents/people.md`)}>
+            <button className="tiny-btn primary" onClick={() => setAsking(true)} disabled={checking || !!blocked || opened}>
+              <PencilRuler size={13} /> {opened && !blocked ? "Drafting…" : "Draft the cell"}
             </button>
           </span>
         )}
         {asking && (
           <>
-            <span className="meta">one Terminal at the root running the agent; it writes only under agents/ and working-on/decisions/</span>
+            {error
+              ? <span className="meta" role="alert" style={{ color: "var(--danger)" }}>The Terminal did not open: {error}. Run <code>organizer draft-cell {initiativeId}</code> in a terminal at the root.</span>
+              : <span className="meta">one Terminal at the root running the agent; it writes only under agents/ and working-on/decisions/</span>}
             <button className="tiny-btn primary" onClick={open} disabled={busy}>{busy ? "Opening…" : "Open"}</button>
-            <button className="tiny-btn ghost" onClick={() => setAsking(false)}>Cancel</button>
+            <button className="tiny-btn ghost" onClick={cancel}>Cancel</button>
           </>
         )}
       </div>
