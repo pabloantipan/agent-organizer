@@ -45,8 +45,12 @@ restating it (the discuss skill).
   first time I work with her. sup16's and frontend-tests' cards predate it:
   no `ui_review` flag (frontend-tests has no UI). **0053 (4ca1b37):** the organizer has an
   `aglaea` seat beside me (token organizer/aglaea, agents/aglaea.md; not in
-  cell.json); I mail `aglaea` directly. No session running at 2026-09-29
-  (`organizer-probe-aglaea` absent); launching it was not named as mine.
+  cell.json); I mail `aglaea` directly. Seated by Hephaistos 2026-09-29: session
+  `organizer-probe-aglaea`, watcher alive (agents 82dc03c). Her first wake
+  posts to me once: up, up to three findings, and the design-system question.
+  **Next with her:** when cell-definition-finish lands, one mail to `aglaea`
+  asking a review of both sup16 cards' screens (Draft the cell's loading and
+  error states named nowhere).
   The design-system ownership record is raised with her on the first ask. When sup16's cards land, ask it to review
   cell-draft's and cell-definition-finish's screens (amendment 1 named no
   loading or error state for Draft the cell).
