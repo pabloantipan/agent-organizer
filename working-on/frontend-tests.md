@@ -1,6 +1,6 @@
 ---
 title: The frontend's pure logic gets a test runner
-status: next
+status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-29
@@ -10,7 +10,7 @@ boundary: ["frontend/package.json and package-lock.json (vitest as a dev depende
 spec: "working-on/decisions/0052-frontend-logic-gets-tests.md (ruled: vitest over lib/); no function in frontend/src/lib changes behaviour"
 gate: "the Gate section below"
 stage:
-seat:
+seat: tests-lib
 ---
 
 ## Goal
@@ -39,6 +39,7 @@ longer needs a screenshot to prove a boolean.
 
 ## Done
 - 2026-09-29 cut from 0052 by the FSE
+- 2026-09-29 sup17 launched builder tests-lib at 12:16 on branch frontend-tests
 
 ## Next
 1. sup17 runs this card
@@ -53,3 +54,4 @@ none
 - forecast (by docs/estimating.md; 0052 was ruled without one): 19–32 min of
   wave time over 1 wave; basis: 21 cards in 9 single-wave tasks, this
   initiative.
+- sup17: the boundary says package-lock.json, but the frontend is pnpm (`frontend/pnpm-lock.yaml`); the builder updates pnpm-lock.yaml instead and adds no package-lock.json.
