@@ -5,8 +5,9 @@ import { inactiveIds, launchVerb, needsMeRows, type NeedsMeRow } from "../lib/qu
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
 import { HEALTH, messages } from "../lib/health";
+import { waitingDecisions, waitingOwners } from "../lib/decisions";
 import { useBoard } from "../stores/board.store";
-import { nextDate, stageState, waitingDecisions } from "./InitiativeHeader";
+import { nextDate, stageState } from "./InitiativeHeader";
 import { InitiativeDetail } from "./Initiatives";
 import { RuleDecisionBox } from "./RuleDecisionBox";
 import { CellStateLz, IN_DEFINITION_WAITS } from "./Crew";
@@ -262,7 +263,7 @@ function Signals({ i, rows, cards, waves, cell }: { i: merge.BoardInitiative; ro
   const none = !waiting && !blocked && !now && !live && !running.length && !problems && !defining;
   return (
     <span className="p-sig">
-      {waiting > 0 && <span className="lz waiting"><span className="num">{waiting}</span> waiting</span>}
+      {waiting > 0 && <span className="lz waiting"><span className="num">{waiting}</span> waiting · {waitingOwners(i).join(", ")}</span>}
       {blocked > 0 && <span className="lz blocked"><span className="num">{blocked}</span> blocked</span>}
       {now > 0 && <span className="lz now"><span className="num">{now}</span> now</span>}
       {running.map((w) => <span key={w.n} className="lz live">wave <span className="num">{w.n}</span> · <span className="num">{w.building!.length}</span> building</span>)}
