@@ -1,13 +1,13 @@
 ---
 title: Accept amendment 1 of discovery-in-a-cell, and launch its two cards
-status: proposed
+status: ruled
 raised: 2026-09-29
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-29
+ruled_by: pablo
 options: [accept as written, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [cell-draft, cell-definition-finish]
 threads: []
 supersedes: []
@@ -54,7 +54,7 @@ left out because the frontend has no test runner.
 
 ## Ruling
 
-
+pablo, 2026-09-29, in the organizer on lodestar: Accepted
 
 ## Consequences
 
