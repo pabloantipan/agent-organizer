@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Lock } from "lucide-react";
 import type { merge, model } from "../../wailsjs/go/models";
 import { parseISO, today } from "../lib/dates";
+import { waitingDecisions } from "../lib/decisions";
 import { readOnlyOf } from "../lib/queue";
 import { useBoard, type Sub } from "../stores/board.store";
 import "../styles/header.css";
@@ -22,9 +23,6 @@ export function exitLine(s: model.Stage): string {
   if (open.length === 0) return `exit met, ${items.length}/${items.length}`;
   return `exit: ${open[0].text}`;
 }
-
-/** Decision records waiting on a ruling in one initiative. */
-export const waitingDecisions = (i: merge.BoardInitiative) => (i.decisions ?? []).filter((d) => d.status === "proposed").length;
 
 /** The next real date of an initiative: the earliest of its open cards' due,
  *  its milestones and its target that is today or later. Never computed. */

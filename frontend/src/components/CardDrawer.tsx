@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { marked } from "marked";
 import { AtSign, Code2, FolderSearch, MessagesSquare, MessageSquareText, Pencil, Send, Terminal, Trash2, X } from "lucide-react";
 import { api } from "../hooks/useWails";
@@ -87,6 +87,7 @@ export function CardDrawer() {
 function Discuss({ card: c, readOnly }: { card: merge.BoardCard; readOnly: string | null }) {
   const { agents, openSlackThread, openSlackDraft, view } = useBoard();
   const [seat, setSeat] = useState("");
+  const noSeatId = useId();
   const notes = view?.order?.notes?.[`${c.initiative_id}/${c.slug}`] ?? [];
   const group = (agents?.groups ?? []).find((g) => g.id === c.initiative_id);
   if (!group?.cell) return null;
@@ -107,12 +108,15 @@ function Discuss({ card: c, readOnly }: { card: merge.BoardCard; readOnly: strin
           <div className="meta">{readOnly}: read-only</div>
         ) : group.can_post ? (
           <div className="discuss-write">
-            <select value={to} onChange={(e) => setSeat(e.target.value)} title="who to write to">
-              {seats.map((a) => <option key={a} value={a}>{a}</option>)}
-            </select>
-            <button onClick={() => openSlackDraft(c.initiative_id, to, `${c.slug}: `, notesAsContext(notes, group.human))} disabled={!to} title={`start a conversation with ${to}, subject "${c.slug}: …", which links it to this card${notes.length ? "; your comments go in as context" : ""}`}>
+            {seats.length > 0 && (
+              <select value={to} onChange={(e) => setSeat(e.target.value)} title="who to write to">
+                {seats.map((a) => <option key={a} value={a}>{a}</option>)}
+              </select>
+            )}
+            <button onClick={() => openSlackDraft(c.initiative_id, to, `${c.slug}: `, notesAsContext(notes, group.human))} disabled={!to} aria-describedby={to ? undefined : noSeatId} title={!to ? undefined : `start a conversation with ${to}, subject "${c.slug}: …", which links it to this card${notes.length ? "; your comments go in as context" : ""}`}>
               <AtSign size={14} /> <span>Write about this card</span>
             </button>
+            {!to && <div id={noSeatId} className="blocked-reason">no seat to write to: the cell's roster has none but you</div>}
           </div>
         ) : (
           <div className="meta">no token for the human seat; read only</div>
