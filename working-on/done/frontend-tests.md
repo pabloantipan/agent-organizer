@@ -1,16 +1,17 @@
 ---
 title: The frontend's pure logic gets a test runner
-status: now
+status: done
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "review: frontend-tests, branch frontend-tests, gate G1 G3 G4 G5 met, G2 the reviewer's, 21a44bb a6fe973 431357e 82e0db3"
+next: "merge: branch frontend-tests (21a44bb a6fe973 431357e 82e0db3), review passed"
 depends_on: ["cell-definition-finish"]
 boundary: ["frontend/package.json and package-lock.json (vitest as a dev dependency, a test script)", "frontend/vite.config.ts (the test block) or a vitest config", "frontend/tsconfig.json (only if the tests need it)", "frontend/src/lib/*.test.ts (new)", "Makefile (the test target)", "CLAUDE.md (Commands: the frontend test line)"]
 spec: "working-on/decisions/0052-frontend-logic-gets-tests.md (ruled: vitest over lib/); no function in frontend/src/lib changes behaviour"
 gate: "the Gate section below"
 stage:
 seat: tests-lib
+review: pass
 ---
 
 ## Goal
@@ -47,6 +48,16 @@ longer needs a screenshot to prove a boolean.
 
 ## Blockers
 none
+
+## Review
+- Verdict: pass. Reviewer tests-review, 2026-09-29, branch frontend-tests at 82e0db3.
+- Unmet gate items: none.
+- G1: `npm test` → "Test Files 2 passed (2) / Tests 18 passed (18)", EXIT=0, runs once. Tests read against the functions: queue.test.ts covers a lead-owned proposed record, an escalated thread, a `pablo:` card, Solved marks removing a card and a thread, FR-7 Launch for a non-draft in-definition cell and none for a draft; initiativeState.test.ts one case per state plus the precedences. (.wt-notes/tests-review/g1-npm-test.txt)
+- G2: queue.ts:131 `!g.cell.draft` → `g.cell.draft`: "Tests 2 failed | 16 passed", EXIT=1 (both FR-7 tests); initiativeState.ts:42 `o !== FSE` → `o === FSE`: "Tests 2 failed | 16 passed", EXIT=1 (business, quiet). Both files restored with git checkout; worktree status clean. (g2-queue-inverted.txt, g2-initiativeState-inverted.txt)
+- G3: `XDG_DATA_HOME=$(mktemp -d) make test` → go vet, go test all ok, "Tests 18 passed", EXIT=0; with queue.test.ts expecting `decision:a/0070` → "Tests 1 failed | 17 passed", "make: *** [test] Error 1", EXIT=2; restored. (g3-make-test-pass.txt, g3-make-test-fail.txt)
+- G4: `npm run build` EXIT=0; `find dist -iname '*test*' -o -iname '*spec*'` → 0, no "vitest" string in dist; `git diff main -- 'frontend/src/lib/*.ts' ':!*.test.ts'` → 0 lines. (g4-build.txt, g4-lib-diff.txt)
+- G5: CLAUDE.md:59 `cd frontend && npm test                        # vitest once over frontend/src/lib (make test runs it after go test)`. (g5-claude-md.txt)
+- Not covered by the gate: `make test` now needs `frontend/node_modules`; on a fresh clone it fails until `pnpm install` (no install step, no hint). The boundary names package-lock.json but the frontend is pnpm (sup17 noted it; the gate text should say pnpm-lock.yaml). Seat rows (deaf/capped) and FR-9's inactive initiatives in `needsMeRows` have no test; the gate did not ask for them.
 
 ## Notes
 - 2026-09-29 sup17 runs this card, spawned by the FSE after cell-definition-finish landed (b002aa3)
