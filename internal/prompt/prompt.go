@@ -144,3 +144,16 @@ func Persona(cell model.Cell, seat, root string) string {
 	w("\nThen say in two lines who you are and what is waiting for you (undelivered threads, cards that name you), and stop. Do not start work nobody asked for.\n")
 	return b.String()
 }
+
+// DraftCell is the opening prompt of a drafting session (discovery-in-a-cell
+// FR-3b, decision 0047): the initiative, its root, the procedure to follow
+// and where the session may write. The procedure reads its own inputs and
+// owns every role; this prompt names none.
+func DraftCell(initiativeID, root string) string {
+	var b strings.Builder
+	w := func(format string, a ...any) { fmt.Fprintf(&b, format, a...) }
+	w("Draft the persona cell of the initiative %q, whose root is %s.\n\n", initiativeID, root)
+	w("Load the persona-agents skill and follow references/drafting.md at this root.\n\n")
+	w("Write only under agents/ and working-on/decisions/ of this root. Nothing else.\n")
+	return b.String()
+}

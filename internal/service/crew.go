@@ -176,7 +176,12 @@ var loadRuns = func() []session.Run { return session.LoadRuns(session.RunsPath()
 // project or by its crew session name (the spec's assumption A1). The
 // archive is read only when no seat has a session, so a live cell costs no
 // disk. A roster with no seats is between waves, not being defined: "".
+// A draft is in definition whatever its seats' runs: it waits on its accept
+// record, not on a launch (discovery-in-a-cell FR-3e).
 func cellState(cell *model.Cell, seats []Seat, runs func() []session.Run) string {
+	if cell != nil && cell.Draft {
+		return model.CellInDefinition
+	}
 	if cell == nil || len(seats) == 0 {
 		return ""
 	}
@@ -442,6 +447,11 @@ func (s *Service) CreateCrew(initiativeID string, open bool) ([]string, error) {
 	}
 	if si.Cell == nil {
 		return nil, fmt.Errorf("initiative %q has no agents/cell.json", initiativeID)
+	}
+	// Nothing launches from a draft: the roster waits on its accept record
+	// (discovery-in-a-cell FR-3f).
+	if si.Cell.Draft {
+		return nil, draftRefusal(si)
 	}
 	// Every seat's persona file, before anything else is looked up or
 	// created: a seat without one would open on an empty role.
