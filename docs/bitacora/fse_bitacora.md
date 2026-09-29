@@ -4,6 +4,32 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-09-29, stage 5's build landed; sup17 on frontend-tests
+
+- **Last SHA seen:** 42c63b8 plus sup16's run record
+  (runs/2026-09-29-cell-draft-and-finish.md): 37 min over 2 waves vs 40–65
+  forecast, 0 rework. **sup16 ended** (probe -k, token revoked, clean,
+  prompts removed).
+- **Running:** sup17 on `frontend-tests` (0052), own window, token
+  organizer/sup17; forecast 19–32 min. End it when the card lands.
+  Aglaea (seat beside me, 0053) asked to review stage 5's cell screens,
+  thread 01M3PVQZ7JS5F40030Z09M2NMS; her findings come back [for fse]; the
+  design-system ownership question rides her answer; raise it as a record.
+- **Stage 5 exit:** (a) needs a draft shown on a real initiative: Pablo
+  presses Draft the cell on one with a goal and people.md and no cell (the
+  Open path was never pressed by a gate); (b) is camp's move into building.
+- **sup16's open points (not built):** accept-record rule duplicated
+  (draft.go, Crew.tsx); RunReview/openAgentTerminal duplication; retire
+  --retirable omits "in definition" as a reason; disabled Bring crew up reads
+  near-enabled (to Aglaea); Home's Needs me subtitle omits launches (to
+  Aglaea). Candidate small card after her review.
+- **From now on:** every spec's G5 includes `cd frontend && npm test` once
+  frontend-tests lands; UI cards get `ui_review: true` when I want Aglaea's
+  reviewer in the wave.
+- **Still open:** header-review-2 (spec and records), the roadmap forecast
+  display card (0049), Pablo's moves to done/ (install-current-build-2 and
+  -4, app-review-with-pablo, fse-pilot); pablo_minutes for sup16: ask Pablo.
+
 ## HAND-OFF — 2026-09-29, stage 5's amendment raised
 
 - **Last SHA seen:** 02f5652 (no `working-on/` change after it before this

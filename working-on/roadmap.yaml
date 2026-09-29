@@ -45,10 +45,10 @@ stages:
       - a cell being defined shows as such, with seats drafted from goal, scope and people.md
       - camp moves from discovery to building through a ruled record
     forecast:              # recomputed by the FSE (docs/estimating.md), never hand-set
-      range: "40–65 min wave time"
-      waves: 2
-      waits: "2 decisions (0050, 0051), median 0 d; exit (b) is camp's, not forecast"
-      basis: "21 cards in 9 single-wave tasks, this initiative"
+      range: "no cards left: amendment 1 landed in 37 min over 2 waves (forecast 40–65)"
+      waves: 0
+      waits: "exit (a): a draft shown on a real initiative (Pablo); exit (b) is camp's"
+      basis: "23 cards in 10 single-wave tasks, this initiative"
       as_of: 2026-09-29
   - id: decisions-owned-and-used
     title: Decisions have real owners, and their data is used

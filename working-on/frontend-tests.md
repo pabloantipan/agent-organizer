@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "fse: start its supervisor when cell-definition-finish lands (that card changes lib/queue.ts)"
+next: "sup17 runs this card (organizer-probe-sup17), spawned by the FSE 2026-09-29 after sup16 ended"
 depends_on: ["cell-definition-finish"]
 boundary: ["frontend/package.json and package-lock.json (vitest as a dev dependency, a test script)", "frontend/vite.config.ts (the test block) or a vitest config", "frontend/tsconfig.json (only if the tests need it)", "frontend/src/lib/*.test.ts (new)", "Makefile (the test target)", "CLAUDE.md (Commands: the frontend test line)"]
 spec: "working-on/decisions/0052-frontend-logic-gets-tests.md (ruled: vitest over lib/); no function in frontend/src/lib changes behaviour"
@@ -41,12 +41,13 @@ longer needs a screenshot to prove a boolean.
 - 2026-09-29 cut from 0052 by the FSE
 
 ## Next
-1. fse: start the supervisor after cell-definition-finish lands
+1. sup17 runs this card
 
 ## Blockers
 none
 
 ## Notes
+- 2026-09-29 sup17 runs this card, spawned by the FSE after cell-definition-finish landed (b002aa3)
 - 0052's consequence: from now on, every spec's "nothing else broke" row
   includes `cd frontend && npm test`.
 - forecast (by docs/estimating.md; 0052 was ruled without one): 19–32 min of
