@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "sup17 runs this card (organizer-probe-sup17), spawned by the FSE 2026-09-29 after sup16 ended"
+next: "review: frontend-tests, branch frontend-tests, gate G1 G3 G4 G5 met, G2 the reviewer's, 21a44bb a6fe973 431357e 82e0db3"
 depends_on: ["cell-definition-finish"]
 boundary: ["frontend/package.json and package-lock.json (vitest as a dev dependency, a test script)", "frontend/vite.config.ts (the test block) or a vitest config", "frontend/tsconfig.json (only if the tests need it)", "frontend/src/lib/*.test.ts (new)", "Makefile (the test target)", "CLAUDE.md (Commands: the frontend test line)"]
 spec: "working-on/decisions/0052-frontend-logic-gets-tests.md (ruled: vitest over lib/); no function in frontend/src/lib changes behaviour"
@@ -19,7 +19,7 @@ starting with the Needs me queue and the initiative states, so a gate no
 longer needs a screenshot to prove a boolean.
 
 ## Gate
-- [ ] G1: `cd frontend && npm test` runs vitest once (no watch) and exits 0,
+- [x] G1: `cd frontend && npm test` runs vitest once (no watch) and exits 0,
   with tests for `needsMeRows`/`queueOf` (`lib/queue.ts`: a proposed record
   owned by the lead, an escalated thread, a `pablo:` card, a Solved mark
   removing a row, FR-7's Launch row for a non-draft cell in definition and
@@ -29,20 +29,21 @@ longer needs a screenshot to prove a boolean.
 - [ ] G2: each G1 test fails when its rule is broken: the reviewer inverts
   one condition in each of the two files, runs `npm test`, sees it fail,
   and restores the file. Evidence: the two failing outputs.
-- [ ] G3: `make test` runs `go vet`, `go test` and the frontend tests, and
+- [x] G3: `make test` runs `go vet`, `go test` and the frontend tests, and
   exits non-zero when a frontend test fails. Evidence: `XDG_DATA_HOME=$(mktemp -d) make test`
   exit 0, and exit non-zero with one test broken on purpose.
-- [ ] G4: `cd frontend && npm run build` exits 0 and `frontend/dist` holds no
+- [x] G4: `cd frontend && npm run build` exits 0 and `frontend/dist` holds no
   test file; `git diff main -- frontend/src/lib/*.ts ':!*.test.ts'` is empty
   (no behaviour changed). Evidence: both outputs.
-- [ ] G5: CLAUDE.md's Commands list `cd frontend && npm test`. Evidence: the line.
+- [x] G5: CLAUDE.md's Commands list `cd frontend && npm test`. Evidence: the line.
 
 ## Done
 - 2026-09-29 cut from 0052 by the FSE
 - 2026-09-29 sup17 launched builder tests-lib at 12:16 on branch frontend-tests
+- 2026-09-29 tests-lib: gate G1 G3 G4 G5 met on branch frontend-tests (rebased onto main 99ecd7c; 21a44bb vitest + `test: vitest run`, a6fe973 `frontend/src/lib/queue.test.ts` 10 tests + `initiativeState.test.ts` 8 tests, 431357e Makefile, 82e0db3 CLAUDE.md). G1: `cd frontend && npm test` → "Test Files 2 passed (2) / Tests 18 passed (18)", EXIT=0 (.wt-notes/tests-lib/g1-npm-test.txt). G3: `XDG_DATA_HOME=$(mktemp -d) make test` → go vet, go test all ok, "Tests 18 passed (18)", EXIT=0 (.wt-notes/tests-lib/g3-make-test-pass.txt); with one expected key broken on purpose → "Tests 1 failed | 17 passed (18)", "make: *** [test] Error 1", EXIT=2 (.wt-notes/tests-lib/g3-make-test-fail.txt). G4: `npm run build` → "✓ built in", EXIT=0, `find dist -name '*test*'` → 0 (.wt-notes/tests-lib/g4-build.txt); `git diff main -- 'frontend/src/lib/*.ts' ':!*.test.ts'` → empty, lines=0 (.wt-notes/tests-lib/g4-lib-diff.txt). G5: CLAUDE.md Commands: `cd frontend && npm test                        # vitest once over frontend/src/lib (make test runs it after go test)`. G2 left to the reviewer; builder self-check: 14 inversions across both files, each fails the suite (.wt-notes/tests-lib/g2-selfcheck.txt). Lockfile is pnpm-lock.yaml, no package-lock.json; no vitest config added (vite.config.ts is read as is); tests stay in tsc's include and type-check.
 
 ## Next
-1. sup17 runs this card
+1. review: a reviewer that is not tests-lib runs G2 and checks G1 G3 G4 G5 on branch frontend-tests
 
 ## Blockers
 none
@@ -54,4 +55,5 @@ none
 - forecast (by docs/estimating.md; 0052 was ruled without one): 19–32 min of
   wave time over 1 wave; basis: 21 cards in 9 single-wave tasks, this
   initiative.
+- 2026-09-29 tests-lib: `pnpm install` warns "Ignored build scripts: esbuild"; build and vitest work regardless.
 - sup17: the boundary says package-lock.json, but the frontend is pnpm (`frontend/pnpm-lock.yaml`); the builder updates pnpm-lock.yaml instead and adds no package-lock.json.
