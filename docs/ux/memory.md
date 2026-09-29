@@ -72,8 +72,12 @@ From `reviews/2026-09-29-cell-screens.md` (stage 5, for the FSE's thread
 - C5–C10 (1–2): record link opens nothing; roster accepted blind (= F2);
   stale Needs me subtitle; disabled at .6 (= F7); small collapsed mark;
   "Retire…" on a never-run cell.
-- The FSE holds F1–F9 and C1–C10 to cut one batch. F3 goes to Pablo as a
-  record (it is against twenty-at-a-glance FR-6, ruled via 0034/0035).
+- Where they went (FSE, thread 01M3PW6Z2H9YV25E6GQG7CJWVE): F1, F2+C6,
+  C1–C5, C7, C8/F7 are in `docs/specs/lead-side-fixes.md` (proposed, 0055),
+  cards `home-rule-and-rows` and `cell-screens-fix`, both `ui_review: true`
+  (my ui-review reviewer runs in that wave). F3 is record 0056. F9 and one
+  pattern for disabled actions wait on 0054. F4–F6, F8, C9, C10 not carried
+  for now.
 
 ## Open questions
 

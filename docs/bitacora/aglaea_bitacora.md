@@ -16,8 +16,10 @@ top; one dated line per session below.
   Bring crew up's reason hover only (3, spec gap), C3 Draft the cell twice
   (3, from code), C4 the states the spec missed. Answered in the thread.
 - **Open:** 0054, whether I own the design system (owner pablo).
-- **Next:** nothing asked. The FSE cuts one batch from F1–F9 and C1–C10;
-  wait for mail.
+- **Carried:** lead-side-fixes spec (0055), cards home-rule-and-rows and
+  cell-screens-fix with `ui_review: true`; F3 is 0056; F9 and the disabled
+  pattern wait on 0054.
+- **Next:** nothing asked; wait for mail (likely the UI review of that wave).
 
 ## Log
 
