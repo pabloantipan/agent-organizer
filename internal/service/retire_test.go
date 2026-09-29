@@ -11,6 +11,7 @@ import (
 	"organizer/internal/cache"
 	"organizer/internal/model"
 	"organizer/internal/scan"
+	"organizer/internal/session"
 )
 
 func TestWriteCellKeepsOtherFields(t *testing.T) {
@@ -175,5 +176,43 @@ func TestRetireOfTheLastSeatKeepsTheCell(t *testing.T) {
 	}
 	if len(back.Problems) != 0 {
 		t.Errorf("problems %v", back.Problems)
+	}
+}
+
+// G6 (discovery-in-a-cell, FR-5): a cell in definition has no retirable
+// seat, so the crew block offers "Retire…", never "N retirable". Once a seat
+// has run the same roster is a wave like any other; a draft stays in
+// definition whatever runs.
+func TestRetirableIsEmptyWhileTheCellIsInDefinition(t *testing.T) {
+	defer func(f func() []session.Run) { loadRuns = f }(loadRuns)
+	cellOf := func(draft bool) *model.ScannedInitiative {
+		si := &model.ScannedInitiative{}
+		si.ID = "init-define"
+		si.Cell = &model.Cell{Project: "define-fixture", Agents: []string{"po_carla", "tech_lead_elena", "designer_diego"}, Human: "pablo", Draft: draft}
+		return si
+	}
+	ran := []session.Run{{PID: 3, SessionID: "c", Persona: "po_carla", Cell: "define-fixture", Ended: true}}
+
+	loadRuns = func() []session.Run { return nil }
+	if got := Retirable(cellOf(false)); len(got) != 0 {
+		t.Errorf("in definition, no seat has run: retirable %v, want none", got)
+	}
+	if got := Retirable(cellOf(true)); len(got) != 0 {
+		t.Errorf("a draft: retirable %v, want none", got)
+	}
+
+	loadRuns = func() []session.Run { return ran }
+	if got := Retirable(cellOf(false)); len(got) != 3 {
+		t.Errorf("a seat has run: retirable %v, want all three", got)
+	}
+	if got := Retirable(cellOf(true)); len(got) != 0 {
+		t.Errorf("a draft with a past run is still in definition: retirable %v", got)
+	}
+
+	loadRuns = func() []session.Run { return nil }
+	live := cellOf(false)
+	live.Agents = []model.Agent{{Session: "define-fixture-probe-carla", State: model.AgentRunning}}
+	if got := Retirable(live); len(got) != 3 {
+		t.Errorf("a seat's session is live, not working: retirable %v, want all three", got)
 	}
 }

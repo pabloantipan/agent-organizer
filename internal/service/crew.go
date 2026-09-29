@@ -584,8 +584,11 @@ func preludeFor(api string, cell model.Cell, seat, session, crewModel string) st
 // Retirable is the seats of a cell that a wave is done with: not the human
 // or the reconciler, named by no open card, and with no working session.
 // Idle and off both count as done; a seat mid-task is never retirable.
+// A cell in definition, a draft or a roster no seat of which has run, has
+// none: a roster being defined is not a wave that ended (discovery-in-a-cell
+// FR-5).
 func Retirable(si *model.ScannedInitiative) []string {
-	if si.Cell == nil {
+	if si.Cell == nil || inDefinition(si) {
 		return nil
 	}
 	busy := map[string]bool{}
@@ -614,4 +617,26 @@ func Retirable(si *model.ScannedInitiative) []string {
 		out = append(out, seat)
 	}
 	return out
+}
+
+// inDefinition is cellState over the seats' joined sessions, matched as
+// buildCrew matches them, without stamping health: Retirable is called on
+// the scanned initiative the feed also reads.
+func inDefinition(si *model.ScannedInitiative) bool {
+	seats := make([]Seat, 0, len(si.Cell.Agents))
+	for _, name := range si.Cell.Agents {
+		s := Seat{Name: name}
+		if sess, err := crewSession(si.Cell, name); err == nil {
+			s.Session = sess
+		}
+		for i := range si.Agents {
+			a := &si.Agents[i]
+			if a.Persona == name || (a.Persona == "" && s.Session != "" && a.Session == s.Session) {
+				s.Agent = a
+				break
+			}
+		}
+		seats = append(seats, s)
+	}
+	return cellState(si.Cell, seats, loadRuns) == model.CellInDefinition
 }
