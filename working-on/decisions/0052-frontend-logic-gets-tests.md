@@ -1,13 +1,13 @@
 ---
 title: The frontend's pure logic gets a test runner
-status: proposed
+status: ruled
 raised: 2026-09-29
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-29
+ruled_by: pablo
 options: [vitest over lib/, move the logic to Go, no frontend tests]
-chosen:
+chosen: vitest over lib/
 cards: []
 threads: []
 supersedes: []
@@ -52,7 +52,7 @@ findings into checks, and it keeps the queue's one definition where it is.
 
 ## Ruling
 
-
+pablo, 2026-09-29, in the organizer on lodestar: Do
 
 ## Consequences
 
