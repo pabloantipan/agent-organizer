@@ -4,6 +4,25 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-09-29, sup18 landed; sup19 on conform-and-waiting
+
+- **Last SHA seen:** f7bc069 (0057 ruled "Do"). sup18's wave landed
+  (a72173b cell-screens-fix, 74a6c97 home-rule-and-rows; run record
+  runs/2026-09-29-lead-side-fixes.md): 25 min vs 20–36, UI reviewers ran in
+  parallel (11 m, 5 m). **sup18 ended.**
+- **Running:** sup19 on `conform-and-waiting` (FR-10–12), token
+  organizer/sup19. End it when the card lands.
+- **Next batch (not cut, 0057 was accepted as written):** the UI reviews'
+  sev 2–1 findings: home-rule-and-rows `## UI review` U1–U8 (U1 the clamp
+  hides the recommendation, skip `## Options`; U2 focus skips the record,
+  no aria-describedby; U5 the Rule box's Decisions link can call
+  openDecision, one line) and cell-screens-fix U1–U4 (U1 focus lost after
+  Draft the cell/Cancel/link; U2 IN_DEFINITION_WAITS beside the real
+  blocker). Read both cards in done/, then one spec amendment and a card
+  after sup19, ui_review, with an accept record and forecast.
+- **Stage 5 exit (a):** Pablo presses Draft the cell on a real initiative;
+  (b) camp's.
+
 ## HAND-OFF — 2026-09-29, lead-side-fixes raised; sup17's card landed
 
 - **Last SHA seen:** 57fcea3. `frontend-tests` landed (merged 45e85f8; 18
