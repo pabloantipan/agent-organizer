@@ -233,7 +233,7 @@ func (s *Service) Cell(initiativeID string) (CellView, error) {
 	snap, why := s.cellHealth(si.Cell)
 	v.Discuss = why
 	v.Crew = buildCrew(si, snap)
-	v.Cell = crewCell(si.Cell, v.Crew)
+	v.Cell = crewCell(si.Cell, si.Decisions, v.Crew)
 	v.Waiting = cardsWaiting(si, snap)
 	v.Threads, _ = s.liveThreads(s.Config(), si, snap)
 	if why != "" {
