@@ -71,6 +71,7 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
 .strip-item.now .strip-rank { color: var(--now); }
 .strip-item.blocked .strip-rank { color: var(--blocked); }
 .strip-item .live-dot { position: absolute; right: 3px; top: 3px; width: 6px; height: 6px; margin: 0; }
+.strip-item .strip-defining { position: absolute; right: 2px; bottom: 2px; color: var(--tone); }
 .rail-hero {
   display: block; width: calc(100% - 20px); text-align: left; font: inherit; cursor: pointer;
   background: var(--panel); color: var(--text); border: 1px solid var(--border);
