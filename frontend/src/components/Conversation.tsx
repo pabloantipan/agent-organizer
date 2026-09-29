@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { ArrowUpRight, AtSign, BookOpen, Archive, Check, ChevronDown, ChevronRight, CornerDownRight, Gavel, GitBranch, Hash, Inbox, Lock, MessagesSquare, Plus, RotateCcw, Search, Send, StickyNote, Unlock, X } from "lucide-react";
 import { api, type AgentGroup, type CellMessage, type CellThread, type CellThreadView } from "../hooks/useWails";
 import { useBoard } from "../stores/board.store";
@@ -84,6 +84,10 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   const undelivered = (group.crew ?? []).find((s) => s.name === human)?.undelivered ?? 0;
   // A cell that is not active (FR-13) is read, not drained: its mail stays.
   const canPost = group.can_post && !readOnly;
+  // Without a token every way to post is blocked for one reason, said once
+  // in the chat list and pointed at by each blocked control (FR-12).
+  const noTokenId = useId();
+  const noToken = !canPost && !readOnly ? noTokenId : undefined;
   useEffect(() => {
     if (!canPost) return;
     api.pickUp(initiativeId).then((n) => { if (n > 0) api.getAgents().then(applyAgents, () => undefined); }, () => undefined);
@@ -210,8 +214,9 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
         <div className="chats-label">
           <span>Chats</span>
           <span className="spacer" />
-          {!readOnly && <button className="rail-icon" onClick={() => { setTarget(null); setDraftSubject(""); }} disabled={!canPost} title={canPost ? (focus ? `new thread with ${focus}` : "new thread") : "no token to post with"}><Plus size={13} /></button>}
+          {!readOnly && <button className="rail-icon" onClick={() => { setTarget(null); setDraftSubject(""); }} disabled={!canPost} aria-describedby={noToken} title={canPost ? (focus ? `new thread with ${focus}` : "new thread") : undefined} aria-label="new thread"><Plus size={13} /></button>}
         </div>
+        {noToken && <div id={noToken} className="chats-reason">no token for {human || "the human seat"} to post with; the cell bootstrap issues one</div>}
         <div className="cell-search">
           <Search size={12} />
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="search" />
@@ -257,6 +262,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
               initiativeId={initiativeId}
               allThreads={[...all, ...(closed ?? [])]}
               canPost={canPost}
+              blockedBy={noToken}
               onRuled={reload}
               onDiscussThread={(id) => goTo(id)}
               onDiscussCard={(c) => {
@@ -555,7 +561,7 @@ const seatGuess = (seats: string[], text: string) => seats.find((a) => text.toLo
  *  them as the decision, and they write it into the card. */
 function NeedsMe(p: {
   threads: CellThread[]; cards: QueueCard[]; human: string; seats: string[]; notes: Record<string, { by: string; at: unknown; text: string }[]>; resolved: Record<string, string>;
-  initiativeId: string; allThreads: CellThread[]; canPost: boolean; onRuled: () => void; onDiscussThread: (id: string) => void; onDiscussCard: (c: QueueCard) => void; onOpenCard: (c: never) => void; onResolve: (key: string, v: boolean) => void;
+  initiativeId: string; allThreads: CellThread[]; canPost: boolean; blockedBy?: string; onRuled: () => void; onDiscussThread: (id: string) => void; onDiscussCard: (c: QueueCard) => void; onOpenCard: (c: never) => void; onResolve: (key: string, v: boolean) => void;
 }) {
   const [showSolved, setShowSolved] = useState(false);
   const [ruling, setRuling] = useState<string | null>(null); // the row whose Rule box is open: thread:<id> or card:<slug>
@@ -619,7 +625,7 @@ function NeedsMe(p: {
             {note && <div className="q-note"><StickyNote size={11} /> {note}</div>}
             <div className="q-actions">
               <button className="tiny-btn primary" onClick={() => p.onDiscussCard(c)}><MessagesSquare size={12} /> Discuss</button>
-              <button className="tiny-btn" aria-pressed={ruling === `card:${c.slug}`} onClick={() => { setRuleErr(null); setRuling(ruling === `card:${c.slug}` ? null : `card:${c.slug}`); }} disabled={!p.canPost} title={p.canPost ? "settle it here: a decision to the seat, with the next action, in a new thread named after the card" : "no token to post with"}><Gavel size={12} /> Rule</button>
+              <button className="tiny-btn" aria-pressed={ruling === `card:${c.slug}`} onClick={() => { setRuleErr(null); setRuling(ruling === `card:${c.slug}` ? null : `card:${c.slug}`); }} disabled={!p.canPost} aria-describedby={p.blockedBy} title={p.canPost ? "settle it here: a decision to the seat, with the next action, in a new thread named after the card" : undefined}><Gavel size={12} /> Rule</button>
               <button className="tiny-btn ghost" onClick={() => openCard(c.slug)}>Open card</button>
               <span className="spacer" />
               <button className="tiny-btn ghost" onClick={() => p.onResolve(`card:${p.initiativeId}/${c.slug}`, true)} title="take it off your queue; the card itself is the agents' to update"><Check size={12} /> Mark solved</button>
@@ -649,7 +655,7 @@ function NeedsMe(p: {
           {(t.cards ?? []).map((slug) => { const l = p.notes[`${p.initiativeId}/${slug}`] ?? []; return l.length ? <div key={slug} className="q-note"><StickyNote size={11} /> {l[l.length - 1].text}{l.length > 1 ? `  (+${l.length - 1} more)` : ""}</div> : null; })}
           <div className="q-actions">
             <button className="tiny-btn primary" onClick={() => p.onDiscussThread(t.id)}><MessagesSquare size={12} /> {t.status === "escalated" ? "Open" : "Answer"}</button>
-            <button className="tiny-btn" aria-pressed={ruling === `thread:${t.id}`} onClick={() => { setRuleErr(null); setRuling(ruling === `thread:${t.id}` ? null : `thread:${t.id}`); }} disabled={!p.canPost} title={p.canPost ? (t.status === "escalated" ? "settle it here: reopen, then a decision with the next action" : "settle it here: a decision into the thread, with the next action") : "no token to post with"}><Gavel size={12} /> Rule</button>
+            <button className="tiny-btn" aria-pressed={ruling === `thread:${t.id}`} onClick={() => { setRuleErr(null); setRuling(ruling === `thread:${t.id}` ? null : `thread:${t.id}`); }} disabled={!p.canPost} aria-describedby={p.blockedBy} title={p.canPost ? (t.status === "escalated" ? "settle it here: reopen, then a decision with the next action" : "settle it here: a decision into the thread, with the next action") : undefined}><Gavel size={12} /> Rule</button>
             <span className="spacer" />
             <button className="tiny-btn ghost" onClick={() => p.onResolve(`thread:${t.id}`, true)} title="take it off your queue without posting"><Check size={12} /> Mark solved</button>
           </div>

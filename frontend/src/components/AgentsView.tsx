@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Bot, PencilRuler, Plus } from "lucide-react";
 import { api } from "../hooks/useWails";
 import { since } from "../lib";
@@ -149,6 +149,7 @@ function DraftCell({ initiativeId }: { initiativeId: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [opened, setOpened] = useState(() => drafting.has(initiativeId));
+  const reasonId = useId();
 
   // An answer is kept whenever it is for the initiative on screen: a board
   // update reissues the preflight, and dropping the one in flight would
@@ -189,13 +190,13 @@ function DraftCell({ initiativeId }: { initiativeId: string }) {
         <PencilRuler size={14} aria-hidden="true" />
         <span className="meta">no cell: no <code>agents/cell.json</code> at the root</span>
         <span className="spacer" />
-        {opened && !blocked && <span className="meta">Drafting in a Terminal: the draft shows here as <em>in definition</em>, and its accept record in Needs me.</span>}
-        {!asking && !opened && blocked && <span className="meta">{blocked}</span>}
+        {opened && !blocked && <span id={reasonId} className="meta">Drafting in a Terminal: the draft shows here as <em>in definition</em>, and its accept record in Needs me.</span>}
+        {!asking && !opened && blocked && <span id={reasonId} className="meta">{blocked}</span>}
         {/* The hover sits on a wrapper: a disabled button gets no mouse
             events in WebKit. The reason is the text beside it. */}
         {!asking && (
           <span title={blocked ?? (opened ? "a drafting session is open in a Terminal" : `organizer draft-cell ${initiativeId}: a session drafts the roster from the goal, scope and agents/people.md`)}>
-            <button className="tiny-btn primary" onClick={() => setAsking(true)} disabled={checking || !!blocked || opened}>
+            <button className="tiny-btn primary" onClick={() => setAsking(true)} disabled={checking || !!blocked || opened} aria-describedby={!checking && (opened ? !blocked : !!blocked) ? reasonId : undefined}>
               <PencilRuler size={13} /> {opened && !blocked ? "Drafting…" : "Draft the cell"}
             </button>
           </span>

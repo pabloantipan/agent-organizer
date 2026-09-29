@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { FileXCorner, MessageSquare, PencilRuler, SquareTerminal, Trash2, UserRoundX, Users } from "lucide-react";
 import { Retire } from "./Retire";
 import { api, type AgentGroup, type Seat } from "../hooks/useWails";
@@ -74,6 +74,7 @@ export function Crew({ group, readOnly = false, onMessage }: { group: AgentGroup
   const [note, setNote] = useState<string | null>(null);
   const [confirmKill, setConfirmKill] = useState<string | null>(null);
   const [retiring, setRetiring] = useState(false);
+  const reasonId = useId();
   const cell = group.cell;
   if (!cell) return null;
   const seats = group.crew ?? [];
@@ -106,10 +107,10 @@ export function Crew({ group, readOnly = false, onMessage }: { group: AgentGroup
         {/* The reason is text beside the button, not only its hover: a
             disabled button takes no focus and no WebKit mouse events
             (lead-side-fixes FR-4). */}
-        {!readOnly && !asking && blocked && <span className="meta">{blocked}</span>}
+        {!readOnly && !asking && blocked && <span id={reasonId} className="meta">{blocked}</span>}
         {!readOnly && !asking && (
           <span title={blocked ?? `organizer crew ${group.id}`}>
-            <button className="tiny-btn primary" onClick={() => setAsking(true)} disabled={busy || !!blocked}>
+            <button className="tiny-btn primary" onClick={() => setAsking(true)} disabled={busy || !!blocked} aria-describedby={blocked ? reasonId : undefined}>
               <Users size={13} /> {off === seats.length ? "Bring crew up" : off > 0 ? `Bring ${off} up` : "Reattach all"}
             </button>
           </span>

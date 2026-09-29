@@ -542,6 +542,8 @@ button.counts.linkish { font-family: var(--mono); }
 .chats { display: flex; flex-direction: column; gap: 2px; min-height: 0; overflow: auto; padding-right: 4px; border-right: 1px solid var(--border); }
 .chats-label { display: flex; align-items: center; font-size: var(--font-size-xs); color: var(--dim); margin: 2px 4px 6px 8px; text-transform: uppercase; letter-spacing: .04em; }
 .chats-label.sub { margin-top: 10px; }
+.chats-reason, .blocked-reason { font-size: var(--font-size-sm); color: var(--fg-muted); line-height: 1.35; }
+.chats-reason { margin: -2px 8px 8px; }
 .chats .cell-search { width: auto; margin: 0 4px 6px 0; }
 .chat { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: var(--radius-md); background: transparent; border: 1px solid transparent; color: var(--muted); font-size: var(--font-size-sm); text-align: left; cursor: pointer; min-width: 0; }
 .chat:hover { background: var(--panel); color: var(--text); }
