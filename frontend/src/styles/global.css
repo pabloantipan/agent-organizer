@@ -120,7 +120,7 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
 .rail-rank { font-family: var(--mono); font-size: var(--font-size-xs); color: var(--dim); width: 14px; text-align: right; }
 .rail-main { flex: 1; min-width: 0; display: grid; gap: 3px; }
 .rail-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-weight: 500; font-size: var(--font-size-md); letter-spacing: -0.01em; }
-.rail-meta { display: flex; gap: 4px; }
+.rail-meta { display: flex; flex-wrap: wrap; gap: 4px; }
 .rail-counts { display: flex; gap: 7px; font-size: var(--font-size-sm); }
 .rail-counts .n { color: var(--now); } .rail-counts .b { color: var(--blocked); } .rail-counts .x { color: var(--next); }
 /* Not active (FR-9): the last group, opens only; the status is a word, never colour alone */
