@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { marked } from "marked";
 import type { merge, model } from "../../wailsjs/go/models";
 import { addDays, daysBetween, parseISO, shortDate, today, toISO } from "../lib/dates";
@@ -24,9 +24,18 @@ const median = (xs: number[]) => {
  *  ruling is signed by the ruler (FR-12, FR-14, 0045); everything else is
  *  read-only. Needs me still lists only the lead's records (0034). */
 export function DecisionsView() {
-  const { view, selectedInitiative, select } = useBoard();
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const { view, selectedInitiative, select, decisionFocus } = useBoard();
+  const [expanded, setExpanded] = useState<string | null>(decisionFocus);
   const [ruling, setRuling] = useState<string | null>(null);
+  const focusRef = useRef<HTMLDivElement | null>(null);
+  // openDecision lands here with its record expanded, scrolled to and
+  // highlighted, as a Needs me key lands on Home (lead-side-fixes FR-6).
+  useEffect(() => {
+    if (!decisionFocus) return;
+    setExpanded(decisionFocus);
+    setRuling(null);
+    focusRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [decisionFocus]);
   const [showClosed, setShowClosed] = useState(false);
   const now = today();
 
@@ -90,8 +99,11 @@ export function DecisionsView() {
     // FR-13: a record of an initiative that is not active offers none.
     const canRule = d.status === "proposed" && !readOnlyOf(view, r.initiative);
     const isRuling = canRule && ruling === r.key;
+    const focused = decisionFocus === r.key;
+    // The highlight is Home's focused row (shell.css .ib-row.focused), inline
+    // because this card's boundary holds no stylesheet for .dec.
     return (
-      <div key={r.key} className={`dec ${d.status} ${isOpen ? "expanded" : ""}`}>
+      <div key={r.key} ref={focused ? focusRef : undefined} className={`dec ${d.status} ${isOpen ? "expanded" : ""} ${focused ? "focused" : ""}`} style={focused ? { background: "var(--surface-selected)" } : undefined}>
         <button className="dec-line" onClick={() => toggle(r.key)} title={isOpen ? "collapse" : "show the record"}>
           <span className="dec-num mono">{d.number}</span>
           <span className="dec-title">{d.title}</span>

@@ -56,9 +56,13 @@ type State = {
   // needsMeFocus is the Needs me row Home scrolls to and highlights, set by
   // openNeedsMe: decision:<initiative>/<NNNN>, thread:<id>, card:<initiative>/<slug>.
   needsMeFocus: string | null;
+  // decisionFocus is the record Decisions expands, scrolls to and highlights,
+  // set by openDecision: <initiative>/<NNNN>. Any other navigation clears it.
+  decisionFocus: string | null;
   goHome: () => void;
   openInitiative: (id: string, sub: Sub) => void;
   openNeedsMe: (key: string) => void;
+  openDecision: (initiativeId: string, number: string) => void;
   openSettings: () => void;
   selected: merge.BoardCard | null;
   filterMachine: string | null;
@@ -161,10 +165,12 @@ export const useBoard = create<State>((set, get) => ({
   screen: "home",
   sub: "overview",
   needsMeFocus: null,
-  goHome: () => set({ screen: "home", selectedInitiative: null, needsMeFocus: null }),
-  openInitiative: (selectedInitiative, sub) => set({ screen: "initiative", selectedInitiative, sub, needsMeFocus: null }),
-  openNeedsMe: (needsMeFocus) => set({ screen: "home", selectedInitiative: null, selected: null, needsMeFocus }),
-  openSettings: () => set({ screen: "settings", selectedInitiative: null, needsMeFocus: null }),
+  decisionFocus: null,
+  goHome: () => set({ screen: "home", selectedInitiative: null, needsMeFocus: null, decisionFocus: null }),
+  openInitiative: (selectedInitiative, sub) => set({ screen: "initiative", selectedInitiative, sub, needsMeFocus: null, decisionFocus: null }),
+  openNeedsMe: (needsMeFocus) => set({ screen: "home", selectedInitiative: null, selected: null, needsMeFocus, decisionFocus: null }),
+  openDecision: (selectedInitiative, number) => set({ screen: "initiative", selectedInitiative, sub: "decisions", selected: null, needsMeFocus: null, decisionFocus: `${selectedInitiative}/${number}` }),
+  openSettings: () => set({ screen: "settings", selectedInitiative: null, needsMeFocus: null, decisionFocus: null }),
   selected: null,
   filterMachine: null,
   filterClient: null,
