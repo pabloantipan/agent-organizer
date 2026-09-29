@@ -6,6 +6,7 @@ import type { model } from "../../wailsjs/go/models";
 import { ContextBar, WatcherBadge } from "./ContextBar";
 import { HealthWhy } from "./AgentList";
 import { healthState } from "../lib/health";
+import { useBoard } from "../stores/board.store";
 
 const STATE_LABEL: Record<string, string> = { working: "working", running: "idle", shell: "shell", exited: "exited" };
 
@@ -13,12 +14,43 @@ const STATE_LABEL: Record<string, string> = { working: "working", running: "idle
  *  session or a run, so the roster is still being written. */
 export const IN_DEFINITION_WAITS = "no seat has run yet; waits on its first launch";
 
+/** A drafted roster waits on its accept record, not on a launch
+ *  (discovery-in-a-cell FR-3e). */
+export const DRAFT_WAITS = "draft roster; nothing launches until its accept record is ruled";
+
+/** The accept record of a drafted roster: the initiative's proposed record
+ *  whose slug is the-cell-roster (persona-agents, references/drafting.md §5),
+ *  the highest number when a redraft raised another. */
+export function acceptRecord(decisions?: model.Decision[] | null): model.Decision | undefined {
+  return (decisions ?? []).filter((d) => d.slug === "the-cell-roster" && d.status === "proposed").pop();
+}
+
+/** What a cell in definition waits on, as the Crew header says it: a
+ *  draft's accept record, linked to Decisions, or its first launch. */
+function DefinitionWaits({ id, cell }: { id: string; cell: model.Cell }) {
+  const { view, openInitiative } = useBoard();
+  if (cell.state !== "in_definition") return null;
+  if (!cell.draft) return <span className="meta">{IN_DEFINITION_WAITS}</span>;
+  const rows = (view?.board.initiatives ?? []).filter((i) => i.id === id);
+  const record = acceptRecord((rows.find((i) => i.local) ?? rows[0])?.decisions);
+  const drafted = cell.drafted ? `drafted ${cell.drafted}; ` : "";
+  if (!record) return <span className="meta" title={DRAFT_WAITS}>{drafted}no accept record yet</span>;
+  return (
+    <span className="meta" title={DRAFT_WAITS}>
+      {drafted}waits on{" "}
+      <button className="linkish meta" onClick={() => openInitiative(id, "decisions")} title="Open in Decisions">
+        <span className="num">{record.number}</span> {record.slug}
+      </button>
+    </span>
+  );
+}
+
 /** The cell's derived state as a lozenge, word and icon, or nothing. One
  *  source for Crew, the Agents tab and Home's signals. */
 export function CellStateLz({ cell, label = "in definition" }: { cell?: model.Cell | null; label?: string }) {
   if (cell?.state !== "in_definition") return null;
   return (
-    <span className="lz tone" title={`${cell.project}: ${IN_DEFINITION_WAITS} (Bring crew up)`}>
+    <span className="lz tone" title={cell.draft ? `${cell.project}: ${DRAFT_WAITS}` : `${cell.project}: ${IN_DEFINITION_WAITS} (Bring crew up)`}>
       <PencilRuler size={12} strokeWidth={2} aria-hidden="true" />{label}
     </span>
   );
@@ -55,7 +87,7 @@ export function Crew({ group, readOnly = false, onMessage }: { group: AgentGroup
         <Users size={14} />
         <span className="ident">{cell.project}</span>
         <CellStateLz cell={cell} />
-        {cell.state === "in_definition" && <span className="meta">{IN_DEFINITION_WAITS}</span>}
+        <DefinitionWaits id={group.id} cell={cell} />
         <span className="meta">{seats.length} seats · {live} live · {off} off{cell.reconciler ? ` · reconciler ${cell.reconciler}` : ""}</span>
         {group.discuss && <span className="badge watcher stale" title="crew health comes from the discuss API">{group.discuss}</span>}
         <span className="spacer" />

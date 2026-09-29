@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Bot, Plus } from "lucide-react";
+import { Bot, PencilRuler, Plus } from "lucide-react";
 import { api } from "../hooks/useWails";
 import { since } from "../lib";
 import { useBoard } from "../stores/board.store";
@@ -65,6 +65,7 @@ export function AgentsView() {
               with a persona outside the roster (a supervisor, a builder, a
               guest) has no seat there, so it is listed here (FR-6). */}
           {g.cell && <Crew group={g} readOnly={!!ro} onMessage={g.can_post && !ro ? (seat) => openSlack(g.id, seat) : undefined} />}
+          {!g.cell && selectedInitiative && !ro && <DraftCell initiativeId={g.id} />}
           <AgentList agents={(g.agents ?? []).filter((a) => !a.persona || !g.cell?.agents?.includes(a.persona))} root={g.path} readOnly={!!ro} onMessage={g.cell && g.can_post && !ro ? (p) => openSlack(g.id, p) : undefined} />
         </section>
         );
@@ -119,5 +120,61 @@ function NewAgent({ initiativeId }: { initiativeId: string }) {
       <button className="tiny-btn ghost" onClick={() => setOpen(false)}>Cancel</button>
       {note && <span className="meta err">{note}</span>}
     </span>
+  );
+}
+
+/** "Draft the cell" for an initiative without agents/cell.json
+ *  (discovery-in-a-cell FR-3): opens a Terminal at the root running the
+ *  agent told to follow the persona-agents skill's drafting procedure. The
+ *  Go side is asked, opening nothing, whether it can run; its refusal is the
+ *  disabled button's hover. Accepting the draft is its record's ruling, so
+ *  there is no accept button here or anywhere. */
+function DraftCell({ initiativeId }: { initiativeId: string }) {
+  const board = useBoard((s) => s.view);
+  const [blocked, setBlocked] = useState<string | null>(null);
+  const [asking, setAsking] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
+
+  useEffect(() => {
+    let live = true;
+    api.draftCell(initiativeId, false).then(() => live && setBlocked(null), (e) => live && setBlocked(String(e).replace(/^Error:\s*/, "")));
+    return () => { live = false; };
+  }, [initiativeId, board]);
+
+  const open = () => {
+    setBusy(true);
+    api.draftCell(initiativeId, true).then(
+      () => { setNote("terminal opened: the session writes a draft roster and raises its accept record"); setAsking(false); },
+      (e) => setNote(String(e)),
+    ).finally(() => setBusy(false));
+  };
+
+  return (
+    <div className="crew">
+      <div className="crew-head">
+        <PencilRuler size={14} aria-hidden="true" />
+        <span className="meta">no cell: no <code>agents/cell.json</code> at the root</span>
+        <span className="spacer" />
+        {note && <span className="meta">{note}</span>}
+        {!asking && blocked && <span className="meta">{blocked}</span>}
+        {/* The hover sits on a wrapper: a disabled button gets no mouse
+            events in WebKit, and its title is the only place the reason is. */}
+        {!asking && (
+          <span title={blocked ?? `organizer draft-cell ${initiativeId}: a session drafts the roster from the goal, scope and agents/people.md`}>
+            <button className="tiny-btn primary" onClick={() => setAsking(true)} disabled={!!blocked}>
+              <PencilRuler size={13} /> Draft the cell
+            </button>
+          </span>
+        )}
+        {asking && (
+          <>
+            <span className="meta">one Terminal at the root running the agent; it writes only under agents/ and working-on/decisions/</span>
+            <button className="tiny-btn primary" onClick={open} disabled={busy}>{busy ? "Opening…" : "Open"}</button>
+            <button className="tiny-btn ghost" onClick={() => setAsking(false)}>Cancel</button>
+          </>
+        )}
+      </div>
+    </div>
   );
 }
