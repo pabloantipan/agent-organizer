@@ -1,6 +1,6 @@
 ---
 title: Draft the cell from the organizer, and never launch a draft
-status: next
+status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-29
