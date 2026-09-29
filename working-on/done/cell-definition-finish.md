@@ -1,6 +1,6 @@
 ---
 title: A cell in definition reads as one on the rail, and its buttons say why
-status: now
+status: done
 repos: [organizer]
 branch: main
 updated: 2026-09-29
@@ -11,6 +11,7 @@ spec: "docs/specs/discovery-in-a-cell.md (FR-1 rail, FR-5, FR-6, FR-7, amendment
 gate: "docs/specs/discovery-in-a-cell.md Acceptance, rows G6, G7, G5; the Gate section below"
 stage: discovery-in-a-cell
 seat: draft-finish
+review: pass
 ---
 
 ## Goal
@@ -30,6 +31,23 @@ Roadmap stage discovery-in-a-cell: sup15's closing points 1, 2 and 4 of
 
 ## Next
 1. review against G6, G7, G5 (a reviewer that is not draft-finish)
+
+## Review
+- Verdict: **pass**. Branch `cell-definition-finish` (6d52e2a..18e108f) meets G6, G7 and G5.
+- Unmet gate items: none.
+- Evidence (mine under `.wt-notes/draft-finish-review/`):
+  - G6: `TestRetirableIsEmptyWhileTheCellIsInDefinition` rerun, PASS (`g6-retirable-test.txt`); covers not-a-draft, draft, a past run, a live session. Rail: `g6-rail-expanded.png` shows "in definition" on init-define and init-drafted, `g6-rail-collapsed.png` the icon on ranks 3 and 5, `g6-rail-collapsed-titles.json` the word in their hover. Crew: `g6-init-define-crew-buttons.json` disabled, title "no persona file: agents/designer_diego.md", "Retire…"; screenshot agrees. Code: `Retirable` returns nil when `inDefinition`; the title sits on a wrapping span so a disabled button still shows it.
+  - G7: `g7-home.png`: badge 6 = six rows, one Launch row for init-define, none for init-drafted (its 0001 is a Rule row) or init-a (seats have run); init-define reads "waits on you" (`initiativeState.ts` derives "you" from `needsMeRows`). `g7-launch-lands-agents.png`: init-define › Agents; `Home.tsx` calls `openInitiative(id, "agents")`.
+  - G5: `XDG_DATA_HOME=$(mktemp -d) make test` exit 0 (`g5-make-test.txt`); `npm run build` "✓ built" exit 0 (`g5-npm-build.txt`); G18 grep over `main...cell-definition-finish` empty (`g5-g18-grep.txt`).
+  - Diff stays in the boundary (plus `global.css`, CSS allowed).
+- Not covered by the gate:
+  - `organizer retire --retirable` on a cell in definition gives a reason list without "in definition" (`retire.go`, outside this boundary).
+  - Disabled Bring crew up (opacity .6 on the primary fill) reads close to enabled in the screenshots; "disabled" is proven by the DOM, not by the eye. A design-system question.
+  - The rail mark and Launch row come from the 10 s agents feed; until the first sample neither shows.
+  - `Retirable` now reads `runs.jsonl` once per call (via `loadRuns`); fine at today's sizes.
+  - G7 and the rail are screenshot-only: no frontend test runner (amendment 1 left it out).
+  - Home's Needs me subtitle still says "decisions, threads, cards and seats".
+- Reviewer: draft-finish-review, 2026-09-29
 
 ## Blockers
 none
