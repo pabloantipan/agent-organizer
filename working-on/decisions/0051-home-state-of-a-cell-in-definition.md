@@ -1,13 +1,13 @@
 ---
 title: What Home's state says for an initiative whose cell is in definition
-status: proposed
+status: ruled
 raised: 2026-09-29
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-29
+ruled_by: pablo
 options: [keep the four states, a Launch row in Needs me, a fifth state]
-chosen:
+chosen: a Launch row in Needs me
 cards: [cell-definition-finish]
 threads: []
 supersedes: []
@@ -46,7 +46,7 @@ adding a word to the glance.
 
 ## Ruling
 
-
+pablo, 2026-09-29, in the organizer on lodestar: better for huamns
 
 ## Consequences
 
