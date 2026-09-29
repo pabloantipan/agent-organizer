@@ -71,6 +71,7 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
 .strip-item.now .strip-rank { color: var(--now); }
 .strip-item.blocked .strip-rank { color: var(--blocked); }
 .strip-item .live-dot { position: absolute; right: 3px; top: 3px; width: 6px; height: 6px; margin: 0; }
+.strip-item .strip-defining { position: absolute; right: 2px; bottom: 2px; color: var(--tone); }
 .rail-hero {
   display: block; width: calc(100% - 20px); text-align: left; font: inherit; cursor: pointer;
   background: var(--panel); color: var(--text); border: 1px solid var(--border);
@@ -119,7 +120,7 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
 .rail-rank { font-family: var(--mono); font-size: var(--font-size-xs); color: var(--dim); width: 14px; text-align: right; }
 .rail-main { flex: 1; min-width: 0; display: grid; gap: 3px; }
 .rail-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-weight: 500; font-size: var(--font-size-md); letter-spacing: -0.01em; }
-.rail-meta { display: flex; gap: 4px; }
+.rail-meta { display: flex; flex-wrap: wrap; gap: 4px; }
 .rail-counts { display: flex; gap: 7px; font-size: var(--font-size-sm); }
 .rail-counts .n { color: var(--now); } .rail-counts .b { color: var(--blocked); } .rail-counts .x { color: var(--next); }
 /* Not active (FR-9): the last group, opens only; the status is a word, never colour alone */

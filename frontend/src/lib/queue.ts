@@ -80,21 +80,27 @@ export function queueOf(group: AgentGroup, view: BoardView | null) {
 }
 
 /** One row of Needs me: a decision waiting on a ruling, a thread asking the
- *  human, a card addressed to them, or a seat mail cannot reach. `since` is
+ *  human, a card addressed to them, a seat mail cannot reach, or a cell in
+ *  definition waiting on its first launch. `since` is
  *  when it started waiting (null when the source has no date, and those sort
  *  last); `key` is what openNeedsMe and the Solved marks name it by. */
 export type NeedsMeRow =
   | { kind: "decision"; key: string; initiative: string; since: Date | null; decision: model.Decision }
   | { kind: "thread"; key: string; initiative: string; since: Date | null; thread: CellThread }
   | { kind: "card"; key: string; initiative: string; since: Date | null; card: merge.BoardCard }
-  | { kind: "seat"; key: string; initiative: string; since: Date | null; seat: Seat };
+  | { kind: "seat"; key: string; initiative: string; since: Date | null; seat: Seat }
+  | { kind: "launch"; key: string; initiative: string; since: null; cell: model.Cell };
 
 const day = (s: string | undefined) => parseISO(s?.slice(0, 10));
 
 /** Needs me (FR-15): queueOf over every cell plus the decision records
  *  waiting on the lead's ruling (FR-8), one list, oldest first, of active
  *  initiatives only (FR-9). The top bar's one badge is
- *  its length, so the count always equals the rows. */
+ *  its length, so the count always equals the rows. Last, one Launch row per
+ *  local cell in definition that is not a draft (discovery-in-a-cell FR-7,
+ *  0051): undated, no Solved mark, gone once a seat has run (the cell's
+ *  derived state, service.cellState); a draft waits on its accept record,
+ *  which is already a decision row. */
 export function needsMeRows(view: BoardView | null, agents: AgentsView | null, now = new Date()): NeedsMeRow[] {
   const rows: NeedsMeRow[] = [];
   // An initiative on two machines reports its records twice; the local scan wins.
@@ -120,5 +126,9 @@ export function needsMeRows(view: BoardView | null, agents: AgentsView | null, n
     }
   }
   const at = (r: NeedsMeRow) => r.since?.getTime() ?? Number.MAX_SAFE_INTEGER;
-  return rows.sort((a, b) => at(a) - at(b));
+  rows.sort((a, b) => at(a) - at(b));
+  for (const g of agents?.groups ?? []) {
+    if (g.cell?.state === "in_definition" && !g.cell.draft && !folded.has(g.id)) rows.push({ kind: "launch", key: `launch:${g.id}`, initiative: g.id, since: null, cell: g.cell });
+  }
+  return rows;
 }
