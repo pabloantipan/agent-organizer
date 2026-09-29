@@ -345,5 +345,8 @@ func readCell(root string, problems []model.Problem) (*model.Cell, []model.Probl
 	if c.Agents == nil {
 		c.Agents = []string{}
 	}
+	if c.Drafted != "" && !validDate(c.Drafted) {
+		problems = append(problems, model.Problem{Path: p, Msg: fmt.Sprintf("cell.json: drafted %q is not a date (YYYY-MM-DD)", c.Drafted)})
+	}
 	return &c, problems
 }

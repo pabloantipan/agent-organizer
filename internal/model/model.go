@@ -386,8 +386,14 @@ type Cell struct {
 	Reconciler string   `json:"reconciler"`
 	// Model overrides the crew_model config for this cell (alias or id).
 	Model string `json:"model,omitempty"`
-	// State is derived, never read from cell.json: CellInDefinition while no
-	// seat has a session or a run, CellActive once one has, empty for a
+	// Draft and Drafted mark a roster a drafting session wrote and the owner
+	// has not accepted (the persona-agents skill's references/drafting.md):
+	// a draft is in definition whatever its seats' runs, and nothing
+	// launches from it. Drafted is the day it was written, YYYY-MM-DD.
+	Draft   bool   `json:"draft,omitempty"`
+	Drafted string `json:"drafted,omitempty"`
+	// State is derived, never read from cell.json: CellInDefinition for a
+	// draft or while no seat has a session or a run, CellActive once one has, empty for a
 	// roster with no seats (decision 0030; service.cellState).
 	State string `json:"state,omitempty"`
 }
