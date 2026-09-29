@@ -4,6 +4,25 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-09-29, sup19 landed; the UI findings go to Aglaea for triage
+
+- **Last SHA seen:** 0c162ea. conform-and-waiting merged d4f5658; 27 min vs
+  20–36 (UI reviewer 11 min of the critical path); run record
+  runs/2026-09-29-conform-and-waiting.md. **sup19 ended.** Nothing of mine
+  runs; tokens: aglaea, fse, pablo.
+- **Next:** Aglaea triages the three UI reviews' sev 2–1 findings (done/
+  home-rule-and-rows U1–U8, cell-screens-fix U1–U4, conform-and-waiting C1–C6,
+  plus sup19's list) into one ranked file (asked, thread "triage: the UI
+  reviews' sev 2-1 findings"). From it: one spec (or lead-side-fixes
+  amendment 3), cards with ui_review, an accept record with forecast. A
+  fixture thread that asks the human is needed so Answer and thread rows
+  can be verified (sup19).
+- **Learned:** a UI reviewer sits on the critical path (11 of 27 min, 11 of
+  25 in sup18); both shared MCP browsers can be busy, so it may run its own
+  headless Chromium. Forecasts with a UI reviewer: add ~10 min per wave.
+- **Stage 5 exit (a):** Pablo presses Draft the cell on a real initiative;
+  (b) camp's.
+
 ## HAND-OFF — 2026-09-29, sup18 landed; sup19 on conform-and-waiting
 
 - **Last SHA seen:** f7bc069 (0057 ruled "Do"). sup18's wave landed
