@@ -10,13 +10,12 @@ restating it (the discuss skill).
   20–36 (UI reviewer 11 min of the critical path); run record
   runs/2026-09-29-conform-and-waiting.md. **sup19 ended.** Nothing of mine
   runs; tokens: aglaea, fse, pablo.
-- **Next:** Aglaea triages the three UI reviews' sev 2–1 findings (done/
-  home-rule-and-rows U1–U8, cell-screens-fix U1–U4, conform-and-waiting C1–C6,
-  plus sup19's list) into one ranked file (asked, thread "triage: the UI
-  reviews' sev 2-1 findings"). From it: one spec (or lead-side-fixes
-  amendment 3), cards with ui_review, an accept record with forecast. A
-  fixture thread that asks the human is needed so Answer and thread rows
-  can be verified (sup19).
+- **Aglaea's triage (ec3ecbb):** 14 rows, V1–V4; design system gained
+  "Focus and names" and "said once per view". Spec `docs/specs/ui-leftovers.md`,
+  card `ui-leftovers` (ui_review), records **0058** accept (forecast 30–46
+  min), **0059** Home's width (row 9, no FSE recommendation), **0060** "you"
+  or "pablo" (row 13, recommend "you"). On 0058: one supervisor; fold 0059/
+  0060 FRs first if ruled.
 - **Learned:** a UI reviewer sits on the critical path (11 of 27 min, 11 of
   25 in sup18); both shared MCP browsers can be busy, so it may run its own
   headless Chromium. Forecasts with a UI reviewer: add ~10 min per wave.
