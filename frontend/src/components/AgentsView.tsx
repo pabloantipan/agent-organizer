@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Bot, PencilRuler, Plus } from "lucide-react";
 import { api } from "../hooks/useWails";
 import { since } from "../lib";
@@ -150,20 +150,24 @@ function DraftCell({ initiativeId }: { initiativeId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [opened, setOpened] = useState(() => drafting.has(initiativeId));
 
+  // An answer is kept whenever it is for the initiative on screen: a board
+  // update reissues the preflight, and dropping the one in flight would
+  // leave the button checking while updates come faster than answers.
+  const current = useRef(initiativeId);
+  current.current = initiativeId;
   useEffect(() => {
-    let live = true;
+    const live = () => current.current === initiativeId;
     setOpened(drafting.has(initiativeId));
     api.draftCell(initiativeId, false).then(
-      () => live && setAnswer({ id: initiativeId, blocked: null }),
+      () => live() && setAnswer({ id: initiativeId, blocked: null }),
       (e) => {
-        if (!live) return;
+        if (!live()) return;
         const why = String(e).replace(/^Error:\s*/, "");
         // The draft's cell.json is there: the session wrote it.
         if (why.includes("agents/cell.json exists")) { drafting.delete(initiativeId); setOpened(false); }
         setAnswer({ id: initiativeId, blocked: why });
       },
     );
-    return () => { live = false; };
   }, [initiativeId, board]);
 
   const checking = answer?.id !== initiativeId;
