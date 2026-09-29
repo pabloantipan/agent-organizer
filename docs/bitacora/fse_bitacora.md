@@ -16,8 +16,10 @@ restating it (the discuss skill).
   still: seat rows (deaf/capped) and inactive initiatives in needsMeRows.
   Forecast error: a one-card test task ran at a third of the low end; small
   single-card tasks should get their own reference set once there are five.
-- **Raised, waiting on Pablo:** 0054 (who owns docs/design-system.md,
-  recommend Aglaea), 0055 (accept `docs/specs/lead-side-fixes.md`: cards
+- **0054 ruled (5b2df77): Aglaea owns docs/design-system.md** on the
+  organizer; told her and Hephaistos (its skill claimed it). F9 and the
+  disabled pattern are hers to write, then code changes come to me as cards.
+- **Raised, waiting on Pablo:** 0055 (accept `docs/specs/lead-side-fixes.md`: cards
   home-rule-and-rows and cell-screens-fix, parallel, both `ui_review: true`,
   forecast 20–36 min over 1 wave), 0056 (F3, "quiet" beside a signal;
   recommend "waiting says whose").
