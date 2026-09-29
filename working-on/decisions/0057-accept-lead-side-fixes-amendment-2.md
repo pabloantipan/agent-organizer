@@ -1,13 +1,13 @@
 ---
 title: Accept amendment 2 of lead-side-fixes, the code Aglaea's design-system rewrite needs
-status: proposed
+status: ruled
 raised: 2026-09-29
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-29
+ruled_by: pablo
 options: [accept as written, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [conform-and-waiting]
 threads: [01M3PWYY5MSHREKZ7M2CMCRZ2P]
 supersedes: []
@@ -54,7 +54,7 @@ seats (blocked).
 
 ## Ruling
 
-
+pablo, 2026-09-29, in the organizer on lodestar: Do
 
 ## Consequences
 
