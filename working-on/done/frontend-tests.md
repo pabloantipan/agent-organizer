@@ -66,5 +66,6 @@ none
 - forecast (by docs/estimating.md; 0052 was ruled without one): 19–32 min of
   wave time over 1 wave; basis: 21 cards in 9 single-wave tasks, this
   initiative.
+  actual: 7 min (12:15 sup17 start to 12:22 in done/), 1 wave, no decision wait; 12 min under the low end (runs/2026-09-29-frontend-tests.md).
 - 2026-09-29 tests-lib: `pnpm install` warns "Ignored build scripts: esbuild"; build and vitest work regardless.
 - sup17: the boundary says package-lock.json, but the frontend is pnpm (`frontend/pnpm-lock.yaml`); the builder updates pnpm-lock.yaml instead and adds no package-lock.json.
