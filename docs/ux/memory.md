@@ -57,10 +57,30 @@ From `reviews/2026-09-29-first-look.md` (all `heuristic`):
   not 45%; stale words ("Slack", "Datastore"); accent button per Needs me row
   vs principle 3.
 
+From `reviews/2026-09-29-cell-screens.md` (stage 5, for the FSE's thread
+01M3PVQZ7JS5F40030Z09M2NMS):
+
+- C1 (3) the Launch row promises a launch the cell cannot make (missing
+  persona file) and only navigates.
+- C2 (3) Bring crew up's disabled reason is hover only (FR-6 as written;
+  spec gap). Pattern to keep: a disabled action shows its reason as text
+  beside it, as Draft the cell does.
+- C3 (3, from code) Draft the cell re-enables after Open: a second drafting
+  session is one click away.
+- C4 (2) the loading, opened and error states of Draft the cell (table in the
+  review).
+- C5–C10 (1–2): record link opens nothing; roster accepted blind (= F2);
+  stale Needs me subtitle; disabled at .6 (= F7); small collapsed mark;
+  "Retire…" on a never-run cell.
+- The FSE holds F1–F9 and C1–C10 to cut one batch. F3 goes to Pablo as a
+  record (it is against twenty-at-a-glance FR-6, ruled via 0034/0035).
+
 ## Open questions
 
-- Whether I own `docs/design-system.md` or only review against it: open with
-  the FSE (0053 Consequences). Until settled, I propose, never edit.
+- Whether I own `docs/design-system.md` or only review against it: record
+  **0054** (proposed, owner pablo; my proposal is option one, the FSE
+  recommends it; hephaistos's skill also claims the design system). Until
+  ruled, I propose, never edit.
 
 ## How I look at it
 
@@ -73,7 +93,8 @@ From `reviews/2026-09-29-first-look.md` (all `heuristic`):
 
 ## Studies and lessons
 
-- none yet.
+- Pressing an action that starts a real session (Draft the cell's Open,
+  Bring crew up) is out of a review's reach; read the code path and say so.
 
 ## Participants in use
 
