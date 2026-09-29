@@ -89,7 +89,7 @@ export type NeedsMeRow =
   | { kind: "thread"; key: string; initiative: string; since: Date | null; thread: CellThread }
   | { kind: "card"; key: string; initiative: string; since: Date | null; card: merge.BoardCard }
   | { kind: "seat"; key: string; initiative: string; since: Date | null; seat: Seat }
-  | { kind: "launch"; key: string; initiative: string; since: null; cell: model.Cell };
+  | { kind: "launch"; key: string; initiative: string; since: null; cell: model.Cell; missing: string | null };
 
 const day = (s: string | undefined) => parseISO(s?.slice(0, 10));
 
@@ -100,7 +100,9 @@ const day = (s: string | undefined) => parseISO(s?.slice(0, 10));
  *  local cell in definition that is not a draft (discovery-in-a-cell FR-7,
  *  0051): undated, no Solved mark, gone once a seat has run (the cell's
  *  derived state, service.cellState); a draft waits on its accept record,
- *  which is already a decision row. */
+ *  which is already a decision row. A seat with no persona file makes the
+ *  row name it instead (lead-side-fixes FR-3): `missing` is the first such
+ *  seat in roster order, and launchVerb turns it into the row's words. */
 export function needsMeRows(view: BoardView | null, agents: AgentsView | null, now = new Date()): NeedsMeRow[] {
   const rows: NeedsMeRow[] = [];
   // An initiative on two machines reports its records twice; the local scan wins.
@@ -128,7 +130,17 @@ export function needsMeRows(view: BoardView | null, agents: AgentsView | null, n
   const at = (r: NeedsMeRow) => r.since?.getTime() ?? Number.MAX_SAFE_INTEGER;
   rows.sort((a, b) => at(a) - at(b));
   for (const g of agents?.groups ?? []) {
-    if (g.cell?.state === "in_definition" && !g.cell.draft && !folded.has(g.id)) rows.push({ kind: "launch", key: `launch:${g.id}`, initiative: g.id, since: null, cell: g.cell });
+    if (g.cell?.state === "in_definition" && !g.cell.draft && !folded.has(g.id)) {
+      const missing = (g.crew ?? []).find((s) => s.no_persona)?.name ?? null;
+      rows.push({ kind: "launch", key: `launch:${g.id}`, initiative: g.id, since: null, cell: g.cell, missing });
+    }
   }
   return rows;
+}
+
+/** The verb and blocker of a cell-in-definition row (FR-3): a cell that
+ *  cannot launch because a seat has no persona file says which, and its verb
+ *  is Open, since the fix is on Agents and not a launch; else Launch. */
+export function launchVerb(row: { missing: string | null }): { verb: "Open" | "Launch"; blocker: string | null } {
+  return row.missing ? { verb: "Open", blocker: `${row.missing} has no persona file` } : { verb: "Launch", blocker: null };
 }

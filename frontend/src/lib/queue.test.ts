@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AgentGroup, AgentsView, BoardView, CellThread } from "../hooks/useWails";
 import type { merge, model } from "../../wailsjs/go/models";
-import { needsMeRows, queueOf } from "./queue";
+import { launchVerb, needsMeRows, queueOf } from "./queue";
 
 // Fixtures are plain objects: the generated classes carry methods the
 // functions under test never call, so each builder casts once.
@@ -96,5 +96,23 @@ describe("FR-7 Launch row", () => {
   it("is not added once the cell has run", () => {
     const g = group("a", { cell: { human: "pablo", state: "running" } as model.Cell });
     expect(kinds(board([initiative("a")]), agents(g))).toEqual([]);
+  });
+});
+
+describe("FR-3 (lead-side-fixes): a cell that cannot launch says why", () => {
+  const seat = (name: string, no_persona = false) => ({ name, no_persona });
+  const defining = (crew: { name: string; no_persona: boolean }[]) =>
+    group("a", { cell: { human: "pablo", state: "in_definition", draft: false } as model.Cell, crew: crew as unknown as AgentGroup["crew"] });
+  const row = (g: AgentGroup) => needsMeRows(board([initiative("a")]), agents(g))[0];
+
+  it("names the first seat with no persona file, verb Open", () => {
+    const r = row(defining([seat("po_carla"), seat("designer_diego", true), seat("tech_lead_elena", true)]));
+    expect(r.kind).toBe("launch");
+    expect(r.kind === "launch" && launchVerb(r)).toEqual({ verb: "Open", blocker: "designer_diego has no persona file" });
+  });
+
+  it("keeps Launch when every seat has its file", () => {
+    const r = row(defining([seat("po_lucia"), seat("dev_mateo")]));
+    expect(r.kind === "launch" && launchVerb(r)).toEqual({ verb: "Launch", blocker: null });
   });
 });

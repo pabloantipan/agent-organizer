@@ -4,13 +4,27 @@
 .rb-anchor { position: relative; display: inline-flex; }
 .rb {
   position: absolute; top: calc(100% + var(--space-1)); right: 0; z-index: 20;
-  width: 400px; display: grid; gap: var(--space-3); padding: var(--space-4);
+  width: 400px; max-width: calc(100vw - var(--space-8)); display: grid; gap: var(--space-3); padding: var(--space-4);
   background: var(--surface-overlay); border-radius: var(--radius-lg); box-shadow: var(--shadow-overlay);
   text-align: left; white-space: normal;
 }
+.rb.with-record { width: 460px; }
 .rb-head { display: flex; gap: var(--space-2); align-items: baseline; min-width: 0; }
 .rb-num { font-family: var(--mono); font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); font-variant-numeric: tabular-nums; }
 .rb-title { font-size: var(--font-size-lg); line-height: var(--line-lg); font-weight: var(--weight-semibold); color: var(--fg); }
+/* the record (lead-side-fixes FR-1): its body clamped to about eight lines
+   of --line-md, the whole of it scrolls inside the box when expanded */
+.rb-record { display: grid; gap: var(--space-1); min-width: 0; }
+.rb .rb-body {
+  margin: 0; max-height: calc(var(--line-md) * 8); overflow: hidden; overflow-wrap: anywhere;
+  color: var(--fg-muted);
+}
+.rb .rb-body.all { max-height: 50vh; overflow-y: auto; }
+.rb-body.empty { color: var(--fg-subtle); font-size: var(--font-size-md); line-height: var(--line-md); }
+.rb-body > :first-child { margin-top: 0; }
+.rb-record-foot { display: flex; gap: var(--space-3); font-size: var(--font-size-sm); line-height: var(--line-sm); }
+.rb-record-foot button.link { color: var(--accent-fg); }
+.rb-record-foot button.link:hover { text-decoration: underline; }
 .rb-label {
   font-size: var(--font-size-xs); line-height: var(--line-xs); letter-spacing: var(--tracking-label);
   text-transform: uppercase; color: var(--fg-subtle); padding: 0;

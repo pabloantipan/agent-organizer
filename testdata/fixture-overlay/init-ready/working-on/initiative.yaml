@@ -1,0 +1,11 @@
+# A cell in definition with every persona file, so its Needs me row keeps
+# Launch (lead-side-fixes G3), beside init-define, whose missing
+# designer_diego turns its row into Open.
+id: init-ready
+title: Initiative Ready
+client: personal
+status: active
+started: 2026-09-21
+machine: testbox
+goal: A cell whose seats all have their files, waiting on its first launch
+repos: []
