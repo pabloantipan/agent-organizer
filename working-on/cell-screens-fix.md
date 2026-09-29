@@ -1,16 +1,16 @@
 ---
 title: Draft the cell and Bring crew up say what they are doing and why
-status: next
+status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "pablo: rule 0055 (accept lead-side-fixes); then the FSE starts its supervisor"
+next: "fix-cells: build FR-4, FR-5, FR-6, FR-8, FR-9 on branch cell-screens-fix (sup18)"
 depends_on: []
 boundary: ["frontend/src/components/AgentsView.tsx (Draft the cell's states)", "frontend/src/components/Crew.tsx (the visible reason, the roster link)", "frontend/src/components/DecisionsView.tsx and frontend/src/stores/board.store.ts (landing on a record expanded)", "frontend/src/styles/global.css (.tiny-btn:disabled only)", "internal/model/model.go (Cell: accept_record)", "internal/service/ (draft.go, crew.go, retire.go)", "frontend/wailsjs (generated)", "tests", "testdata/"]
 spec: "docs/specs/lead-side-fixes.md (FR-4, FR-5, FR-6, FR-8, FR-9); the findings: docs/ux/reviews/2026-09-29-cell-screens.md C2 C3 C4 C5 C8; values: docs/design-system.md"
 gate: "docs/specs/lead-side-fixes.md Acceptance, rows G4, G5, G6, G7; the Gate section below"
 stage: discovery-in-a-cell
-seat:
+seat: fix-cells
 ui_review: true
 ---
 

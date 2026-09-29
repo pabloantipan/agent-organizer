@@ -1,16 +1,16 @@
 ---
 title: Rule from Needs me with the record in view, and Home rows that keep their names
-status: next
+status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "pablo: rule 0055 (accept lead-side-fixes); then the FSE starts its supervisor"
+next: "fix-home: build FR-1, FR-2, FR-3, FR-7 on branch home-rule-and-rows (sup18)"
 depends_on: []
 boundary: ["frontend/src/components/Home.tsx (RuleAction, RuleDecisionBox, the row layout, the Launch/Open row, the subtitle)", "frontend/src/lib/queue.ts (the row's kind, verb and words)", "frontend/src/components/TopBar.tsx (the badge title only)", "frontend/src/styles/shell.css, Home and rule-box CSS", "frontend/src/lib/*.test.ts", "testdata/"]
 spec: "docs/specs/lead-side-fixes.md (FR-1, FR-2, FR-3, FR-7); the findings: docs/ux/reviews/2026-09-29-first-look.md F1 F2, docs/ux/reviews/2026-09-29-cell-screens.md C1 C6 C7; values: docs/design-system.md"
 gate: "docs/specs/lead-side-fixes.md Acceptance, rows G1, G2, G3, G7; the Gate section below"
 stage: discovery-in-a-cell
-seat:
+seat: fix-home
 ui_review: true
 ---
 
