@@ -23,7 +23,7 @@ export function Home() {
   return (
     <div className="home">
       <section className="home-sec">
-        <h2 className="sec-title">Needs me <span className="num sec-count">{rows.length}</span><span className="sec-sub">decisions, threads, cards and seats, oldest first</span></h2>
+        <h2 className="sec-title">Needs me <span className="num sec-count">{rows.length}</span><span className="sec-sub">everything waiting on you, oldest first</span></h2>
         {rows.length === 0 ? (
           <div className="panel empty-state">
             <div>Nothing waits on you.</div>

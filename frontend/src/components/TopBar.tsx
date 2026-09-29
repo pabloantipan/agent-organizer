@@ -43,7 +43,7 @@ export function TopBar() {
           {machines.length} machine{machines.length === 1 ? "" : "s"} · remote {since(view.pulled_at)}
         </span>
       )}
-      <button className={`needs-me ${screen === "home" ? "on" : ""}`} onClick={() => { closeHelp(); goHome(); }} title="things waiting on you: decisions, threads, cards and seats">
+      <button className={`needs-me ${screen === "home" ? "on" : ""}`} onClick={() => { closeHelp(); goHome(); }} title="everything waiting on you">
         <Inbox size={14} /> Needs me{needsMe > 0 && <span className="badge-count num">{needsMe}</span>}
       </button>
       <button className="ghost" onClick={refresh} disabled={loading} title="Rescan local disk">
