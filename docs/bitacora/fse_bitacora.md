@@ -6,10 +6,16 @@ restating it (the discuss skill).
 
 ## HAND-OFF — 2026-09-29, lead-side-fixes raised; sup17's card landed
 
-- **Last SHA seen:** 57fcea3. `frontend-tests` in done/, review pass;
-  **sup17's closing report not in yet**: on it, read it, end sup17
-  (standing-up.md "Ending a supervisor"). From then on `make test` runs
-  `npm test`.
+- **Last SHA seen:** 57fcea3. `frontend-tests` landed (merged 45e85f8; 18
+  tests over queue and initiativeState); actual 7 min vs forecast 19–32 (run
+  record runs/2026-09-29-frontend-tests.md). **sup17 ended** (probe -k, token
+  revoked, clean, prompts removed). `make test` now runs the frontend tests.
+- **Learned (sup17):** the frontend uses pnpm: a card touching frontend deps
+  names `pnpm-lock.yaml`, not `package-lock.json` (my frontend-tests card had
+  it wrong). `make test` on a fresh clone fails until `pnpm install`. Untested
+  still: seat rows (deaf/capped) and inactive initiatives in needsMeRows.
+  Forecast error: a one-card test task ran at a third of the low end; small
+  single-card tasks should get their own reference set once there are five.
 - **Raised, waiting on Pablo:** 0054 (who owns docs/design-system.md,
   recommend Aglaea), 0055 (accept `docs/specs/lead-side-fixes.md`: cards
   home-rule-and-rows and cell-screens-fix, parallel, both `ui_review: true`,
