@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Briefcase, ChevronDown, ChevronRight, CircleDashed, Compass, Hammer, Hand, Play } from "lucide-react";
 import type { merge, model, service } from "../../wailsjs/go/models";
 import { inactiveIds, launchVerb, needsMeRows, type NeedsMeRow } from "../lib/queue";
@@ -160,6 +160,7 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
   const ids = uniq(all.map((i) => i.id)).filter((id) => !folded.has(id));
   const cols = view.board.columns ?? {};
   const states = initiativeStates(view, agents);
+  const { ref, idWidth, narrow } = useFitIds(ids.join(" "));
   if (ids.length === 0) {
     return (
       <div className="panel empty-state">
@@ -169,7 +170,7 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
     );
   }
   return (
-    <div className="panel port" role="table">
+    <div ref={ref} className={`panel port ${narrow ? "narrow" : ""}`} role="table" style={idWidth ? { "--id-w": `${idWidth}px` } as React.CSSProperties : undefined}>
       <div className="p-head" role="row">
         <span className="num">#</span><span>initiative</span><span>state</span><span>phase</span><span>goal</span><span>stage</span><span>signals</span><span>next date</span><span />
       </div>
@@ -199,6 +200,36 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
       })}
     </div>
   );
+}
+
+/** The room the columns after the id need on one line: goal, stage and
+ *  signals at their narrowest readable width, and the fixed columns (rank,
+ *  state, phase, next date, chevron) with their gaps, as home.css sets them. */
+const ONE_LINE_REST = 320 + 480;
+
+/** FR-2 (lead-side-fixes): every id reads in full. The id column is as wide
+ *  as the longest id; when that leaves too little for the rest on one line,
+ *  the table goes narrow and phase, goal and next date move to the row's
+ *  second line (home.css, .port.narrow). A ResizeObserver, not a media query:
+ *  the room depends on the rail, and Safari 15 has no container queries. */
+function useFitIds(key: string) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [idWidth, setIdWidth] = useState(0);
+  const [narrow, setNarrow] = useState(false);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const fit = () => {
+      const w = Math.max(0, ...Array.from(el.querySelectorAll<HTMLElement>(".p-row .p-id")).map((b) => b.scrollWidth));
+      setIdWidth(Math.ceil(w));
+      setNarrow(el.clientWidth < w + ONE_LINE_REST);
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [key]);
+  return { ref, idWidth, narrow };
 }
 
 /** Home's compact stepper: one segment per stage and the current one named.
