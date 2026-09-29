@@ -56,6 +56,20 @@ export function CellStateLz({ cell, label = "in definition" }: { cell?: model.Ce
   );
 }
 
+/** Why Bring crew up cannot run, before the click (discovery-in-a-cell
+ *  FR-6): the seats with no persona file, and a draft's accept record. Null
+ *  when it can. CreateCrew still refuses both, for the CLI and a stale view. */
+export function crewBlocked(seats: Seat[], cell: model.Cell, decisions?: model.Decision[] | null): string | null {
+  const why: string[] = [];
+  const missing = seats.filter((s) => s.no_persona).map((s) => `agents/${s.name}.md`);
+  if (missing.length > 0) why.push(`no persona file: ${missing.join(", ")}`);
+  if (cell.draft) {
+    const record = acceptRecord(decisions);
+    why.push(record ? `draft roster: nothing launches until ${record.number} ${record.slug} is ruled` : "draft roster: no accept record yet");
+  }
+  return why.length > 0 ? why.join("; ") : null;
+}
+
 /** The persona cell of an initiative: one row per seat of agents/cell.json,
  *  joined to whatever process runs for it, its discuss watcher and its
  *  context fill. "Bring crew up" opens one probe per seat in one iTerm2
@@ -66,9 +80,12 @@ export function Crew({ group, readOnly = false, onMessage }: { group: AgentGroup
   const [note, setNote] = useState<string | null>(null);
   const [confirmKill, setConfirmKill] = useState<string | null>(null);
   const [retiring, setRetiring] = useState(false);
+  const view = useBoard((s) => s.view);
   const cell = group.cell;
   if (!cell) return null;
   const seats = group.crew ?? [];
+  const rows = (view?.board.initiatives ?? []).filter((i) => i.id === group.id);
+  const blocked = seats.length === 0 ? "no seats: the roster is empty between waves" : crewBlocked(seats, cell, (rows.find((i) => i.local) ?? rows[0])?.decisions);
   const live = seats.filter((s) => s.agent && (s.agent.state === "working" || s.agent.state === "running")).length;
   const off = seats.filter((s) => !s.agent || s.agent.state === "exited").length;
   const flash = (m: string) => { setNote(m); window.setTimeout(() => setNote(null), 5000); };
@@ -95,9 +112,11 @@ export function Crew({ group, readOnly = false, onMessage }: { group: AgentGroup
         {!readOnly && !asking && <button className={`tiny-btn ${(group.retirable?.length ?? 0) > 0 ? "" : "ghost"}`} onClick={() => setRetiring(true)} title={(group.retirable?.length ?? 0) > 0 ? `wave done with ${group.retirable.join(", ")}: organizer retire ${group.id} --retirable` : `organizer retire ${group.id}: end a wave`}><UserRoundX size={13} /> {(group.retirable?.length ?? 0) > 0 ? `${group.retirable.length} retirable` : "Retire…"}</button>}
         {retiring && <Retire group={group} onClose={() => setRetiring(false)} />}
         {!readOnly && !asking && (
-          <button className="tiny-btn primary" onClick={() => setAsking(true)} title={seats.length === 0 ? "no seats: the roster is empty between waves" : `organizer crew ${group.id}`} disabled={busy || seats.length === 0}>
-            <Users size={13} /> {off === seats.length ? "Bring crew up" : off > 0 ? `Bring ${off} up` : "Reattach all"}
-          </button>
+          <span title={blocked ?? `organizer crew ${group.id}`}>
+            <button className="tiny-btn primary" onClick={() => setAsking(true)} disabled={busy || !!blocked}>
+              <Users size={13} /> {off === seats.length ? "Bring crew up" : off > 0 ? `Bring ${off} up` : "Reattach all"}
+            </button>
+          </span>
         )}
         {asking && (
           <>
