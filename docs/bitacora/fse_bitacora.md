@@ -17,9 +17,12 @@ restating it (the discuss skill).
   over 2 waves), **0051** Home's state for a cell in definition (recommend a
   Launch row in Needs me), **0052** a frontend test runner (repetition 3,
   below). Stage forecast block written in `roadmap.yaml`.
-- **Next:** when 0050 is ruled, start one supervisor for both cards in order
-  (fse skill, references/standing-up.md). If 0051 is ruled first, write FR-7
-  and its gate row into the spec and cell-definition-finish before launch.
+- **0050 ruled (62f0a8b, "Accepted"); sup16 runs both cards** (spawned
+  2026-09-29, own window, token organizer/sup16, prelude and prompt in
+  ~/.local/share/organizer/prompts/organizer-sup16.*). FR-7 left out: 0051 is
+  open; when ruled, FR-7 gets its own card. **Next:** when both cards land,
+  read sup16's closing report and end it (standing-up.md, "Ending a
+  supervisor"). Last SHA seen: 62f0a8b.
   On 0052 "vitest over lib/", cut its card.
 - **Checked:** camp's six seats all have `agents/<seat>.md`, so FR-2 does not
   refuse camp (cell-persona-check's review point 2).
