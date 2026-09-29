@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "review: conform-and-waiting, branch conform-and-waiting, gate pass, 35933d1 14b1391 0fe3dca b0ea790 c6a44e5"
+next: "review: conform-and-waiting, branch conform-and-waiting, gate pass, 327fcd9 601623d f72d7cc e20dbd9 6be6a5a"
 depends_on: ["home-rule-and-rows", "cell-screens-fix"]
 boundary: ["frontend/src/components/Home.tsx (the waiting signal; the row verbs' class)", "frontend/src/components/InitiativeHeader.tsx (waitingDecisions may move to lib, same count)", "frontend/src/components/Conversation.tsx (the worklist's Rule toggle; the chat list's no-token line)", "frontend/src/components/CardDrawer.tsx (Write about this card)", "frontend/src/components/AgentsView.tsx and Crew.tsx (aria-describedby only)", "frontend/src/lib/ (the owner list and its test)", "CSS", "testdata/"]
 spec: "docs/specs/lead-side-fixes.md (FR-10, FR-11, FR-12; amendments 1 and 2; decisions 0056, 0057); the rules: docs/design-system.md principle 3, Inbox row, Disabled actions (7b6afd4)"
@@ -25,7 +25,7 @@ rewrite, 7b6afd4) of `docs/specs/lead-side-fixes.md`.
 
 ## Done
 - 2026-09-29 cut from lead-side-fixes amendments 1 and 2 by the FSE; replaces waiting-says-whose
-- 2026-09-29 conform-build built it on branch conform-and-waiting (35933d1 FR-10, 14b1391 and c6a44e5 fixtures, 0fe3dca FR-11, b0ea790 FR-12), rebased on main 8916167. Choices and findings: `.wt-notes/conform-build/progress.md`
+- 2026-09-29 conform-build built it on branch conform-and-waiting (327fcd9 FR-10, 601623d and 6be6a5a fixtures, f72d7cc FR-11, e20dbd9 FR-12), rebased on main 0a34750. Choices and findings: `.wt-notes/conform-build/progress.md`
 - 2026-09-29 G8: `cd frontend && npm test` → `src/lib/decisions.test.ts` 6 tests pass (in "Tests 26 passed (26)"); on `--twenty` Home reads data-lake "3 waiting · carla, rodrigo", vendor-audit "2 waiting · pablo, no owner", email-digest "1 waiting · fse" (`.wt-notes/conform-build/g8-g9-dom.md`, `g8-g9-home-twenty-1440.png`)
 - 2026-09-29 G9: `--twenty` Needs me rows: 5 verbs, all class `act`, 0 `.ib-row button.primary`; open Rule toggle in Conversations `aria-pressed="true"`, background rgb(47,27,85) = --surface-selected, commit Rule inside the box the accent; + and Rule toggles without a token point with aria-describedby at the chat-list line "no token for pablo to post with; …"; Bring crew up and Draft the cell point at their visible reasons; Write about this card absent on claims-portal (no cell), and with an empty roster disabled, pointing at "no seat to write to: …" (`g8-g9-dom.md`, `g9-*.png`)
 - 2026-09-29 G7: `XDG_DATA_HOME=$(mktemp -d) make test` → "make test exit=0", "Tests 26 passed (26)" (`g7-make-test.txt`); `cd frontend && npm run build` → "npm run build exit=0" (`g7-npm-build.txt`); G18 grep on `main...conform-and-waiting` → empty (`g7-g18-grep.txt`, 0 lines)
