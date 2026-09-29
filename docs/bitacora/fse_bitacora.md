@@ -36,7 +36,14 @@ restating it (the discuss skill).
   refuse camp (cell-persona-check's review point 2).
 - **Aglaea (2026-09-29, Hephaistos relay; renamed from Daedalus):** the
   Product Designer pair role, `aglaea` skill; ask with `[for aglaea]` to
-  pablo (`[for daedalus]` is no longer read). When sup16's cards land, ask it to review
+  pablo (`[for daedalus]` is no longer read). Pablo's rulings (decisions.md
+  "Aglaea", via Hephaistos): a wave gets a UI reviewer only on a card I cut with
+  `ui_review: true`; post to an `aglaea` seat once this initiative has one;
+  her participants are persona agents (`simulated`), a real user only on my
+  ask to Pablo for a severe finding; read `docs/ux/memory.md` before asking
+  her (none here yet); who owns the design system is a proposed record the
+  first time I work with her. sup16's and frontend-tests' cards predate it:
+  no `ui_review` flag (frontend-tests has no UI). When sup16's cards land, ask it to review
   cell-draft's and cell-definition-finish's screens (amendment 1 named no
   loading or error state for Draft the cell).
 - **Still open from the 09-28 hand-off:** header-review-2 (spec and
