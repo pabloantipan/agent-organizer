@@ -105,6 +105,8 @@ roles acording the details of the initiative" (Pablo, 0030). Today (read
   persona file, or the cell is a draft, then Bring crew up shall be
   disabled, and its hover names the missing files or the accept record. The
   refusals of FR-2 and FR-3f stay, for the CLI and for a stale view.
+  (Proposed change: `docs/specs/lead-side-fixes.md` FR-4 makes the reason
+  visible text, 0055.)
 - **FR-7** (0051: a Launch row in Needs me; Pablo: "better for huamns")
   While a local cell is in definition and not a draft, `needsMeRows`
   (`lib/queue.ts`) shall hold one row for it: kind `launch`, key
