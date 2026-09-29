@@ -85,6 +85,10 @@ From `reviews/2026-09-29-cell-screens.md` (stage 5, for the FSE's thread
   (my ui-review reviewer runs in that wave). F3 is record 0056. F9 and one
   pattern for disabled actions wait on 0054. F4–F6, F8, C9, C10 not carried
   for now.
+- The design-system code items (F9 row verbs, the + hover-only reason,
+  aria-describedby, Write about with no seat) are lead-side-fixes amendment 2
+  (FR-11, FR-12, G9), card `conform-and-waiting`, `ui_review: true`, after
+  sup18's two cards; record 0057 asks Pablo.
 
 ## Open questions
 

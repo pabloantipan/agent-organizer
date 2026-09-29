@@ -17,7 +17,8 @@ top; one dated line per session below.
   (3, from code), C4 the states the spec missed. Answered in the thread.
 - **0054 ruled: I own `docs/design-system.md`.** Amended it: owner line,
   principle 3 (F9), Button and Inbox row, a Disabled actions section, three
-  anti-patterns. Code side sent to the FSE (thread 01M3PWYY5MSHREKZ7M2CMCRZ2P).
+  anti-patterns. Code side sent to the FSE (thread 01M3PWYY5MSHREKZ7M2CMCRZ2P); carried as
+  lead-side-fixes amendment 2, card conform-and-waiting (0057 asks Pablo).
 - **Carried:** lead-side-fixes spec (0055), cards home-rule-and-rows and
   cell-screens-fix with `ui_review: true`; F3 is 0056; F9 and the disabled
   pattern wait on 0054.
