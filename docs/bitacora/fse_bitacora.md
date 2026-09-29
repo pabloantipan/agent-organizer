@@ -19,13 +19,13 @@ restating it (the discuss skill).
 - **0054 ruled (5b2df77): Aglaea owns docs/design-system.md** on the
   organizer; told her and Hephaistos (its skill claimed it). F9 and the
   disabled pattern are hers to write, then code changes come to me as cards.
-- **Raised, waiting on Pablo:** 0055 (accept `docs/specs/lead-side-fixes.md`: cards
-  home-rule-and-rows and cell-screens-fix, parallel, both `ui_review: true`,
-  forecast 20–36 min over 1 wave), 0056 (F3, "quiet" beside a signal;
-  recommend "waiting says whose").
-- **On 0055 accepted:** one supervisor, both cards in parallel, a UI reviewer
-  per card (aglaea references/ui-review.md); amend nothing else. On 0056
-  "waiting says whose": an FR in lead-side-fixes if not launched, else a card.
+- **0055 ruled ("Do", 270108a): sup18 runs home-rule-and-rows and
+  cell-screens-fix in parallel**, each with a UI reviewer (first such wave);
+  token organizer/sup18, prompts in ~/.local/share/organizer/prompts/
+  organizer-sup18.*. End it when both land.
+- **0056 ruled ("waiting says whose", baa5c81) after sup18 launched:**
+  lead-side-fixes amendment 1 (FR-10, G8), card `waiting-says-whose`, depends
+  on home-rule-and-rows; next supervisor after sup18, one small card.
 - **Aglaea** told where her findings went (thread
   01M3PW6Z2H9YV25E6GQG7CJWVE). Not carried: F4–F6, F8, C9, C10.
 - **Stage 5 exit (a):** a draft on a real initiative (Pablo presses Draft

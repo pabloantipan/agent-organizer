@@ -1,8 +1,8 @@
 # What the lead sees and presses works as it reads
 
-status: proposed (0055)
+status: accepted (0055, 2026-09-29); amendment 1 from 0056
 owner: pablo
-decisions: [0019 ruled, 0034 ruled, 0047 ruled, 0051 ruled, 0053 ruled, 0055 proposed]
+decisions: [0019 ruled, 0034 ruled, 0047 ruled, 0051 ruled, 0053 ruled, 0055 ruled, 0056 ruled]
 roadmap: stage `discovery-in-a-cell` (its cell screens) and fixes to stage 2's Home; appetite one wave
 
 ## Problem
@@ -52,8 +52,8 @@ them. The ones carried here, most severe first:
 
 ## Non-goals
 
-- F3 ("quiet" beside "1 blocked"): it is against twenty-at-a-glance FR-6,
-  a ruled choice, so it is raised as its own record (0056).
+- F3's blocked half ("quiet" beside "1 blocked"): the state rule stays as
+  ruled (0056); a blocked card does not say whom it waits on.
 - F9 (a solid accent on every Needs me row, against principle 3), and a
   general rule for disabled actions: they go to the design system's owner
   (0054).
@@ -102,6 +102,14 @@ them. The ones carried here, most severe first:
   `Crew.tsx` reads it instead of repeating the rule. `retire --retirable` on
   a cell in definition shall give "the cell is in definition" as its reason.
 
+- **FR-10** (0056: waiting says whose; amendment 1) Home's "N waiting"
+  signal shall name the owners of the initiative's proposed records, distinct,
+  in the order their oldest record was raised, joined with ", " after a " · "
+  ("1 waiting · fse", "3 waiting · pablo, ana"). A record with no owner reads
+  "no owner". The count and the four states do not change. The initiative
+  header's "N decisions waiting" (`InitiativeHeader.tsx:146`) is left as it
+  is.
+
 ## Acceptance → gate
 
 | # | FR | Given / When / Then | Check | Expected |
@@ -112,6 +120,7 @@ them. The ones carried here, most severe first:
 | G4 | 4, 6, 8 | init-define and init-drafted: Bring crew up disabled with its reason as visible text; the roster link lands with the record expanded; a disabled tiny button at `.45` | screenshots; the computed opacity from the DOM | as stated |
 | G5 | 5 | Draft the cell's six states. Checking and refused are screenshots on the fixture. Opened and error come from a test double for the Open call, not a real session | screenshots per state | as the table |
 | G6 | 9 | `accept_record` on the fixture's drafted cell, a test in `internal/service`; `organizer retire init-define --retirable` prints "the cell is in definition" | test output; command output | as stated |
+| G8 | 10 | On `--twenty`, email-digest's row reads "1 waiting · fse"; a fixture initiative with records of two owners names both, oldest first; one with no owner reads "no owner" | a test in `frontend/src/lib` for the owner list; a screenshot of Home | as stated |
 | G7 | all | Nothing else broke | `XDG_DATA_HOME=$(mktemp -d) make test` (it runs `npm test` once frontend-tests lands); `cd frontend && npm run build`; the redesign's G18 grep | pass |
 
 ## Boundary
@@ -131,6 +140,11 @@ them. The ones carried here, most severe first:
   - `internal/model/model.go` (Cell: `accept_record`), `internal/service/`
     (`draft.go`, `crew.go`, `retire.go`), `frontend/wailsjs` (generated);
   - tests, fixtures.
+- **waiting-says-whose card** (amendment 1):
+  - `Home.tsx` (the waiting signal only);
+  - `InitiativeHeader.tsx` (`waitingDecisions` may move to `lib`, same
+    count);
+  - a `lib` function and its test; fixtures.
 - **Must not touch:**
   - `docs/design-system.md` (0054);
   - camp or any other initiative's files;
@@ -159,7 +173,10 @@ them. The ones carried here, most severe first:
 |---|---|---|---|
 | `home-rule-and-rows` | G1, G2, G3, G7 | — | true |
 | `cell-screens-fix` | G4, G5, G6, G7 | — | true |
+| `waiting-says-whose` | G8, G7 | home-rule-and-rows (both touch `Home.tsx`) | false |
 
 ## Amendments
 
-- none yet
+- **1, 2026-09-29, from 0056** ("waiting says whose", ruled after the wave
+  of 0055 launched): FR-10, G8, card `waiting-says-whose`, after
+  home-rule-and-rows. A signal's words, so no UI reviewer.
