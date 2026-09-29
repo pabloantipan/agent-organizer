@@ -56,6 +56,7 @@ This directory is an initiative root: it holds copies of the repos listed in
 ```bash
 go test ./...                                  # unit tests, fixtures in testdata/home
 UPDATE_GOLDEN=1 go test ./internal/cli/        # refresh the status golden file
+cd frontend && npm test                        # vitest once over frontend/src/lib (make test runs it after go test)
 go run . status | board | doctor | sync        # CLI against the real home
 go run . prompt <initiative-id> [--run]        # agent review prompt, or open a terminal running it
 wails dev                                      # app + http://localhost:34115 for browser dev
