@@ -83,7 +83,12 @@ func (s *Service) PlanRetire(o RetireOptions) (RetirePlan, error) {
 	retire := map[string]bool{}
 	if o.Retirable {
 		o.Seats = Retirable(si)
-		if len(o.Seats) == 0 {
+		switch {
+		case len(o.Seats) > 0:
+		case inDefinition(si):
+			// A roster being defined is not a wave that ended (FR-9).
+			p.Problems = append(p.Problems, "no seat is retirable: the cell is in definition")
+		default:
 			p.Problems = append(p.Problems, "no seat is retirable: every seat is the human, the reconciler, named by an open card, or working")
 		}
 	}

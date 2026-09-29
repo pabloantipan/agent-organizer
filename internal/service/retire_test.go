@@ -131,6 +131,30 @@ func TestPlanRetireReportsASeatItCannotName(t *testing.T) {
 	}
 }
 
+// lead-side-fixes G6 (FR-9): --retirable on a cell in definition, a draft
+// or a roster no seat of which has run, says so as its reason.
+func TestPlanRetireRetirableSaysTheCellIsInDefinition(t *testing.T) {
+	defer func(prev func(string) map[string]bool) { sessionLister = prev }(sessionLister)
+	sessionLister = func(string) map[string]bool { return map[string]bool{} }
+	defer func(f func() []session.Run) { loadRuns = f }(loadRuns)
+	loadRuns = func() []session.Run { return nil }
+	t.Setenv("XDG_DATA_HOME", t.TempDir())
+
+	for _, draft := range []bool{false, true} {
+		si := model.ScannedInitiative{}
+		si.ID, si.Path = "init-define", t.TempDir()
+		si.Cell = &model.Cell{Project: "define", Agents: []string{"po_carla", "tech_lead_elena"}, Human: "pablo", Draft: draft}
+		s := &Service{state: cache.State{Local: model.Snapshot{Initiatives: []model.ScannedInitiative{si}}}}
+		p, err := s.PlanRetire(RetireOptions{InitiativeID: si.ID, Retirable: true})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(p.Seats) != 0 || len(p.Problems) != 1 || p.Problems[0] != "no seat is retirable: the cell is in definition" {
+			t.Errorf("draft %v: seats %v, problems %v, want none and the cell is in definition", draft, p.Seats, p.Problems)
+		}
+	}
+}
+
 // Retiring the last seat leaves a cell with no seats, not a malformed file:
 // cell.json reads `"agents": []` and the scan still finds the cell.
 func TestRetireOfTheLastSeatKeepsTheCell(t *testing.T) {
