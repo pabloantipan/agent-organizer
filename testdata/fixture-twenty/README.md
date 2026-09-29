@@ -10,7 +10,11 @@ How each state arises, from files except where noted:
 - **waits on you** (3): a proposed record owned by `pablo`
   (`claims-portal` 0002, `vendor-audit` 0001), and a card whose next action
   starts `pablo:` in an initiative with a cell (`onboarding-flow`; the queue
-  reads cards only through a cell).
+  reads cards only through a cell). `vendor-audit` also has a proposed record
+  with no owner, raised after its `pablo` one; a record with no owner is
+  the lead's to rule (`ownedByLead` in `lib/queue.ts`), so it adds a Needs
+  me row but no state, and the signal reads "2 waiting · pablo, no owner"
+  (lead-side-fixes FR-10, G8).
 - **executing** (4): cannot come from files. The scan reads agents from the
   process table, so the script starts one stand-in agent per line of
   `agents.txt`, a sleep named after the config's `agent_binary`, with its cwd
@@ -25,9 +29,7 @@ How each state arises, from files except where noted:
   (lead-side-fixes FR-10, G8).
 - **quiet** (11): the rest. Two on purpose: `mobile-sync` has two `now`
   cards with nobody on them (A3), and `email-digest` has a proposed record
-  owned by `fse`, which is neither the lead's nor business's. `docs-site`
-  has a proposed record with no owner, which waits on nobody and reads
-  "1 waiting · no owner" (FR-10, G8).
+  owned by `fse`, which is neither the lead's nor business's.
 
 Phases: 5 in discovery, 10 building, 5 with no roadmap. Every staged
 initiative has a ruled `0001-the-roadmap` record that gates its first

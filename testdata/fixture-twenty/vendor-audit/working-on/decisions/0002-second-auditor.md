@@ -1,5 +1,5 @@
 ---
-title: Which search the docs site uses
+title: Whether a second auditor signs
 status: proposed
 raised: 2026-09-21
 raised_by: fse
@@ -17,7 +17,7 @@ superseded_by:
 
 ## Question
 
-Which search the docs site uses?
+Whether a second auditor signs?
 
 ## Options
 
