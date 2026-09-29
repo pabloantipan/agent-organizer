@@ -58,6 +58,7 @@ export const api = {
   getAgents: (): Promise<AgentsView> => App.GetAgents(),
   createAgent: (id: string, name: string): Promise<void> => App.CreateAgent(id, name),
   createCrew: (id: string): Promise<string[]> => App.CreateCrew(id),
+  draftCell: (id: string, open: boolean): Promise<string> => App.DraftCell(id, open),
   getCell: (id: string): Promise<CellView> => App.GetCell(id),
   getCellThread: (id: string, tid: string): Promise<CellThreadView> => App.GetCellThread(id, tid),
   postToCell: (id: string, p: CellPost): Promise<discuss.PostResult> => App.PostToCell(id, p as service.CellPost),

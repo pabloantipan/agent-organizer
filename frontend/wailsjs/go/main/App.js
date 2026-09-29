@@ -38,6 +38,10 @@ export function CreateCrew(arg1) {
   return window['go']['main']['App']['CreateCrew'](arg1);
 }
 
+export function DraftCell(arg1, arg2) {
+  return window['go']['main']['App']['DraftCell'](arg1, arg2);
+}
+
 export function EditNote(arg1, arg2, arg3, arg4) {
   return window['go']['main']['App']['EditNote'](arg1, arg2, arg3, arg4);
 }
