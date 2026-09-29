@@ -15,6 +15,14 @@ restating it (the discuss skill).
   Aglaea (seat beside me, 0053) asked to review stage 5's cell screens,
   thread 01M3PVQZ7JS5F40030Z09M2NMS; her findings come back [for fse]; the
   design-system ownership question rides her answer; raise it as a record.
+- **Aglaea's first look (3e374f1, docs/ux/reviews/2026-09-29-first-look.md):**
+  F1 sev 3, Home names cut to 4–5 chars at the 1024 minimum; F2 sev 3, Rule
+  from Needs me shows no question, option meanings or recommendation; F3
+  sev 2, "quiet" beside "1 blocked"/"1 waiting" (against FR-6 of
+  twenty-at-a-glance, ruled: a record, not a card); F4–F9 minor. Held until
+  her answer on the cell-screens review, then one batch. **0054** raised:
+  who owns docs/design-system.md (recommend Aglaea; Hephaistos's skill claims
+  it too). Read docs/ux/memory.md before any ask of her.
 - **Stage 5 exit:** (a) needs a draft shown on a real initiative: Pablo
   presses Draft the cell on one with a goal and people.md and no cell (the
   Open path was never pressed by a gate); (b) is camp's move into building.
