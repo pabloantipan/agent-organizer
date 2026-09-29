@@ -12,6 +12,7 @@ gate: "docs/specs/lead-side-fixes.md Acceptance, rows G1, G2, G3, G7; the Gate s
 stage: discovery-in-a-cell
 seat: fix-home
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -46,3 +47,12 @@ none
 - fixture-twenty's onboarding-flow cell has an `fse` seat without a persona file, so its row now reads "fse has no persona file" with Open.
 - init-a's next date ("2026-10-01 target") wraps in its 96 px column at 1440; not new, not carried.
 - New fixture `testdata/fixture-overlay/init-ready` (a cell in definition with every file) adds one Launch row and one initiative to the fixture's Home, which the other builder's screenshots will show.
+
+## Review
+- Verdict: **pass**. Unmet gate rows: none.
+- G1: diff puts `RecordBody` (the body through `marked`, as `DecisionsView.tsx:129`) above the options when Needs me opens the box (`withRecord`), clamped to 8 × `--line-md` with "show all" and "<NNNN> in Decisions" (`openInitiative(id, "decisions")`). Builder's screenshots show claims-portal 0002 clamped and expanded, init-drafted 0001 (the roster record) expanded, and the link landing on claims-portal's Decisions.
+- G2: re-measured on `--twenty` in headless Chrome, rail expanded (250 px): 1024×640 port `narrow`, `--id-w` 129 px, 20 rows, cut none; 1440×900 20 rows, cut none. `.wt-notes/fix-home-review/g2-dom-check.txt`, `g2-home-1024x640-{top,bottom}.png` (the builder's 1024 shot showed only 9 of 20 rows), `g2-home-1440x900-*.png`.
+- G3: `npx vitest run src/lib/queue.test.ts -t FR-3` → 2 passed (`g3-vitest.log`); screenshots show init-define "designer_diego has no persona file" · Open landing on Agents, init-ready · Launch; subtitle and badge title read as FR-7 (diff and screenshots).
+- G7: `XDG_DATA_HOME=$(mktemp -d) make test` exit 0, go ok, vitest 20/20; `npm run build` exit 0; redesign G18 grep on `main...home-rule-and-rows` empty; `wails build` exit 0. Boundary: 11 files, all in the card's list or the rule box it names (`RuleDecisionBox.tsx`, `home.css`, `rule-box.css`; the spec says "Home and rule-box CSS").
+- Not covered by the gate: (1) the "in Decisions" link lands with nothing expanded until cell-screens-fix's FR-6 action exists; `RecordBody` should call it then. (2) `ONE_LINE_REST = 320 + 480` in `Home.tsx` restates the column widths in `home.css`; a change to one silently breaks the narrow switch. (3) `useFitIds` measures on mount and resize only, not on font load; the measured 129 px matches the builder's, so no effect seen. (4) G2 is measured in Chromium, not WKWebView (Safari 15 floor); ResizeObserver and grid areas are both supported there. (5) the record body is `marked` HTML unsanitised, as on the Decisions tab already.
+- Reviewer: fix-home-review, 2026-09-29. Evidence in `.wt-notes/fix-home-review/`.
