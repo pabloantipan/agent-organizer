@@ -1,6 +1,6 @@
 ---
 title: A cell in definition reads as one on the rail, and its buttons say why
-status: next
+status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-29
