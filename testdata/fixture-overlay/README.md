@@ -48,3 +48,10 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
   `draft: true` with a proposed `0001-the-cell-roster`, so it reads "in
   definition" waiting on that record and `organizer crew init-drafted --print`
   refuses naming it
+- the same three cells cover discovery-in-a-cell G6 and G7 with no new file:
+  `init-define` (in definition, not a draft, `designer_diego` without a
+  persona file) is marked on the rail, offers "Retire…", has Bring crew up
+  disabled naming `agents/designer_diego.md`, and makes the one Launch row in
+  Needs me; `init-drafted` (a draft) is marked too, has Bring crew up
+  disabled naming 0001 and no Launch row (its record is a Rule row);
+  init-a, whose seats run as stand-ins, has no mark and no Launch row
