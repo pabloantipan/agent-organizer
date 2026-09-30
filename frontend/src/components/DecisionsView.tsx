@@ -25,7 +25,7 @@ const median = (xs: number[]) => {
  *  ruling is signed by the ruler (FR-12, FR-14, 0045); everything else is
  *  read-only. Needs me still lists only the lead's records (0034). */
 export function DecisionsView() {
-  const { view, selectedInitiative, select, decisionFocus } = useBoard();
+  const { view, selectedInitiative, select, decisionFocus, decisionSeq } = useBoard();
   const [expanded, setExpanded] = useState<string | null>(decisionFocus);
   const [ruling, setRuling] = useState<string | null>(null);
   const focusRef = useRef<HTMLDivElement | null>(null);
@@ -39,7 +39,8 @@ export function DecisionsView() {
     // Focus and names, navigating (ui-leftovers FR-5): focus lands on the
     // record's row, never on the page body.
     focusRef.current?.querySelector<HTMLButtonElement>("button.dec-line")?.focus({ preventScroll: true });
-  }, [decisionFocus]);
+    // decisionSeq: the chip pressed again on Decisions lands again (FR-2).
+  }, [decisionFocus, decisionSeq]);
   const ruleBtn = useRef<HTMLButtonElement | null>(null);
   const [showClosed, setShowClosed] = useState(false);
   const now = today();
