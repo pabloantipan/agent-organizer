@@ -11,10 +11,12 @@ type Mode = "stages" | "cards" | "calendar";
  *  selected in the rail, Stages | Cards | Calendar (FR-20). Stages opens first
  *  when the initiative has a roadmap, Cards when it has none. */
 export function RoadmapView() {
-  const { view, selectedInitiative } = useBoard();
+  const { view, selectedInitiative, stageFocus } = useBoard();
   const [picked, setPicked] = useState<Mode | null>(null);
-  // Another initiative falls back to its own default view.
+  // Another initiative falls back to its own default view; a stage tile
+  // lands on Stages whatever was picked (initiative-header FR-4).
   useEffect(() => setPicked(null), [selectedInitiative]);
+  useEffect(() => { if (stageFocus) setPicked("stages"); }, [stageFocus]);
   if (!view) return <div className="empty">Loading…</div>;
   const selected = selectedInitiative ? (view.board.initiatives ?? []).find((i) => i.id === selectedInitiative) : null;
   if (!selected) {
@@ -42,11 +44,6 @@ export function RoadmapView() {
   return (
     <div>
       {modes}
-      <div className="board-head">
-        <h1>{selected.id}</h1>
-        <span className="meta">{selected.title}</span>
-        {selected.client && <span className="badge client">{selected.client}</span>}
-      </div>
       <Roadmap initiative={selected} cards={cards} collapsible={false} defaultOpen />
     </div>
   );

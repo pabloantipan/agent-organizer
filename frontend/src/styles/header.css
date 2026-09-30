@@ -1,18 +1,14 @@
 /* The initiative header's additions (docs/specs/twenty-at-a-glance.md FR-4):
-   scope in and out under the goal, and each stage's phase as a word on the
-   stepper. The header's base rules stay in shell.css. Tier-2 role tokens and
-   the seven type sizes only; no nesting, @layer or color-mix (Safari 15.0). */
+   scope in and out under the goal, the clamps, the read-only mark. The
+   header's base rules stay in shell.css. Tier-2 role tokens and the seven
+   type sizes only; no nesting, @layer or color-mix (Safari 15.0). */
 
-/* Scope: a label and the owner's words, one line per side, flowing like prose. */
+/* Scope: a label and the owner's words, one line per side, flowing like prose,
+   clamped at two lines like the goal (initiative-header FR-1). */
 .ihead-scope { font-size: var(--font-size-md); line-height: var(--line-md); color: var(--fg-muted); max-width: 72ch; }
 .ihead-scope ul, .ihead-scope li { display: inline; margin: 0; padding: 0; }
 .ihead-scope li + li::before { content: " · "; color: var(--fg-subtle); }
 .ihead-scope .none, .ihead-scope.missing { color: var(--fg-subtle); font-style: italic; }
-
-/* The stepper's first line: number and state, then the phase word. */
-.stg-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-width: 0; }
-.stg-head .lz { flex: none; }
-.stages-none .lz { margin-left: var(--space-1); }
 
 /* Goal and measure clamp to two lines (FR-10, 0038). The control shows only
    when the text is clamped or unfolded, and is a real button: the global

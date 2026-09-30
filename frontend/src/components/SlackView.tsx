@@ -16,8 +16,10 @@ const PEOPLE_KEY = "slack.people";
  *  threads ride the agents feed; only open conversations and the archive
  *  are fetched. Lifecycle stays in Agents. */
 export function SlackView() {
-  const { selectedInitiative, setSelectedInitiative, agents: view, slackFocus, setSlackFocus, view: board } = useBoard();
-  const [people, setPeople] = useState<boolean>(() => { try { return localStorage.getItem(PEOPLE_KEY) !== "closed"; } catch { return true; } });
+  const { selectedInitiative, setSelectedInitiative, agents: view, slackFocus, setSlackFocus, view: board, widthClass } = useBoard();
+  // People starts closed at compact, so the timeline keeps the width
+  // (initiative-header FR-6); the stored choice is untouched until toggled.
+  const [people, setPeople] = useState<boolean>(() => { try { return localStorage.getItem(PEOPLE_KEY) !== "closed" && useBoard.getState().widthClass !== "compact"; } catch { return true; } });
   // People is a disclosure, not a commit: aria-pressed and the selected
   // surface while open, never the accent (ui-leftovers FR-7).
   const togglePeople = () => { const next = !people; setPeople(next); try { localStorage.setItem(PEOPLE_KEY, next ? "open" : "closed"); } catch { /* per-viewer convenience */ } };
@@ -65,7 +67,6 @@ export function SlackView() {
   if (!g) {
     return (
       <div>
-        <div className="board-head"><h1>{selectedInitiative}</h1></div>
         <div className="empty">No mailbox: this initiative has no agents/cell.json, so its agents cannot send or receive messages.</div>
       </div>
     );
@@ -77,11 +78,10 @@ export function SlackView() {
   const { deaf, capped } = queueOf(g, board);
   const readOnly = readOnlyOf(board, g.id);
   return (
-    <div className="slack">
-      <div className="board-head">
-        <h1>{g.id}</h1>
-        <span className="meta">{g.title}</span>
-        {g.client && <span className="badge client">{g.client}</span>}
+    <div className={`slack ${widthClass}`}>
+      {/* No title row: the header above names the initiative (initiative-header
+          FR-5); what is not the id stays on this toolbar line. */}
+      <div className="slack-tools">
         <span className="spacer" />
         {slackFocus && <span className="badge persona focus">with {slackFocus} <button className="rail-icon" onClick={() => setSlackFocus(null)} title="back to the channel"><X size={11} /></button></span>}
         <button className={`tiny-btn ${deaf > 0 ? "hot" : ""}`} aria-pressed={people} aria-label={peopleLabel({ seats: seats.length, live, capped, deaf })} onClick={togglePeople} title={people ? "hide people" : "show people"}>

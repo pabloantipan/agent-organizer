@@ -53,6 +53,20 @@ type State = {
   openRule: (key: string | null) => void;
   setRuleDraft: (patch: Partial<Omit<RuleDraft, "key">>) => void;
   dropRule: (key: string) => void;
+  // The initiative header open (Details) or folded (initiative-header FR-1).
+  // The stored choice is written only by the lead's Details toggle; a landing
+  // folds the header in memory and leaves the stored choice alone, which the
+  // next navigation made by hand (openInitiative) applies again.
+  headerOpen: boolean;
+  setHeaderOpen: (v: boolean) => void;
+  // stageFocus is the stage Roadmap → Stages expands and focuses, set by a
+  // stage tile: <initiative>/<stage id>. StageRoadmap consumes it and clears it.
+  stageFocus: string | null;
+  // Open on a card row of a Needs me list is a landing: the card back opens
+  // and the header folds (FR-1), without writing the stored choice.
+  openCardLanding: (c: merge.BoardCard) => void;
+  openStage: (initiativeId: string, stageId: string) => void;
+  clearStageFocus: () => void;
   slackFocus: string | null;
   setSlackFocus: (agent: string | null) => void;
   openSlack: (initiativeId: string, agent: string | null) => void;
@@ -79,6 +93,9 @@ type State = {
   // decisionFocus is the record Decisions expands, scrolls to and highlights,
   // set by openDecision: <initiative>/<NNNN>. Any other navigation clears it.
   decisionFocus: string | null;
+  // Counts openDecision calls, so pressing the chip again on the same record
+  // lands again (FR-2: a press always visibly does something).
+  decisionSeq: number;
   // agentsLanding is where focus lands on the Agents sub-view after a
   // Needs me verb (ui-leftovers FR-5): "seat:<name>", the seat blocking the
   // launch, or "crew-up", Bring crew up. Crew consumes it and clears it.
@@ -113,6 +130,8 @@ const ruleState = (d: Drafts) => ({ ruleDraft: d.open, ruleDrafts: d.drafts });
 
 const RAIL_KEY = "rail.collapsed.strip";
 const storedRail = () => { try { return localStorage.getItem(RAIL_KEY); } catch { return null; } };
+const HEADER_KEY = "initiative.header.open";
+const storedHeaderOpen = () => { try { return localStorage.getItem(HEADER_KEY) === "1"; } catch { return false; } };
 const width0 = typeof window === "undefined" ? 1440 : window.innerWidth;
 
 export const useBoard = create<State>((set, get) => ({
@@ -166,12 +185,18 @@ export const useBoard = create<State>((set, get) => ({
   openRule: (key) => set((st) => ruleState(openDraft(draftsOf(st), key))),
   setRuleDraft: (patch) => set((st) => ruleState(editDraft(draftsOf(st), patch))),
   dropRule: (key) => set((st) => ruleState(dropDraft(draftsOf(st), key))),
+  headerOpen: storedHeaderOpen(),
+  setHeaderOpen: (headerOpen) => { try { localStorage.setItem(HEADER_KEY, headerOpen ? "1" : "0"); } catch { /* per-viewer */ } set({ headerOpen }); },
+  stageFocus: null,
+  openCardLanding: (selected) => set({ selected, headerOpen: false }),
+  openStage: (selectedInitiative, stageId) => set({ ruleDraft: null, headerOpen: false, screen: "initiative", selectedInitiative, sub: "roadmap", selected: null, needsMeFocus: null, decisionFocus: null, stageFocus: `${selectedInitiative}/${stageId}` }),
+  clearStageFocus: () => set({ stageFocus: null }),
   slackFocus: null,
   setSlackFocus: (slackFocus) => set({ slackFocus }),
-  openSlack: (selectedInitiative, slackFocus) => set({ ruleDraft: null, screen: "initiative", sub: "conversations", selectedInitiative, slackFocus, slackDraft: null, needsMeFocus: null }),
+  openSlack: (selectedInitiative, slackFocus) => set({ ruleDraft: null, headerOpen: false, screen: "initiative", sub: "conversations", selectedInitiative, slackFocus, slackDraft: null, needsMeFocus: null }),
   slackDraft: null,
-  openSlackThread: (selectedInitiative, threadId) => set({ ruleDraft: null, screen: "initiative", sub: "conversations", selectedInitiative, selected: null, slackDraft: { threadId }, needsMeFocus: null }),
-  openSlackDraft: (selectedInitiative, slackFocus, subject, body) => set({ ruleDraft: null, screen: "initiative", sub: "conversations", selectedInitiative, selected: null, slackFocus, slackDraft: { subject, body }, needsMeFocus: null }),
+  openSlackThread: (selectedInitiative, threadId) => set({ ruleDraft: null, headerOpen: false, screen: "initiative", sub: "conversations", selectedInitiative, selected: null, slackDraft: { threadId }, needsMeFocus: null }),
+  openSlackDraft: (selectedInitiative, slackFocus, subject, body) => set({ ruleDraft: null, headerOpen: false, screen: "initiative", sub: "conversations", selectedInitiative, selected: null, slackFocus, slackDraft: { subject, body }, needsMeFocus: null }),
   clearSlackDraft: () => set({ slackDraft: null }),
   addNote: async (initiativeId, slug, text) => {
     const key = `${initiativeId}/${slug}`;
@@ -216,13 +241,15 @@ export const useBoard = create<State>((set, get) => ({
   sub: "overview",
   needsMeFocus: null,
   decisionFocus: null,
+  decisionSeq: 0,
   goHome: () => set({ screen: "home", selectedInitiative: null, needsMeFocus: null, decisionFocus: null }),
   agentsLanding: null,
-  openAgentsAt: (selectedInitiative, agentsLanding) => set({ ruleDraft: null, screen: "initiative", selectedInitiative, sub: "agents", needsMeFocus: null, decisionFocus: null, agentsLanding }),
+  openAgentsAt: (selectedInitiative, agentsLanding) => set({ ruleDraft: null, headerOpen: false, screen: "initiative", selectedInitiative, sub: "agents", needsMeFocus: null, decisionFocus: null, agentsLanding }),
   clearAgentsLanding: () => set({ agentsLanding: null }),
-  openInitiative: (selectedInitiative, sub) => set({ ruleDraft: null, screen: "initiative", selectedInitiative, sub, needsMeFocus: null, decisionFocus: null }),
-  openNeedsMe: (needsMeFocus) => set({ screen: "home", selectedInitiative: null, selected: null, needsMeFocus, decisionFocus: null }),
-  openDecision: (selectedInitiative, number) => set({ ruleDraft: null, screen: "initiative", selectedInitiative, sub: "decisions", selected: null, needsMeFocus: null, decisionFocus: `${selectedInitiative}/${number}` }),
+  // A navigation by hand: the header takes the lead's stored choice again.
+  openInitiative: (selectedInitiative, sub) => set({ ruleDraft: null, headerOpen: storedHeaderOpen(), screen: "initiative", selectedInitiative, sub, needsMeFocus: null, decisionFocus: null, stageFocus: null }),
+  openNeedsMe: (needsMeFocus) => set({ headerOpen: false, screen: "home", selectedInitiative: null, selected: null, needsMeFocus, decisionFocus: null }),
+  openDecision: (selectedInitiative, number) => set((st) => ({ ruleDraft: null, headerOpen: false, screen: "initiative", selectedInitiative, sub: "decisions", selected: null, needsMeFocus: null, stageFocus: null, decisionFocus: `${selectedInitiative}/${number}`, decisionSeq: st.decisionSeq + 1 })),
   openSettings: () => set({ ruleDraft: null, screen: "settings", selectedInitiative: null, needsMeFocus: null, decisionFocus: null }),
   selected: null,
   filterMachine: null,
@@ -273,7 +300,9 @@ export const useBoard = create<State>((set, get) => ({
     }
   },
 
-  select: (selected) => set({ selected }),
+  // Open on Home's Needs me card row is a landing, so it folds the header
+  // (FR-1); opening a card anywhere else leaves the header as it is.
+  select: (selected) => set(selected && get().screen === "home" ? { selected, headerOpen: false } : { selected }),
   setFilterMachine: (filterMachine) => set({ filterMachine }),
   setFilterClient: (filterClient) => set({ filterClient }),
 

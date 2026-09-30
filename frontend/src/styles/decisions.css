@@ -2,3 +2,7 @@
    at the top of an expanded proposed record the lead owns; the box itself is
    rule-box.css, dropping under it. Tier-2 tokens only. */
 .dec-actions { display: flex; justify-content: flex-end; padding: var(--space-1) 0 var(--space-2); }
+
+/* Where a landing puts the focused record, or its section when the heading
+   fits above it: just under the header and tabs (DecisionsView, U8, U9). */
+.dec-section, .dec.focused { scroll-margin-top: var(--space-2); }

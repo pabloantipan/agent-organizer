@@ -218,6 +218,7 @@ export namespace merge {
 	    measure: string;
 	    scope: model.Scope;
 	    stages: model.Stage[];
+	    charter_modified: boolean;
 	    path: string;
 	    machine: string;
 	    local: boolean;
@@ -262,6 +263,7 @@ export namespace merge {
 	        this.measure = source["measure"];
 	        this.scope = this.convertValues(source["scope"], model.Scope);
 	        this.stages = this.convertValues(source["stages"], model.Stage);
+	        this.charter_modified = source["charter_modified"];
 	        this.path = source["path"];
 	        this.machine = source["machine"];
 	        this.local = source["local"];

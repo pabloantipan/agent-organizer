@@ -1,5 +1,6 @@
 import type { merge, model } from "../../wailsjs/go/models";
-import type { ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useBoard } from "../stores/board.store";
 import { addDays, daysBetween, parseISO, shortDate, today, toISO } from "../lib/dates";
 import { PhaseWord } from "./InitiativeHeader";
 import "../styles/roadmap.css";
@@ -38,6 +39,30 @@ type Row = {
  *  A stage without a target is a dashed bar after the last dated thing, sized
  *  by order only and labelled with its appetite; no date is computed from it. */
 export function StageRoadmap({ initiative }: { initiative: merge.BoardInitiative }) {
+  const { view, stageFocus, clearStageFocus } = useBoard();
+  // One stage open at a time (initiative-header FR-4), by position: a broken
+  // roadmap may repeat an id (a problem the scan reports). A stage tile in
+  // the header lands here through stageFocus: the first stage with that id
+  // expands and takes focus, then the field clears.
+  const [expanded, setExpanded] = useState<number | null>(null);
+  const [focusOn, setFocusOn] = useState<number | null>(null);
+  const toggles = useRef(new Map<number, HTMLButtonElement>());
+  useEffect(() => {
+    const prefix = `${initiative.id}/`;
+    if (!stageFocus?.startsWith(prefix)) return;
+    const k = (initiative.stages ?? []).findIndex((s) => s.id === stageFocus.slice(prefix.length));
+    if (k >= 0) { setExpanded(k); setFocusOn(k); }
+    clearStageFocus();
+  }, [stageFocus, initiative.id, initiative.stages, clearStageFocus]);
+  useEffect(() => {
+    if (focusOn === null) return;
+    const el = toggles.current.get(focusOn);
+    el?.scrollIntoView({ block: "nearest" });
+    el?.focus({ preventScroll: true });
+    setFocusOn(null);
+  }, [focusOn]);
+  const cards = Object.values(view?.board.columns ?? {}).flat()
+    .filter((c) => c.initiative_id === initiative.id && c.machine === initiative.machine);
   const now = today();
   const stages = initiative.stages ?? [];
   const records = recordsByGate(initiative.decisions);
@@ -120,7 +145,10 @@ export function StageRoadmap({ initiative }: { initiative: merge.BoardInitiative
         </div>
       </div>
       {rows.map((r, i) => (
-        <StageRow key={i} r={r} now={now} pct={pct} slotLeft={slotLeft} slot={slot} grid={grid} />
+        <StageRow key={i} r={r} now={now} pct={pct} slotLeft={slotLeft} slot={slot} grid={grid}
+          initiative={initiative.id} cards={cards.filter((c) => c.stage === r.stage.id)}
+          open={expanded === i} onToggle={() => setExpanded(expanded === i ? null : i)}
+          toggleRef={(el) => { if (el) toggles.current.set(i, el); else toggles.current.delete(i); }} />
       ))}
       <div className="srm-foot">
         <span><i className="srm-key done" /> stage done</span>
@@ -133,8 +161,9 @@ export function StageRoadmap({ initiative }: { initiative: merge.BoardInitiative
   );
 }
 
-function StageRow({ r, now, pct, slotLeft, slot, grid }: {
+function StageRow({ r, now, pct, slotLeft, slot, grid, initiative, cards, open, onToggle, toggleRef }: {
   r: Row; now: Date; pct: (d: Date) => number; slotLeft: (i: number) => number; slot: number; grid: ReactNode;
+  initiative: string; cards: merge.BoardCard[]; open: boolean; onToggle: () => void; toggleRef: (el: HTMLButtonElement | null) => void;
 }) {
   const s = r.stage;
   const missing = r.gates.filter((g) => !g.record).map((g) => g.id);
@@ -155,8 +184,11 @@ function StageRow({ r, now, pct, slotLeft, slot, grid }: {
   for (const l of labels) { row = l.at - last < 5 ? row + 1 : 0; lift.set(l.g.id, row % 2); last = l.at; }
 
   return (
-    <div className={`srm-row ${r.state}`}>
-      <div className="srm-label">
+    <>
+    <div className={`srm-row ${r.state} ${open ? "expanded" : ""}`}>
+      <button ref={toggleRef} className="srm-label srm-toggle" aria-expanded={open} aria-controls={`srm-detail-${r.n}`}
+        aria-label={`Stage ${r.n}: ${s.title || s.id}${state ? `, ${state === "current" ? "now" : state}` : ""}. ${open ? "Hide" : "Show"} its detail`}
+        onClick={onToggle}>
         <span className="srm-head">
           <span className="srm-n num">{r.n}{state && ` · ${state}`}</span>
           <PhaseWord phase={s.phase} />
@@ -166,7 +198,7 @@ function StageRow({ r, now, pct, slotLeft, slot, grid }: {
         {missing.length > 0 && (
           <span className="srm-missing num">{missing.join(", ")} {missing.length === 1 ? "names" : "name"} no record, not drawn</span>
         )}
-      </div>
+      </button>
       <div className="srm-lane">
         {grid}
         {r.end && (
@@ -209,6 +241,65 @@ function StageRow({ r, now, pct, slotLeft, slot, grid }: {
             </span>
           );
         })}
+      </div>
+    </div>
+    {open && <StageDetail id={`srm-detail-${r.n}`} r={r} initiative={initiative} cards={cards} appetite={appetite} />}
+    </>
+  );
+}
+
+/** A stage expanded (initiative-header FR-4, §5), in the anatomy of the
+ *  design system's decision record expanded: the outcome, the exit items
+ *  checked with their met date or open, the gates as record links, the
+ *  cards that carry `stage:` this stage, the appetite and the target. */
+function StageDetail({ id, r, initiative, cards, appetite }: { id: string; r: Row; initiative: string; cards: merge.BoardCard[]; appetite: string }) {
+  const { openDecision, select } = useBoard();
+  const s = r.stage;
+  const exits = s.exit ?? [];
+  return (
+    <div id={id} className="srm-detail">
+      <p className="srm-outcome">{s.outcome || <span className="missing">no outcome written</span>}</p>
+      <div className="srm-dsec">
+        <span className="lbl">Exit</span>
+        {exits.length === 0 ? <span className="missing">no exit written</span> : (
+          <ul className="srm-exits">
+            {exits.map((x, k) => {
+              const met = parseISO(x.met);
+              return (
+                <li key={k} className={met ? "met" : ""}>
+                  <span className="srm-check" aria-hidden>{met ? "✓" : "○"}</span>
+                  <span>{x.text}</span>
+                  <span className="num meta">{met ? `met ${x.met}` : "open"}</span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+      <div className="srm-dsec">
+        <span className="lbl">Gates</span>
+        {r.gates.length === 0 ? <span className="missing">none</span> : (
+          <span className="srm-links">
+            {r.gates.map((g) => g.record ? (
+              <button key={g.id} className={`lz ${g.record.status === "proposed" ? "waiting" : ""}`} onClick={() => openDecision(initiative, g.record!.number)} title={g.record.title}>
+                {g.record.number} · {g.record.status === "proposed" ? "waiting" : g.record.status}
+              </button>
+            ) : <span key={g.id} className="missing">{g.id} names no record</span>)}
+          </span>
+        )}
+      </div>
+      <div className="srm-dsec">
+        <span className="lbl">Cards</span>
+        {cards.length === 0 ? <span className="missing">no card carries stage: {s.id}</span> : (
+          <span className="srm-links">
+            {cards.map((c) => <button key={c.slug} className="linkish" onClick={() => select(c)} title={c.next || c.title}>{c.title || c.slug} <span className="meta">· {c.status}</span></button>)}
+          </span>
+        )}
+      </div>
+      <div className="srm-dsec">
+        <span className="lbl">Appetite</span><span>{appetite}</span>
+        {s.target && <><span className="lbl">Target</span><span className="num">{s.target}</span></>}
+        {s.done && <><span className="lbl">Done</span><span className="num">{s.done}</span></>}
       </div>
     </div>
   );

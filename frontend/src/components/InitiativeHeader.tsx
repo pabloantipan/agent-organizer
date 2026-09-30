@@ -1,9 +1,10 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { Lock } from "lucide-react";
+import { ChevronDown, Code2, FileText, Lock, Route } from "lucide-react";
 import type { merge, model } from "../../wailsjs/go/models";
 import { parseISO, today } from "../lib/dates";
-import { waitingDecisions } from "../lib/decisions";
-import { readOnlyOf } from "../lib/queue";
+import { api } from "../hooks/useWails";
+import { firstWaiting, phaseRuns, stagePosition, waitingChip } from "../lib/header";
+import { leadOf, readOnlyOf } from "../lib/queue";
 import { useBoard, type Sub } from "../stores/board.store";
 import "../styles/header.css";
 
@@ -44,23 +45,24 @@ export function PhaseWord({ phase }: { phase?: string }) {
   return <span className="lz phase" title={`phase: ${phase}`}>{phase}</span>;
 }
 
-/** Scope in and out under the goal (FR-4), in the owner's words, or "no scope
- *  yet" when both lists are empty. */
-function ScopeLines({ scope }: { scope?: model.Scope }) {
+/** Scope in and out (twenty-at-a-glance FR-4), in the owner's words, each
+ *  side clamped to two lines like the goal (initiative-header FR-1), or "no
+ *  scope yet" when both lists are empty. */
+function ScopeLines({ id, scope }: { id: string; scope?: model.Scope }) {
   const inScope = scope?.in ?? [];
   const outScope = scope?.out ?? [];
   if (inScope.length === 0 && outScope.length === 0) {
     return <div className="ihead-scope missing"><span className="lbl">Scope</span>no scope yet</div>;
   }
   const line = (label: string, items: string[]) => (
-    <div className="ihead-scope">
+    <Clamped key={`${label}-${id}`} className="ihead-scope">
       <span className="lbl">{label}</span>
       {items.length === 0 ? (
         <span className="none">none written</span>
       ) : (
         <ul>{items.map((x, k) => <li key={k}>{x}</li>)}</ul>
       )}
-    </div>
+    </Clamped>
   );
   return (
     <>
@@ -70,32 +72,63 @@ function ScopeLines({ scope }: { scope?: model.Scope }) {
   );
 }
 
-/** The stage stepper (design system, Stage stepper): number and state,
- *  title, exit in one line; done, current (named in words) or planned.
- *  Only for three or more stages; fewer are one line of words. */
-export function StageStepper({ stages }: { stages: model.Stage[] }) {
-  if (stages.length === 0) return <div className="stages-none">no roadmap yet</div>;
-  if (stages.length < 3) {
-    const cur = stages.findIndex((s) => s.current);
-    const s = stages[cur >= 0 ? cur : stages.length - 1];
-    return <div className="stages-none">stage <span className="num">{(cur >= 0 ? cur : stages.length - 1) + 1} of {stages.length}</span> · {s.title}{cur >= 0 ? " · now" : " · done"} <PhaseWord phase={s.phase} /></div>;
+const stateWord = (s: model.Stage) => {
+  const st = stageState(s);
+  return st === "done" ? "done" : st === "current" ? "now" : "";
+};
+
+/** The stage strip (initiative-header FR-3, FR-4): a label with the roadmap
+ *  icon saying what it is and where it stands, the phase once in the label
+ *  when every stage shares it, else a word over each run with a divider
+ *  where it changes; each tile is a button that opens its stage in Roadmap.
+ *  Compact shows numbers, with only the current stage's title. */
+function StageStrip({ i, compact }: { i: merge.BoardInitiative; compact: boolean }) {
+  const { openInitiative, openStage } = useBoard();
+  const stages = i.stages ?? [];
+  const roadmap = <button className="linkish" onClick={() => openInitiative(i.id, "roadmap")}>Roadmap</button>;
+  if (stages.length === 0) {
+    return <div className="stg-strip"><div className="stg-label"><Route size={13} aria-hidden />{roadmap}<span className="stg-sep">·</span>no roadmap yet</div></div>;
   }
+  const { single, runs } = phaseRuns(stages);
+  const pos = stagePosition(stages);
   return (
-    <ol className="stepper-full">
-      {stages.map((s, k) => {
-        const st = stageState(s);
-        return (
-          <li key={k} className={`stg ${st}`} aria-current={st === "current" ? "step" : undefined} title={s.outcome}>
-            <span className="stg-head">
-              <span className="stg-n num">{k + 1}{st === "done" ? " · done" : st === "current" ? " · now" : ""}</span>
-              <PhaseWord phase={s.phase} />
-            </span>
-            <span className="stg-t">{s.title || s.id}</span>
-            <span className="stg-x">{exitLine(s)}</span>
-          </li>
-        );
-      })}
-    </ol>
+    <div className="stg-strip" role="group" aria-label={`Roadmap, ${single ? `${single}, ` : ""}${pos.label}`}>
+      <div className="stg-label">
+        <Route size={13} aria-hidden />{roadmap}
+        {single && <><span className="stg-sep">·</span>{single}</>}
+        <span className="stg-sep">·</span><span className="num">{pos.label}</span>
+      </div>
+      <div className={`stg-runs ${runs.length > 1 ? "phased" : ""}`}>
+        {runs.map((r, k) => (
+          <div key={k} className="stg-run" style={compact ? undefined : { flexGrow: r.stages.length }}>
+            {r.phase && <span className="stg-phase">{r.phase}</span>}
+            <ol className="stg-tiles">
+              {r.stages.map(({ stage: s, n }) => {
+                const st = stageState(s);
+                const word = stateWord(s);
+                const title = s.title || s.id;
+                const short = compact && st !== "current";
+                return (
+                  <li key={n} className={short ? "short" : ""}>
+                    <button
+                      className={`stg ${st}`}
+                      aria-current={st === "current" ? "step" : undefined}
+                      aria-label={`Stage ${n} of ${stages.length}: ${title}${word ? `, ${word}` : ""}. Open it in Roadmap`}
+                      title={s.outcome ? `${title}\n${s.outcome}` : title}
+                      onClick={() => openStage(i.id, s.id)}
+                    >
+                      <span className="stg-n num">{n}{word && ` · ${word}`}</span>
+                      {!short && <span className="stg-t">{title}</span>}
+                      {!short && <span className="stg-x">{exitLine(s)}</span>}
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -136,42 +169,74 @@ const SUBS: { id: Sub; label: string }[] = [
   { id: "agents", label: "Agents" },
 ];
 
-/** The initiative header (FR-17): goal, measure, target, the decisions
- *  waiting, and the stages with the current one marked; then the six
- *  sub-views. No badge on a sub-view: Needs me is the one count. */
+/** The initiative header (FR-17; initiative-header FR-1): folded by default
+ *  to one bar (id, stage, waiting chip, target, the goal on one line,
+ *  Details); open, the charter (goal, measure, scope, where they are written)
+ *  and the stage strip. The stored choice is the lead's Details toggle; a
+ *  landing folds it in memory (board.store). No badge on a sub-view: Needs
+ *  me is the one count. */
 export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardInitiative }) {
-  const { sub, openInitiative, view } = useBoard();
-  const waiting = waitingDecisions(i);
+  const { sub, openInitiative, openDecision, openStage, view, agents, headerOpen, setHeaderOpen, widthClass } = useBoard();
+  const lead = leadOf((agents?.groups ?? []).find((g) => g.id === i.id));
+  const chip = waitingChip(i.decisions, lead);
+  const first = firstWaiting(i.decisions);
   // FR-13: not active means read-only, said in words beside the id.
   const readOnly = readOnlyOf(view, i.id);
+  const stages = i.stages ?? [];
+  const pos = stagePosition(stages);
+  const shown = stages[pos.current >= 0 ? pos.current : stages.length - 1];
+  const charter = `${i.path}/working-on/initiative.yaml`;
   return (
-    <header className="ihead">
-      <div className="ihead-top">
-        <div className="ihead-main">
-          <h1 className="ihead-id">
-            {i.id}
-            {i.client && <span className="lz tone">{i.client}</span>}
-            {readOnly && <span className="lz read-only" title="not active: nothing here can be ruled, moved, commented, posted or started"><Lock size={12} aria-hidden /> {readOnly}: read-only</span>}
-          </h1>
-          <Clamped key={`goal-${i.id}`} className={`ihead-goal ${i.goal ? "" : "missing"}`}>
-            <span className="lbl">Goal</span>
-            {i.goal || "no goal yet"}
-          </Clamped>
-          <ScopeLines scope={i.scope} />
-          {i.measure && <Clamped key={`measure-${i.id}`} className="ihead-measure"><span className="lbl">Measure</span>{i.measure}</Clamped>}
-        </div>
-        <div className="ihead-side">
-          <span className="ihead-target">target <b className="num">{i.target || "—"}</b></span>
-          <button
-            className={`lz ${waiting > 0 ? "waiting" : ""}`}
-            onClick={() => openInitiative(i.id, "decisions")}
-            title="decision records waiting on a ruling"
-          >
-            <span className="num">{waiting}</span> decision{waiting === 1 ? "" : "s"} waiting
+    <header className={`ihead ${headerOpen ? "open" : "folded"} ${widthClass}`}>
+      <div className="ihead-bar">
+        <h1 className="ihead-id">
+          {i.id}
+          {i.client && <span className="lz tone">{i.client}</span>}
+          {readOnly && <span className="lz read-only" title="not active: nothing here can be ruled, moved, commented, posted or started"><Lock size={12} aria-hidden /> {readOnly}: read-only</span>}
+        </h1>
+        {!headerOpen && (shown ? (
+          <button className="ihead-stage" onClick={() => openStage(i.id, shown.id)} title={`${shown.title || shown.id}: open it in Roadmap`}
+            aria-label={`Roadmap, ${pos.label}: ${shown.title || shown.id}. Open it in Roadmap`}>
+            <Route size={13} aria-hidden />
+            <span className="num">{pos.current >= 0 ? `Stage ${pos.current + 1} of ${stages.length}` : pos.label}</span>
+            <span className="ihead-stage-t">· {shown.title || shown.id}</span>
           </button>
-        </div>
+        ) : <span className="ihead-stage none"><Route size={13} aria-hidden /> no roadmap yet</span>)}
+        {chip && first ? (
+          <button className="lz waiting ihead-chip" onClick={() => openDecision(i.id, first)} title="open Decisions on the first record waiting on a ruling">{chip}</button>
+        ) : headerOpen ? <span className="ihead-nochip">no decision waiting</span> : null}
+        {i.target && <span className="ihead-target">target <b className="num">{i.target}</b></span>}
+        {!headerOpen && <span className={`ihead-goal-line ${i.goal ? "" : "missing"}`} title={i.goal || undefined}>{i.goal || "no goal yet"}</span>}
+        <span className="spacer" />
+        <button className="ihead-details" aria-expanded={headerOpen} aria-controls={`ihead-open-${i.id}`} onClick={() => setHeaderOpen(!headerOpen)}>
+          <ChevronDown size={14} aria-hidden /> {headerOpen ? "Hide details" : "Details"}
+        </button>
       </div>
-      <StageStepper stages={i.stages ?? []} />
+      {headerOpen && (
+        <div id={`ihead-open-${i.id}`} className="ihead-open">
+          <div className="ihead-cols">
+            <div className="ihead-col">
+              <Clamped key={`goal-${i.id}`} className={`ihead-goal ${i.goal ? "" : "missing"}`}>
+                <span className="lbl">Goal</span>
+                {i.goal || "no goal yet"}
+              </Clamped>
+              {i.measure && <Clamped key={`measure-${i.id}`} className="ihead-measure"><span className="lbl">Measure</span>{i.measure}</Clamped>}
+            </div>
+            <div className="ihead-col">
+              <ScopeLines id={i.id} scope={i.scope} />
+            </div>
+          </div>
+          {/* 0064, file only: where the charter is written, whether git sees it
+              edited and not committed on this machine, and the way to change
+              it. The app writes nothing to the file. */}
+          <div className="ihead-source">
+            <FileText size={12} aria-hidden /> from <span className="mono">working-on/initiative.yaml</span>
+            {i.local && i.charter_modified && <span className="ihead-edited">edited, not committed</span>}
+            {i.local && <button className="linkish" onClick={() => api.openInEditor(charter)}><Code2 size={12} aria-hidden /> Open in editor</button>}
+          </div>
+          <StageStrip i={i} compact={widthClass === "compact"} />
+        </div>
+      )}
       <nav className="subtabs" aria-label="initiative views">
         {SUBS.map((s) => (
           <button key={s.id} className={s.id === sub ? "on" : ""} aria-current={s.id === sub ? "page" : undefined} onClick={() => openInitiative(i.id, s.id)}>
