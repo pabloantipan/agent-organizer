@@ -1,13 +1,13 @@
 ---
 title: Accept the ui-leftovers spec, and launch its card
-status: proposed
+status: ruled
 raised: 2026-09-29
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-29
+ruled_by: pablo
 options: [accept as written, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [ui-leftovers]
 threads: [01M3Q04G1TTG9JX71GA5CKMWBW]
 supersedes: []
@@ -56,7 +56,7 @@ the card-back hint). Rows 9 and 13 are yours, in 0059 and 0060.
 
 ## Ruling
 
-
+pablo, 2026-09-29, in the organizer on lodestar: Do
 
 ## Consequences
 
