@@ -3,37 +3,38 @@
 The Product Designer seat beside the organizer's FSE (0053). HAND-OFF at the
 top; one dated line per session below.
 
-## HAND-OFF — 2026-09-29, first wake
+## HAND-OFF — 2026-09-30, before the full restart
 
-- **Done:** first look at every top-level screen on `--twenty`
-  (`docs/ux/reviews/2026-09-29-first-look.md`); `docs/ux/memory.md` and
-  `principles.md` written; first-wake post to `fse`.
-- **Open findings, not carded:** F1 (3) names truncate at 1024; F2 (3) Rule
-  box without question or recommendation; F3 (2) quiet beside blocked or
-  waiting. Minor F4–F9 in the review.
-- **Done, second:** the FSE's ask (thread 01M3PVQZ7JS5F40030Z09M2NMS),
-  `docs/ux/reviews/2026-09-29-cell-screens.md`: C1 Launch dead-ends (3), C2
-  Bring crew up's reason hover only (3, spec gap), C3 Draft the cell twice
-  (3, from code), C4 the states the spec missed. Answered in the thread.
-- **0054 ruled: I own `docs/design-system.md`.** Amended it: owner line,
-  principle 3 (F9), Button and Inbox row, a Disabled actions section, three
-  anti-patterns. Code side sent to the FSE (thread 01M3PWYY5MSHREKZ7M2CMCRZ2P); carried as
-  lead-side-fixes amendment 2, card conform-and-waiting (0057 asks Pablo).
-- **Carried:** lead-side-fixes spec (0055), cards home-rule-and-rows and
-  cell-screens-fix with `ui_review: true`; F3 is 0056; F9 and the disabled
-  pattern wait on 0054.
-- **Triage done** for the FSE (thread 01M3Q04G1TTG9JX71GA5CKMWBW):
-  `docs/ux/reviews/2026-09-29-triage-ui-leftovers.md`; design system gained
-  Focus and names.
-- **Responsive Home** (0059, thread 01M3QYJ7GKBX6H175TPJF6WPGM): worth it for
-  Home, rule box, rail; design spec `docs/ux/specs/responsive-home.md`
-  (proposed). On acceptance: add a Widths section to the design system.
-- **Initiative header** (thread 01M3R14N3KAYTGQFH09AMBK73W): design spec
-  `docs/ux/specs/initiative-header.md` (proposed) with ui-leftovers UI2–UI7
-  triaged at its end.
-- **Ranked** header-fold + responsive-home-2 leftovers for the FSE:
-  `docs/ux/reviews/2026-09-30-rank-header-fold-responsive-2.md`; DS amended.
-- **Next:** nothing asked; wait for mail.
+Read first: the `aglaea` skill, `agents/aglaea.md`, `docs/ux/memory.md` (what I
+know, ruled choices, open findings, lessons), `docs/ux/principles.md`, and
+`docs/design-system.md` (**mine since 0054**; the app is **Deltagos**, 0066).
+
+- **Doing:** nothing in flight. Last work: the ranked leftovers of header-fold
+  and responsive-home-2, `docs/ux/reviews/2026-09-30-rank-header-fold-responsive-2.md`
+  (3f3df2f), with the design system amended (Widths: wide from 2200, signals
+  never wrap, a column gives way only when it doesn't fit, scrim in regular;
+  24 px targets; focus ring offset; stage word "now").
+- **Waits on Pablo:** record **0069**, accepting the FSE's two cards from that
+  ranking: `header-fold-2` (initiative-header amendment 3) and
+  `widths-and-focus` (responsive-home amendment 3). I agreed the FSE's
+  assumption: a record taller than the view keeps its head on top, Rule
+  included (thread 01M3RCXDRAHWDQSD34QPZ97Y3X).
+- **Waits on the FSE:** nothing asked of me. Both cards are `ui_review`, so a
+  UI reviewer on `references/ui-review.md` runs in their wave; the FSE may
+  send me its leftovers to rank.
+- **My design specs:** `docs/ux/specs/responsive-home.md` (amendment 1 mine,
+  A8 amended by the FSE per 0065), `docs/ux/specs/initiative-header.md` (§2
+  words superseded by 0068). Build specs are the FSE's in `docs/specs/`.
+- **Parked, not carried:** first look F4 (one word per agent state), F5, F6,
+  F8; cell-screens C9, C10. F4 is the one worth bringing back.
+- **Tooling:** run `wails dev` on `scripts/fixture-home.sh [--twenty]`, drive
+  with chrome-devtools in an isolated context, emulate viewports
+  (1024×640, 1512×945, 1920×1080, 3440×1380); afterwards restore
+  `frontend/wailsjs/runtime` and `frontend/package.json.md5`, kill
+  `$FIXTURE_AGENT_PIDS`. Post with `discuss-hook post --to fse --kind … --thread … "<body>"`.
+- **Wake defects** (resume-wake) are fixed and installed; this restart gets
+  the new watcher.
+- **Next action:** read mail; if none, stay silent.
 
 ## Log
 
