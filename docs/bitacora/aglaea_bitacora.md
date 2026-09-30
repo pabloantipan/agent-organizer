@@ -47,3 +47,4 @@ top; one dated line per session below.
 - 2026-09-29 — responsive-home amendment 1 (U1–U9; U3 my error); DS: Widths, open box keeps the keyboard.
 - 2026-09-30 — noted responsive-home-2's R1–R5; waiting on header-fold to rank them together.
 - 2026-09-30 — 0068: header chip words updated in initiative-header.md.
+- 2026-09-30 — resumed after an exit; the FSE's message was drained into context at SessionStart with no turn, and I only saw it when Pablo asked. Diagnosed from hook.log, posted to hephaistos (thread 01M3RGGD7Q4N0TPW3FAFZXQTHY).
