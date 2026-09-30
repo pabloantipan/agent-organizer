@@ -6,6 +6,7 @@ import { useBoard } from "../stores/board.store";
 import { AgentList } from "./AgentList";
 import { CellStateLz, Crew } from "./Crew";
 import { queueOf, readOnlyOf } from "../lib/queue";
+import { escapeCloses, useConfirmFocus } from "../lib/focus";
 import { CleanButton } from "./Retire";
 
 const REFRESH_MS = 10_000;
@@ -150,6 +151,11 @@ function DraftCell({ initiativeId }: { initiativeId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [opened, setOpened] = useState(() => drafting.has(initiativeId));
   const reasonId = useId();
+  // Focus and names (ui-leftovers FR-5): the confirm opens on Open; Cancel
+  // and Escape go back to Draft the cell; after Open, the button reads
+  // "Drafting…" disabled, so focus goes to the line that says so.
+  const drafted = useRef<HTMLSpanElement>(null);
+  const { opener: draftBtn, commit: openBtn } = useConfirmFocus(asking, drafted);
 
   // An answer is kept whenever it is for the initiative on screen: a board
   // update reissues the preflight, and dropping the one in flight would
@@ -190,25 +196,25 @@ function DraftCell({ initiativeId }: { initiativeId: string }) {
         <PencilRuler size={14} aria-hidden="true" />
         <span className="meta">no cell: no <code>agents/cell.json</code> at the root</span>
         <span className="spacer" />
-        {opened && !blocked && <span id={reasonId} className="meta">Drafting in a Terminal: the draft shows here as <em>in definition</em>, and its accept record in Needs me.</span>}
+        {opened && !blocked && <span ref={drafted} tabIndex={-1} id={reasonId} className="meta">Drafting in a Terminal: the draft shows here as <em>in definition</em>, and its accept record in Needs me.</span>}
         {!asking && !opened && blocked && <span id={reasonId} className="meta">{blocked}</span>}
         {/* The hover sits on a wrapper: a disabled button gets no mouse
             events in WebKit. The reason is the text beside it. */}
         {!asking && (
           <span title={blocked ?? (opened ? "a drafting session is open in a Terminal" : `organizer draft-cell ${initiativeId}: a session drafts the roster from the goal, scope and agents/people.md`)}>
-            <button className="tiny-btn primary" onClick={() => setAsking(true)} disabled={checking || !!blocked || opened} aria-describedby={!checking && (opened ? !blocked : !!blocked) ? reasonId : undefined}>
+            <button ref={draftBtn} className="tiny-btn primary" onClick={() => setAsking(true)} disabled={checking || !!blocked || opened} aria-describedby={!checking && (opened ? !blocked : !!blocked) ? reasonId : undefined}>
               <PencilRuler size={13} /> {opened && !blocked ? "Drafting…" : "Draft the cell"}
             </button>
           </span>
         )}
         {asking && (
-          <>
+          <span className="confirm-inline" onKeyDown={escapeCloses(cancel)}>
             {error
               ? <span className="meta" role="alert" style={{ color: "var(--danger)" }}>The Terminal did not open: {error}. Run <code>organizer draft-cell {initiativeId}</code> in a terminal at the root.</span>
               : <span className="meta">one Terminal at the root running the agent; it writes only under agents/ and working-on/decisions/</span>}
-            <button className="tiny-btn primary" onClick={open} disabled={busy}>{busy ? "Opening…" : "Open"}</button>
+            <button ref={openBtn} className="tiny-btn primary" onClick={open} disabled={busy}>{busy ? "Opening…" : "Open"}</button>
             <button className="tiny-btn ghost" onClick={cancel}>Cancel</button>
-          </>
+          </span>
         )}
       </div>
     </div>

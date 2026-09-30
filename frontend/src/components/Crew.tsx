@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { FileXCorner, MessageSquare, PencilRuler, SquareTerminal, Trash2, UserRoundX, Users } from "lucide-react";
 import { Retire } from "./Retire";
 import { api, type AgentGroup, type Seat } from "../hooks/useWails";
@@ -7,6 +7,7 @@ import { ContextBar, WatcherBadge } from "./ContextBar";
 import { HealthWhy } from "./AgentList";
 import { healthState } from "../lib/health";
 import { useBoard } from "../stores/board.store";
+import { escapeCloses, useConfirmFocus } from "../lib/focus";
 
 const STATE_LABEL: Record<string, string> = { working: "working", running: "idle", shell: "shell", exited: "exited" };
 
@@ -75,6 +76,21 @@ export function Crew({ group, readOnly = false, onMessage }: { group: AgentGroup
   const [confirmKill, setConfirmKill] = useState<string | null>(null);
   const [retiring, setRetiring] = useState(false);
   const reasonId = useId();
+  const { opener: crewUp, commit: openBtn } = useConfirmFocus(asking);
+  const box = useRef<HTMLDivElement>(null);
+  const { agentsLanding, clearAgentsLanding } = useBoard();
+  // A Needs me verb lands here (ui-leftovers FR-5): Launch on Bring crew up,
+  // Open on the seat whose persona file is missing.
+  useEffect(() => {
+    if (!agentsLanding) return;
+    const el = agentsLanding === "crew-up"
+      ? crewUp.current
+      : box.current?.querySelector<HTMLElement>(`[data-seat="${CSS.escape(agentsLanding.replace(/^seat:/, ""))}"]`);
+    if (!el) return;
+    el.focus();
+    el.scrollIntoView({ block: "nearest" });
+    clearAgentsLanding();
+  }, [agentsLanding, clearAgentsLanding, crewUp, group.crew]);
   const cell = group.cell;
   if (!cell) return null;
   const seats = group.crew ?? [];
@@ -92,7 +108,7 @@ export function Crew({ group, readOnly = false, onMessage }: { group: AgentGroup
   };
 
   return (
-    <div className="crew">
+    <div className="crew" ref={box}>
       <div className="crew-head">
         <Users size={14} />
         <span className="ident">{cell.project}</span>
@@ -110,17 +126,17 @@ export function Crew({ group, readOnly = false, onMessage }: { group: AgentGroup
         {!readOnly && !asking && blocked && <span id={reasonId} className="meta">{blocked}</span>}
         {!readOnly && !asking && (
           <span title={blocked ?? `organizer crew ${group.id}`}>
-            <button className="tiny-btn primary" onClick={() => setAsking(true)} disabled={busy || !!blocked} aria-describedby={blocked ? reasonId : undefined}>
+            <button ref={crewUp} className="tiny-btn primary" onClick={() => setAsking(true)} disabled={busy || !!blocked} aria-describedby={blocked ? reasonId : undefined}>
               <Users size={13} /> {off === seats.length ? "Bring crew up" : off > 0 ? `Bring ${off} up` : "Reattach all"}
             </button>
           </span>
         )}
         {asking && (
-          <>
+          <span className="confirm-inline" onKeyDown={escapeCloses(() => setAsking(false))}>
             <span className="meta">one iTerm2 window, {seats.length} tabs, each seat with its discuss identity; running seats reattach</span>
-            <button className="tiny-btn primary" onClick={bringUp} disabled={busy}>{busy ? "Opening…" : "Open"}</button>
+            <button ref={openBtn} className="tiny-btn primary" onClick={bringUp} disabled={busy}>{busy ? "Opening…" : "Open"}</button>
             <button className="tiny-btn ghost" onClick={() => setAsking(false)}>Cancel</button>
-          </>
+          </span>
         )}
       </div>
       <ul className="agents crew-seats">
@@ -136,8 +152,9 @@ function SeatRow({ seat, readOnly, confirm, setConfirm, flash, onMessage }: { se
   const session = a?.session || "";
   const asking = confirm === seat.name;
   const health = healthState({ watcher: seat.watcher, deaf: seat.deaf, capped: seat.capped });
+  const { opener: killBtn, commit: killCommit } = useConfirmFocus(asking);
   return (
-    <li className={state}>
+    <li className={state} data-seat={seat.name} tabIndex={-1}>
       <span className={`a-state ${state}`}><i />{STATE_LABEL[state] ?? state}</span>
       <span className="a-name"><span className="ident">{seat.name}</span></span>
       {seat.no_persona && (
@@ -150,18 +167,18 @@ function SeatRow({ seat, readOnly, confirm, setConfirm, flash, onMessage }: { se
       <ContextBar c={a?.context} />
       <span className="meta mono a-proc">{a && a.pid > 0 ? `${a.tty} · up ${a.uptime}` : a?.created ? `session ${a.created}` : a ? "layout only" : seat.session}</span>
       {!readOnly && <span className="a-actions">
-        {onMessage && !asking && <button className="tiny-btn" onClick={() => onMessage(seat.name)} title={`write to ${seat.name}`}><MessageSquare size={13} /> Message</button>}
+        {onMessage && !asking && <button className="tiny-btn" onClick={() => onMessage(seat.name)} title={`write to ${seat.name}`} aria-label={`Message ${seat.name}`}><MessageSquare size={13} /> Message</button>}
         {asking && session && (
-          <>
+          <span className="confirm-inline" onKeyDown={escapeCloses(() => setConfirm(null))}>
             <span className="meta">remove session, layout and profile? conversation stays resumable</span>
-            <button className="tiny-btn danger" onClick={() => api.killAgent(session).then(() => flash(`killed ${session}`), (e) => flash(String(e))).finally(() => setConfirm(null))}>Kill</button>
+            <button ref={killCommit} className="tiny-btn danger" aria-label={`Kill ${seat.name}`} onClick={() => api.killAgent(session).then(() => flash(`killed ${session}`), (e) => flash(String(e))).finally(() => setConfirm(null))}>Kill</button>
             <button className="tiny-btn ghost" onClick={() => setConfirm(null)}>Cancel</button>
-          </>
+          </span>
         )}
         {!asking && session && (
           <>
-            <button className="tiny-btn" onClick={() => api.attachSession(session)} title={`probe ${session}`}><SquareTerminal size={13} /> Attach</button>
-            <button className="tiny-btn ghost" onClick={() => setConfirm(seat.name)} title={`probe -k ${session}`}><Trash2 size={13} /> Kill</button>
+            <button className="tiny-btn" onClick={() => api.attachSession(session)} title={`probe ${session}`} aria-label={`Attach ${seat.name}`}><SquareTerminal size={13} /> Attach</button>
+            <button ref={killBtn} className="tiny-btn ghost" onClick={() => setConfirm(seat.name)} title={`probe -k ${session}`} aria-label={`Kill ${seat.name}`}><Trash2 size={13} /> Kill</button>
           </>
         )}
       </span>}

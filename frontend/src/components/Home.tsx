@@ -74,7 +74,7 @@ function Shell({ row, reason, tone, subject, context, children }: { row: NeedsMe
 }
 
 function InboxRow({ row }: { row: NeedsMeRow }) {
-  const { openSlackThread, openInitiative, select } = useBoard();
+  const { openSlackThread, openInitiative, openAgentsAt, select } = useBoard();
   switch (row.kind) {
     case "decision":
       return <DecisionRow row={row} decision={row.decision} />;
@@ -85,7 +85,7 @@ function InboxRow({ row }: { row: NeedsMeRow }) {
         <Shell row={row} reason={escalated ? "escalated" : "question"} tone={escalated ? "danger" : "tone"}
           subject={<><span className="mono">{row.initiative}</span> · {t.subject}</>}
           context={`${escalated ? "escalated to you" : `${t.asked_by || "a seat"} asks you`} · ${t.messages} message${t.messages === 1 ? "" : "s"}`}>
-          <button className="act" onClick={() => openSlackThread(row.initiative, t.id)}>Answer</button>
+          <button className="act" aria-label={`Answer ${row.initiative} ${t.subject}`} onClick={() => openSlackThread(row.initiative, t.id)}>Answer</button>
         </Shell>
       );
     }
@@ -95,7 +95,7 @@ function InboxRow({ row }: { row: NeedsMeRow }) {
         <Shell row={row} reason="card" tone="blocked"
           subject={<><span className="mono">{row.initiative}</span> · {c.title}</>}
           context={c.next}>
-          <button className="act" onClick={() => select(c)}>Open</button>
+          <button className="act" aria-label={`Open ${row.initiative} ${c.title || c.slug}`} onClick={() => select(c)}>Open</button>
         </Shell>
       );
     }
@@ -106,7 +106,7 @@ function InboxRow({ row }: { row: NeedsMeRow }) {
         <Shell row={row} reason={`${h.label} seat`} tone={s.capped ? "tone" : "danger"}
           subject={<><span className="mono">{row.initiative}</span> · <span className="mono">{s.name}</span> {h.blocker}{s.undelivered > 0 ? ` · ${messages(s.undelivered)} waiting` : ""}</>}
           context={`${h.why} ${h.what}`}>
-          <button className="act" onClick={() => openInitiative(row.initiative, "agents")}>Agents</button>
+          <button className="act" aria-label={`Agents ${row.initiative} ${s.name}`} onClick={() => openInitiative(row.initiative, "agents")}>Agents</button>
         </Shell>
       );
     }
@@ -118,8 +118,8 @@ function InboxRow({ row }: { row: NeedsMeRow }) {
           subject={<><span className="mono">{row.initiative}</span> · <span className="mono">{row.cell.project}</span> in definition</>}
           context={blocker ? <><span className="mono">{row.missing}</span> has no persona file</> : `${n} seat${n === 1 ? "" : "s"}; ${IN_DEFINITION_WAITS}`}>
           {verb === "Open"
-            ? <button className="act" onClick={() => openInitiative(row.initiative, "agents")} title={`open its Agents: agents/${row.missing}.md is missing`}>Open</button>
-            : <button className="act" onClick={() => openInitiative(row.initiative, "agents")} title="open its Agents, where Bring crew up is">Launch</button>}
+            ? <button className="act" aria-label={`Open ${row.initiative} ${row.missing}`} onClick={() => openAgentsAt(row.initiative, `seat:${row.missing}`)} title={`open its Agents: agents/${row.missing}.md is missing`}>Open</button>
+            : <button className="act" aria-label={`Launch ${row.initiative}`} onClick={() => openAgentsAt(row.initiative, "crew-up")} title="open its Agents, where Bring crew up is">Launch</button>}
         </Shell>
       );
     }
