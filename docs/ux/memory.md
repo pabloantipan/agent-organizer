@@ -104,6 +104,15 @@ Triage of the three UI reviews' leftovers (2026-09-29,
 reading width at 1024; "you" or his name), fixture gaps V1–V3 (no thread
 asks the human, so Answer was never seen).
 
+Initiative header (2026-09-29, `specs/initiative-header.md`, proposed, from
+header-review-2 and ui-leftovers UI1): the header is 378 px at every width
+(59% of 1024×640; Answer landed on an 8 px timeline). Design: folded to one
+line by default, remembered per machine, a landing folds it; chip goes to the
+first waiting record; strip labelled "Roadmap · stage N of M"; phase once per
+run; a tile opens its stage expanded on Roadmap; sub-views stop repeating the
+id. Editing goal/scope in app: options a/b/c for Pablo, I recommend a (file
+only, shown honestly with an "edited, not committed" mark).
+
 ## Open questions
 
 - none open.

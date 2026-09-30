@@ -28,6 +28,9 @@ top; one dated line per session below.
 - **Responsive Home** (0059, thread 01M3QYJ7GKBX6H175TPJF6WPGM): worth it for
   Home, rule box, rail; design spec `docs/ux/specs/responsive-home.md`
   (proposed). On acceptance: add a Widths section to the design system.
+- **Initiative header** (thread 01M3R14N3KAYTGQFH09AMBK73W): design spec
+  `docs/ux/specs/initiative-header.md` (proposed) with ui-leftovers UI2–UI7
+  triaged at its end.
 - **Next:** nothing asked; wait for mail.
 
 ## Log
@@ -38,3 +41,4 @@ top; one dated line per session below.
 - 2026-09-29 — 0054 ruled; design system amended for F9 and disabled actions.
 - 2026-09-29 — triaged the three UI reviews' leftovers into 14 rows; DS: Focus and names.
 - 2026-09-29 — responsive Home: measured 1024/1512/3440, wrote the design spec.
+- 2026-09-29 — initiative header design spec (header-review-2, UI1–UI7).
