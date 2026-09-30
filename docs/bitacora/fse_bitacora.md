@@ -11,6 +11,12 @@ restating it (the discuss skill).
   **sup20 ended.**
 - **Running:** sup21 on `responsive-home` (0061, 0062 left from the rail;
   carries 0060's "you"), token organizer/sup21. End it when the card lands.
+- **0066 (Pablo, in my session): the app is Deltagos**, "what you see, plus
+  the .app"; CLI, bundle id, paths, keychain, repos, ids stay organizer.
+  Card rename-deltagos, **sup22 running** (token organizer/sup22). Told
+  Hephaistos (skills, factory docs) and Aglaea (design-system title).
+- **0063 accepted ("Go", f399664):** header-fold and rule-box-finish wait on
+  responsive-home landing; FR-9 on 0064.
 - **responsive-home failed review on G7 only (1a7cb88):** my gate copied
   A8 (one screenshot, all twenty) without checking A1/A3; impossible at 1024
   and 1512. **0065** raised (recommend: scroll allowed under the minute).
