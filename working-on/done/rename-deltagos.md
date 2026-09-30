@@ -1,16 +1,17 @@
 ---
 title: The app is Deltagos - window, top bar, bundle and DMG; the CLI and identifiers stay organizer
-status: now
+status: done
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "review: rename-deltagos, branch rename-deltagos, gate met (G1-G7), 249622e cc9ecc9 1b437e7 71d922b"
+next: "merge rename-deltagos (reviewed, pass)"
 depends_on: []
 boundary: ["wails.json (name, productName; outputfilename stays organizer)", "main.go (the window Title only)", "frontend/index.html (title)", "frontend/src/components/TopBar.tsx (the brand only)", "frontend/src/components/ (visible product-name text only; CLI hints like `organizer crew` stay)", "internal/cli/cli.go (the version line only)", "Makefile (APP, install, uninstall)", "scripts/make-dmg.sh", ".github/workflows/release.yml (the .app and .dmg paths)", "README.md, CLAUDE.md (the product name; commands stay)", "tests"]
 spec: "working-on/decisions/0066-the-app-is-deltagos.md (ruled: what you see plus the .app); the Gate section below is the acceptance"
 gate: "the Gate section below"
 stage:
 seat: name-build
+review: pass
 ---
 
 ## Goal
@@ -60,6 +61,12 @@ stay "organizer".
   G5 `g5-make-dryrun.txt`: `make -n install` → rm -rf /Applications/organizer.app /Applications/Deltagos.app; cp to /Applications/Deltagos.app; ln -sf /Applications/Deltagos.app/Contents/MacOS/organizer ~/.local/bin/organizer; `make -n uninstall` removes both names; `make -n dmg` → build/bin/Deltagos-<version>.dmg; make-dmg.sh run into scratch: volume Deltagos, Deltagos.app, READ ME says Deltagos.app. No real install.
   G6 `g6-docs.diff`: README title and install text Deltagos, commands/paths organizer; CLAUDE.md top paragraph and Packaging.
   G7 `g7-tests.txt`: `XDG_DATA_HOME=$(mktemp -d) make test` exit 0 (vitest 40 passed) and `npm run build` exit 0, rerun after the rebase at 71d922b.
+
+## Review
+Pass: every gate item met at 71d922b, rerun by the reviewer (evidence under `/Users/pabloantipan/organizer/.wt-notes/name-review/`).
+Unmet: none.
+Reviewer: name-review, 2026-09-29.
+Not covered by the gate: the plist templates in `build/darwin/` were edited outside the boundary, as G1 requires; `internal/service/rule.go` still signs rulings "in the organizer" (text a person reads, not in 0066); G3 greps `.tsx` only.
 
 ## Next
 1. review: rename-deltagos, branch rename-deltagos (not merged)
