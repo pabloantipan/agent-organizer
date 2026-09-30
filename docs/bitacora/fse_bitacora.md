@@ -10,6 +10,8 @@ restating it (the discuss skill).
   20–36 (UI reviewer 11 min of the critical path); run record
   runs/2026-09-29-conform-and-waiting.md. **sup19 ended.** Nothing of mine
   runs; tokens: aglaea, fse, pablo.
+- **0061 ruled ("Go", 3a4bb3d).** responsive-home waits on 0062 and on
+  ui-leftovers landing.
 - **Aglaea's responsive design (3174fc2)** → build spec
   `docs/specs/responsive-home.md`, card `responsive-home` (after ui-leftovers,
   ui_review, carries 0060's "you" as FR-6), **0061** accept (forecast 35–55
