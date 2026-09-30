@@ -42,6 +42,12 @@ sections below this one are history.
   system is Aglaea's in its skill; skills and install/doctor tooling say
   Deltagos. Its mail hook dropped every [for hephaistos] note until ef0142b
   (2026-09-29): repetitions 4 and 5 may need resending if not acknowledged.
+- **Wake 2026-09-30 (FSE session after b27b9c2):** no card moved since
+  533ef12. Aglaea has not answered the leftovers thread
+  (01M3RCXDRAHWDQSD34QPZ97Y3X); her session organizer-probe-aglaea is
+  EXITED in zellij (her watcher still reads alive, mail drained, 0
+  undelivered), so the ranking will not come until the seat is resurrected.
+  Asked Pablo.
 - **Waiting on Pablo:** press Draft the cell on a real initiative (stage 5
   exit a; b is camp's); `make install` for Deltagos.app (macOS may re-ask
   keychain access; Dock keeps the old path); pablo_minutes for sup16–sup24;
