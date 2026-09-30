@@ -56,6 +56,11 @@ sections below this one are history.
   other": the five cards moved to done/ with his words in Notes. No minutes
   for sup16–sup24 were given; the Waiting-on-Pablo line below is settled
   except Draft the cell.
+  Pablo then killed that pane's agent; `probe -r organizer-probe-aglaea`
+  in a new iTerm window brought her back (`claude --resume`, mail drained).
+  Rule: a seat whose pane dropped to a shell comes back with `probe -r`,
+  not `probe <name>`; `zellij list-sessions` without TMPDIR=/tmp shows
+  stale EXITED rows, use `probe -l`.
 - **Waiting on Pablo:** press Draft the cell on a real initiative (stage 5
   exit a; b is camp's); `make install` for Deltagos.app (macOS may re-ask
   keychain access; Dock keeps the old path); pablo_minutes for sup16–sup24;
