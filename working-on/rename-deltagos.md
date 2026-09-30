@@ -1,16 +1,16 @@
 ---
 title: The app is Deltagos - window, top bar, bundle and DMG; the CLI and identifiers stay organizer
-status: next
+status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "fse: start its supervisor (0066 ruled; no file overlap with responsive-home)"
+next: "sup22: building (seat name-build, branch rename-deltagos)"
 depends_on: []
 boundary: ["wails.json (name, productName; outputfilename stays organizer)", "main.go (the window Title only)", "frontend/index.html (title)", "frontend/src/components/TopBar.tsx (the brand only)", "frontend/src/components/ (visible product-name text only; CLI hints like `organizer crew` stay)", "internal/cli/cli.go (the version line only)", "Makefile (APP, install, uninstall)", "scripts/make-dmg.sh", ".github/workflows/release.yml (the .app and .dmg paths)", "README.md, CLAUDE.md (the product name; commands stay)", "tests"]
 spec: "working-on/decisions/0066-the-app-is-deltagos.md (ruled: what you see plus the .app); the Gate section below is the acceptance"
 gate: "the Gate section below"
 stage:
-seat:
+seat: name-build
 ---
 
 ## Goal
@@ -51,9 +51,10 @@ stay "organizer".
 
 ## Done
 - 2026-09-29 cut from 0066 by the FSE
+- 2026-09-29 sup22 seated name-build on branch rename-deltagos
 
 ## Next
-1. fse: start its supervisor
+1. name-build: build on branch rename-deltagos (sup22)
 
 ## Blockers
 none
