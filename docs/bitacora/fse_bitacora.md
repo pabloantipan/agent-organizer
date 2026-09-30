@@ -4,6 +4,34 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-09-30 (2), 0069 proposed; restart asked by Pablo via Hephaistos
+
+Read first: `agents/fse.md`, the fse skill, `working-on/roadmap.yaml`,
+`agents/people.md`, then this section; the previous hand-off below still
+holds for rules learned and the supervisor recipe.
+
+- **Last SHA seen:** 0631f00 (mine). origin/main pushed at 6564f76 this
+  session; 222ad92 and 0631f00 are not pushed yet.
+- **Settled with Pablo today:** Deltagos v0.2.0-635-g83e8450 installed;
+  install-current-build-2/-4, app-review-with-pablo, fse-pilot and
+  header-review-2 moved to done/ with his words; Draft the cell later ("we'll
+  draft the cell ahead"); no minutes for sup16–sup24 given.
+- **Aglaea:** alive with the fixed watcher (resume-wake, agent-slack
+  8272a91); comm check acked. A seat whose agent died comes back with
+  `probe -r <session>`. Her ranking 3f3df2f is spec'd.
+- **Open, waiting on Pablo:** 0069 (accept the leftovers batch: amendment 3
+  of docs/specs/initiative-header.md, card header-fold-2, and of
+  docs/specs/responsive-home.md, card widths-and-focus; parallel, both
+  ui_review, forecast 40–70 min). Aglaea's tall-record condition folded in
+  (0631f00). Both cards pass `run --print` (task prompts are the
+  supervisor's).
+- **Next action:** when 0069 is ruled, record it on both cards (next:
+  launchable) and start sup25 for both cards (recipe in the hand-off
+  below; next number sup25). If sent back or amended, amend both specs.
+- **Also waiting on Pablo:** crew-and-context (rule a live camp ask from
+  Needs me); factory-integration (record_url in config); the four small
+  candidates in the hand-off below.
+
 ## HAND-OFF — 2026-09-30, every task landed; nothing of mine runs
 
 Read first: `agents/fse.md`, the fse skill (authority table; "Ending a
