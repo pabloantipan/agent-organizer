@@ -1,13 +1,13 @@
 ---
 title: Accept the header and widths leftovers batch (both specs' amendment 3), and launch its two cards
-status: proposed
+status: ruled
 raised: 2026-09-30
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-30
+ruled_by: pablo
 options: [accept as written, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [header-fold-2, widths-and-focus]
 threads: [01M3RCXDRAHWDQSD34QPZ97Y3X]
 supersedes: []
@@ -64,6 +64,8 @@ The FSE's: accept as written. Every design call is Aglaea's, measured on
 the build; the two spec changes are the design being built as drawn.
 
 ## Ruling
+
+pablo, 2026-09-30, in the organizer on lodestar: Ok
 
 ## Consequences
 
