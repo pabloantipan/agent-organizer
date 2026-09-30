@@ -1,6 +1,6 @@
 ---
 title: Home holds the glance at 1024, on the laptop and on the ultrawide
-status: next
+status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-29
@@ -10,7 +10,7 @@ boundary: ["frontend/src/components/Home.tsx, RuleDecisionBox.tsx, Rail.tsx, App
 spec: "docs/specs/responsive-home.md (FR-1 to FR-6); the design: docs/ux/specs/responsive-home.md (Aglaea, 3174fc2)"
 gate: "docs/specs/responsive-home.md Acceptance, rows G1 to G8; the Gate section below"
 stage: twenty-at-a-glance
-seat:
+seat: resp-build
 ui_review: true
 ---
 
@@ -30,6 +30,7 @@ FR-6 of `docs/specs/responsive-home.md`, from Aglaea's design spec.
 
 ## Done
 - 2026-09-29 cut from responsive-home by the FSE
+- 2026-09-29 sup21 launched resp-build on branch responsive-home (worktree .wt/responsive-home, from 4c3c78d); reviewers resp-review (code), resp-ui (UI), resp-reader (G7, timed)
 
 ## Next
 1. sup21 runs this card
