@@ -4,6 +4,68 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-09-30, every task landed; nothing of mine runs
+
+Read first: `agents/fse.md`, the fse skill (authority table; "Ending a
+supervisor" in references/standing-up.md, changed on disk 2026-09-30, reread
+it), `working-on/roadmap.yaml`, `agents/people.md`, then this section. The
+sections below this one are history.
+
+- **Last SHA seen:** 533ef12 (header-fold to done). No supervisor or seat
+  runs. Tokens: organizer/aglaea, fse, pablo. Aglaea sits beside me as a seat
+  (0053), session organizer-probe-aglaea; mail her at `aglaea`. Read
+  `docs/ux/memory.md` before asking her.
+- **Landed 2026-09-29/30 (all merged on main, runs/ has each record):**
+  cell-draft, cell-definition-finish (discovery-in-a-cell am. 1); frontend-tests
+  (0052, vitest); home-rule-and-rows, cell-screens-fix, conform-and-waiting
+  (lead-side-fixes, 0055/0056/0057); ui-leftovers (0058); responsive-home
+  (0061/0062/0065) and responsive-home-2 (0067); rename-deltagos (0066: the app
+  is Deltagos, CLI and ids stay organizer); rule-box-finish and header-fold
+  (initiative-header, 0063/0064/0068, am. 1 Go fact charter_modified, am. 2
+  "N decisions waiting"). Last merges: header-fold 3a3454d, rule-box-finish
+  421dd9b, responsive-home-2 d5abf1f, rename 27c81a6.
+- **Open, mine, next:**
+  1. The UI leftovers of the last waves are with Aglaea to rank (asked in
+     thread "responsive-home-2 landed: its sev 2-1 leftovers"): R1–R5 from
+     responsive-home-2 (R1 sev 2: wide 1920 with the rail open cuts goals),
+     plus header-fold's UI U1, U2 and 7+3 sev 2-1 (working-on/done/header-fold.md
+     ## UI review), and the spec gap FR-2/H5: which wins when an expanded
+     record is taller than the view. When her ranked file comes, spec one
+     batch with ui_review cards and an accept record with forecast.
+  2. `header-review-2` is delivered by header-fold and rule-box-finish;
+     moving it to done/ is not mine (no gate): ask Pablo.
+  3. Small candidates, not cut: DecisionsView owner phrase if still "—";
+     fixture-home.sh talks to the live organizer-fixture mailbox; rule.go
+     signs "in the organizer on <machine>" (0066 scope; ask Pablo);
+     `make test` needs `pnpm install` on a fresh clone.
+- **Waiting on Pablo:** press Draft the cell on a real initiative (stage 5
+  exit a; b is camp's); `make install` for Deltagos.app (macOS may re-ask
+  keychain access; Dock keeps the old path); pablo_minutes for sup16–sup24;
+  moves to done/: install-current-build-2 and -4, app-review-with-pablo,
+  fse-pilot, header-review-2.
+- **Rules learned this session (keep):**
+  - Seats in auto mode refuse work instructed by mail (a Go write, a rebase,
+    killing pids); a change of scope goes into a fresh continuation seat's
+    launch prompt. Tell every supervisor: seats stop and report, never wait
+    on a permission prompt. (Sent to Hephaistos as repetition 5.)
+  - A blind reader (G7/G8/G9-style gates) launches outside any initiative
+    root and outside ~/agent-slack (hooks and CLAUDE.md load there).
+  - Before an accept record, check each gate row against the others and name
+    where each FR's data comes from (repetition 4, sent to Hephaistos: G7 vs
+    A1/A3; "No Go change" vs FR-9).
+  - A UI reviewer costs 11–14 min of the critical path; forecasts add it.
+    One-card tasks run far under the reference set (7–12 min).
+  - Frontend uses pnpm; name pnpm-lock.yaml; add no fresh deps (odyssey's
+    minimumReleaseAge, aebc25e).
+  - Mark UI cards `ui_review: true` when cutting them. Every spec's
+    "nothing broke" row runs `make test` (which now runs vitest).
+  - Supervisor recipe: prompt + prelude in ~/.local/share/organizer/prompts/
+    organizer-sup<n>.*, `discuss-api token add organizer sup<n>`, launch in a
+    new iTerm window; end with probe -k, token rm, `organizer clean`, rm the
+    two files. Next number: sup25.
+  - Close each hook thread with POST /projects/organizer/threads/<id>/status
+    {"status":"closed"} on 127.0.0.1:9494, bearer $DISCUSS_TOKEN.
+
 ## HAND-OFF — 2026-09-29, sup21 landed; sup22 on the rename, sup23 on the header
 
 - **Last SHA seen:** 8119e20. responsive-home merged d8591aa; 41 min vs
