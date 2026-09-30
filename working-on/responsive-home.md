@@ -4,11 +4,12 @@ status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "review: responsive-home, branch responsive-home, gate G1–G6 and G8 met (G7 for resp-reader, shots at .wt-notes/resp-build/g7-*.png), cd722c2 1ee1a6d 4831660 898cd78"
+next: "G7 unmet (resp-review): at 1024 and 1512 the timed reader cannot see all twenty rows, so the four answers are partial; the gate conflicts with A1/A3, pablo to amend G7/A8 or the layout"
 depends_on: ["ui-leftovers"]
 boundary: ["frontend/src/components/Home.tsx, RuleDecisionBox.tsx, Rail.tsx, App.tsx (the shell layout)", "frontend/src/stores/board.store.ts (the width class; the rail's default)", "frontend/src/lib/ and its tests", "frontend/src/styles/shell.css, home.css, rule-box.css", "docs/specs/twenty-at-a-glance.md (G9's widths, one line)"]
 spec: "docs/specs/responsive-home.md (FR-1 to FR-6); the design: docs/ux/specs/responsive-home.md (Aglaea, 3174fc2)"
 gate: "docs/specs/responsive-home.md Acceptance, rows G1 to G8; the Gate section below"
+review: fail
 stage: twenty-at-a-glance
 seat: resp-build
 ui_review: true
@@ -53,3 +54,41 @@ none
 - 2026-09-29 resp-build: at 1024 with the rail expanded, busy rows' signals wrap to two or three lines (auth-gateway); A2 asks only that the choice is kept. For Aglaea.
 - 2026-09-29 resp-build: with no stored choice the rail follows the class live (compact → regular expands it); the spec says "starts as"; a stored choice always wins.
 - G3 needs a 3440×1440 viewport: headless Chromium `--window-size=3440,1440`.
+
+## Review
+**Verdict: fail.** Unmet gate rows: **G7**. G1–G6 and G8 are met by the diff and the gate's own checks.
+
+- **G1** (A1, A2): `g1-1024.png`. The rail is the strip (46 px, nothing stored), the 5 Needs me rows are 36 px, 7 initiative rows are in view, `idsCut []`, and state and phase are in words. `g1-1024-expanded-reloaded.png`: after the toggle and a reload the rail is 250 px and the stored value is "0". `railCollapsedFor` in `lib/width.ts` is tested in `width.test.ts`. Met.
+- **G2** (A3): `g2-1512.png`, class regular. Each initiative row is one line (36 px) and `idsCut []`. Met.
+- **G3** (A4, A5): `g3-3440.png`. All 20 rows and Needs me are in view, `goalsCut []`, and `.home` is 2152 px wide, starting at the rail. `g3-3440-rule.png`: the box opens in the Needs me column under its row, all 20 rows stay in view, and Cancel and Rule are in view. Met.
+- **G4** (A6): `g4-1024-rule.png` on the default fixture's init-drafted 0001 roster record. The sheet is capped at the window, the record is clipped inside the box, and Cancel and Rule are in view. Met.
+- **G5** (A7): `g5.log` and `g5/g5-1…5`, going wide→regular→compact→regular→wide. The box, option b and the typed words survive every step. The list's top row keeps its offset. The Needs me column's scroll goes 60→60 on the return to wide. The state lives in the store (`ruleDraft`), and the tree is the same in every class. Met.
+- **G6** (FR-6): `signalOwners` has 3 tests in `lib/decisions.test.ts`, and they pass. Home reads "1 waiting · you", "2 waiting · you, no owner", "3 waiting · carla, rodrigo" and "1 waiting · fse". The lead comes from `leadOf`. Met.
+- **G7** (A8): unmet, see the table below.
+- **G8**: I re-ran `XDG_DATA_HOME=$(mktemp -d) make test`: exit 0, 13 go packages ok, vitest 40/40. `npm run build`: exit 0. The G18 grep over `main...responsive-home` is empty. Logs are in `.wt-notes/resp-review/`. Met.
+- **Boundary**: the diffstat touches 12 files, all inside the card's boundary. There is no Go change and no sub-view change. Both worktrees are clean.
+
+### G7 grading (reader `resp-reader`, `.wt-notes/resp-reader/answers.md`)
+The truth is what the app shows for `--twenty`:
+- executing: auth-gateway, billing-api, field-app, ops-dashboard
+- discovery: field-app, onboarding-flow, pricing-model, risk-scoring, search-index
+- waits on business: data-lake, pricing-model
+- waits on you: claims-portal, onboarding-flow, vendor-audit
+
+| Size | Q1 execute | Q2 discovery | Q3 business | Q4 you | Max s |
+|---|---|---|---|---|---|
+| 1024×640 | partial, "cannot tell" past row 8: not right | field-app only: not right | "cannot tell" for the rest: not right | claims-portal only: not right | 6 |
+| 1512×945 | "cannot tell" past row 14: not right | missing risk-scoring, search-index: not right | "cannot tell" past row 14: not right | missing vendor-audit: not right | 5 |
+| 3440×1440 | right | right | right | right | 4 |
+
+Every answer came in under a minute. Only 3440 is right. At 1024 and 1512 the screenshot cannot hold twenty rows, so four of four answers are wrong at each of those sizes.
+
+**The gate itself conflicts:** A1 asks for at least six rows at 1024. A3 is "as today", which is 14 of 20 at 1512. A8/G7 asks for all four answers right from one screenshot at those sizes, which neither layout can give on a twenty-initiative fixture unless G7 allows scrolling or several screenshots. For Pablo: either amend G7/A8 (for example "right for the rows in view", or one screenshot per scroll page), or change A1/A3. As written, no build that meets A1 and A3 can pass G7.
+
+### Findings the gate does not cover
+- With no stored choice, the rail follows the class live: resizing from compact to regular expands it. The spec says "starts as". The builder noted this. Harmless, but not what the words say.
+- `home.css` hides compact's goal and next-date header cells with `.p-head > :nth-child(5)` and `:nth-child(8)`. This breaks silently if a column is added.
+- In the wide Needs me column, the context line of each row is cut at one line ("owner pablo · raised … o…"). The options are only in the hover or the box.
+- At 1024 with the rail expanded, busy rows' signals wrap to 2–3 lines. This is for Aglaea.
+
+Reviewer: resp-review, 2026-09-29.
