@@ -1,4 +1,5 @@
 import type { merge } from "../../wailsjs/go/models";
+import { uniq } from ".";
 
 type Waiting = Pick<merge.BoardInitiative, "decisions">;
 
@@ -20,6 +21,12 @@ export function waitingOwners(i: Waiting): string[] {
   }
   return owners;
 }
+
+/** The owners Home's waiting signal names (0060): the lead's own records read
+ *  "you", other owners keep their names. The lead is `leadOf` (the cell's
+ *  human, else pablo), compared as it compares, trimmed and lower case. */
+export const signalOwners = (i: Waiting, lead: string) =>
+  uniq(waitingOwners(i).map((o) => (o.toLowerCase() === lead ? "you" : o)));
 
 /** How a row or a signal names a record's owner (ui-leftovers FR-10): one
  *  phrase everywhere, "no owner" when the field is empty. */
