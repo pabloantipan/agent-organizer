@@ -1,13 +1,13 @@
 ---
 title: What responsive-home's timed glance (G7, A8) asks at 1024 and 1512
-status: proposed
+status: ruled
 raised: 2026-09-29
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-29
+ruled_by: pablo
 options: [scroll allowed under the minute, wide only, keep as written]
-chosen:
+chosen: scroll allowed under the minute
 cards: [responsive-home]
 threads: []
 supersedes: []
@@ -50,7 +50,7 @@ and one line each, not twenty rows.
 
 ## Ruling
 
-
+pablo, 2026-09-29, in the organizer on lodestar: Ok
 
 ## Consequences
 
