@@ -16,7 +16,8 @@ restating it (the discuss skill).
   Card rename-deltagos, **sup22 running** (token organizer/sup22). Told
   Hephaistos (skills, factory docs) and Aglaea (design-system title).
 - **0063 accepted ("Go", f399664):** header-fold and rule-box-finish wait on
-  responsive-home landing; FR-9 on 0064.
+  responsive-home landing. 0064 ruled "file only" (0b830f6): FR-9 and G10
+  written firm.
 - **responsive-home failed review on G7 only (1a7cb88):** my gate copied
   A8 (one screenshot, all twenty) without checking A1/A3; impossible at 1024
   and 1512. **0065** raised (recommend: scroll allowed under the minute).

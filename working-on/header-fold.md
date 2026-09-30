@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "fse: start its supervisor when responsive-home lands (0063 accepted) and 0064 (FR-9)"
+next: "fse: start its supervisor when responsive-home lands (0063 accepted); 0064 ruled file only"
 depends_on: ["responsive-home"]
 boundary: ["frontend/src/components/InitiativeHeader.tsx", "frontend/src/components/RoadmapView.tsx and Roadmap.tsx (the expanded stage row only)", "frontend/src/components/SlackView.tsx and Conversation.tsx (the title row, the timeline height, Answer focus)", "frontend/src/components/AgentsView.tsx and DecisionsView.tsx (the title row only)", "frontend/src/stores/board.store.ts (fold state; landings fold; stageFocus)", "frontend/src/styles/shell.css and header CSS", "frontend/src/lib/ and its tests"]
 spec: "docs/specs/initiative-header.md (FR-1 to FR-6, FR-8, FR-9); the design: docs/ux/specs/initiative-header.md (Aglaea, 6c93a49)"

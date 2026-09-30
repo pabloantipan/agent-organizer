@@ -1,8 +1,8 @@
 # The initiative header folds, and says what its parts are: the build spec
 
-status: proposed (0063)
+status: accepted (0063, 2026-09-29); 0064 ruled file only
 owner: pablo
-decisions: [0038 ruled, 0061 ruled, 0063 proposed, 0064 proposed]
+decisions: [0038 ruled, 0061 ruled, 0063 ruled, 0064 ruled]
 design: `docs/ux/specs/initiative-header.md` (Aglaea, 6c93a49), "the design"
 roadmap: stage 2 (twenty at a glance), the header; appetite one wave
 
@@ -28,7 +28,7 @@ The design's acceptance H1 to H11.
 
 As the design's "Out of scope": Home, the rule box's placement and the rail
 (responsive-home); Roadmap's Cards and Calendar. Editing goal and scope in the
-app is 0064's. FR-9 below is built only as 0064 rules.
+app: 0064 ruled file only.
 
 ## Requirements
 
@@ -74,11 +74,11 @@ Each FR is the design's section of the same subject.
 - **FR-8** (redesign FR-17 changes) The goal, the measure and the stages
   show on the folded bar (goal on one line, the stage) and in Details (the
   whole). 0038's clamps and fixed header stand.
-- **FR-9** [per 0064] Details shall show, beside goal, measure and scope,
-  where they are written (`working-on/initiative.yaml`). The rest of FR-9
-  follows 0064's ruling: on "file only", Open in editor and an "edited, not
-  committed" mark when git reports the file modified; on "edit" or "edit and
-  commit", a spec amendment first.
+- **FR-9** (0064: file only, shown honestly) Details shall say where goal,
+  measure and scope are written ("from working-on/initiative.yaml"), offer
+  Open in editor (the action Home's row detail already has), and show
+  "edited, not committed" when git reports the file modified. The app writes
+  nothing to the file.
 
 ## Acceptance → gate
 
@@ -93,7 +93,7 @@ Each FR is the design's section of the same subject.
 | G7 | H9 | 3440×1380, Details open | screenshot: as H9 |
 | G8 | H11 | a reviewer who never saw the app, shown the folded bar and the strip at 1512×945 | their answers: as H11 |
 | G9 | FR-7 | the rule box: Tab loop, one box, Question at three lines on the roster record at 1024, the head's name; Decisions' owner phrase; People's name | a log of focus and accessible names; screenshots |
-| G10 | FR-9 | as 0064 rules | as 0064 rules |
+| G10 | FR-9 | Details on the fixture with `initiative.yaml` clean, then modified and uncommitted | screenshots: the source line and Open in editor; then the "edited, not committed" mark |
 | G11 | all | `XDG_DATA_HOME=$(mktemp -d) make test`; `cd frontend && npm run build`; the redesign's G18 grep | pass |
 
 ## Boundary
