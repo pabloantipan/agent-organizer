@@ -14,6 +14,9 @@ restating it (the discuss skill).
   as written, needed by G1); rule.go still signs "in the organizer on
   <machine>" (not in 0066's scope; candidate, ask Pablo if it bites).
   Pablo's install: macOS may re-ask keychain access; Dock keeps the old path.
+- **rule-box-finish landed (8450cac); sup24 runs responsive-home-2**
+  (token organizer/sup24), while sup23 holds header-fold on 0068. End sup23
+  when header-fold lands, sup24 when its card does.
 - **header-fold failed G8 only (830672b):** the chip's words "N waiting"
   (FR-2, from the design) leave a newcomer guessing. **0068** raised
   (recommend "N decisions waiting"). The hdr-rule-review permission prompt went

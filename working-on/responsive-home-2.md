@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "fse: start its supervisor when rule-box-finish lands (0067 accepted; responsive-home landed)"
+next: "sup24 runs this card (organizer-probe-sup24), spawned by the FSE 2026-09-30 after rule-box-finish landed"
 depends_on: ["responsive-home", "rule-box-finish"]
 boundary: ["frontend/src/components/Home.tsx, RuleDecisionBox.tsx, Rail.tsx, App.tsx (the shell layout)", "frontend/src/stores/board.store.ts (the width class; drafts per record)", "frontend/src/lib/ and its tests", "frontend/src/styles/shell.css, home.css, rule-box.css"]
 spec: "docs/specs/responsive-home.md (FR-7 to FR-12, amendment 2); the design: docs/ux/specs/responsive-home.md, Amendment 1 (Aglaea, 836866a)"
@@ -29,10 +29,11 @@ FR-7 to FR-12 of `docs/specs/responsive-home.md`.
 - 2026-09-29 cut from responsive-home amendment 2 by the FSE
 
 ## Next
-1. fse: start the supervisor after rule-box-finish lands
+1. sup24 runs this card
 
 ## Blockers
 none
 
 ## Notes
+- 2026-09-30 sup24 runs this card, spawned by the FSE after rule-box-finish landed (8450cac)
 - The frontend uses pnpm; add no dependency. No Go change.
