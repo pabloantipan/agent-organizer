@@ -199,6 +199,7 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .ihead .lbl { font-size: var(--font-size-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--fg-subtle); margin-right: var(--space-2); font-style: normal; }
 .ihead-source { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1-5); font-size: var(--font-size-sm); color: var(--fg-subtle); }
 .ihead-source .mono { color: var(--fg-muted); }
+.ihead-source .ihead-edited { padding: 0 var(--space-1-5); border-radius: var(--radius-xs); background: var(--warning-bg); color: var(--warning); }
 .ihead-source button.linkish { display: inline-flex; align-items: center; gap: var(--space-1); margin-left: var(--space-2); color: var(--accent-fg); }
 
 /* The stage strip (FR-3, FR-4): a label saying what it is, the phase once or

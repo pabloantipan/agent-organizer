@@ -226,10 +226,12 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
               <ScopeLines id={i.id} scope={i.scope} />
             </div>
           </div>
-          {/* 0064, file only: where the charter is written, and the way to
-              change it. The app writes nothing to the file. */}
+          {/* 0064, file only: where the charter is written, whether git sees it
+              edited and not committed on this machine, and the way to change
+              it. The app writes nothing to the file. */}
           <div className="ihead-source">
             <FileText size={12} aria-hidden /> from <span className="mono">working-on/initiative.yaml</span>
+            {i.local && i.charter_modified && <span className="ihead-edited">edited, not committed</span>}
             {i.local && <button className="linkish" onClick={() => api.openInEditor(charter)}><Code2 size={12} aria-hidden /> Open in editor</button>}
           </div>
           <StageStrip i={i} compact={widthClass === "compact"} />
