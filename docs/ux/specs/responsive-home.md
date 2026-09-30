@@ -131,4 +131,6 @@ them.
 
 ## Technical notes
 
-(left for the FSE)
+In the build spec, `docs/specs/responsive-home.md` ("Technical notes"),
+with requirements FR-1 to FR-6, gate G1 to G8 (A1 to A8) and card
+`responsive-home` (FSE, 2026-09-29). The open point is record 0062.
