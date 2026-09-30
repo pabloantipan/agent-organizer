@@ -1,11 +1,13 @@
-/** Home's three widths (docs/specs/responsive-home.md, FR-1): the class
+/** Home's three widths (docs/specs/responsive-home.md, FR-1, FR-7): the class
  *  follows the window, not Home, because the rail's own default depends on
  *  it. One listener on `window` feeds the store; Home, the rail and the rule
  *  box read the store, never a media query of their own. */
 export type WidthClass = "compact" | "regular" | "wide";
 
-/** Under this the class is compact: the laptop with something beside the app. */
-export const REGULAR_FROM = 1280;
+/** Under this the class is compact: the laptop's windows below full screen
+ *  (FR-7, amendment 2: moved from 1280, since at 1280 the expanded rail left
+ *  seven rows). The 14-inch laptop at full screen (1512) is regular. */
+export const REGULAR_FROM = 1440;
 /** From this the class is wide: the ultrawide. */
 export const WIDE_FROM = 1920;
 /** Regular's top (half of the ultrawide): Home's cap lifts from 1240 to 1480

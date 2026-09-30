@@ -4,9 +4,11 @@ import { railCollapsedFor, roomyOf, widthClassOf } from "./width";
 describe("widthClassOf", () => {
   it("puts each boundary in the class above it", () => {
     expect(widthClassOf(1024)).toBe("compact");
-    expect(widthClassOf(1279)).toBe("compact");
-    expect(widthClassOf(1280)).toBe("regular");
+    expect(widthClassOf(1280)).toBe("compact");
+    expect(widthClassOf(1439)).toBe("compact");
+    expect(widthClassOf(1440)).toBe("regular");
     expect(widthClassOf(1512)).toBe("regular");
+    expect(widthClassOf(1720)).toBe("regular");
     expect(widthClassOf(1919)).toBe("regular");
     expect(widthClassOf(1920)).toBe("wide");
     expect(widthClassOf(3440)).toBe("wide");
