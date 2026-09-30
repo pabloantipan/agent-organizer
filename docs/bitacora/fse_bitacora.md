@@ -14,6 +14,10 @@ restating it (the discuss skill).
   as written, needed by G1); rule.go still signs "in the organizer on
   <machine>" (not in 0066's scope; candidate, ask Pablo if it bites).
   Pablo's install: macOS may re-ask keychain access; Dock keeps the old path.
+- **header-fold failed G8 only (830672b):** the chip's words "N waiting"
+  (FR-2, from the design) leave a newcomer guessing. **0068** raised
+  (recommend "N decisions waiting"). Also: Pablo answered, or not, the
+  hdr-rule-review permission prompt (relayed 2026-09-30).
 - **header-fold decide: (046c69e)** answered by spec amendment 1 (7925401):
   charter_modified, one Go fact for FR-9; sup23 told.
 - **Running:** sup22 on `rename-deltagos` (0066); sup23 on `header-fold` and
