@@ -22,8 +22,8 @@ restating it (the discuss skill).
   (token organizer/sup24), while sup23 holds header-fold on 0068. End sup23
   when header-fold lands, sup24 when its card does.
 - **header-fold failed G8 only (830672b):** the chip's words "N waiting"
-  (FR-2, from the design) leave a newcomer guessing. **0068** raised
-  (recommend "N decisions waiting"). The hdr-rule-review permission prompt went
+  (FR-2, from the design) leave a newcomer guessing. **0068** ruled "N decisions
+  waiting" (9cfb369); FR-2 amended; sup23 relaunches a seat with rebase + chip. The hdr-rule-review permission prompt went
   unanswered 90 min; sup23 replaced the reviewer (hdr-rule-review2, told not to
   kill fixture stand-ins). Repetition (5), third occurrence, sent to Hephaistos:
   auto-mode seats refuse work instructed by mail (Go write, rebase, pid

@@ -2,7 +2,7 @@
 
 status: accepted (0063, 2026-09-29); 0064 ruled file only
 owner: pablo
-decisions: [0038 ruled, 0061 ruled, 0063 ruled, 0064 ruled]
+decisions: [0038 ruled, 0061 ruled, 0063 ruled, 0064 ruled, 0068 ruled]
 design: `docs/ux/specs/initiative-header.md` (Aglaea, 6c93a49), "the design"
 roadmap: stage 2 (twenty at a glance), the header; appetite one wave
 
@@ -44,8 +44,9 @@ Each FR is the design's section of the same subject.
   landing folds it: Answer, Open, `openDecision`, `openNeedsMe`,
   `openSlack`, a stage tile. Opening Details by hand stays open across
   initiatives until the lead folds it.
-- **FR-2** (§2) The waiting chip shall read "N waiting" or "N waiting on
-  you", and is not drawn at zero. It opens Decisions on the first waiting
+- **FR-2** (§2; amendment 2, 0068) The waiting chip shall read "N decisions
+  waiting", or "N decisions waiting on you" when the lead owns them (one
+  decision: "1 decision waiting"), and is not drawn at zero. It opens Decisions on the first waiting
   record, expanded and focused (`openDecision`), from any sub-view,
   including Decisions itself.
 - **FR-3** (§3, §4) The stage strip shall carry a label with an icon:
@@ -163,3 +164,6 @@ Each FR is the design's section of the same subject.
   046c69e). The boundary widens by one narrow Go fact, `charter_modified`,
   for header-fold only. FR-9's words and G10 are unchanged. G11 covers the
   Go test.
+- **2, 2026-09-30, 0068 ("N decisions waiting"):** FR-2's words, after G8's
+  blind reader could only guess what "3 waiting" leads to (830672b). G8
+  reruns with a reader launched outside the initiative root.
