@@ -1,16 +1,16 @@
 ---
 title: The rule box keeps focus, shows the recommendation on short records, and names its initiative
-status: next
+status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "sup23 runs this card (organizer-probe-sup23), spawned by the FSE 2026-09-29 after responsive-home landed"
+next: "build: hdr-rule on branch rule-box-finish (sup23, launched 2026-09-29)"
 depends_on: ["responsive-home"]
 boundary: ["frontend/src/components/RuleDecisionBox.tsx", "frontend/src/styles/rule-box.css", "frontend/src/components/DecisionsView.tsx (ownerPhrase only)", "frontend/src/components/Conversation.tsx (the People toggle label only)", "frontend/src/lib/ tests"]
 spec: "docs/specs/initiative-header.md (FR-7); the design: docs/ux/specs/initiative-header.md (Aglaea, 6c93a49)"
 gate: "docs/specs/initiative-header.md Acceptance, rows G9, G11; the Gate section below"
 stage: twenty-at-a-glance
-seat:
+seat: hdr-rule
 ui_review: true
 ---
 
