@@ -1,11 +1,11 @@
 ---
 title: Responsive Home, second pass - compact to 1439, the sheet's scrim, one draft per record, one-line signals, names
-status: now
+status: done
 repos: [organizer]
 branch: main
 updated: 2026-09-30
 review: pass
-next: "review: responsive-home-2, branch responsive-home-2, gate G9 G10 G11 G12 G8 met, d6d8804 d48101b 780163f 79176a4 ca0ed80 b3c9975 10f2966 33b0fd9"
+next: "merged d5abf1f; code review pass (resp2-review), UI review pass (resp2-ui), R1-R5 sev 2-1 and the spec gaps for the FSE"
 depends_on: ["responsive-home", "rule-box-finish"]
 boundary: ["frontend/src/components/Home.tsx, RuleDecisionBox.tsx, Rail.tsx, App.tsx (the shell layout)", "frontend/src/stores/board.store.ts (the width class; drafts per record)", "frontend/src/lib/ and its tests", "frontend/src/styles/shell.css, home.css, rule-box.css"]
 spec: "docs/specs/responsive-home.md (FR-7 to FR-12, amendment 2); the design: docs/ux/specs/responsive-home.md, Amendment 1 (Aglaea, 836866a)"
@@ -34,6 +34,8 @@ FR-7 to FR-12 of `docs/specs/responsive-home.md`.
 - G11: `s-g11.cjs` at 1024x640 with the rail expanded, unchanged `--twenty` → `.wt-notes/resp2-build/g11.log`, `.wt-notes/resp2-build/1024x640-g11-expanded.png`: "rows in view: 7; rows whose signals take more than one line: 0"; "auth-gateway: … shown=["1 now","+1"] title="and 1 more: wave 2 · 1 building" srName="and 1 more: wave 2 · 1 building""
 - G12: `s-g12.cjs` at 1920x1080 → names log `.wt-notes/resp2-build/g12-names.log`, `.wt-notes/resp2-build/1920x1080-g12-before.png`, `1920x1080-g12-rule-last.png`: "rail toggle: name="Initiatives rail" aria-expanded=true" (false once collapsed), "chevron: name="Details for auth-gateway: goal, next date, repos" title="Details for auth-gateway: goal, next date, repos"", every wide Needs me row "title==context:true", "Needs me rows: 8", "Rule on the last row (Rule vendor-audit 0005): … whole box in the column's view: true; page scrolled: 0". To get eight rows, the throwaway `$FIXTURE_HOME/vendor-audit/working-on/decisions/` got copies of 0002 as 0003–0005 (new titles and raised dates), removed after G12
 - G8, after the rebase: `XDG_DATA_HOME=$(mktemp -d) make test` exit 0, 13 Go packages ok, "Tests 52 passed (52)" (`.wt-notes/resp2-build/g8-make-test.log`); `cd frontend && npm run build` exit 0, "built in 1.05s" (`.wt-notes/resp2-build/g8-build.log`); G18 grep `main...responsive-home-2` empty (`.wt-notes/resp2-build/g8-g18.log`, 0 lines); `wails build` exit 0
+
+- 2026-09-30 sup24: merged d5abf1f; on main make test exit 0 (13 Go packages ok, vitest 52/52), npm run build green; to done/
 
 ## Next
 1. resp2-review (code) and resp2-ui (UI) review branch responsive-home-2
