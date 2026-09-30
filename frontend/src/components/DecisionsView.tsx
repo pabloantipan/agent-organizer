@@ -29,18 +29,39 @@ export function DecisionsView() {
   const [expanded, setExpanded] = useState<string | null>(decisionFocus);
   const [ruling, setRuling] = useState<string | null>(null);
   const focusRef = useRef<HTMLDivElement | null>(null);
+  const landing = useRef(false);
   // openDecision lands here with its record expanded, scrolled to and
   // highlighted, as a Needs me key lands on Home (lead-side-fixes FR-6).
   useEffect(() => {
     if (!decisionFocus) return;
     setExpanded(decisionFocus);
     setRuling(null);
-    focusRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
-    // Focus and names, navigating (ui-leftovers FR-5): focus lands on the
-    // record's row, never on the page body.
-    focusRef.current?.querySelector<HTMLButtonElement>("button.dec-line")?.focus({ preventScroll: true });
+    landing.current = true;
     // decisionSeq: the chip pressed again on Decisions lands again (FR-2).
   }, [decisionFocus, decisionSeq]);
+  // The scroll waits for the render that expanded the record. The record's
+  // line goes to the top of the sub-view's scroller, under the header and
+  // tabs, so its Rule and the question's first lines show even when the
+  // record is taller than the view (header-fold U8); "Waiting on a ruling"
+  // stays above it when the line still sits in the view's top half (U9).
+  // The scroller is set directly: scrollIntoView also scrolls the clipped
+  // ancestors, which pushed the header and the line above the window.
+  useEffect(() => {
+    const el = focusRef.current;
+    if (!landing.current || !el || expanded !== decisionFocus) return;
+    landing.current = false;
+    const wrap = el.closest<HTMLElement>(".board-wrap");
+    if (wrap) {
+      const base = wrap.getBoundingClientRect().top - wrap.scrollTop;
+      const at = (n: Element) => n.getBoundingClientRect().top - base - (parseFloat(getComputedStyle(n).scrollMarginTop) || 0);
+      const section = el.closest(".dec-section");
+      const top = section && at(el) - at(section) <= wrap.clientHeight / 2 ? at(section) : at(el);
+      wrap.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    }
+    // Focus and names, navigating (ui-leftovers FR-5): focus lands on the
+    // record's row, never on the page body.
+    el.querySelector<HTMLButtonElement>("button.dec-line")?.focus({ preventScroll: true });
+  });
   const ruleBtn = useRef<HTMLButtonElement | null>(null);
   const [showClosed, setShowClosed] = useState(false);
   const now = today();
