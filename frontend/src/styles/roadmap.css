@@ -57,3 +57,22 @@
 
 /* A stage's phase as a word next to its number (twenty-at-a-glance FR-4). */
 .srm-head { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+
+/* A stage row opens its detail (initiative-header FR-4): the label is the
+   toggle, the detail runs under the row across both columns. */
+.srm-toggle { text-align: left; background: transparent; border: 0; border-radius: var(--radius-md); color: inherit; font: inherit; min-height: 0; height: auto; cursor: pointer; justify-items: start; }
+.srm-toggle:hover { background: var(--surface-hover); border: 0; }
+.srm-toggle > span { max-width: 100%; }
+.srm-row.expanded { box-shadow: inset 2px 0 0 var(--accent); }
+.srm-detail { display: grid; gap: var(--space-2); margin: 0 0 var(--space-2); padding: var(--space-3) var(--space-4); background: var(--surface-raised); border-radius: var(--radius-md); font-size: var(--font-size-md); line-height: var(--line-md); }
+.srm-outcome { margin: 0; color: var(--fg); max-width: 90ch; }
+.srm-detail .missing { color: var(--fg-subtle); font-style: italic; }
+.srm-detail .lbl { font-size: var(--font-size-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--fg-subtle); }
+.srm-dsec { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-3); }
+.srm-dsec > .lbl { min-width: 72px; }
+.srm-exits { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-0-5); flex: 1; min-width: 0; }
+.srm-exits li { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: var(--space-2); color: var(--fg); }
+.srm-exits li.met { color: var(--fg-muted); }
+.srm-check { color: var(--fg-subtle); }
+.srm-exits li.met .srm-check { color: var(--decision-ruled-fg); }
+.srm-links { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); }
