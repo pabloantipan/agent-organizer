@@ -84,6 +84,9 @@ none
 - forecast (docs/estimating.md): 19–32 min of wave time over 1 wave; basis:
   26 cards in 13 single-wave tasks, this initiative. No UI reviewer: names,
   not layout.
+- actual (sup22): 12 min of wave time over 1 wave, no decision waits
+  (23:39 start to 23:51 in done/), merged 27c81a6; run record
+  `runs/2026-09-29-rename-deltagos.md`.
 - name-build: G1 needed `CFBundleDisplayName`, which Wails' plist template
   lacks, so `build/darwin/Info.plist` and `Info.dev.plist` gained it
   (`{{.Info.ProductName}}`); those files are outside the boundary as written.
