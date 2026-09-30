@@ -38,6 +38,10 @@ sections below this one are history.
      fixture-home.sh talks to the live organizer-fixture mailbox; rule.go
      signs "in the organizer on <machine>" (0066 scope; ask Pablo);
      `make test` needs `pnpm install` on a fresh clone.
+- **Hephaistos applied 0054 and 0066 (claudecode 542204d):** the design
+  system is Aglaea's in its skill; skills and install/doctor tooling say
+  Deltagos. Its mail hook dropped every [for hephaistos] note until ef0142b
+  (2026-09-29): repetitions 4 and 5 may need resending if not acknowledged.
 - **Waiting on Pablo:** press Draft the cell on a real initiative (stage 5
   exit a; b is camp's); `make install` for Deltagos.app (macOS may re-ask
   keychain access; Dock keeps the old path); pablo_minutes for sup16–sup24;
