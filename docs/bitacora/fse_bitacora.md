@@ -14,6 +14,10 @@ restating it (the discuss skill).
   as written, needed by G1); rule.go still signs "in the organizer on
   <machine>" (not in 0066's scope; candidate, ask Pablo if it bites).
   Pablo's install: macOS may re-ask keychain access; Dock keeps the old path.
+- **responsive-home-2 landed (d5abf1f), 34 min vs 30–46; sup24 ended.**
+  Leftovers R1–R5 (sev 2–1; R1 wide 1920 goals cut, FR-4 gated only at 3440)
+  sent to Aglaea to rank with header-fold's. Gate gaps: G12's last row was a
+  launch row; G9–G12 rows have a stray fifth cell (my table).
 - **rule-box-finish landed (8450cac); sup24 runs responsive-home-2**
   (token organizer/sup24), while sup23 holds header-fold on 0068. End sup23
   when header-fold lands, sup24 when its card does.
