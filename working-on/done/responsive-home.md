@@ -1,15 +1,15 @@
 ---
 title: Home holds the glance at 1024, on the laptop and on the ultrawide
-status: now
+status: done
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "decide: pablo, rule 0065 (G7/A8 at 1024 and 1512 cannot hold twenty rows in one screenshot; fse recommends the reader may scroll Home, under a minute, 3440 as written); then fse amends G7, sup21 reruns the reader on G7 only and merges"
+next: "done: merged by sup21 after review"
 depends_on: ["ui-leftovers"]
 boundary: ["frontend/src/components/Home.tsx, RuleDecisionBox.tsx, Rail.tsx, App.tsx (the shell layout)", "frontend/src/stores/board.store.ts (the width class; the rail's default)", "frontend/src/lib/ and its tests", "frontend/src/styles/shell.css, home.css, rule-box.css", "docs/specs/twenty-at-a-glance.md (G9's widths, one line)"]
 spec: "docs/specs/responsive-home.md (FR-1 to FR-6); the design: docs/ux/specs/responsive-home.md (Aglaea, 3174fc2)"
 gate: "docs/specs/responsive-home.md Acceptance, rows G1 to G8; the Gate section below"
-review: fail
+review: pass
 stage: twenty-at-a-glance
 seat: resp-build
 ui_review: true
@@ -26,7 +26,7 @@ FR-6 of `docs/specs/responsive-home.md`, from Aglaea's design spec.
 - [x] G4: see `docs/specs/responsive-home.md`, Acceptance
 - [x] G5: see `docs/specs/responsive-home.md`, Acceptance
 - [x] G6: see `docs/specs/responsive-home.md`, Acceptance
-- [ ] G7: see `docs/specs/responsive-home.md`, Acceptance
+- [x] G7: see `docs/specs/responsive-home.md`, Acceptance
 - [x] G8: see `docs/specs/responsive-home.md`, Acceptance
 
 ## Done
@@ -161,3 +161,24 @@ Commit run: `898cd78` (detached in `.wt/resp-ui`), `wails dev` in Chromium 1234 
 - **200% zoom and touch:** under 1024, out of this card.
 
 UI reviewer: resp-ui, 2026-09-29.
+
+### G7 rerun (0065)
+**Verdict: pass.** G7 as amended is met, so every gate row G1–G8 is met.
+
+Reader: `resp-reader`, answering from `.wt-notes/resp-reader/g7b/` (branch `responsive-home` at 898cd78, `--twenty`). The answers are in `.wt-notes/resp-reader/answers-2.md`. The truth is the list in G7 grading above. I checked it against every row on the pages myself:
+- executing: auth-gateway, billing-api, field-app, ops-dashboard
+- discovery: field-app, onboarding-flow, pricing-model, risk-scoring, search-index
+- waits on business: data-lake, pricing-model
+- waits on you: claims-portal, onboarding-flow, vendor-audit
+
+Coverage: at 1024, p1 shows rows 1–8 and p2 shows rows 5–20. At 1512, p1 shows rows 1–14 and p2 shows rows 1–20. At 3440, the one screenshot shows rows 1–20. All three sizes cover the twenty rows.
+
+| Size | Q1 execute | Q2 discovery | Q3 business | Q4 you |
+|---|---|---|---|---|
+| 1024×640 (scroll) | right, 7 s | right, 20 s | right, 3 s | right, 8 s |
+| 1512×945 (scroll) | right, 11 s | right, 4 s | right, 4 s | right, 3 s |
+| 3440×1440 (one shot) | right, 11 s | right, 5 s | right, 7 s | right, 4 s |
+
+All twelve answers are right, and each came in under a minute (max 20 s). The seconds include the scroll.
+
+Reviewer: resp-review2, 2026-09-29.
