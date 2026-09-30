@@ -1,13 +1,13 @@
 ---
 title: On a wide window, Home sits left from the rail or centred
-status: proposed
+status: ruled
 raised: 2026-09-29
 raised_by: aglaea
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-29
+ruled_by: pablo
 options: [left from the rail, centred]
-chosen:
+chosen: left from the rail
 cards: [responsive-home]
 threads: [01M3QYJ7GKBX6H175TPJF6WPGM]
 supersedes: []
@@ -36,7 +36,7 @@ window is resized or snapped.
 
 ## Ruling
 
-
+pablo, 2026-09-29, in the organizer on lodestar: do
 
 ## Consequences
 
