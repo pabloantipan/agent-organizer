@@ -1,13 +1,13 @@
 ---
 title: Accept responsive-home's second pass (Aglaea's Amendment 1), and launch its card
-status: proposed
+status: ruled
 raised: 2026-09-29
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-29
+ruled_by: pablo
 options: [accept as written, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [responsive-home-2]
 threads: [01M3R30XH7M78JYKWYGK2ABKSF]
 supersedes: []
@@ -55,7 +55,7 @@ measured this time.
 
 ## Ruling
 
-
+pablo, 2026-09-29, in the organizer on lodestar: Ok
 
 ## Consequences
 
