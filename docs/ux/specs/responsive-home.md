@@ -113,7 +113,7 @@ cap lifts to **1480**, and the goal column takes the extra room.
 | A5 | 3440×1440, the lead opens Rule on a Needs me row | The box opens in the Needs me column. All twenty initiatives stay in view. Rule and Cancel are in view without scrolling the page |
 | A6 | 1024×640, Rule opened on the longest fixture record | Rule and Cancel are in view without scrolling; the record scrolls inside the box |
 | A7 | any class, the rule box is open with words typed, and the window is resized across a class | The box, the words and each column's scroll position survive |
-| A8 | a reviewer who did not build it answers G9's four questions from one screenshot at each of 1024×640, 1512×945 and 3440×1440, timed | All four answers right, each under a minute |
+| A8 | a reviewer who did not build it answers G9's four questions, timed: at 3440×1440 from one screenshot; at 1024×640 and 1512×945 from Home as the lead sees it, scrolling allowed (amended by 0065, the FSE, 2026-09-29) | All four answers right, each under a minute |
 
 ## Out of scope
 

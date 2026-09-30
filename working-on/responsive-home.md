@@ -50,6 +50,7 @@ FR-6 of `docs/specs/responsive-home.md`, from Aglaea's design spec.
 - 0065 proposed: G7 as written conflicts with A1/A3 (code review fail on G7 only; UI review pass)
 
 ## Notes
+- 2026-09-29 FSE: G7 amended by 0065 (scroll allowed under the minute at 1024 and 1512); the reader reruns G7 only
 - 2026-09-29 sup21 runs this card, spawned by the FSE after ui-leftovers landed (508d9a8)
 - The frontend uses pnpm; add no dependency (aebc25e). No Go change.
 - 2026-09-29 resp-build: at 1024 with the rail expanded, busy rows' signals wrap to two or three lines (auth-gateway); A2 asks only that the choice is kept. For Aglaea.

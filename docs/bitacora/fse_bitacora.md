@@ -20,7 +20,8 @@ restating it (the discuss skill).
   written firm.
 - **responsive-home failed review on G7 only (1a7cb88):** my gate copied
   A8 (one screenshot, all twenty) without checking A1/A3; impossible at 1024
-  and 1512. **0065** raised (recommend: scroll allowed under the minute).
+  and 1512. **0065** ruled "scroll allowed under the minute" (30a55f0); G7 and A8
+  amended; sup21 told to rerun the reader.
   Wrong-gate rule followed: amended nothing. sup21 told it waits on 0065.
 - **Repetition (4):** a gate row copied from a source without checking it
   against the other rows (here A8 vs A1/A3). First time; watch for it.

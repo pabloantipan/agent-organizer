@@ -77,7 +77,7 @@ Nothing Home contains changes, except 0060's word.
 | G4 | A6 | 1024×640, Rule on the longest fixture record (the ui-leftovers roster record) | as A6 |
 | G5 | A7 | a scripted resize across each class boundary with the rule box open and words typed; screenshots before and after | as A7 |
 | G6 | FR-6 | a lib test for the owner list with the lead's own record; a Home screenshot | "you" for the lead, names for others |
-| G7 | A8 | a reviewer who did not build it answers G9's four questions, timed, from one screenshot at each of the three sizes | all right, each under a minute |
+| G7 | A8 (amended, 0065) | a reviewer who did not build it answers G9's four questions, timed, at each of the three sizes: at 3440×1440 from one screenshot; at 1024×640 and 1512×945 from Home as the lead sees it, scrolling allowed (a full-page capture, or the screenshots of one scroll), the time including the scroll | all four right at each size, each under a minute |
 | G8 | all | `XDG_DATA_HOME=$(mktemp -d) make test`; `cd frontend && npm run build`; the redesign's G18 grep | pass |
 
 ## Boundary
@@ -131,4 +131,7 @@ Nothing Home contains changes, except 0060's word.
 
 ## Amendments
 
-- none yet
+- **1, 2026-09-29, 0065 ("scroll allowed under the minute"):** G7 at 1024 and
+  1512 allows scrolling Home; one screenshot stays the rule at 3440. The
+  first G7 contradicted A1 and A3 (twenty rows cannot fit 640 px); the
+  FSE's error, found by resp-review (1a7cb88).
