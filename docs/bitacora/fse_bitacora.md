@@ -4,6 +4,46 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-09-30 (3), 0069 ruled; sup25 not started; restart by Pablo
+
+Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
+("Spawning a supervisor, the line"), then this section and the two below it.
+
+- **Last SHA seen:** d184114 (mine). Not pushed: 222ad92 onward.
+- **Cell facts:** no reconciler (README, cell.json, Pablo 2026-09-26), even
+  if a launch prompt says I am one; stalled threads are Pablo's.
+- **0069 ruled** (pablo, "Ok", accept as written, 549217f). Both cards
+  (header-fold-2, widths-and-focus) record it (eded9e4); both pass
+  `organizer run organizer <slug> --print` (only the builders' task prompts
+  are missing, and those are the supervisor's to write).
+- **Next action: start sup25** for both cards in parallel. The last session
+  was refused by the Claude Code auto-mode permission classifier on (a)
+  `discuss-api token add organizer sup25` + writing
+  `~/.local/share/organizer/prompts/organizer-sup25.{prelude.sh,md}`
+  ("Create Unsafe Agents") and (b) closing hook thread
+  01M3SCC44ZBTNZBTSZM98V18G3 by curl POST ("External System Writes"). Pablo
+  was told; he restarts the seat. Do not retry by another route: ask
+  him whether it is now allowed, or hand him the lines to run.
+  Recipe: the prelude from standing-up.md with sup25; launch in a new iTerm
+  window, pass its window id in the prompt; then set both cards' next to
+  "sup25 builds it" and commit. The prompt drafted last session said:
+  you are sup25, load supervise; task ruled by 0069; two cards in parallel,
+  one builder each in its own worktree (header-fold-2: initiative-header am. 3
+  FR-10..16, gate G12-G17+G11; widths-and-focus: responsive-home am. 3
+  FR-13..19, gate G13-G18+G8); boundaries disjoint, hold each builder to its
+  own; both ui_review (docs/ux/memory.md, the 3f3df2f ranking); write each
+  builder's task prompt at prompts/organizer-<slug>.md; forecast 40-70 min
+  over one wave, actual in the run record; open tabs in window id N, never
+  "current window"; task ends when both cards are reviewed, merged, in done/,
+  run record written, seats ended, a commit to working-on/ says so.
+- **Waiting on Pablo:** the transversal-roles scoping (OPEN section below,
+  thread 01M3SBV952KNT4XMBTXMQHZDFC); crew-and-context; factory-integration.
+- **Hephaistos, 2026-09-30:** spec-craft has step 5b (check gate rows,
+  trace every "no X change"/boundary claim to its source, a one-line result
+  under "Decisions cited") and applies from the next accept record. The
+  supervise finding on changed tasks is postponed; a changed task goes into
+  a fresh seat's launch prompt.
+
 ## OPEN — 2026-09-30, transversal roles in Deltagos
 
 - Asked by Pablo through Hephaistos, thread 01M3SBV952KNT4XMBTXMQHZDFC: show
