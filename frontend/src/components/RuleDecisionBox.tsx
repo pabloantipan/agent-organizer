@@ -46,6 +46,7 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, d
   const box = useRef<HTMLDivElement>(null);
   const record = useRef<HTMLDivElement>(null);
   const name = useId();
+  const numId = useId();
   const titleId = useId();
   const bodyId = useId();
   const ready = chosen !== "" && words.trim() !== "" && !busy;
@@ -79,10 +80,10 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, d
   };
 
   return (
-    <div ref={box} className={`rb ${withRecord ? "with-record" : ""}`} style={place} role="dialog" aria-labelledby={titleId} aria-describedby={withRecord ? bodyId : undefined}
+    <div ref={box} className={`rb ${withRecord ? "with-record" : ""}`} style={place} role="dialog" aria-labelledby={`${numId} ${titleId}`} aria-describedby={withRecord ? bodyId : undefined}
       onKeyDown={(e) => { if (e.key === "Escape" && !busy) { e.stopPropagation(); close(); } else loopTab(e, box.current); }}>
       <div className="rb-head">
-        <span className="rb-num">{d.number}</span>
+        <span id={numId} className="rb-num">{initiative} {d.number}</span>
         <span ref={title} id={titleId} className="rb-title" tabIndex={-1}>{d.title}</span>
       </div>
       {withRecord && <RecordBody ref={record} id={bodyId} initiative={initiative} decision={d} />}

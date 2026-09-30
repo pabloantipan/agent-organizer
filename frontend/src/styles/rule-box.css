@@ -13,7 +13,7 @@
    options, the words and the buttons never leave the box. */
 .rb > * { flex: none; }
 .rb.with-record { width: 460px; }
-.rb-head { display: flex; gap: var(--space-2); align-items: baseline; min-width: 0; }
+.rb-head { display: flex; flex-wrap: wrap; gap: 0 var(--space-2); align-items: baseline; min-width: 0; }
 .rb-num { font-family: var(--mono); font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); font-variant-numeric: tabular-nums; }
 .rb-title { font-size: var(--font-size-lg); line-height: var(--line-lg); font-weight: var(--weight-semibold); color: var(--fg); }
 .rb-title:focus { outline: none; }
