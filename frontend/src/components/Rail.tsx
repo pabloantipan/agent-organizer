@@ -215,8 +215,8 @@ export function Rail() {
 
   if (railCollapsed) {
     return (
-      <nav className="rail strip">
-        <button className="rail-icon strip-toggle" onClick={() => setRailCollapsed(false)} title="expand the rail"><PanelLeftOpen size={14} /></button>
+      <nav id={RAIL_ID} className="rail strip" aria-label="initiatives">
+        <button className="rail-icon strip-toggle" onClick={() => setRailCollapsed(false)} title="expand the rail" aria-label="Initiatives rail" aria-expanded={false} aria-controls={RAIL_ID}><PanelLeftOpen size={14} /></button>
         <button className={`strip-all ${selectedInitiative === null ? "active" : ""}`} onClick={() => setSelectedInitiative(null)} title={`Home: ${totals.now} now, ${totals.blocked} blocked, ${totals.next} next`}>all</button>
         {active.map((e) => (
           <button
@@ -235,8 +235,8 @@ export function Rail() {
   }
 
   return (
-    <nav className="rail">
-      <button className="rail-icon strip-toggle" onClick={() => setRailCollapsed(true)} title="collapse the rail"><PanelLeftClose size={14} /></button>
+    <nav id={RAIL_ID} className="rail" aria-label="initiatives">
+      <button className="rail-icon strip-toggle" onClick={() => setRailCollapsed(true)} title="collapse the rail" aria-label="Initiatives rail" aria-expanded aria-controls={RAIL_ID}><PanelLeftClose size={14} /></button>
       <button
         className={`rail-hero ${selectedInitiative === null ? "active" : ""}`}
         onClick={() => setSelectedInitiative(null)}
@@ -323,6 +323,8 @@ export function Rail() {
 
 /** The per-viewer collapse key of the Not active group; it is not a stored group. */
 const FOLD = "inactive";
+/** The rail's toggle is a disclosure of the rail (responsive-home FR-11). */
+const RAIL_ID = "rail";
 
 /** Lays `visible` over `stored`, in its new order, leaving every hidden id
  *  of `stored` in its slot, so storing what the rail shows never drops a

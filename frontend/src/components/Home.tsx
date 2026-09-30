@@ -63,15 +63,16 @@ const age = (since: Date | null) => {
 
 /** The shell every Needs me row shares: reason lozenge, subject with one
  *  line of context, age, one verb. Highlighted and scrolled to when
- *  openNeedsMe names it. Compact keeps the row to one line: the context
- *  leaves the view for the row's hover and stays in the accessible text. */
+ *  openNeedsMe names it. The row's hover carries its whole context line in
+ *  every class (FR-11): wide cuts it, compact takes it out of the view and
+ *  keeps it in the accessible text. */
 function Shell({ row, reason, tone, subject, context, children }: { row: NeedsMeRow; reason: string; tone: string; subject: React.ReactNode; context: string; children: React.ReactNode }) {
-  const { needsMeFocus, widthClass, ruleDraft } = useBoard();
+  const { needsMeFocus, ruleDraft } = useBoard();
   const ref = useRef<HTMLDivElement>(null);
   const focused = needsMeFocus === row.key;
   useEffect(() => { if (focused) ref.current?.scrollIntoView({ block: "center", behavior: "smooth" }); }, [focused]);
   return (
-    <div ref={ref} className={`ib-row ${focused ? "focused" : ""} ${ruleDraft?.key === row.key ? "ruling" : ""}`} data-key={row.key} title={widthClass === "compact" ? context : undefined}>
+    <div ref={ref} className={`ib-row ${focused ? "focused" : ""} ${ruleDraft?.key === row.key ? "ruling" : ""}`} data-key={row.key} title={context}>
       <span className={`lz ${tone}`}>{reason}</span>
       <span className="ib-what">
         <span className="ib-subject">{subject}</span>
@@ -177,7 +178,8 @@ const focusNeedsMe = () => document.getElementById(NEEDS_ME_HEADING)?.focus();
 /** The initiatives by priority, one row each (H3): its state and phase
  *  (FR-6 of twenty-at-a-glance), goal or "no goal yet", a compact stage
  *  stepper, its signals and its next real date. A row opens
- *  the initiative; the chevron shows repos, problems and actions in place. */
+ *  the initiative; the chevron shows its goal, next date, repos, problems
+ *  and actions in place. */
 function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.getState>["view"]> }) {
   const { agents, openInitiative, widthClass } = useBoard();
   const compact = widthClass === "compact";
@@ -218,11 +220,11 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
               <MiniStepper stages={i.stages ?? []} compact={compact} />
               <Signals i={i} rows={rows} cards={cards} waves={group?.waves ?? []} cell={group?.cell} missing={missingPersonas(group?.crew)} lead={leadOf(group)} />
               <NextDate next={next} />
-              <button className="p-more ghost" onClick={() => setOpen({ ...open, [id]: !open[id] })} aria-expanded={!!open[id]} title={open[id] ? "hide details" : "repos, problems and actions"}>
+              <button className="p-more ghost" onClick={() => setOpen({ ...open, [id]: !open[id] })} aria-expanded={!!open[id]} aria-label={detailsName(id)} title={detailsName(id)}>
                 {open[id] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
               </button>
             </div>
-            {open[id] && <div className="p-detail">{compact && <GoalAndDate i={i} next={next} />}<InitiativeDetail i={i} /></div>}
+            {open[id] && <div className="p-detail"><GoalAndDate i={i} next={next} /><InitiativeDetail i={i} /></div>}
           </div>
         );
       })}
@@ -232,13 +234,16 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
 
 type Next = ReturnType<typeof nextDate>;
 
+/** The chevron's name and hover (FR-11): what its detail opens on. */
+const detailsName = (id: string) => `Details for ${id}: goal, next date, repos`;
+
 /** Compact's id hover (responsive-home FR-2): the title, then the goal and
  *  the next date that left the row. */
 const idHover = (i: merge.BoardInitiative, next: Next) =>
   `${i.title}\ngoal: ${i.goal || "no goal yet"}\nnext date: ${next ? `${next.date} ${next.what}` : "none ahead"}`;
 
-/** Compact's chevron detail opens on the goal and the next date the row no
- *  longer shows. */
+/** The chevron's detail opens on the goal and the next date, whole: the
+ *  ones compact's row no longer shows and the ones regular cuts (FR-11). */
 function GoalAndDate({ i, next }: { i: merge.BoardInitiative; next: Next }) {
   return (
     <div className="p-detail-goal">
