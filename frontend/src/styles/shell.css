@@ -80,6 +80,11 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .ib-context { font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ib-age { font-family: var(--mono); font-size: var(--font-size-sm); color: var(--fg-subtle); text-align: right; }
 .ib-act .act { min-height: var(--control-sm); padding: 0 var(--space-3); font-size: var(--font-size-sm); }
+/* Focus and names, disclosure state (ui-leftovers FR-4): an open Rule is
+   marked the way Conversations marks its Rule toggle */
+.ib-act .act[aria-expanded="true"] { background: var(--surface-selected); border-color: var(--border-strong); color: var(--fg); }
+.home .sec-title:focus { outline: none; }
+.home .sec-title:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
 
 /* Initiatives by priority (H3) */
 .port { display: grid; }

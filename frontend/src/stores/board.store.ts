@@ -59,6 +59,12 @@ type State = {
   // decisionFocus is the record Decisions expands, scrolls to and highlights,
   // set by openDecision: <initiative>/<NNNN>. Any other navigation clears it.
   decisionFocus: string | null;
+  // agentsLanding is where focus lands on the Agents sub-view after a
+  // Needs me verb (ui-leftovers FR-5): "seat:<name>", the seat blocking the
+  // launch, or "crew-up", Bring crew up. Crew consumes it and clears it.
+  agentsLanding: string | null;
+  openAgentsAt: (initiativeId: string, landing: string) => void;
+  clearAgentsLanding: () => void;
   goHome: () => void;
   openInitiative: (id: string, sub: Sub) => void;
   openNeedsMe: (key: string) => void;
@@ -167,6 +173,9 @@ export const useBoard = create<State>((set, get) => ({
   needsMeFocus: null,
   decisionFocus: null,
   goHome: () => set({ screen: "home", selectedInitiative: null, needsMeFocus: null, decisionFocus: null }),
+  agentsLanding: null,
+  openAgentsAt: (selectedInitiative, agentsLanding) => set({ screen: "initiative", selectedInitiative, sub: "agents", needsMeFocus: null, decisionFocus: null, agentsLanding }),
+  clearAgentsLanding: () => set({ agentsLanding: null }),
   openInitiative: (selectedInitiative, sub) => set({ screen: "initiative", selectedInitiative, sub, needsMeFocus: null, decisionFocus: null }),
   openNeedsMe: (needsMeFocus) => set({ screen: "home", selectedInitiative: null, selected: null, needsMeFocus, decisionFocus: null }),
   openDecision: (selectedInitiative, number) => set({ screen: "initiative", selectedInitiative, sub: "decisions", selected: null, needsMeFocus: null, decisionFocus: `${selectedInitiative}/${number}` }),

@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { FileXCorner, MessageSquare, PencilRuler, SquareTerminal, Trash2, UserRoundX, Users } from "lucide-react";
 import { Retire } from "./Retire";
 import { api, type AgentGroup, type Seat } from "../hooks/useWails";
@@ -6,7 +6,9 @@ import type { model } from "../../wailsjs/go/models";
 import { ContextBar, WatcherBadge } from "./ContextBar";
 import { HealthWhy } from "./AgentList";
 import { healthState } from "../lib/health";
+import { missingPersonas, personaMissing } from "../lib/queue";
 import { useBoard } from "../stores/board.store";
+import { escapeCloses, useConfirmFocus } from "../lib/focus";
 
 const STATE_LABEL: Record<string, string> = { working: "working", running: "idle", shell: "shell", exited: "exited" };
 
@@ -21,10 +23,14 @@ export const DRAFT_WAITS = "draft roster; nothing launches until its accept reco
 /** What a cell in definition waits on, as the Crew header says it: a
  *  draft's accept record, linked to Decisions with the record expanded
  *  (lead-side-fixes FR-6), or its first launch. The record is the service's
- *  (`accept_record`, FR-9); the rule is not repeated here. */
-function DefinitionWaits({ id, cell }: { id: string; cell: model.Cell }) {
+ *  (`accept_record`, FR-9); the rule is not repeated here. A missing persona
+ *  file is what it waits on instead of a launch (ui-leftovers FR-9); that
+ *  reason is said once, beside Bring crew up, so it shows here only when
+ *  the button is not drawn (`said`). */
+function DefinitionWaits({ id, cell, missing, said }: { id: string; cell: model.Cell; missing: string[]; said: boolean }) {
   const openDecision = useBoard((s) => s.openDecision);
   if (cell.state !== "in_definition") return null;
+  if (!cell.draft && missing.length > 0) return said ? null : <span className="meta">{personaMissing(missing)}</span>;
   if (!cell.draft) return <span className="meta">{IN_DEFINITION_WAITS}</span>;
   const record = cell.accept_record;
   const drafted = cell.drafted ? `drafted ${cell.drafted}; ` : "";
@@ -39,12 +45,17 @@ function DefinitionWaits({ id, cell }: { id: string; cell: model.Cell }) {
   );
 }
 
+/** Why a cell in definition waits, in one line: a draft's accept record, a
+ *  missing persona file (ui-leftovers FR-9), or its first launch. */
+export const definitionWaits = (cell: model.Cell, missing: string[]) =>
+  cell.draft ? DRAFT_WAITS : missing.length > 0 ? personaMissing(missing) : `${IN_DEFINITION_WAITS} (Bring crew up)`;
+
 /** The cell's derived state as a lozenge, word and icon, or nothing. One
  *  source for Crew, the Agents tab and Home's signals. */
-export function CellStateLz({ cell, label = "in definition" }: { cell?: model.Cell | null; label?: string }) {
+export function CellStateLz({ cell, missing = [], label = "in definition" }: { cell?: model.Cell | null; missing?: string[]; label?: string }) {
   if (cell?.state !== "in_definition") return null;
   return (
-    <span className="lz tone" title={cell.draft ? `${cell.project}: ${DRAFT_WAITS}` : `${cell.project}: ${IN_DEFINITION_WAITS} (Bring crew up)`}>
+    <span className="lz tone" title={`${cell.project}: ${definitionWaits(cell, missing)}`}>
       <PencilRuler size={12} strokeWidth={2} aria-hidden="true" />{label}
     </span>
   );
@@ -55,8 +66,8 @@ export function CellStateLz({ cell, label = "in definition" }: { cell?: model.Ce
  *  when it can. CreateCrew still refuses both, for the CLI and a stale view. */
 export function crewBlocked(seats: Seat[], cell: model.Cell): string | null {
   const why: string[] = [];
-  const missing = seats.filter((s) => s.no_persona).map((s) => `agents/${s.name}.md`);
-  if (missing.length > 0) why.push(`no persona file: ${missing.join(", ")}`);
+  const missing = missingPersonas(seats);
+  if (missing.length > 0) why.push(personaMissing(missing));
   if (cell.draft) {
     const record = cell.accept_record;
     why.push(record ? `draft roster: nothing launches until ${record.number} is ruled` : "draft roster: no accept record yet");
@@ -75,6 +86,21 @@ export function Crew({ group, readOnly = false, onMessage }: { group: AgentGroup
   const [confirmKill, setConfirmKill] = useState<string | null>(null);
   const [retiring, setRetiring] = useState(false);
   const reasonId = useId();
+  const { opener: crewUp, commit: openBtn } = useConfirmFocus(asking);
+  const box = useRef<HTMLDivElement>(null);
+  const { agentsLanding, clearAgentsLanding } = useBoard();
+  // A Needs me verb lands here (ui-leftovers FR-5): Launch on Bring crew up,
+  // Open on the seat whose persona file is missing.
+  useEffect(() => {
+    if (!agentsLanding) return;
+    const el = agentsLanding === "crew-up"
+      ? crewUp.current
+      : box.current?.querySelector<HTMLElement>(`[data-seat="${CSS.escape(agentsLanding.replace(/^seat:/, ""))}"]`);
+    if (!el) return;
+    el.focus();
+    el.scrollIntoView({ block: "nearest" });
+    clearAgentsLanding();
+  }, [agentsLanding, clearAgentsLanding, crewUp, group.crew]);
   const cell = group.cell;
   if (!cell) return null;
   const seats = group.crew ?? [];
@@ -92,12 +118,12 @@ export function Crew({ group, readOnly = false, onMessage }: { group: AgentGroup
   };
 
   return (
-    <div className="crew">
+    <div className="crew" ref={box}>
       <div className="crew-head">
         <Users size={14} />
         <span className="ident">{cell.project}</span>
-        <CellStateLz cell={cell} />
-        <DefinitionWaits id={group.id} cell={cell} />
+        <CellStateLz cell={cell} missing={missingPersonas(seats)} />
+        <DefinitionWaits id={group.id} cell={cell} missing={missingPersonas(seats)} said={!readOnly && !asking} />
         <span className="meta">{seats.length} seats · {live} live · {off} off{cell.reconciler ? ` · reconciler ${cell.reconciler}` : ""}</span>
         {group.discuss && <span className="badge watcher stale" title="crew health comes from the discuss API">{group.discuss}</span>}
         <span className="spacer" />
@@ -110,17 +136,17 @@ export function Crew({ group, readOnly = false, onMessage }: { group: AgentGroup
         {!readOnly && !asking && blocked && <span id={reasonId} className="meta">{blocked}</span>}
         {!readOnly && !asking && (
           <span title={blocked ?? `organizer crew ${group.id}`}>
-            <button className="tiny-btn primary" onClick={() => setAsking(true)} disabled={busy || !!blocked} aria-describedby={blocked ? reasonId : undefined}>
+            <button ref={crewUp} className="tiny-btn primary" onClick={() => setAsking(true)} disabled={busy || !!blocked} aria-describedby={blocked ? reasonId : undefined}>
               <Users size={13} /> {off === seats.length ? "Bring crew up" : off > 0 ? `Bring ${off} up` : "Reattach all"}
             </button>
           </span>
         )}
         {asking && (
-          <>
+          <span className="confirm-inline" onKeyDown={escapeCloses(() => setAsking(false))}>
             <span className="meta">one iTerm2 window, {seats.length} tabs, each seat with its discuss identity; running seats reattach</span>
-            <button className="tiny-btn primary" onClick={bringUp} disabled={busy}>{busy ? "Opening…" : "Open"}</button>
+            <button ref={openBtn} className="tiny-btn primary" onClick={bringUp} disabled={busy}>{busy ? "Opening…" : "Open"}</button>
             <button className="tiny-btn ghost" onClick={() => setAsking(false)}>Cancel</button>
-          </>
+          </span>
         )}
       </div>
       <ul className="agents crew-seats">
@@ -136,12 +162,13 @@ function SeatRow({ seat, readOnly, confirm, setConfirm, flash, onMessage }: { se
   const session = a?.session || "";
   const asking = confirm === seat.name;
   const health = healthState({ watcher: seat.watcher, deaf: seat.deaf, capped: seat.capped });
+  const { opener: killBtn, commit: killCommit } = useConfirmFocus(asking);
   return (
-    <li className={state}>
+    <li className={state} data-seat={seat.name} tabIndex={-1}>
       <span className={`a-state ${state}`}><i />{STATE_LABEL[state] ?? state}</span>
       <span className="a-name"><span className="ident">{seat.name}</span></span>
       {seat.no_persona && (
-        <span className="lz warning" title={`agents/${seat.name}.md is missing: Bring crew up refuses until it is written`}>
+        <span className="lz warning" title={`agents/${seat.name}.md is missing; the drafting session writes it, or write it by the persona-agents skill`}>
           <FileXCorner size={12} strokeWidth={2} aria-hidden="true" />no persona file
         </span>
       )}
@@ -150,18 +177,18 @@ function SeatRow({ seat, readOnly, confirm, setConfirm, flash, onMessage }: { se
       <ContextBar c={a?.context} />
       <span className="meta mono a-proc">{a && a.pid > 0 ? `${a.tty} · up ${a.uptime}` : a?.created ? `session ${a.created}` : a ? "layout only" : seat.session}</span>
       {!readOnly && <span className="a-actions">
-        {onMessage && !asking && <button className="tiny-btn" onClick={() => onMessage(seat.name)} title={`write to ${seat.name}`}><MessageSquare size={13} /> Message</button>}
+        {onMessage && !asking && <button className="tiny-btn" onClick={() => onMessage(seat.name)} title={`write to ${seat.name}`} aria-label={`Message ${seat.name}`}><MessageSquare size={13} /> Message</button>}
         {asking && session && (
-          <>
+          <span className="confirm-inline" onKeyDown={escapeCloses(() => setConfirm(null))}>
             <span className="meta">remove session, layout and profile? conversation stays resumable</span>
-            <button className="tiny-btn danger" onClick={() => api.killAgent(session).then(() => flash(`killed ${session}`), (e) => flash(String(e))).finally(() => setConfirm(null))}>Kill</button>
+            <button ref={killCommit} className="tiny-btn danger" aria-label={`Kill ${seat.name}`} onClick={() => api.killAgent(session).then(() => flash(`killed ${session}`), (e) => flash(String(e))).finally(() => setConfirm(null))}>Kill</button>
             <button className="tiny-btn ghost" onClick={() => setConfirm(null)}>Cancel</button>
-          </>
+          </span>
         )}
         {!asking && session && (
           <>
-            <button className="tiny-btn" onClick={() => api.attachSession(session)} title={`probe ${session}`}><SquareTerminal size={13} /> Attach</button>
-            <button className="tiny-btn ghost" onClick={() => setConfirm(seat.name)} title={`probe -k ${session}`}><Trash2 size={13} /> Kill</button>
+            <button className="tiny-btn" onClick={() => api.attachSession(session)} title={`probe ${session}`} aria-label={`Attach ${seat.name}`}><SquareTerminal size={13} /> Attach</button>
+            <button ref={killBtn} className="tiny-btn ghost" onClick={() => setConfirm(seat.name)} title={`probe -k ${session}`} aria-label={`Kill ${seat.name}`}><Trash2 size={13} /> Kill</button>
           </>
         )}
       </span>}

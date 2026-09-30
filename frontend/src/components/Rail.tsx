@@ -6,9 +6,10 @@ import type { Group } from "../hooks/useWails";
 import { move, uniq } from "../lib";
 import { inactiveIds } from "../lib/queue";
 import { useBoard } from "../stores/board.store";
-import { CellStateLz, DRAFT_WAITS, IN_DEFINITION_WAITS } from "./Crew";
+import { CellStateLz, definitionWaits } from "./Crew";
+import { missingPersonas } from "../lib/queue";
 
-type Entry = { id: string; title: string; client: string; status: string; now: number; blocked: number; next: number; machines: string[]; live: number; working: number; cell?: model.Cell | null };
+type Entry = { id: string; title: string; client: string; status: string; now: number; blocked: number; next: number; machines: string[]; live: number; working: number; cell?: model.Cell | null; missing: string[] };
 
 /** Left rail: initiatives by priority, optionally partitioned into named
  *  groups. Priority is the flat order and the rank numbers stay global; a
@@ -26,7 +27,7 @@ export function Rail() {
   const inits = view?.board.initiatives ?? [];
   const ids = uniq(inits.map((i) => i.id));
   const byId = new Map<string, Entry>();
-  const cells = new Map((agents?.groups ?? []).map((g) => [g.id, g.cell]));
+  const groupsById = new Map((agents?.groups ?? []).map((g) => [g.id, g]));
   for (const id of ids) {
     const rows = inits.filter((i) => i.id === id);
     const first = rows[0] as merge.BoardInitiative;
@@ -41,7 +42,8 @@ export function Rail() {
       machines: rows.map((r) => r.machine),
       live: rows.reduce((a, r) => a + (r.live ?? 0), 0),
       working: rows.reduce((a, r) => a + (r.working ?? 0), 0),
-      cell: cells.get(id),
+      cell: groupsById.get(id)?.cell,
+      missing: missingPersonas(groupsById.get(id)?.crew),
     });
   }
   const entries = ids.map((id) => byId.get(id)!);
@@ -157,7 +159,7 @@ export function Rail() {
               <span className="rail-meta">
                 {e.client && <span className="badge client">{e.client}</span>}
                 {e.machines.length > 1 && <span className="badge">{e.machines.length} machines</span>}
-                <CellStateLz cell={e.cell} />
+                <CellStateLz cell={e.cell} missing={e.missing} />
               </span>
             </span>
             <Counts now={e.now} blocked={e.blocked} next={e.next} />
@@ -221,7 +223,7 @@ export function Rail() {
             key={e.id}
             className={`strip-item ${selectedInitiative === e.id ? "active" : ""} ${e.blocked > 0 ? "blocked" : e.now > 0 ? "now" : ""}`}
             onClick={() => setSelectedInitiative(e.id)}
-            title={`${e.id}${e.client ? ` (${e.client})` : ""}: ${e.now} now, ${e.blocked} blocked, ${e.next} next${e.live > 0 ? `, ${e.live} live agent${e.live === 1 ? "" : "s"}` : ""}${defining(e) ? `\ncell in definition: ${e.cell!.draft ? DRAFT_WAITS : IN_DEFINITION_WAITS}` : ""}`}
+            title={`${e.id}${e.client ? ` (${e.client})` : ""}: ${e.now} now, ${e.blocked} blocked, ${e.next} next${e.live > 0 ? `, ${e.live} live agent${e.live === 1 ? "" : "s"}` : ""}${defining(e) ? `\ncell in definition: ${definitionWaits(e.cell!, e.missing)}` : ""}`}
           >
             <span className="strip-rank">{rank.get(e.id)}</span>
             {e.live > 0 && <i className={`live-dot ${e.working > 0 ? "working" : ""}`} />}

@@ -35,7 +35,11 @@ export function DecisionsView() {
     setExpanded(decisionFocus);
     setRuling(null);
     focusRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    // Focus and names, navigating (ui-leftovers FR-5): focus lands on the
+    // record's row, never on the page body.
+    focusRef.current?.querySelector<HTMLButtonElement>("button.dec-line")?.focus({ preventScroll: true });
   }, [decisionFocus]);
+  const ruleBtn = useRef<HTMLButtonElement | null>(null);
   const [showClosed, setShowClosed] = useState(false);
   const now = today();
 
@@ -103,7 +107,7 @@ export function DecisionsView() {
     // The highlight is Home's focused row (shell.css .ib-row.focused), inline
     // because this card's boundary holds no stylesheet for .dec.
     return (
-      <div key={r.key} ref={focused ? focusRef : undefined} className={`dec ${d.status} ${isOpen ? "expanded" : ""} ${focused ? "focused" : ""}`} style={focused ? { background: "var(--surface-selected)" } : undefined}>
+      <div key={r.key} data-dec={r.key} ref={focused ? focusRef : undefined} className={`dec ${d.status} ${isOpen ? "expanded" : ""} ${focused ? "focused" : ""}`} style={focused ? { background: "var(--surface-selected)" } : undefined}>
         <button className="dec-line" onClick={() => toggle(r.key)} title={isOpen ? "collapse" : "show the record"}>
           <span className="dec-num mono">{d.number}</span>
           <span className="dec-title">{d.title}</span>
@@ -133,8 +137,8 @@ export function DecisionsView() {
             {canRule && (
               <div className="dec-actions">
                 <span className="rb-anchor">
-                  <button className="primary" aria-expanded={isRuling} onClick={() => setRuling(isRuling ? null : r.key)}>Rule</button>
-                  {isRuling && <RuleDecisionBox initiative={r.initiative} decision={d} onClose={() => setRuling(null)} />}
+                  <button ref={isRuling ? ruleBtn : undefined} className="primary" aria-expanded={isRuling} onClick={() => setRuling(isRuling ? null : r.key)}>Rule</button>
+                  {isRuling && <RuleDecisionBox initiative={r.initiative} decision={d} opener={ruleBtn} afterRule={() => document.querySelector<HTMLButtonElement>(`[data-dec="${r.key}"] button.dec-line`)?.focus()} onClose={() => setRuling(null)} />}
                 </span>
               </div>
             )}

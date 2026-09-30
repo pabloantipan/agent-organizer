@@ -244,11 +244,13 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
         <div className="chat-head">
           {focus ? <AtSign size={14} /> : <Hash size={14} />}
           <span className="chat-title">{chatTitle}</span>
-          <span className="meta">{threads.length} thread{threads.length === 1 ? "" : "s"}{group.project ? ` · as ${human}${readOnly ? ` · ${readOnly}: read-only` : group.can_post ? "" : " · no token, read only"}` : ""}{group.discuss ? ` · ${group.discuss}` : ""}</span>
+          <span className="meta">{threads.length} thread{threads.length === 1 ? "" : "s"}{group.project ? ` · as ${human}${readOnly ? ` · ${readOnly}: read-only` : group.can_post ? "" : " · read only"}` : ""}{group.discuss && !noToken ? ` · ${group.discuss}` : ""}</span>
           <span className="spacer" />
           {(group.waiting?.length ?? 0) > 0 && <span className="badge thread blocked" title={group.waiting.map((w) => `${w.slug} waits on ${w.thread.subject || w.thread.id}`).join("\n")}>{group.waiting.length} card{group.waiting.length === 1 ? "" : "s"} waiting</span>}
         </div>
-        {err && <div className="meta err">{err}</div>}
+        {/* Without a token the chat-list line is the one reason (ui-leftovers
+            FR-8); the mailbox's own error would say it again, with a path. */}
+        {err && !noToken && <div className="meta err">{err}</div>}
 
         <div className="timeline" ref={timelineRef}>
           {hits === null && view === "needs" && !focus ? (
@@ -311,7 +313,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
                     {branches.map((b) => <button key={b.id} className="badge branch" onClick={(e) => { e.stopPropagation(); goTo(b.id); }} title={b.subject}><GitBranch size={10} /> {chatOf(b) ?? "side"}</button>)}
                   </span>
                   <span className="spacer" />
-                  {!readOnly && <span className="a-actions" onClick={(e) => e.stopPropagation()}>
+                  {canPost && <span className="a-actions" onClick={(e) => e.stopPropagation()}>
                     {status !== "open" && <button className="rail-icon" onClick={() => setStatus(t.id, "open")} title="reopen: the thread accepts posts again"><Unlock size={12} /></button>}
                     {status === "open" && <button className="rail-icon" onClick={() => setStatus(t.id, "escalated")} title="escalate: on your queue, no agent can post"><ArrowUpRight size={12} /></button>}
                     {status !== "closed" && <button className="rail-icon" onClick={() => setStatus(t.id, "closed")} title="close"><Lock size={12} /></button>}
@@ -334,7 +336,9 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
           })}
         </div>
 
-        <div className="dock">
+        {/* No token: the composer is not drawn (ui-leftovers FR-8, "never
+            here"); the chat-list line says why, once. */}
+        {(readOnly || canPost) && <div className="dock">
           {readOnly ? (
             <div className="empty"><Lock size={13} aria-hidden /> {readOnly}: read-only. Nothing can be posted here.</div>
           ) : branchFrom && targetThread ? (
@@ -376,7 +380,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
               cancellable={threads.length > 0}
             />
           )}
-        </div>
+        </div>}
       </div>
     </div>
   );
@@ -624,11 +628,11 @@ function NeedsMe(p: {
             <div className="q-ask">{c.next}</div>
             {note && <div className="q-note"><StickyNote size={11} /> {note}</div>}
             <div className="q-actions">
-              <button className="tiny-btn primary" onClick={() => p.onDiscussCard(c)}><MessagesSquare size={12} /> Discuss</button>
-              <button className="tiny-btn" aria-pressed={ruling === `card:${c.slug}`} onClick={() => { setRuleErr(null); setRuling(ruling === `card:${c.slug}` ? null : `card:${c.slug}`); }} disabled={!p.canPost} aria-describedby={p.blockedBy} title={p.canPost ? "settle it here: a decision to the seat, with the next action, in a new thread named after the card" : undefined}><Gavel size={12} /> Rule</button>
-              <button className="tiny-btn ghost" onClick={() => openCard(c.slug)}>Open card</button>
+              <button className="tiny-btn" aria-label={`Discuss ${c.slug}`} onClick={() => p.onDiscussCard(c)}><MessagesSquare size={12} /> Discuss</button>
+              <button className="tiny-btn" aria-label={`Rule ${c.slug}`} aria-pressed={ruling === `card:${c.slug}`} onClick={() => { setRuleErr(null); setRuling(ruling === `card:${c.slug}` ? null : `card:${c.slug}`); }} disabled={!p.canPost} aria-describedby={p.blockedBy} title={p.canPost ? "settle it here: a decision to the seat, with the next action, in a new thread named after the card" : undefined}><Gavel size={12} /> Rule</button>
+              <button className="tiny-btn ghost" aria-label={`Open card ${c.slug}`} onClick={() => openCard(c.slug)}>Open card</button>
               <span className="spacer" />
-              <button className="tiny-btn ghost" onClick={() => p.onResolve(`card:${p.initiativeId}/${c.slug}`, true)} title="take it off your queue; the card itself is the agents' to update"><Check size={12} /> Mark solved</button>
+              <button className="tiny-btn ghost" aria-label={`Mark solved ${c.slug}`} onClick={() => p.onResolve(`card:${p.initiativeId}/${c.slug}`, true)} title="take it off your queue; the card itself is the agents' to update"><Check size={12} /> Mark solved</button>
             </div>
             {ruling === `card:${c.slug}` && (
               <RuleBox
@@ -654,10 +658,10 @@ function NeedsMe(p: {
           <div className="q-ask meta">{(t.participants ?? []).join(", ")} · {t.messages} msg · quiet {ago(t.quiet_seconds)}{t.since_decision > 0 ? ` · ${t.since_decision}/12` : ""}</div>
           {(t.cards ?? []).map((slug) => { const l = p.notes[`${p.initiativeId}/${slug}`] ?? []; return l.length ? <div key={slug} className="q-note"><StickyNote size={11} /> {l[l.length - 1].text}{l.length > 1 ? `  (+${l.length - 1} more)` : ""}</div> : null; })}
           <div className="q-actions">
-            <button className="tiny-btn primary" onClick={() => p.onDiscussThread(t.id)}><MessagesSquare size={12} /> {t.status === "escalated" ? "Open" : "Answer"}</button>
-            <button className="tiny-btn" aria-pressed={ruling === `thread:${t.id}`} onClick={() => { setRuleErr(null); setRuling(ruling === `thread:${t.id}` ? null : `thread:${t.id}`); }} disabled={!p.canPost} aria-describedby={p.blockedBy} title={p.canPost ? (t.status === "escalated" ? "settle it here: reopen, then a decision with the next action" : "settle it here: a decision into the thread, with the next action") : undefined}><Gavel size={12} /> Rule</button>
+            <button className="tiny-btn" aria-label={`${t.status === "escalated" ? "Open" : "Answer"} ${t.subject || t.id.slice(0, 8)}`} onClick={() => p.onDiscussThread(t.id)}><MessagesSquare size={12} /> {t.status === "escalated" ? "Open" : "Answer"}</button>
+            <button className="tiny-btn" aria-label={`Rule ${t.subject || t.id.slice(0, 8)}`} aria-pressed={ruling === `thread:${t.id}`} onClick={() => { setRuleErr(null); setRuling(ruling === `thread:${t.id}` ? null : `thread:${t.id}`); }} disabled={!p.canPost} aria-describedby={p.blockedBy} title={p.canPost ? (t.status === "escalated" ? "settle it here: reopen, then a decision with the next action" : "settle it here: a decision into the thread, with the next action") : undefined}><Gavel size={12} /> Rule</button>
             <span className="spacer" />
-            <button className="tiny-btn ghost" onClick={() => p.onResolve(`thread:${t.id}`, true)} title="take it off your queue without posting"><Check size={12} /> Mark solved</button>
+            <button className="tiny-btn ghost" aria-label={`Mark solved ${t.subject || t.id.slice(0, 8)}`} onClick={() => p.onResolve(`thread:${t.id}`, true)} title="take it off your queue without posting"><Check size={12} /> Mark solved</button>
           </div>
           {ruling === `thread:${t.id}` && (
             <RuleBox
