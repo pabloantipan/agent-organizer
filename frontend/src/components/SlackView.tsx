@@ -4,7 +4,7 @@ import type { Seat } from "../hooks/useWails";
 import { useBoard } from "../stores/board.store";
 import { queueOf, readOnlyOf } from "../lib/queue";
 import { ContextBar, WatcherBadge } from "./ContextBar";
-import { HEALTH } from "../lib/health";
+import { HEALTH, peopleLabel } from "../lib/health";
 import { Conversation } from "./Conversation";
 
 const PEOPLE_KEY = "slack.people";
@@ -84,7 +84,7 @@ export function SlackView() {
         {g.client && <span className="badge client">{g.client}</span>}
         <span className="spacer" />
         {slackFocus && <span className="badge persona focus">with {slackFocus} <button className="rail-icon" onClick={() => setSlackFocus(null)} title="back to the channel"><X size={11} /></button></span>}
-        <button className={`tiny-btn ${deaf > 0 ? "hot" : ""}`} aria-pressed={people} onClick={togglePeople} title={people ? "hide people" : "show people"}>
+        <button className={`tiny-btn ${deaf > 0 ? "hot" : ""}`} aria-pressed={people} aria-label={peopleLabel({ seats: seats.length, live, capped, deaf })} onClick={togglePeople} title={people ? "hide people" : "show people"}>
           <Users size={13} /> {seats.length}{live > 0 ? ` · ${live} live` : ""}{capped > 0 ? ` · ${capped} ${HEALTH.capped.label}` : ""}{deaf > 0 ? ` · ${deaf} ${HEALTH.deaf.label}` : ""}
         </button>
       </div>
