@@ -16,34 +16,22 @@ superseded_by:
 
 ## Question
 
-Is this the cell for the first stage? The drafting session read the goal
-("a drafted roster waits on its accept record before anything launches")
-and `agents/people.md`, and drafted two seats for the drafted-fixture
-cell. Nothing launches until this record is ruled. (Fixture: the accept
-record a draft cell waits on, shaped like the persona-agents skill's
-`references/drafting.md` §5; discovery-in-a-cell G4 iii, ui-leftovers
-FR-12 V2.)
+Is this the cell for the first stage? Two seats, drafted from the goal
+and `agents/people.md`; nothing launches until this is ruled.
 
 ### Seats drafted
 
-- **po_rosa**, the product owner and the cell's reconciler: the goal is an
-  outcome someone has to hold the cell to, and people.md names no one on
-  the product side besides pablo.
-- **tech_lead_tomas**, the technical lead: the goal names a launch that
-  has to be refused until a ruling, which is a behaviour someone has to
-  own end to end.
+- **po_rosa**, product owner and reconciler: the goal needs someone to hold the cell to it.
+- **tech_lead_tomas**, technical lead: the refused launch is a behaviour someone owns.
 
 ### Considered, not drafted
 
-- **a designer**: the goal names no screen and people.md names no user
-  besides pablo; add one when a stage builds UI.
-- **a developer seat**: builders come per wave from cards, not from the
-  roster.
+- **a designer**: the goal names no screen; add one when a stage builds UI.
+- **a developer seat**: builders come per wave from cards, not from the roster.
 
 ### Gaps the inputs left
 
-- No `measure` in `initiative.yaml`: the cell cannot say when the goal is
-  met.
+- No `measure` in `initiative.yaml`: the cell cannot say when the goal is met.
 - No base documents under `docs/`: the personas start from the goal alone.
 - One witness only: people.md names pablo and no one else.
 
@@ -65,6 +53,10 @@ skill before ruling.
 ## Ruling
 
 ## Consequences
+
+(Fixture: the accept record a draft cell waits on, shaped like the
+persona-agents skill's `references/drafting.md` §5; discovery-in-a-cell G4
+iii, ui-leftovers FR-12 V2.)
 
 On accept, cell.json loses `draft` and gains `accepted` and `record`, each
 persona file drops its draft line, and the crew is set up the usual way
