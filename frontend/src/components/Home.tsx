@@ -160,11 +160,16 @@ function DecisionRow({ row, decision: d }: { row: NeedsMeRow; decision: model.De
  *  Cancel (FR-9): opening another row's Rule, Escape or this Rule again
  *  closes the box and keeps them. */
 function RuleAction({ rowKey, initiative, decision }: { rowKey: string; initiative: string; decision: model.Decision }) {
-  const { ruleDraft, openRule, setRuleDraft, dropRule } = useBoard();
+  const { ruleDraft, openRule, setRuleDraft, dropRule, widthClass } = useBoard();
   const open = ruleDraft?.key === rowKey;
   const btn = useRef<HTMLButtonElement>(null);
+  // Compact's sheet covers Home: a scrim goes over what it covers, the rows'
+  // Rule verbs behind it (FR-8). A click on it closes the box and keeps the
+  // words, as Escape does.
+  const closeKeep = () => { openRule(null); btn.current?.focus(); };
   return (
     <span className="rb-anchor">
+      {open && widthClass === "compact" && <div className="rb-scrim" aria-hidden="true" onClick={closeKeep} />}
       <button ref={btn} className="act" aria-expanded={open} aria-label={`Rule ${initiative} ${decision.number}`} onClick={() => openRule(open ? null : rowKey)}>Rule</button>
       {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord opener={btn} afterRule={focusNeedsMe} onClose={() => openRule(null)} onCancel={() => dropRule(rowKey)}
         draft={{ chosen: ruleDraft.chosen, words: ruleDraft.words, set: setRuleDraft }} />}
