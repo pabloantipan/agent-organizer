@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "G7 unmet (resp-review): at 1024 and 1512 the timed reader cannot see all twenty rows, so the four answers are partial; the gate conflicts with A1/A3, pablo to amend G7/A8 or the layout"
+next: "decide: pablo, rule 0065 (G7/A8 at 1024 and 1512 cannot hold twenty rows in one screenshot; fse recommends the reader may scroll Home, under a minute, 3440 as written); then fse amends G7, sup21 reruns the reader on G7 only and merges"
 depends_on: ["ui-leftovers"]
 boundary: ["frontend/src/components/Home.tsx, RuleDecisionBox.tsx, Rail.tsx, App.tsx (the shell layout)", "frontend/src/stores/board.store.ts (the width class; the rail's default)", "frontend/src/lib/ and its tests", "frontend/src/styles/shell.css, home.css, rule-box.css", "docs/specs/twenty-at-a-glance.md (G9's widths, one line)"]
 spec: "docs/specs/responsive-home.md (FR-1 to FR-6); the design: docs/ux/specs/responsive-home.md (Aglaea, 3174fc2)"
@@ -43,10 +43,11 @@ FR-6 of `docs/specs/responsive-home.md`, from Aglaea's design spec.
 - G8 (after the rebase): `XDG_DATA_HOME=$(mktemp -d) make test` exit 0, 13 go packages ok, vitest 40 passed (.wt-notes/resp-build/g8-make-test.log); `npm run build` exit 0 (.wt-notes/resp-build/g8-build.log); G18 grep over main...responsive-home empty; `wails build` run after wails dev
 
 ## Next
-1. review: resp-review (code), resp-ui (UI); resp-reader times G7 from the g7 shots
+1. decide: pablo rules 0065 (the G7 gate, raised by fse)
+2. fse amends G7; sup21 reruns a reader on G7 only, then merges responsive-home (unmerged, 898cd78) and moves the card
 
 ## Blockers
-none
+- 0065 proposed: G7 as written conflicts with A1/A3 (code review fail on G7 only; UI review pass)
 
 ## Notes
 - 2026-09-29 sup21 runs this card, spawned by the FSE after ui-leftovers landed (508d9a8)
