@@ -40,21 +40,22 @@ type Row = {
  *  by order only and labelled with its appetite; no date is computed from it. */
 export function StageRoadmap({ initiative }: { initiative: merge.BoardInitiative }) {
   const { view, stageFocus, clearStageFocus } = useBoard();
-  // One stage open at a time (initiative-header FR-4). A stage tile in the
-  // header lands here through stageFocus: expand it, focus it, clear it.
-  const [expanded, setExpanded] = useState<string | null>(null);
-  const [focusOn, setFocusOn] = useState<string | null>(null);
-  const toggles = useRef(new Map<string, HTMLButtonElement>());
+  // One stage open at a time (initiative-header FR-4), by position: a broken
+  // roadmap may repeat an id (a problem the scan reports). A stage tile in
+  // the header lands here through stageFocus: the first stage with that id
+  // expands and takes focus, then the field clears.
+  const [expanded, setExpanded] = useState<number | null>(null);
+  const [focusOn, setFocusOn] = useState<number | null>(null);
+  const toggles = useRef(new Map<number, HTMLButtonElement>());
   useEffect(() => {
     const prefix = `${initiative.id}/`;
     if (!stageFocus?.startsWith(prefix)) return;
-    const id = stageFocus.slice(prefix.length);
-    setExpanded(id);
-    setFocusOn(id);
+    const k = (initiative.stages ?? []).findIndex((s) => s.id === stageFocus.slice(prefix.length));
+    if (k >= 0) { setExpanded(k); setFocusOn(k); }
     clearStageFocus();
-  }, [stageFocus, initiative.id, clearStageFocus]);
+  }, [stageFocus, initiative.id, initiative.stages, clearStageFocus]);
   useEffect(() => {
-    if (!focusOn) return;
+    if (focusOn === null) return;
     const el = toggles.current.get(focusOn);
     el?.scrollIntoView({ block: "nearest" });
     el?.focus({ preventScroll: true });
@@ -146,8 +147,8 @@ export function StageRoadmap({ initiative }: { initiative: merge.BoardInitiative
       {rows.map((r, i) => (
         <StageRow key={i} r={r} now={now} pct={pct} slotLeft={slotLeft} slot={slot} grid={grid}
           initiative={initiative.id} cards={cards.filter((c) => c.stage === r.stage.id)}
-          open={expanded === r.stage.id} onToggle={() => setExpanded(expanded === r.stage.id ? null : r.stage.id)}
-          toggleRef={(el) => { if (el) toggles.current.set(r.stage.id, el); else toggles.current.delete(r.stage.id); }} />
+          open={expanded === i} onToggle={() => setExpanded(expanded === i ? null : i)}
+          toggleRef={(el) => { if (el) toggles.current.set(i, el); else toggles.current.delete(i); }} />
       ))}
       <div className="srm-foot">
         <span><i className="srm-key done" /> stage done</span>
@@ -185,7 +186,7 @@ function StageRow({ r, now, pct, slotLeft, slot, grid, initiative, cards, open, 
   return (
     <>
     <div className={`srm-row ${r.state} ${open ? "expanded" : ""}`}>
-      <button ref={toggleRef} className="srm-label srm-toggle" aria-expanded={open} aria-controls={`srm-detail-${s.id}`}
+      <button ref={toggleRef} className="srm-label srm-toggle" aria-expanded={open} aria-controls={`srm-detail-${r.n}`}
         aria-label={`Stage ${r.n}: ${s.title || s.id}${state ? `, ${state === "current" ? "now" : state}` : ""}. ${open ? "Hide" : "Show"} its detail`}
         onClick={onToggle}>
         <span className="srm-head">
@@ -242,7 +243,7 @@ function StageRow({ r, now, pct, slotLeft, slot, grid, initiative, cards, open, 
         })}
       </div>
     </div>
-    {open && <StageDetail id={`srm-detail-${s.id}`} r={r} initiative={initiative} cards={cards} appetite={appetite} />}
+    {open && <StageDetail id={`srm-detail-${r.n}`} r={r} initiative={initiative} cards={cards} appetite={appetite} />}
     </>
   );
 }
