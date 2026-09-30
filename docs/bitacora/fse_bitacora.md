@@ -10,6 +10,10 @@ restating it (the discuss skill).
   20–36 (UI reviewer 11 min of the critical path); run record
   runs/2026-09-29-conform-and-waiting.md. **sup19 ended.** Nothing of mine
   runs; tokens: aglaea, fse, pablo.
+- **0059 ruled "1024 is real" (45dc799)**; Pablo asks for "kinda responsive"
+  (wide monitor and a 14" laptop), relayed to Aglaea for a design spec (thread
+  "0059: Home at 1024 and wide"). Next UI card: her spec or the stage-shortening
+  FR, and twenty-at-a-glance records both widths.
 - **0058 ruled ("Do", ce21cb0): sup20 runs ui-leftovers**, token
   organizer/sup20. 0059, 0060 open: if ruled while sup20 runs, they go to the
   next UI card, not this one. Last SHA seen: ce21cb0. Pablo's aebc25e: pnpm on
