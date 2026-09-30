@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: widths-and-focus
 updated: 2026-09-30
-next: "decide: pablo, rule 0069 (accept both amendments 3 and launch header-fold-2 and widths-and-focus in parallel)"
+next: "fse: start sup25 for this card and its pair (0069 ruled, accept as written); launch awaits Pablo's permission for the supervisor token and prelude"
 depends_on: []
 boundary: ["frontend/src/components/Home.tsx, Rail.tsx, RuleDecisionBox.tsx", "frontend/src/lib/width.ts, frontend/src/lib/ and its tests", "frontend/src/styles/home.css, rule-box.css, shell.css (the rail's rules only)", "FR-19 only: frontend/src/components/Overview.tsx (the record row's open), CardDrawer.tsx (focus on open and close), Conversation.tsx (the divider's icon button names)", "frontend/src/stores/board.store.ts only if the class boundary is read there", "not: header-fold-2's files; no Go; not docs/design-system.md"]
 spec: "docs/specs/responsive-home.md (FR-13 to FR-19, amendment 3); the ranking: docs/ux/reviews/2026-09-30-rank-header-fold-responsive-2.md (Aglaea, 3f3df2f); the design system's Widths as amended there"
@@ -27,11 +27,11 @@ Aglaea: FR-13 to FR-19 of `docs/specs/responsive-home.md`.
 - [ ] G8: see `docs/specs/responsive-home.md`, Acceptance
 
 ## Done
+- 2026-09-30 0069 ruled by pablo ("Ok", accept as written, 549217f); launchable, sup25 not started yet
 - 2026-09-30 cut from responsive-home amendment 3 by the FSE
 
 ## Next
 
 ## Blockers
-- 0069 proposed
 
 ## Notes
