@@ -1,16 +1,16 @@
 ---
 title: Responsive Home, second pass - compact to 1439, the sheet's scrim, one draft per record, one-line signals, names
-status: next
+status: now
 repos: [organizer]
 branch: main
-updated: 2026-09-29
-next: "sup24 runs this card (organizer-probe-sup24), spawned by the FSE 2026-09-30 after rule-box-finish landed"
+updated: 2026-09-30
+next: "resp2-build builds it on branch responsive-home-2 (.wt/responsive-home-2), launched by sup24 2026-09-30"
 depends_on: ["responsive-home", "rule-box-finish"]
 boundary: ["frontend/src/components/Home.tsx, RuleDecisionBox.tsx, Rail.tsx, App.tsx (the shell layout)", "frontend/src/stores/board.store.ts (the width class; drafts per record)", "frontend/src/lib/ and its tests", "frontend/src/styles/shell.css, home.css, rule-box.css"]
 spec: "docs/specs/responsive-home.md (FR-7 to FR-12, amendment 2); the design: docs/ux/specs/responsive-home.md, Amendment 1 (Aglaea, 836866a)"
 gate: "docs/specs/responsive-home.md Acceptance, rows G9 to G12 and G8; the Gate section below"
 stage: twenty-at-a-glance
-seat:
+seat: resp2-build
 ui_review: true
 ---
 
@@ -29,7 +29,7 @@ FR-7 to FR-12 of `docs/specs/responsive-home.md`.
 - 2026-09-29 cut from responsive-home amendment 2 by the FSE
 
 ## Next
-1. sup24 runs this card
+1. resp2-build builds it on branch responsive-home-2; then resp2-review (code) and resp2-ui (UI) review
 
 ## Blockers
 none
