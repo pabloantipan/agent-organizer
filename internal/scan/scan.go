@@ -151,6 +151,7 @@ func ReadInitiative(root string, opts Options) model.ScannedInitiative {
 
 	if opts.Git {
 		si.RepoStates = gitStates(root, si.Initiative.Repos, opts.GitTimeout)
+		si.CharterModified = charterModified(root, opts.GitTimeout)
 		branchSpans(root, si.Cards, opts.GitTimeout)
 	}
 	return si

@@ -65,6 +65,19 @@ func gitState(path, name string, timeout time.Duration) model.RepoState {
 	return rs
 }
 
+// charterModified reports whether git sees working-on/initiative.yaml changed
+// and not committed at the initiative root. Not a repo, or git failing, is
+// false and no problem: the mark is a hint, never a scan error.
+func charterModified(root string, timeout time.Duration) bool {
+	if timeout <= 0 {
+		timeout = 5 * time.Second
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	b, err := git(ctx, root, "status", "--porcelain", "--", filepath.Join(workingOnDir, initiativeFile))
+	return err == nil && b != ""
+}
+
 func git(ctx context.Context, dir string, args ...string) (string, error) {
 	cmd := exec.CommandContext(ctx, "git", append([]string{"-C", dir}, args...)...)
 	var stdout, stderr bytes.Buffer

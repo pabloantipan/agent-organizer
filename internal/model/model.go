@@ -75,6 +75,11 @@ type Initiative struct {
 	// means no stages, which is the normal case.
 	Stages []Stage `yaml:"-" json:"stages"`
 
+	// CharterModified is git reporting working-on/initiative.yaml changed
+	// and not committed (initiative-header FR-9, amendment 1). Filled by the
+	// scan; false when the root is not in a repo or git fails.
+	CharterModified bool `yaml:"-" json:"charter_modified"`
+
 	// Path is the initiative root directory (the parent of working-on/).
 	Path string `yaml:"-" json:"path"`
 }
