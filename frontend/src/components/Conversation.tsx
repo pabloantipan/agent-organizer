@@ -72,7 +72,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   const landing = useRef<string | null>(null);
   const [tick, setTick] = useState(0);
   const reload = useCallback(() => setTick((n) => n + 1), []);
-  const { slackDraft, clearSlackDraft, applyAgents, view: boardView, setResolved, select: openCard } = useBoard();
+  const { slackDraft, clearSlackDraft, applyAgents, view: boardView, setResolved, openCardLanding } = useBoard();
   const resolved = boardView?.order?.resolved ?? {};
   const notes = boardView?.order?.notes ?? {};
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -292,7 +292,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
                 setDraftBody(notesAsContext(notes[`${initiativeId}/${c.slug}`], human));
                 setTarget(null);
               }}
-              onOpenCard={openCard}
+              onOpenCard={openCardLanding}
               onResolve={(key, v) => setResolved(key, v)}
             />
           ) : hits !== null ? (

@@ -62,6 +62,9 @@ type State = {
   // stageFocus is the stage Roadmap → Stages expands and focuses, set by a
   // stage tile: <initiative>/<stage id>. StageRoadmap consumes it and clears it.
   stageFocus: string | null;
+  // Open on a card row of a Needs me list is a landing: the card back opens
+  // and the header folds (FR-1), without writing the stored choice.
+  openCardLanding: (c: merge.BoardCard) => void;
   openStage: (initiativeId: string, stageId: string) => void;
   clearStageFocus: () => void;
   slackFocus: string | null;
@@ -185,6 +188,7 @@ export const useBoard = create<State>((set, get) => ({
   headerOpen: storedHeaderOpen(),
   setHeaderOpen: (headerOpen) => { try { localStorage.setItem(HEADER_KEY, headerOpen ? "1" : "0"); } catch { /* per-viewer */ } set({ headerOpen }); },
   stageFocus: null,
+  openCardLanding: (selected) => set({ selected, headerOpen: false }),
   openStage: (selectedInitiative, stageId) => set({ ruleDraft: null, headerOpen: false, screen: "initiative", selectedInitiative, sub: "roadmap", selected: null, needsMeFocus: null, decisionFocus: null, stageFocus: `${selectedInitiative}/${stageId}` }),
   clearStageFocus: () => set({ stageFocus: null }),
   slackFocus: null,
@@ -296,8 +300,8 @@ export const useBoard = create<State>((set, get) => ({
     }
   },
 
-  // Open on a Needs me card row is a landing, so it folds the header (FR-1);
-  // opening a card anywhere else leaves the header as it is.
+  // Open on Home's Needs me card row is a landing, so it folds the header
+  // (FR-1); opening a card anywhere else leaves the header as it is.
   select: (selected) => set(selected && get().screen === "home" ? { selected, headerOpen: false } : { selected }),
   setFilterMachine: (filterMachine) => set({ filterMachine }),
   setFilterClient: (filterClient) => set({ filterClient }),
