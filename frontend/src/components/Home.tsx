@@ -6,7 +6,7 @@ import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from ".
 import { uniq } from "../lib";
 import { HEALTH, messages } from "../lib/health";
 import { ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
-import type { WidthClass } from "../lib/width";
+import { signalsThatFit, type WidthClass } from "../lib/width";
 import { useBoard } from "../stores/board.store";
 import { nextDate, stageState } from "./InitiativeHeader";
 import { InitiativeDetail } from "./Initiatives";
@@ -22,12 +22,12 @@ import "../styles/home.css";
  *  nothing else: the tree is the same in every class, so crossing one
  *  unmounts nothing. Wide puts Needs me in a right column of its own. */
 export function Home() {
-  const { view, agents, widthClass, roomy, ruleDraft, openRule } = useBoard();
+  const { view, agents, widthClass, roomy, ruleDraft, dropRule } = useBoard();
   const home = useRef<HTMLDivElement>(null);
   const rows = view ? needsMeRows(view, agents) : [];
-  // A ruled record leaves the queue, and its box with it.
-  const gone = !!ruleDraft && !!view && !rows.some((r) => r.key === ruleDraft.key);
-  useEffect(() => { if (gone) openRule(null); }, [gone, openRule]);
+  // A ruled record leaves the queue, and its box and its draft with it.
+  const gone = !!ruleDraft && !!view && !rows.some((r) => r.key === ruleDraft.key) ? ruleDraft.key : null;
+  useEffect(() => { if (gone) dropRule(gone); }, [gone, dropRule]);
   useKeepScroll(home, widthClass, !!view);
   if (!view) return <div className="empty">Loading…</div>;
   return (
@@ -63,15 +63,16 @@ const age = (since: Date | null) => {
 
 /** The shell every Needs me row shares: reason lozenge, subject with one
  *  line of context, age, one verb. Highlighted and scrolled to when
- *  openNeedsMe names it. Compact keeps the row to one line: the context
- *  leaves the view for the row's hover and stays in the accessible text. */
+ *  openNeedsMe names it. The row's hover carries its whole context line in
+ *  every class (FR-11): wide cuts it, compact takes it out of the view and
+ *  keeps it in the accessible text. */
 function Shell({ row, reason, tone, subject, context, children }: { row: NeedsMeRow; reason: string; tone: string; subject: React.ReactNode; context: string; children: React.ReactNode }) {
-  const { needsMeFocus, widthClass, ruleDraft } = useBoard();
+  const { needsMeFocus, ruleDraft } = useBoard();
   const ref = useRef<HTMLDivElement>(null);
   const focused = needsMeFocus === row.key;
   useEffect(() => { if (focused) ref.current?.scrollIntoView({ block: "center", behavior: "smooth" }); }, [focused]);
   return (
-    <div ref={ref} className={`ib-row ${focused ? "focused" : ""} ${ruleDraft?.key === row.key ? "ruling" : ""}`} data-key={row.key} title={widthClass === "compact" ? context : undefined}>
+    <div ref={ref} className={`ib-row ${focused ? "focused" : ""} ${ruleDraft?.key === row.key ? "ruling" : ""}`} data-key={row.key} title={context}>
       <span className={`lz ${tone}`}>{reason}</span>
       <span className="ib-what">
         <span className="ib-subject">{subject}</span>
@@ -155,15 +156,22 @@ function DecisionRow({ row, decision: d }: { row: NeedsMeRow; decision: model.De
  *  closes; once the ruling lands the row is gone, and focus goes to the
  *  Needs me heading (FR-5). Which box is open and what is typed in it live
  *  in the store (ruleDraft), above the layout (responsive-home FR-5); one
- *  box is open at a time. */
+ *  box is open at a time, and each record keeps its words until Rule or
+ *  Cancel (FR-9): opening another row's Rule, Escape or this Rule again
+ *  closes the box and keeps them. */
 function RuleAction({ rowKey, initiative, decision }: { rowKey: string; initiative: string; decision: model.Decision }) {
-  const { ruleDraft, openRule, setRuleDraft } = useBoard();
+  const { ruleDraft, openRule, setRuleDraft, dropRule, widthClass } = useBoard();
   const open = ruleDraft?.key === rowKey;
   const btn = useRef<HTMLButtonElement>(null);
+  // Compact's sheet covers Home: a scrim goes over what it covers, the rows'
+  // Rule verbs behind it (FR-8). A click on it closes the box and keeps the
+  // words, as Escape does.
+  const closeKeep = () => { openRule(null); btn.current?.focus(); };
   return (
     <span className="rb-anchor">
+      {open && widthClass === "compact" && <div className="rb-scrim" aria-hidden="true" onClick={closeKeep} />}
       <button ref={btn} className="act" aria-expanded={open} aria-label={`Rule ${initiative} ${decision.number}`} onClick={() => openRule(open ? null : rowKey)}>Rule</button>
-      {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord opener={btn} afterRule={focusNeedsMe} onClose={() => openRule(null)}
+      {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord opener={btn} afterRule={focusNeedsMe} onClose={() => openRule(null)} onCancel={() => dropRule(rowKey)}
         draft={{ chosen: ruleDraft.chosen, words: ruleDraft.words, set: setRuleDraft }} />}
     </span>
   );
@@ -175,7 +183,8 @@ const focusNeedsMe = () => document.getElementById(NEEDS_ME_HEADING)?.focus();
 /** The initiatives by priority, one row each (H3): its state and phase
  *  (FR-6 of twenty-at-a-glance), goal or "no goal yet", a compact stage
  *  stepper, its signals and its next real date. A row opens
- *  the initiative; the chevron shows repos, problems and actions in place. */
+ *  the initiative; the chevron shows its goal, next date, repos, problems
+ *  and actions in place. */
 function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.getState>["view"]> }) {
   const { agents, openInitiative, widthClass } = useBoard();
   const compact = widthClass === "compact";
@@ -214,13 +223,13 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
               <Phase stages={i.stages ?? []} />
               <span title={i.goal || undefined} className={`p-goal ${i.goal ? "" : "missing"}`}>{i.goal || "no goal yet"}</span>
               <MiniStepper stages={i.stages ?? []} compact={compact} />
-              <Signals i={i} rows={rows} cards={cards} waves={group?.waves ?? []} cell={group?.cell} missing={missingPersonas(group?.crew)} lead={leadOf(group)} />
+              <Signals i={i} rows={rows} cards={cards} waves={group?.waves ?? []} cell={group?.cell} missing={missingPersonas(group?.crew)} lead={leadOf(group)} oneLine={widthClass !== "regular"} />
               <NextDate next={next} />
-              <button className="p-more ghost" onClick={() => setOpen({ ...open, [id]: !open[id] })} aria-expanded={!!open[id]} title={open[id] ? "hide details" : "repos, problems and actions"}>
+              <button className="p-more ghost" onClick={() => setOpen({ ...open, [id]: !open[id] })} aria-expanded={!!open[id]} aria-label={detailsName(id)} title={detailsName(id)}>
                 {open[id] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
               </button>
             </div>
-            {open[id] && <div className="p-detail">{compact && <GoalAndDate i={i} next={next} />}<InitiativeDetail i={i} /></div>}
+            {open[id] && <div className="p-detail"><GoalAndDate i={i} next={next} /><InitiativeDetail i={i} /></div>}
           </div>
         );
       })}
@@ -230,13 +239,16 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
 
 type Next = ReturnType<typeof nextDate>;
 
+/** The chevron's name and hover (FR-11): what its detail opens on. */
+const detailsName = (id: string) => `Details for ${id}: goal, next date, repos`;
+
 /** Compact's id hover (responsive-home FR-2): the title, then the goal and
  *  the next date that left the row. */
 const idHover = (i: merge.BoardInitiative, next: Next) =>
   `${i.title}\ngoal: ${i.goal || "no goal yet"}\nnext date: ${next ? `${next.date} ${next.what}` : "none ahead"}`;
 
-/** Compact's chevron detail opens on the goal and the next date the row no
- *  longer shows. */
+/** The chevron's detail opens on the goal and the next date, whole: the
+ *  ones compact's row no longer shows and the ones regular cuts (FR-11). */
 function GoalAndDate({ i, next }: { i: merge.BoardInitiative; next: Next }) {
   return (
     <div className="p-detail-goal">
@@ -308,7 +320,7 @@ function MiniStepper({ stages, compact = false }: { stages: model.Stage[]; compa
   );
 }
 
-function Signals({ i, rows, cards, waves, cell, missing, lead }: { i: merge.BoardInitiative; rows: merge.BoardInitiative[]; cards: merge.BoardCard[]; waves: service.Wave[]; cell?: model.Cell | null; missing: string[]; lead: string }) {
+function Signals({ i, rows, cards, waves, cell, missing, lead, oneLine }: { i: merge.BoardInitiative; rows: merge.BoardInitiative[]; cards: merge.BoardCard[]; waves: service.Wave[]; cell?: model.Cell | null; missing: string[]; lead: string; oneLine: boolean }) {
   const waiting = waitingDecisions(i);
   const blocked = cards.filter((c) => c.status === "blocked").length;
   const now = cards.filter((c) => c.status === "now").length;
@@ -318,8 +330,9 @@ function Signals({ i, rows, cards, waves, cell, missing, lead }: { i: merge.Boar
   const problems = i.problems?.length ?? 0;
   const defining = cell?.state === "in_definition";
   const none = !waiting && !blocked && !now && !live && !running.length && !problems && !defining;
+  const Line = oneLine ? OneLine : AllSignals;
   return (
-    <span className="p-sig">
+    <Line>
       {waiting > 0 && <span className="lz waiting"><span className="num">{waiting}</span> waiting · {signalOwners(i, lead).join(", ")}</span>}
       {blocked > 0 && <span className="lz blocked"><span className="num">{blocked}</span> blocked</span>}
       {now > 0 && <span className="lz now"><span className="num">{now}</span> now</span>}
@@ -328,6 +341,56 @@ function Signals({ i, rows, cards, waves, cell, missing, lead }: { i: merge.Boar
       <CellStateLz cell={cell} missing={missing} label="cell in definition" />
       {problems > 0 && <span className="lz warning"><span className="num">{problems}</span> problem{problems === 1 ? "" : "s"}</span>}
       {none && <span className="p-quiet" title="no signals">—</span>}
+    </Line>
+  );
+}
+
+function AllSignals({ children }: { children: React.ReactNode }) {
+  return <span className="p-sig">{children}</span>;
+}
+
+/** Compact's signals (FR-10), and wide's, whose signals keep one line
+ *  (FR-4) also when the rail leaves the list tight at 1920: one line, never
+ *  wrapped. The lozenges that do
+ *  not fit are hidden and counted in a "+N"; they are named in the cell's
+ *  hover and in its accessible text. Measured after every render, since a
+ *  signal changes with the 10 s agents feed and the room with the rail;
+ *  state is set only when what fits changes. */
+function OneLine({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [cut, setCut] = useState<{ n: number; rest: string[]; whole: string } | null>(null);
+  const measure = () => {
+    const el = ref.current;
+    if (!el) return;
+    const items = Array.from(el.children).filter((c): c is HTMLElement => c instanceof HTMLElement && !c.classList.contains("sig-more") && !c.classList.contains("sr-only"));
+    // Hidden ones are shown for the measure, inside this frame.
+    for (const c of items) c.style.display = "inline-flex";
+    const more = el.querySelector<HTMLElement>(".sig-more");
+    const gap = parseFloat(getComputedStyle(el).columnGap) || 0;
+    const n = signalsThatFit(items.map((c) => Math.max(c.getBoundingClientRect().width, c.scrollWidth)), gap, el.clientWidth, Math.max(more?.getBoundingClientRect().width ?? 0, 28));
+    const rest = items.slice(n).map((c) => (c.textContent ?? "").replace(/\s+/g, " ").trim());
+    items.forEach((c, k) => { c.style.display = ""; if (k >= n) c.dataset.off = "1"; else delete c.dataset.off; });
+    // The first signal may still be cut by its ellipsis: then the hover
+    // names it whole.
+    const first = items[0];
+    const whole = first && first.scrollWidth > first.clientWidth + 1 ? (first.textContent ?? "").replace(/\s+/g, " ").trim() : "";
+    setCut((p) => (p && p.n === n && p.whole === whole && p.rest.join("|") === rest.join("|") ? p : { n, rest, whole }));
+  };
+  useLayoutEffect(measure);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => measure());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const rest = cut?.rest ?? [];
+  const also = rest.length > 0 ? `and ${rest.length} more: ${rest.join(", ")}` : undefined;
+  return (
+    <span ref={ref} className="p-sig one-line" title={[cut?.whole, also].filter(Boolean).join("\n") || undefined}>
+      {children}
+      {rest.length > 0 && <span className="lz sig-more" aria-hidden="true">+{rest.length}</span>}
+      {also && <span className="sr-only">{also}</span>}
     </span>
   );
 }
