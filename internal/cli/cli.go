@@ -132,7 +132,7 @@ func runWith(args []string, stdout, stderr io.Writer, now func() time.Time) int 
 	case "config":
 		return configCmd(cfg, args[1:], stdout, stderr)
 	case "version", "--version":
-		fmt.Fprintln(stdout, "organizer", Version)
+		fmt.Fprintln(stdout, "Deltagos", Version)
 		return 0
 	case "help":
 		usage(stdout)
