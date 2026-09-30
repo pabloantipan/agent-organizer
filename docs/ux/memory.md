@@ -147,6 +147,9 @@ details in `working-on/done/responsive-home-2.md` ## UI review and
 - Pressing an action that starts a real session (Draft the cell's Open,
   Bring crew up) is out of a review's reach; read the code path and say so.
 
+- **A count needs its noun.** "3 waiting" failed header-fold's blind reader;
+  0068 made it "3 decisions waiting". Shortening a label past its noun saves
+  width and costs meaning.
 - **Measure every width you name.** In responsive-home I set regular at 1280
   and called it "as built" without measuring below 1440; the UI review found
   a cliff at 1280 (U3). My A8 also asked all twenty rows in one 1024

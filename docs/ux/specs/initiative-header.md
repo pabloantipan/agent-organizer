@@ -94,8 +94,10 @@ chose that over carrying a second copy of goal and scope in Overview's body.
 
 ### 2. The waiting chip goes where the waiting records are
 
-- It reads "**3 waiting on you**" when the lead owns them, else "3 waiting",
-  with the same count as `waitingDecisions`. It uses the design system's
+- It reads "**3 decisions waiting on you**" when the lead owns them, else
+  "3 decisions waiting" (0068, which supersedes this section's first words,
+  "3 waiting": a reader who never saw the app could only guess what they led
+  to; build spec FR-2, amendment 2). The same count as `waitingDecisions`. It uses the design system's
   decision waiting colours: fuchsia, dashed.
 - Pressing it opens **Decisions**, scrolled to "Waiting on a ruling", with
   focus on the first waiting record's line, expanded. On Decisions itself
