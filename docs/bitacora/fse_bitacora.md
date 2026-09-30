@@ -16,8 +16,11 @@ restating it (the discuss skill).
   Pablo's install: macOS may re-ask keychain access; Dock keeps the old path.
 - **header-fold failed G8 only (830672b):** the chip's words "N waiting"
   (FR-2, from the design) leave a newcomer guessing. **0068** raised
-  (recommend "N decisions waiting"). Also: Pablo answered, or not, the
-  hdr-rule-review permission prompt (relayed 2026-09-30).
+  (recommend "N decisions waiting"). The hdr-rule-review permission prompt went
+  unanswered 90 min; sup23 replaced the reviewer (hdr-rule-review2, told not to
+  kill fixture stand-ins). Repetition candidate: seats stopping on auto-mode
+  prompts (the Go-write refusal, the pid kill); a second supervisor hitting it
+  goes to Hephaistos.
 - **Learned (sup23):** a "reader who never saw the app" launched at the
   initiative root gets CLAUDE.md in context; blind readers launch outside it.
   Applies to every timed-reader gate (G9, G7, G8).
