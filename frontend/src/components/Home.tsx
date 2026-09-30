@@ -1,11 +1,12 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Briefcase, ChevronDown, ChevronRight, CircleDashed, Compass, Hammer, Hand, Play } from "lucide-react";
 import type { merge, model, service } from "../../wailsjs/go/models";
-import { inactiveIds, launchVerb, missingPersonas, needsMeRows, type NeedsMeRow } from "../lib/queue";
+import { inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, type NeedsMeRow } from "../lib/queue";
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
 import { HEALTH, messages } from "../lib/health";
-import { ownerPhrase, waitingDecisions, waitingOwners } from "../lib/decisions";
+import { ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
+import type { WidthClass } from "../lib/width";
 import { useBoard } from "../stores/board.store";
 import { nextDate, stageState } from "./InitiativeHeader";
 import { InitiativeDetail } from "./Initiatives";
@@ -16,14 +17,22 @@ import "../styles/home.css";
 /** Home: what needs me, and where every initiative stands (FR-15, FR-16).
  *  Needs me is one list, oldest first, one verb per row; its length is the
  *  top bar's one badge. Below it, the active initiatives in the rail's order;
- *  the rest sit in the rail's Not active group (FR-9). */
+ *  the rest sit in the rail's Not active group (FR-9).
+ *  The window's width class (responsive-home) is a class on .home and
+ *  nothing else: the tree is the same in every class, so crossing one
+ *  unmounts nothing. Wide puts Needs me in a right column of its own. */
 export function Home() {
-  const { view, agents } = useBoard();
+  const { view, agents, widthClass, roomy, ruleDraft, openRule } = useBoard();
+  const home = useRef<HTMLDivElement>(null);
+  const rows = view ? needsMeRows(view, agents) : [];
+  // A ruled record leaves the queue, and its box with it.
+  const gone = !!ruleDraft && !!view && !rows.some((r) => r.key === ruleDraft.key);
+  useEffect(() => { if (gone) openRule(null); }, [gone, openRule]);
+  useKeepScroll(home, widthClass, !!view);
   if (!view) return <div className="empty">Loading…</div>;
-  const rows = needsMeRows(view, agents);
   return (
-    <div className="home">
-      <section className="home-sec">
+    <div ref={home} className={`home ${widthClass} ${roomy ? "roomy" : ""}`}>
+      <section className="home-sec home-needs">
         <h2 id={NEEDS_ME_HEADING} tabIndex={-1} className="sec-title">Needs me <span className="num sec-count">{rows.length}</span><span className="sec-sub">everything waiting on you, oldest first</span></h2>
         {rows.length === 0 ? (
           <div className="panel empty-state">
@@ -36,7 +45,7 @@ export function Home() {
           </div>
         )}
       </section>
-      <section className="home-sec">
+      <section className="home-sec home-list">
         <h2 className="sec-title">Initiatives <span className="sec-sub">by priority</span></h2>
         <Initiatives view={view} />
       </section>
@@ -54,14 +63,15 @@ const age = (since: Date | null) => {
 
 /** The shell every Needs me row shares: reason lozenge, subject with one
  *  line of context, age, one verb. Highlighted and scrolled to when
- *  openNeedsMe names it. */
-function Shell({ row, reason, tone, subject, context, children }: { row: NeedsMeRow; reason: string; tone: string; subject: React.ReactNode; context: React.ReactNode; children: React.ReactNode }) {
-  const { needsMeFocus } = useBoard();
+ *  openNeedsMe names it. Compact keeps the row to one line: the context
+ *  leaves the view for the row's hover and stays in the accessible text. */
+function Shell({ row, reason, tone, subject, context, children }: { row: NeedsMeRow; reason: string; tone: string; subject: React.ReactNode; context: string; children: React.ReactNode }) {
+  const { needsMeFocus, widthClass, ruleDraft } = useBoard();
   const ref = useRef<HTMLDivElement>(null);
   const focused = needsMeFocus === row.key;
   useEffect(() => { if (focused) ref.current?.scrollIntoView({ block: "center", behavior: "smooth" }); }, [focused]);
   return (
-    <div ref={ref} className={`ib-row ${focused ? "focused" : ""}`} data-key={row.key}>
+    <div ref={ref} className={`ib-row ${focused ? "focused" : ""} ${ruleDraft?.key === row.key ? "ruling" : ""}`} data-key={row.key} title={widthClass === "compact" ? context : undefined}>
       <span className={`lz ${tone}`}>{reason}</span>
       <span className="ib-what">
         <span className="ib-subject">{subject}</span>
@@ -133,8 +143,8 @@ function DecisionRow({ row, decision: d }: { row: NeedsMeRow; decision: model.De
   return (
     <Shell row={row} reason="decision" tone="waiting"
       subject={<><span className="mono">{row.initiative} {d.number}</span> · {d.title}</>}
-      context={<>{ownerPhrase(d.owner)} · raised <span className="num">{d.raised || "—"}</span>{d.raised_by ? ` by ${d.raised_by}` : ""}{opts.length > 0 ? ` · options: ${opts.join(", ")}` : ""}</>}>
-      <RuleAction initiative={row.initiative} decision={d} />
+      context={`${ownerPhrase(d.owner)} · raised ${d.raised || "—"}${d.raised_by ? ` by ${d.raised_by}` : ""}${opts.length > 0 ? ` · options: ${opts.join(", ")}` : ""}`}>
+      <RuleAction rowKey={row.key} initiative={row.initiative} decision={d} />
     </Shell>
   );
 }
@@ -143,14 +153,18 @@ function DecisionRow({ row, decision: d }: { row: NeedsMeRow; decision: model.De
  *  is open (aria-expanded and --surface-selected, ui-leftovers FR-4), and
  *  its name carries the record (FR-6). Focus comes back to it when the box
  *  closes; once the ruling lands the row is gone, and focus goes to the
- *  Needs me heading (FR-5). */
-function RuleAction({ initiative, decision }: { initiative: string; decision: model.Decision }) {
-  const [open, setOpen] = useState(false);
+ *  Needs me heading (FR-5). Which box is open and what is typed in it live
+ *  in the store (ruleDraft), above the layout (responsive-home FR-5); one
+ *  box is open at a time. */
+function RuleAction({ rowKey, initiative, decision }: { rowKey: string; initiative: string; decision: model.Decision }) {
+  const { ruleDraft, openRule, setRuleDraft } = useBoard();
+  const open = ruleDraft?.key === rowKey;
   const btn = useRef<HTMLButtonElement>(null);
   return (
     <span className="rb-anchor">
-      <button ref={btn} className="act" aria-expanded={open} aria-label={`Rule ${initiative} ${decision.number}`} onClick={() => setOpen(!open)}>Rule</button>
-      {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord opener={btn} afterRule={focusNeedsMe} onClose={() => setOpen(false)} />}
+      <button ref={btn} className="act" aria-expanded={open} aria-label={`Rule ${initiative} ${decision.number}`} onClick={() => openRule(open ? null : rowKey)}>Rule</button>
+      {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord opener={btn} afterRule={focusNeedsMe} onClose={() => openRule(null)}
+        draft={{ chosen: ruleDraft.chosen, words: ruleDraft.words, set: setRuleDraft }} />}
     </span>
   );
 }
@@ -163,7 +177,8 @@ const focusNeedsMe = () => document.getElementById(NEEDS_ME_HEADING)?.focus();
  *  stepper, its signals and its next real date. A row opens
  *  the initiative; the chevron shows repos, problems and actions in place. */
 function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.getState>["view"]> }) {
-  const { agents, openInitiative } = useBoard();
+  const { agents, openInitiative, widthClass } = useBoard();
+  const compact = widthClass === "compact";
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const all = view.board.initiatives ?? [];
   const folded = inactiveIds(view);
@@ -180,7 +195,7 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
     );
   }
   return (
-    <div ref={ref} className={`panel port ${narrow ? "narrow" : ""}`} role="table" style={idWidth ? { "--id-w": `${idWidth}px` } as React.CSSProperties : undefined}>
+    <div ref={ref} className={`panel port ${narrow && !compact ? "narrow" : ""}`} role="table" style={idWidth ? { "--id-w": `${idWidth}px` } as React.CSSProperties : undefined}>
       <div className="p-head" role="row">
         <span className="num">#</span><span>initiative</span><span>state</span><span>phase</span><span>goal</span><span>stage</span><span>signals</span><span>next date</span><span />
       </div>
@@ -189,25 +204,46 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
         const i = rows.find((r) => r.local) ?? rows[0];
         const cards = (["now", "blocked", "next"] as const).flatMap((st) => (cols[st] ?? []).filter((c) => c.initiative_id === id));
         const group = agents?.groups?.find((g) => g.id === id);
+        const next = nextDate(i, cards);
         return (
-          <div key={id} className="p-item">
+          <div key={id} className="p-item" data-id={id}>
             <div className="p-row" role="row">
               <span className="p-rank num">{k + 1}</span>
-              <button className="p-id" onClick={() => openInitiative(id, "overview")} title={i.title}>{id}</button>
+              <button className="p-id" onClick={() => openInitiative(id, "overview")} title={compact ? idHover(i, next) : i.title}>{id}</button>
               <StateLz state={states.get(id) ?? "quiet"} />
               <Phase stages={i.stages ?? []} />
               <span title={i.goal || undefined} className={`p-goal ${i.goal ? "" : "missing"}`}>{i.goal || "no goal yet"}</span>
-              <MiniStepper stages={i.stages ?? []} />
-              <Signals i={i} rows={rows} cards={cards} waves={group?.waves ?? []} cell={group?.cell} missing={missingPersonas(group?.crew)} />
-              <NextDate i={i} cards={cards} />
+              <MiniStepper stages={i.stages ?? []} compact={compact} />
+              <Signals i={i} rows={rows} cards={cards} waves={group?.waves ?? []} cell={group?.cell} missing={missingPersonas(group?.crew)} lead={leadOf(group)} />
+              <NextDate next={next} />
               <button className="p-more ghost" onClick={() => setOpen({ ...open, [id]: !open[id] })} aria-expanded={!!open[id]} title={open[id] ? "hide details" : "repos, problems and actions"}>
                 {open[id] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
               </button>
             </div>
-            {open[id] && <div className="p-detail"><InitiativeDetail i={i} /></div>}
+            {open[id] && <div className="p-detail">{compact && <GoalAndDate i={i} next={next} />}<InitiativeDetail i={i} /></div>}
           </div>
         );
       })}
+    </div>
+  );
+}
+
+type Next = ReturnType<typeof nextDate>;
+
+/** Compact's id hover (responsive-home FR-2): the title, then the goal and
+ *  the next date that left the row. */
+const idHover = (i: merge.BoardInitiative, next: Next) =>
+  `${i.title}\ngoal: ${i.goal || "no goal yet"}\nnext date: ${next ? `${next.date} ${next.what}` : "none ahead"}`;
+
+/** Compact's chevron detail opens on the goal and the next date the row no
+ *  longer shows. */
+function GoalAndDate({ i, next }: { i: merge.BoardInitiative; next: Next }) {
+  return (
+    <div className="p-detail-goal">
+      <span className="init-detail-label">goal</span>
+      <span className={i.goal ? "" : "missing"}>{i.goal || "no goal yet"}</span>
+      <span className="init-detail-label">next date</span>
+      {next ? <span><span className="num">{next.date}</span> <span className="p-next-what">{next.what}</span></span> : <span className="missing">none ahead</span>}
     </div>
   );
 }
@@ -243,11 +279,23 @@ function useFitIds(key: string) {
 }
 
 /** Home's compact stepper: one segment per stage and the current one named.
- *  Fewer than three stages are words only (design system, Stage stepper). */
-function MiniStepper({ stages }: { stages: model.Stage[] }) {
+ *  Fewer than three stages are words only (design system, Stage stepper).
+ *  In the compact class the label is `n/m` (responsive-home FR-2); the
+ *  stage's title moves to the hover and stays in the accessible text. */
+function MiniStepper({ stages, compact = false }: { stages: model.Stage[]; compact?: boolean }) {
   if (stages.length === 0) return <span className="p-stage"><span className="stage-lbl missing">no roadmap</span></span>;
   const cur = stages.findIndex((s) => s.current);
   const label = cur >= 0 ? <><span className="num">{cur + 1}</span> · {stages[cur].title} · now</> : <>all <span className="num">{stages.length}</span> done</>;
+  if (compact) {
+    const full = cur >= 0 ? `stage ${cur + 1} of ${stages.length} · ${stages[cur].title} · now` : `all ${stages.length} stages done`;
+    return (
+      <span className="p-stage" title={full}>
+        {stages.length >= 3 && <span className="stepper" aria-hidden="true">{stages.map((s, k) => <i key={k} className={stageState(s)} />)}</span>}
+        <span className="stage-lbl num" aria-hidden="true">{cur >= 0 ? `${cur + 1}/${stages.length}` : `${stages.length}/${stages.length}`}</span>
+        <span className="sr-only">{full}</span>
+      </span>
+    );
+  }
   return (
     <span className="p-stage">
       {stages.length >= 3 && (
@@ -260,7 +308,7 @@ function MiniStepper({ stages }: { stages: model.Stage[] }) {
   );
 }
 
-function Signals({ i, rows, cards, waves, cell, missing }: { i: merge.BoardInitiative; rows: merge.BoardInitiative[]; cards: merge.BoardCard[]; waves: service.Wave[]; cell?: model.Cell | null; missing: string[] }) {
+function Signals({ i, rows, cards, waves, cell, missing, lead }: { i: merge.BoardInitiative; rows: merge.BoardInitiative[]; cards: merge.BoardCard[]; waves: service.Wave[]; cell?: model.Cell | null; missing: string[]; lead: string }) {
   const waiting = waitingDecisions(i);
   const blocked = cards.filter((c) => c.status === "blocked").length;
   const now = cards.filter((c) => c.status === "now").length;
@@ -272,7 +320,7 @@ function Signals({ i, rows, cards, waves, cell, missing }: { i: merge.BoardIniti
   const none = !waiting && !blocked && !now && !live && !running.length && !problems && !defining;
   return (
     <span className="p-sig">
-      {waiting > 0 && <span className="lz waiting"><span className="num">{waiting}</span> waiting · {waitingOwners(i).join(", ")}</span>}
+      {waiting > 0 && <span className="lz waiting"><span className="num">{waiting}</span> waiting · {signalOwners(i, lead).join(", ")}</span>}
       {blocked > 0 && <span className="lz blocked"><span className="num">{blocked}</span> blocked</span>}
       {now > 0 && <span className="lz now"><span className="num">{now}</span> now</span>}
       {running.map((w) => <span key={w.n} className="lz live">wave <span className="num">{w.n}</span> · <span className="num">{w.building!.length}</span> building</span>)}
@@ -307,8 +355,7 @@ function Phase({ stages }: { stages: model.Stage[] }) {
   );
 }
 
-function NextDate({ i, cards }: { i: merge.BoardInitiative; cards: merge.BoardCard[] }) {
-  const n = nextDate(i, cards);
+function NextDate({ next: n }: { next: Next }) {
   if (!n) return <span className="p-next"><span className="num" title="no card due, milestone or target ahead">—</span></span>;
   return (
     <span className="p-next">
@@ -316,4 +363,58 @@ function NextDate({ i, cards }: { i: merge.BoardInitiative; cards: merge.BoardCa
       <span className="p-next-what">{n.what}</span>
     </span>
   );
+}
+
+/** FR-5: crossing a width class keeps each column's scroll. The list keeps
+ *  the initiative row that was at the top of the view, at the same offset
+ *  (Needs me moves above or beside it, so a raw scrollTop would not); a
+ *  page at its top stays at its top. Wide's Needs me column keeps its own
+ *  scrollTop, which it loses while it is not a scroller. Safari 15 has no
+ *  scroll anchoring, so this is done by hand. It also gives wide's column
+ *  its height. */
+function useKeepScroll(home: React.RefObject<HTMLDivElement | null>, widthClass: WidthClass, ready: boolean) {
+  const mark = useRef({ atTop: true, id: null as string | null, offset: 0, needs: 0 });
+  useEffect(() => {
+    const el = home.current;
+    const wrap = el?.parentElement;
+    const needs = el?.querySelector<HTMLElement>(".home-needs");
+    if (!el || !wrap || !needs) return;
+    const onPage = () => {
+      const top = wrap.getBoundingClientRect().top;
+      const first = Array.from(el.querySelectorAll<HTMLElement>(".p-item")).find((p) => p.getBoundingClientRect().bottom > top);
+      mark.current = { ...mark.current, atTop: wrap.scrollTop === 0, id: first?.dataset.id ?? null, offset: first ? first.getBoundingClientRect().top - top : 0 };
+    };
+    const onNeeds = () => { if (needs.scrollHeight > needs.clientHeight && getComputedStyle(needs).overflowY !== "visible") mark.current.needs = needs.scrollTop; };
+    // Wide's Needs me column is as tall as the page's view (shell.css, --wrap-h).
+    const tall = () => el.style.setProperty("--wrap-h", `${wrap.clientHeight}px`);
+    tall();
+    const ro = new ResizeObserver(tall);
+    ro.observe(wrap);
+    wrap.addEventListener("scroll", onPage);
+    needs.addEventListener("scroll", onNeeds);
+    return () => { ro.disconnect(); wrap.removeEventListener("scroll", onPage); needs.removeEventListener("scroll", onNeeds); };
+  }, [home, ready]);
+  const last = useRef(widthClass);
+  useLayoutEffect(() => {
+    if (last.current === widthClass) return;
+    last.current = widthClass;
+    const el = home.current;
+    const wrap = el?.parentElement;
+    if (!el || !wrap) return;
+    const m = { ...mark.current };
+    const needs = el.querySelector<HTMLElement>(".home-needs");
+    // Over the next frames: the rule box re-enters the column's flow and takes
+    // its height on its own re-renders, and until then the column may be too
+    // short to reach the old position.
+    if (widthClass === "wide" && needs) {
+      const restore = (tries: number) => requestAnimationFrame(() => {
+        needs.scrollTop = m.needs;
+        if (needs.scrollTop < m.needs && tries > 0) restore(tries - 1);
+      });
+      restore(10);
+    }
+    if (m.atTop) { wrap.scrollTop = 0; return; }
+    const row = m.id ? el.querySelector<HTMLElement>(`.p-item[data-id="${CSS.escape(m.id)}"]`) : null;
+    if (row) wrap.scrollTop += row.getBoundingClientRect().top - wrap.getBoundingClientRect().top - m.offset;
+  }, [home, widthClass]);
 }
