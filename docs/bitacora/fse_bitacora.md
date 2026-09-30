@@ -4,6 +4,24 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-09-29, sup20 landed; sup21 on responsive-home
+
+- **Last SHA seen:** 2ff4292. ui-leftovers merged 508d9a8; 47 min vs 30–46
+  (UI reviewer 14 min on the path); run record runs/2026-09-29-ui-leftovers.md.
+  **sup20 ended.**
+- **Running:** sup21 on `responsive-home` (0061, 0062 left from the rail;
+  carries 0060's "you"), token organizer/sup21. End it when the card lands.
+- **Asked of Aglaea:** a header design spec, header-review-2's six findings
+  plus ui-leftovers UI1 (8 px timeline at 1024) and whatever of UI2–UI7 fits;
+  the in-app editing of goal/scope comes back as options for a record.
+- **Open from sup20:** FR-10's "no owner everywhere" missed DecisionsView
+  ("owner —", outside the boundary); fixture-home.sh talks to the live
+  organizer-fixture mailbox (not hermetic). Candidates for the next small card.
+- **Forecast note:** three UI-reviewed waves ran 25, 27, 47 min; the reviewer
+  costs 11–14 min of the path. Keep the +10, widen the high end.
+- **Stage 5 exit (a):** Pablo presses Draft the cell on a real initiative;
+  (b) camp's.
+
 ## HAND-OFF — 2026-09-29, sup19 landed; the UI findings go to Aglaea for triage
 
 - **Last SHA seen:** 0c162ea. conform-and-waiting merged d4f5658; 27 min vs

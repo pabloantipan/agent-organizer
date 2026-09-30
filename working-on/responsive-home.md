@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "fse: start its supervisor when ui-leftovers lands (0061 accepted, 0062 ruled left from the rail)"
+next: "sup21 runs this card (organizer-probe-sup21), spawned by the FSE 2026-09-29 after ui-leftovers landed"
 depends_on: ["ui-leftovers"]
 boundary: ["frontend/src/components/Home.tsx, RuleDecisionBox.tsx, Rail.tsx, App.tsx (the shell layout)", "frontend/src/stores/board.store.ts (the width class; the rail's default)", "frontend/src/lib/ and its tests", "frontend/src/styles/shell.css, home.css, rule-box.css", "docs/specs/twenty-at-a-glance.md (G9's widths, one line)"]
 spec: "docs/specs/responsive-home.md (FR-1 to FR-6); the design: docs/ux/specs/responsive-home.md (Aglaea, 3174fc2)"
@@ -32,11 +32,12 @@ FR-6 of `docs/specs/responsive-home.md`, from Aglaea's design spec.
 - 2026-09-29 cut from responsive-home by the FSE
 
 ## Next
-1. fse: start the supervisor after ui-leftovers lands
+1. sup21 runs this card
 
 ## Blockers
 none
 
 ## Notes
+- 2026-09-29 sup21 runs this card, spawned by the FSE after ui-leftovers landed (508d9a8)
 - The frontend uses pnpm; add no dependency (aebc25e). No Go change.
 - G3 needs a 3440×1440 viewport: headless Chromium `--window-size=3440,1440`.

@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: main
 updated: 2026-09-28
-next: "fse: spec these four findings (twenty-at-a-glance amendment), raise the choices as records, cut cards; Pablo rules the choices"
+next: "aglaea: a design spec for the header (these six plus ui-leftovers UI1, the 8 px timeline at 1024); then the FSE specs it and raises the in-app editing choice as a record"
 stage: twenty-at-a-glance
 ---
 
@@ -51,7 +51,8 @@ Pablo, 2026-09-28, in the FSE's session, from the installed app v0.2.0-348
 - 2026-09-28 opened by the FSE from Pablo's report
 
 ## Next
-1. fse: the spec amendment, records for the choices, cards
+1. aglaea: the header design spec (asked 2026-09-29)
+2. fse: build spec, a record for in-app editing of goal and scope, cards
 
 ## Blockers
 none
