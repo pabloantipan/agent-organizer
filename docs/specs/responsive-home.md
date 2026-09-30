@@ -2,7 +2,7 @@
 
 status: accepted (0061, 2026-09-29); 0062 ruled
 owner: pablo
-decisions: [0033 ruled, 0059 ruled, 0060 ruled, 0061 ruled, 0062 ruled, 0065 ruled, 0067 proposed]
+decisions: [0033 ruled, 0059 ruled, 0060 ruled, 0061 ruled, 0062 ruled, 0065 ruled, 0067 ruled, 0069 proposed]
 design: `docs/ux/specs/responsive-home.md` (Aglaea, 3174fc2), "the design"
 roadmap: fixes to stage 2 (twenty at a glance) at the widths Pablo uses; appetite one wave
 
@@ -86,6 +86,36 @@ Nothing Home contains changes, except 0060's word.
 - **FR-12** (the wide gap) In wide, the rule box shall be capped at the Needs
   me column's height, and the column scrolls to keep the whole box in view.
 
+- Amendment 3 (proposed, 0069; Aglaea's ranking
+  `docs/ux/reviews/2026-09-30-rank-header-fold-responsive-2.md`, "row n";
+  the design system's Widths as amended in 3f3df2f):
+- **FR-13** (row 5, rh2-R1) Wide shall start at 2200, changing FR-1's 1920
+  (`WIDE_FROM`, `lib/width.ts`). From 1440 to 2199 Home is regular: one
+  column, goals shown. FR-4 and FR-12 hold from 2200.
+- **FR-14** (row 5) A lozenge that cannot fit shall be cut with an ellipsis
+  on its text, never clipped mid-word by its box.
+- **FR-15** (row 6, rh2-R3) In every class, a row's signals shall stay on
+  one line with "+N", the rest in the hover and the accessible name
+  (FR-10, extended from compact to all classes).
+- **FR-16** (row 4, rh2-R2) A column shall give way only when the row has
+  no room for it, measured on the row (the ResizeObserver Home already has),
+  not by the class name. Compact keeps the goal column while it can show
+  about 30 characters, and the next date while it fits; what gave way comes
+  back when the row grows.
+- **FR-17** (row 12, rh2-R4) In regular, an open rule box that covers other
+  rows' controls shall have a scrim over them, as compact's sheet has
+  (FR-8); a click there does not reach the covered verb.
+- **FR-18** (row 13, rh2-R5) The rail toggle's target shall be at least
+  24×24 px, expanded and as the strip.
+- **FR-19** (rows 7–9, hf-U10 and hf-gap5; Focus and names in the design
+  system; carried by this card, outside Home):
+  - Overview's record rows open a record that is not waiting with
+    `openDecision`, so Decisions shows it expanded and focused;
+  - the card back moves focus to its title when it opens, and back to its
+    opener when it closes;
+  - the thread divider's icon buttons are named by action and thread
+    ("Reopen <subject>", "Escalate <subject>", "Close <subject>").
+
 ## Acceptance → gate
 
 | # | Design | Check | Expected |
@@ -101,6 +131,12 @@ Nothing Home contains changes, except 0060's word.
 | G10 | 8, 9 | compact: the sheet's scrim; Tab and Shift+Tab loop inside the box in each class; type words in one record's box, open another's Rule, reopen the first | screenshots; a focus log; the words restored | as stated |
 | G11 | 10 | 1024×640, rail expanded, `--twenty`: no row's signals wrap; at least five rows in view; a "+N" row's hover and name list the rest | screenshot; the DOM | as stated |
 | G12 | 11, 12 | the chevron's and the rail toggle's accessible names and state; a wide Needs me row's `title`; wide at 1920×1080 with eight rows, Rule on the last | a names log; screenshots | as stated |
+| G13 | 13, 14 | `--twenty` at 1920×1080 and 2199×1200 with the rail expanded, and at 2200×1200 | screenshots; the class per size (regular, regular, wide); at 1920, every lozenge's text either whole or ending in an ellipsis (DOM: `text-overflow` on the text span) |
+| G14 | 15 | `--twenty` at 1440×900, 1920×1080 and 3440×1440 | DOM: no row's signals take more than one line; a "+N" row's hover and name list the rest |
+| G15 | 16 | `--twenty` at 1280×800 and 1439×900; a resize from 1024 to 1439 | screenshots and DOM: the goal column shown with at least 30 characters on each row at both sizes; it comes back during the resize |
+| G16 | 17 | 1512×945, Rule open, the element at the centre of another row's Rule | DOM: the top element is the scrim |
+| G17 | 18 | the rail toggle, expanded and as the strip | its bounding box ≥ 24×24 in both |
+| G18 | 19 | Overview → Open in Decisions on a ruled record; open and close a card back; Answer, then Tab through the thread divider | screenshots; `activeElement` after each; a names log with every divider button named |
 | G8 | all | `XDG_DATA_HOME=$(mktemp -d) make test`; `cd frontend && npm run build`; the redesign's G18 grep | pass |
 
 ## Boundary
@@ -113,7 +149,18 @@ Nothing Home contains changes, except 0060's word.
   - `frontend/src/lib/` and its tests;
   - `frontend/src/styles/shell.css`, `home.css`, `rule-box.css`;
   - `docs/specs/twenty-at-a-glance.md` (G9's widths, one line).
-- **Must not touch:**
+- **widths-and-focus card** (amendment 3: FR-13 to FR-19):
+  - `frontend/src/components/Home.tsx`, `Rail.tsx`, `RuleDecisionBox.tsx`;
+  - `frontend/src/lib/width.ts`, `lib/` and its tests;
+  - `frontend/src/styles/home.css`, `rule-box.css`, `shell.css` (the
+    rail's rules only);
+  - FR-19 only: `Overview.tsx` (the record row's open), `CardDrawer.tsx`
+    (focus on open and close), `Conversation.tsx` (the divider's icon
+    button names);
+  - `board.store.ts` only if the class boundary is read there.
+  - Must not touch the header-fold-2 card's files (initiative-header,
+    amendment 3), Go code, `docs/design-system.md`.
+- **Must not touch** (the first two cards):
   - the sub-views' components;
   - Go code;
   - `docs/design-system.md` (Aglaea adds "Widths" once accepted);
@@ -152,6 +199,7 @@ Nothing Home contains changes, except 0060's word.
 |---|---|---|---|
 | `responsive-home` | G1–G8 | ui-leftovers | true |
 | `responsive-home-2` | G9–G12, G8 | responsive-home, rule-box-finish (both touch the rule box) | true |
+| `widths-and-focus` | G13–G18, G8 | — (parallel with header-fold-2) | true |
 
 ## Amendments
 
@@ -163,3 +211,8 @@ Nothing Home contains changes, except 0060's word.
   836866a), from the card's UI review U1–U9: FR-7 to FR-12, G9 to G12, card
   `responsive-home-2`. Its boundary is the first card's, plus `Home.tsx`'s
   chevron names.
+- **3, 2026-09-30, proposed (0069):** Aglaea's ranking of responsive-home-2's
+  leftovers (rows 4–6, 12, 13) and three focus and name rows from
+  header-fold (7–9), with the design system's Widths as amended (3f3df2f):
+  FR-13 to FR-19, G13 to G18, card `widths-and-focus`. FR-13 moves wide
+  from 1920 to 2200, which 0061 accepted at 1920.

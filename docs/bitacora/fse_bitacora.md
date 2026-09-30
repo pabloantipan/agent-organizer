@@ -61,6 +61,14 @@ sections below this one are history.
   Rule: a seat whose pane dropped to a shell comes back with `probe -r`,
   not `probe <name>`; `zellij list-sessions` without TMPDIR=/tmp shows
   stale EXITED rows, use `probe -l`.
+- **Batch cut 2026-09-30:** Aglaea's ranking (3f3df2f,
+  docs/ux/reviews/2026-09-30-rank-header-fold-responsive-2.md) became
+  amendment 3 of initiative-header (FR-10–16, G12–17, card header-fold-2)
+  and of responsive-home (FR-13–19, G13–18, card widths-and-focus; rows 7–9
+  ride here, outside Home). Parallel, both ui_review, both pass `run
+  --print`. Accept record 0069 proposed, forecast 40–70 min. On its ruling:
+  sup25 for both. Assumption put to Aglaea: a tall expanded record keeps its
+  head at the top (UI review 2 gap 1, not in her ranking).
 - **Waiting on Pablo:** press Draft the cell on a real initiative (stage 5
   exit a; b is camp's); `make install` for Deltagos.app (macOS may re-ask
   keychain access; Dock keeps the old path); pablo_minutes for sup16–sup24;

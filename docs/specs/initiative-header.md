@@ -2,7 +2,7 @@
 
 status: accepted (0063, 2026-09-29); 0064 ruled file only
 owner: pablo
-decisions: [0038 ruled, 0061 ruled, 0063 ruled, 0064 ruled, 0068 ruled]
+decisions: [0038 ruled, 0061 ruled, 0063 ruled, 0064 ruled, 0068 ruled, 0069 proposed]
 design: `docs/ux/specs/initiative-header.md` (Aglaea, 6c93a49), "the design"
 roadmap: stage 2 (twenty at a glance), the header; appetite one wave
 
@@ -82,6 +82,38 @@ Each FR is the design's section of the same subject.
   nothing to the file. (Amendment 1: the scan supplies that fact; see the
   boundary and the technical notes.)
 
+Amendment 3 (proposed, 0069; Aglaea's ranking
+`docs/ux/reviews/2026-09-30-rank-header-fold-responsive-2.md`, rows cited
+as "row n"; the design system as amended in 3f3df2f):
+
+- **FR-10** (row 1, hf-U4) While the class is compact, the open header
+  shall take at most 40% of the window's height and scroll inside itself.
+  Its two clamps and the stage strip stay as they are.
+- **FR-11** (row 2, hf-U2; changes FR-1's technical note) When a landing
+  folds the header, the app shall store "folded" as the lead's choice, so
+  the next tab he presses keeps it folded. Only opening Details stores
+  "open" again.
+- **FR-12** (row 11, hf-U1) When the folded bar is short of room, the goal
+  shall give way first (cut with an ellipsis), and the target only after
+  it, as the design's §1 says.
+- **FR-13** (row 10, hf-U5) While one initiative is selected, Agents' crew
+  group head shall not repeat the initiative's id and client; its counts and
+  New agent move to the sub-view's toolbar line. The all-initiatives view
+  keeps the group head as it is.
+- **FR-14** (rows 3, 14, 15; the Stage stepper as amended) The folded bar's
+  stage and every stage tile shall look like buttons: `cursor: pointer`,
+  the hover surface, and a chevron on hover and focus. On an element
+  already drawn in the accent, the focus ring sits at a 2px offset. The
+  stage word is "now" wherever a stage is drawn (bar, strip, Roadmap rows).
+  A run of stages of one phase takes width by its number of stages.
+- **FR-15** (row 15) The clamps' "more" buttons shall be named by what they
+  open ("Goal, more", "Measure, more", "Scope in, more", "Scope out,
+  more"); Open in editor shall read "Open initiative.yaml in editor";
+  Decisions' `dec-line` carries `aria-expanded`.
+- **FR-16** (V1, the fixture) The fixture shall have an initiative with two
+  or more proposed records all owned by its lead, so FR-2's longest words
+  ("2 decisions waiting on you") can be checked.
+
 ## Acceptance → gate
 
 | # | Design | Check | Expected |
@@ -96,6 +128,12 @@ Each FR is the design's section of the same subject.
 | G8 | H11 | a reviewer who never saw the app, shown the folded bar and the strip at 1512×945 | their answers: as H11 |
 | G9 | FR-7 | the rule box: Tab loop, one box, Question at three lines on the roster record at 1024, the head's name; Decisions' owner phrase; People's name | a log of focus and accessible names; screenshots |
 | G10 | FR-9 | Details on the fixture with `initiative.yaml` clean, then modified and uncommitted | screenshots: the source line and Open in editor; then the "edited, not committed" mark |
+| G12 | FR-10 | 1024×640, Details open, on Work, Decisions and Conversations | screenshots; the header's height ≤ 256 px and it scrolls inside; the strip shown |
+| G13 | FR-11 | Open on a Needs me card row (a landing), then press another tab, then reload; then open Details and switch initiative | screenshots: folded, folded, folded; then open across the switch |
+| G14 | FR-12 | 1024×640, folded, on the fixture initiative with the longest goal and a target | screenshot and DOM: the target whole, the goal cut with an ellipsis |
+| G15 | FR-13 | Agents with one initiative selected, and with none | screenshots: no id or client under the tabs; counts and New agent on the toolbar line; the all view unchanged |
+| G16 | FR-14 | hover and keyboard focus on the bar's stage and on a tile; the current tile focused; Roadmap → Stages; the strip at 1024×640 on the fixture roadmap with a one-stage run | screenshots; computed `cursor` and `outline-offset` (2px on the accent tile); no visible "current" in stage text; each run's width in proportion to its stage count |
+| G17 | FR-15, FR-16 | the header's accessible names; `dec-line` before and after expanding; the chip on the FR-16 initiative | a names log (`aria-expanded` false then true); a screenshot of "N decisions waiting on you", N ≥ 2 |
 | G11 | all | `XDG_DATA_HOME=$(mktemp -d) make test`; `cd frontend && npm run build`; the redesign's G18 grep | pass |
 
 ## Boundary
@@ -119,8 +157,21 @@ Each FR is the design's section of the same subject.
   - `DecisionsView.tsx` (`ownerPhrase` only);
   - `Conversation.tsx` (the People toggle's label only);
   - `lib/` tests.
+- **header-fold-2 card** (amendment 3: FR-10 to FR-16):
+  - `InitiativeHeader.tsx` and its CSS;
+  - `board.store.ts` (the landings store "folded", FR-11 only);
+  - `AgentsView.tsx` (the group head and toolbar line, FR-13 only);
+  - `RoadmapView.tsx`, `Roadmap.tsx` (the stage word and the row, FR-14
+    only);
+  - `DecisionsView.tsx` (`aria-expanded` on `dec-line` only);
+  - `styles/shell.css` (the header's and the stepper's rules only);
+  - `lib/` and its tests;
+  - `testdata/fixture-overlay/` (FR-16) and the fixture script, if it
+    lists records.
 - **Must not touch:**
-  - `Home.tsx`, `Rail.tsx` (responsive-home);
+  - `Home.tsx`, `Rail.tsx` (responsive-home); for header-fold-2 also
+    `lib/width.ts`, `home.css`, `rule-box.css`, `Overview.tsx`,
+    `CardDrawer.tsx`, `Conversation.tsx` (widths-and-focus);
   - Go code, except amendment 1's FR-9 lines;
   - `docs/design-system.md` (Aglaea's);
   - `~/.claude/skills`.
@@ -149,12 +200,25 @@ Each FR is the design's section of the same subject.
 - **Parallel cards:** both touch `DecisionsView.tsx` and `Conversation.tsx`
   in different lines. The second to merge rebases.
 
+- **Amendment 3, FR-11** replaces the first technical note: a landing
+  writes the stored choice "folded" too. It is one line in each landing
+  action, or one helper they share.
+- **Amendment 3, FR-16:** init-drafted's only record is its cell roster,
+  and the draft cell waits on it; add the second record there only if no
+  test counts init-drafted's records, else give another overlay initiative
+  two records owned by its lead. Either way the fixture's README says so.
+- **Amendment 3, assumption** (UI review 2's gap 1, not ranked): when an
+  expanded record is taller than the view, its head (number, title,
+  "Waiting on a ruling") is kept at the top and the rest scrolls. Aglaea may
+  object before 0069 is ruled.
+
 ## Cards
 
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `header-fold` | G1–G8, G10, G11 | responsive-home | true |
 | `rule-box-finish` | G9, G11 | responsive-home | true |
+| `header-fold-2` | G12–G17, G11 | — (parallel with widths-and-focus) | true |
 
 ## Amendments
 
@@ -167,3 +231,7 @@ Each FR is the design's section of the same subject.
 - **2, 2026-09-30, 0068 ("N decisions waiting"):** FR-2's words, after G8's
   blind reader could only guess what "3 waiting" leads to (830672b). G8
   reruns with a reader launched outside the initiative root.
+- **3, 2026-09-30, proposed (0069):** Aglaea's ranking of header-fold's UI
+  leftovers (rows 1–3, 10, 11, 14, 15 and V1; 3f3df2f): FR-10 to FR-16,
+  G12 to G17, card `header-fold-2`. FR-11 reverses the fold's technical
+  note, as the design always had it.
