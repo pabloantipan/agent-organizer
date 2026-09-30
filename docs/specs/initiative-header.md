@@ -78,7 +78,8 @@ Each FR is the design's section of the same subject.
   measure and scope are written ("from working-on/initiative.yaml"), offer
   Open in editor (the action Home's row detail already has), and show
   "edited, not committed" when git reports the file modified. The app writes
-  nothing to the file.
+  nothing to the file. (Amendment 1: the scan supplies that fact; see the
+  boundary and the technical notes.)
 
 ## Acceptance → gate
 
@@ -105,7 +106,13 @@ Each FR is the design's section of the same subject.
     height, Answer's focus);
   - `AgentsView.tsx`, `DecisionsView.tsx` (the title row only);
   - `board.store.ts` (the fold state; landings fold);
-  - `styles/shell.css`, header CSS; `lib/` and its tests.
+  - `styles/shell.css`, header CSS; `lib/` and its tests;
+  - amendment 1, for FR-9 only: `internal/scan/git.go` (a function that runs
+    `git status --porcelain -- working-on/initiative.yaml` at the initiative
+    root, with the scan's timeout); `internal/scan` where the initiative is
+    assembled (one call); `internal/model/model.go` (`Initiative`:
+    `charter_modified bool`); `frontend/wailsjs` (generated); a test in
+    `internal/scan` on a temp git repo (clean, modified, not a repo).
 - **rule-box-finish card** (FR-7):
   - `RuleDecisionBox.tsx`, `rule-box.css`;
   - `DecisionsView.tsx` (`ownerPhrase` only);
@@ -113,7 +120,7 @@ Each FR is the design's section of the same subject.
   - `lib/` tests.
 - **Must not touch:**
   - `Home.tsx`, `Rail.tsx` (responsive-home);
-  - Go code;
+  - Go code, except amendment 1's FR-9 lines;
   - `docs/design-system.md` (Aglaea's);
   - `~/.claude/skills`.
 
@@ -133,6 +140,11 @@ Each FR is the design's section of the same subject.
   and focuses, then clears.
 - **Width class:** read responsive-home's FR-1 field; do not add another
   listener.
+- **FR-9's mark** (amendment 1): the scan knows only a dirty count per listed
+  repo, and the organizer lists `repos: []`, so nothing reports
+  `initiative.yaml`. Reuse `git()` in `internal/scan/git.go`. The call is
+  empty output → false. A root that is not a git repo, or git failing, is
+  false with no problem reported: the mark is a hint, never an error.
 - **Parallel cards:** both touch `DecisionsView.tsx` and `Conversation.tsx`
   in different lines. The second to merge rebases.
 
@@ -145,4 +157,9 @@ Each FR is the design's section of the same subject.
 
 ## Amendments
 
-- none yet
+- **1, 2026-09-29, the build proved the spec wrong:** FR-9's "edited, not
+  committed" mark (chosen in 0064) has no data source, and the spec's "No Go
+  change" was the FSE's unchecked assumption (hdr-fold's `decide:`,
+  046c69e). The boundary widens by one narrow Go fact, `charter_modified`,
+  for header-fold only. FR-9's words and G10 are unchanged. G11 covers the
+  Go test.
