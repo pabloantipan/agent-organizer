@@ -75,3 +75,13 @@ export function healthTitle(s: HealthState, undelivered = 0): string {
   const w = HEALTH[s];
   return `${w.why}${undelivered > 0 ? ` ${messages(undelivered)} waiting.` : ""} ${w.what}`;
 }
+
+/** The People toggle's accessible name (initiative-header FR-7, UI7): what
+ *  it is, then the counts its face shows, in the same words. */
+export function peopleLabel(c: { seats: number; live: number; capped: number; deaf: number }): string {
+  const parts = [`${c.seats} seat${c.seats === 1 ? "" : "s"}`];
+  if (c.live > 0) parts.push(`${c.live} live`);
+  if (c.capped > 0) parts.push(`${c.capped} ${HEALTH.capped.label}`);
+  if (c.deaf > 0) parts.push(`${c.deaf} ${HEALTH.deaf.label}`);
+  return `People, ${parts.join(", ")}`;
+}

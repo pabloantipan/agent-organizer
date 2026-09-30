@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { marked } from "marked";
 import type { merge, model } from "../../wailsjs/go/models";
 import { addDays, daysBetween, parseISO, shortDate, today, toISO } from "../lib/dates";
+import { ownerPhrase } from "../lib/decisions";
 import { readOnlyOf } from "../lib/queue";
 import { useBoard } from "../stores/board.store";
 import { RuleDecisionBox } from "./RuleDecisionBox";
@@ -115,7 +116,7 @@ export function DecisionsView() {
           <span className={`badge dec-status ${d.status}`}>{LABEL[d.status] ?? d.status}</span>
           <span className="dec-meta">
             {d.status === "proposed"
-              ? <>owner {d.owner || "—"} · <b>{age(d)}d</b> waiting</>
+              ? <>{ownerPhrase(d.owner)} · <b>{age(d)}d</b> waiting</>
               : d.status === "ruled"
                 ? <>{d.chosen ? <>“{d.chosen}” · </> : null}by {d.ruled_by || "—"} · {shortDate(parseISO(d.ruled) ?? now)}{t !== null && <> · {t}d</>}</>
                 : d.superseded_by ? <>by {d.superseded_by}</> : null}
