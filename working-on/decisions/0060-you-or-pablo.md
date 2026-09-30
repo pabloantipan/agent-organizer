@@ -1,13 +1,13 @@
 ---
 title: The waiting signal says "you" or "pablo" for the lead's own records
-status: proposed
+status: ruled
 raised: 2026-09-29
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-29
+ruled_by: pablo
 options: [you, the name]
-chosen:
+chosen: you
 cards: []
 threads: [01M3Q04G1TTG9JX71GA5CKMWBW]
 supersedes: []
@@ -36,7 +36,7 @@ Aglaea's, and the FSE's: "you". Home already speaks to you ("waits on you",
 
 ## Ruling
 
-
+pablo, 2026-09-29, in the organizer on lodestar: Do
 
 ## Consequences
 
