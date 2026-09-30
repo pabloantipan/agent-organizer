@@ -32,7 +32,7 @@ func main() {
 		Logger:             appLogger(),
 		LogLevel:           logger.INFO,
 		LogLevelProduction: logger.INFO,
-		Title:              "organizer",
+		Title:              "Deltagos",
 		Width:              1440,
 		Height:             900,
 		MinWidth:           1024,
