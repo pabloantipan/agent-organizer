@@ -18,6 +18,8 @@ const PEOPLE_KEY = "slack.people";
 export function SlackView() {
   const { selectedInitiative, setSelectedInitiative, agents: view, slackFocus, setSlackFocus, view: board } = useBoard();
   const [people, setPeople] = useState<boolean>(() => { try { return localStorage.getItem(PEOPLE_KEY) !== "closed"; } catch { return true; } });
+  // People is a disclosure, not a commit: aria-pressed and the selected
+  // surface while open, never the accent (ui-leftovers FR-7).
   const togglePeople = () => { const next = !people; setPeople(next); try { localStorage.setItem(PEOPLE_KEY, next ? "open" : "closed"); } catch { /* per-viewer convenience */ } };
   if (!view) return <div className="empty">Sampling…</div>;
   const cells = (view.groups ?? []).filter((g) => g.cell);
@@ -82,7 +84,7 @@ export function SlackView() {
         {g.client && <span className="badge client">{g.client}</span>}
         <span className="spacer" />
         {slackFocus && <span className="badge persona focus">with {slackFocus} <button className="rail-icon" onClick={() => setSlackFocus(null)} title="back to the channel"><X size={11} /></button></span>}
-        <button className={`tiny-btn ${people ? "primary" : "ghost"} ${deaf > 0 ? "hot" : ""}`} onClick={togglePeople} title={people ? "hide people" : "show people"}>
+        <button className={`tiny-btn ${deaf > 0 ? "hot" : ""}`} aria-pressed={people} onClick={togglePeople} title={people ? "hide people" : "show people"}>
           <Users size={13} /> {seats.length}{live > 0 ? ` · ${live} live` : ""}{capped > 0 ? ` · ${capped} ${HEALTH.capped.label}` : ""}{deaf > 0 ? ` · ${deaf} ${HEALTH.deaf.label}` : ""}
         </button>
       </div>
