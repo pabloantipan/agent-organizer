@@ -6,6 +6,7 @@ import type { model } from "../../wailsjs/go/models";
 import { ContextBar, WatcherBadge } from "./ContextBar";
 import { HealthWhy } from "./AgentList";
 import { healthState } from "../lib/health";
+import { missingPersonas, personaMissing } from "../lib/queue";
 import { useBoard } from "../stores/board.store";
 import { escapeCloses, useConfirmFocus } from "../lib/focus";
 
@@ -22,10 +23,14 @@ export const DRAFT_WAITS = "draft roster; nothing launches until its accept reco
 /** What a cell in definition waits on, as the Crew header says it: a
  *  draft's accept record, linked to Decisions with the record expanded
  *  (lead-side-fixes FR-6), or its first launch. The record is the service's
- *  (`accept_record`, FR-9); the rule is not repeated here. */
-function DefinitionWaits({ id, cell }: { id: string; cell: model.Cell }) {
+ *  (`accept_record`, FR-9); the rule is not repeated here. A missing persona
+ *  file is what it waits on instead of a launch (ui-leftovers FR-9); that
+ *  reason is said once, beside Bring crew up, so it shows here only when
+ *  the button is not drawn (`said`). */
+function DefinitionWaits({ id, cell, missing, said }: { id: string; cell: model.Cell; missing: string[]; said: boolean }) {
   const openDecision = useBoard((s) => s.openDecision);
   if (cell.state !== "in_definition") return null;
+  if (!cell.draft && missing.length > 0) return said ? null : <span className="meta">{personaMissing(missing)}</span>;
   if (!cell.draft) return <span className="meta">{IN_DEFINITION_WAITS}</span>;
   const record = cell.accept_record;
   const drafted = cell.drafted ? `drafted ${cell.drafted}; ` : "";
@@ -40,12 +45,17 @@ function DefinitionWaits({ id, cell }: { id: string; cell: model.Cell }) {
   );
 }
 
+/** Why a cell in definition waits, in one line: a draft's accept record, a
+ *  missing persona file (ui-leftovers FR-9), or its first launch. */
+export const definitionWaits = (cell: model.Cell, missing: string[]) =>
+  cell.draft ? DRAFT_WAITS : missing.length > 0 ? personaMissing(missing) : `${IN_DEFINITION_WAITS} (Bring crew up)`;
+
 /** The cell's derived state as a lozenge, word and icon, or nothing. One
  *  source for Crew, the Agents tab and Home's signals. */
-export function CellStateLz({ cell, label = "in definition" }: { cell?: model.Cell | null; label?: string }) {
+export function CellStateLz({ cell, missing = [], label = "in definition" }: { cell?: model.Cell | null; missing?: string[]; label?: string }) {
   if (cell?.state !== "in_definition") return null;
   return (
-    <span className="lz tone" title={cell.draft ? `${cell.project}: ${DRAFT_WAITS}` : `${cell.project}: ${IN_DEFINITION_WAITS} (Bring crew up)`}>
+    <span className="lz tone" title={`${cell.project}: ${definitionWaits(cell, missing)}`}>
       <PencilRuler size={12} strokeWidth={2} aria-hidden="true" />{label}
     </span>
   );
@@ -56,8 +66,8 @@ export function CellStateLz({ cell, label = "in definition" }: { cell?: model.Ce
  *  when it can. CreateCrew still refuses both, for the CLI and a stale view. */
 export function crewBlocked(seats: Seat[], cell: model.Cell): string | null {
   const why: string[] = [];
-  const missing = seats.filter((s) => s.no_persona).map((s) => `agents/${s.name}.md`);
-  if (missing.length > 0) why.push(`no persona file: ${missing.join(", ")}`);
+  const missing = missingPersonas(seats);
+  if (missing.length > 0) why.push(personaMissing(missing));
   if (cell.draft) {
     const record = cell.accept_record;
     why.push(record ? `draft roster: nothing launches until ${record.number} is ruled` : "draft roster: no accept record yet");
@@ -112,8 +122,8 @@ export function Crew({ group, readOnly = false, onMessage }: { group: AgentGroup
       <div className="crew-head">
         <Users size={14} />
         <span className="ident">{cell.project}</span>
-        <CellStateLz cell={cell} />
-        <DefinitionWaits id={group.id} cell={cell} />
+        <CellStateLz cell={cell} missing={missingPersonas(seats)} />
+        <DefinitionWaits id={group.id} cell={cell} missing={missingPersonas(seats)} said={!readOnly && !asking} />
         <span className="meta">{seats.length} seats · {live} live · {off} off{cell.reconciler ? ` · reconciler ${cell.reconciler}` : ""}</span>
         {group.discuss && <span className="badge watcher stale" title="crew health comes from the discuss API">{group.discuss}</span>}
         <span className="spacer" />
@@ -158,7 +168,7 @@ function SeatRow({ seat, readOnly, confirm, setConfirm, flash, onMessage }: { se
       <span className={`a-state ${state}`}><i />{STATE_LABEL[state] ?? state}</span>
       <span className="a-name"><span className="ident">{seat.name}</span></span>
       {seat.no_persona && (
-        <span className="lz warning" title={`agents/${seat.name}.md is missing: Bring crew up refuses until it is written`}>
+        <span className="lz warning" title={`agents/${seat.name}.md is missing; the drafting session writes it, or write it by the persona-agents skill`}>
           <FileXCorner size={12} strokeWidth={2} aria-hidden="true" />no persona file
         </span>
       )}

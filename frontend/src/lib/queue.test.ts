@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AgentGroup, AgentsView, BoardView, CellThread } from "../hooks/useWails";
 import type { merge, model } from "../../wailsjs/go/models";
-import { launchVerb, needsMeRows, queueOf } from "./queue";
+import { launchVerb, missingPersonas, needsMeRows, personaMissing, queueOf } from "./queue";
 
 // Fixtures are plain objects: the generated classes carry methods the
 // functions under test never call, so each builder casts once.
@@ -108,11 +108,25 @@ describe("FR-3 (lead-side-fixes): a cell that cannot launch says why", () => {
   it("names the first seat with no persona file, verb Open", () => {
     const r = row(defining([seat("po_carla"), seat("designer_diego", true), seat("tech_lead_elena", true)]));
     expect(r.kind).toBe("launch");
-    expect(r.kind === "launch" && launchVerb(r)).toEqual({ verb: "Open", blocker: "designer_diego has no persona file" });
+    expect(r.kind === "launch" && launchVerb(r)).toEqual({ verb: "Open", blocker: "designer_diego has no persona file; the drafting session writes it, or write it by the persona-agents skill" });
   });
 
   it("keeps Launch when every seat has its file", () => {
     const r = row(defining([seat("po_lucia"), seat("dev_mateo")]));
     expect(r.kind === "launch" && launchVerb(r)).toEqual({ verb: "Launch", blocker: null });
+  });
+});
+
+describe("FR-9 (ui-leftovers): a missing persona file says who writes it", () => {
+  it("names one seat", () => {
+    expect(personaMissing(["designer_diego"])).toBe("designer_diego has no persona file; the drafting session writes it, or write it by the persona-agents skill");
+  });
+  it("names several, in roster order", () => {
+    expect(personaMissing(["a", "b", "c"])).toBe("a, b and c have no persona files; the drafting session writes them, or write them by the persona-agents skill");
+  });
+  it("says nothing when every file is there", () => {
+    expect(personaMissing([])).toBe("");
+    expect(missingPersonas([{ name: "a", no_persona: false }, { name: "b", no_persona: true }])).toEqual(["b"]);
+    expect(missingPersonas(undefined)).toEqual([]);
   });
 });

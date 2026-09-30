@@ -142,5 +142,19 @@ export function needsMeRows(view: BoardView | null, agents: AgentsView | null, n
  *  cannot launch because a seat has no persona file says which, and its verb
  *  is Open, since the fix is on Agents and not a launch; else Launch. */
 export function launchVerb(row: { missing: string | null }): { verb: "Open" | "Launch"; blocker: string | null } {
-  return row.missing ? { verb: "Open", blocker: `${row.missing} has no persona file` } : { verb: "Launch", blocker: null };
+  return row.missing ? { verb: "Open", blocker: personaMissing([row.missing]) } : { verb: "Launch", blocker: null };
+}
+
+/** The seats of a cell with no persona file under agents/, in roster order. */
+export const missingPersonas = (crew: Pick<Seat, "name" | "no_persona">[] | undefined) => (crew ?? []).filter((s) => s.no_persona).map((s) => s.name);
+
+/** What a missing persona file blocks, and who writes it (ui-leftovers FR-9;
+ *  design system, Disabled actions: what is missing and who fixes it). It
+ *  replaces "waits on its first launch" wherever a cell in definition says
+ *  why it waits. Empty when no file is missing. */
+export function personaMissing(names: string[]): string {
+  if (names.length === 0) return "";
+  const who = names.length === 1 ? names[0] : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+  const [has, file, it] = names.length === 1 ? ["has", "file", "it"] : ["have", "files", "them"];
+  return `${who} ${has} no persona ${file}; the drafting session writes ${it}, or write ${it} by the persona-agents skill`;
 }

@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Briefcase, ChevronDown, ChevronRight, CircleDashed, Compass, Hammer, Hand, Play } from "lucide-react";
 import type { merge, model, service } from "../../wailsjs/go/models";
-import { inactiveIds, launchVerb, needsMeRows, type NeedsMeRow } from "../lib/queue";
+import { inactiveIds, launchVerb, missingPersonas, needsMeRows, type NeedsMeRow } from "../lib/queue";
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
 import { HEALTH, messages } from "../lib/health";
@@ -116,7 +116,7 @@ function InboxRow({ row }: { row: NeedsMeRow }) {
       return (
         <Shell row={row} reason="cell" tone="tone"
           subject={<><span className="mono">{row.initiative}</span> · <span className="mono">{row.cell.project}</span> in definition</>}
-          context={blocker ? <><span className="mono">{row.missing}</span> has no persona file</> : `${n} seat${n === 1 ? "" : "s"}; ${IN_DEFINITION_WAITS}`}>
+          context={blocker ?? `${n} seat${n === 1 ? "" : "s"}; ${IN_DEFINITION_WAITS}`}>
           {verb === "Open"
             ? <button className="act" aria-label={`Open ${row.initiative} ${row.missing}`} onClick={() => openAgentsAt(row.initiative, `seat:${row.missing}`)} title={`open its Agents: agents/${row.missing}.md is missing`}>Open</button>
             : <button className="act" aria-label={`Launch ${row.initiative}`} onClick={() => openAgentsAt(row.initiative, "crew-up")} title="open its Agents, where Bring crew up is">Launch</button>}
@@ -198,7 +198,7 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
               <Phase stages={i.stages ?? []} />
               <span title={i.goal || undefined} className={`p-goal ${i.goal ? "" : "missing"}`}>{i.goal || "no goal yet"}</span>
               <MiniStepper stages={i.stages ?? []} />
-              <Signals i={i} rows={rows} cards={cards} waves={group?.waves ?? []} cell={group?.cell} />
+              <Signals i={i} rows={rows} cards={cards} waves={group?.waves ?? []} cell={group?.cell} missing={missingPersonas(group?.crew)} />
               <NextDate i={i} cards={cards} />
               <button className="p-more ghost" onClick={() => setOpen({ ...open, [id]: !open[id] })} aria-expanded={!!open[id]} title={open[id] ? "hide details" : "repos, problems and actions"}>
                 {open[id] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -260,7 +260,7 @@ function MiniStepper({ stages }: { stages: model.Stage[] }) {
   );
 }
 
-function Signals({ i, rows, cards, waves, cell }: { i: merge.BoardInitiative; rows: merge.BoardInitiative[]; cards: merge.BoardCard[]; waves: service.Wave[]; cell?: model.Cell | null }) {
+function Signals({ i, rows, cards, waves, cell, missing }: { i: merge.BoardInitiative; rows: merge.BoardInitiative[]; cards: merge.BoardCard[]; waves: service.Wave[]; cell?: model.Cell | null; missing: string[] }) {
   const waiting = waitingDecisions(i);
   const blocked = cards.filter((c) => c.status === "blocked").length;
   const now = cards.filter((c) => c.status === "now").length;
@@ -277,7 +277,7 @@ function Signals({ i, rows, cards, waves, cell }: { i: merge.BoardInitiative; ro
       {now > 0 && <span className="lz now"><span className="num">{now}</span> now</span>}
       {running.map((w) => <span key={w.n} className="lz live">wave <span className="num">{w.n}</span> · <span className="num">{w.building!.length}</span> building</span>)}
       {live > 0 && <span className="lz">{working > 0 ? <><span className="num">{working}</span> working</> : <><span className="num">{live}</span> live</>}</span>}
-      <CellStateLz cell={cell} label="cell in definition" />
+      <CellStateLz cell={cell} missing={missing} label="cell in definition" />
       {problems > 0 && <span className="lz warning"><span className="num">{problems}</span> problem{problems === 1 ? "" : "s"}</span>}
       {none && <span className="p-quiet" title="no signals">—</span>}
     </span>

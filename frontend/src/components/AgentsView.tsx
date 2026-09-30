@@ -5,7 +5,7 @@ import { since } from "../lib";
 import { useBoard } from "../stores/board.store";
 import { AgentList } from "./AgentList";
 import { CellStateLz, Crew } from "./Crew";
-import { queueOf, readOnlyOf } from "../lib/queue";
+import { missingPersonas, queueOf, readOnlyOf } from "../lib/queue";
 import { escapeCloses, useConfirmFocus } from "../lib/focus";
 import { CleanButton } from "./Retire";
 
@@ -56,7 +56,7 @@ export function AgentsView() {
               {g.client && <span className="badge client">{g.client}</span>}
               <span className="meta">{g.agents?.length ?? 0} agents · {g.live} live · {g.working} working</span>
               {g.cell && <span className="meta">· {g.crew?.length ?? 0} seats</span>}
-              <CellStateLz cell={g.cell} />
+              <CellStateLz cell={g.cell} missing={missingPersonas(g.crew)} />
             </span>
             <span className="spacer" />
             {g.cell && q.total > 0 && <button className="tiny-btn ghost hot" onClick={() => openSlack(g.id, null)} title="escalated to you, or asked of you: threads and cards">{q.total} need you</button>}
