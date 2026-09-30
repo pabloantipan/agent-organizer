@@ -171,7 +171,8 @@ const GAP = 8;
  *  page scrolls, the window resizes or the record grows ("more").
  *  On Home the width class changes the place (responsive-home FR-2, FR-4):
  *  compact centres it over Home as a sheet; wide leaves it in the flow of
- *  the Needs me column, under its row, capped at the column's height. The
+ *  the Needs me column, under its row, capped at the column's height, and
+ *  the column scrolls to keep all of it in view (FR-12). The
  *  box stays the same element in every class, so nothing typed is lost.
  *  `short` is initiative-header FR-7 (UI4): the record area the box leaves
  *  is shorter than the record with both sections at their clamp, so the
@@ -202,7 +203,11 @@ function useFitViewport(box: RefObject<HTMLDivElement | null>, record: RefObject
     };
     const fit = () => {
       if (widthClass === "wide" && column) {
-        const maxHeight = Math.max(0, column.clientHeight - GAP);
+        // FR-12: capped at the column's own height (its max-height, the
+        // page's view), not at what the column holds now, which the box
+        // itself grows.
+        const cap = parseFloat(getComputedStyle(column).maxHeight);
+        const maxHeight = Math.max(0, (Number.isFinite(cap) ? cap : column.clientHeight) - GAP);
         setPlace((p) => (same(p, { maxHeight }) ? p : { maxHeight }));
         judge(maxHeight);
         return;
@@ -230,8 +235,21 @@ function useFitViewport(box: RefObject<HTMLDivElement | null>, record: RefObject
       const q: CSSProperties = { position: "fixed", top, right, maxHeight };
       setPlace((p) => (same(p, q) ? p : q));
     };
+    // FR-12: the column scrolls to keep the whole box in view, on opening
+    // and whenever the box changes size ("more", an error), never on the
+    // reader's own scroll of the column.
+    const keep = () => {
+      if (widthClass !== "wide" || !column) return;
+      const b = el.getBoundingClientRect();
+      const c = column.getBoundingClientRect();
+      if (b.bottom > c.bottom) column.scrollTop += b.bottom - c.bottom;
+      else if (b.top < c.top) column.scrollTop -= c.top - b.top;
+    };
     fit();
-    const ro = new ResizeObserver(fit);
+    // The observer's first call is the observe itself: after a class change
+    // it leaves the column's scroll where FR-5 put it.
+    let first = true;
+    const ro = new ResizeObserver(() => { fit(); if (!first) keep(); first = false; });
     ro.observe(el);
     if (record.current) for (const c of Array.from(record.current.children)) ro.observe(c);
     window.addEventListener("resize", fit);
@@ -239,7 +257,7 @@ function useFitViewport(box: RefObject<HTMLDivElement | null>, record: RefObject
     // Opened in the Needs me column, the box scrolls into the column's view:
     // Rule and Cancel without scrolling the page (A5). A class change later
     // leaves every scroll where it is (FR-5).
-    if (!opened.current && widthClass === "wide" && column) column.scrollTop += Math.max(0, el.getBoundingClientRect().bottom - column.getBoundingClientRect().bottom);
+    if (!opened.current) keep();
     opened.current = true;
     return () => { ro.disconnect(); window.removeEventListener("resize", fit); window.removeEventListener("scroll", fit, true); };
   }, [box, record, widthClass]);
