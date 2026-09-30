@@ -1,10 +1,10 @@
 ---
 title: The initiative header folds to one bar, and its chip, strip and tiles lead somewhere
-status: now
+status: done
 repos: [organizer]
 branch: main
 updated: 2026-09-30
-next: "review: header-fold, U8 fixed, 1ea132f, G4 and G11 rechecked"
+next: "merged 3a3454d (sup23); review 3 and UI review 3 pass"
 review: pass
 depends_on: ["responsive-home"]
 boundary: ["frontend/src/components/InitiativeHeader.tsx", "frontend/src/components/RoadmapView.tsx and Roadmap.tsx (the expanded stage row only)", "frontend/src/components/SlackView.tsx and Conversation.tsx (the title row, the timeline height, Answer focus)", "frontend/src/components/AgentsView.tsx and DecisionsView.tsx (the title row only)", "frontend/src/stores/board.store.ts (fold state; landings fold; stageFocus)", "frontend/src/styles/shell.css and header CSS", "frontend/src/lib/ and its tests", "amendment 1 (FR-9 only): internal/scan/git.go, the initiative assembly in internal/scan (one call), internal/model/model.go (Initiative.charter_modified), frontend/wailsjs (generated), a scan test"]
