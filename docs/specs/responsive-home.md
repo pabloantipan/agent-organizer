@@ -2,7 +2,7 @@
 
 status: accepted (0061, 2026-09-29); 0062 ruled
 owner: pablo
-decisions: [0033 ruled, 0059 ruled, 0060 ruled, 0061 ruled, 0062 ruled]
+decisions: [0033 ruled, 0059 ruled, 0060 ruled, 0061 ruled, 0062 ruled, 0065 ruled, 0067 proposed]
 design: `docs/ux/specs/responsive-home.md` (Aglaea, 3174fc2), "the design"
 roadmap: fixes to stage 2 (twenty at a glance) at the widths Pablo uses; appetite one wave
 
@@ -67,6 +67,25 @@ Nothing Home contains changes, except 0060's word.
   "you" ("1 waiting · you"). The lead is the cell's human, else pablo (the
   rule box's `leadOf`). Other owners keep their names.
 
+- **FR-7** (amendment 2, U3; the design's Amendment 1) The compact class
+  shall run up to 1439 and regular shall start at 1440, changing FR-1's
+  boundary. FR-2 holds through every window under 1440; 1512 and 1720 stay
+  regular.
+- **FR-8** (U1, U8) In compact, the rule-box sheet shall have a scrim over
+  what it covers, with the rows' Rule verbs behind it. The focus loop inside
+  the box is initiative-header FR-7 (rule-box-finish); this FR checks it
+  holds in every class.
+- **FR-9** (U2) Each record keeps one draft until Rule or Cancel. Opening
+  another row's Rule closes the first box and keeps its words, reopening it
+  restores them, and only Cancel discards.
+- **FR-10** (U4) In compact, a row's signals shall stay on one line with
+  "+N" for the rest. The rest go into the row's hover and accessible name.
+- **FR-11** (U5, U6, U9) The chevron's name and hover shall read "Details for
+  <id>: goal, next date, repos". A Needs me row's `title` carries its full
+  context line in every class. The rail toggle carries `aria-expanded`.
+- **FR-12** (the wide gap) In wide, the rule box shall be capped at the Needs
+  me column's height, and the column scrolls to keep the whole box in view.
+
 ## Acceptance → gate
 
 | # | Design | Check | Expected |
@@ -78,6 +97,10 @@ Nothing Home contains changes, except 0060's word.
 | G5 | A7 | a scripted resize across each class boundary with the rule box open and words typed; screenshots before and after | as A7 |
 | G6 | FR-6 | a lib test for the owner list with the lead's own record; a Home screenshot | "you" for the lead, names for others |
 | G7 | A8 (amended, 0065) | a reviewer who did not build it answers G9's four questions, timed, at each of the three sizes: at 3440×1440 from one screenshot; at 1024×640 and 1512×945 from Home as the lead sees it, scrolling allowed (a full-page capture, or the screenshots of one scroll), the time including the scroll | all four right at each size, each under a minute |
+| G9 | 7 | 1280×800 and 1439×900: strip by default, one-line rows; 1440 and 1512: regular | screenshots | as stated |
+| G10 | 8, 9 | compact: the sheet's scrim; Tab and Shift+Tab loop inside the box in each class; type words in one record's box, open another's Rule, reopen the first | screenshots; a focus log; the words restored | as stated |
+| G11 | 10 | 1024×640, rail expanded, `--twenty`: no row's signals wrap; at least five rows in view; a "+N" row's hover and name list the rest | screenshot; the DOM | as stated |
+| G12 | 11, 12 | the chevron's and the rail toggle's accessible names and state; a wide Needs me row's `title`; wide at 1920×1080 with eight rows, Rule on the last | a names log; screenshots | as stated |
 | G8 | all | `XDG_DATA_HOME=$(mktemp -d) make test`; `cd frontend && npm run build`; the redesign's G18 grep | pass |
 
 ## Boundary
@@ -128,6 +151,7 @@ Nothing Home contains changes, except 0060's word.
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `responsive-home` | G1–G8 | ui-leftovers | true |
+| `responsive-home-2` | G9–G12, G8 | responsive-home, rule-box-finish (both touch the rule box) | true |
 
 ## Amendments
 
@@ -135,3 +159,7 @@ Nothing Home contains changes, except 0060's word.
   1512 allows scrolling Home; one screenshot stays the rule at 3440. The
   first G7 contradicted A1 and A3 (twenty rows cannot fit 640 px); the
   FSE's error, found by resp-review (1a7cb88).
+- **2, 2026-09-29, proposed (0067):** the design's Amendment 1 (Aglaea,
+  836866a), from the card's UI review U1–U9: FR-7 to FR-12, G9 to G12, card
+  `responsive-home-2`. Its boundary is the first card's, plus `Home.tsx`'s
+  chevron names.

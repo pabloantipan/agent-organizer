@@ -11,6 +11,9 @@ restating it (the discuss skill).
   **sup20 ended.**
 - **Running:** sup21 on `responsive-home` (0061, 0062 left from the rail;
   carries 0060's "you"), token organizer/sup21. End it when the card lands.
+- **responsive-home UI review → Aglaea's Amendment 1 (836866a)** → build
+  amendment 2 (FR-7–12, compact to 1439), card `responsive-home-2` (after
+  responsive-home and rule-box-finish), **0067** accept.
 - **0066 (Pablo, in my session): the app is Deltagos**, "what you see, plus
   the .app"; CLI, bundle id, paths, keychain, repos, ids stay organizer.
   Card rename-deltagos, **sup22 running** (token organizer/sup22). Told
