@@ -240,6 +240,8 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 /* Sub-views without a title row (initiative-header FR-5): what is not the id
    stays on one toolbar line. */
 .slack-tools { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); flex: none; min-width: 0; }
+/* Answer lands with focus on the thread's divider (FR-6, UI3): visibly. */
+.tl-divider:focus { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
 
 /* Roadmap's Cards | Calendar switch */
 .seg { display: inline-flex; gap: var(--space-0-5); padding: var(--space-0-5); border-radius: var(--radius-sm); background: var(--bg-sunken); margin-bottom: var(--space-3); }

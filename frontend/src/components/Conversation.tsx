@@ -67,6 +67,9 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   const [draftSubject, setDraftSubject] = useState("");
   const [draftBody, setDraftBody] = useState("");
   const [scrollTo, setScrollTo] = useState<string | null>(null);
+  // The thread a landing from elsewhere (Answer, a card's Discuss) named:
+  // it gets focus once its messages are in (initiative-header FR-6).
+  const landing = useRef<string | null>(null);
   const [tick, setTick] = useState(0);
   const reload = useCallback(() => setTick((n) => n + 1), []);
   const { slackDraft, clearSlackDraft, applyAgents, view: boardView, setResolved, select: openCard } = useBoard();
@@ -161,6 +164,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
       const chat = t ? chatOf(t) : null;
       if (chat !== focus) onFocus(chat);
       if (!chat) setView(t ? (t.kind === "journal" ? "journal" : "channel") : "archive");
+      landing.current = slackDraft.threadId;
       setTimeout(() => { setTarget(slackDraft.threadId!); setScrollTo(slackDraft.threadId!); }, 0);
     }
     if (slackDraft.subject !== undefined) { setDraftSubject(slackDraft.subject); setDraftBody(slackDraft.body ?? ""); setTarget(null); }
@@ -169,8 +173,22 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   useEffect(() => {
     if (!scrollTo) return;
     const el = document.getElementById(`thread-${scrollTo}`);
-    if (el) { el.scrollIntoView({ block: "start", behavior: "smooth" }); setScrollTo(null); }
-  }, [scrollTo, ids]);
+    if (!el) return;
+    if (landing.current === scrollTo) {
+      // A landing waits for the thread's messages, then puts the last one
+      // asked of the human in view and focus on the thread's divider, never
+      // on the page body (UI1, UI3).
+      if (!details[scrollTo]) return;
+      const asked = [...el.querySelectorAll<HTMLElement>(".msg.for-me")].pop();
+      el.scrollIntoView({ block: "start" });
+      asked?.scrollIntoView({ block: "nearest" });
+      el.querySelector<HTMLElement>(".tl-divider")?.focus({ preventScroll: true });
+      landing.current = null;
+    } else {
+      el.scrollIntoView({ block: "start", behavior: "smooth" });
+    }
+    setScrollTo(null);
+  }, [scrollTo, ids, details]);
 
   // New messages at the bottom: keep the view pinned there unless the reader
   // scrolled up to read.
@@ -301,7 +319,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
             const writable = status === "open" || status === "stalled";
             return (
               <section key={t.id} id={`thread-${t.id}`} className={`tl-thread ${target === t.id ? "target" : ""} ${needsMe(t) ? "hot" : ""}`}>
-                <div className="tl-divider" onClick={() => { setTarget(t.id); setReplyTo(null); setBranchFrom(null); }} title="reply into this thread">
+                <div className="tl-divider" tabIndex={-1} onClick={() => { setTarget(t.id); setReplyTo(null); setBranchFrom(null); }} title="reply into this thread">
                   <span className="tl-subj">{t.subject || "(no subject)"}</span>
                   <span className="tl-meta">
                     {status !== "open" && <span className={`badge thread ${status}`}>{status}</span>}

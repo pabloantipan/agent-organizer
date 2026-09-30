@@ -17,7 +17,9 @@ const PEOPLE_KEY = "slack.people";
  *  are fetched. Lifecycle stays in Agents. */
 export function SlackView() {
   const { selectedInitiative, setSelectedInitiative, agents: view, slackFocus, setSlackFocus, view: board } = useBoard();
-  const [people, setPeople] = useState<boolean>(() => { try { return localStorage.getItem(PEOPLE_KEY) !== "closed"; } catch { return true; } });
+  // People starts closed at compact, so the timeline keeps the width
+  // (initiative-header FR-6); the stored choice is untouched until toggled.
+  const [people, setPeople] = useState<boolean>(() => { try { return localStorage.getItem(PEOPLE_KEY) !== "closed" && useBoard.getState().widthClass !== "compact"; } catch { return true; } });
   // People is a disclosure, not a commit: aria-pressed and the selected
   // surface while open, never the accent (ui-leftovers FR-7).
   const togglePeople = () => { const next = !people; setPeople(next); try { localStorage.setItem(PEOPLE_KEY, next ? "open" : "closed"); } catch { /* per-viewer convenience */ } };
