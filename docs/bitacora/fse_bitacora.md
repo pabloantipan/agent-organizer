@@ -10,6 +10,11 @@ restating it (the discuss skill).
   20–36 (UI reviewer 11 min of the critical path); run record
   runs/2026-09-29-conform-and-waiting.md. **sup19 ended.** Nothing of mine
   runs; tokens: aglaea, fse, pablo.
+- **ui-leftovers UI review, UI1 (sev 3, outside the card):** at 1024×640,
+  Answer lands on Conversations with an 8 px timeline under the initiative
+  header: the lead answers blind. Sub-views are out of responsive-home (0061
+  as written), so it goes with header-review-2's "header fold" to Aglaea for
+  a design, after sup20 reports. Its other U-findings: read with the report.
 - **0061 ruled ("Go", 3a4bb3d).** 0062 ruled "left from the rail" (70bdfc3),
   written into FR-4. responsive-home waits only on ui-leftovers landing.
 - **Aglaea's responsive design (3174fc2)** → build spec
