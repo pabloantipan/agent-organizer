@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-30
-next: "build: hdr-fold2 (continuing hdr-fold, launched with amendment 1 in its prompt) applies FR-9's Go fact and proves G10; G8 reader running"
+next: "review: header-fold, branch header-fold, gate G1-G7, G10 and G11 met, G8 for a reader (shots at .wt-notes/hdr-fold/g8-*.png), rebased on main 761427d; new 247d660 3b5d418 7440ee1"
 depends_on: ["responsive-home"]
 boundary: ["frontend/src/components/InitiativeHeader.tsx", "frontend/src/components/RoadmapView.tsx and Roadmap.tsx (the expanded stage row only)", "frontend/src/components/SlackView.tsx and Conversation.tsx (the title row, the timeline height, Answer focus)", "frontend/src/components/AgentsView.tsx and DecisionsView.tsx (the title row only)", "frontend/src/stores/board.store.ts (fold state; landings fold; stageFocus)", "frontend/src/styles/shell.css and header CSS", "frontend/src/lib/ and its tests", "amendment 1 (FR-9 only): internal/scan/git.go, the initiative assembly in internal/scan (one call), internal/model/model.go (Initiative.charter_modified), frontend/wailsjs (generated), a scan test"]
 spec: "docs/specs/initiative-header.md (FR-1 to FR-6, FR-8, FR-9); the design: docs/ux/specs/initiative-header.md (Aglaea, 6c93a49)"
@@ -26,7 +26,7 @@ FR-1 to FR-6, FR-8, FR-9 of `docs/specs/initiative-header.md`, from Aglaea's hea
 - [x] G6: see `docs/specs/initiative-header.md`, Acceptance
 - [x] G7: see `docs/specs/initiative-header.md`, Acceptance
 - [ ] G8: see `docs/specs/initiative-header.md`, Acceptance
-- [ ] G10: see `docs/specs/initiative-header.md`, Acceptance
+- [x] G10: see `docs/specs/initiative-header.md`, Acceptance
 - [x] G11: see `docs/specs/initiative-header.md`, Acceptance
 
 ## Done
@@ -42,10 +42,12 @@ FR-1 to FR-6, FR-8, FR-9 of `docs/specs/initiative-header.md`, from Aglaea's hea
   - G8 (not proved here, for a reader): .wt-notes/hdr-fold/g8-folded-1512.png, .wt-notes/hdr-fold/g8-strip-1512.png
   - G10 (open): .wt-notes/hdr-fold/g10-clean.png, g10.log: source "from working-on/initiative.yaml Open in editor"; g10-modified.png: with the file " M" in the temp copy, no "edited, not committed" mark, since amendment 1's Go fact is not built (Notes)
   - G11: `XDG_DATA_HOME=$(mktemp -d) make test` exit 0 (13 Go packages ok, vitest 51 passed; g11-make-test.log); `cd frontend && npm run build` exit 0 (g11-npm-build.log); G18 grep over main...header-fold: 0 lines (g11-g18.log); rerun after the rebase
+- 2026-09-30 hdr-fold2 built FR-9's mark on branch header-fold (247d660 feat(scan) charter_modified with TestCharterModified: clean, modified, not a repo; 3b5d418 generated models.ts; 7440ee1 the mark in Details), from hdr-fold's patch unchanged; rebased on main 761427d (the earlier commits are now 2e991c1 … 029f2f7)
+  - G10: .wt-notes/hdr-fold/g10b-clean.png, g10b-modified.png, g10b.log (fixture, 1512x900, init-a, Details): clean, git status empty, source "from working-on/initiative.yaml Open in editor", no mark; after appending a comment line to the temp copy's initiative.yaml (git " M") and Rescan, source "from working-on/initiative.yaml edited, not committed Open in editor"
+  - G11 after the rebase: `XDG_DATA_HOME=$(mktemp -d) make test` exit 0 (13 Go packages ok, vitest 51 passed; g11-make-test.log); `cd frontend && npm run build` exit 0 (g11-npm-build.log); G18 grep over main...header-fold: 0 lines (g11-g18.log); `wails build` exit 0
 
 ## Next
 1. review the branch; G8 by a reader who never saw the app
-2. FR-9's mark: apply the Go patch in a session allowed to change Go, then G10's second half
 
 ## Blockers
 none
@@ -57,3 +59,4 @@ none
 - 2026-09-29 hdr-fold: FR-9's modified mark has no data source in the board (no per-file git status); raised as decide: to sup23; sup23: no Go here, sent to fse for Pablo, build the rest
 - 2026-09-30 hdr-fold: amendment 1's Go change (charter_modified) was written, then refused at `go test` by this session's permission check, because the task prompt said no Go and the widening came through the mailbox. It is saved unapplied as .wt-notes/hdr-fold/fr9-charter-modified.patch (scan charterModified, the model field, a scan test for clean, modified and not a repo); `wails generate module` and the header's mark are still to do
 - 2026-09-30 hdr-fold: from Home, Open on a card row opens the card back over Home, so the fold is never seen there; H4 is proved on Conversations' needs-me worklist. The card back takes no focus when it opens. The fixture roadmap's duplicate stage id opens the first stage with it. More in .wt-notes/hdr-fold/progress.md
+- 2026-09-30 hdr-fold2: the mark shows only for a local initiative, like Open in editor: another machine's snapshot would speak of that machine's working copy
