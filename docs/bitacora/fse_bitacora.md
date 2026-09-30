@@ -9,6 +9,13 @@ restating it (the discuss skill).
 - **Last SHA seen:** 8119e20. responsive-home merged d8591aa; 41 min vs
   35–55 (incl. ~11 on 0065), gate_rework 1 (my G7); run record
   runs/2026-09-29-responsive-home.md. **sup21 ended.**
+- **sup22 ended:** rename-deltagos merged 27c81a6, 12 min vs 19–32. Found:
+  build/darwin Info.plists gained CFBundleDisplayName (outside the boundary
+  as written, needed by G1); rule.go still signs "in the organizer on
+  <machine>" (not in 0066's scope; candidate, ask Pablo if it bites).
+  Pablo's install: macOS may re-ask keychain access; Dock keeps the old path.
+- **header-fold decide: (046c69e)** answered by spec amendment 1 (7925401):
+  charter_modified, one Go fact for FR-9; sup23 told.
 - **Running:** sup22 on `rename-deltagos` (0066); sup23 on `header-fold` and
   `rule-box-finish` (0063, 0064 file only), tokens organizer/sup22, sup23.
   End each when its cards land.
@@ -41,8 +48,12 @@ restating it (the discuss skill).
   and 1512. **0065** ruled "scroll allowed under the minute" (30a55f0); G7 and A8
   amended; sup21 told to rerun the reader.
   Wrong-gate rule followed: amended nothing. sup21 told it waits on 0065.
-- **Repetition (4):** a gate row copied from a source without checking it
-  against the other rows (here A8 vs A1/A3). First time; watch for it.
+- **Repetition (4), second occurrence, proposed to Hephaistos:** a spec
+  claim of mine not checked before accept: responsive-home's G7 copied A8
+  against A1/A3 (1a7cb88), and initiative-header's "No Go change" when FR-9's
+  mark had no data source (046c69e). Both cost a builder or reviewer round.
+  Proposed: a spec-craft pre-accept check (each gate row against the others;
+  each "no X change" against where every FR's data comes from).
 - **Header:** Aglaea's design (6c93a49) → build spec
   `docs/specs/initiative-header.md`, cards `header-fold` and `rule-box-finish`
   (parallel, after responsive-home, ui_review), **0063** accept (changes
