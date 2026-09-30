@@ -10,16 +10,16 @@ trap 'rm -rf "$STAGE"' EXIT
 cp -R "$APP" "$STAGE/"
 ln -s /Applications "$STAGE/Applications"
 cat > "$STAGE/READ ME.txt" <<'TXT'
-organizer
+Deltagos
 
-1. Drag organizer.app onto the Applications folder.
+1. Drag Deltagos.app onto the Applications folder.
 2. Unsigned build: the first launch is blocked by Gatekeeper. Either
    right-click the app and choose Open, or run once:
-     xattr -d com.apple.quarantine /Applications/organizer.app
-3. Optional CLI:
-     ln -sf /Applications/organizer.app/Contents/MacOS/organizer ~/.local/bin/organizer
+     xattr -d com.apple.quarantine /Applications/Deltagos.app
+3. Optional CLI (the command is organizer):
+     ln -sf /Applications/Deltagos.app/Contents/MacOS/organizer ~/.local/bin/organizer
 TXT
 rm -f "$OUT"
-hdiutil create -quiet -volname "organizer" -srcfolder "$STAGE" -ov -format UDZO "$OUT"
+hdiutil create -quiet -volname "Deltagos" -srcfolder "$STAGE" -ov -format UDZO "$OUT"
 shasum -a 256 "$OUT" > "$OUT.sha256"
 echo "wrote $OUT"

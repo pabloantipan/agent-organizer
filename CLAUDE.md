@@ -1,5 +1,12 @@
 # CLAUDE.md — organizer
 
+The app is Deltagos (0066): the window, the top bar, the version line, the
+`Deltagos.app` bundle and the DMG say so. Everything else stays organizer: the
+`organizer` CLI and its hints, the bundle id, the executable inside the bundle,
+the config, data and keychain names, the Firestore database, the discuss
+project, the initiative id and this repo. Prose below that says "the
+organizer" means the same program.
+
 Wails v2 desktop app plus CLI, Go backend, React + TypeScript frontend. It scans
 configured roots for `working-on/initiative.yaml`, reads the Kanban cards next to
 it, and shows one merged board. It is read-only over the card files. With
@@ -49,7 +56,7 @@ This directory is an initiative root: it holds copies of the repos listed in
 - Agent hand-off: `internal/prompt` renders a review prompt from the live scan (repos, open cards, next actions, staleness, scanner problems) plus the update rules of the working-on skill. `organizer prompt <id>` prints it; `--run` and the board button write it to `~/.local/share/organizer/prompts/<id>.md` and open a terminal at the initiative root running `<agent> "$(cat file)"`. The agent command is `agent` in config, default claude.
 - Record: `internal/record` is the write-only client for discuss-record (spec authority: agent-slack `specs/factory-push-spec.md` §7–8, `specs/record-spec.md` §4). `organizer factory-key [--rotate]` signs the developer in, POSTs `/v1/factories/keys` with the ID token and writes `~/.local/state/discuss/push.key` 0600; `--rotate` issues, writes, then revokes the old key by sha256, in that order. The factory id is `<state>/factory`, written once from `machine`. `CreateCrew` writes the cell's `push` flag from `cell.json` into `<state>/projects.json` (merge, other cells kept) and, when `record_url` is set and a key exists, registers the cell (`POST /v1/factories/{f}/cells` with initiative id, title, client; 2xx or 409 both count as registered). The key is never logged and never stored anywhere else.
 
-- Packaging: `make build|dmg|install|universal`, version from `git describe` into `main.version` via ldflags (`organizer version`, shown in the top bar). `scripts/make-dmg.sh` uses hdiutil only. `.github/workflows/release.yml` builds a universal app on tags `v*`, signs and notarizes only when the Developer ID secrets exist, and attaches the DMG to a GitHub Release. Bundle id `cl.antipan.organizer`, min macOS 12. Logs: `~/.local/share/organizer/organizer.log`.
+- Packaging: `make build|dmg|install|universal`, version from `git describe` into `main.version` via ldflags (`organizer version` prints `Deltagos <version>`, shown in the top bar). `wails.json` `name` and `productName` are Deltagos, which names the bundle `build/bin/Deltagos.app` and `CFBundleName`/`CFBundleDisplayName` (the plist templates in `build/darwin/`); `outputfilename` stays organizer, so the executable is `Contents/MacOS/organizer`. `make install` removes an old `/Applications/organizer.app`, installs `/Applications/Deltagos.app` and links `~/.local/bin/organizer` into it; the DMG is `Deltagos-<version>.dmg`. `scripts/make-dmg.sh` uses hdiutil only. `.github/workflows/release.yml` builds a universal app on tags `v*`, signs and notarizes only when the Developer ID secrets exist, and attaches the DMG to a GitHub Release. Bundle id `cl.antipan.organizer`, min macOS 12. Logs: `~/.local/share/organizer/organizer.log`.
 
 ## Commands
 
@@ -60,7 +67,7 @@ cd frontend && npm test                        # vitest once over frontend/src/l
 go run . status | board | doctor | sync        # CLI against the real home
 go run . prompt <initiative-id> [--run]        # agent review prompt, or open a terminal running it
 wails dev                                      # app + http://localhost:34115 for browser dev
-wails build                                    # build/bin/organizer.app
+wails build                                    # build/bin/Deltagos.app
 wails generate module                          # regenerate frontend/wailsjs after changing bound types
 firebase deploy --only firestore:rules --project <p> # after editing firestore.rules
 ```

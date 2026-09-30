@@ -1,4 +1,6 @@
-# organizer
+# Deltagos
+
+Deltagos is the app; `organizer` is its command, its repo and its paths.
 
 A desktop board for someone who runs many initiatives in parallel, on more than
 one machine, with AI agents doing a lot of the work.
@@ -38,8 +40,8 @@ due: 2026-09-16        # optional, only when a real date exists
 ```
 
 Agents (Claude Code sessions) create and update these cards by following the
-`working-on` skill, which sets the format and a strict verbosity contract. The
-organizer scans them, enriches them with git, shows them, and syncs a snapshot
+`working-on` skill, which sets the format and a strict verbosity contract.
+Deltagos scans them, enriches them with git, shows them, and syncs a snapshot
 per machine through Firestore, under your account, so every machine sees the whole map.
 
 The app is read-only over the files. People and agents write cards; the app
@@ -74,18 +76,18 @@ app opens on the board and the CLI works with no account at all; see
 
 ### From a release
 
-Download `organizer-<version>.dmg` from the Releases page, open it, and drag
-`organizer.app` to Applications. Releases are built unsigned, so the first
+Download `Deltagos-<version>.dmg` from the Releases page, open it, and drag
+`Deltagos.app` to Applications. Releases are built unsigned, so the first
 launch is blocked by Gatekeeper. Right-click the app and choose Open, or run:
 
 ```bash
-xattr -d com.apple.quarantine /Applications/organizer.app
+xattr -d com.apple.quarantine /Applications/Deltagos.app
 ```
 
-Optional CLI on your PATH:
+Optional CLI on your PATH (the command is `organizer`):
 
 ```bash
-ln -sf /Applications/organizer.app/Contents/MacOS/organizer ~/.local/bin/organizer
+ln -sf /Applications/Deltagos.app/Contents/MacOS/organizer ~/.local/bin/organizer
 ```
 
 ### From source
@@ -97,8 +99,8 @@ primary target; Linux paths exist but are less exercised.
 ```bash
 git clone <this repo> ~/organizer
 cd ~/organizer
-make install        # builds, copies to /Applications, links ~/.local/bin/organizer
-make dmg            # or: package build/bin/organizer-<version>.dmg for another machine
+make install        # builds, copies Deltagos.app to /Applications (removing an old organizer.app), links ~/.local/bin/organizer
+make dmg            # or: package build/bin/Deltagos-<version>.dmg for another machine
 ```
 
 The version comes from the git tag (`make version`). A tag `v*` pushed to
@@ -111,7 +113,7 @@ Logs go to `~/.local/share/organizer/organizer.log`.
 The same binary is a CLI:
 
 ```bash
-alias organizer=~/organizer/build/bin/organizer.app/Contents/MacOS/organizer
+alias organizer=~/organizer/build/bin/Deltagos.app/Contents/MacOS/organizer
 organizer status                 # open cards per initiative, in priority order
 organizer board                  # merged view across machines (from the last pull)
 organizer agents                 # agent processes grouped per initiative

@@ -27,7 +27,7 @@ export function TopBar() {
   const closeHelp = useCallback(() => setHelpTop(null), []);
   return (
     <header className="topbar" ref={bar}>
-      <span className="brand" title={version ? `organizer ${version}` : "organizer"}>organizer{version && <span className="brand-version">{version}</span>}</span>
+      <span className="brand" title={version ? `Deltagos ${version}` : "Deltagos"}>Deltagos{version && <span className="brand-version">{version}</span>}</span>
       <nav className="crumbs" aria-label="where you are">
         {screen === "home" ? <b>Home</b> : <button className="crumb" onClick={() => { closeHelp(); goHome(); }}>Home</button>}
         {screen === "initiative" && selectedInitiative && <><span className="crumb-sep">/</span><b className="mono">{selectedInitiative}</b></>}

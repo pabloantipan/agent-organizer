@@ -1,6 +1,6 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
-  "name": "organizer",
+  "name": "Deltagos",
   "outputfilename": "organizer",
   "frontend:install": "pnpm install",
   "frontend:build": "pnpm run build",
@@ -12,7 +12,7 @@
   },
   "info": {
     "companyName": "Pablo Antipan",
-    "productName": "Organizer",
+    "productName": "Deltagos",
     "productVersion": "0.2.0",
     "copyright": "Copyright 2026 Pablo Antipan. MIT License.",
     "comments": "Initiatives, cards, and agents across machines."
