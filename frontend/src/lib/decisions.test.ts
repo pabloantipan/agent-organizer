@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { merge, model } from "../../wailsjs/go/models";
-import { ownerPhrase, recordSections, waitingDecisions, waitingOwners } from "./decisions";
+import { ownerPhrase, recordSections, signalOwners, waitingDecisions, waitingOwners } from "./decisions";
 
 const initiative = (...decisions: Partial<model.Decision>[]) => ({ decisions }) as unknown as merge.BoardInitiative;
 const rec = (number: string, owner: string, raised: string, status = "proposed") => ({ number, owner, raised, status });
@@ -68,5 +68,21 @@ describe("recordSections", () => {
 
   it("ignores a heading inside a code fence", () => {
     expect(recordSections("## Question\n\n```\n## Recommendation\n```\n").question).toBe("```\n## Recommendation\n```");
+  });
+});
+
+describe("signalOwners (0060)", () => {
+  it("reads the lead's own record as you", () => {
+    expect(signalOwners(initiative(rec("0001", "pablo", "2026-09-20")), "pablo")).toEqual(["you"]);
+  });
+
+  it("keeps the names of other owners, in waitingOwners' order", () => {
+    const i = initiative(rec("0003", "ana", "2026-09-10"), rec("0002", "Pablo", "2026-09-05"), rec("0004", "", "2026-09-11"));
+    expect(signalOwners(i, "pablo")).toEqual(["you", "ana", "no owner"]);
+  });
+
+  it("follows the lead, not the name pablo", () => {
+    const i = initiative(rec("0001", "pablo", "2026-09-01"), rec("0002", "ana", "2026-09-02"));
+    expect(signalOwners(i, "ana")).toEqual(["pablo", "you"]);
   });
 });

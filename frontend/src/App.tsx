@@ -19,7 +19,15 @@ import { EventsOn } from "../wailsjs/runtime/runtime";
 import "./styles/shell.css";
 
 export default function App() {
-  const { screen, refresh, sync, applyAgents, railCollapsed } = useBoard();
+  const { screen, refresh, sync, applyAgents, railCollapsed, setWindowWidth } = useBoard();
+
+  // The one width listener (responsive-home FR-1): the store keeps the class.
+  useEffect(() => {
+    const onResize = () => setWindowWidth(window.innerWidth);
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [setWindowWidth]);
 
   useEffect(() => {
     refresh();

@@ -6,6 +6,8 @@
 
 /* ---------- shared ---------- */
 .num { font-variant-numeric: tabular-nums; }
+/* out of view, still read: a word that moved into a hover (responsive-home FR-5) */
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .shell .panel { background: var(--surface); border-radius: var(--radius-lg); }
 
 /* Badge (lozenge): xs, 600, 1x7, radius 4, no border; a neutral tint unless it means something */
@@ -62,6 +64,18 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 /* ---------- Home ---------- */
 .home { display: grid; gap: var(--space-6); align-content: start; max-width: 1240px; }
 .home-sec { display: grid; gap: var(--space-2); }
+/* Home's widths (docs/specs/responsive-home.md): the class is on .home,
+   from the store (FR-1); home.css lays out the rows for each. Regular's top
+   (1720, half of the ultrawide) lifts the cap (FR-3). Wide puts Needs me in
+   a right column of its own, sticky with its own scroll, the list capped at
+   1,600 and the whole near 2,200, starting at the rail (FR-4, 0062). */
+.home.roomy { max-width: 1480px; }
+.home.wide { max-width: 2152px; grid-template-columns: minmax(0, 1600px) 520px; column-gap: var(--space-8); align-items: start; }
+.home.wide > .home-list { grid-column: 1; grid-row: 1; }
+.home.wide > .home-needs {
+  grid-column: 2; grid-row: 1; align-content: start;
+  position: sticky; top: 0; max-height: calc(var(--wrap-h, 100vh) - 36px); overflow-y: auto; overscroll-behavior: contain;
+}
 
 /* Inbox row: reason lozenge, subject with one line of context, age, one verb */
 .inbox { padding: var(--space-1) var(--space-2); display: grid; }

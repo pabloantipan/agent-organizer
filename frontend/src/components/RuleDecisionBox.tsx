@@ -5,6 +5,7 @@ import { api } from "../hooks/useWails";
 import { recordSections } from "../lib/decisions";
 import { leadOf } from "../lib/queue";
 import { useBoard } from "../stores/board.store";
+import type { WidthClass } from "../lib/width";
 import "../styles/rule-box.css";
 
 /** A ruling of a proposed record, from its Needs me row (FR-22) or its row on
@@ -17,8 +18,12 @@ import "../styles/rule-box.css";
  *  FR-1) puts the record's Question and Recommendation above the options,
  *  clamped, with a link to it in Decisions; the Decisions tab leaves it off,
  *  since the body is already under the row there. */
-export function RuleDecisionBox({ initiative, decision: d, withRecord = false, opener, afterRule, onClose }: {
+export function RuleDecisionBox({ initiative, decision: d, withRecord = false, draft, opener, afterRule, onClose }: {
   initiative: string; decision: model.Decision; withRecord?: boolean;
+  /** The chosen option and the words, kept by the caller (Home keeps them in
+   *  the store so a width class change keeps them, responsive-home FR-5);
+   *  without it the box keeps its own. */
+  draft?: { chosen: string; words: string; set: (patch: { chosen?: string; words?: string }) => void };
   /** The control that opened the box: focus goes back to it on close. */
   opener?: RefObject<HTMLElement | null>;
   /** Where focus goes once the ruling is written and the opener has left
@@ -31,8 +36,10 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, o
   const owner = (d.owner ?? "").trim();
   const forOwner = owner !== "" && owner.toLowerCase() !== ruler ? ` · owner ${owner}` : "";
   const options = d.options ?? [];
-  const [chosen, setChosen] = useState("");
-  const [words, setWords] = useState("");
+  const [own, setOwn] = useState({ chosen: "", words: "" });
+  const { chosen, words } = draft ?? own;
+  const setChosen = (chosen: string) => (draft ? draft.set({ chosen }) : setOwn((o) => ({ ...o, chosen })));
+  const setWords = (words: string) => (draft ? draft.set({ words }) : setOwn((o) => ({ ...o, words })));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const title = useRef<HTMLSpanElement>(null);
@@ -42,7 +49,8 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, o
   const titleId = useId();
   const bodyId = useId();
   const ready = chosen !== "" && words.trim() !== "" && !busy;
-  const place = useFitViewport(box, record);
+  const widthClass = useBoard((s) => s.widthClass);
+  const place = useFitViewport(box, record, widthClass);
 
   // Focus and names: a box that shows a record opens on its title, and the
   // record is its description.
@@ -115,24 +123,48 @@ const GAP = 8;
  *  fixed under its opener, moved up when there is no room below, and capped
  *  at the viewport minus the top bar; the record scrolls inside it, so the
  *  options, the words and the buttons stay in view. Placed again when the
- *  page scrolls, the window resizes or the record grows ("more"). */
-function useFitViewport(box: RefObject<HTMLDivElement | null>, record: RefObject<HTMLDivElement | null>): CSSProperties | undefined {
+ *  page scrolls, the window resizes or the record grows ("more").
+ *  On Home the width class changes the place (responsive-home FR-2, FR-4):
+ *  compact centres it over Home as a sheet; wide leaves it in the flow of
+ *  the Needs me column, under its row, capped at the column's height. The
+ *  box stays the same element in every class, so nothing typed is lost. */
+function useFitViewport(box: RefObject<HTMLDivElement | null>, record: RefObject<HTMLDivElement | null>, widthClass: WidthClass): CSSProperties | undefined {
   const [place, setPlace] = useState<CSSProperties>();
+  const opened = useRef(false);
   useLayoutEffect(() => {
     const el = box.current;
     const anchor = el?.parentElement;
     if (!el || !anchor) return;
+    const home = el.closest<HTMLElement>(".board-wrap .home");
+    const column = el.closest<HTMLElement>(".home-needs");
+    const same = (p: CSSProperties | undefined, q: CSSProperties) => !!p && (Object.keys(q) as (keyof CSSProperties)[]).every((k) => p[k] === q[k]) && Object.keys(p).length === Object.keys(q).length;
     const fit = () => {
+      if (widthClass === "wide" && column) {
+        const maxHeight = Math.max(0, column.clientHeight - GAP);
+        setPlace((p) => (same(p, { maxHeight }) ? p : { maxHeight }));
+        return;
+      }
       const a = anchor.getBoundingClientRect();
       const top0 = (document.querySelector(".topbar")?.getBoundingClientRect().bottom ?? 0) + GAP;
       const maxHeight = Math.max(0, window.innerHeight - top0 - GAP);
       const r = record.current;
       const natural = el.offsetHeight + (r ? r.scrollHeight - r.clientHeight : 0);
       const h = Math.min(natural, maxHeight);
-      let top = a.bottom + 4;
+      if (widthClass === "compact" && home) {
+        const w = home.parentElement!.getBoundingClientRect();
+        const left = Math.max(GAP, Math.round(w.left + (w.width - el.offsetWidth) / 2));
+        const top = Math.round(top0 + Math.max(0, (maxHeight - h) / 2));
+        const q: CSSProperties = { position: "fixed", top, left, maxHeight };
+        setPlace((p) => (same(p, q) ? p : q));
+        return;
+      }
+      // Under its opener; moved up when there is no room below, down when the
+      // opener has scrolled above the top bar.
+      let top = Math.max(top0, a.bottom + 4);
       if (top + h > window.innerHeight - GAP) top = Math.max(top0, window.innerHeight - GAP - h);
       const right = Math.max(GAP, window.innerWidth - a.right);
-      setPlace((p) => (p && p.top === top && p.right === right && p.maxHeight === maxHeight ? p : { position: "fixed", top, right, maxHeight }));
+      const q: CSSProperties = { position: "fixed", top, right, maxHeight };
+      setPlace((p) => (same(p, q) ? p : q));
     };
     fit();
     const ro = new ResizeObserver(fit);
@@ -140,8 +172,13 @@ function useFitViewport(box: RefObject<HTMLDivElement | null>, record: RefObject
     if (record.current) for (const c of Array.from(record.current.children)) ro.observe(c);
     window.addEventListener("resize", fit);
     window.addEventListener("scroll", fit, true);
+    // Opened in the Needs me column, the box scrolls into the column's view:
+    // Rule and Cancel without scrolling the page (A5). A class change later
+    // leaves every scroll where it is (FR-5).
+    if (!opened.current && widthClass === "wide" && column) column.scrollTop += Math.max(0, el.getBoundingClientRect().bottom - column.getBoundingClientRect().bottom);
+    opened.current = true;
     return () => { ro.disconnect(); window.removeEventListener("resize", fit); window.removeEventListener("scroll", fit, true); };
-  }, [box, record]);
+  }, [box, record, widthClass]);
   return place;
 }
 

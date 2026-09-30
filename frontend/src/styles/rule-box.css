@@ -86,3 +86,14 @@
 /* at the minimum window the words take three lines, leaving the record
    more of the room (ui-leftovers FR-2) */
 @media (max-height: 720px) { .rb-words textarea { min-height: 64px; } }
+/* Home's widths (responsive-home): compact makes the box a sheet centred
+   over Home (placed by useFitViewport); wide puts it in the Needs me column
+   under its row, at the column's width, in the flow and capped at the
+   column's height. The box is the same element in every class. */
+.home.compact .rb.with-record { width: min(560px, calc(100vw - 2 * var(--space-4))); }
+.home.wide .home-needs .ib-act, .home.wide .home-needs .rb-anchor { display: contents; }
+.home.wide .home-needs .rb {
+  position: static; grid-column: 1 / -1; width: auto; max-width: none; margin: var(--space-1) 0 var(--space-2);
+  background: var(--surface-raised); box-shadow: none;
+}
+.home.wide .ib-row.ruling:hover { background: transparent; }
