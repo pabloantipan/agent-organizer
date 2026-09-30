@@ -1,13 +1,13 @@
 ---
 title: What the header's waiting chip says
-status: proposed
+status: ruled
 raised: 2026-09-30
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-30
+ruled_by: pablo
 options: [N decisions waiting, keep N waiting and change the gate]
-chosen:
+chosen: N decisions waiting
 cards: [header-fold]
 threads: []
 supersedes: []
@@ -46,7 +46,7 @@ keeps the id whole (H2), and the chip is the last thing to give way.
 
 ## Ruling
 
-
+pablo, 2026-09-30, in the organizer on lodestar: Go
 
 ## Consequences
 
