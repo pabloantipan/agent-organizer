@@ -5,7 +5,7 @@ repos: [organizer]
 branch: main
 updated: 2026-09-30
 next: "review: header-fold, branch header-fold rebased on c9d6d03, chip words per 0068, G1-G7, G10, G11 rechecked, G8 shots retaken, 1b6388c f2e551f babcdec b5770e4 74cae05 f3f36bc 0162611 32c900d 4995b30 07dc447 87151f5 5600bf5 b9de179 f68373a"
-review: fail
+review: pass
 depends_on: ["responsive-home"]
 boundary: ["frontend/src/components/InitiativeHeader.tsx", "frontend/src/components/RoadmapView.tsx and Roadmap.tsx (the expanded stage row only)", "frontend/src/components/SlackView.tsx and Conversation.tsx (the title row, the timeline height, Answer focus)", "frontend/src/components/AgentsView.tsx and DecisionsView.tsx (the title row only)", "frontend/src/stores/board.store.ts (fold state; landings fold; stageFocus)", "frontend/src/styles/shell.css and header CSS", "frontend/src/lib/ and its tests", "amendment 1 (FR-9 only): internal/scan/git.go, the initiative assembly in internal/scan (one call), internal/model/model.go (Initiative.charter_modified), frontend/wailsjs (generated), a scan test"]
 spec: "docs/specs/initiative-header.md (FR-1 to FR-6, FR-8, FR-9); the design: docs/ux/specs/initiative-header.md (Aglaea, 6c93a49)"
@@ -26,7 +26,7 @@ FR-1 to FR-6, FR-8, FR-9 of `docs/specs/initiative-header.md`, from Aglaea's hea
 - [x] G5: see `docs/specs/initiative-header.md`, Acceptance
 - [x] G6: see `docs/specs/initiative-header.md`, Acceptance
 - [x] G7: see `docs/specs/initiative-header.md`, Acceptance
-- [ ] G8: see `docs/specs/initiative-header.md`, Acceptance
+- [x] G8: see `docs/specs/initiative-header.md`, Acceptance
 - [x] G10: see `docs/specs/initiative-header.md`, Acceptance
 - [x] G11: see `docs/specs/initiative-header.md`, Acceptance
 
@@ -87,6 +87,24 @@ none
 - G11 met, rerun by me: `XDG_DATA_HOME=$(mktemp -d) make test` exit 0 (vitest 51 passed), `npm run build` exit 0, G18 grep over main...header-fold 0 lines (.wt-notes/hdr-fold-review/).
 - Boundary: diff --stat stays inside it except `StageRoadmap.tsx` and `styles/roadmap.css`; the card and spec boundary say `Roadmap.tsx`, but FR-4 and the technical notes name `StageRoadmap` as where the expanded row goes, so this reads as the boundary's slip, not a breach.
 - Not covered by the gate: (1) the gate may be unmeetable as designed: FR-2 fixes the chip's words to "N waiting" / "N waiting on you", with nothing naming decisions, and the reader pointed at exactly that; Pablo's to settle (chip wording or G8). (2) From Home, Open on a Needs me card row folds the header in memory under a card back over Home, where no header shows, and the next hand navigation restores Details: H4 holds only on Conversations' worklist. (3) The card back takes no focus when it opens (focus stays on Open behind it). (4) `make test` served Go packages from cache; the charter test was rerun uncached.
+
+## Review 2
+- Verdict: pass, 2026-09-30, reviewer hdr-fold-review2 (branch header-fold at f68373a, on main c9d6d03). Evidence of my own in .wt-notes/hdr-fold-review2/
+- Unmet: none
+- Rebase: `git range-diff 761427d..7440ee1 c9d6d03..header-fold`: every commit identical except 1b6388c (store: main's `ruleDrafts`/`openRule`/`setRuleDraft`/`dropRule` kept, the fold state beside them) and b5770e4 (main's People `aria-label` kept), plus f68373a (chip words). So rows were rechecked from hdr-fold3's post-rebase evidence where it exists (G1, G2, G4, G6, G10, G11) and by my own run where it does not (G3, G5, G7).
+- G1 met: g1c-answer-1024x640.png, g1c.log: focus div.tl-divider of the asking thread, inView; asked message and composer on screen; timeline 275 of 519 px (0.53).
+- G2 met: g2c.log, 18 shots: bar plus tabs 76 px at 1024, 1512, 3440 on all six sub-views, h1InSubview empty, idCut false, chip "3 decisions waiting" in the bar.
+- G3 met, my run (fixture, 1512×945, g3.log, g3-1…6): Details open on init-a (goal and measure "more"), still open on init-b, still open after reload; on Conversations' needs me with Details open, Open card delta → header folded, card back open, row 557→291 px on screen, focus on its Open card, same after Escape. The fixture has no card asking the lead: I added `init-a/working-on/delta.md` to the temp copy only, as the builder did, and removed it after (g3-fixture-note.txt). Scope "more" when long: not re-shot; `ScopeLines` wraps each side in `Clamped` (commit f2e551f unchanged by the rebase; g3-10-scope-clamped.png).
+- G4 met: g4c.log, g4c-2/3: chip from Work and again from Decisions after collapsing 0002: Decisions, 0002 expanded, focus button.dec-line 0002, inView, "Waiting on a ruling" on screen; g4c-4: init-c chip null. Code: `openDecision(i.id, firstWaiting)` with `decisionSeq`.
+- G5 met, my run: real home, `wails dev` without the fixture's exports, pressed only the rail's organizer, the Work tab and Details (g5-real-organizer-details.png, g5-real.log): "Roadmap · building · stage 5 of 6", "building" once, one run of 6 tiles, 0 phase chips. Fixture init-a (g5-init-a-fixture.png): DISCOVERY and BUILDING once each over their runs (1 and 3 tiles), one divider, 0 chips.
+- G6 met: g6c.log, g6c-2-click.png, g6c-3-enter.png: click and Enter on stage 2 open Roadmap → Stages, header folded, stage 2 expanded (outcome, exits, gates 0001/0002/0099, cards, appetite), focus on its toggle. Exits in the fixture are open, so "with dates" shows only the open state (as review 1).
+- G7 met, my run (3440×1380, g7.log, g7-details-open-3440.png): two 571 px columns; longest header line 95 characters (canvas-measured, text length capped at the box's), the rest 88, 88, 62 and below.
+- G8 met, box ticked. Reader2 (answers.md), graded against H11. Chip: "the purple '3 decisions waiting' badge … I would expect a click to open the Decisions tab … showing the three decisions that are still waiting for someone to make them", from "The badge text '3 decisions waiting'": right, read off the words; its "a guess" is about the click, which no still shot shows. Tiles: on the strip, "those tiles are the initiative's stages and the current one is highlighted", "Sure about what each row shows": right. Caveat for Pablo: the question said "the row of small tiles under the name" and the folded shot is on Work, whose wave tiles also sit under the name; the reader answered for both rows and leaned to the wave tiles as the one meant. I grade the reading of the stage tiles, which is right; if Pablo reads H11 as "picks the strip unprompted", G8 is unmet and the fix is the question or the shot (Overview), not the build. The reader also reports the working-on vocabulary in its context (a SessionStart hook, a CLAUDE.md, skills), though nothing named the app.
+- G10 met: g10c.log, g10c-clean.png, g10c-modified.png: source line and Open in editor when clean; "edited, not committed" after " M" and Rescan. `TestCharterModified` ran uncached in my `make test` (internal/scan 2.4 s).
+- G11 met, rerun by me: `XDG_DATA_HOME=$(mktemp -d) make test` exit 0 (13 Go packages ok, vitest 7 files 64 passed; make-test.log); `npm run build` exit 0 (npm-build.log); G18 grep over main...header-fold 0 lines (g18.log); `wails build` exit 0 after my runs, worktree status clean.
+- Boundary: diff --stat inside it except `StageRoadmap.tsx` and `styles/roadmap.css`, as review 1 read it: FR-4 and the technical notes name `StageRoadmap` for the expanded row; the boundary's slip, not a breach. Go only amendment 1's lines.
+- Not covered by the gate: (1) G8's procedure: the question should name the strip (or the folded shot be on Overview), and the reader should run with no working-on hook or skills in context. (2) The fixture has no card asking the lead, so H4 needs a temp card each time; testdata could carry one. (3) The "on you" and "1 decision waiting" words are proved by header.test.ts only, never on screen. (4) Review 1's (2) and (3) stand: from Home, Open folds a header that is not shown; the card back takes no focus.
+- Reviewer: hdr-fold-review2, 2026-09-30
 
 ## UI review
 - Ran: branch header-fold at 7440ee1 (detached in .wt/hdr-fold-ui), `scripts/fixture-home.sh`, `wails dev -devserver localhost:34213`, a private headless Chromium (driver .wt-notes/hdr-fold-ui/drive.cjs, logs .wt-notes/hdr-fold-ui/folded.log and the s-*.cjs scenarios) at 1024×640, 1280×800, 1512×945, 1920×1080, 3440×1380; init-a (3 waiting) and init-c (none). Heuristic review plus one `simulated` blind reader; no real user.
