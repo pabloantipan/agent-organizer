@@ -1,13 +1,13 @@
 ---
 title: At which window width does "at a glance" hold on Home?
-status: proposed
+status: ruled
 raised: 2026-09-29
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-09-29
+ruled_by: pablo
 options: [1024 is real, 1440 or wider]
-chosen:
+chosen: 1024 is real
 cards: []
 threads: [01M3Q04G1TTG9JX71GA5CKMWBW]
 supersedes: []
@@ -39,7 +39,7 @@ window on a laptop is this size.
 
 ## Ruling
 
-
+pablo, 2026-09-29, in the organizer on lodestar: Can we have kinda responsive? In my case I have a wide monitor buy I also work at the laptop screen 14 inches. Tel Aglaea if this is worth to be taken into consideration
 
 ## Consequences
 
