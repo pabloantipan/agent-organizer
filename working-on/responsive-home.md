@@ -92,3 +92,70 @@ Every answer came in under a minute. Only 3440 is right. At 1024 and 1512 the sc
 - At 1024 with the rail expanded, busy rows' signals wrap to 2–3 lines. This is for Aglaea.
 
 Reviewer: resp-review, 2026-09-29.
+
+## UI review
+Commit run: `898cd78` (detached in `.wt/resp-ui`), `wails dev` in Chromium 1234 headless, `--twenty` and the default fixture. Shots and the driver (`ui.cjs`) are in `.wt-notes/resp-ui/`.
+
+**Verdict: pass. No finding fails it.** A1–A7 hold at every size I ran: 1024×640 fresh (strip, 5 one-line Needs me rows, 7 initiative rows, ids whole, state and phase in words) and expanded then reloaded (250 px, "0" kept); 1279 compact / 1280 regular; 1512 (14 of 20, ids whole); 1719 cut / 1720 roomy goals whole; 1919 / 1920 wide; 3440 (20 of 20, goals whole, box in the column, Rule and Cancel in view, page not scrolled). The box, option and words survived 2400→1919→1600→1280→1279→1280→1920, with the list's top row and the column's scroll kept. "you" reads right in both fixtures. The two severity 3 findings, U1 and U3, are left out of the verdict on purpose: U1 is the box's focus model, which the spec never defined and which regular already had on main, and U3 is regular "as built" (FR-3). Both go to the FSE as spec gaps. If the FSE reads "sheet" in FR-2 as modal, U1 becomes a fail.
+
+- **U1 — a keyboard user tabs out of the open rule box onto controls hidden under it, and one Enter loses the ruling.**
+  - Where: compact with the rail expanded, 1024×640, Rule open (`1024x-exp-rule-tab.png`). After Rule, Tab lands on `auth-gateway`, `billing-api` and the other ids, at x 312–420, which sit under the sheet (x 357–917). Regular, 1512: past Cancel, focus lands on "Open onboarding-flow Step map" under the box (`1512x`, measured OBSCURED). That already happened on main.
+  - Evidence: heuristic, WCAG 2.2 2.4.11 Focus Not Obscured and 2.4.3.
+  - Severity: 3.
+  - Proposal: decide the box's focus model. Either a modal sheet (focus stays in it, Esc or Cancel leaves), or place it so it never covers a focusable control.
+- **U2 — Rule on a second row silently throws away the words typed in the first.**
+  - Where: any class, `3440b` run. I typed in claims-portal 0002, opened vendor-audit 0002, then reopened claims-portal 0002: its words were "". On main each box kept its own state and stayed open. The new single `ruleDraft` resets on `openRule`. In compact, the rows' Rule verbs stay clickable beside the sheet.
+  - Evidence: heuristic, Nielsen 3 and 5 (control, error prevention).
+  - Severity: 2.
+  - Proposal: keep the draft per record key until Cancel or Rule, or ask before discarding typed words.
+- **U3 — at the bottom of regular the lead sees fewer initiatives and cut goals, one pixel after compact showed more.**
+  - Where: `1279.png` against `1280.png`. At 1279 the rail is the strip and 12 rows show. At 1280 the rail expands to 250 px and 7 rows show: goals are cut to about 15 characters ("Every app signs in…"), stage titles to 3 ("2 · Gat…"), and busy rows' signals wrap to 3 lines (74 px). This persists toward 1512.
+  - Evidence: heuristic, twenty-at-a-glance G9 (only timed at 1440), measured.
+  - Severity: 3.
+  - Proposal (FSE): regular's lower end keeps compact's row layout, or the strip default reaches further (for example until the goal column holds about 30 characters). This is a spec change to FR-3.
+- **U4 — in compact with the rail expanded (A2's state), busy rows take 2–3 lines and 5 initiatives show, under A1's six.**
+  - Where: `1024-fresh-expanded-reloaded.png`.
+  - Evidence: heuristic, measured.
+  - Severity: 2.
+  - Proposal: compact keeps signals on one line (a count and an overflow), or compact's rail is narrower. The builder noted this too.
+- **U5 — the chevron does not say which initiative it belongs to, or that in compact it now holds the goal and next date.**
+  - Where: the tab pass at 1024. Twenty buttons are all named "repos, problems and actions" (a `title`, no label).
+  - Evidence: heuristic, WCAG 2.4.6 and 2.5.3.
+  - Severity: 2.
+  - Proposal: an `aria-label` such as "details for auth-gateway: goal, next date, repos". In compact the hover text should say the same.
+- **U6 — in wide, each Needs me row's context is cut to one line with no hover, so the options are lost from the row.**
+  - Where: `3440-rule.png` ("owner pablo · raised 2026-09-18 by fse · o…"). The row's `title` is only set in compact.
+  - Evidence: heuristic, Nielsen 6.
+  - Severity: 1.
+  - Proposal: set the row's `title` in every class, or give the context two lines in the column.
+- **U7 — in wide, Tab goes rail → Needs me (right column) → list (left), against the left-to-right reading.**
+  - Where: `default-1920k` tab pass.
+  - Evidence: heuristic, WCAG 2.4.3.
+  - Severity: 1. Defensible, since Needs me is the priority.
+  - Proposal: keep it and say so in the design system's Widths section, or move Needs me first in the DOM only for the other classes.
+- **U8 — the compact sheet has no scrim and its top edge cuts through its own row's subject, which reads as a glitch.**
+  - Where: `1024-rule-typed.png`, row 1.
+  - Evidence: heuristic, design system (Rule box anatomy).
+  - Severity: 1.
+  - Proposal: dim what is behind the sheet, or start it below its row.
+- **U9 — the rail toggle is named by its action ("expand the rail") with no `aria-expanded`.**
+  - Where: the tab pass at 1024.
+  - Evidence: heuristic, WCAG 4.1.2.
+  - Severity: 1.
+  - Proposal: add `aria-expanded`.
+
+**Spec gaps (for the FSE)**
+- The rule box's focus model (U1): FR-2 says "a sheet" and FR-5 speaks only of class crossing. Nothing says whether focus stays in the box, or what happens to a draft when another row's Rule is pressed (U2).
+- Regular below about 1440 (U3): "as built" was never measured there. G9 was timed at 1440, A3 at 1512.
+- A2 has no floor: nothing says what the glance must still show at 1024 with the rail expanded (U4).
+- The wide rule box on the last Needs me row grows the column (default fixture: box top 464, bottom 1133 at 3440). Fine here, but nothing says how it should behave at 1920×1080 with eight rows.
+
+**Not verified**
+- **Wide with Needs me empty:** both fixtures always have rows, and ruling is forbidden. From the code only: the section is always rendered with "Nothing waits on you.", so its column stays.
+- **A real screen reader:** names were read from the DOM (accessible name, `title`, the sr-only text), not with VoiceOver.
+- **WKWebView and Safari 15:** Chromium only. `display: contents` on the wide box's anchors is the known risk there.
+- **Real window drag:** resizes were viewport changes through Playwright.
+- **Native tooltip rendering:** checked as `title` text, not shown.
+- **200% zoom and touch:** under 1024, out of this card.
+
+UI reviewer: resp-ui, 2026-09-29.
