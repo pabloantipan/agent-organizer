@@ -223,7 +223,7 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
               <Phase stages={i.stages ?? []} />
               <span title={i.goal || undefined} className={`p-goal ${i.goal ? "" : "missing"}`}>{i.goal || "no goal yet"}</span>
               <MiniStepper stages={i.stages ?? []} compact={compact} />
-              <Signals i={i} rows={rows} cards={cards} waves={group?.waves ?? []} cell={group?.cell} missing={missingPersonas(group?.crew)} lead={leadOf(group)} compact={compact} />
+              <Signals i={i} rows={rows} cards={cards} waves={group?.waves ?? []} cell={group?.cell} missing={missingPersonas(group?.crew)} lead={leadOf(group)} oneLine={widthClass !== "regular"} />
               <NextDate next={next} />
               <button className="p-more ghost" onClick={() => setOpen({ ...open, [id]: !open[id] })} aria-expanded={!!open[id]} aria-label={detailsName(id)} title={detailsName(id)}>
                 {open[id] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -320,7 +320,7 @@ function MiniStepper({ stages, compact = false }: { stages: model.Stage[]; compa
   );
 }
 
-function Signals({ i, rows, cards, waves, cell, missing, lead, compact }: { i: merge.BoardInitiative; rows: merge.BoardInitiative[]; cards: merge.BoardCard[]; waves: service.Wave[]; cell?: model.Cell | null; missing: string[]; lead: string; compact: boolean }) {
+function Signals({ i, rows, cards, waves, cell, missing, lead, oneLine }: { i: merge.BoardInitiative; rows: merge.BoardInitiative[]; cards: merge.BoardCard[]; waves: service.Wave[]; cell?: model.Cell | null; missing: string[]; lead: string; oneLine: boolean }) {
   const waiting = waitingDecisions(i);
   const blocked = cards.filter((c) => c.status === "blocked").length;
   const now = cards.filter((c) => c.status === "now").length;
@@ -330,7 +330,7 @@ function Signals({ i, rows, cards, waves, cell, missing, lead, compact }: { i: m
   const problems = i.problems?.length ?? 0;
   const defining = cell?.state === "in_definition";
   const none = !waiting && !blocked && !now && !live && !running.length && !problems && !defining;
-  const Line = compact ? OneLine : AllSignals;
+  const Line = oneLine ? OneLine : AllSignals;
   return (
     <Line>
       {waiting > 0 && <span className="lz waiting"><span className="num">{waiting}</span> waiting · {signalOwners(i, lead).join(", ")}</span>}
@@ -349,14 +349,16 @@ function AllSignals({ children }: { children: React.ReactNode }) {
   return <span className="p-sig">{children}</span>;
 }
 
-/** Compact's signals (FR-10): one line, never wrapped. The lozenges that do
+/** Compact's signals (FR-10), and wide's, whose signals keep one line
+ *  (FR-4) also when the rail leaves the list tight at 1920: one line, never
+ *  wrapped. The lozenges that do
  *  not fit are hidden and counted in a "+N"; they are named in the cell's
  *  hover and in its accessible text. Measured after every render, since a
  *  signal changes with the 10 s agents feed and the room with the rail;
  *  state is set only when what fits changes. */
 function OneLine({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const [cut, setCut] = useState<{ n: number; rest: string[] } | null>(null);
+  const [cut, setCut] = useState<{ n: number; rest: string[]; whole: string } | null>(null);
   const measure = () => {
     const el = ref.current;
     if (!el) return;
@@ -368,7 +370,11 @@ function OneLine({ children }: { children: React.ReactNode }) {
     const n = signalsThatFit(items.map((c) => Math.max(c.getBoundingClientRect().width, c.scrollWidth)), gap, el.clientWidth, Math.max(more?.getBoundingClientRect().width ?? 0, 28));
     const rest = items.slice(n).map((c) => (c.textContent ?? "").replace(/\s+/g, " ").trim());
     items.forEach((c, k) => { c.style.display = ""; if (k >= n) c.dataset.off = "1"; else delete c.dataset.off; });
-    setCut((p) => (p && p.n === n && p.rest.join("|") === rest.join("|") ? p : { n, rest }));
+    // The first signal may still be cut by its ellipsis: then the hover
+    // names it whole.
+    const first = items[0];
+    const whole = first && first.scrollWidth > first.clientWidth + 1 ? (first.textContent ?? "").replace(/\s+/g, " ").trim() : "";
+    setCut((p) => (p && p.n === n && p.whole === whole && p.rest.join("|") === rest.join("|") ? p : { n, rest, whole }));
   };
   useLayoutEffect(measure);
   useLayoutEffect(() => {
@@ -381,7 +387,7 @@ function OneLine({ children }: { children: React.ReactNode }) {
   const rest = cut?.rest ?? [];
   const also = rest.length > 0 ? `and ${rest.length} more: ${rest.join(", ")}` : undefined;
   return (
-    <span ref={ref} className="p-sig one-line" title={also}>
+    <span ref={ref} className="p-sig one-line" title={[cut?.whole, also].filter(Boolean).join("\n") || undefined}>
       {children}
       {rest.length > 0 && <span className="lz sig-more" aria-hidden="true">+{rest.length}</span>}
       {also && <span className="sr-only">{also}</span>}
