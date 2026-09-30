@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { api, type Account, type AgentsView, type BoardView, type Group, type LockState, type Note } from "../hooks/useWails";
 import type { merge } from "../../wailsjs/go/models";
+import { dropDraft, editDraft, openDraft, type Draft, type Drafts } from "../lib/drafts";
 import { railCollapsedFor, roomyOf, widthClassOf, type WidthClass } from "../lib/width";
 
 /** Navigation is Home, one initiative under its header with six sub-views,
@@ -44,8 +45,14 @@ type State = {
   // Home's layout so crossing a width class keeps both (FR-5). key is the
   // row's key, decision:<initiative>/<NNNN>. Leaving Home closes it.
   ruleDraft: RuleDraft | null;
+  // One draft per record until Rule or Cancel (FR-9): closing a box, opening
+  // another row's, or leaving Home keeps its words here, and reopening
+  // restores them. Only dropRule (Cancel, the ruling written, the row gone)
+  // discards one.
+  ruleDrafts: Record<string, Draft>;
   openRule: (key: string | null) => void;
   setRuleDraft: (patch: Partial<Omit<RuleDraft, "key">>) => void;
+  dropRule: (key: string) => void;
   slackFocus: string | null;
   setSlackFocus: (agent: string | null) => void;
   openSlack: (initiativeId: string, agent: string | null) => void;
@@ -101,6 +108,9 @@ type State = {
 
 export type RuleDraft = { key: string; chosen: string; words: string };
 
+const draftsOf = (st: State): Drafts => ({ open: st.ruleDraft, drafts: st.ruleDrafts });
+const ruleState = (d: Drafts) => ({ ruleDraft: d.open, ruleDrafts: d.drafts });
+
 const RAIL_KEY = "rail.collapsed.strip";
 const storedRail = () => { try { return localStorage.getItem(RAIL_KEY); } catch { return null; } };
 const width0 = typeof window === "undefined" ? 1440 : window.innerWidth;
@@ -152,8 +162,10 @@ export const useBoard = create<State>((set, get) => ({
     set({ widthClass, roomy, railCollapsed: railCollapsedFor(storedRail(), widthClass) });
   },
   ruleDraft: null,
-  openRule: (key) => set({ ruleDraft: key ? { key, chosen: "", words: "" } : null }),
-  setRuleDraft: (patch) => set((st) => (st.ruleDraft ? { ruleDraft: { ...st.ruleDraft, ...patch } } : {})),
+  ruleDrafts: {},
+  openRule: (key) => set((st) => ruleState(openDraft(draftsOf(st), key))),
+  setRuleDraft: (patch) => set((st) => ruleState(editDraft(draftsOf(st), patch))),
+  dropRule: (key) => set((st) => ruleState(dropDraft(draftsOf(st), key))),
   slackFocus: null,
   setSlackFocus: (slackFocus) => set({ slackFocus }),
   openSlack: (selectedInitiative, slackFocus) => set({ ruleDraft: null, screen: "initiative", sub: "conversations", selectedInitiative, slackFocus, slackDraft: null, needsMeFocus: null }),

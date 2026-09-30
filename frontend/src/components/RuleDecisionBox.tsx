@@ -18,7 +18,7 @@ import "../styles/rule-box.css";
  *  FR-1) puts the record's Question and Recommendation above the options,
  *  clamped, with a link to it in Decisions; the Decisions tab leaves it off,
  *  since the body is already under the row there. */
-export function RuleDecisionBox({ initiative, decision: d, withRecord = false, draft, opener, afterRule, onClose }: {
+export function RuleDecisionBox({ initiative, decision: d, withRecord = false, draft, opener, afterRule, onClose, onCancel }: {
   initiative: string; decision: model.Decision; withRecord?: boolean;
   /** The chosen option and the words, kept by the caller (Home keeps them in
    *  the store so a width class change keeps them, responsive-home FR-5);
@@ -29,7 +29,11 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, d
   /** Where focus goes once the ruling is written and the opener has left
    *  with its row. */
   afterRule?: () => void;
+  /** Escape: the box closes, its draft kept by the caller (responsive-home
+   *  FR-9). */
   onClose: () => void;
+  /** Cancel: the box closes and its draft is discarded; onClose without it. */
+  onCancel?: () => void;
 }) {
   const { refresh, agents } = useBoard();
   const ruler = leadOf((agents?.groups ?? []).find((g) => g.id === initiative));
@@ -57,7 +61,7 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, d
   // record is its description.
   useEffect(() => { title.current?.focus(); }, []);
 
-  const close = () => { onClose(); opener?.current?.focus(); };
+  const close = (discard = false) => { (discard && onCancel ? onCancel : onClose)(); opener?.current?.focus(); };
 
   const rule = async () => {
     if (!ready) return;
@@ -110,7 +114,7 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, d
       {error && <div className="rb-error" role="alert">{error}</div>}
       <div className="rb-foot">
         <span className="rb-sign">signed {ruler}{forOwner} · commits one file</span>
-        <button className="ghost" onClick={close} disabled={busy}>Cancel</button>
+        <button className="ghost" onClick={() => close(true)} disabled={busy}>Cancel</button>
         <button className="primary" onClick={() => void rule()} disabled={!ready}>{busy ? "Ruling…" : "Rule"}</button>
       </div>
     </div>

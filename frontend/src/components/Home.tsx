@@ -22,12 +22,12 @@ import "../styles/home.css";
  *  nothing else: the tree is the same in every class, so crossing one
  *  unmounts nothing. Wide puts Needs me in a right column of its own. */
 export function Home() {
-  const { view, agents, widthClass, roomy, ruleDraft, openRule } = useBoard();
+  const { view, agents, widthClass, roomy, ruleDraft, dropRule } = useBoard();
   const home = useRef<HTMLDivElement>(null);
   const rows = view ? needsMeRows(view, agents) : [];
-  // A ruled record leaves the queue, and its box with it.
-  const gone = !!ruleDraft && !!view && !rows.some((r) => r.key === ruleDraft.key);
-  useEffect(() => { if (gone) openRule(null); }, [gone, openRule]);
+  // A ruled record leaves the queue, and its box and its draft with it.
+  const gone = !!ruleDraft && !!view && !rows.some((r) => r.key === ruleDraft.key) ? ruleDraft.key : null;
+  useEffect(() => { if (gone) dropRule(gone); }, [gone, dropRule]);
   useKeepScroll(home, widthClass, !!view);
   if (!view) return <div className="empty">Loading…</div>;
   return (
@@ -155,15 +155,17 @@ function DecisionRow({ row, decision: d }: { row: NeedsMeRow; decision: model.De
  *  closes; once the ruling lands the row is gone, and focus goes to the
  *  Needs me heading (FR-5). Which box is open and what is typed in it live
  *  in the store (ruleDraft), above the layout (responsive-home FR-5); one
- *  box is open at a time. */
+ *  box is open at a time, and each record keeps its words until Rule or
+ *  Cancel (FR-9): opening another row's Rule, Escape or this Rule again
+ *  closes the box and keeps them. */
 function RuleAction({ rowKey, initiative, decision }: { rowKey: string; initiative: string; decision: model.Decision }) {
-  const { ruleDraft, openRule, setRuleDraft } = useBoard();
+  const { ruleDraft, openRule, setRuleDraft, dropRule } = useBoard();
   const open = ruleDraft?.key === rowKey;
   const btn = useRef<HTMLButtonElement>(null);
   return (
     <span className="rb-anchor">
       <button ref={btn} className="act" aria-expanded={open} aria-label={`Rule ${initiative} ${decision.number}`} onClick={() => openRule(open ? null : rowKey)}>Rule</button>
-      {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord opener={btn} afterRule={focusNeedsMe} onClose={() => openRule(null)}
+      {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord opener={btn} afterRule={focusNeedsMe} onClose={() => openRule(null)} onCancel={() => dropRule(rowKey)}
         draft={{ chosen: ruleDraft.chosen, words: ruleDraft.words, set: setRuleDraft }} />}
     </span>
   );
