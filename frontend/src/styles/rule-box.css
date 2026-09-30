@@ -28,6 +28,10 @@
 .rb-body.empty { color: var(--fg-subtle); font-size: var(--font-size-md); line-height: var(--line-md); }
 .rb-body > :first-child { margin-top: 0; }
 .rb-body > :last-child { margin-bottom: 0; }
+/* initiative-header FR-7 (UI4): on a short record area the Question clamps
+   to three lines; a first block longer than that is cut at its third line
+   (Clamped's "over"), with "more" under it */
+.rb-body.clamp-first > :first-child { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
 .rb-section button.rb-more { justify-self: start; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--accent-fg); }
 .rb-record-foot { display: flex; gap: var(--space-3); font-size: var(--font-size-sm); line-height: var(--line-sm); }
 .rb-record-foot button.link, .rb-section button.rb-more { color: var(--accent-fg); }

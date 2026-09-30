@@ -51,7 +51,7 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, d
   const bodyId = useId();
   const ready = chosen !== "" && words.trim() !== "" && !busy;
   const widthClass = useBoard((s) => s.widthClass);
-  const place = useFitViewport(box, record, widthClass);
+  const { place, short } = useFitViewport(box, record, widthClass);
 
   // Focus and names: a box that shows a record opens on its title, and the
   // record is its description.
@@ -86,7 +86,7 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, d
         <span id={numId} className="rb-num">{initiative} {d.number}</span>
         <span ref={title} id={titleId} className="rb-title" tabIndex={-1}>{d.title}</span>
       </div>
-      {withRecord && <RecordBody ref={record} id={bodyId} initiative={initiative} decision={d} />}
+      {withRecord && <RecordBody ref={record} id={bodyId} initiative={initiative} decision={d} short={short} />}
       {options.length === 0 ? (
         <div className="rb-error">This record lists no options, so it cannot be ruled here. Add `options:` to the record.</div>
       ) : (
@@ -168,9 +168,17 @@ const GAP = 8;
  *  On Home the width class changes the place (responsive-home FR-2, FR-4):
  *  compact centres it over Home as a sheet; wide leaves it in the flow of
  *  the Needs me column, under its row, capped at the column's height. The
- *  box stays the same element in every class, so nothing typed is lost. */
-function useFitViewport(box: RefObject<HTMLDivElement | null>, record: RefObject<HTMLDivElement | null>, widthClass: WidthClass): CSSProperties | undefined {
+ *  box stays the same element in every class, so nothing typed is lost.
+ *  `short` is initiative-header FR-7 (UI4): the record area the box leaves
+ *  is shorter than the record with both sections at their clamp, so the
+ *  Question clamps to three lines and the Recommendation comes into view.
+ *  The record's height at both clamps is measured while not short and kept,
+ *  so the three-line Question does not undo the judgement. */
+function useFitViewport(box: RefObject<HTMLDivElement | null>, record: RefObject<HTMLDivElement | null>, widthClass: WidthClass): { place: CSSProperties | undefined; short: boolean } {
   const [place, setPlace] = useState<CSSProperties>();
+  const [short, setShort] = useState(false);
+  const shortNow = useRef(false);
+  const full = useRef(0);
   const opened = useRef(false);
   useLayoutEffect(() => {
     const el = box.current;
@@ -179,10 +187,20 @@ function useFitViewport(box: RefObject<HTMLDivElement | null>, record: RefObject
     const home = el.closest<HTMLElement>(".board-wrap .home");
     const column = el.closest<HTMLElement>(".home-needs");
     const same = (p: CSSProperties | undefined, q: CSSProperties) => !!p && (Object.keys(q) as (keyof CSSProperties)[]).every((k) => p[k] === q[k]) && Object.keys(p).length === Object.keys(q).length;
+    // The record area's room: the cap less what the rest of the box takes.
+    const judge = (maxHeight: number) => {
+      const r = record.current;
+      if (!r) return;
+      if (!shortNow.current) full.current = r.scrollHeight;
+      const room = maxHeight - (el.offsetHeight - r.clientHeight);
+      const s = room < full.current;
+      if (s !== shortNow.current) { shortNow.current = s; setShort(s); }
+    };
     const fit = () => {
       if (widthClass === "wide" && column) {
         const maxHeight = Math.max(0, column.clientHeight - GAP);
         setPlace((p) => (same(p, { maxHeight }) ? p : { maxHeight }));
+        judge(maxHeight);
         return;
       }
       const a = anchor.getBoundingClientRect();
@@ -191,6 +209,7 @@ function useFitViewport(box: RefObject<HTMLDivElement | null>, record: RefObject
       const r = record.current;
       const natural = el.offsetHeight + (r ? r.scrollHeight - r.clientHeight : 0);
       const h = Math.min(natural, maxHeight);
+      judge(maxHeight);
       if (widthClass === "compact" && home) {
         const w = home.parentElement!.getBoundingClientRect();
         const left = Math.max(GAP, Math.round(w.left + (w.width - el.offsetWidth) / 2));
@@ -220,14 +239,14 @@ function useFitViewport(box: RefObject<HTMLDivElement | null>, record: RefObject
     opened.current = true;
     return () => { ro.disconnect(); window.removeEventListener("resize", fit); window.removeEventListener("scroll", fit, true); };
   }, [box, record, widthClass]);
-  return place;
+  return { place, short };
 }
 
 /** The part of the record a ruling needs (ui-leftovers FR-1): its Question
  *  and its Recommendation, each clamped at a block boundary with "more".
  *  The Options are the radios below, so they are not repeated. The whole
  *  record is one link away, landing on it expanded in Decisions (FR-3). */
-const RecordBody = forwardRef<HTMLDivElement, { id: string; initiative: string; decision: model.Decision }>(function RecordBody({ id, initiative, decision: d }, ref) {
+const RecordBody = forwardRef<HTMLDivElement, { id: string; initiative: string; decision: model.Decision; short: boolean }>(function RecordBody({ id, initiative, decision: d, short }, ref) {
   const openDecision = useBoard((s) => s.openDecision);
   const { question, recommendation } = recordSections(d.body);
   return (
@@ -235,8 +254,8 @@ const RecordBody = forwardRef<HTMLDivElement, { id: string; initiative: string; 
       <div id={id} className="rb-sections">
         {question || recommendation ? (
           <>
-            <Clamped label="Question" md={question} />
-            <Clamped label="Recommendation" md={recommendation} />
+            <Clamped label="Question" md={question} lines={short ? SHORT_LINES : CLAMP_LINES} />
+            <Clamped label="Recommendation" md={recommendation} lines={CLAMP_LINES} />
           </>
         ) : (
           <div className="rb-body empty">This record has no Question or Recommendation section; read it in Decisions.</div>
@@ -251,6 +270,8 @@ const RecordBody = forwardRef<HTMLDivElement, { id: string; initiative: string; 
 
 /** Lines a section shows before "more". */
 const CLAMP_LINES = 6;
+/** Lines the Question shows when the record area is short (UI4). */
+const SHORT_LINES = 3;
 
 /** One section of the record, rendered, then cut after the last whole block
  *  that fits in CLAMP_LINES lines: a paragraph, a heading or a list item,
@@ -258,32 +279,36 @@ const CLAMP_LINES = 6;
  *  than the budget shows whole. The cut is on the rendered blocks, not on
  *  the source's lines: the whole section renders once to be measured, then
  *  only the blocks that fit are rendered. */
-function Clamped({ label, md }: { label: string; md: string | null }) {
+function Clamped({ label, md, lines }: { label: string; md: string | null; lines: number }) {
   const [all, setAll] = useState(false);
   const html = md ? (marked.parse(md) as string) : "";
-  // How many blocks fit, for this html; another html is measured again.
-  const [fit, setFit] = useState<{ html: string; keep: number; total: number } | null>(null);
-  const measured = fit?.html === html ? fit : null;
+  // How many blocks fit, for this html at this clamp; either changing is
+  // measured again. `over`: the short clamp (UI4) and a first block longer
+  // than it, which is then cut at its third line instead of shown whole.
+  const [fit, setFit] = useState<{ html: string; lines: number; keep: number; total: number; over: boolean } | null>(null);
+  const measured = fit?.html === html && fit.lines === lines ? fit : null;
   const body = useRef<HTMLDivElement>(null);
   const id = useId();
   useLayoutEffect(() => {
     const el = body.current;
     if (!el || all || measured) return;
     const blocks = blocksOf(el);
-    const budget = (parseFloat(getComputedStyle(el).lineHeight) || 20) * CLAMP_LINES;
+    const budget = (parseFloat(getComputedStyle(el).lineHeight) || 20) * lines;
     const top = el.getBoundingClientRect().top;
     let keep = 0;
     while (keep < blocks.length && (keep === 0 || blocks[keep].getBoundingClientRect().bottom - top <= budget)) keep++;
     while (keep > 1 && keep < blocks.length && /^H\d$/.test(blocks[keep - 1].tagName)) keep--;
-    setFit({ html, keep, total: blocks.length });
-  }, [html, all, measured]);
-  const cut = !all && !!measured && measured.keep < measured.total;
+    const over = lines < CLAMP_LINES && blocks.length > 0 && blocks[0].getBoundingClientRect().bottom - top > budget + 1;
+    setFit({ html, lines, keep, total: blocks.length, over });
+  }, [html, lines, all, measured]);
+  const over = !all && !!measured?.over;
+  const cut = !all && !!measured && (measured.keep < measured.total || over);
   const shown = cut ? firstBlocks(html, measured!.keep) : html;
   return (
     <section className="rb-section" aria-label={label}>
       <div className="rb-label">{label}</div>
       {md
-        ? <div id={id} ref={body} className="markdown dec-text rb-body" dangerouslySetInnerHTML={{ __html: shown }} />
+        ? <div id={id} ref={body} className={`markdown dec-text rb-body ${over ? "clamp-first" : ""}`} dangerouslySetInnerHTML={{ __html: shown }} />
         : <div className="rb-body empty">This record has no {label}.</div>}
       {md && (cut || all) && <button className="link rb-more" aria-expanded={all} aria-controls={id} onClick={() => setAll(!all)}>{all ? "less" : "more"}</button>}
     </section>
