@@ -107,3 +107,11 @@
 .home.wide .p-sig { flex-wrap: nowrap; }
 /* the Needs me column is narrow: a subject takes two lines before it is cut */
 .home.wide .ib-subject { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+/* Compact's signals (FR-10): one line, never wrapped; what does not fit is
+   hidden (data-off, set by OneLine in Home.tsx) and counted in "+N". */
+.home .p-sig.one-line { flex-wrap: nowrap; overflow: hidden; min-width: 0; }
+.home .p-sig.one-line > * { flex: none; }
+.home .p-sig.one-line > [data-off] { display: none; }
+.home .p-sig.one-line > .lz:first-child { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.lz.sig-more { background: var(--surface-raised); color: var(--fg-muted); }

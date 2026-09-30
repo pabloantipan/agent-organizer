@@ -23,3 +23,16 @@ export const roomyOf = (w: number) => w >= ROOMY_FROM && w < WIDE_FROM;
  *  compact class and expanded elsewhere. The class never writes the choice. */
 export const railCollapsedFor = (stored: string | null, cls: WidthClass) =>
   stored === "1" ? true : stored === "0" ? false : cls === "compact";
+
+/** Compact's signals on one line (FR-10): how many of the lozenges, in
+ *  order, fit `room` with `gap` between them. All when all fit; otherwise
+ *  as many as leave room for the "+N" lozenge (`more` wide) after them, and
+ *  never fewer than one, which the cell then cuts. */
+export function signalsThatFit(widths: number[], gap: number, room: number, more: number): number {
+  const total = widths.reduce((a, w) => a + w, 0) + gap * Math.max(0, widths.length - 1);
+  if (total <= room) return widths.length;
+  let used = more;
+  let n = 0;
+  while (n < widths.length && used + gap + widths[n] <= room) { used += gap + widths[n]; n++; }
+  return Math.max(1, n);
+}

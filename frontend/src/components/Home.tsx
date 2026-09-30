@@ -6,7 +6,7 @@ import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from ".
 import { uniq } from "../lib";
 import { HEALTH, messages } from "../lib/health";
 import { ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
-import type { WidthClass } from "../lib/width";
+import { signalsThatFit, type WidthClass } from "../lib/width";
 import { useBoard } from "../stores/board.store";
 import { nextDate, stageState } from "./InitiativeHeader";
 import { InitiativeDetail } from "./Initiatives";
@@ -218,7 +218,7 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
               <Phase stages={i.stages ?? []} />
               <span title={i.goal || undefined} className={`p-goal ${i.goal ? "" : "missing"}`}>{i.goal || "no goal yet"}</span>
               <MiniStepper stages={i.stages ?? []} compact={compact} />
-              <Signals i={i} rows={rows} cards={cards} waves={group?.waves ?? []} cell={group?.cell} missing={missingPersonas(group?.crew)} lead={leadOf(group)} />
+              <Signals i={i} rows={rows} cards={cards} waves={group?.waves ?? []} cell={group?.cell} missing={missingPersonas(group?.crew)} lead={leadOf(group)} compact={compact} />
               <NextDate next={next} />
               <button className="p-more ghost" onClick={() => setOpen({ ...open, [id]: !open[id] })} aria-expanded={!!open[id]} aria-label={detailsName(id)} title={detailsName(id)}>
                 {open[id] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -315,7 +315,7 @@ function MiniStepper({ stages, compact = false }: { stages: model.Stage[]; compa
   );
 }
 
-function Signals({ i, rows, cards, waves, cell, missing, lead }: { i: merge.BoardInitiative; rows: merge.BoardInitiative[]; cards: merge.BoardCard[]; waves: service.Wave[]; cell?: model.Cell | null; missing: string[]; lead: string }) {
+function Signals({ i, rows, cards, waves, cell, missing, lead, compact }: { i: merge.BoardInitiative; rows: merge.BoardInitiative[]; cards: merge.BoardCard[]; waves: service.Wave[]; cell?: model.Cell | null; missing: string[]; lead: string; compact: boolean }) {
   const waiting = waitingDecisions(i);
   const blocked = cards.filter((c) => c.status === "blocked").length;
   const now = cards.filter((c) => c.status === "now").length;
@@ -325,8 +325,9 @@ function Signals({ i, rows, cards, waves, cell, missing, lead }: { i: merge.Boar
   const problems = i.problems?.length ?? 0;
   const defining = cell?.state === "in_definition";
   const none = !waiting && !blocked && !now && !live && !running.length && !problems && !defining;
+  const Line = compact ? OneLine : AllSignals;
   return (
-    <span className="p-sig">
+    <Line>
       {waiting > 0 && <span className="lz waiting"><span className="num">{waiting}</span> waiting · {signalOwners(i, lead).join(", ")}</span>}
       {blocked > 0 && <span className="lz blocked"><span className="num">{blocked}</span> blocked</span>}
       {now > 0 && <span className="lz now"><span className="num">{now}</span> now</span>}
@@ -335,6 +336,50 @@ function Signals({ i, rows, cards, waves, cell, missing, lead }: { i: merge.Boar
       <CellStateLz cell={cell} missing={missing} label="cell in definition" />
       {problems > 0 && <span className="lz warning"><span className="num">{problems}</span> problem{problems === 1 ? "" : "s"}</span>}
       {none && <span className="p-quiet" title="no signals">—</span>}
+    </Line>
+  );
+}
+
+function AllSignals({ children }: { children: React.ReactNode }) {
+  return <span className="p-sig">{children}</span>;
+}
+
+/** Compact's signals (FR-10): one line, never wrapped. The lozenges that do
+ *  not fit are hidden and counted in a "+N"; they are named in the cell's
+ *  hover and in its accessible text. Measured after every render, since a
+ *  signal changes with the 10 s agents feed and the room with the rail;
+ *  state is set only when what fits changes. */
+function OneLine({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [cut, setCut] = useState<{ n: number; rest: string[] } | null>(null);
+  const measure = () => {
+    const el = ref.current;
+    if (!el) return;
+    const items = Array.from(el.children).filter((c): c is HTMLElement => c instanceof HTMLElement && !c.classList.contains("sig-more") && !c.classList.contains("sr-only"));
+    // Hidden ones are shown for the measure, inside this frame.
+    for (const c of items) c.style.display = "inline-flex";
+    const more = el.querySelector<HTMLElement>(".sig-more");
+    const gap = parseFloat(getComputedStyle(el).columnGap) || 0;
+    const n = signalsThatFit(items.map((c) => Math.max(c.getBoundingClientRect().width, c.scrollWidth)), gap, el.clientWidth, Math.max(more?.getBoundingClientRect().width ?? 0, 28));
+    const rest = items.slice(n).map((c) => (c.textContent ?? "").replace(/\s+/g, " ").trim());
+    items.forEach((c, k) => { c.style.display = ""; if (k >= n) c.dataset.off = "1"; else delete c.dataset.off; });
+    setCut((p) => (p && p.n === n && p.rest.join("|") === rest.join("|") ? p : { n, rest }));
+  };
+  useLayoutEffect(measure);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => measure());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const rest = cut?.rest ?? [];
+  const also = rest.length > 0 ? `and ${rest.length} more: ${rest.join(", ")}` : undefined;
+  return (
+    <span ref={ref} className="p-sig one-line" title={also}>
+      {children}
+      {rest.length > 0 && <span className="lz sig-more" aria-hidden="true">+{rest.length}</span>}
+      {also && <span className="sr-only">{also}</span>}
     </span>
   );
 }

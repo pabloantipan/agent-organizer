@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { railCollapsedFor, roomyOf, widthClassOf } from "./width";
+import { railCollapsedFor, roomyOf, signalsThatFit, widthClassOf } from "./width";
 
 describe("widthClassOf", () => {
   it("puts each boundary in the class above it", () => {
@@ -36,5 +36,22 @@ describe("railCollapsedFor", () => {
       expect(railCollapsedFor("0", cls)).toBe(false);
       expect(railCollapsedFor("1", cls)).toBe(true);
     }
+  });
+});
+
+describe("signalsThatFit", () => {
+  it("shows every signal that fits on the line", () => {
+    expect(signalsThatFit([60, 50, 40], 4, 158, 24)).toBe(3);
+    expect(signalsThatFit([], 4, 10, 24)).toBe(0);
+  });
+
+  it("leaves room for the +N after the ones it shows", () => {
+    // "+N" (24) + 4 + 60 + 4 + 50 = 142: two fit in 142, one in 140
+    expect(signalsThatFit([60, 50, 40], 4, 140, 24)).toBe(1);
+    expect(signalsThatFit([60, 50, 40], 4, 142, 24)).toBe(2);
+  });
+
+  it("keeps one signal when not even one fits with the +N", () => {
+    expect(signalsThatFit([200, 50], 4, 100, 24)).toBe(1);
   });
 });
