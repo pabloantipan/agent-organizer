@@ -11,7 +11,7 @@ boundary: ["frontend/src/components/InitiativeHeader.tsx", "frontend/src/compone
 spec: "docs/specs/initiative-header.md (FR-1 to FR-6, FR-8, FR-9); the design: docs/ux/specs/initiative-header.md (Aglaea, 6c93a49)"
 gate: "docs/specs/initiative-header.md Acceptance, rows G1, G2, G3, G4, G5, G6, G7, G8, G10, G11; the Gate section below"
 stage: twenty-at-a-glance
-seat: hdr-fold3
+seat: hdr-fold4
 ui_review: true
 ---
 
