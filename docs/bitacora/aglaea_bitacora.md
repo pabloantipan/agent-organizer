@@ -31,8 +31,9 @@ top; one dated line per session below.
 - **Initiative header** (thread 01M3R14N3KAYTGQFH09AMBK73W): design spec
   `docs/ux/specs/initiative-header.md` (proposed) with ui-leftovers UI2–UI7
   triaged at its end.
-- **Next:** when header-fold lands, rank its leftovers with responsive-home-2's
-  R1–R5 (memory, open findings) into one list for the FSE.
+- **Ranked** header-fold + responsive-home-2 leftovers for the FSE:
+  `docs/ux/reviews/2026-09-30-rank-header-fold-responsive-2.md`; DS amended.
+- **Next:** nothing asked; wait for mail.
 
 ## Log
 
@@ -50,3 +51,4 @@ top; one dated line per session below.
 - 2026-09-30 — resumed after an exit; the FSE's message was drained into context at SessionStart with no turn, and I only saw it when Pablo asked. Diagnosed from hook.log, posted to hephaistos (thread 01M3RGGD7Q4N0TPW3FAFZXQTHY).
 - 2026-09-30 — hephaistos confirmed all three wake defects; carded in agent-slack as resume-wake, built with a fixture per defect once Pablo says go.
 - 2026-09-30 — resume-wake fixed and installed (agent-slack api 8272a91). My seat still runs the old watcher until restarted.
+- 2026-09-30 — ranked header-fold's and responsive-home-2's leftovers (15 rows); DS: Widths from 2200, targets, focus ring, "now".

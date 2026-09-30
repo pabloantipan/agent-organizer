@@ -119,6 +119,8 @@ no `zero` or stylistic sets).
   8 cards and object rows, 12 columns, panels and dialogs, full for dots and
   pills. A focus ring adds 2 to the element's radius.
 - **Controls**: 24 / 28 (default) / 32 high. Icons 16, chevrons 12, stroke 1.5.
+  Every control's target is at least 24×24 px, icon-only ones included (the
+  rail toggle, a divider's icon buttons); WCAG 2.5.8.
 
 ## Elevation and motion
 
@@ -139,7 +141,9 @@ no `zero` or stylistic sets).
 - The legacy names at the bottom of `tokens.css` (`--panel`, `--muted`, `--dim`,
   `--r` …) are aliases for migration. New code uses the role names; a component
   touched by the redesign drops its aliases.
-- `:focus-visible` is a 2px `--focus-ring` outline, never removed.
+- `:focus-visible` is a 2px `--focus-ring` outline, never removed. On an
+  element already drawn in the accent (a selected tile or row), the ring sits
+  at a 2px offset so it reads as a second edge, not as the same border.
 
 ## Components
 
@@ -197,7 +201,12 @@ hollow fuchsia waiting, solid indigo ruled. Every mark has a hover title.
 ### Stage stepper
 Only for three or more stages. Each stage: number and state, title, exit in
 one line. States: done (ruled), current (lilac, tinted), planned (outline).
-Current is also named in words. *Carbon progress indicator.*
+Current is also named in words, and the word is **now** wherever a stage is
+drawn (stepper, header, Roadmap rows), never "current" in one place and "now"
+in another. A run of stages of one phase takes width by its number of
+stages, so a one-stage run never takes half the strip. Every tile and the
+folded bar's stage are buttons and look it: `cursor: pointer`, the hover
+surface, and a chevron on hover and focus. *Carbon progress indicator.*
 
 ### Decision record
 Number (mono), title, status lozenge (waiting / ruled / superseded /
@@ -280,15 +289,23 @@ keeps their place.
 ### Widths
 Deltagos is used on a 14-inch laptop (1512 wide at full screen, down to the
 window's 1024×640 minimum) and on a 3440×1440 ultrawide (0059). Three
-classes, set by the **window** width:
+classes, set by the **window** width. What gives way comes back as soon as
+the row has room for it again: a class hides a column because it does not
+fit, never because of the class name alone.
 
 | class | window | layout rules |
 |---|---|---|
-| **compact** | < 1440 | the rail starts as the strip (the lead's own choice wins and is remembered); rows are one line, and what gives way goes into the row's detail, hover and accessible name, never away; signals never wrap (a "+N" instead); a box over content is a sheet with a scrim, capped at the window |
-| **regular** | 1440–1919 | the rail expanded; content capped at 1,480 px |
-| **wide** | ≥ 1920 | two regions where a screen has a list and a queue (Home: the list, then Needs me on the right, in its own scroll); text held to about 90 characters a line; nothing stretches past about 2,200 px; content left-aligned from the rail (0062), so nothing moves when the window is resized |
+| **compact** | < 1440 | the rail starts as the strip (the lead's own choice wins and is remembered); rows are one line, and what gives way goes into the row's detail, hover and accessible name, never away; the goal column stays while it can show about 30 characters; a box over content is a sheet with a scrim, capped at the window |
+| **regular** | 1440–2199 | the rail expanded; content capped at 1,480 px; a box over other rows' controls has a scrim over them |
+| **wide** | ≥ 2200 | two regions where a screen has a list and a queue (Home: the list, then Needs me on the right, in its own scroll); text held to about 90 characters a line; nothing stretches past about 2,200 px; content left-aligned from the rail (0062), so nothing moves when the window is resized |
 
-Every screen is checked at 1024×640, 1512×945 and 3440×1440. Tab order
+In **every** class, signals never wrap: one line and a "+N", the rest in the
+hover and the accessible name. A lozenge that cannot fit is cut with an
+ellipsis on its text, never clipped mid-word by its cell. Wide starts at
+2200, not 1920: at 1920 with the rail expanded the list keeps about 1,150 px
+beside Needs me and goals fall to 22 characters (responsive-home-2, R1).
+
+Every screen is checked at 1024×640, 1512×945, 1920×1080 and 3440×1440. Tab order
 follows priority, not position: in wide, Needs me before the list.
 *responsive-home, amendment 1.*
 

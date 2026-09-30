@@ -129,6 +129,12 @@ details in `working-on/done/responsive-home-2.md` ## UI review and
 - R4 the regular rule box covers other rows' verbs.
 - R5 the rail toggle is 20 px (WCAG 2.5.8 wants 24).
 
+Ranked 2026-09-30 (`reviews/2026-09-30-rank-header-fold-responsive-2.md`):
+header-fold hf-U1–U10 and responsive-home-2 R1–R5 into 15 rows + 1 fixture
+gap; none needs Pablo. Widths amended: wide from 2200 (was 1920), signals
+never wrap in any class, a column gives way only when it doesn't fit, scrim
+in regular; 24 px targets; focus ring offset on accent; stage word "now".
+
 ## Open questions
 
 - none open.
