@@ -1,10 +1,10 @@
 ---
 title: The UI reviews' leftovers in one pass - the rule box, focus and names, one accent, blockers said once
-status: now
+status: done
 repos: [organizer]
 branch: main
 updated: 2026-09-29
-next: "review: ui-leftovers, branch ui-leftovers, gate met, cdb3934 ae17dcd 2c7110c 8457a9a 28366f9 e35361a 20d149c d44f5bd"
+next: "done: merged 508d9a8; UI1–UI7 and the reviews' uncovered notes are the FSE's"
 depends_on: []
 boundary: ["frontend/src/components/Home.tsx, RuleDecisionBox.tsx, Conversation.tsx, SlackView.tsx, AgentsView.tsx, Crew.tsx, Rail.tsx, CardDrawer.tsx", "frontend/src/components/DecisionsView.tsx (focus landing only)", "frontend/src/stores/board.store.ts (focus targets only)", "frontend/src/lib/ and its tests", "CSS", "testdata/ and scripts/fixture-home.sh (FR-12 only)"]
 spec: "docs/specs/ui-leftovers.md (FR-1 to FR-12); the rows: docs/ux/reviews/2026-09-29-triage-ui-leftovers.md; the rules: docs/design-system.md, Focus and names, Disabled actions (ec3ecbb)"
@@ -35,6 +35,8 @@ FR-1 to FR-12 of `docs/specs/ui-leftovers.md`: Aglaea's triage rows 1–8,
 - 2026-09-29 G3: `.wt-notes/left-build/g3-dom.txt`, `.wt-notes/left-build/g3-conversations-*.png`: Answer on Home → Conversations with "w-queued: which repo…" targeted; row verbs class `tiny-btn` (no accent), People `aria-pressed` true on #2f1b55; init-ready without a token: one reason line, header "0 threads · as pablo · read only", composer false, "token" once
 - 2026-09-29 G4: `.wt-notes/left-build/g4-dom.txt`, `.wt-notes/left-build/g4-*.png`: Crew header, lozenge and collapsed-rail hover read "designer_diego has no persona file; the drafting session writes it, or write it by the persona-agents skill", "waits on its first launch" nowhere on Agents; row "no owner · raised …" and signal "2 waiting · pablo, no owner" (a temp record 0009 in the fixture copy only); init-b card back hint without "Write about this card"
 - 2026-09-29 G5: `XDG_DATA_HOME=$(mktemp -d) make test` exit 0, 13 Go packages ok, vitest 33 passed (`.wt-notes/left-build/g5-make-test.txt`); `npm run build` exit 0 (`.wt-notes/left-build/g5-npm-build.txt`); G18 grep on `main...ui-leftovers` empty (`.wt-notes/left-build/g5-g18-grep.txt`); `wails build` exit 0
+
+- 2026-09-29 sup20: merged to main as 508d9a8 after both passes (code 22:53, UI 23:06); `make test` and `npm run build` green on main
 
 ## Next
 1. left-review and left-ui review branch ui-leftovers
