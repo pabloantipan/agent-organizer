@@ -1,10 +1,10 @@
 ---
 title: The rule box keeps focus, shows the recommendation on short records, and names its initiative
-status: now
+status: done
 repos: [organizer]
 branch: main
 updated: 2026-09-30
-next: "review: rule-box-finish, branch rule-box-finish, gate met, efa7a34 b6ae943 22e7308 9f1c0c1 3828425"
+next: "merged 421dd9b (sup23); both reviews pass"
 depends_on: ["responsive-home"]
 boundary: ["frontend/src/components/RuleDecisionBox.tsx", "frontend/src/styles/rule-box.css", "frontend/src/components/DecisionsView.tsx (ownerPhrase only)", "frontend/src/components/Conversation.tsx (the People toggle label only)", "frontend/src/lib/ tests"]
 spec: "docs/specs/initiative-header.md (FR-7); the design: docs/ux/specs/initiative-header.md (Aglaea, 6c93a49)"
