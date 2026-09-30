@@ -44,11 +44,6 @@ export function RoadmapView() {
   return (
     <div>
       {modes}
-      <div className="board-head">
-        <h1>{selected.id}</h1>
-        <span className="meta">{selected.title}</span>
-        {selected.client && <span className="badge client">{selected.client}</span>}
-      </div>
       <Roadmap initiative={selected} cards={cards} collapsible={false} defaultOpen />
     </div>
   );

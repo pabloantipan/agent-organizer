@@ -237,6 +237,10 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .subtabs button:hover { color: var(--fg); background: transparent; border: 0; }
 .subtabs button.on { color: var(--fg); box-shadow: inset 0 -2px 0 var(--accent); }
 
+/* Sub-views without a title row (initiative-header FR-5): what is not the id
+   stays on one toolbar line. */
+.slack-tools { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); flex: none; min-width: 0; }
+
 /* Roadmap's Cards | Calendar switch */
 .seg { display: inline-flex; gap: var(--space-0-5); padding: var(--space-0-5); border-radius: var(--radius-sm); background: var(--bg-sunken); margin-bottom: var(--space-3); }
 .seg button { min-height: var(--control-sm); background: transparent; border-color: transparent; color: var(--fg-muted); padding: 0 var(--space-3); font-size: var(--font-size-sm); }

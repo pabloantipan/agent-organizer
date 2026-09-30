@@ -79,7 +79,7 @@ export function DecisionsView() {
 
   const head = (
     <div className="board-head">
-      <h1>{selectedInitiative ?? "All initiatives"}</h1>
+      {!selectedInitiative && <h1>All initiatives</h1>}
       <span className="meta">decision records in working-on/decisions/ · anyone may rule a waiting record here, and it notes who did</span>
     </div>
   );

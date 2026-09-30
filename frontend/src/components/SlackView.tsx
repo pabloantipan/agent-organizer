@@ -65,7 +65,6 @@ export function SlackView() {
   if (!g) {
     return (
       <div>
-        <div className="board-head"><h1>{selectedInitiative}</h1></div>
         <div className="empty">No mailbox: this initiative has no agents/cell.json, so its agents cannot send or receive messages.</div>
       </div>
     );
@@ -78,10 +77,9 @@ export function SlackView() {
   const readOnly = readOnlyOf(board, g.id);
   return (
     <div className="slack">
-      <div className="board-head">
-        <h1>{g.id}</h1>
-        <span className="meta">{g.title}</span>
-        {g.client && <span className="badge client">{g.client}</span>}
+      {/* No title row: the header above names the initiative (initiative-header
+          FR-5); what is not the id stays on this toolbar line. */}
+      <div className="slack-tools">
         <span className="spacer" />
         {slackFocus && <span className="badge persona focus">with {slackFocus} <button className="rail-icon" onClick={() => setSlackFocus(null)} title="back to the channel"><X size={11} /></button></span>}
         <button className={`tiny-btn ${deaf > 0 ? "hot" : ""}`} aria-pressed={people} aria-label={peopleLabel({ seats: seats.length, live, capped, deaf })} onClick={togglePeople} title={people ? "hide people" : "show people"}>

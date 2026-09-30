@@ -35,7 +35,7 @@ export function AgentsView() {
   return (
     <div className="agents-view">
       <div className="board-head">
-        <h1>{selectedInitiative ? selectedInitiative : "Agents"}</h1>
+        {!selectedInitiative && <h1>Agents</h1>}
         <span className="meta">
           {selectedInitiative ? "" : `${totals.n} agents, ${totals.live} live, ${totals.working} working · `}
           sampled {since(view.sampled_at)} · every {REFRESH_MS / 1000}s
