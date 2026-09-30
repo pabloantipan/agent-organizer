@@ -41,9 +41,9 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
-        run: scripts/sign-and-notarize.sh build/bin/organizer.app
+        run: scripts/sign-and-notarize.sh build/bin/Deltagos.app
       - name: Package DMG
-        run: scripts/make-dmg.sh build/bin/organizer.app "build/bin/organizer-${GITHUB_REF_NAME:-dev}.dmg"
+        run: scripts/make-dmg.sh build/bin/Deltagos.app "build/bin/Deltagos-${GITHUB_REF_NAME:-dev}.dmg"
       - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
