@@ -104,4 +104,4 @@
 /* FR-8: compact's sheet has a scrim over what it covers; the rows' Rule
    verbs are behind it, so a second box cannot open under the first. Just
    under the box, which is fixed at z-index 20. */
-.rb-scrim { position: fixed; inset: 0; z-index: 19; background: rgba(6, 4, 12, 0.7); } /* the modal backdrop's (global.css); no scrim token yet */
+.rb-scrim { position: fixed; inset: 0; z-index: 19; background: var(--bg-sunken); opacity: 0.7; } /* no scrim token yet: the sunken ground, dimmed like the modal backdrop */
