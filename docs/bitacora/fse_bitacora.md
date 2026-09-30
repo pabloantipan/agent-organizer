@@ -38,7 +38,11 @@ holds for rules learned and the supervisor recipe.
   ui_review, forecast 40–70 min). Aglaea's tall-record condition folded in
   (0631f00). Both cards pass `run --print` (task prompts are the
   supervisor's).
-- **Next action:** when 0069 is ruled, record it on both cards (next:
+- **0069 ruled** (pablo, "Ok", 549217f); recorded on both cards (eded9e4).
+  sup25 NOT started: the token add, prelude and prompt were refused by the
+  permission classifier, and so was closing hook thread 01M3SCC44ZBTNZBTSZM98V18G3.
+  Waiting on Pablo to allow it.
+- **Next action (was):** when 0069 is ruled, record it on both cards (next:
   launchable) and start sup25 for both cards (recipe in the hand-off
   below; next number sup25). If sent back or amended, amend both specs.
 - **Also waiting on Pablo:** crew-and-context (rule a live camp ask from
