@@ -24,7 +24,7 @@ export function Home() {
   return (
     <div className="home">
       <section className="home-sec">
-        <h2 className="sec-title">Needs me <span className="num sec-count">{rows.length}</span><span className="sec-sub">everything waiting on you, oldest first</span></h2>
+        <h2 id={NEEDS_ME_HEADING} tabIndex={-1} className="sec-title">Needs me <span className="num sec-count">{rows.length}</span><span className="sec-sub">everything waiting on you, oldest first</span></h2>
         {rows.length === 0 ? (
           <div className="panel empty-state">
             <div>Nothing waits on you.</div>
@@ -139,15 +139,24 @@ function DecisionRow({ row, decision: d }: { row: NeedsMeRow; decision: model.De
   );
 }
 
+/** Rule on a Needs me row: a disclosure, so it stays marked while its box
+ *  is open (aria-expanded and --surface-selected, ui-leftovers FR-4), and
+ *  its name carries the record (FR-6). Focus comes back to it when the box
+ *  closes; once the ruling lands the row is gone, and focus goes to the
+ *  Needs me heading (FR-5). */
 function RuleAction({ initiative, decision }: { initiative: string; decision: model.Decision }) {
   const [open, setOpen] = useState(false);
+  const btn = useRef<HTMLButtonElement>(null);
   return (
     <span className="rb-anchor">
-      <button className="act" aria-expanded={open} onClick={() => setOpen(!open)}>Rule</button>
-      {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord onClose={() => setOpen(false)} />}
+      <button ref={btn} className="act" aria-expanded={open} aria-label={`Rule ${initiative} ${decision.number}`} onClick={() => setOpen(!open)}>Rule</button>
+      {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord opener={btn} afterRule={focusNeedsMe} onClose={() => setOpen(false)} />}
     </span>
   );
 }
+
+const NEEDS_ME_HEADING = "needs-me-heading";
+const focusNeedsMe = () => document.getElementById(NEEDS_ME_HEADING)?.focus();
 
 /** The initiatives by priority, one row each (H3): its state and phase
  *  (FR-6 of twenty-at-a-glance), goal or "no goal yet", a compact stage

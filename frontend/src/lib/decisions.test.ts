@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { merge, model } from "../../wailsjs/go/models";
-import { waitingDecisions, waitingOwners } from "./decisions";
+import { recordSections, waitingDecisions, waitingOwners } from "./decisions";
 
 const initiative = (...decisions: Partial<model.Decision>[]) => ({ decisions }) as unknown as merge.BoardInitiative;
 const rec = (number: string, owner: string, raised: string, status = "proposed") => ({ number, owner, raised, status });
@@ -37,5 +37,27 @@ describe("waitingOwners", () => {
   it("is empty with nothing waiting", () => {
     expect(waitingOwners(initiative())).toEqual([]);
     expect(waitingOwners({ decisions: undefined } as unknown as merge.BoardInitiative)).toEqual([]);
+  });
+});
+
+describe("recordSections", () => {
+  const body = [
+    "## Question", "", "Is this the cell?", "", "### Seats drafted", "", "- **po_rosa**: why",
+    "## Options", "", "- **accept**",
+    "## Recommendation", "", "Accept.",
+    "## Ruling", "",
+  ].join("\n");
+
+  it("takes the Question with its sub-headings and the Recommendation, not the Options", () => {
+    expect(recordSections(body)).toEqual({ question: "Is this the cell?\n\n### Seats drafted\n\n- **po_rosa**: why", recommendation: "Accept." });
+  });
+
+  it("gives null for a section the record lacks or leaves empty", () => {
+    expect(recordSections("## Question\n\nWhy?\n\n## Recommendation\n\n")).toEqual({ question: "Why?", recommendation: null });
+    expect(recordSections("")).toEqual({ question: null, recommendation: null });
+  });
+
+  it("ignores a heading inside a code fence", () => {
+    expect(recordSections("## Question\n\n```\n## Recommendation\n```\n").question).toBe("```\n## Recommendation\n```");
   });
 });

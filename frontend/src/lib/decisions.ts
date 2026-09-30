@@ -20,3 +20,30 @@ export function waitingOwners(i: Waiting): string[] {
   }
   return owners;
 }
+
+/** The two sections the rule box shows (ui-leftovers FR-1): the record's
+ *  `## Question` and `## Recommendation`, each without its heading; `##
+ *  Options` is left out, since the radios carry it. A section the record
+ *  lacks is null. Headings match case-insensitively; a section runs to the
+ *  next `##` heading, `###` and deeper stay inside it. */
+export function recordSections(body: string | undefined): { question: string | null; recommendation: string | null } {
+  const found: Record<string, string> = {};
+  let name: string | null = null;
+  let lines: string[] = [];
+  let fence = false;
+  const close = () => { if (name && !(name in found)) found[name] = lines.join("\n").trim(); };
+  for (const line of (body ?? "").split("\n")) {
+    if (/^\s*(```|~~~)/.test(line)) fence = !fence;
+    const h = fence ? null : /^##\s+(.+?)\s*#*\s*$/.exec(line);
+    if (h) {
+      close();
+      name = h[1].toLowerCase();
+      lines = [];
+      continue;
+    }
+    lines.push(line);
+  }
+  close();
+  const pick = (k: string) => (found[k] ? found[k] : null);
+  return { question: pick("question"), recommendation: pick("recommendation") };
+}

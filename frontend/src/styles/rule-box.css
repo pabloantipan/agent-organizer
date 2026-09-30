@@ -4,27 +4,34 @@
 .rb-anchor { position: relative; display: inline-flex; }
 .rb {
   position: absolute; top: calc(100% + var(--space-1)); right: 0; z-index: 20;
-  width: 400px; max-width: calc(100vw - var(--space-8)); display: grid; gap: var(--space-3); padding: var(--space-4);
+  width: 400px; max-width: calc(100vw - var(--space-8)); display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4);
   background: var(--surface-overlay); border-radius: var(--radius-lg); box-shadow: var(--shadow-overlay);
-  text-align: left; white-space: normal;
+  text-align: left; white-space: normal; box-sizing: border-box;
 }
+/* ui-leftovers FR-2: the box is placed fixed and capped at the viewport
+   below the top bar (useFitViewport); only the record scrolls, so the
+   options, the words and the buttons never leave the box. */
+.rb > * { flex: none; }
 .rb.with-record { width: 460px; }
 .rb-head { display: flex; gap: var(--space-2); align-items: baseline; min-width: 0; }
 .rb-num { font-family: var(--mono); font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); font-variant-numeric: tabular-nums; }
 .rb-title { font-size: var(--font-size-lg); line-height: var(--line-lg); font-weight: var(--weight-semibold); color: var(--fg); }
-/* the record (lead-side-fixes FR-1): its body clamped to about eight lines
-   of --line-md, the whole of it scrolls inside the box when expanded */
-.rb-record { display: grid; gap: var(--space-1); min-width: 0; }
-.rb .rb-body {
-  margin: 0; max-height: calc(var(--line-md) * 8); overflow: hidden; overflow-wrap: anywhere;
-  color: var(--fg-muted);
-}
-.rb .rb-body.all { max-height: 50vh; overflow-y: auto; }
+.rb-title:focus { outline: none; }
+.rb-title:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
+/* the record (ui-leftovers FR-1): Question and Recommendation, each cut at a
+   block boundary after six lines of --line-md (Clamped); the record area
+   takes what the controls leave and scrolls */
+.rb .rb-record { flex: 0 1 auto; min-height: 0; overflow-y: auto; display: grid; gap: var(--space-2); align-content: start; }
+.rb-sections { display: grid; gap: var(--space-3); min-width: 0; }
+.rb-section { display: grid; gap: var(--space-1); min-width: 0; }
+.rb .rb-body { margin: 0; overflow-wrap: anywhere; color: var(--fg-muted); }
 .rb-body.empty { color: var(--fg-subtle); font-size: var(--font-size-md); line-height: var(--line-md); }
 .rb-body > :first-child { margin-top: 0; }
+.rb-body > :last-child { margin-bottom: 0; }
+.rb-section button.rb-more { justify-self: start; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--accent-fg); }
 .rb-record-foot { display: flex; gap: var(--space-3); font-size: var(--font-size-sm); line-height: var(--line-sm); }
-.rb-record-foot button.link { color: var(--accent-fg); }
-.rb-record-foot button.link:hover { text-decoration: underline; }
+.rb-record-foot button.link, .rb-section button.rb-more { color: var(--accent-fg); }
+.rb-record-foot button.link:hover, .rb-section button.rb-more:hover { text-decoration: underline; }
 .rb-label {
   font-size: var(--font-size-xs); line-height: var(--line-xs); letter-spacing: var(--tracking-label);
   text-transform: uppercase; color: var(--fg-subtle); padding: 0;
@@ -72,3 +79,10 @@
 .rb-sign { flex: 1; min-width: 0; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-subtle); }
 .rb-foot button { min-height: var(--control-md); font-size: var(--font-size-md); }
 @media (prefers-reduced-motion: reduce) { .rb-option span { transition: none; } }
+/* a record's sub-headings (a roster record's "Seats drafted") read as
+   labels inside a section, so a seat line fits under the clamp */
+.rb .rb-body h3, .rb .rb-body h4 { font-size: var(--font-size-md); line-height: var(--line-md); font-weight: var(--weight-semibold); color: var(--fg); margin: var(--space-2) 0 0; }
+.rb .rb-body p, .rb .rb-body ul, .rb .rb-body ol { margin: 0 0 var(--space-1); }
+/* at the minimum window the words take three lines, leaving the record
+   more of the room (ui-leftovers FR-2) */
+@media (max-height: 720px) { .rb-words textarea { min-height: 64px; } }
