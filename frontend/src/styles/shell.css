@@ -174,7 +174,7 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .ihead-nochip { flex: none; font-size: var(--font-size-sm); color: var(--fg-subtle); }
 .ihead-target { flex: none; font-family: var(--mono); font-size: var(--font-size-sm); color: var(--fg-muted); white-space: nowrap; }
 .ihead-target b { color: var(--fg); font-weight: var(--weight-medium); }
-.ihead-goal-line { flex: 1 1 0; min-width: 0; max-width: 90ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--font-size-md); color: var(--fg-muted); }
+.ihead-goal-line { flex: 1 1 0; min-width: 0; max-width: 72ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--font-size-md); color: var(--fg-muted); }
 .ihead-goal-line.missing { color: var(--fg-subtle); font-style: italic; }
 .ihead-bar .spacer { flex: 0 1 0; }
 .ihead-details { margin-left: auto; }
@@ -190,8 +190,9 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .ihead-open { display: grid; gap: var(--space-3); padding-bottom: var(--space-3); }
 .ihead-cols { display: grid; gap: var(--space-1-5); }
 .ihead-col { display: grid; gap: var(--space-1-5); align-content: start; min-width: 0; }
-.ihead.wide .ihead-cols { grid-template-columns: repeat(2, minmax(0, 90ch)); column-gap: var(--space-8); }
-.ihead.wide .ihead-goal, .ihead.wide .ihead-measure, .ihead.wide .ihead-scope { max-width: 90ch; }
+/* 72ch of the header's text is about 90 of its characters: ch is the "0",
+   wider than Manrope's average letter. */
+.ihead.wide .ihead-cols { grid-template-columns: repeat(2, minmax(0, 72ch)); column-gap: var(--space-8); }
 .ihead-goal { font-size: var(--font-size-lg); line-height: var(--line-lg); color: var(--fg); max-width: 72ch; }
 .ihead-goal.missing { color: var(--fg-subtle); font-style: italic; }
 .ihead-measure { font-size: var(--font-size-md); line-height: var(--line-md); color: var(--fg-muted); max-width: 72ch; }
