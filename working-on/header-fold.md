@@ -4,13 +4,13 @@ status: now
 repos: [organizer]
 branch: main
 updated: 2026-09-30
-next: "review: header-fold, branch header-fold, gate G1-G7 and G11 met, G8 for a reader (shots at .wt-notes/hdr-fold/g8-*.png), G10 open (FR-9 mark not built: this session's permission check refused amendment 1's Go change; patch at .wt-notes/hdr-fold/fr9-charter-modified.patch), 5ad068c 0791802 3e3dc85 82c8291 6808257 ee1cbc3 704090f b0e64cc 0037a01 a510609"
+next: "build: hdr-fold2 (continuing hdr-fold, launched with amendment 1 in its prompt) applies FR-9's Go fact and proves G10; G8 reader running"
 depends_on: ["responsive-home"]
 boundary: ["frontend/src/components/InitiativeHeader.tsx", "frontend/src/components/RoadmapView.tsx and Roadmap.tsx (the expanded stage row only)", "frontend/src/components/SlackView.tsx and Conversation.tsx (the title row, the timeline height, Answer focus)", "frontend/src/components/AgentsView.tsx and DecisionsView.tsx (the title row only)", "frontend/src/stores/board.store.ts (fold state; landings fold; stageFocus)", "frontend/src/styles/shell.css and header CSS", "frontend/src/lib/ and its tests", "amendment 1 (FR-9 only): internal/scan/git.go, the initiative assembly in internal/scan (one call), internal/model/model.go (Initiative.charter_modified), frontend/wailsjs (generated), a scan test"]
 spec: "docs/specs/initiative-header.md (FR-1 to FR-6, FR-8, FR-9); the design: docs/ux/specs/initiative-header.md (Aglaea, 6c93a49)"
 gate: "docs/specs/initiative-header.md Acceptance, rows G1, G2, G3, G4, G5, G6, G7, G8, G10, G11; the Gate section below"
 stage: twenty-at-a-glance
-seat: hdr-fold
+seat: hdr-fold2
 ui_review: true
 ---
 
