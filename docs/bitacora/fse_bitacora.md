@@ -4,6 +4,19 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## OPEN — 2026-09-30, transversal roles in Deltagos
+
+- Asked by Pablo through Hephaistos, thread 01M3SBV952KNT4XMBTXMQHZDFC: show
+  Hephaistos, Aglaea, Ariadna, Talos and Hermione in Deltagos "properly". The
+  five scoping questions (placement, what each role shows, odyssey-only roles
+  on lodestar, how a session is recognized, show or also start) are in that
+  thread as a question to pablo. No spec until he answers; then spec-craft
+  with step 5b, and Aglaea on the design.
+- Checked on lodestar: probe-hefesto is listed under "not in any initiative";
+  organizer-probe-aglaea is a session under the organizer, not in the crew.
+  The talos and hermione skills are not installed here; there is no ariadna
+  bitácora.
+
 ## HAND-OFF — 2026-09-30 (2), 0069 proposed; restart asked by Pablo via Hephaistos
 
 Read first: `agents/fse.md`, the fse skill, `working-on/roadmap.yaml`,
