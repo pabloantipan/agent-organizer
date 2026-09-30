@@ -18,6 +18,9 @@ restating it (the discuss skill).
   (FR-2, from the design) leave a newcomer guessing. **0068** raised
   (recommend "N decisions waiting"). Also: Pablo answered, or not, the
   hdr-rule-review permission prompt (relayed 2026-09-30).
+- **Learned (sup23):** a "reader who never saw the app" launched at the
+  initiative root gets CLAUDE.md in context; blind readers launch outside it.
+  Applies to every timed-reader gate (G9, G7, G8).
 - **header-fold decide: (046c69e)** answered by spec amendment 1 (7925401):
   charter_modified, one Go fact for FR-9; sup23 told.
 - **Running:** sup22 on `rename-deltagos` (0066); sup23 on `header-fold` and

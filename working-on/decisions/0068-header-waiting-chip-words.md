@@ -51,5 +51,7 @@ keeps the id whole (H2), and the chip is the last thing to give way.
 ## Consequences
 
 On "N decisions waiting": the FSE amends initiative-header FR-2 and tells
-sup23 and Aglaea; the builder changes the words; a new reader reruns G8. On
+sup23 and Aglaea; the builder changes the words; a new reader reruns G8, launched outside the
+initiative root so `CLAUDE.md` does not load into its context (the first
+reader disclosed it had). On
 "change the gate": the FSE amends G8 and H11, and sup23 merges.
