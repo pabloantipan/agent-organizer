@@ -11,6 +11,12 @@ restating it (the discuss skill).
   **sup20 ended.**
 - **Running:** sup21 on `responsive-home` (0061, 0062 left from the rail;
   carries 0060's "you"), token organizer/sup21. End it when the card lands.
+- **responsive-home failed review on G7 only (1a7cb88):** my gate copied
+  A8 (one screenshot, all twenty) without checking A1/A3; impossible at 1024
+  and 1512. **0065** raised (recommend: scroll allowed under the minute).
+  Wrong-gate rule followed: amended nothing. sup21 told it waits on 0065.
+- **Repetition (4):** a gate row copied from a source without checking it
+  against the other rows (here A8 vs A1/A3). First time; watch for it.
 - **Header:** Aglaea's design (6c93a49) → build spec
   `docs/specs/initiative-header.md`, cards `header-fold` and `rule-box-finish`
   (parallel, after responsive-home, ui_review), **0063** accept (changes
