@@ -47,7 +47,15 @@ sections below this one are history.
   (01M3RCXDRAHWDQSD34QPZ97Y3X); her session organizer-probe-aglaea is
   EXITED in zellij (her watcher still reads alive, mail drained, 0
   undelivered), so the ranking will not come until the seat is resurrected.
-  Asked Pablo.
+  Asked Pablo. His answers, same session: (1) "Do": I reopened her
+  session with `probe organizer-probe-aglaea` in a new iTerm window and
+  re-sent the ask. (2) "install the last version possible": `make install`
+  put Deltagos v0.2.0-635-g83e8450 in /Applications (the build flips
+  frontend/wailsjs/runtime file modes; restore with git checkout). (3) "we'll
+  draft the cell ahead" (stage 5 exit a waits, later) and "yes to the
+  other": the five cards moved to done/ with his words in Notes. No minutes
+  for sup16–sup24 were given; the Waiting-on-Pablo line below is settled
+  except Draft the cell.
 - **Waiting on Pablo:** press Draft the cell on a real initiative (stage 5
   exit a; b is camp's); `make install` for Deltagos.app (macOS may re-ask
   keychain access; Dock keeps the old path); pablo_minutes for sup16–sup24;

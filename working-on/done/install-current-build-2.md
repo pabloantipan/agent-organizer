@@ -1,10 +1,10 @@
 ---
 title: The installed organizer is the current main, again
-status: now
+status: done
 repos: [organizer]
 branch: main
-updated: 2026-09-28
-next: "decide: pablo, no record is proposed any more (0039 was ruled in 7d740c7, the installed commit), so the installed Decisions tab has nothing to offer Rule on; accept gate 3 on the header alone, or propose a record to show Rule on?"
+updated: 2026-09-30
+next: "superseded by the install of main v0.2.0-635-g83e8450 on 2026-09-30; gate 3 settled by Pablo (\"install the last version possible\")"
 depends_on: []
 seat: install2-build
 boundary: ["build/ (the build output)", "/Applications/organizer.app (install target)", "~/.local/bin/organizer (the symlink make install writes)", "no source file in the repo"]
@@ -42,3 +42,4 @@ sees them.
 - 2026-09-28 install2-build: both builds flipped the mode of `frontend/wailsjs/go/main/App.{d.ts,js}`; I restored it with `git checkout --` each time. `osascript ... quit` answered "User canceled (-128)", but the process was gone (pgrep). Chrome was frontmost, not the organizer
 - 2026-09-28 install2-build: after opening the app I clicked where the Decisions tab sits; System Events returned error -25204, and the next capture showed Roadmap instead (decisions-rule.png shows Roadmap, not Decisions). Someone was probably using the app, so I stopped interacting. The app is left running
 - 2026-09-28 FSE: record 0040 is proposed since 643469e (after the install) and owned by pablo. The app scans working-on/ live, so the installed Decisions tab should now offer Rule on 0040 without a rebuild; a screenshot of the box, without ruling, would cover gate 3's Rule half. The decide: above stays Pablo's.
+- 2026-09-30: Pablo, 2026-09-30, in the FSE's session: "install the last version possible" (answer to gate 3) and "yes" to moving it to done/. The FSE ran `make install`: /Applications/Deltagos.app and ~/.local/bin/organizer are Deltagos v0.2.0-635-g83e8450 (main at 83e8450).

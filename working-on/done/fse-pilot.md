@@ -1,10 +1,10 @@
 ---
 title: A standing FSE seat on the organizer, as a pilot
-status: now
+status: done
 repos: [organizer]
 branch: main
-updated: 2026-09-26
-next: "pablo: report your minutes on each redesign wave (run records); then the FSE proposes keep or drop on pablo_minutes, gate_rework and decide_turnaround"
+updated: 2026-09-30
+next: "closed by Pablo on 2026-09-30; the seat stays; minutes per wave not reported, so no keep-or-drop proposal on the metrics"
 ---
 
 ## Context
@@ -56,3 +56,4 @@ none
 - Card edits in this initiative must be committed now, or the FSE never
   hears of them and the other machine never sees them.
 - 2026-09-28 FSE: Pablo ruled "keeping" (decision 0043) without reporting minutes; the next action above is moot. Closing this card is Pablo's.
+- 2026-09-30: Pablo, 2026-09-30, in the FSE's session: "yes" to moving it to done/. He did not give minutes for sup16 to sup24; the keep-or-drop proposal on pablo_minutes, gate_rework and decide_turnaround is not made.

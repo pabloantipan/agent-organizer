@@ -1,10 +1,10 @@
 ---
 title: Review the initiative header again — collapse, the waiting chip, the stage strip, editing goal and scope
-status: next
+status: done
 repos: [organizer]
 branch: main
-updated: 2026-09-28
-next: "pablo: rule 0063 (accept the header design and build spec) and 0064 (edit goal and scope in the app?); built by header-fold and rule-box-finish"
+updated: 2026-09-30
+next: "closed: 0063, 0064 and 0068 ruled; built by header-fold (3a3454d) and rule-box-finish (421dd9b)"
 stage: twenty-at-a-glance
 ---
 
@@ -57,3 +57,6 @@ Pablo, 2026-09-28, in the FSE's session, from the installed app v0.2.0-348
 
 ## Blockers
 none
+
+## Notes
+- 2026-09-30: Pablo, 2026-09-30, in the FSE's session: "yes" to moving it to done/.

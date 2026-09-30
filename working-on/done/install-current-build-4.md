@@ -1,10 +1,10 @@
 ---
 title: The installed organizer is main, with read-only and odyssey's merge
-status: now
+status: done
 repos: [organizer]
 branch: main
-updated: 2026-09-28
-next: "decide: pablo, gate 3 cannot hold as written: organizer status prints no initiative status, so the seven archived initiatives are listed like active ones (read-only, 2bffd31, is frontend-only); accept the installed commit containing 2bffd31 plus the initiative.yaml list as gate 3, or open a card for an archived mark in organizer status?"
+updated: 2026-09-30
+next: "superseded by the install of main v0.2.0-635-g83e8450 on 2026-09-30, which contains 2bffd31; gate 3 settled by Pablo (\"install the last version possible\"); no card for an archived mark in organizer status"
 depends_on: []
 seat: install4-build
 boundary: ["build/ (the build output)", "/Applications/organizer.app (install target)", "~/.local/bin/organizer (the symlink make install writes)", "no source file in the repo"]
@@ -50,3 +50,4 @@ none
 - 2026-09-28 install4-build: my mistake, a bare `organizer` (to read its usage) launched the installed app as pid 27143 from my shell instead of `open -a`; my kill of it was refused by the permission layer, so that instance is the one left running (v0.2.0-332) and I did not open a second. Nothing was pressed, ruled or posted in it. Quit it from the menu if a Finder-launched instance is wanted
 - 2026-09-28 FSE: gate 3 was written wrong by the FSE (the text `organizer status` prints no initiative status). The installed binary's `organizer status --json` lists the seven PLV initiatives as `archived` and camp, organizer, agent-slack as `active` (checked from ~/.local/bin/organizer, v0.2.0-332). That is what gate 3 meant; accepting it is Pablo's.
 - 2026-09-28 FSE: superseded by install-current-build-5 (0045); sup13 ended as superseded. Closing this card is Pablo's.
+- 2026-09-30: Pablo, 2026-09-30, in the FSE's session: "install the last version possible" (answer to gate 3) and "yes" to moving it to done/. The FSE ran `make install`: Deltagos v0.2.0-635-g83e8450, which contains 2bffd31 and fc26867. The review: fail stays as the reviewer wrote it; no archived-mark card was asked for.

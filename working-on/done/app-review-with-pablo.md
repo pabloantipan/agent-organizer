@@ -1,10 +1,10 @@
 ---
 title: Review the app with Pablo, soon — a long header, no Rule on the Decisions tab, no scroll
-status: next
+status: done
 repos: [organizer]
 branch: main
-updated: 2026-09-27
-next: "reviewed with Pablo 2026-09-28 (0038); the work is in glance-header-scroll and glance-rule-in-decisions, run by sup8; this note closes when they land"
+updated: 2026-09-30
+next: "closed: glance-header-scroll and glance-rule-in-decisions landed, then header-fold and rule-box-finish"
 stage: twenty-at-a-glance
 ---
 
@@ -39,3 +39,6 @@ rule these at organizar app. Place a note we need to review this soon."
 
 ## Blockers
 none
+
+## Notes
+- 2026-09-30: Pablo, 2026-09-30, in the FSE's session: "yes" to moving it to done/.
