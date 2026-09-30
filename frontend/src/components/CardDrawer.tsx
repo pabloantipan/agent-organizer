@@ -132,8 +132,12 @@ function Discuss({ card: c, readOnly }: { card: merge.BoardCard; readOnly: strin
  *  app's synced state and never in the card file, so agents keep the file.
  *  "Write about this card" and the queue carry them into the conversation. */
 function MyNotes({ card: c, readOnly }: { card: merge.BoardCard; readOnly: string | null }) {
-  const { view, addNote, editNote, account } = useBoard();
+  const { view, addNote, editNote, account, agents } = useBoard();
   const key = `${c.initiative_id}/${c.slug}`;
+  // The hint promises "Write about this card" only where Discuss draws it:
+  // a cell, a token, an active initiative (ui-leftovers FR-11).
+  const group = (agents?.groups ?? []).find((g) => g.id === c.initiative_id);
+  const canWrite = !!group?.cell && group.can_post && !readOnly;
   const notes = view?.order?.notes?.[key] ?? [];
   const [text, setText] = useState("");
   const [editing, setEditing] = useState<string | null>(null);
@@ -148,7 +152,7 @@ function MyNotes({ card: c, readOnly }: { card: merge.BoardCard; readOnly: strin
   const initial = (by: string) => (by || "?").replace(/@.*$/, "").slice(0, 1).toUpperCase();
   return (
     <div className="comments">
-      <div className="section-label"><MessageSquareText size={12} /> Comments <span className="meta">{notes.length || ""}</span> <span className="meta hint-inline">yours; synced with the app, not in the card file; carried into "Write about this card"</span></div>
+      <div className="section-label"><MessageSquareText size={12} /> Comments <span className="meta">{notes.length || ""}</span> <span className="meta hint-inline">yours; synced with the app, not in the card file{canWrite ? "; carried into \"Write about this card\"" : ""}</span></div>
       {readOnly ? (
         notes.length === 0 && <div className="meta">No comments. {readOnly}: read-only.</div>
       ) : <div className="comment-new">
