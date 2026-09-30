@@ -16,7 +16,7 @@ const PEOPLE_KEY = "slack.people";
  *  threads ride the agents feed; only open conversations and the archive
  *  are fetched. Lifecycle stays in Agents. */
 export function SlackView() {
-  const { selectedInitiative, setSelectedInitiative, agents: view, slackFocus, setSlackFocus, view: board } = useBoard();
+  const { selectedInitiative, setSelectedInitiative, agents: view, slackFocus, setSlackFocus, view: board, widthClass } = useBoard();
   // People starts closed at compact, so the timeline keeps the width
   // (initiative-header FR-6); the stored choice is untouched until toggled.
   const [people, setPeople] = useState<boolean>(() => { try { return localStorage.getItem(PEOPLE_KEY) !== "closed" && useBoard.getState().widthClass !== "compact"; } catch { return true; } });
@@ -78,7 +78,7 @@ export function SlackView() {
   const { deaf, capped } = queueOf(g, board);
   const readOnly = readOnlyOf(board, g.id);
   return (
-    <div className="slack">
+    <div className={`slack ${widthClass}`}>
       {/* No title row: the header above names the initiative (initiative-header
           FR-5); what is not the id stays on this toolbar line. */}
       <div className="slack-tools">

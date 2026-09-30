@@ -241,6 +241,10 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 /* Sub-views without a title row (initiative-header FR-5): what is not the id
    stays on one toolbar line. */
 .slack-tools { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); flex: none; min-width: 0; }
+/* At compact the composer is its one-line box, so the timeline keeps at
+   least half of the sub-view (FR-6, UI1); it grows by hand, as before. */
+.slack.compact .composer-line textarea { min-height: 0; height: 32px; padding: 5px 10px; }
+.slack.compact .composer { gap: var(--space-1); padding: var(--space-1-5) var(--space-3) var(--space-2); }
 /* Answer lands with focus on the thread's divider (FR-6, UI3): visibly. */
 .tl-divider:focus { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
 
