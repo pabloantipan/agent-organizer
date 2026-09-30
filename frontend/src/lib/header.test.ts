@@ -51,10 +51,14 @@ describe("waitingChip", () => {
     expect(waitingChip(undefined, "pablo")).toBeNull();
   });
   it("says on you when every waiting record is the lead's or has no owner", () => {
-    expect(waitingChip([rec("0001", "Pablo ", "2026-09-01"), rec("0002", "", "2026-09-02")], "pablo")).toBe("2 waiting on you");
+    expect(waitingChip([rec("0001", "Pablo ", "2026-09-01"), rec("0002", "", "2026-09-02")], "pablo")).toBe("2 decisions waiting on you");
   });
   it("says waiting when someone else owns one", () => {
-    expect(waitingChip([rec("0001", "pablo", "2026-09-01"), rec("0002", "ana", "2026-09-02")], "pablo")).toBe("2 waiting");
+    expect(waitingChip([rec("0001", "pablo", "2026-09-01"), rec("0002", "ana", "2026-09-02")], "pablo")).toBe("2 decisions waiting");
+  });
+  it("says decision, not decisions, for one", () => {
+    expect(waitingChip([rec("0001", "ana", "2026-09-01")], "pablo")).toBe("1 decision waiting");
+    expect(waitingChip([rec("0001", "pablo", "2026-09-01")], "pablo")).toBe("1 decision waiting on you");
   });
 });
 

@@ -33,9 +33,10 @@ export function stagePosition(stages: model.Stage[]): { current: number; label: 
   return { current: -1, label: `all ${stages.length} stages done` };
 }
 
-/** The waiting chip's words (FR-2): "N waiting on you" when every waiting
- *  record is the lead's (or has no owner, which asks the lead, 0034), else
- *  "N waiting". Null at zero: the chip is not drawn. */
+/** The waiting chip's words (FR-2, 0068): "N decisions waiting on you" when
+ *  every waiting record is the lead's (or has no owner, which asks the lead,
+ *  0034), else "N decisions waiting"; "1 decision" for one. Null at zero: the
+ *  chip is not drawn. */
 export function waitingChip(decisions: model.Decision[] | undefined, lead: string): string | null {
   const waiting = (decisions ?? []).filter((d) => d.status === "proposed");
   if (waiting.length === 0) return null;
@@ -43,7 +44,8 @@ export function waitingChip(decisions: model.Decision[] | undefined, lead: strin
     const o = (d.owner ?? "").trim().toLowerCase();
     return o === "" || o === lead;
   });
-  return `${waiting.length} waiting${mine ? " on you" : ""}`;
+  const noun = waiting.length === 1 ? "decision" : "decisions";
+  return `${waiting.length} ${noun} waiting${mine ? " on you" : ""}`;
 }
 
 /** The record the chip lands on: the oldest waiting one, as Decisions lists
