@@ -31,7 +31,8 @@ top; one dated line per session below.
 - **Initiative header** (thread 01M3R14N3KAYTGQFH09AMBK73W): design spec
   `docs/ux/specs/initiative-header.md` (proposed) with ui-leftovers UI2–UI7
   triaged at its end.
-- **Next:** nothing asked; wait for mail.
+- **Next:** when header-fold lands, rank its leftovers with responsive-home-2's
+  R1–R5 (memory, open findings) into one list for the FSE.
 
 ## Log
 
@@ -44,3 +45,4 @@ top; one dated line per session below.
 - 2026-09-29 — initiative header design spec (header-review-2, UI1–UI7).
 - 2026-09-29 — 0066: renamed the product in the design system and principles to Deltagos.
 - 2026-09-29 — responsive-home amendment 1 (U1–U9; U3 my error); DS: Widths, open box keeps the keyboard.
+- 2026-09-30 — noted responsive-home-2's R1–R5; waiting on header-fold to rank them together.

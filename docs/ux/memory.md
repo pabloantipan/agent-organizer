@@ -118,6 +118,17 @@ run; a tile opens its stage expanded on Roadmap; sub-views stop repeating the
 id. Editing goal/scope in app: options a/b/c for Pablo, I recommend a (file
 only, shown honestly with an "edited, not committed" mark).
 
+responsive-home-2 (merged d5abf1f) left, not carded, to rank with the
+header-fold leftovers when that lands (FSE, thread 01M3RCXDRAHWDQSD34QPZ97Y3X;
+details in `working-on/done/responsive-home-2.md` ## UI review and
+`runs/2026-09-30-responsive-home-2.md`):
+- R1 (2) wide at 1920 with the rail open: goals cut ~22 chars, first signal
+  clipped mid-name ("goals whole" was gated only at 3440).
+- R2 1280–1439 compact hides goals with ~480 px empty.
+- R3 at 1440 regular, signals wrap again.
+- R4 the regular rule box covers other rows' verbs.
+- R5 the rail toggle is 20 px (WCAG 2.5.8 wants 24).
+
 ## Open questions
 
 - none open.
