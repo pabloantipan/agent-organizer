@@ -25,6 +25,9 @@ top; one dated line per session below.
 - **Triage done** for the FSE (thread 01M3Q04G1TTG9JX71GA5CKMWBW):
   `docs/ux/reviews/2026-09-29-triage-ui-leftovers.md`; design system gained
   Focus and names.
+- **Responsive Home** (0059, thread 01M3QYJ7GKBX6H175TPJF6WPGM): worth it for
+  Home, rule box, rail; design spec `docs/ux/specs/responsive-home.md`
+  (proposed). On acceptance: add a Widths section to the design system.
 - **Next:** nothing asked; wait for mail.
 
 ## Log
@@ -34,3 +37,4 @@ top; one dated line per session below.
 - 2026-09-29 — reviewed stage 5's cell screens for the FSE (C1–C10).
 - 2026-09-29 — 0054 ruled; design system amended for F9 and disabled actions.
 - 2026-09-29 — triaged the three UI reviews' leftovers into 14 rows; DS: Focus and names.
+- 2026-09-29 — responsive Home: measured 1024/1512/3440, wrote the design spec.

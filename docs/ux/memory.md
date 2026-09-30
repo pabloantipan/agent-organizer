@@ -17,6 +17,11 @@ line carries its source. Updated at the end of every session.
   too much time for introducing a dev in the work" (`agents/people.md`; 0029;
   `docs/specs/machine-explains-itself.md`).
 - Business people do not log in yet (0038 scope out; stage 6, identity).
+- Pablo works on two screens (0059, "1024 is real"; his words: "I have a
+  wide monitor buy I also work at the laptop screen 14 inches"): a 3440×1440
+  ultrawide (this machine's main display) and a 14-inch laptop (1512×982 by
+  default, 1024 when something sits beside the app). Design spec
+  `specs/responsive-home.md` (proposed): compact < 1280, regular, wide ≥ 1920.
 - Context: a desktop app (Wails, WKWebView, Safari 15.0 floor), window
   1440×900 by default, **minimum 1024×640** (`main.go:36-39`). 400 px does not
   occur.

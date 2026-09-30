@@ -17,5 +17,6 @@ specific to the organizer's use, each with its reason.
 4. **The app teaches the machine.** A new developer learns the flow from the
    screens and the Help, "we don't have too much time for introducing a dev"
    (0029): an empty or disabled state says what is missing and how to get it.
-5. **Works at the smallest window.** The window can be 1024×640
-   (`main.go`); every screen is checked there as well as at 1440×900.
+5. **Works at the smallest window and uses the widest.** Pablo works at
+   1024×640 on a 14-inch laptop and at 3440×1440 on an ultrawide (0059);
+   every screen is checked at 1024×640, 1512×945 and 3440×1440.
