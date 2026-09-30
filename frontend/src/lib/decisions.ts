@@ -21,6 +21,13 @@ export function waitingOwners(i: Waiting): string[] {
   return owners;
 }
 
+/** How a row or a signal names a record's owner (ui-leftovers FR-10): one
+ *  phrase everywhere, "no owner" when the field is empty. */
+export const ownerPhrase = (owner: string | undefined) => {
+  const o = owner?.trim();
+  return o ? `owner ${o}` : "no owner";
+};
+
 /** The two sections the rule box shows (ui-leftovers FR-1): the record's
  *  `## Question` and `## Recommendation`, each without its heading; `##
  *  Options` is left out, since the radios carry it. A section the record

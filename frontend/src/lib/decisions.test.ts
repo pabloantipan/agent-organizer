@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { merge, model } from "../../wailsjs/go/models";
-import { recordSections, waitingDecisions, waitingOwners } from "./decisions";
+import { ownerPhrase, recordSections, waitingDecisions, waitingOwners } from "./decisions";
 
 const initiative = (...decisions: Partial<model.Decision>[]) => ({ decisions }) as unknown as merge.BoardInitiative;
 const rec = (number: string, owner: string, raised: string, status = "proposed") => ({ number, owner, raised, status });
@@ -37,6 +37,15 @@ describe("waitingOwners", () => {
   it("is empty with nothing waiting", () => {
     expect(waitingOwners(initiative())).toEqual([]);
     expect(waitingOwners({ decisions: undefined } as unknown as merge.BoardInitiative)).toEqual([]);
+  });
+});
+
+describe("ownerPhrase", () => {
+  it("names the owner, or says no owner", () => {
+    expect(ownerPhrase("pablo")).toBe("owner pablo");
+    expect(ownerPhrase("")).toBe("no owner");
+    expect(ownerPhrase("  ")).toBe("no owner");
+    expect(ownerPhrase(undefined)).toBe("no owner");
   });
 });
 

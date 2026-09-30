@@ -5,7 +5,7 @@ import { inactiveIds, launchVerb, missingPersonas, needsMeRows, type NeedsMeRow 
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
 import { HEALTH, messages } from "../lib/health";
-import { waitingDecisions, waitingOwners } from "../lib/decisions";
+import { ownerPhrase, waitingDecisions, waitingOwners } from "../lib/decisions";
 import { useBoard } from "../stores/board.store";
 import { nextDate, stageState } from "./InitiativeHeader";
 import { InitiativeDetail } from "./Initiatives";
@@ -133,7 +133,7 @@ function DecisionRow({ row, decision: d }: { row: NeedsMeRow; decision: model.De
   return (
     <Shell row={row} reason="decision" tone="waiting"
       subject={<><span className="mono">{row.initiative} {d.number}</span> · {d.title}</>}
-      context={<>owner {d.owner || "—"} · raised <span className="num">{d.raised || "—"}</span>{d.raised_by ? ` by ${d.raised_by}` : ""}{opts.length > 0 ? ` · options: ${opts.join(", ")}` : ""}</>}>
+      context={<>{ownerPhrase(d.owner)} · raised <span className="num">{d.raised || "—"}</span>{d.raised_by ? ` by ${d.raised_by}` : ""}{opts.length > 0 ? ` · options: ${opts.join(", ")}` : ""}</>}>
       <RuleAction initiative={row.initiative} decision={d} />
     </Shell>
   );
