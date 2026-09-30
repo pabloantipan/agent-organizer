@@ -28,6 +28,10 @@ line carries its source. Updated at the end of every session.
 
 ## Ruled design choices (do not reopen; raise findings against them)
 
+- **The app is Deltagos** (0066): what a person sees and `Deltagos.app`. The
+  initiative, the CLI (`organizer …`), repos and identifiers stay organizer.
+  Product-name text in my docs says Deltagos; dated reviews stay as written.
+
 - Dark only, one accent, magenta tone, red for blocked; no gradients, no
   light theme (CLAUDE.md, visual direction; `docs/design-system.md`).
 - Initiative-first navigation: Home + one initiative with six sub-views

@@ -1,6 +1,7 @@
-# Organizer design system
+# Deltagos design system
 
-The rules every organizer screen follows. Values live in
+The rules every screen of Deltagos (the app; the initiative, CLI and repo
+keep the name organizer, 0066) follows. Values live in
 `frontend/src/styles/tokens.css`; this file says what they are for, how the
 components are built from them, and why. The redesign (`docs/specs/redesign.md`)
 builds on it. When this file and the code disagree, fix one of them in the

@@ -1,8 +1,8 @@
-# Design principles — organizer
+# Design principles — Deltagos (initiative: organizer)
 
 The visual and component rules are `docs/design-system.md` (seven
 principles, tokens, components, anti-patterns). This file adds only what is
-specific to the organizer's use, each with its reason.
+specific to how Deltagos is used, each with its reason.
 
 1. **The glance is the product.** Home must answer "which of twenty execute,
    are in discovery, wait on business, wait on me" without opening one
