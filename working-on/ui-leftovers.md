@@ -12,6 +12,7 @@ gate: "docs/specs/ui-leftovers.md Acceptance, rows G1 to G5; the Gate section be
 stage: discovery-in-a-cell
 seat: left-build
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -50,3 +51,13 @@ none
 - 2026-09-29 left-build: not verified: focus after Draft the cell's real Open (goes to the "Drafting in a Terminal" line; Open is not pressed), WKWebView, VoiceOver (V4)
 - 2026-09-29 left-build: the chat-list no-token line assumes a missing token whenever the human cannot post, also when discuss is down (lead-side-fixes FR-12's wording); `Retire.tsx`'s dialog is outside the boundary and was not checked for Escape
 - 2026-09-29 left-build: harness to rerun the evidence: `.wt-notes/left-build/scripts/` (headless Chromium on `wails dev -devserver localhost:34125`); choices in `.wt-notes/left-build/progress.md`
+
+## Review
+- Verdict: pass. Unmet gate rows: none.
+- G1: `.wt-notes/left-build/g1-dom.txt` and the four g1 screenshots: init-drafted 0001 (roster, seat lines) and init-a 0002 at 1024x640 and 1440x900 show Question and Recommendation, `options:false`, Rule/Cancel bottom 616<640 and 876<900; open Rule `aria-expanded=true` on rgb(47,27,85) (`--surface-selected`, `shell.css` `.ib-act .act[aria-expanded]`); the link calls `openDecision` (`RuleDecisionBox.tsx` RecordBody), landing expanded per g2 log step 4.
+- G2: `.wt-notes/left-build/g2-focus-log.txt`, both sizes: title on open with the record as `aria-describedby`, back to "Rule init-a 0002" on Escape and Cancel, link → 0002's `dec-line`, Launch → Bring crew up, Open → designer_diego's row, roster link → 0001's `dec-line`, Draft the cell and Bring crew up confirms open on Open and close on Escape/Cancel to their opener; eight Needs me names carry their row.
+- G3: `.wt-notes/left-build/g3-dom.txt`, g3 screenshots: row verbs `tiny-btn` (no primary), People `aria-pressed` on the selected surface; init-ready: one reason line, header "read only", no composer, "token" once; Answer lands on the asking thread.
+- G4: `.wt-notes/left-build/g4-dom.txt`, g4 screenshots: Crew header, lozenge and collapsed-rail title name designer_diego's file and who writes it; "no owner" on row and signal (temp record in the fixture copy); init-b card back hint without "Write about this card".
+- G5: rerun, `.wt-notes/left-review/`: `make test` exit 0 (13 Go packages ok, vitest 33 passed), `npm run build` exit 0, G18 grep on `main...ui-leftovers` empty. Boundary: `diff --stat` touches only boundary files; no Go, no design-system.md. Worktree status clean.
+- Not covered by the gate: (1) at 1024x640 the roster record's Recommendation is cut mid-line by the record's scroll area and "0001 in Decisions" scrolls out of view; FR-2 allows it, the Goal ("recommendation in view at every size") does not quite hold. (2) FR-10 "everywhere" vs boundary: DecisionsView still reads "owner —"; the spec's boundary contradicts its FR. (3) `fixture-home.sh` reads the live discuss mailbox and may post an fse → pablo question into organizer-fixture: the fixture is not hermetic. (4) Focus after a ruling lands (Needs me heading) is untested, since ruling is forbidden to reviewers.
+- Reviewer: left-review, 2026-09-29
