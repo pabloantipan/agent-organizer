@@ -4,6 +4,21 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-09-29, sup21 landed; sup22 on the rename, sup23 on the header
+
+- **Last SHA seen:** 8119e20. responsive-home merged d8591aa; 41 min vs
+  35–55 (incl. ~11 on 0065), gate_rework 1 (my G7); run record
+  runs/2026-09-29-responsive-home.md. **sup21 ended.**
+- **Running:** sup22 on `rename-deltagos` (0066); sup23 on `header-fold` and
+  `rule-box-finish` (0063, 0064 file only), tokens organizer/sup22, sup23.
+  End each when its cards land.
+- **Next:** when rule-box-finish lands, start a supervisor for
+  `responsive-home-2` (0067 accepted; compact to 1439). header-review-2
+  closes when header-fold and rule-box-finish land.
+- **For Aglaea later:** header-fold's and rule-box-finish's UI reviews.
+- **Stage 5 exit (a):** Pablo presses Draft the cell on a real initiative;
+  (b) camp's. pablo_minutes for sup16–sup21: ask Pablo.
+
 ## HAND-OFF — 2026-09-29, sup20 landed; sup21 on responsive-home
 
 - **Last SHA seen:** 2ff4292. ui-leftovers merged 508d9a8; 47 min vs 30–46
