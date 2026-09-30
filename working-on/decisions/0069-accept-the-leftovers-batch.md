@@ -42,9 +42,9 @@ and the thread divider; "now" as the stage word everywhere.
 It is amendment 3 of `docs/specs/initiative-header.md` (FR-10 to FR-16,
 G12 to G17, card `header-fold-2`) and of `docs/specs/responsive-home.md`
 (FR-13 to FR-19, G13 to G18, card `widths-and-focus`). The two cards run in
-parallel, each with a UI reviewer. One assumption is stated for Aglaea to
-object to: an expanded record taller than the view keeps its head at the
-top.
+parallel, each with a UI reviewer. Aglaea settled the one open point: an
+expanded record taller than the view keeps its head at the top, Rule
+included, and the body scrolls (main already does; G17 checks it holds).
 
 forecast: 40–70 min of wave time over 1 wave (two cards in parallel, UI
 reviewers included), plus this decision (median 0 d); basis: 7 cards in 5

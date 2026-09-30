@@ -133,7 +133,7 @@ as "row n"; the design system as amended in 3f3df2f):
 | G14 | FR-12 | 1024×640, folded, on the fixture initiative with the longest goal and a target | screenshot and DOM: the target whole, the goal cut with an ellipsis |
 | G15 | FR-13 | Agents with one initiative selected, and with none | screenshots: no id or client under the tabs; counts and New agent on the toolbar line; the all view unchanged |
 | G16 | FR-14 | hover and keyboard focus on the bar's stage and on a tile; the current tile focused; Roadmap → Stages; the strip at 1024×640 on the fixture roadmap with a one-stage run | screenshots; computed `cursor` and `outline-offset` (2px on the accent tile); no visible "current" in stage text; each run's width in proportion to its stage count |
-| G17 | FR-15, FR-16 | the header's accessible names; `dec-line` before and after expanding; the chip on the FR-16 initiative | a names log (`aria-expanded` false then true); a screenshot of "N decisions waiting on you", N ≥ 2 |
+| G17 | FR-15, FR-16 | the header's accessible names; `dec-line` before and after expanding; the chip on the FR-16 initiative | a names log (`aria-expanded` false then true); a screenshot of "N decisions waiting on you", N ≥ 2; at 1024×640 the chip's landing shows the record's head with Rule on screen |
 | G11 | all | `XDG_DATA_HOME=$(mktemp -d) make test`; `cd frontend && npm run build`; the redesign's G18 grep | pass |
 
 ## Boundary
@@ -207,10 +207,12 @@ as "row n"; the design system as amended in 3f3df2f):
   and the draft cell waits on it; add the second record there only if no
   test counts init-drafted's records, else give another overlay initiative
   two records owned by its lead. Either way the fixture's README says so.
-- **Amendment 3, assumption** (UI review 2's gap 1, not ranked): when an
-  expanded record is taller than the view, its head (number, title,
-  "Waiting on a ruling") is kept at the top and the rest scrolls. Aglaea may
-  object before 0069 is ruled.
+- **Amendment 3, the tall record** (UI review 2's gap 1; Aglaea's call,
+  thread 01M3RCXDRAHWDQSD34QPZ97Y3X): when an expanded record is taller
+  than the view, its head stays at the top: number, title, "Waiting on a
+  ruling" and Rule, so the lead can rule without scrolling back; the rest
+  of the body scrolls. Main already does it since U8 (UI review 3 at
+  1024×640); header-fold-2's `dec-line` change must keep it (G17).
 
 ## Cards
 
