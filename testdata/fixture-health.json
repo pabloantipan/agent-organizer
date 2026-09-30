@@ -10,5 +10,23 @@
       {"agent": "sup9", "watcher": "never", "seconds_since_wait": 0, "seconds_since_drain": 0, "undelivered": 3, "oldest_undelivered_seconds": 1500, "deaf": false}
     ],
     "threads": []
+  },
+  "define-fixture": {
+    "agents": [
+      {"agent": "pablo", "watcher": "alive", "seconds_since_wait": 5, "seconds_since_drain": 5, "undelivered": 0, "oldest_undelivered_seconds": 0, "deaf": false}
+    ],
+    "threads": []
+  },
+  "drafted-fixture": {
+    "agents": [
+      {"agent": "pablo", "watcher": "alive", "seconds_since_wait": 5, "seconds_since_drain": 5, "undelivered": 0, "oldest_undelivered_seconds": 0, "deaf": false}
+    ],
+    "threads": []
+  },
+  "ready-fixture": {
+    "agents": [
+      {"agent": "pablo", "watcher": "alive", "seconds_since_wait": 5, "seconds_since_drain": 5, "undelivered": 0, "oldest_undelivered_seconds": 0, "deaf": false}
+    ],
+    "threads": []
   }
 }

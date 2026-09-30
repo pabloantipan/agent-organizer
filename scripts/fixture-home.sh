@@ -15,11 +15,14 @@
 # cannot be made on demand, so the config's canned_health points at a copy of
 # testdata/fixture-health.json, read in place of the discuss API: a roster seat
 # alive (po_ana), one deaf (dev_bruno), a supervisor capped (sup10), a builder
-# stale (build-help), and sup9 never with 3 undelivered. One stand-in agent per
+# stale (build-help), and sup9 never with 3 undelivered. It also names the
+# other cells' projects (define-fixture, drafted-fixture, ready-fixture) with
+# only the human alive, so their Crew headers carry no "no project" line, and
+# asking_thread below copies organizer-fixture's live threads into it. One stand-in agent per
 # standin line at the end runs in init-a with the environment a probe launch
 # would give it; organizer-fixture-probe-sup9 has no AGENT_NAME, so its row
-# says "no identity". --live-mailbox drops canned_health, which brings back
-# the FSE thread of G19 (the canned file has no threads). Either way the
+# says "no identity". --live-mailbox drops canned_health and reads every
+# thread from discuss as it is. Either way the
 # stand-ins are in FIXTURE_AGENT_PIDS; `kill $FIXTURE_AGENT_PIDS` ends them.
 #
 # --twenty lays out testdata/fixture-twenty (docs/specs/twenty-at-a-glance.md,
@@ -55,6 +58,52 @@ standin() {
   pids="$pids $!"
 }
 pids=""
+
+# asking_thread <health.json>: the canned file carries organizer-fixture's
+# live threads from the discuss mailbox, so the fixture shows a thread that
+# asks the human (ui-leftovers FR-12, V1): Answer on Home, the worklist's
+# thread rows. The organizer computes "asks you" from the thread's messages,
+# which it reads from the mailbox as the cell's human, so the thread has to
+# live there; only its head rides the canned file. If no open thread of
+# organizer-fixture asks pablo, the fixture's fse posts one to pablo. Only
+# organizer-fixture, never another project. Tokens are read from the
+# registry inside python and never printed. Without discuss it says so on
+# stderr and the canned file keeps no threads.
+asking_thread() {
+  DISCUSS_STATE="${DISCUSS_STATE_DIR:-$HOME/.local/state/discuss}" \
+  DISCUSS_ADDR="${DISCUSS_BIND:-127.0.0.1:9494}" python3 - "$1" <<'PY' >&2
+import json, os, sys, urllib.request
+path, project = sys.argv[1], "organizer-fixture"
+state, addr = os.environ["DISCUSS_STATE"], os.environ["DISCUSS_ADDR"]
+subject = "w-review: may the review start before the queued card lands"
+body = ("pablo, w-review is ready for its reviewer, but w-queued has not landed. "
+        "Does the review start now, or after w-queued?")
+try:
+    toks = json.load(open(os.path.join(state, "tokens.json")))["tokens"]
+    tok = {v["agent"]: t for t, v in toks.items() if v.get("project") == project}
+    def call(who, method, rest, data=None):
+        req = urllib.request.Request("http://%s/projects/%s%s" % (addr, project, rest), method=method,
+            data=None if data is None else json.dumps(data).encode(),
+            headers={"Authorization": "Bearer " + tok[who], "Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=3) as r:
+            return json.load(r)
+    def asks(t):
+        n = 0
+        for m in call("pablo", "GET", "/threads/" + t["id"])["messages"]:
+            n = 0 if m["from"] == "pablo" else n + (m["to"] == "pablo")
+        return n > 0
+    threads = call("pablo", "GET", "/health")["threads"]
+    if not any(t["status"] == "open" and asks(t) for t in threads):
+        call("fse", "POST", "/messages", {"to": "pablo", "kind": "question", "subject": subject, "body": body})
+        threads = call("pablo", "GET", "/health")["threads"]
+except Exception as e:
+    print("fixture-home: no thread asks pablo (discuss %s: %s)" % (addr, e))
+    sys.exit(1)
+doc = json.load(open(path))
+doc[project]["threads"] = threads
+json.dump(doc, open(path, "w"), indent=1)
+PY
+}
 
 repo="$(cd "$(dirname "$0")/.." && pwd)"
 tmp="$(mktemp -d "${TMPDIR:-/tmp}/organizer-fixture.XXXXXX")"
@@ -119,6 +168,7 @@ echo "- 0002 and 0003 raised" >> "$a/docs/bitacora/fse_bitacora.md"
 g commit -q -am "docs(decisions): raise 0002 and 0003" -m "Committed-by: FSE"
 
 cp "$repo/testdata/fixture-health.json" "$tmp/health.json"
+[ -n "$live_mailbox" ] || asking_thread "$tmp/health.json" || true
 cat > "$tmp/config.yaml" <<EOF
 machine: fixture
 roots:

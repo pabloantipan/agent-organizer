@@ -55,3 +55,13 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
   Needs me; `init-drafted` (a draft) is marked too, has Bring crew up
   disabled naming 0001 and no Launch row (its record is a Rule row);
   init-a, whose seats run as stand-ins, has no mark and no Launch row
+- what a UI reviewer needs to see every row of Needs me (ui-leftovers FR-12):
+  a thread of `organizer-fixture` that asks pablo (V1), copied from the
+  discuss mailbox into the canned health by the script, which has the
+  fixture's fse post one only when none is open; `init-drafted`'s
+  `0001-the-cell-roster` shaped like the persona-agents skill's
+  `references/drafting.md` §5, with a line per seat, the seats considered
+  and the gaps (V2); and canned health for `define-fixture`,
+  `drafted-fixture` and `ready-fixture` (V3), with only the human, so their
+  Crew headers carry no "no project" line and `init-ready` shows
+  Conversations without a token
