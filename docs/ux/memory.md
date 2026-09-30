@@ -21,7 +21,8 @@ line carries its source. Updated at the end of every session.
   wide monitor buy I also work at the laptop screen 14 inches"): a 3440×1440
   ultrawide (this machine's main display) and a 14-inch laptop (1512×982 by
   default, 1024 when something sits beside the app). Design spec
-  `specs/responsive-home.md` (proposed): compact < 1280, regular, wide ≥ 1920.
+  `specs/responsive-home.md` (proposed): compact < 1440 (amendment 1; built as < 1280), regular, wide ≥ 1920;
+  now the design system's Widths section.
 - Context: a desktop app (Wails, WKWebView, Safari 15.0 floor), window
   1440×900 by default, **minimum 1024×640** (`main.go:36-39`). 400 px does not
   occur.
@@ -134,6 +135,12 @@ only, shown honestly with an "edited, not committed" mark).
 
 - Pressing an action that starts a real session (Draft the cell's Open,
   Bring crew up) is out of a review's reach; read the code path and say so.
+
+- **Measure every width you name.** In responsive-home I set regular at 1280
+  and called it "as built" without measuring below 1440; the UI review found
+  a cliff at 1280 (U3). My A8 also asked all twenty rows in one 1024
+  screenshot, against my own A1 (0065 fixed it). Check the acceptance rows
+  against each other before sending.
 
 ## Participants in use
 

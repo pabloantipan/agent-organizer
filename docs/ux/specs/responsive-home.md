@@ -118,16 +118,32 @@ cap lifts to **1480**, and the goal column takes the extra room.
 ## Out of scope
 
 The six sub-views; widths under 1024; touch; any change to what Home
-contains. Once this is accepted, I add a "Widths" section to
-`docs/design-system.md` with these three classes, so later screens follow
-them.
+contains. The three classes are in `docs/design-system.md`, Widths
+(added with Amendment 1).
 
 ## Open, for Pablo
 
-- The wide list's cap: 1,600 plus Needs me, left-aligned from the rail.
-  The alternative is to centre the whole content in the ultrawide. I
-  recommend left-aligned, so things do not move when the window is resized
-  or snapped.
+- Ruled by 0062: left from the rail.
+
+## Amendment 1 — Aglaea, 2026-09-29, after the card's UI review
+
+The UI review of `responsive-home` (`working-on/responsive-home.md`,
+898cd78, U1–U9) found gaps in this design. U3 is my own error: I called
+regular "as built" without measuring it below 1440. Each finding below gets
+its design answer; the FSE decides the cards.
+
+| UI review | Sev | Answer |
+|---|---|---|
+| U3: at 1280 the expanded rail leaves 7 rows, goals about 15 characters and stages 3; at 1279 compact shows 12 | 3 | **Compact runs up to 1439; regular starts at 1440.** Compact's rail default (the strip) and one-line rows hold through the laptop's window sizes below 1440. The 14-inch laptop at full screen (1512) and half the ultrawide (1720) stay regular. Where A1 says "1024×640" it now reads "any width under 1440" |
+| U1: Tab leaves the open rule box onto controls it covers; one Enter can lose the ruling | 3 | **One focus model in every class.** While a rule box is open, Tab and Shift+Tab loop inside it; Escape and Cancel close it and return focus to its Rule (the same answer as `initiative-header.md`, UI2). In compact, the sheet also gets a scrim over what it covers (answers U8), and the rows' Rule verbs are behind the scrim |
+| U2: opening another row's Rule throws away the words typed in the first | 2 | **One draft per record** until Rule or Cancel. Opening another row's Rule closes the first box and keeps its words; reopening it restores them. Only Cancel discards |
+| U4: compact with the rail expanded shows 5 rows; signals wrap to 2–3 lines | 2 | In compact, signals never wrap: they show on one line with a "+N" for the rest, and the rest go into the row's hover and accessible name. The floor for A2 (rail expanded) is at least five rows at 1024×640 |
+| U5: twenty chevrons are named "repos, problems and actions" | 2 | Conformance (Focus and names): "Details for auth-gateway: goal, next date, repos", as the name and as the hover |
+| U6: in wide, a Needs me row's context is cut with no hover | 1 | The row's hover (`title`) carries the full context line in every class, not only compact |
+| U7: in wide, Tab goes rail, then Needs me (right), then the list (left) | 1 | Kept on purpose: Needs me is the priority. Written into the design system's Widths section |
+| U8: the compact sheet has no scrim and cuts through its row | 1 | The scrim of U1 |
+| U9: the rail toggle has no `aria-expanded` | 1 | Conformance (Focus and names, disclosure state) |
+| gap: in wide, a rule box on the last Needs me row grows the column (at 1920×1080 with eight rows) | — | The box is capped at the column's height, and the column scrolls to keep the whole box in view |
 
 ## Technical notes
 

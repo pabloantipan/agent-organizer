@@ -43,3 +43,4 @@ top; one dated line per session below.
 - 2026-09-29 — responsive Home: measured 1024/1512/3440, wrote the design spec.
 - 2026-09-29 — initiative header design spec (header-review-2, UI1–UI7).
 - 2026-09-29 — 0066: renamed the product in the design system and principles to Deltagos.
+- 2026-09-29 — responsive-home amendment 1 (U1–U9; U3 my error); DS: Widths, open box keeps the keyboard.

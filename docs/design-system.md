@@ -269,8 +269,28 @@ keeps their place.
 - **Disclosure state**: a control that opens something stays marked while it
   is open (`aria-expanded` or `aria-pressed`, and `--surface-selected`), the
   same way everywhere.
+- **An open box keeps the keyboard** (a rule box, a sheet, a dialog): Tab
+  and Shift+Tab loop inside it until Escape, Cancel or its commit closes
+  it. One box at a time; a box that covers content has a scrim. What was
+  typed in a box survives it closing for another one, and only Cancel
+  discards it.
 
 *WCAG 2.4.3, 2.4.4, 2.4.6, 2.4.7, 3.2.1.*
+
+### Widths
+Deltagos is used on a 14-inch laptop (1512 wide at full screen, down to the
+window's 1024×640 minimum) and on a 3440×1440 ultrawide (0059). Three
+classes, set by the **window** width:
+
+| class | window | layout rules |
+|---|---|---|
+| **compact** | < 1440 | the rail starts as the strip (the lead's own choice wins and is remembered); rows are one line, and what gives way goes into the row's detail, hover and accessible name, never away; signals never wrap (a "+N" instead); a box over content is a sheet with a scrim, capped at the window |
+| **regular** | 1440–1919 | the rail expanded; content capped at 1,480 px |
+| **wide** | ≥ 1920 | two regions where a screen has a list and a queue (Home: the list, then Needs me on the right, in its own scroll); text held to about 90 characters a line; nothing stretches past about 2,200 px; content left-aligned from the rail (0062), so nothing moves when the window is resized |
+
+Every screen is checked at 1024×640, 1512×945 and 3440×1440. Tab order
+follows priority, not position: in wide, Needs me before the list.
+*responsive-home, amendment 1.*
 
 ## Anti-patterns
 
