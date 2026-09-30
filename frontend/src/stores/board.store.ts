@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { api, type Account, type AgentsView, type BoardView, type Group, type LockState, type Note } from "../hooks/useWails";
 import type { merge } from "../../wailsjs/go/models";
+import { railCollapsedFor, roomyOf, widthClassOf, type WidthClass } from "../lib/width";
 
 /** Navigation is Home, one initiative under its header with six sub-views,
  *  or Settings behind the gear (FR-14). */
@@ -31,8 +32,20 @@ type State = {
   // slackFocus is the agent the Conversations sub-view is narrowed to, set from an agent
   // row's Message button; openSlack switches to it and to the initiative.
   // railCollapsed narrows the rail to a strip of ranks; remembered per machine.
+  // With no stored choice it follows the width class (railCollapsedFor).
   railCollapsed: boolean;
   setRailCollapsed: (v: boolean) => void;
+  // The window's width class (responsive-home FR-1) and regular's top, where
+  // Home's cap lifts (FR-3). Set by App's one resize listener, only on change.
+  widthClass: WidthClass;
+  roomy: boolean;
+  setWindowWidth: (w: number) => void;
+  // The Rule box open on a Needs me row and what is typed in it, kept above
+  // Home's layout so crossing a width class keeps both (FR-5). key is the
+  // row's key, decision:<initiative>/<NNNN>. Leaving Home closes it.
+  ruleDraft: RuleDraft | null;
+  openRule: (key: string | null) => void;
+  setRuleDraft: (patch: Partial<Omit<RuleDraft, "key">>) => void;
   slackFocus: string | null;
   setSlackFocus: (agent: string | null) => void;
   openSlack: (initiativeId: string, agent: string | null) => void;
@@ -86,6 +99,12 @@ type State = {
   reorderCards: (initiativeId: string, slugs: string[]) => Promise<void>;
 };
 
+export type RuleDraft = { key: string; chosen: string; words: string };
+
+const RAIL_KEY = "rail.collapsed.strip";
+const storedRail = () => { try { return localStorage.getItem(RAIL_KEY); } catch { return null; } };
+const width0 = typeof window === "undefined" ? 1440 : window.innerWidth;
+
 export const useBoard = create<State>((set, get) => ({
   view: null,
   account: null,
@@ -120,14 +139,27 @@ export const useBoard = create<State>((set, get) => ({
       const view = Object.assign(Object.create(Object.getPrototypeOf(st.view)), st.view, { board });
       return { agents, view };
     }),
-  railCollapsed: (() => { try { return localStorage.getItem("rail.collapsed.strip") === "1"; } catch { return false; } })(),
-  setRailCollapsed: (railCollapsed) => { try { localStorage.setItem("rail.collapsed.strip", railCollapsed ? "1" : "0"); } catch { /* per-viewer */ } set({ railCollapsed }); },
+  railCollapsed: railCollapsedFor(storedRail(), widthClassOf(width0)),
+  // The lead's toggle is the only writer of the stored choice.
+  setRailCollapsed: (railCollapsed) => { try { localStorage.setItem(RAIL_KEY, railCollapsed ? "1" : "0"); } catch { /* per-viewer */ } set({ railCollapsed }); },
+  widthClass: widthClassOf(width0),
+  roomy: roomyOf(width0),
+  setWindowWidth: (w) => {
+    const widthClass = widthClassOf(w);
+    const roomy = roomyOf(w);
+    const st = get();
+    if (widthClass === st.widthClass && roomy === st.roomy) return;
+    set({ widthClass, roomy, railCollapsed: railCollapsedFor(storedRail(), widthClass) });
+  },
+  ruleDraft: null,
+  openRule: (key) => set({ ruleDraft: key ? { key, chosen: "", words: "" } : null }),
+  setRuleDraft: (patch) => set((st) => (st.ruleDraft ? { ruleDraft: { ...st.ruleDraft, ...patch } } : {})),
   slackFocus: null,
   setSlackFocus: (slackFocus) => set({ slackFocus }),
-  openSlack: (selectedInitiative, slackFocus) => set({ screen: "initiative", sub: "conversations", selectedInitiative, slackFocus, slackDraft: null, needsMeFocus: null }),
+  openSlack: (selectedInitiative, slackFocus) => set({ ruleDraft: null, screen: "initiative", sub: "conversations", selectedInitiative, slackFocus, slackDraft: null, needsMeFocus: null }),
   slackDraft: null,
-  openSlackThread: (selectedInitiative, threadId) => set({ screen: "initiative", sub: "conversations", selectedInitiative, selected: null, slackDraft: { threadId }, needsMeFocus: null }),
-  openSlackDraft: (selectedInitiative, slackFocus, subject, body) => set({ screen: "initiative", sub: "conversations", selectedInitiative, selected: null, slackFocus, slackDraft: { subject, body }, needsMeFocus: null }),
+  openSlackThread: (selectedInitiative, threadId) => set({ ruleDraft: null, screen: "initiative", sub: "conversations", selectedInitiative, selected: null, slackDraft: { threadId }, needsMeFocus: null }),
+  openSlackDraft: (selectedInitiative, slackFocus, subject, body) => set({ ruleDraft: null, screen: "initiative", sub: "conversations", selectedInitiative, selected: null, slackFocus, slackDraft: { subject, body }, needsMeFocus: null }),
   clearSlackDraft: () => set({ slackDraft: null }),
   addNote: async (initiativeId, slug, text) => {
     const key = `${initiativeId}/${slug}`;
@@ -174,12 +206,12 @@ export const useBoard = create<State>((set, get) => ({
   decisionFocus: null,
   goHome: () => set({ screen: "home", selectedInitiative: null, needsMeFocus: null, decisionFocus: null }),
   agentsLanding: null,
-  openAgentsAt: (selectedInitiative, agentsLanding) => set({ screen: "initiative", selectedInitiative, sub: "agents", needsMeFocus: null, decisionFocus: null, agentsLanding }),
+  openAgentsAt: (selectedInitiative, agentsLanding) => set({ ruleDraft: null, screen: "initiative", selectedInitiative, sub: "agents", needsMeFocus: null, decisionFocus: null, agentsLanding }),
   clearAgentsLanding: () => set({ agentsLanding: null }),
-  openInitiative: (selectedInitiative, sub) => set({ screen: "initiative", selectedInitiative, sub, needsMeFocus: null, decisionFocus: null }),
+  openInitiative: (selectedInitiative, sub) => set({ ruleDraft: null, screen: "initiative", selectedInitiative, sub, needsMeFocus: null, decisionFocus: null }),
   openNeedsMe: (needsMeFocus) => set({ screen: "home", selectedInitiative: null, selected: null, needsMeFocus, decisionFocus: null }),
-  openDecision: (selectedInitiative, number) => set({ screen: "initiative", selectedInitiative, sub: "decisions", selected: null, needsMeFocus: null, decisionFocus: `${selectedInitiative}/${number}` }),
-  openSettings: () => set({ screen: "settings", selectedInitiative: null, needsMeFocus: null, decisionFocus: null }),
+  openDecision: (selectedInitiative, number) => set({ ruleDraft: null, screen: "initiative", selectedInitiative, sub: "decisions", selected: null, needsMeFocus: null, decisionFocus: `${selectedInitiative}/${number}` }),
+  openSettings: () => set({ ruleDraft: null, screen: "settings", selectedInitiative: null, needsMeFocus: null, decisionFocus: null }),
   selected: null,
   filterMachine: null,
   filterClient: null,
