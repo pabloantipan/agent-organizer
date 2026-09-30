@@ -1,8 +1,8 @@
 # Home at every width Pablo works at: the build spec
 
-status: proposed (0061)
+status: accepted (0061, 2026-09-29); 0062 ruled
 owner: pablo
-decisions: [0033 ruled, 0059 ruled, 0060 ruled, 0061 proposed, 0062 proposed]
+decisions: [0033 ruled, 0059 ruled, 0060 ruled, 0061 ruled, 0062 ruled]
 design: `docs/ux/specs/responsive-home.md` (Aglaea, 3174fc2), "the design"
 roadmap: fixes to stage 2 (twenty at a glance) at the widths Pablo uses; appetite one wave
 
@@ -55,7 +55,8 @@ Nothing Home contains changes, except 0060's word.
   - **Needs me** becomes a right column of about 520 px that scrolls on its
     own;
   - **the list** is capped at 1,600 px, and the whole is capped near
-    2,200 px, placed per 0062;
+    2,200 px, starting at the rail with the empty space on the right
+    (0062: left from the rail);
   - **goals** show whole up to about 70 characters;
   - **the rule box** opens inside the Needs me column, under its row;
   - **an empty Needs me** keeps its column, with "Nothing waits on you".
@@ -108,7 +109,7 @@ Nothing Home contains changes, except 0060's word.
   by the lead's toggle, never by the class.
 - **Wide layout.** `.home` becomes a two-column grid in the wide class. Needs
   me's column is `position: sticky` with its own `overflow: auto`, so it
-  scrolls on its own. Placement (left from the rail or centred) is 0062's.
+  scrolls on its own. It starts at the rail; the space past the cap stays empty on the right (0062).
 - **The rule box in the wide class** renders inside the Needs me column,
   under its row, not in the page's overlay layer. FR-5 means the box's state
   must live above the layout switch: the open row's key and the typed words
