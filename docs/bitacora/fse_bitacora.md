@@ -11,9 +11,11 @@ restating it (the discuss skill).
   **sup20 ended.**
 - **Running:** sup21 on `responsive-home` (0061, 0062 left from the rail;
   carries 0060's "you"), token organizer/sup21. End it when the card lands.
-- **Asked of Aglaea:** a header design spec, header-review-2's six findings
-  plus ui-leftovers UI1 (8 px timeline at 1024) and whatever of UI2–UI7 fits;
-  the in-app editing of goal/scope comes back as options for a record.
+- **Header:** Aglaea's design (6c93a49) → build spec
+  `docs/specs/initiative-header.md`, cards `header-fold` and `rule-box-finish`
+  (parallel, after responsive-home, ui_review), **0063** accept (changes
+  redesign FR-17; forecast 45–70 min), **0064** editing goal/scope (recommend
+  file only). On both: one supervisor after sup21.
 - **Open from sup20:** FR-10's "no owner everywhere" missed DecisionsView
   ("owner —", outside the boundary); fixture-home.sh talks to the live
   organizer-fixture mailbox (not hermetic). Candidates for the next small card.

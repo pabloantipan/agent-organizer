@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: main
 updated: 2026-09-28
-next: "aglaea: a design spec for the header (these six plus ui-leftovers UI1, the 8 px timeline at 1024); then the FSE specs it and raises the in-app editing choice as a record"
+next: "pablo: rule 0063 (accept the header design and build spec) and 0064 (edit goal and scope in the app?); built by header-fold and rule-box-finish"
 stage: twenty-at-a-glance
 ---
 
@@ -48,11 +48,12 @@ Pablo, 2026-09-28, in the FSE's session, from the installed app v0.2.0-348
   file-only editing.
 
 ## Done
+- 2026-09-29 designed by Aglaea (docs/ux/specs/initiative-header.md), specced by the FSE (docs/specs/initiative-header.md), cards header-fold and rule-box-finish
 - 2026-09-28 opened by the FSE from Pablo's report
 
 ## Next
-1. aglaea: the header design spec (asked 2026-09-29)
-2. fse: build spec, a record for in-app editing of goal and scope, cards
+1. pablo: rule 0063 and 0064
+2. closes when header-fold and rule-box-finish land
 
 ## Blockers
 none

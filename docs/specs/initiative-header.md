@@ -1,0 +1,148 @@
+# The initiative header folds, and says what its parts are: the build spec
+
+status: proposed (0063)
+owner: pablo
+decisions: [0038 ruled, 0061 ruled, 0063 proposed, 0064 proposed]
+design: `docs/ux/specs/initiative-header.md` (Aglaea, 6c93a49), "the design"
+roadmap: stage 2 (twenty at a glance), the header; appetite one wave
+
+## Problem
+
+Pablo's six findings on the header from the installed app are in
+`working-on/header-review-2.md`, in his words ("I can't colapse the goal and
+the scope. And gain, too much space."; "On the chip 2 decisions waiting click
+does nothing"; the stage strip has no label; the phase chip reads as a status;
+a stage tile opens nothing; editing goal and scope). ui-leftovers' UI reviewer
+added UI1: at 1024×640, Answer lands on Conversations with an 8 px timeline.
+The design measured the cause on `4c3c78d`: the header is 378 px at every
+width, 59% of the window at 1024×640.
+
+**Appetite:** one wave, two cards in parallel, after responsive-home (it
+adds the width class these cards read, and it owns the rule box).
+
+## Goals
+
+The design's acceptance H1 to H11.
+
+## Non-goals
+
+As the design's "Out of scope": Home, the rule box's placement and the rail
+(responsive-home); Roadmap's Cards and Calendar. Editing goal and scope in the
+app is 0064's. FR-9 below is built only as 0064 rules.
+
+## Requirements
+
+Each FR is the design's section of the same subject.
+
+- **FR-1** (§1, the fold) The header shall have two states:
+  - **folded**, one bar: id, stage, waiting chip, target, the goal on one
+    line, and Details;
+  - **open**, today's block, with scope clamped like goal and two columns in
+    the wide class.
+
+  Folded is the default, and the state is remembered per machine. Every
+  landing folds it: Answer, Open, `openDecision`, `openNeedsMe`,
+  `openSlack`, a stage tile. Opening Details by hand stays open across
+  initiatives until the lead folds it.
+- **FR-2** (§2) The waiting chip shall read "N waiting" or "N waiting on
+  you", and is not drawn at zero. It opens Decisions on the first waiting
+  record, expanded and focused (`openDecision`), from any sub-view,
+  including Decisions itself.
+- **FR-3** (§3, §4) The stage strip shall carry a label with an icon:
+  "Roadmap · stage n of m". When every stage has the same phase, the phase
+  sits once in the label ("Roadmap · building · stage 5 of 6"). Otherwise it
+  is a word over each run of stages, with a divider where it changes. No tile
+  carries a phase chip.
+- **FR-4** (§5) A stage tile shall be a button. It opens Roadmap → Stages
+  with that stage expanded (outcome, exit items with their dates, gates, its
+  cards) and focused. The expanded stage row in `StageRoadmap` is new.
+- **FR-5** (§6) Conversations, Agents and Decisions shall drop their title
+  row repeating the initiative's id (`SlackView.tsx:68`, `:82`;
+  `DecisionsView.tsx:80` when an initiative is selected; Agents' equivalent).
+- **FR-6** (§7) At 1024×640, Conversations shall give the timeline at least
+  half the sub-view's height. Answer lands with focus on the thread's
+  divider, and the asked message and the composer both on screen.
+- **FR-7** (the design's "the rest", UI2, UI4–UI7):
+  - Tab and Shift+Tab loop inside the open rule box, and one box is open at
+    a time.
+  - When the record area is shorter than both clamps, the Question clamps
+    to three lines.
+  - `ownerPhrase` on DecisionsView.
+  - The rule box's head and its dialog name carry the initiative
+    ("init-drafted 0001").
+  - The People toggle's `aria-label` names People and its counts.
+- **FR-8** (redesign FR-17 changes) The goal, the measure and the stages
+  show on the folded bar (goal on one line, the stage) and in Details (the
+  whole). 0038's clamps and fixed header stand.
+- **FR-9** [per 0064] Details shall show, beside goal, measure and scope,
+  where they are written (`working-on/initiative.yaml`). The rest of FR-9
+  follows 0064's ruling: on "file only", Open in editor and an "edited, not
+  committed" mark when git reports the file modified; on "edit" or "edit and
+  commit", a spec amendment first.
+
+## Acceptance → gate
+
+| # | Design | Check | Expected |
+|---|---|---|---|
+| G1 | H1 | 1024×640, Answer on init-a's asking thread (the ui-leftovers fixture) | screenshot and `activeElement`: as H1 |
+| G2 | H2, H10 | every sub-view at 1024, 1512 and 3440, folded | screenshots; bar plus tabs ≤ 90 px; no repeated id row |
+| G3 | H3, H4 | open Details, switch initiative, reload; then Open on a Needs me card row | screenshots; as H3, H4 |
+| G4 | H5 | the chip from Work and from Decisions; an initiative with no waiting record | screenshots and `activeElement`: as H5 |
+| G5 | H6, H7 | the organizer's header on the real home (read only), init-a on the fixture | screenshots: as H6, H7 |
+| G6 | H8 | click and Enter on stage 2's tile | screenshot and `activeElement`: as H8 |
+| G7 | H9 | 3440×1380, Details open | screenshot: as H9 |
+| G8 | H11 | a reviewer who never saw the app, shown the folded bar and the strip at 1512×945 | their answers: as H11 |
+| G9 | FR-7 | the rule box: Tab loop, one box, Question at three lines on the roster record at 1024, the head's name; Decisions' owner phrase; People's name | a log of focus and accessible names; screenshots |
+| G10 | FR-9 | as 0064 rules | as 0064 rules |
+| G11 | all | `XDG_DATA_HOME=$(mktemp -d) make test`; `cd frontend && npm run build`; the redesign's G18 grep | pass |
+
+## Boundary
+
+- **header-fold card** (FR-1 to FR-6, FR-8, FR-9):
+  - `InitiativeHeader.tsx`;
+  - `RoadmapView.tsx`, `Roadmap.tsx` (the expanded stage row only);
+  - `SlackView.tsx`, `Conversation.tsx` (the title row, the timeline's
+    height, Answer's focus);
+  - `AgentsView.tsx`, `DecisionsView.tsx` (the title row only);
+  - `board.store.ts` (the fold state; landings fold);
+  - `styles/shell.css`, header CSS; `lib/` and its tests.
+- **rule-box-finish card** (FR-7):
+  - `RuleDecisionBox.tsx`, `rule-box.css`;
+  - `DecisionsView.tsx` (`ownerPhrase` only);
+  - `Conversation.tsx` (the People toggle's label only);
+  - `lib/` tests.
+- **Must not touch:**
+  - `Home.tsx`, `Rail.tsx` (responsive-home);
+  - Go code;
+  - `docs/design-system.md` (Aglaea's);
+  - `~/.claude/skills`.
+
+## Technical notes
+
+- **Fold state:** a store field remembered in localStorage, like
+  `rail.collapsed.strip` (`board.store.ts:117`). It is a key of its own,
+  written only by the lead's Details toggle. The landing actions (`openSlack`,
+  `openNeedsMe`, `openDecision`, and the stage-tile action) set the in-memory
+  field to folded and do not write the stored choice. That is how "a landing
+  folds it" and "Details stays open" coexist: the stored choice applies on
+  the next navigation the lead makes by hand.
+- **The chip** today calls `openInitiative(id, "decisions")`, which does
+  nothing on Decisions. Use `openDecision(id, first waiting number)`.
+- **The stage tile** needs a store target like `decisionFocus`, named
+  `stageFocus: <initiative>/<stage id>`, which `StageRoadmap` reads, expands
+  and focuses, then clears.
+- **Width class:** read responsive-home's FR-1 field; do not add another
+  listener.
+- **Parallel cards:** both touch `DecisionsView.tsx` and `Conversation.tsx`
+  in different lines. The second to merge rebases.
+
+## Cards
+
+| Card | Gate rows | Depends on | ui_review |
+|---|---|---|---|
+| `header-fold` | G1–G8, G10, G11 | responsive-home | true |
+| `rule-box-finish` | G9, G11 | responsive-home | true |
+
+## Amendments
+
+- none yet
