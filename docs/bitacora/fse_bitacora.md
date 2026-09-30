@@ -10,6 +10,8 @@ restating it (the discuss skill).
   20–36 (UI reviewer 11 min of the critical path); run record
   runs/2026-09-29-conform-and-waiting.md. **sup19 ended.** Nothing of mine
   runs; tokens: aglaea, fse, pablo.
+- **0060 ruled "you" (6aac168):** the lead's own records read "1 waiting ·
+  you"; an FR in the next UI card (sup20 had launched).
 - **0059 ruled "1024 is real" (45dc799)**; Pablo asks for "kinda responsive"
   (wide monitor and a 14" laptop), relayed to Aglaea for a design spec (thread
   "0059: Home at 1024 and wide"). Next UI card: her spec or the stage-shortening
