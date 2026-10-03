@@ -1,13 +1,13 @@
 ---
 title: Accept the time-zoom spec and launch its card after header-fold-2
-status: proposed
+status: ruled
 raised: 2026-10-03
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-03
+ruled_by: pablo
 options: [accept as written, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [time-zoom]
 threads: [01M416RZH3E5VPJC9D5H8PK73F]
 supersedes: []
@@ -43,6 +43,8 @@ high end raised because this card spans three graphs and a Go change.
 The FSE's: accept as written.
 
 ## Ruling
+
+pablo, 2026-10-03, in the organizer on lodestar: Ok
 
 ## Consequences
 
