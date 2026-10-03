@@ -172,9 +172,9 @@ const SUBS: { id: Sub; label: string }[] = [
 /** The initiative header (FR-17; initiative-header FR-1): folded by default
  *  to one bar (id, stage, waiting chip, target, the goal on one line,
  *  Details); open, the charter (goal, measure, scope, where they are written)
- *  and the stage strip. The stored choice is the lead's Details toggle; a
- *  landing folds it in memory (board.store). No badge on a sub-view: Needs
- *  me is the one count. */
+ *  and the stage strip. The stored choice is the lead's Details toggle, and a
+ *  landing stores "folded" (FR-11, board.store). No badge on a sub-view:
+ *  Needs me is the one count. */
 export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardInitiative }) {
   const { sub, openInitiative, openDecision, openStage, view, agents, headerOpen, setHeaderOpen, widthClass } = useBoard();
   const lead = leadOf((agents?.groups ?? []).find((g) => g.id === i.id));
