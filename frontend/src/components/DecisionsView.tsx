@@ -332,6 +332,12 @@ export function DecisionsView() {
           ref={findRef}
           type="text"
           className="dec-find-input"
+          // A number or words to match, not prose: no spelling or completion
+          // bubble, which in WKWebView took the first Escape (L8).
+          spellCheck={false}
+          autoCorrect="off"
+          autoCapitalize="off"
+          autoComplete="off"
           placeholder="Find a decision: number or words"
           aria-label="Find a decision: number or words"
           value={query}
