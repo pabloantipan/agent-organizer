@@ -1,10 +1,10 @@
 ---
 title: Home widths, third pass - wide from 2200, signals never wrap, columns give way only when they do not fit; three focus and name fixes
-status: now
+status: done
 repos: [organizer]
 branch: widths-and-focus
 updated: 2026-10-03
-next: "review: widths-and-focus, gate met (G13-G18, G8 on 9fdb19d, rebased on 4afddc0)"
+next: "merged 82ca2a2; W1-W5 and the spec gaps are the FSE's"
 depends_on: []
 boundary: ["frontend/src/components/Home.tsx, Rail.tsx, RuleDecisionBox.tsx", "frontend/src/lib/width.ts, frontend/src/lib/ and its tests", "frontend/src/styles/home.css, rule-box.css, shell.css (the rail's rules only)", "FR-19 only: frontend/src/components/Overview.tsx (the record row's open), CardDrawer.tsx (focus on open and close), Conversation.tsx (the divider's icon button names)", "frontend/src/stores/board.store.ts only if the class boundary is read there", "not: header-fold-2's files; no Go; not docs/design-system.md"]
 spec: "docs/specs/responsive-home.md (FR-13 to FR-19, amendment 3); the ranking: docs/ux/reviews/2026-09-30-rank-header-fold-responsive-2.md (Aglaea, 3f3df2f); the design system's Widths as amended there"
@@ -28,6 +28,7 @@ Aglaea: FR-13 to FR-19 of `docs/specs/responsive-home.md`.
 - [x] G8: see `docs/specs/responsive-home.md`, Acceptance
 
 ## Done
+- 2026-10-03 sup25 merged widths-and-focus as 82ca2a2 after code and UI review pass; make test and npm run build green on main
 - 2026-10-03 wf-build: FR-13 to FR-19 on widths-and-focus (e0875dc..9fdb19d, 9 commits), rebased on main after header-fold-2 (4afddc0, no conflict); G8 green and G13-G18 measured on 9fdb19d; logs, shots and scripts in .wt-notes/wf-build/ (progress.md)
 - 2026-10-03 sup25 launched seat wf-build in .wt/widths-and-focus
 - 2026-10-03 sup25 launched by the FSE (Pablo's go-ahead, "ok")
