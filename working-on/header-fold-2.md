@@ -1,10 +1,10 @@
 ---
 title: The header, second pass - a height budget at compact, landings stay folded, stage buttons that look it, names
-status: next
+status: now
 repos: [organizer]
 branch: header-fold-2
 updated: 2026-10-03
-next: "sup25 builds it (organizer-probe-sup25, launched 2026-10-03)"
+next: "hf2-build: build FR on .wt/header-fold-2 (sup25 wave)"
 depends_on: []
 boundary: ["frontend/src/components/InitiativeHeader.tsx and its CSS", "frontend/src/stores/board.store.ts (landings store folded, FR-11 only)", "frontend/src/components/AgentsView.tsx (group head and toolbar line, FR-13 only)", "frontend/src/components/RoadmapView.tsx and Roadmap.tsx (stage word and row, FR-14 only)", "frontend/src/components/DecisionsView.tsx (aria-expanded on dec-line only)", "frontend/src/styles/shell.css (header and stepper rules only)", "frontend/src/lib/ and its tests", "testdata/fixture-overlay/ and the fixture script (FR-16)", "not: Home.tsx, Rail.tsx, lib/width.ts, home.css, rule-box.css, Overview.tsx, CardDrawer.tsx, Conversation.tsx (widths-and-focus); no Go; not docs/design-system.md"]
 spec: "docs/specs/initiative-header.md (FR-10 to FR-16, amendment 3); the ranking: docs/ux/reviews/2026-09-30-rank-header-fold-responsive-2.md (Aglaea, 3f3df2f); the design system as amended there"
@@ -27,6 +27,7 @@ header-fold's UI leftovers, ranked by Aglaea: FR-10 to FR-16 of
 - [ ] G11: see `docs/specs/initiative-header.md`, Acceptance
 
 ## Done
+- 2026-10-03 sup25 launched seat hf2-build in .wt/header-fold-2
 - 2026-10-03 sup25 launched by the FSE (Pablo's go-ahead, "ok")
 - 2026-09-30 0069 ruled by pablo ("Ok", accept as written, 549217f); launchable, sup25 not started yet
 - 2026-09-30 cut from initiative-header amendment 3 by the FSE
