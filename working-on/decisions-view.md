@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: decisions-view
 updated: 2026-10-03
-next: "review: decisions-view, gate met (B1-B14 measured, tests green; branch decisions-view e056cba)"
+next: "review: decisions-view, U1 fixed (7c4f1e0)"
 depends_on: [header-fold-2, time-zoom]
 boundary: ["frontend/src/components/DecisionsView.tsx (page frame, summary, find, section headings, Ruled's limit, Timeline row label and position; dec-line's sticky head and its name, Amendment 1 (0074); not the record body, the Timeline's axis, marks or zoom)", "its CSS", "frontend/src/lib/ and its tests (find match, summary words, turnaround words)", "frontend/src/stores/board.store.ts (the three sections' remembered open state only)", "testdata/ fixtures the gate rows need", "not: Go, the rule box, InitiativeHeader.tsx, Roadmap*.tsx, docs/design-system.md, ~/agent-slack"]
 spec: "docs/ux/specs/decisions-view.md (Aglaea, 9386d15, with the FSE's Technical notes); the review docs/ux/reviews/2026-10-03-decisions-view.md (D1-D7)"
@@ -24,6 +24,7 @@ it: rule what waits, check what he just ruled, find an old ruling, see the pace.
 - [x] `cd frontend && npm test` passes with tests for the find match, the summary line's cases and the turnaround words; `go test ./...` green; `wails build` succeeds
 
 ## Done
+- 2026-10-03 dv-build: U1 fixed (7c4f1e0): the capped rule box on a stuck head scrolls inside itself, foot pinned; 1024x580 Chromium scrollHeight 348 > clientHeight 332, foot inside the box (.wt-notes/dv-build/u1-1024x580.log); branch rebased on main, make test, npm run build, wails build green
 - 2026-10-03 dv-build: built on decisions-view (5907cff lib, 32941c1 store, e056cba view); B1-B14 measured in headless Chromium against the fixture and a 74-record copy, numbers and shots in .wt-notes/dv-build/progress.md; make test, npm run build, wails build green
 - 2026-10-03 sup27 launched by the FSE (0072, 0074 ruled, accept as written)
 - 2026-10-03 Aglaea's Amendment 1 (2b6d608) adds the sticky record head and the line's name (B12-B14); proposed in 0074
