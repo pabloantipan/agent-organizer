@@ -322,7 +322,9 @@ export function TimeFrame({ z, label, axis, extents, undated, children }: FrameP
 /** No axis text is cut, and none overlaps (design system, Timeline;
  *  leftovers-4 FR-11), decided on the rendered boxes. The room is the lane's
  *  visible stretch: from the label column's edge to the frame's inner right
- *  edge (a classic scrollbar's width is outside it).
+ *  edge (a classic scrollbar's width is outside it), narrowed by any box
+ *  between the label and the frame that clips it (the grid, which ends with
+ *  the lane, clips the today label: U2).
  *  - A mark's title (a milestone, the target), the undated label and the
  *    today label are moved inside the room while their mark is in it; the
  *    today label first flips to the line's other side. One wider than the
@@ -349,6 +351,15 @@ function placeAxisLabels(content: HTMLElement) {
   if (today) { today.style.left = ""; today.style.right = ""; }
   if (undated) undated.style.borderLeftColor = "";
   const hide = (e: HTMLElement) => { e.style.visibility = "hidden"; };
+  const room = (e: HTMLElement) => {
+    let [l, h] = [lo, hi];
+    for (let a = e.parentElement; a && a !== frame; a = a.parentElement) {
+      if (getComputedStyle(a).overflowX === "visible") continue;
+      const r = a.getBoundingClientRect();
+      l = Math.max(l, r.left + a.clientLeft); h = Math.min(h, r.left + a.clientLeft + a.clientWidth);
+    }
+    return [l, h] as const;
+  };
   // A label's text box: what overlaps is the text, not a line box's leading
   // (and a Days label's span is its whole column). The today, undated and
   // context labels keep their own box, which their background or rule fills.
@@ -360,13 +371,14 @@ function placeAxisLabels(content: HTMLElement) {
     const at = e === today ? e.parentElement!.getBoundingClientRect().left
       : e === undated ? e.getBoundingClientRect().left
       : (() => { const g = e.parentElement!.getBoundingClientRect(); return (g.left + g.right) / 2; })();
-    if (at < lo || at > hi) { hide(e); continue; }
+    const [l, h] = room(e);
+    if (at < l || at > h) { hide(e); continue; }
     let b = e.getBoundingClientRect();
-    if (e === today && b.right > hi) {
+    if (e === today && b.right > h) {
       e.style.left = "auto"; e.style.right = "5px";
       b = e.getBoundingClientRect();
     }
-    const dx = shiftInside(b, lo, hi);
+    const dx = shiftInside(b, l, h);
     if (dx === null) { hide(e); continue; }
     if (dx !== 0) {
       e.style.transform = `translateX(${dx}px)`;
@@ -379,7 +391,8 @@ function placeAxisLabels(content: HTMLElement) {
   }
   const boxes = ticks.map((e) => ({ e, b: text(e), k: Number(e.dataset.k), minor: !!e.closest(".minor") }));
   const whole = boxes.filter(({ e, b }) => {
-    if (b.left >= lo && b.right <= hi) return true;
+    const [l, h] = room(e);
+    if (b.left >= l && b.right <= h) return true;
     hide(e);
     return false;
   });
