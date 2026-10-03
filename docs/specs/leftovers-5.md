@@ -51,6 +51,16 @@ disjoint files):
 - **FR-11** (row 12) Home's next date reads as everywhere else (`30 Nov`, the
   year only when not this year) and never wraps.
 
+Amendment 1 (proposed with 0077, from `docs/specs/leftovers-6.md`; Aglaea's
+`rank-leftovers-6.md`, b582a27):
+
+- **FR-12** (leftovers-6 row 13; rule-box-and-stages) A Stages bar's text
+  that does not fit sits after the bar, as the due label does; never cut
+  inside. A fixture record with eight options and a long question in
+  `testdata/fixture-overlay/` (leftovers-6 S2).
+- **FR-13** (leftovers-6 row 5; home-signals-5) A `pre` or table that scrolls
+  sideways carries the scroll edge, through the same `useScrollEdges`.
+
 ## Acceptance → gate
 
 Every width row names window or content, the rail state and overlay or
@@ -68,6 +78,8 @@ on its line" (row 14, amended by the FSE with this spec).
 | M5 | 8 | `--twenty`, the built app, classic scrollbars, after the first `agents` event: 1024×640 and 1280×800 rail expanded, 1920×1080 | waiting and blocked whole ("5 waiting") or folded after live, now, problems and the cell; the goal shown at 1280; the cell shown at 1920; a lib test that `shareRoom` returns fits |
 | M6 | 9 | the header's scroll area with content past an edge | the edge line in `--fg-subtle`; it appears for content added after mount |
 | M7 | 10, 11 | the names log over Conversation's clear and hide buttons; init-a's row at 1512 in the built app | names as FR-10; `30 Nov` on one line |
+| M8 | 12 | a short Stages bar with appetite text; the fixture record's rule box at a 1024×640 window | the text after the bar, whole; the box taller than its room scrolls, Rule and Cancel inside (leftovers-4 L7 reachable) |
+| M9 | 13 | a record with a wide code block, scrolled to its start and to its end | the edge line on the side with hidden content only |
 | M0 | all | `XDG_DATA_HOME=$(mktemp -d) make test` from a clean checkout; `cd frontend && npm run build`; `wails build` | pass |
 
 ## Boundary
@@ -80,8 +92,8 @@ on its line" (row 14, amended by the FSE with this spec).
 - **home-signals-5:** `Home.tsx`, `home.css`, `global.css` (`html, body` only),
   `lib/width.ts` and `lib/` tests, `shell.css` (the scroll edge only),
   `InitiativeHeader.tsx` (`useScrollEdges` only), `Conversation.tsx` and
-  `SlackView.tsx` (FR-10's names only), `testdata/fixture-twenty/` and
-  `scripts/fixture-home.sh`.
+  `SlackView.tsx` (FR-10's names only), `global.css` (`.markdown` scroll
+  edge, FR-13), `testdata/fixture-twenty/` and `scripts/fixture-home.sh`.
   Not: rule-box-and-stages' files, Go, `docs/design-system.md`.
 
 ## Technical notes
@@ -104,5 +116,5 @@ on its line" (row 14, amended by the FSE with this spec).
 
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
-| `rule-box-and-stages` | M1–M3, M0 | markdown-and-labels | true |
-| `home-signals-5` | M4–M7, M0 | markdown-and-labels | true |
+| `rule-box-and-stages` | M1–M3, M8, M0 | markdown-and-labels | true |
+| `home-signals-5` | M4–M7, M9, M0 | markdown-and-labels | true |
