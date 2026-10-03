@@ -135,9 +135,18 @@ gap; none needs Pablo. Widths amended: wide from 2200 (was 1920), signals
 never wrap in any class, a column gives way only when it doesn't fit, scrim
 in regular; 24 px targets; focus ring offset on accent; stage word "now".
 
+Roadmap time zoom (2026-10-03, `specs/roadmap-time-zoom.md`, proposed, for
+the FSE, thread 01M416RZH3E5VPJC9D5H8PK73F; Pablo: "month … days and then to
+hours with mins"): Months (as built) → Days (40 px/day) → Hours (64 px/h,
+quarter-hour grid); − level + Today Fit; pinch/⌘-wheel/keys/double-click
+one level each, pointer-anchored; day-precision dates fill their whole day;
+edge pointers for marks out of view; level not remembered.
+
 ## Open questions
 
-- none open.
+- O1 (Pablo, via the FSE): every Gantt date is day-only (`git.go` `%cs`), so
+  Hours shows whole-day bands unless commit times (`%cI`) or runs come first.
+  I recommend commit times in the same card.
 
 ## How I look at it
 
@@ -149,6 +158,9 @@ in regular; 24 px targets; focus ring offset on accent; stage word "now".
   `git checkout -- frontend/wailsjs/runtime` after, never commit it.
 
 ## Studies and lessons
+
+- **Check the data's precision before designing a scale.** Pablo asked for
+  hours and minutes; nothing the Gantt draws has a time of day.
 
 - Pressing an action that starts a real session (Draft the cell's Open,
   Bring crew up) is out of a review's reach; read the code path and say so.
