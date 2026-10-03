@@ -390,3 +390,16 @@ Every gate row (A1-A14, T1, T2) names its evidence. Boundary claims traced:
 "nothing else in Go reads BranchStart" (grep above); "level not remembered"
 (the spec's States, last row); "Calendar not zoomed" (Which graphs, 0070's
 O3 ruling). Result: holds.
+
+### Technical notes for Amendment 1
+
+by the FSE, 2026-10-03, on main 624c1eb. Card `time-zoom-2`, proposed in
+0074. Files: `TimeZoom.tsx`, `lib/axis.ts` and its test, `time-zoom.css`;
+A19's minutes label sits where the due label is, in `Roadmap.tsx`, and A22's
+highlight in `StageRoadmap.tsx`'s rows, so both are in the boundary for those
+lines only; A23's fixture card is in `scripts/fixture-home.sh` (sup26 found
+the script missing from the first boundary). Spec check: A15 replaces "Fit
+shows only when not at Fit" in States, which Amendment 1 rewrites; A16 and
+G3 agree; A18 and A19 use the fixture's `feat/beta` timed branch (b72cadd).
+None of A15-A23 needs remembered state (T5 holds). Result: holds.
+

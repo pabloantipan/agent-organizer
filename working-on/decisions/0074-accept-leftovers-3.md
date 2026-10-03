@@ -1,5 +1,5 @@
 ---
-title: Accept the leftovers-3 batch (both specs' amendment 4, decisions-view Amendment 1) and launch its two cards after decisions-view
+title: Accept the leftovers-3 batch (both specs' amendment 4, decisions-view and time-zoom Amendment 1) and launch its cards
 status: proposed
 raised: 2026-10-03
 raised_by: fse
@@ -8,8 +8,8 @@ ruled:
 ruled_by:
 options: [accept as written, accept with amendments, send back]
 chosen:
-cards: [header-fold-3, home-widths-4, decisions-view]
-threads: [01M41B2BRFY6W55KSBC307ZWY5]
+cards: [header-fold-3, home-widths-4, decisions-view, time-zoom-2]
+threads: [01M41B2BRFY6W55KSBC307ZWY5, 01M41BMCN93DZYWK5SZFNEBEVM]
 supersedes: []
 superseded_by:
 ---
@@ -38,6 +38,15 @@ design. She also amended the design system's Widths in that commit.
   24 px targets; the cell lozenge ellipsized; the fixture gains the rows the
   reviewers had to force.
 
+- **time-zoom-2** (`docs/ux/specs/roadmap-time-zoom.md` Amendment 1,
+  A15-A23; Aglaea 726cbe8, added to this record before your ruling): the
+  zoom control always shown, focus kept when a button disables at an end;
+  Today disabled at Fit; the day band at Hours readable (3:1 border) with its
+  dot kept in view; an edge pointer reveals the whole mark; a timed bar shows
+  `09:12–17:48`; whole axis labels; 24 px pointers; a fixture card for a
+  later month. Its files are the zoom's own, so it runs beside
+  decisions-view under one supervisor.
+
 Both cards run in parallel after decisions-view (it shares the rule box's
 Decisions behaviour), each with a UI reviewer who also shoots the built app
 in WKWebView, since every number so far is headless Chromium.
@@ -47,10 +56,10 @@ Technical notes and States; boundary files traced by grep (`CellStateLz` in
 `Crew.tsx`, `.rail-icon` in `global.css`, the tile's `openStage` in
 `InitiativeHeader.tsx`, vitest's scope for FR-19). Result: holds.
 
-forecast: 40-75 min of wave time over 1 wave (two cards in parallel, UI
-reviewers included), after decisions-view's wave, plus this decision
-(median 0 d); basis: 6 single-wave UI tasks, this initiative (25, 34, 41,
-46, 47, ~80 min).
+forecast: 40-75 min of wave time per wave over 2 waves (decisions-view with
+time-zoom-2, then header-fold-3 with home-widths-4, each two cards in
+parallel with UI reviewers), plus this decision (median 0 d); basis: 7 single-wave UI tasks, this initiative (25, 34, 41,
+45, 46, 47, ~80 min).
 
 ## Options
 
@@ -67,5 +76,6 @@ the design system as amended and gate fixes.
 
 ## Consequences
 
-On acceptance: decisions-view builds B1-B14; the FSE starts one supervisor
-for header-fold-3 and home-widths-4 once decisions-view is in `done/`.
+On acceptance: the FSE starts one supervisor for decisions-view (B1-B14)
+and time-zoom-2 in parallel, then one for header-fold-3 and home-widths-4
+once decisions-view is in `done/`.
