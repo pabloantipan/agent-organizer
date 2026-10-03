@@ -163,7 +163,7 @@ Nothing Home contains changes, except 0060's word.
 | G17 | 18 | the rail toggle, expanded and as the strip | its bounding box ≥ 24×24 in both |
 | G18 | 19 | Overview → Open in Decisions on a ruled record; open and close a card back; Answer, then Tab through the thread divider | screenshots; `activeElement` after each; a names log with every divider button named |
 | G19 | 20 | `--twenty` at 1440×900 and 1512×945, rail expanded | DOM: an all-"—" column has given way while any goal shows; on the seven-signal row, blocked, waiting and waits-on-you are visible; only problems/now/live and, last, the cell's state are in "+N"; at a 1024×640 window with the rail expanded "+N" is whole inside the column (0076) |
-| G20 | 21 | `--twenty` at 2200×1200 and 2560×1440, rail expanded and collapsed | the class per size; wherever wide shows, every goal keeps ≥ 70 characters or is whole |
+| G20 | 21 | `--twenty` at 2200×1200 and 2560×1440, rail expanded and collapsed | the class per size; wherever wide shows, every goal keeps ≥ 65 characters on its line or is whole ("about 70", Widths; leftovers-5 row 14) |
 | G21 | 22, 23 | Home and Decisions: Rule open, click the record's text, press Escape; the element at the opener's Rule with the box open | the box closed both times; DOM: the opener's row is above the scrim with `--surface-selected` |
 | G22 | 24 | Conversation: a names log over a thread's reply and branch buttons; `.rail-icon` bounding boxes; hide, then `activeElement` | every button named as FR-24; each box ≥ 24×24; focus on the show control |
 | G23 | 25 | `--twenty` at 1024×640 and 1920×1080; the Needs me card row | DOM: CellStateLz's text whole or ending in an ellipsis on its span; the card row listed under Needs me |
