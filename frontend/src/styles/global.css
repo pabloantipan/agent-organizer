@@ -705,15 +705,7 @@ button.counts.linkish { font-family: var(--mono); }
    superseded and withdrawn are dim; every status also carries its word.
    Pair validated for colour vision on --bg (dataviz validator, 2026-09-26). */
 .decisions .dim { color: var(--dim); }
-.dec-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 18px; }
-.dec-stat { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 2px; }
-.dec-stat b { font-size: var(--font-size-3xl); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
-.dec-stat b.waiting { color: var(--decision-waiting); }
-.dec-stat span { font-size: var(--font-size-sm); color: var(--muted); }
 .dec-section { margin-bottom: 22px; }
-.dec-section h2 { display: flex; align-items: baseline; gap: 10px; font-size: var(--font-size-md); font-weight: 600; margin: 0 0 8px; }
-.dec-section h2 .meta { font-weight: 400; }
-.dec-section h2 button { margin-left: auto; }
 .dec-section h3 { font-size: var(--font-size-sm); font-weight: 500; margin: 14px 0 6px; }
 .dec { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); margin-bottom: 6px; }
 .dec.proposed { border-left: 3px solid var(--decision-waiting); }

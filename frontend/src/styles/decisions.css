@@ -6,3 +6,77 @@
 /* Where a landing puts the focused record, or its section when the heading
    fits above it: just under the header and tabs (DecisionsView, U8, U9). */
 .dec-section, .dec.focused { scroll-margin-top: var(--space-2); }
+
+/* The page (docs/ux/specs/decisions-view.md): find, the summary line, then
+   To rule, Ruled and the Timeline, each under a heading that folds it and
+   sticks under the initiative header while its rows scroll by. */
+.decisions { --dec-stick: calc(-1 * 18px); --dec-sh: 40px; }
+.dec-find { display: grid; gap: var(--space-2); margin-bottom: var(--space-3); }
+.dec-find-input { width: 100%; box-sizing: border-box; }
+.dec-find-none { display: flex; align-items: center; gap: var(--space-3); font-size: var(--font-size-md); line-height: var(--line-md); color: var(--fg-muted); }
+.dec-summary { margin: 0 0 var(--space-4); font-size: var(--font-size-md); line-height: var(--line-md); color: var(--fg); }
+.dec-summary button.dec-summary-link { font: inherit; color: var(--accent-fg); padding: 0; min-height: 0; text-decoration: underline; text-underline-offset: 2px; }
+
+/* §3: the section heading, xl semibold, sticky on the page's ground. The
+   board-wrap's own top padding is taken back so nothing shows above it. */
+.dec-sh {
+  position: sticky; top: var(--dec-stick); z-index: 6;
+  display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;
+  min-height: var(--dec-sh); box-sizing: border-box; margin: 0 0 var(--space-2);
+  background: var(--bg); box-shadow: 0 1px 0 var(--border-subtle);
+}
+.dec-sh h2 { margin: 0; font-size: var(--font-size-xl); line-height: var(--line-xl); font-weight: var(--weight-semibold); }
+.dec-sh-btn, .dec-sh-static {
+  display: inline-flex; align-items: center; gap: var(--space-1-5);
+  min-height: var(--dec-sh); padding: 0 var(--space-2) 0 0; border: 0; background: none;
+  font: inherit; font-size: var(--font-size-xl); line-height: var(--line-xl); font-weight: var(--weight-semibold); color: var(--fg);
+}
+.dec-sh-btn { cursor: pointer; border-radius: var(--radius-sm); }
+.dec-sh-btn:hover { color: var(--accent-fg); }
+.dec-sh-btn:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.dec-sh-btn[aria-expanded="true"] .dec-chev { color: var(--fg-muted); }
+.dec-chev { display: inline-block; width: 14px; text-align: center; font-size: var(--font-size-md); color: var(--fg-subtle); }
+.dec-sh-tools { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); margin-left: auto; }
+.dec-section.dec-tl .tz-head { margin-bottom: 0; }
+.dec-empty, .dec-nomatch { padding: var(--space-1) 0 var(--space-2); }
+
+/* §4: Ruled's limit, a row of its own. */
+button.dec-more {
+  display: block; width: 100%; min-height: 32px; margin-top: var(--space-1); text-align: left; padding: 0 var(--space-3);
+  background: none; border: 1px dashed var(--border); border-radius: var(--r);
+  font-size: var(--font-size-md); color: var(--accent-fg); cursor: pointer;
+}
+button.dec-more:hover { background: var(--surface-hover); }
+
+/* §5: Timeline rows on one line, 28 px; the marks centred in the shorter lane. */
+.g-row.dec-row { min-height: 28px; height: 28px; }
+.g-row.dec-row + .g-row.dec-row { border-top: 0; box-shadow: inset 0 1px 0 rgba(255,255,255,0.03); }
+.dec-row .g-lane { height: 28px; }
+.dec-row .g-label { display: flex; align-items: center; height: 28px; }
+.dec-row .dec-bar { top: 8px; }
+.dec-row .dec-dot { top: 9px; }
+
+/* Amendment 1 §8: a record taller than the view keeps its head (line and
+   Rule) stuck under the section heading until the record ends; the body
+   passes under it. The rule box rides with Rule, capped in the room under
+   the stuck head (--dec-box-max, measured), and scrolls inside itself. */
+.dec-head.stuck {
+  position: sticky; top: calc(var(--dec-stick) + var(--dec-sh)); z-index: 5;
+  background: var(--panel); border-bottom: 1px solid var(--border);
+  border-radius: var(--r) var(--r) 0 0;
+}
+.dec-head.stuck + .dec-body { border-top: 0; }
+.dec-head.stuck .dec-actions { padding: 0 var(--space-3) var(--space-2); }
+.dec-head.stuck .rb {
+  position: absolute !important; top: calc(100% + var(--space-1)) !important; right: 0 !important; left: auto !important;
+  max-height: var(--dec-box-max, 60vh) !important;
+  overflow-y: auto; overscroll-behavior: contain;
+}
+/* Capped, the box scrolls inside itself (§8, U1) and its foot, Cancel and
+   Rule, stays pinned at the box's bottom edge, never below it. */
+.dec-head.stuck .rb > .rb-foot {
+  position: sticky; bottom: calc(-1 * var(--space-4)); z-index: 1;
+  margin: 0 calc(-1 * var(--space-4)) calc(-1 * var(--space-4)); padding: var(--space-2) var(--space-4) var(--space-4);
+  background: var(--surface-overlay);
+}
+.dec-actions { padding-right: var(--space-3); }
