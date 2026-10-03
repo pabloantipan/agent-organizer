@@ -66,6 +66,10 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   home-widths-4 (window 394068), held until time-zoom-2 landed for shared
   files (9b71bf4). sup27's findings to aglaea for leftovers-4. End sup28 on
   its done.
+- Pablo "al recommendation accepted. Go on": 0075 accept, 0076 folds last
+  (ce75486; FR-20 and G19 amended; sup28 told). Tab question (Aglaea's Q1)
+  unanswered: no spike; the DS line covers it. sup29 launched for
+  zoom-decisions-polish (window 395002). make install after sup28 lands.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
