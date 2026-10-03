@@ -56,6 +56,16 @@ button.dec-more:hover { background: var(--surface-hover); }
 .dec-row .dec-bar { top: 8px; }
 .dec-row .dec-dot { top: 9px; }
 
+/* Row 4: at Fit the frame does not scroll, so its axis sticks to the page's
+   scroller, right under the Timeline's sticky heading (its measured height,
+   --dec-tl-sh), while the rows pass under it. Zoomed, the frame scrolls
+   itself and its axis sticks inside it (time-zoom.css). */
+.dec-timeline .tz-frame:not(.zoomed) { overflow: visible; }
+.dec-timeline .tz-frame:not(.zoomed) .tz-axis-row {
+  position: sticky; top: calc(var(--dec-stick) + var(--dec-tl-sh, var(--dec-sh))); z-index: 6;
+  background: var(--panel);
+}
+
 /* Amendment 1 §8: a record taller than the view keeps its head (line and
    Rule) stuck under the section heading until the record ends; the body
    passes under it. The rule box rides with Rule, capped in the room under

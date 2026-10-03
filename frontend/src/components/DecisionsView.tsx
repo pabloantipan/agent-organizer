@@ -4,7 +4,7 @@ import type { merge, model } from "../../wailsjs/go/models";
 import { DAY, daysBetween, parseISO, shortDate, today } from "../lib/dates";
 import { addLocalDays } from "../lib/axis";
 import { ownerPhrase } from "../lib/decisions";
-import { countWords, decisionMatches, lineName, ruledShown, statusWord, summaryOf, timelineName, turnaroundWords, waitedWords, type DecSections } from "../lib/decisionsPage";
+import { countWords, decisionMatches, emptyRuledWords, lineName, rulerWords, ruledShown, shownSections, statusWord, summaryOf, timelineCount, timelineName, turnaroundWords, waitedWords, type DecSections } from "../lib/decisionsPage";
 import { readOnlyOf } from "../lib/queue";
 import { useBoard } from "../stores/board.store";
 import { RuleDecisionBox } from "./RuleDecisionBox";
@@ -30,6 +30,10 @@ export function DecisionsView() {
   const [query, setQuery] = useState("");
   const [showAllRuled, setShowAllRuled] = useState(false);
   const [showClosed, setShowClosed] = useState(false);
+  // Sections a landing opened for this visit (§6, row 8) and hand toggles
+  // made during the current find (row 6): neither is stored.
+  const [visit, setVisit] = useState<Partial<DecSections>>({});
+  const [findHand, setFindHand] = useState<Partial<DecSections>>({});
   // The record a landing is on its way to, and a count so the same record
   // lands again (the chip pressed twice, FR-2).
   const landing = useRef<string | null>(null);
@@ -62,6 +66,24 @@ export function DecisionsView() {
   // their small heading, inside the same limit (§4).
   const past = [...ruled, ...closed];
   const hit = (r: Row) => decisionMatches(r.d, query);
+  // Timeline rows: superseded and withdrawn only when asked for.
+  const shown = [...rows].filter((r) => showClosed || (r.d.status !== "superseded" && r.d.status !== "withdrawn")).sort((a, b) => a.d.raised.localeCompare(b.d.raised) || a.d.number.localeCompare(b.d.number));
+  const openHits = open.filter(hit);
+  const pastHits = past.filter(hit);
+  const shownHits = shown.filter(hit);
+  // What shows open: while a find is on, every section with a hit (row 6);
+  // a landing's section for this visit (row 8); else the stored layout,
+  // which holds only what was toggled by hand.
+  const sections = shownSections(decSections, visit, filtering ? { rule: openHits.length > 0, ruled: pastHits.length > 0, timeline: shownHits.length > 0 } : null, findHand);
+  const handToggle = (id: keyof DecSections) => {
+    const next = !sections[id];
+    setDecSection(id, next);
+    setVisit((v) => { const rest = { ...v }; delete rest[id]; return rest; });
+    if (filtering) setFindHand((h) => ({ ...h, [id]: next }));
+  };
+  useEffect(() => { if (!filtering) setFindHand({}); }, [filtering]);
+  // Leaving the initiative ends the visit.
+  useEffect(() => { setVisit({}); }, [selectedInitiative]);
 
   // A landing (§6): the section that hides the record opens, Ruled shows all
   // when the record is beyond its ten, a find that hides it is cleared; then
@@ -72,7 +94,7 @@ export function DecisionsView() {
     if (r) {
       if (!hit(r)) setQuery("");
       const sec = sectionOf(r.d);
-      if (!decSections[sec]) setDecSection(sec, true);
+      if (!decSections[sec]) setVisit((v) => ({ ...v, [sec]: true }));
       if (sec === "ruled" && past.indexOf(r) >= 10) setShowAllRuled(true);
     }
     setExpanded(key);
@@ -119,7 +141,7 @@ export function DecisionsView() {
     // Focus and names, navigating (ui-leftovers FR-5): focus lands on the
     // record's row, never on the page body.
     el.querySelector<HTMLButtonElement>("button.dec-line")?.focus({ preventScroll: true });
-  }, [expanded, landSeq, decSections, showAllRuled, query]);
+  }, [expanded, landSeq, sections.rule, sections.ruled, sections.timeline, showAllRuled, query]);
 
   // Amendment 1 §8: an expanded record taller than the view keeps its head
   // (line and Rule) stuck under the section heading until its end. `tall`
@@ -146,7 +168,19 @@ export function DecisionsView() {
     ro.observe(el);
     ro.observe(wrap);
     return () => ro.disconnect();
-  }, [expanded, ruling, decSections, view]);
+  }, [expanded, ruling, sections.rule, sections.ruled, sections.timeline, view]);
+
+  // The Timeline's axis sticks under its heading (row 4), whose height grows
+  // when its tools wrap: measured, so the axis sits right under it.
+  const [tlHead, setTlHead] = useState<HTMLElement | null>(null);
+  const [tlHeadH, setTlHeadH] = useState(0);
+  useLayoutEffect(() => {
+    if (!tlHead) return;
+    setTlHeadH(tlHead.offsetHeight);
+    const ro = new ResizeObserver(() => setTlHeadH(tlHead.offsetHeight));
+    ro.observe(tlHead);
+    return () => ro.disconnect();
+  }, [tlHead]);
 
   // `/` puts the cursor in the find field when it is not in a text box (§2).
   useEffect(() => {
@@ -164,7 +198,6 @@ export function DecisionsView() {
   // Timeline: one row per decision, raised → ruled, open ones running to the
   // end of today. Records carry whole days, so the zoom stops at Days (A12);
   // each date covers its day.
-  const shown = [...rows].filter((r) => showClosed || (r.d.status !== "superseded" && r.d.status !== "withdrawn")).sort((a, b) => a.d.raised.localeCompare(b.d.raised) || a.d.number.localeCompare(b.d.number));
   const marks = [now, ...shown.flatMap((r) => [parseISO(r.d.raised), parseISO(r.d.ruled)]).filter((d): d is Date => !!d)].map((d) => d.getTime());
   const dataFrom = Math.min(...marks);
   const dataTo = addLocalDays(Math.max(...marks), 1);
@@ -222,7 +255,7 @@ export function DecisionsView() {
               {d.status === "proposed"
                 ? <>{ownerPhrase(d.owner)} · <b>{waitedWords(age(d))}</b></>
                 : d.status === "ruled"
-                  ? <>{d.chosen ? <>“{d.chosen}” · </> : null}by {d.ruled_by || "—"} · {ruledOn}{t && <> · {t}</>}</>
+                  ? <>{d.chosen ? <>“{d.chosen}” · </> : null}{rulerWords(d.ruled_by)} · {ruledOn}{t && <> · {t}</>}</>
                   : d.superseded_by ? <>by {d.superseded_by}</> : null}
             </span>
           </button>
@@ -260,17 +293,17 @@ export function DecisionsView() {
   // its words and count, the sort order its description. `extra` sits at the
   // heading's right (the Timeline's controls); `fixed` is a heading that
   // cannot close (an empty To rule).
-  const heading = (id: keyof DecSections, words: string, count: string | null, order: string | null, extra?: ReactNode, fixed?: boolean) => {
-    const isOpen = fixed || decSections[id];
+  const heading = (id: keyof DecSections, words: string, count: string | null, order: string | null, extra?: ReactNode, fixed?: boolean, ref?: (el: HTMLDivElement | null) => void) => {
+    const isOpen = fixed || sections[id];
     const label = count === null ? words : `${words} · ${count}`;
     const desc = order ? `dec-${id}-order` : undefined;
     return (
-      <div className="dec-sh">
+      <div className="dec-sh" ref={ref}>
         <h2>
           {fixed
             ? <span className="dec-sh-static"><span className="dec-chev" aria-hidden="true" />{label}</span>
             : (
-              <button className="dec-sh-btn" aria-expanded={isOpen} aria-describedby={desc} onClick={() => setDecSection(id, !isOpen)}>
+              <button className="dec-sh-btn" aria-expanded={isOpen} aria-describedby={desc} onClick={() => handToggle(id)}>
                 <span className="dec-chev" aria-hidden="true">{isOpen ? "▾" : "▸"}</span>{label}
               </button>
             )}
@@ -281,9 +314,6 @@ export function DecisionsView() {
     );
   };
 
-  const openHits = open.filter(hit);
-  const pastHits = past.filter(hit);
-  const shownHits = shown.filter(hit);
   const anyHit = openHits.length + pastHits.length + closed.filter(hit).length > 0;
   const summary = summaryOf(open.map((r) => r.d), ruled.map((r) => r.d), now);
   const oldest = open[0];
@@ -302,6 +332,12 @@ export function DecisionsView() {
           ref={findRef}
           type="text"
           className="dec-find-input"
+          // A number or words to match, not prose: no spelling or completion
+          // bubble, which in WKWebView took the first Escape (L8).
+          spellCheck={false}
+          autoCorrect="off"
+          autoCapitalize="off"
+          autoComplete="off"
           placeholder="Find a decision: number or words"
           aria-label="Find a decision: number or words"
           value={query}
@@ -324,7 +360,7 @@ export function DecisionsView() {
 
       <section className="dec-section dec-rule">
         {heading("rule", "To rule", open.length === 0 ? "0" : countWords(openHits.length, open.length, filtering), "oldest first", undefined, open.length === 0)}
-        {(open.length === 0 || decSections.rule) && (
+        {(open.length === 0 || sections.rule) && (
           open.length === 0
             ? <div className="meta dec-empty">Nothing to rule.</div>
             : openHits.length === 0 ? noMatch : openHits.map(record)
@@ -333,7 +369,7 @@ export function DecisionsView() {
 
       <section className="dec-section dec-ruled">
         {heading("ruled", "Ruled", countWords(pastHits.length, past.length, filtering), "newest first")}
-        {decSections.ruled && (pastHits.length === 0 ? noMatch : (
+        {sections.ruled && (pastHits.length === 0 ? <div className={`meta ${filtering ? "dec-nomatch" : "dec-empty"}`}>{emptyRuledWords(filtering)}</div> : (
           <>
             {pastShown.filter((r) => r.d.status === "ruled").map(record)}
             {pastShown.some((r) => r.d.status !== "ruled") && (
@@ -351,17 +387,17 @@ export function DecisionsView() {
         ))}
       </section>
 
-      <section className="dec-section dec-tl">
-        {heading("timeline", "Timeline", filtering ? countWords(shownHits.length, shown.length, true) : null, "raised to ruled; open ones run to today",
-          decSections.timeline ? (
+      <section className="dec-section dec-tl" style={tlHeadH ? { "--dec-tl-sh": `${tlHeadH}px` } as CSSProperties : undefined}>
+        {heading("timeline", "Timeline", timelineCount(shownHits.length, shown.length, showClosed ? 0 : closed.length, filtering), "raised to ruled; open ones run to today",
+          sections.timeline ? (
             <div className="dec-sh-tools">
               {closed.length > 0 && (
                 <button className="ghost small" onClick={() => setShowClosed(!showClosed)}>{showClosed ? "hide" : "show"} {closed.length} superseded or withdrawn</button>
               )}
               <ZoomControl z={z} />
             </div>
-          ) : undefined)}
-        {decSections.timeline && (shownHits.length === 0 ? noMatch : (
+          ) : undefined, false, setTlHead)}
+        {sections.timeline && (shownHits.length === 0 ? noMatch : (
           <>
             <div className="gantt-body dec-timeline tz-host">
               <TimeFrame z={z} label="Decisions timeline" extents={shownHits.map((r) => {

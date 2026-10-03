@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
+import { flushSync } from "react-dom";
 import {
   GUTTER, LABEL_W, LEVEL_WORD, anchorScroll, buttonAnchor, clampScroll, contextAt, dayMonth, deeper, focusAfter, hhmm,
   revealScroll, scaleOf, shallower, sideOf, startOfDay, addLocalDays, stepOf, tickLabelWhole, ticksOf, todayScroll, windowOf,
@@ -177,19 +178,31 @@ export function useTimeZoom(o: ZoomOptions) {
 /** `[-] level [+]  Today  Fit`, the same on every graph and at every level
  *  (§A1.1): nothing mounts or unmounts, so the control keeps its width; a
  *  button that cannot act here is disabled, and when the one just pressed
- *  disables, focus moves to the opposite zoom button, never to the body. */
+ *  disables, focus moves to the opposite zoom button first, in the same tick
+ *  and before the level changes, so WebKit keeps the ring on it (design
+ *  system, Focus and names). Where the opposite button is itself still
+ *  disabled (Fit or `−` from the deepest level), the level commits
+ *  synchronously and focus follows at once. A keyboard press also marks the
+ *  target `tz-moved`, which draws the same ring in case WKWebView drops
+ *  `:focus-visible` on a programmatic move; it goes with the focus. */
 export function ZoomControl({ z, note }: { z: Zoom; note?: string }) {
   const word = LEVEL_WORD[z.level];
   const refs = useRef<Partial<Record<ZoomButton, HTMLButtonElement | null>>>({});
-  const focusNext = useRef<ZoomButton | null>(null);
-  useLayoutEffect(() => {
-    const b = focusNext.current;
-    focusNext.current = null;
-    if (b) refs.current[b]?.focus();
-  }, [z.level]);
-  const press = (b: ZoomButton, next: Level | null, act: () => void) => {
-    if (next && next !== z.level) focusNext.current = focusAfter(b, next, z.hours);
-    act();
+  const press = (e: MouseEvent, b: ZoomButton, next: Level | null, act: () => void) => {
+    const to = next && next !== z.level ? focusAfter(b, next, z.hours) : null;
+    const target = to ? refs.current[to] : null;
+    if (!target) { act(); return; }
+    const keyboard = e.detail === 0;
+    const move = () => {
+      target.focus();
+      if (keyboard) {
+        target.classList.add("tz-moved");
+        target.addEventListener("blur", () => target.classList.remove("tz-moved"), { once: true });
+      }
+    };
+    if (!target.disabled) { move(); act(); return; }
+    flushSync(act);
+    move();
   };
   const fit = z.level === "fit";
   return (
@@ -197,16 +210,20 @@ export function ZoomControl({ z, note }: { z: Zoom; note?: string }) {
       {note && <span className="tz-note">{note}</span>}
       <div className="tz-ctl" role="group" aria-label={`Zoom, ${word}`}>
         <button ref={(e) => { refs.current.out = e; }} className="tz-icon" aria-label="Zoom out" title="Zoom out (−)" disabled={!z.canOut}
-          onClick={() => press("out", shallower(z.level), () => z.zoomOut())}>−</button>
+          onClick={(e) => press(e, "out", shallower(z.level), () => z.zoomOut())}>−</button>
         <span className="tz-level" aria-live="polite">{word}</span>
         <button ref={(e) => { refs.current.in = e; }} className="tz-icon" aria-label="Zoom in" title="Zoom in (+)" disabled={!z.canIn}
-          onClick={() => press("in", deeper(z.level, z.hours), () => z.zoomIn())}>+</button>
+          onClick={(e) => press(e, "in", deeper(z.level, z.hours), () => z.zoomIn())}>+</button>
         <button ref={(e) => { refs.current.today = e; }} className="small" disabled={fit} onClick={() => z.today()} title="Today (t)">Today</button>
-        <button ref={(e) => { refs.current.fit = e; }} className="small" disabled={fit} onClick={() => press("fit", "fit", () => z.fit())} title="Fit (0)">Fit</button>
+        <button ref={(e) => { refs.current.fit = e; }} className="small" disabled={fit} onClick={(e) => press(e, "fit", "fit", () => z.fit())} title="Fit (0)">Fit</button>
       </div>
     </div>
   );
 }
+
+/** Zoomed, the lane ends this much further right (and the foot as much
+ *  lower, time-zoom.css), so a classic scrollbar covers no mark (row 13). */
+const END_PAD = 12;
 
 type FrameProps = {
   z: Zoom;
@@ -218,8 +235,22 @@ type FrameProps = {
 };
 
 /** The scroll frame: a sticky label column and axis, the grid behind the
- *  rows (ticks, weekends, today), and the rows the graph draws. */
+ *  rows (ticks, weekends, today), and the rows the graph draws. Its focus
+ *  ring is drawn by the wrapper, outside the frame, so the sticky labels and
+ *  axis never cover it (row 12). Zoomed, one background runs behind the
+ *  whole label column, so nothing of the lane shows between the labels
+ *  (row 11); it is measured to the content's height. */
 export function TimeFrame({ z, label, axis, extents, undated, children }: FrameProps) {
+  const [ring, setRing] = useState(false);
+  const [contentEl, setContentEl] = useState<HTMLDivElement | null>(null);
+  const [contentH, setContentH] = useState(0);
+  useLayoutEffect(() => {
+    if (!contentEl) return;
+    setContentH(contentEl.offsetHeight);
+    const ro = new ResizeObserver(() => setContentH(contentEl.offsetHeight));
+    ro.observe(contentEl);
+    return () => ro.disconnect();
+  }, [contentEl]);
   const zoomed = z.level !== "fit";
   const s = z.scale;
   const ticks = zoomed ? ticksOf(s, z.scrollX - z.view, z.scrollX + 2 * z.view) : ticksOf(s);
@@ -235,16 +266,19 @@ export function TimeFrame({ z, label, axis, extents, undated, children }: FrameP
   const whole = (t: Tick) => !zoomed || tickLabelWhole(t, z.level, z.scrollX, z.frameW - LABEL_W);
   const todayWord = z.level === "hours" ? `now ${hhmm(z.now)}` : "today";
   return (
+    <div className={`tz-wrap ${ring ? "ring" : ""}`}>
     <div
       ref={z.frameRef}
       className={`tz-frame ${zoomed ? "zoomed" : ""} lvl-${z.level}`}
       tabIndex={0}
+      onFocus={(e) => { if (e.target === e.currentTarget) setRing(focusVisible(e.currentTarget)); }}
+      onBlur={(e) => { if (e.target === e.currentTarget) setRing(false); }}
       aria-label={`${label}, ${LEVEL_WORD[z.level]}. Plus and minus zoom, 0 fits, t goes to today, arrows pan.`}
       onKeyDown={z.onKeyDown}
       onScroll={z.onScroll}
     >
       {z.frameW > 0 && (
-        <div className="tz-content" style={{ width: LABEL_W + z.laneW + GUTTER, ["--tz-lane" as string]: `${z.laneW}px` }}>
+        <div ref={setContentEl} className="tz-content" style={{ width: LABEL_W + z.laneW + GUTTER + (zoomed ? END_PAD : 0), ["--tz-lane" as string]: `${z.laneW}px` }}>
           <div className="tz-grid" style={{ left: LABEL_W, width: z.laneW }} aria-hidden>
             {z.level === "days" && ticks.filter((t) => t.weekend).map((t) => <span key={`w${t.at}`} className="tz-weekend" style={{ left: t.x, width: t.width }} />)}
             {zoomed && <span className="tz-todayband" style={{ left: s.x(dayFrom), width: s.x(addLocalDays(dayFrom, 1)) - s.x(dayFrom) }} />}
@@ -252,6 +286,7 @@ export function TimeFrame({ z, label, axis, extents, undated, children }: FrameP
             {z.reserve > 0 && <span className="tz-undated-edge" style={{ left: s.width }} />}
             {xNow >= 0 && xNow <= s.width && <span className="tz-today" style={{ left: xNow }}><span>{todayWord}</span></span>}
           </div>
+          {zoomed && <div className="tz-labelcol" aria-hidden><span style={{ height: contentH }} /></div>}
           <div className="tz-row tz-axis-row">
             <div className="tz-label tz-corner" />
             <div className="tz-axis" onDoubleClick={(e) => z.onAxisDoubleClick(e.clientX)} title={z.canIn ? "Double-click to zoom in here" : undefined}>
@@ -277,7 +312,14 @@ export function TimeFrame({ z, label, axis, extents, undated, children }: FrameP
         </div>
       )}
     </div>
+    </div>
   );
+}
+
+/** Whether a focus should show its ring: `:focus-visible` where the engine
+ *  knows it (Safari 15.4 on), else every focus, as `:focus` would. */
+function focusVisible(el: Element): boolean {
+  try { return el.matches(":focus-visible"); } catch { return true; }
 }
 
 /** A row's pointer to its mark when the mark lies wholly outside the window:

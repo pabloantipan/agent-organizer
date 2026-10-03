@@ -75,3 +75,7 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
   waiting on you", FR-2's longest words (initiative-header FR-16, G17); the
   draft still waits only on `0001-the-cell-roster`, which the organizer
   finds by slug, and no test counts init-drafted's records
+- `work/init-c`'s `0001-a-ruling-nobody-signed`, a ruled record with no
+  `ruled_by`, so the Decisions line shows and names "no ruler recorded"
+  (leftovers-4 FR-8, L6); the scan reports it as a problem of init-c, which
+  already carries one

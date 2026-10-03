@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countWords, decSectionsOf, decisionMatches, lineName, ruledShown, summaryOf, summaryText, timelineName, turnaroundWords, waitedWords } from "./decisionsPage";
+import { countWords, decSectionsOf, decisionMatches, emptyRuledWords, lineName, rulerWords, ruledShown, shownSections, summaryOf, summaryText, timelineCount, timelineName, turnaroundWords, waitedWords } from "./decisionsPage";
 
 const now = new Date(2026, 9, 3); // 2026-10-03, local midnight
 const rec = (number: string, raised: string, ruled = "") => ({ number, raised, ruled });
@@ -94,6 +94,14 @@ describe("lineName", () => {
     expect(lineName({ ...r, raised: "2026-10-01" }, now, "init-a", "1 Oct")).toBe("0007 Stage normalize: exit met, init-a, ruled, “accept as written”, by pablo, 1 Oct");
   });
 
+  it("says no ruler recorded in the text and the name alike (row 15)", () => {
+    const r = { ...waiting, status: "ruled", ruled: "2026-10-01", ruled_by: "", chosen: "" };
+    expect(rulerWords("")).toBe("no ruler recorded");
+    expect(rulerWords("  ")).toBe("no ruler recorded");
+    expect(rulerWords("pablo")).toBe("by pablo");
+    expect(lineName(r, now, undefined, "1 Oct")).toBe("0007 Stage normalize: exit met, ruled, no ruler recorded, 1 Oct, after 3 days");
+  });
+
   it("names the Timeline row's status (B11)", () => {
     expect(timelineName(waiting)).toBe("0007 Stage normalize: exit met, waiting, raised 2026-09-28, owner pablo");
   });
@@ -117,5 +125,34 @@ describe("sections", () => {
     expect(decSectionsOf(null)).toEqual({ rule: true, ruled: true, timeline: false });
     expect(decSectionsOf("not json")).toEqual({ rule: true, ruled: true, timeline: false });
     expect(decSectionsOf('{"ruled":false,"timeline":true,"rule":"x"}')).toEqual({ rule: true, ruled: false, timeline: true });
+  });
+
+  it("says nothing ruled yet without a find, no match only with one (row 5)", () => {
+    expect(emptyRuledWords(false)).toBe("Nothing ruled yet.");
+    expect(emptyRuledWords(true)).toBe("no match");
+  });
+
+  it("names what the Timeline hides while finding (row 9)", () => {
+    expect(timelineCount(1, 71, 3, true)).toBe("1 of 71 · 3 hidden");
+    expect(timelineCount(1, 74, 0, true)).toBe("1 of 74");
+    expect(timelineCount(71, 71, 3, false)).toBeNull();
+  });
+
+  const stored = { rule: true, ruled: false, timeline: false };
+  it("opens the sections with a hit while finding and restores the layout after (row 6)", () => {
+    const hits = { rule: false, ruled: true, timeline: true };
+    expect(shownSections(stored, {}, hits, {})).toEqual({ rule: true, ruled: true, timeline: true });
+    expect(shownSections(stored, {}, null, {})).toEqual(stored);
+  });
+
+  it("lets a hand toggle win during a find, and drops it with the find", () => {
+    const hits = { rule: false, ruled: true, timeline: false };
+    expect(shownSections(stored, {}, hits, { ruled: false }).ruled).toBe(false);
+    expect(shownSections(stored, {}, null, { ruled: true }).ruled).toBe(false);
+  });
+
+  it("opens a landing's section for the visit over the stored layout (row 8)", () => {
+    expect(shownSections(stored, { ruled: true }, null, {})).toEqual({ rule: true, ruled: true, timeline: false });
+    expect(shownSections(stored, {}, null, {}).ruled).toBe(false);
   });
 });

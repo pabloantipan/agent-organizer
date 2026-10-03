@@ -92,7 +92,7 @@ export function lineName(d: Named, now: Date, initiative?: string, ruledOn?: str
     parts.push(waitedWords(r ? daysBetween(r, now) : 0));
   } else if (d.status === "ruled") {
     if (d.chosen) parts.push(`“${d.chosen}”`);
-    parts.push(`by ${d.ruled_by || "no one named"}`);
+    parts.push(rulerWords(d.ruled_by));
     if (ruledOn) parts.push(ruledOn);
     const t = turnaroundWords(d.raised, d.ruled);
     if (t) parts.push(t);
@@ -101,6 +101,12 @@ export function lineName(d: Named, now: Date, initiative?: string, ruledOn?: str
   }
   return parts.join(", ");
 }
+
+/** Who ruled, as the record line shows it and its name says it (row 15,
+ *  WCAG 2.5.3): `by pablo`, or `no ruler recorded` where the record names
+ *  none (a scanner problem already). */
+export const NO_RULER = "no ruler recorded";
+export const rulerWords = (ruledBy?: string) => (ruledBy?.trim() ? `by ${ruledBy.trim()}` : NO_RULER);
 
 /** A Timeline row's name and hover title (§5, B11): the number, the title and
  *  the status, which the row no longer shows as a second line. */
@@ -131,3 +137,29 @@ export function decSectionsOf(stored: string | null): DecSections {
   const pick = (k: keyof DecSections) => (typeof o[k] === "boolean" ? (o[k] as boolean) : DEC_SECTIONS_DEFAULT[k]);
   return { rule: pick("rule"), ruled: pick("ruled"), timeline: pick("timeline") };
 }
+
+/** The sections as shown (§3, §6, rows 6 and 8). Precedence, highest first:
+ *  a hand toggle made during the current find (`findHand`, dropped when the
+ *  find clears); a find's hit, which shows its section open; a landing's
+ *  opening for this visit (`visit`, never stored); the stored layout, which
+ *  holds only hand toggles. `hits` is null while no find is on. */
+export function shownSections(stored: DecSections, visit: Partial<DecSections>, hits: DecSections | null, findHand: Partial<DecSections>): DecSections {
+  const one = (k: keyof DecSections) => {
+    if (hits && findHand[k] !== undefined) return findHand[k] as boolean;
+    if (hits && hits[k]) return true;
+    return visit[k] ?? stored[k];
+  };
+  return { rule: one("rule"), ruled: one("ruled"), timeline: one("timeline") };
+}
+
+/** The Timeline's heading count (row 9): while a find is on, `1 of 71`, and
+ *  `· 3 hidden` while superseded and withdrawn records are left out, so its
+ *  total and Ruled's add up. No count without a find (§3). */
+export function timelineCount(matched: number, total: number, hidden: number, filtering: boolean): string | null {
+  if (!filtering) return null;
+  return `${matched} of ${total}${hidden > 0 ? ` · ${hidden} hidden` : ""}`;
+}
+
+/** Ruled's line when it lists nothing (row 5): `Nothing ruled yet.` with no
+ *  find on, `no match` only while one is. */
+export const emptyRuledWords = (filtering: boolean) => (filtering ? "no match" : "Nothing ruled yet.");
