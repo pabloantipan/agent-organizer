@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: home-widths-4
 updated: 2026-10-03
-next: "G23: at 1024x640 (and 1280x800) with the rail expanded, partner-payouts' cell lozenge has a 0 px text span and its +4 is clipped out of the signal column; make never-fold lozenges share the column with visible ellipses and keep +N inside it, or raise it on 0076"
+next: "hw4-build waits on sup28 (question posted): at 1024x640 with the rail expanded the never-fold signals at their least plus +4 need 151 px of a 145 px column; everything else passes the clip probe at 424149a"
 review: fail
 depends_on: [decisions-view, time-zoom-2]
 boundary: ["frontend/src/components/Home.tsx, Rail.tsx, RuleDecisionBox.tsx", "frontend/src/components/Crew.tsx (CellStateLz only), Conversation.tsx (FR-24's names and focus only)", "frontend/src/lib/width.ts, frontend/src/lib/ and its tests", "frontend/src/styles/home.css, rule-box.css, global.css (.rail-icon only), shell.css (the rail's rules only)", "testdata/fixture-twenty/ and scripts/fixture-home.sh (FR-25's rows)", "not: header-fold-3's files, DecisionsView.tsx, Go, docs/design-system.md"]
@@ -28,6 +28,7 @@ widths-and-focus's leftovers, ranked by Aglaea: FR-20 to FR-25 of
 - [x] G8: see `docs/specs/responsive-home.md`, Acceptance
 
 ## Done
+- 2026-10-03 hw4-build: 424149a never-fold signals share the column (shareRoom), each with at least 2 characters + ellipsis on its span, +N inside; clip probe from a clean checkout (.wt-notes/hw4-build/clip-clean.log): passes at 1024 strip and at 1280, 1440, 1512, 1920 expanded and strip; fails only at 1024x640 rail expanded by 6 px (32+32+48 + 27 + 12 = 151 > 145)
 - 2026-10-03 hw4-build: 2941f2c (was 40ab320 before the rebase) tracks testdata/fixture-twenty/partner-payouts/agents/cell.json (git add -f, agents/ is ignored); G19 and G23 re-run from a clean detached checkout at 40ab320 (.wt-notes/hw4-build/g19-clean.log, g23-clean.log): the card row partner-payouts · Partner terms is in Needs me, and the cell lozenge on the seven-signal row is shown and cut with an ellipsis on its span at 1920
 - 2026-10-03 hw4-build: code review fixes on home-widths-4, rebased on main 189680e (e02059b the cell in definition never folds, it takes its ellipsis; d570c7e one Escape closes only the topmost, Help or a card back first; 95ace22 People's hide named); G19 re-measured at 1440x900 and 1512x945 (.wt-notes/hw4-build/g19-fix.log), the Escape stack in esc-topmost.log, G22 in g22-fix.log; G8 green again
 - 2026-10-03 hw4-build: FR-20 to FR-25 on home-widths-4, rebased on 9048507 (6362137, 0aca68a, 1b84824, 09f0bec, 94e31f5, 78599ee, e522b2e); G19-G23 measured before and after the rebase, G8 green (make test, npm run build, G18 grep empty, wails build); evidence and choices in .wt-notes/hw4-build/progress.md. G24 left unticked for the UI reviewer
