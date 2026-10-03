@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: markdown-and-labels
 updated: 2026-10-03
-next: "mal-build: U2 (L10 today label cut on Decisions at Fit), then U1 if the FSE widens the boundary to DecisionsView.tsx"
+next: "mal-build: U1 (L12, kept offset) and L10 as amended (fe6f0c9), then review again"
 depends_on: [header-fold-3, home-widths-4, zoom-decisions-polish]
 boundary: ["frontend/src/components/DecisionsView.tsx (the record body's render only, FR-9 as amended)", "frontend/src/styles/global.css (.markdown and .dec.* rules only)", "frontend/src/styles/rule-box.css, frontend/src/components/RuleDecisionBox.tsx, frontend/src/styles/decisions.css (the !important placement only)", "frontend/src/components/TimeZoom.tsx, frontend/src/lib/axis.ts, frontend/src/components/StageRoadmap.tsx (axis labels only)", "frontend/src/lib/ tests", "testdata/fixture-overlay/, scripts/fixture-home.sh", "not: Go, docs/design-system.md"]
 spec: "docs/specs/leftovers-4.md (FR-9 to FR-12); the ranking docs/ux/reviews/2026-10-03-rank-leftovers-4.md (Aglaea, 94308ad); the design system as amended there"
