@@ -69,3 +69,4 @@ know, ruled choices, open findings, lessons), `docs/ux/principles.md`, and
 - 2026-10-03 — leftovers-4 ranked (16 rows + 5 gate rows); DS: window sizes, focus before disable, WKWebView keyboard, axis text, dimming.
 - 2026-10-03 — 0076 design call: the cell's state folds last of the foldable signals (option c); DS Widths names it.
 - 2026-10-03 — leftovers-5 ranked (15 rows + 6 gate/code); DS: no document scroll, classic bars, fold order and floors, edge colour, topmost Escape, opener.
+- 2026-10-03 — sup30: superseded/withdrawn take the neutral lozenge; mark titles stagger, never skip (DS).

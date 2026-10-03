@@ -200,8 +200,11 @@ The axis sticks under its section's heading while the rows scroll. **No axis
 text is ever cut**: a tick label, a mark's title, the today label or the
 undated label that would not fit is moved inside the lane (the today label
 flips to the line's other side) or left to its hover title, never clipped
-by the label column, the frame or a scrollbar. Labels that would overlap
-skip, one in two, until they do not.
+by the label column, the frame or a scrollbar. **Tick** labels that would
+overlap skip, one in two, until they do not, and a tick label gives way to
+a mark's title. A mark's title (milestone, target) is content and is never
+skipped: titles that would collide stagger to the next label row, as
+same-day marks already do; only the frame's edge moves one inward.
 *Jira timeline, Linear milestones, GitHub roadmap.*
 
 ### Stage stepper
@@ -220,7 +223,10 @@ withdrawn), owner and age or ruler and date. Expanded: options, the question,
 recommendation, ruling in the owner's words, consequences, linked cards and
 threads, supersedes chain. Superseded records stay, dimmed, linked forward. Dimmed means the
 `--fg-muted` text token, **never opacity**: a row at .7 opacity took its
-lozenge to 1.5:1 (leftovers-4). A record's body never widens its view: code
+lozenge to 1.5:1 (leftovers-4). The superseded and withdrawn lozenges are
+the **neutral** badge (`--fg-muted` text, 6.7:1): out of the flow, named by
+their word, not by a hue. `--done` on its tint is 2.05:1 and is never a
+lozenge's text (markdown-and-labels, L9). A record's body never widens its view: code
 blocks and tables scroll inside themselves.
 *Nygard ADRs, MADR, GitHub Discussions answers.*
 
