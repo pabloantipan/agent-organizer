@@ -44,6 +44,16 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   supervise finding on changed tasks is postponed; a changed task goes into
   a fresh seat's launch prompt.
 
+## OPEN — 2026-10-03, rulings 0072 and 0073
+
+- Pablo: "I accept recommendations go on" (FSE session). 0073 amend A14,
+  0072 accept as written, leftovers batched (12d6019). sup26 told (decision,
+  thread 01M41B2BR8NATVMPRHVQHQM8MY). Aglaea asked to rank sup25's leftovers
+  into amendments, U2 included (thread 01M41B2BRFY6W55KSBC307ZWY5).
+- Order: time-zoom (sup26, re-review) -> decisions-view (new supervisor when
+  time-zoom is in done/) -> leftovers-3 (after Aglaea's ranking and its
+  accept record). Rebuilt and reinstalled the app from main on Pablo's ask.
+
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
 - sup25's task closed (aff199a): 46 min against 0069's 40-70, all four
