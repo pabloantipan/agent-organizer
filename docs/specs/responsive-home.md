@@ -116,6 +116,31 @@ Nothing Home contains changes, except 0060's word.
   - the thread divider's icon buttons are named by action and thread
     ("Reopen <subject>", "Escalate <subject>", "Close <subject>").
 
+- Amendment 4 (proposed, 0074; Aglaea's ranking
+  `docs/ux/reviews/2026-10-03-rank-leftovers-3.md`, "row n"; the design
+  system's Widths as amended in 2b6d608):
+- **FR-20** (rows 1 and 4, W2, wf-gap2, wf-gap3) A column whose cell is
+  empty ("—") on every shown row shall give way before any column with
+  content, in every class. Signals that do not fit fold from the least
+  urgent: problems, now and live first; waits on you, blocked and waiting
+  never fold into "+N".
+- **FR-21** (row 3, W1) Wide shall start where the row measures it can keep
+  about 70 characters of goal beside the Needs me column, never below 2200
+  (FR-13 becomes the floor), with the rail expanded or collapsed.
+- **FR-22** (row 6, W3) While a rule box is open, Escape shall close it
+  wherever focus sits inside the view, the record's text included (a
+  document listener while the box is open), on Home and on Decisions alike.
+- **FR-23** (row 7, W4) The row whose Rule opened the box shall stay above
+  the scrim, marked with `--surface-selected`.
+- **FR-24** (row 8, W5) In a conversation, the reply and branch buttons
+  shall be named "Reply to <author>" and "Branch from <author>'s message";
+  `.rail-icon` targets shall be at least 24×24 px; after "hide", focus goes
+  to the control that shows it again.
+- **FR-25** (row 11; G-d) `CellStateLz`'s text shall be cut with an
+  ellipsis on a text span, as FR-14. The `--twenty` fixture gains one card
+  row whose next starts `pablo` (a Needs me card row) and one initiative
+  with seven signals and a long waiting list.
+
 ## Acceptance → gate
 
 | # | Design | Check | Expected |
@@ -137,6 +162,12 @@ Nothing Home contains changes, except 0060's word.
 | G16 | 17 | 1512×945, Rule open, the element at the centre of another row's Rule | DOM: the top element is the scrim |
 | G17 | 18 | the rail toggle, expanded and as the strip | its bounding box ≥ 24×24 in both |
 | G18 | 19 | Overview → Open in Decisions on a ruled record; open and close a card back; Answer, then Tab through the thread divider | screenshots; `activeElement` after each; a names log with every divider button named |
+| G19 | 20 | `--twenty` at 1440×900 and 1512×945, rail expanded | DOM: an all-"—" column has given way while any goal shows; on the seven-signal row, blocked, waiting and waits-on-you are visible and only problems/now/live are in "+N" |
+| G20 | 21 | `--twenty` at 2200×1200 and 2560×1440, rail expanded and collapsed | the class per size; wherever wide shows, every goal keeps ≥ 70 characters or is whole |
+| G21 | 22, 23 | Home and Decisions: Rule open, click the record's text, press Escape; the element at the opener's Rule with the box open | the box closed both times; DOM: the opener's row is above the scrim with `--surface-selected` |
+| G22 | 24 | Conversation: a names log over a thread's reply and branch buttons; `.rail-icon` bounding boxes; hide, then `activeElement` | every button named as FR-24; each box ≥ 24×24; focus on the show control |
+| G23 | 25 | `--twenty` at 1024×640 and 1920×1080; the Needs me card row | DOM: CellStateLz's text whole or ending in an ellipsis on its span; the card row listed under Needs me |
+| G24 | 20–25 | the batch's UI reviewer: one shot per row in the built app (WKWebView), beside the Chromium shots | the shots; any difference named |
 | G8 | all | `XDG_DATA_HOME=$(mktemp -d) make test`; `cd frontend && npm run build`; the redesign's G18 grep | pass |
 
 ## Boundary
@@ -160,6 +191,16 @@ Nothing Home contains changes, except 0060's word.
   - `board.store.ts` only if the class boundary is read there.
   - Must not touch the header-fold-2 card's files (initiative-header,
     amendment 3), Go code, `docs/design-system.md`.
+- **home-widths-4 card** (amendment 4: FR-20 to FR-25):
+  - `frontend/src/components/Home.tsx`, `Rail.tsx`, `RuleDecisionBox.tsx`,
+    `Crew.tsx` (`CellStateLz` only), `Conversation.tsx` (FR-24's names and
+    focus only);
+  - `frontend/src/lib/width.ts`, `lib/` and its tests;
+  - `frontend/src/styles/home.css`, `rule-box.css`, `global.css`
+    (`.rail-icon` only), `shell.css` (the rail's rules only);
+  - `testdata/fixture-twenty/` and `scripts/fixture-home.sh` (FR-25's rows);
+  - must not touch header-fold-3's files, `DecisionsView.tsx`, Go code,
+    `docs/design-system.md`.
 - **Must not touch** (the first two cards):
   - the sub-views' components;
   - Go code;
@@ -200,6 +241,7 @@ Nothing Home contains changes, except 0060's word.
 | `responsive-home` | G1–G8 | ui-leftovers | true |
 | `responsive-home-2` | G9–G12, G8 | responsive-home, rule-box-finish (both touch the rule box) | true |
 | `widths-and-focus` | G13–G18, G8 | — (parallel with header-fold-2) | true |
+| `home-widths-4` | G19–G24, G8 | decisions-view (rule box, Decisions) | true |
 
 ## Amendments
 
@@ -216,3 +258,7 @@ Nothing Home contains changes, except 0060's word.
   header-fold (7–9), with the design system's Widths as amended (3f3df2f):
   FR-13 to FR-19, G13 to G18, card `widths-and-focus`. FR-13 moves wide
   from 1920 to 2200, which 0061 accepted at 1920.
+- **4, 2026-10-03, proposed (0074):** Aglaea's ranking of sup25's leftovers
+  (rows 1, 3, 4, 6, 7, 8, 11 and G-d; 2b6d608), with the design system's
+  Widths as amended there: FR-20 to FR-25, G19 to G24, card `home-widths-4`.
+  FR-21 makes FR-13's 2200 a floor, measured on the row.

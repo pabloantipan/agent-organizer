@@ -114,6 +114,20 @@ as "row n"; the design system as amended in 3f3df2f):
   or more proposed records all owned by its lead, so FR-2's longest words
   ("2 decisions waiting on you") can be checked.
 
+- Amendment 4 (proposed, 0074; Aglaea's ranking
+  `docs/ux/reviews/2026-10-03-rank-leftovers-3.md`, "row n"):
+- **FR-17** (row 5, U1; G-b) While the class is compact and Details is open,
+  the bar shall keep its stage, so the stage never leaves the view; the open
+  header's scroll area shows its edge (1 px `--border-strong`, the design
+  system's Widths as amended). The strip may scroll.
+- **FR-18** (row 10, hf-gap3) A stage tile shall open its own stage by its
+  position in the roadmap, not by id, so a duplicate id opens the tile's
+  stage. Nothing more is shown on the tile; the problem is already reported.
+- **FR-19** (G-c) FR-11's stored "folded" shall have a test; vitest runs over `frontend/src/lib`, so its read and write move behind a lib function.
+- Corrections (G-a, G-e): G15 drops "the all view unchanged" (the
+  all-initiatives Agents view is not mounted); the stage word lives in
+  `StageRoadmap.tsx`, which amendment 3's boundary should have named.
+
 ## Acceptance → gate
 
 | # | Design | Check | Expected |
@@ -131,9 +145,13 @@ as "row n"; the design system as amended in 3f3df2f):
 | G12 | FR-10 | 1024×640, Details open, on Work, Decisions and Conversations | screenshots; the header's height ≤ 256 px and it scrolls inside; the strip shown |
 | G13 | FR-11 | Open on a Needs me card row (a landing), then press another tab, then reload; then open Details and switch initiative | screenshots: folded, folded, folded; then open across the switch |
 | G14 | FR-12 | 1024×640, folded, on the fixture initiative with the longest goal and a target | screenshot and DOM: the target whole, the goal cut with an ellipsis |
-| G15 | FR-13 | Agents with one initiative selected, and with none | screenshots: no id or client under the tabs; counts and New agent on the toolbar line; the all view unchanged |
+| G15 | FR-13 | Agents with one initiative selected, and with none | screenshots: no id or client under the tabs; counts and New agent on the toolbar line (amendment 4 dropped "the all view unchanged") |
 | G16 | FR-14 | hover and keyboard focus on the bar's stage and on a tile; the current tile focused; Roadmap → Stages; the strip at 1024×640 on the fixture roadmap with a one-stage run | screenshots; computed `cursor` and `outline-offset` (2px on the accent tile); no visible "current" in stage text; each run's width in proportion to its stage count |
 | G17 | FR-15, FR-16 | the header's accessible names; `dec-line` before and after expanding; the chip on the FR-16 initiative | a names log (`aria-expanded` false then true); a screenshot of "N decisions waiting on you", N ≥ 2; at 1024×640 the chip's landing shows the record's head with Rule on screen |
+| G18 | FR-17 | 1024×640, Details open, scrolled to the bottom of the header, on Work and Decisions | screenshots: the stage in the bar; the scroll area's edge visible |
+| G19 | FR-18 | the init-a fixture roadmap (a duplicate stage id): press each tile | each opens the stage at its own position in Roadmap → Stages |
+| G20 | FR-19 | `cd frontend && npm test` | a test under `frontend/src/lib` (vitest's scope): the landing's fold read and write moved behind a lib function, "folded" stored and read back |
+| G21 | FR-17, FR-18 | the batch's UI reviewer: one shot per row in the built app (WKWebView), beside Chromium | the shots; any difference named |
 | G11 | all | `XDG_DATA_HOME=$(mktemp -d) make test`; `cd frontend && npm run build`; the redesign's G18 grep | pass |
 
 ## Boundary
@@ -168,6 +186,14 @@ as "row n"; the design system as amended in 3f3df2f):
   - `lib/` and its tests;
   - `testdata/fixture-overlay/` (FR-16) and the fixture script, if it
     lists records.
+- **header-fold-3 card** (amendment 4: FR-17 to FR-19):
+  - `InitiativeHeader.tsx` and its CSS; `styles/shell.css` (the header's
+    rules only);
+  - `StageRoadmap.tsx` and `board.store.ts` (opening a stage by position,
+    FR-18, and the store test, FR-19);
+  - `lib/` and its tests;
+  - must not touch home-widths-4's files, `DecisionsView.tsx`, Go code,
+    `docs/design-system.md`.
 - **Must not touch:**
   - `Home.tsx`, `Rail.tsx` (responsive-home); for header-fold-2 also
     `lib/width.ts`, `home.css`, `rule-box.css`, `Overview.tsx`,
@@ -221,6 +247,7 @@ as "row n"; the design system as amended in 3f3df2f):
 | `header-fold` | G1–G8, G10, G11 | responsive-home | true |
 | `rule-box-finish` | G9, G11 | responsive-home | true |
 | `header-fold-2` | G12–G17, G11 | — (parallel with widths-and-focus) | true |
+| `header-fold-3` | G18–G21, G11 | decisions-view (sequenced with the batch) | true |
 
 ## Amendments
 
@@ -237,3 +264,6 @@ as "row n"; the design system as amended in 3f3df2f):
   leftovers (rows 1–3, 10, 11, 14, 15 and V1; 3f3df2f): FR-10 to FR-16,
   G12 to G17, card `header-fold-2`. FR-11 reverses the fold's technical
   note, as the design always had it.
+- **4, 2026-10-03, proposed (0074):** Aglaea's ranking of sup25's leftovers
+  (rows 5, 10, G-a, G-b, G-c, G-e; 2b6d608): FR-17 to FR-19, G18 to G21,
+  card `header-fold-3`; G15 loses its unmounted clause.
