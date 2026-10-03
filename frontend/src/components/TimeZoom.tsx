@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
+import { flushSync } from "react-dom";
 import {
   GUTTER, LABEL_W, LEVEL_WORD, anchorScroll, buttonAnchor, clampScroll, contextAt, dayMonth, deeper, focusAfter, hhmm,
   revealScroll, scaleOf, shallower, sideOf, startOfDay, addLocalDays, stepOf, tickLabelWhole, ticksOf, todayScroll, windowOf,
@@ -177,19 +178,31 @@ export function useTimeZoom(o: ZoomOptions) {
 /** `[-] level [+]  Today  Fit`, the same on every graph and at every level
  *  (§A1.1): nothing mounts or unmounts, so the control keeps its width; a
  *  button that cannot act here is disabled, and when the one just pressed
- *  disables, focus moves to the opposite zoom button, never to the body. */
+ *  disables, focus moves to the opposite zoom button first, in the same tick
+ *  and before the level changes, so WebKit keeps the ring on it (design
+ *  system, Focus and names). Where the opposite button is itself still
+ *  disabled (Fit or `−` from the deepest level), the level commits
+ *  synchronously and focus follows at once. A keyboard press also marks the
+ *  target `tz-moved`, which draws the same ring in case WKWebView drops
+ *  `:focus-visible` on a programmatic move; it goes with the focus. */
 export function ZoomControl({ z, note }: { z: Zoom; note?: string }) {
   const word = LEVEL_WORD[z.level];
   const refs = useRef<Partial<Record<ZoomButton, HTMLButtonElement | null>>>({});
-  const focusNext = useRef<ZoomButton | null>(null);
-  useLayoutEffect(() => {
-    const b = focusNext.current;
-    focusNext.current = null;
-    if (b) refs.current[b]?.focus();
-  }, [z.level]);
-  const press = (b: ZoomButton, next: Level | null, act: () => void) => {
-    if (next && next !== z.level) focusNext.current = focusAfter(b, next, z.hours);
-    act();
+  const press = (e: MouseEvent, b: ZoomButton, next: Level | null, act: () => void) => {
+    const to = next && next !== z.level ? focusAfter(b, next, z.hours) : null;
+    const target = to ? refs.current[to] : null;
+    if (!target) { act(); return; }
+    const keyboard = e.detail === 0;
+    const move = () => {
+      target.focus();
+      if (keyboard) {
+        target.classList.add("tz-moved");
+        target.addEventListener("blur", () => target.classList.remove("tz-moved"), { once: true });
+      }
+    };
+    if (!target.disabled) { move(); act(); return; }
+    flushSync(act);
+    move();
   };
   const fit = z.level === "fit";
   return (
@@ -197,12 +210,12 @@ export function ZoomControl({ z, note }: { z: Zoom; note?: string }) {
       {note && <span className="tz-note">{note}</span>}
       <div className="tz-ctl" role="group" aria-label={`Zoom, ${word}`}>
         <button ref={(e) => { refs.current.out = e; }} className="tz-icon" aria-label="Zoom out" title="Zoom out (−)" disabled={!z.canOut}
-          onClick={() => press("out", shallower(z.level), () => z.zoomOut())}>−</button>
+          onClick={(e) => press(e, "out", shallower(z.level), () => z.zoomOut())}>−</button>
         <span className="tz-level" aria-live="polite">{word}</span>
         <button ref={(e) => { refs.current.in = e; }} className="tz-icon" aria-label="Zoom in" title="Zoom in (+)" disabled={!z.canIn}
-          onClick={() => press("in", deeper(z.level, z.hours), () => z.zoomIn())}>+</button>
+          onClick={(e) => press(e, "in", deeper(z.level, z.hours), () => z.zoomIn())}>+</button>
         <button ref={(e) => { refs.current.today = e; }} className="small" disabled={fit} onClick={() => z.today()} title="Today (t)">Today</button>
-        <button ref={(e) => { refs.current.fit = e; }} className="small" disabled={fit} onClick={() => press("fit", "fit", () => z.fit())} title="Fit (0)">Fit</button>
+        <button ref={(e) => { refs.current.fit = e; }} className="small" disabled={fit} onClick={(e) => press(e, "fit", "fit", () => z.fit())} title="Fit (0)">Fit</button>
       </div>
     </div>
   );
