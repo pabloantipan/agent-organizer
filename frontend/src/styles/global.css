@@ -717,7 +717,10 @@ button.counts.linkish { font-family: var(--mono); }
 .dec { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r); margin-bottom: 6px; }
 .dec.proposed { border-left: 3px solid var(--decision-waiting); }
 .dec.ruled { border-left: 3px solid var(--decision-ruled); }
-.dec.superseded, .dec.withdrawn { opacity: .7; }
+/* Dimmed is a token, never opacity (Decision record; leftovers-4 FR-10):
+   the title and meta take --fg-muted, the lozenge keeps its own tokens. */
+.dec.superseded .dec-title, .dec.withdrawn .dec-title,
+.dec.superseded .dec-meta, .dec.withdrawn .dec-meta { color: var(--fg-muted); }
 .dec-line { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 12px; background: none; border: 0; font: inherit; color: var(--text); text-align: left; cursor: pointer; min-width: 0; }
 .dec-line:hover .dec-title { color: var(--accent-fg); }
 .dec-num { font-size: var(--font-size-xs); color: var(--dim); flex-shrink: 0; }
@@ -726,7 +729,8 @@ button.counts.linkish { font-family: var(--mono); }
 .dec-meta b { color: var(--text); font-weight: 600; }
 .badge.dec-status.proposed { background: var(--decision-waiting-bg); color: var(--decision-waiting); border-color: transparent; }
 .badge.dec-status.ruled { background: var(--decision-ruled-bg); color: #b9a3ff; border-color: transparent; }
-.badge.dec-status.superseded, .badge.dec-status.withdrawn { color: var(--done); }
+/* Superseded and withdrawn keep the neutral lozenge's own tokens: --done
+   on its tint read 2.05:1 (leftovers-4 L9); the word carries the status. */
 .dec-body { padding: 0 14px 12px 14px; border-top: 1px solid var(--border); }
 .dec-facts { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 10px 0 6px; font-size: var(--font-size-sm); color: var(--muted); }
 .dec-facts button.link { font-size: var(--font-size-sm); color: var(--accent-fg); }
