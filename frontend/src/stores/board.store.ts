@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { api, type Account, type AgentsView, type BoardView, type Group, type LockState, type Note } from "../hooks/useWails";
 import type { merge } from "../../wailsjs/go/models";
 import { dropDraft, editDraft, openDraft, type Draft, type Drafts } from "../lib/drafts";
+import { decSectionsOf, type DecSections } from "../lib/decisionsPage";
 import { railCollapsedFor, roomyOf, widthClassOf, type WidthClass } from "../lib/width";
 
 /** Navigation is Home, one initiative under its header with six sub-views,
@@ -59,6 +60,11 @@ type State = {
   // next tab he presses keeps it folded; only Details stores "open" again.
   headerOpen: boolean;
   setHeaderOpen: (v: boolean) => void;
+  // Decisions' three sections open or closed (decisions-view §3): the lead's
+  // working layout, remembered per machine like the rail. A landing opens
+  // the section that hides its record through the same setter (§6).
+  decSections: DecSections;
+  setDecSection: (k: keyof DecSections, open: boolean) => void;
   // stageFocus is the stage Roadmap → Stages expands and focuses, set by a
   // stage tile: <initiative>/<stage id>. StageRoadmap consumes it and clears it.
   stageFocus: string | null;
@@ -134,6 +140,8 @@ const HEADER_KEY = "initiative.header.open";
 const storedHeaderOpen = () => { try { return localStorage.getItem(HEADER_KEY) === "1"; } catch { return false; } };
 // A landing folds the header and stores it as the lead's choice (FR-11).
 const folded = () => { try { localStorage.setItem(HEADER_KEY, "0"); } catch { /* per-viewer */ } return false; };
+const DEC_SECTIONS_KEY = "decisions.sections";
+const storedDecSections = () => { try { return decSectionsOf(localStorage.getItem(DEC_SECTIONS_KEY)); } catch { return decSectionsOf(null); } };
 const width0 = typeof window === "undefined" ? 1440 : window.innerWidth;
 
 export const useBoard = create<State>((set, get) => ({
@@ -189,6 +197,12 @@ export const useBoard = create<State>((set, get) => ({
   dropRule: (key) => set((st) => ruleState(dropDraft(draftsOf(st), key))),
   headerOpen: storedHeaderOpen(),
   setHeaderOpen: (headerOpen) => { try { localStorage.setItem(HEADER_KEY, headerOpen ? "1" : "0"); } catch { /* per-viewer */ } set({ headerOpen }); },
+  decSections: storedDecSections(),
+  setDecSection: (k, open) => set((st) => {
+    const decSections = { ...st.decSections, [k]: open };
+    try { localStorage.setItem(DEC_SECTIONS_KEY, JSON.stringify(decSections)); } catch { /* per-viewer */ }
+    return { decSections };
+  }),
   stageFocus: null,
   openCardLanding: (selected) => set({ selected, headerOpen: folded() }),
   openStage: (selectedInitiative, stageId) => set({ ruleDraft: null, headerOpen: folded(), screen: "initiative", selectedInitiative, sub: "roadmap", selected: null, needsMeFocus: null, decisionFocus: null, stageFocus: `${selectedInitiative}/${stageId}` }),
