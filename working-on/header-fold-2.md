@@ -11,6 +11,7 @@ spec: "docs/specs/initiative-header.md (FR-10 to FR-16, amendment 3); the rankin
 gate: "docs/specs/initiative-header.md Acceptance, rows G12 to G17 and G11; the Gate section below"
 stage: twenty-at-a-glance
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -25,6 +26,13 @@ header-fold's UI leftovers, ranked by Aglaea: FR-10 to FR-16 of
 - [x] G16: see `docs/specs/initiative-header.md`, Acceptance
 - [x] G17: see `docs/specs/initiative-header.md`, Acceptance
 - [x] G11: see `docs/specs/initiative-header.md`, Acceptance
+
+## Review
+- Verdict: pass (code review; the UI review is separate).
+- Unmet gate items: none. G11 rerun at ac49856: `XDG_DATA_HOME=$(mktemp -d) make test` green (Go, vitest 64), `npm run build` green, G18 grep empty. G12, G14, G16, G17 from the diff plus the shots and measurements in .wt-notes/hf2-build.
+- G13 and G15 pass on the diff, not on the literal check: the fixture has no Needs me card row, so G13 ran through the cell row's Open. Home's card Open is `select(c)` on Home, and that calls the same `folded()` helper. The all-initiatives Agents view is not mounted, so "the all view unchanged" can only be read in the diff: the group head is the same apart from one shared counts string. Both checks ask for something the fixture or the app cannot show. For Pablo: add a card row to the fixture, and drop or rewrite G15's "with none".
+- Outside the gate: StageRoadmap.tsx is outside the boundary. The boundary named Roadmap.tsx and RoadmapView.tsx, but the "current" word lives in StageRoadmap.tsx; the change is 3 lines and FR-14 only. Spec boundary wrong, not the build. No test covers FR-11 (a landing stores "folded"): the store has no tests, so a regression would show only by hand.
+- Reviewer: hf2-review, 2026-10-03
 
 ## Done
 - 2026-10-03 hf2-build: FR-10 to FR-16 on header-fold-2 (f30a7e5 713558c 944fb1b f16b13f 97cd0d0 b9c0e85 ac49856), rebased on main (main runs ahead only by this card's own commits); G12-G17 measured on the fixture at 1024x640 (header 256 px, scrolls inside; folded across tab and reload; target whole, goal cut; no id on Agents; pointer, chevron, 2px offset, runs 1:3; names and aria-expanded; "2 decisions waiting on you"); G11 green. Shots and numbers in .wt-notes/hf2-build/progress.md
