@@ -28,6 +28,16 @@ The reviewer's point: a cell in definition is itself a Needs me row
 ("partner-payouts · payouts-fixture in definition"), so it waits on you, and
 by the design system's own rule it should not fold.
 
+Since raised: sup28 built "never folds" (G19 as written). It then failed at a
+1024x640 window with the rail expanded: waiting, blocked and the cell at
+their shortest plus "+4" need 151 px of a 145 px column (1d6cec6, 7460ea4).
+Aglaea's design call (thread 01M41HJGNN8PP85CHHSBN3VHCV, design system
+Widths amended e9fdcf4): the cell folds last of the foldable signals,
+everywhere. Widths names only waits on you, blocked and waiting as never
+folding; a cell waiting on you is already its own Needs me row. A wider
+column at compact breaks the goal's ~30-character floor; a rule for compact
+only would depend on the class name, which Widths forbids.
+
 ## Options
 
 - **never folds**: the cell stays in view like waiting; when the column is
@@ -39,14 +49,15 @@ by the design system's own rule it should not fold.
 
 ## Recommendation
 
-The FSE's: never folds. It is a Needs me row, so it waits on you, and the
-rule you accepted in 0074 keeps those in view. A cut word with the full text
-on hover is how waiting already behaves.
+Aglaea's, and now the FSE's: folds last. The FSE first recommended never
+folds; the build showed it cannot fit at the minimum window, and the cell
+already reaches you as a Needs me row.
 
 ## Ruling
 
 ## Consequences
 
-Never folds: `home-widths-4` goes back to its builder, G19 unchanged.
-Folds last: the FSE amends FR-20 and G19 in `docs/specs/responsive-home.md`
-and the card goes back to review; Aglaea adds the cell to Widths' list.
+Folds last: the FSE amends FR-20 and G19 in `docs/specs/responsive-home.md`;
+the builder puts back `FOLD.cell` (lib/width.ts), and the card goes back to
+review. Never folds: the card needs another way into 145 px, and the design
+system's Widths changes back.
