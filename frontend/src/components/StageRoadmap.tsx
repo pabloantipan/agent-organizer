@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useBoard } from "../stores/board.store";
 import { DAY, daysBetween, parseISO, today, toISO } from "../lib/dates";
 import { addLocalDays } from "../lib/axis";
+import { stageFocusIndex } from "../lib/stageFocus";
 import { PhaseWord } from "./InitiativeHeader";
 import { EdgePointer, TimeFrame, ZoomControl, useTimeZoom, type Zoom } from "./TimeZoom";
 import "../styles/roadmap.css";
@@ -44,25 +45,28 @@ export function StageRoadmap({ initiative, head }: { initiative: merge.BoardInit
   const { view, stageFocus, clearStageFocus } = useBoard();
   // One stage open at a time (initiative-header FR-4), by position: a broken
   // roadmap may repeat an id (a problem the scan reports). A stage tile in
-  // the header lands here through stageFocus: the first stage with that id
-  // expands and takes focus, then the field clears.
+  // the header lands here through stageFocus, which names the tile's
+  // position (FR-18): that stage expands and takes focus, then the field
+  // clears.
   const [expanded, setExpanded] = useState<number | null>(null);
   const [focusOn, setFocusOn] = useState<number | null>(null);
   const toggles = useRef(new Map<number, HTMLButtonElement>());
   useEffect(() => {
-    const prefix = `${initiative.id}/`;
-    if (!stageFocus?.startsWith(prefix)) return;
-    const k = (initiative.stages ?? []).findIndex((s) => s.id === stageFocus.slice(prefix.length));
-    if (k >= 0) { setExpanded(k); setFocusOn(k); }
+    if (!stageFocus?.startsWith(`${initiative.id}/`)) return;
+    const k = stageFocusIndex(stageFocus, initiative.id, (initiative.stages ?? []).length);
+    if (k !== null) { setExpanded(k); setFocusOn(k); }
     clearStageFocus();
   }, [stageFocus, initiative.id, initiative.stages, clearStageFocus]);
+  // The rows mount only once the time frame has measured its width, a
+  // render after the landing, so the focus waits for its toggle.
   useEffect(() => {
     if (focusOn === null) return;
     const el = toggles.current.get(focusOn);
-    el?.scrollIntoView({ block: "nearest" });
-    el?.focus({ preventScroll: true });
+    if (!el) return;
+    el.scrollIntoView({ block: "nearest" });
+    el.focus({ preventScroll: true });
     setFocusOn(null);
-  }, [focusOn]);
+  });
   const cards = Object.values(view?.board.columns ?? {}).flat()
     .filter((c) => c.initiative_id === initiative.id && c.machine === initiative.machine);
   const now = today();

@@ -1,10 +1,11 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { ChevronDown, ChevronRight, Code2, FileText, Lock, Route } from "lucide-react";
 import type { merge, model } from "../../wailsjs/go/models";
 import { parseISO, today } from "../lib/dates";
 import { api } from "../hooks/useWails";
 import { firstWaiting, phaseRuns, stagePosition, waitingChip } from "../lib/header";
 import { leadOf, readOnlyOf } from "../lib/queue";
+import { scrollEdges, type Edges } from "../lib/scrollEdges";
 import { useBoard, type Sub } from "../stores/board.store";
 import "../styles/header.css";
 
@@ -115,7 +116,7 @@ function StageStrip({ i, compact }: { i: merge.BoardInitiative; compact: boolean
                       aria-current={st === "current" ? "step" : undefined}
                       aria-label={`Stage ${n} of ${stages.length}: ${title}${word ? `, ${word}` : ""}. Open it in Roadmap`}
                       title={s.outcome ? `${title}\n${s.outcome}` : title}
-                      onClick={() => openStage(i.id, s.id)}
+                      onClick={() => openStage(i.id, n - 1)}
                     >
                       <span className="stg-n num">{n}{word && ` · ${word}`}</span>
                       {!short && <span className="stg-t">{title}</span>}
@@ -162,6 +163,28 @@ function Clamped({ name, className, children }: { name: string; className: strin
   );
 }
 
+/** Which edges of a scroll area have content hidden past them (FR-17, the
+ *  design system's Widths): measured on scroll, and when the area or what is
+ *  in it changes size (a clamp's "more", the window). */
+function useScrollEdges(ref: RefObject<HTMLElement | null>, on: boolean): Edges {
+  const [edges, setEdges] = useState<Edges>({ top: false, bottom: false });
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || !on) { setEdges({ top: false, bottom: false }); return; }
+    const measure = () => {
+      const e = scrollEdges(el);
+      setEdges((p) => (p.top === e.top && p.bottom === e.bottom ? p : e));
+    };
+    measure();
+    el.addEventListener("scroll", measure, { passive: true });
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    for (const c of Array.from(el.children)) ro.observe(c);
+    return () => { el.removeEventListener("scroll", measure); ro.disconnect(); };
+  }, [ref, on]);
+  return edges;
+}
+
 const SUBS: { id: Sub; label: string }[] = [
   { id: "overview", label: "Overview" },
   { id: "work", label: "Work" },
@@ -186,8 +209,15 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
   const readOnly = readOnlyOf(view, i.id);
   const stages = i.stages ?? [];
   const pos = stagePosition(stages);
-  const shown = stages[pos.current >= 0 ? pos.current : stages.length - 1];
+  const shownAt = pos.current >= 0 ? pos.current : stages.length - 1;
+  const shown = stages[shownAt];
   const charter = `${i.path}/working-on/initiative.yaml`;
+  // FR-17: at compact the bar keeps its stage while Details is open, since
+  // the open header scrolls inside itself and the strip may scroll away.
+  const compact = widthClass === "compact";
+  const barStage = !headerOpen || compact;
+  const openRef = useRef<HTMLDivElement>(null);
+  const edges = useScrollEdges(openRef, headerOpen);
   return (
     <header className={`ihead ${headerOpen ? "open" : "folded"} ${widthClass}`}>
       <div className="ihead-bar">
@@ -196,8 +226,8 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
           {i.client && <span className="lz tone">{i.client}</span>}
           {readOnly && <span className="lz read-only" title="not active: nothing here can be ruled, moved, commented, posted or started"><Lock size={12} aria-hidden /> {readOnly}: read-only</span>}
         </h1>
-        {!headerOpen && (shown ? (
-          <button className="ihead-stage" onClick={() => openStage(i.id, shown.id)} title={`${shown.title || shown.id}: open it in Roadmap`}
+        {barStage && (shown ? (
+          <button className="ihead-stage" onClick={() => openStage(i.id, shownAt)} title={`${shown.title || shown.id}: open it in Roadmap`}
             aria-label={`Roadmap, ${pos.label}: ${shown.title || shown.id}. Open it in Roadmap`}>
             <Route size={13} aria-hidden />
             <span className="num">{pos.current >= 0 ? `Stage ${pos.current + 1} of ${stages.length} · now` : pos.label}</span>
@@ -216,7 +246,7 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
         </button>
       </div>
       {headerOpen && (
-        <div id={`ihead-open-${i.id}`} className="ihead-open">
+        <div ref={openRef} id={`ihead-open-${i.id}`} className={`ihead-open ${edges.top ? "edge-top" : ""} ${edges.bottom ? "edge-bottom" : ""}`}>
           <div className="ihead-cols">
             <div className="ihead-col">
               <Clamped key={`goal-${i.id}`} name="Goal" className={`ihead-goal ${i.goal ? "" : "missing"}`}>
@@ -237,7 +267,7 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
             {i.local && i.charter_modified && <span className="ihead-edited">edited, not committed</span>}
             {i.local && <button className="linkish" onClick={() => api.openInEditor(charter)}><Code2 size={12} aria-hidden /> Open initiative.yaml in editor</button>}
           </div>
-          <StageStrip i={i} compact={widthClass === "compact"} />
+          <StageStrip i={i} compact={compact} />
         </div>
       )}
       <nav className="subtabs" aria-label="initiative views">

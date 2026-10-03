@@ -3,6 +3,8 @@ import { api, type Account, type AgentsView, type BoardView, type Group, type Lo
 import type { merge } from "../../wailsjs/go/models";
 import { dropDraft, editDraft, openDraft, type Draft, type Drafts } from "../lib/drafts";
 import { decSectionsOf, type DecSections } from "../lib/decisionsPage";
+import { storedHeaderOpen, storeFolded, storeHeaderOpen } from "../lib/fold";
+import { stageFocusOf } from "../lib/stageFocus";
 import { railCollapsedFor, roomyOf, widthClassOf, type WidthClass } from "../lib/width";
 
 /** Navigation is Home, one initiative under its header with six sub-views,
@@ -66,12 +68,14 @@ type State = {
   decSections: DecSections;
   setDecSection: (k: keyof DecSections, open: boolean) => void;
   // stageFocus is the stage Roadmap → Stages expands and focuses, set by a
-  // stage tile: <initiative>/<stage id>. StageRoadmap consumes it and clears it.
+  // stage tile: <initiative>/<position>, by position so a duplicate id opens
+  // the tile's own stage (FR-18; lib/stageFocus). StageRoadmap consumes it
+  // and clears it.
   stageFocus: string | null;
   // Open on a card row of a Needs me list is a landing: the card back opens
   // and the header folds (FR-1), storing "folded" (FR-11).
   openCardLanding: (c: merge.BoardCard) => void;
-  openStage: (initiativeId: string, stageId: string) => void;
+  openStage: (initiativeId: string, index: number) => void;
   clearStageFocus: () => void;
   slackFocus: string | null;
   setSlackFocus: (agent: string | null) => void;
@@ -136,10 +140,9 @@ const ruleState = (d: Drafts) => ({ ruleDraft: d.open, ruleDrafts: d.drafts });
 
 const RAIL_KEY = "rail.collapsed.strip";
 const storedRail = () => { try { return localStorage.getItem(RAIL_KEY); } catch { return null; } };
-const HEADER_KEY = "initiative.header.open";
-const storedHeaderOpen = () => { try { return localStorage.getItem(HEADER_KEY) === "1"; } catch { return false; } };
-// A landing folds the header and stores it as the lead's choice (FR-11).
-const folded = () => { try { localStorage.setItem(HEADER_KEY, "0"); } catch { /* per-viewer */ } return false; };
+// A landing folds the header and stores it as the lead's choice (FR-11);
+// the read and write live in lib/fold so they are tested (FR-19).
+const folded = () => storeFolded();
 const DEC_SECTIONS_KEY = "decisions.sections";
 const storedDecSections = () => { try { return decSectionsOf(localStorage.getItem(DEC_SECTIONS_KEY)); } catch { return decSectionsOf(null); } };
 const width0 = typeof window === "undefined" ? 1440 : window.innerWidth;
@@ -196,7 +199,7 @@ export const useBoard = create<State>((set, get) => ({
   setRuleDraft: (patch) => set((st) => ruleState(editDraft(draftsOf(st), patch))),
   dropRule: (key) => set((st) => ruleState(dropDraft(draftsOf(st), key))),
   headerOpen: storedHeaderOpen(),
-  setHeaderOpen: (headerOpen) => { try { localStorage.setItem(HEADER_KEY, headerOpen ? "1" : "0"); } catch { /* per-viewer */ } set({ headerOpen }); },
+  setHeaderOpen: (headerOpen) => set({ headerOpen: storeHeaderOpen(headerOpen) }),
   decSections: storedDecSections(),
   setDecSection: (k, open) => set((st) => {
     const decSections = { ...st.decSections, [k]: open };
@@ -205,7 +208,7 @@ export const useBoard = create<State>((set, get) => ({
   }),
   stageFocus: null,
   openCardLanding: (selected) => set({ selected, headerOpen: folded() }),
-  openStage: (selectedInitiative, stageId) => set({ ruleDraft: null, headerOpen: folded(), screen: "initiative", selectedInitiative, sub: "roadmap", selected: null, needsMeFocus: null, decisionFocus: null, stageFocus: `${selectedInitiative}/${stageId}` }),
+  openStage: (selectedInitiative, index) => set({ ruleDraft: null, headerOpen: folded(), screen: "initiative", selectedInitiative, sub: "roadmap", selected: null, needsMeFocus: null, decisionFocus: null, stageFocus: stageFocusOf(selectedInitiative, index) }),
   clearStageFocus: () => set({ stageFocus: null }),
   slackFocus: null,
   setSlackFocus: (slackFocus) => set({ slackFocus }),

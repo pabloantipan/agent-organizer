@@ -200,6 +200,14 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .ihead.compact.open { display: flex; flex-direction: column; max-height: 40vh; }
 .ihead.compact.open > .ihead-bar, .ihead.compact.open > .subtabs { flex: none; }
 .ihead.compact.open > .ihead-open { flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: var(--space-1) var(--space-1) var(--space-3); margin: 0 calc(-1 * var(--space-1)); }
+/* The scroll area shows it scrolls (FR-17, the design system's Widths):
+   an edge with content hidden past it carries 1 px of --border-strong, gone
+   at that end. Transparent otherwise, so nothing moves when it shows. The
+   bar keeps its stage at compact (InitiativeHeader), so the strip may
+   scroll away. */
+.ihead.compact.open > .ihead-open { border-top: 1px solid transparent; border-bottom: 1px solid transparent; }
+.ihead.compact.open > .ihead-open.edge-top { border-top-color: var(--border-strong); }
+.ihead.compact.open > .ihead-open.edge-bottom { border-bottom-color: var(--border-strong); }
 
 /* Open: the charter, then where it is written, then the strip. Wide puts
    goal and measure beside scope, each held to about 90 characters (H9). */
