@@ -162,6 +162,13 @@ U3 as its Amendment 1 (B12–B14). DS Widths amended: wide measured on the row
 (2200 floor); an all-empty column gives way first; signals fold least urgent
 first; a scrolling region shows its edge.
 
+time-zoom merged 2c0292f (shared `TimeZoom.tsx`, `lib/axis.ts`). Its
+leftovers ranked as roadmap-time-zoom Amendment 1 (2026-10-03, thread
+01M41BMCN93DZYWK5SZFNEBEVM): the control always rendered (focus to the
+opposite button), a bordered band with a pinned dot, pointer reveal shows the
+whole mark, A8 wins over the window rule, the builder's note words accepted,
+times after a timed bar at Hours, A15–A23.
+
 ## Open questions
 
 - none open.
@@ -176,6 +183,10 @@ first; a scrolling region shows its edge.
   `git checkout -- frontend/wailsjs/runtime` after, never commit it.
 
 ## Studies and lessons
+
+- **A control that hides or disables itself must say where focus goes.**
+  time-zoom's Fit unmounted on press and dropped focus (U1). Say it in the
+  spec whenever a button can disable itself.
 
 - **Check the data's precision before designing a scale.** Pablo asked for
   hours and minutes; nothing the Gantt draws has a time of day.

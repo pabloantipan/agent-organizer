@@ -228,6 +228,107 @@ rule above changes how a date becomes a pixel.
 | A14 | zoom one graph without another graph's level changing, and find a graph he left back at Fit | on Roadmap, Cards at Days, switch to Stages: Stages is at Fit; zoom Stages to Days, back to Cards: Cards at Fit (remounted, States row). Open Decisions, zoom to Days, back to Roadmap: Roadmap at Fit. No graph's level moves when another zooms (amended by 0073) |
 | A11 | use it by keyboard alone, with the level read out | tab to the control, the level word is in the group's accessible name ("Zoom, Days"); keys work with focus in the chart |
 
+## Amendment 1: time-zoom's leftovers
+
+by aglaea, 2026-10-03, for the FSE (thread 01M41BMCN93DZYWK5SZFNEBEVM), from
+the card's UI review (`working-on/done/time-zoom.md`, U1–U6, G1–G4; run
+`runs/2026-10-03-time-zoom.md`). That review ran in headless Chromium. I did
+not re-run it, and these rows rest on its logs and shots. Nothing here needs
+Pablo. Every row lands in `TimeZoom.tsx`, `lib/axis.ts` and
+`time-zoom.css`; none needs `DecisionsView.tsx` beyond what the shared
+component already renders there.
+
+### Ranked
+
+| # | What the lead cannot do, or does wrong | From | Sev | Kind | Direction |
+|---|---|---|---|---|---|
+| 1 | By keyboard, pressing Zoom in at the last level, Zoom out at Fit, or Fit drops focus to the page, and he loses his place | U1 | 2 | DS (Focus and names) | §A1.1: the control keeps its buttons; focus moves to the opposite zoom button |
+| 2 | At Hours a day-only card's band is barely visible (~1.2:1), and once its dot is off view the row reads as empty | U2 | 2 | Design | §A1.2: the band gets a 1 px border in its status colour and the dot stays pinned at the lane's visible left edge |
+| 3 | An edge pointer scrolls a timed bar so its start hides under the label column | U3 | 2 | Design | §A1.3: a mark that fits is shown whole, with a margin |
+| 4 | Today at Fit is enabled and does nothing | U4, G3 | 1 | DS (disabled, never here) | §A1.1: Today is disabled at Fit |
+| 5 | The window rule and Today at a third disagree: the build extends the window | G1 | — | Spec | §A1.4: A8 wins, as built |
+| 6 | The Hours note's words | G2 | — | Words | **Accepted as built**: "Dates without a time of day fill their whole day." It replaces the States row's words. It is true with and without timed marks |
+| 7 | A timed bar's minutes show only in its hover title | G3 | 1 | Design | §A1.5: at Hours, the times sit after the bar where the due label does |
+| 8 | The sticky context label changes a pixel early, and tick labels show half-cut beside the label column | U5 | 1 | Design | §A1.6 |
+| 9 | Edge pointers are 18 px tall; at Stages Days the weekend tint stripes the current row's highlight | U6 | 1 | DS (24 px targets; disclosure state) | Pointers 24 px tall. The row highlight is drawn over the weekend tint, never under it |
+| 10 | The fixture cannot reach A2's `October 2026` | G4 | — | Fixture | One fixture card dated at least ten days after the fixture's last date, so a later month's sticky label is reachable. The fixture script belongs in the card's boundary (the run's own note) |
+
+### §A1.1 The control keeps its shape
+
+`[ − ]  Days  [ + ]   Today   Fit` is always rendered, at every level. This
+replaces "Fit shows only when the level is not Fit", whose unmounting was one
+cause of U1, and the control no longer shifts.
+
+- At Fit: `−`, Today and Fit are disabled. At the deepest level, `+` is
+  disabled. These use the design system's never-here treatment, with no
+  reason text.
+- When the button that was pressed becomes disabled, focus moves to the
+  opposite zoom button: `+` at the last level to `−`; `−` or Fit reaching
+  Fit to `+`. It never moves to the body. Today never disables itself while
+  it is pressed.
+- The level word stays in the group's name ("Zoom, Days").
+
+### §A1.2 The whole-day band reads
+
+- The band is filled with the status's `-bg` token, with no extra opacity,
+  and has a 1 px border in the status colour (`--status-next` and so on).
+  The border carries the 3:1 non-text contrast (WCAG 1.4.11); the fill only
+  groups.
+- While the band crosses the lane's visible left edge, its dot is pinned
+  there, just inside the label column's edge, so a row whose band fills the
+  view still says what it is. When the band's start scrolls into view, the
+  dot goes back to it.
+- A band that fills the whole view needs no edge pointer, since it is in
+  view.
+
+### §A1.3 An edge pointer shows the whole mark
+
+Pressing an edge pointer scrolls so that:
+
+- a mark that fits in the lane shows whole, with 24 px between it and the
+  lane's edges, and centred when it is shorter than a third of the lane;
+- a mark longer than the lane shows its nearer end at a third of the lane in
+  from that side, so it starts at a third when it was to the right, and ends
+  at two thirds when it was to the left.
+
+The level never changes. The lane starts after the 240 px label column:
+"visible" means right of it.
+
+### §A1.4 The window, settled
+
+The window is the Fit span plus one day (Days) or 12 hours (Hours) at each
+end, **and is extended as far as needed** for Today to put today or now at
+a third of the lane. A8 wins. This is how it is built; the rule now says
+so.
+
+### §A1.5 A timed bar says its times at Hours
+
+At Hours, a bar with at least one timed end shows its times after its right
+end, where the due label sits: `09:12–17:48`, or `09:12–` for an open bar.
+If a due date exists, the times come first (`09:12–17:48 · due end of 5 Oct`).
+At Days and Fit, the times stay in the hover title.
+
+### §A1.6 Axis labels
+
+- The sticky context label names the unit at a point **4 px into the lane**,
+  not at its exact edge.
+- A tick label that would be cut by the label column or by the frame's right
+  edge is not drawn. The sticky context label covers the left edge.
+
+### Acceptance
+
+| # | The lead can | Checked by |
+|---|---|---|
+| A15 | zoom by keyboard to either end and keep his place | Enter on `+` until the deepest level: focus on `−`; Enter on `−` or Fit until Fit: focus on `+`; `document.activeElement` is never BODY. The control's width is the same at every level |
+| A16 | not press a Today that does nothing | Today disabled at Fit, enabled at Days and Hours |
+| A17 | see a day-only card at Hours | the band's border is in the status colour (non-text contrast ≥ 3:1 against the lane); scrolled to mid-band, the dot sits at the lane's left edge |
+| A18 | see the whole timed bar after an edge pointer | Beta at Hours, press `‹ 2 Oct`: the bar's left edge is ≥ 24 px right of the label column and its right edge in view |
+| A19 | read a timed bar's minutes without hovering | Beta at Hours shows `09:12–17:48` after its end |
+| A20 | read only whole axis labels, and the right day | at Hours, scroll so a midnight tick is 1–3 px into the lane: the context label names the new day; no tick label is cut |
+| A21 | press an edge pointer as a 24 px target | pointer height ≥ 24 px |
+| A22 | see the current stage's highlight whole at Days | Stages at Days over a weekend: the row highlight is uniform |
+| A23 | reach a later month's sticky label | on the fixture, scroll Cards at Days into its last month: the sticky label names it |
+
 ## Open questions
 
 Ruled 2026-10-03, record 0070. O1, Pablo: "Agree" (commit times in the
