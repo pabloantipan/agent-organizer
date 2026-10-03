@@ -7,7 +7,7 @@ import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from ".
 import { uniq } from "../lib";
 import { HEALTH, messages } from "../lib/health";
 import { ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
-import { compactColumns, FOLD, GOAL_CHARS, homeClassOf, NO_EMPTY, signalsShown, wideGoalRoom, type Empty, type Fold, type WidthClass } from "../lib/width";
+import { compactColumns, FOLD, GOAL_CHARS, homeClassOf, LZ_MIN_TEXT, NO_EMPTY, shareRoom, signalsShown, wideGoalRoom, type Empty, type Fold, type WidthClass } from "../lib/width";
 import { useBoard } from "../stores/board.store";
 import { nextDate, stageState } from "./InitiativeHeader";
 import { InitiativeDetail } from "./Initiatives";
@@ -457,8 +457,9 @@ function OneLine({ children }: { children: React.ReactNode }) {
     const el = ref.current;
     if (!el) return;
     const items = Array.from(el.children).filter((c): c is HTMLElement => c instanceof HTMLElement && !c.classList.contains("sig-more") && !c.classList.contains("sr-only"));
-    // Hidden ones are shown for the measure, inside this frame.
-    for (const c of items) c.style.display = "inline-flex";
+    // Hidden ones are shown for the measure, inside this frame, and every
+    // cap from the last measure is lifted.
+    for (const c of items) { c.style.display = "inline-flex"; c.style.maxWidth = ""; }
     const more = el.querySelector<HTMLElement>(".sig-more");
     const gap = parseFloat(getComputedStyle(el).columnGap) || 0;
     // A lozenge's natural width: a shrunk one hides the rest in its text
@@ -472,6 +473,17 @@ function OneLine({ children }: { children: React.ReactNode }) {
     const words = (c: HTMLElement) => (c.textContent ?? "").replace(/\s+/g, " ").trim();
     const rest = items.filter((_, k) => !shown[k]).map(words);
     items.forEach((c, k) => { c.style.display = ""; if (!shown[k]) c.dataset.off = "1"; else delete c.dataset.off; });
+    // The shown ones share what the "+N" leaves (FR-20): each capped at one
+    // width, never under its chrome and two characters with the ellipsis.
+    const on = items.filter((_, k) => shown[k]);
+    const room = el.clientWidth - gap * Math.max(0, on.length - 1) - (rest.length > 0 ? gap + Math.max(more?.getBoundingClientRect().width ?? 0, 28) : 0);
+    const nat = on.map(natural);
+    const mins = on.map((c, k) => {
+      const t = c.querySelector<HTMLElement>(".lz-t");
+      return t ? Math.min(nat[k], Math.ceil(nat[k] - t.scrollWidth) + LZ_MIN_TEXT) : nat[k];
+    });
+    const share = shareRoom(nat, mins, room);
+    on.forEach((c, k) => { if (share.widths[k] < nat[k]) c.style.maxWidth = `${share.widths[k]}px`; });
     // A shown signal may still be cut by its ellipsis (the first one when
     // the cell is tight, any one at the lozenge's cap): then the hover names
     // it whole.

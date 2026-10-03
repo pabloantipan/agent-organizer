@@ -142,3 +142,23 @@ export function homeClassOf(cls: WidthClass, was: WidthClass, avail: number, nee
   const room = wideGoalRoom(avail, id, gap, empty);
   return room >= need - (was === "wide" ? SLACK : 0) ? "wide" : "regular";
 }
+
+/** The least text a shown lozenge keeps (FR-20, the code review of
+ *  home-widths-4): two characters and the ellipsis at --font-size-xs. */
+export const LZ_MIN_TEXT = 18;
+
+/** The signals that never fold share what is left of their column (FR-20):
+ *  all at their natural width when they fit; otherwise each is capped at
+ *  one width, the same for all (the widest give way first), never below its
+ *  own least (`mins`, its chrome and LZ_MIN_TEXT, or its natural width when
+ *  that is less). When even the leasts do not fit, it returns the leasts and
+ *  the caller's row overflows: `fits` says so. */
+export function shareRoom(widths: number[], mins: number[], room: number): { widths: number[]; fits: boolean } {
+  const total = (c: number) => widths.reduce((a, w, k) => a + Math.max(Math.min(mins[k], w), Math.min(w, c)), 0);
+  if (widths.reduce((a, w) => a + w, 0) <= room) return { widths, fits: true };
+  const floor = widths.map((w, k) => Math.min(mins[k], w));
+  if (floor.reduce((a, w) => a + w, 0) > room) return { widths: floor, fits: false };
+  let lo = 0, hi = Math.max(...widths);
+  for (let i = 0; i < 40; i++) { const c = (lo + hi) / 2; if (total(c) <= room) lo = c; else hi = c; }
+  return { widths: widths.map((w, k) => Math.floor(Math.max(Math.min(mins[k], w), Math.min(w, lo)))), fits: true };
+}

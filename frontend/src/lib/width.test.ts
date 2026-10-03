@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { COMPACT_FIXED, compactColumns, FOLD, GOAL_MIN, homeClassOf, NEXT_W, railCollapsedFor, roomyOf, SIGNALS_MIN, SLACK, signalsShown, signalsThatFit, wideGoalRoom, widthClassOf, type Fold } from "./width";
+import { COMPACT_FIXED, shareRoom, compactColumns, FOLD, GOAL_MIN, homeClassOf, NEXT_W, railCollapsedFor, roomyOf, SIGNALS_MIN, SLACK, signalsShown, signalsThatFit, wideGoalRoom, widthClassOf, type Fold } from "./width";
 
 describe("widthClassOf", () => {
   it("puts each boundary in the class above it", () => {
@@ -161,5 +161,31 @@ describe("homeClassOf (FR-21)", () => {
     expect(homeClassOf("wide", "wide", 1910, room + SLACK, 129, gap)).toBe("wide");
     expect(homeClassOf("wide", "regular", 1910, room + SLACK, 129, gap)).toBe("regular");
     expect(homeClassOf("wide", "wide", 1910, room + SLACK + 1, 129, gap)).toBe("regular");
+  });
+});
+
+describe("shareRoom (FR-20)", () => {
+  it("leaves every lozenge whole when they fit", () => {
+    expect(shareRoom([100, 60, 80], [36, 36, 52], 240)).toEqual({ widths: [100, 60, 80], fits: true });
+  });
+
+  it("cuts the widest first, to one cap, within the room", () => {
+    const r = shareRoom([330, 66, 125], [36, 36, 52], 230);
+    expect(r.fits).toBe(true);
+    expect(r.widths[1]).toBe(66);
+    expect(r.widths[0]).toBe(r.widths[2]);
+    expect(r.widths.reduce((a, w) => a + w, 0)).toBeLessThanOrEqual(230);
+  });
+
+  it("never cuts a lozenge under its least, and says when the leasts do not fit", () => {
+    const r = shareRoom([330, 66, 125], [36, 36, 52], 100);
+    expect(r).toEqual({ widths: [36, 36, 52], fits: false });
+  });
+
+  it("does not raise a lozenge narrower than its least", () => {
+    const w = shareRoom([30, 300], [36, 36], 120).widths;
+    expect(w[0]).toBe(30);
+    expect(w[1]).toBeGreaterThanOrEqual(89);
+    expect(w[0] + w[1]).toBeLessThanOrEqual(120);
   });
 });

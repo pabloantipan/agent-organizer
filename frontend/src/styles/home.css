@@ -154,13 +154,12 @@
 .home .p-sig.one-line { flex-wrap: nowrap; overflow: hidden; min-width: 0; }
 .home .p-sig.one-line > * { flex: none; }
 .home .p-sig.one-line > [data-off] { display: none; }
-/* When the signals that never fold (FR-20) do not fit whole, they take
-   their ellipses instead of "+N": the waiting list first (as long as its
-   owners), down to about its count and word, then the cell in definition;
-   blocked, two words, stays whole. A lone first signal shrinks as before. */
-.home .p-sig.one-line > .lz:first-child { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.home .p-sig.one-line > .lz.waiting { flex: 0 100 auto; min-width: 6em; }
-.home .p-sig.one-line > .lz.tone { flex: 0 1 auto; min-width: 0; overflow: hidden; }
+/* When the signals that never fold (FR-20) do not fit whole, they share
+   the column instead of folding: OneLine in Home.tsx caps each shown
+   lozenge (max-width, lib/width.ts shareRoom), the widest first, never
+   under two characters and the ellipsis on its text span, so "+N" stays
+   inside the column. */
+.home .p-sig.one-line > .lz { overflow: hidden; }
 .lz.sig-more { background: var(--surface-raised); color: var(--fg-muted); }
 /* FR-14: a lozenge is a flex box, which clips its text mid-word; its words
    sit in a text span that takes the ellipsis instead. */
