@@ -60,6 +60,12 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
 - Repetition: a spec boundary named the wrong file (StageRoadmap.tsx held
   "current", not Roadmap.tsx). spec-craft 5b traced the claims I wrote, not
   where the words live: first time; second time, propose a grep step.
+- Second gate error the same day: time-zoom A14 contradicted my own T5 and
+  the spec's States row (review fail 3b533f5; 0073 proposed, 049fe66).
+  spec-craft 5b checks claims against sources, not gate rows against the
+  spec's own notes. Second recurrence of "my 5b missed it": propose to
+  Hephaistos a 5b line, "read every gate row against the Technical notes
+  and States", once 0073 is ruled.
 
 ## OPEN — 2026-10-03, sup25 running; Decisions view review asked
 
