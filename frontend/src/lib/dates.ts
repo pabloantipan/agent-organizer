@@ -1,10 +1,23 @@
 export const DAY = 86400000;
 
+const DATE_ONLY = /^(\d{4})-(\d{2})-(\d{2})$/;
+// RFC 3339 as git's %cI writes it: a time and an offset (Z or ±hh:mm).
+const DATE_TIME = /^\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?([Zz]|[+-]\d{2}:\d{2})$/;
+
+/** A card, record or stage date (`YYYY-MM-DD`, local midnight) or an RFC
+ *  3339 time (git's %cI on a branch span); null for anything else. */
 export function parseISO(s: string | undefined | null): Date | null {
   if (!s) return null;
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
-  if (!m) return null;
-  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  const m = DATE_ONLY.exec(s);
+  if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  if (!DATE_TIME.test(s)) return null;
+  const d = new Date(s.replace(" ", "T"));
+  return isNaN(d.getTime()) ? null : d;
+}
+
+/** Whether a string parseISO takes carries a time of day, not a whole day. */
+export function hasTime(s: string | undefined | null): boolean {
+  return !!s && DATE_TIME.test(s) && parseISO(s) !== null;
 }
 
 export function toISO(d: Date): string {
