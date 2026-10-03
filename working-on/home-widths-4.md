@@ -4,7 +4,8 @@ status: now
 repos: [organizer]
 branch: home-widths-4
 updated: 2026-10-03
-next: "review: home-widths-4, G19-G23 and G8 met; G24 is the UI reviewer's"
+next: "G19: the cell-in-definition lozenge folds into \"+N\" on partner-payouts at 1440 and 1512, where G19 allows only problems/now/live; make it never fold, or have the gate amended (see Review)"
+review: fail
 depends_on: [decisions-view, time-zoom-2]
 boundary: ["frontend/src/components/Home.tsx, Rail.tsx, RuleDecisionBox.tsx", "frontend/src/components/Crew.tsx (CellStateLz only), Conversation.tsx (FR-24's names and focus only)", "frontend/src/lib/width.ts, frontend/src/lib/ and its tests", "frontend/src/styles/home.css, rule-box.css, global.css (.rail-icon only), shell.css (the rail's rules only)", "testdata/fixture-twenty/ and scripts/fixture-home.sh (FR-25's rows)", "not: header-fold-3's files, DecisionsView.tsx, Go, docs/design-system.md"]
 spec: "docs/specs/responsive-home.md (amendment 4, FR-20 to FR-25); the ranking docs/ux/reviews/2026-10-03-rank-leftovers-3.md (Aglaea, 2b6d608); the design system's Widths as amended there"
@@ -35,6 +36,17 @@ widths-and-focus's leftovers, ranked by Aglaea: FR-20 to FR-25 of
 ## Next
 
 ## Blockers
+
+## Review
+- **Verdict:** fail (code review). G20, G21, G22, G23 and G8 met; G24 is the UI reviewer's.
+- **Unmet:** G19. Its Expected says "only problems/now/live are in +N" on the seven-signal row; g19-rebased.log shows "cell in definition [in +N, fold 3]" at 1440 and 1512 (Home.tsx passes `fold={FOLD.cell}`). FR-20 does not rank the cell, but the cell in definition is itself a Needs me row ("partner-payouts · payouts-fixture in definition"), so it waits on the lead and by FR-20's own reasoning should not fold. Either make it never fold (it then takes the ellipsis like waiting) or have the gate amended; that is a decision for Pablo, not a reviewer.
+- **G8 rerun by the reviewer:** `XDG_DATA_HOME=$(mktemp -d) make test` green (148 vitest), `npm run build` ok, the G18 grep empty, `wails build` ok, at e522b2e.
+- **Outside the gate:**
+  - the Escape listener is now on `document` and the box no longer stops propagation: with Help or a card drawer open over a box (both listen on `document` too), one Escape closes both;
+  - on Decisions at 1024x640 the box covers its own Rule (the element there is `DIV.rb`); FR-23 is met only because Decisions has no scrim;
+  - People's hide button (`.rail-icon`) has no aria-label, only a title (the G22 log reads its name as "");
+  - SlackView.tsx is outside the spec's boundary; widened by sup28 (Notes), so not a finding.
+- **Reviewer:** hw4-review, 2026-10-03
 
 ## Notes
 Runs in parallel with header-fold-3; boundaries disjoint.
