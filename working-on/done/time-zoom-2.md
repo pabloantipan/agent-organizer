@@ -1,10 +1,10 @@
 ---
 title: Time zoom, second pass - focus kept at the ends, Today only where it moves, readable day bands, whole marks after a pointer
-status: now
+status: done
 repos: [organizer]
 branch: time-zoom-2
 updated: 2026-10-03
-next: "review: time-zoom-2, gate met (A15-A23 measured, build row green)"
+next: "none: merged 599eca9"
 depends_on: []
 boundary: ["frontend/src/components/TimeZoom.tsx, frontend/src/lib/axis.ts and axis.test.ts, frontend/src/styles/time-zoom.css", "frontend/src/components/Roadmap.tsx (A19's minutes label only), StageRoadmap.tsx (A22's row highlight only)", "scripts/fixture-home.sh (A23's card only)", "not: DecisionsView.tsx, RoadmapView.tsx, Home, the stores, Go, docs/design-system.md"]
 spec: "docs/ux/specs/roadmap-time-zoom.md, Amendment 1 (Aglaea, 726cbe8) and its Technical notes"
@@ -23,6 +23,7 @@ time-zoom's UI leftovers, ranked by Aglaea: Amendment 1 of
 - [x] `go test ./...` and `cd frontend && npm test` green (axis tests for A15's focus target and A20's cut-label rule where pure); `wails build` succeeds
 
 ## Done
+- 2026-10-03 merged to main 599eca9 by sup27 after the code review (pass) and the UI review (pass, 17def3a); make test, npm run build and wails build green on main with decisions-view
 - 2026-10-03 tz2-build built Amendment 1 on `time-zoom-2` (d0ebc90, 7d25c11, 17def3a, rebased on main); A15-A23 measured in .wt-notes/tz2-build/measurements.md; go test, make test, npm run build, wails build green
 - 2026-10-03 sup27 launched by the FSE (0074 ruled, accept as written)
 - 2026-10-03 cut by the FSE from Aglaea's Amendment 1 (726cbe8)
