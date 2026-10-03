@@ -170,6 +170,18 @@ export function DecisionsView() {
     return () => ro.disconnect();
   }, [expanded, ruling, sections.rule, sections.ruled, sections.timeline, view]);
 
+  // The Timeline's axis sticks under its heading (row 4), whose height grows
+  // when its tools wrap: measured, so the axis sits right under it.
+  const [tlHead, setTlHead] = useState<HTMLElement | null>(null);
+  const [tlHeadH, setTlHeadH] = useState(0);
+  useLayoutEffect(() => {
+    if (!tlHead) return;
+    setTlHeadH(tlHead.offsetHeight);
+    const ro = new ResizeObserver(() => setTlHeadH(tlHead.offsetHeight));
+    ro.observe(tlHead);
+    return () => ro.disconnect();
+  }, [tlHead]);
+
   // `/` puts the cursor in the find field when it is not in a text box (§2).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -281,12 +293,12 @@ export function DecisionsView() {
   // its words and count, the sort order its description. `extra` sits at the
   // heading's right (the Timeline's controls); `fixed` is a heading that
   // cannot close (an empty To rule).
-  const heading = (id: keyof DecSections, words: string, count: string | null, order: string | null, extra?: ReactNode, fixed?: boolean) => {
+  const heading = (id: keyof DecSections, words: string, count: string | null, order: string | null, extra?: ReactNode, fixed?: boolean, ref?: (el: HTMLDivElement | null) => void) => {
     const isOpen = fixed || sections[id];
     const label = count === null ? words : `${words} · ${count}`;
     const desc = order ? `dec-${id}-order` : undefined;
     return (
-      <div className="dec-sh">
+      <div className="dec-sh" ref={ref}>
         <h2>
           {fixed
             ? <span className="dec-sh-static"><span className="dec-chev" aria-hidden="true" />{label}</span>
@@ -369,7 +381,7 @@ export function DecisionsView() {
         ))}
       </section>
 
-      <section className="dec-section dec-tl">
+      <section className="dec-section dec-tl" style={tlHeadH ? { "--dec-tl-sh": `${tlHeadH}px` } as CSSProperties : undefined}>
         {heading("timeline", "Timeline", timelineCount(shownHits.length, shown.length, showClosed ? 0 : closed.length, filtering), "raised to ruled; open ones run to today",
           sections.timeline ? (
             <div className="dec-sh-tools">
@@ -378,7 +390,7 @@ export function DecisionsView() {
               )}
               <ZoomControl z={z} />
             </div>
-          ) : undefined)}
+          ) : undefined, false, setTlHead)}
         {sections.timeline && (shownHits.length === 0 ? noMatch : (
           <>
             <div className="gantt-body dec-timeline tz-host">
