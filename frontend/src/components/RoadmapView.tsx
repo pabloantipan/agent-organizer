@@ -38,13 +38,13 @@ export function RoadmapView() {
       ))}
     </div>
   );
-  if (mode === "stages") return <div>{modes}<StageRoadmap initiative={selected} /></div>;
+  // The zoom control sits on the switch's line (time-zoom); Calendar has none.
+  if (mode === "stages") return <div><StageRoadmap initiative={selected} head={modes} /></div>;
   if (mode === "calendar") return <div>{modes}<Calendar /></div>;
   const cards = ["now", "blocked", "next"].flatMap((st) => (view.board.columns?.[st] ?? []).filter((c) => c.initiative_id === selected.id && c.machine === selected.machine));
   return (
     <div>
-      {modes}
-      <Roadmap initiative={selected} cards={cards} collapsible={false} defaultOpen />
+      <Roadmap initiative={selected} cards={cards} collapsible={false} defaultOpen head={modes} />
     </div>
   );
 }

@@ -1,8 +1,10 @@
 import type { merge, model } from "../../wailsjs/go/models";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useBoard } from "../stores/board.store";
-import { addDays, daysBetween, parseISO, shortDate, today, toISO } from "../lib/dates";
+import { DAY, daysBetween, parseISO, today, toISO } from "../lib/dates";
+import { addLocalDays } from "../lib/axis";
 import { PhaseWord } from "./InitiativeHeader";
+import { EdgePointer, TimeFrame, ZoomControl, useTimeZoom, type Zoom } from "./TimeZoom";
 import "../styles/roadmap.css";
 
 /** A gate's key for finding its record (FR-5): a number compares by value, so
@@ -38,7 +40,7 @@ type Row = {
  *  Gates are diamonds at the date raised and, once ruled, at the date ruled.
  *  A stage without a target is a dashed bar after the last dated thing, sized
  *  by order only and labelled with its appetite; no date is computed from it. */
-export function StageRoadmap({ initiative }: { initiative: merge.BoardInitiative }) {
+export function StageRoadmap({ initiative, head }: { initiative: merge.BoardInitiative; head?: ReactNode }) {
   const { view, stageFocus, clearStageFocus } = useBoard();
   // One stage open at a time (initiative-header FR-4), by position: a broken
   // roadmap may repeat an id (a problem the scan reports). A stage tile in
@@ -85,71 +87,58 @@ export function StageRoadmap({ initiative }: { initiative: merge.BoardInitiative
     return { stage: s, n: i + 1, state, start, end, toToday, slot, gates };
   });
 
+  // The dated region: every real date on the rows, and today; each date
+  // covers its whole day. Stage dates never carry a time, so the zoom stops
+  // at Days (A12).
+  const dates: number[] = [now.getTime()];
+  for (const r of rows) {
+    if (r.start) dates.push(r.start.getTime());
+    if (r.end) dates.push(r.end.getTime());
+    for (const g of r.gates) { if (g.raised) dates.push(g.raised.getTime()); if (g.ruled) dates.push(g.ruled.getTime()); }
+  }
+  const dataFrom = Math.min(...dates);
+  const dataTo = addLocalDays(Math.max(...dates), 1);
+  const span = Math.max((dataTo - dataFrom) / DAY, 21);
+  const fit = { from: addLocalDays(dataFrom, -Math.max(2, Math.round(span * 0.04))), to: addLocalDays(dataTo, Math.max(3, Math.round(span * 0.06))) };
+  const slot = slots ? Math.min(SLOT_MAX, SLOT_ROOM / slots) : 0;
+  const z = useTimeZoom({ fit, data: { from: dataFrom, to: Math.max(dataTo, Date.now()) }, hours: false, reserveFrac: (slot * slots) / 100, reset: initiative.id });
+
   if (rows.length === 0) {
     return (
-      <div className="srm-empty">
-        <p>No roadmap yet.</p>
-        <p className="meta">Stages come from <span className="mono">working-on/roadmap.yaml</span>; the roadmapping skill says how to cut them.</p>
-      </div>
+      <>
+        {head}
+        <div className="srm-empty">
+          <p>No roadmap yet.</p>
+          <p className="meta">Stages come from <span className="mono">working-on/roadmap.yaml</span>; the roadmapping skill says how to cut them.</p>
+        </div>
+      </>
     );
   }
 
-  // The dated region: every real date on the rows, and today.
-  const dates: Date[] = [now];
-  for (const r of rows) {
-    if (r.start) dates.push(r.start);
-    if (r.end) dates.push(r.end);
-    for (const g of r.gates) { if (g.raised) dates.push(g.raised); if (g.ruled) dates.push(g.ruled); }
-  }
-  let from = new Date(Math.min(...dates.map((d) => d.getTime())));
-  let to = new Date(Math.max(...dates.map((d) => d.getTime())));
-  const span = Math.max(daysBetween(from, to), 21);
-  from = addDays(from, -Math.max(2, Math.round(span * 0.04)));
-  to = addDays(to, Math.max(3, Math.round(span * 0.06)));
-  const total = daysBetween(from, to);
-  const slot = slots ? Math.min(SLOT_MAX, SLOT_ROOM / slots) : 0;
-  const dated = 100 - slot * slots;
-  const pct = (d: Date) => (daysBetween(from, d) / total) * dated;
-  const slotLeft = (i: number) => dated + i * slot;
-
-  // Weekly ticks under 90 days, else monthly (design system, Timeline).
-  const ticks: Date[] = [];
-  if (total < 90) {
-    for (let d = addDays(from, (8 - from.getDay()) % 7); d <= to; d = addDays(d, 7)) ticks.push(d);
-  } else {
-    for (let d = new Date(from.getFullYear(), from.getMonth() + 1, 1); d <= to; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) ticks.push(d);
-  }
-  // Keep a tick's label clear of today's label and of the undated edge.
-  const labelled = (d: Date) => Math.abs(pct(d) - pct(now)) > 6 && (slots === 0 || pct(d) < dated - 4);
-  const tickLabel = (d: Date) => (total < 90 ? shortDate(d) : d.toLocaleDateString(undefined, { month: "short" }));
-  const grid = (
-    <>
-      {ticks.map((t) => <span key={toISO(t)} className="srm-tick" style={{ left: `${pct(t)}%` }} />)}
-      {slots > 0 && <span className="srm-undated-edge" style={{ left: `${dated}%` }} />}
-      <span className="srm-today" style={{ left: `${pct(now)}%` }} />
-    </>
-  );
+  // Undated stages keep their Fit width after the window's end at any level.
+  const slotPx = slots ? z.reserve / slots : 0;
+  const pos: Pos = {
+    x: (d) => z.scale.x(d.getTime()),
+    mid: (d) => (z.scale.x(d.getTime()) + z.scale.x(addLocalDays(d.getTime(), 1))) / 2,
+    end: (d) => z.scale.x(addLocalDays(d.getTime(), 1)),
+    slotLeft: (i) => z.scale.width + i * slotPx,
+    slot: slotPx,
+    pad: z.view * 0.006,
+    nowEnd: z.scale.x(addLocalDays(now.getTime(), 1)),
+  };
 
   return (
+    <>
+    {head !== undefined ? <div className="tz-head">{head}<ZoomControl z={z} /></div> : <div className="tz-head"><ZoomControl z={z} /></div>}
     <div className="srm">
-      <div className="srm-row srm-axis">
-        <div className="srm-label" />
-        <div className="srm-lane">
-          {ticks.map((t) => (
-            <span key={toISO(t)} className="srm-tick" style={{ left: `${pct(t)}%` }}>{labelled(t) && <span>{tickLabel(t)}</span>}</span>
-          ))}
-          {slots > 0 && (
-            <span className="srm-undated-edge" style={{ left: `${dated}%` }}><span>no dates · order only</span></span>
-          )}
-          <span className="srm-today" style={{ left: `${pct(now)}%` }} title={`today ${toISO(now)}`}><span>today</span></span>
-        </div>
-      </div>
-      {rows.map((r, i) => (
-        <StageRow key={i} r={r} now={now} pct={pct} slotLeft={slotLeft} slot={slot} grid={grid}
-          initiative={initiative.id} cards={cards.filter((c) => c.stage === r.stage.id)}
-          open={expanded === i} onToggle={() => setExpanded(expanded === i ? null : i)}
-          toggleRef={(el) => { if (el) toggles.current.set(i, el); else toggles.current.delete(i); }} />
-      ))}
+      <TimeFrame z={z} label="Stages timeline" undated={slots > 0 ? "no dates · order only" : undefined} extents={rows.map(extentOf).filter((e): e is { from: number; to: number } => !!e)}>
+        {rows.map((r, i) => (
+          <StageRow key={i} r={r} now={now} pos={pos} z={z}
+            initiative={initiative.id} cards={cards.filter((c) => c.stage === r.stage.id)}
+            open={expanded === i} onToggle={() => setExpanded(expanded === i ? null : i)}
+            toggleRef={(el) => { if (el) toggles.current.set(i, el); else toggles.current.delete(i); }} />
+        ))}
+      </TimeFrame>
       <div className="srm-foot">
         <span><i className="srm-key done" /> stage done</span>
         <span><i className="srm-key current" /> stage now, to today</span>
@@ -158,11 +147,26 @@ export function StageRoadmap({ initiative }: { initiative: merge.BoardInitiative
         <span><i className="srm-gem ruled inline" /> decision ruled, at ruled</span>
       </div>
     </div>
+    </>
   );
 }
 
-function StageRow({ r, now, pct, slotLeft, slot, grid, initiative, cards, open, onToggle, toggleRef }: {
-  r: Row; now: Date; pct: (d: Date) => number; slotLeft: (i: number) => number; slot: number; grid: ReactNode;
+/** Pixel positions on the shared axis: a day's start, middle and end. */
+type Pos = { x: (d: Date) => number; mid: (d: Date) => number; end: (d: Date) => number; slotLeft: (i: number) => number; slot: number; pad: number; nowEnd: number };
+
+/** A stage row's dated extent, for its edge pointer; undated rows have none. */
+function extentOf(r: Row): { from: number; to: number } | null {
+  const ds: number[] = [];
+  if (r.start && (r.end || r.toToday)) ds.push(r.start.getTime());
+  if (r.end) ds.push(r.end.getTime());
+  if (r.toToday) ds.push(today().getTime());
+  for (const g of r.gates) { if (g.record && g.raised) ds.push(g.raised.getTime()); if (g.record && g.ruled) ds.push(g.ruled.getTime()); }
+  if (ds.length === 0) return null;
+  return { from: Math.min(...ds), to: addLocalDays(Math.max(...ds), 1) };
+}
+
+function StageRow({ r, now, pos, z, initiative, cards, open, onToggle, toggleRef }: {
+  r: Row; now: Date; pos: Pos; z: Zoom;
   initiative: string; cards: merge.BoardCard[]; open: boolean; onToggle: () => void; toggleRef: (el: HTMLButtonElement | null) => void;
 }) {
   const s = r.stage;
@@ -177,17 +181,18 @@ function StageRow({ r, now, pct, slotLeft, slot, grid, initiative, cards, open, 
 
   // Stagger gate labels that would collide.
   const labels = drawn
-    .map((g) => ({ g, at: pct(g.ruled ?? (g.raised as Date)) }))
+    .map((g) => ({ g, at: pos.mid(g.ruled ?? (g.raised as Date)) }))
     .sort((a, b) => a.at - b.at);
   const lift = new Map<string, number>();
-  let last = -100;
+  let last = -1000;
   let row = 0;
-  for (const l of labels) { row = l.at - last < 5 ? row + 1 : 0; lift.set(l.g.id, row % 2); last = l.at; }
+  for (const l of labels) { row = l.at - last < 36 ? row + 1 : 0; lift.set(l.g.id, row % 2); last = l.at; }
+  const ext = extentOf(r);
 
   return (
     <>
-    <div className={`srm-row ${r.state} ${open ? "expanded" : ""}`}>
-      <button ref={toggleRef} className="srm-label srm-toggle" aria-expanded={open} aria-controls={`srm-detail-${r.n}`}
+    <div className={`srm-row tz-row ${r.state} ${open ? "expanded" : ""}`}>
+      <button ref={toggleRef} className="srm-label srm-toggle tz-label" aria-expanded={open} aria-controls={`srm-detail-${r.n}`}
         aria-label={`Stage ${r.n}: ${s.title || s.id}${state ? `, ${state}` : ""}. ${open ? "Hide" : "Show"} its detail`}
         onClick={onToggle}>
         <span className="srm-head">
@@ -200,23 +205,22 @@ function StageRow({ r, now, pct, slotLeft, slot, grid, initiative, cards, open, 
           <span className="srm-missing num">{missing.join(", ")} {missing.length === 1 ? "names" : "name"} no record, not drawn</span>
         )}
       </button>
-      <div className="srm-lane">
-        {grid}
+      <div className="srm-lane tz-lane">
         {r.end && (
           r.start && daysBetween(r.start, r.end) >= 1 ? (
-            <span className={`srm-bar ${r.state}`} style={{ left: `${pct(r.start)}%`, width: `${pct(r.end) - pct(r.start)}%` }}
+            <span className={`srm-bar ${r.state}`} style={{ left: pos.x(r.start), width: pos.end(r.end) - pos.x(r.start) }}
               title={`${s.title || s.id}: ${toISO(r.start)} → ${toISO(r.end)}${r.state === "done" ? " (done)" : " (target)"}`} />
           ) : (
-            <span className={`srm-dot ${r.state}`} style={{ left: `${pct(r.end)}%` }}
+            <span className={`srm-dot ${r.state}`} style={{ left: pos.mid(r.end) }}
               title={`${s.title || s.id}: ${r.state === "done" ? "done" : "target"} ${toISO(r.end)}`} />
           )
         )}
         {r.toToday && r.start && (
-          <span className="srm-bar current" style={{ left: `${pct(r.start)}%`, width: `${Math.max(pct(now) - pct(r.start), 0.6)}%` }}
+          <span className="srm-bar current" style={{ left: pos.x(r.start), width: Math.max(pos.nowEnd - pos.x(r.start), 4) }}
             title={`${s.title || s.id}: since ${toISO(r.start)}, in progress`} />
         )}
         {r.slot >= 0 && (
-          <span className={`srm-bar planned ${r.state}`} style={{ left: `${slotLeft(r.slot) + 0.6}%`, width: `${slot - 1.2}%` }}
+          <span className={`srm-bar planned ${r.state}`} style={{ left: pos.slotLeft(r.slot) + pos.pad, width: pos.slot - 2 * pos.pad }}
             title={`${s.title || s.id}: no target. Sized by order only; appetite ${appetite}. No date is computed from it.`}>
             <span className="srm-appetite">{appetite}</span>
           </span>
@@ -224,27 +228,29 @@ function StageRow({ r, now, pct, slotLeft, slot, grid, initiative, cards, open, 
         {drawn.map((g) => {
           const d = g.record as model.Decision;
           const tip = `${d.number} ${d.title}`;
+          const raised = g.raised as Date;
           if (g.ruled) {
             return (
               <span key={g.id}>
-                <span className="srm-link" style={{ left: `${pct(g.raised as Date)}%`, width: `${pct(g.ruled) - pct(g.raised as Date)}%` }} />
-                <span className="srm-gem raised" style={{ left: `${pct(g.raised as Date)}%` }} title={`${tip}\nraised ${d.raised}`} />
-                <span className="srm-gem ruled" style={{ left: `${pct(g.ruled)}%` }} title={`${tip}\nruled ${d.ruled}${d.ruled_by ? ` by ${d.ruled_by}` : ""}${d.chosen ? `: ${d.chosen}` : ""}`} />
-                <span className={`srm-gem-label num lift-${lift.get(g.id)}`} style={{ left: `${pct(g.ruled)}%` }}>{d.number}</span>
+                <span className="srm-link" style={{ left: pos.mid(raised), width: pos.mid(g.ruled) - pos.mid(raised) }} />
+                <span className="srm-gem raised" style={{ left: pos.mid(raised) }} title={`${tip}\nraised ${d.raised}`} />
+                <span className="srm-gem ruled" style={{ left: pos.mid(g.ruled) }} title={`${tip}\nruled ${d.ruled}${d.ruled_by ? ` by ${d.ruled_by}` : ""}${d.chosen ? `: ${d.chosen}` : ""}`} />
+                <span className={`srm-gem-label num lift-${lift.get(g.id)}`} style={{ left: pos.mid(g.ruled) }}>{d.number}</span>
               </span>
             );
           }
-          const age = daysBetween(g.raised as Date, now);
+          const age = daysBetween(raised, now);
           return (
             <span key={g.id}>
-              <span className="srm-gem waiting" style={{ left: `${pct(g.raised as Date)}%` }} title={`${tip}\nwaiting since ${d.raised}${d.owner ? ` on ${d.owner}` : ""}`} />
-              <span className={`srm-gem-label waiting num lift-${lift.get(g.id)}`} style={{ left: `${pct(g.raised as Date)}%` }}>{d.number} · {age}d</span>
+              <span className="srm-gem waiting" style={{ left: pos.mid(raised) }} title={`${tip}\nwaiting since ${d.raised}${d.owner ? ` on ${d.owner}` : ""}`} />
+              <span className={`srm-gem-label waiting num lift-${lift.get(g.id)}`} style={{ left: pos.mid(raised) }}>{d.number} · {age}d</span>
             </span>
           );
         })}
+        {ext && <EdgePointer z={z} from={ext.from} to={ext.to} />}
       </div>
     </div>
-    {open && <StageDetail id={`srm-detail-${r.n}`} r={r} initiative={initiative} cards={cards} appetite={appetite} />}
+    {open && <div className="tz-pin" style={{ width: z.frameW || undefined }}><StageDetail id={`srm-detail-${r.n}`} r={r} initiative={initiative} cards={cards} appetite={appetite} /></div>}
     </>
   );
 }

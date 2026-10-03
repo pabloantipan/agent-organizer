@@ -168,6 +168,11 @@ func TestGitStateOnRealRepo(t *testing.T) {
 	if cards[0].BranchStart == "" || cards[0].BranchLast == "" {
 		t.Errorf("feat/x span not found: %+v", cards[0])
 	}
+	for _, v := range []string{cards[0].BranchStart, cards[0].BranchLast} {
+		if _, err := time.Parse(time.RFC3339, v); err != nil {
+			t.Errorf("branch span should carry an RFC 3339 time, got %q: %v", v, err)
+		}
+	}
 	if cards[1].BranchStart == "" {
 		t.Errorf("work is not main, so its own history is the span: %+v", cards[1])
 	}

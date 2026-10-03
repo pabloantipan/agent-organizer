@@ -166,6 +166,12 @@ echo "- the fixture wave runs" >> "$a/docs/bitacora/fse_bitacora.md"
 g commit -q -am "docs(bitacora): the fixture wave" -m "Committed-by: FSE"
 echo "- 0002 and 0003 raised" >> "$a/docs/bitacora/fse_bitacora.md"
 g commit -q -am "docs(decisions): raise 0002 and 0003" -m "Committed-by: FSE"
+# feat/beta's two commits carry a time of day, so the Cards Gantt offers
+# Hours (time-zoom, 0070): its bar runs 09:12 to 17:48 on 2 Oct 2026.
+g checkout -q -b feat/beta
+GIT_COMMITTER_DATE=2026-10-02T09:12:00-03:00 g commit -q --allow-empty --date=2026-10-02T09:12:00-03:00 -m "feat: beta starts"
+GIT_COMMITTER_DATE=2026-10-02T17:48:00-03:00 g commit -q --allow-empty --date=2026-10-02T17:48:00-03:00 -m "feat: beta lands"
+g checkout -q main
 
 cp "$repo/testdata/fixture-health.json" "$tmp/health.json"
 [ -n "$live_mailbox" ] || asking_thread "$tmp/health.json" || true
