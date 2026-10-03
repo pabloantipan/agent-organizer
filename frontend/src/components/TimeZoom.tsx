@@ -221,6 +221,10 @@ export function ZoomControl({ z, note }: { z: Zoom; note?: string }) {
   );
 }
 
+/** Zoomed, the lane ends this much further right (and the foot as much
+ *  lower, time-zoom.css), so a classic scrollbar covers no mark (row 13). */
+const END_PAD = 12;
+
 type FrameProps = {
   z: Zoom;
   label: string;              // what the chart is, for its accessible name
@@ -231,8 +235,22 @@ type FrameProps = {
 };
 
 /** The scroll frame: a sticky label column and axis, the grid behind the
- *  rows (ticks, weekends, today), and the rows the graph draws. */
+ *  rows (ticks, weekends, today), and the rows the graph draws. Its focus
+ *  ring is drawn by the wrapper, outside the frame, so the sticky labels and
+ *  axis never cover it (row 12). Zoomed, one background runs behind the
+ *  whole label column, so nothing of the lane shows between the labels
+ *  (row 11); it is measured to the content's height. */
 export function TimeFrame({ z, label, axis, extents, undated, children }: FrameProps) {
+  const [ring, setRing] = useState(false);
+  const [contentEl, setContentEl] = useState<HTMLDivElement | null>(null);
+  const [contentH, setContentH] = useState(0);
+  useLayoutEffect(() => {
+    if (!contentEl) return;
+    setContentH(contentEl.offsetHeight);
+    const ro = new ResizeObserver(() => setContentH(contentEl.offsetHeight));
+    ro.observe(contentEl);
+    return () => ro.disconnect();
+  }, [contentEl]);
   const zoomed = z.level !== "fit";
   const s = z.scale;
   const ticks = zoomed ? ticksOf(s, z.scrollX - z.view, z.scrollX + 2 * z.view) : ticksOf(s);
@@ -248,16 +266,19 @@ export function TimeFrame({ z, label, axis, extents, undated, children }: FrameP
   const whole = (t: Tick) => !zoomed || tickLabelWhole(t, z.level, z.scrollX, z.frameW - LABEL_W);
   const todayWord = z.level === "hours" ? `now ${hhmm(z.now)}` : "today";
   return (
+    <div className={`tz-wrap ${ring ? "ring" : ""}`}>
     <div
       ref={z.frameRef}
       className={`tz-frame ${zoomed ? "zoomed" : ""} lvl-${z.level}`}
       tabIndex={0}
+      onFocus={(e) => { if (e.target === e.currentTarget) setRing(focusVisible(e.currentTarget)); }}
+      onBlur={(e) => { if (e.target === e.currentTarget) setRing(false); }}
       aria-label={`${label}, ${LEVEL_WORD[z.level]}. Plus and minus zoom, 0 fits, t goes to today, arrows pan.`}
       onKeyDown={z.onKeyDown}
       onScroll={z.onScroll}
     >
       {z.frameW > 0 && (
-        <div className="tz-content" style={{ width: LABEL_W + z.laneW + GUTTER, ["--tz-lane" as string]: `${z.laneW}px` }}>
+        <div ref={setContentEl} className="tz-content" style={{ width: LABEL_W + z.laneW + GUTTER + (zoomed ? END_PAD : 0), ["--tz-lane" as string]: `${z.laneW}px` }}>
           <div className="tz-grid" style={{ left: LABEL_W, width: z.laneW }} aria-hidden>
             {z.level === "days" && ticks.filter((t) => t.weekend).map((t) => <span key={`w${t.at}`} className="tz-weekend" style={{ left: t.x, width: t.width }} />)}
             {zoomed && <span className="tz-todayband" style={{ left: s.x(dayFrom), width: s.x(addLocalDays(dayFrom, 1)) - s.x(dayFrom) }} />}
@@ -265,6 +286,7 @@ export function TimeFrame({ z, label, axis, extents, undated, children }: FrameP
             {z.reserve > 0 && <span className="tz-undated-edge" style={{ left: s.width }} />}
             {xNow >= 0 && xNow <= s.width && <span className="tz-today" style={{ left: xNow }}><span>{todayWord}</span></span>}
           </div>
+          {zoomed && <div className="tz-labelcol" aria-hidden><span style={{ height: contentH }} /></div>}
           <div className="tz-row tz-axis-row">
             <div className="tz-label tz-corner" />
             <div className="tz-axis" onDoubleClick={(e) => z.onAxisDoubleClick(e.clientX)} title={z.canIn ? "Double-click to zoom in here" : undefined}>
@@ -290,7 +312,14 @@ export function TimeFrame({ z, label, axis, extents, undated, children }: FrameP
         </div>
       )}
     </div>
+    </div>
   );
+}
+
+/** Whether a focus should show its ring: `:focus-visible` where the engine
+ *  knows it (Safari 15.4 on), else every focus, as `:focus` would. */
+function focusVisible(el: Element): boolean {
+  try { return el.matches(":focus-visible"); } catch { return true; }
 }
 
 /** A row's pointer to its mark when the mark lies wholly outside the window:

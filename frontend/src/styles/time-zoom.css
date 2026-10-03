@@ -19,12 +19,22 @@
 .tz-ctl button.tz-moved { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .tz-level { width: 48px; text-align: center; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg); font-weight: var(--weight-medium); }
 
-/* The frame */
+/* The frame. Its focus ring is the wrapper's, drawn outside the frame at the
+   design system's 2 px offset, above the sticky labels and axis (row 12);
+   the wrapper is its own stacking context, so the page's sticky headings
+   still pass over it. The host leaves the ring room inside its panel. */
+.tz-wrap { position: relative; z-index: 0; border-radius: var(--radius-md); }
+.tz-wrap.ring::after { content: ""; position: absolute; inset: -4px; z-index: 9; border: 2px solid var(--focus-ring); border-radius: calc(var(--radius-md) + 4px); pointer-events: none; }
 .tz-frame { position: relative; overflow: hidden; outline: none; border-radius: var(--radius-md); }
-.tz-frame:focus-visible { box-shadow: inset 0 0 0 2px var(--focus-ring); }
+.tz-frame:focus-visible { outline: none; }
 .tz-frame.zoomed { overflow: auto; max-height: max(320px, calc(100vh - 240px)); overscroll-behavior-x: contain; }
-.tz-content { position: relative; }
-.gantt-body.tz-host { padding: 10px 0 0; overflow: hidden; }
+.tz-content { position: relative; --tz-foot: 20px; }
+/* Zoomed, the lane ends with 12 px more at the right and the bottom, so a
+   classic scrollbar (WKWebView draws them over the frame) covers no mark:
+   not the today label, not the last tick (row 13). Safari 15 has no
+   scrollbar-gutter. */
+.tz-frame.zoomed .tz-content { --tz-foot: 32px; } /* and 12 px wider: END_PAD */
+.gantt-body.tz-host { padding: 10px var(--space-1-5) var(--space-1-5); overflow: visible; }
 .srm .tz-frame { margin: 0 calc(-1 * var(--space-4)) 0 0; }
 
 /* Rows: the graph's own row classes, laid on the frame's columns. */
@@ -39,6 +49,11 @@
 .tz-frame.zoomed .srm-row.current > .srm-lane { background: var(--surface-selected); }
 .tz-row > .tz-lane, .tz-row > .g-lane, .tz-row > .srm-lane { width: var(--tz-lane); }
 .tz-pin { position: sticky; left: 0; z-index: 5; }
+/* Zoomed, one background behind the whole label column, the panel's, under
+   the labels and over the grid and marks, so no gap between two labels
+   shows the lane (row 11). Its height is the content's, measured. */
+.tz-labelcol { position: sticky; left: 0; z-index: 4; width: 240px; height: 0; }
+.tz-labelcol > span { position: absolute; top: 0; left: 0; width: 240px; background: var(--surface); pointer-events: none; }
 
 /* The axis */
 .tz-axis-row { min-height: 52px; border-bottom: 1px solid var(--border); margin-bottom: var(--space-1); }
@@ -61,15 +76,15 @@
 
 /* The grid behind the rows: ticks, weekends, today. */
 .tz-grid { position: absolute; top: 0; bottom: 0; pointer-events: none; overflow: hidden; }
-.tz-line { position: absolute; top: 52px; bottom: 20px; border-left: 1px dashed var(--border-subtle); }
+.tz-line { position: absolute; top: 52px; bottom: var(--tz-foot); border-left: 1px dashed var(--border-subtle); }
 .lvl-days .tz-line { border-left-style: solid; }
 .tz-line.minor { border-left: 1px dotted var(--border-subtle); opacity: .6; }
-.tz-weekend { position: absolute; top: 0; bottom: 20px; background: var(--surface-raised); }
-.tz-todayband { position: absolute; top: 0; bottom: 20px; background: var(--accent-muted); opacity: .45; }
-.tz-undated-edge { position: absolute; top: 0; bottom: 20px; border-left: 1px solid var(--border-strong); }
-.tz-today { position: absolute; top: 0; bottom: 4px; border-left: 2px solid var(--accent); z-index: 4; }
+.tz-weekend { position: absolute; top: 0; bottom: var(--tz-foot); background: var(--surface-raised); }
+.tz-todayband { position: absolute; top: 0; bottom: var(--tz-foot); background: var(--accent-muted); opacity: .45; }
+.tz-undated-edge { position: absolute; top: 0; bottom: var(--tz-foot); border-left: 1px solid var(--border-strong); }
+.tz-today { position: absolute; top: 0; bottom: calc(var(--tz-foot) - 16px); border-left: 2px solid var(--accent); z-index: 4; }
 .tz-today > span { position: absolute; bottom: 0; left: 5px; font-size: var(--font-size-xs); line-height: var(--line-xs); font-weight: var(--weight-semibold); color: var(--accent-fg); background: var(--surface); padding: 0 3px; border-radius: var(--radius-xs); white-space: nowrap; }
-.tz-foot { height: 20px; }
+.tz-foot { height: var(--tz-foot); }
 
 /* Marks the zoom adds: a whole day at Hours, and pointers to marks out of view. */
 /* A whole day at Hours (§A1.2): the status's -bg fill groups, the 1 px
