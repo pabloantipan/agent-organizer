@@ -77,11 +77,7 @@ button.dec-more:hover { background: var(--surface-hover); }
 }
 .dec-head.stuck + .dec-body { border-top: 0; }
 .dec-head.stuck .dec-actions { padding: 0 var(--space-3) var(--space-2); }
-.dec-head.stuck .rb {
-  position: absolute !important; top: calc(100% + var(--space-1)) !important; right: 0 !important; left: auto !important;
-  max-height: var(--dec-box-max, 60vh) !important;
-  overflow-y: auto; overscroll-behavior: contain;
-}
+/* The box's own placement under a stuck head is rule-box.css, .rb.capped. */
 /* Capped, the box scrolls inside itself (§8, U1) and its foot, Cancel and
    Rule, stays pinned at the box's bottom edge, never below it. */
 .dec-head.stuck .rb > .rb-foot {

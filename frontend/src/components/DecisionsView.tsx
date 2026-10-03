@@ -281,7 +281,7 @@ export function DecisionsView() {
                   : <span key={slug} className="mono dim">{slug}</span>;
               })}
             </div>
-            <div className="markdown dec-text" dangerouslySetInnerHTML={{ __html: marked.parse(d.body || "") as string }} />
+            <RecordBody body={d.body || ""} />
             <div className="dec-path mono">{d.path}</div>
           </div>
         )}
@@ -443,4 +443,25 @@ export function DecisionsView() {
       </section>
     </div>
   );
+}
+
+/** A record's body (FR-9 as amended, mal-ui U1). The periodic refresh
+ *  re-rendered it and React set its innerHTML again with the same HTML, so
+ *  a code block scrolled sideways went back to its start every few seconds.
+ *  The body's DOM is written only when its HTML changes, and then each code
+ *  block and table keeps the offset it was scrolled to. */
+function RecordBody({ body }: { body: string }) {
+  const el = useRef<HTMLDivElement>(null);
+  const last = useRef<string | null>(null);
+  const html = useMemo(() => marked.parse(body) as string, [body]);
+  useLayoutEffect(() => {
+    const e = el.current;
+    if (!e || last.current === html) return;
+    const wide = () => Array.from(e.querySelectorAll<HTMLElement>("pre, table"));
+    const offsets = wide().map((w) => w.scrollLeft);
+    e.innerHTML = html;
+    last.current = html;
+    wide().forEach((w, i) => { if (offsets[i]) w.scrollLeft = offsets[i]; });
+  }, [html]);
+  return <div ref={el} className="markdown dec-text" />;
 }

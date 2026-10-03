@@ -79,3 +79,9 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
   `ruled_by`, so the Decisions line shows and names "no ruler recorded"
   (leftovers-4 FR-8, L6); the scan reports it as a problem of init-c, which
   already carries one
+- `0006`, a copy of the organizer's own 0032 with its wide yaml block, and
+  `0007`, superseded by it, so a record body wider than its view and a
+  superseded lozenge are both on Decisions (leftovers-4 L9)
+- `0008`, the same record as it stood proposed (no ruling), taller than
+  the view at 1024×640, so its head sticks and the rule box is capped under
+  it (leftovers-4 L11); it adds one Needs me row

@@ -293,27 +293,59 @@ export function contextAt(s: Scale, scrollLeft: number): string {
   return contextLabel(s.level, s.at(Math.max(scrollLeft, 0) + CONTEXT_INSET));
 }
 
-/** A tick label's horizontal extent in lane pixels, estimated from its text:
- *  Days centres it in its column at 10 px mono, the others start 4 px after
- *  the tick at 11 px (mono, or the sans semibold of a midnight). Estimates err
- *  wide, so a label is dropped rather than cut. */
-export function tickLabelExtent(t: Tick, level: Level): { left: number; right: number } {
-  const text = t.label ?? "";
-  if (level === "days") {
-    const w = text.length * 6;
-    const col = t.width ?? PX_DAY;
-    return { left: t.x + (col - w) / 2, right: t.x + (col + w) / 2 };
-  }
-  const w = text.length * (t.midnight ? 7.4 : 6.8);
-  return { left: t.x + 4, right: t.x + 4 + w };
+/** A label's box on screen, in CSS pixels (getBoundingClientRect). */
+export type Box = { left: number; right: number; top: number; bottom: number };
+
+/** The least room between two labels on one line. */
+export const LABEL_GAP = 4;
+
+/** How far a label moves along the axis to lie whole between `lo` and `hi`
+ *  (the lane's visible stretch: the label column's edge and the frame's):
+ *  0 when it already does, null when it is wider than the room, so it is
+ *  left to its hover title (design system, Timeline: no axis text is cut). */
+export function shiftInside(b: { left: number; right: number }, lo: number, hi: number): number | null {
+  if (b.right - b.left > hi - lo) return null;
+  if (b.left < lo) return lo - b.left;
+  if (b.right > hi) return hi - b.right;
+  return 0;
 }
 
-/** Whether a tick label is drawn whole between the label column (the lane's
- *  visible left edge, scrollLeft) and the frame's right edge, `visible`
- *  lane pixels later. A label that either would cut is not drawn (§A1.6). */
-export function tickLabelWhole(t: Tick, level: Level, scrollLeft: number, visible: number): boolean {
-  const e = tickLabelExtent(t, level);
-  return e.left >= scrollLeft && e.right <= scrollLeft + visible;
+/** Whether two labels' boxes overlap or sit closer than `gap` side by side. */
+export function overlaps(a: Box, b: Box, gap = LABEL_GAP): boolean {
+  return a.left < b.right + gap && b.left < a.right + gap && a.top < b.bottom && b.top < a.bottom;
+}
+
+const mod = (k: number, n: number) => ((k % n) + n) % n;
+
+/** Labels that would overlap skip one in two until they do not (design
+ *  system, Timeline): the smallest step, 1, 2, 4, ..., at which the labels
+ *  whose place `k` is a multiple of it stand `gap` apart. The boxes are the
+ *  rendered ones, measured in the DOM, never a count of characters; `k` is a
+ *  label's place in its series from a fixed origin (seriesIndex), so the
+ *  same labels stay while the lane scrolls. */
+export function skipStep(labels: (Box & { k: number })[], gap = LABEL_GAP): number {
+  const sorted = [...labels].sort((a, b) => a.left - b.left);
+  for (let step = 1; step < 1 << 20; step *= 2) {
+    const shown = sorted.filter((l) => mod(l.k, step) === 0);
+    if (shown.every((l, i) => i === 0 || !overlaps(shown[i - 1], l, gap))) return step;
+  }
+  return 1 << 20;
+}
+
+/** Whether a label at place `k` shows under a skip step. */
+export function keptBy(k: number, step: number): boolean {
+  return mod(k, step) === 0;
+}
+
+/** A tick's place in its series, counted from a fixed origin: months at a
+ *  monthly Fit, weeks at a weekly Fit, days at Days, hours at Hours (and
+ *  quarters for a minor tick). */
+export function seriesIndex(t: Tick, level: Level, weekly: boolean): number {
+  const d = new Date(t.at);
+  const day = Math.round(startOfDay(t.at) / DAY);
+  if (level === "fit") return weekly ? Math.floor(day / 7) : d.getFullYear() * 12 + d.getMonth();
+  if (level === "days") return day;
+  return t.major ? Math.round(t.at / HOUR) : Math.round(t.at / QUARTER);
 }
 
 /** What a bar with a timed end says after it at Hours (§A1.5): `09:12–17:48`,

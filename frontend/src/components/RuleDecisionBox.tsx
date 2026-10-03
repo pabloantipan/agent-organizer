@@ -59,7 +59,7 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
   const ready = chosen !== "" && words.trim() !== "" && !busy;
   const windowClass = useBoard((s) => s.widthClass);
   const widthClass = homeClass ?? windowClass;
-  const { place, short } = useFitViewport(box, record, widthClass);
+  const { place, short, capped } = useFitViewport(box, record, widthClass);
 
   // Focus and names: a box that shows a record opens on its title, and the
   // record is its description.
@@ -120,7 +120,7 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
   };
 
   return (
-    <div ref={box} className={`rb ${withRecord ? "with-record" : ""}`} style={place} role="dialog" aria-labelledby={`${numId} ${titleId}`} aria-describedby={withRecord ? bodyId : undefined}
+    <div ref={box} className={`rb ${withRecord ? "with-record" : ""} ${capped ? "capped" : ""}`} style={capped ? undefined : place} role="dialog" aria-labelledby={`${numId} ${titleId}`} aria-describedby={withRecord ? bodyId : undefined}
       onKeyDown={(e) => loopTab(e, box.current)}>
       <div className="rb-head">
         <span id={numId} className="rb-num">{initiative} {d.number}</span>
@@ -214,10 +214,25 @@ const GAP = 8;
  *  is shorter than the record with both sections at their clamp, so the
  *  Question clamps to three lines and the Recommendation comes into view.
  *  The record's height at both clamps is measured while not short and kept,
- *  so the three-line Question does not undo the judgement. */
-function useFitViewport(box: RefObject<HTMLDivElement | null>, record: RefObject<HTMLDivElement | null>, widthClass: WidthClass): { place: CSSProperties | undefined; short: boolean } {
+ *  so the three-line Question does not undo the judgement.
+ *  `capped` is the Decisions record's stuck head (amendment 1 §8,
+ *  leftovers-4 FR-12): there the box rides with Rule under the head, capped
+ *  at the head's measured room (--dec-box-max) and scrolling inside itself
+ *  (rule-box.css, .rb.capped), so no fixed place is set. The head turns
+ *  stuck as the record scrolls, which the box follows on its class. */
+function useFitViewport(box: RefObject<HTMLDivElement | null>, record: RefObject<HTMLDivElement | null>, widthClass: WidthClass): { place: CSSProperties | undefined; short: boolean; capped: boolean } {
   const [place, setPlace] = useState<CSSProperties>();
   const [short, setShort] = useState(false);
+  const [capped, setCapped] = useState(false);
+  useLayoutEffect(() => {
+    const head = box.current?.closest<HTMLElement>(".dec-head");
+    if (!head) return;
+    const read = () => setCapped(head.classList.contains("stuck"));
+    read();
+    const mo = new MutationObserver(read);
+    mo.observe(head, { attributes: true, attributeFilter: ["class"] });
+    return () => mo.disconnect();
+  }, [box]);
   const shortNow = useRef(false);
   const full = useRef(0);
   const opened = useRef(false);
@@ -297,7 +312,7 @@ function useFitViewport(box: RefObject<HTMLDivElement | null>, record: RefObject
     opened.current = true;
     return () => { ro.disconnect(); window.removeEventListener("resize", fit); window.removeEventListener("scroll", fit, true); };
   }, [box, record, widthClass]);
-  return { place, short };
+  return { place, short, capped };
 }
 
 /** The part of the record a ruling needs (ui-leftovers FR-1): its Question
