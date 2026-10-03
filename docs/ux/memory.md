@@ -189,6 +189,14 @@ floors; scroll edge in --fg-subtle; Escape closes the topmost box only;
 hover keeps the selected mark; a box never covers its opener; the ring is
 for the keyboard. 0076 (ruled): the cell folds last.
 
+Leftovers-6 (2026-10-03, `reviews/2026-10-03-rank-leftovers-6.md`, thread
+01M4234H29HX9P9J0WJFQYYA9F): 13 rows from zoom-decisions-polish and
+markdown-and-labels. Top: Days does not name today; ruling with Ruled closed
+drops focus; "Show the other" leaves focus out of view. DS Timeline amended:
+title rows grow then "+N"; 12 px tick gap; today line under titles; today
+label in the axis with its date; context label = first whole unit. Superseded
+and withdrawn lozenges are neutral (59b4dcb).
+
 ## Open questions
 
 - Q1 (Pablo, via the FSE, leftovers-4): does he use Tab in the app? In

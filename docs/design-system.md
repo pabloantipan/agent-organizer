@@ -204,7 +204,15 @@ by the label column, the frame or a scrollbar. **Tick** labels that would
 overlap skip, one in two, until they do not, and a tick label gives way to
 a mark's title. A mark's title (milestone, target) is content and is never
 skipped: titles that would collide stagger to the next label row, as
-same-day marks already do; only the frame's edge moves one inward.
+same-day marks already do; only the frame's edge moves one inward. When
+three rows of titles are not enough, the axis grows a row rather than
+overlap; past three rows, the rest of a crowd fold into "+N" at that date,
+listed in its hover and name. Tick labels keep **at least 12 px** between
+them. The today line passes **under** title text, never over it. The today
+label sits **in the axis**, never at the frame's foot, and at Days and Hours
+it carries the date (`today · Sat 3`), so the day is named even when its
+tick gives way. The sticky context label names the month (or day) of the
+first whole unit in view (leftovers-6).
 *Jira timeline, Linear milestones, GitHub roadmap.*
 
 ### Stage stepper
@@ -351,7 +359,8 @@ beside a cut waiting (leftovers-5).
 **A region that scrolls inside a view shows it does**: each edge with
 content hidden past it carries a 1 px `--fg-subtle` line (4.5:1, not
 `--border-strong`, which measured 1.6:1, leftovers-5), gone when nothing
-is hidden past that edge. Overlay scrollbars on macOS do not count, since they
+is hidden past that edge. A code block or table that scrolls
+inside a body carries the same edge (leftovers-6). Overlay scrollbars on macOS do not count, since they
 hide until scrolled (leftovers-3, U1).
 
 **The document never scrolls**; only a view's own scroller does. Anything
