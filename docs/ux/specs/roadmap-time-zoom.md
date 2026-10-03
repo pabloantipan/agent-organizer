@@ -251,4 +251,41 @@ O2: the FSE sequences the card after header-fold-2. As asked:
 
 ## Technical notes
 
-(left for the FSE)
+by the FSE, 2026-10-03, on main 20435e7. O1 and O3 ruled in
+`working-on/decisions/0070-time-zoom-hours-only-with-times.md` (Hours only
+where a mark has a time; commit times in the same card). O2: the card runs
+after header-fold-2 (`depends_on`), whose boundary holds `Roadmap.tsx`,
+`RoadmapView.tsx` and `DecisionsView.tsx`.
+
+- **T1, commit times.** `branchSpan` (`internal/scan/git.go:142`) logs
+  `--format=%cI` in place of `%cs`, so `model.Card.BranchStart` and
+  `BranchLast` carry an RFC 3339 time. Nothing else in Go reads them (grep:
+  `scan.go:155`, `scan_test.go`, `model.go:238`). Snapshots from machines on
+  an older build still carry dates only; the frontend takes both.
+- **T2, one parser, precision kept.** `lib/dates.ts` `parseISO` accepts
+  `YYYY-MM-DD` (as today, local midnight) and an RFC 3339 time, and a new
+  helper tells which (`hasTime`). Its callers today (`Roadmap.tsx:25,30`,
+  `Portfolio.tsx:21-22`) must keep working with either form; a time string
+  that `parseISO` refuses would silently drop the git span. Vitest covers
+  both forms.
+- **T3, one axis.** The three graphs share one axis module in `lib/`
+  (span, levels, ticks, pixel position, the day-end rule, `offersHours`) and
+  one control component; each graph keeps its own rows and marks. This is the
+  design system's "one shared axis component" (Timeline). The pure parts
+  (ticks per level, day-end positions, anchor arithmetic, `offersHours`) are
+  vitest-tested in `frontend/src/lib`.
+- **T4, Hours offered.** `offersHours(marks)` is true when any mark's date
+  has a time (T2). Today that is only Cards with a git span; Stages and
+  Decisions stop at Days (A12).
+- **T5, level is component state**, per graph, reset on initiative change
+  or remount; never in the store, browser storage or the order document.
+- **Not touched:** Calendar, Portfolio's mounting, the stage word and stage
+  row (header-fold-2 FR-14), `docs/design-system.md`, any card or record
+  writer. No new bound Go type, so no `wails generate module`.
+
+### Spec check (spec-craft step 5b)
+
+Every gate row (A1-A14, T1, T2) names its evidence. Boundary claims traced:
+"nothing else in Go reads BranchStart" (grep above); "level not remembered"
+(the spec's States, last row); "Calendar not zoomed" (Which graphs, 0070's
+O3 ruling). Result: holds.
