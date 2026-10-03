@@ -169,9 +169,20 @@ opposite button), a bordered band with a pinned dot, pointer reveal shows the
 whole mark, A8 wins over the window rule, the builder's note words accepted,
 times after a timed bar at Hours, A15–A23.
 
+Leftovers-4 (2026-10-03, `reviews/2026-10-03-rank-leftovers-4.md`, thread
+01M41EBN13XE2GAPG9M7R2T5BW): 16 rows from decisions-view and time-zoom-2.
+Design calls: a find opens every section with a hit while it is on; a landing
+opens for the visit only; "Nothing ruled yet."; the Timeline count names its
+hidden. DS amended: gate sizes are window sizes (the built app's content is
+~32 px shorter) plus the rail state; disable-on-press moves focus first;
+keyboard checked in WKWebView with the Keyboard navigation setting named; no
+axis text cut and the axis sticks; dimmed means a token, never opacity; a
+body never widens its view.
+
 ## Open questions
 
-- none open.
+- Q1 (Pablo, via the FSE, leftovers-4): does he use Tab in the app? In
+  WKWebView, Tab reaches buttons only with macOS Keyboard navigation on.
 
 ## How I look at it
 
@@ -183,6 +194,11 @@ times after a timed bar at Hours, A15–A23.
   `git checkout -- frontend/wailsjs/runtime` after, never commit it.
 
 ## Studies and lessons
+
+- **Chromium is not the app.** WKWebView found the wave's only sev 3
+  (the rule box spilling at 1024×640, because the content is 609 px and a
+  code block added a scrollbar) and the focus ring lost on a disabling
+  button. Ask for WKWebView shots on every UI review.
 
 - **A control that hides or disables itself must say where focus goes.**
   time-zoom's Fit unmounted on press and dropped focus (U1). Say it in the

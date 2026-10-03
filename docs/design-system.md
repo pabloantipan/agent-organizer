@@ -196,6 +196,12 @@ monthly, today as a 2px accent line with a label and a "today" control.
 Bars radius 4; open-ended work runs to today; planned work is dashed; no date
 is a dot or an empty row, never an invented bar. Decisions are diamonds:
 hollow fuchsia waiting, solid indigo ruled. Every mark has a hover title.
+The axis sticks under its section's heading while the rows scroll. **No axis
+text is ever cut**: a tick label, a mark's title, the today label or the
+undated label that would not fit is moved inside the lane (the today label
+flips to the line's other side) or left to its hover title, never clipped
+by the label column, the frame or a scrollbar. Labels that would overlap
+skip, one in two, until they do not.
 *Jira timeline, Linear milestones, GitHub roadmap.*
 
 ### Stage stepper
@@ -212,7 +218,10 @@ surface, and a chevron on hover and focus. *Carbon progress indicator.*
 Number (mono), title, status lozenge (waiting / ruled / superseded /
 withdrawn), owner and age or ruler and date. Expanded: options, the question,
 recommendation, ruling in the owner's words, consequences, linked cards and
-threads, supersedes chain. Superseded records stay, dimmed, linked forward.
+threads, supersedes chain. Superseded records stay, dimmed, linked forward. Dimmed means the
+`--fg-muted` text token, **never opacity**: a row at .7 opacity took its
+lozenge to 1.5:1 (leftovers-4). A record's body never widens its view: code
+blocks and tables scroll inside themselves.
 *Nygard ADRs, MADR, GitHub Discussions answers.*
 
 ### Agent row
@@ -272,6 +281,8 @@ keeps their place.
   named: the record's row, the blocked seat, Bring crew up. Never on the
   page body.
 - **A control that unmounts on press** hands focus to what took its place.
+- **A control that disables itself on press** moves focus first, then
+  disables, so WebKit keeps the focus ring on the new target (leftovers-4).
 - **Names**: a verb repeated on every row carries its row in its accessible
   name ("Rule init-a 0002", "Open onboarding-flow Step map"), through
   `aria-label` or `aria-describedby` on the row's subject.
@@ -283,6 +294,11 @@ keeps their place.
   it. One box at a time; a box that covers content has a scrim. What was
   typed in a box survives it closing for another one, and only Cancel
   discards it.
+
+- **Checked in WKWebView**, the app's engine, not only Chromium. In
+  WKWebView, macOS's Keyboard navigation setting (System Settings ›
+  Keyboard) decides whether Tab reaches buttons; it is off by default. A
+  keyboard gate row says which setting it ran under (leftovers-4).
 
 *WCAG 2.4.3, 2.4.4, 2.4.6, 2.4.7, 3.2.1.*
 
@@ -319,7 +335,12 @@ below its edge, that edge carries a 1 px `--border-strong` line, gone once
 scrolled to the end. Overlay scrollbars on macOS do not count, since they
 hide until scrolled (leftovers-3, U1).
 
-Every screen is checked at 1024×640, 1512×945, 1920×1080 and 3440×1440. Tab order
+Every screen is checked at 1024×640, 1512×945, 1920×1080 and 3440×1440.
+These are **window** sizes. The built app's content is the window less its
+title bar (about 31–33 px: 1024×640 gives 609 of content), and Chromium's
+viewport is content. A gate row says which one it means, and the rail's
+state (expanded or strip), which is remembered per machine and changes
+every width below it (leftovers-4). Tab order
 follows priority, not position: in wide, Needs me before the list.
 *responsive-home, amendment 1.*
 
