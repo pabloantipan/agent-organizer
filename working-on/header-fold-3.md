@@ -11,7 +11,15 @@ spec: "docs/specs/initiative-header.md (amendment 4, FR-17 to FR-19); the rankin
 gate: "docs/specs/initiative-header.md Acceptance, rows G18 to G21 and G11"
 ui_review: true
 seat: hf3-build
+review: pass
 ---
+
+## Review
+- Verdict: **pass** (code review; G21 is the UI reviewer's).
+- Unmet gate items: none. G18: `G18-measure.json` and the 1024x640 shots, Work and Decisions, header 256 px, bar stage at y 55-79, edges 1 px `--border-strong` switching at top/bottom. G19: `G19-measure.json`, tiles 1-4 (click and Enter) expand and focus their own row; tile 3 (duplicate `joins`) opens row 3. G20: `lib/fold.test.ts` stores "folded" and reads it back; the store calls `lib/fold`. G11, rerun by the reviewer at 6a670e6: `make test` (Go ok, vitest 13 files / 137 tests), `npm run build`, the redesign G18 grep empty, `wails build` ok.
+- Boundary: 10 files, all inside it; none of home-widths-4's.
+- Outside the gate: (1) G18's "edge visible" when scrolled to the bottom is met by the top edge. That is the builder's reading of the design system's line. The gate should say "the edge with content hidden past it", so Pablo/the FSE can confirm the wording. (2) StageRoadmap's focus effect now has no dependency list. If the target row never mounts, `focusOn` stays set and could take focus on a later render. A guard or a clear on initiative change would close it. (3) `useScrollEdges` observes the area's children only at mount, so a child added later does not re-measure until scroll or resize. (4) The evidence is headless Chromium, so WKWebView rests on G21. (5) This was already there and is outside the boundary: at 1024 the Stages axis labels overlap ("3 Aug10 Aug17").
+- Reviewer: hf3-review, 2026-10-03.
 
 ## Goal
 header-fold-2's leftovers, ranked by Aglaea: FR-17 to FR-19 of
