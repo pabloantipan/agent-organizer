@@ -70,6 +70,13 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   (ce75486; FR-20 and G19 amended; sup28 told). Tab question (Aglaea's Q1)
   unanswered: no spike; the DS line covers it. sup29 launched for
   zoom-decisions-polish (window 395002). make install after sup28 lands.
+- sup28 closed (header-fold-3 4f17404 21 min; home-widths-4 c8cc059 ~80
+  min working, 4h39m wall, ~3h18m waiting on 0076; ~$48). Ended by me.
+  Installed the app from main 1c6eca9. Findings to aglaea (leftovers-5,
+  thread 01M41YCPTBFVQDFS9CQW76DQ14); fixture and S4 traps to hephaistos.
+- Repetition: 0076 cost 3h18m of a 4h39m wave. A gate-vs-measure conflict
+  raised while Pablo is away stalls a task. Second time a decision blocked a
+  wave mid-build (0073 was the first, quicker). Watch for a third.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
