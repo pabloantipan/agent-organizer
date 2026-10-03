@@ -224,7 +224,7 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
               <Phase stages={i.stages ?? []} />
               <span title={i.goal || undefined} className={`p-goal ${i.goal ? "" : "missing"}`}>{i.goal || "no goal yet"}</span>
               <MiniStepper stages={i.stages ?? []} compact={compact} />
-              <Signals i={i} rows={rows} cards={cards} waves={group?.waves ?? []} cell={group?.cell} missing={missingPersonas(group?.crew)} lead={leadOf(group)} oneLine={widthClass !== "regular"} />
+              <Signals i={i} rows={rows} cards={cards} waves={group?.waves ?? []} cell={group?.cell} missing={missingPersonas(group?.crew)} lead={leadOf(group)}  />
               <NextDate next={next} />
               <button className="p-more ghost" onClick={() => setOpen({ ...open, [id]: !open[id] })} aria-expanded={!!open[id]} aria-label={detailsName(id)} title={detailsName(id)}>
                 {open[id] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -321,7 +321,10 @@ function MiniStepper({ stages, compact = false }: { stages: model.Stage[]; compa
   );
 }
 
-function Signals({ i, rows, cards, waves, cell, missing, lead, oneLine }: { i: merge.BoardInitiative; rows: merge.BoardInitiative[]; cards: merge.BoardCard[]; waves: service.Wave[]; cell?: model.Cell | null; missing: string[]; lead: string; oneLine: boolean }) {
+/** A row's signals. Each lozenge's words sit in a text span that takes the
+ *  ellipsis (FR-14): the lozenge is a flex box, and a flex box clips its
+ *  text mid-word instead of cutting it. */
+function Signals({ i, rows, cards, waves, cell, missing, lead }: { i: merge.BoardInitiative; rows: merge.BoardInitiative[]; cards: merge.BoardCard[]; waves: service.Wave[]; cell?: model.Cell | null; missing: string[]; lead: string }) {
   const waiting = waitingDecisions(i);
   const blocked = cards.filter((c) => c.status === "blocked").length;
   const now = cards.filter((c) => c.status === "now").length;
@@ -331,27 +334,21 @@ function Signals({ i, rows, cards, waves, cell, missing, lead, oneLine }: { i: m
   const problems = i.problems?.length ?? 0;
   const defining = cell?.state === "in_definition";
   const none = !waiting && !blocked && !now && !live && !running.length && !problems && !defining;
-  const Line = oneLine ? OneLine : AllSignals;
   return (
-    <Line>
-      {waiting > 0 && <span className="lz waiting"><span className="num">{waiting}</span> waiting · {signalOwners(i, lead).join(", ")}</span>}
-      {blocked > 0 && <span className="lz blocked"><span className="num">{blocked}</span> blocked</span>}
-      {now > 0 && <span className="lz now"><span className="num">{now}</span> now</span>}
-      {running.map((w) => <span key={w.n} className="lz live">wave <span className="num">{w.n}</span> · <span className="num">{w.building!.length}</span> building</span>)}
-      {live > 0 && <span className="lz">{working > 0 ? <><span className="num">{working}</span> working</> : <><span className="num">{live}</span> live</>}</span>}
+    <OneLine>
+      {waiting > 0 && <span className="lz waiting"><span className="lz-t"><span className="num">{waiting}</span> waiting · {signalOwners(i, lead).join(", ")}</span></span>}
+      {blocked > 0 && <span className="lz blocked"><span className="lz-t"><span className="num">{blocked}</span> blocked</span></span>}
+      {now > 0 && <span className="lz now"><span className="lz-t"><span className="num">{now}</span> now</span></span>}
+      {running.map((w) => <span key={w.n} className="lz live"><span className="lz-t">wave <span className="num">{w.n}</span> · <span className="num">{w.building!.length}</span> building</span></span>)}
+      {live > 0 && <span className="lz"><span className="lz-t">{working > 0 ? <><span className="num">{working}</span> working</> : <><span className="num">{live}</span> live</>}</span></span>}
       <CellStateLz cell={cell} missing={missing} label="cell in definition" />
-      {problems > 0 && <span className="lz warning"><span className="num">{problems}</span> problem{problems === 1 ? "" : "s"}</span>}
+      {problems > 0 && <span className="lz warning"><span className="lz-t"><span className="num">{problems}</span> problem{problems === 1 ? "" : "s"}</span></span>}
       {none && <span className="p-quiet" title="no signals">—</span>}
-    </Line>
+    </OneLine>
   );
 }
 
-function AllSignals({ children }: { children: React.ReactNode }) {
-  return <span className="p-sig">{children}</span>;
-}
-
-/** Compact's signals (FR-10), and wide's, whose signals keep one line
- *  (FR-4) also when the rail leaves the list tight at 1920: one line, never
+/** A row's signals in every class (FR-10, FR-15): one line, never
  *  wrapped. The lozenges that do
  *  not fit are hidden and counted in a "+N"; they are named in the cell's
  *  hover and in its accessible text. Measured after every render, since a
@@ -371,10 +368,13 @@ function OneLine({ children }: { children: React.ReactNode }) {
     const n = signalsThatFit(items.map((c) => Math.max(c.getBoundingClientRect().width, c.scrollWidth)), gap, el.clientWidth, Math.max(more?.getBoundingClientRect().width ?? 0, 28));
     const rest = items.slice(n).map((c) => (c.textContent ?? "").replace(/\s+/g, " ").trim());
     items.forEach((c, k) => { c.style.display = ""; if (k >= n) c.dataset.off = "1"; else delete c.dataset.off; });
-    // The first signal may still be cut by its ellipsis: then the hover
-    // names it whole.
-    const first = items[0];
-    const whole = first && first.scrollWidth > first.clientWidth + 1 ? (first.textContent ?? "").replace(/\s+/g, " ").trim() : "";
+    // A shown signal may still be cut by its ellipsis (the first one when
+    // the cell is tight, any one at the lozenge's cap): then the hover names
+    // it whole.
+    const whole = items.slice(0, n).filter((c) => {
+      const t = c.querySelector<HTMLElement>(".lz-t") ?? c;
+      return t.scrollWidth > t.clientWidth + 1;
+    }).map((c) => (c.textContent ?? "").replace(/\s+/g, " ").trim()).join("\n");
     setCut((p) => (p && p.n === n && p.whole === whole && p.rest.join("|") === rest.join("|") ? p : { n, rest, whole }));
   };
   useLayoutEffect(measure);
