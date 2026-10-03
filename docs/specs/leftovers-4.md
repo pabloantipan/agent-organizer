@@ -43,13 +43,19 @@ whose files it shares):
 
 - **FR-9** (row 2) `pre` and tables in any `.markdown` body scroll inside
   themselves (`overflow-x: auto; max-width: 100%`); no body widens its view.
+  Amended 2026-10-03 (mal-ui U1, sev 3): a body scrolled sideways keeps its
+  offset across the periodic refresh; the body's DOM is replaced only when
+  its HTML changes (`DecisionsView.tsx:284` re-sets it today).
 - **FR-10** (row 3; amended 2026-10-03, Aglaea 59b4dcb, as built) Superseded
   and withdrawn records lose the row opacity (`global.css:713`); title and
   meta take `--fg-muted`; their lozenge takes the neutral badge
   (`--fg-muted`), not its own tokens.
-- **FR-11** (row 10) No axis text is cut at the lane's edges (milestone
-  titles, today, the undated label); labels that would overlap skip one in
-  two, measured on the rendered width, not a character count.
+- **FR-11** (row 10; amended 2026-10-03 to the design system's Timeline as
+  amended in 59b4dcb, mal-ui U2/U3) No axis text is cut at the lane's edges
+  (milestone titles, today, the undated label). Tick labels that would
+  overlap skip one in two, and a tick label gives way to a mark's title; a
+  mark's title is never skipped: colliding titles stagger to the next label
+  row. Measured on the rendered width, not a character count.
 - **FR-12** (row 14) The capped rule box has `overflow-x: hidden`, and its
   stuck placement moves from `decisions.css`'s `!important` into the box.
 
@@ -70,7 +76,8 @@ on and say so (Focus and names, as amended; row 7).
 | L7 | S1 | B13 with a box taller than its room: Chromium 1024×580 content, or an error line in the box | the box scrolls; Rule and Cancel inside it |
 | L8 | S3 | `/` focuses the find; Escape clears it; "Show only the newest ten"; a record ruled while Ruled is closed leaves To rule | each as stated |
 | L9 | 9, 10 | Decisions with 0032's wide yaml at a 1024×640 window; a superseded record | no horizontal scrollbar on the scroller; the code block scrolls inside; the superseded lozenge's text ≥ 4.5:1 |
-| L10 | 11 | the fixture at 1024×640 window, rail expanded: Cards at Fit and Days, Stages, Decisions at Fit | no cut milestone, today or undated label; no overlapping labels (DOM: rendered widths) |
+| L10 | 11 | the fixture at 1024×640 window, rail expanded: Cards at Fit and Days, Stages, Decisions at Fit | no cut milestone, today or undated label; no overlapping labels; every milestone title shown, colliding ones on the next row; a tick under a title gives way (DOM: rendered widths) |
+| L12 | 9 | Decisions, 0006 expanded, its code block scrolled right, wait 40 s through refreshes, both engines | the `pre` keeps its `scrollLeft`; the body's DOM not replaced while its HTML is unchanged |
 | L11 | 12 | WKWebView, the capped rule box | no horizontal scrollbar; no `!important` placement left in `decisions.css` |
 | L0 | all | `XDG_DATA_HOME=$(mktemp -d) make test`; `cd frontend && npm run build`; `wails build` | pass |
 
@@ -82,7 +89,8 @@ on and say so (Focus and names, as amended; row 7).
   `scripts/fixture-home.sh` and `testdata/fixture-twenty/` (home-widths-4's
   while it runs), `global.css`, `rule-box.css`, `RuleDecisionBox.tsx`,
   `StageRoadmap.tsx`, sup28's files, Go, `docs/design-system.md`.
-- **markdown-and-labels:** `global.css` (`.markdown` and `.dec.*` rules
+- **markdown-and-labels:** `DecisionsView.tsx` (the record body's render
+  only, FR-9 as amended), `global.css` (`.markdown` and `.dec.*` rules
   only), `rule-box.css`, `RuleDecisionBox.tsx`, `decisions.css` (the
   `!important` placement only), `TimeZoom.tsx`, `lib/axis.ts` and
   `StageRoadmap.tsx` (axis labels only), `lib/` tests, the fixture homes.
