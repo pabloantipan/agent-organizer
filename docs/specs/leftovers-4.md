@@ -115,4 +115,4 @@ on and say so (Focus and names, as amended; row 7).
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `zoom-decisions-polish` | L1–L8, L0 | — (beside sup28) | true |
-| `markdown-and-labels` | L9–L11, L0 | header-fold-3, home-widths-4, zoom-decisions-polish | true |
+| `markdown-and-labels` | L9–L12, L0 | header-fold-3, home-widths-4, zoom-decisions-polish | true |

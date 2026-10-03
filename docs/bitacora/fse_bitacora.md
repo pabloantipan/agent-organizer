@@ -90,6 +90,13 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
 - For the next batch too: at Fit a milestone title can be hidden whole by the
   skip-one-in-two rule (sev 1; DS Timeline now staggers titles, 59b4dcb).
   leftovers-4 FR-10 amended to the neutral badge, as built.
+- markdown-and-labels: UI fail U1 sev 3 (a body's scroll reset by the
+  refresh) fixed by widening the boundary to DecisionsView.tsx's body render;
+  FR-9, FR-11/L10 (titles stagger) amended, L12 added (fe6f0c9). Merged
+  d541e28, 65 min, ~$26. sup30 ended by me. Every ruled card is built; 0077
+  waits on Pablo. sup29+sup30 findings to aglaea as leftovers-6.
+- A second pre-wave WebKit copy: .wt-notes/mal-build/webkit-before/. The
+  earlier one (.wt-notes/zdp-ui/webkit-before/) is the closer to Pablo's own.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
