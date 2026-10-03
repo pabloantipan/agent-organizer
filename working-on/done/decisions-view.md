@@ -24,6 +24,7 @@ it: rule what waits, check what he just ruled, find an old ruling, see the pace.
 - [x] `cd frontend && npm test` passes with tests for the find match, the summary line's cases and the turnaround words; `go test ./...` green; `wails build` succeeds
 
 ## Done
+- 2026-10-03 sup27 ended: seats killed and tokens revoked, worktree and branch removed; run record runs/2026-10-03-decisions-view-and-time-zoom-2.md (~45 min against 0074's 40-75, ~$32)
 - 2026-10-03 merged to main 2fd42fa by sup27 after the code review (pass) and the UI review (pass at 7c4f1e0, after U1); make test and npm run build green on main
 - 2026-10-03 dv-build: U1 fixed (7c4f1e0): the capped rule box on a stuck head scrolls inside itself, foot pinned; 1024x580 Chromium scrollHeight 348 > clientHeight 332, foot inside the box (.wt-notes/dv-build/u1-1024x580.log); branch rebased on main, make test, npm run build, wails build green
 - 2026-10-03 dv-build: built on decisions-view (5907cff lib, 32941c1 store, e056cba view); B1-B14 measured in headless Chromium against the fixture and a 74-record copy, numbers and shots in .wt-notes/dv-build/progress.md; make test, npm run build, wails build green
