@@ -254,8 +254,73 @@ export function sideOf(s: Scale, from: number, to: number, scrollLeft: number, v
   return null;
 }
 
-/** The scroll offset that brings a mark on one side into view: its nearest
- *  date at a third of the lane from the side it comes in on. */
+export const REVEAL_MARGIN = 24; // a revealed mark's distance from the lane's edges
+
+/** The scroll offset an edge pointer brings a mark into view with (§A1.3):
+ *  a mark that fits in the lane with REVEAL_MARGIN each side shows whole,
+ *  centred when shorter than a third of the lane, else starting REVEAL_MARGIN
+ *  into the lane, so what a bar says after its end (its times, its due) shows
+ *  too; a longer one shows its nearer end at a third of the lane in from its
+ *  side. The level never changes. */
 export function revealScroll(s: Scale, from: number, to: number, side: "left" | "right", reserve: number, view: number): number {
-  return clampScroll(side === "left" ? s.x(to) - (view * 2) / 3 : s.x(from) - view / 3, s, reserve, view);
+  const a = s.x(from), b = s.x(to), w = b - a;
+  let left: number;
+  if (w < view / 3) left = (a + b) / 2 - view / 2;
+  else if (w + 2 * REVEAL_MARGIN <= view) left = Math.floor(a - REVEAL_MARGIN); // whole pixels: scrollLeft rounds
+  else left = side === "left" ? b - (view * 2) / 3 : a - view / 3;
+  return clampScroll(left, s, reserve, view);
+}
+
+/** The zoom control's buttons that can take focus back (§A1.1). */
+export type ZoomButton = "in" | "out" | "fit" | "today";
+
+/** Where focus goes after a control button moved the level to `next`: the
+ *  opposite zoom button when the pressed one is now disabled, else nowhere
+ *  (it stays). `+` reaching the deepest level hands focus to `−`; `−` or Fit
+ *  reaching Fit hand it to `+`. Today never disables itself while pressed. */
+export function focusAfter(pressed: ZoomButton, next: Level, hours: boolean): ZoomButton | null {
+  if (pressed === "in" && deeper(next, hours) === null) return "out";
+  if ((pressed === "out" || pressed === "fit") && next === "fit") return "in";
+  return null;
+}
+
+export const CONTEXT_INSET = 4; // the sticky context label reads this far into the lane
+
+/** The sticky context label for a scroll offset: the unit at a point
+ *  CONTEXT_INSET px into the lane, so a midnight tick 1-3 px in already names
+ *  its new day (§A1.6). */
+export function contextAt(s: Scale, scrollLeft: number): string {
+  return contextLabel(s.level, s.at(Math.max(scrollLeft, 0) + CONTEXT_INSET));
+}
+
+/** A tick label's horizontal extent in lane pixels, estimated from its text:
+ *  Days centres it in its column at 10 px mono, the others start 4 px after
+ *  the tick at 11 px (mono, or the sans semibold of a midnight). Estimates err
+ *  wide, so a label is dropped rather than cut. */
+export function tickLabelExtent(t: Tick, level: Level): { left: number; right: number } {
+  const text = t.label ?? "";
+  if (level === "days") {
+    const w = text.length * 6;
+    const col = t.width ?? PX_DAY;
+    return { left: t.x + (col - w) / 2, right: t.x + (col + w) / 2 };
+  }
+  const w = text.length * (t.midnight ? 7.4 : 6.8);
+  return { left: t.x + 4, right: t.x + 4 + w };
+}
+
+/** Whether a tick label is drawn whole between the label column (the lane's
+ *  visible left edge, scrollLeft) and the frame's right edge, `visible`
+ *  lane pixels later. A label that either would cut is not drawn (§A1.6). */
+export function tickLabelWhole(t: Tick, level: Level, scrollLeft: number, visible: number): boolean {
+  const e = tickLabelExtent(t, level);
+  return e.left >= scrollLeft && e.right <= scrollLeft + visible;
+}
+
+/** What a bar with a timed end says after it at Hours (§A1.5): `09:12–17:48`,
+ *  `09:12–` for an open bar, a whole-day end left blank; nothing when neither
+ *  end has a time. */
+export function timesLabel(start: When, end: When | null): string {
+  const a = start.timed ? hhmm(start.at) : "";
+  const b = end?.timed ? hhmm(end.at) : "";
+  return a || b ? `${a}–${b}` : "";
 }

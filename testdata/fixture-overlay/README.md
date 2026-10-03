@@ -12,6 +12,9 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
   with the owner named (twenty-at-a-glance G17, 0045); it is not in Needs me
 - the roadmap gates the current stage on 0002 as well, so the gate diamonds
   show one ruled and one waiting (G12, G14)
+- `w-later`, a card from 16 to 30 Nov 2026, weeks after every other fixture
+  date, so Cards at Days scrolls into November and its sticky label names it
+  (roadmap-time-zoom A23)
 - three cards seated `wave1-*`: one queued, one in review, one queued with no
   gate heading (G13)
 - a cell whose project is `organizer-fixture` with an `fse` seat, so the FSE

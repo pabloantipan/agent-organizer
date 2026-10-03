@@ -1,9 +1,9 @@
 import { useState, type ReactNode } from "react";
 import type { merge } from "../../wailsjs/go/models";
 import { DAY, toISO } from "../lib/dates";
-import { addLocalDays, dayMonth, endOf, hhmm, offersHours, startOfDay, when, type When } from "../lib/axis";
+import { addLocalDays, dayMonth, endOf, hhmm, offersHours, startOfDay, timesLabel, when, type When } from "../lib/axis";
 import { useBoard } from "../stores/board.store";
-import { EdgePointer, TimeFrame, ZoomControl, useTimeZoom } from "./TimeZoom";
+import { DayBand, EdgePointer, TimeFrame, ZoomControl, useTimeZoom } from "./TimeZoom";
 
 type Props = { initiative: merge.BoardInitiative; cards: merge.BoardCard[]; collapsible?: boolean; defaultOpen?: boolean; head?: ReactNode };
 
@@ -64,6 +64,8 @@ export function Roadmap({ initiative, cards, collapsible = true, defaultOpen = f
   const atHours = z.level === "hours";
   // Open-ended work runs to the end of today, and to now at Hours.
   const endAt = (r: Row) => (r.openEnded ? (atHours ? nowMs : addLocalDays(today, 1)) : endOf(r.end));
+  // At Hours a bar says its times, then its due, after its end (§A1.5).
+  const afterBar = (r: Row) => [timesLabel(r.start, r.openEnded ? null : r.end), r.card.due ? `due end of ${dayMonth(r.end.at)}` : ""].filter(Boolean).join(" · ");
   const dayMid = (w: When) => (x(w.at) + x(endOf(w))) / 2;
   const dayOnly = atHours && (rows.some((r) => r.dot) || milestones.length > 0 || !!target);
   const labelRow = (() => { const used = new Map<number, number>(); return (w: When) => { const r = used.get(w.at) ?? 0; used.set(w.at, r + 1); return r; }; })();
@@ -111,21 +113,21 @@ export function Roadmap({ initiative, cards, collapsible = true, defaultOpen = f
                   <div className="g-lane tz-lane">
                     {r.dot ? (
                       atHours ? (
-                        <>
-                          <div className={`tz-band ${r.card.status}`} style={{ left: x(from), width: x(to) - x(from) }} title={`${r.card.slug} · ${toISO(new Date(from))}, all day: no time recorded`} />
-                          <div className={`g-dot ${r.card.status}`} style={{ left: x(from) }} title={`${r.card.slug} · ${toISO(new Date(from))}, all day: no time recorded`} />
-                        </>
+                        <DayBand z={z} from={from} to={to} status={r.card.status} dot="g-dot" title={`${r.card.slug} · ${toISO(new Date(from))}, all day: no time recorded`} />
                       ) : (
                         <div className={`g-dot ${r.card.status}`} style={{ left: dayMid(r.start) }} title={`${r.card.slug} · ${toISO(new Date(from))}`} />
                       )
                     ) : (
+                      <>
                       <div
                         className={`g-bar ${r.card.status} ${r.openEnded ? "open" : ""} ${r.overdue ? "overdue" : ""}`}
                         style={{ left: x(from), width: Math.max(x(to) - x(from), 4) }}
                         title={`${stamp(r.start)} → ${r.openEnded ? "in progress" : stamp(r.end)}${!r.card.start && r.card.branch_start ? " (start from git)" : ""}`}
                       >
-                        {r.card.due && <span className="g-due">{atHours ? `due end of ${dayMonth(r.end.at)}` : dayMonth(r.end.at)}</span>}
+                        {r.card.due && !atHours && <span className="g-due">{dayMonth(r.end.at)}</span>}
                       </div>
+                      {atHours && afterBar(r) && <span className="g-due tz-after" style={{ left: x(to) }}>{afterBar(r)}</span>}
+                      </>
                     )}
                     <EdgePointer z={z} from={from} to={to} />
                   </div>
