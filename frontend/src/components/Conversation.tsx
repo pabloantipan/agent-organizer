@@ -439,8 +439,10 @@ function Msg({ m, parent, human, onReply, onBranch }: { m: CellMessage; parent?:
             <Kind k={m.kind} /> <b>{m.from}</b> <span className="meta">{self ? "note to self" : m.to === human && human ? "→ you" : m.to ? `→ ${m.to}` : "→ everyone"}</span>
             <span className="meta time">{when(m.created_at)}</span>
             <span className="msg-tools">
-              {onReply && <button className="rail-icon" title="reply in this thread" onClick={onReply}>↩</button>}
-              {onBranch && <button className="rail-icon" title={`branch a side thread with ${m.from}`} onClick={onBranch}><GitBranch size={11} /></button>}
+              {/* Named by action and author (responsive-home FR-24), not by the
+                  title alone, which a screen reader may not read. */}
+              {onReply && <button className="rail-icon" title="reply in this thread" aria-label={`Reply to ${m.from}`} onClick={onReply}>↩</button>}
+              {onBranch && <button className="rail-icon" title={`branch a side thread with ${m.from}`} aria-label={`Branch from ${m.from}'s message`} onClick={onBranch}><GitBranch size={11} /></button>}
             </span>
           </div>
           <div className="bubble-body">{body}{long && <button className="linkish show-all" onClick={() => setFull((f) => !f)}>{full ? "show less" : "show all"}</button>}</div>

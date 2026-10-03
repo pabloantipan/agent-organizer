@@ -93,7 +93,8 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
 .rail-label { font-size: var(--font-size-sm); color: var(--dim); margin: 12px 8px 6px 18px; display: flex; align-items: center; gap: 2px; }
 .rail-label .rail-icon { opacity: 0; }
 .rail-list:hover .rail-label .rail-icon { opacity: 1; }
-.rail-icon { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; padding: 0; border-radius: var(--radius-sm); background: transparent; border: 1px solid transparent; color: var(--muted); cursor: pointer; }
+/* a 24 px target at least (responsive-home FR-24; WCAG 2.5.8) */
+.rail-icon { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; min-width: 24px; min-height: 24px; padding: 0; border-radius: var(--radius-sm); background: transparent; border: 1px solid transparent; color: var(--muted); cursor: pointer; }
 .rail-icon:hover { color: var(--text); background: var(--panel-2); border-color: var(--border); }
 .rail-group { margin-bottom: 4px; border-radius: var(--radius-md); }
 .rail-group.dragging { background: var(--panel-2); box-shadow: var(--shadow-lift); }
