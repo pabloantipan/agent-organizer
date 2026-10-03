@@ -1,10 +1,10 @@
 ---
 title: The header, second pass - a height budget at compact, landings stay folded, stage buttons that look it, names
-status: now
+status: done
 repos: [organizer]
 branch: header-fold-2
 updated: 2026-10-03
-next: "review: header-fold-2, gate met (G12-G17, G11)"
+next: "merged 4afddc0; U1-U3 and the spec gaps are the FSE's"
 depends_on: []
 boundary: ["frontend/src/components/InitiativeHeader.tsx and its CSS", "frontend/src/stores/board.store.ts (landings store folded, FR-11 only)", "frontend/src/components/AgentsView.tsx (group head and toolbar line, FR-13 only)", "frontend/src/components/RoadmapView.tsx and Roadmap.tsx (stage word and row, FR-14 only)", "frontend/src/components/DecisionsView.tsx (aria-expanded on dec-line only)", "frontend/src/styles/shell.css (header and stepper rules only)", "frontend/src/lib/ and its tests", "testdata/fixture-overlay/ and the fixture script (FR-16)", "not: Home.tsx, Rail.tsx, lib/width.ts, home.css, rule-box.css, Overview.tsx, CardDrawer.tsx, Conversation.tsx (widths-and-focus); no Go; not docs/design-system.md"]
 spec: "docs/specs/initiative-header.md (FR-10 to FR-16, amendment 3); the ranking: docs/ux/reviews/2026-09-30-rank-header-fold-responsive-2.md (Aglaea, 3f3df2f); the design system as amended there"
@@ -35,6 +35,7 @@ header-fold's UI leftovers, ranked by Aglaea: FR-10 to FR-16 of
 - Reviewer: hf2-review, 2026-10-03
 
 ## Done
+- 2026-10-03 sup25 merged header-fold-2 as 4afddc0 after code and UI review pass; make test and npm run build green on main
 - 2026-10-03 hf2-build: FR-10 to FR-16 on header-fold-2 (f30a7e5 713558c 944fb1b f16b13f 97cd0d0 b9c0e85 ac49856), rebased on main (main runs ahead only by this card's own commits); G12-G17 measured on the fixture at 1024x640 (header 256 px, scrolls inside; folded across tab and reload; target whole, goal cut; no id on Agents; pointer, chevron, 2px offset, runs 1:3; names and aria-expanded; "2 decisions waiting on you"); G11 green. Shots and numbers in .wt-notes/hf2-build/progress.md
 - 2026-10-03 sup25 launched seat hf2-build in .wt/header-fold-2
 - 2026-10-03 sup25 launched by the FSE (Pablo's go-ahead, "ok")
