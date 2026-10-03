@@ -122,8 +122,8 @@ Nothing Home contains changes, except 0060's word.
 - **FR-20** (rows 1 and 4, W2, wf-gap2, wf-gap3) A column whose cell is
   empty ("—") on every shown row shall give way before any column with
   content, in every class. Signals that do not fit fold from the least
-  urgent: problems, now and live first; waits on you, blocked and waiting
-  never fold into "+N".
+  urgent: problems, now and live first, then the cell's state (amended by
+  0076); waits on you, blocked and waiting never fold into "+N".
 - **FR-21** (row 3, W1) Wide shall start where the row measures it can keep
   about 70 characters of goal beside the Needs me column, never below 2200
   (FR-13 becomes the floor), with the rail expanded or collapsed.
@@ -162,7 +162,7 @@ Nothing Home contains changes, except 0060's word.
 | G16 | 17 | 1512×945, Rule open, the element at the centre of another row's Rule | DOM: the top element is the scrim |
 | G17 | 18 | the rail toggle, expanded and as the strip | its bounding box ≥ 24×24 in both |
 | G18 | 19 | Overview → Open in Decisions on a ruled record; open and close a card back; Answer, then Tab through the thread divider | screenshots; `activeElement` after each; a names log with every divider button named |
-| G19 | 20 | `--twenty` at 1440×900 and 1512×945, rail expanded | DOM: an all-"—" column has given way while any goal shows; on the seven-signal row, blocked, waiting and waits-on-you are visible and only problems/now/live are in "+N" |
+| G19 | 20 | `--twenty` at 1440×900 and 1512×945, rail expanded | DOM: an all-"—" column has given way while any goal shows; on the seven-signal row, blocked, waiting and waits-on-you are visible; only problems/now/live and, last, the cell's state are in "+N"; at a 1024×640 window with the rail expanded "+N" is whole inside the column (0076) |
 | G20 | 21 | `--twenty` at 2200×1200 and 2560×1440, rail expanded and collapsed | the class per size; wherever wide shows, every goal keeps ≥ 70 characters or is whole |
 | G21 | 22, 23 | Home and Decisions: Rule open, click the record's text, press Escape; the element at the opener's Rule with the box open | the box closed both times; DOM: the opener's row is above the scrim with `--surface-selected` |
 | G22 | 24 | Conversation: a names log over a thread's reply and branch buttons; `.rail-icon` bounding boxes; hide, then `activeElement` | every button named as FR-24; each box ≥ 24×24; focus on the show control |

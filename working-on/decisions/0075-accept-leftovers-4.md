@@ -1,13 +1,13 @@
 ---
 title: Accept the leftovers-4 batch and launch zoom-decisions-polish now, markdown-and-labels after
-status: proposed
+status: ruled
 raised: 2026-10-03
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-03
+ruled_by: pablo
 options: [accept as written, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [zoom-decisions-polish, markdown-and-labels]
 threads: [01M41EBN13XE2GAPG9M7R2T5BW]
 supersedes: []
@@ -57,6 +57,8 @@ single-wave UI tasks, this initiative (25, 34, 41, 45, 45, 46, 47, ~80 min).
 The FSE's: accept as written.
 
 ## Ruling
+
+pablo, 2026-10-03, in the FSE session on lodestar: "al recommendation accepted. Go on"
 
 ## Consequences
 

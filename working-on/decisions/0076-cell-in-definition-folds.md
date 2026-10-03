@@ -1,13 +1,13 @@
 ---
 title: home-widths-4 G19 - does "cell in definition" fold into "+N"?
-status: proposed
+status: ruled
 raised: 2026-10-03
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-03
+ruled_by: pablo
 options: [never folds, folds last]
-chosen:
+chosen: folds last
 cards: [home-widths-4]
 threads: []
 supersedes: []
@@ -54,6 +54,8 @@ folds; the build showed it cannot fit at the minimum window, and the cell
 already reaches you as a Needs me row.
 
 ## Ruling
+
+pablo, 2026-10-03, in the FSE session on lodestar: "al recommendation accepted. Go on"
 
 ## Consequences
 
