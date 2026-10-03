@@ -12,6 +12,16 @@
    below the top bar (useFitViewport); only the record scrolls, so the
    options, the words and the buttons never leave the box. */
 .rb > * { flex: none; }
+/* Capped (leftovers-4 FR-12): under a Decisions record's stuck head the box
+   rides with Rule, capped in the room under the head (--dec-box-max, which
+   DecisionsView measures) and scrolls inside itself, vertically only: a
+   classic scrollbar never shows across it. RuleDecisionBox sets the class
+   and no fixed place, so nothing here needs to outrank an inline style. */
+.rb.capped {
+  position: absolute; top: calc(100% + var(--space-1)); right: 0; left: auto;
+  max-height: var(--dec-box-max, 60vh);
+  overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+}
 .rb.with-record { width: 460px; }
 .rb-head { display: flex; flex-wrap: wrap; gap: 0 var(--space-2); align-items: baseline; min-width: 0; }
 .rb-num { font-family: var(--mono); font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); font-variant-numeric: tabular-nums; }
