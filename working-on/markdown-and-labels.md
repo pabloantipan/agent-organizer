@@ -10,6 +10,7 @@ boundary: ["frontend/src/styles/global.css (.markdown and .dec.* rules only)", "
 spec: "docs/specs/leftovers-4.md (FR-9 to FR-12); the ranking docs/ux/reviews/2026-10-03-rank-leftovers-4.md (Aglaea, 94308ad); the design system as amended there"
 gate: "docs/specs/leftovers-4.md Acceptance, rows L9 to L11 and L0"
 ui_review: true
+review: pass
 seat: mal-build
 ---
 
@@ -28,6 +29,11 @@ sup28's cards and with zoom-decisions-polish.
 - 2026-10-03 cut from leftovers-4 by the FSE
 
 ## Next
+
+## Review
+- Verdict: code review pass (mal-review, 2026-10-03), on 058578f.
+- Unmet gate items: none. L9: `.markdown :where(pre, table)` scrolls inside; 0006 carries 0032's yaml byte for byte; scroller 774 = 774, pre 702 of 1055 (rail expanded and strip); superseded row opacity 1, lozenge 6.67:1. L10: placement on rendered boxes (`placeAxisLabels`, `shiftInside`, `skipStep` by `seriesIndex`), JSON cut 0 and overlapping 0 in all eight states. L11: `.rb.capped` with `overflow-x: hidden`, no inline place while capped (the dropped place held only position, top/left/right, maxHeight, all of which the old `!important` overrode), WKWebView crop shows the vertical bar only, `grep important decisions.css` empty. L0 rerun by me: make test, vitest 161, npm run build, wails build pass.
+- Outside the gate: (1) FR-10 contradicts L9: "the lozenge keeps its tokens" (`--done`) reads 2.05:1, so the builder dropped the lozenge's colour rule; the spec should be amended, Pablo's call. (2) That removal is a `.badge.dec-status` rule, at the edge of "`.dec.*` only". (3) A milestone title can now be hidden whole ("Port to canonical" at Fit), left to its hover title; no gate row says whether that is acceptable. (4) `.markdown table` is `display: block` everywhere, card backs and Help included. (5) `placeAxisLabels` measures the DOM after every render. (6) S4 not kept: the builder's runs wrote into Pablo's app's WebKit storage.
 
 ## Blockers
 
