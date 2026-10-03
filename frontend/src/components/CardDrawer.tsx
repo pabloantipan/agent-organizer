@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { marked } from "marked";
 import { AtSign, Code2, FolderSearch, MessagesSquare, MessageSquareText, Pencil, Send, Terminal, Trash2, X } from "lucide-react";
 import { api } from "../hooks/useWails";
@@ -6,6 +6,28 @@ import type { merge } from "../../wailsjs/go/models";
 import { ageLabel, notesAsContext, shortHome, since } from "../lib";
 import { useBoard } from "../stores/board.store";
 import { readOnlyOf } from "../lib/queue";
+
+/** Focus and names, opening inline (widths-and-focus FR-19): the card back
+ *  takes focus on its title when it opens, and hands it back to what opened
+ *  it (the control focused at the time) when it closes. Another card opened
+ *  over it keeps the first opener. */
+function useFocusOpener(key: string | null, title: React.RefObject<HTMLHeadingElement | null>) {
+  const opener = useRef<HTMLElement | null>(null);
+  const was = useRef<string | null>(null);
+  useLayoutEffect(() => {
+    if (key && !was.current) {
+      const a = document.activeElement;
+      opener.current = a instanceof HTMLElement && a !== document.body ? a : null;
+    }
+    if (key && key !== was.current) title.current?.focus();
+    if (!key && was.current) {
+      const o = opener.current;
+      opener.current = null;
+      if (o?.isConnected) o.focus();
+    }
+    was.current = key;
+  }, [key, title]);
+}
 
 // Trello-style card back: centered, description in the main column, labels
 // and actions in the side column.
@@ -17,6 +39,9 @@ export function CardDrawer() {
     return () => window.removeEventListener("keydown", onKey);
   }, [select]);
   const html = useMemo(() => (selected ? (marked.parse(selected.body || "") as string) : ""), [selected]);
+  const title = useRef<HTMLHeadingElement>(null);
+  const titleId = useId();
+  useFocusOpener(selected ? `${selected.initiative_id}/${selected.slug}` : null, title);
   if (!selected) return null;
   const c = selected;
   // FR-13: a card of an initiative that is not active takes no comment and
@@ -25,10 +50,10 @@ export function CardDrawer() {
   const dir = c.path.replace(/\/working-on\/.*$/, "");
   return (
     <div className="modal-backdrop" onClick={() => select(null)}>
-      <div className={`modal ${c.status}`} onClick={(e) => e.stopPropagation()} role="dialog" aria-label={c.title || c.slug}>
+      <div className={`modal ${c.status}`} onClick={(e) => e.stopPropagation()} role="dialog" aria-labelledby={titleId}>
         <header className="modal-head">
           <div>
-            <h2>{c.title || c.slug}</h2>
+            <h2 ref={title} id={titleId} tabIndex={-1}>{c.title || c.slug}</h2>
             <div className="meta">
               in <span className="ident">{c.initiative_id}</span> · <span className="mono">{c.slug}</span>
             </div>
