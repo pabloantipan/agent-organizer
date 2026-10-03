@@ -53,7 +53,9 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   time-zoom launches after header-fold-2 lands.
 - Pablo's Decisions sub-view ask (collapsible sections, scroll length, tiles,
   median in days, headings; "the operator spends most time here") is with
-  aglaea, thread 01M417NHHRR2WP7XPY69XM438N. No card until her spec.
+  aglaea, thread 01M417NHHRR2WP7XPY69XM438N. Her review and spec 9386d15;
+  card decisions-view (after header-fold-2, time-zoom) and proposed 0072 in
+  a93dd92. Help already names working-on/decisions/ (how-we-build.md:122).
 - Hook threads not closed (curl POST refused before); not retried.
 
 ## OPEN — 2026-10-03, roadmap time zoom
