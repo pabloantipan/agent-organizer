@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: home-widths-4
 updated: 2026-10-03
-next: "hw4-build waits on sup28 (question posted): at 1024x640 with the rail expanded the never-fold signals at their least plus +4 need 151 px of a 145 px column; everything else passes the clip probe at 424149a"
+next: "decide: at 1024x640 rail expanded waiting+blocked+cell+\"+4\" need 151 px of a 145 px column at 2 chars+ellipsis each; pick 1 char+ellipsis as the least (fits, 133 px), the cell folds at compact only (0076), or a wider compact signal column (hw4-build, 424149a, clip-clean.log)"
 review: fail
 depends_on: [decisions-view, time-zoom-2]
 boundary: ["frontend/src/components/Home.tsx, Rail.tsx, RuleDecisionBox.tsx", "frontend/src/components/Crew.tsx (CellStateLz only), Conversation.tsx (FR-24's names and focus only)", "frontend/src/lib/width.ts, frontend/src/lib/ and its tests", "frontend/src/styles/home.css, rule-box.css, global.css (.rail-icon only), shell.css (the rail's rules only)", "testdata/fixture-twenty/ and scripts/fixture-home.sh (FR-25's rows)", "not: header-fold-3's files, DecisionsView.tsx, Go, docs/design-system.md"]
