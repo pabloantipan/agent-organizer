@@ -185,4 +185,36 @@ the zoom stay as those cards make them.
 
 ## Technical notes
 
-(left for the FSE)
+by the FSE, 2026-10-03, on main aa41169.
+
+- **O2, sequencing:** the card depends on header-fold-2 (owns `dec-line`'s
+  aria-expanded in `DecisionsView.tsx`) and time-zoom (0071, owns the
+  Timeline's axis, marks and zoom control). It builds after both are in
+  `done/`, on what they leave.
+- **O3, find over the body:** `model.Decision.Body` (`internal/model/decision.go:46`,
+  json `body`) is on every record already. The match is a pure function in
+  `frontend/src/lib/` (number with or without padding, every word in title,
+  chosen or body), vitest-tested. No Go change.
+- **Remembered per machine:** the three sections' open state goes in browser
+  storage the way `railCollapsed` and `headerOpen` do
+  (`board.store.ts:132-189`, try/catch, a default when storage is empty):
+  To rule and Ruled open, Timeline closed. Not in the order document; it is a
+  look, not a setting that syncs.
+- **The page's first line to Help:** the builder only removes it. Help is
+  `~/agent-slack/docs/how-we-build.md` (`config.DefaultHelpDoc`), another
+  repo, outside the card; if it lacks the sentence, the FSE raises it with
+  Hephaistos.
+- **Summary line and turnaround words** are pure functions in `lib/`
+  (the §1 table's cases; `after N days`, nothing for the same day),
+  vitest-tested.
+- **Not touched:** `dec-line` and its aria-expanded, the record body, the
+  Timeline's axis, marks and zoom, the rule box, the store's navigation
+  (`openNeedsMe` landings only open sections, §6), Go, `docs/design-system.md`.
+
+### Spec check (spec-craft step 5b)
+
+Gate rows B1-B11 each name evidence; B6 needs the organizer's own records,
+which the builder reads from this repo's `working-on/decisions/` through a
+fixture copy, not the real home. Boundary claims traced: body on the record
+(decision.go:46); per-machine storage precedent (board.store.ts). Result:
+holds.
