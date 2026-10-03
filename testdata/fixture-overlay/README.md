@@ -24,7 +24,9 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
   and init-b has none, so the header shows both cases (twenty-at-a-glance G5)
 - `init-a/working-on/initiative.yaml` replaces that file with the same fields
   and a goal and a measure each longer than two lines at 1280 px, so the
-  header's clamp and "more" have something to fold (twenty-at-a-glance G13);
+  header's clamp and "more" have something to fold (twenty-at-a-glance G13),
+  and two more items on each side of its scope, so "Scope in, more" and
+  "Scope out, more" show at 1024 px too (initiative-header FR-15, G17);
   keep its other fields in step with the one in `testdata/home`
 - init-b and init-c are in discovery, each with a building stage next: init-b's
   is gated by 0001, a proposed record, and init-c's names no record, so the
@@ -65,3 +67,8 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
   `drafted-fixture` and `ready-fixture` (V3), with only the human, so their
   Crew headers carry no "no project" line and `init-ready` shows
   Conversations without a token
+- a second proposed record owned by the human in `init-drafted`
+  (`0002-who-the-cell-reports-to`), so its header chip reads "2 decisions
+  waiting on you", FR-2's longest words (initiative-header FR-16, G17); the
+  draft still waits only on `0001-the-cell-roster`, which the organizer
+  finds by slug, and no test counts init-drafted's records
