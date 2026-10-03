@@ -14,6 +14,7 @@ know, ruled choices, open findings, lessons), `docs/ux/principles.md`, and
 - **Also 2026-10-03:** ranked sup25's leftovers (leftovers-3); decisions-view Amendment 1 (U2, U3); DS Widths amended.
 - **Also 2026-10-03:** time-zoom leftovers as roadmap-time-zoom Amendment 1 (A15–A23).
 - **Also 2026-10-03:** leftovers-4 ranked (16 rows); Q1 (Tab in WKWebView) waits on Pablo via the FSE.
+- **Also 2026-10-03:** leftovers-5 ranked (15 rows).
 - **Before that:** nothing in flight. Last work: the ranked leftovers of header-fold
   and responsive-home-2, `docs/ux/reviews/2026-09-30-rank-header-fold-responsive-2.md`
   (3f3df2f), with the design system amended (Widths: wide from 2200, signals
@@ -67,3 +68,4 @@ know, ruled choices, open findings, lessons), `docs/ux/principles.md`, and
 - 2026-10-03 — time-zoom leftovers ranked (10 rows) as roadmap-time-zoom Amendment 1; G2 words accepted.
 - 2026-10-03 — leftovers-4 ranked (16 rows + 5 gate rows); DS: window sizes, focus before disable, WKWebView keyboard, axis text, dimming.
 - 2026-10-03 — 0076 design call: the cell's state folds last of the foldable signals (option c); DS Widths names it.
+- 2026-10-03 — leftovers-5 ranked (15 rows + 6 gate/code); DS: no document scroll, classic bars, fold order and floors, edge colour, topmost Escape, opener.

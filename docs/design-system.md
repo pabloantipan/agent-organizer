@@ -276,7 +276,9 @@ keeps their place.
   `aria-describedby`; a confirm puts focus on its commit.
 - **Closing** (Cancel, Escape, the commit done): focus returns to the control
   that opened it, or to what replaced it. Escape closes every inline box and
-  confirm.
+  confirm, **the topmost one only**: Escape on Help or a card drawer over an
+  open rule box closes the drawer, and the box stays with what was typed
+  (leftovers-5).
 - **Navigating** (a row verb, a link to a record): focus lands on the thing
   named: the record's row, the blocked seat, Bring crew up. Never on the
   page body.
@@ -288,7 +290,12 @@ keeps their place.
   `aria-label` or `aria-describedby` on the row's subject.
 - **Disclosure state**: a control that opens something stays marked while it
   is open (`aria-expanded` or `aria-pressed`, and `--surface-selected`), the
-  same way everywhere.
+  same way everywhere. Hover never takes the mark away. A box never covers
+  its own opener: where it cannot fit beside or below it, it opens below the
+  opener's row (leftovers-5).
+- **The ring is for the keyboard**: after a pointer landing, the target shows
+  its selected state, and the focus ring shows only under `:focus-visible`,
+  as the engine decides (leftovers-5, hf3-U2).
 - **An open box keeps the keyboard** (a rule box, a sheet, a dialog): Tab
   and Shift+Tab loop inside it until Escape, Cancel or its commit closes
   it. One box at a time; a box that covers content has a scrim. What was
@@ -328,14 +335,26 @@ is the floor.
 **What gives way first.** A column that is empty on every row (all "—")
 gives way before any column with content. Signals fold into "+N" from the
 least urgent: waits on you, blocked and waiting stay in view; problems, now
-and live fold first, and the cell's state folds last of the foldable ones
+and live fold first, in that order (live, now, problems), and the cell's state folds last of the foldable ones
 (it is not in the never-fold set; a cell that waits on him is already a
-Needs me row) (leftovers-3, W2; home-widths-4, 0076).
+Needs me row) (leftovers-3, W2; home-widths-4, 0076). Whether something
+folds is decided against what stays **at its floor** (waiting with its
+names cut), not at its natural width, so the cell shows wherever it fits
+beside a cut waiting (leftovers-5).
 
-**A region that scrolls inside a view shows it does**: while content hides
-below its edge, that edge carries a 1 px `--border-strong` line, gone once
-scrolled to the end. Overlay scrollbars on macOS do not count, since they
+**A region that scrolls inside a view shows it does**: each edge with
+content hidden past it carries a 1 px `--fg-subtle` line (4.5:1, not
+`--border-strong`, which measured 1.6:1, leftovers-5), gone when nothing
+is hidden past that edge. Overlay scrollbars on macOS do not count, since they
 hide until scrolled (leftovers-3, U1).
+
+**The document never scrolls**; only a view's own scroller does. Anything
+positioned, visually hidden text included, sits inside a positioned
+ancestor within its scroller, so it cannot stretch the page (leftovers-5,
+hw4-U8: five `sr-only` spans let the whole app scroll away in WKWebView).
+**Measure with classic scrollbars too**: with a mouse attached, or System
+Settings › Appearance › Show scroll bars: Always, WKWebView draws ~15 px
+bars that overlay scrollbars do not take. A width gate passes with both.
 
 Every screen is checked at 1024×640, 1512×945, 1920×1080 and 3440×1440.
 These are **window** sizes. The built app's content is the window less its

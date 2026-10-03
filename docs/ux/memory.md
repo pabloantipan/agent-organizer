@@ -179,6 +179,16 @@ keyboard checked in WKWebView with the Keyboard navigation setting named; no
 axis text cut and the axis sticks; dimmed means a token, never opacity; a
 body never widens its view.
 
+Leftovers-5 (2026-10-03, `reviews/2026-10-03-rank-leftovers-5.md`, thread
+01M41YCPTBFVQDFS9CQW76DQ14): 15 rows from header-fold-3 and home-widths-4.
+Top: the document scrolls away in WKWebView (sr-only spans out of their
+scroller; the outer bar costs ~15 px and likely causes the 1280 goal drop
+and the one-letter signals). DS amended: the document never scrolls; classic
+scrollbars in gates; fold order live, now, problems, cell; fold against
+floors; scroll edge in --fg-subtle; Escape closes the topmost box only;
+hover keeps the selected mark; a box never covers its opener; the ring is
+for the keyboard. 0076 (ruled): the cell folds last.
+
 ## Open questions
 
 - Q1 (Pablo, via the FSE, leftovers-4): does he use Tab in the app? In
@@ -194,6 +204,10 @@ body never widens its view.
   `git checkout -- frontend/wailsjs/runtime` after, never commit it.
 
 ## Studies and lessons
+
+- **A design-shaped fail should come to me first.** home-widths-4's G19 went
+  back to the builder twice ("never fold") before reaching me; one line
+  settled it (0076).
 
 - **Chromium is not the app.** WKWebView found the wave's only sev 3
   (the rule box spilling at 1024×640, because the content is 609 px and a
