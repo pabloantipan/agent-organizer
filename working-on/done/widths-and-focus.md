@@ -28,6 +28,7 @@ Aglaea: FR-13 to FR-19 of `docs/specs/responsive-home.md`.
 - [x] G8: see `docs/specs/responsive-home.md`, Acceptance
 
 ## Done
+- 2026-10-03 sup25 closed the task: seats ended, tokens revoked, worktree removed; run record runs/2026-10-03-header-fold-2-widths-and-focus.md (46 min against 0069's 40-70)
 - 2026-10-03 sup25 merged widths-and-focus as 82ca2a2 after code and UI review pass; make test and npm run build green on main
 - 2026-10-03 wf-build: FR-13 to FR-19 on widths-and-focus (e0875dc..9fdb19d, 9 commits), rebased on main after header-fold-2 (4afddc0, no conflict); G8 green and G13-G18 measured on 9fdb19d; logs, shots and scripts in .wt-notes/wf-build/ (progress.md)
 - 2026-10-03 sup25 launched seat wf-build in .wt/widths-and-focus

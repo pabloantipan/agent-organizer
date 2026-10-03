@@ -35,6 +35,7 @@ header-fold's UI leftovers, ranked by Aglaea: FR-10 to FR-16 of
 - Reviewer: hf2-review, 2026-10-03
 
 ## Done
+- 2026-10-03 sup25 closed the task: seats ended, tokens revoked, worktree removed; run record runs/2026-10-03-header-fold-2-widths-and-focus.md (46 min against 0069's 40-70)
 - 2026-10-03 sup25 merged header-fold-2 as 4afddc0 after code and UI review pass; make test and npm run build green on main
 - 2026-10-03 hf2-build: FR-10 to FR-16 on header-fold-2 (f30a7e5 713558c 944fb1b f16b13f 97cd0d0 b9c0e85 ac49856), rebased on main (main runs ahead only by this card's own commits); G12-G17 measured on the fixture at 1024x640 (header 256 px, scrolls inside; folded across tab and reload; target whole, goal cut; no id on Agents; pointer, chevron, 2px offset, runs 1:3; names and aria-expanded; "2 decisions waiting on you"); G11 green. Shots and numbers in .wt-notes/hf2-build/progress.md
 - 2026-10-03 sup25 launched seat hf2-build in .wt/header-fold-2
