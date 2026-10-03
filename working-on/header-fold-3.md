@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: header-fold-3
 updated: 2026-10-03
-next: "decide: pablo - accept 0074 (the leftovers-3 batch); then the FSE starts its supervisor after decisions-view lands"
+next: "fse: start a supervisor for this card and its pair once decisions-view is in done/ (0074 ruled, accept as written)"
 depends_on: [decisions-view]
 boundary: ["frontend/src/components/InitiativeHeader.tsx and its CSS", "frontend/src/styles/shell.css (the header's rules only)", "frontend/src/components/StageRoadmap.tsx and frontend/src/stores/board.store.ts (open a stage by position, FR-18; the fold's storage behind a lib function, FR-19)", "frontend/src/lib/ and its tests", "not: home-widths-4's files, DecisionsView.tsx, Go, docs/design-system.md"]
 spec: "docs/specs/initiative-header.md (amendment 4, FR-17 to FR-19); the ranking docs/ux/reviews/2026-10-03-rank-leftovers-3.md (Aglaea, 2b6d608)"
@@ -24,6 +24,7 @@ header-fold-2's leftovers, ranked by Aglaea: FR-17 to FR-19 of
 - [ ] G11: see `docs/specs/initiative-header.md`, Acceptance
 
 ## Done
+- 2026-10-03 0074 ruled by pablo ("Ok", accept as written, 117e269)
 - 2026-10-03 cut from initiative-header amendment 4 by the FSE
 
 ## Next
