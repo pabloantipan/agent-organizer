@@ -1,10 +1,10 @@
 ---
 title: Home widths, fourth pass - empty columns give way first, urgent signals never fold, wide measured on the row; Escape, the opener, names
-status: now
+status: done
 repos: [organizer]
 branch: home-widths-4
 updated: 2026-10-03
-next: "review: home-widths-4, 0076 applied (the cell folds last, 650ee48); clip probe 0 bad rows at 1024/1280/1440/1512/1920, rail expanded and strip; G19-G23 and G8 met; G24 is the UI reviewer's"
+next: "merged c8cc059 (sup28); UI findings U2-U10 sev 2/1 and the spec gaps are the FSE's"
 review: pass
 depends_on: [decisions-view, time-zoom-2]
 boundary: ["frontend/src/components/Home.tsx, Rail.tsx, RuleDecisionBox.tsx", "frontend/src/components/Crew.tsx (CellStateLz only), Conversation.tsx (FR-24's names and focus only)", "frontend/src/lib/width.ts, frontend/src/lib/ and its tests", "frontend/src/styles/home.css, rule-box.css, global.css (.rail-icon only), shell.css (the rail's rules only)", "testdata/fixture-twenty/ and scripts/fixture-home.sh (FR-25's rows)", "not: header-fold-3's files, DecisionsView.tsx, Go, docs/design-system.md"]
@@ -24,10 +24,11 @@ widths-and-focus's leftovers, ranked by Aglaea: FR-20 to FR-25 of
 - [x] G21: see `docs/specs/responsive-home.md`, Acceptance
 - [x] G22: see `docs/specs/responsive-home.md`, Acceptance
 - [x] G23: see `docs/specs/responsive-home.md`, Acceptance
-- [ ] G24: see `docs/specs/responsive-home.md`, Acceptance
+- [x] G24: see `docs/specs/responsive-home.md`, Acceptance
 - [x] G8: see `docs/specs/responsive-home.md`, Acceptance
 
 ## Done
+- 2026-10-03 sup28 merged c8cc059 (code review pass 7f49158, UI recheck pass ca185f3, after 0076 folds last); make test (vitest 152) and npm run build green on main
 - 2026-10-03 hw4-build: 0076 (Pablo: the cell folds last) applied in 650ee48, with a1b14b2 (never-fold signals share the column with a 2-character + ellipsis floor); from a clean detached checkout: clip probe 0 bad rows at 1024x640, 1280x800, 1440x900, 1512x945, 1920x1080, rail expanded and strip ("+5" inside the 145 px column at 1024 expanded), G19 as amended and G23 (.wt-notes/hw4-build/clip-0076.log, g19-0076.log, g23-0076.log); rebased on main, make test, npm run build, G18 grep, wails build green
 - 2026-10-03 hw4-build: 424149a never-fold signals share the column (shareRoom), each with at least 2 characters + ellipsis on its span, +N inside; clip probe from a clean checkout (.wt-notes/hw4-build/clip-clean.log): passes at 1024 strip and at 1280, 1440, 1512, 1920 expanded and strip; fails only at 1024x640 rail expanded by 6 px (32+32+48 + 27 + 12 = 151 > 145)
 - 2026-10-03 hw4-build: 2941f2c (was 40ab320 before the rebase) tracks testdata/fixture-twenty/partner-payouts/agents/cell.json (git add -f, agents/ is ignored); G19 and G23 re-run from a clean detached checkout at 40ab320 (.wt-notes/hw4-build/g19-clean.log, g23-clean.log): the card row partner-payouts · Partner terms is in Needs me, and the cell lozenge on the seven-signal row is shown and cut with an ellipsis on its span at 1920
