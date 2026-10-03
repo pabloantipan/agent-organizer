@@ -52,13 +52,12 @@ export const definitionWaits = (cell: model.Cell, missing: string[]) =>
 
 /** The cell's derived state as a lozenge, word and icon, or nothing. One
  *  source for Crew, the Agents tab and Home's signals. */
-export function CellStateLz({ cell, missing = [], label = "in definition", fold }: { cell?: model.Cell | null; missing?: string[]; label?: string; fold?: number }) {
+export function CellStateLz({ cell, missing = [], label = "in definition" }: { cell?: model.Cell | null; missing?: string[]; label?: string }) {
   if (cell?.state !== "in_definition") return null;
   // The words sit in a text span that takes the ellipsis (responsive-home
   // FR-25, as FR-14): the lozenge is a flex box, which clips mid-word.
-  // `fold` is how soon Home's signals fold it into "+N" (FR-20).
   return (
-    <span className="lz tone" title={`${cell.project}: ${definitionWaits(cell, missing)}`} data-fold={fold}>
+    <span className="lz tone" title={`${cell.project}: ${definitionWaits(cell, missing)}`}>
       <PencilRuler size={12} strokeWidth={2} aria-hidden="true" /><span className="lz-t">{label}</span>
     </span>
   );

@@ -437,7 +437,7 @@ function Signals({ i, sig, cell, missing, lead }: { i: merge.BoardInitiative; si
       {now > 0 && <span className="lz now" data-fold={FOLD.now}><span className="lz-t"><span className="num">{now}</span> now</span></span>}
       {running.map((w) => <span key={w.n} className="lz live" data-fold={FOLD.live}><span className="lz-t">wave <span className="num">{w.n}</span> · <span className="num">{w.building!.length}</span> building</span></span>)}
       {live > 0 && <span className="lz" data-fold={FOLD.live}><span className="lz-t">{working > 0 ? <><span className="num">{working}</span> working</> : <><span className="num">{live}</span> live</>}</span></span>}
-      <CellStateLz cell={cell} missing={missing} label="cell in definition" fold={FOLD.cell} />
+      <CellStateLz cell={cell} missing={missing} label="cell in definition" />
       {problems > 0 && <span className="lz warning" data-fold={FOLD.problems}><span className="lz-t"><span className="num">{problems}</span> problem{problems === 1 ? "" : "s"}</span></span>}
       {none && <span className="p-quiet" title="no signals">—</span>}
     </OneLine>
