@@ -10,6 +10,7 @@ boundary: ["frontend/src/components/TimeZoom.tsx, frontend/src/styles/time-zoom.
 spec: "docs/specs/leftovers-4.md (FR-1 to FR-8); the ranking docs/ux/reviews/2026-10-03-rank-leftovers-4.md (Aglaea, 94308ad); the design system as amended there"
 gate: "docs/specs/leftovers-4.md Acceptance, rows L1 to L8 and L0"
 ui_review: true
+review: pass
 seat: zdp-build
 ---
 
@@ -37,3 +38,10 @@ Runs beside sup28's header-fold-3 and home-widths-4: disjoint files.
 - L2 needs ~74 records and the fixture has 8 at most: it ran on a run-time copy of this repo's 76 records inside the fixture home, not committed. A large-decisions fixture would make L2 repeatable.
 - Found, not asked: ruling a record while Ruled is closed leaves focus on the page body (afterRule focuses the record's line, no longer rendered); Focus and names says never the body.
 - FR-2 makes only the Decisions Timeline's axis stick to the page at Fit; Roadmap's Cards and Stages keep their axis in the frame.
+
+## Review
+- Verdict: code review pass at 28f581a. L0 rerun here: make test, npm test (143), npm run build, wails build all pass. L1-L8 met by the diff plus the builder's shots.
+- Unmet gate items: none.
+- Boundary: 8 files, all inside; decisions.css only adds the Fit axis rule, no `!important` touched.
+- Outside the gate: (1) on the L7 shots the stuck Ruled heading cuts a band through the capped rule box (z-order), so it is not this diff; it belongs to markdown-and-labels FR-12. (2) Ruling while Ruled is closed drops focus to the body (the builder found this too). (3) A landing during a find, into a section hand-closed during that find, keeps the section closed (findHand outranks visit). (4) L2 is not repeatable: no 74-record fixture. (5) `.tz-labelcol` hard-codes 240 px twice in CSS beside `LABEL_W`.
+- Reviewer: zdp-review, 2026-10-03
