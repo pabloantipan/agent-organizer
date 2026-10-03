@@ -99,12 +99,12 @@
   grid-template-columns: 24px minmax(var(--id-w, 0px), 0.9fr) 144px 96px minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1.5fr) 96px 24px;
 }
 
-/* Wide (FR-4): stage and signals at their full width when the list has the
-   room, so a goal of about 70 characters reads whole and the signals keep
-   one line. At 1920 with the rail expanded the list is about 1,100 px, less
-   than those widths: stage and signals give way down to 120 px, and the goal
-   keeps 160, instead of the goal going to 0 and the chevrons spilling into
-   the Needs me column (found building responsive-home-2). */
+/* Wide (FR-4, from 2200 since FR-13): stage and signals at their full
+   width when the list has the room, so a goal of about 70 characters reads
+   whole and the signals keep one line. When the rail leaves the list
+   tighter than those widths, stage and signals give way down to 120 px and
+   the goal keeps 160, instead of the goal going to 0 and the chevrons
+   spilling into the Needs me column (found building responsive-home-2). */
 .home.wide .port .p-head, .home.wide .port .p-row {
   grid-template-columns: 24px max(var(--id-w, 0px), 96px) 144px 104px minmax(160px, 1fr) minmax(120px, 208px) minmax(120px, 288px) 136px 24px;
 }

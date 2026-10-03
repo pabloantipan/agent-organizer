@@ -10,7 +10,9 @@ describe("widthClassOf", () => {
     expect(widthClassOf(1512)).toBe("regular");
     expect(widthClassOf(1720)).toBe("regular");
     expect(widthClassOf(1919)).toBe("regular");
-    expect(widthClassOf(1920)).toBe("wide");
+    expect(widthClassOf(1920)).toBe("regular");
+    expect(widthClassOf(2199)).toBe("regular");
+    expect(widthClassOf(2200)).toBe("wide");
     expect(widthClassOf(3440)).toBe("wide");
   });
 });
@@ -19,8 +21,9 @@ describe("roomyOf", () => {
   it("is the top of regular only, from 1720", () => {
     expect(roomyOf(1719)).toBe(false);
     expect(roomyOf(1720)).toBe(true);
-    expect(roomyOf(1919)).toBe(true);
-    expect(roomyOf(1920)).toBe(false);
+    expect(roomyOf(1920)).toBe(true);
+    expect(roomyOf(2199)).toBe(true);
+    expect(roomyOf(2200)).toBe(false);
   });
 });
 
