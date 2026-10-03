@@ -115,7 +115,7 @@ function StageStrip({ i, compact }: { i: merge.BoardInitiative; compact: boolean
                       aria-current={st === "current" ? "step" : undefined}
                       aria-label={`Stage ${n} of ${stages.length}: ${title}${word ? `, ${word}` : ""}. Open it in Roadmap`}
                       title={s.outcome ? `${title}\n${s.outcome}` : title}
-                      onClick={() => openStage(i.id, s.id)}
+                      onClick={() => openStage(i.id, n - 1)}
                     >
                       <span className="stg-n num">{n}{word && ` · ${word}`}</span>
                       {!short && <span className="stg-t">{title}</span>}
@@ -186,7 +186,8 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
   const readOnly = readOnlyOf(view, i.id);
   const stages = i.stages ?? [];
   const pos = stagePosition(stages);
-  const shown = stages[pos.current >= 0 ? pos.current : stages.length - 1];
+  const shownAt = pos.current >= 0 ? pos.current : stages.length - 1;
+  const shown = stages[shownAt];
   const charter = `${i.path}/working-on/initiative.yaml`;
   return (
     <header className={`ihead ${headerOpen ? "open" : "folded"} ${widthClass}`}>
@@ -197,7 +198,7 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
           {readOnly && <span className="lz read-only" title="not active: nothing here can be ruled, moved, commented, posted or started"><Lock size={12} aria-hidden /> {readOnly}: read-only</span>}
         </h1>
         {!headerOpen && (shown ? (
-          <button className="ihead-stage" onClick={() => openStage(i.id, shown.id)} title={`${shown.title || shown.id}: open it in Roadmap`}
+          <button className="ihead-stage" onClick={() => openStage(i.id, shownAt)} title={`${shown.title || shown.id}: open it in Roadmap`}
             aria-label={`Roadmap, ${pos.label}: ${shown.title || shown.id}. Open it in Roadmap`}>
             <Route size={13} aria-hidden />
             <span className="num">{pos.current >= 0 ? `Stage ${pos.current + 1} of ${stages.length} · now` : pos.label}</span>
