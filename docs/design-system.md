@@ -328,7 +328,9 @@ is the floor.
 **What gives way first.** A column that is empty on every row (all "—")
 gives way before any column with content. Signals fold into "+N" from the
 least urgent: waits on you, blocked and waiting stay in view; problems, now
-and live fold first (leftovers-3, W2).
+and live fold first, and the cell's state folds last of the foldable ones
+(it is not in the never-fold set; a cell that waits on him is already a
+Needs me row) (leftovers-3, W2; home-widths-4, 0076).
 
 **A region that scrolls inside a view shows it does**: while content hides
 below its edge, that edge carries a 1 px `--border-strong` line, gone once
