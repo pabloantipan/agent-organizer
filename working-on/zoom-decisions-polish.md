@@ -1,15 +1,16 @@
 ---
 title: Decisions and zoom polish - focus kept at the zoom's ends, a sticky axis, finds open their sections, honest empty and hidden counts
-status: next
+status: now
 repos: [organizer]
 branch: zoom-decisions-polish
 updated: 2026-10-03
-next: "sup29 builds it (organizer-probe-sup29, launched 2026-10-03; 0075 ruled)"
+next: "zdp-build builds it in .wt/zoom-decisions-polish (sup29)"
 depends_on: []
 boundary: ["frontend/src/components/TimeZoom.tsx, frontend/src/styles/time-zoom.css, frontend/src/lib/axis.ts and its tests", "frontend/src/components/DecisionsView.tsx, frontend/src/styles/decisions.css (FR-2 to FR-8 only)", "frontend/src/lib/ and its tests", "testdata/fixture-overlay/", "not: scripts/fixture-home.sh, testdata/fixture-twenty/, global.css, rule-box.css, RuleDecisionBox.tsx, StageRoadmap.tsx, header-fold-3's and home-widths-4's files, Go, docs/design-system.md"]
 spec: "docs/specs/leftovers-4.md (FR-1 to FR-8); the ranking docs/ux/reviews/2026-10-03-rank-leftovers-4.md (Aglaea, 94308ad); the design system as amended there"
 gate: "docs/specs/leftovers-4.md Acceptance, rows L1 to L8 and L0"
 ui_review: true
+seat: zdp-build
 ---
 
 ## Goal
