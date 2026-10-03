@@ -185,6 +185,13 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .ihead-details svg { transition: transform var(--dur-fast) var(--ease-out); }
 .ihead-details[aria-expanded="true"] svg { transform: rotate(180deg); }
 
+/* At compact the open header takes at most 40% of the window and scrolls
+   inside itself; the bar and the tabs stay, the clamps and the strip are
+   as they are (FR-10). The inline padding keeps the focus ring unclipped. */
+.ihead.compact.open { display: flex; flex-direction: column; max-height: 40vh; }
+.ihead.compact.open > .ihead-bar, .ihead.compact.open > .subtabs { flex: none; }
+.ihead.compact.open > .ihead-open { flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: var(--space-1) var(--space-1) var(--space-3); margin: 0 calc(-1 * var(--space-1)); }
+
 /* Open: the charter, then where it is written, then the strip. Wide puts
    goal and measure beside scope, each held to about 90 characters (H9). */
 .ihead-open { display: grid; gap: var(--space-3); padding-bottom: var(--space-3); }
