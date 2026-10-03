@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: home-widths-4
 updated: 2026-10-03
-next: "G19: the cell-in-definition lozenge folds into \"+N\" on partner-payouts at 1440 and 1512, where G19 allows only problems/now/live; make it never fold, or have the gate amended (see Review)"
+next: "review: home-widths-4, G19 fixed (the cell never folds), G19-G23 and G8 met; G24 is the UI reviewer's"
 review: fail
 depends_on: [decisions-view, time-zoom-2]
 boundary: ["frontend/src/components/Home.tsx, Rail.tsx, RuleDecisionBox.tsx", "frontend/src/components/Crew.tsx (CellStateLz only), Conversation.tsx (FR-24's names and focus only)", "frontend/src/lib/width.ts, frontend/src/lib/ and its tests", "frontend/src/styles/home.css, rule-box.css, global.css (.rail-icon only), shell.css (the rail's rules only)", "testdata/fixture-twenty/ and scripts/fixture-home.sh (FR-25's rows)", "not: header-fold-3's files, DecisionsView.tsx, Go, docs/design-system.md"]
@@ -28,6 +28,7 @@ widths-and-focus's leftovers, ranked by Aglaea: FR-20 to FR-25 of
 - [x] G8: see `docs/specs/responsive-home.md`, Acceptance
 
 ## Done
+- 2026-10-03 hw4-build: code review fixes on home-widths-4, rebased on main 189680e (e02059b the cell in definition never folds, it takes its ellipsis; d570c7e one Escape closes only the topmost, Help or a card back first; 95ace22 People's hide named); G19 re-measured at 1440x900 and 1512x945 (.wt-notes/hw4-build/g19-fix.log), the Escape stack in esc-topmost.log, G22 in g22-fix.log; G8 green again
 - 2026-10-03 hw4-build: FR-20 to FR-25 on home-widths-4, rebased on 9048507 (6362137, 0aca68a, 1b84824, 09f0bec, 94e31f5, 78599ee, e522b2e); G19-G23 measured before and after the rebase, G8 green (make test, npm run build, G18 grep empty, wails build); evidence and choices in .wt-notes/hw4-build/progress.md. G24 left unticked for the UI reviewer
 - 2026-10-03 sup28 launched by the FSE (decisions-view and time-zoom-2 in done/)
 - 2026-10-03 0074 ruled by pablo ("Ok", accept as written, 117e269)
@@ -51,6 +52,6 @@ widths-and-focus's leftovers, ranked by Aglaea: FR-20 to FR-25 of
 ## Notes
 Runs in parallel with header-fold-3; boundaries disjoint.
 - boundary widened by sup28: SlackView.tsx, FR-24 focus only
-- The cell-in-definition signal folds into "+N" last, after problems, now and live. Only waiting and blocked never fold, since at 1440 the signal column (218 px) cannot hold waiting, blocked and the cell whole. G19 does not name the cell; at 1440 and 1512 it is in "+N".
+- The cell in definition never folds (after the code review): at 1440 and 1512 waiting and the cell show cut with their ellipses, blocked whole, and only problems, now and live are in "+N". 0076 asks Pablo whether the cell should fold; if he rules that it folds, put back `FOLD.cell` (lib/width.ts).
 - On Decisions at 1024x640 the rule box is moved up to fit and covers the lower half of its own Rule (existing placement); the head stays marked.
 - The empty-column track uses a CSS space toggle (`--t-next: ;`): G24 should look at it in WKWebView.
