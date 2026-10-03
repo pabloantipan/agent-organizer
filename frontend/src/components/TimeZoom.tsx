@@ -329,10 +329,14 @@ export function TimeFrame({ z, label, axis, extents, undated, children }: FrameP
  *    today label are moved inside the room while their mark is in it; the
  *    today label first flips to the line's other side. One wider than the
  *    room, or whose mark is out of view, is hidden and left to the mark's
- *    hover title. Of two that overlap, the later one is hidden.
+ *    hover title.
+ *  - A mark's title is never skipped (FR-11 as amended): one that would
+ *    overlap a title already placed staggers to the next label row, up
+ *    from where its graph drew it, a row of its own text height at a time,
+ *    as long as the axis has room above it.
  *  - A tick label is never moved off its tick: one the room would cut is
  *    hidden; those that would overlap skip one in two (skipStep), and one
- *    under a mark's title or the sticky context label is hidden.
+ *    under a mark's title or the sticky context label gives way.
  *  Every pass starts from what React drew, so nothing set here outlives the
  *  layout it was measured on. */
 function placeAxisLabels(content: HTMLElement) {
@@ -346,8 +350,13 @@ function placeAxisLabels(content: HTMLElement) {
   const undated = content.querySelector<HTMLElement>(".tz-axis > .tz-undated-label");
   const marks = Array.from(content.querySelectorAll<HTMLElement>(".tz-axis .g-mark > span"));
   const context = content.querySelector<HTMLElement>(".tz-axis > .tz-context");
+  const axisTop = content.querySelector(".tz-axis")?.getBoundingClientRect().top ?? 0;
   const placed = [today, undated, ...marks].filter((e): e is HTMLElement => !!e);
   for (const e of [...ticks, ...placed]) { e.style.visibility = ""; e.style.transform = ""; }
+  for (const e of marks) e.style.bottom = "";
+  // Titles left to right, so a stagger moves the later of two.
+  const byLeft = (a: HTMLElement, b: HTMLElement) => a.getBoundingClientRect().left - b.getBoundingClientRect().left;
+  placed.splice(placed.length - marks.length, marks.length, ...marks.sort(byLeft));
   if (today) { today.style.left = ""; today.style.right = ""; }
   if (undated) undated.style.borderLeftColor = "";
   const hide = (e: HTMLElement) => { e.style.visibility = "hidden"; };
@@ -385,8 +394,20 @@ function placeAxisLabels(content: HTMLElement) {
       if (e === undated) e.style.borderLeftColor = "transparent"; // the grid draws the edge
       b = { left: b.left + dx, right: b.right + dx, top: b.top, bottom: b.bottom } as DOMRect;
     }
-    const t = e === today || e === undated ? b : (() => { const r = text(e); return { left: r.left + dx, right: r.right + dx, top: r.top, bottom: r.bottom }; })();
-    if (shown.some((o) => overlaps(o, t))) { hide(e); continue; }
+    const box = () => { const r = text(e); return { left: r.left + dx, right: r.right + dx, top: r.top, bottom: r.bottom }; };
+    let t = e === today || e === undated ? b : box();
+    if (marks.includes(e)) {
+      // A row is the title's own text height, so stacked titles never
+      // touch; a row that would rise past the axis's top is not taken.
+      const base = parseFloat(getComputedStyle(e).bottom) || 0;
+      const step = Math.ceil(t.bottom - t.top);
+      for (let row = 1; shown.some((o) => overlaps(o, t)); row++) {
+        e.style.bottom = `${base + row * step}px`;
+        const up = box();
+        if (up.top < axisTop) { e.style.bottom = `${base + (row - 1) * step}px`; t = box(); break; }
+        t = up;
+      }
+    } else if (shown.some((o) => overlaps(o, t))) { hide(e); continue; }
     shown.push(t);
   }
   const boxes = ticks.map((e) => ({ e, b: text(e), k: Number(e.dataset.k), minor: !!e.closest(".minor") }));
