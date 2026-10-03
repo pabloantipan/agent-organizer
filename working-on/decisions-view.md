@@ -11,6 +11,7 @@ spec: "docs/ux/specs/decisions-view.md (Aglaea, 9386d15, with the FSE's Technica
 gate: "docs/ux/specs/decisions-view.md Acceptance B1-B11, and B12-B14 (Amendment 1, 0074), plus the tests row below"
 ui_review: true
 seat: dv-build
+review: pass
 ---
 
 ## Goal
@@ -32,6 +33,19 @@ it: rule what waits, check what he just ruled, find an old ruling, see the pace.
 ## Next
 
 ## Blockers
+
+## Review
+Verdict: pass (code review; the UI review is separate).
+Unmet gate items: none. B1-B14 shown by the diff, the vitest cases (find, summary's 0/1/n/today/no-week, turnaround, line name says "waiting" once, limit, stored sections) and the shots in .wt-notes/dv-build/; make test (go + 115 vitest), npm run build and wails build re-run green on e056cba.
+Findings outside the gate:
+- global.css loses the old .dec-stats and h2 rules: the page's own dead CSS, but global.css is not named in the boundary.
+- decisions.css places RuleDecisionBox in a stuck head with !important over its inline fixed placement; it breaks silently if the box changes. Move it into the box in a later card.
+- B13's cap is not exercised: the box fit the room in the shot. The cap is in the code, but no measurement checks it.
+- The line's name says "by no one named" where the visible text shows "—" (label-in-name).
+- A wide code block in a body overflows beside the sticky heading at 1024 (header-fold-2's body).
+- Evidence is headless Chromium only; the UI reviewer should shoot WKWebView.
+- No gate row checks `/`, Escape clearing, "Show only the newest ten", or a ruled record leaving To rule while Ruled stays closed.
+Reviewer: dv-review, 2026-10-03.
 
 ## Notes
 - dv-build: the rule box in a stuck record head is placed by decisions.css (`.dec-head.stuck .rb`, `!important` over RuleDecisionBox's inline fixed placement), since the box's file is outside this card; a later card may move that into the box.
