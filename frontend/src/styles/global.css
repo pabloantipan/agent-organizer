@@ -250,7 +250,13 @@ button.tiny { padding: 0 5px; font-size: var(--font-size-xs); line-height: 14px;
 .next-box { background: var(--accent-soft); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 14px; font-size: var(--font-size-lg); }
 .next-box .section-label { margin-top: 0; color: var(--accent-fg); }
 .markdown h2 { font-size: var(--font-size-sm); font-weight: 600; color: var(--muted); margin: 18px 0 6px; }
-.markdown table { border-collapse: collapse; font-size: var(--font-size-md); }
+/* A body never widens its view (design system, Decision record; leftovers-4
+   FR-9): a code block or a table wider than the body scrolls inside itself.
+   A table is a block so it can scroll; its cells keep their layout. :where
+   keeps the cap at one class, so a view's own narrower cap (Help's 760 px)
+   still wins. */
+.markdown :where(pre, table) { overflow-x: auto; max-width: 100%; }
+.markdown table { display: block; border-collapse: collapse; font-size: var(--font-size-md); }
 .markdown td, .markdown th { border: 1px solid var(--border); padding: 5px 9px; text-align: left; }
 .markdown code { background: var(--panel-2); padding: 1px 5px; border-radius: var(--radius-xs); }
 .markdown ul, .markdown ol { padding-left: 20px; }
