@@ -1,0 +1,21 @@
+stages:
+  - id: shape
+    title: The shape
+    phase: discovery
+    outcome: the shape is in place
+    exit:
+      - the shape is checked
+    done: 2026-08-20
+  - id: run
+    title: The payout run
+    phase: building
+    outcome: the payout run is in place
+    exit:
+      - the payout run is checked
+    gates: ["0001"]
+  - id: statements
+    title: Statements
+    phase: building
+    outcome: statements are in place
+    exit:
+      - statements are checked

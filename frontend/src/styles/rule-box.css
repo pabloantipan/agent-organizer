@@ -106,3 +106,11 @@
    verb cannot land on it, nor a second box open under the first. Just under
    the box, which is fixed at z-index 20. Wide's box is in the flow: none. */
 .rb-scrim { position: fixed; inset: 0; z-index: 19; background: var(--bg-sunken); opacity: 0.7; } /* no scrim token yet: the sunken ground, dimmed like the modal backdrop */
+/* FR-23 (amendment 4): the row whose Rule opened the box stays marked
+   while the box is open, with --surface-selected (design system, Focus and
+   names: disclosure state), set by RuleDecisionBox as data-rb-opener. On
+   Home it also stands above the scrim, which RuleAction renders outside the
+   row, so the lead can see which row's Rule it was. Decisions has no
+   scrim; its record head is only marked. */
+.home .ib-row[data-rb-opener], .dec .dec-head[data-rb-opener] { background: var(--surface-selected); }
+.home:not(.wide) .ib-row[data-rb-opener] { position: relative; z-index: 20; }

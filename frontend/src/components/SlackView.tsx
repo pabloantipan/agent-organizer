@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { MessagesSquare, Users, X } from "lucide-react";
 import type { Seat } from "../hooks/useWails";
 import { useBoard } from "../stores/board.store";
@@ -23,6 +23,10 @@ export function SlackView() {
   // People is a disclosure, not a commit: aria-pressed and the selected
   // surface while open, never the accent (ui-leftovers FR-7).
   const togglePeople = () => { const next = !people; setPeople(next); try { localStorage.setItem(PEOPLE_KEY, next ? "open" : "closed"); } catch { /* per-viewer convenience */ } };
+  // The panel's hide unmounts with the panel: focus goes to the toggle that
+  // shows it again, not to the page body (responsive-home FR-24).
+  const peopleToggle = useRef<HTMLButtonElement>(null);
+  const hidePeople = () => { togglePeople(); peopleToggle.current?.focus(); };
   if (!view) return <div className="empty">Sampling…</div>;
   const cells = (view.groups ?? []).filter((g) => g.cell);
 
@@ -84,13 +88,13 @@ export function SlackView() {
       <div className="slack-tools">
         <span className="spacer" />
         {slackFocus && <span className="badge persona focus">with {slackFocus} <button className="rail-icon" onClick={() => setSlackFocus(null)} title="back to the channel"><X size={11} /></button></span>}
-        <button className={`tiny-btn ${deaf > 0 ? "hot" : ""}`} aria-pressed={people} aria-label={peopleLabel({ seats: seats.length, live, capped, deaf })} onClick={togglePeople} title={people ? "hide people" : "show people"}>
+        <button ref={peopleToggle} className={`tiny-btn ${deaf > 0 ? "hot" : ""}`} aria-pressed={people} aria-label={peopleLabel({ seats: seats.length, live, capped, deaf })} onClick={togglePeople} title={people ? "hide people" : "show people"}>
           <Users size={13} /> {seats.length}{live > 0 ? ` · ${live} live` : ""}{capped > 0 ? ` · ${capped} ${HEALTH.capped.label}` : ""}{deaf > 0 ? ` · ${deaf} ${HEALTH.deaf.label}` : ""}
         </button>
       </div>
       <div className={`slack-body ${people ? "with-people" : ""}`}>
         <Conversation key={g.id} group={g} focus={slackFocus} onFocus={setSlackFocus} readOnly={readOnly} />
-        {people && <People seats={seats} human={g.human} focus={slackFocus} onFocus={setSlackFocus} onClose={togglePeople} />}
+        {people && <People seats={seats} human={g.human} focus={slackFocus} onFocus={setSlackFocus} onClose={hidePeople} />}
       </div>
     </div>
   );
@@ -102,7 +106,7 @@ export function SlackView() {
 function People({ seats, human, focus, onFocus, onClose }: { seats: Seat[]; human: string; focus: string | null; onFocus: (a: string | null) => void; onClose: () => void }) {
   return (
     <aside className="people">
-      <div className="people-head"><Users size={13} /> <span>People</span> <span className="meta">{seats.length + (human ? 1 : 0)}</span> <span className="spacer" /><button className="rail-icon" onClick={onClose} title="hide"><X size={12} /></button></div>
+      <div className="people-head"><Users size={13} /> <span>People</span> <span className="meta">{seats.length + (human ? 1 : 0)}</span> <span className="spacer" /><button className="rail-icon" onClick={onClose} title="hide" aria-label="Hide people"><X size={12} /></button></div>
       <ul>
         {human && (
           <li className="person me" title="you: the seat this app reads and posts as">

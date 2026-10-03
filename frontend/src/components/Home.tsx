@@ -1,4 +1,5 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Briefcase, ChevronDown, ChevronRight, CircleDashed, Compass, Hammer, Hand, Play } from "lucide-react";
 import type { merge, model, service } from "../../wailsjs/go/models";
 import { inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, type NeedsMeRow } from "../lib/queue";
@@ -6,7 +7,7 @@ import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from ".
 import { uniq } from "../lib";
 import { HEALTH, messages } from "../lib/health";
 import { ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
-import { compactColumns, signalsThatFit, type WidthClass } from "../lib/width";
+import { compactColumns, FOLD, GOAL_CHARS, homeClassOf, LZ_MIN_TEXT, NO_EMPTY, shareRoom, signalsShown, wideGoalRoom, type Empty, type Fold, type WidthClass } from "../lib/width";
 import { useBoard } from "../stores/board.store";
 import { nextDate, stageState } from "./InitiativeHeader";
 import { InitiativeDetail } from "./Initiatives";
@@ -20,10 +21,16 @@ import "../styles/home.css";
  *  the rest sit in the rail's Not active group (FR-9).
  *  The window's width class (responsive-home) is a class on .home and
  *  nothing else: the tree is the same in every class, so crossing one
- *  unmounts nothing. Wide puts Needs me in a right column of its own. */
+ *  unmounts nothing. Wide puts Needs me in a right column of its own, and
+ *  only while the list beside it keeps about 70 characters of goal (FR-21):
+ *  Home's class is the window's, measured on the row. */
 export function Home() {
-  const { view, agents, widthClass, roomy, ruleDraft, dropRule } = useBoard();
+  const { view, agents, widthClass: windowClass, roomy: windowRoomy, ruleDraft, dropRule } = useBoard();
   const home = useRef<HTMLDivElement>(null);
+  const { cls: widthClass, goalMin } = useHomeClass(home, windowClass, view);
+  // A window wide enough for wide that Home measures too tight for it is
+  // regular at its top, so the cap lifts as regular's does from 1720.
+  const roomy = windowRoomy || (windowClass === "wide" && widthClass === "regular");
   const rows = view ? needsMeRows(view, agents) : [];
   // A ruled record leaves the queue, and its box and its draft with it.
   const gone = !!ruleDraft && !!view && !rows.some((r) => r.key === ruleDraft.key) ? ruleDraft.key : null;
@@ -31,7 +38,8 @@ export function Home() {
   useKeepScroll(home, widthClass, !!view);
   if (!view) return <div className="empty">Loading…</div>;
   return (
-    <div ref={home} className={`home ${widthClass} ${roomy ? "roomy" : ""}`}>
+    <HomeClass.Provider value={widthClass}>
+    <div ref={home} className={`home ${widthClass} ${roomy ? "roomy" : ""}`} style={widthClass === "wide" ? { "--goal-min": `${goalMin}px` } as React.CSSProperties : undefined}>
       <section className="home-sec home-needs">
         <h2 id={NEEDS_ME_HEADING} tabIndex={-1} className="sec-title">Needs me <span className="num sec-count">{rows.length}</span><span className="sec-sub">everything waiting on you, oldest first</span></h2>
         {rows.length === 0 ? (
@@ -50,7 +58,62 @@ export function Home() {
         <Initiatives view={view} />
       </section>
     </div>
+    </HomeClass.Provider>
   );
+}
+
+/** Home's width class, which the rule box and the rows read in place of the
+ *  window's (FR-21). */
+const HomeClass = createContext<WidthClass>("regular");
+
+/** FR-21: a window in the wide class is wide on Home only while the goal
+ *  column beside Needs me keeps each goal's first 70 characters, or the
+ *  whole goal when it is shorter (lib/width.ts, homeClassOf), with the rail
+ *  expanded or collapsed. Measured on the rows after layout and again when
+ *  the room changes (the window, the rail); the goal's need is measured on
+ *  the goal's own font. `goalMin` is wide's least goal column, so the grid
+ *  gives the goal its need before stage and signals grow. */
+function useHomeClass(home: React.RefObject<HTMLDivElement | null>, windowClass: WidthClass, view: unknown) {
+  const [state, setState] = useState<{ cls: WidthClass; goalMin: number }>({ cls: windowClass, goalMin: 0 });
+  const was = useRef(state.cls);
+  was.current = state.cls;
+  useLayoutEffect(() => {
+    const el = home.current;
+    const wrap = el?.parentElement;
+    const set = (cls: WidthClass, goalMin = 0) => setState((p) => (p.cls === cls && p.goalMin === goalMin ? p : { cls, goalMin }));
+    if (windowClass !== "wide" || !el || !wrap) { set(windowClass); return; }
+    const measure = () => {
+      const port = el.querySelector<HTMLElement>(".port");
+      const row = el.querySelector<HTMLElement>(".p-row");
+      if (!port || !row) { set(windowClass); return; }
+      const wcs = getComputedStyle(wrap);
+      const avail = wrap.clientWidth - parseFloat(wcs.paddingLeft) - parseFloat(wcs.paddingRight);
+      const id = Math.ceil(Math.max(0, ...Array.from(el.querySelectorAll<HTMLElement>(".p-row .p-id")).map((b) => b.scrollWidth)));
+      const gap = parseFloat(getComputedStyle(row).columnGap) || 0;
+      const empty = { next: port.classList.contains("empty-next"), sig: port.classList.contains("empty-sig") };
+      const need = goalNeed(Array.from(el.querySelectorAll<HTMLElement>(".p-row .p-goal")));
+      const cls = homeClassOf(windowClass, was.current, avail, need, id, gap, empty);
+      set(cls, cls === "wide" ? Math.max(160, Math.min(need, Math.floor(wideGoalRoom(avail, id, gap, empty)))) : 0);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(wrap);
+    return () => ro.disconnect();
+  }, [home, windowClass, view]);
+  return state;
+}
+
+/** The goal column's need (FR-21): the widest of the goals' first
+ *  GOAL_CHARS characters (with the ellipsis a cut one ends in), or of the
+ *  whole goal when it is shorter, in the goal's own font. */
+function goalNeed(goals: HTMLElement[]): number {
+  const g = goals[0];
+  const ctx = g ? document.createElement("canvas").getContext("2d") : null;
+  if (!g || !ctx) return 0;
+  const cs = getComputedStyle(g);
+  ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+  const text = (t: string) => (t.length > GOAL_CHARS ? `${t.slice(0, GOAL_CHARS)}…` : t);
+  return Math.ceil(Math.max(0, ...goals.map((el) => ctx.measureText(text((el.textContent ?? "").trim())).width))) + 1;
 }
 
 const age = (since: Date | null) => {
@@ -160,7 +223,8 @@ function DecisionRow({ row, decision: d }: { row: NeedsMeRow; decision: model.De
  *  Cancel (FR-9): opening another row's Rule, Escape or this Rule again
  *  closes the box and keeps them. */
 function RuleAction({ rowKey, initiative, decision }: { rowKey: string; initiative: string; decision: model.Decision }) {
-  const { ruleDraft, openRule, setRuleDraft, dropRule, widthClass } = useBoard();
+  const { ruleDraft, openRule, setRuleDraft, dropRule } = useBoard();
+  const widthClass = useContext(HomeClass);
   const open = ruleDraft?.key === rowKey;
   const btn = useRef<HTMLButtonElement>(null);
   // Compact's sheet covers Home, and regular's box covers the rows under its
@@ -170,9 +234,11 @@ function RuleAction({ rowKey, initiative, decision }: { rowKey: string; initiati
   const closeKeep = () => { openRule(null); btn.current?.focus(); };
   return (
     <span className="rb-anchor">
-      {open && widthClass !== "wide" && <div className="rb-scrim" aria-hidden="true" onClick={closeKeep} />}
+      {/* The scrim sits outside the row, on the page's ground, so the
+          opener's row can stand above it (FR-23). */}
+      {open && widthClass !== "wide" && createPortal(<div className="rb-scrim" aria-hidden="true" onClick={closeKeep} />, document.body)}
       <button ref={btn} className="act" aria-expanded={open} aria-label={`Rule ${initiative} ${decision.number}`} onClick={() => openRule(open ? null : rowKey)}>Rule</button>
-      {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord opener={btn} afterRule={focusNeedsMe} onClose={() => openRule(null)} onCancel={() => dropRule(rowKey)}
+      {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord widthClass={widthClass} opener={btn} afterRule={focusNeedsMe} onClose={() => openRule(null)} onCancel={() => dropRule(rowKey)}
         draft={{ chosen: ruleDraft.chosen, words: ruleDraft.words, set: setRuleDraft }} />}
     </span>
   );
@@ -187,18 +253,28 @@ const focusNeedsMe = () => document.getElementById(NEEDS_ME_HEADING)?.focus();
  *  the initiative; the chevron shows its goal, next date, repos, problems
  *  and actions in place. */
 function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.getState>["view"]> }) {
-  const { agents, openInitiative, widthClass } = useBoard();
-  const compact = widthClass === "compact";
+  const { agents, openInitiative } = useBoard();
+  const compact = useContext(HomeClass) === "compact";
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const all = view.board.initiatives ?? [];
   const folded = inactiveIds(view);
   const ids = uniq(all.map((i) => i.id)).filter((id) => !folded.has(id));
   const cols = view.board.columns ?? {};
   const states = initiativeStates(view, agents);
-  const { ref, idWidth, narrow, fit } = useFitIds(ids.join(" "));
+  const items = ids.map((id) => {
+    const rows = all.filter((i) => i.id === id);
+    const i = rows.find((r) => r.local) ?? rows[0];
+    const cards = (["now", "blocked", "next"] as const).flatMap((st) => (cols[st] ?? []).filter((c) => c.initiative_id === id));
+    const group = agents?.groups?.find((g) => g.id === id);
+    const sig = signalFacts(i, rows, cards, group?.waves ?? [], group?.cell);
+    return { id, rows, i, cards, group, sig, next: nextDate(i, cards) };
+  });
+  // FR-20: a column empty ("—") on every shown row gives way first.
+  const empty: Empty = { next: items.length > 0 && items.every((r) => !r.next), sig: items.length > 0 && items.every((r) => r.sig.none) };
+  const { ref, idWidth, narrow, fit } = useFitIds(ids.join(" "), empty);
   // Compact's row is one line; its goal and next date give way only when the
   // row has no room for them (FR-16), and come back when it has.
-  const hides = { goal: compact && !fit.goal, next: compact && !fit.next };
+  const hides = { goal: compact && !fit.goal, next: compact && !fit.next && !empty.next };
   if (ids.length === 0) {
     return (
       <div className="panel empty-state">
@@ -208,16 +284,11 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
     );
   }
   return (
-    <div ref={ref} className={`panel port ${narrow && !compact ? "narrow" : ""} ${hides.goal ? "" : "fit-goal"} ${hides.next ? "" : "fit-next"}`} role="table" style={idWidth ? { "--id-w": `${idWidth}px` } as React.CSSProperties : undefined}>
+    <div ref={ref} className={`panel port ${narrow && !compact ? "narrow" : ""} ${hides.goal ? "" : "fit-goal"} ${hides.next || empty.next ? "" : "fit-next"} ${empty.next ? "empty-next" : ""} ${empty.sig ? "empty-sig" : ""}`} role="table" style={idWidth ? { "--id-w": `${idWidth}px` } as React.CSSProperties : undefined}>
       <div className="p-head" role="row">
         <span className="num">#</span><span>initiative</span><span>state</span><span>phase</span><span>goal</span><span>stage</span><span>signals</span><span>next date</span><span />
       </div>
-      {ids.map((id, k) => {
-        const rows = all.filter((i) => i.id === id);
-        const i = rows.find((r) => r.local) ?? rows[0];
-        const cards = (["now", "blocked", "next"] as const).flatMap((st) => (cols[st] ?? []).filter((c) => c.initiative_id === id));
-        const group = agents?.groups?.find((g) => g.id === id);
-        const next = nextDate(i, cards);
+      {items.map(({ id, rows, i, group, sig, next }, k) => {
         return (
           <div key={id} className="p-item" data-id={id}>
             <div className="p-row" role="row">
@@ -227,7 +298,7 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
               <Phase stages={i.stages ?? []} />
               <span title={i.goal || undefined} className={`p-goal ${i.goal ? "" : "missing"}`}>{i.goal || "no goal yet"}</span>
               <MiniStepper stages={i.stages ?? []} compact={compact} />
-              <Signals i={i} rows={rows} cards={cards} waves={group?.waves ?? []} cell={group?.cell} missing={missingPersonas(group?.crew)} lead={leadOf(group)}  />
+              <Signals i={i} sig={sig} cell={group?.cell} missing={missingPersonas(group?.crew)} lead={leadOf(group)} />
               <NextDate next={next} />
               <button className="p-more ghost" onClick={() => setOpen({ ...open, [id]: !open[id] })} aria-expanded={!!open[id]} aria-label={detailsName(id)} title={detailsName(id)}>
                 {open[id] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -268,6 +339,8 @@ function GoalAndDate({ i, next }: { i: merge.BoardInitiative; next: Next }) {
  *  signals at their narrowest readable width, and the fixed columns (rank,
  *  state, phase, next date, chevron) with their gaps, as home.css sets them. */
 const ONE_LINE_REST = 320 + 480;
+/** The next date's share of that (its 96 px column). */
+const NEXT_REST = 96;
 
 /** FR-2 (lead-side-fixes): every id reads in full. The id column is as wide
  *  as the longest id; when that leaves too little for the rest on one line,
@@ -276,7 +349,7 @@ const ONE_LINE_REST = 320 + 480;
  *  `fit` says which of goal and next date the row has room for (FR-16). A
  *  ResizeObserver, not a media query: the room depends on the rail, and
  *  Safari 15 has no container queries. */
-function useFitIds(key: string) {
+function useFitIds(key: string, empty: Empty = NO_EMPTY) {
   const ref = useRef<HTMLDivElement>(null);
   const [idWidth, setIdWidth] = useState(0);
   const [narrow, setNarrow] = useState(false);
@@ -287,18 +360,20 @@ function useFitIds(key: string) {
     const fit = () => {
       const w = Math.max(0, ...Array.from(el.querySelectorAll<HTMLElement>(".p-row .p-id")).map((b) => b.scrollWidth));
       setIdWidth(Math.ceil(w));
-      setNarrow(el.clientWidth < w + ONE_LINE_REST);
       const row = el.querySelector<HTMLElement>(".p-row");
       const cs = row ? getComputedStyle(row) : null;
       const pad = cs ? parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) : 0;
-      const f = compactColumns(el.clientWidth - pad, Math.ceil(w), cs ? parseFloat(cs.columnGap) || 0 : 0);
+      const gap = cs ? parseFloat(cs.columnGap) || 0 : 0;
+      // An empty next date takes no room on the line (FR-20).
+      setNarrow(el.clientWidth < w + ONE_LINE_REST - (empty.next ? NEXT_REST + gap : 0));
+      const f = compactColumns(el.clientWidth - pad, Math.ceil(w), gap, empty);
       setFit((p) => (p.goal === f.goal && p.next === f.next ? p : f));
     };
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [key]);
+  }, [key, empty.next, empty.sig]);
   return { ref, idWidth, narrow, fit };
 }
 
@@ -332,10 +407,11 @@ function MiniStepper({ stages, compact = false }: { stages: model.Stage[]; compa
   );
 }
 
-/** A row's signals. Each lozenge's words sit in a text span that takes the
- *  ellipsis (FR-14): the lozenge is a flex box, and a flex box clips its
- *  text mid-word instead of cutting it. */
-function Signals({ i, rows, cards, waves, cell, missing, lead }: { i: merge.BoardInitiative; rows: merge.BoardInitiative[]; cards: merge.BoardCard[]; waves: service.Wave[]; cell?: model.Cell | null; missing: string[]; lead: string }) {
+type SignalFacts = ReturnType<typeof signalFacts>;
+
+/** What a row's signals count, apart from how they are drawn: Home asks
+ *  whether the column is empty on every row (FR-20) before it draws one. */
+function signalFacts(i: merge.BoardInitiative, rows: merge.BoardInitiative[], cards: merge.BoardCard[], waves: service.Wave[], cell?: model.Cell | null) {
   const waiting = waitingDecisions(i);
   const blocked = cards.filter((c) => c.status === "blocked").length;
   const now = cards.filter((c) => c.status === "now").length;
@@ -345,15 +421,24 @@ function Signals({ i, rows, cards, waves, cell, missing, lead }: { i: merge.Boar
   const problems = i.problems?.length ?? 0;
   const defining = cell?.state === "in_definition";
   const none = !waiting && !blocked && !now && !live && !running.length && !problems && !defining;
+  return { waiting, blocked, now, live, working, running, problems, none };
+}
+
+/** A row's signals. Each lozenge's words sit in a text span that takes the
+ *  ellipsis (FR-14): the lozenge is a flex box, and a flex box clips its
+ *  text mid-word instead of cutting it. `data-fold` is how soon a signal
+ *  folds into "+N" (FR-20); one without it never folds. */
+function Signals({ i, sig, cell, missing, lead }: { i: merge.BoardInitiative; sig: SignalFacts; cell?: model.Cell | null; missing: string[]; lead: string }) {
+  const { waiting, blocked, now, live, working, running, problems, none } = sig;
   return (
     <OneLine>
       {waiting > 0 && <span className="lz waiting"><span className="lz-t"><span className="num">{waiting}</span> waiting · {signalOwners(i, lead).join(", ")}</span></span>}
       {blocked > 0 && <span className="lz blocked"><span className="lz-t"><span className="num">{blocked}</span> blocked</span></span>}
-      {now > 0 && <span className="lz now"><span className="lz-t"><span className="num">{now}</span> now</span></span>}
-      {running.map((w) => <span key={w.n} className="lz live"><span className="lz-t">wave <span className="num">{w.n}</span> · <span className="num">{w.building!.length}</span> building</span></span>)}
-      {live > 0 && <span className="lz"><span className="lz-t">{working > 0 ? <><span className="num">{working}</span> working</> : <><span className="num">{live}</span> live</>}</span></span>}
-      <CellStateLz cell={cell} missing={missing} label="cell in definition" />
-      {problems > 0 && <span className="lz warning"><span className="lz-t"><span className="num">{problems}</span> problem{problems === 1 ? "" : "s"}</span></span>}
+      {now > 0 && <span className="lz now" data-fold={FOLD.now}><span className="lz-t"><span className="num">{now}</span> now</span></span>}
+      {running.map((w) => <span key={w.n} className="lz live" data-fold={FOLD.live}><span className="lz-t">wave <span className="num">{w.n}</span> · <span className="num">{w.building!.length}</span> building</span></span>)}
+      {live > 0 && <span className="lz" data-fold={FOLD.live}><span className="lz-t">{working > 0 ? <><span className="num">{working}</span> working</> : <><span className="num">{live}</span> live</>}</span></span>}
+      <CellStateLz cell={cell} missing={missing} label="cell in definition" fold={FOLD.cell} />
+      {problems > 0 && <span className="lz warning" data-fold={FOLD.problems}><span className="lz-t"><span className="num">{problems}</span> problem{problems === 1 ? "" : "s"}</span></span>}
       {none && <span className="p-quiet" title="no signals">—</span>}
     </OneLine>
   );
@@ -367,13 +452,14 @@ function Signals({ i, rows, cards, waves, cell, missing, lead }: { i: merge.Boar
  *  state is set only when what fits changes. */
 function OneLine({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const [cut, setCut] = useState<{ n: number; rest: string[]; whole: string } | null>(null);
+  const [cut, setCut] = useState<{ rest: string[]; whole: string } | null>(null);
   const measure = () => {
     const el = ref.current;
     if (!el) return;
     const items = Array.from(el.children).filter((c): c is HTMLElement => c instanceof HTMLElement && !c.classList.contains("sig-more") && !c.classList.contains("sr-only"));
-    // Hidden ones are shown for the measure, inside this frame.
-    for (const c of items) c.style.display = "inline-flex";
+    // Hidden ones are shown for the measure, inside this frame, and every
+    // cap from the last measure is lifted.
+    for (const c of items) { c.style.display = "inline-flex"; c.style.maxWidth = ""; }
     const more = el.querySelector<HTMLElement>(".sig-more");
     const gap = parseFloat(getComputedStyle(el).columnGap) || 0;
     // A lozenge's natural width: a shrunk one hides the rest in its text
@@ -382,17 +468,30 @@ function OneLine({ children }: { children: React.ReactNode }) {
       const t = c.querySelector<HTMLElement>(".lz-t");
       return Math.max(c.getBoundingClientRect().width + (t ? t.scrollWidth - t.clientWidth : 0), c.scrollWidth);
     };
-    const n = signalsThatFit(items.map(natural), gap, el.clientWidth, Math.max(more?.getBoundingClientRect().width ?? 0, 28));
-    const rest = items.slice(n).map((c) => (c.textContent ?? "").replace(/\s+/g, " ").trim());
-    items.forEach((c, k) => { c.style.display = ""; if (k >= n) c.dataset.off = "1"; else delete c.dataset.off; });
+    const folds = items.map((c): Fold => (c.dataset.fold === undefined ? null : (Number(c.dataset.fold) as Fold)));
+    const shown = signalsShown(items.map(natural), folds, gap, el.clientWidth, Math.max(more?.getBoundingClientRect().width ?? 0, 28));
+    const words = (c: HTMLElement) => (c.textContent ?? "").replace(/\s+/g, " ").trim();
+    const rest = items.filter((_, k) => !shown[k]).map(words);
+    items.forEach((c, k) => { c.style.display = ""; if (!shown[k]) c.dataset.off = "1"; else delete c.dataset.off; });
+    // The shown ones share what the "+N" leaves (FR-20): each capped at one
+    // width, never under its chrome and two characters with the ellipsis.
+    const on = items.filter((_, k) => shown[k]);
+    const room = el.clientWidth - gap * Math.max(0, on.length - 1) - (rest.length > 0 ? gap + Math.max(more?.getBoundingClientRect().width ?? 0, 28) : 0);
+    const nat = on.map(natural);
+    const mins = on.map((c, k) => {
+      const t = c.querySelector<HTMLElement>(".lz-t");
+      return t ? Math.min(nat[k], Math.ceil(nat[k] - t.scrollWidth) + LZ_MIN_TEXT) : nat[k];
+    });
+    const share = shareRoom(nat, mins, room);
+    on.forEach((c, k) => { if (share.widths[k] < nat[k]) c.style.maxWidth = `${share.widths[k]}px`; });
     // A shown signal may still be cut by its ellipsis (the first one when
     // the cell is tight, any one at the lozenge's cap): then the hover names
     // it whole.
-    const whole = items.slice(0, n).filter((c) => {
+    const whole = items.filter((_, k) => shown[k]).filter((c) => {
       const t = c.querySelector<HTMLElement>(".lz-t") ?? c;
       return t.scrollWidth > t.clientWidth + 1;
     }).map((c) => (c.textContent ?? "").replace(/\s+/g, " ").trim()).join("\n");
-    setCut((p) => (p && p.n === n && p.whole === whole && p.rest.join("|") === rest.join("|") ? p : { n, rest, whole }));
+    setCut((p) => (p && p.whole === whole && p.rest.join("|") === rest.join("|") ? p : { rest, whole }));
   };
   useLayoutEffect(measure);
   useLayoutEffect(() => {

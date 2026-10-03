@@ -41,3 +41,15 @@ active it would add two Needs me rows: its proposed record 0001 owned by
 and which the queue reads through its cell. Being archived, it is missing
 from Home and from Needs me and sits alone under "Not active (1)" at the
 bottom of the rail. It has no roadmap and is not counted in the mix above.
+
+The 22nd, `partner-payouts` (responsive-home FR-25, the leftovers-3
+ranking's G-d), is active and stretches a row on purpose: seven signals
+(five waiting, one blocked, one now, wave 3 building, one live, its cell in
+definition, one problem) and a long waiting list ("5 waiting · you, carla,
+rodrigo, valentina, no owner"), so "+N" and a cut lozenge show without
+forcing the DOM. Its card `partner-terms` has a next action starting
+`pablo:`, read through its cell: a Needs me card row. The problem is
+record 0007, ruled without `ruled_by`. Its stand-in agent is the last line
+of `agents.txt`; its cell's seats have never run, so the cell is in
+definition and Needs me also carries its Launch row. It makes Home 21
+active rows, not twenty.

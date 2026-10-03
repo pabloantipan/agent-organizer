@@ -18,8 +18,11 @@ import "../styles/rule-box.css";
  *  FR-1) puts the record's Question and Recommendation above the options,
  *  clamped, with a link to it in Decisions; the Decisions tab leaves it off,
  *  since the body is already under the row there. */
-export function RuleDecisionBox({ initiative, decision: d, withRecord = false, draft, opener, afterRule, onClose, onCancel }: {
+export function RuleDecisionBox({ initiative, decision: d, withRecord = false, widthClass: homeClass, draft, opener, afterRule, onClose, onCancel }: {
   initiative: string; decision: model.Decision; withRecord?: boolean;
+  /** Home's class, which Home measures on its rows (responsive-home FR-21);
+   *  elsewhere the window's. */
+  widthClass?: WidthClass;
   /** The chosen option and the words, kept by the caller (Home keeps them in
    *  the store so a width class change keeps them, responsive-home FR-5);
    *  without it the box keeps its own. */
@@ -54,7 +57,8 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, d
   const titleId = useId();
   const bodyId = useId();
   const ready = chosen !== "" && words.trim() !== "" && !busy;
-  const widthClass = useBoard((s) => s.widthClass);
+  const windowClass = useBoard((s) => s.widthClass);
+  const widthClass = homeClass ?? windowClass;
   const { place, short } = useFitViewport(box, record, widthClass);
 
   // Focus and names: a box that shows a record opens on its title, and the
@@ -62,6 +66,38 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, d
   useEffect(() => { title.current?.focus(); }, []);
 
   const close = (discard = false) => { (discard && onCancel ? onCancel : onClose)(); opener?.current?.focus(); };
+
+  // FR-22 (responsive-home amendment 4): Escape closes the box wherever
+  // focus sits in the view, the record's text included, which takes no
+  // focus and so leaves it on the body. A document listener while the box
+  // is open; the latest close and busy through a ref, so it is added once.
+  // One Escape closes only the topmost: a dialog open over the box (Help,
+  // a card back) is always above an inline box and closes itself on its
+  // own window listener, so the box waits while one is open.
+  const escape = useRef({ close, busy });
+  escape.current = { close, busy };
+  useEffect(() => {
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented || escape.current.busy) return;
+      const over = Array.from(document.querySelectorAll('[role="dialog"]')).some((d) => d !== box.current && !box.current?.contains(d));
+      if (over) return;
+      e.preventDefault();
+      escape.current.close();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
+  // FR-23: the row whose Rule opened the box stays marked while it is open
+  // (rule-box.css, [data-rb-opener]: --surface-selected, and on Home above
+  // the scrim). A data attribute, not a class: the row's className is its
+  // owner's to render. Home's Needs me row, or the Decisions record's head.
+  useEffect(() => {
+    const row = opener?.current?.closest<HTMLElement>(".ib-row, .dec-head");
+    if (!row) return;
+    row.dataset.rbOpener = "";
+    return () => { delete row.dataset.rbOpener; };
+  }, [opener]);
 
   const rule = async () => {
     if (!ready) return;
@@ -85,7 +121,7 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, d
 
   return (
     <div ref={box} className={`rb ${withRecord ? "with-record" : ""}`} style={place} role="dialog" aria-labelledby={`${numId} ${titleId}`} aria-describedby={withRecord ? bodyId : undefined}
-      onKeyDown={(e) => { if (e.key === "Escape" && !busy) { e.stopPropagation(); close(); } else loopTab(e, box.current); }}>
+      onKeyDown={(e) => loopTab(e, box.current)}>
       <div className="rb-head">
         <span id={numId} className="rb-num">{initiative} {d.number}</span>
         <span ref={title} id={titleId} className="rb-title" tabIndex={-1}>{d.title}</span>

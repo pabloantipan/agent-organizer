@@ -1,0 +1,10 @@
+{
+  "project": "payouts-fixture",
+  "workdir": "/h/partner-payouts",
+  "agents": [
+    "fse",
+    "po_vale"
+  ],
+  "human": "pablo",
+  "reconciler": "po_vale"
+}
