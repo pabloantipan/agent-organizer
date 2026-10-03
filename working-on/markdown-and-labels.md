@@ -22,7 +22,7 @@ sup28's cards and with zoom-decisions-polish.
 - [x] L0: see `docs/specs/leftovers-4.md`, Acceptance
 
 ## Done
-- 2026-10-03 mal-build: FR-9 to FR-12 on markdown-and-labels (7483814, 187f462, 06e16d8, effbfc8, c19204b); L9 and L10 measured in Chromium at a 1024x640 window, L9 with rail expanded and strip, L10 expanded: no scroller bar, the code block scrolls inside, superseded lozenge 6.67:1, no cut or overlapping axis label; L11 in the built app (WKWebView, classic scrollbars): capped box has no horizontal bar, no !important left in decisions.css; L0 green. Evidence and choices: .wt-notes/mal-build/progress.md
+- 2026-10-03 mal-build: FR-9 to FR-12 on markdown-and-labels (e16320a, 88d2384, ebf35bd, 92e766b, 058578f, on main 752630c); L9 and L10 measured in Chromium at a 1024x640 window, L9 with rail expanded and strip, L10 expanded: no scroller bar, the code block scrolls inside, superseded lozenge 6.67:1, no cut or overlapping axis label; L11 in the built app (WKWebView, classic scrollbars): capped box has no horizontal bar, no !important left in decisions.css; L0 green. Evidence and choices: .wt-notes/mal-build/progress.md
 - 2026-10-03 sup30 launched by the FSE (its three dependencies in done/)
 - 2026-10-03 0075 ruled by pablo (accept as written)
 - 2026-10-03 cut from leftovers-4 by the FSE
