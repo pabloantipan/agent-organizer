@@ -61,8 +61,11 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   moved sup26's there from agent-slack/docs/runs (my prompt named the old
   place). Leftovers to aglaea (thread 01M41BMCN93DZYWK5SZFNEBEVM); spec-craft
   5b proposal to hephaistos (thread 01M41BMCNH2AM10EG4BTKSS255).
-- Next: decisions-view's supervisor (sup27) once Pablo rules 0074, so it
-  builds B1-B14 at once.
+- 0074 ruled (117e269). sup27 ran decisions-view (2fd42fa) and time-zoom-2,
+  ~45 min vs 40-75, ~$32; ended by me. sup28 launched for header-fold-3 and
+  home-widths-4 (window 394068), held until time-zoom-2 landed for shared
+  files (9b71bf4). sup27's findings to aglaea for leftovers-4. End sup28 on
+  its done.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
