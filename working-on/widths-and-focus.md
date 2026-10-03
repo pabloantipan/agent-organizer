@@ -11,6 +11,7 @@ spec: "docs/specs/responsive-home.md (FR-13 to FR-19, amendment 3); the ranking:
 gate: "docs/specs/responsive-home.md Acceptance, rows G13 to G18 and G8; the Gate section below"
 stage: twenty-at-a-glance
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -34,6 +35,12 @@ Aglaea: FR-13 to FR-19 of `docs/specs/responsive-home.md`.
 - 2026-09-30 cut from responsive-home amendment 3 by the FSE
 
 ## Next
+
+## Review
+- Verdict: pass (code review, on 9fdb19d). G13-G18 met on the builder's DOM logs and screenshots in .wt-notes/wf-build/, read against the diff; G8 re-run by the reviewer: make test green (go + vitest 68/68), npm run build ok, the redesign's G18 grep empty. Diff inside the boundary.
+- Unmet gate items: none.
+- Outside the gate: (1) at 2200 with the rail expanded, wide cuts goals to 26-32 characters where regular at 2199 shows them whole (2200x1200-g13.png); FR-4's "goals whole up to about 70" fails at the new boundary, and G13 only checks the class. (2) CellStateLz (Crew.tsx) has no text span, so "cell in definition" would clip mid-word if cut (FR-14); it was whole in every run. (3) G14's "+N" and G13's ellipsis appear only when a cell is forced narrower; the fixture never produces them. (4) The message's branch button has no name and its reply button reads "↩" (Conversation.tsx:440-441); the divider icon buttons are 20x28, under 24 px (.rail-icon, global.css). G18's names log covers only the divider.
+- Reviewer: wf-review, 2026-10-03
 
 ## Blockers
 
