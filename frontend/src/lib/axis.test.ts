@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
-  HOUR, PX_DAY, PX_HOUR, anchorScroll, buttonAnchor, contextLabel, deeper, endOf, offersHours, revealScroll,
-  scaleOf, shallower, sideOf, startOfDay, ticksOf, todayScroll, when, windowOf,
+  CONTEXT_INSET, HOUR, PX_DAY, PX_HOUR, REVEAL_MARGIN, anchorScroll, buttonAnchor, contextAt, contextLabel, deeper,
+  endOf, focusAfter, offersHours, revealScroll, scaleOf, shallower, sideOf, startOfDay, tickLabelExtent,
+  tickLabelWhole, ticksOf, timesLabel, todayScroll, when, windowOf,
 } from "./axis";
 
 const local = (y: number, m: number, d: number, h = 0, min = 0) => new Date(y, m - 1, d, h, min).getTime();
@@ -143,5 +144,95 @@ describe("anchors", () => {
   it("starts a day at its midnight", () => {
     expect(startOfDay(local(2026, 10, 3, 17, 5))).toBe(local(2026, 10, 3));
     expect(HOUR).toBe(3600000);
+  });
+});
+
+describe("focus at the control's ends (A15)", () => {
+  it("hands focus to the opposite zoom button when the pressed one disables", () => {
+    expect(focusAfter("in", "days", false)).toBe("out");   // Days is deepest
+    expect(focusAfter("in", "days", true)).toBeNull();     // Hours is still offered
+    expect(focusAfter("in", "hours", true)).toBe("out");
+    expect(focusAfter("out", "fit", true)).toBe("in");
+    expect(focusAfter("fit", "fit", false)).toBe("in");
+    expect(focusAfter("out", "days", true)).toBeNull();    // − still enabled at Days
+  });
+  it("never moves focus from Today, which never disables itself", () => {
+    expect(focusAfter("today", "days", false)).toBeNull();
+    expect(focusAfter("today", "hours", true)).toBeNull();
+  });
+  it("leaves no level where the pressed button disables without a target", () => {
+    for (const hours of [false, true]) {
+      for (const lvl of ["fit", "days", "hours"] as const) {
+        if (lvl === "hours" && !hours) continue;
+        const inDisabled = deeper(lvl, hours) === null;
+        if (inDisabled) expect(focusAfter("in", lvl, hours)).toBe("out");
+        if (lvl === "fit") { expect(focusAfter("out", lvl, hours)).toBe("in"); expect(focusAfter("fit", lvl, hours)).toBe("in"); }
+      }
+    }
+  });
+});
+
+describe("an edge pointer shows the whole mark (A18)", () => {
+  const w = { from: local(2026, 10, 1, 0), to: local(2026, 10, 5, 0) };
+  const s = scaleOf("hours", w, 0);
+  const view = 760;
+  const beta = { from: local(2026, 10, 2, 9, 12), to: local(2026, 10, 2, 17, 48) }; // 550 px
+  it("shows a mark that fits whole, 24 px clear of the edges", () => {
+    const fromRight = s.x(local(2026, 10, 3, 12));
+    expect(sideOf(s, beta.from, beta.to, fromRight, view)).toBe("left");
+    const left = revealScroll(s, beta.from, beta.to, "left", 0, view);
+    expect(s.x(beta.from) - left).toBeGreaterThanOrEqual(REVEAL_MARGIN);
+    expect(s.x(beta.from) - left).toBeLessThan(REVEAL_MARGIN + 1);
+    expect(Number.isInteger(left)).toBe(true);
+    expect(s.x(beta.to) - left).toBeLessThanOrEqual(view - REVEAL_MARGIN);
+    const right = revealScroll(s, beta.from, beta.to, "right", 0, view);
+    expect(s.x(beta.from) - right).toBeGreaterThanOrEqual(REVEAL_MARGIN);
+  });
+  it("centres a mark shorter than a third of the lane", () => {
+    const a = local(2026, 10, 2, 12), b = local(2026, 10, 2, 13);
+    const left = revealScroll(s, a, b, "left", 0, view);
+    expect((s.x(a) + s.x(b)) / 2 - left).toBeCloseTo(view / 2);
+  });
+  it("puts a mark longer than the lane's nearer end at a third from its side", () => {
+    const a = local(2026, 10, 2, 0), b = local(2026, 10, 3, 0); // 1536 px
+    expect(s.x(a) - revealScroll(s, a, b, "right", 0, view)).toBeCloseTo(view / 3);
+    expect(s.x(b) - revealScroll(s, a, b, "left", 0, view)).toBeCloseTo((view * 2) / 3);
+  });
+});
+
+describe("axis labels (A20)", () => {
+  const s = scaleOf("hours", { from: local(2026, 10, 3, 20), to: local(2026, 10, 4, 6) }, 0);
+  const midnight = s.x(local(2026, 10, 4));
+  it("names the new day once a midnight tick is 1-3 px into the lane", () => {
+    for (const into of [1, 2, 3]) expect(contextAt(s, midnight - into)).toBe("Sun 4 Oct");
+    expect(contextAt(s, midnight - CONTEXT_INSET - 1)).toBe("Sat 3 Oct");
+  });
+  it("draws no tick label the label column or the right edge would cut", () => {
+    const t = ticksOf(s).filter((k) => k.major);
+    const mid = t.find((k) => k.midnight)!;
+    expect(tickLabelWhole(mid, "hours", mid.x, 500)).toBe(true);
+    expect(tickLabelWhole(mid, "hours", mid.x + 10, 500)).toBe(false);  // its start is under the column
+    const e = tickLabelExtent(mid, "hours");
+    expect(tickLabelWhole(mid, "hours", e.right - 500, 500)).toBe(true);
+    expect(tickLabelWhole(mid, "hours", e.right - 499, 500)).toBe(true);
+    expect(tickLabelWhole(mid, "hours", e.right - 498 - 2, 497)).toBe(false); // its end past the frame
+  });
+  it("judges a Days label by its centred text, not its column", () => {
+    const d = ticksOf(scaleOf("days", { from: local(2026, 9, 29), to: local(2026, 10, 6) }, 0))[1]; // Wed 30
+    const e = tickLabelExtent(d, "days");
+    expect(e.left).toBeGreaterThan(d.x);
+    expect(e.right).toBeLessThan(d.x + PX_DAY);
+    expect(tickLabelWhole(d, "days", d.x + 1, 400)).toBe(true);
+    expect(tickLabelWhole(d, "days", e.left + 1, 400)).toBe(false);
+  });
+});
+
+describe("a timed bar's times (A19)", () => {
+  const a = { at: local(2026, 10, 2, 9, 12), timed: true }, b = { at: local(2026, 10, 2, 17, 48), timed: true };
+  it("says both ends, an open end, or nothing for whole days", () => {
+    expect(timesLabel(a, b)).toBe("09:12–17:48");
+    expect(timesLabel(a, null)).toBe("09:12–");
+    expect(timesLabel(a, when("2026-10-05"))).toBe("09:12–");
+    expect(timesLabel(when("2026-10-01")!, when("2026-10-05"))).toBe("");
   });
 });
