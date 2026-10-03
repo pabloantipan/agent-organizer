@@ -57,13 +57,16 @@ export function StageRoadmap({ initiative, head }: { initiative: merge.BoardInit
     if (k !== null) { setExpanded(k); setFocusOn(k); }
     clearStageFocus();
   }, [stageFocus, initiative.id, initiative.stages, clearStageFocus]);
+  // The rows mount only once the time frame has measured its width, a
+  // render after the landing, so the focus waits for its toggle.
   useEffect(() => {
     if (focusOn === null) return;
     const el = toggles.current.get(focusOn);
-    el?.scrollIntoView({ block: "nearest" });
-    el?.focus({ preventScroll: true });
+    if (!el) return;
+    el.scrollIntoView({ block: "nearest" });
+    el.focus({ preventScroll: true });
     setFocusOn(null);
-  }, [focusOn]);
+  });
   const cards = Object.values(view?.board.columns ?? {}).flat()
     .filter((c) => c.initiative_id === initiative.id && c.machine === initiative.machine);
   const now = today();
