@@ -53,6 +53,9 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
 - Order: time-zoom (sup26, re-review) -> decisions-view (new supervisor when
   time-zoom is in done/) -> leftovers-3 (after Aglaea's ranking and its
   accept record). Rebuilt and reinstalled the app from main on Pablo's ask.
+- Aglaea ranked (2b6d608); I wrote amendment 4 of both specs, cards
+  header-fold-3 and home-widths-4 (depends_on decisions-view), decisions-view
+  widened to B1-B14, and proposed 0074 (8ed2ec3). Waiting on Pablo.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
