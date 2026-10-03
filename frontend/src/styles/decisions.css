@@ -70,5 +70,13 @@ button.dec-more:hover { background: var(--surface-hover); }
 .dec-head.stuck .rb {
   position: absolute !important; top: calc(100% + var(--space-1)) !important; right: 0 !important; left: auto !important;
   max-height: var(--dec-box-max, 60vh) !important;
+  overflow-y: auto; overscroll-behavior: contain;
+}
+/* Capped, the box scrolls inside itself (§8, U1) and its foot, Cancel and
+   Rule, stays pinned at the box's bottom edge, never below it. */
+.dec-head.stuck .rb > .rb-foot {
+  position: sticky; bottom: calc(-1 * var(--space-4)); z-index: 1;
+  margin: 0 calc(-1 * var(--space-4)) calc(-1 * var(--space-4)); padding: var(--space-2) var(--space-4) var(--space-4);
+  background: var(--surface-overlay);
 }
 .dec-actions { padding-right: var(--space-3); }
