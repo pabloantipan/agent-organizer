@@ -155,13 +155,14 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .initiative-screen { display: grid; grid-template-rows: auto minmax(0, 1fr); min-width: 0; min-height: 0; overflow: hidden; }
 .initiative-screen > .board-wrap { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
 /* The header folds to one bar (initiative-header FR-1): id, stage, chip,
-   target, the goal on one line, Details. The goal gives way first, then the
-   stage's title; the id never. Bar and tabs stay under 90 px (H2). */
+   target, the goal on one line, Details. The goal gives way first (cut with
+   an ellipsis), then the target, then the stage's title; the id never
+   (FR-12, the design's §1). Bar and tabs stay under 90 px (H2). */
 .ihead { display: grid; gap: 0; padding: 0 var(--space-5); background: var(--bg); }
 .ihead-bar { display: flex; align-items: center; gap: var(--space-3); min-height: 44px; min-width: 0; }
 .ihead-id { margin: 0; flex: none; display: flex; align-items: center; gap: var(--space-2); font-family: var(--mono); font-size: var(--font-size-xl); line-height: var(--line-xl); font-weight: var(--weight-semibold); letter-spacing: -0.02em; white-space: nowrap; }
 .ihead-stage {
-  flex: 0 1 auto; min-width: 12ch; display: inline-flex; align-items: center; gap: var(--space-1-5);
+  flex: 0 0.001 auto; min-width: 12ch; display: inline-flex; align-items: center; gap: var(--space-1-5);
   min-height: var(--control-sm); padding: 0 var(--space-2); background: transparent; border-color: transparent;
   font-size: var(--font-size-sm); color: var(--fg); white-space: nowrap; overflow: hidden;
 }
@@ -172,7 +173,7 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .ihead-stage.none { color: var(--fg-subtle); font-style: italic; padding: 0; }
 .ihead-chip { flex: none; }
 .ihead-nochip { flex: none; font-size: var(--font-size-sm); color: var(--fg-subtle); }
-.ihead-target { flex: none; font-family: var(--mono); font-size: var(--font-size-sm); color: var(--fg-muted); white-space: nowrap; }
+.ihead-target { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-family: var(--mono); font-size: var(--font-size-sm); color: var(--fg-muted); white-space: nowrap; }
 .ihead-target b { color: var(--fg); font-weight: var(--weight-medium); }
 .ihead-goal-line { flex: 1 1 0; min-width: 0; max-width: 72ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--font-size-md); color: var(--fg-muted); }
 .ihead-goal-line.missing { color: var(--fg-subtle); font-style: italic; }
@@ -183,7 +184,6 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .ihead-details[aria-expanded="true"] { color: var(--fg); background: var(--surface-selected); }
 .ihead-details svg { transition: transform var(--dur-fast) var(--ease-out); }
 .ihead-details[aria-expanded="true"] svg { transform: rotate(180deg); }
-.ihead.compact .ihead-target { display: none; }
 
 /* Open: the charter, then where it is written, then the strip. Wide puts
    goal and measure beside scope, each held to about 90 characters (H9). */
