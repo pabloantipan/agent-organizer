@@ -102,7 +102,7 @@ describe("compactColumns with empty columns (FR-20)", () => {
 
 describe("signalsShown (FR-20)", () => {
   // The seven-signal row in Home's order: waiting, blocked, now, wave, live, cell, problems.
-  const folds: Fold[] = [null, null, FOLD.now, FOLD.live, FOLD.live, null, FOLD.problems];
+  const folds: Fold[] = [null, null, FOLD.now, FOLD.live, FOLD.live, FOLD.cell, FOLD.problems];
   const widths = [180, 70, 50, 140, 60, 130, 80];
   const gap = 4;
   const sum = (ws: number[]) => ws.reduce((a, w) => a + w, 0) + gap * (ws.length - 1);
@@ -111,13 +111,13 @@ describe("signalsShown (FR-20)", () => {
     expect(signalsShown(widths, folds, gap, sum(widths), 28)).toEqual(widths.map(() => true));
   });
 
-  it("folds problems first, then now, then live; waiting, blocked and the cell never", () => {
+  it("folds problems first, then now, then live, then the cell (0076); waiting and blocked never", () => {
     const room = sum(widths) - 1;
     expect(signalsShown(widths, folds, gap, room, 28)).toEqual([true, true, true, true, true, true, false]);
     const tight = signalsShown(widths, folds, gap, sum([180, 70, 130]) + gap + 28, 28);
     expect(tight).toEqual([true, true, false, false, false, true, false]);
     const tighter = signalsShown(widths, folds, gap, 200, 28);
-    expect(tighter).toEqual([true, true, false, false, false, true, false]);
+    expect(tighter).toEqual([true, true, false, false, false, false, false]);
   });
 
   it("folds now before live", () => {

@@ -40,13 +40,13 @@ export function signalsThatFit(widths: number[], gap: number, room: number, more
   return Math.max(1, n);
 }
 
-/** How soon a signal folds into "+N" (FR-20; design system, Widths: "what
- *  gives way first"): problems first, then now, then live (a wave building,
- *  live or working seats). Null never folds: waiting, the lead's own
- *  ("waiting · you") or anyone's, blocked, and a cell in definition, which
- *  waits on the lead's Launch (G19: only problems, now and live in "+N"). */
-export type Fold = 0 | 1 | 2 | null;
-export const FOLD = { problems: 0, now: 1, live: 2 } as const;
+/** How soon a signal folds into "+N" (FR-20 as amended by 0076; design
+ *  system, Widths: "what gives way first"): problems first, then now, then
+ *  live (a wave building, live or working seats), and last the cell's state.
+ *  Null never folds: waiting, the lead's own ("waiting · you") or anyone's,
+ *  and blocked. */
+export type Fold = 0 | 1 | 2 | 3 | null;
+export const FOLD = { problems: 0, now: 1, live: 2, cell: 3 } as const;
 
 /** Which signals a row shows (FR-20), in their own order: all when all fit
  *  `room`; otherwise the foldable ones leave, the least urgent first and,
