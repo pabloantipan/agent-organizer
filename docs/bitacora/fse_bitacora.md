@@ -77,6 +77,16 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
 - Repetition: 0076 cost 3h18m of a 4h39m wave. A gate-vs-measure conflict
   raised while Pablo is away stalls a task. Second time a decision blocked a
   wave mid-build (0073 was the first, quicker). Watch for a third.
+- leftovers-5 cut, 0077 proposed (55c1ecc). sup29 closed zoom-decisions-polish
+  (d92e33e, 45 min, ~$23), ended by me. sup30 runs markdown-and-labels.
+- S4 open: UI reviewers share Pablo's WebKit storage (bundle id
+  cl.antipan.organizer). zdp-ui's pre-review copy sits in
+  .wt-notes/zdp-ui/webkit-before, not restored (his app was running): his
+  call. My "clear the state" line in sup29/sup30 prompts was wrong (it wipes
+  his own layout); sup30 corrected to copy-and-restore. Durable fix: a test
+  bundle id for review builds; a card to propose.
+- sup29's leftovers (U2 focus after "Show the other 66", U3, U4, R2, gate
+  gaps) not yet sent to aglaea: batch with sup30's.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
