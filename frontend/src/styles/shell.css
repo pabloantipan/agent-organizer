@@ -77,6 +77,10 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
   position: sticky; top: 0; max-height: calc(var(--wrap-h, 100vh) - 36px); overflow-y: auto; overscroll-behavior: contain;
 }
 
+/* The rail's toggle (responsive-home FR-18; design system, Controls): a
+   24x24 target, expanded and as the strip. */
+.rail > .rail-icon.strip-toggle { width: var(--control-sm); height: var(--control-sm); min-height: var(--control-sm); }
+
 /* Inbox row: reason lozenge, subject with one line of context, age, one verb */
 .inbox { padding: var(--space-1) var(--space-2); display: grid; }
 .ib-row {

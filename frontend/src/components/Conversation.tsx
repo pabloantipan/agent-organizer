@@ -317,6 +317,8 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
             const parent = branchParent(t.subject) ? bySubject.get(branchParent(t.subject)) : undefined;
             const branches = branchesOf.get(t.id) ?? [];
             const writable = status === "open" || status === "stalled";
+            // Names (FR-19): each divider button says its action and its thread.
+            const subj = t.subject || t.id.slice(0, 8);
             return (
               <section key={t.id} id={`thread-${t.id}`} className={`tl-thread ${target === t.id ? "target" : ""} ${needsMe(t) ? "hot" : ""}`}>
                 <div className="tl-divider" tabIndex={-1} onClick={() => { setTarget(t.id); setReplyTo(null); setBranchFrom(null); }} title="reply into this thread">
@@ -332,9 +334,9 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
                   </span>
                   <span className="spacer" />
                   {canPost && <span className="a-actions" onClick={(e) => e.stopPropagation()}>
-                    {status !== "open" && <button className="rail-icon" onClick={() => setStatus(t.id, "open")} title="reopen: the thread accepts posts again"><Unlock size={12} /></button>}
-                    {status === "open" && <button className="rail-icon" onClick={() => setStatus(t.id, "escalated")} title="escalate: on your queue, no agent can post"><ArrowUpRight size={12} /></button>}
-                    {status !== "closed" && <button className="rail-icon" onClick={() => setStatus(t.id, "closed")} title="close"><Lock size={12} /></button>}
+                    {status !== "open" && <button className="rail-icon" onClick={() => setStatus(t.id, "open")} title="reopen: the thread accepts posts again" aria-label={`Reopen ${subj}`}><Unlock size={12} /></button>}
+                    {status === "open" && <button className="rail-icon" onClick={() => setStatus(t.id, "escalated")} title="escalate: on your queue, no agent can post" aria-label={`Escalate ${subj}`}><ArrowUpRight size={12} /></button>}
+                    {status !== "closed" && <button className="rail-icon" onClick={() => setStatus(t.id, "closed")} title="close" aria-label={`Close ${subj}`}><Lock size={12} /></button>}
                   </span>}
                 </div>
                 {decision && <div className="decision-banner"><Gavel size={13} /><span><b>{decision.from}</b> decided: {decision.body}</span></div>}

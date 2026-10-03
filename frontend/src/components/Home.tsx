@@ -6,7 +6,7 @@ import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from ".
 import { uniq } from "../lib";
 import { HEALTH, messages } from "../lib/health";
 import { ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
-import { signalsThatFit, type WidthClass } from "../lib/width";
+import { compactColumns, signalsThatFit, type WidthClass } from "../lib/width";
 import { useBoard } from "../stores/board.store";
 import { nextDate, stageState } from "./InitiativeHeader";
 import { InitiativeDetail } from "./Initiatives";
@@ -163,13 +163,14 @@ function RuleAction({ rowKey, initiative, decision }: { rowKey: string; initiati
   const { ruleDraft, openRule, setRuleDraft, dropRule, widthClass } = useBoard();
   const open = ruleDraft?.key === rowKey;
   const btn = useRef<HTMLButtonElement>(null);
-  // Compact's sheet covers Home: a scrim goes over what it covers, the rows'
-  // Rule verbs behind it (FR-8). A click on it closes the box and keeps the
-  // words, as Escape does.
+  // Compact's sheet covers Home, and regular's box covers the rows under its
+  // opener: a scrim goes over what it covers, the rows' verbs behind it (FR-8,
+  // FR-17). Wide's box sits in the column's flow and covers nothing. A click
+  // on the scrim closes the box and keeps the words, as Escape does.
   const closeKeep = () => { openRule(null); btn.current?.focus(); };
   return (
     <span className="rb-anchor">
-      {open && widthClass === "compact" && <div className="rb-scrim" aria-hidden="true" onClick={closeKeep} />}
+      {open && widthClass !== "wide" && <div className="rb-scrim" aria-hidden="true" onClick={closeKeep} />}
       <button ref={btn} className="act" aria-expanded={open} aria-label={`Rule ${initiative} ${decision.number}`} onClick={() => openRule(open ? null : rowKey)}>Rule</button>
       {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord opener={btn} afterRule={focusNeedsMe} onClose={() => openRule(null)} onCancel={() => dropRule(rowKey)}
         draft={{ chosen: ruleDraft.chosen, words: ruleDraft.words, set: setRuleDraft }} />}
@@ -194,7 +195,10 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
   const ids = uniq(all.map((i) => i.id)).filter((id) => !folded.has(id));
   const cols = view.board.columns ?? {};
   const states = initiativeStates(view, agents);
-  const { ref, idWidth, narrow } = useFitIds(ids.join(" "));
+  const { ref, idWidth, narrow, fit } = useFitIds(ids.join(" "));
+  // Compact's row is one line; its goal and next date give way only when the
+  // row has no room for them (FR-16), and come back when it has.
+  const hides = { goal: compact && !fit.goal, next: compact && !fit.next };
   if (ids.length === 0) {
     return (
       <div className="panel empty-state">
@@ -204,7 +208,7 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
     );
   }
   return (
-    <div ref={ref} className={`panel port ${narrow && !compact ? "narrow" : ""}`} role="table" style={idWidth ? { "--id-w": `${idWidth}px` } as React.CSSProperties : undefined}>
+    <div ref={ref} className={`panel port ${narrow && !compact ? "narrow" : ""} ${hides.goal ? "" : "fit-goal"} ${hides.next ? "" : "fit-next"}`} role="table" style={idWidth ? { "--id-w": `${idWidth}px` } as React.CSSProperties : undefined}>
       <div className="p-head" role="row">
         <span className="num">#</span><span>initiative</span><span>state</span><span>phase</span><span>goal</span><span>stage</span><span>signals</span><span>next date</span><span />
       </div>
@@ -218,12 +222,12 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
           <div key={id} className="p-item" data-id={id}>
             <div className="p-row" role="row">
               <span className="p-rank num">{k + 1}</span>
-              <button className="p-id" onClick={() => openInitiative(id, "overview")} title={compact ? idHover(i, next) : i.title}>{id}</button>
+              <button className="p-id" onClick={() => openInitiative(id, "overview")} title={hides.goal || hides.next ? idHover(i, next, hides) : i.title}>{id}</button>
               <StateLz state={states.get(id) ?? "quiet"} />
               <Phase stages={i.stages ?? []} />
               <span title={i.goal || undefined} className={`p-goal ${i.goal ? "" : "missing"}`}>{i.goal || "no goal yet"}</span>
               <MiniStepper stages={i.stages ?? []} compact={compact} />
-              <Signals i={i} rows={rows} cards={cards} waves={group?.waves ?? []} cell={group?.cell} missing={missingPersonas(group?.crew)} lead={leadOf(group)} oneLine={widthClass !== "regular"} />
+              <Signals i={i} rows={rows} cards={cards} waves={group?.waves ?? []} cell={group?.cell} missing={missingPersonas(group?.crew)} lead={leadOf(group)}  />
               <NextDate next={next} />
               <button className="p-more ghost" onClick={() => setOpen({ ...open, [id]: !open[id] })} aria-expanded={!!open[id]} aria-label={detailsName(id)} title={detailsName(id)}>
                 {open[id] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -242,10 +246,10 @@ type Next = ReturnType<typeof nextDate>;
 /** The chevron's name and hover (FR-11): what its detail opens on. */
 const detailsName = (id: string) => `Details for ${id}: goal, next date, repos`;
 
-/** Compact's id hover (responsive-home FR-2): the title, then the goal and
- *  the next date that left the row. */
-const idHover = (i: merge.BoardInitiative, next: Next) =>
-  `${i.title}\ngoal: ${i.goal || "no goal yet"}\nnext date: ${next ? `${next.date} ${next.what}` : "none ahead"}`;
+/** Compact's id hover (responsive-home FR-2, FR-16): the title, then the
+ *  goal and the next date if they left the row. */
+const idHover = (i: merge.BoardInitiative, next: Next, hides: { goal: boolean; next: boolean }) =>
+  [i.title, hides.goal && `goal: ${i.goal || "no goal yet"}`, hides.next && `next date: ${next ? `${next.date} ${next.what}` : "none ahead"}`].filter(Boolean).join("\n");
 
 /** The chevron's detail opens on the goal and the next date, whole: the
  *  ones compact's row no longer shows and the ones regular cuts (FR-11). */
@@ -268,12 +272,15 @@ const ONE_LINE_REST = 320 + 480;
 /** FR-2 (lead-side-fixes): every id reads in full. The id column is as wide
  *  as the longest id; when that leaves too little for the rest on one line,
  *  the table goes narrow and phase, goal and next date move to the row's
- *  second line (home.css, .port.narrow). A ResizeObserver, not a media query:
- *  the room depends on the rail, and Safari 15 has no container queries. */
+ *  second line (home.css, .port.narrow). Compact's rows stay one line, and
+ *  `fit` says which of goal and next date the row has room for (FR-16). A
+ *  ResizeObserver, not a media query: the room depends on the rail, and
+ *  Safari 15 has no container queries. */
 function useFitIds(key: string) {
   const ref = useRef<HTMLDivElement>(null);
   const [idWidth, setIdWidth] = useState(0);
   const [narrow, setNarrow] = useState(false);
+  const [fit, setFit] = useState({ goal: true, next: true });
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -281,13 +288,18 @@ function useFitIds(key: string) {
       const w = Math.max(0, ...Array.from(el.querySelectorAll<HTMLElement>(".p-row .p-id")).map((b) => b.scrollWidth));
       setIdWidth(Math.ceil(w));
       setNarrow(el.clientWidth < w + ONE_LINE_REST);
+      const row = el.querySelector<HTMLElement>(".p-row");
+      const cs = row ? getComputedStyle(row) : null;
+      const pad = cs ? parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) : 0;
+      const f = compactColumns(el.clientWidth - pad, Math.ceil(w), cs ? parseFloat(cs.columnGap) || 0 : 0);
+      setFit((p) => (p.goal === f.goal && p.next === f.next ? p : f));
     };
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(el);
     return () => ro.disconnect();
   }, [key]);
-  return { ref, idWidth, narrow };
+  return { ref, idWidth, narrow, fit };
 }
 
 /** Home's compact stepper: one segment per stage and the current one named.
@@ -320,7 +332,10 @@ function MiniStepper({ stages, compact = false }: { stages: model.Stage[]; compa
   );
 }
 
-function Signals({ i, rows, cards, waves, cell, missing, lead, oneLine }: { i: merge.BoardInitiative; rows: merge.BoardInitiative[]; cards: merge.BoardCard[]; waves: service.Wave[]; cell?: model.Cell | null; missing: string[]; lead: string; oneLine: boolean }) {
+/** A row's signals. Each lozenge's words sit in a text span that takes the
+ *  ellipsis (FR-14): the lozenge is a flex box, and a flex box clips its
+ *  text mid-word instead of cutting it. */
+function Signals({ i, rows, cards, waves, cell, missing, lead }: { i: merge.BoardInitiative; rows: merge.BoardInitiative[]; cards: merge.BoardCard[]; waves: service.Wave[]; cell?: model.Cell | null; missing: string[]; lead: string }) {
   const waiting = waitingDecisions(i);
   const blocked = cards.filter((c) => c.status === "blocked").length;
   const now = cards.filter((c) => c.status === "now").length;
@@ -330,27 +345,21 @@ function Signals({ i, rows, cards, waves, cell, missing, lead, oneLine }: { i: m
   const problems = i.problems?.length ?? 0;
   const defining = cell?.state === "in_definition";
   const none = !waiting && !blocked && !now && !live && !running.length && !problems && !defining;
-  const Line = oneLine ? OneLine : AllSignals;
   return (
-    <Line>
-      {waiting > 0 && <span className="lz waiting"><span className="num">{waiting}</span> waiting · {signalOwners(i, lead).join(", ")}</span>}
-      {blocked > 0 && <span className="lz blocked"><span className="num">{blocked}</span> blocked</span>}
-      {now > 0 && <span className="lz now"><span className="num">{now}</span> now</span>}
-      {running.map((w) => <span key={w.n} className="lz live">wave <span className="num">{w.n}</span> · <span className="num">{w.building!.length}</span> building</span>)}
-      {live > 0 && <span className="lz">{working > 0 ? <><span className="num">{working}</span> working</> : <><span className="num">{live}</span> live</>}</span>}
+    <OneLine>
+      {waiting > 0 && <span className="lz waiting"><span className="lz-t"><span className="num">{waiting}</span> waiting · {signalOwners(i, lead).join(", ")}</span></span>}
+      {blocked > 0 && <span className="lz blocked"><span className="lz-t"><span className="num">{blocked}</span> blocked</span></span>}
+      {now > 0 && <span className="lz now"><span className="lz-t"><span className="num">{now}</span> now</span></span>}
+      {running.map((w) => <span key={w.n} className="lz live"><span className="lz-t">wave <span className="num">{w.n}</span> · <span className="num">{w.building!.length}</span> building</span></span>)}
+      {live > 0 && <span className="lz"><span className="lz-t">{working > 0 ? <><span className="num">{working}</span> working</> : <><span className="num">{live}</span> live</>}</span></span>}
       <CellStateLz cell={cell} missing={missing} label="cell in definition" />
-      {problems > 0 && <span className="lz warning"><span className="num">{problems}</span> problem{problems === 1 ? "" : "s"}</span>}
+      {problems > 0 && <span className="lz warning"><span className="lz-t"><span className="num">{problems}</span> problem{problems === 1 ? "" : "s"}</span></span>}
       {none && <span className="p-quiet" title="no signals">—</span>}
-    </Line>
+    </OneLine>
   );
 }
 
-function AllSignals({ children }: { children: React.ReactNode }) {
-  return <span className="p-sig">{children}</span>;
-}
-
-/** Compact's signals (FR-10), and wide's, whose signals keep one line
- *  (FR-4) also when the rail leaves the list tight at 1920: one line, never
+/** A row's signals in every class (FR-10, FR-15): one line, never
  *  wrapped. The lozenges that do
  *  not fit are hidden and counted in a "+N"; they are named in the cell's
  *  hover and in its accessible text. Measured after every render, since a
@@ -367,13 +376,22 @@ function OneLine({ children }: { children: React.ReactNode }) {
     for (const c of items) c.style.display = "inline-flex";
     const more = el.querySelector<HTMLElement>(".sig-more");
     const gap = parseFloat(getComputedStyle(el).columnGap) || 0;
-    const n = signalsThatFit(items.map((c) => Math.max(c.getBoundingClientRect().width, c.scrollWidth)), gap, el.clientWidth, Math.max(more?.getBoundingClientRect().width ?? 0, 28));
+    // A lozenge's natural width: a shrunk one hides the rest in its text
+    // span (FR-14), not in its own overflow.
+    const natural = (c: HTMLElement) => {
+      const t = c.querySelector<HTMLElement>(".lz-t");
+      return Math.max(c.getBoundingClientRect().width + (t ? t.scrollWidth - t.clientWidth : 0), c.scrollWidth);
+    };
+    const n = signalsThatFit(items.map(natural), gap, el.clientWidth, Math.max(more?.getBoundingClientRect().width ?? 0, 28));
     const rest = items.slice(n).map((c) => (c.textContent ?? "").replace(/\s+/g, " ").trim());
     items.forEach((c, k) => { c.style.display = ""; if (k >= n) c.dataset.off = "1"; else delete c.dataset.off; });
-    // The first signal may still be cut by its ellipsis: then the hover
-    // names it whole.
-    const first = items[0];
-    const whole = first && first.scrollWidth > first.clientWidth + 1 ? (first.textContent ?? "").replace(/\s+/g, " ").trim() : "";
+    // A shown signal may still be cut by its ellipsis (the first one when
+    // the cell is tight, any one at the lozenge's cap): then the hover names
+    // it whole.
+    const whole = items.slice(0, n).filter((c) => {
+      const t = c.querySelector<HTMLElement>(".lz-t") ?? c;
+      return t.scrollWidth > t.clientWidth + 1;
+    }).map((c) => (c.textContent ?? "").replace(/\s+/g, " ").trim()).join("\n");
     setCut((p) => (p && p.n === n && p.whole === whole && p.rest.join("|") === rest.join("|") ? p : { n, rest, whole }));
   };
   useLayoutEffect(measure);

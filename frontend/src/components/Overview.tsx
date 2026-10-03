@@ -30,7 +30,7 @@ const daysSince = (iso: string | undefined) => {
  *  record has that number. The scan reports the missing one as a problem;
  *  here it is a row like the others. */
 function GateRow({ initiative, number, record }: { initiative: string; number: string; record?: model.Decision }) {
-  const { openNeedsMe, openInitiative } = useBoard();
+  const { openNeedsMe, openDecision } = useBoard();
   if (!record) {
     return (
       <li className="gl-row missing" title={`no decision record ${number} in working-on/decisions/`}>
@@ -43,7 +43,9 @@ function GateRow({ initiative, number, record }: { initiative: string; number: s
   const waiting = record.status === "proposed";
   const ruled = record.status === "ruled";
   const waited = daysSince(record.raised);
-  const open = () => (waiting ? openNeedsMe(`decision:${initiative}/${record.number}`) : openInitiative(initiative, "decisions"));
+  // Navigating lands on the thing named (design system, Focus and names): a
+  // record not waiting opens expanded and focused in Decisions (FR-19).
+  const open = () => (waiting ? openNeedsMe(`decision:${initiative}/${record.number}`) : openDecision(initiative, record.number));
   return (
     <li>
       <button className="gl-row" onClick={open} title={waiting ? "Open this record's row in Needs me" : "Open in Decisions"}>
