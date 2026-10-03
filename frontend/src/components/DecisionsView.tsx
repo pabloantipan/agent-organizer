@@ -131,7 +131,7 @@ export function DecisionsView() {
     // because this card's boundary holds no stylesheet for .dec.
     return (
       <div key={r.key} data-dec={r.key} ref={focused ? focusRef : undefined} className={`dec ${d.status} ${isOpen ? "expanded" : ""} ${focused ? "focused" : ""}`} style={focused ? { background: "var(--surface-selected)" } : undefined}>
-        <button className="dec-line" onClick={() => toggle(r.key)} title={isOpen ? "collapse" : "show the record"}>
+        <button className="dec-line" aria-expanded={isOpen} onClick={() => toggle(r.key)} title={isOpen ? "collapse" : "show the record"}>
           <span className="dec-num mono">{d.number}</span>
           <span className="dec-title">{d.title}</span>
           {all && <span className="badge">{r.initiative}</span>}

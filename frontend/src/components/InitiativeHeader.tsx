@@ -54,8 +54,8 @@ function ScopeLines({ id, scope }: { id: string; scope?: model.Scope }) {
   if (inScope.length === 0 && outScope.length === 0) {
     return <div className="ihead-scope missing"><span className="lbl">Scope</span>no scope yet</div>;
   }
-  const line = (label: string, items: string[]) => (
-    <Clamped key={`${label}-${id}`} className="ihead-scope">
+  const line = (label: string, name: string, items: string[]) => (
+    <Clamped key={`${label}-${id}`} name={name} className="ihead-scope">
       <span className="lbl">{label}</span>
       {items.length === 0 ? (
         <span className="none">none written</span>
@@ -66,8 +66,8 @@ function ScopeLines({ id, scope }: { id: string; scope?: model.Scope }) {
   );
   return (
     <>
-      {line("In scope", inScope)}
-      {line("Out of scope", outScope)}
+      {line("In scope", "Scope in", inScope)}
+      {line("Out of scope", "Scope out", outScope)}
     </>
   );
 }
@@ -135,8 +135,9 @@ function StageStrip({ i, compact }: { i: merge.BoardInitiative; compact: boolean
 
 /** A header line clamped to two lines (FR-10): "more" shows the rest and
  *  "less" folds it again; no control when the text fits. Whether it is
- *  clamped is measured, so it follows the window width. */
-function Clamped({ className, children }: { className: string; children: ReactNode }) {
+ *  clamped is measured, so it follows the window width. The control is named
+ *  by what it opens, "Goal, more" (initiative-header FR-15). */
+function Clamped({ name, className, children }: { name: string; className: string; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [clamped, setClamped] = useState(false);
@@ -153,7 +154,7 @@ function Clamped({ className, children }: { className: string; children: ReactNo
     <div className={`clamp-line ${className}`}>
       <div ref={ref} className={`clamp-text ${open ? "" : "clamped"}`}>{children}</div>
       {(clamped || open) && (
-        <button className="clamp-more" aria-expanded={open} onClick={() => setOpen(!open)}>
+        <button className="clamp-more" aria-expanded={open} aria-label={`${name}, ${open ? "less" : "more"}`} onClick={() => setOpen(!open)}>
           {open ? "less" : "more"}
         </button>
       )}
@@ -218,11 +219,11 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
         <div id={`ihead-open-${i.id}`} className="ihead-open">
           <div className="ihead-cols">
             <div className="ihead-col">
-              <Clamped key={`goal-${i.id}`} className={`ihead-goal ${i.goal ? "" : "missing"}`}>
+              <Clamped key={`goal-${i.id}`} name="Goal" className={`ihead-goal ${i.goal ? "" : "missing"}`}>
                 <span className="lbl">Goal</span>
                 {i.goal || "no goal yet"}
               </Clamped>
-              {i.measure && <Clamped key={`measure-${i.id}`} className="ihead-measure"><span className="lbl">Measure</span>{i.measure}</Clamped>}
+              {i.measure && <Clamped key={`measure-${i.id}`} name="Measure" className="ihead-measure"><span className="lbl">Measure</span>{i.measure}</Clamped>}
             </div>
             <div className="ihead-col">
               <ScopeLines id={i.id} scope={i.scope} />
@@ -234,7 +235,7 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
           <div className="ihead-source">
             <FileText size={12} aria-hidden /> from <span className="mono">working-on/initiative.yaml</span>
             {i.local && i.charter_modified && <span className="ihead-edited">edited, not committed</span>}
-            {i.local && <button className="linkish" onClick={() => api.openInEditor(charter)}><Code2 size={12} aria-hidden /> Open in editor</button>}
+            {i.local && <button className="linkish" onClick={() => api.openInEditor(charter)}><Code2 size={12} aria-hidden /> Open initiative.yaml in editor</button>}
           </div>
           <StageStrip i={i} compact={widthClass === "compact"} />
         </div>
