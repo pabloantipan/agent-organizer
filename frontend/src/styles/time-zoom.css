@@ -23,7 +23,10 @@
    design system's 2 px offset, above the sticky labels and axis (row 12);
    the wrapper is its own stacking context, so the page's sticky headings
    still pass over it. The host leaves the ring room inside its panel. */
-.tz-wrap { position: relative; z-index: 0; border-radius: var(--radius-md); }
+/* min-width: 0, since the wrapper is a grid item in Stages (.srm): with
+   the default auto it grew to the lane and the page scrolled instead of
+   the frame (zdp-ui U1). */
+.tz-wrap { position: relative; z-index: 0; min-width: 0; border-radius: var(--radius-md); }
 .tz-wrap.ring::after { content: ""; position: absolute; inset: -4px; z-index: 9; border: 2px solid var(--focus-ring); border-radius: calc(var(--radius-md) + 4px); pointer-events: none; }
 .tz-frame { position: relative; overflow: hidden; outline: none; border-radius: var(--radius-md); }
 .tz-frame:focus-visible { outline: none; }
