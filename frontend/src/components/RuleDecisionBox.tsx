@@ -67,6 +67,33 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
 
   const close = (discard = false) => { (discard && onCancel ? onCancel : onClose)(); opener?.current?.focus(); };
 
+  // FR-22 (responsive-home amendment 4): Escape closes the box wherever
+  // focus sits in the view, the record's text included, which takes no
+  // focus and so leaves it on the body. A document listener while the box
+  // is open; the latest close and busy through a ref, so it is added once.
+  const escape = useRef({ close, busy });
+  escape.current = { close, busy };
+  useEffect(() => {
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented || escape.current.busy) return;
+      e.preventDefault();
+      escape.current.close();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
+  // FR-23: the row whose Rule opened the box stays marked while it is open
+  // (rule-box.css, [data-rb-opener]: --surface-selected, and on Home above
+  // the scrim). A data attribute, not a class: the row's className is its
+  // owner's to render. Home's Needs me row, or the Decisions record's head.
+  useEffect(() => {
+    const row = opener?.current?.closest<HTMLElement>(".ib-row, .dec-head");
+    if (!row) return;
+    row.dataset.rbOpener = "";
+    return () => { delete row.dataset.rbOpener; };
+  }, [opener]);
+
   const rule = async () => {
     if (!ready) return;
     setBusy(true);
@@ -89,7 +116,7 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
 
   return (
     <div ref={box} className={`rb ${withRecord ? "with-record" : ""}`} style={place} role="dialog" aria-labelledby={`${numId} ${titleId}`} aria-describedby={withRecord ? bodyId : undefined}
-      onKeyDown={(e) => { if (e.key === "Escape" && !busy) { e.stopPropagation(); close(); } else loopTab(e, box.current); }}>
+      onKeyDown={(e) => loopTab(e, box.current)}>
       <div className="rb-head">
         <span id={numId} className="rb-num">{initiative} {d.number}</span>
         <span ref={title} id={titleId} className="rb-title" tabIndex={-1}>{d.title}</span>

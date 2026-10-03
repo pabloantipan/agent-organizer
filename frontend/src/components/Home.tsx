@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Briefcase, ChevronDown, ChevronRight, CircleDashed, Compass, Hammer, Hand, Play } from "lucide-react";
 import type { merge, model, service } from "../../wailsjs/go/models";
 import { inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, type NeedsMeRow } from "../lib/queue";
@@ -233,7 +234,9 @@ function RuleAction({ rowKey, initiative, decision }: { rowKey: string; initiati
   const closeKeep = () => { openRule(null); btn.current?.focus(); };
   return (
     <span className="rb-anchor">
-      {open && widthClass !== "wide" && <div className="rb-scrim" aria-hidden="true" onClick={closeKeep} />}
+      {/* The scrim sits outside the row, on the page's ground, so the
+          opener's row can stand above it (FR-23). */}
+      {open && widthClass !== "wide" && createPortal(<div className="rb-scrim" aria-hidden="true" onClick={closeKeep} />, document.body)}
       <button ref={btn} className="act" aria-expanded={open} aria-label={`Rule ${initiative} ${decision.number}`} onClick={() => openRule(open ? null : rowKey)}>Rule</button>
       {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord widthClass={widthClass} opener={btn} afterRule={focusNeedsMe} onClose={() => openRule(null)} onCancel={() => dropRule(rowKey)}
         draft={{ chosen: ruleDraft.chosen, words: ruleDraft.words, set: setRuleDraft }} />}
