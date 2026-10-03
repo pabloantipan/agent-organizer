@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   CONTEXT_INSET, HOUR, PX_DAY, PX_HOUR, REVEAL_MARGIN, anchorScroll, buttonAnchor, contextAt, contextLabel, deeper,
-  endOf, focusAfter, offersHours, revealScroll, scaleOf, shallower, sideOf, startOfDay, tickLabelExtent,
-  tickLabelWhole, ticksOf, timesLabel, todayScroll, when, windowOf,
+  endOf, focusAfter, offersHours, revealScroll, scaleOf, shallower, sideOf, startOfDay,
+  ticksOf, shiftInside, overlaps, skipStep, keptBy, seriesIndex, fitIsWeekly, timesLabel, todayScroll, when, windowOf,
 } from "./axis";
 
 const local = (y: number, m: number, d: number, h = 0, min = 0) => new Date(y, m - 1, d, h, min).getTime();
@@ -207,23 +207,48 @@ describe("axis labels (A20)", () => {
     for (const into of [1, 2, 3]) expect(contextAt(s, midnight - into)).toBe("Sun 4 Oct");
     expect(contextAt(s, midnight - CONTEXT_INSET - 1)).toBe("Sat 3 Oct");
   });
-  it("draws no tick label the label column or the right edge would cut", () => {
-    const t = ticksOf(s).filter((k) => k.major);
-    const mid = t.find((k) => k.midnight)!;
-    expect(tickLabelWhole(mid, "hours", mid.x, 500)).toBe(true);
-    expect(tickLabelWhole(mid, "hours", mid.x + 10, 500)).toBe(false);  // its start is under the column
-    const e = tickLabelExtent(mid, "hours");
-    expect(tickLabelWhole(mid, "hours", e.right - 500, 500)).toBe(true);
-    expect(tickLabelWhole(mid, "hours", e.right - 499, 500)).toBe(true);
-    expect(tickLabelWhole(mid, "hours", e.right - 498 - 2, 497)).toBe(false); // its end past the frame
+});
+
+describe("axis labels are placed on their rendered boxes (leftovers-4 FR-11)", () => {
+  const box = (left: number, right: number, top = 0, bottom = 14) => ({ left, right, top, bottom });
+  it("moves a label inside the room, or leaves it to its title when wider", () => {
+    expect(shiftInside(box(250, 300), 240, 1000)).toBe(0);
+    expect(shiftInside(box(220, 300), 240, 1000)).toBe(20);   // under the label column
+    expect(shiftInside(box(980, 1030), 240, 1000)).toBe(-30); // past the frame's edge
+    expect(shiftInside(box(0, 800), 240, 1000)).toBeNull();
   });
-  it("judges a Days label by its centred text, not its column", () => {
-    const d = ticksOf(scaleOf("days", { from: local(2026, 9, 29), to: local(2026, 10, 6) }, 0))[1]; // Wed 30
-    const e = tickLabelExtent(d, "days");
-    expect(e.left).toBeGreaterThan(d.x);
-    expect(e.right).toBeLessThan(d.x + PX_DAY);
-    expect(tickLabelWhole(d, "days", d.x + 1, 400)).toBe(true);
-    expect(tickLabelWhole(d, "days", e.left + 1, 400)).toBe(false);
+  it("counts labels on two lines as apart, and a gap under 4 px as touching", () => {
+    expect(overlaps(box(0, 50), box(52, 90))).toBe(true);
+    expect(overlaps(box(0, 50), box(54, 90))).toBe(false);
+    expect(overlaps(box(0, 50, 0, 14), box(20, 90, 14, 28))).toBe(false);
+  });
+  it("skips one in two until no two shown labels overlap", () => {
+    // 40 px labels every 30 px: every other one leaves 20 px, enough
+    const ls = Array.from({ length: 10 }, (_, k) => ({ ...box(k * 30, k * 30 + 40), k }));
+    expect(skipStep(ls)).toBe(2);
+    // every 12 px: one in four
+    const tight = Array.from({ length: 10 }, (_, k) => ({ ...box(k * 12, k * 12 + 40), k }));
+    expect(skipStep(tight)).toBe(4);
+    expect(skipStep(ls.map((l) => ({ ...l, left: l.k * 60, right: l.k * 60 + 40 })))).toBe(1);
+  });
+  it("keeps the same labels while the lane scrolls: the place counts from a fixed origin", () => {
+    const at = (from: number) => Array.from({ length: 6 }, (_, i) => ({ ...box(i * 30, i * 30 + 40), k: from + i }));
+    const step = skipStep(at(7));
+    expect(at(7).filter((l) => keptBy(l.k, step)).map((l) => l.k)).toEqual([8, 10, 12]);
+    expect(at(8).filter((l) => keptBy(l.k, step)).map((l) => l.k)).toEqual([8, 10, 12]);
+  });
+  it("numbers a tick in its series: weeks, months, days, hours", () => {
+    const fitW = scaleOf("fit", { from: local(2026, 9, 1), to: local(2026, 10, 15) }, 700);
+    expect(fitIsWeekly(fitW)).toBe(true);
+    const w = ticksOf(fitW).map((t) => seriesIndex(t, "fit", true));
+    w.slice(1).forEach((k, i) => expect(k - w[i]).toBe(1));
+    const fitM = scaleOf("fit", { from: local(2025, 11, 1), to: local(2026, 6, 1) }, 700);
+    const m = ticksOf(fitM).map((t) => seriesIndex(t, "fit", false));
+    m.slice(1).forEach((k, i) => expect(k - m[i]).toBe(1));
+    const d = ticksOf(scaleOf("days", { from: local(2026, 10, 20), to: local(2026, 11, 5) }, 0)).map((t) => seriesIndex(t, "days", false));
+    d.slice(1).forEach((k, i) => expect(k - d[i]).toBe(1)); // across the DST change
+    const h = ticksOf(scaleOf("hours", { from: local(2026, 10, 3, 20), to: local(2026, 10, 4, 6) }, 0)).filter((t) => t.major).map((t) => seriesIndex(t, "hours", false));
+    h.slice(1).forEach((k, i) => expect(k - h[i]).toBe(1));
   });
 });
 
