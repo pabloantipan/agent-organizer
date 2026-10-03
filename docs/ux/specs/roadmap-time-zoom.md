@@ -225,7 +225,7 @@ rule above changes how a date becomes a pixel.
 | A10 | do all of it at 1024×640 without the page scrolling sideways | screenshots at 1024×640 at each level; `document.scrollingElement.scrollWidth` equals the window width |
 | A12 | not be offered an hour axis where nothing has an hour | with day-only data, `+` is disabled at Days on all three graphs; with commit times (O1), Cards offers Hours and Stages and Decisions do not |
 | A13 | still see Stages' undated stages, in order, at any level | Stages at Days: the undated slots keep their Fit width after the window's end |
-| A14 | zoom the Decisions Timeline without his Roadmap level changing | set Roadmap › Cards to Days, zoom Decisions to Days and back to Fit; the Roadmap is still at Days |
+| A14 | zoom one graph without another graph's level changing, and find a graph he left back at Fit | on Roadmap, Cards at Days, switch to Stages: Stages is at Fit; zoom Stages to Days, back to Cards: Cards at Fit (remounted, States row). Open Decisions, zoom to Days, back to Roadmap: Roadmap at Fit. No graph's level moves when another zooms (amended by 0073) |
 | A11 | use it by keyboard alone, with the level read out | tab to the control, the level word is in the group's accessible name ("Zoom, Days"); keys work with focus in the chart |
 
 ## Open questions

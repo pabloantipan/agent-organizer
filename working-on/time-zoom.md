@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: time-zoom
 updated: 2026-10-03
-next: "A14: unmet as written (Roadmap returns at Fit, not Days); the gate contradicts T5 and the States row, so pablo amends A14 or accepts the remount reading, then re-review"
+next: "re-review: A14 amended by 0073 (ruled, amend to the spec); the build stands as is"
 seat: tz-build
 depends_on: [header-fold-2]
 boundary: ["frontend/src/components/Roadmap.tsx, RoadmapView.tsx, StageRoadmap.tsx (axis and positions only, not the stage word or row), DecisionsView.tsx (the Timeline only)", "one new shared axis module in frontend/src/lib/ and one zoom-control component, with their CSS", "frontend/src/lib/dates.ts and frontend/src/lib/ tests", "internal/scan/git.go (branchSpan's format only) and internal/scan/scan_test.go", "testdata/ fixtures the gate rows need", "not: Calendar.tsx, Portfolio.tsx's mounting, the stores, Home, docs/design-system.md; no bound Go type change"]
@@ -25,6 +25,7 @@ Days, and Hours only where a mark carries a time (0070).
 - [x] `go test ./...` and `npm test` green; `wails build` succeeds
 
 ## Done
+- 2026-10-03 0073 ruled by pablo (amend A14 to the spec); A14 rewritten in the spec, back to review
 - 2026-10-03 tz-build: branch time-zoom on main d1b9245, 1ae27b0 00c8e1e 93a8ba7 197487b c95ab4a ffb2576 b72cadd; one axis (`lib/axis.ts`), one control and frame (`components/TimeZoom.tsx`); make test (vitest 97), npm run build, wails build green; A1-A14 measured, progress in `.wt-notes/tz-build/progress.md`
 - 2026-10-03 sup26: worktree .wt/time-zoom on 0774ab2, builder tz-build launched; reviewers tz-review (code) and tz-ui (UI)
 - 2026-10-03 sup26 launched by the FSE, header-fold-2 in done/ (4afddc0), per 0071

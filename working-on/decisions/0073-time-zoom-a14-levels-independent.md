@@ -1,13 +1,13 @@
 ---
 title: time-zoom A14 - each graph's level is its own, or remembered across sub-views
-status: proposed
+status: ruled
 raised: 2026-10-03
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-03
+ruled_by: pablo
 options: [amend A14 to the spec, remember the level while the app runs]
-chosen:
+chosen: amend A14 to the spec
 cards: [time-zoom]
 threads: [01M416RZH3E5VPJC9D5H8PK73F]
 supersedes: []
@@ -46,6 +46,8 @@ The FSE's: amend A14 to the spec. Aglaea designed the level as a look that
 resets, and nothing you said asked to keep it.
 
 ## Ruling
+
+pablo, 2026-10-03, in the FSE session on lodestar: "I accept recommendations go on"
 
 ## Consequences
 
