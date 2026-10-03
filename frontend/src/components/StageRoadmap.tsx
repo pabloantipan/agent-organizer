@@ -152,7 +152,7 @@ export function StageRoadmap({ initiative }: { initiative: merge.BoardInitiative
       ))}
       <div className="srm-foot">
         <span><i className="srm-key done" /> stage done</span>
-        <span><i className="srm-key current" /> current stage, to today</span>
+        <span><i className="srm-key current" /> stage now, to today</span>
         <span><i className="srm-key planned" /> no target: order and appetite, no date</span>
         <span><i className="srm-gem waiting inline" /> decision waiting, at raised</span>
         <span><i className="srm-gem ruled inline" /> decision ruled, at ruled</span>
@@ -169,7 +169,8 @@ function StageRow({ r, now, pct, slotLeft, slot, grid, initiative, cards, open, 
   const missing = r.gates.filter((g) => !g.record).map((g) => g.id);
   const drawn = r.gates.filter((g) => g.record && g.raised);
   const appetite = s.appetite || "no appetite";
-  const state = r.state === "done" ? "done" : r.state === "current" ? "current" : "";
+  // The stage word is "now" wherever a stage is drawn (initiative-header FR-14).
+  const state = r.state === "done" ? "done" : r.state === "current" ? "now" : "";
   const sub = r.state === "done"
     ? `done ${s.done}`
     : s.target ? `target ${s.target}` : `appetite: ${appetite}`;
@@ -187,7 +188,7 @@ function StageRow({ r, now, pct, slotLeft, slot, grid, initiative, cards, open, 
     <>
     <div className={`srm-row ${r.state} ${open ? "expanded" : ""}`}>
       <button ref={toggleRef} className="srm-label srm-toggle" aria-expanded={open} aria-controls={`srm-detail-${r.n}`}
-        aria-label={`Stage ${r.n}: ${s.title || s.id}${state ? `, ${state === "current" ? "now" : state}` : ""}. ${open ? "Hide" : "Show"} its detail`}
+        aria-label={`Stage ${r.n}: ${s.title || s.id}${state ? `, ${state}` : ""}. ${open ? "Hide" : "Show"} its detail`}
         onClick={onToggle}>
         <span className="srm-head">
           <span className="srm-n num">{r.n}{state && ` · ${state}`}</span>

@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Bot, PencilRuler, Plus } from "lucide-react";
-import { api } from "../hooks/useWails";
+import { api, type AgentGroup } from "../hooks/useWails";
 import { since } from "../lib";
 import { useBoard } from "../stores/board.store";
 import { AgentList } from "./AgentList";
@@ -31,16 +31,24 @@ export function AgentsView() {
     (t, g) => ({ n: t.n + (g.agents?.length ?? 0), live: t.live + g.live, working: t.working + g.working }),
     { n: 0, live: 0, working: 0 },
   );
+  // initiative-header FR-13: with one initiative selected its group head
+  // would repeat the id and client the header shows; its counts and New
+  // agent sit on the toolbar line instead. The all view keeps the head.
+  const sel = selectedInitiative ? groups.find((g) => g.id === selectedInitiative) : undefined;
+  const selQ = sel ? queueOf(sel, board) : null;
 
   return (
     <div className="agents-view">
       <div className="board-head">
         {!selectedInitiative && <h1>Agents</h1>}
         <span className="meta">
-          {selectedInitiative ? "" : `${totals.n} agents, ${totals.live} live, ${totals.working} working · `}
+          {selectedInitiative ? (sel ? `${countsOf(sel)} · ` : "") : `${totals.n} agents, ${totals.live} live, ${totals.working} working · `}
           sampled {since(view.sampled_at)} · every {REFRESH_MS / 1000}s
         </span>
+        {sel && <CellStateLz cell={sel.cell} missing={missingPersonas(sel.crew)} />}
         <span className="spacer" />
+        {sel?.cell && selQ && selQ.total > 0 && <button className="tiny-btn ghost hot" onClick={() => openSlack(sel.id, null)} title="escalated to you, or asked of you: threads and cards">{selQ.total} need you</button>}
+        {sel && !readOnly && <NewAgent initiativeId={sel.id} />}
         {readOnly ? <span className="meta">{readOnly}: read-only</span> : <CleanButton />}
       </div>
       {groups.length === 0 && <div className="empty">No agents{selectedInitiative ? " in this initiative" : ""}.</div>}
@@ -49,19 +57,20 @@ export function AgentsView() {
         const ro = readOnlyOf(board, g.id);
         return (
         <section key={g.id} className="agent-group">
-          <header className={`agent-group-head ${selectedInitiative ? "static" : ""}`}>
-            <span className="agent-group-title" onClick={() => !selectedInitiative && setSelectedInitiative(g.id)} title={selectedInitiative ? "" : "Show only this initiative"}>
+          {!selectedInitiative && (
+          <header className="agent-group-head">
+            <span className="agent-group-title" onClick={() => setSelectedInitiative(g.id)} title="Show only this initiative">
               <Bot size={14} />
               <span className="ident">{g.id}</span>
               {g.client && <span className="badge client">{g.client}</span>}
-              <span className="meta">{g.agents?.length ?? 0} agents · {g.live} live · {g.working} working</span>
-              {g.cell && <span className="meta">· {g.crew?.length ?? 0} seats</span>}
+              <span className="meta">{countsOf(g)}</span>
               <CellStateLz cell={g.cell} missing={missingPersonas(g.crew)} />
             </span>
             <span className="spacer" />
             {g.cell && q.total > 0 && <button className="tiny-btn ghost hot" onClick={() => openSlack(g.id, null)} title="escalated to you, or asked of you: threads and cards">{q.total} need you</button>}
             {!ro && <NewAgent initiativeId={g.id} />}
           </header>
+          )}
           {/* A roster seat's agent shows in the crew block above; an agent
               with a persona outside the roster (a supervisor, a builder, a
               guest) has no seat there, so it is listed here (FR-6). */}
@@ -88,6 +97,11 @@ export function AgentsView() {
 
 /** Inline "new agent" control: opens a probe in the initiative directory, in
  *  the family named after the initiative. Empty name = animal name. */
+/** A group's counts: in its head in the all view, on the toolbar line with
+ *  one initiative selected (initiative-header FR-13). */
+const countsOf = (g: AgentGroup) =>
+  `${g.agents?.length ?? 0} agents · ${g.live} live · ${g.working} working${g.cell ? ` · ${g.crew?.length ?? 0} seats` : ""}`;
+
 function NewAgent({ initiativeId }: { initiativeId: string }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");

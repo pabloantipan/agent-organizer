@@ -17,8 +17,12 @@ scope:
   in:
     - the scanner and the board acme opens every morning
     - one merged view across both machines
+    - the cards' due dates, the milestones and the target on one calendar their lead reads before the Monday call
+    - a review prompt an agent can run against the live scan without anyone pasting context into it
   out:
     - writing to acme's card files
+    - a mobile app, an email digest, or any notification that leaves the machine the board runs on
+    - importing the history of acme's own tracker, or keeping it in step with the board after the first run
 target: 2026-10-01
 milestones:
   - date: 2026-09-10

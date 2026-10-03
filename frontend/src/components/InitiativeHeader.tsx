@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { ChevronDown, Code2, FileText, Lock, Route } from "lucide-react";
+import { ChevronDown, ChevronRight, Code2, FileText, Lock, Route } from "lucide-react";
 import type { merge, model } from "../../wailsjs/go/models";
 import { parseISO, today } from "../lib/dates";
 import { api } from "../hooks/useWails";
@@ -54,8 +54,8 @@ function ScopeLines({ id, scope }: { id: string; scope?: model.Scope }) {
   if (inScope.length === 0 && outScope.length === 0) {
     return <div className="ihead-scope missing"><span className="lbl">Scope</span>no scope yet</div>;
   }
-  const line = (label: string, items: string[]) => (
-    <Clamped key={`${label}-${id}`} className="ihead-scope">
+  const line = (label: string, name: string, items: string[]) => (
+    <Clamped key={`${label}-${id}`} name={name} className="ihead-scope">
       <span className="lbl">{label}</span>
       {items.length === 0 ? (
         <span className="none">none written</span>
@@ -66,8 +66,8 @@ function ScopeLines({ id, scope }: { id: string; scope?: model.Scope }) {
   );
   return (
     <>
-      {line("In scope", inScope)}
-      {line("Out of scope", outScope)}
+      {line("In scope", "Scope in", inScope)}
+      {line("Out of scope", "Scope out", outScope)}
     </>
   );
 }
@@ -100,7 +100,7 @@ function StageStrip({ i, compact }: { i: merge.BoardInitiative; compact: boolean
       </div>
       <div className={`stg-runs ${runs.length > 1 ? "phased" : ""}`}>
         {runs.map((r, k) => (
-          <div key={k} className="stg-run" style={compact ? undefined : { flexGrow: r.stages.length }}>
+          <div key={k} className="stg-run" style={{ flexGrow: r.stages.length }}>
             {r.phase && <span className="stg-phase">{r.phase}</span>}
             <ol className="stg-tiles">
               {r.stages.map(({ stage: s, n }) => {
@@ -120,6 +120,7 @@ function StageStrip({ i, compact }: { i: merge.BoardInitiative; compact: boolean
                       <span className="stg-n num">{n}{word && ` · ${word}`}</span>
                       {!short && <span className="stg-t">{title}</span>}
                       {!short && <span className="stg-x">{exitLine(s)}</span>}
+                      <ChevronRight className="stg-chev" size={12} aria-hidden />
                     </button>
                   </li>
                 );
@@ -134,8 +135,9 @@ function StageStrip({ i, compact }: { i: merge.BoardInitiative; compact: boolean
 
 /** A header line clamped to two lines (FR-10): "more" shows the rest and
  *  "less" folds it again; no control when the text fits. Whether it is
- *  clamped is measured, so it follows the window width. */
-function Clamped({ className, children }: { className: string; children: ReactNode }) {
+ *  clamped is measured, so it follows the window width. The control is named
+ *  by what it opens, "Goal, more" (initiative-header FR-15). */
+function Clamped({ name, className, children }: { name: string; className: string; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [clamped, setClamped] = useState(false);
@@ -152,7 +154,7 @@ function Clamped({ className, children }: { className: string; children: ReactNo
     <div className={`clamp-line ${className}`}>
       <div ref={ref} className={`clamp-text ${open ? "" : "clamped"}`}>{children}</div>
       {(clamped || open) && (
-        <button className="clamp-more" aria-expanded={open} onClick={() => setOpen(!open)}>
+        <button className="clamp-more" aria-expanded={open} aria-label={`${name}, ${open ? "less" : "more"}`} onClick={() => setOpen(!open)}>
           {open ? "less" : "more"}
         </button>
       )}
@@ -172,9 +174,9 @@ const SUBS: { id: Sub; label: string }[] = [
 /** The initiative header (FR-17; initiative-header FR-1): folded by default
  *  to one bar (id, stage, waiting chip, target, the goal on one line,
  *  Details); open, the charter (goal, measure, scope, where they are written)
- *  and the stage strip. The stored choice is the lead's Details toggle; a
- *  landing folds it in memory (board.store). No badge on a sub-view: Needs
- *  me is the one count. */
+ *  and the stage strip. The stored choice is the lead's Details toggle, and a
+ *  landing stores "folded" (FR-11, board.store). No badge on a sub-view:
+ *  Needs me is the one count. */
 export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardInitiative }) {
   const { sub, openInitiative, openDecision, openStage, view, agents, headerOpen, setHeaderOpen, widthClass } = useBoard();
   const lead = leadOf((agents?.groups ?? []).find((g) => g.id === i.id));
@@ -198,8 +200,9 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
           <button className="ihead-stage" onClick={() => openStage(i.id, shown.id)} title={`${shown.title || shown.id}: open it in Roadmap`}
             aria-label={`Roadmap, ${pos.label}: ${shown.title || shown.id}. Open it in Roadmap`}>
             <Route size={13} aria-hidden />
-            <span className="num">{pos.current >= 0 ? `Stage ${pos.current + 1} of ${stages.length}` : pos.label}</span>
+            <span className="num">{pos.current >= 0 ? `Stage ${pos.current + 1} of ${stages.length} · now` : pos.label}</span>
             <span className="ihead-stage-t">· {shown.title || shown.id}</span>
+            <ChevronRight className="stg-chev" size={12} aria-hidden />
           </button>
         ) : <span className="ihead-stage none"><Route size={13} aria-hidden /> no roadmap yet</span>)}
         {chip && first ? (
@@ -216,11 +219,11 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
         <div id={`ihead-open-${i.id}`} className="ihead-open">
           <div className="ihead-cols">
             <div className="ihead-col">
-              <Clamped key={`goal-${i.id}`} className={`ihead-goal ${i.goal ? "" : "missing"}`}>
+              <Clamped key={`goal-${i.id}`} name="Goal" className={`ihead-goal ${i.goal ? "" : "missing"}`}>
                 <span className="lbl">Goal</span>
                 {i.goal || "no goal yet"}
               </Clamped>
-              {i.measure && <Clamped key={`measure-${i.id}`} className="ihead-measure"><span className="lbl">Measure</span>{i.measure}</Clamped>}
+              {i.measure && <Clamped key={`measure-${i.id}`} name="Measure" className="ihead-measure"><span className="lbl">Measure</span>{i.measure}</Clamped>}
             </div>
             <div className="ihead-col">
               <ScopeLines id={i.id} scope={i.scope} />
@@ -232,7 +235,7 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
           <div className="ihead-source">
             <FileText size={12} aria-hidden /> from <span className="mono">working-on/initiative.yaml</span>
             {i.local && i.charter_modified && <span className="ihead-edited">edited, not committed</span>}
-            {i.local && <button className="linkish" onClick={() => api.openInEditor(charter)}><Code2 size={12} aria-hidden /> Open in editor</button>}
+            {i.local && <button className="linkish" onClick={() => api.openInEditor(charter)}><Code2 size={12} aria-hidden /> Open initiative.yaml in editor</button>}
           </div>
           <StageStrip i={i} compact={widthClass === "compact"} />
         </div>
