@@ -71,11 +71,16 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
   // focus sits in the view, the record's text included, which takes no
   // focus and so leaves it on the body. A document listener while the box
   // is open; the latest close and busy through a ref, so it is added once.
+  // One Escape closes only the topmost: a dialog open over the box (Help,
+  // a card back) is always above an inline box and closes itself on its
+  // own window listener, so the box waits while one is open.
   const escape = useRef({ close, busy });
   escape.current = { close, busy };
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {
       if (e.key !== "Escape" || e.defaultPrevented || escape.current.busy) return;
+      const over = Array.from(document.querySelectorAll('[role="dialog"]')).some((d) => d !== box.current && !box.current?.contains(d));
+      if (over) return;
       e.preventDefault();
       escape.current.close();
     };
