@@ -4,13 +4,14 @@ status: now
 repos: [organizer]
 branch: time-zoom
 updated: 2026-10-03
-next: "review: time-zoom, gate met (A1-A14 measured; A14 per the remount rule, see Notes)"
+next: "A14: unmet as written (Roadmap returns at Fit, not Days); the gate contradicts T5 and the States row, so pablo amends A14 or accepts the remount reading, then re-review"
 seat: tz-build
 depends_on: [header-fold-2]
 boundary: ["frontend/src/components/Roadmap.tsx, RoadmapView.tsx, StageRoadmap.tsx (axis and positions only, not the stage word or row), DecisionsView.tsx (the Timeline only)", "one new shared axis module in frontend/src/lib/ and one zoom-control component, with their CSS", "frontend/src/lib/dates.ts and frontend/src/lib/ tests", "internal/scan/git.go (branchSpan's format only) and internal/scan/scan_test.go", "testdata/ fixtures the gate rows need", "not: Calendar.tsx, Portfolio.tsx's mounting, the stores, Home, docs/design-system.md; no bound Go type change"]
 spec: "docs/ux/specs/roadmap-time-zoom.md (Aglaea's design, 6569427, with the FSE's Technical notes T1-T5); ruling 0070"
 gate: "docs/ux/specs/roadmap-time-zoom.md Acceptance A1-A14, plus T1 and T2 below"
 ui_review: true
+review: fail
 ---
 
 ## Goal
@@ -29,6 +30,13 @@ Days, and Hours only where a mark carries a time (0070).
 - 2026-10-03 sup26 launched by the FSE, header-fold-2 in done/ (4afddc0), per 0071
 - 2026-10-03 0071 ruled by pablo ("Ok", accept as written, 1328071); launchable, waits on header-fold-2
 - 2026-10-03 cut by the FSE from Aglaea's spec and ruling 0070
+
+## Review
+- Verdict: fail (code review). Unmet: A14. A1-A13, T1, T2 and the build row are met.
+- A14: measured Roadmap Days -> Decisions -> Roadmap at Fit; the check says "still at Days". The gate is wrong, not the build: sub-views are exclusive (`App.tsx`, outside the boundary), and T5 plus the States row reset the level on remount. Keeping Days needs remembered state (T5 forbids it) or a mounted hidden Roadmap (out of boundary). Pablo amends A14, for example to "zooming Decisions never changes another graph's level; each resets on remount", then this passes as built.
+- Checks re-run on b72cadd: `XDG_DATA_HOME=$(mktemp -d) make test` (go test ./..., vitest 97), `npm run build`, `wails build`, all green.
+- Outside the gate: `scripts/fixture-home.sh` is outside the boundary (it allows `testdata/` fixtures); the change is additive and A3, A6 and A12 need it. Pinch was measured as Chromium ctrl+wheel only; the WebKit gesture path is read, not run, so the UI review should pinch a real trackpad. A2 shows `September 2026`, not `October 2026`, because of the fixture. The Hours note's copy differs from the spec; the change is sound but Aglaea should accept it. At Fit, Today is shown but does nothing. At Hours, the sticky day label covers the first `:00` label (shot `1512x945-cards-hours-midnight.png`).
+- Reviewer: tz-review, 2026-10-03.
 
 ## Next
 
