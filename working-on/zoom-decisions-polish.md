@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: zoom-decisions-polish
 updated: 2026-10-03
-next: "review: zoom-decisions-polish, gate L1-L8 and L0 met at 28f581a (L1, L5, L8 in WKWebView with Keyboard navigation on)"
+next: "zdp-build: fix UI review U1 (.tz-wrap min-width: 0 in time-zoom.css; Stages zoom scrolls its frame, not the page), then re-review"
 depends_on: []
 boundary: ["frontend/src/components/TimeZoom.tsx, frontend/src/styles/time-zoom.css, frontend/src/lib/axis.ts and its tests", "frontend/src/components/DecisionsView.tsx, frontend/src/styles/decisions.css (FR-2 to FR-8 only)", "frontend/src/lib/ and its tests", "testdata/fixture-overlay/", "not: scripts/fixture-home.sh, testdata/fixture-twenty/, global.css, rule-box.css, RuleDecisionBox.tsx, StageRoadmap.tsx, header-fold-3's and home-widths-4's files, Go, docs/design-system.md"]
 spec: "docs/specs/leftovers-4.md (FR-1 to FR-8); the ranking docs/ux/reviews/2026-10-03-rank-leftovers-4.md (Aglaea, 94308ad); the design system as amended there"
