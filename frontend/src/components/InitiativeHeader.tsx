@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { ChevronDown, Code2, FileText, Lock, Route } from "lucide-react";
+import { ChevronDown, ChevronRight, Code2, FileText, Lock, Route } from "lucide-react";
 import type { merge, model } from "../../wailsjs/go/models";
 import { parseISO, today } from "../lib/dates";
 import { api } from "../hooks/useWails";
@@ -100,7 +100,7 @@ function StageStrip({ i, compact }: { i: merge.BoardInitiative; compact: boolean
       </div>
       <div className={`stg-runs ${runs.length > 1 ? "phased" : ""}`}>
         {runs.map((r, k) => (
-          <div key={k} className="stg-run" style={compact ? undefined : { flexGrow: r.stages.length }}>
+          <div key={k} className="stg-run" style={{ flexGrow: r.stages.length }}>
             {r.phase && <span className="stg-phase">{r.phase}</span>}
             <ol className="stg-tiles">
               {r.stages.map(({ stage: s, n }) => {
@@ -120,6 +120,7 @@ function StageStrip({ i, compact }: { i: merge.BoardInitiative; compact: boolean
                       <span className="stg-n num">{n}{word && ` · ${word}`}</span>
                       {!short && <span className="stg-t">{title}</span>}
                       {!short && <span className="stg-x">{exitLine(s)}</span>}
+                      <ChevronRight className="stg-chev" size={12} aria-hidden />
                     </button>
                   </li>
                 );
@@ -198,8 +199,9 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
           <button className="ihead-stage" onClick={() => openStage(i.id, shown.id)} title={`${shown.title || shown.id}: open it in Roadmap`}
             aria-label={`Roadmap, ${pos.label}: ${shown.title || shown.id}. Open it in Roadmap`}>
             <Route size={13} aria-hidden />
-            <span className="num">{pos.current >= 0 ? `Stage ${pos.current + 1} of ${stages.length}` : pos.label}</span>
+            <span className="num">{pos.current >= 0 ? `Stage ${pos.current + 1} of ${stages.length} · now` : pos.label}</span>
             <span className="ihead-stage-t">· {shown.title || shown.id}</span>
+            <ChevronRight className="stg-chev" size={12} aria-hidden />
           </button>
         ) : <span className="ihead-stage none"><Route size={13} aria-hidden /> no roadmap yet</span>)}
         {chip && first ? (

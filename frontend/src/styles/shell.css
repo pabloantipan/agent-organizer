@@ -162,7 +162,7 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .ihead-bar { display: flex; align-items: center; gap: var(--space-3); min-height: 44px; min-width: 0; }
 .ihead-id { margin: 0; flex: none; display: flex; align-items: center; gap: var(--space-2); font-family: var(--mono); font-size: var(--font-size-xl); line-height: var(--line-xl); font-weight: var(--weight-semibold); letter-spacing: -0.02em; white-space: nowrap; }
 .ihead-stage {
-  flex: 0 0.001 auto; min-width: 12ch; display: inline-flex; align-items: center; gap: var(--space-1-5);
+  flex: 0 0.001 auto; min-width: 12ch; cursor: pointer; display: inline-flex; align-items: center; gap: var(--space-1-5);
   min-height: var(--control-sm); padding: 0 var(--space-2); background: transparent; border-color: transparent;
   font-size: var(--font-size-sm); color: var(--fg); white-space: nowrap; overflow: hidden;
 }
@@ -184,6 +184,11 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .ihead-details[aria-expanded="true"] { color: var(--fg); background: var(--surface-selected); }
 .ihead-details svg { transition: transform var(--dur-fast) var(--ease-out); }
 .ihead-details[aria-expanded="true"] svg { transform: rotate(180deg); }
+/* The stage is a button and looks it (FR-14): the pointer, the hover
+   surface, and a chevron on hover and focus that takes its room always, so
+   nothing moves when it shows. */
+.stg-chev { flex: none; color: var(--fg-subtle); opacity: 0; transition: opacity var(--dur-fast) var(--ease-out); }
+.ihead-stage:hover .stg-chev, .ihead-stage:focus-visible .stg-chev, .stg:hover .stg-chev, .stg:focus-visible .stg-chev { opacity: 1; }
 
 /* At compact the open header takes at most 40% of the window and scrolls
    inside itself; the bar and the tabs stay, the clamps and the strip are
@@ -225,11 +230,14 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .stg-tiles > li { flex: 1 1 0; min-width: 0; display: grid; }
 .stg-tiles > li.short { flex: 0 0 auto; }
 .stg {
-  display: grid; gap: var(--space-0-5); justify-items: start; text-align: left; min-width: 0; min-height: 0; height: auto;
+  position: relative; cursor: pointer; display: grid; gap: var(--space-0-5); justify-items: start; text-align: left; min-width: 0; min-height: 0; height: auto;
   padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: transparent; border: 1px dashed var(--border-strong); color: var(--fg);
 }
 .stg:hover { background: var(--surface-hover); border-color: var(--border-accent); }
 .stg > span { max-width: 100%; }
+.stg .stg-chev { position: absolute; top: var(--space-2); right: var(--space-2); }
+.stg-tiles > li.short .stg { grid-auto-flow: column; align-items: center; }
+.stg-tiles > li.short .stg .stg-chev { position: static; }
 .stg-n { font-family: var(--mono); font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-subtle); }
 .stg-t { font-size: var(--font-size-md); line-height: var(--line-md); font-weight: var(--weight-semibold); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .stg-x { font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -237,6 +245,8 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .stg.done .stg-n, .stg.done .stg-t, .stg.done .stg-x { color: var(--fg-subtle); }
 .stg.current { border-style: solid; border-color: var(--border-accent); background: var(--surface-selected); }
 .stg.current .stg-n { color: var(--status-now); font-weight: var(--weight-semibold); }
+/* Drawn in the accent, so the ring sits at a 2px offset (FR-14). */
+.stg.current:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 
 .subtabs { display: flex; gap: var(--space-1); margin: 0 calc(-1 * var(--space-5)); padding: 0 var(--space-4); box-shadow: inset 0 -1px 0 var(--border-subtle); }
 .subtabs button {
