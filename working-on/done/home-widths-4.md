@@ -28,6 +28,7 @@ widths-and-focus's leftovers, ranked by Aglaea: FR-20 to FR-25 of
 - [x] G8: see `docs/specs/responsive-home.md`, Acceptance
 
 ## Done
+- 2026-10-03 sup28 wave ended: seats ended, tokens revoked, run record runs/2026-10-03-header-fold-3-home-widths-4.md
 - 2026-10-03 sup28 merged c8cc059 (code review pass 7f49158, UI recheck pass ca185f3, after 0076 folds last); make test (vitest 152) and npm run build green on main
 - 2026-10-03 hw4-build: 0076 (Pablo: the cell folds last) applied in 650ee48, with a1b14b2 (never-fold signals share the column with a 2-character + ellipsis floor); from a clean detached checkout: clip probe 0 bad rows at 1024x640, 1280x800, 1440x900, 1512x945, 1920x1080, rail expanded and strip ("+5" inside the 145 px column at 1024 expanded), G19 as amended and G23 (.wt-notes/hw4-build/clip-0076.log, g19-0076.log, g23-0076.log); rebased on main, make test, npm run build, G18 grep, wails build green
 - 2026-10-03 hw4-build: 424149a never-fold signals share the column (shareRoom), each with at least 2 characters + ellipsis on its span, +N inside; clip probe from a clean checkout (.wt-notes/hw4-build/clip-clean.log): passes at 1024 strip and at 1280, 1440, 1512, 1920 expanded and strip; fails only at 1024x640 rail expanded by 6 px (32+32+48 + 27 + 12 = 151 > 145)

@@ -33,6 +33,7 @@ header-fold-2's leftovers, ranked by Aglaea: FR-17 to FR-19 of
 - [x] G11: see `docs/specs/initiative-header.md`, Acceptance
 
 ## Done
+- 2026-10-03 sup28 wave ended: seats ended, tokens revoked, run record runs/2026-10-03-header-fold-3-home-widths-4.md
 - 2026-10-03 sup28 merged 4f17404 (code review pass e4f4d00, UI review pass c2e715b); make test and npm run build green on main
 - 2026-10-03 hf3-build: FR-17 to FR-19 on header-fold-3 (376b1aa fold in lib/fold, 3c07f67 tiles by position, b577edc stage kept in the bar at compact with scroll edges, 6a670e6 landed stage focused); G18 G19 G20 G11 measured in .wt-notes/hf3-build/; G21 left for the UI reviewer
 - 2026-10-03 sup28 launched by the FSE (decisions-view and time-zoom-2 in done/)
