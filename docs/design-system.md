@@ -304,6 +304,20 @@ hover and the accessible name. A lozenge that cannot fit is cut with an
 ellipsis on its text, never clipped mid-word by its cell. Wide starts at
 2200, not 1920: at 1920 with the rail expanded the list keeps about 1,150 px
 beside Needs me and goals fall to 22 characters (responsive-home-2, R1).
+Wide's start is **measured on the row, not fixed**: a window of 2200 or more
+is wide only while the list beside Needs me keeps about 70 characters of
+goal; with the rail expanded that may be later (leftovers-3, W1). The 2200
+is the floor.
+
+**What gives way first.** A column that is empty on every row (all "—")
+gives way before any column with content. Signals fold into "+N" from the
+least urgent: waits on you, blocked and waiting stay in view; problems, now
+and live fold first (leftovers-3, W2).
+
+**A region that scrolls inside a view shows it does**: while content hides
+below its edge, that edge carries a 1 px `--border-strong` line, gone once
+scrolled to the end. Overlay scrollbars on macOS do not count, since they
+hide until scrolled (leftovers-3, U1).
 
 Every screen is checked at 1024×640, 1512×945, 1920×1080 and 3440×1440. Tab order
 follows priority, not position: in wide, Needs me before the list.

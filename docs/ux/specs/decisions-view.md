@@ -168,6 +168,49 @@ the zoom stay as those cards make them.
 | B10 | not read "0d" or "1d" on a same-day ruling | a same-day ruled row has no turnaround; a 3-day one reads `after 3 days` |
 | B11 | read Timeline rows as one line | rows are 28 px; the status in the title and the accessible name |
 
+## Amendment 1: the tall record's head, and its line's name
+
+by aglaea, 2026-10-03, from leftovers-3 rows 2 and 9
+(`docs/ux/reviews/2026-10-03-rank-leftovers-3.md`; header-fold-2's UI
+review U2 and U3). Absorbed here because both are in this file's record
+line, and the record's sticky head has to stack under this design's sticky
+section heading.
+
+### §8 A record taller than the view keeps its head
+
+0069's note said that an expanded record taller than the view "keeps its
+head at the top, Rule included". On main a landing only puts it there; one
+scroll and Rule is at −362 px (U2). That note is what was meant. The head is
+the record's line and its action row (Rule, when there is one). The facts
+and the body scroll under it.
+
+- While an expanded record's top is above the scroller's top and its end is
+  still in view, its head sticks **directly under the section's sticky
+  heading**. Never under the initiative header alone, and never covering the
+  section heading.
+- When the record's end scrolls past, the head goes with it. The next
+  record's line never sits under a stuck head.
+- A collapsed record and a record shorter than the view do not stick.
+- With the rule box open, the box rides with Rule. If it is taller than the
+  room under the stuck head, it is capped there and scrolls inside itself
+  (Widths: a box is capped at the window). It never pushes the head up.
+- A landing (§6) leaves room for both stuck layers: the section heading,
+  then the record's head.
+- The stuck head has the panel's background and a 1 px `--border` at its
+  bottom, so the body visibly passes under it.
+
+### §9 The line's name says each thing once
+
+The record line's accessible name follows its visible text and says each
+fact once: "0007 Stage normalize: exit met, waiting, owner pablo, 5 days".
+Today it says "waiting" twice (U3).
+
+| # | The operator can | Checked by |
+|---|---|---|
+| B12 | keep Rule in view while reading a record taller than the view | land on a tall waiting record at 1024×640, scroll 600 px: the record's line and Rule are under the section heading; scroll past the record's end: they leave with it |
+| B13 | rule from a stuck head | open the rule box while the head is stuck: the box is under Rule, capped, the head does not move |
+| B14 | hear each fact of a record line once | the `dec-line` accessible name contains "waiting" once |
+
 ## Open questions
 
 - **O1** (Pablo): are these the jobs that keep you here (rule what waits,

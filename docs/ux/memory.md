@@ -154,6 +154,14 @@ rule / Ruled / Timeline as sticky 16 px disclosure headings remembered per
 machine; Timeline last and closed; Ruled shows the newest ten; one-line
 Timeline rows. O1 for Pablo: confirm the four jobs.
 
+Leftovers-3 (2026-10-03, `reviews/2026-10-03-rank-leftovers-3.md`, thread
+01M41B2BRFY6W55KSBC307ZWY5): sup25's U1–U3 and W1–W5 plus gaps, 11 rows and
+5 gate/fixture rows, none needs Pablo. decisions-view absorbs U2 (sticky
+record head under the sticky section heading; 0069's note meant "stays") and
+U3 as its Amendment 1 (B12–B14). DS Widths amended: wide measured on the row
+(2200 floor); an all-empty column gives way first; signals fold least urgent
+first; a scrolling region shows its edge.
+
 ## Open questions
 
 - none open.

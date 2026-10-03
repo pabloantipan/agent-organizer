@@ -11,6 +11,7 @@ know, ruled choices, open findings, lessons), `docs/ux/principles.md`, and
 
 - **Doing:** nothing in flight. 2026-10-03: sent the FSE `docs/ux/specs/roadmap-time-zoom.md` (time zoom on Cards, Stages, Decisions); O1 and O3 ruled in 0070 (commit times in the card; no Hours without a timestamp); the FSE cards it after header-fold-2.
 - **Also 2026-10-03:** sent the FSE the Decisions view review and spec (`reviews/2026-10-03-decisions-view.md`, `specs/decisions-view.md`); O1 (the jobs) is for Pablo.
+- **Also 2026-10-03:** ranked sup25's leftovers (leftovers-3); decisions-view Amendment 1 (U2, U3); DS Widths amended.
 - **Before that:** nothing in flight. Last work: the ranked leftovers of header-fold
   and responsive-home-2, `docs/ux/reviews/2026-09-30-rank-header-fold-responsive-2.md`
   (3f3df2f), with the design system amended (Widths: wide from 2200, signals
@@ -60,3 +61,4 @@ know, ruled choices, open findings, lessons), `docs/ux/principles.md`, and
 - 2026-10-03 — scope widened to every Gantt-style graph (Cards, Stages, Decisions; not Calendar); spec amended, answered the FSE.
 - 2026-10-03 — 0070 ruled O1 and O3 as recommended; spec and memory updated.
 - 2026-10-03 — Decisions view: review D1–D7 from Pablo's screenshot and the code, plus a design spec (find, summary line, collapsible sticky sections, ten ruled, Timeline last).
+- 2026-10-03 — leftovers-3 ranked (11 rows); decisions-view absorbs U2/U3 (Amendment 1); DS: wide measured, fold order, scroll edge.
