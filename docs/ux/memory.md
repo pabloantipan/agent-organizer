@@ -135,11 +135,11 @@ gap; none needs Pablo. Widths amended: wide from 2200 (was 1920), signals
 never wrap in any class, a column gives way only when it doesn't fit, scrim
 in regular; 24 px targets; focus ring offset on accent; stage word "now".
 
-Roadmap time zoom (2026-10-03, `specs/roadmap-time-zoom.md`, proposed, for
+Time zoom on every Gantt-style axis (Cards, Stages, Decisions; not Calendar) (2026-10-03, `specs/roadmap-time-zoom.md`, proposed, for
 the FSE, thread 01M416RZH3E5VPJC9D5H8PK73F; Pablo: "month … days and then to
-hours with mins"): Months (as built) → Days (40 px/day) → Hours (64 px/h,
+hours with mins"; widened: "each graph that implicates time as gantt style"): Fit (as built) → Days (40 px/day) → Hours (64 px/h,
 quarter-hour grid); − level + Today Fit; pinch/⌘-wheel/keys/double-click
-one level each, pointer-anchored; day-precision dates fill their whole day;
+one level each, pointer-anchored; Hours only where a mark has a time; day-precision dates fill their whole day;
 edge pointers for marks out of view; level not remembered.
 
 ## Open questions
