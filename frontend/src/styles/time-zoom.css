@@ -1,0 +1,80 @@
+/* The time zoom shared by Roadmap Cards, Roadmap Stages and the Decisions
+   Timeline (docs/ux/specs/roadmap-time-zoom.md; design system, Timeline).
+   Tier-2 tokens only. The frame scrolls sideways at Days and Hours; the label
+   column and the axis stay put, the page never scrolls sideways. */
+
+/* The line above the graph: the Stages | Cards | Calendar switch or the
+   Timeline's title on the left, the control on the right; it wraps under the
+   switch when narrow, never into a menu. */
+.tz-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-4); margin-bottom: var(--space-3); }
+.tz-head .seg { margin-bottom: 0; }
+.tz-ctl-wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--space-2) var(--space-3); margin-left: auto; }
+.tz-note { font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); font-weight: var(--weight-regular); }
+.tz-ctl { display: inline-flex; align-items: center; gap: var(--space-1); }
+.tz-ctl button { min-height: var(--control-sm); font-size: var(--font-size-sm); font-weight: var(--weight-medium); }
+.tz-ctl .tz-icon { display: inline-flex; align-items: center; justify-content: center; width: 28px; min-width: 28px; padding: 0; font-size: var(--font-size-xl); line-height: 1; }
+.tz-level { min-width: 44px; text-align: center; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg); font-weight: var(--weight-medium); }
+
+/* The frame */
+.tz-frame { position: relative; overflow: hidden; outline: none; border-radius: var(--radius-md); }
+.tz-frame:focus-visible { box-shadow: inset 0 0 0 2px var(--focus-ring); }
+.tz-frame.zoomed { overflow: auto; max-height: max(320px, calc(100vh - 240px)); overscroll-behavior-x: contain; }
+.tz-content { position: relative; }
+.gantt-body.tz-host { padding: 10px 0 0; overflow: hidden; }
+.srm .tz-frame { margin: 0 calc(-1 * var(--space-4)) 0 0; }
+
+/* Rows: the graph's own row classes, laid on the frame's columns. */
+.tz-row { display: grid; grid-template-columns: 240px var(--tz-lane); }
+.tz-row > .tz-label { position: sticky; left: 0; z-index: 5; }
+.tz-frame.zoomed .tz-row > .tz-label { background: var(--surface); }
+.tz-frame.zoomed .srm-row.current > .tz-label { background: var(--surface-selected); }
+.tz-frame.zoomed .srm-row > .srm-toggle:hover { background: var(--surface-hover); }
+.tz-row > .tz-lane, .tz-row > .g-lane, .tz-row > .srm-lane { width: var(--tz-lane); }
+.tz-pin { position: sticky; left: 0; z-index: 5; }
+
+/* The axis */
+.tz-axis-row { min-height: 52px; border-bottom: 1px solid var(--border); margin-bottom: var(--space-1); }
+.tz-frame.zoomed .tz-axis-row { position: sticky; top: 0; z-index: 6; background: var(--surface); }
+.tz-frame.zoomed .tz-corner { z-index: 7; background: var(--surface); }
+.tz-axis { position: relative; height: 52px; width: var(--tz-lane); user-select: none; -webkit-user-select: none; }
+.tz-tick { position: absolute; top: 0; bottom: 0; border-left: 1px dashed var(--border); }
+.tz-tick > span { position: absolute; top: var(--space-0-5); left: var(--space-1); font-family: var(--mono); font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-subtle); white-space: nowrap; }
+.tz-frame.zoomed .tz-tick > span { top: 20px; }
+.lvl-days .tz-tick { border-left-style: solid; border-left-color: var(--border-subtle); }
+.lvl-days .tz-tick > span { left: 0; right: 0; text-align: center; font-size: 10px; letter-spacing: -0.02em; }
+.tz-tick.minor { border-left: 1px solid var(--border-subtle); }
+.tz-tick.midnight { border-left: 1px solid var(--border-strong); }
+.tz-tick.midnight > span { font-family: var(--font); font-weight: var(--weight-semibold); color: var(--fg-muted); }
+/* Zoomed, an axis mark's title sits beside its mark, under the tick labels. */
+.tz-frame.zoomed .g-mark span { bottom: -4px; left: calc(50% + 8px); }
+.tz-frame.zoomed.lvl-hours .g-mark span { left: 12px; }
+.tz-context { position: absolute; top: var(--space-0-5); padding: 0 var(--space-1-5); font-size: var(--font-size-sm); line-height: var(--line-sm); font-weight: var(--weight-semibold); color: var(--fg); background: var(--surface); white-space: nowrap; z-index: 3; border-radius: var(--radius-xs); }
+.tz-undated-label { position: absolute; top: var(--space-0-5); padding-left: var(--space-1); font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-subtle); white-space: nowrap; border-left: 1px solid var(--border-strong); height: 100%; }
+
+/* The grid behind the rows: ticks, weekends, today. */
+.tz-grid { position: absolute; top: 0; bottom: 0; pointer-events: none; overflow: hidden; }
+.tz-line { position: absolute; top: 52px; bottom: 20px; border-left: 1px dashed var(--border-subtle); }
+.lvl-days .tz-line { border-left-style: solid; }
+.tz-line.minor { border-left: 1px dotted var(--border-subtle); opacity: .6; }
+.tz-weekend { position: absolute; top: 0; bottom: 20px; background: var(--surface-raised); }
+.tz-todayband { position: absolute; top: 0; bottom: 20px; background: var(--accent-muted); opacity: .45; }
+.tz-undated-edge { position: absolute; top: 0; bottom: 20px; border-left: 1px solid var(--border-strong); }
+.tz-today { position: absolute; top: 0; bottom: 4px; border-left: 2px solid var(--accent); z-index: 4; }
+.tz-today > span { position: absolute; bottom: 0; left: 5px; font-size: var(--font-size-xs); line-height: var(--line-xs); font-weight: var(--weight-semibold); color: var(--accent-fg); background: var(--surface); padding: 0 3px; border-radius: var(--radius-xs); white-space: nowrap; }
+.tz-foot { height: 20px; }
+
+/* Marks the zoom adds: a whole day at Hours, and pointers to marks out of view. */
+.tz-band { position: absolute; top: 4px; bottom: 4px; border-radius: var(--radius-xs); opacity: .5; }
+.tz-band.now { background: var(--status-now-bg); } .tz-band.next { background: var(--status-next-bg); } .tz-band.blocked { background: var(--status-blocked-bg); }
+.tz-band.done, .tz-band.superseded, .tz-band.withdrawn { background: var(--status-done-bg); }
+.tz-band.ruled { background: var(--decision-ruled-bg); } .tz-band.proposed { background: var(--decision-waiting-bg); }
+.tz-band.current, .tz-band.planned { background: var(--status-now-bg); }
+.tz-band.gate { background: var(--decision-ruled-bg); }
+.tz-band.axis { top: auto; bottom: 0; height: 18px; background: var(--surface-raised); opacity: 1; }
+.lvl-hours .g-dot, .lvl-hours .dec-dot, .lvl-hours .srm-dot { transform: none; margin-left: 0; }
+.lvl-hours .g-mark { transform: none; justify-items: start; }
+.lvl-hours .g-mark span { left: 0; }
+.tz-edge { position: absolute; top: 50%; transform: translateY(-50%); z-index: 4; min-height: 0; height: auto; padding: 1px var(--space-1-5); border: 0; border-radius: var(--radius-xs); background: var(--surface); font-family: var(--mono); font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-muted); white-space: nowrap; cursor: pointer; }
+.tz-edge.right { transform: translate(-100%, -50%); }
+.tz-edge:hover { color: var(--fg); background: var(--surface-hover); }
+.tz-nothing { position: absolute; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); background: var(--surface); padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); z-index: 4; white-space: nowrap; }
