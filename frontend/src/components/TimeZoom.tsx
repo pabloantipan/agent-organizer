@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import {
-  GUTTER, LABEL_W, LEVEL_WORD, anchorScroll, buttonAnchor, clampScroll, contextLabel, dayMonth, deeper, hhmm,
-  revealScroll, scaleOf, shallower, sideOf, startOfDay, addLocalDays, stepOf, ticksOf, todayScroll, windowOf,
-  type Level, type Scale, type Span,
+  GUTTER, LABEL_W, LEVEL_WORD, anchorScroll, buttonAnchor, clampScroll, contextAt, dayMonth, deeper, focusAfter, hhmm,
+  revealScroll, scaleOf, shallower, sideOf, startOfDay, addLocalDays, stepOf, tickLabelWhole, ticksOf, todayScroll, windowOf,
+  type Level, type Scale, type Span, type Tick, type ZoomButton,
 } from "../lib/axis";
 import "../styles/time-zoom.css";
 
@@ -163,7 +163,7 @@ export function useTimeZoom(o: ZoomOptions) {
   };
 
   return {
-    level, scale, laneW, reserve, view, frameW, scrollX, now, deepest, frameRef,
+    level, scale, laneW, reserve, view, frameW, scrollX, now, deepest, frameRef, hours: o.hours,
     canIn: !deepest, canOut: level !== "fit",
     ...api,
     onScroll, onKeyDown,
@@ -174,18 +174,35 @@ export function useTimeZoom(o: ZoomOptions) {
   };
 }
 
-/** `[-] level [+]  Today  Fit`, the same on every graph. */
+/** `[-] level [+]  Today  Fit`, the same on every graph and at every level
+ *  (§A1.1): nothing mounts or unmounts, so the control keeps its width; a
+ *  button that cannot act here is disabled, and when the one just pressed
+ *  disables, focus moves to the opposite zoom button, never to the body. */
 export function ZoomControl({ z, note }: { z: Zoom; note?: string }) {
   const word = LEVEL_WORD[z.level];
+  const refs = useRef<Partial<Record<ZoomButton, HTMLButtonElement | null>>>({});
+  const focusNext = useRef<ZoomButton | null>(null);
+  useLayoutEffect(() => {
+    const b = focusNext.current;
+    focusNext.current = null;
+    if (b) refs.current[b]?.focus();
+  }, [z.level]);
+  const press = (b: ZoomButton, next: Level | null, act: () => void) => {
+    if (next && next !== z.level) focusNext.current = focusAfter(b, next, z.hours);
+    act();
+  };
+  const fit = z.level === "fit";
   return (
     <div className="tz-ctl-wrap">
       {note && <span className="tz-note">{note}</span>}
       <div className="tz-ctl" role="group" aria-label={`Zoom, ${word}`}>
-        <button className="tz-icon" aria-label="Zoom out" title="Zoom out (−)" disabled={!z.canOut} onClick={() => z.zoomOut()}>−</button>
+        <button ref={(e) => { refs.current.out = e; }} className="tz-icon" aria-label="Zoom out" title="Zoom out (−)" disabled={!z.canOut}
+          onClick={() => press("out", shallower(z.level), () => z.zoomOut())}>−</button>
         <span className="tz-level" aria-live="polite">{word}</span>
-        <button className="tz-icon" aria-label="Zoom in" title="Zoom in (+)" disabled={!z.canIn} onClick={() => z.zoomIn()}>+</button>
-        <button className="small" onClick={() => z.today()} title="Today (t)">Today</button>
-        {z.level !== "fit" && <button className="small" onClick={() => z.fit()} title="Fit (0)">Fit</button>}
+        <button ref={(e) => { refs.current.in = e; }} className="tz-icon" aria-label="Zoom in" title="Zoom in (+)" disabled={!z.canIn}
+          onClick={() => press("in", deeper(z.level, z.hours), () => z.zoomIn())}>+</button>
+        <button ref={(e) => { refs.current.today = e; }} className="small" disabled={fit} onClick={() => z.today()} title="Today (t)">Today</button>
+        <button ref={(e) => { refs.current.fit = e; }} className="small" disabled={fit} onClick={() => press("fit", "fit", () => z.fit())} title="Fit (0)">Fit</button>
       </div>
     </div>
   );
@@ -212,7 +229,10 @@ export function TimeFrame({ z, label, axis, extents, undated, children }: FrameP
   // Fit keeps a tick's label clear of the undated edge's label (Stages).
   // and every label clear of the lane's right end.
   const labelled = (x: number) => x < z.laneW - 36 && (zoomed || !undated || x < s.width - 56);
-  const ctx = zoomed ? contextLabel(z.level, s.at(Math.max(z.scrollX, 0))) : "";
+  const ctx = zoomed ? contextAt(s, z.scrollX) : "";
+  // Zoomed, a tick label shows only whole, between the label column and the
+  // frame's right edge (§A1.6); the sticky context label covers the left.
+  const whole = (t: Tick) => !zoomed || tickLabelWhole(t, z.level, z.scrollX, z.frameW - LABEL_W);
   const todayWord = z.level === "hours" ? `now ${hhmm(z.now)}` : "today";
   return (
     <div
@@ -235,10 +255,10 @@ export function TimeFrame({ z, label, axis, extents, undated, children }: FrameP
           <div className="tz-row tz-axis-row">
             <div className="tz-label tz-corner" />
             <div className="tz-axis" onDoubleClick={(e) => z.onAxisDoubleClick(e.clientX)} title={z.canIn ? "Double-click to zoom in here" : undefined}>
-              {ticks.filter((t) => t.major && t.label && labelled(t.x)).map((t) => (
+              {ticks.filter((t) => t.major && t.label && labelled(t.x) && whole(t)).map((t) => (
                 <span key={t.at} className={`tz-tick ${t.midnight ? "midnight" : ""}`} style={{ left: t.x, width: t.width }}><span>{t.label}</span></span>
               ))}
-              {ticks.filter((t) => !t.major && t.label).map((t) => (
+              {ticks.filter((t) => !t.major && t.label && whole(t)).map((t) => (
                 <span key={t.at} className="tz-tick minor" style={{ left: t.x }}><span>{t.label}</span></span>
               ))}
               {z.reserve > 0 && undated && <span className="tz-undated-label" style={{ left: s.width }}>{undated}</span>}
@@ -277,5 +297,18 @@ export function EdgePointer({ z, from, to }: { z: Zoom; from: number; to: number
     >
       {side === "left" ? `‹ ${date}` : `${date} ›`}
     </button>
+  );
+}
+
+/** A whole day at Hours (§A1.2): the status's band with a border in its
+ *  colour, and the mark's dot inside it, pinned at the lane's visible left
+ *  edge while the band crosses it (sticky within the band, so it returns to
+ *  the band's start once that is in view). */
+export function DayBand({ z, from, to, status, dot, title }: { z: Zoom; from: number; to: number; status: string; dot: string; title: string }) {
+  const x = z.scale.x;
+  return (
+    <div className={`tz-band day ${status}`} style={{ left: x(from), width: x(to) - x(from) }} title={title}>
+      <span className={`${dot} ${status} tz-pinned`} />
+    </div>
   );
 }

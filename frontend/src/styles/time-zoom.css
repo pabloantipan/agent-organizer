@@ -13,7 +13,7 @@
 .tz-ctl { display: inline-flex; align-items: center; gap: var(--space-1); }
 .tz-ctl button { min-height: var(--control-sm); font-size: var(--font-size-sm); font-weight: var(--weight-medium); }
 .tz-ctl .tz-icon { display: inline-flex; align-items: center; justify-content: center; width: 28px; min-width: 28px; padding: 0; font-size: var(--font-size-xl); line-height: 1; }
-.tz-level { min-width: 44px; text-align: center; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg); font-weight: var(--weight-medium); }
+.tz-level { width: 48px; text-align: center; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg); font-weight: var(--weight-medium); }
 
 /* The frame */
 .tz-frame { position: relative; overflow: hidden; outline: none; border-radius: var(--radius-md); }
@@ -29,6 +29,10 @@
 .tz-frame.zoomed .tz-row > .tz-label { background: var(--surface); }
 .tz-frame.zoomed .srm-row.current > .tz-label { background: var(--surface-selected); }
 .tz-frame.zoomed .srm-row > .srm-toggle:hover { background: var(--surface-hover); }
+/* The current stage's highlight lies over the grid (weekend tint, gridlines),
+   never under it, so it reads as one band at Days (§A1 row 9). The today line
+   stays above it. */
+.tz-frame.zoomed .srm-row.current > .srm-lane { background: var(--surface-selected); }
 .tz-row > .tz-lane, .tz-row > .g-lane, .tz-row > .srm-lane { width: var(--tz-lane); }
 .tz-pin { position: sticky; left: 0; z-index: 5; }
 
@@ -64,17 +68,23 @@
 .tz-foot { height: 20px; }
 
 /* Marks the zoom adds: a whole day at Hours, and pointers to marks out of view. */
-.tz-band { position: absolute; top: 4px; bottom: 4px; border-radius: var(--radius-xs); opacity: .5; }
-.tz-band.now { background: var(--status-now-bg); } .tz-band.next { background: var(--status-next-bg); } .tz-band.blocked { background: var(--status-blocked-bg); }
-.tz-band.done, .tz-band.superseded, .tz-band.withdrawn { background: var(--status-done-bg); }
-.tz-band.ruled { background: var(--decision-ruled-bg); } .tz-band.proposed { background: var(--decision-waiting-bg); }
-.tz-band.current, .tz-band.planned { background: var(--status-now-bg); }
-.tz-band.gate { background: var(--decision-ruled-bg); }
-.tz-band.axis { top: auto; bottom: 0; height: 18px; background: var(--surface-raised); opacity: 1; }
+/* A whole day at Hours (§A1.2): the status's -bg fill groups, the 1 px
+   border in the status colour carries the 3:1 against the lane. */
+.tz-band { position: absolute; top: 4px; bottom: 4px; border-radius: var(--radius-xs); border: 1px solid transparent; }
+.tz-band.now { background: var(--status-now-bg); border-color: var(--status-now); } .tz-band.next { background: var(--status-next-bg); border-color: var(--status-next); } .tz-band.blocked { background: var(--status-blocked-bg); border-color: var(--status-blocked); }
+.tz-band.done, .tz-band.superseded, .tz-band.withdrawn { background: var(--status-done-bg); border-color: var(--status-done); }
+.tz-band.ruled { background: var(--decision-ruled-bg); border-color: var(--decision-ruled); } .tz-band.proposed { background: var(--decision-waiting-bg); border-color: var(--decision-waiting); }
+.tz-band.current, .tz-band.planned { background: var(--status-now-bg); border-color: var(--status-now); }
+.tz-band.gate { background: var(--decision-ruled-bg); border-color: var(--decision-ruled); }
+/* Its dot sticks just inside the label column while the band crosses it. */
+.tz-band.day > .tz-pinned { position: sticky; left: calc(240px + var(--space-1)); top: auto; display: block; margin: 7px 0 0; transform: none; }
+/* At Hours a bar's times and due sit after its end, unfaded (§A1.5). */
+.g-lane > .tz-after { position: absolute; top: 9px; margin-left: var(--space-1-5); font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tz-band.axis { top: auto; bottom: 0; height: 18px; background: var(--surface-raised); border: 0; }
 .lvl-hours .g-dot, .lvl-hours .dec-dot, .lvl-hours .srm-dot { transform: none; margin-left: 0; }
 .lvl-hours .g-mark { transform: none; justify-items: start; }
 .lvl-hours .g-mark span { left: 0; }
-.tz-edge { position: absolute; top: 50%; transform: translateY(-50%); z-index: 4; min-height: 0; height: auto; padding: 1px var(--space-1-5); border: 0; border-radius: var(--radius-xs); background: var(--surface); font-family: var(--mono); font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-muted); white-space: nowrap; cursor: pointer; }
+.tz-edge { position: absolute; top: 50%; transform: translateY(-50%); z-index: 4; display: inline-flex; align-items: center; min-height: var(--control-sm); height: var(--control-sm); padding: 0 var(--space-1-5); border: 0; border-radius: var(--radius-xs); background: var(--surface); font-family: var(--mono); font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-muted); white-space: nowrap; cursor: pointer; }
 .tz-edge.right { transform: translate(-100%, -50%); }
 .tz-edge:hover { color: var(--fg); background: var(--surface-hover); }
 .tz-nothing { position: absolute; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); background: var(--surface); padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); z-index: 4; white-space: nowrap; }
