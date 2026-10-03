@@ -5,7 +5,7 @@ repos: [organizer]
 branch: home-widths-4
 updated: 2026-10-03
 next: "review: home-widths-4, 0076 applied (the cell folds last, 650ee48); clip probe 0 bad rows at 1024/1280/1440/1512/1920, rail expanded and strip; G19-G23 and G8 met; G24 is the UI reviewer's"
-review: fail
+review: pass
 depends_on: [decisions-view, time-zoom-2]
 boundary: ["frontend/src/components/Home.tsx, Rail.tsx, RuleDecisionBox.tsx", "frontend/src/components/Crew.tsx (CellStateLz only), Conversation.tsx (FR-24's names and focus only)", "frontend/src/lib/width.ts, frontend/src/lib/ and its tests", "frontend/src/styles/home.css, rule-box.css, global.css (.rail-icon only), shell.css (the rail's rules only)", "testdata/fixture-twenty/ and scripts/fixture-home.sh (FR-25's rows)", "not: header-fold-3's files, DecisionsView.tsx, Go, docs/design-system.md"]
 spec: "docs/specs/responsive-home.md (amendment 4, FR-20 to FR-25); the ranking docs/ux/reviews/2026-10-03-rank-leftovers-3.md (Aglaea, 2b6d608); the design system's Widths as amended there"
@@ -42,15 +42,22 @@ widths-and-focus's leftovers, ranked by Aglaea: FR-20 to FR-25 of
 ## Blockers
 
 ## Review
-- **Verdict:** fail (code review, second re-review of 40ab320, the same tree as 2941f2c after the rebase). G19, G20, G21, G22 and G8 met; G23 unmet; G24 is the UI reviewer's.
-- **Unmet:** G23. At 1024×640, `--twenty`, with the rail expanded, partner-payouts' CellStateLz is shown but its text span is 0 of 84 px wide, so there is neither the whole text nor an ellipsis, and the lozenge sits 8 px past the clipped signal column. Its "+4" sits 39 px past the column, so the four folded signals have no visible marker; only the `title` and the accessible name still list them. The same happens at 1280×800 with the rail expanded (text 0/84, "+4" 19 px past the column). It comes from e02059b: waiting, blocked and the cell never fold, and in compact their total is wider than the 145 px column. Before e02059b, at 1024 with the rail expanded, the cell folded (the builder's g23.log). With the rail as the strip (fresh storage) at 1024, and at 1439, 1440, 1512 and 1920 with the rail expanded, no signal is clipped or emptied. This also regresses G11 ("+N" at 1024×640, rail expanded). Fix: never-fold lozenges must share the column so each keeps a visible ellipsis and "+N" stays inside it. If they cannot, say so on 0076 for Pablo.
-- **Rerun by the reviewer** (my own detached worktree at 40ab320, `fixture-home.sh --twenty`, my own wails dev, headless Chromium, the builder's probe scripts copied, plus a clip probe over every row): G19 at 1440×900 and 1512×945: the all-"—" next date gone, 21/21 goals shown; on partner-payouts (state "waits on you") waiting and the cell cut with their ellipsis, blocked whole, and only now, wave, live and problem in "+4". Wave counts as live by the design system's Widths and `FOLD`. G20 at 2200×1200 and 2560×1440, rail expanded and collapsed: wide each time, every goal whole or ≥ 70 characters (partner-payouts 70, 87, 95, 95). G21 on Home and Decisions at 1512×945 and 1024×640: after a click on the record's text, Escape closes the box; the opener's row is marked `--surface-selected`, and on Home it sits at z 20 over the scrim at 19. G23 at 1024×640 (strip) and 1920×1080: the text is whole, or cut 65/84 px with an ellipsis, on `.lz-t`. Needs me lists 9 rows, including "partner-payouts · Partner terms" and the partner-payouts cell row. G22 from the diff (`Reply to <from>`, `Branch from <from>'s message`, `Hide people`, `.rail-icon` 24×24, focus to the People toggle) and g22-fix.log; nothing that touches it changed after 95ace22.
-- **G8** in the builder's worktree at 2941f2c: `XDG_DATA_HOME=$(mktemp -d) make test` green (148 vitest), `npm test` and `npm run build` ok, the G18 grep empty; `wails build` ok in my worktree at 40ab320.
+- **Verdict:** pass (code review, third re-review, of 650ee48). G19 (as amended by 0076, ce75486), G20, G21, G22, G23 and G8 met; G24 is the UI reviewer's.
+- **Unmet:** none.
+- **Rerun by the reviewer** (my own detached worktree at 650ee48, `fixture-home.sh --twenty`, my own wails dev on 34471, headless Chromium with a fresh profile per run, 40 s wait for the agents feed; logs in `.wt-notes/hw4-review/`):
+  - Clip probe over every row at 1024×640, 1280×800, 1440×900, 1512×945 and 1920×1080, rail expanded and as the strip: 0 rows with a signal outside the column or a text span without text (`clip.log`). At 1024×640 expanded (145 px column): waiting 54 px and blocked 54 px, each cut with its ellipsis, and "+5" 27 px inside the column.
+  - G19 at 1440×900 and 1512×945, rail expanded: the all-"—" next date gone, 21/21 goals shown; on partner-payouts waiting · you is shown (cut, ellipsis), blocked whole, and "+5" holds exactly problem, now, wave, live and the cell, which the hover and the accessible name list (`g19.log`).
+  - G20 at 2200×1200 and 2560×1440, rail expanded and collapsed: wide every time, every goal whole or ≥ 70 characters (partner-payouts 70, 87, 95, 95) (`g20.log`).
+  - G21 on Home and Decisions at 1512×945 and 1024×640: after a click on the record's text, Escape closes the box and focus returns to Rule; the opener's row carries `data-rb-opener` and `--surface-selected`, on Home at z 20 over the scrim at 19 (`g21.log`).
+  - G23 at 1024×640 and 1920×1080, rail expanded and as the strip: every shown CellStateLz has its text on `.lz-t` with `text-overflow: ellipsis` (whole here), partner-payouts' folds into "+N" as 0076 allows; Needs me lists 9 rows including "partner-payouts · Partner terms" (`g23.log`).
+  - G22 from the diff: `Reply to <from>`, `Branch from <from>'s message`, `Hide people`, `.rail-icon` 24×24, focus to the People toggle after hide. Nothing G20–G22 reads changed since my last run at 2941f2c (the only frontend changes are OneLine, `shareRoom`, `FOLD.cell`, home.css's signal rules).
+- **G8** in the builder's worktree at 650ee48: `XDG_DATA_HOME=$(mktemp -d) make test` exit 0 (152 vitest), `npm test` and `npm run build` ok, the G18 grep empty; `wails build` ok in my worktree.
+- **Boundary:** the diff stays inside `boundary` (Crew.tsx only in `CellStateLz`, global.css only `.rail-icon`), plus SlackView.tsx, widened by sup28.
 - **Outside the gate:**
-  - the gate fixes no rail state for G23 or G15, and compact with the rail expanded is where never-fold overflows. G19 to G23 should name the rail state, or check both;
-  - on Decisions at 1024×640 the box still covers its own Rule (top element `DIV.rb`), as before;
-  - the box's Escape yields to any other `[role="dialog"]` in the document, as before;
-  - the diff stays inside `boundary`, plus SlackView.tsx (widened by sup28).
+  - the cell is in "+N" at every size measured, 1920 included, because the fold step compares natural widths and the waiting list alone is wider than the column; a cut waiting would leave room for the cell at 1512 and up. 0076 allows it; whether the cell should show where it could is Aglaea's call;
+  - `shareRoom` can still return `fits: false` (floors wider than the room); with the cell foldable it no longer happens on the fixture, but nothing guarantees "+N" stays inside for a row with only waiting and blocked in a narrower column;
+  - the gate still names no rail state for G11, G15 and G23; G19's amendment names it for 1024 only;
+  - on Decisions at 1024×640 the box still covers its own Rule (top element `DIV.rb`), as before.
 - **Reviewer:** hw4-review, 2026-10-03
 
 ## UI review
