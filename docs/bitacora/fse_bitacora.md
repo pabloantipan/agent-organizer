@@ -44,6 +44,23 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   supervise finding on changed tasks is postponed; a changed task goes into
   a fresh seat's launch prompt.
 
+## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
+
+- sup25's task closed (aff199a): 46 min against 0069's 40-70, all four
+  reviews passed first time. Run record runs/2026-10-03-header-fold-2-widths-and-focus.md
+  ("Found, not asked"). Ended by me: probe -k, token rm, organizer clean,
+  prompt files removed. sup26 (time-zoom) still running.
+- To triage with Pablo: U2 needs his reading of 0069's note (record head
+  stays at top while scrolling vs only lands there); W1 (wide's start at
+  2200 cuts goals with the rail open), W2 (which signals fold first), W3
+  (Escape after clicking record text does not close the rule box) are sev 2;
+  U1 sev 2; the rest sev 1 or spec cleanup (G13/G15 wording, FR-11 untested).
+- Run records live in <initiative root>/runs/ now (supervise skill), not
+  ~/agent-slack/docs/runs/. sup26's prompt named the old place; the skill wins.
+- Repetition: a spec boundary named the wrong file (StageRoadmap.tsx held
+  "current", not Roadmap.tsx). spec-craft 5b traced the claims I wrote, not
+  where the words live: first time; second time, propose a grep step.
+
 ## OPEN — 2026-10-03, sup25 running; Decisions view review asked
 
 - sup25 launched (Pablo "ok"): token added, prelude and prompt in
