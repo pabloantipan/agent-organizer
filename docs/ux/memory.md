@@ -144,6 +144,16 @@ edge pointers for marks out of view; level not remembered. **0070**: commit
 times (`%cI`) in the same card; no timestamp → no Hours (Pablo: "component
 shall detect it and avoid showing hours"). Card after header-fold-2.
 
+Decisions view (2026-10-03, review `reviews/2026-10-03-decisions-view.md`
+D1–D7, spec `specs/decisions-view.md` proposed, thread
+01M417NHHRR2WP7XPY69XM438N). Pablo: the operator "spend mayor time in this
+view". D1 (4): every record is listed twice (Timeline + Ruled), ≈ 6,500 px.
+D2 (3): the tiles and the median (always 0d) answer nothing. D3 (3): there is
+no way to find a ruling. Design: a find field; a summary line of words; To
+rule / Ruled / Timeline as sticky 16 px disclosure headings remembered per
+machine; Timeline last and closed; Ruled shows the newest ten; one-line
+Timeline rows. O1 for Pablo: confirm the four jobs.
+
 ## Open questions
 
 - none open.
