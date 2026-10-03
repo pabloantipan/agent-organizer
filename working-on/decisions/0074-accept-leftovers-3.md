@@ -1,13 +1,13 @@
 ---
 title: Accept the leftovers-3 batch (both specs' amendment 4, decisions-view and time-zoom Amendment 1) and launch its cards
-status: proposed
+status: ruled
 raised: 2026-10-03
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-03
+ruled_by: pablo
 options: [accept as written, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [header-fold-3, home-widths-4, decisions-view, time-zoom-2]
 threads: [01M41B2BRFY6W55KSBC307ZWY5, 01M41BMCN93DZYWK5SZFNEBEVM]
 supersedes: []
@@ -73,6 +73,8 @@ The FSE's: accept as written. Every design call is Aglaea's; the rest is
 the design system as amended and gate fixes.
 
 ## Ruling
+
+pablo, 2026-10-03, in the organizer on lodestar: Ok
 
 ## Consequences
 
