@@ -1,10 +1,10 @@
 ---
 title: Decisions and zoom polish - focus kept at the zoom's ends, a sticky axis, finds open their sections, honest empty and hidden counts
-status: now
+status: done
 repos: [organizer]
 branch: zoom-decisions-polish
 updated: 2026-10-03
-next: "review: zoom-decisions-polish, U1 fixed at b7e8671 (Stages zooms its frame, not the page; Chromium and WKWebView), gate L1-L8 and L0 still met"
+next: "none: merged d92e33e; U2-U4, R2 and the gate gaps went to the FSE"
 depends_on: []
 boundary: ["frontend/src/components/TimeZoom.tsx, frontend/src/styles/time-zoom.css, frontend/src/lib/axis.ts and its tests", "frontend/src/components/DecisionsView.tsx, frontend/src/styles/decisions.css (FR-2 to FR-8 only)", "frontend/src/lib/ and its tests", "testdata/fixture-overlay/", "not: scripts/fixture-home.sh, testdata/fixture-twenty/, global.css, rule-box.css, RuleDecisionBox.tsx, StageRoadmap.tsx, header-fold-3's and home-widths-4's files, Go, docs/design-system.md"]
 spec: "docs/specs/leftovers-4.md (FR-1 to FR-8); the ranking docs/ux/reviews/2026-10-03-rank-leftovers-4.md (Aglaea, 94308ad); the design system as amended there"
@@ -22,6 +22,7 @@ The first half of sup27's leftovers, the part free of sup28's files.
 - [x] L0: see `docs/specs/leftovers-4.md`, Acceptance
 
 ## Done
+- 2026-10-03 sup29: code review pass, UI review pass at b7e8671 (after U1); merged to main d92e33e; make test and npm run build green on main
 - 2026-10-03 zdp-build: U1 fixed (b7e8671, `.tz-wrap { min-width: 0 }`), rebased on adb2969 (branch now 5394ed9..b7e8671). Stages at Days, 1512x945, rail expanded: Chromium page scrollWidth 1262 = clientWidth, frame 1206 wide scrolls 3632, Today moves it 0 -> 2239; WKWebView no page-wide scrollbar, Today moves the frame. Cards (Days, Hours) and Decisions (Days) unchanged, no page overflow. Stages offers no Hours in the fixture (no timed mark), so Hours on Stages is not measured. L0 green. Shots `*-U1-*` in .wt-notes/zdp-build
 - 2026-10-03 zdp-build: FR-1 to FR-8 on zoom-decisions-polish (68dfc40, bf224db, a011b9d, 73f7b57, 5d5abfa, 28f581a), rebased on 7f49158; L1-L8 and L0 measured, rows and shots in .wt-notes/zdp-build/progress.md
 - 2026-10-03 sup29 launched by the FSE
