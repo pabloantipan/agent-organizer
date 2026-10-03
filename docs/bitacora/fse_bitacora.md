@@ -44,6 +44,18 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   supervise finding on changed tasks is postponed; a changed task goes into
   a fresh seat's launch prompt.
 
+## OPEN — 2026-10-03, sup25 running; Decisions view review asked
+
+- sup25 launched (Pablo "ok"): token added, prelude and prompt in
+  ~/.local/share/organizer/prompts/organizer-sup25.*, iTerm window 393104,
+  session organizer-probe-sup25; cards marked in 17d19ba. Let go; end it
+  when both cards are in done/ (standing-up.md, "Ending a supervisor").
+  time-zoom launches after header-fold-2 lands.
+- Pablo's Decisions sub-view ask (collapsible sections, scroll length, tiles,
+  median in days, headings; "the operator spends most time here") is with
+  aglaea, thread 01M417NHHRR2WP7XPY69XM438N. No card until her spec.
+- Hook threads not closed (curl POST refused before); not retried.
+
 ## OPEN — 2026-10-03, roadmap time zoom
 
 - Pablo: "we have dates at the top of the graph, we need to be able have time
