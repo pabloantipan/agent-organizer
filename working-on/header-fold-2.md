@@ -45,6 +45,35 @@ header-fold's UI leftovers, ranked by Aglaea: FR-10 to FR-16 of
 
 ## Blockers
 
+## UI review
+hf2-ui, 2026-10-03, on `ac49856` (header-fold-2), fixture and `--twenty`,
+wails dev :34335, headless Chromium. Shots and logs: `.wt-notes/hf2-ui/`.
+
+**Verdict: pass.** No severity 4 or 3. G12-G17 hold as measured:
+- G12: open at 1024x640 the header is 256 px (40.0%), `.ihead-open` scrolls (180 of 450 px) on Work, Decisions, Conversations; 307 px at 1024x768.
+- G13: Open on a Needs me card row (`--twenty`, onboarding-flow) stores folded; next tab and reload stay folded; chip and stage tile too. Details then switching initiative stays open, reload too.
+- G14: folded at 1024, target whole (122 px), goal cut with an ellipsis (236 px).
+- G15: no id or client under the tabs; counts, "1 need you", New agent on the toolbar line.
+- G16: pointer, hover surface, chevron on bar stage and tiles; current tile ring 2px offset; no "current"; runs 229:698 px for 1:3.
+- G17: Goal/Measure/Scope in/Scope out, more; "Open initiative.yaml in editor"; `dec-line` false then true. init-drafted reads "2 decisions waiting on you", landing focuses 0001 with Rule in view.
+
+**U1, sev 2.** *Cannot:* see the stage after opening Details on the laptop. *Where:* 1024x640-g12-open-work.png. *Evidence:* the bar's stage leaves when open, and the strip sits at 399-527 px under a 180 px area that shows no sign it scrolls (overlay scrollbars). *Severity:* 2, it is one scroll away. *Proposal:* a bottom fade while more is below, or the strip first at compact.
+
+**U2, sev 2.** *Cannot:* keep Rule in view while reading a tall record. *Where:* 1024x640-g17-drafted-landing-scrolled.png. *Evidence:* landing puts 0001's head at the top; one scroll and Rule sits at -362 px. Main does the same, no regression. *Severity:* 2. *Proposal:* a sticky head, as the technical note describes.
+
+**U3, sev 1.** *Cannot:* tell what the record line says. *Where:* Decisions. *Evidence:* the `dec-line` name reads "…waiting owner pablo · 5d waiting". *Severity:* 1. *Proposal:* drop one "waiting" from the name.
+
+**Spec gaps (FSE):**
+- G12 "the strip shown" does not say if the strip may be scrolled out of view (U1).
+- The tall-record note says the head "stays at the top" while the body scrolls, but main only lands it there (U2); say which is meant.
+- A tile whose stage id is a duplicate (init-a's stage 3) opens stage 2. The spec does not say what a tile does in a malformed roadmap.
+
+**Not verified:**
+- The all-initiatives Agents view: it is not mounted.
+- Regular and wide widths: the scripts need the rail's numbers.
+- 200% zoom: below the 1024 minimum window.
+- G11: code review's.
+
 ## Notes
 - The Roadmap rows that said "current" are in StageRoadmap.tsx, not Roadmap.tsx/RoadmapView.tsx as the boundary says; hf2-build changed the word there only (FR-14).
 - The all-initiatives Agents view is not mounted (App.tsx renders AgentsView only inside an initiative), so G15's "all view unchanged" is code-only.
