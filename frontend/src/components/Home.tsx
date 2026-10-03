@@ -365,7 +365,13 @@ function OneLine({ children }: { children: React.ReactNode }) {
     for (const c of items) c.style.display = "inline-flex";
     const more = el.querySelector<HTMLElement>(".sig-more");
     const gap = parseFloat(getComputedStyle(el).columnGap) || 0;
-    const n = signalsThatFit(items.map((c) => Math.max(c.getBoundingClientRect().width, c.scrollWidth)), gap, el.clientWidth, Math.max(more?.getBoundingClientRect().width ?? 0, 28));
+    // A lozenge's natural width: a shrunk one hides the rest in its text
+    // span (FR-14), not in its own overflow.
+    const natural = (c: HTMLElement) => {
+      const t = c.querySelector<HTMLElement>(".lz-t");
+      return Math.max(c.getBoundingClientRect().width + (t ? t.scrollWidth - t.clientWidth : 0), c.scrollWidth);
+    };
+    const n = signalsThatFit(items.map(natural), gap, el.clientWidth, Math.max(more?.getBoundingClientRect().width ?? 0, 28));
     const rest = items.slice(n).map((c) => (c.textContent ?? "").replace(/\s+/g, " ").trim());
     items.forEach((c, k) => { c.style.display = ""; if (k >= n) c.dataset.off = "1"; else delete c.dataset.off; });
     // A shown signal may still be cut by its ellipsis (the first one when
