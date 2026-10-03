@@ -139,8 +139,12 @@
    the goal keeps 160, instead of the goal going to 0 and the chevrons
    spilling into the Needs me column (found building responsive-home-2). */
 .home.wide .port .p-head, .home.wide .port .p-row {
-  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 144px 104px minmax(160px, 1fr) minmax(120px, 208px) var(--t-sig, minmax(120px, 288px)) var(--t-next, 136px) 24px;
+  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 144px 104px minmax(var(--goal-min, 160px), 1fr) minmax(120px, 208px) var(--t-sig, minmax(120px, 288px)) var(--t-next, 136px) 24px;
 }
+/* FR-21: Home is wide only while this goal column keeps each goal's first
+   70 characters (or the whole goal); --goal-min is that width, measured by
+   useHomeClass in Home.tsx, so the goal gets it before stage and signals
+   grow to their tops. */
 /* the Needs me column is narrow: a subject takes two lines before it is cut */
 .home.wide .ib-subject { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 

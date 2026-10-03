@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Briefcase, ChevronDown, ChevronRight, CircleDashed, Compass, Hammer, Hand, Play } from "lucide-react";
 import type { merge, model, service } from "../../wailsjs/go/models";
 import { inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, type NeedsMeRow } from "../lib/queue";
@@ -6,7 +6,7 @@ import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from ".
 import { uniq } from "../lib";
 import { HEALTH, messages } from "../lib/health";
 import { ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
-import { compactColumns, FOLD, NO_EMPTY, signalsShown, type Empty, type Fold, type WidthClass } from "../lib/width";
+import { compactColumns, FOLD, GOAL_CHARS, homeClassOf, NO_EMPTY, signalsShown, wideGoalRoom, type Empty, type Fold, type WidthClass } from "../lib/width";
 import { useBoard } from "../stores/board.store";
 import { nextDate, stageState } from "./InitiativeHeader";
 import { InitiativeDetail } from "./Initiatives";
@@ -20,10 +20,16 @@ import "../styles/home.css";
  *  the rest sit in the rail's Not active group (FR-9).
  *  The window's width class (responsive-home) is a class on .home and
  *  nothing else: the tree is the same in every class, so crossing one
- *  unmounts nothing. Wide puts Needs me in a right column of its own. */
+ *  unmounts nothing. Wide puts Needs me in a right column of its own, and
+ *  only while the list beside it keeps about 70 characters of goal (FR-21):
+ *  Home's class is the window's, measured on the row. */
 export function Home() {
-  const { view, agents, widthClass, roomy, ruleDraft, dropRule } = useBoard();
+  const { view, agents, widthClass: windowClass, roomy: windowRoomy, ruleDraft, dropRule } = useBoard();
   const home = useRef<HTMLDivElement>(null);
+  const { cls: widthClass, goalMin } = useHomeClass(home, windowClass, view);
+  // A window wide enough for wide that Home measures too tight for it is
+  // regular at its top, so the cap lifts as regular's does from 1720.
+  const roomy = windowRoomy || (windowClass === "wide" && widthClass === "regular");
   const rows = view ? needsMeRows(view, agents) : [];
   // A ruled record leaves the queue, and its box and its draft with it.
   const gone = !!ruleDraft && !!view && !rows.some((r) => r.key === ruleDraft.key) ? ruleDraft.key : null;
@@ -31,7 +37,8 @@ export function Home() {
   useKeepScroll(home, widthClass, !!view);
   if (!view) return <div className="empty">Loading…</div>;
   return (
-    <div ref={home} className={`home ${widthClass} ${roomy ? "roomy" : ""}`}>
+    <HomeClass.Provider value={widthClass}>
+    <div ref={home} className={`home ${widthClass} ${roomy ? "roomy" : ""}`} style={widthClass === "wide" ? { "--goal-min": `${goalMin}px` } as React.CSSProperties : undefined}>
       <section className="home-sec home-needs">
         <h2 id={NEEDS_ME_HEADING} tabIndex={-1} className="sec-title">Needs me <span className="num sec-count">{rows.length}</span><span className="sec-sub">everything waiting on you, oldest first</span></h2>
         {rows.length === 0 ? (
@@ -50,7 +57,62 @@ export function Home() {
         <Initiatives view={view} />
       </section>
     </div>
+    </HomeClass.Provider>
   );
+}
+
+/** Home's width class, which the rule box and the rows read in place of the
+ *  window's (FR-21). */
+const HomeClass = createContext<WidthClass>("regular");
+
+/** FR-21: a window in the wide class is wide on Home only while the goal
+ *  column beside Needs me keeps each goal's first 70 characters, or the
+ *  whole goal when it is shorter (lib/width.ts, homeClassOf), with the rail
+ *  expanded or collapsed. Measured on the rows after layout and again when
+ *  the room changes (the window, the rail); the goal's need is measured on
+ *  the goal's own font. `goalMin` is wide's least goal column, so the grid
+ *  gives the goal its need before stage and signals grow. */
+function useHomeClass(home: React.RefObject<HTMLDivElement | null>, windowClass: WidthClass, view: unknown) {
+  const [state, setState] = useState<{ cls: WidthClass; goalMin: number }>({ cls: windowClass, goalMin: 0 });
+  const was = useRef(state.cls);
+  was.current = state.cls;
+  useLayoutEffect(() => {
+    const el = home.current;
+    const wrap = el?.parentElement;
+    const set = (cls: WidthClass, goalMin = 0) => setState((p) => (p.cls === cls && p.goalMin === goalMin ? p : { cls, goalMin }));
+    if (windowClass !== "wide" || !el || !wrap) { set(windowClass); return; }
+    const measure = () => {
+      const port = el.querySelector<HTMLElement>(".port");
+      const row = el.querySelector<HTMLElement>(".p-row");
+      if (!port || !row) { set(windowClass); return; }
+      const wcs = getComputedStyle(wrap);
+      const avail = wrap.clientWidth - parseFloat(wcs.paddingLeft) - parseFloat(wcs.paddingRight);
+      const id = Math.ceil(Math.max(0, ...Array.from(el.querySelectorAll<HTMLElement>(".p-row .p-id")).map((b) => b.scrollWidth)));
+      const gap = parseFloat(getComputedStyle(row).columnGap) || 0;
+      const empty = { next: port.classList.contains("empty-next"), sig: port.classList.contains("empty-sig") };
+      const need = goalNeed(Array.from(el.querySelectorAll<HTMLElement>(".p-row .p-goal")));
+      const cls = homeClassOf(windowClass, was.current, avail, need, id, gap, empty);
+      set(cls, cls === "wide" ? Math.max(160, Math.min(need, Math.floor(wideGoalRoom(avail, id, gap, empty)))) : 0);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(wrap);
+    return () => ro.disconnect();
+  }, [home, windowClass, view]);
+  return state;
+}
+
+/** The goal column's need (FR-21): the widest of the goals' first
+ *  GOAL_CHARS characters (with the ellipsis a cut one ends in), or of the
+ *  whole goal when it is shorter, in the goal's own font. */
+function goalNeed(goals: HTMLElement[]): number {
+  const g = goals[0];
+  const ctx = g ? document.createElement("canvas").getContext("2d") : null;
+  if (!g || !ctx) return 0;
+  const cs = getComputedStyle(g);
+  ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+  const text = (t: string) => (t.length > GOAL_CHARS ? `${t.slice(0, GOAL_CHARS)}…` : t);
+  return Math.ceil(Math.max(0, ...goals.map((el) => ctx.measureText(text((el.textContent ?? "").trim())).width))) + 1;
 }
 
 const age = (since: Date | null) => {
@@ -160,7 +222,8 @@ function DecisionRow({ row, decision: d }: { row: NeedsMeRow; decision: model.De
  *  Cancel (FR-9): opening another row's Rule, Escape or this Rule again
  *  closes the box and keeps them. */
 function RuleAction({ rowKey, initiative, decision }: { rowKey: string; initiative: string; decision: model.Decision }) {
-  const { ruleDraft, openRule, setRuleDraft, dropRule, widthClass } = useBoard();
+  const { ruleDraft, openRule, setRuleDraft, dropRule } = useBoard();
+  const widthClass = useContext(HomeClass);
   const open = ruleDraft?.key === rowKey;
   const btn = useRef<HTMLButtonElement>(null);
   // Compact's sheet covers Home, and regular's box covers the rows under its
@@ -172,7 +235,7 @@ function RuleAction({ rowKey, initiative, decision }: { rowKey: string; initiati
     <span className="rb-anchor">
       {open && widthClass !== "wide" && <div className="rb-scrim" aria-hidden="true" onClick={closeKeep} />}
       <button ref={btn} className="act" aria-expanded={open} aria-label={`Rule ${initiative} ${decision.number}`} onClick={() => openRule(open ? null : rowKey)}>Rule</button>
-      {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord opener={btn} afterRule={focusNeedsMe} onClose={() => openRule(null)} onCancel={() => dropRule(rowKey)}
+      {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord widthClass={widthClass} opener={btn} afterRule={focusNeedsMe} onClose={() => openRule(null)} onCancel={() => dropRule(rowKey)}
         draft={{ chosen: ruleDraft.chosen, words: ruleDraft.words, set: setRuleDraft }} />}
     </span>
   );
@@ -187,8 +250,8 @@ const focusNeedsMe = () => document.getElementById(NEEDS_ME_HEADING)?.focus();
  *  the initiative; the chevron shows its goal, next date, repos, problems
  *  and actions in place. */
 function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.getState>["view"]> }) {
-  const { agents, openInitiative, widthClass } = useBoard();
-  const compact = widthClass === "compact";
+  const { agents, openInitiative } = useBoard();
+  const compact = useContext(HomeClass) === "compact";
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const all = view.board.initiatives ?? [];
   const folded = inactiveIds(view);

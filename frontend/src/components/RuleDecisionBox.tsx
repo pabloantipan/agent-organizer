@@ -18,8 +18,11 @@ import "../styles/rule-box.css";
  *  FR-1) puts the record's Question and Recommendation above the options,
  *  clamped, with a link to it in Decisions; the Decisions tab leaves it off,
  *  since the body is already under the row there. */
-export function RuleDecisionBox({ initiative, decision: d, withRecord = false, draft, opener, afterRule, onClose, onCancel }: {
+export function RuleDecisionBox({ initiative, decision: d, withRecord = false, widthClass: homeClass, draft, opener, afterRule, onClose, onCancel }: {
   initiative: string; decision: model.Decision; withRecord?: boolean;
+  /** Home's class, which Home measures on its rows (responsive-home FR-21);
+   *  elsewhere the window's. */
+  widthClass?: WidthClass;
   /** The chosen option and the words, kept by the caller (Home keeps them in
    *  the store so a width class change keeps them, responsive-home FR-5);
    *  without it the box keeps its own. */
@@ -54,7 +57,8 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, d
   const titleId = useId();
   const bodyId = useId();
   const ready = chosen !== "" && words.trim() !== "" && !busy;
-  const widthClass = useBoard((s) => s.widthClass);
+  const windowClass = useBoard((s) => s.widthClass);
+  const widthClass = homeClass ?? windowClass;
   const { place, short } = useFitViewport(box, record, widthClass);
 
   // Focus and names: a box that shows a record opens on its title, and the
