@@ -87,6 +87,9 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   bundle id for review builds; a card to propose.
 - sup29's leftovers (U2 focus after "Show the other 66", U3, U4, R2, gate
   gaps) not yet sent to aglaea: batch with sup30's.
+- For the next batch too: at Fit a milestone title can be hidden whole by the
+  skip-one-in-two rule (sev 1; DS Timeline now staggers titles, 59b4dcb).
+  leftovers-4 FR-10 amended to the neutral badge, as built.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 

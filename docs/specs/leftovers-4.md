@@ -43,9 +43,10 @@ whose files it shares):
 
 - **FR-9** (row 2) `pre` and tables in any `.markdown` body scroll inside
   themselves (`overflow-x: auto; max-width: 100%`); no body widens its view.
-- **FR-10** (row 3) Superseded and withdrawn records lose the row opacity
-  (`global.css:713`); title and meta take `--fg-muted`; the lozenge keeps
-  its tokens.
+- **FR-10** (row 3; amended 2026-10-03, Aglaea 59b4dcb, as built) Superseded
+  and withdrawn records lose the row opacity (`global.css:713`); title and
+  meta take `--fg-muted`; their lozenge takes the neutral badge
+  (`--fg-muted`), not its own tokens.
 - **FR-11** (row 10) No axis text is cut at the lane's edges (milestone
   titles, today, the undated label); labels that would overlap skip one in
   two, measured on the rendered width, not a character count.
