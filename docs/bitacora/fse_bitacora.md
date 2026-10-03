@@ -56,6 +56,13 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
 - Aglaea ranked (2b6d608); I wrote amendment 4 of both specs, cards
   header-fold-3 and home-widths-4 (depends_on decisions-view), decisions-view
   widened to B1-B14, and proposed 0074 (8ed2ec3). Waiting on Pablo.
+- time-zoom merged 2c0292f, done 3ef7c7e, ~45 min vs 45-90. sup26 ended by
+  me. Run records live in ~/organizer/runs/, gitignored (local by design);
+  moved sup26's there from agent-slack/docs/runs (my prompt named the old
+  place). Leftovers to aglaea (thread 01M41BMCN93DZYWK5SZFNEBEVM); spec-craft
+  5b proposal to hephaistos (thread 01M41BMCNH2AM10EG4BTKSS255).
+- Next: decisions-view's supervisor (sup27) once Pablo rules 0074, so it
+  builds B1-B14 at once.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
