@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { marked } from "marked";
 import type { merge, model } from "../../wailsjs/go/models";
-import { addDays, daysBetween, parseISO, shortDate, today, toISO } from "../lib/dates";
+import { DAY, daysBetween, parseISO, shortDate, today } from "../lib/dates";
+import { addLocalDays } from "../lib/axis";
 import { ownerPhrase } from "../lib/decisions";
 import { readOnlyOf } from "../lib/queue";
 import { useBoard } from "../stores/board.store";
 import { RuleDecisionBox } from "./RuleDecisionBox";
+import { EdgePointer, TimeFrame, ZoomControl, useTimeZoom } from "./TimeZoom";
 import "../styles/decisions.css";
 
 type Row = { d: model.Decision; initiative: string; machine: string; key: string };
@@ -81,6 +83,17 @@ export function DecisionsView() {
     }
     return out;
   }, [view, selectedInitiative]);
+
+  // Timeline: one row per decision, raised → ruled, open ones running to the
+  // end of today. Records carry whole days, so the zoom stops at Days (A12);
+  // each date covers its day.
+  const shown = [...rows].filter((r) => showClosed || (r.d.status !== "superseded" && r.d.status !== "withdrawn")).sort((a, b) => a.d.raised.localeCompare(b.d.raised) || a.d.number.localeCompare(b.d.number));
+  const marks = [now, ...shown.flatMap((r) => [parseISO(r.d.raised), parseISO(r.d.ruled)]).filter((d): d is Date => !!d)].map((d) => d.getTime());
+  const dataFrom = Math.min(...marks);
+  const dataTo = addLocalDays(Math.max(...marks), 1);
+  const span = Math.max((dataTo - dataFrom) / DAY, 14);
+  const fit = { from: addLocalDays(dataFrom, -Math.max(1, Math.round(span * 0.04))), to: addLocalDays(dataTo, Math.max(2, Math.round(span * 0.08))) };
+  const z = useTimeZoom({ fit, data: { from: dataFrom, to: Math.max(dataTo, Date.now()) }, hours: false, reset: selectedInitiative });
 
   if (!view) return <div className="empty">Loading…</div>;
 
@@ -173,24 +186,8 @@ export function DecisionsView() {
     );
   };
 
-  // Timeline: one row per decision, raised → ruled, open ones running to today.
-  const shown = [...rows].filter((r) => showClosed || (r.d.status !== "superseded" && r.d.status !== "withdrawn")).sort((a, b) => a.d.raised.localeCompare(b.d.raised) || a.d.number.localeCompare(b.d.number));
-  const dates = [now, ...shown.flatMap((r) => [parseISO(r.d.raised), parseISO(r.d.ruled)]).filter((d): d is Date => !!d)];
-  let start = new Date(Math.min(...dates.map((d) => d.getTime())));
-  let end = new Date(Math.max(...dates.map((d) => d.getTime())));
-  const span = Math.max(daysBetween(start, end), 14);
-  start = addDays(start, -Math.max(1, Math.round(span * 0.04)));
-  end = addDays(end, Math.max(2, Math.round(span * 0.08)));
-  const total = Math.max(daysBetween(start, end), 1);
-  const pct = (d: Date) => (daysBetween(start, d) / total) * 100;
-  const weekly = total <= 90;
-  const ticks: Date[] = [];
-  if (weekly) {
-    const first = addDays(start, (8 - start.getDay()) % 7);
-    for (let d = first; d <= end; d = addDays(d, 7)) ticks.push(d);
-  } else {
-    for (let d = new Date(start.getFullYear(), start.getMonth() + 1, 1); d <= end; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) ticks.push(d);
-  }
+  const x = z.scale.x;
+  const endOfDay = (d: Date) => addLocalDays(d.getTime(), 1);
 
   return (
     <div className="decisions">
@@ -209,46 +206,47 @@ export function DecisionsView() {
       </section>
 
       <section className="dec-section">
-        <h2>
-          Timeline <span className="meta">raised → ruled; open ones run to today</span>
-          {closed.length > 0 && (
-            <button className="ghost small" onClick={() => setShowClosed(!showClosed)}>{showClosed ? "hide" : "show"} {closed.length} superseded or withdrawn</button>
-          )}
-        </h2>
-        <div className="gantt-body dec-timeline">
-          <div className="g-row g-axis">
-            <div className="g-label" />
-            <div className="g-lane">
-              {ticks.map((t) => (
-                <div key={toISO(t)} className="g-tick" style={{ left: `${pct(t)}%` }}>
-                  <span>{weekly ? shortDate(t) : t.toLocaleDateString(undefined, { month: "short" })}</span>
+        <div className="tz-head dec-tz-head">
+          <h2>
+            Timeline <span className="meta">raised → ruled; open ones run to today</span>
+            {closed.length > 0 && (
+              <button className="ghost small" onClick={() => setShowClosed(!showClosed)}>{showClosed ? "hide" : "show"} {closed.length} superseded or withdrawn</button>
+            )}
+          </h2>
+          <ZoomControl z={z} />
+        </div>
+        <div className="gantt-body dec-timeline tz-host">
+          <TimeFrame z={z} label="Decisions timeline" extents={shown.map((r) => {
+            const raised = parseISO(r.d.raised) ?? now;
+            const until = r.d.status === "proposed" ? now : parseISO(r.d.ruled) ?? raised;
+            return { from: raised.getTime(), to: endOfDay(until < raised ? raised : until) };
+          })}>
+            {shown.map((r) => {
+              const d = r.d;
+              const raised = parseISO(d.raised) ?? now;
+              const ruledAt = parseISO(d.ruled);
+              let until = d.status === "proposed" ? now : ruledAt ?? raised;
+              if (until < raised) until = raised;
+              const dot = daysBetween(raised, until) < 1 && d.status !== "proposed";
+              const from = raised.getTime();
+              const to = endOfDay(until);
+              const tip = `${d.number} ${d.title}\n${LABEL[d.status] ?? d.status} · raised ${d.raised}${d.ruled ? ` · ruled ${d.ruled} by ${d.ruled_by}` : ""}${d.owner ? ` · owner ${d.owner}` : ""}`;
+              return (
+                <div key={r.key} className={`g-row tz-row dec-row ${d.status}`}>
+                  <button className="g-label link tz-label" onClick={() => toggle(r.key)} title={tip}>
+                    <span className="g-title"><span className="mono dim">{d.number}</span> {d.title}</span>
+                    <span className="g-branch">{all ? `${r.initiative} · ` : ""}{LABEL[d.status] ?? d.status}</span>
+                  </button>
+                  <div className="g-lane tz-lane" title={tip}>
+                    {dot
+                      ? <div className={`dec-dot ${d.status}`} style={{ left: (x(from) + x(to)) / 2 }} />
+                      : <div className={`dec-bar ${d.status}`} style={{ left: x(from), width: Math.max(x(to) - x(from), 4) }} />}
+                    <EdgePointer z={z} from={from} to={to} />
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
-          {shown.map((r) => {
-            const d = r.d;
-            const raised = parseISO(d.raised) ?? now;
-            const ruledAt = parseISO(d.ruled);
-            const until = d.status === "proposed" ? now : ruledAt ?? raised;
-            const dot = daysBetween(raised, until) < 1;
-            const tip = `${d.number} ${d.title}\n${LABEL[d.status] ?? d.status} · raised ${d.raised}${d.ruled ? ` · ruled ${d.ruled} by ${d.ruled_by}` : ""}${d.owner ? ` · owner ${d.owner}` : ""}`;
-            return (
-              <div key={r.key} className={`g-row dec-row ${d.status}`}>
-                <button className="g-label link" onClick={() => toggle(r.key)} title={tip}>
-                  <span className="g-title"><span className="mono dim">{d.number}</span> {d.title}</span>
-                  <span className="g-branch">{all ? `${r.initiative} · ` : ""}{LABEL[d.status] ?? d.status}</span>
-                </button>
-                <div className="g-lane" title={tip}>
-                  {ticks.map((t) => <div key={toISO(t)} className="g-tick faint" style={{ left: `${pct(t)}%` }} />)}
-                  {dot
-                    ? <div className={`dec-dot ${d.status}`} style={{ left: `${pct(raised)}%` }} />
-                    : <div className={`dec-bar ${d.status}`} style={{ left: `${pct(raised)}%`, width: `${Math.max(pct(until) - pct(raised), 0.8)}%` }} />}
-                </div>
-              </div>
-            );
-          })}
-          <div className="g-today" style={{ left: `calc(240px + (100% - 264px) * ${pct(now) / 100})` }}><span>today</span></div>
+              );
+            })}
+          </TimeFrame>
         </div>
         <div className="dec-legend meta">
           <span><i className="dec-key proposed" /> waiting (dashed, runs to today)</span>
