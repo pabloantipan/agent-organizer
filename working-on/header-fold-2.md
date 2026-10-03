@@ -27,7 +27,7 @@ header-fold's UI leftovers, ranked by Aglaea: FR-10 to FR-16 of
 - [x] G11: see `docs/specs/initiative-header.md`, Acceptance
 
 ## Done
-- 2026-10-03 hf2-build: FR-10 to FR-16 on header-fold-2 (7b8a025 31d2383 9c59933 1360a61 1a281a4 04b3fb4 3e7666f), rebased on main; G12-G17 measured on the fixture at 1024x640 (header 256 px, scrolls inside; folded across tab and reload; target whole, goal cut; no id on Agents; pointer, chevron, 2px offset, runs 1:3; names and aria-expanded; "2 decisions waiting on you"); G11 green. Shots and numbers in .wt-notes/hf2-build/progress.md
+- 2026-10-03 hf2-build: FR-10 to FR-16 on header-fold-2 (f30a7e5 713558c 944fb1b f16b13f 97cd0d0 b9c0e85 ac49856), rebased on main (main runs ahead only by this card's own commits); G12-G17 measured on the fixture at 1024x640 (header 256 px, scrolls inside; folded across tab and reload; target whole, goal cut; no id on Agents; pointer, chevron, 2px offset, runs 1:3; names and aria-expanded; "2 decisions waiting on you"); G11 green. Shots and numbers in .wt-notes/hf2-build/progress.md
 - 2026-10-03 sup25 launched seat hf2-build in .wt/header-fold-2
 - 2026-10-03 sup25 launched by the FSE (Pablo's go-ahead, "ok")
 - 2026-09-30 0069 ruled by pablo ("Ok", accept as written, 549217f); launchable, sup25 not started yet
