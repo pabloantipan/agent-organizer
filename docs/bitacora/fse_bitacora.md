@@ -52,6 +52,9 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   01M416RZH3E5VPJC9D5H8PK73F: a proposed design spec for the Gantt axis
   (Roadmap.tsx). No card until it arrives; then spec-craft with step 5b. Its
   card overlaps header-fold-2's boundary (RoadmapView.tsx, Roadmap.tsx).
+- Spec 6569427 (Aglaea); O1/O3 ruled as 0070 (20435e7); Technical notes,
+  card time-zoom (depends_on header-fold-2) and proposed 0071 in 4781b3a.
+  Passes run --print. Waiting on Pablo for 0071.
 
 ## OPEN — 2026-09-30, transversal roles in Deltagos
 
