@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: time-zoom
 updated: 2026-10-03
-next: "fse: start a supervisor for this card once header-fold-2 is in done/ (0071 ruled, accept as written); header-fold-2 itself waits on sup25"
+next: "sup26 builds it (organizer-probe-sup26, launched 2026-10-03)"
 depends_on: [header-fold-2]
 boundary: ["frontend/src/components/Roadmap.tsx, RoadmapView.tsx, StageRoadmap.tsx (axis and positions only, not the stage word or row), DecisionsView.tsx (the Timeline only)", "one new shared axis module in frontend/src/lib/ and one zoom-control component, with their CSS", "frontend/src/lib/dates.ts and frontend/src/lib/ tests", "internal/scan/git.go (branchSpan's format only) and internal/scan/scan_test.go", "testdata/ fixtures the gate rows need", "not: Calendar.tsx, Portfolio.tsx's mounting, the stores, Home, docs/design-system.md; no bound Go type change"]
 spec: "docs/ux/specs/roadmap-time-zoom.md (Aglaea's design, 6569427, with the FSE's Technical notes T1-T5); ruling 0070"
@@ -23,6 +23,7 @@ Days, and Hours only where a mark carries a time (0070).
 - [ ] `go test ./...` and `npm test` green; `wails build` succeeds
 
 ## Done
+- 2026-10-03 sup26 launched by the FSE, header-fold-2 in done/ (4afddc0), per 0071
 - 2026-10-03 0071 ruled by pablo ("Ok", accept as written, 1328071); launchable, waits on header-fold-2
 - 2026-10-03 cut by the FSE from Aglaea's spec and ruling 0070
 

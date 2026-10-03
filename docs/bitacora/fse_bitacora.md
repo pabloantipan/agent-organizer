@@ -50,7 +50,9 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   ~/.local/share/organizer/prompts/organizer-sup25.*, iTerm window 393104,
   session organizer-probe-sup25; cards marked in 17d19ba. Let go; end it
   when both cards are in done/ (standing-up.md, "Ending a supervisor").
-  time-zoom launches after header-fold-2 lands.
+  header-fold-2 merged 4afddc0, in done/ (7c0e979). time-zoom: sup26
+  launched, window 393369, session organizer-probe-sup26; end it when
+  time-zoom is in done/.
 - Pablo's Decisions sub-view ask (collapsible sections, scroll length, tiles,
   median in days, headings; "the operator spends most time here") is with
   aglaea, thread 01M417NHHRR2WP7XPY69XM438N. Her review and spec 9386d15;
