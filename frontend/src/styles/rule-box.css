@@ -101,7 +101,8 @@
   background: var(--surface-raised); box-shadow: none;
 }
 .home.wide .ib-row.ruling:hover { background: transparent; }
-/* FR-8: compact's sheet has a scrim over what it covers; the rows' Rule
-   verbs are behind it, so a second box cannot open under the first. Just
-   under the box, which is fixed at z-index 20. */
+/* FR-8, FR-17: compact's sheet and regular's box have a scrim over what
+   they cover; the rows' verbs are behind it, so a click meant for a covered
+   verb cannot land on it, nor a second box open under the first. Just under
+   the box, which is fixed at z-index 20. Wide's box is in the flow: none. */
 .rb-scrim { position: fixed; inset: 0; z-index: 19; background: var(--bg-sunken); opacity: 0.7; } /* no scrim token yet: the sunken ground, dimmed like the modal backdrop */
