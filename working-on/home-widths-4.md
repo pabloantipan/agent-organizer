@@ -52,6 +52,56 @@ widths-and-focus's leftovers, ranked by Aglaea: FR-20 to FR-25 of
   - the diff stays inside `boundary`, plus SlackView.tsx (widened by sup28).
 - **Reviewer:** hw4-review, 2026-10-03
 
+## UI review
+- **Commits run:** 424149a (branch head when I finished; only the signal column re-checked, its diff touches nothing else), 2941f2c (every row, both engines), e522b2e (the first pass; superseded, kept for the wide shots). Shots and logs under `.wt-notes/hw4-ui/<commit>/`. Fixture `--twenty` for G19–G21 and G23, default for G22. Chromium is a viewport of the stated size; WKWebView is the built app's window at the stated size. Its content is about 31 px shorter, and this Mac draws classic scrollbars (about 15 px).
+- **Verdict:** fail. Severity 3: U1.
+- **U1 (3)**: the lead cannot see that an initiative has more signals than it shows.
+  - **Where:** Home at 1024×640 with the rail expanded, partner-payouts, in the built app at 424149a. The row reads "5 … · 1 … · ▪ cell…" and the "+4" is cut off past the column. `424149a/webkit-1024x640-G19-G23-rail-expanded-scrolled-424.png`.
+  - **Evidence:** Chromium fits the "+4" with 6 px spare. The column is 145 px, and the floors are 32 + 32 + 48 plus the "+4" (27) plus the gaps (`424149a/pp-row-424.log`, `chromium-1024x640-G19-424-pp-row-rail0.png`). WebKit's column is narrower, and `shareRoom` returns the floors with `fits: false`, so the row overflows by design. At 2941f2c it was worse in both engines: in Chromium a 14 px cell lozenge and no "+4" at 1024 and 1280; in WebKit "1 blocke" was cut mid-word with no "+4" (`2941f2c/`). The "+4" hides 1 problem, 1 now, a wave and a live seat, with nothing on screen to prompt a hover. This breaks FR-10/FR-15 (one line *with "+N"*) and the earlier row G11 at its own size and rail state.
+  - **Proposal:** reserve the "+N" first. When the never-fold floors still do not fit, fold the cell in definition before clipping anything (0076 is open), and measure the floors in the built app, not in Chromium only.
+- **U2 (2)**: the lead cannot tell waiting from blocked without colour.
+  - **Where:** the same row at 1024 and 1280 with the rail expanded, in both engines at 424149a: "5 …" and "1 …".
+  - **Evidence:** `LZ_MIN_TEXT` is 18 px, which leaves only the count. That fails WCAG 1.4.1 and the design system's "never by colour alone". The state column still says "waits on you", and the hover names each signal.
+  - **Proposal:** a floor of count plus the first letters of the word ("5 wait…", "1 block…"), or an icon per signal kind.
+- **U3 (2)**: the built app's classic scrollbars take room the Chromium numbers assume.
+  - **Where:** the expanded rail cuts "partner-payou…", which is whole in Chromium. In the 46 px strip the scrollbar overlaps rank "14" and its cell mark. At 1280×800 with the rail expanded, WebKit gives the goal column away where Chromium keeps 31 characters (G15, an earlier row, names no rail state). `2941f2c/webkit-1440x900-G19-rail-expanded.png`, `e522b2e/webkit-1024x640-G21-home-before.png`, `424149a/webkit-1280x800-G19-rail-expanded-424.png`.
+  - **Proposal:** the strip hides its scrollbar or reserves its gutter, and width gates run in the app as well.
+- **U4 (1)**: in wide, the opener's `--surface-selected` goes away whenever the pointer is over the row or its box, which is where the pointer sits while ruling.
+  - **Cause:** `rule-box.css:103` `.home.wide .ib-row.ruling:hover { background: transparent }`. Seen in both engines: `e522b2e/webkit-2560x1305-G21-home-open-pointer-{on-row,away}.png`, `chromium-2560x1440-G21-home-open-pointer-away.png`.
+  - **Proposal:** drop that hover rule while `[data-rb-opener]` is set.
+- **U5 (1)**: at 2200×1200 with the rail expanded, partner-payouts' goal shows 67 characters ("…with a statement…").
+  - **Evidence:** the room is measured as 70 characters plus "…" in one run (423.7 of 425 px), but the one-line clamp breaks at a word. G20 says ≥ 70. `2941f2c/chromium-2200x1200-G20-rail-expanded.png`, `webkit-2200x1200-G20-rail-expanded.png`.
+  - **Proposal:** measure up to the word after character 70.
+- **U6 (1)**: on Decisions at 1024×640 the box covers its own Rule. The placement is unchanged from main, as the builder and the code review note.
+- **U7 (1, from code)**: two `.rail-icon` buttons still have no name: the search clear and the reply-to clear (`Conversation.tsx` :241, :490). They are outside FR-24's list.
+
+| Row | Chromium | WKWebView (built app) | Result |
+|---|---|---|---|
+| G19 | 2941f2c `chromium-{1440x900,1512x945}-G19-rail-expanded.png`; 424149a `chromium-{1440x900,1512x945}-G19-424-pp-row-rail0.png` | 424149a `webkit-{1440x900,1512x945}-G19-rail-expanded-424.png` | met in both: "—" column gone, goals shown; waiting, blocked and the cell are shown (cut, U2), and only problems, now and live are in "+4". Difference: WebKit cuts harder |
+| G20 | 2941f2c `chromium-{2200x1200,2560x1440}-G20-rail-{expanded,strip}.png` | 2941f2c `webkit-2200x1200-G20-rail-{expanded,strip}.png`, `webkit-2560x1305-G20-rail-{expanded,strip}.png` (the window cannot reach 1440 high: 1305) | wide at every size and rail state in both; U5 (67 characters) |
+| G21 | 2941f2c `chromium-{1024x640,1512x945,2560x1440}-G21-home-{open,after-escape}.png`, `chromium-{1024x640,1512x945}-G21-decisions-{open,after-escape}.png` | 2941f2c `webkit-1024x640-G21-{home,decisions}-{open,after-escape}.png`; e522b2e `webkit-1512x945-G21-home-*`, `webkit-2560x1305-G21-home-*` | met in both: closed after a click on the text and Escape; the opener above the scrim and marked (U4 in wide); focus back on Rule with a ring in WebKit |
+| G22 | 2941f2c `chromium-1512x945-G22-{conversation,after-hide}.png`, `g22.log` | 2941f2c `webkit-1512x945-G22-{conversation,reply-hover,after-hide,after-hide-then-return}.png` | met: "Reply to fse" and "Branch from fse's message"; every `.rail-icon` 24×24 (WebKit: reply's hover box 24×24); after hide, Return reopens People, so focus is on the toggle |
+| G23 | 2941f2c `chromium-{1024x640,1920x1080}-G23-*.png`; 424149a `chromium-1024x640-G19-424-pp-row-rail0.png` | 2941f2c `webkit-1920x1080-G23-home-rail-strip.png`; 424149a `webkit-1024x640-G19-G23-rail-expanded-scrolled-424.png` | the card row "partner-payouts · Partner terms" is listed. CellStateLz ends in its ellipsis at 424149a in both engines, but the row's "+4" is lost in WebKit (U1) |
+| G24 | this table | | the differences are named in U1–U3 |
+
+- **Spec gaps (FSE):**
+  - FR-20 does not say what wins when the never-fold signals alone overflow the column: "+N", word floors, or folding the cell (0076).
+  - FR-20 sets no order among problems, now and live. The build folds now before live, so at 2200 auth-gateway shows its wave and live but folds "1 now".
+  - G20's "≥ 70 characters" does not say whether that means the first line at its word break or the measured run.
+  - Gate widths do not say how classic scrollbars count. The design system dismisses overlay scrollbars, but macOS shows classic ones when a mouse is attached.
+  - 2560×1440 is not a reachable window size on the 3440×1440 screen.
+  - FR-23 does not cover hover.
+  - G11, G15 and G23 name no rail state.
+  - The fixture's live and cell signals arrive 10–40 s after load, so a signal gate must wait for the agents feed.
+- **Not verified:**
+  - G22's accessible names in WKWebView: System Events exposes only 130 elements, not the conversation. The names come from Chromium and the code.
+  - G21 in WebKit at 1512 and 2560 at the head: shot at e522b2e. The Escape change since then (cf05457) only adds an early return while another dialog is open.
+  - Escape with Help or a card back open.
+  - Tab in WKWebView: the Keyboard navigation setting was not checked, and the Return trick stood in.
+  - G20–G22 at 424149a (carried from 2941f2c).
+- **Note:** WKWebView's storage is shared with the installed app. I toggled the rail and left it expanded, as I found it.
+- **Reviewer:** hw4-ui, 2026-10-03
+
 ## Notes
 Runs in parallel with header-fold-3; boundaries disjoint.
 - boundary widened by sup28: SlackView.tsx, FR-24 focus only
