@@ -1,10 +1,10 @@
 ---
 title: The header, third pass - the stage stays in the bar at compact, tiles open their own stage, the fold tested
-status: now
+status: done
 repos: [organizer]
 branch: header-fold-3
 updated: 2026-10-03
-next: "review: header-fold-3, gate met (G18 G19 G20 G11); G21 is the UI reviewer's"
+next: "merged 4f17404 (sup28); UI findings U1-U3 sev 1 and the code review outside-gate notes are the FSE's"
 depends_on: [decisions-view, time-zoom-2]
 boundary: ["frontend/src/components/InitiativeHeader.tsx and its CSS", "frontend/src/styles/shell.css (the header's rules only)", "frontend/src/components/StageRoadmap.tsx and frontend/src/stores/board.store.ts (open a stage by position, FR-18; the fold's storage behind a lib function, FR-19)", "frontend/src/lib/ and its tests", "not: home-widths-4's files, DecisionsView.tsx, Go, docs/design-system.md"]
 spec: "docs/specs/initiative-header.md (amendment 4, FR-17 to FR-19); the ranking docs/ux/reviews/2026-10-03-rank-leftovers-3.md (Aglaea, 2b6d608)"
@@ -29,10 +29,11 @@ header-fold-2's leftovers, ranked by Aglaea: FR-17 to FR-19 of
 - [x] G18: see `docs/specs/initiative-header.md`, Acceptance
 - [x] G19: see `docs/specs/initiative-header.md`, Acceptance
 - [x] G20: see `docs/specs/initiative-header.md`, Acceptance
-- [ ] G21: see `docs/specs/initiative-header.md`, Acceptance
+- [x] G21: see `docs/specs/initiative-header.md`, Acceptance
 - [x] G11: see `docs/specs/initiative-header.md`, Acceptance
 
 ## Done
+- 2026-10-03 sup28 merged 4f17404 (code review pass e4f4d00, UI review pass c2e715b); make test and npm run build green on main
 - 2026-10-03 hf3-build: FR-17 to FR-19 on header-fold-3 (376b1aa fold in lib/fold, 3c07f67 tiles by position, b577edc stage kept in the bar at compact with scroll edges, 6a670e6 landed stage focused); G18 G19 G20 G11 measured in .wt-notes/hf3-build/; G21 left for the UI reviewer
 - 2026-10-03 sup28 launched by the FSE (decisions-view and time-zoom-2 in done/)
 - 2026-10-03 0074 ruled by pablo ("Ok", accept as written, 117e269)
