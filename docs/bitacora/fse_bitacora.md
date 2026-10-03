@@ -44,6 +44,15 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   supervise finding on changed tasks is postponed; a changed task goes into
   a fresh seat's launch prompt.
 
+## OPEN — 2026-10-03, roadmap time zoom
+
+- Pablo: "we have dates at the top of the graph, we need to be able have time
+  zooming ... month there, after user action ... days and then to hours with
+  mins. call Aglaea for taking this". Asked of aglaea as a question, thread
+  01M416RZH3E5VPJC9D5H8PK73F: a proposed design spec for the Gantt axis
+  (Roadmap.tsx). No card until it arrives; then spec-craft with step 5b. Its
+  card overlaps header-fold-2's boundary (RoadmapView.tsx, Roadmap.tsx).
+
 ## OPEN — 2026-09-30, transversal roles in Deltagos
 
 - Asked by Pablo through Hephaistos, thread 01M3SBV952KNT4XMBTXMQHZDFC: show
