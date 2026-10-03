@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: home-widths-4
 updated: 2026-10-03
-next: "review: home-widths-4, G19 fixed (the cell never folds), G19-G23 and G8 met; G24 is the UI reviewer's"
+next: "G23: commit testdata/fixture-twenty/partner-payouts/agents/cell.json (git add -f; .gitignore's agents/ keeps it out, as b46d48d found), then rerun G19 and G23 from a clean checkout"
 review: fail
 depends_on: [decisions-view, time-zoom-2]
 boundary: ["frontend/src/components/Home.tsx, Rail.tsx, RuleDecisionBox.tsx", "frontend/src/components/Crew.tsx (CellStateLz only), Conversation.tsx (FR-24's names and focus only)", "frontend/src/lib/width.ts, frontend/src/lib/ and its tests", "frontend/src/styles/home.css, rule-box.css, global.css (.rail-icon only), shell.css (the rail's rules only)", "testdata/fixture-twenty/ and scripts/fixture-home.sh (FR-25's rows)", "not: header-fold-3's files, DecisionsView.tsx, Go, docs/design-system.md"]
@@ -39,14 +39,15 @@ widths-and-focus's leftovers, ranked by Aglaea: FR-20 to FR-25 of
 ## Blockers
 
 ## Review
-- **Verdict:** fail (code review). G20, G21, G22, G23 and G8 met; G24 is the UI reviewer's.
-- **Unmet:** G19. Its Expected says "only problems/now/live are in +N" on the seven-signal row; g19-rebased.log shows "cell in definition [in +N, fold 3]" at 1440 and 1512 (Home.tsx passes `fold={FOLD.cell}`). FR-20 does not rank the cell, but the cell in definition is itself a Needs me row ("partner-payouts · payouts-fixture in definition"), so it waits on the lead and by FR-20's own reasoning should not fold. Either make it never fold (it then takes the ellipsis like waiting) or have the gate amended; that is a decision for Pablo, not a reviewer.
-- **G8 rerun by the reviewer:** `XDG_DATA_HOME=$(mktemp -d) make test` green (148 vitest), `npm run build` ok, the G18 grep empty, `wails build` ok, at e522b2e.
+- **Verdict:** fail (code review, re-review of 95ace22). G19, G20, G21, G22 and G8 met; G23 unmet; G24 is the UI reviewer's.
+- **Unmet:** G23. FR-25's fixture is not on the branch: `testdata/fixture-twenty/partner-payouts/agents/cell.json` exists only untracked in the builder's worktree (`git check-ignore`: `.gitignore:7: agents/`; the same trap b46d48d fixed for onboarding-flow). From a clean detached checkout of 95ace22 with `fixture-home.sh --twenty`, Needs me lists 7 rows: no "partner-payouts · Partner terms" card row (it is read through the cell) and no cell Launch row; the only card row is onboarding-flow's Step map, which main already had. The fixture does not gain the card row FR-25 asks for, and the builder's g23 logs were taken with the untracked file. Fix: `git add -f` that file, rerun G19 and G23 from a clean checkout.
+- **Rerun by the reviewer** (clean checkout of 95ace22, own wails dev, headless Chromium, the builder's probe scripts copied): G19 at 1440x900 and 1512x945: next date gone (all "—"), 21/21 goals shown; waiting cut with its ellipsis, blocked whole, only now/wave/live/problem in "+N", state "waits on you". The committed row has six signals, not seven (no cell), so the cell-never-folds change (e02059b) is shown only by the builder's g19-fix.log, with the untracked file; the code (no `data-fold` on CellStateLz) agrees. G20 at 2200x1200 and 2560x1440, rail expanded and collapsed: wide each time, every goal whole or >= 70 characters (partner-payouts 70, 87, 95, 95 of 100). G21 on Home and Decisions at 1512x945 and 1024x640: click on the record's text then Escape closes the box; the opener's row marked `--surface-selected`, on Home at z 20 over the scrim at 19. G22 from g22-fix.log (after 95ace22) and the diff: "Reply to fse", "Branch from fse's message", ten `.rail-icon`s all 24x24, "Hide people" named, focus on the People toggle after hide. Escape stack from esc-topmost.log: Help or a card back closes first, the box on the second Escape.
+- **G8 rerun by the reviewer** in the builder's worktree at 95ace22: `XDG_DATA_HOME=$(mktemp -d) make test` green (148 vitest), `npm run build` ok, the G18 grep empty, `wails build` ok.
 - **Outside the gate:**
-  - the Escape listener is now on `document` and the box no longer stops propagation: with Help or a card drawer open over a box (both listen on `document` too), one Escape closes both;
-  - on Decisions at 1024x640 the box covers its own Rule (the element there is `DIV.rb`); FR-23 is met only because Decisions has no scrim;
-  - People's hide button (`.rail-icon`) has no aria-label, only a title (the G22 log reads its name as "");
-  - SlackView.tsx is outside the spec's boundary; widened by sup28 (Notes), so not a finding.
+  - on Decisions at 1024x640 the box still covers its own Rule (top element `DIV.rb`); FR-23 holds only because Decisions has no scrim (unchanged, existing placement);
+  - the box's Escape now yields to any other `[role="dialog"]` in the document (CardDrawer, Retire, Help today); a future non-modal dialog left mounted would silently disable it;
+  - SlackView.tsx is outside the card's `boundary` field; widened by sup28 (Notes), so not a finding;
+  - the gate cannot catch an ignored fixture file: G19 and G23 should be run from a clean checkout of the branch, not the builder's worktree.
 - **Reviewer:** hw4-review, 2026-10-03
 
 ## Notes
