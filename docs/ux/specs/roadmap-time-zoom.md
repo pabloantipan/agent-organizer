@@ -3,7 +3,7 @@
 status: proposed
 owner: pablo
 by: aglaea, 2026-10-03, for the FSE (thread 01M416RZH3E5VPJC9D5H8PK73F)
-rulings it rests on: 0013 and redesign FR-14 (Roadmap sub-view, Cards |
+rulings it rests on: 0070 (O1 and O3 ruled 2026-10-03); 0013 and redesign FR-14 (Roadmap sub-view, Cards |
 Calendar switch); 0022 (no invented dates); 0059 (1024 is real); the design
 system's Timeline section
 
@@ -229,6 +229,11 @@ rule above changes how a date becomes a pixel.
 | A11 | use it by keyboard alone, with the level read out | tab to the control, the level word is in the group's accessible name ("Zoom, Days"); keys work with focus in the chart |
 
 ## Open questions
+
+Ruled 2026-10-03, record 0070. O1, Pablo: "Agree" (commit times in the
+same card). O3, Pablo: "yes, it's correct, If we have only date and no
+timestamp, component shall detect it and avoid showing hours." A12 stands.
+O2: the FSE sequences the card after header-fold-2. As asked:
 
 - **O1** (Pablo): Hours over day-only data now, or commit times first. I
   recommend commit times in the same card.

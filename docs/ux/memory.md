@@ -140,13 +140,13 @@ the FSE, thread 01M416RZH3E5VPJC9D5H8PK73F; Pablo: "month … days and then to
 hours with mins"; widened: "each graph that implicates time as gantt style"): Fit (as built) → Days (40 px/day) → Hours (64 px/h,
 quarter-hour grid); − level + Today Fit; pinch/⌘-wheel/keys/double-click
 one level each, pointer-anchored; Hours only where a mark has a time; day-precision dates fill their whole day;
-edge pointers for marks out of view; level not remembered.
+edge pointers for marks out of view; level not remembered. **0070**: commit
+times (`%cI`) in the same card; no timestamp → no Hours (Pablo: "component
+shall detect it and avoid showing hours"). Card after header-fold-2.
 
 ## Open questions
 
-- O1 (Pablo, via the FSE): every Gantt date is day-only (`git.go` `%cs`), so
-  Hours shows whole-day bands unless commit times (`%cI`) or runs come first.
-  I recommend commit times in the same card.
+- none open.
 
 ## How I look at it
 

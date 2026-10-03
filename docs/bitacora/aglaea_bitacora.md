@@ -9,7 +9,7 @@ Read first: the `aglaea` skill, `agents/aglaea.md`, `docs/ux/memory.md` (what I
 know, ruled choices, open findings, lessons), `docs/ux/principles.md`, and
 `docs/design-system.md` (**mine since 0054**; the app is **Deltagos**, 0066).
 
-- **Doing:** nothing in flight. 2026-10-03: sent the FSE `docs/ux/specs/roadmap-time-zoom.md` (time zoom on Cards, Stages, Decisions); O1 (day-only data, commit times first?) and O3 wait on Pablo through the FSE.
+- **Doing:** nothing in flight. 2026-10-03: sent the FSE `docs/ux/specs/roadmap-time-zoom.md` (time zoom on Cards, Stages, Decisions); O1 and O3 ruled in 0070 (commit times in the card; no Hours without a timestamp); the FSE cards it after header-fold-2.
 - **Before that:** nothing in flight. Last work: the ranked leftovers of header-fold
   and responsive-home-2, `docs/ux/reviews/2026-09-30-rank-header-fold-responsive-2.md`
   (3f3df2f), with the design system amended (Widths: wide from 2200, signals
@@ -57,3 +57,4 @@ know, ruled choices, open findings, lessons), `docs/ux/principles.md`, and
 - 2026-09-30 — FSE cut header-fold-2 and widths-and-focus (0069); agreed the tall-record head stays on top, Rule included.
 - 2026-10-03 — FSE asked for time zoom on the Gantt; wrote specs/roadmap-time-zoom.md (proposed); O1: data is day-only, hours need commit times.
 - 2026-10-03 — scope widened to every Gantt-style graph (Cards, Stages, Decisions; not Calendar); spec amended, answered the FSE.
+- 2026-10-03 — 0070 ruled O1 and O3 as recommended; spec and memory updated.
