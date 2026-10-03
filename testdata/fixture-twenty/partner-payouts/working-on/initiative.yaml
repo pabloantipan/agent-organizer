@@ -1,0 +1,8 @@
+id: partner-payouts
+title: Partner payouts
+client: northwind
+status: active
+started: 2026-07-01
+machine: fixture
+repos: []
+goal: Every partner is paid on the day the month closes, with a statement they can read without calling us
