@@ -39,3 +39,25 @@ export function signalsThatFit(widths: number[], gap: number, room: number, more
   while (n < widths.length && used + gap + widths[n] <= room) { used += gap + widths[n]; n++; }
   return Math.max(1, n);
 }
+
+/** Compact's row (FR-16): its fixed columns as home.css draws them (rank,
+ *  state, phase, the stage as n/m, chevron), the least the signals take
+ *  (one lozenge and the "+N"), and what the goal and the next date need. */
+export const COMPACT_FIXED = 24 + 136 + 104 + 76 + 24;
+export const SIGNALS_MIN = 160;
+/** About 30 characters of a goal at --font-size-md (13 px Manrope). */
+export const GOAL_MIN = 224;
+export const NEXT_W = 96;
+
+/** Which of goal and next date a compact row shows (FR-16): a column gives
+ *  way only when the row has no room for it, measured on the row, never by
+ *  the class name. `room` is the row's inner width, `id` the id column's,
+ *  `gap` the grid's column gap. The goal is kept first; the next date fits
+ *  in what is left, alone if the goal could not. */
+export function compactColumns(room: number, id: number, gap: number): { goal: boolean; next: boolean } {
+  let used = COMPACT_FIXED + Math.max(id, 96) + SIGNALS_MIN + 6 * gap;
+  const goal = used + gap + GOAL_MIN <= room;
+  if (goal) used += gap + GOAL_MIN;
+  const next = used + gap + NEXT_W <= room;
+  return { goal, next };
+}

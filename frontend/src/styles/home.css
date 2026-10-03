@@ -70,19 +70,37 @@
 .p-phase.missing { color: var(--fg-subtle); font-style: italic; }
 
 /* ---------- widths (docs/specs/responsive-home.md) ---------- */
-/* Compact (FR-2): every row is one line. A Needs me row's context and an
-   initiative's goal and next date leave the view for the hover (the row's
-   title, the id's title) and the chevron's detail, and stay in the
-   accessible text (.sr-only's rule, repeated here for the cells). The stage
-   reads n/m with its stepper. */
+/* Compact (FR-2): every row is one line. A Needs me row's context leaves the
+   view for the row's hover. An initiative's goal and next date give way only
+   when the row has no room for them (FR-16: .fit-goal and .fit-next, set by
+   useFitIds in Home.tsx from the row's width, never the class), and then go
+   to the id's hover and the chevron's detail and stay in the accessible
+   text (.sr-only's rule, repeated here for the cells). The stage reads n/m
+   with its stepper. Widths as lib/width.ts measures them: the goal keeps
+   about 30 characters (GOAL_MIN 224), the signals at least 160. */
+/* The row is measured on the room Home has, never on its own content: the
+   list's track and sections take the width they are given, not their
+   min-content, or a column that does not fit would widen the page instead
+   of giving way (found building widths-and-focus). */
+.home:not(.wide) { grid-template-columns: minmax(0, 1fr); }
+.home > .home-sec { min-width: 0; grid-template-columns: minmax(0, 1fr); }
 .home.compact .ib-row { padding: var(--space-1-5) var(--space-2); }
 .home.compact .ib-context,
-.home.compact .p-goal, .home.compact .p-next,
-.home.compact .p-head > :nth-child(5), .home.compact .p-head > :nth-child(8) {
+.home.compact .port:not(.fit-goal) .p-goal, .home.compact .port:not(.fit-next) .p-next,
+.home.compact .port:not(.fit-goal) .p-head > :nth-child(5), .home.compact .port:not(.fit-next) .p-head > :nth-child(8) {
   position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
 .home.compact .port .p-head, .home.compact .port .p-row {
   grid-template-columns: 24px max(var(--id-w, 0px), 96px) 136px 104px 76px minmax(0, 1fr) 24px;
+}
+.home.compact .port.fit-goal .p-head, .home.compact .port.fit-goal .p-row {
+  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 136px 104px minmax(224px, 1.2fr) 76px minmax(160px, 1fr) 24px;
+}
+.home.compact .port.fit-next .p-head, .home.compact .port.fit-next .p-row {
+  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 136px 104px 76px minmax(160px, 1fr) 96px 24px;
+}
+.home.compact .port.fit-goal.fit-next .p-head, .home.compact .port.fit-goal.fit-next .p-row {
+  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 136px 104px minmax(224px, 1.2fr) 76px minmax(160px, 1fr) 96px 24px;
 }
 .home.compact .p-stage .stepper { flex: 0 0 36px; }
 .home.compact .p-stage .stage-lbl { flex: none; }

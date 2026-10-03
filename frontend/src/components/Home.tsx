@@ -6,7 +6,7 @@ import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from ".
 import { uniq } from "../lib";
 import { HEALTH, messages } from "../lib/health";
 import { ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
-import { signalsThatFit, type WidthClass } from "../lib/width";
+import { compactColumns, signalsThatFit, type WidthClass } from "../lib/width";
 import { useBoard } from "../stores/board.store";
 import { nextDate, stageState } from "./InitiativeHeader";
 import { InitiativeDetail } from "./Initiatives";
@@ -195,7 +195,10 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
   const ids = uniq(all.map((i) => i.id)).filter((id) => !folded.has(id));
   const cols = view.board.columns ?? {};
   const states = initiativeStates(view, agents);
-  const { ref, idWidth, narrow } = useFitIds(ids.join(" "));
+  const { ref, idWidth, narrow, fit } = useFitIds(ids.join(" "));
+  // Compact's row is one line; its goal and next date give way only when the
+  // row has no room for them (FR-16), and come back when it has.
+  const hides = { goal: compact && !fit.goal, next: compact && !fit.next };
   if (ids.length === 0) {
     return (
       <div className="panel empty-state">
@@ -205,7 +208,7 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
     );
   }
   return (
-    <div ref={ref} className={`panel port ${narrow && !compact ? "narrow" : ""}`} role="table" style={idWidth ? { "--id-w": `${idWidth}px` } as React.CSSProperties : undefined}>
+    <div ref={ref} className={`panel port ${narrow && !compact ? "narrow" : ""} ${hides.goal ? "" : "fit-goal"} ${hides.next ? "" : "fit-next"}`} role="table" style={idWidth ? { "--id-w": `${idWidth}px` } as React.CSSProperties : undefined}>
       <div className="p-head" role="row">
         <span className="num">#</span><span>initiative</span><span>state</span><span>phase</span><span>goal</span><span>stage</span><span>signals</span><span>next date</span><span />
       </div>
@@ -219,7 +222,7 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
           <div key={id} className="p-item" data-id={id}>
             <div className="p-row" role="row">
               <span className="p-rank num">{k + 1}</span>
-              <button className="p-id" onClick={() => openInitiative(id, "overview")} title={compact ? idHover(i, next) : i.title}>{id}</button>
+              <button className="p-id" onClick={() => openInitiative(id, "overview")} title={hides.goal || hides.next ? idHover(i, next, hides) : i.title}>{id}</button>
               <StateLz state={states.get(id) ?? "quiet"} />
               <Phase stages={i.stages ?? []} />
               <span title={i.goal || undefined} className={`p-goal ${i.goal ? "" : "missing"}`}>{i.goal || "no goal yet"}</span>
@@ -243,10 +246,10 @@ type Next = ReturnType<typeof nextDate>;
 /** The chevron's name and hover (FR-11): what its detail opens on. */
 const detailsName = (id: string) => `Details for ${id}: goal, next date, repos`;
 
-/** Compact's id hover (responsive-home FR-2): the title, then the goal and
- *  the next date that left the row. */
-const idHover = (i: merge.BoardInitiative, next: Next) =>
-  `${i.title}\ngoal: ${i.goal || "no goal yet"}\nnext date: ${next ? `${next.date} ${next.what}` : "none ahead"}`;
+/** Compact's id hover (responsive-home FR-2, FR-16): the title, then the
+ *  goal and the next date if they left the row. */
+const idHover = (i: merge.BoardInitiative, next: Next, hides: { goal: boolean; next: boolean }) =>
+  [i.title, hides.goal && `goal: ${i.goal || "no goal yet"}`, hides.next && `next date: ${next ? `${next.date} ${next.what}` : "none ahead"}`].filter(Boolean).join("\n");
 
 /** The chevron's detail opens on the goal and the next date, whole: the
  *  ones compact's row no longer shows and the ones regular cuts (FR-11). */
@@ -269,12 +272,15 @@ const ONE_LINE_REST = 320 + 480;
 /** FR-2 (lead-side-fixes): every id reads in full. The id column is as wide
  *  as the longest id; when that leaves too little for the rest on one line,
  *  the table goes narrow and phase, goal and next date move to the row's
- *  second line (home.css, .port.narrow). A ResizeObserver, not a media query:
- *  the room depends on the rail, and Safari 15 has no container queries. */
+ *  second line (home.css, .port.narrow). Compact's rows stay one line, and
+ *  `fit` says which of goal and next date the row has room for (FR-16). A
+ *  ResizeObserver, not a media query: the room depends on the rail, and
+ *  Safari 15 has no container queries. */
 function useFitIds(key: string) {
   const ref = useRef<HTMLDivElement>(null);
   const [idWidth, setIdWidth] = useState(0);
   const [narrow, setNarrow] = useState(false);
+  const [fit, setFit] = useState({ goal: true, next: true });
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -282,13 +288,18 @@ function useFitIds(key: string) {
       const w = Math.max(0, ...Array.from(el.querySelectorAll<HTMLElement>(".p-row .p-id")).map((b) => b.scrollWidth));
       setIdWidth(Math.ceil(w));
       setNarrow(el.clientWidth < w + ONE_LINE_REST);
+      const row = el.querySelector<HTMLElement>(".p-row");
+      const cs = row ? getComputedStyle(row) : null;
+      const pad = cs ? parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) : 0;
+      const f = compactColumns(el.clientWidth - pad, Math.ceil(w), cs ? parseFloat(cs.columnGap) || 0 : 0);
+      setFit((p) => (p.goal === f.goal && p.next === f.next ? p : f));
     };
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(el);
     return () => ro.disconnect();
   }, [key]);
-  return { ref, idWidth, narrow };
+  return { ref, idWidth, narrow, fit };
 }
 
 /** Home's compact stepper: one segment per stage and the current one named.
