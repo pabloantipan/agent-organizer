@@ -1,15 +1,16 @@
 ---
 title: Time zoom, second pass - focus kept at the ends, Today only where it moves, readable day bands, whole marks after a pointer
-status: next
+status: now
 repos: [organizer]
 branch: time-zoom-2
 updated: 2026-10-03
-next: "sup27 builds it with its pair (organizer-probe-sup27, launched 2026-10-03; 0074 ruled)"
+next: "tz2-build builds it in .wt/time-zoom-2 (sup27, 2026-10-03)"
 depends_on: []
 boundary: ["frontend/src/components/TimeZoom.tsx, frontend/src/lib/axis.ts and axis.test.ts, frontend/src/styles/time-zoom.css", "frontend/src/components/Roadmap.tsx (A19's minutes label only), StageRoadmap.tsx (A22's row highlight only)", "scripts/fixture-home.sh (A23's card only)", "not: DecisionsView.tsx, RoadmapView.tsx, Home, the stores, Go, docs/design-system.md"]
 spec: "docs/ux/specs/roadmap-time-zoom.md, Amendment 1 (Aglaea, 726cbe8) and its Technical notes"
 gate: "docs/ux/specs/roadmap-time-zoom.md Acceptance A15-A23, plus the build row below"
 ui_review: true
+seat: tz2-build
 ---
 
 ## Goal

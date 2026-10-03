@@ -1,15 +1,16 @@
 ---
 title: Decisions as the operator's main view - find, a summary line, sections that fold, the Timeline last and closed
-status: next
+status: now
 repos: [organizer]
 branch: decisions-view
 updated: 2026-10-03
-next: "sup27 builds it with its pair (organizer-probe-sup27, launched 2026-10-03; 0072, 0074 ruled)"
+next: "dv-build builds it in .wt/decisions-view (sup27, 2026-10-03)"
 depends_on: [header-fold-2, time-zoom]
 boundary: ["frontend/src/components/DecisionsView.tsx (page frame, summary, find, section headings, Ruled's limit, Timeline row label and position; dec-line's sticky head and its name, Amendment 1 (0074); not the record body, the Timeline's axis, marks or zoom)", "its CSS", "frontend/src/lib/ and its tests (find match, summary words, turnaround words)", "frontend/src/stores/board.store.ts (the three sections' remembered open state only)", "testdata/ fixtures the gate rows need", "not: Go, the rule box, InitiativeHeader.tsx, Roadmap*.tsx, docs/design-system.md, ~/agent-slack"]
 spec: "docs/ux/specs/decisions-view.md (Aglaea, 9386d15, with the FSE's Technical notes); the review docs/ux/reviews/2026-10-03-decisions-view.md (D1-D7)"
 gate: "docs/ux/specs/decisions-view.md Acceptance B1-B11, and B12-B14 (Amendment 1, 0074), plus the tests row below"
 ui_review: true
+seat: dv-build
 ---
 
 ## Goal
