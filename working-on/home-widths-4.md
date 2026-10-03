@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: home-widths-4
 updated: 2026-10-03
-next: "hw4-build: put back FOLD.cell (0076 ruled folds last; FR-20 and G19 amended ce75486), then review"
+next: "review: home-widths-4, 0076 applied (the cell folds last, 650ee48); clip probe 0 bad rows at 1024/1280/1440/1512/1920, rail expanded and strip; G19-G23 and G8 met; G24 is the UI reviewer's"
 review: fail
 depends_on: [decisions-view, time-zoom-2]
 boundary: ["frontend/src/components/Home.tsx, Rail.tsx, RuleDecisionBox.tsx", "frontend/src/components/Crew.tsx (CellStateLz only), Conversation.tsx (FR-24's names and focus only)", "frontend/src/lib/width.ts, frontend/src/lib/ and its tests", "frontend/src/styles/home.css, rule-box.css, global.css (.rail-icon only), shell.css (the rail's rules only)", "testdata/fixture-twenty/ and scripts/fixture-home.sh (FR-25's rows)", "not: header-fold-3's files, DecisionsView.tsx, Go, docs/design-system.md"]
@@ -28,6 +28,7 @@ widths-and-focus's leftovers, ranked by Aglaea: FR-20 to FR-25 of
 - [x] G8: see `docs/specs/responsive-home.md`, Acceptance
 
 ## Done
+- 2026-10-03 hw4-build: 0076 (Pablo: the cell folds last) applied in 650ee48, with a1b14b2 (never-fold signals share the column with a 2-character + ellipsis floor); from a clean detached checkout: clip probe 0 bad rows at 1024x640, 1280x800, 1440x900, 1512x945, 1920x1080, rail expanded and strip ("+5" inside the 145 px column at 1024 expanded), G19 as amended and G23 (.wt-notes/hw4-build/clip-0076.log, g19-0076.log, g23-0076.log); rebased on main, make test, npm run build, G18 grep, wails build green
 - 2026-10-03 hw4-build: 424149a never-fold signals share the column (shareRoom), each with at least 2 characters + ellipsis on its span, +N inside; clip probe from a clean checkout (.wt-notes/hw4-build/clip-clean.log): passes at 1024 strip and at 1280, 1440, 1512, 1920 expanded and strip; fails only at 1024x640 rail expanded by 6 px (32+32+48 + 27 + 12 = 151 > 145)
 - 2026-10-03 hw4-build: 2941f2c (was 40ab320 before the rebase) tracks testdata/fixture-twenty/partner-payouts/agents/cell.json (git add -f, agents/ is ignored); G19 and G23 re-run from a clean detached checkout at 40ab320 (.wt-notes/hw4-build/g19-clean.log, g23-clean.log): the card row partner-payouts · Partner terms is in Needs me, and the cell lozenge on the seven-signal row is shown and cut with an ellipsis on its span at 1920
 - 2026-10-03 hw4-build: code review fixes on home-widths-4, rebased on main 189680e (e02059b the cell in definition never folds, it takes its ellipsis; d570c7e one Escape closes only the topmost, Help or a card back first; 95ace22 People's hide named); G19 re-measured at 1440x900 and 1512x945 (.wt-notes/hw4-build/g19-fix.log), the Escape stack in esc-topmost.log, G22 in g22-fix.log; G8 green again
@@ -105,6 +106,6 @@ widths-and-focus's leftovers, ranked by Aglaea: FR-20 to FR-25 of
 ## Notes
 Runs in parallel with header-fold-3; boundaries disjoint.
 - boundary widened by sup28: SlackView.tsx, FR-24 focus only
-- The cell in definition never folds (after the code review): at 1440 and 1512 waiting and the cell show cut with their ellipses, blocked whole, and only problems, now and live are in "+N". 0076 asks Pablo whether the cell should fold; if he rules that it folds, put back `FOLD.cell` (lib/width.ts).
+- 0076 ruled (Pablo): the cell's state folds into "+N" last, after problems, now and live; waiting and blocked never fold and keep a 2-character + ellipsis floor.
 - On Decisions at 1024x640 the rule box is moved up to fit and covers the lower half of its own Rule (existing placement); the head stays marked.
 - The empty-column track uses a CSS space toggle (`--t-next: ;`): G24 should look at it in WKWebView.
