@@ -6,7 +6,7 @@ import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from ".
 import { uniq } from "../lib";
 import { HEALTH, messages } from "../lib/health";
 import { ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
-import { compactColumns, signalsThatFit, type WidthClass } from "../lib/width";
+import { compactColumns, FOLD, NO_EMPTY, signalsShown, type Empty, type Fold, type WidthClass } from "../lib/width";
 import { useBoard } from "../stores/board.store";
 import { nextDate, stageState } from "./InitiativeHeader";
 import { InitiativeDetail } from "./Initiatives";
@@ -195,10 +195,20 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
   const ids = uniq(all.map((i) => i.id)).filter((id) => !folded.has(id));
   const cols = view.board.columns ?? {};
   const states = initiativeStates(view, agents);
-  const { ref, idWidth, narrow, fit } = useFitIds(ids.join(" "));
+  const items = ids.map((id) => {
+    const rows = all.filter((i) => i.id === id);
+    const i = rows.find((r) => r.local) ?? rows[0];
+    const cards = (["now", "blocked", "next"] as const).flatMap((st) => (cols[st] ?? []).filter((c) => c.initiative_id === id));
+    const group = agents?.groups?.find((g) => g.id === id);
+    const sig = signalFacts(i, rows, cards, group?.waves ?? [], group?.cell);
+    return { id, rows, i, cards, group, sig, next: nextDate(i, cards) };
+  });
+  // FR-20: a column empty ("—") on every shown row gives way first.
+  const empty: Empty = { next: items.length > 0 && items.every((r) => !r.next), sig: items.length > 0 && items.every((r) => r.sig.none) };
+  const { ref, idWidth, narrow, fit } = useFitIds(ids.join(" "), empty);
   // Compact's row is one line; its goal and next date give way only when the
   // row has no room for them (FR-16), and come back when it has.
-  const hides = { goal: compact && !fit.goal, next: compact && !fit.next };
+  const hides = { goal: compact && !fit.goal, next: compact && !fit.next && !empty.next };
   if (ids.length === 0) {
     return (
       <div className="panel empty-state">
@@ -208,16 +218,11 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
     );
   }
   return (
-    <div ref={ref} className={`panel port ${narrow && !compact ? "narrow" : ""} ${hides.goal ? "" : "fit-goal"} ${hides.next ? "" : "fit-next"}`} role="table" style={idWidth ? { "--id-w": `${idWidth}px` } as React.CSSProperties : undefined}>
+    <div ref={ref} className={`panel port ${narrow && !compact ? "narrow" : ""} ${hides.goal ? "" : "fit-goal"} ${hides.next || empty.next ? "" : "fit-next"} ${empty.next ? "empty-next" : ""} ${empty.sig ? "empty-sig" : ""}`} role="table" style={idWidth ? { "--id-w": `${idWidth}px` } as React.CSSProperties : undefined}>
       <div className="p-head" role="row">
         <span className="num">#</span><span>initiative</span><span>state</span><span>phase</span><span>goal</span><span>stage</span><span>signals</span><span>next date</span><span />
       </div>
-      {ids.map((id, k) => {
-        const rows = all.filter((i) => i.id === id);
-        const i = rows.find((r) => r.local) ?? rows[0];
-        const cards = (["now", "blocked", "next"] as const).flatMap((st) => (cols[st] ?? []).filter((c) => c.initiative_id === id));
-        const group = agents?.groups?.find((g) => g.id === id);
-        const next = nextDate(i, cards);
+      {items.map(({ id, rows, i, group, sig, next }, k) => {
         return (
           <div key={id} className="p-item" data-id={id}>
             <div className="p-row" role="row">
@@ -227,7 +232,7 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
               <Phase stages={i.stages ?? []} />
               <span title={i.goal || undefined} className={`p-goal ${i.goal ? "" : "missing"}`}>{i.goal || "no goal yet"}</span>
               <MiniStepper stages={i.stages ?? []} compact={compact} />
-              <Signals i={i} rows={rows} cards={cards} waves={group?.waves ?? []} cell={group?.cell} missing={missingPersonas(group?.crew)} lead={leadOf(group)}  />
+              <Signals i={i} sig={sig} cell={group?.cell} missing={missingPersonas(group?.crew)} lead={leadOf(group)} />
               <NextDate next={next} />
               <button className="p-more ghost" onClick={() => setOpen({ ...open, [id]: !open[id] })} aria-expanded={!!open[id]} aria-label={detailsName(id)} title={detailsName(id)}>
                 {open[id] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -268,6 +273,8 @@ function GoalAndDate({ i, next }: { i: merge.BoardInitiative; next: Next }) {
  *  signals at their narrowest readable width, and the fixed columns (rank,
  *  state, phase, next date, chevron) with their gaps, as home.css sets them. */
 const ONE_LINE_REST = 320 + 480;
+/** The next date's share of that (its 96 px column). */
+const NEXT_REST = 96;
 
 /** FR-2 (lead-side-fixes): every id reads in full. The id column is as wide
  *  as the longest id; when that leaves too little for the rest on one line,
@@ -276,7 +283,7 @@ const ONE_LINE_REST = 320 + 480;
  *  `fit` says which of goal and next date the row has room for (FR-16). A
  *  ResizeObserver, not a media query: the room depends on the rail, and
  *  Safari 15 has no container queries. */
-function useFitIds(key: string) {
+function useFitIds(key: string, empty: Empty = NO_EMPTY) {
   const ref = useRef<HTMLDivElement>(null);
   const [idWidth, setIdWidth] = useState(0);
   const [narrow, setNarrow] = useState(false);
@@ -287,18 +294,20 @@ function useFitIds(key: string) {
     const fit = () => {
       const w = Math.max(0, ...Array.from(el.querySelectorAll<HTMLElement>(".p-row .p-id")).map((b) => b.scrollWidth));
       setIdWidth(Math.ceil(w));
-      setNarrow(el.clientWidth < w + ONE_LINE_REST);
       const row = el.querySelector<HTMLElement>(".p-row");
       const cs = row ? getComputedStyle(row) : null;
       const pad = cs ? parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) : 0;
-      const f = compactColumns(el.clientWidth - pad, Math.ceil(w), cs ? parseFloat(cs.columnGap) || 0 : 0);
+      const gap = cs ? parseFloat(cs.columnGap) || 0 : 0;
+      // An empty next date takes no room on the line (FR-20).
+      setNarrow(el.clientWidth < w + ONE_LINE_REST - (empty.next ? NEXT_REST + gap : 0));
+      const f = compactColumns(el.clientWidth - pad, Math.ceil(w), gap, empty);
       setFit((p) => (p.goal === f.goal && p.next === f.next ? p : f));
     };
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [key]);
+  }, [key, empty.next, empty.sig]);
   return { ref, idWidth, narrow, fit };
 }
 
@@ -332,10 +341,11 @@ function MiniStepper({ stages, compact = false }: { stages: model.Stage[]; compa
   );
 }
 
-/** A row's signals. Each lozenge's words sit in a text span that takes the
- *  ellipsis (FR-14): the lozenge is a flex box, and a flex box clips its
- *  text mid-word instead of cutting it. */
-function Signals({ i, rows, cards, waves, cell, missing, lead }: { i: merge.BoardInitiative; rows: merge.BoardInitiative[]; cards: merge.BoardCard[]; waves: service.Wave[]; cell?: model.Cell | null; missing: string[]; lead: string }) {
+type SignalFacts = ReturnType<typeof signalFacts>;
+
+/** What a row's signals count, apart from how they are drawn: Home asks
+ *  whether the column is empty on every row (FR-20) before it draws one. */
+function signalFacts(i: merge.BoardInitiative, rows: merge.BoardInitiative[], cards: merge.BoardCard[], waves: service.Wave[], cell?: model.Cell | null) {
   const waiting = waitingDecisions(i);
   const blocked = cards.filter((c) => c.status === "blocked").length;
   const now = cards.filter((c) => c.status === "now").length;
@@ -345,15 +355,24 @@ function Signals({ i, rows, cards, waves, cell, missing, lead }: { i: merge.Boar
   const problems = i.problems?.length ?? 0;
   const defining = cell?.state === "in_definition";
   const none = !waiting && !blocked && !now && !live && !running.length && !problems && !defining;
+  return { waiting, blocked, now, live, working, running, problems, none };
+}
+
+/** A row's signals. Each lozenge's words sit in a text span that takes the
+ *  ellipsis (FR-14): the lozenge is a flex box, and a flex box clips its
+ *  text mid-word instead of cutting it. `data-fold` is how soon a signal
+ *  folds into "+N" (FR-20); one without it never folds. */
+function Signals({ i, sig, cell, missing, lead }: { i: merge.BoardInitiative; sig: SignalFacts; cell?: model.Cell | null; missing: string[]; lead: string }) {
+  const { waiting, blocked, now, live, working, running, problems, none } = sig;
   return (
     <OneLine>
       {waiting > 0 && <span className="lz waiting"><span className="lz-t"><span className="num">{waiting}</span> waiting · {signalOwners(i, lead).join(", ")}</span></span>}
       {blocked > 0 && <span className="lz blocked"><span className="lz-t"><span className="num">{blocked}</span> blocked</span></span>}
-      {now > 0 && <span className="lz now"><span className="lz-t"><span className="num">{now}</span> now</span></span>}
-      {running.map((w) => <span key={w.n} className="lz live"><span className="lz-t">wave <span className="num">{w.n}</span> · <span className="num">{w.building!.length}</span> building</span></span>)}
-      {live > 0 && <span className="lz"><span className="lz-t">{working > 0 ? <><span className="num">{working}</span> working</> : <><span className="num">{live}</span> live</>}</span></span>}
-      <CellStateLz cell={cell} missing={missing} label="cell in definition" />
-      {problems > 0 && <span className="lz warning"><span className="lz-t"><span className="num">{problems}</span> problem{problems === 1 ? "" : "s"}</span></span>}
+      {now > 0 && <span className="lz now" data-fold={FOLD.now}><span className="lz-t"><span className="num">{now}</span> now</span></span>}
+      {running.map((w) => <span key={w.n} className="lz live" data-fold={FOLD.live}><span className="lz-t">wave <span className="num">{w.n}</span> · <span className="num">{w.building!.length}</span> building</span></span>)}
+      {live > 0 && <span className="lz" data-fold={FOLD.live}><span className="lz-t">{working > 0 ? <><span className="num">{working}</span> working</> : <><span className="num">{live}</span> live</>}</span></span>}
+      <CellStateLz cell={cell} missing={missing} label="cell in definition" fold={FOLD.cell} />
+      {problems > 0 && <span className="lz warning" data-fold={FOLD.problems}><span className="lz-t"><span className="num">{problems}</span> problem{problems === 1 ? "" : "s"}</span></span>}
       {none && <span className="p-quiet" title="no signals">—</span>}
     </OneLine>
   );
@@ -367,7 +386,7 @@ function Signals({ i, rows, cards, waves, cell, missing, lead }: { i: merge.Boar
  *  state is set only when what fits changes. */
 function OneLine({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const [cut, setCut] = useState<{ n: number; rest: string[]; whole: string } | null>(null);
+  const [cut, setCut] = useState<{ rest: string[]; whole: string } | null>(null);
   const measure = () => {
     const el = ref.current;
     if (!el) return;
@@ -382,17 +401,19 @@ function OneLine({ children }: { children: React.ReactNode }) {
       const t = c.querySelector<HTMLElement>(".lz-t");
       return Math.max(c.getBoundingClientRect().width + (t ? t.scrollWidth - t.clientWidth : 0), c.scrollWidth);
     };
-    const n = signalsThatFit(items.map(natural), gap, el.clientWidth, Math.max(more?.getBoundingClientRect().width ?? 0, 28));
-    const rest = items.slice(n).map((c) => (c.textContent ?? "").replace(/\s+/g, " ").trim());
-    items.forEach((c, k) => { c.style.display = ""; if (k >= n) c.dataset.off = "1"; else delete c.dataset.off; });
+    const folds = items.map((c): Fold => (c.dataset.fold === undefined ? null : (Number(c.dataset.fold) as Fold)));
+    const shown = signalsShown(items.map(natural), folds, gap, el.clientWidth, Math.max(more?.getBoundingClientRect().width ?? 0, 28));
+    const words = (c: HTMLElement) => (c.textContent ?? "").replace(/\s+/g, " ").trim();
+    const rest = items.filter((_, k) => !shown[k]).map(words);
+    items.forEach((c, k) => { c.style.display = ""; if (!shown[k]) c.dataset.off = "1"; else delete c.dataset.off; });
     // A shown signal may still be cut by its ellipsis (the first one when
     // the cell is tight, any one at the lozenge's cap): then the hover names
     // it whole.
-    const whole = items.slice(0, n).filter((c) => {
+    const whole = items.filter((_, k) => shown[k]).filter((c) => {
       const t = c.querySelector<HTMLElement>(".lz-t") ?? c;
       return t.scrollWidth > t.clientWidth + 1;
     }).map((c) => (c.textContent ?? "").replace(/\s+/g, " ").trim()).join("\n");
-    setCut((p) => (p && p.n === n && p.whole === whole && p.rest.join("|") === rest.join("|") ? p : { n, rest, whole }));
+    setCut((p) => (p && p.whole === whole && p.rest.join("|") === rest.join("|") ? p : { rest, whole }));
   };
   useLayoutEffect(measure);
   useLayoutEffect(() => {

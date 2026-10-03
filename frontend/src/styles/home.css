@@ -5,14 +5,14 @@
    seven type sizes only; no nesting, no @layer, no color-mix (Safari 15.0). */
 
 .home .p-head, .home .p-row {
-  grid-template-columns: 24px minmax(0, 0.9fr) 144px 96px minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.5fr) 96px 24px;
+  grid-template-columns: 24px minmax(0, 0.9fr) 144px 96px var(--t-goal, minmax(0, 1.2fr)) minmax(0, 1fr) var(--t-sig, minmax(0, 1.5fr)) var(--t-next, 96px) 24px;
   gap: var(--space-3);
   padding: var(--space-1-5) var(--space-3);
 }
 /* FR-2 (lead-side-fixes): the id column is never narrower than the longest
    id (--id-w, measured by useFitIds in Home.tsx) */
 .home .port .p-head, .home .port .p-row {
-  grid-template-columns: 24px minmax(var(--id-w, 0px), 0.9fr) 144px 96px minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.5fr) 96px 24px;
+  grid-template-columns: 24px minmax(var(--id-w, 0px), 0.9fr) 144px 96px var(--t-goal, minmax(0, 1.2fr)) minmax(0, 1fr) var(--t-sig, minmax(0, 1.5fr)) var(--t-next, 96px) 24px;
 }
 .home .p-id { max-width: none; }
 
@@ -38,6 +38,21 @@
 .home .port.narrow .p-head > :nth-child(8), .home .port.narrow .p-row > :nth-child(8) { grid-area: next; }
 .home .port.narrow .p-head > :nth-child(9), .home .port.narrow .p-row > :nth-child(9) { grid-area: more; }
 .home .port.narrow .p-row > :nth-child(9) { align-self: start; }
+.home .port.narrow.empty-next .p-head, .home .port.narrow.empty-next .p-row {
+  grid-template-areas:
+    "rank id    state stage sig  more"
+    ".    phase goal  goal  goal .";
+}
+.home .port.narrow.empty-sig .p-head, .home .port.narrow.empty-sig .p-row {
+  grid-template-areas:
+    "rank id    state stage stage more"
+    ".    phase goal  goal  next  .";
+}
+.home .port.narrow.empty-next.empty-sig .p-head, .home .port.narrow.empty-next.empty-sig .p-row {
+  grid-template-areas:
+    "rank id    state stage stage more"
+    ".    phase goal  goal  goal  .";
+}
 
 .home .p-head { padding-top: var(--space-2); padding-bottom: var(--space-2); }
 
@@ -91,16 +106,16 @@
   position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }
 .home.compact .port .p-head, .home.compact .port .p-row {
-  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 136px 104px 76px minmax(0, 1fr) 24px;
+  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 136px 104px 76px var(--t-sig, minmax(0, 1fr)) 24px;
 }
 .home.compact .port.fit-goal .p-head, .home.compact .port.fit-goal .p-row {
-  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 136px 104px minmax(224px, 1.2fr) 76px minmax(160px, 1fr) 24px;
+  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 136px 104px minmax(224px, 1.2fr) 76px var(--t-sig, minmax(160px, 1fr)) 24px;
 }
 .home.compact .port.fit-next .p-head, .home.compact .port.fit-next .p-row {
-  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 136px 104px 76px minmax(160px, 1fr) 96px 24px;
+  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 136px 104px 76px var(--t-sig, minmax(160px, 1fr)) 96px 24px;
 }
 .home.compact .port.fit-goal.fit-next .p-head, .home.compact .port.fit-goal.fit-next .p-row {
-  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 136px 104px minmax(224px, 1.2fr) 76px minmax(160px, 1fr) 96px 24px;
+  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 136px 104px minmax(224px, 1.2fr) 76px var(--t-sig, minmax(160px, 1fr)) 96px 24px;
 }
 .home.compact .p-stage .stepper { flex: 0 0 36px; }
 .home.compact .p-stage .stage-lbl { flex: none; }
@@ -114,7 +129,7 @@
 
 /* Regular's top (FR-3): the goal column takes the room the cap gives. */
 .home.roomy .port .p-head, .home.roomy .port .p-row {
-  grid-template-columns: 24px minmax(var(--id-w, 0px), 0.9fr) 144px 96px minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1.5fr) 96px 24px;
+  grid-template-columns: 24px minmax(var(--id-w, 0px), 0.9fr) 144px 96px var(--t-goal, minmax(0, 2.2fr)) minmax(0, 1fr) var(--t-sig, minmax(0, 1.5fr)) var(--t-next, 96px) 24px;
 }
 
 /* Wide (FR-4, from 2200 since FR-13): stage and signals at their full
@@ -124,7 +139,7 @@
    the goal keeps 160, instead of the goal going to 0 and the chevrons
    spilling into the Needs me column (found building responsive-home-2). */
 .home.wide .port .p-head, .home.wide .port .p-row {
-  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 144px 104px minmax(160px, 1fr) minmax(120px, 208px) minmax(120px, 288px) 136px 24px;
+  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 144px 104px minmax(160px, 1fr) minmax(120px, 208px) var(--t-sig, minmax(120px, 288px)) var(--t-next, 136px) 24px;
 }
 /* the Needs me column is narrow: a subject takes two lines before it is cut */
 .home.wide .ib-subject { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
@@ -135,8 +150,23 @@
 .home .p-sig.one-line { flex-wrap: nowrap; overflow: hidden; min-width: 0; }
 .home .p-sig.one-line > * { flex: none; }
 .home .p-sig.one-line > [data-off] { display: none; }
+/* the first (the waiting list, as long as its owners, when there is one)
+   takes the cut when the signals that never fold (FR-20) do not fit whole */
 .home .p-sig.one-line > .lz:first-child { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .lz.sig-more { background: var(--surface-raised); color: var(--fg-muted); }
 /* FR-14: a lozenge is a flex box, which clips its text mid-word; its words
    sit in a text span that takes the ellipsis instead. */
 .lz-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* FR-20 (amendment 4; design system, Widths, "what gives way first"): a
+   column whose cell is empty ("—") on every shown row gives way before any
+   column with content, in every class. Its track leaves the row's template
+   (--t-next and --t-sig set to nothing, so the var drops the track) and its
+   cells leave the grid. The goal's share grows with an empty next date, so
+   most of its room goes to the goal (ranking row 4). .empty-next and
+   .empty-sig are set by Initiatives in Home.tsx from the rows it shows. */
+.home .port.empty-next { --t-next: ; --t-goal: minmax(0, 1.8fr); }
+.home.roomy .port.empty-next { --t-goal: minmax(0, 2.8fr); }
+.home .port.empty-sig { --t-sig: ; }
+.home .port.empty-next .p-row > .p-next, .home .port.empty-next .p-head > :nth-child(8),
+.home .port.empty-sig .p-row > .p-sig, .home .port.empty-sig .p-head > :nth-child(7) { display: none; }
