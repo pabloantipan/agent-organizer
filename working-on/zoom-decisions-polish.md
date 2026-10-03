@@ -41,10 +41,11 @@ Runs beside sup28's header-fold-3 and home-widths-4: disjoint files.
 - FR-2 makes only the Decisions Timeline's axis stick to the page at Fit; Roadmap's Cards and Stages keep their axis in the frame.
 
 ## Review
-- Verdict: code review pass at 28f581a. L0 rerun here: make test, npm test (143), npm run build, wails build all pass. L1-L8 met by the diff plus the builder's shots.
+- Verdict: code review pass at b7e8671 (rebased on adb2969). L0 rerun here: make test (go ok, vitest 158), npm run build, wails build all pass. L1-L8 still met. The rebase brought in no new files and the commits are the same.
+- U1 fix: one line, `.tz-wrap { min-width: 0 }` in time-zoom.css, inside the boundary. Cards and Decisions are not hit because there the wrapper is a block, not a grid item.
 - Unmet gate items: none.
 - Boundary: 8 files, all inside; decisions.css only adds the Fit axis rule, no `!important` touched.
-- Outside the gate: (1) on the L7 shots the stuck Ruled heading cuts a band through the capped rule box (z-order), so it is not this diff; it belongs to markdown-and-labels FR-12. (2) Ruling while Ruled is closed drops focus to the body (the builder found this too). (3) A landing during a find, into a section hand-closed during that find, keeps the section closed (findHand outranks visit). (4) L2 is not repeatable: no 74-record fixture. (5) `.tz-labelcol` hard-codes 240 px twice in CSS beside `LABEL_W`.
+- Outside the gate: (1) on the L7 shots the stuck Ruled heading cuts a band through the capped rule box (z-order), so it is not this diff; it belongs to markdown-and-labels FR-12. (2) Ruling while Ruled is closed drops focus to the body (the builder found this too). (3) A landing during a find, into a section hand-closed during that find, keeps the section closed (findHand outranks visit). (4) L2 is not repeatable: no 74-record fixture. (5) `.tz-labelcol` hard-codes 240 px twice in CSS beside `LABEL_W`. (6) No gate row zooms Stages, which is how U1 got through both reviews.
 - Reviewer: zdp-review, 2026-10-03
 
 ## UI review
