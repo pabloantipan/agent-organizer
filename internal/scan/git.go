@@ -139,7 +139,9 @@ func branchSpan(dir, branch string, timeout time.Duration) (first, last string, 
 	}
 	// Exclude whatever main line exists so the span is the branch's own work.
 	bases, _ := git(ctx, dir, "for-each-ref", "--format=%(refname:short)", "refs/heads/main", "refs/heads/master", "refs/remotes/origin/main", "refs/remotes/origin/master")
-	args := []string{"log", "--format=%cs", "--reverse", branch}
+	// %cI is the strict ISO 8601 committer time (RFC 3339), so the axis can
+	// draw a branch's ends to the minute; card dates stay whole days.
+	args := []string{"log", "--format=%cI", "--reverse", branch}
 	for _, b := range strings.Fields(bases) {
 		if b != branch {
 			args = append(args, "^"+b)
