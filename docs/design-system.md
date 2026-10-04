@@ -34,6 +34,14 @@ JetBrains Mono for data.
 7. **No invented values.** A missing date is an empty row or a dot, never a bar
    (Jira timeline); a missing goal says so.
 
+**Dates read as words** wherever a person reads them: `24 Sep`, with the
+year only when it is not this year, and `today`. ISO (`2026-09-24`) appears
+only where the text is a file's own content: a path, a frontmatter field
+shown verbatim, mono code (leftovers-8). **The lead's words are kept
+verbatim**: a field that takes his words (a ruling, a note, a message) has
+`autocorrect="off" autocapitalize="off"` and no spell-replace, since
+WKWebView applies macOS's corrections silently (leftovers-8, lf7-U4).
+
 ## Colour
 
 ### Scales (tier 1: primitives, never used directly by components)

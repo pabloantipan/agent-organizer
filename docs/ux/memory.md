@@ -205,6 +205,12 @@ stack puts focus back into the box below; the scrim stops below the top bar
 (3424695); within the never-fold set, waiting gives way before blocked
 (857949c). Reviews now run in `Deltagos Review.app` (own bundle id).
 
+Leftovers-8 (2026-10-04, `reviews/2026-10-04-rank-leftovers-8.md`, thread
+01M43Z4MM70GV0TH1NAJC2D28A): 7 rows from layers-focus-and-words plus my
+A1–A3 (80ab772). DS Principles amended: dates read as words wherever a
+person reads them; the lead's words are kept verbatim (no autocorrect in
+WKWebView).
+
 ## Open questions
 
 - Q1 (Pablo, via the FSE, leftovers-4): does he use Tab in the app? In

@@ -78,3 +78,4 @@ know, ruled choices, open findings, lessons), `docs/ux/principles.md`, and
 - 2026-10-04 — sup32 tf6-ui A1/A2: +N rides the crowd's last title; at Days today's own tick in accent, 'today' on the context row (DS).
 - 2026-10-04 — tf6 leftovers: directions for P8 of layers-focus-and-words; DS: 'in view' defined.
 - 2026-10-04 — sup33 lf7-ui A1-A3: facts line joins the stuck head while ruling; drawers scroll their own body; Home's list short at 1512 strip is a defect.
+- 2026-10-04 — leftovers-8 ranked (7 rows + 3 gate/code); DS: dates as words, words verbatim.
