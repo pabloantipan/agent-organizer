@@ -8,6 +8,9 @@ import { inactiveIds } from "../lib/queue";
 import { useBoard } from "../stores/board.store";
 import { CellStateLz, definitionWaits } from "./Crew";
 import { missingPersonas } from "../lib/queue";
+import { roleInitials, roleMail, roleState } from "../lib/roles";
+import { openRoleFrom, RoleDrawer } from "./RoleDrawer";
+import "../styles/roles.css";
 
 type Entry = { id: string; title: string; client: string; status: string; now: number; blocked: number; next: number; machines: string[]; live: number; working: number; cell?: model.Cell | null; missing: string[] };
 
@@ -19,7 +22,7 @@ type Entry = { id: string; title: string; client: string; status: string; now: n
  *  that are not active (FR-9) leave every group and sit in one last
  *  "Not active" group, collapsed by default, that only opens them. */
 export function Rail() {
-  const { view, agents, selectedInitiative, setSelectedInitiative, reorderInitiatives, setGroups, railCollapsed, setRailCollapsed } = useBoard();
+  const { view, agents, selectedInitiative, setSelectedInitiative, reorderInitiatives, setGroups, railCollapsed, setRailCollapsed, roleOpen } = useBoard();
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() => {
     try { return JSON.parse(localStorage.getItem("rail.collapsed") || "{}"); } catch { return {}; }
   });
@@ -74,6 +77,11 @@ export function Rail() {
   // Ranks count active initiatives only; a folded one has none until it is
   // active again, and then its stored place gives it back.
   const rank = new Map(activeIds.map((id, i) => [id, i + 1]));
+
+  // The transversal roles (spec, The rail): those that run here, unranked.
+  const allRoles = agents?.roles ?? [];
+  const roles = allRoles.filter((r) => r.here);
+  const initials = roleInitials(allRoles.map((r) => r.name));
 
   const isCollapsed = (key: string) => (key === FOLD ? collapsed[key] ?? true : !!collapsed[key]);
   const toggle = (key: string) => {
@@ -215,9 +223,23 @@ export function Rail() {
 
   if (railCollapsed) {
     return (
+      <>
       <nav id={RAIL_ID} className="rail strip" aria-label="initiatives">
         <button className="rail-icon strip-toggle" onClick={() => setRailCollapsed(false)} title="expand the rail" aria-label="Initiatives rail" aria-expanded={false} aria-controls={RAIL_ID}><PanelLeftOpen size={14} /></button>
         <button className={`strip-all ${selectedInitiative === null ? "active" : ""}`} onClick={() => setSelectedInitiative(null)} title={`Home: ${totals.now} now, ${totals.blocked} blocked, ${totals.next} next`}>all</button>
+        {roles.map((r) => {
+          const st = roleState(r);
+          const m = roleMail(r);
+          return (
+            <button key={`role:${r.name}`} type="button" className={`strip-item role ${roleOpen === r.name ? "active" : ""}`} data-role={r.name}
+              onClick={(ev) => openRoleFrom(ev.currentTarget, r.name)} aria-label={r.name} aria-haspopup="dialog" aria-expanded={roleOpen === r.name}
+              title={`${r.name}: ${st.text}${m.text ? `, ${m.text}` : m.unknown ? ", mailbox not reachable" : ""}`}>
+              {initials.get(r.name)}
+              {st.live && <i className={`live-dot ${st.working ? "working" : ""}`} />}
+            </button>
+          );
+        })}
+        {roles.length > 0 && <span className="strip-sep" aria-hidden="true" />}
         {active.map((e) => (
           <button
             key={e.id}
@@ -231,10 +253,13 @@ export function Rail() {
           </button>
         ))}
       </nav>
+      <RoleDrawer />
+      </>
     );
   }
 
   return (
+    <>
     <nav id={RAIL_ID} className="rail" aria-label="initiatives">
       <button className="rail-icon strip-toggle" onClick={() => setRailCollapsed(true)} title="collapse the rail" aria-label="Initiatives rail" aria-expanded aria-controls={RAIL_ID}><PanelLeftClose size={14} /></button>
       <button
@@ -252,6 +277,36 @@ export function Rail() {
         {selectedInitiative && <div className="hero-back"><ArrowLeft size={12} /> Home</div>}
       </button>
       <div className="rail-list">
+        {roles.length > 0 && (
+          <section className="rail-group roles" aria-label="Roles">
+            <div className="rail-group-head fixed">
+              <button className="rail-chevron" onClick={() => toggle(ROLES)} aria-expanded={!isCollapsed(ROLES)} title={isCollapsed(ROLES) ? "expand" : "collapse"}>
+                {isCollapsed(ROLES) ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+              </button>
+              <span className="rail-group-name" title="the transversal seats: show only, not priorities">Roles</span>
+              <span className="rail-group-n">{roles.length}</span>
+            </div>
+            {!isCollapsed(ROLES) && (
+              <div className="rail-group-list">
+                {roles.map((r) => {
+                  const st = roleState(r);
+                  const m = roleMail(r);
+                  return (
+                    <button key={r.name} type="button" className={`rail-item role ${roleOpen === r.name ? "active" : ""}`} data-role={r.name}
+                      onClick={(ev) => openRoleFrom(ev.currentTarget, r.name)} aria-haspopup="dialog" aria-expanded={roleOpen === r.name}
+                      aria-label={`${r.name}: ${st.text}${m.text ? `; ${m.text}` : m.unknown ? "; mailbox not reachable" : ""}`} title={`${r.name}: ${st.text}`}>
+                      <span className="rail-rank" aria-hidden="true" />
+                      <span className="rail-main">
+                        <span className="rail-title">{st.live && <span className={`live-dot ${st.working ? "working" : ""}`} />}{r.name}</span>
+                      </span>
+                      {m.count > 0 && <span className="rail-counts mono"><span className="m" title={m.text}>{m.count}</span></span>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        )}
         <div className="rail-label">
           <span>By priority{grouped ? ", grouped" : ""}</span>
           <span className="spacer" />
@@ -318,9 +373,13 @@ export function Rail() {
         )}
       </div>
     </nav>
+    <RoleDrawer />
+    </>
   );
 }
 
+/** The per-viewer collapse key of the Roles group; it is not a stored group. */
+const ROLES = "roles";
 /** The per-viewer collapse key of the Not active group; it is not a stored group. */
 const FOLD = "inactive";
 /** The rail's toggle is a disclosure of the rail (responsive-home FR-11). */
