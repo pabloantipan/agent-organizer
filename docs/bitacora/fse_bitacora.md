@@ -156,6 +156,11 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   65c190c..42efe71), layout copies discard (all five webkit-before removed),
   reinstall (v0.2.0-949). Transversal roles: he asked what the questions
   are; restated in the session.
+- rule-words-and-dates merged (cb55516). FR-4: boundary widened to
+  shell.css:65 (f45da3a). leftovers-9 collecting: aglaea D1 (2, Escape
+  keeps a draft per record, returns on reopen, "Rule · draft"; only Cancel
+  discards; rule box, card note, composer), U1 (2, Home's fixed columns give
+  slack to cut cells, shareRoom; gate 1512 rail strip: next date whole).
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
