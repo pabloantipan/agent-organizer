@@ -3,43 +3,34 @@
 The Product Designer seat beside the organizer's FSE (0053). HAND-OFF at the
 top; one dated line per session below.
 
-## HAND-OFF — 2026-09-30, before the full restart
+## HAND-OFF — 2026-10-04, at the context cap
 
-Read first: the `aglaea` skill, `agents/aglaea.md`, `docs/ux/memory.md` (what I
-know, ruled choices, open findings, lessons), `docs/ux/principles.md`, and
-`docs/design-system.md` (**mine since 0054**; the app is **Deltagos**, 0066).
+Read first: the `aglaea` skill, `agents/aglaea.md`, `docs/ux/memory.md`,
+`docs/ux/principles.md`, `docs/design-system.md` (**mine since 0054**; the app
+is **Deltagos**, 0066; amended many times on 2026-10-03/04, every line cites
+its source).
 
-- **Doing:** nothing in flight. 2026-10-03: sent the FSE `docs/ux/specs/roadmap-time-zoom.md` (time zoom on Cards, Stages, Decisions); O1 and O3 ruled in 0070 (commit times in the card; no Hours without a timestamp); the FSE cards it after header-fold-2.
-- **Also 2026-10-03:** sent the FSE the Decisions view review and spec (`reviews/2026-10-03-decisions-view.md`, `specs/decisions-view.md`); O1 (the jobs) is for Pablo.
-- **Also 2026-10-03:** ranked sup25's leftovers (leftovers-3); decisions-view Amendment 1 (U2, U3); DS Widths amended.
-- **Also 2026-10-03:** time-zoom leftovers as roadmap-time-zoom Amendment 1 (A15–A23).
-- **Also 2026-10-03:** leftovers-4 ranked (16 rows); Q1 (Tab in WKWebView) waits on Pablo via the FSE.
-- **Also 2026-10-03:** leftovers-5 ranked (15 rows).
-- **Before that:** nothing in flight. Last work: the ranked leftovers of header-fold
-  and responsive-home-2, `docs/ux/reviews/2026-09-30-rank-header-fold-responsive-2.md`
-  (3f3df2f), with the design system amended (Widths: wide from 2200, signals
-  never wrap, a column gives way only when it doesn't fit, scrim in regular;
-  24 px targets; focus ring offset; stage word "now").
-- **Waits on Pablo:** record **0069**, accepting the FSE's two cards from that
-  ranking: `header-fold-2` (initiative-header amendment 3) and
-  `widths-and-focus` (responsive-home amendment 3). I agreed the FSE's
-  assumption: a record taller than the view keeps its head on top, Rule
-  included (thread 01M3RCXDRAHWDQSD34QPZ97Y3X).
-- **Waits on the FSE:** nothing asked of me. Both cards are `ui_review`, so a
-  UI reviewer on `references/ui-review.md` runs in their wave; the FSE may
-  send me its leftovers to rank.
-- **My design specs:** `docs/ux/specs/responsive-home.md` (amendment 1 mine,
-  A8 amended by the FSE per 0065), `docs/ux/specs/initiative-header.md` (§2
-  words superseded by 0068). Build specs are the FSE's in `docs/specs/`.
-- **Parked, not carried:** first look F4 (one word per agent state), F5, F6,
-  F8; cell-screens C9, C10. F4 is the one worth bringing back.
-- **Tooling:** run `wails dev` on `scripts/fixture-home.sh [--twenty]`, drive
-  with chrome-devtools in an isolated context, emulate viewports
-  (1024×640, 1512×945, 1920×1080, 3440×1380); afterwards restore
-  `frontend/wailsjs/runtime` and `frontend/package.json.md5`, kill
-  `$FIXTURE_AGENT_PIDS`. Post with `discuss-hook post --to fse --kind … --thread … "<body>"`.
-- **Wake defects** (resume-wake) are fixed and installed; this restart gets
-  the new watcher.
+- **Doing:** nothing in flight. The pattern of these days: the FSE asks me to
+  rank each wave's UI leftovers (`docs/ux/reviews/<date>-rank-leftovers-N.md`,
+  N = 3…8 so far), and supervisors (sup31–35) send design questions mid-wave
+  ("[for aglaea]"). I answer in one message, put the rule in the design system,
+  and send the FSE a msg with the row for its next batch.
+- **Last answered:** sup35 (d06e265): Escape keeps drafts per record (`Rule ·
+  draft`), and Home's fixed columns give their slack to cut cells. Both were
+  sent to the FSE for leftovers-9.
+- **My design specs (proposed, ruled into cards):** `docs/ux/specs/roadmap-time-zoom.md`
+  (amendment 1; 0070, 0071, 0073), `docs/ux/specs/decisions-view.md` (0072;
+  amendment 1 and later notes on §8: the facts line joins the stuck head while
+  ruling), `responsive-home.md`, `initiative-header.md`.
+- **Waits on Pablo:** Q1 of leftovers-4: does he use Tab in the app? Tab in
+  WKWebView reaches buttons only with macOS Keyboard navigation on. Not
+  answered yet; it goes through the FSE.
+- **Reviews now run** in `Deltagos Review.app` (bundle id
+  `cl.antipan.organizer.review`), so Pablo's storage is safe. Ask for
+  WKWebView shots every time; Chromium has missed sev 3s.
+- **Tooling:** as in `memory.md`, "How I look at it". Post with `discuss-hook
+  post --to <seat> --kind answer --thread <id> "<body>"`, then
+  `discuss-hook ack <id>`.
 - **Next action:** read mail; if none, stay silent.
 
 ## Log
