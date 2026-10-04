@@ -117,6 +117,10 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
 - sup31 closed (0077 wave one: 71 min vs 40-80, ~$38), ended by me.
   leftovers-7 sent to aglaea (thread 01M43Q8CBZ9HX2JD0K2A1QWRCR); review-build
   proposal for supervise to hephaistos. sup32 runs timeline-and-find-6.
+- leftovers-7 cut: one card layers-focus-and-words, 0078 proposed (6fed226),
+  P7 added from tf6-ui (3198cda). sup32 closed timeline-and-find-6 (8c6749c,
+  53 min, ~$23), ended by me. Every ruled card built. tf6 leftovers asked of
+  aglaea to fold into 0078 as P8 if quick.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
