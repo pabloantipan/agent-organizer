@@ -162,6 +162,11 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   discards; rule box, card note, composer), U1 (2, Home's fixed columns give
   slack to cut cells, shareRoom; gate 1512 rail strip: next date whole).
 - sup35 ended (~52 min, ~$23). leftovers-9 cut: drafts-and-slack, 0081 proposed.
+- 0081 ruled ("Accepted", 477aef6); sup36 runs drafts-and-slack (window
+  398035). Transversal roles: Pablo answered (0082, 1eb9b95); thread
+  01M3SBV952 answered and closed; design asked of aglaea (thread
+  01M4432DTFCSXJN9F715G84FYS). Talos/Hermione "named only" is my reading.
+  Held for aglaea's next ranking: compact inherits shell.css's base cap.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
