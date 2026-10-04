@@ -11,6 +11,7 @@ boundary: ["frontend/src/lib/drafts.ts, lib/width.ts and their tests", "frontend
 spec: "docs/specs/leftovers-9.md (FR-1, FR-2); Aglaea's calls d06e265"
 gate: "docs/specs/leftovers-9.md Acceptance, rows S1 to S4 and S0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -29,6 +30,13 @@ Nothing he writes is lost to an Escape; Home's dates whole at 1512.
 ## Next
 
 ## Blockers
+
+## Review
+- Verdict: pass (code and checks; the WKWebView shots are the UI reviewer's).
+- Commit reviewed: 9453240 (branch drafts-and-slack).
+- Unmet gate items: none. S0: make test from a clean clone and in a worktree, npm test (199) and npm run build pass; wails build taken from the builder's phase table. S2: drafts.test.ts keeps, restores and discards per decision/card/thread/new/branch key; store is an in-memory Map, no storage or sync hit. S3: width.test.ts fixedColumns via shareRoom, cause in Notes. S4: dateWords on header target and card back updated; names as FR-4.
+- Boundary finding: frontend/src/stores/board.store.ts changed, outside the card's boundary (inside the spec's, which excludes stores only beyond the draft's session state); the change only moves ruleDrafts into lib/drafts. FSE to widen the card or accept.
+- Reviewer: das-review, 2026-10-04.
 
 ## Notes
 - FR-2 measured before the fix (Chromium 1512x945, rail strip, classic and overlay): next date needs 120 px in its 96 px track (cut 24); slack in state (144 track, widest 96: 48 px) and phase (96, widest 69: 27 px). home.css widened by the FSE for --t-state/--t-phase.
