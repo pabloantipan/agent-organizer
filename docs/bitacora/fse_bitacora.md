@@ -864,3 +864,9 @@ sections below this one are history.
   Not raised yet; a candidate `proposed` record if it bites.
 
 - none yet
+- roles-ui: code pass, UI pass in Chromium only. The Mac's screen was
+  locked, so no seat could shoot the review build; sup38 holds the merge
+  until Pablo unlocks it and ru-ui reruns R1-R7 in WKWebView. Not a lost
+  permission: nothing to raise. leftovers-11 collecting from sup38 (U1-U4,
+  spec gaps, aglaea's A1-A3). 0084 proposed, waiting.
+
