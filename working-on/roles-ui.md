@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: roles-ui
 updated: 2026-10-04
-next: "review: roles-ui, A2 re-fixed (ed9b5bf: initiatives inline as one comma list), A3 at 9a0b81c; R5 and R7 not verified in WKWebView, left to the UI reviewer; A1 is the next batch"
+next: "review: code pass and UI pass in Chromium at ed9b5bf (A2, A3 met); ru-ui runs the WKWebView columns of R1-R7 when the Mac is unlocked, then merge (sup38)"
 seat: ru-build
 depends_on: [roles-feed, drafts-and-slack]
 boundary: ["frontend/src/components/Home.tsx, Rail.tsx, a new RoleDrawer.tsx", "frontend/src/styles/home.css, shell.css (the rail group only), a roles stylesheet", "frontend/src/lib/ (a roles view helper) and its tests", "frontend/src/stores/board.store.ts (the drawer's open state and the rail group's collapse only)", "scripts/fixture-home.sh and testdata/fixture-overlay/ (the roles fixture R1-R4 read; added by sup38)", "frontend/src/components/AgentList.tsx (the row's data-session, tabIndex -1 and accessible name only, for A3; added by sup38)", "not: Go, docs/design-system.md"]
