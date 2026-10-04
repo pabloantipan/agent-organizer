@@ -284,13 +284,37 @@ export function focusAfter(pressed: ZoomButton, next: Level, hours: boolean): Zo
   return null;
 }
 
-export const CONTEXT_INSET = 4; // the sticky context label reads this far into the lane
-
-/** The sticky context label for a scroll offset: the unit at a point
- *  CONTEXT_INSET px into the lane, so a midnight tick 1-3 px in already names
- *  its new day (§A1.6). */
+/** The sticky context label for a scroll offset: the month (Days) or the
+ *  day (Hours) of the first whole unit in view, a day at Days and an hour at
+ *  Hours, so a sliver of last month's last day at the lane's edge does not
+ *  name last month, and a midnight tick 1-3 px into the lane already names
+ *  its new day (design system, Timeline, leftovers-6 FR-1; §A1.6). */
 export function contextAt(s: Scale, scrollLeft: number): string {
-  return contextLabel(s.level, s.at(Math.max(scrollLeft, 0) + CONTEXT_INSET));
+  return contextLabel(s.level, firstWholeUnit(s, Math.max(scrollLeft, 0)));
+}
+
+/** The start of the first whole unit (a day at Days, an hour at Hours) at or
+ *  right of `x`; a unit that starts within half a pixel of it counts, since
+ *  scrollLeft rounds. */
+export function firstWholeUnit(s: Scale, x: number): number {
+  const t = s.at(x);
+  if (s.level === "hours") {
+    const h = Math.floor(t / HOUR) * HOUR;
+    return s.x(h) >= x - 0.5 ? h : h + HOUR;
+  }
+  const d = startOfDay(t);
+  return s.x(d) >= x - 0.5 ? d : addLocalDays(d, 1);
+}
+
+/** The today label, in the axis (design system, Timeline): `today` at Fit,
+ *  `today · Sat 3` at Days and `now 14:32 · Sat 3` at Hours, so the day is
+ *  named even where its tick gives way (leftovers-6 FR-1). */
+export function todayLabel(level: Level, now: number): string {
+  const d = new Date(now);
+  const day = `${WD[d.getDay()]} ${d.getDate()}`;
+  if (level === "days") return `today · ${day}`;
+  if (level === "hours") return `now ${hhmm(now)} · ${day}`;
+  return "today";
 }
 
 /** A label's box on screen, in CSS pixels (getBoundingClientRect). */
@@ -298,6 +322,9 @@ export type Box = { left: number; right: number; top: number; bottom: number };
 
 /** The least room between two labels on one line. */
 export const LABEL_GAP = 4;
+/** The least room between two tick labels (design system, Timeline,
+ *  leftovers-6 FR-4). */
+export const TICK_GAP = 12;
 
 /** How far a label moves along the axis to lie whole between `lo` and `hi`
  *  (the lane's visible stretch: the label column's edge and the frame's):
@@ -355,4 +382,55 @@ export function timesLabel(start: When, end: When | null): string {
   const a = start.timed ? hhmm(start.at) : "";
   const b = end?.timed ? hhmm(end.at) : "";
   return a || b ? `${a}–${b}` : "";
+}
+
+/** Rows of mark titles the axis stacks at one place before the rest of a
+ *  crowd fold into "+N" (design system, Timeline, leftovers-6 FR-4). */
+export const TITLE_ROWS = 3;
+
+/** A box `rows` label rows up. */
+export const raised = (b: Box, rows: number, step: number): Box => ({ ...b, top: b.top - rows * step, bottom: b.bottom - rows * step });
+
+/** Where each mark title goes (leftovers-6 FR-4): titles in the order given
+ *  (left to right), each at the lowest row, 0 to TITLE_ROWS - 1, in which it
+ *  overlaps nothing shown, a row being `step` px (the title's own text
+ *  height) above the last. `boxes` are the titles at row 0, `obstacles`
+ *  what is already placed (the today and context labels). A title that
+ *  finds no free row is folded (-1) into the "+N" of the crowd it ran into:
+ *  `into` is the index of the title on the top row it overlaps there, else
+ *  the nearest title on the top row, else -1. The axis grows to the rows
+ *  used (axisGrowth); nothing is ever drawn over another title. */
+export function stackTitles(boxes: Box[], step: number, obstacles: Box[] = [], gap = LABEL_GAP, rows = TITLE_ROWS): { row: number[]; into: number[] } {
+  const shown: Box[] = [...obstacles];
+  const placed: { i: number; b: Box; row: number }[] = [];
+  const row = boxes.map(() => -1);
+  const into = boxes.map(() => -1);
+  boxes.forEach((b0, i) => {
+    for (let r = 0; r < rows; r++) {
+      const b = raised(b0, r, step);
+      if (!shown.some((o) => overlaps(o, b, gap))) {
+        shown.push(b);
+        placed.push({ i, b, row: r });
+        row[i] = r;
+        return;
+      }
+    }
+    const top = placed.filter((p) => p.row === rows - 1);
+    const b = raised(b0, rows - 1, step);
+    const hitTop = top.find((p) => overlaps(p.b, b, gap));
+    const centre = (x: Box) => (x.left + x.right) / 2;
+    const nearest = [...top].sort((p, q) => Math.abs(centre(p.b) - centre(b0)) - Math.abs(centre(q.b) - centre(b0)))[0];
+    into[i] = (hitTop ?? nearest)?.i ?? -1;
+  });
+  return { row, into };
+}
+
+/** How many px the axis grows (leftovers-6 FR-4): enough that the highest
+ *  title's top sits at or under `top`, the axis's top edge, measured while
+ *  the axis had grown `current`; titles hang from the axis's foot, so they
+ *  move down with what it grows. 0 when every title fits ungrown. */
+export function axisGrowth(titles: Box[], top: number, current = 0): number {
+  if (titles.length === 0) return 0;
+  const slack = Math.min(...titles.map((t) => t.top)) - top;
+  return Math.max(0, Math.ceil(current - slack - 0.5));
 }

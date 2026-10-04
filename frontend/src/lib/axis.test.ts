@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  CONTEXT_INSET, HOUR, PX_DAY, PX_HOUR, REVEAL_MARGIN, anchorScroll, buttonAnchor, contextAt, contextLabel, deeper,
-  endOf, focusAfter, offersHours, revealScroll, scaleOf, shallower, sideOf, startOfDay,
+  HOUR, PX_DAY, PX_HOUR, REVEAL_MARGIN, TICK_GAP, TITLE_ROWS, anchorScroll, axisGrowth, buttonAnchor, contextAt, contextLabel, deeper,
+  endOf, firstWholeUnit, focusAfter, todayLabel, stackTitles, offersHours, revealScroll, scaleOf, shallower, sideOf, startOfDay,
   ticksOf, shiftInside, overlaps, skipStep, keptBy, seriesIndex, fitIsWeekly, timesLabel, todayScroll, when, windowOf,
 } from "./axis";
 
@@ -205,7 +205,65 @@ describe("axis labels (A20)", () => {
   const midnight = s.x(local(2026, 10, 4));
   it("names the new day once a midnight tick is 1-3 px into the lane", () => {
     for (const into of [1, 2, 3]) expect(contextAt(s, midnight - into)).toBe("Sun 4 Oct");
-    expect(contextAt(s, midnight - CONTEXT_INSET - 1)).toBe("Sat 3 Oct");
+    // the 23:00 hour is whole in view, so the day is still Saturday
+    expect(contextAt(s, midnight - PX_HOUR)).toBe("Sat 3 Oct");
+  });
+});
+
+describe("the first whole unit in view names the context (leftovers-6 FR-1)", () => {
+  const s = scaleOf("days", { from: local(2026, 9, 20), to: local(2026, 10, 20) }, 0);
+  const oct1 = s.x(local(2026, 10, 1));
+  it("names October once a sliver of 30 Sep is all of September left in view", () => {
+    expect(contextAt(s, oct1 - 1)).toBe("October 2026");
+    expect(contextAt(s, oct1 - PX_DAY + 1)).toBe("October 2026");
+    expect(firstWholeUnit(s, oct1 - 1)).toBe(local(2026, 10, 1));
+  });
+  it("names September while 30 Sep is whole in view, and a day exactly at the edge counts", () => {
+    expect(contextAt(s, oct1 - PX_DAY)).toBe("September 2026");
+    expect(contextAt(s, oct1)).toBe("October 2026");
+  });
+  it("names the month scrolled to mid-month", () => {
+    expect(contextAt(s, s.x(local(2026, 10, 14)) + 10)).toBe("October 2026");
+  });
+});
+
+describe("the today label (leftovers-6 FR-1)", () => {
+  it("says the day at Days and Hours, today alone at Fit", () => {
+    const sat3 = local(2026, 10, 3, 14, 32);
+    expect(todayLabel("days", sat3)).toBe("today · Sat 3");
+    expect(todayLabel("hours", sat3)).toBe("now 14:32 · Sat 3");
+    expect(todayLabel("fit", sat3)).toBe("today");
+  });
+});
+
+describe("mark titles stack, then fold (leftovers-6 FR-4)", () => {
+  const box = (left: number, right: number, top = 100, bottom = 116) => ({ left, right, top, bottom });
+  it("stacks titles on one date a row each, up to three", () => {
+    const three = [box(500, 580), box(500, 560), box(500, 600)];
+    expect(stackTitles(three, 16)).toEqual({ row: [0, 1, 2], into: [-1, -1, -1] });
+  });
+  it("folds a fourth into the top row's title, so it reads +1 there", () => {
+    const four = [box(500, 580), box(500, 560), box(500, 600), box(500, 590)];
+    const { row, into } = stackTitles(four, 16);
+    expect(row).toEqual([0, 1, 2, -1]);
+    expect(into[3]).toBe(2);
+    expect(TITLE_ROWS).toBe(3);
+  });
+  it("leaves titles that do not touch on the first row", () => {
+    expect(stackTitles([box(100, 160), box(200, 260)], 16).row).toEqual([0, 0]);
+  });
+  it("stacks a title past an obstacle: the today label", () => {
+    expect(stackTitles([box(500, 580)], 16, [box(540, 620)]).row).toEqual([1]);
+  });
+  it("grows the axis by what the highest row needs, and gives it back", () => {
+    // the axis's top at 70: a title whose top is at 62 needs 8 px more
+    expect(axisGrowth([box(0, 10, 62, 78), box(0, 10, 90, 106)], 70)).toBe(8);
+    expect(axisGrowth([box(0, 10, 84, 100)], 70)).toBe(0);
+    // grown 16 for a row that is gone: its title now sits 20 px under the top
+    expect(axisGrowth([box(0, 10, 90, 106)], 70, 16)).toBe(0);
+    // grown 16 and still needed: the title's top is at the axis's top
+    expect(axisGrowth([box(0, 10, 70, 86)], 70, 16)).toBe(16);
+    expect(axisGrowth([], 70, 16)).toBe(0);
   });
 });
 
@@ -230,6 +288,14 @@ describe("axis labels are placed on their rendered boxes (leftovers-4 FR-11)", (
     const tight = Array.from({ length: 10 }, (_, k) => ({ ...box(k * 12, k * 12 + 40), k }));
     expect(skipStep(tight)).toBe(4);
     expect(skipStep(ls.map((l) => ({ ...l, left: l.k * 60, right: l.k * 60 + 40 })))).toBe(1);
+  });
+  it("keeps tick labels at least 12 px apart (leftovers-6 FR-4)", () => {
+    // 36 px labels 41 px apart leave 5 px: at TICK_GAP every other one goes
+    const ticks = Array.from({ length: 10 }, (_, k) => ({ ...box(k * 41, k * 41 + 36), k }));
+    expect(skipStep(ticks)).toBe(1);
+    expect(skipStep(ticks, TICK_GAP)).toBe(2);
+    const kept = ticks.filter((t) => keptBy(t.k, skipStep(ticks, TICK_GAP)));
+    for (let i = 1; i < kept.length; i++) expect(kept[i].left - kept[i - 1].right).toBeGreaterThanOrEqual(12);
   });
   it("keeps the same labels while the lane scrolls: the place counts from a fixed origin", () => {
     const at = (from: number) => Array.from({ length: 6 }, (_, i) => ({ ...box(i * 30, i * 30 + 40), k: from + i }));

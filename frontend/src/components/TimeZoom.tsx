@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
+import { isValidElement, useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import {
-  GUTTER, LABEL_W, LEVEL_WORD, anchorScroll, buttonAnchor, clampScroll, contextAt, dayMonth, deeper, fitIsWeekly, focusAfter, hhmm,
-  keptBy, overlaps, revealScroll, scaleOf, seriesIndex, shallower, shiftInside, sideOf, skipStep, startOfDay, addLocalDays, stepOf,
-  ticksOf, todayScroll, windowOf,
+  GUTTER, LABEL_GAP, LABEL_W, LEVEL_WORD, TICK_GAP, anchorScroll, axisGrowth, buttonAnchor, clampScroll, contextAt, dayMonth, deeper, fitIsWeekly,
+  focusAfter, keptBy, overlaps, raised, revealScroll, scaleOf, seriesIndex, shallower, shiftInside, sideOf, skipStep, stackTitles, startOfDay,
+  addLocalDays, stepOf, ticksOf, todayLabel, todayScroll, windowOf,
   type Box, type Level, type Scale, type Span, type ZoomButton,
 } from "../lib/axis";
 import "../styles/time-zoom.css";
@@ -230,7 +230,7 @@ type FrameProps = {
   z: Zoom;
   label: string;              // what the chart is, for its accessible name
   axis?: ReactNode;           // the graph's own marks on the axis
-  extents: Span[];            // each row's mark, for "Nothing in this window."
+  extents: Span[];            // each row's mark, for "No cards in this window."
   undated?: string;           // Stages: the label after the window's end
   children: ReactNode;        // the rows: .tz-row > .tz-label + .tz-lane
 };
@@ -258,16 +258,24 @@ export function TimeFrame({ z, label, axis, extents, undated, children }: FrameP
   const xNow = s.x(z.now);
   const dayFrom = startOfDay(z.now);
   const nothing = zoomed && extents.length > 0 && extents.every((e) => z.side(e.from, e.to) !== null);
+  // With today in view there is nowhere for Today to go (leftovers-6 FR-6):
+  // the line names the graph's own things and drops the button.
+  const todayInView = xNow >= z.scrollX && xNow <= z.scrollX + z.view;
+  const noun = label.split(" ")[0].toLowerCase();
   const ctx = zoomed ? contextAt(s, z.scrollX) : "";
   const weekly = fitIsWeekly(s);
+  const todayWord = todayLabel(z.level, z.now);
   // Every axis label is placed after it renders, on its rendered box: none is
-  // cut and none overlaps (placeAxisLabels). After every render, since a
-  // scroll, a resize, the level or a graph's own marks can each move one; and
-  // once the fonts are in, since they change every width.
-  const [, setFonts] = useState(0);
+  // cut and none overlaps (placeAxisLabels). Only when something that moves
+  // one changed (leftovers-6 FR-7): a scroll, a resize, the level, the
+  // lane, the time, the graph's own marks (their elements' signature), and
+  // once the fonts are in, since they change every width. A render for
+  // anything else (the agents feed, every 10 s) measures nothing.
+  const [fonts, setFonts] = useState(0);
   useEffect(() => { document.fonts?.ready.then(() => setFonts((n) => n + 1)); }, []);
-  useLayoutEffect(() => { if (contentEl) placeAxisLabels(contentEl); });
-  const todayWord = z.level === "hours" ? `now ${hhmm(z.now)}` : "today";
+  const axisSig = sigOf(axis);
+  useLayoutEffect(() => { if (contentEl) placeAxisLabels(contentEl, z.level); },
+    [contentEl, contentH, fonts, axisSig, todayWord, ctx, undated, z.scrollX, z.level, z.frameW, z.laneW, z.view, z.reserve, xNow]);
   return (
     <div className={`tz-wrap ${ring ? "ring" : ""}`}>
     <div
@@ -281,13 +289,13 @@ export function TimeFrame({ z, label, axis, extents, undated, children }: FrameP
       onScroll={z.onScroll}
     >
       {z.frameW > 0 && (
-        <div ref={setContentEl} className="tz-content" style={{ width: LABEL_W + z.laneW + GUTTER + (zoomed ? END_PAD : 0), ["--tz-lane" as string]: `${z.laneW}px` }}>
+        <div ref={setContentEl} className="tz-content" style={{ width: LABEL_W + z.laneW + GUTTER + (zoomed ? END_PAD : 0), ["--tz-lane" as string]: `${z.laneW}px`, ["--tz-label-w" as string]: `${LABEL_W}px` }}>
           <div className="tz-grid" style={{ left: LABEL_W, width: z.laneW }} aria-hidden>
             {z.level === "days" && ticks.filter((t) => t.weekend).map((t) => <span key={`w${t.at}`} className="tz-weekend" style={{ left: t.x, width: t.width }} />)}
             {zoomed && <span className="tz-todayband" style={{ left: s.x(dayFrom), width: s.x(addLocalDays(dayFrom, 1)) - s.x(dayFrom) }} />}
             {ticks.map((t) => <span key={t.at} className={`tz-line ${t.major ? "" : "minor"}`} style={{ left: t.x }} />)}
             {z.reserve > 0 && <span className="tz-undated-edge" style={{ left: s.width }} />}
-            {xNow >= 0 && xNow <= s.width && <span className="tz-today" style={{ left: xNow }}><span>{todayWord}</span></span>}
+            {xNow >= 0 && xNow <= s.width && <span className="tz-today" style={{ left: xNow }} />}
           </div>
           {zoomed && <div className="tz-labelcol" aria-hidden><span style={{ height: contentH }} /></div>}
           <div className="tz-row tz-axis-row">
@@ -300,6 +308,7 @@ export function TimeFrame({ z, label, axis, extents, undated, children }: FrameP
                 <span key={t.at} className="tz-tick minor" style={{ left: t.x }}><span data-k={seriesIndex(t, z.level, weekly)}>{t.label}</span></span>
               ))}
               {z.reserve > 0 && undated && <span className="tz-undated-label" style={{ left: s.width }} title={undated}>{undated}</span>}
+              {xNow >= 0 && xNow <= s.width && <span className="tz-today-at" style={{ left: xNow }}><span className="tz-today-label">{todayWord}</span></span>}
               {axis}
               {ctx && <span className="tz-context" style={{ left: Math.max(z.scrollX, 0) }}>{ctx}</span>}
             </div>
@@ -308,8 +317,9 @@ export function TimeFrame({ z, label, axis, extents, undated, children }: FrameP
           <div className="tz-foot" />
           {nothing && (
             <div className="tz-nothing" style={{ left: LABEL_W + z.scrollX + z.view / 2 }}>
-              <span>Nothing in this window.</span>
-              <button className="small" onClick={() => z.today()}>Today</button>
+              {todayInView
+                ? <span>No {noun} in this window.</span>
+                : <><span>Nothing in this window.</span><button className="small" onClick={() => z.today()}>Today</button></>}
             </div>
           )}
         </div>
@@ -320,45 +330,48 @@ export function TimeFrame({ z, label, axis, extents, undated, children }: FrameP
 }
 
 /** No axis text is cut, and none overlaps (design system, Timeline;
- *  leftovers-4 FR-11), decided on the rendered boxes. The room is the lane's
- *  visible stretch: from the label column's edge to the frame's inner right
- *  edge (a classic scrollbar's width is outside it), narrowed by any box
- *  between the label and the frame that clips it (the grid, which ends with
- *  the lane, clips the today label: U2).
- *  - A mark's title (a milestone, the target), the undated label and the
- *    today label are moved inside the room while their mark is in it; the
- *    today label first flips to the line's other side. One wider than the
- *    room, or whose mark is out of view, is hidden and left to the mark's
- *    hover title.
- *  - A mark's title is never skipped (FR-11 as amended): one that would
- *    overlap a title already placed staggers to the next label row, up
- *    from where its graph drew it, a row of its own text height at a time,
- *    as long as the axis has room above it.
+ *  leftovers-4 FR-11, leftovers-6 FR-4), decided on the rendered boxes. The
+ *  room is the lane's visible stretch: from the label column's edge to the
+ *  frame's inner right edge (a classic scrollbar's width is outside it),
+ *  narrowed by any box between the label and the frame that clips it.
+ *  - The today label (in the axis, beside its line) and the undated label
+ *    are moved inside the room while their mark is in it; the today label
+ *    first flips to the line's other side. One wider than the room, or
+ *    whose mark is out of view, is hidden.
+ *  - A mark's title (a milestone, the target) is never skipped: one that
+ *    would overlap a label already placed stacks a row up, a row of its own
+ *    text height at a time, up to TITLE_ROWS rows (stackTitles); the axis
+ *    grows to hold the rows used (--tz-axis-grow), and the rest of a crowd
+ *    fold into "+N" beside the top row's title, named in its hover and
+ *    accessible name. Titles have the panel's ground and lie over the today
+ *    line (time-zoom.css).
  *  - A tick label is never moved off its tick: one the room would cut is
- *    hidden; those that would overlap skip one in two (skipStep), and one
- *    under a mark's title or the sticky context label gives way.
+ *    hidden; those that would sit closer than TICK_GAP (LABEL_GAP between
+ *    Days' columns) skip one in two (skipStep), and one under a title, the today or the context label
+ *    gives way.
  *  Every pass starts from what React drew, so nothing set here outlives the
- *  layout it was measured on. */
-function placeAxisLabels(content: HTMLElement) {
+ *  layout it was measured on; the axis's growth is kept and corrected, so a
+ *  pass never shrinks the page under the reader. */
+function placeAxisLabels(content: HTMLElement, level: Level) {
   const frame = content.parentElement;
-  if (!frame) return;
+  const axis = content.querySelector<HTMLElement>(".tz-axis");
+  if (!frame || !axis) return;
   const f = frame.getBoundingClientRect();
   const lo = f.left + frame.clientLeft + LABEL_W;
   const hi = f.left + frame.clientLeft + frame.clientWidth;
-  const ticks = Array.from(content.querySelectorAll<HTMLElement>(".tz-axis > .tz-tick > span"));
-  const today = content.querySelector<HTMLElement>(".tz-grid > .tz-today > span");
-  const undated = content.querySelector<HTMLElement>(".tz-axis > .tz-undated-label");
-  const marks = Array.from(content.querySelectorAll<HTMLElement>(".tz-axis .g-mark > span"));
-  const context = content.querySelector<HTMLElement>(".tz-axis > .tz-context");
-  const axisTop = content.querySelector(".tz-axis")?.getBoundingClientRect().top ?? 0;
-  const placed = [today, undated, ...marks].filter((e): e is HTMLElement => !!e);
-  for (const e of [...ticks, ...placed]) { e.style.visibility = ""; e.style.transform = ""; }
+  const ticks = Array.from(axis.querySelectorAll<HTMLElement>(":scope > .tz-tick > span"));
+  const today = axis.querySelector<HTMLElement>(":scope > .tz-today-at > span");
+  const undated = axis.querySelector<HTMLElement>(":scope > .tz-undated-label");
+  const marks = Array.from(axis.querySelectorAll<HTMLElement>(".g-mark > span:not(.tz-more)"));
+  const context = axis.querySelector<HTMLElement>(":scope > .tz-context");
+  axis.querySelectorAll(".tz-more").forEach((e) => e.remove());
+  const labels = [today, undated].filter((e): e is HTMLElement => !!e);
+  for (const e of [...ticks, ...labels, ...marks]) { e.style.visibility = ""; e.style.transform = ""; }
   for (const e of marks) e.style.bottom = "";
-  // Titles left to right, so a stagger moves the later of two.
-  const byLeft = (a: HTMLElement, b: HTMLElement) => a.getBoundingClientRect().left - b.getBoundingClientRect().left;
-  placed.splice(placed.length - marks.length, marks.length, ...marks.sort(byLeft));
   if (today) { today.style.left = ""; today.style.right = ""; }
   if (undated) undated.style.borderLeftColor = "";
+  const grow = parseFloat(content.style.getPropertyValue("--tz-axis-grow")) || 0;
+  const axisTop = axis.getBoundingClientRect().top;
   const hide = (e: HTMLElement) => { e.style.visibility = "hidden"; };
   const room = (e: HTMLElement) => {
     let [l, h] = [lo, hi];
@@ -372,46 +385,79 @@ function placeAxisLabels(content: HTMLElement) {
   // A label's text box: what overlaps is the text, not a line box's leading
   // (and a Days label's span is its whole column). The today, undated and
   // context labels keep their own box, which their background or rule fills.
-  const text = (e: HTMLElement) => { const r = document.createRange(); r.selectNodeContents(e); return r.getBoundingClientRect(); };
-  const shown: Box[] = context ? [context.getBoundingClientRect()] : [];
-  for (const e of placed) {
-    // Where the mark itself is: the today line, the undated edge, a mark's
-    // glyph (the label is centred on it).
-    const at = e === today ? e.parentElement!.getBoundingClientRect().left
-      : e === undated ? e.getBoundingClientRect().left
-      : (() => { const g = e.parentElement!.getBoundingClientRect(); return (g.left + g.right) / 2; })();
+  const boxOf = (b: DOMRect): Box => ({ left: b.left, right: b.right, top: b.top, bottom: b.bottom });
+  const text = (e: HTMLElement): Box => { const r = document.createRange(); r.selectNodeContents(e); return boxOf(r.getBoundingClientRect()); };
+  const shift = (b: Box, dx: number): Box => ({ ...b, left: b.left + dx, right: b.right + dx });
+  const shown: Box[] = context ? [boxOf(context.getBoundingClientRect())] : [];
+  /** Moves a label inside its room, or hides it; its box, or null. */
+  const inside = (e: HTMLElement, at: number): { dx: number; b: Box } | null => {
     const [l, h] = room(e);
-    if (at < l || at > h) { hide(e); continue; }
-    let b = e.getBoundingClientRect();
+    if (at < l || at > h) { hide(e); return null; }
+    let b = boxOf(e.getBoundingClientRect());
     if (e === today && b.right > h) {
       e.style.left = "auto"; e.style.right = "5px";
-      b = e.getBoundingClientRect();
+      b = boxOf(e.getBoundingClientRect());
     }
     const dx = shiftInside(b, l, h);
-    if (dx === null) { hide(e); continue; }
-    if (dx !== 0) {
-      e.style.transform = `translateX(${dx}px)`;
-      if (e === undated) e.style.borderLeftColor = "transparent"; // the grid draws the edge
-      b = { left: b.left + dx, right: b.right + dx, top: b.top, bottom: b.bottom } as DOMRect;
-    }
-    const box = () => { const r = text(e); return { left: r.left + dx, right: r.right + dx, top: r.top, bottom: r.bottom }; };
-    let t = e === today || e === undated ? b : box();
-    if (marks.includes(e)) {
-      // A row is the title's own text height, so stacked titles never
-      // touch; a row that would rise past the axis's top is not taken.
-      const base = parseFloat(getComputedStyle(e).bottom) || 0;
-      const step = Math.ceil(t.bottom - t.top);
-      for (let row = 1; shown.some((o) => overlaps(o, t)); row++) {
-        e.style.bottom = `${base + row * step}px`;
-        const up = box();
-        if (up.top < axisTop) { e.style.bottom = `${base + (row - 1) * step}px`; t = box(); break; }
-        t = up;
-      }
-    } else if (shown.some((o) => overlaps(o, t))) { hide(e); continue; }
-    shown.push(t);
+    if (dx === null) { hide(e); return null; }
+    if (dx !== 0) e.style.transform = `translateX(${dx}px)`;
+    return { dx, b: shift(b, dx) };
+  };
+  for (const e of labels) {
+    const at = e === today ? e.parentElement!.getBoundingClientRect().left : e.getBoundingClientRect().left;
+    const p = inside(e, at);
+    if (!p) continue;
+    if (p.dx !== 0 && e === undated) e.style.borderLeftColor = "transparent"; // the grid draws the edge
+    if (shown.some((o) => overlaps(o, p.b))) { hide(e); continue; }
+    shown.push(p.b);
   }
-  const boxes = ticks.map((e) => ({ e, b: text(e), k: Number(e.dataset.k), minor: !!e.closest(".minor") }));
-  const whole = boxes.filter(({ e, b }) => {
+  // Titles left to right, so a stack moves the later of two; each centred
+  // on its mark's glyph.
+  const titles = marks
+    .map((e) => { const g = e.parentElement!.getBoundingClientRect(); return { e, at: (g.left + g.right) / 2 }; })
+    .sort((a, b) => a.at - b.at)
+    .map(({ e, at }) => { const p = inside(e, at); return p ? { e, box: shift(text(e), p.dx), dx: p.dx } : null; })
+    .filter((t): t is { e: HTMLElement; box: Box; dx: number } => !!t);
+  const step = Math.ceil(Math.max(0, ...titles.map((t) => t.box.bottom - t.box.top)));
+  const { row, into } = stackTitles(titles.map((t) => t.box), step, shown);
+  const folded = new Map<number, HTMLElement[]>();
+  const boxes: Box[] = [];
+  titles.forEach((t, i) => {
+    if (row[i] < 0) {
+      hide(t.e);
+      if (into[i] >= 0) folded.set(into[i], [...(folded.get(into[i]) ?? []), t.e]);
+      return;
+    }
+    if (row[i] > 0) t.e.style.bottom = `${(parseFloat(getComputedStyle(t.e).bottom) || 0) + row[i] * step}px`;
+    boxes.push(raised(t.box, row[i], step));
+  });
+  // The rest of a crowd: "+N" after the top row's title, or before it where
+  // the room ends (the title's own glyph is the date it stands for).
+  for (const [i, rest] of folded) {
+    const t = titles[i];
+    const more = document.createElement("span");
+    const names = rest.map((e) => e.textContent ?? "").join(", ");
+    more.className = "tz-more";
+    more.textContent = `+${rest.length}`;
+    more.title = `${rest.length} more: ${names}`;
+    more.setAttribute("role", "img");
+    more.setAttribute("aria-label", more.title);
+    more.style.bottom = t.e.style.bottom || getComputedStyle(t.e).bottom;
+    t.e.parentElement!.appendChild(more);
+    const at = t.e.offsetLeft + t.dx;
+    more.style.left = `${at + t.e.offsetWidth + LABEL_GAP_PX}px`;
+    let b = boxOf(more.getBoundingClientRect());
+    if (b.right > room(t.e)[1]) { more.style.left = `${at - more.offsetWidth - LABEL_GAP_PX}px`; b = boxOf(more.getBoundingClientRect()); }
+    boxes.push(b);
+  }
+  // The axis grows by what the highest title needs, and gives back what it
+  // no longer does; titles hang from its foot, so they move down with it.
+  const need = axisGrowth(boxes, axisTop, grow);
+  const dy = need - grow;
+  if (dy !== 0) content.style.setProperty("--tz-axis-grow", `${need}px`);
+  for (const b of boxes) shown.push({ ...b, top: b.top + dy, bottom: b.bottom + dy });
+  const tickBoxes = ticks.map((e) => ({ e, b: text(e), k: Number(e.dataset.k), minor: !!e.closest(".minor") }));
+  const whole = tickBoxes.filter(({ e, b }) => {
     const [l, h] = room(e);
     if (b.left >= l && b.right <= h) return true;
     hide(e);
@@ -419,9 +465,29 @@ function placeAxisLabels(content: HTMLElement) {
   });
   for (const minor of [false, true]) {
     const series = whole.filter((t) => t.minor === minor);
-    const step = skipStep(series.map((t) => ({ left: t.b.left, right: t.b.right, top: t.b.top, bottom: t.b.bottom, k: t.k })));
-    for (const t of series) if (!keptBy(t.k, step) || shown.some((o) => overlaps(o, t.b))) hide(t.e);
+    // At Days each label is centred in its own day column, whose gridline
+    // parts it from the next; 12 px there would drop every other day (A2),
+    // so the columns keep LABEL_GAP (progress.md, choices).
+    const k = skipStep(series.map((t) => ({ ...t.b, k: t.k })), level === "days" ? LABEL_GAP : TICK_GAP);
+    for (const t of series) if (!keptBy(t.k, k) || shown.some((o) => overlaps(o, t.b))) hide(t.e);
   }
+}
+
+/** The room between a title and its "+N". */
+const LABEL_GAP_PX = 4;
+
+/** A cheap signature of a graph's axis marks: each element's key, class,
+ *  title and style, and the text, so the labels are placed again when a
+ *  mark moves or its title changes, and not otherwise. */
+function sigOf(n: ReactNode): string {
+  if (n === null || n === undefined || typeof n === "boolean") return "";
+  if (typeof n === "string" || typeof n === "number") return String(n);
+  if (Array.isArray(n)) return n.map(sigOf).join("|");
+  if (isValidElement(n)) {
+    const p = n.props as { children?: ReactNode; className?: string; title?: string; style?: object };
+    return `<${n.key ?? ""} ${p.className ?? ""} ${p.title ?? ""} ${JSON.stringify(p.style ?? {})}>${sigOf(p.children)}`;
+  }
+  return "";
 }
 
 /** Whether a focus should show its ring: `:focus-visible` where the engine

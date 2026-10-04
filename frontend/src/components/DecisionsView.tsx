@@ -4,7 +4,7 @@ import type { merge, model } from "../../wailsjs/go/models";
 import { DAY, daysBetween, parseISO, shortDate, today } from "../lib/dates";
 import { addLocalDays } from "../lib/axis";
 import { ownerPhrase } from "../lib/decisions";
-import { countWords, decisionMatches, emptyRuledWords, lineName, rulerWords, ruledShown, shownSections, statusWord, summaryOf, timelineCount, timelineName, turnaroundWords, waitedWords, type DecSections } from "../lib/decisionsPage";
+import { RULED_LIMIT, countWords, decisionMatches, emptyRuledWords, lineName, rulerWords, ruledShown, shownSections, statusWord, summaryOf, timelineName, turnaroundWords, waitedWords, type DecSections } from "../lib/decisionsPage";
 import { readOnlyOf } from "../lib/queue";
 import { useMarkdownEdges } from "../lib/useScrollEdges";
 import { useBoard } from "../stores/board.store";
@@ -40,6 +40,10 @@ export function DecisionsView() {
   const landing = useRef<string | null>(null);
   const [landSeq, setLandSeq] = useState(0);
   const findRef = useRef<HTMLInputElement | null>(null);
+  // "Show the other N" hands focus to the first record it revealed, "Show
+  // only the newest ten" keeps it and is brought into view (row 3).
+  const moreRef = useRef<HTMLButtonElement | null>(null);
+  const [moreFocus, setMoreFocus] = useState<{ to: "first" | "toggle"; seq: number } | null>(null);
   const ruleBtn = useRef<HTMLButtonElement | null>(null);
   const now = today();
   const filtering = query.trim() !== "";
@@ -76,11 +80,14 @@ export function DecisionsView() {
   // a landing's section for this visit (row 8); else the stored layout,
   // which holds only what was toggled by hand.
   const sections = shownSections(decSections, visit, filtering ? { rule: openHits.length > 0, ruled: pastHits.length > 0, timeline: shownHits.length > 0 } : null, findHand);
+  // A find stores nothing, toggles included (leftovers-6 FR-5, row 9):
+  // while one is on, opening and closing are for the visit, and clearing it
+  // restores the stored layout.
   const handToggle = (id: keyof DecSections) => {
     const next = !sections[id];
+    if (filtering) { setFindHand((h) => ({ ...h, [id]: next })); return; }
     setDecSection(id, next);
     setVisit((v) => { const rest = { ...v }; delete rest[id]; return rest; });
-    if (filtering) setFindHand((h) => ({ ...h, [id]: next }));
   };
   useEffect(() => { if (!filtering) setFindHand({}); }, [filtering]);
   // Leaving the initiative ends the visit.
@@ -96,6 +103,9 @@ export function DecisionsView() {
       if (!hit(r)) setQuery("");
       const sec = sectionOf(r.d);
       if (!decSections[sec]) setVisit((v) => ({ ...v, [sec]: true }));
+      // A landing opens its section whatever the find did (row 10): a
+      // section closed by hand during the find opens again for it.
+      setFindHand((h) => { const rest = { ...h }; delete rest[sec]; return rest; });
       if (sec === "ruled" && past.indexOf(r) >= 10) setShowAllRuled(true);
     }
     setExpanded(key);
@@ -183,6 +193,17 @@ export function DecisionsView() {
     return () => ro.disconnect();
   }, [tlHead]);
 
+  useEffect(() => {
+    if (!moreFocus) return;
+    setMoreFocus(null);
+    const target = moreFocus.to === "toggle"
+      ? moreRef.current
+      : document.querySelectorAll<HTMLButtonElement>(".dec-ruled .dec button.dec-line")[RULED_LIMIT] ?? null;
+    if (!target) return;
+    target.focus({ preventScroll: true });
+    revealInWrap(target);
+  }, [moreFocus]);
+
   // `/` puts the cursor in the find field when it is not in a text box (§2).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -264,7 +285,7 @@ export function DecisionsView() {
             <div className="dec-actions">
               <span className="rb-anchor">
                 <button ref={isRuling ? ruleBtn : undefined} className="primary" aria-expanded={isRuling} onClick={() => setRuling(isRuling ? null : r.key)}>Rule</button>
-                {isRuling && <RuleDecisionBox initiative={r.initiative} decision={d} opener={ruleBtn} afterRule={() => document.querySelector<HTMLButtonElement>(`[data-dec="${r.key}"] button.dec-line`)?.focus()} onClose={() => setRuling(null)} />}
+                {isRuling && <RuleDecisionBox initiative={r.initiative} decision={d} opener={ruleBtn} afterRule={() => focusAfterRule(open.indexOf(r))} onClose={() => setRuling(null)} />}
               </span>
             </div>
           )}
@@ -300,7 +321,7 @@ export function DecisionsView() {
     const desc = order ? `dec-${id}-order` : undefined;
     return (
       <div className="dec-sh" ref={ref}>
-        <h2>
+        <h2 id={`dec-${id}-h`} tabIndex={-1}>
           {fixed
             ? <span className="dec-sh-static"><span className="dec-chev" aria-hidden="true" />{label}</span>
             : (
@@ -380,7 +401,7 @@ export function DecisionsView() {
               </>
             )}
             {!filtering && past.length > 10 && (
-              <button className="dec-more" onClick={() => setShowAllRuled(!showAllRuled)}>
+              <button ref={moreRef} className="dec-more" onClick={() => { setMoreFocus({ to: showAllRuled ? "toggle" : "first", seq: Date.now() }); setShowAllRuled(!showAllRuled); }}>
                 {showAllRuled ? "Show only the newest ten" : `Show the other ${limited.hidden}`}
               </button>
             )}
@@ -389,7 +410,7 @@ export function DecisionsView() {
       </section>
 
       <section className="dec-section dec-tl" style={tlHeadH ? { "--dec-tl-sh": `${tlHeadH}px` } as CSSProperties : undefined}>
-        {heading("timeline", "Timeline", timelineCount(shownHits.length, shown.length, showClosed ? 0 : closed.length, filtering), "raised to ruled; open ones run to today",
+        {heading("timeline", "Timeline", timelineCountOf(shownHits.length, shown.length, showClosed ? 0 : closed.length, showClosed ? 0 : closed.filter(hit).length, filtering), "raised to ruled; open ones run to today",
           sections.timeline ? (
             <div className="dec-sh-tools">
               {closed.length > 0 && (
@@ -444,6 +465,43 @@ export function DecisionsView() {
       </section>
     </div>
   );
+}
+
+/** The Timeline's heading count while a find is on (row 9, leftovers-6
+ *  FR-5): `1 of 73`, then the superseded and withdrawn it leaves out, saying
+ *  how many of those match: `· 1 more among 3 hidden`, or `· 3 hidden` when
+ *  none does. No count without a find (§3). */
+function timelineCountOf(matched: number, total: number, hidden: number, hiddenHits: number, filtering: boolean): string | null {
+  if (!filtering) return null;
+  const rest = hidden === 0 ? "" : hiddenHits > 0 ? ` · ${hiddenHits} more among ${hidden} hidden` : ` · ${hidden} hidden`;
+  return `${matched} of ${total}${rest}`;
+}
+
+/** After a ruling (row 2, leftovers-6 FR-2; design system, Focus and names,
+ *  closing): the ruled record has left To rule, so focus goes to the waiting
+ *  record that took its place (the next, else the one before), else to the
+ *  To rule heading, and is brought into view under the sticky headings. */
+function focusAfterRule(index: number) {
+  const lines = document.querySelectorAll<HTMLButtonElement>(".dec-rule .dec button.dec-line");
+  const target = lines[Math.max(0, index)] ?? lines[lines.length - 1] ?? document.getElementById("dec-rule-h");
+  if (!target) return;
+  target.focus({ preventScroll: true });
+  revealInWrap(target);
+}
+
+/** Scrolls the page's scroller (.board-wrap) so `el` is whole in view and not
+ *  under the stuck section heading; nothing when it already is. The scroller
+ *  is set directly, as the landing does. */
+function revealInWrap(el: HTMLElement) {
+  const wrap = el.closest<HTMLElement>(".board-wrap");
+  if (!wrap) { el.scrollIntoView({ block: "nearest" }); return; }
+  const w = wrap.getBoundingClientRect();
+  const sh = el.closest(".dec-section")?.querySelector<HTMLElement>(".dec-sh");
+  const shBottom = sh && sh !== el.closest(".dec-sh") ? sh.getBoundingClientRect().bottom : w.top;
+  const b = el.getBoundingClientRect();
+  const top = Math.max(w.top, shBottom) + 4;
+  if (b.top < top) wrap.scrollTop -= top - b.top;
+  else if (b.bottom > w.bottom - 4) wrap.scrollTop += b.bottom - (w.bottom - 4);
 }
 
 /** A record's body (FR-9 as amended, mal-ui U1). The periodic refresh

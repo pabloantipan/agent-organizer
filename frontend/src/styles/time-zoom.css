@@ -38,10 +38,13 @@
    scrollbar-gutter. */
 .tz-frame.zoomed .tz-content { --tz-foot: 32px; } /* and 12 px wider: END_PAD */
 .gantt-body.tz-host { padding: 10px var(--space-1-5) var(--space-1-5); overflow: visible; }
-.srm .tz-frame { margin: 0 calc(-1 * var(--space-4)) 0 0; }
+/* Stages' frame runs into its panel's right padding; the margin is the
+   wrapper's, so the focus ring wraps what scrolls (leftovers-6 FR-6a). */
+.srm .tz-wrap { margin: 0 calc(-1 * var(--space-4)) 0 0; }
 
 /* Rows: the graph's own row classes, laid on the frame's columns. */
-.tz-row { display: grid; grid-template-columns: 240px var(--tz-lane); }
+/* --tz-label-w is LABEL_W, set on .tz-content (TimeZoom.tsx). */
+.tz-row { display: grid; grid-template-columns: var(--tz-label-w, 240px) var(--tz-lane); }
 .tz-row > .tz-label { position: sticky; left: 0; z-index: 5; }
 .tz-frame.zoomed .tz-row > .tz-label { background: var(--surface); }
 .tz-frame.zoomed .srm-row.current > .tz-label { background: var(--surface-selected); }
@@ -55,14 +58,17 @@
 /* Zoomed, one background behind the whole label column, the panel's, under
    the labels and over the grid and marks, so no gap between two labels
    shows the lane (row 11). Its height is the content's, measured. */
-.tz-labelcol { position: sticky; left: 0; z-index: 4; width: 240px; height: 0; }
-.tz-labelcol > span { position: absolute; top: 0; left: 0; width: 240px; background: var(--surface); pointer-events: none; }
+.tz-labelcol { position: sticky; left: 0; z-index: 4; width: var(--tz-label-w, 240px); height: 0; }
+.tz-labelcol > span { position: absolute; top: 0; left: 0; width: var(--tz-label-w, 240px); background: var(--surface); pointer-events: none; }
 
-/* The axis */
-.tz-axis-row { min-height: 52px; border-bottom: 1px solid var(--border); margin-bottom: var(--space-1); }
+/* The axis. It grows a row for each row of mark titles past what it holds
+   (--tz-axis-grow, set by placeAxisLabels; design system, Timeline). It
+   lies over the today line, and a title has the panel's ground, so the
+   line passes under title text (leftovers-6 FR-4). */
+.tz-axis-row { min-height: calc(52px + var(--tz-axis-grow, 0px)); border-bottom: 1px solid var(--border); margin-bottom: var(--space-1); }
 .tz-frame.zoomed .tz-axis-row { position: sticky; top: 0; z-index: 6; background: var(--surface); }
 .tz-frame.zoomed .tz-corner { z-index: 7; background: var(--surface); }
-.tz-axis { position: relative; height: 52px; width: var(--tz-lane); user-select: none; -webkit-user-select: none; }
+.tz-axis { position: relative; z-index: 5; height: calc(52px + var(--tz-axis-grow, 0px)); width: var(--tz-lane); user-select: none; -webkit-user-select: none; }
 .tz-tick { position: absolute; top: 0; bottom: 0; border-left: 1px dashed var(--border); }
 .tz-tick > span { position: absolute; top: var(--space-0-5); left: var(--space-1); font-family: var(--mono); font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-subtle); white-space: nowrap; }
 .tz-frame.zoomed .tz-tick > span { top: 20px; }
@@ -71,6 +77,16 @@
 .tz-tick.minor { border-left: 1px solid var(--border-subtle); }
 .tz-tick.midnight { border-left: 1px solid var(--border-strong); }
 .tz-tick.midnight > span { font-family: var(--font); font-weight: var(--weight-semibold); color: var(--fg-muted); }
+/* The rows are placeAxisLabels' (stackTitles), measured, not a graph's
+   own count of same-day marks (--row). */
+.tz-axis .g-mark > span { --row: 0; background: var(--surface); padding: 0 var(--space-0-5); border-radius: var(--radius-xs); }
+/* The rest of a crowd past three rows: "+N", named in its hover. */
+.tz-axis .g-mark > .tz-more { position: absolute; font-family: var(--mono); font-size: var(--font-size-xs); line-height: var(--line-xs); font-weight: var(--weight-semibold); color: var(--fg-muted); background: var(--surface); padding: 0 var(--space-0-5); border-radius: var(--radius-xs); white-space: nowrap; cursor: default; }
+/* The today label sits in the axis on the tick labels' line, beside its
+   line, and names the day at Days and Hours; a tick under it gives way. */
+.tz-today-at { position: absolute; top: 0; bottom: 0; width: 0; }
+.tz-today-label { position: absolute; top: var(--space-0-5); left: 5px; font-size: var(--font-size-xs); line-height: var(--line-xs); font-weight: var(--weight-semibold); color: var(--accent-fg); background: var(--surface); padding: 0 3px; border-radius: var(--radius-xs); white-space: nowrap; }
+.tz-frame.zoomed .tz-today-label { top: 20px; }
 /* Zoomed, an axis mark's title sits beside its mark, under the tick labels. */
 .tz-frame.zoomed .g-mark span { bottom: -4px; left: calc(50% + 8px); }
 .tz-frame.zoomed.lvl-hours .g-mark span { left: 12px; }
@@ -79,14 +95,13 @@
 
 /* The grid behind the rows: ticks, weekends, today. */
 .tz-grid { position: absolute; top: 0; bottom: 0; pointer-events: none; overflow: hidden; }
-.tz-line { position: absolute; top: 52px; bottom: var(--tz-foot); border-left: 1px dashed var(--border-subtle); }
+.tz-line { position: absolute; top: calc(52px + var(--tz-axis-grow, 0px)); bottom: var(--tz-foot); border-left: 1px dashed var(--border-subtle); }
 .lvl-days .tz-line { border-left-style: solid; }
 .tz-line.minor { border-left: 1px dotted var(--border-subtle); opacity: .6; }
 .tz-weekend { position: absolute; top: 0; bottom: var(--tz-foot); background: var(--surface-raised); }
 .tz-todayband { position: absolute; top: 0; bottom: var(--tz-foot); background: var(--accent-muted); opacity: .45; }
 .tz-undated-edge { position: absolute; top: 0; bottom: var(--tz-foot); border-left: 1px solid var(--border-strong); }
-.tz-today { position: absolute; top: 0; bottom: calc(var(--tz-foot) - 16px); border-left: 2px solid var(--accent); z-index: 4; }
-.tz-today > span { position: absolute; bottom: 0; left: 5px; font-size: var(--font-size-xs); line-height: var(--line-xs); font-weight: var(--weight-semibold); color: var(--accent-fg); background: var(--surface); padding: 0 3px; border-radius: var(--radius-xs); white-space: nowrap; }
+.tz-today { position: absolute; top: 0; bottom: var(--tz-foot); border-left: 2px solid var(--accent); z-index: 4; }
 .tz-foot { height: var(--tz-foot); }
 
 /* Marks the zoom adds: a whole day at Hours, and pointers to marks out of view. */
@@ -99,7 +114,7 @@
 .tz-band.current, .tz-band.planned { background: var(--status-now-bg); border-color: var(--status-now); }
 .tz-band.gate { background: var(--decision-ruled-bg); border-color: var(--decision-ruled); }
 /* Its dot sticks just inside the label column while the band crosses it. */
-.tz-band.day > .tz-pinned { position: sticky; left: calc(240px + var(--space-1)); top: auto; display: block; margin: 7px 0 0; transform: none; }
+.tz-band.day > .tz-pinned { position: sticky; left: calc(var(--tz-label-w, 240px) + var(--space-1)); top: auto; display: block; margin: 7px 0 0; transform: none; }
 /* At Hours a bar's times and due sit after its end, unfaded (§A1.5). */
 .g-lane > .tz-after { position: absolute; top: 9px; margin-left: var(--space-1-5); font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .tz-band.axis { top: auto; bottom: 0; height: 18px; background: var(--surface-raised); border: 0; }
