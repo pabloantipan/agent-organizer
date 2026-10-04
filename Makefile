@@ -31,6 +31,10 @@ uninstall: ## remove the app under either name and the CLI link
 	rm -rf /Applications/Deltagos.app /Applications/organizer.app $(HOME)/.local/bin/organizer
 
 test: ## go vet, go test, then the frontend's vitest run
+	@# main.go embeds frontend/dist: from a clean checkout, build it first
+	@# (leftovers-8 FR-8), installing the frontend's packages if missing.
+	test -d frontend/node_modules || (cd frontend && npm install)
+	test -f frontend/dist/index.html || (cd frontend && npm run build)
 	go vet ./... && go test ./...
 	cd frontend && npm test
 
