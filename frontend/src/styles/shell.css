@@ -62,7 +62,12 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .gear.on { color: var(--fg); background: var(--surface-selected); }
 
 /* ---------- Home ---------- */
-.home { display: grid; gap: var(--space-6); align-content: start; max-width: 1240px; }
+/* leftovers-8 FR-4 (A3): capped at the design system's 1,480 (Widths,
+   regular), not 1240, which left the list 171 px short of the content edge
+   at a 1512 window with the rail as a strip while columns were cut.
+   Compact's content (window < 1440) never reaches 1,480, so it fills the
+   view; wide sets its own cap below. */
+.home { display: grid; gap: var(--space-6); align-content: start; max-width: 1480px; }
 .home-sec { display: grid; gap: var(--space-2); }
 /* Home's widths (docs/specs/responsive-home.md): the class is on .home,
    from the store (FR-1); home.css lays out the rows for each. Regular's top

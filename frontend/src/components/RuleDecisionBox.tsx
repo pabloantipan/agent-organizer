@@ -171,9 +171,17 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
       )}
       <label className="rb-words">
         <span className="rb-label">Your words</span>
+        {/* leftovers-8 FR-3: his words are kept verbatim (design system,
+            Principles): no autocorrect, capitalisation or spell-replace,
+            which WKWebView applies silently; an Escape that ends a
+            composition or a correction is the field's, not the box's. */}
         <textarea rows={4} value={words} disabled={busy} placeholder="Why this option, in your words. They go under ## Ruling."
+          autoCorrect="off" autoCapitalize="off" spellCheck={false}
           onChange={(e) => setWords(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) void rule(); }} />
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) void rule();
+            if (e.key === "Escape" && (e.nativeEvent.isComposing || e.keyCode === 229)) e.preventDefault();
+          }} />
       </label>
       {error && <div className="rb-error" role="alert">{error}</div>}
       <div className="rb-foot">

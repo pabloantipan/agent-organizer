@@ -85,3 +85,7 @@ button.dec-more:hover { background: var(--surface-hover); }
   max-height: calc(var(--dec-box-max, 60vh) - var(--space-2) - 1px);
 }
 .dec-actions { padding-right: var(--space-3); }
+/* leftovers-8 FR-2 (A1, decisions-view §8): while ruling, the facts line is
+   the head's second row, stuck with it, between the record line and Rule;
+   the box opens below the head, so the card links stay in view. */
+.dec-head > .dec-facts { padding: 0 var(--space-3) var(--space-1); }

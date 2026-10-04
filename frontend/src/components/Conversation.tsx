@@ -496,7 +496,7 @@ function ReplyBox(p: {
       {p.status === "closed" && <div className="frozen">Closed. Reopen it to add anything.</div>}
       {!p.canPost && <div className="frozen">No token for {p.human || "the human seat"}: run the cell bootstrap to issue one.</div>}
       <div className="composer-line">
-        <textarea ref={ref} rows={2} value={body} onChange={(e) => setBody(e.target.value)} disabled={!writable} placeholder={writable ? "Type a message  (Enter to send, Shift+Enter for a new line)" : ""} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }} />
+        <textarea ref={ref} rows={2} value={body} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setBody(e.target.value)} disabled={!writable} placeholder={writable ? "Type a message  (Enter to send, Shift+Enter for a new line)" : ""} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }} />
       </div>
       <div className="composer-row">
         <select value={kind} onChange={(e) => setKind(e.target.value)} disabled={!writable}>
@@ -542,9 +542,9 @@ function NewThread({ initiativeId, seats, to: initialTo, subject: initialSubject
         {cancellable && <button className="linkish meta" onClick={() => onDone(null)}>cancel</button>}
       </div>
       {!canPost && <div className="frozen">No token for the human seat: run the cell bootstrap to issue one.</div>}
-      <input autoFocus={!quote && !initialSubject} value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="subject  (start with a card slug to link it: readiness-endpoint: …)" disabled={!canPost} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); (e.currentTarget.closest(".composer")?.querySelector("textarea") as HTMLTextAreaElement | null)?.focus(); } }} />
+      <input autoFocus={!quote && !initialSubject} value={subject} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setSubject(e.target.value)} placeholder="subject  (start with a card slug to link it: readiness-endpoint: …)" disabled={!canPost} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); (e.currentTarget.closest(".composer")?.querySelector("textarea") as HTMLTextAreaElement | null)?.focus(); } }} />
       <div className="composer-line">
-        <textarea autoFocus={!!quote || !!initialSubject} rows={3} value={body} onChange={(e) => setBody(e.target.value)} placeholder="Type a message  (Enter to send, Shift+Enter for a new line)" disabled={!canPost} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } if (e.key === "Escape" && cancellable) onDone(null); }} />
+        <textarea autoFocus={!!quote || !!initialSubject} rows={3} value={body} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setBody(e.target.value)} placeholder="Type a message  (Enter to send, Shift+Enter for a new line)" disabled={!canPost} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } if (e.key === "Escape" && cancellable && !e.nativeEvent.isComposing) onDone(null); }} />
       </div>
       <div className="composer-row">
         <select value={kind} onChange={(e) => setKind(e.target.value)} disabled={!canPost}>{KINDS.map((k) => <option key={k} value={k}>{k}</option>)}</select>
@@ -742,8 +742,8 @@ function RuleBox(p: { seats: string[]; defaultTo: string; where: string; escalat
         <span className="spacer" />
         <button className="linkish meta" onClick={p.onCancel}>cancel</button>
       </div>
-      <textarea autoFocus rows={3} value={text} onChange={(e) => setText(e.target.value)} placeholder="What you decided  (Enter to rule, Shift+Enter for a new line)" onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } if (e.key === "Escape") p.onCancel(); }} />
-      <input value={next} onChange={(e) => setNext(e.target.value)} placeholder="Next action  (one line: who does what; the seat writes it into the card)" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); send(); } if (e.key === "Escape") p.onCancel(); }} />
+      <textarea autoFocus rows={3} value={text} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setText(e.target.value)} placeholder="What you decided  (Enter to rule, Shift+Enter for a new line)" onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } if (e.key === "Escape" && !e.nativeEvent.isComposing) p.onCancel(); }} />
+      <input value={next} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setNext(e.target.value)} placeholder="Next action  (one line: who does what; the seat writes it into the card)" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); send(); } if (e.key === "Escape") p.onCancel(); }} />
       <div className="composer-row">
         <select value={to} onChange={(e) => setTo(e.target.value)} title="direct wakes one seat; everyone wakes them all">
           <option value="">everyone (wakes {p.seats.length})</option>

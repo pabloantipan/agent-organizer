@@ -1,7 +1,7 @@
 import type { merge, model } from "../../wailsjs/go/models";
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useBoard } from "../stores/board.store";
-import { DAY, daysBetween, parseISO, today, toISO } from "../lib/dates";
+import { DAY, dateWords, daysBetween, parseISO, today } from "../lib/dates";
 import { addLocalDays } from "../lib/axis";
 import { stageFocusIndex } from "../lib/stageFocus";
 import { PhaseWord } from "./InitiativeHeader";
@@ -211,8 +211,8 @@ function StageRow({ r, now, pos, z, initiative, cards, sharing, open, onToggle, 
   // The stage word is "now" wherever a stage is drawn (initiative-header FR-14).
   const state = r.state === "done" ? "done" : r.state === "current" ? "now" : "";
   const sub = r.state === "done"
-    ? `done ${s.done}`
-    : s.target ? `target ${s.target}` : `appetite: ${appetite}`;
+    ? `done ${dateWords(s.done)}`
+    : s.target ? `target ${dateWords(s.target)}` : `appetite: ${appetite}`;
 
   // Stagger gate labels that would collide.
   const labels = drawn
@@ -244,15 +244,15 @@ function StageRow({ r, now, pos, z, initiative, cards, sharing, open, onToggle, 
         {r.end && (
           r.start && daysBetween(r.start, r.end) >= 1 ? (
             <span className={`srm-bar ${r.state}`} style={{ left: pos.x(r.start), width: pos.end(r.end) - pos.x(r.start) }}
-              title={`${s.title || s.id}: ${toISO(r.start)} → ${toISO(r.end)}${r.state === "done" ? " (done)" : " (target)"}`} />
+              title={`${s.title || s.id}: ${dateWords(r.start)} → ${dateWords(r.end)}${r.state === "done" ? " (done)" : " (target)"}`} />
           ) : (
             <span className={`srm-dot ${r.state}`} style={{ left: pos.mid(r.end) }}
-              title={`${s.title || s.id}: ${r.state === "done" ? "done" : "target"} ${toISO(r.end)}`} />
+              title={`${s.title || s.id}: ${r.state === "done" ? "done" : "target"} ${dateWords(r.end)}`} />
           )
         )}
         {r.toToday && r.start && (
           <span className="srm-bar current" style={{ left: pos.x(r.start), width: Math.max(pos.nowEnd - pos.x(r.start), 4) }}
-            title={`${s.title || s.id}: since ${toISO(r.start)}, in progress`} />
+            title={`${s.title || s.id}: since ${dateWords(r.start)}, in progress`} />
         )}
         {r.slot >= 0 && (
           <PlannedBar r={r} pos={pos} appetite={appetite}
@@ -266,8 +266,8 @@ function StageRow({ r, now, pos, z, initiative, cards, sharing, open, onToggle, 
             return (
               <span key={g.id}>
                 <span className="srm-link" style={{ left: pos.mid(raised), width: pos.mid(g.ruled) - pos.mid(raised) }} />
-                <span className="srm-gem raised" style={{ left: pos.mid(raised) }} title={`${tip}\nraised ${d.raised}`} />
-                <span className="srm-gem ruled" style={{ left: pos.mid(g.ruled) }} title={`${tip}\nruled ${d.ruled}${d.ruled_by ? ` by ${d.ruled_by}` : ""}${d.chosen ? `: ${d.chosen}` : ""}`} />
+                <span className="srm-gem raised" style={{ left: pos.mid(raised) }} title={`${tip}\nraised ${dateWords(d.raised)}`} />
+                <span className="srm-gem ruled" style={{ left: pos.mid(g.ruled) }} title={`${tip}\nruled ${dateWords(d.ruled)}${d.ruled_by ? ` by ${d.ruled_by}` : ""}${d.chosen ? `: ${d.chosen}` : ""}`} />
                 <span className={`srm-gem-label num lift-${lift.get(g.id)}`} style={{ left: pos.mid(g.ruled) }}>{d.number}</span>
               </span>
             );
@@ -275,7 +275,7 @@ function StageRow({ r, now, pos, z, initiative, cards, sharing, open, onToggle, 
           const age = daysBetween(raised, now);
           return (
             <span key={g.id}>
-              <span className="srm-gem waiting" style={{ left: pos.mid(raised) }} title={`${tip}\nwaiting since ${d.raised}${d.owner ? ` on ${d.owner}` : ""}`} />
+              <span className="srm-gem waiting" style={{ left: pos.mid(raised) }} title={`${tip}\nwaiting since ${dateWords(d.raised)}${d.owner ? ` on ${d.owner}` : ""}`} />
               <span className={`srm-gem-label waiting num lift-${lift.get(g.id)}`} style={{ left: pos.mid(raised) }}>{d.number} · {age}d</span>
             </span>
           );
@@ -351,7 +351,7 @@ function StageDetail({ id, r, initiative, cards, sharing, appetite }: { id: stri
                 <li key={k} className={met ? "met" : ""}>
                   <span className="srm-check" aria-hidden>{met ? "✓" : "○"}</span>
                   <span>{x.text}</span>
-                  <span className="num meta">{met ? `met ${x.met}` : "open"}</span>
+                  <span className="num meta">{met ? `met ${dateWords(x.met)}` : "open"}</span>
                 </li>
               );
             })}
@@ -380,8 +380,8 @@ function StageDetail({ id, r, initiative, cards, sharing, appetite }: { id: stri
       </div>
       <div className="srm-dsec">
         <span className="lbl">Appetite</span><span>{appetite}</span>
-        {s.target && <><span className="lbl">Target</span><span className="num">{s.target}</span></>}
-        {s.done && <><span className="lbl">Done</span><span className="num">{s.done}</span></>}
+        {s.target && <><span className="lbl">Target</span><span className="num">{dateWords(s.target)}</span></>}
+        {s.done && <><span className="lbl">Done</span><span className="num">{dateWords(s.done)}</span></>}
       </div>
     </div>
   );

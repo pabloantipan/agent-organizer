@@ -60,6 +60,11 @@
 .rb-sections { display: grid; gap: var(--space-3); min-width: 0; }
 .rb-section { display: grid; gap: var(--space-1); min-width: 0; }
 .rb .rb-body { margin: 0; overflow-wrap: anywhere; color: var(--fg-muted); }
+/* leftovers-8 FR-1 (row 1): the body's prose breaks anywhere, its tables do
+   not: a word in a cell keeps its letters together and the table scrolls
+   inside itself with its edges (global.css, .markdown table), never crushed
+   to "cli ent" nor widening the box. */
+.rb .rb-body table { overflow-wrap: normal; }
 .rb-body.empty { color: var(--fg-subtle); font-size: var(--font-size-md); line-height: var(--line-md); }
 .rb-body > :first-child { margin-top: 0; }
 .rb-body > :last-child { margin-bottom: 0; }

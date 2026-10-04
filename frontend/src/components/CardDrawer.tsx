@@ -7,7 +7,7 @@ import { ageLabel, notesAsContext, shortHome, since } from "../lib";
 import { useBoard } from "../stores/board.store";
 import { readOnlyOf } from "../lib/queue";
 import { openBox } from "../lib/boxStack";
-import { useMarkdownEdges } from "../lib/useScrollEdges";
+import { useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
 import { focusBoxBelow } from "./RuleDecisionBox";
 
 /** Focus and names, opening inline (widths-and-focus FR-19): the card back
@@ -46,6 +46,9 @@ export function CardDrawer() {
   const title = useRef<HTMLHeadingElement>(null);
   const body = useRef<HTMLDivElement>(null);
   useMarkdownEdges(body, html);
+  // leftovers-8 FR-6: the card back scrolls its own body, with the edge.
+  const scroller = useRef<HTMLDivElement>(null);
+  const edges = useScrollEdges(scroller, open);
   const titleId = useId();
   useFocusOpener(selected ? `${selected.initiative_id}/${selected.slug}` : null, title);
   if (!selected) return null;
@@ -56,7 +59,7 @@ export function CardDrawer() {
   const dir = c.path.replace(/\/working-on\/.*$/, "");
   return (
     <div className="modal-backdrop" onClick={() => select(null)}>
-      <div className={`modal ${c.status}`} onClick={(e) => e.stopPropagation()} role="dialog" aria-labelledby={titleId}>
+      <div className={`modal card-back ${c.status}`} onClick={(e) => e.stopPropagation()} role="dialog" aria-labelledby={titleId}>
         <header className="modal-head">
           <div>
             <h2 ref={title} id={titleId} tabIndex={-1}>{c.title || c.slug}</h2>
@@ -66,7 +69,7 @@ export function CardDrawer() {
           </div>
           <button className="ghost" onClick={() => select(null)} aria-label="Close"><X size={16} /></button>
         </header>
-        <div className="modal-body">
+        <div ref={scroller} className={`modal-body ${edges.top ? "edge-top" : ""} ${edges.bottom ? "edge-bottom" : ""}`}>
           <div className="modal-main">
             <div className="labels">
               <span className={`badge ${c.status}`}>{c.status}</span>
@@ -189,7 +192,7 @@ function MyNotes({ card: c, readOnly }: { card: merge.BoardCard; readOnly: strin
       ) : <div className="comment-new">
         <span className="avatar" title={me || "you"}>{initial(me)}</span>
         <div className="comment-box">
-          <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Write a comment…  (Enter to save, Shift+Enter for a new line)" rows={text ? 3 : 1} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); submit(); } }} />
+          <textarea value={text} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setText(e.target.value)} placeholder="Write a comment…  (Enter to save, Shift+Enter for a new line)" rows={text ? 3 : 1} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); submit(); } if (e.key === "Escape" && (e.nativeEvent.isComposing || e.keyCode === 229)) e.preventDefault(); }} />
           {text && <div className="comment-actions"><button className="tiny-btn primary" onClick={submit} disabled={busy}><Send size={12} /> Save</button><button className="tiny-btn ghost" onClick={() => setText("")}>Cancel</button></div>}
         </div>
       </div>}
@@ -206,7 +209,7 @@ function MyNotes({ card: c, readOnly }: { card: merge.BoardCard; readOnly: strin
               </div>
               {editing === n.id ? (
                 <div className="comment-box">
-                  <textarea autoFocus value={draft} onChange={(e) => setDraft(e.target.value)} rows={3} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); editNote(c.initiative_id, c.slug, n.id, draft); setEditing(null); } if (e.key === "Escape") { e.preventDefault(); setEditing(null); } }} />
+                  <textarea autoFocus value={draft} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setDraft(e.target.value)} rows={3} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); editNote(c.initiative_id, c.slug, n.id, draft); setEditing(null); } if (e.key === "Escape") { e.preventDefault(); if (!e.nativeEvent.isComposing) setEditing(null); } }} />
                   <div className="comment-actions"><button className="tiny-btn primary" onClick={() => { editNote(c.initiative_id, c.slug, n.id, draft); setEditing(null); }}>Save</button><button className="tiny-btn ghost" onClick={() => setEditing(null)}>Cancel</button></div>
                 </div>
               ) : (
