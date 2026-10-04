@@ -211,6 +211,14 @@ A1–A3 (80ab772). DS Principles amended: dates read as words wherever a
 person reads them; the lead's words are kept verbatim (no autocorrect in
 WKWebView).
 
+Transversal roles (2026-10-04, `specs/transversal-roles.md`, proposed, thread
+01M4432DTFCSXJN9F715G84FYS; 0082). A Roles section on Home between Needs me
+and the initiatives, and a Roles group at the top of the rail. Rows show
+live and context, the HAND-OFF's date and first line, messages waiting, and
+the initiatives touched. A drawer holds the detail. Show only. Talos and
+Hermione are one muted line. Roles are configured, not hard-coded; O1 asks
+about Daedalus.
+
 ## Open questions
 
 - Q1 (Pablo, via the FSE, leftovers-4): does he use Tab in the app? In

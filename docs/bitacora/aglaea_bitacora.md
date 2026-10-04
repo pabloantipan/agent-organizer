@@ -31,6 +31,7 @@ its source).
 - **Tooling:** as in `memory.md`, "How I look at it". Post with `discuss-hook
   post --to <seat> --kind answer --thread <id> "<body>"`, then
   `discuss-hook ack <id>`.
+- **Also sent:** `docs/ux/specs/transversal-roles.md` (0082), proposed; O1 (Daedalus) and O2 to the FSE.
 - **Next action:** read mail; if none, stay silent.
 
 ## Log
@@ -71,3 +72,4 @@ its source).
 - 2026-10-04 — sup33 lf7-ui A1-A3: facts line joins the stuck head while ruling; drawers scroll their own body; Home's list short at 1512 strip is a defect.
 - 2026-10-04 — leftovers-8 ranked (7 rows + 3 gate/code); DS: dates as words, words verbatim.
 - 2026-10-04 — sup35: Escape keeps drafts per record ('Rule · draft'); slack goes to cut cells (DS).
+- 2026-10-04 — transversal-roles design spec (0082): Home section, rail group, drawer, states.
