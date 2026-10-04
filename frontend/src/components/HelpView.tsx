@@ -20,17 +20,16 @@ export function HelpView({ top, onClose }: { top: number; onClose: () => void })
   const close = useRef<HTMLButtonElement>(null);
 
   // Read on open, every open: the file is never kept.
-  useEffect(() => {
-    Help().then(setDoc, (e) => setFailed(String(e)));
-    close.current?.focus();
-  }, []);
   // leftovers-7 FR-2: closing Help puts focus back into the rule box under
   // it, at the field it last held; with no box, on Help's opener (the
   // control focused when it opened, else the top bar's Help button, since
-  // WebKit does not focus a clicked button).
+  // WebKit does not focus a clicked button). The opener is read before
+  // Help focuses its own Close, or Close would be taken for it.
   useEffect(() => {
     const a = document.activeElement;
-    const opener = a instanceof HTMLElement && a !== document.body && !a.closest(".rb") ? a : document.querySelector<HTMLElement>('.topbar button[aria-label="Help"]');
+    const opener = a instanceof HTMLElement && a !== document.body && !a.closest(".rb, .help") ? a : document.querySelector<HTMLElement>('.topbar button[aria-label="Help"]');
+    Help().then(setDoc, (e) => setFailed(String(e)));
+    close.current?.focus();
     return () => { if (!focusBoxBelow()) opener?.focus(); };
   }, []);
   // Escape closes Help when it is the topmost open box (leftovers-5 FR-1).
