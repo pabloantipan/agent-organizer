@@ -1,10 +1,10 @@
 ---
 title: One layer order (the card back above the rule box), focus back to the box below, the scrim under the top bar, blocked never folds, edges and words
-status: next
+status: done
 repos: [organizer]
 branch: layers-focus-and-words
 updated: 2026-10-04
-next: "review: layers-focus-and-words, P0 pass, P1-P8 pass in Chromium; WKWebView rows (P1-P4, P8) not verified, left to the UI reviewer"
+next: "merged 06888cf; leftovers on the card for the FSE"
 seat: lf7-build
 depends_on: [timeline-and-find-6]
 boundary: ["frontend/src/styles/tokens.css (z-index tokens), global.css (.modal-backdrop and layer z-index), decisions.css, rule-box.css, home.css, time-zoom.css", "frontend/src/components/RuleDecisionBox.tsx, HelpView.tsx and CardDrawer.tsx (focus return and layer only), DecisionsView.tsx (Rule's name, FR-11), Home.tsx, TimeZoom.tsx, StageRoadmap.tsx (the sticky axis only)", "frontend/src/lib/width.ts, lib/axis.ts, lib/decisionsPage.ts, lib/useScrollEdges.ts and lib/ tests", "testdata/fixture-overlay/", "not: Go, docs/design-system.md"]
@@ -18,10 +18,11 @@ review: pass
 sup31's leftovers, the severity-3 layer bug first.
 
 ## Gate
-- [ ] P1-P8: see `docs/specs/leftovers-7.md`, Acceptance (all pass in Chromium; P1-P4 and P8 not verified in WKWebView)
+- [x] P1-P8: see `docs/specs/leftovers-7.md`, Acceptance (Chromium by the builder; both engines by lf7-ui at cfa6937, P7 at da128f9)
 - [x] P0: see `docs/specs/leftovers-7.md`, Acceptance
 
 ## Done
+- 2026-10-04 sup33: code review pass (cfa6937, deltas 41f1b77 and da128f9), UI review pass at da128f9 after U1; merged 06888cf; on main vitest 187, npm run build and go test green
 - 2026-10-04 lf7-build: UI review U1 fixed (+N clipped out of the axis frame at Fit): +N is static inside its title, and the longer title keeps 12 px from the today label; hit test at +N's centre returns it, inside the frame, init-many Cards Fit at 1024x640 strip and expanded and 1512x945 strip and expanded (Chromium, overlay)
 - 2026-10-04 lf7-build: review's FR-2 defect fixed (Help closed with no box returns focus to the top bar's Help button; Chromium 1512x945 and 1024x640, Escape and Close); no lib test, since the opener is read off the live DOM in HelpView and no new lib file is in the boundary
 - 2026-10-04 lf7-build: FR-1 to FR-11 on branch layers-focus-and-words (12 commits, rebased on main 4242d2c, cfa6937 tip); P0 and P1-P8 pass in Chromium, WKWebView not driven; rows in .wt-notes/lf7-build/gate.md
@@ -88,6 +89,7 @@ sup31's leftovers, the severity-3 layer bug first.
 - Note for sup33: one synthetic click meant for an off-screen button (y=1017) landed in another app's window (WhatsApp, not mine). Nothing was typed into it. The driver now refuses points outside its own window's content.
 
 ## Notes
+- 2026-10-04 sup33, leftovers for the FSE: U2 (Home rule box crushes a wide table; `.rb .rb-body table { overflow-wrap: normal }`), U4/G1 (autocorrect on the words field), U5/G2 (ISO dates beyond Needs me), G3 (visual rows hit-test, not text), G4 (P1's path assumes the record link is reachable); aglaea's calls 80ab772: A1 (the facts line joins the stuck head while ruling), A2 (drawers scroll their own body, edge at the foot), A3 (Home list ~200 px short at 1512 strip in WK, sev 2, measure first). The code reviewer's note: `make test` from a clean checkout fails at `go vet` until `frontend/dist` exists (pre-existing build order). Run record `runs/2026-10-04-layers-focus-and-words.md`.
 - Boundary widened by sup33 for P4: HelpView.tsx takes useScrollEdges on .help-doc, help.css its edge rules. Help's side edge not exercised: the real help_doc has no pre wider than its column.
 - WKWebView not verified: driving the review build means synthetic clicks on the shared desktop, which was in use; the UI reviewer shoots P1-P4 and P8 there (P8's count repaint is WKWebView-only).
 - lib/boxStack.ts is outside the boundary, so the "box below" for focus return is a registry in RuleDecisionBox.tsx (focusBoxBelow).
