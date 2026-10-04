@@ -4,12 +4,13 @@ status: next
 repos: [organizer]
 branch: needs-me-relays
 updated: 2026-10-04
-next: "sup34 builds it (organizer-probe-sup34, launched 2026-10-04; 0079 ruled)"
+next: "nmr-build builds it on branch needs-me-relays (.wt/needs-me-relays), sup34 supervising"
 depends_on: []
 boundary: ["frontend/src/lib/queue.ts (needsMeThread only)", "frontend/src/lib/queue.test.ts", "not: components, Go, the discuss server"]
 spec: "docs/specs/needs-me-relays.md; ruling 0079"
 gate: "docs/specs/needs-me-relays.md Acceptance, rows R1 and R0"
 ui_review: false
+seat: nmr-build
 ---
 
 ## Goal
@@ -20,6 +21,7 @@ Relays to a transversal role stop counting as the human's.
 - [ ] R0: see `docs/specs/needs-me-relays.md`, Acceptance
 
 ## Done
+- 2026-10-04 sup34: worktree .wt/needs-me-relays from 027b1c7, seat nmr-build launched
 - 2026-10-04 sup34 launched by the FSE; forecast 15-30 min
 - 2026-10-04 cut by the FSE from 0079
 
