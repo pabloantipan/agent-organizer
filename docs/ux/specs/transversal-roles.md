@@ -153,4 +153,40 @@ as words (design system Principles).
 
 ## Technical notes
 
-(left for the FSE)
+by the FSE, 2026-10-04, on main. Two cards: `roles-feed` (Go) then
+`roles-ui` (frontend).
+
+- **T1, config.** `roles` in `~/.config/organizer/config.yaml`
+  (`config.Config`, json tags), each `{name, description, sessions (glob on
+  the zellij session name), bitacora (a path, `<initiative>` expanded over
+  each scanned initiative root), here (bool)}`; the default list is the
+  table above when the key is absent; `roles: []` turns the section off.
+- **T2, the feed.** `service.Roles` builds `[]model.Role` and rides the 10 s
+  agents feed as `AgentsView.Roles` (one sample, no new ticker): sessions
+  from the zellij list matched by glob, each with its cwd's initiative and
+  context % from the existing statusline join (`Agent.Context`); state
+  `live`, `not running` with last seen (`runs.jsonl` last_seen for a
+  matching session name), or never seen; HAND-OFF: the first `## HAND-OFF`
+  heading of each bitácora found, its date and first line, the date parsed
+  from the heading, stale over 7 days; mail: open threads in every cell the
+  organizer reads as the human whose subject starts `[for <name>]`
+  (case-insensitive) and whose last message is not the role's reply (a body
+  starting `[<name>`), via the existing discuss client (`GET
+  /threads?status=open` per project); initiatives touched (O2): the
+  initiatives of its live sessions, of its `runs.jsonl` sessions by cwd, and
+  of the bitácoras found. Discuss down means mail unknown, not zero. A role
+  with `here: false` carries its name only.
+- **T3, binding and CLI.** New bound types need json tags and `wails
+  generate module`; `organizer roles [--json]` prints the same view.
+- **T4, Needs me untouched.** Role mail stays out of `queueOf`; 0079
+  already leaves `[for <role>]` relays out.
+- **T5, the UI** reads `AgentsView.Roles` only: Home's section, the rail's
+  group (unranked, collapsible, initials in the strip), and a drawer on the
+  card back's pattern; navigation through the store's existing
+  `openInitiative(id, "agents")` and `openSlack`.
+- **O1** (Daedalus): put to Pablo in the accept record; until ruled, the
+  default list includes it as Aglaea proposed.
+- Spec check (spec-craft 5b): rows R1-R7 read against these notes and the
+  States table; no row asks for starting a session (0082 "show only");
+  files found by grep (`AgentsView` at `internal/service/service.go:437`,
+  `runs.jsonl`, `probe-hefesto` live). Result: holds.
