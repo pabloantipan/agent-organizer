@@ -63,6 +63,42 @@ type Config struct {
 	// HelpDoc is the markdown file the Help renders, read each time the Help
 	// opens and never copied. Hephaistos owns its content.
 	HelpDoc string `yaml:"help_doc" json:"help_doc"`
+	// Roles are the transversal seats Deltagos shows apart from the
+	// initiatives (spec docs/ux/specs/transversal-roles.md, 0082). The key
+	// absent gives DefaultRoles; `roles: []` gives none.
+	Roles []Role `yaml:"roles" json:"roles"`
+}
+
+// Role is one transversal role: how its sessions are recognised and where it
+// keeps its bitácora. Deltagos only shows a role, it never starts one.
+type Role struct {
+	Name        string `yaml:"name" json:"name"`
+	Description string `yaml:"description" json:"description"`
+	// Sessions is a glob (path.Match) on the zellij session name.
+	Sessions string `yaml:"sessions" json:"sessions"`
+	// Bitacora is a path; `<initiative>` stands for each scanned initiative
+	// root, and a leading ~ is the home directory.
+	Bitacora string `yaml:"bitacora" json:"bitacora"`
+	// Here is false for a role that runs on another machine: it is named,
+	// and nothing else about it is looked up.
+	Here bool `yaml:"here" json:"here"`
+}
+
+// InitiativeToken is the placeholder a role's bitácora path uses for an
+// initiative root.
+const InitiativeToken = "<initiative>"
+
+// DefaultRoles is the spec's "Which roles" table, in its order (Daedalus in,
+// 0083).
+func DefaultRoles() []Role {
+	return []Role{
+		{Name: "Hephaistos", Description: "Forges the agent factory with Pablo: skills, seats, shared primitives", Sessions: "probe-hefesto*", Bitacora: "~/agent-slack/docs/bitacora/hephaistos_bitacora.md", Here: true},
+		{Name: "Aglaea", Description: "Product designer: UI, user research and validation, one seat per initiative", Sessions: "*-probe-aglaea", Bitacora: InitiativeToken + "/docs/bitacora/aglaea_bitacora.md", Here: true},
+		{Name: "Ariadna", Description: "Business analyst beside a non-technical person", Sessions: "*-probe-ariadna", Bitacora: InitiativeToken + "/docs/bitacora/ariadna_bitacora.md", Here: true},
+		{Name: "Daedalus", Description: "Head of architecture: reviews a solution from an initiative's docs", Sessions: "*-probe-daedalus", Bitacora: InitiativeToken + "/docs/bitacora/daedalus_bitacora.md", Here: true},
+		{Name: "Talos", Description: "PLV infra, on odyssey", Here: false},
+		{Name: "Hermione", Description: "PLV infra, on odyssey", Here: false},
+	}
 }
 
 // DefaultHelpDoc is the Help's source when help_doc is not set.
@@ -95,6 +131,7 @@ func Default() Config {
 		DiscussStateDir:     "~/.local/state/discuss",
 		CrewModel:           "opus",
 		HelpDoc:             DefaultHelpDoc,
+		Roles:               DefaultRoles(),
 	}
 }
 
