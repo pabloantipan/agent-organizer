@@ -447,6 +447,7 @@ function placeAxisLabels(content: HTMLElement, level: Level) {
   // top row's (`Pilot opens · +1`), never a label of its own beside another
   // (design system, Timeline, 106a4bd; leftovers-7 FR-10). The title, now
   // longer, is moved back inside its room.
+  const carried: { e: HTMLElement; at: number; l: number; k: number }[] = [];
   for (const [i, rest] of folded) {
     const t = titles[i];
     const more = document.createElement("span");
@@ -457,17 +458,40 @@ function placeAxisLabels(content: HTMLElement, level: Level) {
     more.setAttribute("aria-label", `, and ${more.title}`);
     t.e.appendChild(more);
     const [l, h] = room(t.e);
-    const b = boxOf(t.e.getBoundingClientRect());
-    const dx = shiftInside(b, l, h);
-    if (dx !== null && dx !== 0) t.e.style.transform = `translateX(${t.dx + dx}px)`;
-    boxes[boxOfTitle.get(i)!] = boxOf(t.e.getBoundingClientRect());
+    let nb = boxOf(t.e.getBoundingClientRect());
+    const at = t.dx + (shiftInside(nb, l, h) ?? 0);
+    t.e.style.transform = at ? `translateX(${at}px)` : "";
+    nb = boxOf(t.e.getBoundingClientRect());
+    const k = boxOfTitle.get(i)!;
+    carried.push({ e: t.e, at, l, k });
+    boxes[k] = nb;
   }
   // The axis grows by what the highest title needs, and gives back what it
   // no longer does; titles hang from its foot, so they move down with it.
   const need = axisGrowth(boxes, axisTop, grow);
   const dy = need - grow;
   if (dy !== 0) content.style.setProperty("--tz-axis-grow", `${need}px`);
+  const own = shown.length;
   for (const b of boxes) shown.push({ ...b, top: b.top + dy, bottom: b.bottom + dy });
+  // A title carrying "+N" is longer: it keeps a floating label's 12 px from
+  // what stands to its right on its own row (the today label, another title),
+  // moving left where there is room. Measured live, after the growth, which
+  // moves titles down onto the today label's row (leftovers-7 U1).
+  for (const c of carried) {
+    const self = own + c.k;
+    const nb = boxOf(c.e.getBoundingClientRect());
+    // its row: what crosses the title's middle line, not the row under it,
+    // whose text box reaches a few px into this one
+    const mid = (nb.top + nb.bottom) / 2;
+    const others = shown.filter((o, j) => j !== self && o.top < mid && o.bottom > mid);
+    const right = others.filter((o) => o.left >= nb.left && overlaps(o, nb, TICK_GAP));
+    if (right.length === 0) continue;
+    const by = Math.max(...right.map((o) => nb.right + TICK_GAP - o.left));
+    const moved = shift(nb, -by);
+    if (moved.left < c.l || others.some((o) => o.left < nb.left && overlaps(o, moved, LABEL_GAP))) continue;
+    c.e.style.transform = `translateX(${c.at - by}px)`;
+    shown[self] = moved;
+  }
   const tickBoxes = ticks.map((e) => ({ e, b: text(e), k: Number(e.dataset.k), minor: !!e.closest(".minor") }));
   const whole = tickBoxes.filter(({ e, b }) => {
     const [l, h] = room(e);

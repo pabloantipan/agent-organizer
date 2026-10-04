@@ -95,7 +95,7 @@
 /* The rest of a crowd past three rows: "+N", named in its hover. */
 /* "+N" rides its crowd's last title, in the title's own box (leftovers-7
    FR-10): only its weight and colour set it apart. */
-.tz-axis .g-mark .tz-more { font-weight: var(--weight-semibold); color: var(--fg-muted); cursor: default; }
+.tz-axis .g-mark .tz-more { position: static; bottom: auto; font-weight: var(--weight-semibold); color: var(--fg-muted); cursor: default; } /* static: global.css's .g-mark span would lift it out of the frame */
 /* The today label sits in the axis on the tick labels' line, beside its
    line, and names the day at Days and Hours; a tick under it gives way. */
 .tz-today-at { position: absolute; top: 0; bottom: 0; width: 0; }
