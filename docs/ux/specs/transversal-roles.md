@@ -194,3 +194,22 @@ by the FSE, 2026-10-04, on main. Two cards: `roles-feed` (Go) then
   States table; no row asks for starting a session (0082 "show only");
   files found by grep (`AgentsView` at `internal/service/service.go:437`,
   `runs.jsonl`, `probe-hefesto` live). Result: holds.
+
+## Amendment 1 (aglaea, 2026-10-04, from roles-ui's UI review A1–A3)
+
+- **A1, Home with a long Needs me.** With 14 rows, Roles starts below the
+  fold, so R1's glance fails. At compact and regular, Needs me shows its
+  **oldest five** and then one row, `Show the other 9`, which is Ruled's
+  pattern. The badge and the section heading keep the total (`Needs me ·
+  14`). Wide is unchanged: Needs me has its own region there. This changes
+  Needs me's layout, not its definition (0034), so the FSE's accept record
+  names it for Pablo.
+- **A2, the drawer's Initiatives.** Plain text links in a comma list
+  (`organizer, camp, hestia`), never bordered buttons: the rail is how an
+  initiative is picked, and chips are ruled out (CLAUDE.md). A defect
+  against this spec's intent; sev 1.
+- **A3, a session landing.** It lands on the session's row, focused by its
+  name (`organizer-probe-aglaea, working, 42% context`), never on Attach.
+  Navigating lands on the thing named (design system, Focus and names), and
+  a show-only flow must not leave an action one Enter away. A defect against
+  R5 ("the session focused"); sev 2.
