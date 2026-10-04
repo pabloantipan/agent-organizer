@@ -4,12 +4,13 @@ status: next
 repos: [organizer]
 branch: timeline-and-find-6
 updated: 2026-10-04
-next: "sup32 builds it (organizer-probe-sup32, launched 2026-10-04; 0077 ruled)"
+next: "tf6-build builds it in .wt/timeline-and-find-6 (sup32, launched 2026-10-04)"
 depends_on: [rule-box-and-stages]
 boundary: ["frontend/src/components/TimeZoom.tsx, frontend/src/lib/axis.ts and its tests, frontend/src/styles/time-zoom.css", "frontend/src/components/DecisionsView.tsx, frontend/src/styles/decisions.css", "frontend/src/components/RuleDecisionBox.tsx (the after-rule focus only)", "a new many-records fixture initiative under testdata/, scripts/fixture-home.sh (to lay it out)", "not: Go, docs/design-system.md"]
 spec: "docs/specs/leftovers-6.md (FR-1 to FR-7, FR-6a); the ranking docs/ux/reviews/2026-10-03-rank-leftovers-6.md (Aglaea, b582a27); the design system's Timeline as amended there"
 gate: "docs/specs/leftovers-6.md Acceptance, rows N1 to N6 and N0"
 ui_review: true
+seat: tf6-build
 ---
 
 ## Goal
