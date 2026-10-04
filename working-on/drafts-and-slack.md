@@ -5,7 +5,7 @@ repos: [organizer]
 branch: drafts-and-slack
 seat: das-build
 updated: 2026-10-04
-next: "das-build builds it in .wt/drafts-and-slack (sup36)"
+next: "review: drafts-and-slack, gate met (S0-S4, Chromium and WKWebView, classic and overlay)"
 depends_on: []
 boundary: ["frontend/src/lib/drafts.ts, lib/width.ts and their tests", "frontend/src/components/RuleDecisionBox.tsx, DecisionsView.tsx (its rule box's draft only), Home.tsx", "frontend/src/components/CardDrawer.tsx (the comment field's draft, name and updated date), Conversation.tsx (the composer's draft and field names)", "frontend/src/components/InitiativeHeader.tsx (the target's date), StageRoadmap.tsx (the row's name)", "frontend/src/styles/home.css (the three grid templates at lines 8, 15, 140 only, as --t-state/--t-phase variables with today's defaults; widened by the FSE 2026-10-04 for FR-2)", "not: Go, docs/design-system.md"]
 spec: "docs/specs/leftovers-9.md (FR-1, FR-2); Aglaea's calls d06e265"
@@ -17,10 +17,11 @@ ui_review: true
 Nothing he writes is lost to an Escape; Home's dates whole at 1512.
 
 ## Gate
-- [ ] S1-S4: see `docs/specs/leftovers-9.md`, Acceptance
-- [ ] S0: see `docs/specs/leftovers-9.md`, Acceptance
+- [x] S1-S4: see `docs/specs/leftovers-9.md`, Acceptance
+- [x] S0: see `docs/specs/leftovers-9.md`, Acceptance
 
 ## Done
+- 2026-10-04 das-build: drafts-and-slack 55fe3fd on main 8402e31; one session draft store (lib/drafts.ts), Escape keeps rule box/comment/composer drafts with `· draft` verbs, fixed columns give slack to a cut next date (fixedColumns via shareRoom), dates in words, field and stage names; S0-S4 met, evidence in .wt-notes/das-build/progress.md
 - 2026-10-04 sup36: worktree .wt/drafts-and-slack off 477aef6, seat das-build launched
 - 2026-10-04 0081 ruled by pablo ("Accepted"); sup36 launched by the FSE
 - 2026-10-04 cut from leftovers-9 by the FSE
@@ -30,3 +31,7 @@ Nothing he writes is lost to an Escape; Home's dates whole at 1512.
 ## Blockers
 
 ## Notes
+- FR-2 measured before the fix (Chromium 1512x945, rail strip, classic and overlay): next date needs 120 px in its 96 px track (cut 24); slack in state (144 track, widest 96: 48 px) and phase (96, widest 69: 27 px). home.css widened by the FSE for --t-state/--t-phase.
+- Still at 1512 strip: init-a's signals cut 20-25 px (folds "+1") while the flexible id (63 px) and stage (61 px) columns hold slack; FR-2 named fixed columns only.
+- WKWebView with classic bars: the bar is drawn but Home's rows keep the overlay width (1412 px); Chromium's lose ~17 px.
+- The reply composer gained a `cancel` link (shown while a message is kept), so Cancel exists in all four places.
