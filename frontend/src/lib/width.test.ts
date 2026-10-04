@@ -103,7 +103,7 @@ describe("compactColumns with empty columns (FR-20)", () => {
 describe("signalsShown (FR-20; leftovers-5 FR-8)", () => {
   // The seven-signal row in Home's order: waiting, blocked, now, wave, live,
   // cell, problems; waiting and blocked at their floor ("5 waiting…").
-  const folds: Fold[] = [null, null, FOLD.now, FOLD.live, FOLD.live, FOLD.cell, FOLD.problems];
+  const folds: Fold[] = [FOLD.waiting, null, FOLD.now, FOLD.live, FOLD.live, FOLD.cell, FOLD.problems];
   const floors = [70, 65, 50, 140, 60, 130, 80];
   const gap = 4;
   const sum = (ws: number[]) => ws.reduce((a, w) => a + w, 0) + gap * (ws.length - 1);
@@ -123,12 +123,19 @@ describe("signalsShown (FR-20; leftovers-5 FR-8)", () => {
 
   it("keeps the cell beside a waiting at its floor, not at its natural width", () => {
     // waiting's natural width (330) would not leave the cell room; its floor does
-    expect(signalsShown([70, 130], [null, FOLD.cell], gap, 70 + gap + 130, 28)).toEqual([true, true]);
+    expect(signalsShown([70, 130], [FOLD.waiting, FOLD.cell], gap, 70 + gap + 130, 28)).toEqual([true, true]);
   });
 
-  it("folds waiting or blocked only after every foldable one, the last first", () => {
-    expect(signalsShown(floors, folds, gap, sum([70, 65]) + gap + 28 - 1, 28)).toEqual([true, false, false, false, false, false, false]);
-    expect(signalsShown([70, 65], [null, null], gap, 100, 28)).toEqual([true, false]);
+  it("folds waiting after every foldable one, and never blocked (leftovers-7 FR-4)", () => {
+    // waiting gives way, not blocked: "1 blocked" stays whole beside "+6"
+    expect(signalsShown(floors, folds, gap, sum([70, 65]) + gap + 28 - 1, 28)).toEqual([false, true, false, false, false, false, false]);
+    expect(signalsShown([70, 65], [FOLD.waiting, null], gap, 100, 28)).toEqual([false, true]);
+    // blocked first in the row changes nothing
+    expect(signalsShown([65, 70], [null, FOLD.waiting], gap, 100, 28)).toEqual([true, false]);
+  });
+
+  it("never folds blocked, even when it alone does not fit", () => {
+    expect(signalsShown([65, 50], [null, FOLD.now], gap, 40, 28)).toEqual([true, false]);
   });
 
   it("keeps one signal when every signal folds", () => {
@@ -140,11 +147,11 @@ describe("signalsShown (FR-20; leftovers-5 FR-8)", () => {
 describe("signalsNeed (leftovers-5 FR-8)", () => {
   const gap = 4;
   it("is waiting and blocked at their floor, the cell whole and the +N for the rest", () => {
-    const folds: Fold[] = [null, null, FOLD.now, FOLD.live, FOLD.cell, FOLD.problems];
+    const folds: Fold[] = [FOLD.waiting, null, FOLD.now, FOLD.live, FOLD.cell, FOLD.problems];
     expect(signalsNeed([75, 65, 45, 108, 114, 70], folds, gap, 27)).toBe(75 + 65 + 114 + 3 * gap + 27);
   });
   it("needs no +N when nothing else folds, and only the +N with nothing kept", () => {
-    expect(signalsNeed([75, 114], [null, FOLD.cell], gap, 27)).toBe(75 + gap + 114);
+    expect(signalsNeed([75, 114], [FOLD.waiting, FOLD.cell], gap, 27)).toBe(75 + gap + 114);
     expect(signalsNeed([45, 41], [FOLD.now, FOLD.live], gap, 27)).toBe(27);
     expect(signalsNeed([], [], gap, 27)).toBe(0);
   });
