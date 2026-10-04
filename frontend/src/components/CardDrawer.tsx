@@ -7,6 +7,7 @@ import { ageLabel, notesAsContext, shortHome, since } from "../lib";
 import { useBoard } from "../stores/board.store";
 import { readOnlyOf } from "../lib/queue";
 import { openBox } from "../lib/boxStack";
+import { useMarkdownEdges } from "../lib/useScrollEdges";
 
 /** Focus and names, opening inline (widths-and-focus FR-19): the card back
  *  takes focus on its title when it opens, and hands it back to what opened
@@ -40,6 +41,8 @@ export function CardDrawer() {
   useEffect(() => (open ? openBox(() => select(null)) : undefined), [open, select]);
   const html = useMemo(() => (selected ? (marked.parse(selected.body || "") as string) : ""), [selected]);
   const title = useRef<HTMLHeadingElement>(null);
+  const body = useRef<HTMLDivElement>(null);
+  useMarkdownEdges(body, html);
   const titleId = useId();
   useFocusOpener(selected ? `${selected.initiative_id}/${selected.slug}` : null, title);
   if (!selected) return null;
@@ -76,7 +79,7 @@ export function CardDrawer() {
               </div>
             )}
             <MyNotes card={c} readOnly={readOnly} />
-            <div className="markdown" dangerouslySetInnerHTML={{ __html: html }} />
+            <div ref={body} className="markdown" dangerouslySetInnerHTML={{ __html: html }} />
           </div>
           <aside className="modal-side">
             <div className="section-label">Repos</div>

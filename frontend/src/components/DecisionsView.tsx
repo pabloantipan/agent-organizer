@@ -6,6 +6,7 @@ import { addLocalDays } from "../lib/axis";
 import { ownerPhrase } from "../lib/decisions";
 import { countWords, decisionMatches, emptyRuledWords, lineName, rulerWords, ruledShown, shownSections, statusWord, summaryOf, timelineCount, timelineName, turnaroundWords, waitedWords, type DecSections } from "../lib/decisionsPage";
 import { readOnlyOf } from "../lib/queue";
+import { useMarkdownEdges } from "../lib/useScrollEdges";
 import { useBoard } from "../stores/board.store";
 import { RuleDecisionBox } from "./RuleDecisionBox";
 import { EdgePointer, TimeFrame, ZoomControl, useTimeZoom } from "./TimeZoom";
@@ -453,6 +454,7 @@ export function DecisionsView() {
 function RecordBody({ body }: { body: string }) {
   const el = useRef<HTMLDivElement>(null);
   const last = useRef<string | null>(null);
+  useMarkdownEdges(el);
   const html = useMemo(() => marked.parse(body) as string, [body]);
   useLayoutEffect(() => {
     const e = el.current;

@@ -8,6 +8,7 @@ import { openBox } from "../lib/boxStack";
 import { useBoard } from "../stores/board.store";
 import type { WidthClass } from "../lib/width";
 import "../styles/rule-box.css";
+import { useMarkdownEdges } from "../lib/useScrollEdges";
 
 /** A ruling of a proposed record, from its Needs me row (FR-22) or its row on
  *  the Decisions tab (FR-12). The ruler signs it, not the owner (0045): the
@@ -413,6 +414,7 @@ function Clamped({ label, md, lines }: { label: string; md: string | null; lines
   const [fit, setFit] = useState<{ html: string; lines: number; keep: number; total: number; over: boolean } | null>(null);
   const measured = fit?.html === html && fit.lines === lines ? fit : null;
   const body = useRef<HTMLDivElement>(null);
+  useMarkdownEdges(body, html);
   const id = useId();
   useLayoutEffect(() => {
     const el = body.current;

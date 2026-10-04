@@ -2,6 +2,10 @@
 
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; }
+/* The document never scrolls; only a view's own scroller does (design
+   system, Widths; leftovers-5 FR-7). A guard: what is positioned sits
+   inside a positioned ancestor within its scroller. */
+html, body { overflow: hidden; }
 body {
   background: var(--bg);
   color: var(--text);
@@ -257,6 +261,14 @@ button.tiny { padding: 0 5px; font-size: var(--font-size-xs); line-height: 14px;
    still wins. */
 .markdown :where(pre, table) { overflow-x: auto; max-width: 100%; }
 .markdown table { display: block; border-collapse: collapse; font-size: var(--font-size-md); }
+/* A code block or table that scrolls sideways shows it does (design system,
+   Widths; leftovers-5 FR-13): the side with content hidden past it carries
+   1 px of --fg-subtle (edge-left, edge-right, set by useMarkdownEdges in
+   lib/useScrollEdges.ts), transparent otherwise so nothing moves. A view's
+   own border on the block (Help's) stays; the edge only recolours it. */
+.markdown :where(pre, table) { border-left: 1px solid transparent; border-right: 1px solid transparent; }
+.markdown .edge-left { border-left-color: var(--fg-subtle); }
+.markdown .edge-right { border-right-color: var(--fg-subtle); }
 .markdown td, .markdown th { border: 1px solid var(--border); padding: 5px 9px; text-align: left; }
 .markdown code { background: var(--panel-2); padding: 1px 5px; border-radius: var(--radius-xs); }
 .markdown ul, .markdown ol { padding-left: 20px; }

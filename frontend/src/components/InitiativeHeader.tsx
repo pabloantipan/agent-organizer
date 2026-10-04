@@ -1,11 +1,11 @@
-import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronDown, ChevronRight, Code2, FileText, Lock, Route } from "lucide-react";
 import type { merge, model } from "../../wailsjs/go/models";
 import { parseISO, today } from "../lib/dates";
 import { api } from "../hooks/useWails";
 import { firstWaiting, phaseRuns, stagePosition, waitingChip } from "../lib/header";
 import { leadOf, readOnlyOf } from "../lib/queue";
-import { scrollEdges, type Edges } from "../lib/scrollEdges";
+import { useScrollEdges } from "../lib/useScrollEdges";
 import { useBoard, type Sub } from "../stores/board.store";
 import "../styles/header.css";
 
@@ -161,28 +161,6 @@ function Clamped({ name, className, children }: { name: string; className: strin
       )}
     </div>
   );
-}
-
-/** Which edges of a scroll area have content hidden past them (FR-17, the
- *  design system's Widths): measured on scroll, and when the area or what is
- *  in it changes size (a clamp's "more", the window). */
-function useScrollEdges(ref: RefObject<HTMLElement | null>, on: boolean): Edges {
-  const [edges, setEdges] = useState<Edges>({ top: false, bottom: false });
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el || !on) { setEdges({ top: false, bottom: false }); return; }
-    const measure = () => {
-      const e = scrollEdges(el);
-      setEdges((p) => (p.top === e.top && p.bottom === e.bottom ? p : e));
-    };
-    measure();
-    el.addEventListener("scroll", measure, { passive: true });
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    for (const c of Array.from(el.children)) ro.observe(c);
-    return () => { el.removeEventListener("scroll", measure); ro.disconnect(); };
-  }, [ref, on]);
-  return edges;
 }
 
 const SUBS: { id: Sub; label: string }[] = [

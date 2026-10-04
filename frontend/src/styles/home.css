@@ -5,16 +5,20 @@
    seven type sizes only; no nesting, no @layer, no color-mix (Safari 15.0). */
 
 .home .p-head, .home .p-row {
-  grid-template-columns: 24px minmax(0, 0.9fr) 144px 96px var(--t-goal, minmax(0, 1.2fr)) minmax(0, 1fr) var(--t-sig, minmax(0, 1.5fr)) var(--t-next, 96px) 24px;
+  grid-template-columns: 24px minmax(0, 0.9fr) 144px 96px var(--t-goal, minmax(0, 1.2fr)) minmax(0, 1fr) var(--t-sig, minmax(var(--sig-floor, 0px), 1.5fr)) var(--t-next, 96px) 24px;
   gap: var(--space-3);
   padding: var(--space-1-5) var(--space-3);
 }
 /* FR-2 (lead-side-fixes): the id column is never narrower than the longest
    id (--id-w, measured by useFitIds in Home.tsx) */
 .home .port .p-head, .home .port .p-row {
-  grid-template-columns: 24px minmax(var(--id-w, 0px), 0.9fr) 144px 96px var(--t-goal, minmax(0, 1.2fr)) minmax(0, 1fr) var(--t-sig, minmax(0, 1.5fr)) var(--t-next, 96px) 24px;
+  grid-template-columns: 24px minmax(var(--id-w, 0px), 0.9fr) 144px 96px var(--t-goal, minmax(0, 1.2fr)) minmax(0, 1fr) var(--t-sig, minmax(var(--sig-floor, 0px), 1.5fr)) var(--t-next, 96px) 24px;
 }
 .home .p-id { max-width: none; }
+/* The row holds its visually hidden text (.p-stage's and the signals'
+   sr-only spans, compact's hidden goal and date): positioned, so that text
+   stays inside the row and cannot stretch the page (leftovers-5 FR-7). */
+.home .p-head, .home .p-row { position: relative; }
 
 /* Narrow (the minimum window with the rail open): phase, goal and next date
    give way to a second line under the id, state and signals; the header
@@ -65,6 +69,9 @@
 .home .p-stage .stepper { flex: 0 0 40px; }
 .home .p-stage .stage-lbl { flex: 1 1 auto; min-width: 0; }
 .home .p-next { display: flex; gap: var(--space-2); align-items: baseline; min-width: 0; }
+/* The date never wraps (leftovers-5 FR-11): `30 Nov` stays on its line and
+   the words after it take the ellipsis. */
+.home .p-next .num { flex: none; white-space: nowrap; }
 
 /* State: a lozenge with its own icon and word, one per row (never colour
    alone, design system Principles 4). */
@@ -92,7 +99,8 @@
    to the id's hover and the chevron's detail and stay in the accessible
    text (.sr-only's rule, repeated here for the cells). The stage reads n/m
    with its stepper. Widths as lib/width.ts measures them: the goal keeps
-   about 30 characters (GOAL_MIN 224), the signals at least 160. */
+   about 30 characters, measured in its font (--goal-floor, goalFloor;
+   GOAL_MIN 224 until measured), the signals at least 160. */
 /* The row is measured on the room Home has, never on its own content: the
    list's track and sections take the width they are given, not their
    min-content, or a column that does not fit would widen the page instead
@@ -109,13 +117,13 @@
   grid-template-columns: 24px max(var(--id-w, 0px), 96px) 136px 104px 76px var(--t-sig, minmax(0, 1fr)) 24px;
 }
 .home.compact .port.fit-goal .p-head, .home.compact .port.fit-goal .p-row {
-  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 136px 104px minmax(224px, 1.2fr) 76px var(--t-sig, minmax(160px, 1fr)) 24px;
+  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 136px 104px minmax(var(--goal-floor, 224px), 1.2fr) 76px var(--t-sig, minmax(160px, 1fr)) 24px;
 }
 .home.compact .port.fit-next .p-head, .home.compact .port.fit-next .p-row {
   grid-template-columns: 24px max(var(--id-w, 0px), 96px) 136px 104px 76px var(--t-sig, minmax(160px, 1fr)) 96px 24px;
 }
 .home.compact .port.fit-goal.fit-next .p-head, .home.compact .port.fit-goal.fit-next .p-row {
-  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 136px 104px minmax(224px, 1.2fr) 76px var(--t-sig, minmax(160px, 1fr)) 96px 24px;
+  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 136px 104px minmax(var(--goal-floor, 224px), 1.2fr) 76px var(--t-sig, minmax(160px, 1fr)) 96px 24px;
 }
 .home.compact .p-stage .stepper { flex: 0 0 36px; }
 .home.compact .p-stage .stage-lbl { flex: none; }
@@ -129,7 +137,7 @@
 
 /* Regular's top (FR-3): the goal column takes the room the cap gives. */
 .home.roomy .port .p-head, .home.roomy .port .p-row {
-  grid-template-columns: 24px minmax(var(--id-w, 0px), 0.9fr) 144px 96px var(--t-goal, minmax(0, 2.2fr)) minmax(0, 1fr) var(--t-sig, minmax(0, 1.5fr)) var(--t-next, 96px) 24px;
+  grid-template-columns: 24px minmax(var(--id-w, 0px), 0.9fr) 144px 96px var(--t-goal, minmax(0, 2.2fr)) minmax(0, 1fr) var(--t-sig, minmax(var(--sig-floor, 0px), 1.5fr)) var(--t-next, 96px) 24px;
 }
 
 /* Wide (FR-4, from 2200 since FR-13): stage and signals at their full
@@ -139,7 +147,7 @@
    the goal keeps 160, instead of the goal going to 0 and the chevrons
    spilling into the Needs me column (found building responsive-home-2). */
 .home.wide .port .p-head, .home.wide .port .p-row {
-  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 144px 104px minmax(var(--goal-min, 160px), 1fr) minmax(120px, 208px) var(--t-sig, minmax(120px, 288px)) var(--t-next, 136px) 24px;
+  grid-template-columns: 24px max(var(--id-w, 0px), 96px) 144px 104px minmax(var(--goal-min, 160px), 1fr) minmax(120px, 208px) var(--t-sig, minmax(120px, max(288px, var(--sig-floor, 0px)))) var(--t-next, 136px) 24px;
 }
 /* FR-21: Home is wide only while this goal column keeps each goal's first
    70 characters (or the whole goal); --goal-min is that width, measured by
@@ -148,17 +156,23 @@
 /* the Needs me column is narrow: a subject takes two lines before it is cut */
 .home.wide .ib-subject { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
+/* --sig-floor (leftovers-5 FR-8, ranking row 6): the widest row's need
+   for waiting and blocked at their floor ("5 waiting…") and the cell's
+   state whole beside them, with "+N" (lib/width.ts signalsNeed, set by
+   Initiatives in Home.tsx). Regular's and wide's signal column is never
+   narrower, so the cell shows wherever the row can afford it; compact's
+   goal floor comes first, and its column keeps its own least. */
 /* Signals in every class (FR-10, FR-15): one line, never wrapped; what does
    not fit is hidden (data-off, set by OneLine in Home.tsx) and counted in
    "+N". */
 .home .p-sig.one-line { flex-wrap: nowrap; overflow: hidden; min-width: 0; }
 .home .p-sig.one-line > * { flex: none; }
 .home .p-sig.one-line > [data-off] { display: none; }
-/* When the signals that never fold (FR-20) do not fit whole, they share
-   the column instead of folding: OneLine in Home.tsx caps each shown
-   lozenge (max-width, lib/width.ts shareRoom), the widest first, never
-   under two characters and the ellipsis on its text span, so "+N" stays
-   inside the column. */
+/* When the shown signals do not fit whole, they share the column: OneLine
+   in Home.tsx caps each shown lozenge (max-width, lib/width.ts shareRoom),
+   the widest first, never under its floor (waiting's and blocked's N and
+   whole noun, leftovers-5 FR-8) and the ellipsis on its text span, so "+N"
+   stays inside the column. */
 .home .p-sig.one-line > .lz { overflow: hidden; }
 .lz.sig-more { background: var(--surface-raised); color: var(--fg-muted); }
 /* FR-14: a lozenge is a flex box, which clips its text mid-word; its words

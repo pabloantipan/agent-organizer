@@ -40,36 +40,54 @@ export function signalsThatFit(widths: number[], gap: number, room: number, more
   return Math.max(1, n);
 }
 
-/** How soon a signal folds into "+N" (FR-20 as amended by 0076; design
- *  system, Widths: "what gives way first"): problems first, then now, then
- *  live (a wave building, live or working seats), and last the cell's state.
- *  Null never folds: waiting, the lead's own ("waiting · you") or anyone's,
- *  and blocked. */
+/** How soon a signal folds into "+N" (FR-20 as amended by 0076; leftovers-5
+ *  FR-8; design system, Widths: "what gives way first"): live first (a wave
+ *  building, live or working seats), then now, then problems, and last of
+ *  the foldable ones the cell's state. Null is waiting, the lead's own
+ *  ("waiting · you") or anyone's, and blocked: they stay while they fit at
+ *  their floor. */
 export type Fold = 0 | 1 | 2 | 3 | null;
-export const FOLD = { problems: 0, now: 1, live: 2, cell: 3 } as const;
+export const FOLD = { live: 0, now: 1, problems: 2, cell: 3 } as const;
 
-/** Which signals a row shows (FR-20), in their own order: all when all fit
- *  `room`; otherwise the foldable ones leave, the least urgent first and,
- *  among equals, the last first, until what stays fits beside the "+N"
- *  (`more` wide). Signals that never fold stay even when they do not fit:
- *  the cell cuts them with their ellipsis. At least one signal stays. */
-export function signalsShown(widths: number[], folds: Fold[], gap: number, room: number, more: number): boolean[] {
-  const shown = widths.map(() => true);
+/** Which signals a row shows (FR-20; leftovers-5 FR-8), in their own order.
+ *  `floors` are what each keeps at the least, in rendered width: waiting's
+ *  and blocked's `N` and the whole noun ("5 waiting", the names cut), a
+ *  foldable one whole. All show when their floors fit `room`; otherwise the
+ *  foldable ones leave, the soonest first and, among equals, the last
+ *  first, until what stays fits beside the "+N" (`more` wide), so the cell
+ *  shows wherever it fits beside a cut waiting. Only when waiting and
+ *  blocked cannot both keep their floor does one of them fold too, after
+ *  every foldable one, the last first, so no signal reads as one letter.
+ *  At least one signal stays, which the cell then cuts. */
+export function signalsShown(floors: number[], folds: Fold[], gap: number, room: number, more: number): boolean[] {
+  const shown = floors.map(() => true);
   const used = () => {
-    const on = widths.filter((_, k) => shown[k]);
-    const hidden = on.length < widths.length;
+    const on = floors.filter((_, k) => shown[k]);
+    const hidden = on.length < floors.length;
     return on.reduce((a, w) => a + w, 0) + gap * Math.max(0, on.length - 1) + (hidden ? gap + more : 0);
   };
+  const rank = (k: number) => folds[k] ?? 4;
   while (used() > room && shown.filter(Boolean).length > 1) {
     let pick = -1;
-    folds.forEach((f, k) => {
-      if (!shown[k] || f === null) return;
-      if (pick < 0 || f < (folds[pick] as number) || f === folds[pick]) pick = k;
+    folds.forEach((_, k) => {
+      if (!shown[k]) return;
+      if (pick < 0 || rank(k) <= rank(pick)) pick = k;
     });
-    if (pick < 0) break;
     shown[pick] = false;
   }
   return shown;
+}
+
+/** What a row's signal cell needs so that waiting and blocked keep their
+ *  floor and the cell's state shows whole beside them (leftovers-5 FR-8,
+ *  ranking row 6), with "+N" (`more` wide) for whatever else folds. Home
+ *  gives regular's and wide's signal column the widest row's need as its
+ *  least, so the cell shows wherever the row can afford it; compact keeps
+ *  its own least, since the goal's floor comes first there. */
+export function signalsNeed(floors: number[], folds: Fold[], gap: number, more: number): number {
+  const keep = floors.filter((_, k) => folds[k] === null || folds[k] === FOLD.cell);
+  const rest = floors.length - keep.length;
+  return keep.reduce((a, w) => a + w, 0) + gap * Math.max(0, keep.length - 1) + (rest > 0 ? (keep.length > 0 ? gap : 0) + more : 0);
 }
 
 /** Compact's row (FR-16): its fixed columns as home.css draws them (rank,
@@ -77,8 +95,19 @@ export function signalsShown(widths: number[], folds: Fold[], gap: number, room:
  *  (one lozenge and the "+N"), and what the goal and the next date need. */
 export const COMPACT_FIXED = 24 + 136 + 104 + 76 + 24;
 export const SIGNALS_MIN = 160;
-/** About 30 characters of a goal at --font-size-md (13 px Manrope). */
+/** About 30 characters of a goal at --font-size-md (13 px Manrope), when
+ *  no goal has been measured (goalFloor). */
 export const GOAL_MIN = 224;
+/** About 30 characters of goal (the design system's compact goal column). */
+export const GOAL_FLOOR_CHARS = 30;
+
+/** The goal column's floor in rendered width (leftovers-5 FR-8, row 2):
+ *  the widest of the shown goals' first 30 characters (or the whole goal
+ *  when shorter), as `widths` gives them measured in the goal's font.
+ *  With no goal measured it is GOAL_MIN. */
+export function goalFloor(widths: number[]): number {
+  return widths.length ? Math.ceil(Math.max(...widths)) : GOAL_MIN;
+}
 export const NEXT_W = 96;
 
 /** Which of goal and next date a compact row shows (FR-16): a column gives
@@ -87,11 +116,11 @@ export const NEXT_W = 96;
  *  `gap` the grid's column gap. The goal is kept first; the next date fits
  *  in what is left, alone if the goal could not. A column empty on every
  *  shown row (`empty`, FR-20) has already given way: it is never shown and
- *  takes no room. */
-export function compactColumns(room: number, id: number, gap: number, empty: Empty = NO_EMPTY): { goal: boolean; next: boolean } {
+ *  takes no room. `goalMin` is the goal's floor (goalFloor). */
+export function compactColumns(room: number, id: number, gap: number, empty: Empty = NO_EMPTY, goalMin = GOAL_MIN): { goal: boolean; next: boolean } {
   let used = COMPACT_FIXED + Math.max(id, 96) + 5 * gap + (empty.sig ? 0 : SIGNALS_MIN + gap);
-  const goal = used + gap + GOAL_MIN <= room;
-  if (goal) used += gap + GOAL_MIN;
+  const goal = used + gap + goalMin <= room;
+  if (goal) used += gap + goalMin;
   const next = !empty.next && used + gap + NEXT_W <= room;
   return { goal, next };
 }
@@ -143,22 +172,23 @@ export function homeClassOf(cls: WidthClass, was: WidthClass, avail: number, nee
   return room >= need - (was === "wide" ? SLACK : 0) ? "wide" : "regular";
 }
 
-/** The least text a shown lozenge keeps (FR-20, the code review of
- *  home-widths-4): two characters and the ellipsis at --font-size-xs. */
-export const LZ_MIN_TEXT = 18;
-
-/** The signals that never fold share what is left of their column (FR-20):
- *  all at their natural width when they fit; otherwise each is capped at
- *  one width, the same for all (the widest give way first), never below its
- *  own least (`mins`, its chrome and LZ_MIN_TEXT, or its natural width when
- *  that is less). When even the leasts do not fit, it returns the leasts and
- *  the caller's row overflows: `fits` says so. */
-export function shareRoom(widths: number[], mins: number[], room: number): { widths: number[]; fits: boolean } {
-  const total = (c: number) => widths.reduce((a, w, k) => a + Math.max(Math.min(mins[k], w), Math.min(w, c)), 0);
+/** The shown signals share their column (FR-20; leftovers-5 FR-8): all at
+ *  their natural width when they fit; otherwise each is capped at one
+ *  width, the same for all (the widest give way first), never below its
+ *  own least (`mins`, its floor, or its natural width when that is less).
+ *  signalsShown leaves only what fits at its least; should the leasts still
+ *  not fit (one signal left in a column narrower than its floor), the cap
+ *  goes under them, so the widths always fit `room` and the row never
+ *  overflows (S6). */
+export function shareRoom(widths: number[], mins: number[], room: number): { widths: number[]; fits: true } {
   if (widths.reduce((a, w) => a + w, 0) <= room) return { widths, fits: true };
   const floor = widths.map((w, k) => Math.min(mins[k], w));
-  if (floor.reduce((a, w) => a + w, 0) > room) return { widths: floor, fits: false };
+  const under = floor.reduce((a, w) => a + w, 0) > room;
+  const least = (k: number) => (under ? 0 : floor[k]);
+  const total = (c: number) => widths.reduce((a, w, k) => a + Math.max(least(k), Math.min(w, c)), 0);
   let lo = 0, hi = Math.max(...widths);
   for (let i = 0; i < 40; i++) { const c = (lo + hi) / 2; if (total(c) <= room) lo = c; else hi = c; }
-  return { widths: widths.map((w, k) => Math.floor(Math.max(Math.min(mins[k], w), Math.min(w, lo)))), fits: true };
+  // A lozenge at its natural width keeps it exactly: rounding 65.4 down
+  // to 65 would clip its last letter (WebKit's widths are fractional).
+  return { widths: widths.map((w, k) => { const v = Math.max(least(k), Math.min(w, lo)); return v >= w ? w : Math.floor(v); }), fits: true };
 }

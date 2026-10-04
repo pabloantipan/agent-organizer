@@ -5,9 +5,11 @@ import type { merge, model, service } from "../../wailsjs/go/models";
 import { inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, type NeedsMeRow } from "../lib/queue";
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
+import { dayMonth } from "../lib/axis";
+import { parseISO, today } from "../lib/dates";
 import { HEALTH, messages } from "../lib/health";
 import { ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
-import { compactColumns, FOLD, GOAL_CHARS, homeClassOf, LZ_MIN_TEXT, NO_EMPTY, shareRoom, signalsShown, wideGoalRoom, type Empty, type Fold, type WidthClass } from "../lib/width";
+import { compactColumns, FOLD, GOAL_CHARS, GOAL_FLOOR_CHARS, goalFloor, homeClassOf, NO_EMPTY, shareRoom, signalsNeed, signalsShown, wideGoalRoom, type Empty, type Fold, type WidthClass } from "../lib/width";
 import { useBoard } from "../stores/board.store";
 import { nextDate, stageState } from "./InitiativeHeader";
 import { InitiativeDetail } from "./Initiatives";
@@ -271,7 +273,8 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
   });
   // FR-20: a column empty ("—") on every shown row gives way first.
   const empty: Empty = { next: items.length > 0 && items.every((r) => !r.next), sig: items.length > 0 && items.every((r) => r.sig.none) };
-  const { ref, idWidth, narrow, fit } = useFitIds(ids.join(" "), empty);
+  const { ref, idWidth, narrow, fit, goalMin } = useFitIds(ids.join(" "), empty);
+  const [sigFloor, reportSig] = useSigFloor();
   // Compact's row is one line; its goal and next date give way only when the
   // row has no room for them (FR-16), and come back when it has.
   const hides = { goal: compact && !fit.goal, next: compact && !fit.next && !empty.next };
@@ -284,10 +287,11 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
     );
   }
   return (
-    <div ref={ref} className={`panel port ${narrow && !compact ? "narrow" : ""} ${hides.goal ? "" : "fit-goal"} ${hides.next || empty.next ? "" : "fit-next"} ${empty.next ? "empty-next" : ""} ${empty.sig ? "empty-sig" : ""}`} role="table" style={idWidth ? { "--id-w": `${idWidth}px` } as React.CSSProperties : undefined}>
+    <div ref={ref} className={`panel port ${narrow && !compact ? "narrow" : ""} ${hides.goal ? "" : "fit-goal"} ${hides.next || empty.next ? "" : "fit-next"} ${empty.next ? "empty-next" : ""} ${empty.sig ? "empty-sig" : ""}`} role="table" style={{ ...(idWidth ? { "--id-w": `${idWidth}px` } : {}), ...(goalMin ? { "--goal-floor": `${goalMin}px` } : {}), ...(sigFloor ? { "--sig-floor": `${sigFloor}px` } : {}) } as React.CSSProperties}>
       <div className="p-head" role="row">
         <span className="num">#</span><span>initiative</span><span>state</span><span>phase</span><span>goal</span><span>stage</span><span>signals</span><span>next date</span><span />
       </div>
+      <SigNeed.Provider value={reportSig}>
       {items.map(({ id, rows, i, group, sig, next }, k) => {
         return (
           <div key={id} className="p-item" data-id={id}>
@@ -308,11 +312,20 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
           </div>
         );
       })}
+      </SigNeed.Provider>
     </div>
   );
 }
 
 type Next = ReturnType<typeof nextDate>;
+
+/** Home's next date as dates read everywhere else (leftovers-5 FR-11):
+ *  `30 Nov`, with the year only when it is not this year. */
+function dateWords(iso: string): string {
+  const d = parseISO(iso);
+  if (!d) return iso;
+  return d.getFullYear() === today().getFullYear() ? dayMonth(d.getTime()) : `${dayMonth(d.getTime())} ${d.getFullYear()}`;
+}
 
 /** The chevron's name and hover (FR-11): what its detail opens on. */
 const detailsName = (id: string) => `Details for ${id}: goal, next date, repos`;
@@ -320,7 +333,7 @@ const detailsName = (id: string) => `Details for ${id}: goal, next date, repos`;
 /** Compact's id hover (responsive-home FR-2, FR-16): the title, then the
  *  goal and the next date if they left the row. */
 const idHover = (i: merge.BoardInitiative, next: Next, hides: { goal: boolean; next: boolean }) =>
-  [i.title, hides.goal && `goal: ${i.goal || "no goal yet"}`, hides.next && `next date: ${next ? `${next.date} ${next.what}` : "none ahead"}`].filter(Boolean).join("\n");
+  [i.title, hides.goal && `goal: ${i.goal || "no goal yet"}`, hides.next && `next date: ${next ? `${dateWords(next.date)} ${next.what}` : "none ahead"}`].filter(Boolean).join("\n");
 
 /** The chevron's detail opens on the goal and the next date, whole: the
  *  ones compact's row no longer shows and the ones regular cuts (FR-11). */
@@ -330,7 +343,7 @@ function GoalAndDate({ i, next }: { i: merge.BoardInitiative; next: Next }) {
       <span className="init-detail-label">goal</span>
       <span className={i.goal ? "" : "missing"}>{i.goal || "no goal yet"}</span>
       <span className="init-detail-label">next date</span>
-      {next ? <span><span className="num">{next.date}</span> <span className="p-next-what">{next.what}</span></span> : <span className="missing">none ahead</span>}
+      {next ? <span><span className="num">{dateWords(next.date)}</span> <span className="p-next-what">{next.what}</span></span> : <span className="missing">none ahead</span>}
     </div>
   );
 }
@@ -354,6 +367,7 @@ function useFitIds(key: string, empty: Empty = NO_EMPTY) {
   const [idWidth, setIdWidth] = useState(0);
   const [narrow, setNarrow] = useState(false);
   const [fit, setFit] = useState({ goal: true, next: true });
+  const [goalMin, setGoalMin] = useState(0);
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -366,7 +380,12 @@ function useFitIds(key: string, empty: Empty = NO_EMPTY) {
       const gap = cs ? parseFloat(cs.columnGap) || 0 : 0;
       // An empty next date takes no room on the line (FR-20).
       setNarrow(el.clientWidth < w + ONE_LINE_REST - (empty.next ? NEXT_REST + gap : 0));
-      const f = compactColumns(el.clientWidth - pad, Math.ceil(w), gap, empty);
+      // The goal's floor in rendered width (leftovers-5 FR-8): its first
+      // 30 characters in the goal's own font, measured on the room the row
+      // has, classic scrollbar and all.
+      const floor = goalFloor(goalWidths(el));
+      setGoalMin(floor);
+      const f = compactColumns(el.clientWidth - pad, Math.ceil(w), gap, empty, floor);
       setFit((p) => (p.goal === f.goal && p.next === f.next ? p : f));
     };
     fit();
@@ -374,7 +393,18 @@ function useFitIds(key: string, empty: Empty = NO_EMPTY) {
     ro.observe(el);
     return () => ro.disconnect();
   }, [key, empty.next, empty.sig]);
-  return { ref, idWidth, narrow, fit };
+  return { ref, idWidth, narrow, fit, goalMin };
+}
+
+/** The shown goals' first GOAL_FLOOR_CHARS characters (or the whole goal
+ *  when shorter), measured in the goal's font. */
+function goalWidths(el: HTMLElement): number[] {
+  const goals = Array.from(el.querySelectorAll<HTMLElement>(".p-row .p-goal:not(.missing)"));
+  if (goals.length === 0) return [];
+  const ctx = document.createElement("canvas").getContext("2d");
+  if (!ctx) return [];
+  ctx.font = getComputedStyle(goals[0]).font;
+  return goals.map((g) => ctx.measureText((g.textContent ?? "").trim().slice(0, GOAL_FLOOR_CHARS)).width);
 }
 
 /** Home's compact stepper: one segment per stage and the current one named.
@@ -409,6 +439,25 @@ function MiniStepper({ stages, compact = false }: { stages: model.Stage[]; compa
 
 type SignalFacts = ReturnType<typeof signalFacts>;
 
+/** Each row's OneLine reports what its signals need (signalsNeed); the
+ *  table gives regular's and wide's signal column the widest (--sig-floor). */
+const SigNeed = createContext<(id: string, px: number) => void>(() => {});
+
+/** The widest row's signal need, as rows report it. State changes only
+ *  when the widest changes, so a row's report does not loop: the need is
+ *  measured with every cap lifted, whatever the column's width. */
+function useSigFloor(): [number, (id: string, px: number) => void] {
+  const needs = useRef(new Map<string, number>());
+  const [floor, setFloor] = useState(0);
+  const report = useRef((id: string, px: number) => {
+    if (needs.current.get(id) === px) return;
+    needs.current.set(id, px);
+    const max = Math.ceil(Math.max(0, ...needs.current.values()));
+    setFloor((p) => (p === max ? p : max));
+  }).current;
+  return [floor, report];
+}
+
 /** What a row's signals count, apart from how they are drawn: Home asks
  *  whether the column is empty on every row (FR-20) before it draws one. */
 function signalFacts(i: merge.BoardInitiative, rows: merge.BoardInitiative[], cards: merge.BoardCard[], waves: service.Wave[], cell?: model.Cell | null) {
@@ -431,8 +480,8 @@ function signalFacts(i: merge.BoardInitiative, rows: merge.BoardInitiative[], ca
 function Signals({ i, sig, cell, missing, lead }: { i: merge.BoardInitiative; sig: SignalFacts; cell?: model.Cell | null; missing: string[]; lead: string }) {
   const { waiting, blocked, now, live, working, running, problems, none } = sig;
   return (
-    <OneLine>
-      {waiting > 0 && <span className="lz waiting"><span className="lz-t"><span className="num">{waiting}</span> waiting · {signalOwners(i, lead).join(", ")}</span></span>}
+    <OneLine id={i.id}>
+      {waiting > 0 && <span className="lz waiting"><span className="lz-t"><span className="lz-floor"><span className="num">{waiting}</span> waiting</span> · {signalOwners(i, lead).join(", ")}</span></span>}
       {blocked > 0 && <span className="lz blocked"><span className="lz-t"><span className="num">{blocked}</span> blocked</span></span>}
       {now > 0 && <span className="lz now" data-fold={FOLD.now}><span className="lz-t"><span className="num">{now}</span> now</span></span>}
       {running.map((w) => <span key={w.n} className="lz live" data-fold={FOLD.live}><span className="lz-t">wave <span className="num">{w.n}</span> · <span className="num">{w.building!.length}</span> building</span></span>)}
@@ -450,8 +499,9 @@ function Signals({ i, sig, cell, missing, lead }: { i: merge.BoardInitiative; si
  *  hover and in its accessible text. Measured after every render, since a
  *  signal changes with the 10 s agents feed and the room with the rail;
  *  state is set only when what fits changes. */
-function OneLine({ children }: { children: React.ReactNode }) {
+function OneLine({ id, children }: { id: string; children: React.ReactNode }) {
   const ref = useRef<HTMLSpanElement>(null);
+  const reportNeed = useContext(SigNeed);
   const [cut, setCut] = useState<{ rest: string[]; whole: string } | null>(null);
   const measure = () => {
     const el = ref.current;
@@ -469,21 +519,29 @@ function OneLine({ children }: { children: React.ReactNode }) {
       return Math.max(c.getBoundingClientRect().width + (t ? t.scrollWidth - t.clientWidth : 0), c.scrollWidth);
     };
     const folds = items.map((c): Fold => (c.dataset.fold === undefined ? null : (Number(c.dataset.fold) as Fold)));
-    const shown = signalsShown(items.map(natural), folds, gap, el.clientWidth, Math.max(more?.getBoundingClientRect().width ?? 0, 28));
+    // Each lozenge's floor in rendered width (leftovers-5 FR-8): one that
+    // never folds keeps its N and whole noun (.lz-floor, "5 waiting") and
+    // the ellipsis after it; a foldable one stays whole or folds.
+    const nat = items.map(natural);
+    const ell = ellipsisWidth(el);
+    const floors = items.map((c, k) => {
+      const t = c.querySelector<HTMLElement>(".lz-t");
+      const f = c.querySelector<HTMLElement>(".lz-floor");
+      if (folds[k] !== null || !t || !f) return nat[k];
+      return Math.min(nat[k], Math.ceil(nat[k] - t.scrollWidth + f.getBoundingClientRect().width + ell));
+    });
+    const moreW = Math.max(more?.getBoundingClientRect().width ?? 0, 28);
+    reportNeed(id, signalsNeed(floors, folds, gap, moreW));
+    const shown = signalsShown(floors, folds, gap, el.clientWidth, moreW);
     const words = (c: HTMLElement) => (c.textContent ?? "").replace(/\s+/g, " ").trim();
     const rest = items.filter((_, k) => !shown[k]).map(words);
     items.forEach((c, k) => { c.style.display = ""; if (!shown[k]) c.dataset.off = "1"; else delete c.dataset.off; });
     // The shown ones share what the "+N" leaves (FR-20): each capped at one
-    // width, never under its chrome and two characters with the ellipsis.
-    const on = items.filter((_, k) => shown[k]);
-    const room = el.clientWidth - gap * Math.max(0, on.length - 1) - (rest.length > 0 ? gap + Math.max(more?.getBoundingClientRect().width ?? 0, 28) : 0);
-    const nat = on.map(natural);
-    const mins = on.map((c, k) => {
-      const t = c.querySelector<HTMLElement>(".lz-t");
-      return t ? Math.min(nat[k], Math.ceil(nat[k] - t.scrollWidth) + LZ_MIN_TEXT) : nat[k];
-    });
-    const share = shareRoom(nat, mins, room);
-    on.forEach((c, k) => { if (share.widths[k] < nat[k]) c.style.maxWidth = `${share.widths[k]}px`; });
+    // width, never under its floor while the floors fit.
+    const on = items.map((_, k) => k).filter((k) => shown[k]);
+    const room = el.clientWidth - gap * Math.max(0, on.length - 1) - (rest.length > 0 ? gap + moreW : 0);
+    const share = shareRoom(on.map((k) => nat[k]), on.map((k) => floors[k]), room);
+    on.forEach((k, j) => { if (share.widths[j] < nat[k]) items[k].style.maxWidth = `${share.widths[j]}px`; });
     // A shown signal may still be cut by its ellipsis (the first one when
     // the cell is tight, any one at the lozenge's cap): then the hover names
     // it whole.
@@ -494,6 +552,8 @@ function OneLine({ children }: { children: React.ReactNode }) {
     setCut((p) => (p && p.whole === whole && p.rest.join("|") === rest.join("|") ? p : { rest, whole }));
   };
   useLayoutEffect(measure);
+  // A row that leaves the table needs nothing.
+  useEffect(() => () => reportNeed(id, 0), [id, reportNeed]);
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -510,6 +570,22 @@ function OneLine({ children }: { children: React.ReactNode }) {
       {also && <span className="sr-only">{also}</span>}
     </span>
   );
+}
+
+/** The ellipsis' width in a lozenge's text font, measured once per font. */
+const ellipses = new Map<string, number>();
+function ellipsisWidth(el: HTMLElement): number {
+  const t = el.querySelector<HTMLElement>(".lz-t");
+  if (!t) return 0;
+  const font = getComputedStyle(t).font;
+  let w = ellipses.get(font);
+  if (w === undefined) {
+    const ctx = document.createElement("canvas").getContext("2d");
+    if (ctx) ctx.font = font;
+    w = ctx ? Math.ceil(ctx.measureText("…").width) : 0;
+    ellipses.set(font, w);
+  }
+  return w;
 }
 
 const STATE_ICON: Record<InitiativeState, typeof Hand> = { you: Hand, executing: Play, business: Briefcase, quiet: CircleDashed };
@@ -539,7 +615,7 @@ function NextDate({ next: n }: { next: Next }) {
   if (!n) return <span className="p-next"><span className="num" title="no card due, milestone or target ahead">—</span></span>;
   return (
     <span className="p-next">
-      <span className="num">{n.date}</span>
+      <span className="num" title={n.date}>{dateWords(n.date)}</span>
       <span className="p-next-what">{n.what}</span>
     </span>
   );

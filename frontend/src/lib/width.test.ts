@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { COMPACT_FIXED, shareRoom, compactColumns, FOLD, GOAL_MIN, homeClassOf, NEXT_W, railCollapsedFor, roomyOf, SIGNALS_MIN, SLACK, signalsShown, signalsThatFit, wideGoalRoom, widthClassOf, type Fold } from "./width";
+import { COMPACT_FIXED, shareRoom, signalsNeed, compactColumns, FOLD, GOAL_MIN, homeClassOf, NEXT_W, railCollapsedFor, roomyOf, SIGNALS_MIN, SLACK, signalsShown, signalsThatFit, wideGoalRoom, widthClassOf, type Fold } from "./width";
 
 describe("widthClassOf", () => {
   it("puts each boundary in the class above it", () => {
@@ -100,33 +100,53 @@ describe("compactColumns with empty columns (FR-20)", () => {
   });
 });
 
-describe("signalsShown (FR-20)", () => {
-  // The seven-signal row in Home's order: waiting, blocked, now, wave, live, cell, problems.
+describe("signalsShown (FR-20; leftovers-5 FR-8)", () => {
+  // The seven-signal row in Home's order: waiting, blocked, now, wave, live,
+  // cell, problems; waiting and blocked at their floor ("5 waiting…").
   const folds: Fold[] = [null, null, FOLD.now, FOLD.live, FOLD.live, FOLD.cell, FOLD.problems];
-  const widths = [180, 70, 50, 140, 60, 130, 80];
+  const floors = [70, 65, 50, 140, 60, 130, 80];
   const gap = 4;
   const sum = (ws: number[]) => ws.reduce((a, w) => a + w, 0) + gap * (ws.length - 1);
 
-  it("shows every signal that fits", () => {
-    expect(signalsShown(widths, folds, gap, sum(widths), 28)).toEqual(widths.map(() => true));
+  it("shows every signal whose floor fits", () => {
+    expect(signalsShown(floors, folds, gap, sum(floors), 28)).toEqual(floors.map(() => true));
   });
 
-  it("folds problems first, then now, then live, then the cell (0076); waiting and blocked never", () => {
-    const room = sum(widths) - 1;
-    expect(signalsShown(widths, folds, gap, room, 28)).toEqual([true, true, true, true, true, true, false]);
-    const tight = signalsShown(widths, folds, gap, sum([180, 70, 130]) + gap + 28, 28);
-    expect(tight).toEqual([true, true, false, false, false, true, false]);
-    const tighter = signalsShown(widths, folds, gap, 200, 28);
-    expect(tighter).toEqual([true, true, false, false, false, false, false]);
+  it("folds live first, then now, then problems, then the cell (0076)", () => {
+    // one px short: the last live signal goes first
+    expect(signalsShown(floors, folds, gap, sum(floors) - 1, 28)).toEqual([true, true, true, true, false, true, true]);
+    expect(signalsShown(floors, folds, gap, sum([70, 65, 50, 130, 80]) + gap + 28, 28)).toEqual([true, true, true, false, false, true, true]);
+    expect(signalsShown(floors, folds, gap, sum([70, 65, 130, 80]) + gap + 28, 28)).toEqual([true, true, false, false, false, true, true]);
+    expect(signalsShown(floors, folds, gap, sum([70, 65, 130]) + gap + 28, 28)).toEqual([true, true, false, false, false, true, false]);
+    expect(signalsShown(floors, folds, gap, sum([70, 65]) + gap + 28, 28)).toEqual([true, true, false, false, false, false, false]);
   });
 
-  it("folds now before live", () => {
-    const shown = signalsShown(widths, folds, gap, sum([180, 70, 140, 60, 130]) + gap + 28, 28);
-    expect(shown).toEqual([true, true, false, true, true, true, false]);
+  it("keeps the cell beside a waiting at its floor, not at its natural width", () => {
+    // waiting's natural width (330) would not leave the cell room; its floor does
+    expect(signalsShown([70, 130], [null, FOLD.cell], gap, 70 + gap + 130, 28)).toEqual([true, true]);
+  });
+
+  it("folds waiting or blocked only after every foldable one, the last first", () => {
+    expect(signalsShown(floors, folds, gap, sum([70, 65]) + gap + 28 - 1, 28)).toEqual([true, false, false, false, false, false, false]);
+    expect(signalsShown([70, 65], [null, null], gap, 100, 28)).toEqual([true, false]);
   });
 
   it("keeps one signal when every signal folds", () => {
-    expect(signalsShown([100, 100], [FOLD.now, FOLD.live], gap, 50, 28)).toEqual([false, true]);
+    expect(signalsShown([100, 100], [FOLD.now, FOLD.live], gap, 50, 28)).toEqual([true, false]);
+    expect(signalsShown([100], [null], gap, 50, 28)).toEqual([true]);
+  });
+});
+
+describe("signalsNeed (leftovers-5 FR-8)", () => {
+  const gap = 4;
+  it("is waiting and blocked at their floor, the cell whole and the +N for the rest", () => {
+    const folds: Fold[] = [null, null, FOLD.now, FOLD.live, FOLD.cell, FOLD.problems];
+    expect(signalsNeed([75, 65, 45, 108, 114, 70], folds, gap, 27)).toBe(75 + 65 + 114 + 3 * gap + 27);
+  });
+  it("needs no +N when nothing else folds, and only the +N with nothing kept", () => {
+    expect(signalsNeed([75, 114], [null, FOLD.cell], gap, 27)).toBe(75 + gap + 114);
+    expect(signalsNeed([45, 41], [FOLD.now, FOLD.live], gap, 27)).toBe(27);
+    expect(signalsNeed([], [], gap, 27)).toBe(0);
   });
 });
 
@@ -172,14 +192,33 @@ describe("shareRoom (FR-20)", () => {
   it("cuts the widest first, to one cap, within the room", () => {
     const r = shareRoom([330, 66, 125], [36, 36, 52], 230);
     expect(r.fits).toBe(true);
-    expect(r.widths[1]).toBe(66);
+    expect(r.widths[1]).toBeGreaterThanOrEqual(36);
     expect(r.widths[0]).toBe(r.widths[2]);
     expect(r.widths.reduce((a, w) => a + w, 0)).toBeLessThanOrEqual(230);
   });
 
-  it("never cuts a lozenge under its least, and says when the leasts do not fit", () => {
-    const r = shareRoom([330, 66, 125], [36, 36, 52], 100);
-    expect(r).toEqual({ widths: [36, 36, 52], fits: false });
+  it("never cuts a lozenge under its least while the leasts fit", () => {
+    const r = shareRoom([330, 66, 125], [70, 36, 65], 180);
+    expect(r.widths[0]).toBeGreaterThanOrEqual(70);
+    expect(r.widths[1]).toBeGreaterThanOrEqual(36);
+    expect(r.widths[2]).toBeGreaterThanOrEqual(65);
+    expect(r.widths.reduce((a, w) => a + w, 0)).toBeLessThanOrEqual(180);
+  });
+
+  it("always returns fits, its widths within the room, even when the leasts do not fit (S6)", () => {
+    for (const room of [100, 40, 1, 0]) {
+      const r = shareRoom([330, 66, 125], [70, 36, 65], room);
+      expect(r.fits).toBe(true);
+      expect(r.widths.reduce((a, w) => a + w, 0)).toBeLessThanOrEqual(room);
+      expect(r.widths.every((w) => w >= 0)).toBe(true);
+    }
+    expect(shareRoom([200], [70], 50)).toEqual({ widths: [50], fits: true });
+  });
+
+  it("keeps an uncut lozenge at its exact, fractional width", () => {
+    const r = shareRoom([200.6, 65.4], [75, 65.4], 200);
+    expect(r.widths[1]).toBe(65.4);
+    expect(r.widths[0] + r.widths[1]).toBeLessThanOrEqual(200);
   });
 
   it("does not raise a lozenge narrower than its least", () => {
