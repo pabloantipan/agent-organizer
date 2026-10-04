@@ -22,6 +22,7 @@ sup33's leftovers with Aglaea's A1-A3.
 - [x] Q0: see `docs/specs/leftovers-8.md`, Acceptance
 
 ## Done
+- 2026-10-04 sup35 ended: seats rwd-build, rwd-review, rwd-ui killed and revoked, worktree and branch removed, task threads closed; D1 and U1 answered by aglaea (d06e265) for the next ranking; run record runs/2026-10-04-rule-words-and-dates.md (50 min against 40-80)
 - 2026-10-04 code review pass and UI review pass at bd1ff21; merged to main cdefd78 by sup35, make test green on main (vitest 191)
 - 2026-10-04 rwd-build: FR-4 fixed at the source, `.home` capped at 1,480 (shell.css:65, boundary widened by the FSE via sup35; bd1ff21): at 1512×945 with the strip the list reaches the content edge in both engines; gate met, rows in `.wt-notes/rwd-build/gate.md`
 - 2026-10-04 rwd-build: FR-1, 2, 3, 5, 6, 7, 8 built on rule-words-and-dates (fbd0d2f e1f0470 8eefbae 802d297 a40e038 6fc221f fc712a2, fixture 0e3f3c1); Q1 Q2 Q5 Q6 Q7 Q0 pass in Chromium and WKWebView, Q3's values pass in WKWebView (`.wt-notes/rwd-build/gate.md`)
