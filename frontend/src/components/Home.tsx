@@ -209,7 +209,7 @@ function DecisionRow({ row, decision: d }: { row: NeedsMeRow; decision: model.De
   return (
     <Shell row={row} reason="decision" tone="waiting"
       subject={<><span className="mono">{row.initiative} {d.number}</span> · {d.title}</>}
-      context={`${ownerPhrase(d.owner)} · raised ${d.raised || "—"}${d.raised_by ? ` by ${d.raised_by}` : ""}${opts.length > 0 ? ` · options: ${opts.join(", ")}` : ""}`}>
+      context={`${ownerPhrase(d.owner)} · raised ${d.raised ? dateWords(d.raised) : "—"}${d.raised_by ? ` by ${d.raised_by}` : ""}${opts.length > 0 ? ` · options: ${opts.join(", ")}` : ""}`}>
       <RuleAction rowKey={row.key} initiative={row.initiative} decision={d} />
     </Shell>
   );
@@ -614,9 +614,11 @@ function Phase({ stages }: { stages: model.Stage[] }) {
 
 function NextDate({ next: n }: { next: Next }) {
   if (!n) return <span className="p-next"><span className="num" title="no card due, milestone or target ahead">—</span></span>;
+  // leftovers-7 FR-8: the hover says the cell's words whole, as the cell
+  // reads them before its cut ("30 Nov · due · w-later").
   return (
-    <span className="p-next">
-      <span className="num" title={n.date}>{dateWords(n.date)}</span>
+    <span className="p-next" title={`${dateWords(n.date)} · ${n.what}`}>
+      <span className="num">{dateWords(n.date)}</span>
       <span className="p-next-what">{n.what}</span>
     </span>
   );
