@@ -10,6 +10,7 @@ boundary: ["frontend/src/components/RuleDecisionBox.tsx, frontend/src/styles/rul
 spec: "docs/specs/leftovers-5.md; the ranking docs/ux/reviews/2026-10-03-rank-leftovers-5.md (Aglaea, 31f7ac9); the design system as amended there"
 gate: "docs/specs/leftovers-5.md Acceptance, rows M1 to M3, M8 and M0"
 ui_review: true
+review: pass
 seat: rbs-build
 ---
 
@@ -26,6 +27,12 @@ leftovers-5 FR-1 to FR-6: the rule box's and the stages' rows.
 - 2026-10-04 0077 ruled by pablo ("go"); sup31 launched by the FSE
 - 2026-10-03 amendment 1 of leftovers-5 adds M8 (from leftovers-6), proposed with 0077
 - 2026-10-03 cut from leftovers-5 by the FSE
+
+## Review
+- Verdict: pass. Every changed path is inside the boundary (CardDrawer and HelpView touch only Escape; decisions.css only the box under a stuck head). M0 rerun in the worktree at 6591145: `XDG_DATA_HOME=$(mktemp -d) make test` green (go, vitest 166/166), `npm run build` green; wails build from the builder's log (m0-wails-build-2.log, review-build.log). M1-M3, M8 from the code and the builder's Chromium log and WebKit shots.
+- Unmet: none.
+- Not covered by the gate: on Decisions a card back opened over a rule box paints under the box and the sticky "To rule" heading (webkit-1512x945-M1-dec-card-over-box.png), so the box Escape skips is the one on top to the eye; on compact Home, Help cannot open over a rule box by pointer. The chromium-rows.log "head near the foot (hw4-U6)" block equals the landing block; the WebKit 1024x640 shot carries that state.
+- Reviewer: rbs-review, 2026-10-04
 
 ## Next
 
