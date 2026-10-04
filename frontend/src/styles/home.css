@@ -15,6 +15,10 @@
   grid-template-columns: 24px minmax(var(--id-w, 0px), 0.9fr) 144px 96px var(--t-goal, minmax(0, 1.2fr)) minmax(0, 1fr) var(--t-sig, minmax(0, 1.5fr)) var(--t-next, 96px) 24px;
 }
 .home .p-id { max-width: none; }
+/* The row holds its visually hidden text (.p-stage's and the signals'
+   sr-only spans, compact's hidden goal and date): positioned, so that text
+   stays inside the row and cannot stretch the page (leftovers-5 FR-7). */
+.home .p-head, .home .p-row { position: relative; }
 
 /* Narrow (the minimum window with the rail open): phase, goal and next date
    give way to a second line under the id, state and signals; the header

@@ -2,6 +2,10 @@
 
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; }
+/* The document never scrolls; only a view's own scroller does (design
+   system, Widths; leftovers-5 FR-7). A guard: what is positioned sits
+   inside a positioned ancestor within its scroller. */
+html, body { overflow: hidden; }
 body {
   background: var(--bg);
   color: var(--text);
