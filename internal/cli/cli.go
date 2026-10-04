@@ -31,7 +31,7 @@ import (
 var Version = "dev"
 
 // Subcommands the binary recognises. Anything else launches the GUI.
-var Subcommands = []string{"status", "board", "sync", "prompt", "run", "runs", "decisions", "rule", "agents", "crew", "draft-cell", "retire", "clean", "statusline", "factory-key", "login", "logout", "whoami", "doctor", "config", "version", "--version", "help"}
+var Subcommands = []string{"status", "board", "sync", "prompt", "run", "runs", "decisions", "rule", "agents", "roles", "crew", "draft-cell", "retire", "clean", "statusline", "factory-key", "login", "logout", "whoami", "doctor", "config", "version", "--version", "help"}
 
 // IsSubcommand reports whether arg names a CLI subcommand.
 func IsSubcommand(arg string) bool {
@@ -77,6 +77,8 @@ func runWith(args []string, stdout, stderr io.Writer, now func() time.Time) int 
 		return ruleCmd(cfg, args[1:], stdout, stderr, now)
 	case "agents":
 		return agentsCmd(cfg, stdout, now)
+	case "roles":
+		return rolesCmd(cfg, args[1:], stdout, stderr, now)
 	case "crew":
 		return crewCmd(cfg, args[1:], stdout, stderr, now)
 	case "draft-cell":
@@ -157,6 +159,7 @@ func usage(w io.Writer) {
   organizer decisions [initiative] [--json] decision records: the open queue by age, rulings with turnaround
   organizer rule <initiative> <NNNN> --chosen <option> --words <text>  write the owner's ruling into a proposed record and commit that one file
   organizer agents                    agent processes and sessions grouped per initiative
+  organizer roles [--json]            the transversal roles: live and context, what each is on, mail waiting, initiatives touched
   organizer crew <initiative> [--print] bring the initiative's persona cell up, one probe per seat; --print shows the lines
   organizer draft-cell <initiative> [--print] open a session that drafts the persona cell (persona-agents, references/drafting.md); --print shows its prompt
   organizer retire <initiative> [--retirable | --keep a,b] [--kill session] [--run]  end a wave: retire seats, kill sessions, close the mailbox, revoke tokens, rewrite cell.json (dry unless --run)

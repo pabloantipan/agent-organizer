@@ -40,6 +40,8 @@ type Service struct {
 	prevAt    time.Time
 	openersMu sync.Mutex
 	openers   map[string]facts
+	// roleFiles caches the bitácoras and runs.jsonl the roles read (roles.go).
+	roleFiles roleFiles
 
 	Auth *auth.Manager
 	Lock *lock.Lock
@@ -437,7 +439,10 @@ type AgentGroup struct {
 type AgentsView struct {
 	Groups     []AgentGroup  `json:"groups"`
 	Unassigned []model.Agent `json:"unassigned"`
-	SampledAt  time.Time     `json:"sampled_at"`
+	// Roles are the configured transversal roles (roles.go), built from this
+	// same sample; none when config says roles: [].
+	Roles     []model.Role `json:"roles"`
+	SampledAt time.Time    `json:"sampled_at"`
 }
 
 // RefreshAgents re-samples processes and sessions only (no git, no card
@@ -460,6 +465,8 @@ func (s *Service) RefreshAgents() AgentsView {
 
 func (s *Service) agentsViewLocked() AgentsView {
 	v := AgentsView{SampledAt: s.now(), Unassigned: s.state.Local.Unassigned}
+	var cells []RoleCell
+	read := map[string]bool{}
 	for i := range s.state.Local.Initiatives {
 		si := &s.state.Local.Initiatives[i]
 		g := AgentGroup{ID: si.ID, Title: si.Title, Client: si.Client, Path: si.Path}
@@ -470,6 +477,15 @@ func (s *Service) agentsViewLocked() AgentsView {
 			g.Waiting = cardsWaiting(si, snap)
 			g.Project, g.Human = si.Cell.Project, si.Cell.Human
 			g.Threads, g.NeedsMe = s.liveThreads(s.cfg, si, snap)
+			// The roles read the same snapshot, once per project, as the human.
+			if si.Cell.Human != "" && !read[si.Cell.Project] {
+				read[si.Cell.Project] = true
+				rc := RoleCell{Project: si.Cell.Project, Initiative: si.ID, Threads: snap.Threads, Err: why}
+				if why == "" {
+					rc.Facts = s.threadFacts(s.cfg, si.Cell, snap.Threads)
+				}
+				cells = append(cells, rc)
+			}
 			g.Retirable = Retirable(si)
 			for _, t := range snap.Threads {
 				if t.Kind != "journal" && needsReconciler(t) {
@@ -488,6 +504,7 @@ func (s *Service) agentsViewLocked() AgentsView {
 		g.Waves = waves(si)
 		v.Groups = append(v.Groups, g)
 	}
+	v.Roles = s.rolesLocked(cells)
 	return v
 }
 
