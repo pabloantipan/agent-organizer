@@ -161,6 +161,7 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   keeps a draft per record, returns on reopen, "Rule · draft"; only Cancel
   discards; rule box, card note, composer), U1 (2, Home's fixed columns give
   slack to cut cells, shareRoom; gate 1512 rail strip: next date whole).
+- sup35 ended (~52 min, ~$23). leftovers-9 cut: drafts-and-slack, 0081 proposed.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
