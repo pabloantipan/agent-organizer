@@ -73,3 +73,4 @@ its source).
 - 2026-10-04 — leftovers-8 ranked (7 rows + 3 gate/code); DS: dates as words, words verbatim.
 - 2026-10-04 — sup35: Escape keeps drafts per record ('Rule · draft'); slack goes to cut cells (DS).
 - 2026-10-04 — transversal-roles design spec (0082): Home section, rail group, drawer, states.
+- 2026-10-04 — sup36: drafts keyed per chat with their addressee; '· draft' on collapsed rows (DS).
