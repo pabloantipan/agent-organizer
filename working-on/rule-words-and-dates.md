@@ -10,6 +10,7 @@ boundary: ["frontend/src/styles/rule-box.css, decisions.css, home.css; frontend/
 spec: "docs/specs/leftovers-8.md (FR-1 to FR-8); the ranking docs/ux/reviews/2026-10-04-rank-leftovers-8.md (Aglaea, 10bc67a); the design system's Principles as amended there"
 gate: "docs/specs/leftovers-8.md Acceptance, rows Q1 to Q7 and Q0"
 ui_review: true
+review: pass
 seat: rwd-build
 ---
 
@@ -27,6 +28,29 @@ sup33's leftovers with Aglaea's A1-A3.
 - 2026-10-04 cut from leftovers-8 by the FSE
 
 ## Next
+
+## Review
+- Verdict: pass (code review; the UI review is separate).
+- Commit reviewed: bd1ff21 (`git diff main...bd1ff21`).
+- Unmet gate items: none.
+- Checks: Q7 fresh `git clone` + `checkout bd1ff21` + `make test`, exit 0
+  (Go ok, vitest 191); Q0 detached worktree, `XDG_DATA_HOME=$(mktemp -d)
+  make test` 0, `npm test` 0, `npm run build` 0; `wails build` from the
+  builder's log only (q0b). Q4's cause is on the card before the fix
+  (2b25628 < bd1ff21) and the fix is that cause (shell.css:65 cap).
+  Q5: `dateWords` in lib/dates.ts with lib tests; no raw ISO left in
+  record meta, Timeline names or Stages (grep).
+- Findings, not gate items: (1) boundary: Conversation.tsx also changes the
+  queue's RuleBox (attributes and its Escape guard) and keydown handlers, not
+  only the composer's attributes; CardDrawer's note edit gains an Enter
+  composing guard. Both serve FR-3; the FSE decides. (2) Q3's Escape with a
+  correction bubble is guarded in code (preventDefault on composing/229,
+  boxStack skips prevented keys) but no one has raised a bubble yet: the UI
+  reviewer's. (3) Q4 in WKWebView: the list reaches the edge but init-a's
+  goal, first signal and next date still ellipsise while Stage and Phase
+  show slack; the gate's "room" reads as list width, so it passes, but the
+  column split is not covered by any row.
+- Reviewer: rwd-review, 2026-10-04.
 
 ## Blockers
 
