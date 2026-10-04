@@ -869,4 +869,8 @@ sections below this one are history.
   until Pablo unlocks it and ru-ui reruns R1-R7 in WKWebView. Not a lost
   permission: nothing to raise. leftovers-11 collecting from sup38 (U1-U4,
   spec gaps, aglaea's A1-A3). 0084 proposed, waiting.
-
+- aglaea on roles-ui (f3535e7, transversal-roles Amendment 1): A3 (2, a
+  defect against R5: a session landing focuses the session row, not Attach),
+  A2 (1, drawer initiatives as text links), A1 (2, a design change to Needs
+  me: at compact and regular, oldest five plus "Show the other N"; name it
+  for Pablo in the accept record). For leftovers-11.
