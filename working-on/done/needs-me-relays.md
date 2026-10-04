@@ -1,10 +1,11 @@
 ---
 title: Needs me leaves out '[for <role>]' relays
-status: next
+status: done
 repos: [organizer]
 branch: needs-me-relays
 updated: 2026-10-04
 next: "review: needs-me-relays, R1 and R0 pass at 755b5e1"
+review: pass
 depends_on: []
 boundary: ["frontend/src/lib/queue.ts (needsMeThread only)", "frontend/src/lib/queue.test.ts", "not: components, Go, the discuss server"]
 spec: "docs/specs/needs-me-relays.md; ruling 0079"
@@ -29,6 +30,14 @@ Relays to a transversal role stop counting as the human's.
 ## Next
 
 ## Blockers
+
+## Review
+- Verdict: pass
+- Commit reviewed: 755b5e1 (branch needs-me-relays)
+- Unmet gate items: none. R1: queue.test.ts has all five cases with the expected results; reverting queue.ts to main fails them. R0: `make test` and `npm run build` pass in a fresh detached worktree (185 vitest tests). Boundary: only queue.ts (`needsMeThread` plus a private `RELAY_RE`) and queue.test.ts changed.
+- Not gated: the regex accepts any bracket text after `[for `, spaces included (`[for a b] x` counts as a relay); the repo has no frontend lockfile, so `npm ci` cannot run.
+- Reviewer: nmr-review
+- Date: 2026-10-04
 
 ## Notes
 Disjoint from layers-focus-and-words (queue.ts is not in its boundary).
