@@ -134,6 +134,18 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   raw HTTP. (d) is mine: 0079 recorded, card needs-me-relays (093fa2c), sup34
   launched. Skills updated (spec-craft 5b, supervise review rules); reread
   them before the next spec.
+- Mailbox fixed by hephaistos (all five done): discuss-hook close and post
+  --close exist (api 74f9f70); hooks post closed; supervise and my Ending
+  lines close a task's threads (~/claudecode/scripts/discuss-threads; its
+  '*' pattern lists every open thread, not only the task's: name the wave);
+  sweep closed 332. My wake routine now closes settled threads with
+  discuss-hook close; closed 7 of mine. needs-me-relays merged fbf3548
+  (~4 min, $2.60); sup34 ended. Its note: organizer retire --seats plans to
+  close every open thread of the project.
+- leftovers-8 collecting: aglaea A1 (2, facts line joins the stuck head while
+  ruling), A2 (1, card back and Help capped and scrolling), A3 (2, WKWebView
+  1512 rail strip: Home list stops ~200 px short; measure vs Chromium).
+  lf7 UI review failed U1 (+N clipped at Fit): sup33's.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
