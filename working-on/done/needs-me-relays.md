@@ -4,7 +4,7 @@ status: done
 repos: [organizer]
 branch: needs-me-relays
 updated: 2026-10-04
-next: "review: needs-me-relays, R1 and R0 pass at 755b5e1"
+next: "none: merged fbf3548"
 review: pass
 depends_on: []
 boundary: ["frontend/src/lib/queue.ts (needsMeThread only)", "frontend/src/lib/queue.test.ts", "not: components, Go, the discuss server"]
@@ -22,6 +22,7 @@ Relays to a transversal role stop counting as the human's.
 - [x] R0: see `docs/specs/needs-me-relays.md`, Acceptance
 
 ## Done
+- 2026-10-04 sup34: merged to main as fbf3548; seats nmr-build and nmr-review ended, tokens revoked, their two threads closed; run record runs/2026-10-04-needs-me-relays.md (forecast 15-30 min, actual ~4)
 - 2026-10-04 nmr-build: needsMeThread leaves out `[for <role>]` subjects (755b5e1, rebased on main); five queue.test.ts cases; npm test 185 pass, make test and npm run build pass
 - 2026-10-04 sup34: worktree .wt/needs-me-relays from 027b1c7, seat nmr-build launched
 - 2026-10-04 sup34 launched by the FSE; forecast 15-30 min
