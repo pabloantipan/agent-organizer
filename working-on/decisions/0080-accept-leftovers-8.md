@@ -1,13 +1,13 @@
 ---
 title: Accept the leftovers-8 batch and launch its card
-status: proposed
+status: ruled
 raised: 2026-10-04
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-04
+ruled_by: pablo
 options: [accept as written, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [rule-words-and-dates]
 threads: [01M43Z4MM70GV0TH1NAJC2D28A]
 supersedes: []
@@ -49,6 +49,8 @@ forecast: 40-80 min of wave time over 1 wave, plus this decision (median
 The FSE's: accept as written.
 
 ## Ruling
+
+pablo, 2026-10-04, in the organizer on lodestar: Ok
 
 ## Consequences
 
