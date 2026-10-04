@@ -6,10 +6,13 @@ DMG      = build/bin/Deltagos-$(VERSION).dmg
 PLATFORM ?= darwin/arm64
 WAILS   ?= $(shell command -v wails 2>/dev/null || echo $(HOME)/go/bin/wails)
 
-.PHONY: build universal dmg install uninstall test clean version
+.PHONY: build review-build universal dmg install uninstall test clean version
 
 build: ## build the .app for this machine
 	$(WAILS) build -clean -platform $(PLATFORM) -ldflags "$(LDFLAGS)"
+
+review-build: build ## build/bin/Deltagos Review.app: a copy under cl.antipan.organizer.review for reviewers
+	scripts/review-build.sh "$(APP)"
 
 universal: ## build a universal (arm64 + amd64) .app
 	$(MAKE) build PLATFORM=darwin/universal
