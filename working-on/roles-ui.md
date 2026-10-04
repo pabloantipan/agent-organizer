@@ -11,7 +11,7 @@ boundary: ["frontend/src/components/Home.tsx, Rail.tsx, a new RoleDrawer.tsx", "
 spec: "docs/ux/specs/transversal-roles.md (Aglaea, 299b221) and its Technical note T5; ruling 0082"
 gate: "docs/ux/specs/transversal-roles.md Acceptance R1-R7, plus the build row below"
 ui_review: true
-review: fail
+review: pass
 ---
 
 ## Goal
@@ -39,14 +39,15 @@ mail and its initiatives, and opens a role without starting anything.
 ## Blockers
 
 ## Review
-- Verdict: fail. R1-R7 and the build row hold in code and checks, but A2, the fix 582462b exists for, is not met as built. The WKWebView rows of R5 and R7 are the UI reviewer's.
-- Commit reviewed: 582462b (branch roles-ui, base 382271c). Supersedes the pass at c6f39ce.
-- Unmet: A2 (Amendment 1). It is not an R row, but sup38 made A2 and A3 conditions of the merge. `.rd-inits` is still in `roles.css:82`'s `display: grid` rule, so each `<span>` is a grid row. The list renders one initiative per line with a leading comma (`init-a` / `, init-b` / `, init-many` …). The builder's own `chromium-1512x945-A2-drawer-initiatives-full-overlay.png` shows it. The links themselves are plain text, not bordered.
-- Evidence: clean clone of 582462b. `XDG_DATA_HOME=$(mktemp -d) make test` exit 0 (go 13 packages ok, vitest 224). `npm install && npm test && npm run build` exit 0. `wails build` exit 0. Fixture `go run . roles --json` in a fresh shell: Hephaistos live, 2 sessions, 61%. Aglaea live, 28%, one `[for aglaea]` mail. Ariadna never seen, no bitácora. Daedalus not running, last seen 2 Oct. Talos and Hermione are here: false. Stand-ins killed from bash.
-- Code: roles.ts and the drawer feed nothing to queueOf/needsMeRows, and lib/queue.ts is untouched (T4, R3). The UI reads `agents.roles` only (T5). Rows, rail items and the drawer hold no Attach, Kill, Start, Stop or Message (R6). A3's landing only reads Attach's title, to find a crew row. Escape closes the drawer through openBox, focus lands on the title, and it returns to the opener or its `data-role` (R5). A3: the landing focuses the `li[data-session]` row or the Crew `li[data-seat]`, never Attach. Dates go through lib/dates. The tests cover the States table; "no roles configured" lives in the components, not the helper.
-- AgentList.tsx: only `data-session`, `tabIndex={-1}`, `aria-label` and the `rowName` helper that builds that name. Boundary: every changed path is inside it. board.store.ts adds only `roleOpen`/`openRole`.
-- Gate gap, for the FSE: the gate reads "Acceptance R1-R7" and carries none of Amendment 1. A2 and A3 are merge conditions with no gate row.
-- Still not gated, as at c6f39ce: `ageWords` copies Home's `age`; `sessionStarted` prints `up <ps etime>` raw (U2); the strip's accessible name is the bare name (U3).
+- Verdict: pass. R1-R7 and the build row hold in code and checks, and Amendment 1's A2 and A3 are met. The WKWebView rows of R5 and R7 are the UI reviewer's.
+- Commit reviewed: ed9b5bf (branch roles-ui, rebased on main). Supersedes the fail at 582462b.
+- Unmet gate items: none
+- A2: against 582462b, the only change under frontend/, scripts/ and testdata/ is `roles.css:82`, which drops `.rd-inits` from the grid rule. `.rd-inits` is a `<p>` of inline spans and `<a>` links, so the list reads `init-a, init-b, …` on one line, as plain links with no border. Checked in code; the rendering is the UI reviewer's.
+- Evidence: clean clone of ed9b5bf. `XDG_DATA_HOME=$(mktemp -d) make test` exit 0 (go 13 packages ok, vitest 224). `npm install && npm test && npm run build` exit 0. `wails build` exit 0. The fixture roles (R1-R4) were checked at 582462b, and nothing under scripts/, testdata/ or the Go code changed since: Hephaistos live, 2 sessions, 61%. Aglaea live, 28%, one `[for aglaea]` mail. Ariadna never seen, no bitácora. Daedalus not running, last seen 2 Oct. Talos and Hermione are here: false.
+- Code: as at 582462b. Nothing feeds queueOf/needsMeRows, and lib/queue.ts is untouched (T4, R3). The UI reads `agents.roles` only (T5). No Attach, Kill, Start, Stop or Message in rows, rail or drawer (R6). Escape closes through openBox, focus lands on the title, and it returns to the opener or its `data-role` (R5). A3's landing focuses the row by `data-session`, or the Crew `data-seat` row, never Attach. Dates go through lib/dates. The tests cover the States table.
+- AgentList.tsx: only `data-session`, `tabIndex={-1}`, `aria-label` and the `rowName` helper for that name. Boundary: every changed path is inside it.
+- Gate gap, for the FSE: the gate names only R1-R7, so A2 and A3, the merge conditions, have no gate row.
+- Still not gated: `ageWords` copies Home's `age`; `sessionStarted` prints `up <ps etime>` raw (U2); the strip's accessible name is the bare name (U3).
 - Reviewer: ru-review, 2026-10-04
 
 ## UI review
