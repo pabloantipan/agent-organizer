@@ -22,7 +22,7 @@ The data the Roles group shows, on the 10 s agents feed and `organizer roles`.
 - [x] G3: `wails generate module` run; `XDG_DATA_HOME=$(mktemp -d) make test` from a clean checkout; `wails build`
 
 ## Done
-- 2026-10-04 rf-build: roles config, `service.Roles` on `AgentsView.Roles`, `organizer roles [--json]`, bindings (6dfd625, 37f39a6, da3f68e, be92b7d on roles-feed); G1-G3 met
+- 2026-10-04 rf-build: roles config, `service.Roles` on `AgentsView.Roles`, `organizer roles [--json]`, bindings (70fb345, 1e9fc4a, a13493d, de539d9 on roles-feed, based on 363edcf); G1-G3 met
 - 2026-10-04 0083 ruled by pablo ("Ok", accept as written); sup37 launched by the FSE
 - 2026-10-04 cut by the FSE from Aglaea's design (299b221) and 0082
 
