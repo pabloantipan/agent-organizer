@@ -167,8 +167,12 @@ by the FSE, 2026-10-04, on main. Two cards: `roles-feed` (Go) then
   context % from the existing statusline join (`Agent.Context`); state
   `live`, `not running` with last seen (`runs.jsonl` last_seen for a
   matching session name), or never seen; HAND-OFF: the first `## HAND-OFF`
-  heading of each bitácora found, its date and first line, the date parsed
-  from the heading, stale over 7 days; mail: open threads in every cell the
+  heading of each bitácora found (this machine's heading first, as the
+  drawer orders them; amended after roles-feed's review), its date and first
+  line, the date parsed
+  from the heading, stale over 7 days; mail: threads not closed (open,
+  stalled or escalated: each still waits on the role; amended after
+  roles-feed's review) in every cell the
   organizer reads as the human whose subject starts `[for <name>]`
   (case-insensitive) and whose last message is not the role's reply (a body
   starting `[<name>`), via the existing discuss client (`GET
