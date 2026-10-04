@@ -97,6 +97,11 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   waits on Pablo. sup29+sup30 findings to aglaea as leftovers-6.
 - A second pre-wave WebKit copy: .wt-notes/mal-build/webkit-before/. The
   earlier one (.wt-notes/zdp-ui/webkit-before/) is the closer to Pablo's own.
+- 2026-10-04: leftovers-6 and review-build folded into 0077 (a16c204);
+  Pablo "go" recorded as accept (fbe7e90). sup31 runs rule-box-and-stages,
+  home-signals-5, review-build (window 395926); timeline-and-find-6 after
+  rule-box-and-stages. App reinstalled from fbe7e90. Layout copies: no answer,
+  not restored.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
