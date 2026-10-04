@@ -291,6 +291,15 @@ record "${pids##* }" $f-probe-aglaea "$a" 28
 seen="$(date -u -v-2d +%Y-%m-%dT10:00:00Z)"
 printf '{"pid":999999,"session_id":"fixture-daedalus","session":"init-b-probe-daedalus","cwd":"%s","model":"claude-opus-5-5","used_percent":35,"input_tokens":0,"window_size":200000,"cost_usd":0,"first_seen":"%s","last_seen":"%s","ended":true}\n' \
   "$home/work/init-b" "$seen" "$seen" > "$tmp/data/organizer/runs.jsonl"
+# Earlier Hephaistos sessions in four more initiatives, so its where reads
+# five initiatives, "+2" past three, and gives way at 1024 (R7).
+n=0
+for d in "$home/work/init-b" "$home/init-many" "$home/init-define" "$home/init-drafted"; do
+  n=$((n + 1))
+  at="$(date -u -v-$((n + 2))d +%Y-%m-%dT09:00:00Z)"
+  printf '{"pid":%s,"session_id":"fixture-hefesto-%s","session":"probe-hefesto-%s","cwd":"%s","model":"claude-opus-5-5","used_percent":50,"input_tokens":0,"window_size":200000,"cost_usd":0,"first_seen":"%s","last_seen":"%s","ended":true}\n' \
+    "$((999990 - n))" "$n" "$n" "$d" "$at" "$at" >> "$tmp/data/organizer/runs.jsonl"
+done
 echo "${pids# }" > "$tmp/agents.pid"
 
 echo "export ORGANIZER_CONFIG='$tmp/config.yaml'"
