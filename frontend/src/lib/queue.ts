@@ -58,7 +58,12 @@ export function readOnlyOf(view: BoardView | null, id: string | null | undefined
   return (row.status ?? "").trim().toLowerCase();
 }
 
-export const needsMeThread = (t: CellThread) => t.status === "escalated" || (t.asked_of_me ?? 0) > 0;
+/** A relay to a transversal role (`[for <role>] …`, 0079): posted to the
+ *  human's seat but the named role's to answer, so never the human's queue. */
+const RELAY_RE = /^\s*\[for\s+[^\]]+\]/i;
+
+export const needsMeThread = (t: CellThread) =>
+  !RELAY_RE.test(t.subject ?? "") && (t.status === "escalated" || (t.asked_of_me ?? 0) > 0);
 
 export function askedCards(view: BoardView | null, initiativeId: string) {
   return (["now", "blocked", "next"] as const)

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AgentGroup, AgentsView, BoardView, CellThread } from "../hooks/useWails";
 import type { merge, model } from "../../wailsjs/go/models";
-import { launchVerb, missingPersonas, needsMeRows, personaMissing, queueOf } from "./queue";
+import { launchVerb, missingPersonas, needsMeRows, needsMeThread, personaMissing, queueOf } from "./queue";
 
 // Fixtures are plain objects: the generated classes carry methods the
 // functions under test never call, so each builder casts once.
@@ -57,6 +57,21 @@ describe("needsMeRows and queueOf: threads", () => {
   it("lists an open thread that asks the human", () => {
     const g = group("a", { threads: [thread(3, "open", 1)] });
     expect(kinds(board([initiative("a")]), agents(g))).toEqual(["thread:3"]);
+  });
+});
+
+describe("needsMeThread: [for <role>] relays (0079)", () => {
+  const subj = (subject: string, status: string, asked_of_me = 0) => ({ ...thread(9, status, asked_of_me), subject }) as CellThread;
+
+  it("leaves out a relay asked of the human, an escalated one in any case, and one with leading spaces", () => {
+    expect(needsMeThread(subj("[for hephaistos] x", "open", 1))).toBe(false);
+    expect(needsMeThread(subj("[FOR aglaea] x", "escalated"))).toBe(false);
+    expect(needsMeThread(subj(" [for talos] x", "open", 1))).toBe(false);
+  });
+
+  it("keeps a subject that only contains [for later, and a plain asked thread", () => {
+    expect(needsMeThread(subj("re: [for hephaistos] x", "open", 1))).toBe(true);
+    expect(needsMeThread(subj("plain question", "open", 1))).toBe(true);
   });
 });
 
