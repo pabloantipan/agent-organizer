@@ -284,7 +284,7 @@ export function DecisionsView() {
           {isOpen && canRule && (
             <div className="dec-actions">
               <span className="rb-anchor">
-                <button ref={isRuling ? ruleBtn : undefined} className="primary" aria-expanded={isRuling} onClick={() => setRuling(isRuling ? null : r.key)}>Rule</button>
+                <button ref={isRuling ? ruleBtn : undefined} className="primary" aria-label={`Rule ${d.number} ${d.title}`} aria-expanded={isRuling} onClick={() => setRuling(isRuling ? null : r.key)}>Rule</button>
                 {isRuling && <RuleDecisionBox initiative={r.initiative} decision={d} opener={ruleBtn} afterRule={() => focusAfterRule(open.indexOf(r))} onClose={() => setRuling(null)} />}
               </span>
             </div>
