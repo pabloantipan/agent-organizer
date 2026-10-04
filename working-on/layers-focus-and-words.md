@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: layers-focus-and-words
 updated: 2026-10-04
-next: "lf7-build builds it in .wt/layers-focus-and-words (sup33)"
+next: "review: layers-focus-and-words, P0 pass, P1-P8 pass in Chromium; WKWebView rows (P1-P4, P8) not verified, left to the UI reviewer"
 seat: lf7-build
 depends_on: [timeline-and-find-6]
 boundary: ["frontend/src/styles/tokens.css (z-index tokens), global.css (.modal-backdrop and layer z-index), decisions.css, rule-box.css, home.css, time-zoom.css", "frontend/src/components/RuleDecisionBox.tsx, HelpView.tsx and CardDrawer.tsx (focus return and layer only), DecisionsView.tsx (Rule's name, FR-11), Home.tsx, TimeZoom.tsx, StageRoadmap.tsx (the sticky axis only)", "frontend/src/lib/width.ts, lib/axis.ts, lib/decisionsPage.ts, lib/useScrollEdges.ts and lib/ tests", "testdata/fixture-overlay/", "not: Go, docs/design-system.md"]
@@ -17,10 +17,11 @@ ui_review: true
 sup31's leftovers, the severity-3 layer bug first.
 
 ## Gate
-- [ ] P1-P8: see `docs/specs/leftovers-7.md`, Acceptance
-- [ ] P0: see `docs/specs/leftovers-7.md`, Acceptance
+- [ ] P1-P8: see `docs/specs/leftovers-7.md`, Acceptance (all pass in Chromium; P1-P4 and P8 not verified in WKWebView)
+- [x] P0: see `docs/specs/leftovers-7.md`, Acceptance
 
 ## Done
+- 2026-10-04 lf7-build: FR-1 to FR-11 on branch layers-focus-and-words (12 commits, rebased on main 4242d2c, cfa6937 tip); P0 and P1-P8 pass in Chromium, WKWebView not driven; rows in .wt-notes/lf7-build/gate.md
 - 2026-10-04 0078 ruled by pablo ("Ok", accept as written, 045ff78); sup33 launched by the FSE
 - 2026-10-04 cut from leftovers-7 by the FSE
 
@@ -29,4 +30,8 @@ sup31's leftovers, the severity-3 layer bug first.
 ## Blockers
 
 ## Notes
+- Boundary widened by sup33 for P4: HelpView.tsx takes useScrollEdges on .help-doc, help.css its edge rules. Help's side edge not exercised: the real help_doc has no pre wider than its column.
+- WKWebView not verified: driving the review build means synthetic clicks on the shared desktop, which was in use; the UI reviewer shoots P1-P4 and P8 there (P8's count repaint is WKWebView-only).
+- lib/boxStack.ts is outside the boundary, so the "box below" for focus return is a registry in RuleDecisionBox.tsx (focusBoxBelow).
+- Fixture 0010 adds one Needs me row.
 - 2026-10-04 sup33 widened the boundary for P4's Help row: `HelpView.tsx` takes `useScrollEdges` on `.help-doc` (wiring only), `help.css` its scroll-edge rules and the sheet's z-index line, nothing else in either. Help's side edge is not exercised: the real help doc has no pre wider than its column.
