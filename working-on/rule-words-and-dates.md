@@ -6,7 +6,7 @@ branch: rule-words-and-dates
 updated: 2026-10-04
 next: "sup35: may FR-4's fix go in shell.css:65 or as a home.css override? (question posted); rwd-build then fixes it, runs Q4 and Q3's DOM row, reruns Q0 and posts done"
 depends_on: []
-boundary: ["frontend/src/styles/rule-box.css, decisions.css, home.css; frontend/src/components/RuleDecisionBox.tsx, DecisionsView.tsx, Home.tsx", "frontend/src/components/Conversation.tsx (the composer's attributes only), CardDrawer.tsx and its CSS (cap, scroll, comments' attributes)", "frontend/src/components/TimeZoom.tsx (.tz-more name, Timeline names' dates), StageRoadmap.tsx (dates only)", "frontend/src/lib/dates.ts and lib/ tests", "testdata/fixture-overlay/", "Makefile (the test target only)", "not: Go, docs/design-system.md"]
+boundary: ["frontend/src/styles/rule-box.css, decisions.css, home.css; frontend/src/components/RuleDecisionBox.tsx, DecisionsView.tsx, Home.tsx", "frontend/src/components/Conversation.tsx (the composer's attributes only), CardDrawer.tsx and its CSS (cap, scroll, comments' attributes)", "frontend/src/components/TimeZoom.tsx (.tz-more name, Timeline names' dates), StageRoadmap.tsx (dates only)", "frontend/src/lib/dates.ts and lib/ tests", "testdata/fixture-overlay/", "Makefile (the test target only)", "frontend/src/styles/shell.css (the .home max-width rule at :65 only, FR-4; widened by the FSE 2026-10-04)", "not: Go, docs/design-system.md"]
 spec: "docs/specs/leftovers-8.md (FR-1 to FR-8); the ranking docs/ux/reviews/2026-10-04-rank-leftovers-8.md (Aglaea, 10bc67a); the design system's Principles as amended there"
 gate: "docs/specs/leftovers-8.md Acceptance, rows Q1 to Q7 and Q0"
 ui_review: true
