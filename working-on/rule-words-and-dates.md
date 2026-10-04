@@ -52,6 +52,107 @@ sup33's leftovers with Aglaea's A1-A3.
   column split is not covered by any row.
 - Reviewer: rwd-review, 2026-10-04.
 
+## UI review
+- Verdict: **pass** (no severity 4 or 3). Commit run: bd1ff21, every row
+  (detached worktree `.wt/rwd-ui`, fixture from that clean checkout; Chromium
+  via `wails dev -devserver localhost:34525`, WKWebView via `make
+  review-build`, Deltagos Review). Shots, AX dumps, drivers and JSON under
+  `.wt-notes/rwd-ui/`; WKWebView rows hit-tested by the AX element at the
+  point, Chromium by `elementFromPoint`; every synthetic click was refused
+  outside the review app's window frame.
+- Scrollbars: WebKit "classic" is `-AppleShowScrollBars Always`; the first
+  WebKit run (`*-classic-auto.png`) was the system's Automatic setting with a
+  mouse attached, which also drew classic bars (the thumb stays when idle) and
+  measured the same; "overlay" is `-AppleShowScrollBars WhenScrolling`,
+  confirmed by no thumb when idle. Windows are window sizes (Chromium viewport
+  = h − 31). Rail: the review bundle remembered the strip, so every WebKit
+  row ran with the strip; Chromium as noted.
+
+| Row | Chromium (shot · window · rail · bars) | WKWebView (shot · window · rail · bars) | Result |
+|---|---|---|---|
+| Q1 | `chromium-1024x640-Q1-rule-box-0010-{classic,overlay}.png` (strip), `chromium-1512x945-Q1-…` (expanded); both bars. Box 560 / 460 px with 0010 = same as 0002 without a table; table scrollWidth 750 > client 511/526 (1024), 411/426 (1512); `edge-right` (fg-subtle); words whole ("initiative id"); hit at the table centre = a `td` | `webkit-1024x640-Q1-rule-box-0010-{classic,overlay}.png`, `webkit-1512x945-Q1-…-{classic,overlay}.png`, strip. Box 560 / 460; table frame 514 / 414 (classic), 528 / 428 (overlay) with rows 749 wide inside; edge pixel (138,130,151) at its right end vs (78,72,87) for a cell border; AX hit at the centre = a cell | pass |
+| Q2 | `chromium-{1024x640,1512x945}-Q2-decisions-0008-ruling-scrolled600-{classic,overlay}.png`; strip at 1024, expanded at 1512. Scrolled exactly 600 in `.board-wrap`; head sticky, facts line inside it (y 199–231), box top 272 ≥ head bottom 268; `w-later` link hit-tests | `webkit-1024x640-Q2-…-{classic,overlay}.png`, strip. Find field −39 → −639 (600 px); head at 224, facts at 263, Rule 294, box 335; AX hit on `w-later` = the link, on the box = the box | pass |
+| Q3 | `q35-chromium.json`, `q6-chromium.json`, `chromium-1512x945-Q3-composer-classic.png` (expanded, classic): `autocorrect="off" autocapitalize="off" spellcheck="false"` on the rule box's words, the new-thread subject and body, the card comment | `webkit-1024x640-Q3-{rulebox,composer,comment}-typed-{classic,overlay}.png`, strip: `words` typed with real key codes stays `words` in all three (AX value); no spelling underline on "teh recieve". Escape **with a bubble showing: not verified** (below) | pass, bubble not verified |
+| Q4 | `chromium-1512x945-Q4-home-strip-list-{classic,overlay}.png` (strip). `.home` and `.home-list` end at 1477 classic / 1492 overlay = the content edge (gap 0); last cell hit-tests. init-a's next date cut ("due · w-later" 68 > 45 px) | `webkit-1512x945-Q4-home-strip-{classic,overlay}.png`, `-row-zoom.png` (strip). AXTable 66–1478 classic / 66–1492 overlay = the content edge; the chevron at the row's end hit-tests. Same date cut ("due · …") | edge pass; "no column cut while room remains" not met: U1 (sev 2) |
+| Q5 | `chromium-1512x945-Q5-{decisions-timeline-open,decisions-ruled-record-meta,roadmap-stage1-open}-classic.png` (expanded, classic): "raised 27 Sep by fse", Ruled "· by pablo · 27 Sep", Timeline names "raised 2 Aug, ruled 5 Aug by acme", Stages "done 15 Aug", "met 10 Aug", Target/Done "15 Aug"; no ISO text in the view; Timeline name and stage sub hit-test | `webkit-1512x945-Q5-…-classic-auto.png`, `webkit-1024x640-Q5-{decisions-timeline,roadmap-stage1-open}-{classic,overlay}.png`, strip: same words in AX; the Timeline name hit-tests | pass (ISO elsewhere: U3) |
+| Q6 | `chromium-1024x640-Q6-card-back-w-wide{,-scrolled,-bottom}-{classic,overlay}.png` (strip): modal 48–561 in a 609 viewport; body overflow auto, 752/702 > 432; `edge-bottom` then `edge-top` after a wheel of 400; backdrop and document do not scroll. `+N`: `role="img"`, name "1 more milestone on 22 Sep: Billing switched on", hit-tests at both sizes | `webkit-1024x640-Q6-card-back-w-wide{,-scrolled,-bottom}-{classic,overlay}.png`, strip: dialog 111–623 in a 640 window; a wheel moves the comment field 366 → 77 while the heading stays at 131; bottom edge pixel (138,130,151) at y 590 in overlay. `+N` is an AXImage named "1 more milestone on 22 Sep: Billing switched on", AX hit at its centre = it | pass |
+
+### Findings
+- **U1 (2)** — *The lead cannot read which card Home's next date belongs to,
+  while columns to its left keep room.* Where: Home, 1512×945, rail strip,
+  both bars, both engines, bd1ff21; `chromium-1512x945-Q4-home-strip-list-classic.png`,
+  `webkit-1512x945-Q4-home-strip-overlay-row-zoom.png`. Evidence: heuristic,
+  design system Widths ("a column gives way only when it doesn't fit") and
+  Q4's third clause; measured: the next-date cell is 96 px and needs ~119
+  ("30 Nov" + "due · w-later" 68 px shown in 45) while the initiative column
+  keeps ~60 px past its longest id (init-draftable ends at 231, the column
+  at 291) and the state column ~48 px past "waits on you". FR-4 fixed the
+  cap (the list now reaches the edge); the column split is not FR-4's cause
+  and is the same in both engines. Proposal: share the fixed columns' slack
+  before cutting the next date (`shareRoom` in `lib/width.ts`), a
+  responsive-home row for the FSE; not this card.
+- **U2 (2)** — *An Escape loses the lead's typed ruling or comment.* Where:
+  Decisions › 0008 › Rule, and the card back's comment field, WKWebView,
+  1024×640, bd1ff21; `webkit-1024x640-Q3-rulebox-typed-overlay.png`. Evidence:
+  observed by driving the app (heuristic: Nielsen error prevention, user
+  control): `words` typed, Escape (no bubble) closes the box and reopening
+  Rule shows an empty field; Escape in a comment closes the card back with
+  the draft unsaved (seen; that it is gone on reopening is read from the
+  code, the field's state lives in the closed drawer). Existed before this branch (Escape closes the topmost box,
+  leftovers-5); FR-3 only spares the Escape that ends a correction. Proposal:
+  for aglaea (D1 below).
+- **U3 (1)** — *Dates still read as ISO in two places a person reads.* Where:
+  the initiative header "target 2026-10-01" (every sub-view) and the card
+  back's "updated 2026-10-04 · today"; `webkit-1024x640-Q2-…-classic.png`,
+  `chromium-1024x640-Q6-card-back-w-wide-classic.png`. Evidence: heuristic,
+  the amended Principle ("wherever a person reads them"); FR-5 names only
+  record meta, Timeline names and Stages, so not a gate miss. Proposal: spec
+  gap S1.
+- **U4 (1)** — *A screen reader on a Stages row does not hear the stage's
+  date.* Where: Roadmap › Stages, WKWebView; the row is an AXButton named
+  "Stage 1: Foundations, done. Show its detail", which hides its visible
+  "done 15 Aug". Evidence: heuristic, design system Names (and WCAG 2.5.3
+  label in name). Proposal: put the sub line in the name ("…, done 15 Aug").
+  Spec gap S2.
+- **U5 (1)** — *The comment field and the composer's fields have no name.*
+  Where: WKWebView AX: card back comment AXTextArea, composer subject and
+  body, title and description empty (placeholder only). Evidence: heuristic,
+  WCAG 1.3.1 / 4.1.2. Not this spec; noted for the FSE (S2).
+
+### Spec gaps (for the FSE)
+- S1: FR-5 lists three places; the Principle says everywhere. The header's
+  target and the card back's updated badge remain ISO (U3), and so do
+  Roadmap's milestone and target hover titles (the builder's note).
+- S2: names, not in any row: Stages row names drop the date (U4); the
+  comment and composer fields are unnamed (U5).
+- S3: Q4's "no column cut while room remains" was read by the build as list
+  width only; a row should name the column split (U1), as the code reviewer
+  also noted.
+
+### Design questions (for aglaea)
+- D1 (from U2): what should Escape do in a box holding the lead's unsent
+  words (a ruling, a comment, a message)? Keep the draft for the record, ask,
+  or not close? Today one Escape discards them silently.
+
+### Not verified
+- Q3's correction bubble and its Escape, in WKWebView: synthetic key events
+  (real virtual key codes through the HID event tap) raised no correction,
+  underline or capitalisation in the rule box **and none in a control field
+  without the attributes** (Decisions' find, `webkit-1024x640-Q3-control-find-typed-classic-auto-zoom.png`),
+  so no bubble could be shown and "keeps `words`" does not discriminate on
+  this machine. The guard is in code (the code review). Needs a real
+  keyboard.
+- Q3's attributes in the WKWebView DOM: AX does not expose them and the
+  review build has no inspector; read in Chromium (same bundle) only.
+- The reply box of an existing thread: the fixture's chats showed the
+  new-thread form; its attributes read from the code only.
+- Q6 at 1512×945: the w-wide card back fits the window there (body 732 = its
+  content), so "longer than the window" was reached at 1024×640 only. Q2 at
+  1512 in WKWebView not shot (Chromium both sizes).
+- Chromium in browser mode logs `Cannot read properties of null (reading
+  'nodes')` on every load; not checked against main or in the built app.
+- Reviewer: rwd-ui, 2026-10-04.
+
 ## Blockers
 
 ## Notes
