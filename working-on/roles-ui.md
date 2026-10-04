@@ -22,6 +22,7 @@ mail and its initiatives, and opens a role without starting anything.
 - [x] `XDG_DATA_HOME=$(mktemp -d) make test` from a clean checkout; `cd frontend && npm run build`; `wails build`
 
 ## Done
+- 2026-10-04 sup38 launched ru-review and ru-ui pinned at c6f39ce
 - 2026-10-04 ru-build: built on roles-ui (49f8256..c6f39ce), unmerged and rebased on main; R1-R7 measured in Chromium at 1024x609 (strip and full, overlay and classic), 1512x945, 1920x1080, 3440x1440; build row green; WKWebView not driveable from the seat (no AX windows, no screen capture); rows in .wt-notes/ru-build/progress.md
 - 2026-10-04 sup38 launched ru-build in .wt/roles-ui from 1f0cb4a
 - 2026-10-04 sup38 launched by the FSE
