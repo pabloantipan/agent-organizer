@@ -114,6 +114,9 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   waiting gives way first (names, noun to the floor, then +N), blocked never
   folds; gate on --twenty partner-payouts at 1024x640 and 1280x800, rail
   expanded, classic scrollbars: "1 blocked" whole. lib/width.ts, Home.tsx.
+- sup31 closed (0077 wave one: 71 min vs 40-80, ~$38), ended by me.
+  leftovers-7 sent to aglaea (thread 01M43Q8CBZ9HX2JD0K2A1QWRCR); review-build
+  proposal for supervise to hephaistos. sup32 runs timeline-and-find-6.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
