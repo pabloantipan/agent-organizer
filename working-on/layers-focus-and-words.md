@@ -6,9 +6,9 @@ branch: layers-focus-and-words
 updated: 2026-10-04
 next: "decide: pablo - accept 0078 (leftovers-7); then the FSE starts its supervisor once timeline-and-find-6 is in done/"
 depends_on: [timeline-and-find-6]
-boundary: ["frontend/src/styles/tokens.css (z-index tokens), global.css (.modal-backdrop and layer z-index), decisions.css, rule-box.css, home.css, time-zoom.css", "frontend/src/components/RuleDecisionBox.tsx, HelpView.tsx and CardDrawer.tsx (focus return and layer only), DecisionsView.tsx (Rule's name), Home.tsx, TimeZoom.tsx, StageRoadmap.tsx (the sticky axis only)", "frontend/src/lib/width.ts, lib/axis.ts, lib/useScrollEdges.ts and lib/ tests", "testdata/fixture-overlay/", "not: Go, docs/design-system.md"]
+boundary: ["frontend/src/styles/tokens.css (z-index tokens), global.css (.modal-backdrop and layer z-index), decisions.css, rule-box.css, home.css, time-zoom.css", "frontend/src/components/RuleDecisionBox.tsx, HelpView.tsx and CardDrawer.tsx (focus return and layer only), DecisionsView.tsx (Rule's name, FR-11), Home.tsx, TimeZoom.tsx, StageRoadmap.tsx (the sticky axis only)", "frontend/src/lib/width.ts, lib/axis.ts, lib/decisionsPage.ts, lib/useScrollEdges.ts and lib/ tests", "testdata/fixture-overlay/", "not: Go, docs/design-system.md"]
 spec: "docs/specs/leftovers-7.md (FR-1 to FR-9); the ranking docs/ux/reviews/2026-10-04-rank-leftovers-7.md (Aglaea, adfce1e); the design system as amended there"
-gate: "docs/specs/leftovers-7.md Acceptance, rows P1 to P7 and P0"
+gate: "docs/specs/leftovers-7.md Acceptance, rows P1 to P8 and P0"
 ui_review: true
 ---
 
@@ -16,7 +16,7 @@ ui_review: true
 sup31's leftovers, the severity-3 layer bug first.
 
 ## Gate
-- [ ] P1-P7: see `docs/specs/leftovers-7.md`, Acceptance
+- [ ] P1-P8: see `docs/specs/leftovers-7.md`, Acceptance
 - [ ] P0: see `docs/specs/leftovers-7.md`, Acceptance
 
 ## Done

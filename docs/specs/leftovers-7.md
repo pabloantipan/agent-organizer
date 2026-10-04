@@ -43,6 +43,14 @@ this is one card, after timeline-and-find-6.
   tick is drawn in the accent, and `today` or `now HH:MM` sits on the
   context row above its column (`lib/axis.ts`, `TimeZoom.tsx`,
   `time-zoom.css`).
+- **FR-11** (timeline-and-find-6's leftovers, Aglaea in thread
+  01M43RWD9V3Z7JVN3BQ79EAHPP and 508a85e; added before 0078's ruling)
+  After "Show only the newest ten", the toggle is in view (whole, below
+  every stuck layer, the design system's "in view") and keeps focus (U1).
+  A section heading's count repaints when it changes, in WKWebView (U2).
+  Closing and reopening a section keeps a zoomed graph's level and scroll
+  position, else it reopens at Fit; an axis is never drawn with no ticks
+  (U3). The unused `timelineCount` in `lib/decisionsPage.ts` is deleted.
 - **FR-9** (S1) A fixture card and a fixture record whose bodies hold a wide
   code block and a ten-column table.
 
@@ -60,6 +68,7 @@ a fixture run from a clean checkout; UI reviewers use `make review-build`.
 | P5 | 6 | a stage landing at 1024×640 on the fixture roadmap; scroll its rows | the axis in view throughout |
 | P6 | 7, 8 | the names log on an open record's Rule; Home's cut next date hover; a Needs me row | "Rule 0009 …"; `30 Nov · due · …`; `raised 24 Sep` |
 | P7 | 10 | the fixture with four titles on one date at Fit; Cards at Days and Hours with today in view | "+N" after the crowd's last title; today's tick in the accent with `today` / `now HH:MM` above its column |
+| P8 | 11 | the built app (WKWebView): "Show the other N" then "Show only the newest ten"; rule a record with Ruled closed; zoom the Timeline to Days, close and reopen its section | the toggle whole below the stuck heading, focused; the count matches the rows with no hover; the Timeline at Days with its ticks and scroll kept, or at Fit |
 | P0 | all | `XDG_DATA_HOME=$(mktemp -d) make test` from a clean checkout; `cd frontend && npm run build`; `wails build` | pass |
 
 ## Boundary
@@ -67,7 +76,7 @@ a fixture run from a clean checkout; UI reviewers use `make review-build`.
 `tokens.css` (the z-index tokens), `global.css` (`.modal-backdrop` and the
 layers' z-index), `decisions.css`, `rule-box.css`, `RuleDecisionBox.tsx`,
 `HelpView.tsx` and `CardDrawer.tsx` (focus return and layer only),
-`DecisionsView.tsx` (Rule's name), `Home.tsx`, `home.css`, `lib/width.ts`, `lib/axis.ts`,
+`DecisionsView.tsx` (Rule's name, FR-11), `Home.tsx`, `home.css`, `lib/width.ts`, `lib/axis.ts`, `lib/decisionsPage.ts`,
 `lib/useScrollEdges.ts` and `lib/` tests, `TimeZoom.tsx`, `time-zoom.css`,
 `StageRoadmap.tsx` (the sticky axis only), `testdata/fixture-overlay/`. Not:
 Go, `docs/design-system.md`.
@@ -89,4 +98,4 @@ Go, `docs/design-system.md`.
 
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
-| `layers-focus-and-words` | P1–P7, P0 | timeline-and-find-6 | true |
+| `layers-focus-and-words` | P1–P8, P0 | timeline-and-find-6 | true |
