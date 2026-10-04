@@ -94,3 +94,16 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
   the record on Decisions and the card back each scroll a body sideways
   inside itself with its edges (leftovers-7 FR-5, FR-9, P4); it adds one
   Needs me row
+- the transversal roles (docs/ux/specs/transversal-roles.md R1-R4, roles-ui):
+  the script writes a `roles` list into the config (the default list's names
+  and globs, every bitácora inside the fixture home), starts two
+  `probe-hefesto*` stand-ins (one in init-a, one in `agent-slack/`) and one
+  `organizer-fixture-probe-aglaea`, each with a statusline record (42, 61
+  and 28 % context), writes one ended Daedalus run in init-b two days ago
+  into the fixture's own `runs.jsonl`, and adds an open `[for aglaea]`
+  thread to organizer-fixture's canned threads. The bitácoras are here:
+  `agent-slack/docs/bitacora/hephaistos_bitacora.md` with a HAND-OFF for
+  this machine (`fixture`) and one for odyssey, `init-a/.../aglaea_bitacora.md`
+  with log lines and no HAND-OFF, and `work/init-b/.../daedalus_bitacora.md`
+  with a HAND-OFF ten days old (stale); Ariadna has none. Their `@D<n>@`
+  marks are dated n days before today by the script
