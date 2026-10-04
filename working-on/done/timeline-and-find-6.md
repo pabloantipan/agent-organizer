@@ -1,10 +1,10 @@
 ---
 title: Today said at Days, focus after a ruling and after Show the other N, titles that stack, finds that store nothing
-status: next
+status: done
 repos: [organizer]
 branch: timeline-and-find-6
 updated: 2026-10-04
-next: "review: timeline-and-find-6, gate met (N2-N6, N0 in Chromium; N1 in Chromium and WKWebView, Cards and Decisions)"
+next: "done: merged 8c6749c; leftovers (U1-U3, G1-G4, review notes) for the FSE"
 depends_on: [rule-box-and-stages]
 boundary: ["frontend/src/components/TimeZoom.tsx, frontend/src/lib/axis.ts and its tests, frontend/src/styles/time-zoom.css", "frontend/src/components/DecisionsView.tsx, frontend/src/styles/decisions.css", "frontend/src/components/RuleDecisionBox.tsx (the after-rule focus only)", "a new many-records fixture initiative under testdata/, scripts/fixture-home.sh (to lay it out)", "not: Go, docs/design-system.md"]
 spec: "docs/specs/leftovers-6.md (FR-1 to FR-7, FR-6a); the ranking docs/ux/reviews/2026-10-03-rank-leftovers-6.md (Aglaea, b582a27); the design system's Timeline as amended there"
@@ -23,6 +23,7 @@ rule-box-and-stages lands.
 - [x] N0: see `docs/specs/leftovers-6.md`, Acceptance
 
 ## Done
+- 2026-10-04 sup32: code review pass, UI review pass (sev 4/3 none); merged to main 8c6749c, make test and npm run build green on main; seats ended
 - 2026-10-04 tf6-build: built on timeline-and-find-6 (377dfea, c9ca911, f28f167, rebased on 8e515e9), gate met; evidence and choices in .wt-notes/tf6-build/progress.md
 - 2026-10-04 sup32 launched by the FSE, rule-box-and-stages in done/
 - 2026-10-04 0077 ruled by pablo ("go")
@@ -74,3 +75,6 @@ rule-box-and-stages lands.
 - Days keeps 4 px between tick labels, not 12: a day column is 40 px and "Wed 30" ~35 px, so 12 px would drop every other day against the zoom spec's A2. 12 px holds at Fit and Hours. For the UI reviewer / Aglaea.
 - N1's Decisions case with 1 Oct as first whole day was seen in Chromium only on the card's graphs that scroll that far (Cards, Stages); Decisions' window ends near today. In WKWebView: Cards both cases, Decisions mid-September.
 - lib/decisionsPage.ts timelineCount is unused now (outside the boundary).
+- Aglaea on the Days gap: 4 px at Days is right, every day labelled; the 12 px floor is for floating labels (Fit); design system f8c3743.
+- Aglaea on UI review A1, A2: "+N" rides the crowd's last shown title; at Days and Hours "today"/"now" sits on the context row over today's column, today's tick in --accent-fg; design system 106a4bd, for the next leftovers ranking.
+- For the FSE: UI review U1 (newest-ten toggle under the sticky Ruled heading in WKWebView, sev 2), U2 (stale section count in WKWebView, sev 2), U3 (Timeline axis blank after close/reopen while zoomed, sev 2, predates the card), G1-G4; code review: empty line without Today at every zoomed level, today label hides two day ticks at Days, timelineCount dead in lib/decisionsPage.ts.
