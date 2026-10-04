@@ -6,6 +6,7 @@ import { addLocalDays } from "../lib/axis";
 import { ownerPhrase } from "../lib/decisions";
 import { RULED_LIMIT, countWords, decisionMatches, emptyRuledWords, lineName, rulerWords, ruledShown, shownSections, statusWord, summaryOf, timelineName, turnaroundWords, waitedWords, type DecSections } from "../lib/decisionsPage";
 import { readOnlyOf } from "../lib/queue";
+import { decisionKey, draftVerb, useDrafts, type Draft, type DraftFields } from "../lib/drafts";
 import { useMarkdownEdges } from "../lib/useScrollEdges";
 import { useBoard } from "../stores/board.store";
 import { RuleDecisionBox } from "./RuleDecisionBox";
@@ -28,6 +29,10 @@ export function DecisionsView() {
   const { view, selectedInitiative, select, decisionFocus, decisionSeq, decSections, setDecSection } = useBoard();
   const [expanded, setExpanded] = useState<string | null>(decisionFocus);
   const [ruling, setRuling] = useState<string | null>(null);
+  // leftovers-9 FR-1: the rule box's words live in the session's drafts, per
+  // record and under the key Home's box uses, so Escape, another record or
+  // leaving the tab keeps them; only Cancel or the ruling discards them.
+  const kept = useDrafts();
   const [query, setQuery] = useState("");
   const [showAllRuled, setShowAllRuled] = useState(false);
   const [showClosed, setShowClosed] = useState(false);
@@ -260,6 +265,8 @@ export function DecisionsView() {
     // FR-13: a record of an initiative that is not active offers none.
     const canRule = d.status === "proposed" && !readOnlyOf(view, r.initiative);
     const isRuling = canRule && ruling === r.key;
+    const dk = decisionKey(r.initiative, d.number);
+    const hasDraft = kept.has(dk);
     const focused = decisionFocus === r.key;
     const stuck = isOpen && tall?.key === r.key;
     const style: CSSProperties = { ...(focused ? { background: "var(--surface-selected)" } : {}), ...(stuck ? { "--dec-box-max": `${tall!.boxMax}px` } as CSSProperties : {}) };
@@ -301,8 +308,9 @@ export function DecisionsView() {
           {isOpen && canRule && (
             <div className="dec-actions">
               <span className="rb-anchor">
-                <button ref={isRuling ? ruleBtn : undefined} className="primary" aria-label={`Rule ${d.number} ${d.title}`} aria-expanded={isRuling} onClick={() => setRuling(isRuling ? null : r.key)}>Rule</button>
-                {isRuling && <RuleDecisionBox initiative={r.initiative} decision={d} opener={ruleBtn} afterRule={() => focusAfterRule(open.indexOf(r))} onClose={() => setRuling(null)} />}
+                <button ref={isRuling ? ruleBtn : undefined} className="primary" aria-label={draftVerb(`Rule ${d.number} ${d.title}`, hasDraft)} aria-expanded={isRuling} onClick={() => setRuling(isRuling ? null : r.key)}>{draftVerb("Rule", hasDraft)}</button>
+                {isRuling && <RuleDecisionBox initiative={r.initiative} decision={d} opener={ruleBtn} afterRule={() => focusAfterRule(open.indexOf(r))} onClose={() => setRuling(null)} onCancel={() => { kept.discard(dk); setRuling(null); }}
+                  draft={{ chosen: "", words: "", ...kept.restore<Draft>(dk), set: (patch) => kept.edit(dk, patch as DraftFields), discard: () => kept.discard(dk) }} />}
               </span>
             </div>
           )}

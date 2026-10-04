@@ -6,6 +6,7 @@ import { inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, type Nee
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
 import { dateWords } from "../lib/dates";
+import { draftVerb, useDraft } from "../lib/drafts";
 import { HEALTH, messages } from "../lib/health";
 import { ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
 import { compactColumns, FOLD, GOAL_CHARS, GOAL_FLOOR_CHARS, goalFloor, homeClassOf, NO_EMPTY, shareRoom, signalsNeed, signalsShown, wideGoalRoom, type Empty, type Fold, type WidthClass } from "../lib/width";
@@ -222,12 +223,15 @@ function DecisionRow({ row, decision: d }: { row: NeedsMeRow; decision: model.De
  *  in the store (ruleDraft), above the layout (responsive-home FR-5); one
  *  box is open at a time, and each record keeps its words until Rule or
  *  Cancel (FR-9): opening another row's Rule, Escape or this Rule again
- *  closes the box and keeps them. */
+ *  closes the box and keeps them, and the verb reads `Rule · draft`
+ *  (leftovers-9 FR-1). */
 function RuleAction({ rowKey, initiative, decision }: { rowKey: string; initiative: string; decision: model.Decision }) {
   const { ruleDraft, openRule, setRuleDraft, dropRule } = useBoard();
   const widthClass = useContext(HomeClass);
   const open = ruleDraft?.key === rowKey;
   const btn = useRef<HTMLButtonElement>(null);
+  // leftovers-9 FR-1: while words are kept for this record the verb says so.
+  const kept = !!useDraft(rowKey);
   // Compact's sheet covers Home, and regular's box covers the rows under its
   // opener: a scrim goes over what it covers, the rows' verbs behind it (FR-8,
   // FR-17). Wide's box sits in the column's flow and covers nothing. A click
@@ -238,7 +242,7 @@ function RuleAction({ rowKey, initiative, decision }: { rowKey: string; initiati
       {/* The scrim sits outside the row, on the page's ground, so the
           opener's row can stand above it (FR-23). */}
       {open && widthClass !== "wide" && createPortal(<div className="rb-scrim" aria-hidden="true" onClick={closeKeep} />, document.body)}
-      <button ref={btn} className="act" aria-expanded={open} aria-label={`Rule ${initiative} ${decision.number}`} onClick={() => openRule(open ? null : rowKey)}>Rule</button>
+      <button ref={btn} className="act" aria-expanded={open} aria-label={draftVerb(`Rule ${initiative} ${decision.number}`, kept)} onClick={() => openRule(open ? null : rowKey)}>{draftVerb("Rule", kept)}</button>
       {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord widthClass={widthClass} opener={btn} afterRule={focusNeedsMe} onClose={() => openRule(null)} onCancel={() => dropRule(rowKey)}
         draft={{ chosen: ruleDraft.chosen, words: ruleDraft.words, set: setRuleDraft }} />}
     </span>

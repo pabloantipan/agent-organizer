@@ -44,7 +44,9 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
   /** The chosen option and the words, kept by the caller (Home keeps them in
    *  the store so a width class change keeps them, responsive-home FR-5);
    *  without it the box keeps its own. */
-  draft?: { chosen: string; words: string; set: (patch: { chosen?: string; words?: string }) => void };
+  draft?: { chosen: string; words: string; set: (patch: { chosen?: string; words?: string }) => void;
+    /** The ruling written: the kept words go (leftovers-9 FR-1). */
+    discard?: () => void };
   /** The control that opened the box: focus goes back to it on close. */
   opener?: RefObject<HTMLElement | null>;
   /** Where focus goes once the ruling is written and the opener has left
@@ -139,6 +141,7 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
       return;
     }
     await refresh();
+    draft?.discard?.();
     // The ruled record leaves the queue and the opener with it: focus goes
     // to what took its place.
     requestAnimationFrame(() => {
