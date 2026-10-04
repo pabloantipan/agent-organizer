@@ -3,8 +3,8 @@ title: A review build with its own bundle id, so reviewers stop writing into the
 status: next
 repos: [organizer]
 branch: review-build
-updated: 2026-10-03
-next: "decide: pablo - accept 0077 (amended); then it runs in the next wave, beside rule-box-and-stages and home-signals-5"
+updated: 2026-10-04
+next: "sup31 builds it with its wave (0077 ruled, accept as written)"
 depends_on: []
 boundary: ["Makefile", "a script under scripts/ if needed", "CLAUDE.md (the Packaging line only)", "not: wails.json, build/darwin/ templates, frontend, Go"]
 spec: "docs/specs/leftovers-6.md (FR-8)"
@@ -22,6 +22,7 @@ ui_review: false
 - [ ] N0: see `docs/specs/leftovers-6.md`, Acceptance
 
 ## Done
+- 2026-10-04 0077 ruled by pablo ("go"); sup31 launched by the FSE
 - 2026-10-03 cut from leftovers-6 by the FSE
 
 ## Next

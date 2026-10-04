@@ -1,13 +1,13 @@
 ---
 title: Accept the leftovers-5 and leftovers-6 batches and the review build, and launch their cards
-status: proposed
+status: ruled
 raised: 2026-10-03
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-04
+ruled_by: pablo
 options: [accept as written, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [rule-box-and-stages, home-signals-5, timeline-and-find-6, review-build]
 threads: [01M41YCPTBFVQDFS9CQW76DQ14, 01M4234H29HX9P9J0WJFQYYA9F]
 supersedes: []
@@ -71,6 +71,8 @@ decision wait, not build).
 The FSE's: accept as written.
 
 ## Ruling
+
+pablo, 2026-10-04, in the FSE session on lodestar, answering the FSE's "I recommend accepting 0077 as written": "go"
 
 ## Consequences
 
