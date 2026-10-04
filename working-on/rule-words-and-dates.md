@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: rule-words-and-dates
 updated: 2026-10-04
-next: "sup35: FR-4's cause is .home { max-width: 1240px } in shell.css, outside the boundary; rwd-build asked (question) and runs the other gate rows meanwhile"
+next: "sup35: may FR-4's fix go in shell.css:65 or as a home.css override? (question posted); rwd-build then fixes it, runs Q4 and Q3's DOM row, reruns Q0 and posts done"
 depends_on: []
 boundary: ["frontend/src/styles/rule-box.css, decisions.css, home.css; frontend/src/components/RuleDecisionBox.tsx, DecisionsView.tsx, Home.tsx", "frontend/src/components/Conversation.tsx (the composer's attributes only), CardDrawer.tsx and its CSS (cap, scroll, comments' attributes)", "frontend/src/components/TimeZoom.tsx (.tz-more name, Timeline names' dates), StageRoadmap.tsx (dates only)", "frontend/src/lib/dates.ts and lib/ tests", "testdata/fixture-overlay/", "Makefile (the test target only)", "not: Go, docs/design-system.md"]
 spec: "docs/specs/leftovers-8.md (FR-1 to FR-8); the ranking docs/ux/reviews/2026-10-04-rank-leftovers-8.md (Aglaea, 10bc67a); the design system's Principles as amended there"
@@ -21,6 +21,7 @@ sup33's leftovers with Aglaea's A1-A3.
 - [ ] Q0: see `docs/specs/leftovers-8.md`, Acceptance
 
 ## Done
+- 2026-10-04 rwd-build: FR-1, 2, 3, 5, 6, 7, 8 built on rule-words-and-dates (3c75331 ba3e7e3 92e2c93 6e175f9 2d90b7f fd619fa 617af3e, fixture ea9337e); Q1 Q2 Q5 Q6 Q7 Q0 pass in Chromium and WKWebView, Q3's values pass in WKWebView (`.wt-notes/rwd-build/gate.md`)
 - 2026-10-04 0080 ruled by pablo ("Ok", 5fa5b5e); sup35 launched by the FSE
 - 2026-10-04 cut from leftovers-8 by the FSE
 
@@ -29,6 +30,10 @@ sup33's leftovers with Aglaea's A1-A3.
 ## Blockers
 
 ## Notes
+- Q3's correction bubble and its Escape could not be raised by synthetic
+  typing in WKWebView on this machine (a control field without the
+  attributes was not corrected either): left to the UI reviewer with a real
+  keyboard.
 - FR-4 measured (rwd-build, 2026-10-04, ea9337e, fixture): Home at a
   1512×945 window, rail as a strip. The list (`.home-list`, and Needs me
   above it) ends at x=1306 in both engines: `.home` is 1240 px wide because
