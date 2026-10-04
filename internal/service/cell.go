@@ -132,12 +132,17 @@ type facts struct {
 	msgs      int
 	askedOfMe int
 	askedBy   string
+	// lastFrom and lastBody are the thread's last message: a role's mail is
+	// answered when the last word is the role's reply (roles.go).
+	lastFrom, lastBody string
 }
 
 func factsOf(d discuss.ThreadDetail, human string) facts {
 	f := facts{msgs: len(d.Messages)}
 	if len(d.Messages) > 0 {
 		f.from, f.to = d.Messages[0].From, d.Messages[0].To
+		last := d.Messages[len(d.Messages)-1]
+		f.lastFrom, f.lastBody = last.From, last.Body
 	}
 	for _, m := range d.Messages {
 		switch {
