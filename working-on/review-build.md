@@ -10,6 +10,7 @@ boundary: ["Makefile", "a script under scripts/ if needed", "CLAUDE.md (the Pack
 spec: "docs/specs/leftovers-6.md (FR-8)"
 gate: "docs/specs/leftovers-6.md Acceptance, rows N7 and N0"
 ui_review: false
+review: pass
 seat: revb-build
 ---
 
@@ -21,6 +22,12 @@ seat: revb-build
 ## Gate
 - [x] N7: see `docs/specs/leftovers-6.md`, Acceptance
 - [x] N0: see `docs/specs/leftovers-6.md`, Acceptance
+
+## Review
+- Verdict: pass. Diff main...review-build (Makefile, scripts/review-build.sh, CLAUDE.md Packaging line) is inside the boundary. N7: `make review-build` built `Deltagos Review.app`, bundle id cl.antipan.organizer.review, signed adhoc; launched from a fresh shell over the fixture, rail toggled twice (true→false→true), quit by pid. `~/Library/WebKit/cl.antipan.organizer` mtime unchanged; while it ran, its WebKit networking process had only the `.review` dir open. Two WAL files in the lead's dir newer than the marker came from Pablo's Deltagos (32614) and rbs-build's build (51307), not from the review app. N0: `XDG_DATA_HOME=$(mktemp -d) make test` (Go + 161 vitest), `npm run build`, wails build (inside make review-build) all pass.
+- Unmet: none.
+- Gate gap for the FSE: N7's "mtime of the dir unchanged" passes even when WebKit writes inside the dir (it writes WAL files deep inside without touching the top-level mtime). Use `find -newer` plus an lsof check on who wrote the files.
+- Reviewer: revb-review, 2026-10-04
 
 ## Done
 - 2026-10-04 revb-build: `make review-build` (f733251) and the Packaging sentence (3ef0105) on branch review-build, rebased on main; N7 over the fixture (bundle id cl.antipan.organizer.review, adhoc, its own WebKit dir, the lead's dir mtime unchanged) and N0 green; evidence in .wt-notes/revb-build/
