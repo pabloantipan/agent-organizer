@@ -110,6 +110,10 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   away); gaps M1 (stacking, focus after Escape), M8 (scroll cue); aglaea's
   call on Q1 (3424695): at regular and compact the scrim starts below the
   top bar, sev 2. review-build merged; sup32 runs timeline-and-find-6.
+- aglaea's call on hs5-U1 (857949c), sev 2: inside the never-fold set,
+  waiting gives way first (names, noun to the floor, then +N), blocked never
+  folds; gate on --twenty partner-payouts at 1024x640 and 1280x800, rail
+  expanded, classic scrollbars: "1 blocked" whole. lib/width.ts, Home.tsx.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
