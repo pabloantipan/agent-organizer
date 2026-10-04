@@ -8,6 +8,7 @@ import { useBoard } from "../stores/board.store";
 import { readOnlyOf } from "../lib/queue";
 import { openBox } from "../lib/boxStack";
 import { useMarkdownEdges } from "../lib/useScrollEdges";
+import { focusBoxBelow } from "./RuleDecisionBox";
 
 /** Focus and names, opening inline (widths-and-focus FR-19): the card back
  *  takes focus on its title when it opens, and hands it back to what opened
@@ -25,7 +26,9 @@ function useFocusOpener(key: string | null, title: React.RefObject<HTMLHeadingEl
     if (!key && was.current) {
       const o = opener.current;
       opener.current = null;
-      if (o?.isConnected) o.focus();
+      // leftovers-7 FR-2: over an open rule box, focus goes back into the
+      // box at the field it last held; else to the opener.
+      if (!focusBoxBelow() && o?.isConnected) o.focus();
     }
     was.current = key;
   }, [key, title]);

@@ -5,6 +5,7 @@ import { useMarkdownEdges } from "../lib/useScrollEdges";
 import { Help } from "../../wailsjs/go/main/App";
 import type { service } from "../../wailsjs/go/models";
 import { openBox } from "../lib/boxStack";
+import { focusBoxBelow } from "./RuleDecisionBox";
 import "../styles/help.css";
 
 type Section = { id: string; depth: number; title: string };
@@ -22,6 +23,15 @@ export function HelpView({ top, onClose }: { top: number; onClose: () => void })
   useEffect(() => {
     Help().then(setDoc, (e) => setFailed(String(e)));
     close.current?.focus();
+  }, []);
+  // leftovers-7 FR-2: closing Help puts focus back into the rule box under
+  // it, at the field it last held; with no box, on Help's opener (the
+  // control focused when it opened, else the top bar's Help button, since
+  // WebKit does not focus a clicked button).
+  useEffect(() => {
+    const a = document.activeElement;
+    const opener = a instanceof HTMLElement && a !== document.body && !a.closest(".rb") ? a : document.querySelector<HTMLElement>('.topbar button[aria-label="Help"]');
+    return () => { if (!focusBoxBelow()) opener?.focus(); };
   }, []);
   // Escape closes Help when it is the topmost open box (leftovers-5 FR-1).
   const closeNow = useRef(onClose);

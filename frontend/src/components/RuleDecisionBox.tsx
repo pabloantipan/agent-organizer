@@ -10,6 +10,22 @@ import type { WidthClass } from "../lib/width";
 import "../styles/rule-box.css";
 import { useMarkdownEdges } from "../lib/useScrollEdges";
 
+/** leftovers-7 FR-2 (Focus and names, closing the top of a stack): the open
+ *  rule boxes, newest last, each able to put focus back on the field it last
+ *  held. Help and the card back call focusBoxBelow when they close. */
+const openRuleBoxes: { id: number; restore: () => void }[] = [];
+let nextRuleBox = 1;
+
+/** Closing Help or a card back over an open rule box: focus goes back into
+ *  the box, to the field it last held. False when no box is open, so the
+ *  caller hands focus to its own opener. */
+export function focusBoxBelow(): boolean {
+  const top = openRuleBoxes[openRuleBoxes.length - 1];
+  if (!top) return false;
+  top.restore();
+  return true;
+}
+
 /** A ruling of a proposed record, from its Needs me row (FR-22) or its row on
  *  the Decisions tab (FR-12). The ruler signs it, not the owner (0045): the
  *  cell's human, else pablo, the same rule as `ruler` in service/rule.go.
@@ -67,6 +83,22 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
   // record is its description.
   useEffect(() => { title.current?.focus(); }, []);
 
+  // FR-2: the field the box last held, so a drawer closed over it hands
+  // focus back there; the title until another field takes it.
+  const last = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const id = nextRuleBox++;
+    openRuleBoxes.push({
+      id,
+      restore: () => {
+        const f = last.current;
+        if (f && f.isConnected && !f.matches(":disabled") && box.current?.contains(f)) f.focus();
+        else title.current?.focus();
+      },
+    });
+    return () => { const i = openRuleBoxes.findIndex((b) => b.id === id); if (i >= 0) openRuleBoxes.splice(i, 1); };
+  }, []);
+
   const close = (discard = false) => { (discard && onCancel ? onCancel : onClose)(); opener?.current?.focus(); };
 
   // FR-22 (responsive-home amendment 4): Escape closes the box wherever
@@ -112,7 +144,7 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
 
   return (
     <div ref={box} className={`rb ${withRecord ? "with-record" : ""} ${capped ? "capped" : ""}`} style={capped ? undefined : place} role="dialog" aria-labelledby={`${numId} ${titleId}`} aria-describedby={withRecord ? bodyId : undefined}
-      onKeyDown={(e) => loopTab(e, box.current)}>
+      onKeyDown={(e) => loopTab(e, box.current)} onFocus={(e) => { if (e.target instanceof HTMLElement) last.current = e.target; }}>
       <div className="rb-head">
         <span id={numId} className="rb-num">{initiative} {d.number}</span>
         <span ref={title} id={titleId} className="rb-title" tabIndex={-1}>{d.title}</span>
