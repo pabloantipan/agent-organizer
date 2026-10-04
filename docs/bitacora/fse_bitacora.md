@@ -152,6 +152,10 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   design-call threads too. Organizer mailbox: one open thread, the
   transversal roles (Pablo's). leftovers-8 asked of aglaea (thread
   01M43Z4MM70GV0TH1NAJC2D28A). Nothing building.
+- 0080 ruled; sup35 runs rule-words-and-dates. Pablo: push yes (pushed
+  65c190c..42efe71), layout copies discard (all five webkit-before removed),
+  reinstall (v0.2.0-949). Transversal roles: he asked what the questions
+  are; restated in the session.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
