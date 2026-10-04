@@ -42,23 +42,23 @@ export function signalsThatFit(widths: number[], gap: number, room: number, more
 
 /** How soon a signal folds into "+N" (FR-20 as amended by 0076; leftovers-5
  *  FR-8; design system, Widths: "what gives way first"): live first (a wave
- *  building, live or working seats), then now, then problems, and last of
- *  the foldable ones the cell's state. Null is waiting, the lead's own
- *  ("waiting · you") or anyone's, and blocked: they stay while they fit at
- *  their floor. */
-export type Fold = 0 | 1 | 2 | 3 | null;
-export const FOLD = { live: 0, now: 1, problems: 2, cell: 3 } as const;
+ *  building, live or working seats), then now, then problems, then the
+ *  cell's state, and last waiting, the lead's own ("waiting · you") or
+ *  anyone's, which is cut to its floor before it folds. Null is blocked,
+ *  which never folds and is never cut (leftovers-7 FR-4, home-signals-5 U1:
+ *  red never reaches the lead only through a "+N"). */
+export type Fold = 0 | 1 | 2 | 3 | 4 | null;
+export const FOLD = { live: 0, now: 1, problems: 2, cell: 3, waiting: 4 } as const;
 
 /** Which signals a row shows (FR-20; leftovers-5 FR-8), in their own order.
  *  `floors` are what each keeps at the least, in rendered width: waiting's
- *  and blocked's `N` and the whole noun ("5 waiting", the names cut), a
- *  foldable one whole. All show when their floors fit `room`; otherwise the
- *  foldable ones leave, the soonest first and, among equals, the last
- *  first, until what stays fits beside the "+N" (`more` wide), so the cell
- *  shows wherever it fits beside a cut waiting. Only when waiting and
- *  blocked cannot both keep their floor does one of them fold too, after
- *  every foldable one, the last first, so no signal reads as one letter.
- *  At least one signal stays, which the cell then cuts. */
+ *  `N` and the whole noun ("5 waiting", the names cut), any other whole.
+ *  All show when their floors fit `room`; otherwise the foldable ones
+ *  leave, the soonest first and, among equals, the last first, until what
+ *  stays fits beside the "+N" (`more` wide), so the cell shows wherever it
+ *  fits beside a cut waiting. Waiting folds last, after the cell; blocked
+ *  never folds (leftovers-7 FR-4). At least one signal stays, which the
+ *  cell then cuts. */
 export function signalsShown(floors: number[], folds: Fold[], gap: number, room: number, more: number): boolean[] {
   const shown = floors.map(() => true);
   const used = () => {
@@ -66,26 +66,26 @@ export function signalsShown(floors: number[], folds: Fold[], gap: number, room:
     const hidden = on.length < floors.length;
     return on.reduce((a, w) => a + w, 0) + gap * Math.max(0, on.length - 1) + (hidden ? gap + more : 0);
   };
-  const rank = (k: number) => folds[k] ?? 4;
   while (used() > room && shown.filter(Boolean).length > 1) {
     let pick = -1;
-    folds.forEach((_, k) => {
-      if (!shown[k]) return;
-      if (pick < 0 || rank(k) <= rank(pick)) pick = k;
+    folds.forEach((f, k) => {
+      if (!shown[k] || f === null) return;
+      if (pick < 0 || f <= folds[pick]!) pick = k;
     });
+    if (pick < 0) break;
     shown[pick] = false;
   }
   return shown;
 }
 
-/** What a row's signal cell needs so that waiting and blocked keep their
- *  floor and the cell's state shows whole beside them (leftovers-5 FR-8,
+/** What a row's signal cell needs so that waiting keeps its floor, blocked
+ *  shows whole and the cell's state shows whole beside them (leftovers-5 FR-8,
  *  ranking row 6), with "+N" (`more` wide) for whatever else folds. Home
  *  gives regular's and wide's signal column the widest row's need as its
  *  least, so the cell shows wherever the row can afford it; compact keeps
  *  its own least, since the goal's floor comes first there. */
 export function signalsNeed(floors: number[], folds: Fold[], gap: number, more: number): number {
-  const keep = floors.filter((_, k) => folds[k] === null || folds[k] === FOLD.cell);
+  const keep = floors.filter((_, k) => folds[k] === null || folds[k] === FOLD.cell || folds[k] === FOLD.waiting);
   const rest = floors.length - keep.length;
   return keep.reduce((a, w) => a + w, 0) + gap * Math.max(0, keep.length - 1) + (rest > 0 ? (keep.length > 0 ? gap : 0) + more : 0);
 }

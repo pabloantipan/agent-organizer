@@ -306,15 +306,30 @@ export function firstWholeUnit(s: Scale, x: number): number {
   return s.x(d) >= x - 0.5 ? d : addLocalDays(d, 1);
 }
 
-/** The today label, in the axis (design system, Timeline): `today` at Fit,
- *  `today · Sat 3` at Days and `now 14:32 · Sat 3` at Hours, so the day is
- *  named even where its tick gives way (leftovers-6 FR-1). */
+/** The today label, in the axis (design system, Timeline, as amended by
+ *  106a4bd; leftovers-7 FR-10): `today` beside the line at Fit; at Days
+ *  `today` on the context row, centred on today's column, and at Hours
+ *  `now 14:32` over the line, while today's own tick label is drawn in the
+ *  accent (todayTick), so no neighbour's tick gives way. */
 export function todayLabel(level: Level, now: number): string {
-  const d = new Date(now);
-  const day = `${WD[d.getDay()]} ${d.getDate()}`;
-  if (level === "days") return `today · ${day}`;
-  if (level === "hours") return `now ${hhmm(now)} · ${day}`;
-  return "today";
+  return level === "hours" ? `now ${hhmm(now)}` : "today";
+}
+
+/** Whether a tick is today's own (leftovers-7 FR-10): at Days the column of
+ *  today, at Hours the hour now is in; at Fit none, since a floating tick
+ *  is a week or a month. */
+export function todayTick(t: Tick, level: Level, now: number): boolean {
+  if (level === "days") return t.at === startOfDay(now);
+  if (level === "hours") { const h = new Date(now); h.setMinutes(0, 0, 0); return t.major && t.at === h.getTime(); }
+  return false;
+}
+
+/** Where the today label stands on the lane, in px: today's column's middle
+ *  at Days, the line itself at Fit and Hours. */
+export function todayAt(s: Scale, now: number): number {
+  if (s.level !== "days") return s.x(now);
+  const d = startOfDay(now);
+  return (s.x(d) + s.x(addLocalDays(d, 1))) / 2;
 }
 
 /** A label's box on screen, in CSS pixels (getBoundingClientRect). */

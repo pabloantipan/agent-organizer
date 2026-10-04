@@ -8,7 +8,23 @@ import { openBox } from "../lib/boxStack";
 import { useBoard } from "../stores/board.store";
 import type { WidthClass } from "../lib/width";
 import "../styles/rule-box.css";
-import { useMarkdownEdges } from "../lib/useScrollEdges";
+import { useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
+
+/** leftovers-7 FR-2 (Focus and names, closing the top of a stack): the open
+ *  rule boxes, newest last, each able to put focus back on the field it last
+ *  held. Help and the card back call focusBoxBelow when they close. */
+const openRuleBoxes: { id: number; restore: () => void }[] = [];
+let nextRuleBox = 1;
+
+/** Closing Help or a card back over an open rule box: focus goes back into
+ *  the box, to the field it last held. False when no box is open, so the
+ *  caller hands focus to its own opener. */
+export function focusBoxBelow(): boolean {
+  const top = openRuleBoxes[openRuleBoxes.length - 1];
+  if (!top) return false;
+  top.restore();
+  return true;
+}
 
 /** A ruling of a proposed record, from its Needs me row (FR-22) or its row on
  *  the Decisions tab (FR-12). The ruler signs it, not the owner (0045): the
@@ -62,10 +78,31 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
   const windowClass = useBoard((s) => s.widthClass);
   const widthClass = homeClass ?? windowClass;
   const { place, short, capped } = useFitViewport(box, record, widthClass);
+  // leftovers-7 FR-5: the box and its record area scroll inside themselves;
+  // each edge with content hidden past it shows (rule-box.css, edge-*), so
+  // overlay scrollbars do not hide that options or the words are below.
+  const boxEdges = useScrollEdges(box, true);
+  const recordEdges = useScrollEdges(record, withRecord);
 
   // Focus and names: a box that shows a record opens on its title, and the
   // record is its description.
   useEffect(() => { title.current?.focus(); }, []);
+
+  // FR-2: the field the box last held, so a drawer closed over it hands
+  // focus back there; the title until another field takes it.
+  const last = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const id = nextRuleBox++;
+    openRuleBoxes.push({
+      id,
+      restore: () => {
+        const f = last.current;
+        if (f && f.isConnected && !f.matches(":disabled") && box.current?.contains(f)) f.focus();
+        else title.current?.focus();
+      },
+    });
+    return () => { const i = openRuleBoxes.findIndex((b) => b.id === id); if (i >= 0) openRuleBoxes.splice(i, 1); };
+  }, []);
 
   const close = (discard = false) => { (discard && onCancel ? onCancel : onClose)(); opener?.current?.focus(); };
 
@@ -111,13 +148,13 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
   };
 
   return (
-    <div ref={box} className={`rb ${withRecord ? "with-record" : ""} ${capped ? "capped" : ""}`} style={capped ? undefined : place} role="dialog" aria-labelledby={`${numId} ${titleId}`} aria-describedby={withRecord ? bodyId : undefined}
-      onKeyDown={(e) => loopTab(e, box.current)}>
+    <div ref={box} className={`rb ${withRecord ? "with-record" : ""} ${capped ? "capped" : ""} ${boxEdges.top ? "edge-top" : ""} ${boxEdges.bottom ? "edge-bottom" : ""}`} style={capped ? undefined : place} role="dialog" aria-labelledby={`${numId} ${titleId}`} aria-describedby={withRecord ? bodyId : undefined}
+      onKeyDown={(e) => loopTab(e, box.current)} onFocus={(e) => { if (e.target instanceof HTMLElement) last.current = e.target; }}>
       <div className="rb-head">
         <span id={numId} className="rb-num">{initiative} {d.number}</span>
         <span ref={title} id={titleId} className="rb-title" tabIndex={-1}>{d.title}</span>
       </div>
-      {withRecord && <RecordBody ref={record} id={bodyId} initiative={initiative} decision={d} short={short} />}
+      {withRecord && <RecordBody ref={record} id={bodyId} initiative={initiative} decision={d} short={short} edges={recordEdges} />}
       {options.length === 0 ? (
         <div className="rb-error">This record lists no options, so it cannot be ruled here. Add `options:` to the record.</div>
       ) : (
@@ -372,11 +409,11 @@ function stickyFloor(row: HTMLElement, scroller: HTMLElement): number {
  *  and its Recommendation, each clamped at a block boundary with "more".
  *  The Options are the radios below, so they are not repeated. The whole
  *  record is one link away, landing on it expanded in Decisions (FR-3). */
-const RecordBody = forwardRef<HTMLDivElement, { id: string; initiative: string; decision: model.Decision; short: boolean }>(function RecordBody({ id, initiative, decision: d, short }, ref) {
+const RecordBody = forwardRef<HTMLDivElement, { id: string; initiative: string; decision: model.Decision; short: boolean; edges: { top: boolean; bottom: boolean } }>(function RecordBody({ id, initiative, decision: d, short, edges }, ref) {
   const openDecision = useBoard((s) => s.openDecision);
   const { question, recommendation } = recordSections(d.body);
   return (
-    <div ref={ref} className="rb-record">
+    <div ref={ref} className={`rb-record ${edges.top ? "edge-top" : ""} ${edges.bottom ? "edge-bottom" : ""}`}>
       <div id={id} className="rb-sections">
         {question || recommendation ? (
           <>

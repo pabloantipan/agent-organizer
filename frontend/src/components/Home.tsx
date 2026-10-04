@@ -209,7 +209,7 @@ function DecisionRow({ row, decision: d }: { row: NeedsMeRow; decision: model.De
   return (
     <Shell row={row} reason="decision" tone="waiting"
       subject={<><span className="mono">{row.initiative} {d.number}</span> · {d.title}</>}
-      context={`${ownerPhrase(d.owner)} · raised ${d.raised || "—"}${d.raised_by ? ` by ${d.raised_by}` : ""}${opts.length > 0 ? ` · options: ${opts.join(", ")}` : ""}`}>
+      context={`${ownerPhrase(d.owner)} · raised ${d.raised ? dateWords(d.raised) : "—"}${d.raised_by ? ` by ${d.raised_by}` : ""}${opts.length > 0 ? ` · options: ${opts.join(", ")}` : ""}`}>
       <RuleAction rowKey={row.key} initiative={row.initiative} decision={d} />
     </Shell>
   );
@@ -476,12 +476,13 @@ function signalFacts(i: merge.BoardInitiative, rows: merge.BoardInitiative[], ca
 /** A row's signals. Each lozenge's words sit in a text span that takes the
  *  ellipsis (FR-14): the lozenge is a flex box, and a flex box clips its
  *  text mid-word instead of cutting it. `data-fold` is how soon a signal
- *  folds into "+N" (FR-20); one without it never folds. */
+ *  folds into "+N" (FR-20); one without it (blocked) never folds
+ *  (leftovers-7 FR-4). */
 function Signals({ i, sig, cell, missing, lead }: { i: merge.BoardInitiative; sig: SignalFacts; cell?: model.Cell | null; missing: string[]; lead: string }) {
   const { waiting, blocked, now, live, working, running, problems, none } = sig;
   return (
     <OneLine id={i.id}>
-      {waiting > 0 && <span className="lz waiting"><span className="lz-t"><span className="lz-floor"><span className="num">{waiting}</span> waiting</span> · {signalOwners(i, lead).join(", ")}</span></span>}
+      {waiting > 0 && <span className="lz waiting" data-fold={FOLD.waiting}><span className="lz-t"><span className="lz-floor"><span className="num">{waiting}</span> waiting</span> · {signalOwners(i, lead).join(", ")}</span></span>}
       {blocked > 0 && <span className="lz blocked"><span className="lz-t"><span className="num">{blocked}</span> blocked</span></span>}
       {now > 0 && <span className="lz now" data-fold={FOLD.now}><span className="lz-t"><span className="num">{now}</span> now</span></span>}
       {running.map((w) => <span key={w.n} className="lz live" data-fold={FOLD.live}><span className="lz-t">wave <span className="num">{w.n}</span> · <span className="num">{w.building!.length}</span> building</span></span>)}
@@ -519,15 +520,15 @@ function OneLine({ id, children }: { id: string; children: React.ReactNode }) {
       return Math.max(c.getBoundingClientRect().width + (t ? t.scrollWidth - t.clientWidth : 0), c.scrollWidth);
     };
     const folds = items.map((c): Fold => (c.dataset.fold === undefined ? null : (Number(c.dataset.fold) as Fold)));
-    // Each lozenge's floor in rendered width (leftovers-5 FR-8): one that
-    // never folds keeps its N and whole noun (.lz-floor, "5 waiting") and
-    // the ellipsis after it; a foldable one stays whole or folds.
+    // Each lozenge's floor in rendered width (leftovers-5 FR-8): waiting
+    // keeps its N and whole noun (.lz-floor, "5 waiting") and the ellipsis
+    // after it; any other stays whole or folds, and blocked stays whole.
     const nat = items.map(natural);
     const ell = ellipsisWidth(el);
     const floors = items.map((c, k) => {
       const t = c.querySelector<HTMLElement>(".lz-t");
       const f = c.querySelector<HTMLElement>(".lz-floor");
-      if (folds[k] !== null || !t || !f) return nat[k];
+      if (!t || !f) return nat[k];
       return Math.min(nat[k], Math.ceil(nat[k] - t.scrollWidth + f.getBoundingClientRect().width + ell));
     });
     const moreW = Math.max(more?.getBoundingClientRect().width ?? 0, 28);
@@ -613,9 +614,11 @@ function Phase({ stages }: { stages: model.Stage[] }) {
 
 function NextDate({ next: n }: { next: Next }) {
   if (!n) return <span className="p-next"><span className="num" title="no card due, milestone or target ahead">—</span></span>;
+  // leftovers-7 FR-8: the hover says the cell's words whole, as the cell
+  // reads them before its cut ("30 Nov · due · w-later").
   return (
-    <span className="p-next">
-      <span className="num" title={n.date}>{dateWords(n.date)}</span>
+    <span className="p-next" title={`${dateWords(n.date)} · ${n.what}`}>
+      <span className="num">{dateWords(n.date)}</span>
       <span className="p-next-what">{n.what}</span>
     </span>
   );

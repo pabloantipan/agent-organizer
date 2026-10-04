@@ -1,10 +1,11 @@
 import { X } from "lucide-react";
 import { marked } from "marked";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useMarkdownEdges } from "../lib/useScrollEdges";
+import { useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
 import { Help } from "../../wailsjs/go/main/App";
 import type { service } from "../../wailsjs/go/models";
 import { openBox } from "../lib/boxStack";
+import { focusBoxBelow } from "./RuleDecisionBox";
 import "../styles/help.css";
 
 type Section = { id: string; depth: number; title: string };
@@ -19,9 +20,17 @@ export function HelpView({ top, onClose }: { top: number; onClose: () => void })
   const close = useRef<HTMLButtonElement>(null);
 
   // Read on open, every open: the file is never kept.
+  // leftovers-7 FR-2: closing Help puts focus back into the rule box under
+  // it, at the field it last held; with no box, on Help's opener (the
+  // control focused when it opened, else the top bar's Help button, since
+  // WebKit does not focus a clicked button). The opener is read before
+  // Help focuses its own Close, or Close would be taken for it.
   useEffect(() => {
+    const a = document.activeElement;
+    const opener = a instanceof HTMLElement && a !== document.body && !a.closest(".rb, .help") ? a : document.querySelector<HTMLElement>('.topbar button[aria-label="Help"]');
     Help().then(setDoc, (e) => setFailed(String(e)));
     close.current?.focus();
+    return () => { if (!focusBoxBelow()) opener?.focus(); };
   }, []);
   // Escape closes Help when it is the topmost open box (leftovers-5 FR-1).
   const closeNow = useRef(onClose);
@@ -49,6 +58,9 @@ export function HelpView({ top, onClose }: { top: number; onClose: () => void })
     return { html: tpl.innerHTML, sections: found };
   }, [doc]);
   useMarkdownEdges(body, html);
+  // leftovers-7 FR-5, P4: the document scrolls inside Help; each edge with
+  // content hidden past it shows (help.css, edge-top and edge-bottom).
+  const docEdges = useScrollEdges(body, !!html);
 
   // The article (.help-doc, overflow-y: auto) is the element that scrolls;
   // the fixed overlay around it does not, so the heading moves into its view.
@@ -77,7 +89,7 @@ export function HelpView({ top, onClose }: { top: number; onClose: () => void })
               <button key={s.id} className={`help-section d${s.depth}`} onClick={() => go(s.id)}>{s.title}</button>
             ))}
           </nav>
-          <article ref={body} className="markdown help-doc" dangerouslySetInnerHTML={{ __html: html }} />
+          <article ref={body} className={`markdown help-doc ${docEdges.top ? "edge-top" : ""} ${docEdges.bottom ? "edge-bottom" : ""}`} dangerouslySetInnerHTML={{ __html: html }} />
         </div>
       )}
     </section>

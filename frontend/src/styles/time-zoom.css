@@ -26,8 +26,8 @@
 /* min-width: 0, since the wrapper is a grid item in Stages (.srm): with
    the default auto it grew to the lane and the page scrolled instead of
    the frame (zdp-ui U1). */
-.tz-wrap { position: relative; z-index: 0; min-width: 0; border-radius: var(--radius-md); }
-.tz-wrap.ring::after { content: ""; position: absolute; inset: -4px; z-index: 9; border: 2px solid var(--focus-ring); border-radius: calc(var(--radius-md) + 4px); pointer-events: none; }
+.tz-wrap { position: relative; z-index: var(--z-content); min-width: 0; border-radius: var(--radius-md); }
+.tz-wrap.ring::after { content: ""; position: absolute; inset: -4px; z-index: var(--z-tz-ring); border: 2px solid var(--focus-ring); border-radius: calc(var(--radius-md) + 4px); pointer-events: none; }
 .tz-frame { position: relative; overflow: hidden; outline: none; border-radius: var(--radius-md); }
 .tz-frame:focus-visible { outline: none; }
 .tz-frame.zoomed { overflow: auto; max-height: max(320px, calc(100vh - 240px)); overscroll-behavior-x: contain; }
@@ -41,11 +41,23 @@
 /* Stages' frame runs into its panel's right padding; the margin is the
    wrapper's, so the focus ring wraps what scrolls (leftovers-6 FR-6a). */
 .srm .tz-wrap { margin: 0 calc(-1 * var(--space-4)) 0 0; }
+/* leftovers-7 FR-6 (design system, Timeline: the axis sticks while the rows
+   scroll, on Stages as on Decisions): at Fit the frame does not scroll, so
+   its axis sticks to the page's scroller, at its top (the board-wrap's own
+   top padding taken back, as Decisions' --dec-stick), while the stage rows
+   pass under it. Zoomed, the frame scrolls itself and its axis sticks
+   inside it (below). */
+.srm { --srm-stick: calc(-1 * 18px); }
+.srm .tz-frame:not(.zoomed) { overflow: visible; }
+.srm .tz-frame:not(.zoomed) .tz-axis-row {
+  position: sticky; top: var(--srm-stick); z-index: var(--z-tz-axis);
+  background: var(--surface);
+}
 
 /* Rows: the graph's own row classes, laid on the frame's columns. */
 /* --tz-label-w is LABEL_W, set on .tz-content (TimeZoom.tsx). */
 .tz-row { display: grid; grid-template-columns: var(--tz-label-w, 240px) var(--tz-lane); }
-.tz-row > .tz-label { position: sticky; left: 0; z-index: 5; }
+.tz-row > .tz-label { position: sticky; left: 0; z-index: var(--z-tz-pinned); }
 .tz-frame.zoomed .tz-row > .tz-label { background: var(--surface); }
 .tz-frame.zoomed .srm-row.current > .tz-label { background: var(--surface-selected); }
 .tz-frame.zoomed .srm-row > .srm-toggle:hover { background: var(--surface-hover); }
@@ -54,11 +66,11 @@
    stays above it. */
 .tz-frame.zoomed .srm-row.current > .srm-lane { background: var(--surface-selected); }
 .tz-row > .tz-lane, .tz-row > .g-lane, .tz-row > .srm-lane { width: var(--tz-lane); }
-.tz-pin { position: sticky; left: 0; z-index: 5; }
+.tz-pin { position: sticky; left: 0; z-index: var(--z-tz-pinned); }
 /* Zoomed, one background behind the whole label column, the panel's, under
    the labels and over the grid and marks, so no gap between two labels
    shows the lane (row 11). Its height is the content's, measured. */
-.tz-labelcol { position: sticky; left: 0; z-index: 4; width: var(--tz-label-w, 240px); height: 0; }
+.tz-labelcol { position: sticky; left: 0; z-index: var(--z-tz-over); width: var(--tz-label-w, 240px); height: 0; }
 .tz-labelcol > span { position: absolute; top: 0; left: 0; width: var(--tz-label-w, 240px); background: var(--surface); pointer-events: none; }
 
 /* The axis. It grows a row for each row of mark titles past what it holds
@@ -66,9 +78,9 @@
    lies over the today line, and a title has the panel's ground, so the
    line passes under title text (leftovers-6 FR-4). */
 .tz-axis-row { min-height: calc(52px + var(--tz-axis-grow, 0px)); border-bottom: 1px solid var(--border); margin-bottom: var(--space-1); }
-.tz-frame.zoomed .tz-axis-row { position: sticky; top: 0; z-index: 6; background: var(--surface); }
-.tz-frame.zoomed .tz-corner { z-index: 7; background: var(--surface); }
-.tz-axis { position: relative; z-index: 5; height: calc(52px + var(--tz-axis-grow, 0px)); width: var(--tz-lane); user-select: none; -webkit-user-select: none; }
+.tz-frame.zoomed .tz-axis-row { position: sticky; top: 0; z-index: var(--z-tz-axis); background: var(--surface); }
+.tz-frame.zoomed .tz-corner { z-index: var(--z-tz-corner); background: var(--surface); }
+.tz-axis { position: relative; z-index: var(--z-tz-pinned); height: calc(52px + var(--tz-axis-grow, 0px)); width: var(--tz-lane); user-select: none; -webkit-user-select: none; }
 .tz-tick { position: absolute; top: 0; bottom: 0; border-left: 1px dashed var(--border); }
 .tz-tick > span { position: absolute; top: var(--space-0-5); left: var(--space-1); font-family: var(--mono); font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-subtle); white-space: nowrap; }
 .tz-frame.zoomed .tz-tick > span { top: 20px; }
@@ -81,16 +93,23 @@
    own count of same-day marks (--row). */
 .tz-axis .g-mark > span { --row: 0; background: var(--surface); padding: 0 var(--space-0-5); border-radius: var(--radius-xs); }
 /* The rest of a crowd past three rows: "+N", named in its hover. */
-.tz-axis .g-mark > .tz-more { position: absolute; font-family: var(--mono); font-size: var(--font-size-xs); line-height: var(--line-xs); font-weight: var(--weight-semibold); color: var(--fg-muted); background: var(--surface); padding: 0 var(--space-0-5); border-radius: var(--radius-xs); white-space: nowrap; cursor: default; }
+/* "+N" rides its crowd's last title, in the title's own box (leftovers-7
+   FR-10): only its weight and colour set it apart. */
+.tz-axis .g-mark .tz-more { position: static; bottom: auto; font-weight: var(--weight-semibold); color: var(--fg-muted); cursor: default; } /* static: global.css's .g-mark span would lift it out of the frame */
 /* The today label sits in the axis on the tick labels' line, beside its
    line, and names the day at Days and Hours; a tick under it gives way. */
 .tz-today-at { position: absolute; top: 0; bottom: 0; width: 0; }
 .tz-today-label { position: absolute; top: var(--space-0-5); left: 5px; font-size: var(--font-size-xs); line-height: var(--line-xs); font-weight: var(--weight-semibold); color: var(--accent-fg); background: var(--surface); padding: 0 3px; border-radius: var(--radius-xs); white-space: nowrap; }
 .tz-frame.zoomed .tz-today-label { top: 20px; }
+/* leftovers-7 FR-10 (Timeline, 106a4bd): at Days and Hours today's own tick
+   label is in the accent, and the word (`today`, `now 14:32`) stands on the
+   context row above it, centred on today's column or the line. */
+.tz-tick.today > span { color: var(--accent-fg); font-weight: var(--weight-semibold); }
+.tz-frame.zoomed .tz-today-at.over > .tz-today-label { top: var(--space-0-5); left: 0; translate: -50% 0; }
 /* Zoomed, an axis mark's title sits beside its mark, under the tick labels. */
 .tz-frame.zoomed .g-mark span { bottom: -4px; left: calc(50% + 8px); }
 .tz-frame.zoomed.lvl-hours .g-mark span { left: 12px; }
-.tz-context { position: absolute; top: var(--space-0-5); padding: 0 var(--space-1-5); font-size: var(--font-size-sm); line-height: var(--line-sm); font-weight: var(--weight-semibold); color: var(--fg); background: var(--surface); white-space: nowrap; z-index: 3; border-radius: var(--radius-xs); }
+.tz-context { position: absolute; top: var(--space-0-5); padding: 0 var(--space-1-5); font-size: var(--font-size-sm); line-height: var(--line-sm); font-weight: var(--weight-semibold); color: var(--fg); background: var(--surface); white-space: nowrap; z-index: var(--z-tz-context); border-radius: var(--radius-xs); }
 .tz-undated-label { position: absolute; top: var(--space-0-5); padding-left: var(--space-1); font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-subtle); white-space: nowrap; border-left: 1px solid var(--border-strong); height: 100%; }
 
 /* The grid behind the rows: ticks, weekends, today. */
@@ -101,7 +120,7 @@
 .tz-weekend { position: absolute; top: 0; bottom: var(--tz-foot); background: var(--surface-raised); }
 .tz-todayband { position: absolute; top: 0; bottom: var(--tz-foot); background: var(--accent-muted); opacity: .45; }
 .tz-undated-edge { position: absolute; top: 0; bottom: var(--tz-foot); border-left: 1px solid var(--border-strong); }
-.tz-today { position: absolute; top: 0; bottom: var(--tz-foot); border-left: 2px solid var(--accent); z-index: 4; }
+.tz-today { position: absolute; top: 0; bottom: var(--tz-foot); border-left: 2px solid var(--accent); z-index: var(--z-tz-over); }
 .tz-foot { height: var(--tz-foot); }
 
 /* Marks the zoom adds: a whole day at Hours, and pointers to marks out of view. */
@@ -121,7 +140,7 @@
 .lvl-hours .g-dot, .lvl-hours .dec-dot, .lvl-hours .srm-dot { transform: none; margin-left: 0; }
 .lvl-hours .g-mark { transform: none; justify-items: start; }
 .lvl-hours .g-mark span { left: 0; }
-.tz-edge { position: absolute; top: 50%; transform: translateY(-50%); z-index: 4; display: inline-flex; align-items: center; min-height: var(--control-sm); height: var(--control-sm); padding: 0 var(--space-1-5); border: 0; border-radius: var(--radius-xs); background: var(--surface); font-family: var(--mono); font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-muted); white-space: nowrap; cursor: pointer; }
+.tz-edge { position: absolute; top: 50%; transform: translateY(-50%); z-index: var(--z-tz-over); display: inline-flex; align-items: center; min-height: var(--control-sm); height: var(--control-sm); padding: 0 var(--space-1-5); border: 0; border-radius: var(--radius-xs); background: var(--surface); font-family: var(--mono); font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-muted); white-space: nowrap; cursor: pointer; }
 .tz-edge.right { transform: translate(-100%, -50%); }
 .tz-edge:hover { color: var(--fg); background: var(--surface-hover); }
-.tz-nothing { position: absolute; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); background: var(--surface); padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); z-index: 4; white-space: nowrap; }
+.tz-nothing { position: absolute; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); background: var(--surface); padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); z-index: var(--z-tz-over); white-space: nowrap; }

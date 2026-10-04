@@ -284,7 +284,7 @@ export function DecisionsView() {
           {isOpen && canRule && (
             <div className="dec-actions">
               <span className="rb-anchor">
-                <button ref={isRuling ? ruleBtn : undefined} className="primary" aria-expanded={isRuling} onClick={() => setRuling(isRuling ? null : r.key)}>Rule</button>
+                <button ref={isRuling ? ruleBtn : undefined} className="primary" aria-label={`Rule ${d.number} ${d.title}`} aria-expanded={isRuling} onClick={() => setRuling(isRuling ? null : r.key)}>Rule</button>
                 {isRuling && <RuleDecisionBox initiative={r.initiative} decision={d} opener={ruleBtn} afterRule={() => focusAfterRule(open.indexOf(r))} onClose={() => setRuling(null)} />}
               </span>
             </div>
@@ -318,15 +318,18 @@ export function DecisionsView() {
   const heading = (id: keyof DecSections, words: string, count: string | null, order: string | null, extra?: ReactNode, fixed?: boolean, ref?: (el: HTMLDivElement | null) => void) => {
     const isOpen = fixed || sections[id];
     const label = count === null ? words : `${words} · ${count}`;
+    // leftovers-7 FR-11 (U2): the words sit in a node keyed by them, so a
+    // count that changes is a new node WKWebView paints, not a text edit in
+    // a stuck heading it left stale until hovered.
     const desc = order ? `dec-${id}-order` : undefined;
     return (
       <div className="dec-sh" ref={ref}>
         <h2 id={`dec-${id}-h`} tabIndex={-1}>
           {fixed
-            ? <span className="dec-sh-static"><span className="dec-chev" aria-hidden="true" />{label}</span>
+            ? <span className="dec-sh-static"><span className="dec-chev" aria-hidden="true" /><span key={label}>{label}</span></span>
             : (
               <button className="dec-sh-btn" aria-expanded={isOpen} aria-describedby={desc} onClick={() => handToggle(id)}>
-                <span className="dec-chev" aria-hidden="true">{isOpen ? "▾" : "▸"}</span>{label}
+                <span className="dec-chev" aria-hidden="true">{isOpen ? "▾" : "▸"}</span><span key={label}>{label}</span>
               </button>
             )}
         </h2>
@@ -489,19 +492,29 @@ function focusAfterRule(index: number) {
   revealInWrap(target);
 }
 
-/** Scrolls the page's scroller (.board-wrap) so `el` is whole in view and not
- *  under the stuck section heading; nothing when it already is. The scroller
- *  is set directly, as the landing does. */
+/** Brings a control into view in its scroller (design system, Focus and
+ *  names, "in view", 508a85e; leftovers-7 FR-11, tf6-U1): whole, and
+ *  topmost at its top edge, centre and foot, so below every stuck layer (a
+ *  section heading, a stuck record head, a stuck axis). Measured by hit
+ *  test after each move, since a scroll changes which layers stick. */
 function revealInWrap(el: HTMLElement) {
   const wrap = el.closest<HTMLElement>(".board-wrap");
   if (!wrap) { el.scrollIntoView({ block: "nearest" }); return; }
-  const w = wrap.getBoundingClientRect();
-  const sh = el.closest(".dec-section")?.querySelector<HTMLElement>(".dec-sh");
-  const shBottom = sh && sh !== el.closest(".dec-sh") ? sh.getBoundingClientRect().bottom : w.top;
-  const b = el.getBoundingClientRect();
-  const top = Math.max(w.top, shBottom) + 4;
-  if (b.top < top) wrap.scrollTop -= top - b.top;
-  else if (b.bottom > w.bottom - 4) wrap.scrollTop += b.bottom - (w.bottom - 4);
+  for (let i = 0; i < 4; i++) {
+    const w = wrap.getBoundingClientRect();
+    const b = el.getBoundingClientRect();
+    if (b.bottom > w.bottom - 4) { wrap.scrollTop += b.bottom - (w.bottom - 4); continue; }
+    if (b.top < w.top + 4) { wrap.scrollTop -= w.top + 4 - b.top; continue; }
+    const x = b.left + Math.min(b.width / 2, 24);
+    const cover = [b.top + 1, (b.top + b.bottom) / 2, b.bottom - 1]
+      .map((y) => document.elementFromPoint(x, y))
+      .find((h) => h && h !== el && !el.contains(h));
+    if (!cover) return;
+    const layer = cover.closest<HTMLElement>(".dec-sh, .dec-head, .tz-axis-row") ?? cover;
+    const under = layer.getBoundingClientRect().bottom + 4 - b.top;
+    if (under <= 0) return;
+    wrap.scrollTop -= under;
+  }
 }
 
 /** A record's body (FR-9 as amended, mal-ui U1). The periodic refresh

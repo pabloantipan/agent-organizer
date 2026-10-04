@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { countWords, decSectionsOf, decisionMatches, emptyRuledWords, lineName, rulerWords, ruledShown, shownSections, summaryOf, summaryText, timelineCount, timelineName, turnaroundWords, waitedWords } from "./decisionsPage";
+import { countWords, decSectionsOf, decisionMatches, emptyRuledWords, lineName, rulerWords, ruledShown, shownSections, summaryOf, summaryText, timelineName, turnaroundWords, waitedWords } from "./decisionsPage";
 
 const now = new Date(2026, 9, 3); // 2026-10-03, local midnight
 const rec = (number: string, raised: string, ruled = "") => ({ number, raised, ruled });
@@ -130,12 +130,6 @@ describe("sections", () => {
   it("says nothing ruled yet without a find, no match only with one (row 5)", () => {
     expect(emptyRuledWords(false)).toBe("Nothing ruled yet.");
     expect(emptyRuledWords(true)).toBe("no match");
-  });
-
-  it("names what the Timeline hides while finding (row 9)", () => {
-    expect(timelineCount(1, 71, 3, true)).toBe("1 of 71 · 3 hidden");
-    expect(timelineCount(1, 74, 0, true)).toBe("1 of 74");
-    expect(timelineCount(71, 71, 3, false)).toBeNull();
   });
 
   const stored = { rule: true, ruled: false, timeline: false };

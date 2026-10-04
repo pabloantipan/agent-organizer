@@ -1,7 +1,7 @@
 /* The Help (FR-2): an overlay under the top bar, sections list and document.
    Tier-2 tokens only. */
 .help {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--z-modal);
   display: grid; grid-template-rows: auto auto minmax(0, 1fr);
   background: var(--bg); color: var(--fg);
 }
@@ -37,6 +37,11 @@
 .help-section.d3 { padding-left: var(--space-5); }
 .help-doc { overflow-y: auto; padding: var(--space-6) var(--space-8) var(--space-12); font-size: var(--font-size-lg); line-height: 1.6; }
 .help-doc > * { max-width: 760px; }
+/* leftovers-7 FR-5 (design system, Widths): the document's 1 px edges where
+   content hides past them (HelpView, useScrollEdges). */
+.help-doc { border-top: 1px solid transparent; border-bottom: 1px solid transparent; }
+.help-doc.edge-top { border-top-color: var(--fg-subtle); }
+.help-doc.edge-bottom { border-bottom-color: var(--fg-subtle); }
 .help-doc.markdown h1 { font-size: var(--font-size-2xl); margin: 0 0 var(--space-4); }
 .help-doc.markdown h2 { font-size: var(--font-size-xl); color: var(--fg); margin: var(--space-8) 0 var(--space-3); }
 .help-doc.markdown h3 { font-size: var(--font-size-lg); margin: var(--space-6) 0 var(--space-2); }

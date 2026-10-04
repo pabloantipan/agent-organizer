@@ -56,6 +56,9 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
   display: flex; align-items: center; gap: var(--space-3);
   padding: var(--space-2) var(--space-4); border-bottom: 1px solid var(--border-subtle); background: var(--bg);
   -webkit-app-region: drag;
+  /* above the content's layers and an inline box's scrim, under a drawer
+     (design system, Elevation; leftovers-7 FR-1, FR-3) */
+  position: relative; z-index: var(--z-topbar);
 }
 .topbar * { -webkit-app-region: no-drag; }
 .brand { font-weight: 600; font-size: var(--font-size-lg); letter-spacing: .01em; }
@@ -65,7 +68,7 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
 
 /* rail */
 .rail { background: var(--bg-sunken); border-right: 1px solid var(--border-subtle); overflow: auto; display: flex; flex-direction: column; position: relative; }
-.rail > .strip-toggle { position: absolute; top: 8px; right: 6px; z-index: 1; opacity: 0; }
+.rail > .strip-toggle { position: absolute; top: 8px; right: 6px; z-index: var(--z-raised); opacity: 0; }
 .rail:hover > .strip-toggle { opacity: 1; }
 .content.with-rail.rail-strip { grid-template-columns: 46px 1fr; }
 .rail.strip { align-items: center; padding: 8px 0; gap: 4px; overflow-x: hidden; }
@@ -233,7 +236,7 @@ button.tiny { padding: 0 5px; font-size: var(--font-size-xs); line-height: 14px;
 .card-order .next-inline { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* card back */
-.modal-backdrop { position: fixed; inset: 0; background: rgba(6, 4, 12, 0.7); display: grid; place-items: start center; padding: 48px 16px; overflow: auto; }
+.modal-backdrop { position: fixed; inset: 0; z-index: var(--z-modal); background: rgba(6, 4, 12, 0.7); display: grid; place-items: start center; padding: 48px 16px; overflow: auto; }
 .modal {
   width: min(840px, 100%); background: var(--panel); color: var(--text);
   border: 1px solid var(--border-accent); border-radius: var(--r-lg); box-shadow: var(--shadow-lift);
@@ -523,7 +526,7 @@ button.counts.linkish { font-family: var(--mono); }
 .meta.ok { color: var(--local); }
 .meta.warn { color: var(--blocked); }
 .account { position: relative; }
-.menu { position: absolute; right: 0; top: calc(100% + 6px); background: var(--panel-2); border: 1px solid var(--border-accent); border-radius: var(--r); padding: 6px; display: grid; gap: 2px; min-width: 220px; z-index: 20; box-shadow: var(--shadow-lift); }
+.menu { position: absolute; right: 0; top: calc(100% + 6px); background: var(--panel-2); border: 1px solid var(--border-accent); border-radius: var(--r); padding: 6px; display: grid; gap: 2px; min-width: 220px; z-index: var(--z-raised); box-shadow: var(--shadow-lift); }
 .menu button { justify-content: flex-start; width: 100%; border-radius: var(--radius-md); }
 .menu-head { padding: 4px 10px 6px; color: var(--muted); font-size: var(--font-size-sm); border-bottom: 1px solid var(--border); margin-bottom: 4px; }
 .settings-block { background: var(--panel); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 12px 14px; }
@@ -602,7 +605,7 @@ button.counts.linkish { font-family: var(--mono); }
 .tl-thread { display: flex; flex-direction: column; gap: 10px; padding: 0 0 6px; }
 /* Sticky, so it must be opaque: anything translucent lets the messages
    scrolling beneath it bleed through the title. */
-.tl-divider { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 6px 10px; border-radius: var(--radius-md); background: var(--panel-2); border: 1px solid var(--border); cursor: pointer; position: sticky; top: 0; z-index: 2; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45); }
+.tl-divider { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 6px 10px; border-radius: var(--radius-md); background: var(--panel-2); border: 1px solid var(--border); cursor: pointer; position: sticky; top: 0; z-index: var(--z-sticky); box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45); }
 .tl-divider:hover { border-color: var(--border-accent); }
 .tl-thread.target .tl-divider { border-color: var(--border-accent); background: #32264d; }
 .tl-thread.hot .tl-divider { border-left: 3px solid var(--blocked); }
