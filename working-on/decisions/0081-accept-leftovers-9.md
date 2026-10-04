@@ -18,7 +18,7 @@ superseded_by:
 
 Two severity-2 calls by Aglaea from rule-words-and-dates' UI review, none
 needing your word on design. Build spec `docs/specs/leftovers-9.md`, one card,
-`drafts-and-slack` (S1-S3):
+`drafts-and-slack` (S1-S4):
 
 - Escape no longer loses what you wrote: the rule box on Home and Decisions,
   a card comment and the conversation composer keep a draft per record or
@@ -26,6 +26,9 @@ needing your word on design. Build spec `docs/specs/leftovers-9.md`, one card,
   while one is kept. Session only, nothing written to disk.
 - Home at 1512 with the rail as a strip: fixed columns give their spare room
   to cut cells, so the next date shows whole.
+- added before your ruling, sup35's own sev 1 rows: the header's target and
+  the card back's date in words, not ISO; a Stages row, the comment field and
+  the composer's fields get names a screen reader reads.
 
 forecast: 40-80 min of wave time over 1 wave, plus this decision (median
 0 d); basis: 15 single-wave tasks, this initiative (rule-words-and-dates 52).
