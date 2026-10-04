@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: roles-ui
 updated: 2026-10-04
-next: "fse: start a supervisor once drafts-and-slack is in done/ too (both change Home.tsx and home.css); roles-feed landed"
+next: "sup38 builds it (0083 ruled; roles-feed and drafts-and-slack in done/)"
 depends_on: [roles-feed, drafts-and-slack]
 boundary: ["frontend/src/components/Home.tsx, Rail.tsx, a new RoleDrawer.tsx", "frontend/src/styles/home.css, shell.css (the rail group only), a roles stylesheet", "frontend/src/lib/ (a roles view helper) and its tests", "frontend/src/stores/board.store.ts (the drawer's open state and the rail group's collapse only)", "not: Go, docs/design-system.md"]
 spec: "docs/ux/specs/transversal-roles.md (Aglaea, 299b221) and its Technical note T5; ruling 0082"
@@ -21,6 +21,7 @@ mail and its initiatives, and opens a role without starting anything.
 - [ ] `XDG_DATA_HOME=$(mktemp -d) make test` from a clean checkout; `cd frontend && npm run build`; `wails build`
 
 ## Done
+- 2026-10-04 sup38 launched by the FSE
 - 2026-10-04 0083 ruled by pablo ("Ok", accept as written)
 - 2026-10-04 cut by the FSE from Aglaea's design (299b221) and 0082
 
