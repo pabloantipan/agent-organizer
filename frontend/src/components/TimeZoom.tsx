@@ -3,7 +3,7 @@ import { flushSync } from "react-dom";
 import {
   GUTTER, LABEL_GAP, LABEL_W, LEVEL_WORD, TICK_GAP, anchorScroll, axisGrowth, buttonAnchor, clampScroll, contextAt, dayMonth, deeper, fitIsWeekly,
   focusAfter, keptBy, overlaps, raised, revealScroll, scaleOf, seriesIndex, shallower, shiftInside, sideOf, skipStep, stackTitles, startOfDay,
-  addLocalDays, stepOf, ticksOf, todayLabel, todayScroll, windowOf,
+  addLocalDays, stepOf, ticksOf, todayAt, todayLabel, todayScroll, todayTick, windowOf,
   type Box, type Level, type Scale, type Span, type ZoomButton,
 } from "../lib/axis";
 import "../styles/time-zoom.css";
@@ -302,13 +302,15 @@ export function TimeFrame({ z, label, axis, extents, undated, children }: FrameP
             <div className="tz-label tz-corner" />
             <div className="tz-axis" onDoubleClick={(e) => z.onAxisDoubleClick(e.clientX)} title={z.canIn ? "Double-click to zoom in here" : undefined}>
               {ticks.filter((t) => t.major && t.label).map((t) => (
-                <span key={t.at} className={`tz-tick ${t.midnight ? "midnight" : ""}`} style={{ left: t.x, width: t.width }}><span data-k={seriesIndex(t, z.level, weekly)}>{t.label}</span></span>
+                <span key={t.at} className={`tz-tick ${t.midnight ? "midnight" : ""} ${todayTick(t, z.level, z.now) ? "today" : ""}`} style={{ left: t.x, width: t.width }}><span data-k={seriesIndex(t, z.level, weekly)}>{t.label}</span></span>
               ))}
               {ticks.filter((t) => !t.major && t.label).map((t) => (
                 <span key={t.at} className="tz-tick minor" style={{ left: t.x }}><span data-k={seriesIndex(t, z.level, weekly)}>{t.label}</span></span>
               ))}
               {z.reserve > 0 && undated && <span className="tz-undated-label" style={{ left: s.width }} title={undated}>{undated}</span>}
-              {xNow >= 0 && xNow <= s.width && <span className="tz-today-at" style={{ left: xNow }}><span className="tz-today-label">{todayWord}</span></span>}
+              {/* leftovers-7 FR-10: zoomed, the word sits on the context row,
+                  centred over today's column (Days) or the line (Hours) */}
+              {xNow >= 0 && xNow <= s.width && <span className={`tz-today-at ${zoomed ? "over" : ""}`} style={{ left: zoomed ? todayAt(s, z.now) : xNow }}><span className="tz-today-label">{todayWord}</span></span>}
               {axis}
               {ctx && <span className="tz-context" style={{ left: Math.max(z.scrollX, 0) }}>{ctx}</span>}
             </div>
@@ -342,7 +344,7 @@ export function TimeFrame({ z, label, axis, extents, undated, children }: FrameP
  *    would overlap a label already placed stacks a row up, a row of its own
  *    text height at a time, up to TITLE_ROWS rows (stackTitles); the axis
  *    grows to hold the rows used (--tz-axis-grow), and the rest of a crowd
- *    fold into "+N" beside the top row's title, named in its hover and
+ *    fold into "+N" written on the top row's title, named in its hover and
  *    accessible name. Titles have the panel's ground and lie over the today
  *    line (time-zoom.css).
  *  - A tick label is never moved off its tick: one the room would cut is
@@ -394,7 +396,7 @@ function placeAxisLabels(content: HTMLElement, level: Level) {
     const [l, h] = room(e);
     if (at < l || at > h) { hide(e); return null; }
     let b = boxOf(e.getBoundingClientRect());
-    if (e === today && b.right > h) {
+    if (e === today && level === "fit" && b.right > h) {
       e.style.left = "auto"; e.style.right = "5px";
       b = boxOf(e.getBoundingClientRect());
     }
@@ -422,6 +424,7 @@ function placeAxisLabels(content: HTMLElement, level: Level) {
   const { row, into } = stackTitles(titles.map((t) => t.box), step, shown);
   const folded = new Map<number, HTMLElement[]>();
   const boxes: Box[] = [];
+  const boxOfTitle = new Map<number, number>();
   titles.forEach((t, i) => {
     if (row[i] < 0) {
       hide(t.e);
@@ -429,26 +432,27 @@ function placeAxisLabels(content: HTMLElement, level: Level) {
       return;
     }
     if (row[i] > 0) t.e.style.bottom = `${(parseFloat(getComputedStyle(t.e).bottom) || 0) + row[i] * step}px`;
+    boxOfTitle.set(i, boxes.length);
     boxes.push(raised(t.box, row[i], step));
   });
-  // The rest of a crowd: "+N" after the top row's title, or before it where
-  // the room ends (the title's own glyph is the date it stands for).
+  // The rest of a crowd: "+N" written on the crowd's last shown title, the
+  // top row's (`Pilot opens · +1`), never a label of its own beside another
+  // (design system, Timeline, 106a4bd; leftovers-7 FR-10). The title, now
+  // longer, is moved back inside its room.
   for (const [i, rest] of folded) {
     const t = titles[i];
     const more = document.createElement("span");
     const names = rest.map((e) => e.textContent ?? "").join(", ");
     more.className = "tz-more";
-    more.textContent = `+${rest.length}`;
+    more.textContent = ` · +${rest.length}`;
     more.title = `${rest.length} more: ${names}`;
-    more.setAttribute("role", "img");
-    more.setAttribute("aria-label", more.title);
-    more.style.bottom = t.e.style.bottom || getComputedStyle(t.e).bottom;
-    t.e.parentElement!.appendChild(more);
-    const at = t.e.offsetLeft + t.dx;
-    more.style.left = `${at + t.e.offsetWidth + LABEL_GAP_PX}px`;
-    let b = boxOf(more.getBoundingClientRect());
-    if (b.right > room(t.e)[1]) { more.style.left = `${at - more.offsetWidth - LABEL_GAP_PX}px`; b = boxOf(more.getBoundingClientRect()); }
-    boxes.push(b);
+    more.setAttribute("aria-label", `, and ${more.title}`);
+    t.e.appendChild(more);
+    const [l, h] = room(t.e);
+    const b = boxOf(t.e.getBoundingClientRect());
+    const dx = shiftInside(b, l, h);
+    if (dx !== null && dx !== 0) t.e.style.transform = `translateX(${t.dx + dx}px)`;
+    boxes[boxOfTitle.get(i)!] = boxOf(t.e.getBoundingClientRect());
   }
   // The axis grows by what the highest title needs, and gives back what it
   // no longer does; titles hang from its foot, so they move down with it.
@@ -472,9 +476,6 @@ function placeAxisLabels(content: HTMLElement, level: Level) {
     for (const t of series) if (!keptBy(t.k, k) || shown.some((o) => overlaps(o, t.b))) hide(t.e);
   }
 }
-
-/** The room between a title and its "+N". */
-const LABEL_GAP_PX = 4;
 
 /** A cheap signature of a graph's axis marks: each element's key, class,
  *  title and style, and the text, so the labels are placed again when a

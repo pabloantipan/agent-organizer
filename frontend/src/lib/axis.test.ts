@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   HOUR, PX_DAY, PX_HOUR, REVEAL_MARGIN, TICK_GAP, TITLE_ROWS, anchorScroll, axisGrowth, buttonAnchor, contextAt, contextLabel, deeper,
-  endOf, firstWholeUnit, focusAfter, todayLabel, stackTitles, offersHours, revealScroll, scaleOf, shallower, sideOf, startOfDay,
+  endOf, firstWholeUnit, focusAfter, todayLabel, todayTick, todayAt, stackTitles, offersHours, revealScroll, scaleOf, shallower, sideOf, startOfDay,
   ticksOf, shiftInside, overlaps, skipStep, keptBy, seriesIndex, fitIsWeekly, timesLabel, todayScroll, when, windowOf,
 } from "./axis";
 
@@ -228,11 +228,30 @@ describe("the first whole unit in view names the context (leftovers-6 FR-1)", ()
 });
 
 describe("the today label (leftovers-6 FR-1)", () => {
-  it("says the day at Days and Hours, today alone at Fit", () => {
+  it("says today at Fit and Days and the time at Hours; the day is today's own tick (leftovers-7 FR-10)", () => {
     const sat3 = local(2026, 10, 3, 14, 32);
-    expect(todayLabel("days", sat3)).toBe("today · Sat 3");
-    expect(todayLabel("hours", sat3)).toBe("now 14:32 · Sat 3");
+    expect(todayLabel("days", sat3)).toBe("today");
+    expect(todayLabel("hours", sat3)).toBe("now 14:32");
     expect(todayLabel("fit", sat3)).toBe("today");
+  });
+
+  it("marks today's own tick at Days and the hour now is in at Hours, none at Fit", () => {
+    const sat3 = local(2026, 10, 3, 14, 32);
+    const days = scaleOf("days", { from: local(2026, 9, 28), to: local(2026, 10, 10) }, 800);
+    const dayTicks = ticksOf(days).filter((t) => todayTick(t, "days", sat3));
+    expect(dayTicks.map((t) => t.label)).toEqual(["Sat 3"]);
+    const hours = scaleOf("hours", { from: local(2026, 10, 3, 10), to: local(2026, 10, 3, 18) }, 800);
+    expect(ticksOf(hours).filter((t) => todayTick(t, "hours", sat3)).map((t) => t.label)).toEqual(["14:00"]);
+    const fit = scaleOf("fit", { from: local(2026, 9, 1), to: local(2026, 11, 1) }, 800);
+    expect(ticksOf(fit).some((t) => todayTick(t, "fit", sat3))).toBe(false);
+  });
+
+  it("stands the today label on today's column's middle at Days, on the line elsewhere", () => {
+    const sat3 = local(2026, 10, 3, 14, 32);
+    const days = scaleOf("days", { from: local(2026, 9, 28), to: local(2026, 10, 10) }, 800);
+    expect(todayAt(days, sat3)).toBeCloseTo((days.x(local(2026, 10, 3)) + days.x(local(2026, 10, 4))) / 2);
+    const hours = scaleOf("hours", { from: local(2026, 10, 3, 10), to: local(2026, 10, 3, 18) }, 800);
+    expect(todayAt(hours, sat3)).toBe(hours.x(sat3));
   });
 });
 

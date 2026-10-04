@@ -93,12 +93,19 @@
    own count of same-day marks (--row). */
 .tz-axis .g-mark > span { --row: 0; background: var(--surface); padding: 0 var(--space-0-5); border-radius: var(--radius-xs); }
 /* The rest of a crowd past three rows: "+N", named in its hover. */
-.tz-axis .g-mark > .tz-more { position: absolute; font-family: var(--mono); font-size: var(--font-size-xs); line-height: var(--line-xs); font-weight: var(--weight-semibold); color: var(--fg-muted); background: var(--surface); padding: 0 var(--space-0-5); border-radius: var(--radius-xs); white-space: nowrap; cursor: default; }
+/* "+N" rides its crowd's last title, in the title's own box (leftovers-7
+   FR-10): only its weight and colour set it apart. */
+.tz-axis .g-mark .tz-more { font-weight: var(--weight-semibold); color: var(--fg-muted); cursor: default; }
 /* The today label sits in the axis on the tick labels' line, beside its
    line, and names the day at Days and Hours; a tick under it gives way. */
 .tz-today-at { position: absolute; top: 0; bottom: 0; width: 0; }
 .tz-today-label { position: absolute; top: var(--space-0-5); left: 5px; font-size: var(--font-size-xs); line-height: var(--line-xs); font-weight: var(--weight-semibold); color: var(--accent-fg); background: var(--surface); padding: 0 3px; border-radius: var(--radius-xs); white-space: nowrap; }
 .tz-frame.zoomed .tz-today-label { top: 20px; }
+/* leftovers-7 FR-10 (Timeline, 106a4bd): at Days and Hours today's own tick
+   label is in the accent, and the word (`today`, `now 14:32`) stands on the
+   context row above it, centred on today's column or the line. */
+.tz-tick.today > span { color: var(--accent-fg); font-weight: var(--weight-semibold); }
+.tz-frame.zoomed .tz-today-at.over > .tz-today-label { top: var(--space-0-5); left: 0; translate: -50% 0; }
 /* Zoomed, an axis mark's title sits beside its mark, under the tick labels. */
 .tz-frame.zoomed .g-mark span { bottom: -4px; left: calc(50% + 8px); }
 .tz-frame.zoomed.lvl-hours .g-mark span { left: 12px; }
