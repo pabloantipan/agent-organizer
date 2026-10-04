@@ -11,6 +11,7 @@ spec: "docs/specs/leftovers-6.md (FR-1 to FR-7, FR-6a); the ranking docs/ux/revi
 gate: "docs/specs/leftovers-6.md Acceptance, rows N1 to N6 and N0"
 ui_review: true
 seat: tf6-build
+review: pass
 ---
 
 ## Goal
@@ -30,6 +31,12 @@ rule-box-and-stages lands.
 ## Next
 
 ## Blockers
+
+## Review
+- Verdict: pass (code and gate review; the WKWebView N1 row and the zoom-row shots are the UI reviewer's)
+- Unmet gate items: none. N0 re-run in the worktree at f28f167: `XDG_DATA_HOME=$(mktemp -d) make test` exit 0, `npm test` 183 passed, `npm run build` exit 0; `wails build` from the builder's log. N6: 76 records, generate.py re-run reproduces the committed tree byte for byte. N1-N5 from the diff and the builder's recorded JSON and shots. Boundary: every changed path inside it; RuleDecisionBox.tsx, decisions.css, Go and docs untouched.
+- Not covered by the gate: FR-4's 12 px between tick labels holds at Fit and Hours only; Days keeps 4 px (N3 checks Fit alone), a spec deviation for the FSE/Aglaea to rule. "No <noun> in this window." without Today applies at every zoomed level with today in view, not only Hours (FR-6). At Days the today label hides the next two day ticks. `timelineCount` in lib/decisionsPage.ts is dead.
+- Reviewer: tf6-review, 2026-10-04
 
 ## Notes
 - Days keeps 4 px between tick labels, not 12: a day column is 40 px and "Wed 30" ~35 px, so 12 px would drop every other day against the zoom spec's A2. 12 px holds at Fit and Hours. For the UI reviewer / Aglaea.
