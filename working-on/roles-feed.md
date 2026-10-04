@@ -4,12 +4,13 @@ status: next
 repos: [organizer]
 branch: roles-feed
 updated: 2026-10-04
-next: "sup37 builds it (0083 ruled, accept as written)"
+next: "rf-build builds it in .wt/roles-feed (sup37)"
 depends_on: []
 boundary: ["internal/config (roles)", "internal/model (Role and its parts)", "internal/service (roles.go, AgentsView.Roles, its tests)", "internal/cli (organizer roles)", "app.go bindings and frontend/wailsjs regenerated", "testdata/ fixtures for roles", "not: frontend/src components, docs/design-system.md"]
 spec: "docs/ux/specs/transversal-roles.md (Aglaea, 299b221) and its Technical notes T1-T4; ruling 0082"
 gate: "the Gate section below"
 ui_review: false
+seat: rf-build
 ---
 
 ## Goal
