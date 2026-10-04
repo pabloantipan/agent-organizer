@@ -251,6 +251,19 @@ button.tiny { padding: 0 5px; font-size: var(--font-size-xs); line-height: 14px;
 .modal-body { display: grid; grid-template-columns: 1fr 230px; gap: 22px; padding: 6px 22px 22px; }
 .modal-main { min-width: 0; }
 .modal-side { border-left: 1px solid var(--border); padding-left: 18px; min-width: 0; }
+/* leftovers-8 FR-6 (lf7-ui A2; design system, Widths): the card back is
+   capped at the window, less the backdrop's padding, and scrolls its own
+   body, never its backdrop; the head stays. Each end of the body with
+   content hidden past it carries the 1 px --fg-subtle edge (useScrollEdges
+   in CardDrawer). */
+.modal.card-back { display: flex; flex-direction: column; max-height: calc(100vh - 96px); }
+.modal.card-back > .modal-head { flex: none; }
+.modal.card-back > .modal-body {
+  flex: 0 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+  border-top: 1px solid transparent; border-bottom: 1px solid transparent;
+}
+.modal.card-back > .modal-body.edge-top { border-top-color: var(--fg-subtle); }
+.modal.card-back > .modal-body.edge-bottom { border-bottom-color: var(--fg-subtle); }
 .labels { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
 .section-label { font-size: var(--font-size-sm); font-weight: 600; color: var(--muted); margin: 16px 0 6px; }
 .modal-main .section-label:first-child, .modal-side .section-label:first-child { margin-top: 0; }

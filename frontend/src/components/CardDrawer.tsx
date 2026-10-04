@@ -7,7 +7,7 @@ import { ageLabel, notesAsContext, shortHome, since } from "../lib";
 import { useBoard } from "../stores/board.store";
 import { readOnlyOf } from "../lib/queue";
 import { openBox } from "../lib/boxStack";
-import { useMarkdownEdges } from "../lib/useScrollEdges";
+import { useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
 import { focusBoxBelow } from "./RuleDecisionBox";
 
 /** Focus and names, opening inline (widths-and-focus FR-19): the card back
@@ -46,6 +46,9 @@ export function CardDrawer() {
   const title = useRef<HTMLHeadingElement>(null);
   const body = useRef<HTMLDivElement>(null);
   useMarkdownEdges(body, html);
+  // leftovers-8 FR-6: the card back scrolls its own body, with the edge.
+  const scroller = useRef<HTMLDivElement>(null);
+  const edges = useScrollEdges(scroller, open);
   const titleId = useId();
   useFocusOpener(selected ? `${selected.initiative_id}/${selected.slug}` : null, title);
   if (!selected) return null;
@@ -56,7 +59,7 @@ export function CardDrawer() {
   const dir = c.path.replace(/\/working-on\/.*$/, "");
   return (
     <div className="modal-backdrop" onClick={() => select(null)}>
-      <div className={`modal ${c.status}`} onClick={(e) => e.stopPropagation()} role="dialog" aria-labelledby={titleId}>
+      <div className={`modal card-back ${c.status}`} onClick={(e) => e.stopPropagation()} role="dialog" aria-labelledby={titleId}>
         <header className="modal-head">
           <div>
             <h2 ref={title} id={titleId} tabIndex={-1}>{c.title || c.slug}</h2>
@@ -66,7 +69,7 @@ export function CardDrawer() {
           </div>
           <button className="ghost" onClick={() => select(null)} aria-label="Close"><X size={16} /></button>
         </header>
-        <div className="modal-body">
+        <div ref={scroller} className={`modal-body ${edges.top ? "edge-top" : ""} ${edges.bottom ? "edge-bottom" : ""}`}>
           <div className="modal-main">
             <div className="labels">
               <span className={`badge ${c.status}`}>{c.status}</span>
