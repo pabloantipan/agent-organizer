@@ -22,6 +22,7 @@ sup31's leftovers, the severity-3 layer bug first.
 - [x] P0: see `docs/specs/leftovers-7.md`, Acceptance
 
 ## Done
+- 2026-10-04 lf7-build: review's FR-2 defect fixed (Help closed with no box returns focus to the top bar's Help button; Chromium 1512x945 and 1024x640, Escape and Close); no lib test, since the opener is read off the live DOM in HelpView and no new lib file is in the boundary
 - 2026-10-04 lf7-build: FR-1 to FR-11 on branch layers-focus-and-words (12 commits, rebased on main 4242d2c, cfa6937 tip); P0 and P1-P8 pass in Chromium, WKWebView not driven; rows in .wt-notes/lf7-build/gate.md
 - 2026-10-04 0078 ruled by pablo ("Ok", accept as written, 045ff78); sup33 launched by the FSE
 - 2026-10-04 cut from leftovers-7 by the FSE
