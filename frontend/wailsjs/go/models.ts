@@ -21,6 +21,26 @@ export namespace auth {
 
 export namespace config {
 	
+	export class Role {
+	    name: string;
+	    description: string;
+	    sessions: string;
+	    bitacora: string;
+	    here: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Role(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.description = source["description"];
+	        this.sessions = source["sessions"];
+	        this.bitacora = source["bitacora"];
+	        this.here = source["here"];
+	    }
+	}
 	export class Config {
 	    machine: string;
 	    roots: string[];
@@ -42,6 +62,7 @@ export namespace config {
 	    crew_model: string;
 	    record_url: string;
 	    help_doc: string;
+	    roles: Role[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -69,7 +90,26 @@ export namespace config {
 	        this.crew_model = source["crew_model"];
 	        this.record_url = source["record_url"];
 	        this.help_doc = source["help_doc"];
+	        this.roles = this.convertValues(source["roles"], Role);
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 
 }
@@ -932,6 +972,192 @@ export namespace model {
 	        this.err = source["err"];
 	    }
 	}
+	export class RoleMail {
+	    thread_id: string;
+	    subject: string;
+	    project: string;
+	    initiative: string;
+	    from: string;
+	    status: string;
+	    age_seconds: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new RoleMail(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.thread_id = source["thread_id"];
+	        this.subject = source["subject"];
+	        this.project = source["project"];
+	        this.initiative = source["initiative"];
+	        this.from = source["from"];
+	        this.status = source["status"];
+	        this.age_seconds = source["age_seconds"];
+	    }
+	}
+	export class RoleLogLine {
+	    date: string;
+	    text: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RoleLogLine(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.date = source["date"];
+	        this.text = source["text"];
+	    }
+	}
+	export class RoleHandOff {
+	    title: string;
+	    date: string;
+	    host: string;
+	    first_line: string;
+	    body: string;
+	    stale: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new RoleHandOff(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.title = source["title"];
+	        this.date = source["date"];
+	        this.host = source["host"];
+	        this.first_line = source["first_line"];
+	        this.body = source["body"];
+	        this.stale = source["stale"];
+	    }
+	}
+	export class RoleBitacora {
+	    path: string;
+	    initiative: string;
+	    hand_off?: RoleHandOff;
+	    others: RoleHandOff[];
+	    log: RoleLogLine[];
+	
+	    static createFrom(source: any = {}) {
+	        return new RoleBitacora(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.initiative = source["initiative"];
+	        this.hand_off = this.convertValues(source["hand_off"], RoleHandOff);
+	        this.others = this.convertValues(source["others"], RoleHandOff);
+	        this.log = this.convertValues(source["log"], RoleLogLine);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class RoleSession {
+	    name: string;
+	    initiative: string;
+	    state: string;
+	    working: boolean;
+	    context?: number;
+	    created: string;
+	    uptime: string;
+	    pid: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new RoleSession(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.initiative = source["initiative"];
+	        this.state = source["state"];
+	        this.working = source["working"];
+	        this.context = source["context"];
+	        this.created = source["created"];
+	        this.uptime = source["uptime"];
+	        this.pid = source["pid"];
+	    }
+	}
+	export class Role {
+	    name: string;
+	    description: string;
+	    here: boolean;
+	    state: string;
+	    working: boolean;
+	    sessions: RoleSession[];
+	    context?: number;
+	    // Go type: time
+	    last_seen?: any;
+	    last_seen_in: string;
+	    bitacoras: RoleBitacora[];
+	    bitacora_expected: string;
+	    mail: RoleMail[];
+	    mail_unknown: boolean;
+	    initiatives: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Role(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.description = source["description"];
+	        this.here = source["here"];
+	        this.state = source["state"];
+	        this.working = source["working"];
+	        this.sessions = this.convertValues(source["sessions"], RoleSession);
+	        this.context = source["context"];
+	        this.last_seen = this.convertValues(source["last_seen"], null);
+	        this.last_seen_in = source["last_seen_in"];
+	        this.bitacoras = this.convertValues(source["bitacoras"], RoleBitacora);
+	        this.bitacora_expected = source["bitacora_expected"];
+	        this.mail = this.convertValues(source["mail"], RoleMail);
+	        this.mail_unknown = source["mail_unknown"];
+	        this.initiatives = source["initiatives"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+	
+	
+	
 	export class Scope {
 	    in: string[];
 	    out: string[];
@@ -1334,6 +1560,7 @@ export namespace service {
 	export class AgentsView {
 	    groups: AgentGroup[];
 	    unassigned: model.Agent[];
+	    roles: model.Role[];
 	    // Go type: time
 	    sampled_at: any;
 	
@@ -1345,6 +1572,7 @@ export namespace service {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.groups = this.convertValues(source["groups"], AgentGroup);
 	        this.unassigned = this.convertValues(source["unassigned"], model.Agent);
+	        this.roles = this.convertValues(source["roles"], model.Role);
 	        this.sampled_at = this.convertValues(source["sampled_at"], null);
 	    }
 	
