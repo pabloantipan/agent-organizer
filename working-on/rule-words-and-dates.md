@@ -21,7 +21,7 @@ sup33's leftovers with Aglaea's A1-A3.
 - [ ] Q0: see `docs/specs/leftovers-8.md`, Acceptance
 
 ## Done
-- 2026-10-04 rwd-build: FR-1, 2, 3, 5, 6, 7, 8 built on rule-words-and-dates (3c75331 ba3e7e3 92e2c93 6e175f9 2d90b7f fd619fa 617af3e, fixture ea9337e); Q1 Q2 Q5 Q6 Q7 Q0 pass in Chromium and WKWebView, Q3's values pass in WKWebView (`.wt-notes/rwd-build/gate.md`)
+- 2026-10-04 rwd-build: FR-1, 2, 3, 5, 6, 7, 8 built on rule-words-and-dates (2d76c08 a77e5ea a2290b0 9595953 c607d1c d1c2ea1 2aa1afb, fixture dff9f41); Q1 Q2 Q5 Q6 Q7 Q0 pass in Chromium and WKWebView, Q3's values pass in WKWebView (`.wt-notes/rwd-build/gate.md`)
 - 2026-10-04 0080 ruled by pablo ("Ok", 5fa5b5e); sup35 launched by the FSE
 - 2026-10-04 cut from leftovers-8 by the FSE
 
@@ -34,7 +34,7 @@ sup33's leftovers with Aglaea's A1-A3.
   typing in WKWebView on this machine (a control field without the
   attributes was not corrected either): left to the UI reviewer with a real
   keyboard.
-- FR-4 measured (rwd-build, 2026-10-04, ea9337e, fixture): Home at a
+- FR-4 measured (rwd-build, 2026-10-04, dff9f41, fixture): Home at a
   1512×945 window, rail as a strip. The list (`.home-list`, and Needs me
   above it) ends at x=1306 in both engines: `.home` is 1240 px wide because
   `.home { max-width: 1240px }` (`frontend/src/styles/shell.css:65`) holds
