@@ -11,6 +11,7 @@ boundary: ["frontend/src/styles/tokens.css (z-index tokens), global.css (.modal-
 spec: "docs/specs/leftovers-7.md (FR-1 to FR-9); the ranking docs/ux/reviews/2026-10-04-rank-leftovers-7.md (Aglaea, adfce1e); the design system as amended there"
 gate: "docs/specs/leftovers-7.md Acceptance, rows P1 to P8 and P0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -28,6 +29,14 @@ sup31's leftovers, the severity-3 layer bug first.
 ## Next
 
 ## Blockers
+
+## Review
+- Verdict: pass (code review; the WKWebView shots of P1-P4 and P8 are the UI reviewer's)
+- Commit reviewed: cfa6937 (branch layers-focus-and-words)
+- Unmet gate items: none
+- Checked: every changed path inside the boundary plus sup33's Help allowance; no raw z-index in the changed files (grep); vitest 185 pass, `npm run build` pass, Go tests pass in a clean worktree once `frontend/dist` exists; P1-P8 against the builder's Chromium measurements (.wt-notes/lf7-build/gate.md) and the diff.
+- Not gated, should be: Help closed with no rule box open loses focus. HelpView's opener effect runs after the mount effect focused Help's own Close, so it captures Close as the opener and the top-bar fallback never applies (FR-2's "else to the opener"; P2 only tests with a box). From a clean checkout `make test` fails at `go vet` (main.go embeds frontend/dist, which is not built yet). The Makefile is unchanged on this branch, but P0's "clean checkout" depends on build order.
+- Reviewer: lf7-review, 2026-10-04
 
 ## Notes
 - Boundary widened by sup33 for P4: HelpView.tsx takes useScrollEdges on .help-doc, help.css its edge rules. Help's side edge not exercised: the real help_doc has no pre wider than its column.
