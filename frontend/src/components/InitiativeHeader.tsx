@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronDown, ChevronRight, Code2, FileText, Lock, Route } from "lucide-react";
 import type { merge, model } from "../../wailsjs/go/models";
-import { parseISO, today } from "../lib/dates";
+import { dateWords, parseISO, today } from "../lib/dates";
 import { api } from "../hooks/useWails";
 import { firstWaiting, phaseRuns, stagePosition, waitingChip } from "../lib/header";
 import { leadOf, readOnlyOf } from "../lib/queue";
@@ -216,7 +216,7 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
         {chip && first ? (
           <button className="lz waiting ihead-chip" onClick={() => openDecision(i.id, first)} title="open Decisions on the first record waiting on a ruling">{chip}</button>
         ) : headerOpen ? <span className="ihead-nochip">no decision waiting</span> : null}
-        {i.target && <span className="ihead-target">target <b className="num">{i.target}</b></span>}
+        {i.target && <span className="ihead-target">target <b className="num">{dateWords(i.target)}</b></span>}
         {!headerOpen && <span className={`ihead-goal-line ${i.goal ? "" : "missing"}`} title={i.goal || undefined}>{i.goal || "no goal yet"}</span>}
         <span className="spacer" />
         <button className="ihead-details" aria-expanded={headerOpen} aria-controls={`ihead-open-${i.id}`} onClick={() => setHeaderOpen(!headerOpen)}>

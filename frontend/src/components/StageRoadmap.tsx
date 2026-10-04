@@ -223,12 +223,17 @@ function StageRow({ r, now, pos, z, initiative, cards, sharing, open, onToggle, 
   let row = 0;
   for (const l of labels) { row = l.at - last < 36 ? row + 1 : 0; lift.set(l.g.id, row % 2); last = l.at; }
   const ext = extentOf(r);
+  // leftovers-9 FR-4: the row's name carries its dates as the bar draws
+  // them, in words, else what the sub line says (appetite, no date).
+  const span = r.end && r.start && daysBetween(r.start, r.end) >= 1
+    ? `${dateWords(r.start)} to ${dateWords(r.end)}${r.state === "done" ? ", done" : ", target"}`
+    : r.toToday && r.start ? `since ${dateWords(r.start)}, in progress` : sub;
 
   return (
     <>
     <div className={`srm-row tz-row ${r.state} ${open ? "expanded" : ""}`}>
       <button ref={toggleRef} className="srm-label srm-toggle tz-label" aria-expanded={open} aria-controls={`srm-detail-${r.n}`}
-        aria-label={`Stage ${r.n}: ${s.title || s.id}${state ? `, ${state}` : ""}. ${open ? "Hide" : "Show"} its detail`}
+        aria-label={`Stage ${r.n}: ${s.title || s.id}${state ? `, ${state}` : ""}, ${span}. ${open ? "Hide" : "Show"} its detail`}
         onClick={onToggle}>
         <span className="srm-head">
           <span className="srm-n num">{r.n}{state && ` · ${state}`}</span>
