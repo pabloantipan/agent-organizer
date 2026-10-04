@@ -4,7 +4,7 @@ status: done
 repos: [organizer]
 branch: roles-feed
 updated: 2026-10-04
-next: "review: roles-feed, G1-G3 met"
+next: "merged 8402e31; roles-ui is next (fse)"
 depends_on: []
 boundary: ["internal/config (roles)", "internal/model (Role and its parts)", "internal/service (roles.go, AgentsView.Roles, its tests)", "internal/cli (organizer roles)", "app.go bindings and frontend/wailsjs regenerated", "testdata/ fixtures for roles", "not: frontend/src components, docs/design-system.md"]
 spec: "docs/ux/specs/transversal-roles.md (Aglaea, 299b221) and its Technical notes T1-T4; ruling 0082"
@@ -23,6 +23,7 @@ The data the Roles group shows, on the 10 s agents feed and `organizer roles`.
 - [x] G3: `wails generate module` run; `XDG_DATA_HOME=$(mktemp -d) make test` from a clean checkout; `wails build`
 
 ## Done
+- 2026-10-04 sup37: review pass at de539d9 (rf-review); merged to main as 8402e31; seats ended, threads closed; run record runs/2026-10-04-roles-feed.md
 - 2026-10-04 rf-build: roles config, `service.Roles` on `AgentsView.Roles`, `organizer roles [--json]`, bindings (70fb345, 1e9fc4a, a13493d, de539d9 on roles-feed, based on 363edcf); G1-G3 met
 - 2026-10-04 0083 ruled by pablo ("Ok", accept as written); sup37 launched by the FSE
 - 2026-10-04 cut by the FSE from Aglaea's design (299b221) and 0082
