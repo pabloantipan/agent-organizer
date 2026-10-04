@@ -29,3 +29,4 @@ sup31's leftovers, the severity-3 layer bug first.
 ## Blockers
 
 ## Notes
+- 2026-10-04 sup33 widened the boundary for P4's Help row: `HelpView.tsx` takes `useScrollEdges` on `.help-doc` (wiring only), `help.css` its scroll-edge rules and the sheet's z-index line, nothing else in either. Help's side edge is not exercised: the real help doc has no pre wider than its column.
