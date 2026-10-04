@@ -226,8 +226,8 @@ function StageRow({ r, now, pos, z, initiative, cards, sharing, open, onToggle, 
   // leftovers-9 FR-4: the row's name carries its dates as the bar draws
   // them, in words, else what the sub line says (appetite, no date).
   const span = r.end && r.start && daysBetween(r.start, r.end) >= 1
-    ? `${dateWords(r.start)} to ${dateWords(r.end)}${r.state === "done" ? ", done" : ", target"}`
-    : r.toToday && r.start ? `since ${dateWords(r.start)}, in progress` : sub;
+    ? `${dateWords(r.start)} to ${dateWords(r.end)}${r.state === "done" ? "" : ", target"}`
+    : r.toToday && r.start ? `since ${dateWords(r.start)}` : sub;
 
   return (
     <>
