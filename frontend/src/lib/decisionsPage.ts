@@ -152,14 +152,6 @@ export function shownSections(stored: DecSections, visit: Partial<DecSections>, 
   return { rule: one("rule"), ruled: one("ruled"), timeline: one("timeline") };
 }
 
-/** The Timeline's heading count (row 9): while a find is on, `1 of 71`, and
- *  `· 3 hidden` while superseded and withdrawn records are left out, so its
- *  total and Ruled's add up. No count without a find (§3). */
-export function timelineCount(matched: number, total: number, hidden: number, filtering: boolean): string | null {
-  if (!filtering) return null;
-  return `${matched} of ${total}${hidden > 0 ? ` · ${hidden} hidden` : ""}`;
-}
-
 /** Ruled's line when it lists nothing (row 5): `Nothing ruled yet.` with no
  *  find on, `no match` only while one is. */
 export const emptyRuledWords = (filtering: boolean) => (filtering ? "no match" : "Nothing ruled yet.");

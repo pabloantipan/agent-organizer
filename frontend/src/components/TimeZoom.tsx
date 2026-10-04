@@ -42,8 +42,16 @@ export function useTimeZoom(o: ZoomOptions) {
     const t = setInterval(() => setNow(Date.now()), 15000);
     return () => clearInterval(t);
   }, []);
+  // leftovers-7 FR-11 (U3): a frame mounted again (its section closed and
+  // reopened) keeps the level and goes back to the scroll it had, so the
+  // ticks drawn around scrollX are the ones in view; the browser clamps a
+  // scroll the lane no longer has, and scrollX follows what it kept.
+  const lastX = useRef(0);
+  lastX.current = scrollX;
   useLayoutEffect(() => {
     if (!frameEl) return;
+    if (frameEl.scrollLeft !== lastX.current) frameEl.scrollLeft = lastX.current;
+    setScrollX(frameEl.scrollLeft);
     setFrameW(frameEl.clientWidth);
     const ro = new ResizeObserver(() => setFrameW(frameEl.clientWidth));
     ro.observe(frameEl);
