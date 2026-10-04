@@ -121,6 +121,8 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   P7 added from tf6-ui (3198cda). sup32 closed timeline-and-find-6 (8c6749c,
   53 min, ~$23), ended by me. Every ruled card built. tf6 leftovers asked of
   aglaea to fold into 0078 as P8 if quick.
+- P8 folded (d0c91f8). 0078 ruled (045ff78); sup33 runs layers-focus-and-words
+  (window 397358).
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
