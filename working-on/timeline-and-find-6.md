@@ -3,8 +3,8 @@ title: Today said at Days, focus after a ruling and after Show the other N, titl
 status: next
 repos: [organizer]
 branch: timeline-and-find-6
-updated: 2026-10-03
-next: "fse: start a supervisor once rule-box-and-stages is in done/ (0077 ruled)"
+updated: 2026-10-04
+next: "sup32 builds it (organizer-probe-sup32, launched 2026-10-04; 0077 ruled)"
 depends_on: [rule-box-and-stages]
 boundary: ["frontend/src/components/TimeZoom.tsx, frontend/src/lib/axis.ts and its tests, frontend/src/styles/time-zoom.css", "frontend/src/components/DecisionsView.tsx, frontend/src/styles/decisions.css", "frontend/src/components/RuleDecisionBox.tsx (the after-rule focus only)", "a new many-records fixture initiative under testdata/, scripts/fixture-home.sh (to lay it out)", "not: Go, docs/design-system.md"]
 spec: "docs/specs/leftovers-6.md (FR-1 to FR-7, FR-6a); the ranking docs/ux/reviews/2026-10-03-rank-leftovers-6.md (Aglaea, b582a27); the design system's Timeline as amended there"
@@ -21,6 +21,7 @@ rule-box-and-stages lands.
 - [ ] N0: see `docs/specs/leftovers-6.md`, Acceptance
 
 ## Done
+- 2026-10-04 sup32 launched by the FSE, rule-box-and-stages in done/
 - 2026-10-04 0077 ruled by pablo ("go")
 - 2026-10-03 cut from leftovers-6 by the FSE
 
