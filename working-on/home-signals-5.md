@@ -41,6 +41,7 @@ leftovers-5 FR-7 to FR-11: row 1 first (the document never scrolls), then re-mea
 
 ## Notes
 Runs in parallel with its pair; boundaries disjoint.
+- sup31 on hs5-review's boundary finding: `lib/useScrollEdges.ts` is within the prompt (it allowed moving the hook to a new `lib/` file) and sup31's answer; the FSE was told.
 - Boundary widened by sup31 (2026-10-04): one `useMarkdownEdges(el)` call and its import in `DecisionsView.tsx` (the record body, M9). The same line goes into `CardDrawer.tsx`, `RuleDecisionBox.tsx` and `HelpView.tsx` after rule-box-and-stages merges and this branch rebases (sup31 will say); not done yet. `useScrollEdges` moved to `frontend/src/lib/useScrollEdges.ts`.
 - Re-measure after row 1 (built app, classic): rows 2 and 5 still held, so FR-8 was built for both; the fold order on main was problems first, not live first.
 - At 1024 and 1280 (rail expanded) partner-payouts' blocked folds into "+N" after live, now, problems and the cell, as M5 allows; at 1280 the goal keeps priority over a whole blocked (progress.md, Choices).
