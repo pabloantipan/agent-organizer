@@ -8,7 +8,7 @@ ruled:
 ruled_by:
 options: [as proposed, reorder or merge, rewrite]
 chosen:
-cards: []
+cards: [w-later]
 threads: []
 supersedes: []
 superseded_by:
