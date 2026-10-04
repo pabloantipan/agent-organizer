@@ -40,6 +40,7 @@ sup31's leftovers, the severity-3 layer bug first.
 - Not gated, should be: Help closed with no rule box open loses focus. HelpView's opener effect runs after the mount effect focused Help's own Close, so it captures Close as the opener and the top-bar fallback never applies (FR-2's "else to the opener"; P2 only tests with a box). From a clean checkout `make test` fails at `go vet` (main.go embeds frontend/dist, which is not built yet). The Makefile is unchanged on this branch, but P0's "clean checkout" depends on build order.
 - Reviewer: lf7-review, 2026-10-04
 - Delta 41f1b77: pass. HelpView.tsx only, inside the boundary. The opener is read before Close takes focus, and `.help` is excluded, so a StrictMode re-run falls back to the top-bar Help button. The box case is unchanged because focusBoxBelow runs first. npm test 185 pass, npm run build pass.
+- Delta da128f9: pass. TimeZoom.tsx and time-zoom.css only, inside the boundary; lib/axis.ts and its tests untouched. `.tz-more` is `position: static`, so global.css:354 `.g-mark span` no longer lifts it out of the frame (U1); the carried title's 12 px clearance moves it left only where its room and its left neighbour allow. npm test 185 pass, npm run build pass.
 
 ## UI review
 - Verdict: **pass** at da128f9: U1 (sev 3, P7) is fixed, and the rest of the gate holds in both engines. The verdict was fail at cfa6937 and 41f1b77, on U1.
