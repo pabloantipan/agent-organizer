@@ -41,6 +41,18 @@
 /* Stages' frame runs into its panel's right padding; the margin is the
    wrapper's, so the focus ring wraps what scrolls (leftovers-6 FR-6a). */
 .srm .tz-wrap { margin: 0 calc(-1 * var(--space-4)) 0 0; }
+/* leftovers-7 FR-6 (design system, Timeline: the axis sticks while the rows
+   scroll, on Stages as on Decisions): at Fit the frame does not scroll, so
+   its axis sticks to the page's scroller, at its top (the board-wrap's own
+   top padding taken back, as Decisions' --dec-stick), while the stage rows
+   pass under it. Zoomed, the frame scrolls itself and its axis sticks
+   inside it (below). */
+.srm { --srm-stick: calc(-1 * 18px); }
+.srm .tz-frame:not(.zoomed) { overflow: visible; }
+.srm .tz-frame:not(.zoomed) .tz-axis-row {
+  position: sticky; top: var(--srm-stick); z-index: var(--z-tz-axis);
+  background: var(--surface);
+}
 
 /* Rows: the graph's own row classes, laid on the frame's columns. */
 /* --tz-label-w is LABEL_W, set on .tz-content (TimeZoom.tsx). */

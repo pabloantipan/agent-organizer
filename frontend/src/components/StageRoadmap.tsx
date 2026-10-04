@@ -179,6 +179,9 @@ function showDetail(toggle: HTMLElement, detail: HTMLElement) {
   const floor = axis && getComputedStyle(axis).position === "sticky" ? Math.max(view.top, axis.getBoundingClientRect().bottom) : view.top;
   const over = detail.getBoundingClientRect().bottom - bottom;
   const room = toggle.getBoundingClientRect().top - floor;
+  // leftovers-7 FR-6: a toggle the landing left under the stuck axis comes
+  // down to just below it, so the axis and the stage are both in view.
+  if (room < 0) { s.scrollTop += room; return; }
   const by = Math.min(over, room);
   if (by > 0) s.scrollTop += by;
 }
