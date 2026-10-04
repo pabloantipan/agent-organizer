@@ -238,7 +238,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
         <div className="cell-search">
           <Search size={12} />
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="search" />
-          {query && <button className="rail-icon" onClick={() => setQuery("")}><X size={12} /></button>}
+          {query && <button className="rail-icon" onClick={() => setQuery("")} aria-label="Clear search" title="Clear search"><X size={12} /></button>}
         </div>
         <button className={`chat ${!focus && view === "needs" ? "active" : ""} ${counts.needs > 0 ? "fresh hot" : ""}`} onClick={() => pick("needs")} title="escalated to you, or a message addressed to you with no reply from you after it"><Inbox size={12} /><span className="chat-name">needs me</span>{counts.needs > 0 && <span className="chat-fresh hot">{counts.needs}</span>}</button>
         {reconciler && reconciler !== human && <button className={`chat ${!focus && view === "reconciler" ? "active" : ""}`} onClick={() => pick("reconciler")} title={`the reconciler's backlog: stalled, or answered and left without a decision. ${reconciler}'s work, not yours`}><Gavel size={12} /><span className="chat-name">needs {reconciler}</span>{counts.reconciler > 0 && <span className="chat-n">{counts.reconciler}</span>}</button>}
@@ -487,7 +487,7 @@ function ReplyBox(p: {
     <div className="composer">
       <div className="composer-row">
         <span className="meta composer-target" title={p.subject}><CornerDownRight size={11} /> in <b>{p.subject || "(no subject)"}</b></span>
-        {p.replyTo && <span className="meta reply-to">· replying to {p.replyTo.from}'s {p.replyTo.kind} <button className="rail-icon" onClick={p.onClearReply}><X size={11} /></button></span>}
+        {p.replyTo && <span className="meta reply-to">· replying to {p.replyTo.from}'s {p.replyTo.kind} <button className="rail-icon" onClick={p.onClearReply} aria-label={`Clear reply to ${p.replyTo.from}`} title={`Clear reply to ${p.replyTo.from}`}><X size={11} /></button></span>}
         <span className="spacer" />
         {p.onNewThread && <button className="linkish meta" onClick={p.onNewThread}>new thread instead</button>}
       </div>
