@@ -1,6 +1,6 @@
 ---
 title: The roles feed - configured roles, their sessions, hand-off, mail and initiatives on the agents feed
-status: next
+status: done
 repos: [organizer]
 branch: roles-feed
 updated: 2026-10-04
@@ -11,6 +11,7 @@ spec: "docs/ux/specs/transversal-roles.md (Aglaea, 299b221) and its Technical no
 gate: "the Gate section below"
 ui_review: false
 seat: rf-build
+review: pass
 ---
 
 ## Goal
@@ -29,6 +30,17 @@ The data the Roles group shows, on the 10 s agents feed and `organizer roles`.
 ## Next
 
 ## Blockers
+
+## Review
+- Verdict: pass
+- Commit reviewed: de539d9 (branch roles-feed), from a clean clone
+- Unmet gate items: none
+- G1: `go test ./internal/...` passes; `roles_test.go` covers every listed state (live x2 with max context 61, runs.jsonl last seen, never seen, no bitácora with expected path, stale HAND-OFF, mail waiting, `[aglaea` reply answers, discuss down = unknown with Mail `[]` not nil, `here: false` name and description only, `roles: []` none on config and on the feed, key absent = six in the spec's order, Daedalus in); `[for <name>]` case-insensitive (`[for Aglaea]`, `[FOR aglaea]`).
+- G2: `go run . roles --json` on lodestar: probe-hefesto under Hephaistos, live, 29%; organizer-probe-aglaea under Aglaea, initiative organizer, 31%.
+- G3: `XDG_DATA_HOME=$(mktemp -d) make test` exit 0 (vitest 191 passed); `wails generate module` leaves `frontend/wailsjs` clean; `wails build` exit 0.
+- T2: roles built in `agentsViewLocked` from the same sample; no new ticker, ps or zellij call; the second `threadFacts` call hits the `openers` cache filled by `liveThreads`. T3: new bound types all json-tagged. T4: Needs me untouched (no `frontend/src` diff, server `NeedsMe` unchanged). Boundary: all paths inside it.
+- Findings (not gate): (1) mail counts stalled and escalated threads too, where T2 says `status=open`; the card notes it, the FSE may confirm. (2) A thread whose facts fetch failed has an empty last body and counts as waiting until fetched. (3) `go test ./...` from a clean clone fails the root package (`frontend/dist` embed, pre-existing); G1 names `./internal/...`, which passes. (4) `wails build` rewrites `frontend/wailsjs/runtime/*`, generator drift, pre-existing.
+- Reviewer: rf-review, 2026-10-04
 
 ## Notes
 - G2, 2026-10-04 on lodestar, `go run . roles --json` from .wt/roles-feed (excerpt):
