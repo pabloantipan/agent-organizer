@@ -189,7 +189,7 @@ function MyNotes({ card: c, readOnly }: { card: merge.BoardCard; readOnly: strin
       ) : <div className="comment-new">
         <span className="avatar" title={me || "you"}>{initial(me)}</span>
         <div className="comment-box">
-          <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Write a comment…  (Enter to save, Shift+Enter for a new line)" rows={text ? 3 : 1} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); submit(); } }} />
+          <textarea value={text} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setText(e.target.value)} placeholder="Write a comment…  (Enter to save, Shift+Enter for a new line)" rows={text ? 3 : 1} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); submit(); } if (e.key === "Escape" && (e.nativeEvent.isComposing || e.keyCode === 229)) e.preventDefault(); }} />
           {text && <div className="comment-actions"><button className="tiny-btn primary" onClick={submit} disabled={busy}><Send size={12} /> Save</button><button className="tiny-btn ghost" onClick={() => setText("")}>Cancel</button></div>}
         </div>
       </div>}
@@ -206,7 +206,7 @@ function MyNotes({ card: c, readOnly }: { card: merge.BoardCard; readOnly: strin
               </div>
               {editing === n.id ? (
                 <div className="comment-box">
-                  <textarea autoFocus value={draft} onChange={(e) => setDraft(e.target.value)} rows={3} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); editNote(c.initiative_id, c.slug, n.id, draft); setEditing(null); } if (e.key === "Escape") { e.preventDefault(); setEditing(null); } }} />
+                  <textarea autoFocus value={draft} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setDraft(e.target.value)} rows={3} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); editNote(c.initiative_id, c.slug, n.id, draft); setEditing(null); } if (e.key === "Escape") { e.preventDefault(); if (!e.nativeEvent.isComposing) setEditing(null); } }} />
                   <div className="comment-actions"><button className="tiny-btn primary" onClick={() => { editNote(c.initiative_id, c.slug, n.id, draft); setEditing(null); }}>Save</button><button className="tiny-btn ghost" onClick={() => setEditing(null)}>Cancel</button></div>
                 </div>
               ) : (
