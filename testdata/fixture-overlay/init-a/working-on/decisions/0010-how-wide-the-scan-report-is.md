@@ -25,10 +25,10 @@ command and what it prints today:
 organizer scan --report --columns id,client,machine,stage,phase,now,blocked,next,waiting,problems --since 2026-09-01T00:00:00-03:00 --format table --no-color
 ```
 
-| id | client | machine | stage | phase | now | blocked | next | waiting | problems |
+| initiative id | client | machine | current stage | phase | now cards | blocked cards | next cards | waiting decisions | scanner problems |
 |---|---|---|---|---|---|---|---|---|---|
-| init-a | acme | lodestar | joins | building | 1 | 1 | 3 | 2 | 4 |
-| init-b | personal | the-laptop | foundations | discovery | 0 | 0 | 2 | 1 | 0 |
+| init-a | acme | lodestar.local | joins | building | 1 | 1 | 3 | 2 | 4 |
+| init-b | personal | the-laptop.local | foundations | discovery | 0 | 0 | 2 | 1 | 0 |
 
 ## Options
 
