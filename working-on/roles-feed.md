@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: roles-feed
 updated: 2026-10-04
-next: "decide: pablo - accept 0083 (the Roles design and its launch)"
+next: "sup37 builds it (0083 ruled, accept as written)"
 depends_on: []
 boundary: ["internal/config (roles)", "internal/model (Role and its parts)", "internal/service (roles.go, AgentsView.Roles, its tests)", "internal/cli (organizer roles)", "app.go bindings and frontend/wailsjs regenerated", "testdata/ fixtures for roles", "not: frontend/src components, docs/design-system.md"]
 spec: "docs/ux/specs/transversal-roles.md (Aglaea, 299b221) and its Technical notes T1-T4; ruling 0082"
@@ -21,6 +21,7 @@ The data the Roles group shows, on the 10 s agents feed and `organizer roles`.
 - [ ] G3: `wails generate module` run; `XDG_DATA_HOME=$(mktemp -d) make test` from a clean checkout; `wails build`
 
 ## Done
+- 2026-10-04 0083 ruled by pablo ("Ok", accept as written); sup37 launched by the FSE
 - 2026-10-04 cut by the FSE from Aglaea's design (299b221) and 0082
 
 ## Next
