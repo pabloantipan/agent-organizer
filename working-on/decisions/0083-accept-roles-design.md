@@ -1,13 +1,13 @@
 ---
 title: Accept the Roles design and launch roles-feed then roles-ui
-status: proposed
+status: ruled
 raised: 2026-10-04
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-04
+ruled_by: pablo
 options: [accept as written, accept without Daedalus, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [roles-feed, roles-ui]
 threads: [01M4432DTFCSXJN9F715G84FYS]
 supersedes: []
@@ -57,6 +57,8 @@ run and a new view.
 The FSE's: accept as written.
 
 ## Ruling
+
+pablo, 2026-10-04, in the organizer on lodestar: Ok
 
 ## Consequences
 
