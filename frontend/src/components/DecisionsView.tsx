@@ -263,6 +263,22 @@ export function DecisionsView() {
     const focused = decisionFocus === r.key;
     const stuck = isOpen && tall?.key === r.key;
     const style: CSSProperties = { ...(focused ? { background: "var(--surface-selected)" } : {}), ...(stuck ? { "--dec-box-max": `${tall!.boxMax}px` } as CSSProperties : {}) };
+    // leftovers-8 FR-2 (A1): while ruling, the facts line joins the head,
+    // stuck or not, above Rule, so the box opens below it and never covers
+    // the record's card links.
+    const facts = (
+      <div className="dec-facts">
+        <span>raised {dateWords(d.raised, now) || "—"} by {d.raised_by || "—"}</span>
+        {d.options?.length ? <span>options: {d.options.join(" · ")}</span> : null}
+        {(d.supersedes ?? []).length > 0 && <span>supersedes {d.supersedes.join(", ")}</span>}
+        {(d.cards ?? []).map((slug) => {
+          const c = cardOf(r.initiative, slug);
+          return c
+            ? <button key={slug} className="link mono" onClick={() => select(c)}>{slug}</button>
+            : <span key={slug} className="mono dim">{slug}</span>;
+        })}
+      </div>
+    );
     // The highlight is Home's focused row (shell.css .ib-row.focused).
     return (
       <div key={r.key} data-dec={r.key} className={`dec ${d.status} ${isOpen ? "expanded" : ""} ${focused ? "focused" : ""}`} style={style}>
@@ -281,6 +297,7 @@ export function DecisionsView() {
                   : d.superseded_by ? <>by {d.superseded_by}</> : null}
             </span>
           </button>
+          {isOpen && isRuling && facts}
           {isOpen && canRule && (
             <div className="dec-actions">
               <span className="rb-anchor">
@@ -292,17 +309,7 @@ export function DecisionsView() {
         </div>
         {isOpen && (
           <div className="dec-body">
-            <div className="dec-facts">
-              <span>raised {dateWords(d.raised, now) || "—"} by {d.raised_by || "—"}</span>
-              {d.options?.length ? <span>options: {d.options.join(" · ")}</span> : null}
-              {(d.supersedes ?? []).length > 0 && <span>supersedes {d.supersedes.join(", ")}</span>}
-              {(d.cards ?? []).map((slug) => {
-                const c = cardOf(r.initiative, slug);
-                return c
-                  ? <button key={slug} className="link mono" onClick={() => select(c)}>{slug}</button>
-                  : <span key={slug} className="mono dim">{slug}</span>;
-              })}
-            </div>
+            {!isRuling && facts}
             <RecordBody body={d.body || ""} />
             <div className="dec-path mono">{d.path}</div>
           </div>
