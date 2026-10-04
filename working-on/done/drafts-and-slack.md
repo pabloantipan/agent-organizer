@@ -1,11 +1,11 @@
 ---
 title: Escape keeps what he wrote (rule box, comments, composer), and Home's fixed columns give their slack to cut cells
-status: now
+status: done
 repos: [organizer]
 branch: drafts-and-slack
 seat: das-build
 updated: 2026-10-04
-next: "review: drafts-and-slack, gate met (S0-S4, Chromium and WKWebView, classic and overlay)"
+next: ""
 depends_on: []
 boundary: ["frontend/src/lib/drafts.ts, lib/width.ts and their tests", "frontend/src/components/RuleDecisionBox.tsx, DecisionsView.tsx (its rule box's draft only), Home.tsx", "frontend/src/components/CardDrawer.tsx (the comment field's draft, name and updated date), Conversation.tsx (the composer's draft and field names)", "frontend/src/components/InitiativeHeader.tsx (the target's date), StageRoadmap.tsx (the row's name)", "frontend/src/styles/home.css (the three grid templates at lines 8, 15, 140 only, as --t-state/--t-phase variables with today's defaults; widened by the FSE 2026-10-04 for FR-2)", "frontend/src/stores/board.store.ts (the rule drafts only, through lib/drafts; accepted by the FSE 2026-10-04 after das-review)", "not: Go, docs/design-system.md"]
 spec: "docs/specs/leftovers-9.md (FR-1, FR-2); Aglaea's calls d06e265"
@@ -22,6 +22,7 @@ Nothing he writes is lost to an Escape; Home's dates whole at 1512.
 - [x] S0: see `docs/specs/leftovers-9.md`, Acceptance
 
 ## Done
+- 2026-10-04 merged 583b3f3 by sup36 (reviewed at 9453240: code pass, UI pass); make test green on main; U2, U3 to aglaea, U1, U4-U6 and G1-G3 to the FSE
 - 2026-10-04 das-build: branch drafts-and-slack, 8 commits abe9b04..9453240 on main 097402a; one session draft store (lib/drafts.ts), Escape keeps rule box/comment/composer drafts with `· draft` verbs, fixed columns give slack to a cut next date (fixedColumns via shareRoom), dates in words, field and stage names; S0-S4 met, evidence in .wt-notes/das-build/progress.md
 - 2026-10-04 sup36: worktree .wt/drafts-and-slack off 477aef6, seat das-build launched
 - 2026-10-04 0081 ruled by pablo ("Accepted"); sup36 launched by the FSE
