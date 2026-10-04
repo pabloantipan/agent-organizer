@@ -10,6 +10,7 @@ boundary: ["frontend/src/components/Home.tsx, frontend/src/styles/home.css", "fr
 spec: "docs/specs/leftovers-5.md; the ranking docs/ux/reviews/2026-10-03-rank-leftovers-5.md (Aglaea, 31f7ac9); the design system as amended there"
 gate: "docs/specs/leftovers-5.md Acceptance, rows M4 to M7, M9 and M0"
 ui_review: true
+review: pass
 seat: hs5-build
 ---
 
@@ -28,6 +29,13 @@ leftovers-5 FR-7 to FR-11: row 1 first (the document never scrolls), then re-mea
 - 2026-10-03 cut from leftovers-5 by the FSE
 
 ## Next
+
+## Review
+- Verdict: pass (M4-M7, M9, M0 met; WKWebView rows M4, M5, M7 checked on code and the builder's shots, the UI reviewer shoots them).
+- Unmet gate items: none.
+- Finding (boundary): `frontend/src/lib/useScrollEdges.ts` is a new non-test file outside the card's boundary as written (`lib/width.ts` and `lib/` tests) and outside sup31's recorded widening (DecisionsView's import and one call); it is the hook moved out of `InitiativeHeader.tsx` so DecisionsView can share it (FR-13 "the same useScrollEdges"). The FSE to bless it or not; every other path is inside, DecisionsView is the import and one call.
+- Checked: `XDG_DATA_HOME=$(mktemp -d) make test` and `npm test` (168) pass, `npm run build` passes in the clean worktree at 3b52e87; `wails build` from the builder's M0 log, not rerun.
+- Reviewer: hs5-review, 2026-10-04.
 
 ## Blockers
 
