@@ -167,6 +167,16 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   01M3SBV952 answered and closed; design asked of aglaea (thread
   01M4432DTFCSXJN9F715G84FYS). Talos/Hermione "named only" is my reading.
   Held for aglaea's next ranking: compact inherits shell.css's base cap.
+- roles-feed merged 8402e31 (sup37 ended); T2 amended to the build (5f56eea).
+  drafts-and-slack merged 583b3f3 (boundary widened twice: home.css grid
+  templates, board.store.ts rule drafts). sup38 runs roles-ui.
+- leftovers-10 collecting (sup36): U1 sev 2 (signals cut at 1512 strip while
+  the flexible Stage column holds ~61 px; FR-2 named fixed columns only, DS
+  says any column), U4 sev 1 (composer selects and chat search unnamed), U5
+  sev 1 (Escape ending an IME composition commits the marked char), U6 sev 1
+  (message times and Overview's ruled date ISO); U2, U3 sev 2 with aglaea,
+  U2 first (a new-thread draft shared across chats may wake the wrong seat).
+  Plus compact's base cap from earlier.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
