@@ -194,6 +194,9 @@ and the body scroll under it.
 - With the rule box open, the box rides with Rule. If it is taller than the
   room under the stuck head, it is capped there and scrolls inside itself
   (Widths: a box is capped at the window). It never pushes the head up.
+- While ruling, the record's facts line (its card and thread links) joins
+  the stuck head, and the box opens below it: what he rules about stays
+  one click away, at every width (lf7-ui A1, 2026-10-04).
 - A landing (§6) leaves room for both stuck layers: the section heading,
   then the record's head.
 - The stuck head has the panel's background and a 1 px `--border` at its
