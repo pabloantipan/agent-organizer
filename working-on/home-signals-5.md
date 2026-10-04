@@ -36,6 +36,7 @@ leftovers-5 FR-7 to FR-11: row 1 first (the document never scrolls), then re-mea
 - Unmet gate items: none.
 - Finding (boundary): `frontend/src/lib/useScrollEdges.ts` is a new non-test file outside the card's boundary as written (`lib/width.ts` and `lib/` tests) and outside sup31's recorded widening (DecisionsView's import and one call); it is the hook moved out of `InitiativeHeader.tsx` so DecisionsView can share it (FR-13 "the same useScrollEdges"). The FSE to bless it or not; every other path is inside, DecisionsView is the import and one call.
 - Checked: `XDG_DATA_HOME=$(mktemp -d) make test` and `npm test` (168) pass, `npm run build` passes in the clean worktree at 3b52e87; `wails build` from the builder's M0 log, not rerun.
+- Recheck after the rebase onto main 54c006a (head a7f32e4): `git range-diff` shows the six commits unchanged (`=`); a7f32e4 adds the import and one `useMarkdownEdges(body, html)` call to CardDrawer.tsx (plus its body ref), RuleDecisionBox.tsx and HelpView.tsx (ref already there), as sup31 widened. It also gives `useMarkdownEdges` an optional `content` dependency in `lib/useScrollEdges.ts`, the file already flagged above. `make test` (exit 0), `npm test` (173) and `npm run build` pass at a7f32e4. Still pass, unmet: none. The three new call sites have no gate row and no measurement.
 - Reviewer: hs5-review, 2026-10-04.
 
 ## Blockers
