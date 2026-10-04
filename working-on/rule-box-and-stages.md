@@ -4,12 +4,13 @@ status: next
 repos: [organizer]
 branch: rule-box-and-stages
 updated: 2026-10-04
-next: "sup31 builds it with its wave (0077 ruled, accept as written)"
+next: "rbs-build builds it in .wt/rule-box-and-stages (sup31)"
 depends_on: [markdown-and-labels]
 boundary: ["frontend/src/components/RuleDecisionBox.tsx, frontend/src/styles/rule-box.css", "frontend/src/components/HelpView.tsx and CardDrawer.tsx (their Escape only)", "frontend/src/styles/decisions.css (the box placement only)", "frontend/src/components/StageRoadmap.tsx", "frontend/src/lib/ and its tests", "testdata/fixture-overlay/", "not: home-signals-5's files, DecisionsView.tsx, Go, docs/design-system.md"]
 spec: "docs/specs/leftovers-5.md; the ranking docs/ux/reviews/2026-10-03-rank-leftovers-5.md (Aglaea, 31f7ac9); the design system as amended there"
 gate: "docs/specs/leftovers-5.md Acceptance, rows M1 to M3, M8 and M0"
 ui_review: true
+seat: rbs-build
 ---
 
 ## Goal

@@ -4,12 +4,13 @@ status: next
 repos: [organizer]
 branch: review-build
 updated: 2026-10-04
-next: "sup31 builds it with its wave (0077 ruled, accept as written)"
+next: "revb-build builds it in .wt/review-build (sup31)"
 depends_on: []
 boundary: ["Makefile", "a script under scripts/ if needed", "CLAUDE.md (the Packaging line only)", "not: wails.json, build/darwin/ templates, frontend, Go"]
 spec: "docs/specs/leftovers-6.md (FR-8)"
 gate: "docs/specs/leftovers-6.md Acceptance, rows N7 and N0"
 ui_review: false
+seat: revb-build
 ---
 
 ## Goal
