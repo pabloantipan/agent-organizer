@@ -129,6 +129,11 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   (transversal roles). Raised to hephaistos at Pablo's ask, thread
   01M43W57REPSPT6K1588R5PNF6, proposals (a)-(e). No sweep done. Push of 261
   commits not done: asked Pablo.
+- Hephaistos relayed Pablo's ruling of all five (b2993a8): he builds (c)
+  discuss-hook close, (a), (b), runs the sweep (e). Do not close threads by
+  raw HTTP. (d) is mine: 0079 recorded, card needs-me-relays (093fa2c), sup34
+  launched. Skills updated (spec-craft 5b, supervise review rules); reread
+  them before the next spec.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
