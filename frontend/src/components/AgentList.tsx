@@ -30,7 +30,7 @@ export function AgentList({ agents, root, local = true, readOnly = false, onMess
           const asking = confirm === key;
           const health = healthState({ watcher: a.watcher, deaf: a.deaf, capped: a.capped, noIdentity: a.no_identity });
           return (
-            <li key={key} className={a.state}>
+            <li key={key} className={a.state} data-session={a.session || undefined} tabIndex={-1} aria-label={rowName(a)}>
               <span className={`a-state ${a.state}`}><i />{STATE_LABEL[a.state] ?? a.state}</span>
               <span className="a-name">
                 {a.family && <span className="a-family">{a.family}</span>}
@@ -83,6 +83,13 @@ export function AgentList({ agents, root, local = true, readOnly = false, onMess
       </ul>
     </>
   );
+}
+
+/** A row's accessible name, what a landing on it reads first (a role's
+ *  session line, transversal-roles A3): its session, state and context. */
+function rowName(a: Agent): string {
+  const ctx = a.context ? `, ${Math.round(a.context.used_percent)}% context` : "";
+  return `${a.session || a.short || a.name}, ${a.state}${ctx}`;
 }
 
 /** Why a row's health word is what it is and what to do about it, from the

@@ -27,27 +27,26 @@ export function openRoleFrom(el: HTMLElement | null, name: string) {
   useBoard.getState().openRole(name);
 }
 
-/** After a session line lands on its initiative's Agents (R5): focus goes to
- *  that session's row, by its first control (Attach, whose title names the
- *  session on Agents and Crew alike), and the row shows as selected until
- *  focus leaves it. Waits for the sub-view to mount, two seconds at most. */
+/** After a session line lands on its initiative's Agents (R5, A3): focus
+ *  goes to that session's row, by its data-session, read by its name, never
+ *  to one of its actions; a crew seat's row (Crew, data-seat) is found by the
+ *  session its Attach names. The row shows as selected until focus leaves
+ *  it. Waits for the sub-view to mount, two seconds at most. */
 function landOnSession(session: string) {
   const until = Date.now() + 2000;
   const tryLand = () => {
-    const btn = document.querySelector<HTMLElement>(`.agents button[title="${CSS.escape(`probe ${session}`)}"]`);
-    if (!btn) { if (Date.now() < until) window.setTimeout(tryLand, 50); return; }
-    const row = btn.closest("li");
-    btn.focus();
-    btn.scrollIntoView({ block: "center" });
-    if (row) {
-      row.classList.add("role-landed");
-      const off = (e: FocusEvent) => {
-        if (e.relatedTarget instanceof Node && row.contains(e.relatedTarget)) return;
-        row.classList.remove("role-landed");
-        row.removeEventListener("focusout", off);
-      };
-      row.addEventListener("focusout", off);
-    }
+    const row = document.querySelector<HTMLElement>(`.agents li[data-session="${CSS.escape(session)}"]`)
+      ?? document.querySelector<HTMLElement>(`.agents button[title="${CSS.escape(`probe ${session}`)}"]`)?.closest<HTMLElement>("li[data-seat]") ?? null;
+    if (!row) { if (Date.now() < until) window.setTimeout(tryLand, 50); return; }
+    row.focus();
+    row.scrollIntoView({ block: "center" });
+    row.classList.add("role-landed");
+    const off = (e: FocusEvent) => {
+      if (e.relatedTarget instanceof Node && row.contains(e.relatedTarget)) return;
+      row.classList.remove("role-landed");
+      row.removeEventListener("focusout", off);
+    };
+    row.addEventListener("focusout", off);
   };
   window.setTimeout(tryLand, 0);
 }
@@ -130,11 +129,11 @@ export function RoleDrawer() {
           <Section label="Initiatives">
             {inits.length === 0
               ? <p className="rd-empty">None yet.</p>
-              : <ul className="rd-inits">
-                  {inits.map((id) => (
-                    <li key={id}><button className="rd-init mono" onClick={() => go(() => openInitiative(id, "overview"))} aria-label={`Open ${id}`}>{id}</button></li>
+              : <p className="rd-inits">
+                  {inits.map((id, i) => (
+                    <span key={id}>{i > 0 && ", "}<a href="#" className="rd-init mono" onClick={(e) => { e.preventDefault(); go(() => openInitiative(id, "overview")); }} aria-label={`Open ${id}`}>{id}</a></span>
                   ))}
-                </ul>}
+                </p>}
           </Section>
         </div>
       </div>
