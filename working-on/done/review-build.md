@@ -1,10 +1,10 @@
 ---
 title: A review build with its own bundle id, so reviewers stop writing into the lead's app
-status: next
+status: done
 repos: [organizer]
 branch: review-build
 updated: 2026-10-04
-next: "review: review-build, N7 and N0 met"
+next: "merged to main; reviewers use make review-build"
 depends_on: []
 boundary: ["Makefile", "a script under scripts/ if needed", "CLAUDE.md (the Packaging line only)", "not: wails.json, build/darwin/ templates, frontend, Go"]
 spec: "docs/specs/leftovers-6.md (FR-8)"
@@ -30,6 +30,7 @@ seat: revb-build
 - Reviewer: revb-review, 2026-10-04
 
 ## Done
+- 2026-10-04 sup31: review passed (revb-review); merged 81c0ea3 to main; card to done/
 - 2026-10-04 revb-build: `make review-build` (f733251) and the Packaging sentence (3ef0105) on branch review-build, rebased on main; N7 over the fixture (bundle id cl.antipan.organizer.review, adhoc, its own WebKit dir, the lead's dir mtime unchanged) and N0 green; evidence in .wt-notes/revb-build/
 - 2026-10-04 0077 ruled by pablo ("go"); sup31 launched by the FSE
 - 2026-10-03 cut from leftovers-6 by the FSE
