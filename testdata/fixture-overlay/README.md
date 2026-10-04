@@ -89,3 +89,8 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
   so its rule box is taller than its room at a 1024×640 window and scrolls
   with Rule and Cancel inside (leftovers-5 FR-12, leftovers-6 S2); it adds
   one Needs me row
+- `0010`, proposed, owned by pablo, and its card `w-wide`: each body holds
+  a code block and a ten-column table wider than any box, so the rule box,
+  the record on Decisions and the card back each scroll a body sideways
+  inside itself with its edges (leftovers-7 FR-5, FR-9, P4); it adds one
+  Needs me row
