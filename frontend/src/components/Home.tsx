@@ -5,8 +5,7 @@ import type { merge, model, service } from "../../wailsjs/go/models";
 import { inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, type NeedsMeRow } from "../lib/queue";
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
-import { dayMonth } from "../lib/axis";
-import { parseISO, today } from "../lib/dates";
+import { dateWords } from "../lib/dates";
 import { HEALTH, messages } from "../lib/health";
 import { ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
 import { compactColumns, FOLD, GOAL_CHARS, GOAL_FLOOR_CHARS, goalFloor, homeClassOf, NO_EMPTY, shareRoom, signalsNeed, signalsShown, wideGoalRoom, type Empty, type Fold, type WidthClass } from "../lib/width";
@@ -319,13 +318,6 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
 
 type Next = ReturnType<typeof nextDate>;
 
-/** Home's next date as dates read everywhere else (leftovers-5 FR-11):
- *  `30 Nov`, with the year only when it is not this year. */
-function dateWords(iso: string): string {
-  const d = parseISO(iso);
-  if (!d) return iso;
-  return d.getFullYear() === today().getFullYear() ? dayMonth(d.getTime()) : `${dayMonth(d.getTime())} ${d.getFullYear()}`;
-}
 
 /** The chevron's name and hover (FR-11): what its detail opens on. */
 const detailsName = (id: string) => `Details for ${id}: goal, next date, repos`;

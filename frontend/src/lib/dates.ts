@@ -46,6 +46,19 @@ export function shortDate(d: Date): string {
   return d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
 }
 
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** A date as a person reads it (design system, Principles; leftovers-8
+ *  FR-5): `24 Sep`, with the year only when it is not `now`'s, `24 Sep
+ *  2025`. Takes a Date or what parseISO takes; anything else comes back as
+ *  it was, so a malformed value is still shown, never hidden. */
+export function dateWords(d: Date | string | undefined | null, now: Date = today()): string {
+  const at = typeof d === "string" || d == null ? parseISO(d) : d;
+  if (!at) return typeof d === "string" ? d : "";
+  const words = `${at.getDate()} ${MONTHS[at.getMonth()]}`;
+  return at.getFullYear() === now.getFullYear() ? words : `${words} ${at.getFullYear()}`;
+}
+
 /** Monday-first grid of 6 weeks covering the month. */
 export function monthGrid(year: number, month: number): Date[] {
   const first = new Date(year, month, 1);

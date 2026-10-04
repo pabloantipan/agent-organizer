@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { marked } from "marked";
 import type { merge, model } from "../../wailsjs/go/models";
-import { DAY, daysBetween, parseISO, shortDate, today } from "../lib/dates";
+import { DAY, dateWords, daysBetween, parseISO, today } from "../lib/dates";
 import { addLocalDays } from "../lib/axis";
 import { ownerPhrase } from "../lib/decisions";
 import { RULED_LIMIT, countWords, decisionMatches, emptyRuledWords, lineName, rulerWords, ruledShown, shownSections, statusWord, summaryOf, timelineName, turnaroundWords, waitedWords, type DecSections } from "../lib/decisionsPage";
@@ -254,7 +254,7 @@ export function DecisionsView() {
   const record = (r: Row) => {
     const d = r.d;
     const isOpen = expanded === r.key;
-    const ruledOn = shortDate(parseISO(d.ruled) ?? now);
+    const ruledOn = dateWords(parseISO(d.ruled) ?? now, now);
     const t = turnaroundWords(d.raised, d.ruled);
     // FR-12, 0045: every proposed record offers Rule, whoever owns it.
     // FR-13: a record of an initiative that is not active offers none.
@@ -293,7 +293,7 @@ export function DecisionsView() {
         {isOpen && (
           <div className="dec-body">
             <div className="dec-facts">
-              <span>raised {d.raised} by {d.raised_by || "—"}</span>
+              <span>raised {dateWords(d.raised, now) || "—"} by {d.raised_by || "—"}</span>
               {d.options?.length ? <span>options: {d.options.join(" · ")}</span> : null}
               {(d.supersedes ?? []).length > 0 && <span>supersedes {d.supersedes.join(", ")}</span>}
               {(d.cards ?? []).map((slug) => {
@@ -440,7 +440,8 @@ export function DecisionsView() {
                   const from = raised.getTime();
                   const to = endOfDay(until);
                   // §5: one line; the status is in the name and the title.
-                  const name = timelineName(d, all ? r.initiative : undefined);
+                  // Dates as words (leftovers-8 FR-5): the name reads them as the line does.
+                  const name = timelineName({ ...d, raised: dateWords(d.raised, now), ruled: d.ruled ? dateWords(d.ruled, now) : d.ruled }, all ? r.initiative : undefined);
                   return (
                     <div key={r.key} className={`g-row tz-row dec-row ${d.status}`}>
                       <button className="g-label link tz-label" onClick={() => land(r.key)} title={name} aria-label={name}>
