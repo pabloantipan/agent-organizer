@@ -4,8 +4,8 @@ status: next
 repos: [organizer]
 branch: roles-ui
 updated: 2026-10-04
-next: "fse: start a supervisor once roles-feed is in done/ (0083 ruled)"
-depends_on: [roles-feed]
+next: "fse: start a supervisor once drafts-and-slack is in done/ too (both change Home.tsx and home.css); roles-feed landed"
+depends_on: [roles-feed, drafts-and-slack]
 boundary: ["frontend/src/components/Home.tsx, Rail.tsx, a new RoleDrawer.tsx", "frontend/src/styles/home.css, shell.css (the rail group only), a roles stylesheet", "frontend/src/lib/ (a roles view helper) and its tests", "frontend/src/stores/board.store.ts (the drawer's open state and the rail group's collapse only)", "not: Go, docs/design-system.md"]
 spec: "docs/ux/specs/transversal-roles.md (Aglaea, 299b221) and its Technical note T5; ruling 0082"
 gate: "docs/ux/specs/transversal-roles.md Acceptance R1-R7, plus the build row below"
