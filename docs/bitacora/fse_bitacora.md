@@ -146,6 +146,12 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   ruling), A2 (1, card back and Help capped and scrolling), A3 (2, WKWebView
   1512 rail strip: Home list stops ~200 px short; measure vs Chromium).
   lf7 UI review failed U1 (+N clipped at Fit): sup33's.
+- layers-focus-and-words merged (9c7bf7d, closed 8716551); sup33 ended by me,
+  its 17 threads closed one by one (discuss-hook close stops at the first
+  error; told hephaistos, posted closed). Closed the four settled aglaea
+  design-call threads too. Organizer mailbox: one open thread, the
+  transversal roles (Pablo's). leftovers-8 asked of aglaea (thread
+  01M43Z4MM70GV0TH1NAJC2D28A). Nothing building.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
