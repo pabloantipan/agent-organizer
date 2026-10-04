@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: home-signals-5
 updated: 2026-10-04
-next: "review: home-signals-5, gate met (M4, M5, M7 in WKWebView; M6, M9 in Chromium); the edge line in CardDrawer, RuleDecisionBox and HelpView waits on rule-box-and-stages' merge"
+next: "review: home-signals-5, gate met (M4, M5, M7 in WKWebView; M6, M9 in Chromium); rebased on 54c006a with the edge in CardDrawer, RuleDecisionBox and HelpView (a7f32e4)"
 depends_on: [markdown-and-labels]
 boundary: ["frontend/src/components/Home.tsx, frontend/src/styles/home.css", "frontend/src/styles/global.css (html, body; the .markdown scroll edge, FR-13)", "frontend/src/lib/width.ts and frontend/src/lib/ tests", "frontend/src/styles/shell.css (the scroll edge only), frontend/src/components/InitiativeHeader.tsx (useScrollEdges only)", "frontend/src/components/Conversation.tsx and SlackView.tsx (FR-10 names only)", "testdata/fixture-twenty/, scripts/fixture-home.sh", "not: rule-box-and-stages' files, Go, docs/design-system.md"]
 spec: "docs/specs/leftovers-5.md; the ranking docs/ux/reviews/2026-10-03-rank-leftovers-5.md (Aglaea, 31f7ac9); the design system as amended there"
@@ -23,6 +23,7 @@ leftovers-5 FR-7 to FR-11: row 1 first (the document never scrolls), then re-mea
 - [x] M0: see `docs/specs/leftovers-5.md`, Acceptance
 
 ## Done
+- 2026-10-04 hs5-build: rebased on main after rule-box-and-stages (54c006a); SHAs now 5db2b84, b98c80e, 36caa66, 938eea4, 7c2a94a, fb0f102, plus a7f32e4 (the edge wired in CardDrawer, RuleDecisionBox, HelpView); npm test (173), npm run build, make test, wails build green
 - 2026-10-04 hs5-build: branch home-signals-5 (0a1efb1 document never scrolls, d960285 signals fold against floors, 90f2920 scroll edge --fg-subtle and later children, 4141954 markdown code/table edge, ca746ac names, 3b52e87 30 Nov), rebased on main; gate met, measurements and shots in .wt-notes/hs5-build/progress.md
 - 2026-10-04 0077 ruled by pablo ("go"); sup31 launched by the FSE
 - 2026-10-03 amendment 1 of leftovers-5 adds M9 (from leftovers-6), proposed with 0077
@@ -42,8 +43,9 @@ leftovers-5 FR-7 to FR-11: row 1 first (the document never scrolls), then re-mea
 ## Notes
 Runs in parallel with its pair; boundaries disjoint.
 - sup31 on hs5-review's boundary finding: `lib/useScrollEdges.ts` is within the prompt (it allowed moving the hook to a new `lib/` file) and sup31's answer; the FSE was told.
-- Boundary widened by sup31 (2026-10-04): one `useMarkdownEdges(el)` call and its import in `DecisionsView.tsx` (the record body, M9). The same line goes into `CardDrawer.tsx`, `RuleDecisionBox.tsx` and `HelpView.tsx` after rule-box-and-stages merges and this branch rebases (sup31 will say); not done yet. `useScrollEdges` moved to `frontend/src/lib/useScrollEdges.ts`.
+- Boundary widened by sup31 (2026-10-04): one `useMarkdownEdges(el)` call and its import in `DecisionsView.tsx` (the record body, M9). Done in a7f32e4 for `CardDrawer.tsx`, `RuleDecisionBox.tsx` and `HelpView.tsx`: import plus `useMarkdownEdges(body, html)`; CardDrawer's body had no ref, so it also got `const body = useRef…` and `ref={body}`. The hook takes the content as a second argument because those bodies mount after their component does. `useScrollEdges` moved to `frontend/src/lib/useScrollEdges.ts`.
 - Re-measure after row 1 (built app, classic): rows 2 and 5 still held, so FR-8 was built for both; the fold order on main was problems first, not live first.
 - At 1024 and 1280 (rail expanded) partner-payouts' blocked folds into "+N" after live, now, problems and the cell, as M5 allows; at 1280 the goal keeps priority over a whole blocked (progress.md, Choices).
 - Pablo's WebKit storage was copied aside to .wt-notes/hs5-build/webkit-before/ before the first launch and not restored: his Deltagos ran throughout, and none of my runs used his bundle id (my own copy, then Deltagos Review.app).
+- Found: in the rule box a wide code block is not capped by its section (a forced 3,557 px `pre` widened `.rb .markdown` instead of scrolling), so its edge cannot show there; the wiring is in, the cap is `rule-box.css`'s (not mine). Help (a narrowed diagram) and the card back (an added wide block) show the edge (`.wt-notes/hs5-build/chromium-1280x800-M9-wiring.log`).
 - Found: Needs me's row context still shows ISO dates ("raised 2026-09-20"); SlackView.tsx:90 and Conversation.tsx:717 X buttons are named by title only.
