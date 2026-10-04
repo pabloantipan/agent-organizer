@@ -123,6 +123,12 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   aglaea to fold into 0078 as P8 if quick.
 - P8 folded (d0c91f8). 0078 ruled (045ff78); sup33 runs layers-focus-and-words
   (window 397358).
+- Mailbox diagnosis (read-only, discuss.db): 334 open organizer threads (200
+  supervisor/seat, 105 hook, rest fse/aglaea), almost all settled. "12 need
+  you" = 5 old sup reports, 2 settled fse, 4 [for hephaistos] relays, 1 real
+  (transversal roles). Raised to hephaistos at Pablo's ask, thread
+  01M43W57REPSPT6K1588R5PNF6, proposals (a)-(e). No sweep done. Push of 261
+  commits not done: asked Pablo.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
