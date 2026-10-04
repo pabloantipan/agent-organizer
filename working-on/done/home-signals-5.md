@@ -23,6 +23,7 @@ leftovers-5 FR-7 to FR-11: row 1 first (the document never scrolls), then re-mea
 - [x] M0: see `docs/specs/leftovers-5.md`, Acceptance
 
 ## Done
+- 2026-10-04 sup31: wave ended 12:06 (71 min against 0077's 40-80); run record runs/2026-10-04-leftovers-5-wave.md; every seat ended and its token revoked
 - 2026-10-04 sup31: code review (and recheck at a7f32e4) and UI review passed (hs5-review, hs5-ui); merged 922276f to main; U1 to aglaea, U2 and G1-G4 to the FSE; card to done/
 - 2026-10-04 hs5-build: rebased on main after rule-box-and-stages (54c006a); SHAs now 5db2b84, b98c80e, 36caa66, 938eea4, 7c2a94a, fb0f102, plus a7f32e4 (the edge wired in CardDrawer, RuleDecisionBox, HelpView); npm test (173), npm run build, make test, wails build green
 - 2026-10-04 hs5-build: branch home-signals-5 (0a1efb1 document never scrolls, d960285 signals fold against floors, 90f2920 scroll edge --fg-subtle and later children, 4141954 markdown code/table edge, ca746ac names, 3b52e87 30 Nov), rebased on main; gate met, measurements and shots in .wt-notes/hs5-build/progress.md

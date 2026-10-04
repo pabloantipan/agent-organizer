@@ -30,6 +30,7 @@ seat: revb-build
 - Reviewer: revb-review, 2026-10-04
 
 ## Done
+- 2026-10-04 sup31: wave ended 12:06 (71 min against 0077's 40-80); run record runs/2026-10-04-leftovers-5-wave.md; every seat ended and its token revoked
 - 2026-10-04 sup31: review passed (revb-review); merged 81c0ea3 to main; card to done/
 - 2026-10-04 revb-build: `make review-build` (f733251) and the Packaging sentence (3ef0105) on branch review-build, rebased on main; N7 over the fixture (bundle id cl.antipan.organizer.review, adhoc, its own WebKit dir, the lead's dir mtime unchanged) and N0 green; evidence in .wt-notes/revb-build/
 - 2026-10-04 0077 ruled by pablo ("go"); sup31 launched by the FSE

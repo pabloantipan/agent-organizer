@@ -23,6 +23,7 @@ leftovers-5 FR-1 to FR-6: the rule box's and the stages' rows.
 - [x] M0: see `docs/specs/leftovers-5.md`, Acceptance
 
 ## Done
+- 2026-10-04 sup31: wave ended 12:06 (71 min against 0077's 40-80); run record runs/2026-10-04-leftovers-5-wave.md; every seat ended and its token revoked
 - 2026-10-04 sup31: code review and UI review passed (rbs-review, rbs-ui); merged 54c006a to main; Q1 to aglaea, U1-U4 and the spec gaps to the FSE; card to done/
 - 2026-10-04 rbs-build: FR-1 to FR-6 and FR-12 on branch rule-box-and-stages (c4967d5 Escape stack, lib/boxStack; 9680ac6 box below its opener's row, hover keeps the mark; 83a4f5b fixture 0009; 6591145 stage landing, duplicate ids, appetite after short bars). Gate met: Chromium on the clean-checkout fixture, rail expanded, overlay scrollbars (`.wt-notes/rbs-build/chromium-rows.log`); WKWebView in `Deltagos Review.app`, classic scrollbars: M1 Help over a box at a 2560x1305 window and a card back over a box on Decisions at 1512x945, M2 at 1024x640 (hw4-U6 state, stuck head) and wide Home's mark with the pointer in the box, M3 tile 4 and the duplicate rows, M8 box and bars (`webkit-*.png`); M0 green (make test, npm test and build, wails build). Choices and evidence: `.wt-notes/rbs-build/progress.md`
 - 2026-10-04 0077 ruled by pablo ("go"); sup31 launched by the FSE
