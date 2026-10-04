@@ -197,6 +197,14 @@ title rows grow then "+N"; 12 px tick gap; today line under titles; today
 label in the axis with its date; context label = first whole unit. Superseded
 and withdrawn lozenges are neutral (59b4dcb).
 
+Leftovers-7 (2026-10-04, `reviews/2026-10-04-rank-leftovers-7.md`, thread
+01M43Q8CBZ9HX2JD0K2A1QWRCR): 10 rows from rule-box-and-stages, home-signals-5
+and review-build. Top: the card back paints under the rule box (sev 3,
+pre-existing). DS: one layer order from z-index tokens; closing the top of a
+stack puts focus back into the box below; the scrim stops below the top bar
+(3424695); within the never-fold set, waiting gives way before blocked
+(857949c). Reviews now run in `Deltagos Review.app` (own bundle id).
+
 ## Open questions
 
 - Q1 (Pablo, via the FSE, leftovers-4): does he use Tab in the app? In

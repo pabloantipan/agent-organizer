@@ -129,6 +129,12 @@ no `zero` or stylistic sets).
 - Hover and press 100ms, panels and the card back 200ms, nothing over 300ms;
   `--ease-out` in, `--ease-exit` out. Under `prefers-reduced-motion` nothing
   moves.
+- **Layers, one order everywhere**, from z-index tokens and never from bare
+  numbers: content < sticky headings and heads < an inline box (rule box)
+  and its scrim < the top bar < a drawer or modal (card back, Help) and its
+  backdrop. A drawer opened from inside a box paints over the box, and
+  nothing under its backdrop takes a click (leftovers-7, rbs-U1: the card
+  back painted under the rule box and the sticky heading).
 
 ## CSS rules
 
@@ -293,6 +299,10 @@ keeps their place.
   confirm, **the topmost one only**: Escape on Help or a card drawer over an
   open rule box closes the drawer, and the box stays with what was typed
   (leftovers-5).
+- **Closing the top of a stack** (Help or a card back over an open box):
+  focus goes back into the box below, to the field it last held, since the
+  open box keeps the keyboard. With no box below, it goes to the opener
+  (leftovers-7, rbs-U2).
 - **Navigating** (a row verb, a link to a record): focus lands on the thing
   named: the record's row, the blocked seat, Bring crew up. Never on the
   page body.
