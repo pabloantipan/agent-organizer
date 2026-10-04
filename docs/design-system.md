@@ -312,7 +312,11 @@ keeps their place.
   as the engine decides (leftovers-5, hf3-U2).
 - **An open box keeps the keyboard** (a rule box, a sheet, a dialog): Tab
   and Shift+Tab loop inside it until Escape, Cancel or its commit closes
-  it. One box at a time; a box that covers content has a scrim. What was
+  it. One box at a time; a box that covers content has a scrim. **The scrim
+  covers the content, never the top bar**: Help and navigation stay
+  reachable while a box is open. Help opens over the box, and Escape closes
+  Help first. A navigation closes the box and keeps what was typed
+  (leftovers-7, rule-box-and-stages Q1). What was
   typed in a box survives it closing for another one, and only Cancel
   discards it.
 
