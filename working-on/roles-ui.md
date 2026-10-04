@@ -11,6 +11,7 @@ boundary: ["frontend/src/components/Home.tsx, Rail.tsx, a new RoleDrawer.tsx", "
 spec: "docs/ux/specs/transversal-roles.md (Aglaea, 299b221) and its Technical note T5; ruling 0082"
 gate: "docs/ux/specs/transversal-roles.md Acceptance R1-R7, plus the build row below"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -32,6 +33,14 @@ mail and its initiatives, and opens a role without starting anything.
 ## Next
 
 ## Blockers
+
+## Review
+- Verdict: pass (code and checks; the WKWebView rows of R5 and R7 are the UI reviewer's)
+- Commit reviewed: c6f39ce (branch roles-ui, base ee7658a)
+- Unmet gate items: none
+- Evidence: clean clone of c6f39ce, `XDG_DATA_HOME=$(mktemp -d) make test` 0 (vitest 224); `npm install && npm test && npm run build` 0; `wails build` 0. Fixture `go run . roles --json`: Hephaistos live, 2 sessions (42, 61), hand-off 3 Oct; Aglaea live 28%, one `[for aglaea]` mail; Ariadna never seen, no bitácora; Daedalus not running, last seen 2 Oct; Talos, Hermione here: false. Code: roles.ts feeds nothing to queueOf/needsMeRows, lib/queue.ts untouched (T4); UI reads `agents.roles` only (T5); drawer and rows hold no Attach, Kill, Start or Message (R6); Escape through boxStack, focus on the title and back to the opener or its `data-role` (R5); dates through lib/dates; tests cover the States table. Boundary: every changed path inside it. R5, R7 layout taken from ru-build's Chromium measurements in .wt-notes/ru-build.
+- Not gated, worth a card: `ageWords` copies Home's private `age` instead of sharing it; `sessionStarted` prints the feed's `created` string raw; the strip carries a role's mail only in its hover title; `kill $FIXTURE_AGENT_PIDS` does not word-split in zsh, so the documented cleanup leaves the eight stand-ins running (killed by pid here).
+- Reviewer: ru-review, 2026-10-04
 
 ## Notes
 - 2026-10-04 sup38: R1-R4 are checked "by fixture" and no fixture carried roles (its zellij is /usr/bin/true). Stand-ins with AGENT_SESSION, a roles config, bitácoras, runs.jsonl and a canned [for aglaea] thread make it; those live in scripts/fixture-home.sh and testdata/fixture-overlay/, so the boundary gained them (supervise precondition 10). The gate is unchanged; told the FSE.
