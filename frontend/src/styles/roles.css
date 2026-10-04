@@ -54,9 +54,11 @@
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 /* Wide: Needs me is the right column; Roles heads the list column. */
+/* The spanning Needs me grows the list's row, not the Roles row. */
+.home.wide.with-roles { grid-template-rows: auto minmax(0, 1fr); }
 .home.wide > .home-roles { grid-column: 1; grid-row: 1; }
-.home.wide > .home-roles ~ .home-list { grid-row: 2; }
-.home.wide > .home-roles ~ .home-needs { grid-row: 1 / span 2; }
+.home.wide.with-roles > .home-list { grid-row: 2; }
+.home.wide.with-roles > .home-needs { grid-row: 1 / span 2; }
 
 /* ---------- the rail: the Roles group ---------- */
 .rail-group.roles { margin-bottom: var(--space-1); }

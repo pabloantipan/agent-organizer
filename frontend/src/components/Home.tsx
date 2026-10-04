@@ -44,7 +44,7 @@ export function Home() {
   if (!view) return <div className="empty">Loading…</div>;
   return (
     <HomeClass.Provider value={widthClass}>
-    <div ref={home} className={`home ${widthClass} ${roomy ? "roomy" : ""}`} style={widthClass === "wide" ? { "--goal-min": `${goalMin}px` } as React.CSSProperties : undefined}>
+    <div ref={home} className={`home ${widthClass} ${roomy ? "roomy" : ""} ${agents?.roles?.length ? "with-roles" : ""}`} style={widthClass === "wide" ? { "--goal-min": `${goalMin}px` } as React.CSSProperties : undefined}>
       <section className="home-sec home-needs">
         <h2 id={NEEDS_ME_HEADING} tabIndex={-1} className="sec-title">Needs me <span className="num sec-count">{rows.length}</span><span className="sec-sub">everything waiting on you, oldest first</span></h2>
         {rows.length === 0 ? (
