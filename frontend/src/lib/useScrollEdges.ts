@@ -51,8 +51,10 @@ export function useScrollEdges(ref: RefObject<HTMLElement | null>, on: boolean):
 /** FR-13: every `pre` and table in a markdown body that scrolls sideways
  *  carries the edge on the side with hidden content only, as the classes
  *  `edge-left` and `edge-right` (global.css). Blocks the body gains later
- *  (innerHTML, a "show all") are watched as they arrive. */
-export function useMarkdownEdges(ref: RefObject<HTMLElement | null>) {
+ *  (innerHTML, a "show all") are watched as they arrive. `content` is what
+ *  the body shows (its html): a body that mounts later, or is replaced, is
+ *  picked up when it changes. */
+export function useMarkdownEdges(ref: RefObject<HTMLElement | null>, content?: unknown) {
   useLayoutEffect(() => {
     const root = ref.current;
     if (!root) return;
@@ -73,5 +75,5 @@ export function useMarkdownEdges(ref: RefObject<HTMLElement | null>) {
     const mo = new MutationObserver(sync);
     mo.observe(root, { childList: true, subtree: true });
     return () => { mo.disconnect(); for (const stop of watched.values()) stop(); };
-  }, [ref]);
+  }, [ref, content]);
 }

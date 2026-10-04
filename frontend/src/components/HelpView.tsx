@@ -1,6 +1,7 @@
 import { X } from "lucide-react";
 import { marked } from "marked";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useMarkdownEdges } from "../lib/useScrollEdges";
 import { Help } from "../../wailsjs/go/main/App";
 import type { service } from "../../wailsjs/go/models";
 import { openBox } from "../lib/boxStack";
@@ -47,6 +48,7 @@ export function HelpView({ top, onClose }: { top: number; onClose: () => void })
     });
     return { html: tpl.innerHTML, sections: found };
   }, [doc]);
+  useMarkdownEdges(body, html);
 
   // The article (.help-doc, overflow-y: auto) is the element that scrolls;
   // the fixed overlay around it does not, so the heading moves into its view.
