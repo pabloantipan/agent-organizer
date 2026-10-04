@@ -1,13 +1,13 @@
 ---
 title: Accept the leftovers-7 batch and launch its card after timeline-and-find-6
-status: proposed
+status: ruled
 raised: 2026-10-04
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-04
+ruled_by: pablo
 options: [accept as written, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [layers-focus-and-words]
 threads: [01M43Q8CBZ9HX2JD0K2A1QWRCR]
 supersedes: []
@@ -56,6 +56,8 @@ initiative (21 to ~80 min working).
 The FSE's: accept as written.
 
 ## Ruling
+
+pablo, 2026-10-04, in the organizer on lodestar: Ok
 
 ## Consequences
 
