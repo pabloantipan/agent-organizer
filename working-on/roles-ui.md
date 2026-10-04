@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: roles-ui
 updated: 2026-10-04
-next: "ru-build: A2, the drawer's initiatives stack one per line with a leading comma (.rd-inits is still display: grid, roles.css:82); make them one inline comma list"
+next: "review: roles-ui, A2 re-fixed (ed9b5bf: initiatives inline as one comma list), A3 at 9a0b81c; R5 and R7 not verified in WKWebView, left to the UI reviewer; A1 is the next batch"
 seat: ru-build
 depends_on: [roles-feed, drafts-and-slack]
 boundary: ["frontend/src/components/Home.tsx, Rail.tsx, a new RoleDrawer.tsx", "frontend/src/styles/home.css, shell.css (the rail group only), a roles stylesheet", "frontend/src/lib/ (a roles view helper) and its tests", "frontend/src/stores/board.store.ts (the drawer's open state and the rail group's collapse only)", "scripts/fixture-home.sh and testdata/fixture-overlay/ (the roles fixture R1-R4 read; added by sup38)", "frontend/src/components/AgentList.tsx (the row's data-session, tabIndex -1 and accessible name only, for A3; added by sup38)", "not: Go, docs/design-system.md"]
@@ -23,6 +23,7 @@ mail and its initiatives, and opens a role without starting anything.
 - [x] `XDG_DATA_HOME=$(mktemp -d) make test` from a clean checkout; `cd frontend && npm run build`; `wails build`
 
 ## Done
+- 2026-10-04 ru-build: A2 re-fixed after the code review (ed9b5bf): .rd-inits out of the list grid rule, so the initiatives read inline on one line; measured in Chromium at 1512x945 and 1024x609; tests and build row green
 - 2026-10-04 ru-build: Amendment 1 A3 (a session landing focuses the session's row by data-session and its name, 9a0b81c) and A2 (Initiatives as comma-separated text links, 582462b), rebased on main; R5 re-measured in Chromium at 1512x945 full and 1024x609 strip, overlay and classic; tests and build row green
 - 2026-10-04 sup38: aglaea's calls (f3535e7): A3 a defect against R5 (sev 2) and A2 (sev 1) go in before the merge; A1 is the next batch, for the FSE and Pablo
 - 2026-10-04 sup38: code review pass and UI review pass in Chromium at c6f39ce; merge held for the WKWebView columns (the screen was locked at 16:58); A1-A3 to aglaea, U1-U4 and gaps to the FSE
