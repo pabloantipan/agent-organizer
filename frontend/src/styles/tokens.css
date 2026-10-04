@@ -166,6 +166,25 @@
   --shadow-overlay: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 12px 32px rgba(0, 0, 0, 0.50);
   --shadow-drag: 0 0 0 1px var(--border-accent), 0 18px 44px rgba(0, 0, 0, 0.55);
 
+  /* ---------- layers (design system, Elevation): one order everywhere,
+     never a bare number. content < sticky < box and scrim < top bar <
+     drawer or modal and its backdrop (leftovers-7 FR-1). ---------- */
+  --z-content: 0;      /* a component's own stacking context */
+  --z-raised: 1;       /* a part over its siblings inside one component */
+  --z-stuck-head: 9;   /* a stuck record head, under its section heading */
+  --z-sticky: 10;      /* sticky headings, a stuck axis */
+  --z-scrim: 20;       /* the scrim under an inline box */
+  --z-box: 21;         /* an inline box (the rule box) and its opener's row */
+  --z-topbar: 30;      /* the top bar: Help and navigation stay reachable */
+  --z-modal: 40;       /* a drawer or modal (card back, Help) and its backdrop */
+  /* inside a timeline's frame (time-zoom.css), its own stacking context */
+  --z-tz-context: 3;   /* the sticky context label */
+  --z-tz-over: 4;      /* the today line, edge and empty notes, the label column */
+  --z-tz-pinned: 5;    /* row labels, pins and the axis */
+  --z-tz-axis: 6;      /* the stuck axis row */
+  --z-tz-corner: 7;    /* the corner over the stuck axis and labels */
+  --z-tz-ring: 9;      /* the landing ring, over everything in the frame */
+
   /* ---------- component ---------- */
   --button-bg: var(--surface-raised);
   --button-bg-hover: var(--surface-hover);

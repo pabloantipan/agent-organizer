@@ -20,7 +20,7 @@
 /* §3: the section heading, xl semibold, sticky on the page's ground. The
    board-wrap's own top padding is taken back so nothing shows above it. */
 .dec-sh {
-  position: sticky; top: var(--dec-stick); z-index: 6;
+  position: sticky; top: var(--dec-stick); z-index: var(--z-sticky);
   display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;
   min-height: var(--dec-sh); box-sizing: border-box; margin: 0 0 var(--space-2);
   background: var(--bg); box-shadow: 0 1px 0 var(--border-subtle);
@@ -62,7 +62,7 @@ button.dec-more:hover { background: var(--surface-hover); }
    itself and its axis sticks inside it (time-zoom.css). */
 .dec-timeline .tz-frame:not(.zoomed) { overflow: visible; }
 .dec-timeline .tz-frame:not(.zoomed) .tz-axis-row {
-  position: sticky; top: calc(var(--dec-stick) + var(--dec-tl-sh, var(--dec-sh))); z-index: 6;
+  position: sticky; top: calc(var(--dec-stick) + var(--dec-tl-sh, var(--dec-sh))); z-index: var(--z-tz-axis);
   background: var(--panel);
 }
 
@@ -71,7 +71,7 @@ button.dec-more:hover { background: var(--surface-hover); }
    passes under it. The rule box rides with Rule, capped in the room under
    the stuck head (--dec-box-max, measured), and scrolls inside itself. */
 .dec-head.stuck {
-  position: sticky; top: calc(var(--dec-stick) + var(--dec-sh)); z-index: 5;
+  position: sticky; top: calc(var(--dec-stick) + var(--dec-sh)); z-index: var(--z-stuck-head);
   background: var(--panel); border-bottom: 1px solid var(--border);
   border-radius: var(--r) var(--r) 0 0;
 }

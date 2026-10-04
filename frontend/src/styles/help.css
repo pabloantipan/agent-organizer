@@ -1,7 +1,7 @@
 /* The Help (FR-2): an overlay under the top bar, sections list and document.
    Tier-2 tokens only. */
 .help {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--z-modal);
   display: grid; grid-template-rows: auto auto minmax(0, 1fr);
   background: var(--bg); color: var(--fg);
 }

@@ -3,7 +3,7 @@
    color-mix or nesting). */
 .rb-anchor { position: relative; display: inline-flex; }
 .rb {
-  position: absolute; top: calc(100% + var(--space-1)); right: 0; z-index: 20;
+  position: absolute; top: calc(100% + var(--space-1)); right: 0; z-index: var(--z-box);
   width: 400px; max-width: calc(100vw - var(--space-8)); display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4);
   background: var(--surface-overlay); border-radius: var(--radius-lg); box-shadow: var(--shadow-overlay);
   text-align: left; white-space: normal; box-sizing: border-box;
@@ -17,7 +17,7 @@
 .rb > * { flex: none; }
 .rb { overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; }
 .rb > .rb-foot {
-  position: sticky; bottom: calc(-1 * var(--space-4)); z-index: 1;
+  position: sticky; bottom: calc(-1 * var(--space-4)); z-index: var(--z-raised);
   margin: 0 calc(-1 * var(--space-4)) calc(-1 * var(--space-4)); padding: var(--space-2) var(--space-4) var(--space-4);
   background: var(--surface-overlay);
 }
@@ -123,8 +123,10 @@
 /* FR-8, FR-17: compact's sheet and regular's box have a scrim over what
    they cover; the rows' verbs are behind it, so a click meant for a covered
    verb cannot land on it, nor a second box open under the first. Just under
-   the box, which is fixed at z-index 20. Wide's box is in the flow: none. */
-.rb-scrim { position: fixed; inset: 0; z-index: 19; background: var(--bg-sunken); opacity: 0.7; } /* no scrim token yet: the sunken ground, dimmed like the modal backdrop */
+   the box (--z-scrim < --z-box), and under the top bar (--z-topbar), which
+   paints over its top: Help and navigation stay reachable (leftovers-7
+   FR-3). Wide's box is in the flow: none. */
+.rb-scrim { position: fixed; inset: 0; z-index: var(--z-scrim); background: var(--bg-sunken); opacity: 0.7; } /* no scrim token yet: the sunken ground, dimmed like the modal backdrop */
 /* FR-23 (amendment 4): the row whose Rule opened the box stays marked
    while the box is open, with --surface-selected (design system, Focus and
    names: disclosure state), set by RuleDecisionBox as data-rb-opener. On
@@ -134,4 +136,10 @@
 /* leftovers-5 FR-3: hover never takes the mark away, the pointer in the
    box (wide's box sits inside its row) or on the row itself. */
 .home .ib-row[data-rb-opener], .home .ib-row[data-rb-opener]:hover, .dec .dec-head[data-rb-opener] { background: var(--surface-selected); }
-.home:not(.wide) .ib-row[data-rb-opener] { position: relative; z-index: 20; }
+.home:not(.wide) .ib-row[data-rb-opener] { position: relative; z-index: var(--z-box); }
+/* leftovers-7 FR-1: on Decisions the box lives in its record's head, so the
+   head carries the box's layer while it is open: over the section headings
+   and the stuck axis, under the top bar and the card back. A stuck head
+   keeps its sticky position. */
+.dec .dec-head[data-rb-opener] { z-index: var(--z-box); }
+.dec .dec-head[data-rb-opener]:not(.stuck) { position: relative; }
