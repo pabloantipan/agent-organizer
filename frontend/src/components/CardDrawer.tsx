@@ -6,6 +6,7 @@ import type { merge } from "../../wailsjs/go/models";
 import { ageLabel, notesAsContext, shortHome, since } from "../lib";
 import { useBoard } from "../stores/board.store";
 import { readOnlyOf } from "../lib/queue";
+import { openBox } from "../lib/boxStack";
 
 /** Focus and names, opening inline (widths-and-focus FR-19): the card back
  *  takes focus on its title when it opens, and hands it back to what opened
@@ -33,11 +34,10 @@ function useFocusOpener(key: string | null, title: React.RefObject<HTMLHeadingEl
 // and actions in the side column.
 export function CardDrawer() {
   const { selected, select, view } = useBoard();
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && select(null);
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [select]);
+  // Escape closes the card back when it is the topmost open box
+  // (leftovers-5 FR-1): opened over a rule box, it closes and the box stays.
+  const open = !!selected;
+  useEffect(() => (open ? openBox(() => select(null)) : undefined), [open, select]);
   const html = useMemo(() => (selected ? (marked.parse(selected.body || "") as string) : ""), [selected]);
   const title = useRef<HTMLHeadingElement>(null);
   const titleId = useId();
@@ -200,7 +200,7 @@ function MyNotes({ card: c, readOnly }: { card: merge.BoardCard; readOnly: strin
               </div>
               {editing === n.id ? (
                 <div className="comment-box">
-                  <textarea autoFocus value={draft} onChange={(e) => setDraft(e.target.value)} rows={3} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); editNote(c.initiative_id, c.slug, n.id, draft); setEditing(null); } if (e.key === "Escape") setEditing(null); }} />
+                  <textarea autoFocus value={draft} onChange={(e) => setDraft(e.target.value)} rows={3} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); editNote(c.initiative_id, c.slug, n.id, draft); setEditing(null); } if (e.key === "Escape") { e.preventDefault(); setEditing(null); } }} />
                   <div className="comment-actions"><button className="tiny-btn primary" onClick={() => { editNote(c.initiative_id, c.slug, n.id, draft); setEditing(null); }}>Save</button><button className="tiny-btn ghost" onClick={() => setEditing(null)}>Cancel</button></div>
                 </div>
               ) : (

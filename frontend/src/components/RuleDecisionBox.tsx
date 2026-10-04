@@ -4,6 +4,7 @@ import type { model } from "../../wailsjs/go/models";
 import { api } from "../hooks/useWails";
 import { recordSections } from "../lib/decisions";
 import { leadOf } from "../lib/queue";
+import { openBox } from "../lib/boxStack";
 import { useBoard } from "../stores/board.store";
 import type { WidthClass } from "../lib/width";
 import "../styles/rule-box.css";
@@ -69,24 +70,13 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
 
   // FR-22 (responsive-home amendment 4): Escape closes the box wherever
   // focus sits in the view, the record's text included, which takes no
-  // focus and so leaves it on the body. A document listener while the box
-  // is open; the latest close and busy through a ref, so it is added once.
-  // One Escape closes only the topmost: a dialog open over the box (Help,
-  // a card back) is always above an inline box and closes itself on its
-  // own window listener, so the box waits while one is open.
+  // focus and so leaves it on the body. leftovers-5 FR-1: only when the box
+  // is the topmost open one (lib/boxStack); Help or a card back opened over
+  // it takes the Escape first. Busy, the box keeps the Escape and stays.
+  // The latest close and busy through a ref, so the box opens once.
   const escape = useRef({ close, busy });
   escape.current = { close, busy };
-  useEffect(() => {
-    const onKey = (e: globalThis.KeyboardEvent) => {
-      if (e.key !== "Escape" || e.defaultPrevented || escape.current.busy) return;
-      const over = Array.from(document.querySelectorAll('[role="dialog"]')).some((d) => d !== box.current && !box.current?.contains(d));
-      if (over) return;
-      e.preventDefault();
-      escape.current.close();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, []);
+  useEffect(() => openBox(() => { if (!escape.current.busy) escape.current.close(); }), []);
 
   // FR-23: the row whose Rule opened the box stays marked while it is open
   // (rule-box.css, [data-rb-opener]: --surface-selected, and on Home above
