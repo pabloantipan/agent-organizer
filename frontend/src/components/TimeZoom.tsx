@@ -6,6 +6,7 @@ import {
   addLocalDays, stepOf, ticksOf, todayAt, todayLabel, todayScroll, todayTick, windowOf,
   type Box, type Level, type Scale, type Span, type ZoomButton,
 } from "../lib/axis";
+import { dateWords } from "../lib/dates";
 import "../styles/time-zoom.css";
 
 /** The time zoom shared by Roadmap Cards, Roadmap Stages and the Decisions
@@ -362,6 +363,24 @@ export function TimeFrame({ z, label, axis, extents, undated, children }: FrameP
  *  Every pass starts from what React drew, so nothing set here outlives the
  *  layout it was measured on; the axis's growth is kept and corrected, so a
  *  pass never shrinks the page under the reader. */
+/** The day a mark stands on, read from its hover title's trailing
+ *  `YYYY-MM-DD` (the Roadmap writes `<title> · <date>`); null without one. */
+function dayOfMark(mark: Element | null): string | null {
+  const m = /(\d{4}-\d{2}-\d{2})$/.exec(mark?.getAttribute("title") ?? "");
+  return m ? m[1] : null;
+}
+
+/** A crowd's "+N" name (leftovers-8 FR-7): "2 more milestones on 24 Sep:
+ *  Pilot, Billing", the days in words, each once. */
+function moreName(rest: { name: string; kind: "milestone" | "date"; day: string | null }[]): string {
+  const n = rest.length;
+  const noun = rest.every((r) => r.kind === "milestone") ? (n === 1 ? "milestone" : "milestones") : (n === 1 ? "date" : "dates");
+  const days = [...new Set(rest.map((r) => r.day).filter((d): d is string => !!d))].sort().map((d) => dateWords(d));
+  const on = days.length ? ` on ${days.join(", ")}` : "";
+  const names = rest.map((r) => r.name.trim()).filter(Boolean).join(", ");
+  return `${n} more ${noun}${on}${names ? `: ${names}` : ""}`;
+}
+
 function placeAxisLabels(content: HTMLElement, level: Level) {
   const frame = content.parentElement;
   const axis = content.querySelector<HTMLElement>(".tz-axis");
@@ -451,11 +470,13 @@ function placeAxisLabels(content: HTMLElement, level: Level) {
   for (const [i, rest] of folded) {
     const t = titles[i];
     const more = document.createElement("span");
-    const names = rest.map((e) => e.textContent ?? "").join(", ");
     more.className = "tz-more";
     more.textContent = ` · +${rest.length}`;
-    more.title = `${rest.length} more: ${names}`;
-    more.setAttribute("aria-label", `, and ${more.title}`);
+    // leftovers-8 FR-7: its own name, not text WKWebView reads as plain
+    // ("+1"): "1 more milestone on 24 Sep: Billing switched on".
+    more.title = moreName(rest.map((e) => ({ name: e.textContent ?? "", kind: e.parentElement?.classList.contains("ms") ? "milestone" : "date", day: dayOfMark(e.parentElement) })));
+    more.setAttribute("role", "img");
+    more.setAttribute("aria-label", more.title);
     t.e.appendChild(more);
     const [l, h] = room(t.e);
     let nb = boxOf(t.e.getBoundingClientRect());
