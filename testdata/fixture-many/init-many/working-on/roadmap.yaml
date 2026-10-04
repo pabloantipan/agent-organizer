@@ -1,0 +1,18 @@
+stages:
+  - id: discover
+    title: Discover
+    outcome: the records say what the operator needs
+    exit: [the find covers number and words]
+    appetite: two waves
+    done: 2026-08-15
+  - id: build
+    title: Build
+    outcome: the view holds seventy records
+    exit: [N4 passes]
+    appetite: three waves
+    target: 2026-10-20
+  - id: ship
+    title: Ship
+    outcome: the operator rules from it every day
+    exit: [a week of rulings]
+    appetite: one wave
