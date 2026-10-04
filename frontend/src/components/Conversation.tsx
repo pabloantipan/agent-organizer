@@ -3,6 +3,7 @@ import { ArrowUpRight, AtSign, BookOpen, Archive, Check, ChevronDown, ChevronRig
 import { api, type AgentGroup, type CellMessage, type CellThread, type CellThreadView } from "../hooks/useWails";
 import { useBoard } from "../stores/board.store";
 import { notesAsContext } from "../lib";
+import { branchKey, drafts, draftVerb, newThreadKey, threadKey, useDraft } from "../lib/drafts";
 import { askedCards, needsMeThread } from "../lib/queue";
 
 const KINDS = ["msg", "question", "answer", "status", "decision", "done", "claim", "yield"];
@@ -64,8 +65,11 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   const [target, setTarget] = useState<string | null>(null); // thread the box posts into; null = new thread
   const [replyTo, setReplyTo] = useState<CellMessage | null>(null);
   const [branchFrom, setBranchFrom] = useState<CellMessage | null>(null);
-  const [draftSubject, setDraftSubject] = useState("");
-  const [draftBody, setDraftBody] = useState("");
+  // What a landing put in the new-thread form (a card's Discuss, Write about
+  // this card). Not a draft: what the lead types is, and a kept draft wins
+  // over a prefill (leftovers-9 FR-1).
+  const [prefill, setPrefill] = useState<{ subject: string; body: string } | null>(null);
+  const newKept = !!useDraft(newThreadKey(initiativeId));
   const [scrollTo, setScrollTo] = useState<string | null>(null);
   // The thread a landing from elsewhere (Answer, a card's Discuss) named:
   // it gets focus once its messages are in (initiative-header FR-6).
@@ -167,7 +171,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
       landing.current = slackDraft.threadId;
       setTimeout(() => { setTarget(slackDraft.threadId!); setScrollTo(slackDraft.threadId!); }, 0);
     }
-    if (slackDraft.subject !== undefined) { setDraftSubject(slackDraft.subject); setDraftBody(slackDraft.body ?? ""); setTarget(null); }
+    if (slackDraft.subject !== undefined) { setPrefill({ subject: slackDraft.subject, body: slackDraft.body ?? "" }); setTarget(null); }
     clearSlackDraft();
   }, [slackDraft]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -232,7 +236,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
         <div className="chats-label">
           <span>Chats</span>
           <span className="spacer" />
-          {!readOnly && <button className="rail-icon" onClick={() => { setTarget(null); setDraftSubject(""); }} disabled={!canPost} aria-describedby={noToken} title={canPost ? (focus ? `new thread with ${focus}` : "new thread") : undefined} aria-label="new thread"><Plus size={13} /></button>}
+          {!readOnly && <button className="rail-icon" onClick={() => { setTarget(null); setPrefill(null); }} disabled={!canPost} aria-describedby={noToken} title={canPost ? (focus ? `new thread with ${focus}` : "new thread") : undefined} aria-label={draftVerb("new thread", newKept)}><Plus size={13} /></button>}
         </div>
         {noToken && <div id={noToken} className="chats-reason">no token for {human || "the human seat"} to post with; the cell bootstrap issues one</div>}
         <div className="cell-search">
@@ -288,8 +292,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
               onDiscussCard={(c) => {
                 const guess = seats.find((a) => (c.next || "").toLowerCase().includes(a.split("_").pop() ?? "\u0000"));
                 if (guess) pickPerson(guess);
-                setDraftSubject(`${c.slug}: `);
-                setDraftBody(notesAsContext(notes[`${initiativeId}/${c.slug}`], human));
+                setPrefill({ subject: `${c.slug}: `, body: notesAsContext(notes[`${initiativeId}/${c.slug}`], human) });
                 setTarget(null);
               }}
               onOpenCard={openCardLanding}
@@ -365,6 +368,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
             <NewThread
               initiativeId={initiativeId}
               seats={seats}
+              draftKey={branchKey(initiativeId, branchFrom.id)}
               to={branchFrom.from}
               subject={`${BRANCH_PREFIX}${targetThread.subject}`}
               quote={branchFrom}
@@ -384,19 +388,21 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
               defaultTo={focus ?? lastAsker(targetDetail?.messages ?? [], human) ?? lastOther(targetDetail?.messages ?? [], human)}
               replyTo={replyTo}
               onClearReply={() => setReplyTo(null)}
-              onNewThread={group.can_post ? () => { setTarget(null); setDraftSubject(""); } : undefined}
+              onNewThread={group.can_post ? () => { setTarget(null); setPrefill(null); } : undefined}
+              newKept={newKept}
               onSent={() => { setReplyTo(null); reload(); }}
             />
           ) : (
             <NewThread
-              key={`${focus ?? ""}|${draftSubject}|${draftBody.length}`}
+              key={`${focus ?? ""}|${prefill?.subject ?? ""}`}
               initiativeId={initiativeId}
+              draftKey={newThreadKey(initiativeId)}
               seats={seats}
               to={focus ?? seats[0] ?? ""}
-              subject={draftSubject || undefined}
-              body={draftBody || undefined}
+              subject={prefill?.subject || undefined}
+              body={prefill?.body || undefined}
               canPost={group.can_post}
-              onDone={(tid) => { setDraftSubject(""); setDraftBody(""); reload(); if (tid) goTo(tid); else if (threads.length) setTarget(threads[threads.length - 1].id); }}
+              onDone={(tid) => { setPrefill(null); reload(); if (tid) goTo(tid); else if (threads.length) setTarget(threads[threads.length - 1].id); }}
               cancellable={threads.length > 0}
             />
           )}
@@ -456,9 +462,14 @@ function Msg({ m, parent, human, onReply, onBranch }: { m: CellMessage; parent?:
  *  then the cost. Stalled threads accept only a decision. */
 function ReplyBox(p: {
   initiativeId: string; threadId: string; subject: string; status: string; human: string; seats: string[]; canPost: boolean; wakesAll: number;
-  defaultTo: string; replyTo: CellMessage | null; onClearReply: () => void; onNewThread?: () => void; onSent: () => void;
+  defaultTo: string; replyTo: CellMessage | null; onClearReply: () => void; onNewThread?: () => void; newKept?: boolean; onSent: () => void;
 }) {
-  const [body, setBody] = useState("");
+  // leftovers-9 FR-1: the message is kept per thread for the session, so
+  // leaving the thread or the chat keeps it and coming back restores it;
+  // only cancel or Send discards it.
+  const dk = threadKey(p.initiativeId, p.threadId);
+  const body = useDraft<{ body: string }>(dk)?.body ?? "";
+  const setBody = (b: string) => drafts.keep(dk, { body: b });
   const [kind, setKind] = useState(p.status === "stalled" ? "decision" : "msg");
   const [to, setTo] = useState(p.defaultTo);
   const [busy, setBusy] = useState(false);
@@ -479,7 +490,7 @@ function ReplyBox(p: {
     if (!body.trim() || busy) return;
     setBusy(true);
     api.postToCell(p.initiativeId, { thread_id: p.threadId, parent_id: p.replyTo?.id ?? "", to, kind, body } as never).then(
-      () => { setBody(""); setErr(null); p.onSent(); },
+      () => { drafts.discard(dk); setErr(null); p.onSent(); },
       (e) => setErr(String(e)),
     ).finally(() => setBusy(false));
   };
@@ -489,14 +500,15 @@ function ReplyBox(p: {
         <span className="meta composer-target" title={p.subject}><CornerDownRight size={11} /> in <b>{p.subject || "(no subject)"}</b></span>
         {p.replyTo && <span className="meta reply-to">· replying to {p.replyTo.from}'s {p.replyTo.kind} <button className="rail-icon" onClick={p.onClearReply} aria-label={`Clear reply to ${p.replyTo.from}`} title={`Clear reply to ${p.replyTo.from}`}><X size={11} /></button></span>}
         <span className="spacer" />
-        {p.onNewThread && <button className="linkish meta" onClick={p.onNewThread}>new thread instead</button>}
+        {body && <button className="linkish meta" onClick={() => drafts.discard(dk)}>cancel</button>}
+        {p.onNewThread && <button className="linkish meta" onClick={p.onNewThread}>{draftVerb("new thread instead", !!p.newKept)}</button>}
       </div>
       {p.status === "stalled" && <div className="frozen">Stalled: only a decision is accepted until one is recorded or the thread is escalated.</div>}
       {p.status === "escalated" && <div className="frozen">Escalated to you. It accepts nothing; reopen it to reply.</div>}
       {p.status === "closed" && <div className="frozen">Closed. Reopen it to add anything.</div>}
       {!p.canPost && <div className="frozen">No token for {p.human || "the human seat"}: run the cell bootstrap to issue one.</div>}
       <div className="composer-line">
-        <textarea ref={ref} rows={2} value={body} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setBody(e.target.value)} disabled={!writable} placeholder={writable ? "Type a message  (Enter to send, Shift+Enter for a new line)" : ""} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }} />
+        <textarea ref={ref} rows={2} value={body} aria-label={`Message to ${to || "the channel"}`} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setBody(e.target.value)} disabled={!writable} placeholder={writable ? "Type a message  (Enter to send, Shift+Enter for a new line)" : ""} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }} />
       </div>
       <div className="composer-row">
         <select value={kind} onChange={(e) => setKind(e.target.value)} disabled={!writable}>
@@ -509,7 +521,7 @@ function ReplyBox(p: {
         <span className={`meta wakes ${!to && wakes > 1 ? "hot" : ""}`}>wakes {wakes} seat{wakes === 1 ? "" : "s"}</span>
         <span className="spacer" />
         {err && <span className="meta err">{err}</span>}
-        <button className="tiny-btn primary" onClick={send} disabled={!writable || !body.trim() || busy} title="send"><Send size={12} /> Send</button>
+        <button className="tiny-btn primary" onClick={send} disabled={!writable || !body.trim() || busy} title="send"><Send size={12} /> {draftVerb("Send", !!body)}</button>
       </div>
     </div>
   );
@@ -518,11 +530,17 @@ function ReplyBox(p: {
 /** Starting a thread, or branching one: subject, recipient, kind, body. A
  *  branch arrives with its subject set and the quoted message as the first
  *  lines, so the link back survives in the record itself. */
-function NewThread({ initiativeId, seats, to: initialTo, subject: initialSubject, body: initialBody, quote, canPost = true, cancellable = true, onDone }: { initiativeId: string; seats: string[]; to: string; subject?: string; body?: string; quote?: CellMessage; canPost?: boolean; cancellable?: boolean; onDone: (threadId: string | null) => void }) {
-  const [subject, setSubject] = useState(initialSubject ?? "");
+function NewThread({ initiativeId, draftKey, seats, to: initialTo, subject: initialSubject, body: initialBody, quote, canPost = true, cancellable = true, onDone }: { initiativeId: string; draftKey: string; seats: string[]; to: string; subject?: string; body?: string; quote?: CellMessage; canPost?: boolean; cancellable?: boolean; onDone: (threadId: string | null) => void }) {
+  // leftovers-9 FR-1: subject and body are one draft, kept for the session
+  // under draftKey; Escape closes the form and keeps it, a kept draft wins
+  // over what the form was opened with, and only cancel or Start discards it.
+  const kept = useDraft<{ subject: string; body: string }>(draftKey);
+  const subject = kept?.subject ?? initialSubject ?? "";
+  const body = kept?.body ?? (quote ? `↳ from thread ${quote.thread_id}, ${quote.from}'s ${quote.kind}:\n> ${quote.body.slice(0, 300).replace(/\n/g, "\n> ")}\n\n` : (initialBody ?? ""));
+  const setSubject = (v: string) => drafts.keep(draftKey, { subject: v, body });
+  const setBody = (v: string) => drafts.keep(draftKey, { subject, body: v });
   const [to, setTo] = useState(initialTo);
   const [kind, setKind] = useState("question");
-  const [body, setBody] = useState(quote ? `↳ from thread ${quote.thread_id}, ${quote.from}'s ${quote.kind}:\n> ${quote.body.slice(0, 300).replace(/\n/g, "\n> ")}\n\n` : (initialBody ?? ""));
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const wakes = to ? 1 : seats.length;
@@ -530,7 +548,7 @@ function NewThread({ initiativeId, seats, to: initialTo, subject: initialSubject
     if (!subject.trim() || !body.trim() || busy) return;
     setBusy(true);
     api.postToCell(initiativeId, { thread_id: "", parent_id: "", to, kind, subject, body } as never).then(
-      (r) => onDone(r.thread_id),
+      (r) => { drafts.discard(draftKey); onDone(r.thread_id); },
       (e) => { setErr(String(e)); setBusy(false); },
     );
   };
@@ -539,12 +557,12 @@ function NewThread({ initiativeId, seats, to: initialTo, subject: initialSubject
       <div className="composer-row">
         <span className="meta composer-target">{quote ? <><GitBranch size={11} /> side thread with <b>{to || "everyone"}</b></> : <><Plus size={11} /> new thread</>}</span>
         <span className="spacer" />
-        {cancellable && <button className="linkish meta" onClick={() => onDone(null)}>cancel</button>}
+        {(cancellable || kept) && <button className="linkish meta" onClick={() => { drafts.discard(draftKey); if (cancellable) onDone(null); }}>cancel</button>}
       </div>
       {!canPost && <div className="frozen">No token for the human seat: run the cell bootstrap to issue one.</div>}
-      <input autoFocus={!quote && !initialSubject} value={subject} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setSubject(e.target.value)} placeholder="subject  (start with a card slug to link it: readiness-endpoint: …)" disabled={!canPost} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); (e.currentTarget.closest(".composer")?.querySelector("textarea") as HTMLTextAreaElement | null)?.focus(); } }} />
+      <input autoFocus={!quote && !initialSubject} value={subject} aria-label="Subject" autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setSubject(e.target.value)} placeholder="subject  (start with a card slug to link it: readiness-endpoint: …)" disabled={!canPost} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); (e.currentTarget.closest(".composer")?.querySelector("textarea") as HTMLTextAreaElement | null)?.focus(); } }} />
       <div className="composer-line">
-        <textarea autoFocus={!!quote || !!initialSubject} rows={3} value={body} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setBody(e.target.value)} placeholder="Type a message  (Enter to send, Shift+Enter for a new line)" disabled={!canPost} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } if (e.key === "Escape" && cancellable && !e.nativeEvent.isComposing) onDone(null); }} />
+        <textarea autoFocus={!!quote || !!initialSubject} rows={3} value={body} aria-label={`Message to ${to || "the channel"}`} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setBody(e.target.value)} placeholder="Type a message  (Enter to send, Shift+Enter for a new line)" disabled={!canPost} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } if (e.key === "Escape" && cancellable && !e.nativeEvent.isComposing) onDone(null); }} />
       </div>
       <div className="composer-row">
         <select value={kind} onChange={(e) => setKind(e.target.value)} disabled={!canPost}>{KINDS.map((k) => <option key={k} value={k}>{k}</option>)}</select>
@@ -555,7 +573,7 @@ function NewThread({ initiativeId, seats, to: initialTo, subject: initialSubject
         <span className={`meta wakes ${wakes > 1 ? "hot" : ""}`}>wakes {wakes} seat{wakes === 1 ? "" : "s"}</span>
         <span className="spacer" />
         {err && <span className="meta err">{err}</span>}
-        <button className="tiny-btn primary" onClick={send} disabled={busy || !canPost || !subject.trim() || !body.trim()}><Send size={12} /> {quote ? "Branch" : "Start"}</button>
+        <button className="tiny-btn primary" onClick={send} disabled={busy || !canPost || !subject.trim() || !body.trim()}><Send size={12} /> {draftVerb(quote ? "Branch" : "Start", !!kept)}</button>
       </div>
     </div>
   );

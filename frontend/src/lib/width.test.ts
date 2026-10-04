@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { COMPACT_FIXED, shareRoom, signalsNeed, compactColumns, FOLD, GOAL_MIN, homeClassOf, NEXT_W, railCollapsedFor, roomyOf, SIGNALS_MIN, SLACK, signalsShown, signalsThatFit, wideGoalRoom, widthClassOf, type Fold } from "./width";
+import { COMPACT_FIXED, fixedColumns, REGULAR_FIXED, shareRoom, signalsNeed, compactColumns, FOLD, GOAL_MIN, homeClassOf, NEXT_W, railCollapsedFor, roomyOf, SIGNALS_MIN, SLACK, signalsShown, signalsThatFit, wideGoalRoom, widthClassOf, type Fold } from "./width";
 
 describe("widthClassOf", () => {
   it("puts each boundary in the class above it", () => {
@@ -233,5 +233,31 @@ describe("shareRoom (FR-20)", () => {
     expect(w[0]).toBe(30);
     expect(w[1]).toBeGreaterThanOrEqual(89);
     expect(w[0] + w[1]).toBeLessThanOrEqual(120);
+  });
+});
+
+describe("fixed columns' slack goes to cut cells first (leftovers-9 FR-2)", () => {
+  // Measured at a 1512x945 window, rail as a strip: state's 144 px track
+  // holds 96 px of lozenge, phase's 96 holds 69, and the next date needs
+  // 120 in its 96 ("30 Nov due · w-later").
+  it("shareRoom gives each fixed column its widest row while their room holds them all", () => {
+    expect(shareRoom([96, 69, 120], [96, 69, 120], 144 + 96 + 96).widths).toEqual([96, 69, 120]);
+  });
+
+  it("sizes the fixed columns to their widest rows once one is cut, the next date whole", () => {
+    const w = fixedColumns(REGULAR_FIXED, [95.4, 68.2, 119.6]);
+    expect(w).toEqual([96, 69, 120]);
+    expect(w.reduce((a, x) => a + x, 0)).toBeLessThanOrEqual(144 + 96 + 96);
+  });
+
+  it("moves nothing while every fixed cell fits its track", () => {
+    expect(fixedColumns(REGULAR_FIXED, [96, 69, 90])).toBe(REGULAR_FIXED);
+  });
+
+  it("cuts only when the widest rows together exceed the room, the widest first, within the room", () => {
+    const w = fixedColumns([100, 100], [150, 90]);
+    expect(w[1]).toBe(90);
+    expect(w[0]).toBeGreaterThanOrEqual(109);
+    expect(w[0] + w[1]).toBeLessThanOrEqual(200);
   });
 });

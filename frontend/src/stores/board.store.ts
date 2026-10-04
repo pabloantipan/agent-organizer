@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { api, type Account, type AgentsView, type BoardView, type Group, type LockState, type Note } from "../hooks/useWails";
 import type { merge } from "../../wailsjs/go/models";
-import { dropDraft, editDraft, openDraft, type Draft, type Drafts } from "../lib/drafts";
+import { drafts, type Draft } from "../lib/drafts";
 import { decSectionsOf, type DecSections } from "../lib/decisionsPage";
 import { storedHeaderOpen, storeFolded, storeHeaderOpen } from "../lib/fold";
 import { stageFocusOf } from "../lib/stageFocus";
@@ -49,10 +49,10 @@ type State = {
   // row's key, decision:<initiative>/<NNNN>. Leaving Home closes it.
   ruleDraft: RuleDraft | null;
   // One draft per record until Rule or Cancel (FR-9): closing a box, opening
-  // another row's, or leaving Home keeps its words here, and reopening
-  // restores them. Only dropRule (Cancel, the ruling written, the row gone)
-  // discards one.
-  ruleDrafts: Record<string, Draft>;
+  // another row's, or leaving Home keeps its words in the session's drafts
+  // (lib/drafts, the same key Decisions' box uses), and reopening restores
+  // them. Only dropRule (Cancel, the ruling written, the row gone) discards
+  // one.
   openRule: (key: string | null) => void;
   setRuleDraft: (patch: Partial<Omit<RuleDraft, "key">>) => void;
   dropRule: (key: string) => void;
@@ -135,8 +135,7 @@ type State = {
 
 export type RuleDraft = { key: string; chosen: string; words: string };
 
-const draftsOf = (st: State): Drafts => ({ open: st.ruleDraft, drafts: st.ruleDrafts });
-const ruleState = (d: Drafts) => ({ ruleDraft: d.open, ruleDrafts: d.drafts });
+const NO_RULING: Draft = { chosen: "", words: "" };
 
 const RAIL_KEY = "rail.collapsed.strip";
 const storedRail = () => { try { return localStorage.getItem(RAIL_KEY); } catch { return null; } };
@@ -194,10 +193,14 @@ export const useBoard = create<State>((set, get) => ({
     set({ widthClass, roomy, railCollapsed: railCollapsedFor(storedRail(), widthClass) });
   },
   ruleDraft: null,
-  ruleDrafts: {},
-  openRule: (key) => set((st) => ruleState(openDraft(draftsOf(st), key))),
-  setRuleDraft: (patch) => set((st) => ruleState(editDraft(draftsOf(st), patch))),
-  dropRule: (key) => set((st) => ruleState(dropDraft(draftsOf(st), key))),
+  openRule: (key) => set({ ruleDraft: key ? { key, ...NO_RULING, ...drafts.restore<Draft>(key) } : null }),
+  setRuleDraft: (patch) => set((st) => {
+    if (!st.ruleDraft) return {};
+    const { key, chosen, words } = { ...st.ruleDraft, ...patch };
+    drafts.keep(key, { chosen, words });
+    return { ruleDraft: { key, chosen, words } };
+  }),
+  dropRule: (key) => { drafts.discard(key); set((st) => (st.ruleDraft?.key === key ? { ruleDraft: null } : {})); },
   headerOpen: storedHeaderOpen(),
   setHeaderOpen: (headerOpen) => set({ headerOpen: storeHeaderOpen(headerOpen) }),
   decSections: storedDecSections(),

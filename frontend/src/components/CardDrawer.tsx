@@ -6,6 +6,8 @@ import type { merge } from "../../wailsjs/go/models";
 import { ageLabel, notesAsContext, shortHome, since } from "../lib";
 import { useBoard } from "../stores/board.store";
 import { readOnlyOf } from "../lib/queue";
+import { dateWords } from "../lib/dates";
+import { cardKey, drafts, draftVerb, useDraft } from "../lib/drafts";
 import { openBox } from "../lib/boxStack";
 import { useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
 import { focusBoxBelow } from "./RuleDecisionBox";
@@ -76,7 +78,7 @@ export function CardDrawer() {
               <span className={`badge machine ${c.local ? "local" : "remote"}`}>{c.machine}</span>
               {c.client && <span className="badge client">{c.client}</span>}
               {c.branch && <span className="badge mono">{c.branch}</span>}
-              <span className="badge">updated {c.updated} · {ageLabel(c.updated)}</span>
+              <span className="badge">updated {dateWords(c.updated)} · {ageLabel(c.updated)}</span>
             </div>
             {c.next && (
               <div className="next-box">
@@ -173,7 +175,12 @@ function MyNotes({ card: c, readOnly }: { card: merge.BoardCard; readOnly: strin
   const group = (agents?.groups ?? []).find((g) => g.id === c.initiative_id);
   const canWrite = !!group?.cell && group.can_post && !readOnly;
   const notes = view?.order?.notes?.[key] ?? [];
-  const [text, setText] = useState("");
+  // leftovers-9 FR-1: what is typed is kept per card for the session, so an
+  // Escape that closes the card back keeps it and reopening restores it;
+  // only Cancel or Save discards it.
+  const dk = cardKey(c.initiative_id, c.slug);
+  const text = useDraft<{ text: string }>(dk)?.text ?? "";
+  const setText = (t: string) => drafts.keep(dk, { text: t });
   const [editing, setEditing] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
@@ -181,7 +188,7 @@ function MyNotes({ card: c, readOnly }: { card: merge.BoardCard; readOnly: strin
   const submit = () => {
     if (!text.trim() || busy) return;
     setBusy(true);
-    addNote(c.initiative_id, c.slug, text).then(() => setText("")).finally(() => setBusy(false));
+    addNote(c.initiative_id, c.slug, text).then(() => drafts.discard(dk)).finally(() => setBusy(false));
   };
   const initial = (by: string) => (by || "?").replace(/@.*$/, "").slice(0, 1).toUpperCase();
   return (
@@ -192,8 +199,8 @@ function MyNotes({ card: c, readOnly }: { card: merge.BoardCard; readOnly: strin
       ) : <div className="comment-new">
         <span className="avatar" title={me || "you"}>{initial(me)}</span>
         <div className="comment-box">
-          <textarea value={text} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setText(e.target.value)} placeholder="Write a comment…  (Enter to save, Shift+Enter for a new line)" rows={text ? 3 : 1} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); submit(); } if (e.key === "Escape" && (e.nativeEvent.isComposing || e.keyCode === 229)) e.preventDefault(); }} />
-          {text && <div className="comment-actions"><button className="tiny-btn primary" onClick={submit} disabled={busy}><Send size={12} /> Save</button><button className="tiny-btn ghost" onClick={() => setText("")}>Cancel</button></div>}
+          <textarea value={text} aria-label={`Comment on ${c.title || c.slug}`} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setText(e.target.value)} placeholder="Write a comment…  (Enter to save, Shift+Enter for a new line)" rows={text ? 3 : 1} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); submit(); } if (e.key === "Escape" && (e.nativeEvent.isComposing || e.keyCode === 229)) e.preventDefault(); }} />
+          {text && <div className="comment-actions"><button className="tiny-btn primary" onClick={submit} disabled={busy}><Send size={12} /> {draftVerb("Save", true)}</button><button className="tiny-btn ghost" onClick={() => drafts.discard(dk)}>Cancel</button></div>}
         </div>
       </div>}
       <ul className="comment-list">

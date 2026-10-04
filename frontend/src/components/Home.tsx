@@ -6,9 +6,10 @@ import { inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, type Nee
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
 import { dateWords } from "../lib/dates";
+import { draftVerb, useDraft } from "../lib/drafts";
 import { HEALTH, messages } from "../lib/health";
 import { ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
-import { compactColumns, FOLD, GOAL_CHARS, GOAL_FLOOR_CHARS, goalFloor, homeClassOf, NO_EMPTY, shareRoom, signalsNeed, signalsShown, wideGoalRoom, type Empty, type Fold, type WidthClass } from "../lib/width";
+import { compactColumns, fixedColumns, FOLD, GOAL_CHARS, GOAL_FLOOR_CHARS, goalFloor, homeClassOf, NO_EMPTY, REGULAR_FIXED, shareRoom, signalsNeed, signalsShown, wideGoalRoom, type Empty, type Fold, type WidthClass } from "../lib/width";
 import { useBoard } from "../stores/board.store";
 import { nextDate, stageState } from "./InitiativeHeader";
 import { InitiativeDetail } from "./Initiatives";
@@ -222,12 +223,15 @@ function DecisionRow({ row, decision: d }: { row: NeedsMeRow; decision: model.De
  *  in the store (ruleDraft), above the layout (responsive-home FR-5); one
  *  box is open at a time, and each record keeps its words until Rule or
  *  Cancel (FR-9): opening another row's Rule, Escape or this Rule again
- *  closes the box and keeps them. */
+ *  closes the box and keeps them, and the verb reads `Rule · draft`
+ *  (leftovers-9 FR-1). */
 function RuleAction({ rowKey, initiative, decision }: { rowKey: string; initiative: string; decision: model.Decision }) {
   const { ruleDraft, openRule, setRuleDraft, dropRule } = useBoard();
   const widthClass = useContext(HomeClass);
   const open = ruleDraft?.key === rowKey;
   const btn = useRef<HTMLButtonElement>(null);
+  // leftovers-9 FR-1: while words are kept for this record the verb says so.
+  const kept = !!useDraft(rowKey);
   // Compact's sheet covers Home, and regular's box covers the rows under its
   // opener: a scrim goes over what it covers, the rows' verbs behind it (FR-8,
   // FR-17). Wide's box sits in the column's flow and covers nothing. A click
@@ -238,7 +242,7 @@ function RuleAction({ rowKey, initiative, decision }: { rowKey: string; initiati
       {/* The scrim sits outside the row, on the page's ground, so the
           opener's row can stand above it (FR-23). */}
       {open && widthClass !== "wide" && createPortal(<div className="rb-scrim" aria-hidden="true" onClick={closeKeep} />, document.body)}
-      <button ref={btn} className="act" aria-expanded={open} aria-label={`Rule ${initiative} ${decision.number}`} onClick={() => openRule(open ? null : rowKey)}>Rule</button>
+      <button ref={btn} className="act" aria-expanded={open} aria-label={draftVerb(`Rule ${initiative} ${decision.number}`, kept)} onClick={() => openRule(open ? null : rowKey)}>{draftVerb("Rule", kept)}</button>
       {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord widthClass={widthClass} opener={btn} afterRule={focusNeedsMe} onClose={() => openRule(null)} onCancel={() => dropRule(rowKey)}
         draft={{ chosen: ruleDraft.chosen, words: ruleDraft.words, set: setRuleDraft }} />}
     </span>
@@ -274,6 +278,7 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
   const empty: Empty = { next: items.length > 0 && items.every((r) => !r.next), sig: items.length > 0 && items.every((r) => r.sig.none) };
   const { ref, idWidth, narrow, fit, goalMin } = useFitIds(ids.join(" "), empty);
   const [sigFloor, reportSig] = useSigFloor();
+  const fixed = useFixedTracks(ref, empty.next);
   // Compact's row is one line; its goal and next date give way only when the
   // row has no room for them (FR-16), and come back when it has.
   const hides = { goal: compact && !fit.goal, next: compact && !fit.next && !empty.next };
@@ -286,7 +291,7 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
     );
   }
   return (
-    <div ref={ref} className={`panel port ${narrow && !compact ? "narrow" : ""} ${hides.goal ? "" : "fit-goal"} ${hides.next || empty.next ? "" : "fit-next"} ${empty.next ? "empty-next" : ""} ${empty.sig ? "empty-sig" : ""}`} role="table" style={{ ...(idWidth ? { "--id-w": `${idWidth}px` } : {}), ...(goalMin ? { "--goal-floor": `${goalMin}px` } : {}), ...(sigFloor ? { "--sig-floor": `${sigFloor}px` } : {}) } as React.CSSProperties}>
+    <div ref={ref} className={`panel port ${narrow && !compact ? "narrow" : ""} ${hides.goal ? "" : "fit-goal"} ${hides.next || empty.next ? "" : "fit-next"} ${empty.next ? "empty-next" : ""} ${empty.sig ? "empty-sig" : ""}`} role="table" style={{ ...(idWidth ? { "--id-w": `${idWidth}px` } : {}), ...(goalMin ? { "--goal-floor": `${goalMin}px` } : {}), ...(sigFloor ? { "--sig-floor": `${sigFloor}px` } : {}), ...fixed } as React.CSSProperties}>
       <div className="p-head" role="row">
         <span className="num">#</span><span>initiative</span><span>state</span><span>phase</span><span>goal</span><span>stage</span><span>signals</span><span>next date</span><span />
       </div>
@@ -386,6 +391,55 @@ function useFitIds(key: string, empty: Empty = NO_EMPTY) {
     return () => ro.disconnect();
   }, [key, empty.next, empty.sig]);
   return { ref, idWidth, narrow, fit, goalMin };
+}
+
+/** leftovers-9 FR-2 (design system, Widths): no cell is cut while another
+ *  column holds room it does not use. Regular's fixed columns (state, phase,
+ *  next date; home.css --t-state, --t-phase, --t-next) give their slack to
+ *  the cut ones (fixedColumns, through shareRoom): each column's need is its
+ *  widest row, measured on a copy laid out at its natural width, so the
+ *  measure does not depend on the track it sits in. An empty next date has
+ *  no track (FR-20), so it is left to home.css. Measured after every render,
+ *  since the state's words move with the agents feed; state is set only
+ *  when a track changes. Other classes draw their own literal tracks and
+ *  ignore these. */
+function useFixedTracks(ref: React.RefObject<HTMLDivElement | null>, emptyNext: boolean): Record<string, string> {
+  const [tracks, setTracks] = useState<number[] | null>(null);
+  const measure = () => {
+    const el = ref.current;
+    if (!el) return;
+    const rows = Array.from(el.querySelectorAll<HTMLElement>(".p-row"));
+    if (rows.length === 0) return;
+    const widest = (pick: (row: HTMLElement) => HTMLElement | null) => Math.max(0, ...rows.map((r) => { const c = pick(r); return c ? naturalWidth(c) : 0; }));
+    const needs = [widest((r) => r.querySelector(".p-state")), widest((r) => r.querySelector(".p-phase"))];
+    if (!emptyNext) needs.push(widest((r) => r.querySelector(".p-next")));
+    const next = fixedColumns(REGULAR_FIXED.slice(0, needs.length), needs);
+    setTracks((p) => (p && p.length === next.length && p.every((w, k) => w === next[k]) ? p : next));
+  };
+  useLayoutEffect(measure);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => measure());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  if (!tracks) return {};
+  const [state, phase, next] = tracks;
+  return { "--t-state": `${state}px`, "--t-phase": `${phase}px`, ...(next !== undefined ? { "--t-next": `${next}px` } : {}) };
+}
+
+/** A cell's width with nothing cut: a hidden copy beside it, laid out at
+ *  max-content with every cap and clip lifted. */
+function naturalWidth(cell: HTMLElement): number {
+  const copy = cell.cloneNode(true) as HTMLElement;
+  copy.setAttribute("aria-hidden", "true");
+  copy.style.cssText = "position:absolute;left:0;top:0;width:max-content;max-width:none;min-width:0;visibility:hidden;overflow:visible";
+  copy.querySelectorAll<HTMLElement>("*").forEach((e) => { e.style.maxWidth = "none"; e.style.overflow = "visible"; });
+  cell.parentElement!.appendChild(copy);
+  const w = copy.getBoundingClientRect().width;
+  copy.remove();
+  return w;
 }
 
 /** The shown goals' first GOAL_FLOOR_CHARS characters (or the whole goal

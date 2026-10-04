@@ -192,3 +192,20 @@ export function shareRoom(widths: number[], mins: number[], room: number): { wid
   // to 65 would clip its last letter (WebKit's widths are fractional).
   return { widths: widths.map((w, k) => { const v = Math.max(least(k), Math.min(w, lo)); return v >= w ? w : Math.floor(v); }), fits: true };
 }
+
+/** Regular's fixed columns as home.css draws them: state, phase, next date. */
+export const REGULAR_FIXED = [144, 96, 96];
+
+/** No cell is cut while another column holds room it does not use
+ *  (leftovers-9 FR-2; design system, Widths). `tracks` are the fixed
+ *  columns as home.css draws them, `needs` what each takes on its widest
+ *  row. While every one fits its track nothing moves. Once one is cut, the
+ *  fixed columns share the room they hold together through shareRoom: each
+ *  sizes to its widest row, so one's slack goes to the cut one before any
+ *  cell is cut, and what is left returns to the flexible columns. Only when
+ *  the widest rows together do not fit is anything cut, the widest first. */
+export function fixedColumns(tracks: number[], needs: number[]): number[] {
+  const want = needs.map((n) => Math.ceil(n));
+  if (want.every((n, k) => n <= tracks[k])) return tracks;
+  return shareRoom(want, want, tracks.reduce((a, w) => a + w, 0)).widths;
+}
