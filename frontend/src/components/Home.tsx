@@ -5,6 +5,8 @@ import type { merge, model, service } from "../../wailsjs/go/models";
 import { inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, type NeedsMeRow } from "../lib/queue";
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
+import { dayMonth } from "../lib/axis";
+import { parseISO, today } from "../lib/dates";
 import { HEALTH, messages } from "../lib/health";
 import { ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
 import { compactColumns, FOLD, GOAL_CHARS, GOAL_FLOOR_CHARS, goalFloor, homeClassOf, NO_EMPTY, shareRoom, signalsNeed, signalsShown, wideGoalRoom, type Empty, type Fold, type WidthClass } from "../lib/width";
@@ -317,13 +319,21 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
 
 type Next = ReturnType<typeof nextDate>;
 
+/** Home's next date as dates read everywhere else (leftovers-5 FR-11):
+ *  `30 Nov`, with the year only when it is not this year. */
+function dateWords(iso: string): string {
+  const d = parseISO(iso);
+  if (!d) return iso;
+  return d.getFullYear() === today().getFullYear() ? dayMonth(d.getTime()) : `${dayMonth(d.getTime())} ${d.getFullYear()}`;
+}
+
 /** The chevron's name and hover (FR-11): what its detail opens on. */
 const detailsName = (id: string) => `Details for ${id}: goal, next date, repos`;
 
 /** Compact's id hover (responsive-home FR-2, FR-16): the title, then the
  *  goal and the next date if they left the row. */
 const idHover = (i: merge.BoardInitiative, next: Next, hides: { goal: boolean; next: boolean }) =>
-  [i.title, hides.goal && `goal: ${i.goal || "no goal yet"}`, hides.next && `next date: ${next ? `${next.date} ${next.what}` : "none ahead"}`].filter(Boolean).join("\n");
+  [i.title, hides.goal && `goal: ${i.goal || "no goal yet"}`, hides.next && `next date: ${next ? `${dateWords(next.date)} ${next.what}` : "none ahead"}`].filter(Boolean).join("\n");
 
 /** The chevron's detail opens on the goal and the next date, whole: the
  *  ones compact's row no longer shows and the ones regular cuts (FR-11). */
@@ -333,7 +343,7 @@ function GoalAndDate({ i, next }: { i: merge.BoardInitiative; next: Next }) {
       <span className="init-detail-label">goal</span>
       <span className={i.goal ? "" : "missing"}>{i.goal || "no goal yet"}</span>
       <span className="init-detail-label">next date</span>
-      {next ? <span><span className="num">{next.date}</span> <span className="p-next-what">{next.what}</span></span> : <span className="missing">none ahead</span>}
+      {next ? <span><span className="num">{dateWords(next.date)}</span> <span className="p-next-what">{next.what}</span></span> : <span className="missing">none ahead</span>}
     </div>
   );
 }
@@ -605,7 +615,7 @@ function NextDate({ next: n }: { next: Next }) {
   if (!n) return <span className="p-next"><span className="num" title="no card due, milestone or target ahead">—</span></span>;
   return (
     <span className="p-next">
-      <span className="num">{n.date}</span>
+      <span className="num" title={n.date}>{dateWords(n.date)}</span>
       <span className="p-next-what">{n.what}</span>
     </span>
   );

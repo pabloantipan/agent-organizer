@@ -69,6 +69,9 @@
 .home .p-stage .stepper { flex: 0 0 40px; }
 .home .p-stage .stage-lbl { flex: 1 1 auto; min-width: 0; }
 .home .p-next { display: flex; gap: var(--space-2); align-items: baseline; min-width: 0; }
+/* The date never wraps (leftovers-5 FR-11): `30 Nov` stays on its line and
+   the words after it take the ellipsis. */
+.home .p-next .num { flex: none; white-space: nowrap; }
 
 /* State: a lozenge with its own icon and word, one per row (never colour
    alone, design system Principles 4). */
