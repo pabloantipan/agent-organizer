@@ -19,7 +19,7 @@ superseded_by:
 Aglaea ranked the 0077 first wave's findings
 (`docs/ux/reviews/2026-10-04-rank-leftovers-7.md`, adfce1e), none needing your
 word on design. The build spec is `docs/specs/leftovers-7.md`, one card,
-`layers-focus-and-words` (P1-P6):
+`layers-focus-and-words` (P1-P7):
 
 - **severity 3, in the app before this wave:** a card back opened while you
   rule paints under the rule box and the sticky heading, and the box's Rule
@@ -29,6 +29,9 @@ word on design. The build spec is `docs/specs/leftovers-7.md`, one card,
   the top bar); "1 blocked" never folds, waiting gives way first; a tall rule
   box and wide code blocks show they scroll; the Stages axis stays in view
   on a landing; Rule named with its record; Home's dates in words.
+- added before your ruling (Aglaea, from timeline-and-find-6's UI review,
+  sev 1): "+N" sits after its crowd's last title, and at Days and Hours
+  today's tick is in the accent with `today` / `now HH:MM` above it (P7).
 
 One card because its rows share files with timeline-and-find-6 and with each
 other. Aglaea would hold the severity 3 no more than one wave: this is that

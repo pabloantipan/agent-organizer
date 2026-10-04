@@ -38,6 +38,11 @@ this is one card, after timeline-and-find-6.
 - **FR-8** (rows 8, 9) Home's cut next date hovers the cell's words whole
   (`30 Nov · due · w-later`); Needs me rows read `raised 24 Sep` (the year
   only when not this year).
+- **FR-10** (tf6-ui A1, A2, Aglaea 106a4bd, sev 1; added before 0078's
+  ruling) "+N" rides its crowd's last title; at Days and Hours today's own
+  tick is drawn in the accent, and `today` or `now HH:MM` sits on the
+  context row above its column (`lib/axis.ts`, `TimeZoom.tsx`,
+  `time-zoom.css`).
 - **FR-9** (S1) A fixture card and a fixture record whose bodies hold a wide
   code block and a ten-column table.
 
@@ -54,6 +59,7 @@ a fixture run from a clean checkout; UI reviewers use `make review-build`.
 | P4 | 5, 9 | the fixture record's rule box with its wide code block and table, overlay scrollbars; the fixture card's back; Help | each scroller shows its edge where content is hidden; no box or view widens |
 | P5 | 6 | a stage landing at 1024×640 on the fixture roadmap; scroll its rows | the axis in view throughout |
 | P6 | 7, 8 | the names log on an open record's Rule; Home's cut next date hover; a Needs me row | "Rule 0009 …"; `30 Nov · due · …`; `raised 24 Sep` |
+| P7 | 10 | the fixture with four titles on one date at Fit; Cards at Days and Hours with today in view | "+N" after the crowd's last title; today's tick in the accent with `today` / `now HH:MM` above its column |
 | P0 | all | `XDG_DATA_HOME=$(mktemp -d) make test` from a clean checkout; `cd frontend && npm run build`; `wails build` | pass |
 
 ## Boundary
@@ -61,7 +67,7 @@ a fixture run from a clean checkout; UI reviewers use `make review-build`.
 `tokens.css` (the z-index tokens), `global.css` (`.modal-backdrop` and the
 layers' z-index), `decisions.css`, `rule-box.css`, `RuleDecisionBox.tsx`,
 `HelpView.tsx` and `CardDrawer.tsx` (focus return and layer only),
-`DecisionsView.tsx` (Rule's name), `Home.tsx`, `home.css`, `lib/width.ts`,
+`DecisionsView.tsx` (Rule's name), `Home.tsx`, `home.css`, `lib/width.ts`, `lib/axis.ts`,
 `lib/useScrollEdges.ts` and `lib/` tests, `TimeZoom.tsx`, `time-zoom.css`,
 `StageRoadmap.tsx` (the sticky axis only), `testdata/fixture-overlay/`. Not:
 Go, `docs/design-system.md`.
@@ -83,4 +89,4 @@ Go, `docs/design-system.md`.
 
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
-| `layers-focus-and-words` | P1–P6, P0 | timeline-and-find-6 | true |
+| `layers-focus-and-words` | P1–P7, P0 | timeline-and-find-6 | true |
