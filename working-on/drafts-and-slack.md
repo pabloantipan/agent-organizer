@@ -7,7 +7,7 @@ seat: das-build
 updated: 2026-10-04
 next: "review: drafts-and-slack, gate met (S0-S4, Chromium and WKWebView, classic and overlay)"
 depends_on: []
-boundary: ["frontend/src/lib/drafts.ts, lib/width.ts and their tests", "frontend/src/components/RuleDecisionBox.tsx, DecisionsView.tsx (its rule box's draft only), Home.tsx", "frontend/src/components/CardDrawer.tsx (the comment field's draft, name and updated date), Conversation.tsx (the composer's draft and field names)", "frontend/src/components/InitiativeHeader.tsx (the target's date), StageRoadmap.tsx (the row's name)", "frontend/src/styles/home.css (the three grid templates at lines 8, 15, 140 only, as --t-state/--t-phase variables with today's defaults; widened by the FSE 2026-10-04 for FR-2)", "not: Go, docs/design-system.md"]
+boundary: ["frontend/src/lib/drafts.ts, lib/width.ts and their tests", "frontend/src/components/RuleDecisionBox.tsx, DecisionsView.tsx (its rule box's draft only), Home.tsx", "frontend/src/components/CardDrawer.tsx (the comment field's draft, name and updated date), Conversation.tsx (the composer's draft and field names)", "frontend/src/components/InitiativeHeader.tsx (the target's date), StageRoadmap.tsx (the row's name)", "frontend/src/styles/home.css (the three grid templates at lines 8, 15, 140 only, as --t-state/--t-phase variables with today's defaults; widened by the FSE 2026-10-04 for FR-2)", "frontend/src/stores/board.store.ts (the rule drafts only, through lib/drafts; accepted by the FSE 2026-10-04 after das-review)", "not: Go, docs/design-system.md"]
 spec: "docs/specs/leftovers-9.md (FR-1, FR-2); Aglaea's calls d06e265"
 gate: "docs/specs/leftovers-9.md Acceptance, rows S1 to S4 and S0"
 ui_review: true
