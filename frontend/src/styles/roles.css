@@ -79,7 +79,7 @@
 .rd-sec > .section-label { margin-top: 0; }
 .rd-empty { margin: 0; color: var(--fg-muted); font-size: var(--font-size-md); }
 .rd-empty code { font-size: var(--font-size-sm); color: var(--fg); word-break: break-all; }
-.rd-list, .rd-inits, .rd-log { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-0-5); }
+.rd-list, .rd-log { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-0-5); }
 .rd-line {
   display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) max-content max-content max-content; gap: var(--space-3); align-items: center;
   width: 100%; padding: var(--space-1-5) var(--space-2); text-align: left; min-height: var(--control-md);
