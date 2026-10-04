@@ -102,6 +102,14 @@ Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
   home-signals-5, review-build (window 395926); timeline-and-find-6 after
   rule-box-and-stages. App reinstalled from fbe7e90. Layout copies: no answer,
   not restored.
+- For leftovers-7 (collect, then send to aglaea with home-signals-5's when
+  sup31 closes): rbs U1 sev 3 (pre-existing: a card back opened from a rule
+  box draws under the box and the sticky heading; .modal-backdrop has no
+  z-index, global.css:232), U2 (focus to body after Escape closes Help), U3
+  (tall box no scroll-edge cue), U4 (stage landing scrolls the Stages axis
+  away); gaps M1 (stacking, focus after Escape), M8 (scroll cue); aglaea's
+  call on Q1 (3424695): at regular and compact the scrim starts below the
+  top bar, sev 2. review-build merged; sup32 runs timeline-and-find-6.
 
 ## OPEN — 2026-10-03, sup25 ended; its findings not yet triaged
 
