@@ -212,14 +212,17 @@ a mark's title. A mark's title (milestone, target) is content and is never
 skipped: titles that would collide stagger to the next label row, as
 same-day marks already do; only the frame's edge moves one inward. When
 three rows of titles are not enough, the axis grows a row rather than
-overlap; past three rows, the rest of a crowd fold into "+N" at that date,
-listed in its hover and name. Tick labels keep **at least 12 px** between
+overlap; past three rows, the rest of a crowd fold into "+N", written on the
+crowd's last shown title (`Pilot opens · +1`), never as a label of its own
+beside another, and listed in its hover and name. Tick labels keep **at least 12 px** between
 them where they float (Fit). At Days and Hours each label owns its column,
 centred between gridlines, and the gridline is the gap: 4 px either side
 is enough, and every day keeps its label (timeline-and-find-6). The today line passes **under** title text, never over it. The today
-label sits **in the axis**, never at the frame's foot, and at Days and Hours
-it carries the date (`today · Sat 3`), so the day is named even when its
-tick gives way. The sticky context label names the month (or day) of the
+label sits **in the axis**, never at the frame's foot. At Days, today's own
+tick label is drawn in `--accent-fg` (`Sun 4`) and the word `today` sits on
+the context row above it, centred on today's column, so no neighbour's tick
+gives way; at Hours the same, with `now 14:32` over the line. At Fit it is
+`today` beside the line, keeping the 12 px of a floating label. The sticky context label names the month (or day) of the
 first whole unit in view (leftovers-6).
 *Jira timeline, Linear milestones, GitHub roadmap.*
 
