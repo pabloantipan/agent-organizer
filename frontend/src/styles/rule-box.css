@@ -32,6 +32,22 @@
   overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
 }
 .rb.with-record { width: 460px; }
+/* leftovers-7 FR-5 (design system, Widths: a region that scrolls inside a
+   view shows it does): the box and its record area each carry the 1 px
+   --fg-subtle edge where content hides past it (useScrollEdges). The box's
+   foot is pinned, so its lower edge is drawn on the foot's top. */
+.rb { border-top: 1px solid transparent; }
+.rb.edge-top { border-top-color: var(--fg-subtle); }
+.rb.edge-bottom > .rb-foot { box-shadow: 0 -1px 0 var(--fg-subtle); }
+.rb .rb-record { border-top: 1px solid transparent; border-bottom: 1px solid transparent; }
+.rb .rb-record.edge-top { border-top-color: var(--fg-subtle); }
+.rb .rb-record.edge-bottom { border-bottom-color: var(--fg-subtle); }
+/* FR-5 (row 10): a body never widens its box. Each grid in the record takes
+   one column that may shrink under its content's width, so a wide pre or
+   table scrolls inside itself (global.css, .markdown pre) with its side
+   edges (useMarkdownEdges), and the box keeps its width in every class. */
+.rb .rb-record, .rb .rb-sections, .rb .rb-section { grid-template-columns: minmax(0, 1fr); min-width: 0; }
+.rb .rb-body { min-width: 0; max-width: 100%; }
 .rb-head { display: flex; flex-wrap: wrap; gap: 0 var(--space-2); align-items: baseline; min-width: 0; }
 .rb-num { font-family: var(--mono); font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); font-variant-numeric: tabular-nums; }
 .rb-title { font-size: var(--font-size-lg); line-height: var(--line-lg); font-weight: var(--weight-semibold); color: var(--fg); }
