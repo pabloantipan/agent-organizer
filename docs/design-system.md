@@ -308,6 +308,10 @@ keeps their place.
   focus goes back into the box below, to the field it last held, since the
   open box keeps the keyboard. With no box below, it goes to the opener
   (leftovers-7, rbs-U2).
+- **In view** means whole, topmost at its centre and below every stuck
+  layer (sticky headings, a stuck record head), in WKWebView. A scroll that
+  brings something into view leaves room for the stuck layers above it
+  (leftovers, tf6-U1).
 - **Navigating** (a row verb, a link to a record): focus lands on the thing
   named: the record's row, the blocked seat, Bring crew up. Never on the
   page body.

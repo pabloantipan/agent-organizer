@@ -76,3 +76,4 @@ know, ruled choices, open findings, lessons), `docs/ux/principles.md`, and
 - 2026-10-04 — leftovers-7 ranked (10 rows + 4 gate/code); DS: layer order, focus after the stack top closes.
 - 2026-10-04 — sup32: at Days the gridline is the gap; 12 px only for floating labels (DS).
 - 2026-10-04 — sup32 tf6-ui A1/A2: +N rides the crowd's last title; at Days today's own tick in accent, 'today' on the context row (DS).
+- 2026-10-04 — tf6 leftovers: directions for P8 of layers-focus-and-words; DS: 'in view' defined.
