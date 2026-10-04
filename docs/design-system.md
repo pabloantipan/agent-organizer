@@ -214,7 +214,9 @@ same-day marks already do; only the frame's edge moves one inward. When
 three rows of titles are not enough, the axis grows a row rather than
 overlap; past three rows, the rest of a crowd fold into "+N" at that date,
 listed in its hover and name. Tick labels keep **at least 12 px** between
-them. The today line passes **under** title text, never over it. The today
+them where they float (Fit). At Days and Hours each label owns its column,
+centred between gridlines, and the gridline is the gap: 4 px either side
+is enough, and every day keeps its label (timeline-and-find-6). The today line passes **under** title text, never over it. The today
 label sits **in the axis**, never at the frame's foot, and at Days and Hours
 it carries the date (`today · Sat 3`), so the day is named even when its
 tick gives way. The sticky context label names the month (or day) of the

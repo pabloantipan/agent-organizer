@@ -74,3 +74,4 @@ know, ruled choices, open findings, lessons), `docs/ux/principles.md`, and
 - 2026-10-04 — sup31 Q1: the scrim never covers the top bar; Help opens over a box at every width (DS).
 - 2026-10-04 — sup31 hs5-U1: within the never-fold set, waiting gives way before blocked (DS).
 - 2026-10-04 — leftovers-7 ranked (10 rows + 4 gate/code); DS: layer order, focus after the stack top closes.
+- 2026-10-04 — sup32: at Days the gridline is the gap; 12 px only for floating labels (DS).
