@@ -345,7 +345,10 @@ keeps their place.
   Help first. A navigation closes the box and keeps what was typed
   (leftovers-7, rule-box-and-stages Q1). What was
   typed in a box survives it closing for another one, and only Cancel
-  discards it.
+  discards it. **Escape closes, it does not discard**: the draft is kept per
+  record (a ruling, a comment, a message) and comes back when that box
+  reopens, and the verb that reopens it says so (`Rule · draft`). No
+  confirm on Escape (rule-words-and-dates, D1).
 
 - **Checked in WKWebView**, the app's engine, not only Chromium. In
   WKWebView, macOS's Keyboard navigation setting (System Settings ›
@@ -376,6 +379,10 @@ Wide's start is **measured on the row, not fixed**: a window of 2200 or more
 is wide only while the list beside Needs me keeps about 70 characters of
 goal; with the rail expanded that may be later (leftovers-3, W1). The 2200
 is the floor.
+
+**No cell is cut while another column holds room it does not use**:
+columns size to their widest row, and slack goes to the cut ones before
+anything gives way (rule-words-and-dates, U1).
 
 **What gives way first.** A column that is empty on every row (all "—")
 gives way before any column with content. Signals fold into "+N" from the
