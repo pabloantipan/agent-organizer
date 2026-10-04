@@ -358,7 +358,11 @@ and live fold first, in that order (live, now, problems), and the cell's state f
 Needs me row) (leftovers-3, W2; home-widths-4, 0076). Whether something
 folds is decided against what stays **at its floor** (waiting with its
 names cut), not at its natural width, so the cell shows wherever it fits
-beside a cut waiting (leftovers-5).
+beside a cut waiting (leftovers-5). Inside the never-fold set the order is
+**waits on you, blocked, waiting**: when they do not all fit whole, waiting
+gives way first (its names, then its noun down to the floor, then into
+"+N"); blocked and waits-on-you are never cut or folded. Red never reaches
+the lead only through a "+N" (home-signals-5, U1).
 
 **A region that scrolls inside a view shows it does**: each edge with
 content hidden past it carries a 1 px `--fg-subtle` line (4.5:1, not
