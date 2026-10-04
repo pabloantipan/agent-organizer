@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import { marked } from "marked";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useMarkdownEdges } from "../lib/useScrollEdges";
+import { useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
 import { Help } from "../../wailsjs/go/main/App";
 import type { service } from "../../wailsjs/go/models";
 import { openBox } from "../lib/boxStack";
@@ -59,6 +59,9 @@ export function HelpView({ top, onClose }: { top: number; onClose: () => void })
     return { html: tpl.innerHTML, sections: found };
   }, [doc]);
   useMarkdownEdges(body, html);
+  // leftovers-7 FR-5, P4: the document scrolls inside Help; each edge with
+  // content hidden past it shows (help.css, edge-top and edge-bottom).
+  const docEdges = useScrollEdges(body, !!html);
 
   // The article (.help-doc, overflow-y: auto) is the element that scrolls;
   // the fixed overlay around it does not, so the heading moves into its view.
@@ -87,7 +90,7 @@ export function HelpView({ top, onClose }: { top: number; onClose: () => void })
               <button key={s.id} className={`help-section d${s.depth}`} onClick={() => go(s.id)}>{s.title}</button>
             ))}
           </nav>
-          <article ref={body} className="markdown help-doc" dangerouslySetInnerHTML={{ __html: html }} />
+          <article ref={body} className={`markdown help-doc ${docEdges.top ? "edge-top" : ""} ${docEdges.bottom ? "edge-bottom" : ""}`} dangerouslySetInnerHTML={{ __html: html }} />
         </div>
       )}
     </section>
