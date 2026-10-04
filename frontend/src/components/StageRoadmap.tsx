@@ -1,5 +1,5 @@
 import type { merge, model } from "../../wailsjs/go/models";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useBoard } from "../stores/board.store";
 import { DAY, daysBetween, parseISO, today, toISO } from "../lib/dates";
 import { addLocalDays } from "../lib/axis";
@@ -57,21 +57,15 @@ export function StageRoadmap({ initiative, head }: { initiative: merge.BoardInit
     if (k !== null) { setExpanded(k); setFocusOn(k); }
     clearStageFocus();
   }, [stageFocus, initiative.id, initiative.stages, clearStageFocus]);
-  // The rows mount only once the time frame has measured its width, a
-  // render after the landing, so the focus waits for its toggle.
-  useEffect(() => {
-    if (focusOn === null) return;
-    const el = toggles.current.get(focusOn);
-    if (!el) return;
-    el.scrollIntoView({ block: "nearest" });
-    el.focus({ preventScroll: true });
-    setFocusOn(null);
-  });
   const cards = Object.values(view?.board.columns ?? {}).flat()
     .filter((c) => c.initiative_id === initiative.id && c.machine === initiative.machine);
   const now = today();
   const stages = initiative.stages ?? [];
   const records = recordsByGate(initiative.decisions);
+  // A stage id named by more than one stage (a problem the scan reports):
+  // a card's `stage:` cannot say which, so neither row lists it (FR-5).
+  const named = new Map<string, number>();
+  for (const s of stages) named.set(s.id, (named.get(s.id) ?? 0) + 1);
 
   let slots = 0;
   let prevEnd: Date | null = null;
@@ -107,6 +101,23 @@ export function StageRoadmap({ initiative, head }: { initiative: merge.BoardInit
   const slot = slots ? Math.min(SLOT_MAX, SLOT_ROOM / slots) : 0;
   const z = useTimeZoom({ fit, data: { from: dataFrom, to: Math.max(dataTo, Date.now()) }, hours: false, reserveFrac: (slot * slots) / 100, reset: initiative.id });
 
+  // The rows mount only once the time frame has measured its width (frameW),
+  // a render after the landing, so the focus waits for its toggle; the
+  // effect runs again when either changes (leftovers-5 FR-6). The landing
+  // brings the expanded detail into view as far as it fits, its toggle kept
+  // at the top, under the sticky axis (FR-4), as the Decisions landing does.
+  const frameW = z.frameW;
+  useEffect(() => {
+    if (focusOn === null) return;
+    const el = toggles.current.get(focusOn);
+    if (!el) return;
+    el.scrollIntoView({ block: "nearest" });
+    const detail = document.getElementById(el.getAttribute("aria-controls") ?? "");
+    if (detail) showDetail(el, detail);
+    el.focus({ preventScroll: true });
+    setFocusOn(null);
+  }, [focusOn, frameW]);
+
   if (rows.length === 0) {
     return (
       <>
@@ -138,7 +149,7 @@ export function StageRoadmap({ initiative, head }: { initiative: merge.BoardInit
       <TimeFrame z={z} label="Stages timeline" undated={slots > 0 ? "no dates · order only" : undefined} extents={rows.map(extentOf).filter((e): e is { from: number; to: number } => !!e)}>
         {rows.map((r, i) => (
           <StageRow key={i} r={r} now={now} pos={pos} z={z}
-            initiative={initiative.id} cards={cards.filter((c) => c.stage === r.stage.id)}
+            initiative={initiative.id} cards={cards.filter((c) => c.stage === r.stage.id)} sharing={named.get(r.stage.id) ?? 1}
             open={expanded === i} onToggle={() => setExpanded(expanded === i ? null : i)}
             toggleRef={(el) => { if (el) toggles.current.set(i, el); else toggles.current.delete(i); }} />
         ))}
@@ -155,6 +166,23 @@ export function StageRoadmap({ initiative, head }: { initiative: merge.BoardInit
   );
 }
 
+/** Scrolls the toggle's scroller so its stage's detail shows as far as it
+ *  fits, never taking the toggle above the top of the view: the sticky axis
+ *  when it sticks in that scroller, else the scroller's own top. */
+function showDetail(toggle: HTMLElement, detail: HTMLElement) {
+  let s = toggle.parentElement;
+  while (s && !(/(auto|scroll)/.test(getComputedStyle(s).overflowY) && s.scrollHeight > s.clientHeight)) s = s.parentElement;
+  if (!s) return;
+  const view = s.getBoundingClientRect();
+  const bottom = Math.min(view.bottom, window.innerHeight);
+  const axis = toggle.closest(".srm")?.querySelector<HTMLElement>(".tz-axis-row");
+  const floor = axis && getComputedStyle(axis).position === "sticky" ? Math.max(view.top, axis.getBoundingClientRect().bottom) : view.top;
+  const over = detail.getBoundingClientRect().bottom - bottom;
+  const room = toggle.getBoundingClientRect().top - floor;
+  const by = Math.min(over, room);
+  if (by > 0) s.scrollTop += by;
+}
+
 /** Pixel positions on the shared axis: a day's start, middle and end. */
 type Pos = { x: (d: Date) => number; mid: (d: Date) => number; end: (d: Date) => number; slotLeft: (i: number) => number; slot: number; pad: number; nowEnd: number };
 
@@ -169,9 +197,9 @@ function extentOf(r: Row): { from: number; to: number } | null {
   return { from: Math.min(...ds), to: addLocalDays(Math.max(...ds), 1) };
 }
 
-function StageRow({ r, now, pos, z, initiative, cards, open, onToggle, toggleRef }: {
+function StageRow({ r, now, pos, z, initiative, cards, sharing, open, onToggle, toggleRef }: {
   r: Row; now: Date; pos: Pos; z: Zoom;
-  initiative: string; cards: merge.BoardCard[]; open: boolean; onToggle: () => void; toggleRef: (el: HTMLButtonElement | null) => void;
+  initiative: string; cards: merge.BoardCard[]; sharing: number; open: boolean; onToggle: () => void; toggleRef: (el: HTMLButtonElement | null) => void;
 }) {
   const s = r.stage;
   const missing = r.gates.filter((g) => !g.record).map((g) => g.id);
@@ -224,10 +252,8 @@ function StageRow({ r, now, pos, z, initiative, cards, open, onToggle, toggleRef
             title={`${s.title || s.id}: since ${toISO(r.start)}, in progress`} />
         )}
         {r.slot >= 0 && (
-          <span className={`srm-bar planned ${r.state}`} style={{ left: pos.slotLeft(r.slot) + pos.pad, width: pos.slot - 2 * pos.pad }}
-            title={`${s.title || s.id}: no target. Sized by order only; appetite ${appetite}. No date is computed from it.`}>
-            <span className="srm-appetite">{appetite}</span>
-          </span>
+          <PlannedBar r={r} pos={pos} appetite={appetite}
+            title={`${s.title || s.id}: no target. Sized by order only; appetite ${appetite}. No date is computed from it.`} />
         )}
         {drawn.map((g) => {
           const d = g.record as model.Decision;
@@ -254,7 +280,49 @@ function StageRow({ r, now, pos, z, initiative, cards, open, onToggle, toggleRef
         {ext && <EdgePointer z={z} from={ext.from} to={ext.to} />}
       </div>
     </div>
-    {open && <div className="tz-pin" style={{ width: z.frameW || undefined }}><StageDetail id={`srm-detail-${r.n}`} r={r} initiative={initiative} cards={cards} appetite={appetite} /></div>}
+    {open && <div className="tz-pin" style={{ width: z.frameW || undefined }}><StageDetail id={`srm-detail-${r.n}`} r={r} initiative={initiative} cards={cards} sharing={sharing} appetite={appetite} /></div>}
+    </>
+  );
+}
+
+/** Gap between a bar and the text set beside it, as the due label's. */
+const AFTER_GAP = 6;
+
+/** An undated stage's dashed bar with its appetite (leftovers-5 FR-12,
+ *  leftovers-6 row 13). The appetite sits inside when it fits whole;
+ *  otherwise after the bar, as a card's due label does, or before it when
+ *  the lane ends first. Never cut inside the bar. The text inside stays
+ *  rendered, hidden, so its whole width is measured again whenever the bar
+ *  or the text changes. */
+function PlannedBar({ r, pos, appetite, title }: { r: Row; pos: Pos; appetite: string; title: string }) {
+  const left = pos.slotLeft(r.slot) + pos.pad;
+  const width = pos.slot - 2 * pos.pad;
+  const inner = useRef<HTMLSpanElement>(null);
+  const [beside, setBeside] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const el = inner.current;
+    if (!el) return;
+    const text = el.scrollWidth;
+    if (text <= el.clientWidth) { setBeside(null); return; }
+    // The room after the bar runs to the frame's inner edge, past the lane's
+    // own end, as the due label's does; only past the frame does the text
+    // go before the bar.
+    const lane = el.closest<HTMLElement>(".srm-lane")?.getBoundingClientRect();
+    const frame = el.closest<HTMLElement>(".tz-frame");
+    const end = lane && frame ? frame.getBoundingClientRect().left + frame.clientWidth - lane.left : Infinity;
+    const after = left + width + AFTER_GAP;
+    setBeside(after + text <= end ? after : Math.max(0, left - AFTER_GAP - text));
+  }, [appetite, left, width]);
+  const outside: CSSProperties = {
+    position: "absolute", top: 20, left: beside ?? 0, height: 16, display: "flex", alignItems: "center",
+    padding: "0 var(--space-1)", fontSize: "var(--font-size-xs)", lineHeight: "var(--line-xs)", color: "var(--fg-muted)", whiteSpace: "nowrap",
+  };
+  return (
+    <>
+      <span className={`srm-bar planned ${r.state}`} style={{ left, width }} title={title}>
+        <span ref={inner} className="srm-appetite" aria-hidden={beside !== null || undefined} style={beside !== null ? { visibility: "hidden" } : undefined}>{appetite}</span>
+      </span>
+      {beside !== null && <span className="srm-appetite-after" style={outside} title={title}>{appetite}</span>}
     </>
   );
 }
@@ -263,7 +331,7 @@ function StageRow({ r, now, pos, z, initiative, cards, open, onToggle, toggleRef
  *  design system's decision record expanded: the outcome, the exit items
  *  checked with their met date or open, the gates as record links, the
  *  cards that carry `stage:` this stage, the appetite and the target. */
-function StageDetail({ id, r, initiative, cards, appetite }: { id: string; r: Row; initiative: string; cards: merge.BoardCard[]; appetite: string }) {
+function StageDetail({ id, r, initiative, cards, sharing, appetite }: { id: string; r: Row; initiative: string; cards: merge.BoardCard[]; sharing: number; appetite: string }) {
   const { openDecision, select } = useBoard();
   const s = r.stage;
   const exits = s.exit ?? [];
@@ -301,7 +369,7 @@ function StageDetail({ id, r, initiative, cards, appetite }: { id: string; r: Ro
       </div>
       <div className="srm-dsec">
         <span className="lbl">Cards</span>
-        {cards.length === 0 ? <span className="missing">no card carries stage: {s.id}</span> : (
+        {sharing > 1 ? <span className="missing">Cards can't be joined: {sharing === 2 ? "two" : sharing} stages are named "{s.id}".</span> : cards.length === 0 ? <span className="missing">no card carries stage: {s.id}</span> : (
           <span className="srm-links">
             {cards.map((c) => <button key={c.slug} className="linkish" onClick={() => select(c)} title={c.next || c.title}>{c.title || c.slug} <span className="meta">· {c.status}</span></button>)}
           </span>
