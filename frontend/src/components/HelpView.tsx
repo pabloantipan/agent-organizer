@@ -3,6 +3,7 @@ import { marked } from "marked";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Help } from "../../wailsjs/go/main/App";
 import type { service } from "../../wailsjs/go/models";
+import { openBox } from "../lib/boxStack";
 import "../styles/help.css";
 
 type Section = { id: string; depth: number; title: string };
@@ -21,11 +22,10 @@ export function HelpView({ top, onClose }: { top: number; onClose: () => void })
     Help().then(setDoc, (e) => setFailed(String(e)));
     close.current?.focus();
   }, []);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  // Escape closes Help when it is the topmost open box (leftovers-5 FR-1).
+  const closeNow = useRef(onClose);
+  closeNow.current = onClose;
+  useEffect(() => openBox(() => closeNow.current()), []);
 
   // Name the headings and let a diagram take focus (so the keyboard can
   // scroll it sideways) in the HTML string itself, not on the rendered DOM:

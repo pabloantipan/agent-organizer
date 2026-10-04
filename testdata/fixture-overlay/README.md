@@ -85,3 +85,7 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
 - `0008`, the same record as it stood proposed (no ruling), taller than
   the view at 1024×640, so its head sticks and the rule box is capped under
   it (leftovers-4 L11); it adds one Needs me row
+- `0009`, proposed, owned by pablo, with eight options and a long Question,
+  so its rule box is taller than its room at a 1024×640 window and scrolls
+  with Rule and Cancel inside (leftovers-5 FR-12, leftovers-6 S2); it adds
+  one Needs me row

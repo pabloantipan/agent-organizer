@@ -4,6 +4,7 @@ import type { model } from "../../wailsjs/go/models";
 import { api } from "../hooks/useWails";
 import { recordSections } from "../lib/decisions";
 import { leadOf } from "../lib/queue";
+import { openBox } from "../lib/boxStack";
 import { useBoard } from "../stores/board.store";
 import type { WidthClass } from "../lib/width";
 import "../styles/rule-box.css";
@@ -69,24 +70,13 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
 
   // FR-22 (responsive-home amendment 4): Escape closes the box wherever
   // focus sits in the view, the record's text included, which takes no
-  // focus and so leaves it on the body. A document listener while the box
-  // is open; the latest close and busy through a ref, so it is added once.
-  // One Escape closes only the topmost: a dialog open over the box (Help,
-  // a card back) is always above an inline box and closes itself on its
-  // own window listener, so the box waits while one is open.
+  // focus and so leaves it on the body. leftovers-5 FR-1: only when the box
+  // is the topmost open one (lib/boxStack); Help or a card back opened over
+  // it takes the Escape first. Busy, the box keeps the Escape and stays.
+  // The latest close and busy through a ref, so the box opens once.
   const escape = useRef({ close, busy });
   escape.current = { close, busy };
-  useEffect(() => {
-    const onKey = (e: globalThis.KeyboardEvent) => {
-      if (e.key !== "Escape" || e.defaultPrevented || escape.current.busy) return;
-      const over = Array.from(document.querySelectorAll('[role="dialog"]')).some((d) => d !== box.current && !box.current?.contains(d));
-      if (over) return;
-      e.preventDefault();
-      escape.current.close();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, []);
+  useEffect(() => openBox(() => { if (!escape.current.busy) escape.current.close(); }), []);
 
   // FR-23: the row whose Rule opened the box stays marked while it is open
   // (rule-box.css, [data-rb-opener]: --surface-selected, and on Home above
@@ -265,12 +255,12 @@ function useFitViewport(box: RefObject<HTMLDivElement | null>, record: RefObject
       }
       const a = anchor.getBoundingClientRect();
       const top0 = (document.querySelector(".topbar")?.getBoundingClientRect().bottom ?? 0) + GAP;
-      const maxHeight = Math.max(0, window.innerHeight - top0 - GAP);
-      const r = record.current;
-      const natural = el.offsetHeight + (r ? r.scrollHeight - r.clientHeight : 0);
-      const h = Math.min(natural, maxHeight);
-      judge(maxHeight);
+      const viewMax = Math.max(0, window.innerHeight - top0 - GAP);
+      const natural = naturalHeight(el, record.current);
+      const h = Math.min(natural, viewMax);
       if (widthClass === "compact" && home) {
+        const maxHeight = viewMax;
+        judge(maxHeight);
         const w = home.parentElement!.getBoundingClientRect();
         const left = Math.max(GAP, Math.round(w.left + (w.width - el.offsetWidth) / 2));
         const top = Math.round(top0 + Math.max(0, (maxHeight - h) / 2));
@@ -278,10 +268,20 @@ function useFitViewport(box: RefObject<HTMLDivElement | null>, record: RefObject
         setPlace((p) => (same(p, q) ? p : q));
         return;
       }
-      // Under its opener; moved up when there is no room below, down when the
-      // opener has scrolled above the top bar.
-      let top = Math.max(top0, a.bottom + 4);
-      if (top + h > window.innerHeight - GAP) top = Math.max(top0, window.innerHeight - GAP - h);
+      // leftovers-5 FR-2 (Disclosure state): a box never covers its opener.
+      // It opens below the opener's row (the record's head, the Needs me
+      // row), capped at the room there and scrolling inside itself; only
+      // when there is more room above the row than below does it open above
+      // it. Never moved up over the row, as it was when the room below ran
+      // out (hw4-U6). Down when the row has scrolled above the top bar.
+      const o = openerRow(anchor).getBoundingClientRect();
+      const below = Math.max(top0, o.bottom + 4);
+      const roomBelow = Math.max(0, window.innerHeight - GAP - below);
+      const roomAbove = Math.max(0, o.top - 4 - top0);
+      const up = h > roomBelow && roomAbove > roomBelow;
+      const maxHeight = up ? roomAbove : roomBelow;
+      judge(maxHeight);
+      const top = up ? o.top - 4 - Math.min(h, roomAbove) : below;
       const right = Math.max(GAP, window.innerWidth - a.right);
       const q: CSSProperties = { position: "fixed", top, right, maxHeight };
       setPlace((p) => (same(p, q) ? p : q));
@@ -296,6 +296,27 @@ function useFitViewport(box: RefObject<HTMLDivElement | null>, record: RefObject
       if (b.bottom > c.bottom) column.scrollTop += b.bottom - c.bottom;
       else if (b.top < c.top) column.scrollTop -= c.top - b.top;
     };
+    // FR-2: opened under a row near the window's foot, the row's scroller
+    // moves it up (never under a sticky heading) until the box fits below
+    // it, so the box need not open above the row nor shrink to a sliver.
+    // Once, on opening; the reader's own scroll is left alone.
+    const room = () => {
+      if (widthClass === "wide" && column) return false;
+      if (widthClass === "compact" && home) return false;
+      const row = openerRow(anchor);
+      const scroller = scrollerOf(row);
+      if (!scroller) return false;
+      const top0 = (document.querySelector(".topbar")?.getBoundingClientRect().bottom ?? 0) + GAP;
+      const h = Math.min(naturalHeight(el, record.current), Math.max(0, window.innerHeight - top0 - GAP));
+      const o = row.getBoundingClientRect();
+      const need = o.bottom + 4 + h - (window.innerHeight - GAP);
+      if (need <= 0) return false;
+      const floor = Math.max(top0, stickyFloor(row, scroller));
+      const by = Math.min(need, o.top - floor, scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop);
+      if (by <= 0) return false;
+      scroller.scrollTop += by;
+      return true;
+    };
     fit();
     // The observer's first call is the observe itself: after a class change
     // it leaves the column's scroll where FR-5 put it.
@@ -308,11 +329,42 @@ function useFitViewport(box: RefObject<HTMLDivElement | null>, record: RefObject
     // Opened in the Needs me column, the box scrolls into the column's view:
     // Rule and Cancel without scrolling the page (A5). A class change later
     // leaves every scroll where it is (FR-5).
-    if (!opened.current) keep();
+    if (!opened.current) { keep(); if (room()) fit(); }
     opened.current = true;
     return () => { ro.disconnect(); window.removeEventListener("resize", fit); window.removeEventListener("scroll", fit, true); };
   }, [box, record, widthClass]);
   return { place, short, capped };
+}
+
+/** The opener's row: a Decisions record's head or a Needs me row, else the
+ *  anchor itself. The box opens below it, never over it. */
+function openerRow(anchor: HTMLElement): HTMLElement {
+  return anchor.closest<HTMLElement>(".dec-head, .ib-row") ?? anchor;
+}
+
+/** The box's height with nothing capped: itself, plus what its record or its
+ *  own scroll hides. */
+function naturalHeight(el: HTMLElement, r: HTMLElement | null): number {
+  return Math.max(el.offsetHeight, el.scrollHeight) + (r ? r.scrollHeight - r.clientHeight : 0);
+}
+
+/** The nearest ancestor that scrolls vertically. */
+function scrollerOf(el: HTMLElement): HTMLElement | null {
+  for (let p = el.parentElement; p; p = p.parentElement) {
+    const oy = getComputedStyle(p).overflowY;
+    if ((oy === "auto" || oy === "scroll") && p.scrollHeight > p.clientHeight) return p;
+  }
+  return null;
+}
+
+/** How high a row may be scrolled: under its scroller's top and under the
+ *  sticky heading of its section (Decisions' .dec-sh), where it sticks. */
+function stickyFloor(row: HTMLElement, scroller: HTMLElement): number {
+  const s = scroller.getBoundingClientRect();
+  const pad = parseFloat(getComputedStyle(scroller).paddingTop) || 0;
+  const sh = row.closest(".dec-section")?.querySelector<HTMLElement>(".dec-sh");
+  if (!sh) return s.top + 4;
+  return s.top + pad + (parseFloat(getComputedStyle(sh).top) || 0) + sh.offsetHeight + 4;
 }
 
 /** The part of the record a ruling needs (ui-leftovers FR-1): its Question
