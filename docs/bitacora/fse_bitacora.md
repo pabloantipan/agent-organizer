@@ -898,4 +898,10 @@ sections below this one are history.
   aglaea's rn5-A1/A2 (sev 1, 2203d7d): the wake count is neutral, magenta
   when it wakes every seat, never --blocked red; it sits beside Send in the
   reply composer as beside Start.
+- sup40 ended (rn5, 51 min, $12.44, merged 042c7ee). leftovers-12 adds:
+  rn5-U1 (2) the landed thread divider has no accessible name; rn5-U2 (1)
+  the drawer says running where the row says idle; gaps G1 focus after "Show
+  the other N", G2 landing on a hidden Needs me row, G3 V4's fixture had
+  three roles not four, G4 FR-6 gated the new-thread form only (the reply
+  composer too).
 
