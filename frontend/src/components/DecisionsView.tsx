@@ -8,6 +8,7 @@ import { RULED_LIMIT, countWords, decisionMatches, emptyRuledWords, lineName, ru
 import { readOnlyOf } from "../lib/queue";
 import { decisionKey, draftVerb, useDrafts, type Draft, type DraftFields } from "../lib/drafts";
 import { useMarkdownEdges } from "../lib/useScrollEdges";
+import { holdTall, stickNow, type HeldTall } from "../lib/stuckHead";
 import { useBoard } from "../stores/board.store";
 import { RuleDecisionBox } from "./RuleDecisionBox";
 import { EdgePointer, TimeFrame, ZoomControl, useTimeZoom } from "./TimeZoom";
@@ -162,10 +163,14 @@ export function DecisionsView() {
   // Amendment 1 §8: an expanded record taller than the view keeps its head
   // (line and Rule) stuck under the section heading until its end. `tall`
   // is measured, so a short record never sticks; `boxMax` caps the rule box
-  // in the room under the stuck head.
+  // in the room under the stuck head. Tallness is decided before ruling and
+  // held while the box is open (§8 as amended, dst-ui F1): the facts that
+  // join the head while ruling never unstick it.
   const [tall, setTall] = useState<{ key: string; boxMax: number } | null>(null);
+  const heldTall = useRef<HeldTall | null>(null);
   useLayoutEffect(() => {
     if (!expanded) { setTall(null); return; }
+    const isRuling = ruling === expanded;
     const el = document.querySelector<HTMLElement>(`[data-dec="${CSS.escape(expanded)}"]`);
     const wrap = el?.closest<HTMLElement>(".board-wrap");
     if (!el || !wrap) { setTall(null); return; }
@@ -175,7 +180,9 @@ export function DecisionsView() {
       const head = el.querySelector<HTMLElement>(".dec-head");
       const pad = parseFloat(getComputedStyle(wrap).paddingTop) || 0;
       const view = wrap.clientHeight - pad - stick;
-      const isTall = el.offsetHeight > view;
+      const measured = el.offsetHeight > view;
+      const isTall = stickNow(expanded, measured, isRuling, heldTall.current);
+      heldTall.current = holdTall(expanded, measured, isRuling, heldTall.current);
       const boxMax = Math.max(160, Math.round(view - (head?.offsetHeight ?? 0) - 12));
       setTall((t) => (isTall ? (t && t.key === expanded && t.boxMax === boxMax ? t : { key: expanded, boxMax }) : null));
     };
