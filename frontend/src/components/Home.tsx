@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState
 import { createPortal } from "react-dom";
 import { Briefcase, ChevronDown, ChevronRight, CircleDashed, Compass, Hammer, Hand, Play } from "lucide-react";
 import type { merge, model, service } from "../../wailsjs/go/models";
-import { inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, type NeedsMeRow } from "../lib/queue";
+import { inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, needsMeShown, NEEDS_ME_FIRST, type NeedsMeRow } from "../lib/queue";
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
 import { dateWords } from "../lib/dates";
@@ -30,7 +30,7 @@ import "../styles/roles.css";
  *  only while the list beside it keeps about 70 characters of goal (FR-21):
  *  Home's class is the window's, measured on the row. */
 export function Home() {
-  const { view, agents, widthClass: windowClass, roomy: windowRoomy, ruleDraft, dropRule } = useBoard();
+  const { view, agents, widthClass: windowClass, roomy: windowRoomy, ruleDraft, dropRule, needsMeFocus } = useBoard();
   const home = useRef<HTMLDivElement>(null);
   const { cls: widthClass, goalMin } = useHomeClass(home, windowClass, view);
   // A window wide enough for wide that Home measures too tight for it is
@@ -41,12 +41,31 @@ export function Home() {
   const gone = !!ruleDraft && !!view && !rows.some((r) => r.key === ruleDraft.key) ? ruleDraft.key : null;
   useEffect(() => { if (gone) dropRule(gone); }, [gone, dropRule]);
   useKeepScroll(home, widthClass, !!view);
+  // Needs me's first five (leftovers-11 FR-1): Ruled's pattern on Decisions.
+  // A landing on a row past the five, or a box open on one, shows them all.
+  const [showAll, setShowAll] = useState(false);
+  const past = (key: string | null | undefined) => !!key && rows.findIndex((r) => r.key === key) >= NEEDS_ME_FIRST;
+  const { shown, hidden } = needsMeShown(rows, showAll || past(needsMeFocus) || past(ruleDraft?.key), widthClass === "wide");
+  const more = useRef<HTMLButtonElement>(null);
+  const [moreFocus, setMoreFocus] = useState<{ to: "first" | "toggle"; seq: number } | null>(null);
+  // "Show the other N" hands focus to the first row it revealed, its verb;
+  // "Show only the oldest five" keeps it (Ruled's handover, row 3 there).
+  useEffect(() => {
+    if (!moreFocus) return;
+    setMoreFocus(null);
+    const target = moreFocus.to === "toggle"
+      ? more.current
+      : home.current?.querySelectorAll<HTMLElement>(".home-needs .ib-row")[NEEDS_ME_FIRST]?.querySelector<HTMLElement>(".ib-act button") ?? null;
+    target?.focus({ preventScroll: true });
+    target?.scrollIntoView({ block: "nearest" });
+  }, [moreFocus]);
+  const toggleMore = () => { setMoreFocus({ to: showAll ? "toggle" : "first", seq: Date.now() }); setShowAll(!showAll); };
   if (!view) return <div className="empty">Loading…</div>;
   return (
     <HomeClass.Provider value={widthClass}>
     <div ref={home} className={`home ${widthClass} ${roomy ? "roomy" : ""} ${agents?.roles?.length ? "with-roles" : ""}`} style={widthClass === "wide" ? { "--goal-min": `${goalMin}px` } as React.CSSProperties : undefined}>
       <section className="home-sec home-needs">
-        <h2 id={NEEDS_ME_HEADING} tabIndex={-1} className="sec-title">Needs me <span className="num sec-count">{rows.length}</span><span className="sec-sub">everything waiting on you, oldest first</span></h2>
+        <h2 id={NEEDS_ME_HEADING} tabIndex={-1} className="sec-title">Needs me · <span className="num sec-count">{rows.length}</span><span className="sec-sub">everything waiting on you, oldest first</span></h2>
         {rows.length === 0 ? (
           <div className="panel empty-state">
             <div>Nothing waits on you.</div>
@@ -54,7 +73,12 @@ export function Home() {
           </div>
         ) : (
           <div className="panel inbox">
-            {rows.map((r) => <InboxRow key={r.key} row={r} />)}
+            {shown.map((r) => <InboxRow key={r.key} row={r} />)}
+            {widthClass !== "wide" && rows.length > NEEDS_ME_FIRST && (hidden > 0 || showAll) && (
+              <button ref={more} type="button" className="ib-more" onClick={toggleMore}>
+                {hidden > 0 ? `Show the other ${hidden}` : `Show only the oldest ${NEEDS_ME_FIRST}`}
+              </button>
+            )}
           </div>
         )}
       </section>
@@ -852,14 +876,15 @@ function Roles({ roles }: { roles: model.Role[] }) {
   );
 }
 
-/** Widths, what gives way first (design system; spec, Home): name, state
- *  and mail size to their widest row and stay; where gives way first, then
+/** Widths, what gives way first (design system; spec, Home): name, state,
+ *  mail and where size to their widest row, so the rows share their tracks;
+ *  name, state and mail stay; where gives way first, then
  *  doing now, each only when the row has no room for it at its floor (about
  *  30 characters of doing now; where whole), and back as soon as it has. */
 const DOING_FLOOR = 200;
 function useRoleFit(n: number, open: boolean) {
   const ref = useRef<HTMLDivElement>(null);
-  const [state, setState] = useState<{ where: boolean; doing: boolean; name: number; st: number; mail: number }>({ where: false, doing: false, name: 0, st: 0, mail: 0 });
+  const [state, setState] = useState<{ where: boolean; doing: boolean; name: number; st: number; mail: number; wh: number }>({ where: false, doing: false, name: 0, st: 0, mail: 0, wh: 0 });
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el || !open) return;
@@ -876,14 +901,17 @@ function useRoleFit(n: number, open: boolean) {
       const fixed = 24 + name + st + mail + gap * 4;
       const hideWhere = where > 0 && fixed + DOING_FLOOR + gap + where > inner;
       const hideDoing = fixed + DOING_FLOOR > inner;
-      setState((p) => (p.where === hideWhere && p.doing === hideDoing && p.name === name && p.st === st && p.mail === mail ? p : { where: hideWhere, doing: hideDoing, name, st, mail }));
+      // Where sizes to its widest row too, so every row's doing now gets the
+      // same track and both start at one x on every row (leftovers-11 FR-5).
+      const wh = where > 0 ? where + 1 : 0;
+      setState((p) => (p.where === hideWhere && p.doing === hideDoing && p.name === name && p.st === st && p.mail === mail && p.wh === wh ? p : { where: hideWhere, doing: hideDoing, name, st, mail, wh }));
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
   }, [n, open]);
-  const style = (state.name ? { "--r-name": `${state.name}px`, "--r-state": `${state.st}px`, "--r-mail": `${state.mail}px` } : {}) as React.CSSProperties;
+  const style = (state.name ? { "--r-name": `${state.name}px`, "--r-state": `${state.st}px`, "--r-mail": `${state.mail}px`, ...(state.wh ? { "--r-where": `${state.wh}px` } : {}) } : {}) as React.CSSProperties;
   return { ref, hide: { where: state.where, doing: state.doing }, style };
 }
 

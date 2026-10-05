@@ -25,6 +25,9 @@
 # thread from discuss as it is. Either way the
 # stand-ins are in FIXTURE_AGENT_PIDS; `kill $FIXTURE_AGENT_PIDS` ends them.
 #
+# Needs me has 14 rows in the default home, with or without discuss
+# (leftovers-11 V1); see asking_thread's call below.
+#
 # The default home also holds init-many (testdata/fixture-many), 76 decision
 # records for the find and limit rows (leftovers-6 FR-7).
 #
@@ -198,7 +201,26 @@ GIT_COMMITTER_DATE=2026-09-30T16:40:00-03:00 gm commit -q --allow-empty --date=2
 gm checkout -q main
 
 cp "$repo/testdata/fixture-health.json" "$tmp/health.json"
-[ -n "$live_mailbox" ] || asking_thread "$tmp/health.json" || true
+# Needs me holds 14 rows (leftovers-11 V1: five, then "Show the other 9"),
+# one of them the thread above. Without discuss that thread cannot exist, so
+# a card in init-a addressed to pablo takes its place and the count stays 14.
+if [ -z "$live_mailbox" ] && ! asking_thread "$tmp/health.json"; then
+  cat > "$a/working-on/w-asks-pablo.md" <<'CARD'
+---
+title: Review before the queued card lands
+status: next
+repos: [repo-one]
+branch: none
+updated: 2026-09-26
+next: "pablo: may the review start before w-queued lands, or after it"
+---
+
+## Goal
+Stands in for the fixture thread that asks pablo when discuss is not
+running, so Needs me keeps its 14 rows (leftovers-11 V1).
+CARD
+  echo "fixture-home: a card addressed to pablo stands in for that thread" >&2
+fi
 # A relay to Aglaea (roles-ui R3): a [for aglaea] thread to pablo with no
 # reply, open, in organizer-fixture's canned threads. The organizer cannot
 # read its messages (the mailbox does not hold it), so it has no sender and

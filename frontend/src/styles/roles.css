@@ -6,8 +6,9 @@
 /* ---------- Home: the Roles section ---------- */
 /* The rows share the initiative rows' metrics (shell.css .p-row: padding,
    gap, one line, the rank track left empty since roles take no rank) on a
-   grid of their own: name, state, doing now, mail, where. Name, state and
-   mail size to their widest row; doing now and where share the rest. */
+   grid of their own: name, state, doing now, mail, where. Name, state, mail
+   and where size to their widest row (useRoleFit), so every row has the same
+   tracks at every class and doing now takes the rest (leftovers-11 FR-5). */
 .roles-sec .sec-toggle {
   display: inline-flex; align-items: center; gap: var(--space-1); padding: 0 var(--space-1); margin-left: calc(-1 * var(--space-1));
   min-height: var(--control-sm); background: transparent; border: 1px solid transparent; border-radius: var(--radius-xs);
@@ -19,7 +20,7 @@
 .roles-list { display: grid; position: relative; }
 .r-row {
   display: grid; position: relative;
-  grid-template-columns: 24px var(--r-name, max-content) var(--r-state, max-content) minmax(0, 1fr) var(--r-mail, max-content) minmax(0, max-content);
+  grid-template-columns: 24px var(--r-name, max-content) var(--r-state, max-content) minmax(0, 1fr) var(--r-mail, max-content) var(--r-where, minmax(0, max-content));
   gap: var(--space-3); align-items: center; padding: var(--space-1-5) var(--space-3);
   width: 100%; min-height: calc(var(--control-sm) + 2 * var(--space-1-5)); text-align: left;
   background: transparent; border: 0; border-radius: 0; color: var(--fg); font: inherit; cursor: pointer;

@@ -51,6 +51,19 @@ function landOnSession(session: string) {
   window.setTimeout(tryLand, 0);
 }
 
+/** After an initiative link lands on its Overview (leftovers-11 FR-2):
+ *  focus goes to the initiative header's title, the thing named, never the
+ *  page body. Waits for the header to mount, two seconds at most. */
+function landOnInitiative(id: string) {
+  const until = Date.now() + 2000;
+  const tryLand = () => {
+    const title = document.querySelector<HTMLElement>(`.ihead-id[data-initiative="${CSS.escape(id)}"]`);
+    if (!title) { if (Date.now() < until) window.setTimeout(tryLand, 50); return; }
+    title.focus();
+  };
+  window.setTimeout(tryLand, 0);
+}
+
 export function RoleDrawer() {
   const { agents, roleOpen, openRole, openInitiative, openSlackThread } = useBoard();
   const role = (agents?.roles ?? []).find((r) => r.here && r.name === roleOpen) ?? null;
@@ -131,7 +144,7 @@ export function RoleDrawer() {
               ? <p className="rd-empty">None yet.</p>
               : <p className="rd-inits">
                   {inits.map((id, i) => (
-                    <span key={id}>{i > 0 && ", "}<a href="#" className="rd-init mono" onClick={(e) => { e.preventDefault(); go(() => openInitiative(id, "overview")); }} aria-label={`Open ${id}`}>{id}</a></span>
+                    <span key={id}>{i > 0 && ", "}<a href="#" className="rd-init mono" onClick={(e) => { e.preventDefault(); go(() => { openInitiative(id, "overview"); landOnInitiative(id); }); }} aria-label={`Open ${id}`}>{id}</a></span>
                   ))}
                 </p>}
           </Section>

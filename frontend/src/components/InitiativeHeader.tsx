@@ -199,7 +199,9 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
   return (
     <header className={`ihead ${headerOpen ? "open" : "folded"} ${widthClass}`}>
       <div className="ihead-bar">
-        <h1 className="ihead-id">
+        {/* A landing on the initiative (a role drawer's initiative link)
+            puts focus on its title (leftovers-11 FR-2). */}
+        <h1 className="ihead-id" tabIndex={-1} data-initiative={i.id}>
           {i.id}
           {i.client && <span className="lz tone">{i.client}</span>}
           {readOnly && <span className="lz read-only" title="not active: nothing here can be ruled, moved, commented, posted or started"><Lock size={12} aria-hidden /> {readOnly}: read-only</span>}

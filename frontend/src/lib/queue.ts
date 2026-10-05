@@ -163,3 +163,14 @@ export function personaMissing(names: string[]): string {
   const [has, file, it] = names.length === 1 ? ["has", "file", "it"] : ["have", "files", "them"];
   return `${who} ${has} no persona ${file}; the drafting session writes ${it}, or write ${it} by the persona-agents skill`;
 }
+
+/** Needs me's first five (leftovers-11 FR-1; transversal-roles Amendment 1,
+ *  A1): at compact and regular the oldest five and how many follow, so Roles
+ *  stays in view, unless all are asked for; wide, where Needs me has its own
+ *  region, shows every row. The rows are needsMeRows', in its order: this
+ *  changes the layout, never what counts (0034). */
+export const NEEDS_ME_FIRST = 5;
+export function needsMeShown<T>(rows: T[], showAll: boolean, wide: boolean): { shown: T[]; hidden: number } {
+  if (showAll || wide || rows.length <= NEEDS_ME_FIRST) return { shown: rows, hidden: 0 };
+  return { shown: rows.slice(0, NEEDS_ME_FIRST), hidden: rows.length - NEEDS_ME_FIRST };
+}
