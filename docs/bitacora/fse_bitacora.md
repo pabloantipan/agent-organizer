@@ -893,4 +893,9 @@ sections below this one are history.
   an edit of a ruled record. Restored 0085 byte for byte and raised 0086
   (3efa2b5). Lesson: before editing a proposed record, read its status at
   HEAD, not from memory. sup40 runs roles-and-needs-me-five (window 400884).
+- roles-and-needs-me-five merged (78509bf). decisions-still: cause measured
+  (0645df7: the stuck head's measure and its CSS loop). leftovers-12 adds
+  aglaea's rn5-A1/A2 (sev 1, 2203d7d): the wake count is neutral, magenta
+  when it wakes every seat, never --blocked red; it sits beside Send in the
+  reply composer as beside Start.
 
