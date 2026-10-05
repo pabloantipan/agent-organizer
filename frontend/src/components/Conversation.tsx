@@ -3,7 +3,7 @@ import { ArrowUpRight, AtSign, BookOpen, Archive, Check, ChevronDown, ChevronRig
 import { api, type AgentGroup, type CellMessage, type CellThread, type CellThreadView } from "../hooks/useWails";
 import { useBoard } from "../stores/board.store";
 import { notesAsContext } from "../lib";
-import { branchKey, drafts, draftVerb, newThreadKey, threadKey, useDraft } from "../lib/drafts";
+import { branchKey, chatKey, drafts, draftVerb, newThreadKey, newThreadPost, threadKey, useDraft, useDrafts } from "../lib/drafts";
 import { askedCards, needsMeThread } from "../lib/queue";
 
 const KINDS = ["msg", "question", "answer", "status", "decision", "done", "claim", "yield"];
@@ -67,9 +67,12 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   const [branchFrom, setBranchFrom] = useState<CellMessage | null>(null);
   // What a landing put in the new-thread form (a card's Discuss, Write about
   // this card). Not a draft: what the lead types is, and a kept draft wins
-  // over a prefill (leftovers-9 FR-1).
-  const [prefill, setPrefill] = useState<{ subject: string; body: string } | null>(null);
-  const newKept = !!useDraft(newThreadKey(initiativeId));
+  // over a prefill (leftovers-9 FR-1). It belongs to the chat it landed in,
+  // like a draft (leftovers-10 FR-1).
+  const [prefill, setPrefill] = useState<{ chat: string; subject: string; body: string } | null>(null);
+  const chat = chatKey(focus, view);
+  const newKept = !!useDraft(newThreadKey(initiativeId, chat));
+  const kept = useDrafts();
   const [scrollTo, setScrollTo] = useState<string | null>(null);
   // The thread a landing from elsewhere (Answer, a card's Discuss) named:
   // it gets focus once its messages are in (initiative-header FR-6).
@@ -171,7 +174,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
       landing.current = slackDraft.threadId;
       setTimeout(() => { setTarget(slackDraft.threadId!); setScrollTo(slackDraft.threadId!); }, 0);
     }
-    if (slackDraft.subject !== undefined) { setPrefill({ subject: slackDraft.subject, body: slackDraft.body ?? "" }); setTarget(null); }
+    if (slackDraft.subject !== undefined) { setPrefill({ chat, subject: slackDraft.subject, body: slackDraft.body ?? "" }); setTarget(null); }
     clearSlackDraft();
   }, [slackDraft]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -213,6 +216,11 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
     channelFresh: all.filter((t) => chatOf(t) === null && isNew(t)).length,
     journal: all.filter((t) => t.kind === "journal").length,
   };
+  // A chat with words kept in it says so in the list (design system, Focus
+  // and names: a kept draft is marked wherever its chat shows).
+  const drafted = (c: string, ts: CellThread[]) => kept.has(newThreadKey(initiativeId, c)) || ts.some((t) => kept.has(threadKey(initiativeId, t.id)));
+  const draftMark = (c: string, ts: CellThread[]) => (drafted(c, ts) ? <span className="meta">· draft</span> : null);
+  const landed = prefill && prefill.chat === chat ? prefill : null;
   const pick = (v: View) => { onFocus(null); setView(v); setQuery(""); };
   const pickPerson = (a: string) => { setView("channel"); onFocus(a); setQuery(""); };
   const targetThread = target ? threads.find((t) => t.id === target) : undefined;
@@ -244,22 +252,22 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="search" />
           {query && <button className="rail-icon" onClick={() => setQuery("")} aria-label="Clear search" title="Clear search"><X size={12} /></button>}
         </div>
-        <button className={`chat ${!focus && view === "needs" ? "active" : ""} ${counts.needs > 0 ? "fresh hot" : ""}`} onClick={() => pick("needs")} title="escalated to you, or a message addressed to you with no reply from you after it"><Inbox size={12} /><span className="chat-name">needs me</span>{counts.needs > 0 && <span className="chat-fresh hot">{counts.needs}</span>}</button>
-        {reconciler && reconciler !== human && <button className={`chat ${!focus && view === "reconciler" ? "active" : ""}`} onClick={() => pick("reconciler")} title={`the reconciler's backlog: stalled, or answered and left without a decision. ${reconciler}'s work, not yours`}><Gavel size={12} /><span className="chat-name">needs {reconciler}</span>{counts.reconciler > 0 && <span className="chat-n">{counts.reconciler}</span>}</button>}
-        <button className={`chat ${!focus && view === "channel" ? "active" : ""} ${counts.channelFresh > 0 ? "fresh" : ""}`} onClick={() => pick("channel")} title="every conversation not between you and one seat"><Hash size={12} /><span className="chat-name">channel</span>{counts.channelFresh > 0 ? <span className="chat-fresh">{counts.channelFresh}</span> : counts.channel > 0 ? <span className="chat-n">{counts.channel}</span> : null}</button>
+        <button className={`chat ${!focus && view === "needs" ? "active" : ""} ${counts.needs > 0 ? "fresh hot" : ""}`} onClick={() => pick("needs")} title="escalated to you, or a message addressed to you with no reply from you after it"><Inbox size={12} /><span className="chat-name">needs me</span>{draftMark("needs", openThreads)}{counts.needs > 0 && <span className="chat-fresh hot">{counts.needs}</span>}</button>
+        {reconciler && reconciler !== human && <button className={`chat ${!focus && view === "reconciler" ? "active" : ""}`} onClick={() => pick("reconciler")} title={`the reconciler's backlog: stalled, or answered and left without a decision. ${reconciler}'s work, not yours`}><Gavel size={12} /><span className="chat-name">needs {reconciler}</span>{draftMark("reconciler", all.filter(needsReconciler))}{counts.reconciler > 0 && <span className="chat-n">{counts.reconciler}</span>}</button>}
+        <button className={`chat ${!focus && view === "channel" ? "active" : ""} ${counts.channelFresh > 0 ? "fresh" : ""}`} onClick={() => pick("channel")} title="every conversation not between you and one seat"><Hash size={12} /><span className="chat-name">channel</span>{draftMark("channel", all.filter((t) => chatOf(t) === null && t.kind !== "journal"))}{counts.channelFresh > 0 ? <span className="chat-fresh">{counts.channelFresh}</span> : counts.channel > 0 ? <span className="chat-n">{counts.channel}</span> : null}</button>
         <div className="chats-label sub"><span>People</span></div>
         {seats.map((a) => {
           const n = all.filter((t) => chatOf(t) === a).length;
           const fresh = all.filter((t) => chatOf(t) === a && isNew(t)).length;
           return (
             <button key={a} className={`chat ${focus === a ? "active" : ""} ${fresh > 0 ? "fresh" : ""}`} onClick={() => pickPerson(a)} title={`direct with ${a}`}>
-              <AtSign size={12} /><span className="chat-name">{a}</span>{fresh > 0 ? <span className="chat-fresh">{fresh}</span> : n > 0 ? <span className="chat-n">{n}</span> : null}
+              <AtSign size={12} /><span className="chat-name">{a}</span>{draftMark(chatKey(a, "channel"), all.filter((t) => chatOf(t) === a))}{fresh > 0 ? <span className="chat-fresh">{fresh}</span> : n > 0 ? <span className="chat-n">{n}</span> : null}
             </button>
           );
         })}
         <div className="chats-label sub"><span>More</span></div>
-        <button className={`chat ${!focus && view === "journal" ? "active" : ""}`} onClick={() => pick("journal")} title="self-addressed notes: each seat's open questions"><BookOpen size={12} /><span className="chat-name">journal</span>{counts.journal > 0 && <span className="chat-n">{counts.journal}</span>}</button>
-        <button className={`chat ${!focus && view === "archive" ? "active" : ""}`} onClick={() => pick("archive")} title="closed threads"><Archive size={12} /><span className="chat-name">archive</span>{closed && closed.length > 0 && <span className="chat-n">{closed.length}</span>}</button>
+        <button className={`chat ${!focus && view === "journal" ? "active" : ""}`} onClick={() => pick("journal")} title="self-addressed notes: each seat's open questions"><BookOpen size={12} /><span className="chat-name">journal</span>{draftMark("journal", all.filter((t) => t.kind === "journal"))}{counts.journal > 0 && <span className="chat-n">{counts.journal}</span>}</button>
+        <button className={`chat ${!focus && view === "archive" ? "active" : ""}`} onClick={() => pick("archive")} title="closed threads"><Archive size={12} /><span className="chat-name">archive</span>{draftMark("archive", closed ?? [])}{closed && closed.length > 0 && <span className="chat-n">{closed.length}</span>}</button>
       </nav>
 
       <div className="cell-main">
@@ -292,7 +300,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
               onDiscussCard={(c) => {
                 const guess = seats.find((a) => (c.next || "").toLowerCase().includes(a.split("_").pop() ?? "\u0000"));
                 if (guess) pickPerson(guess);
-                setPrefill({ subject: `${c.slug}: `, body: notesAsContext(notes[`${initiativeId}/${c.slug}`], human) });
+                setPrefill({ chat: guess ? chatKey(guess, "channel") : chat, subject: `${c.slug}: `, body: notesAsContext(notes[`${initiativeId}/${c.slug}`], human) });
                 setTarget(null);
               }}
               onOpenCard={openCardLanding}
@@ -394,13 +402,14 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
             />
           ) : (
             <NewThread
-              key={`${focus ?? ""}|${prefill?.subject ?? ""}`}
+              key={`${chat}|${landed?.subject ?? ""}`}
               initiativeId={initiativeId}
-              draftKey={newThreadKey(initiativeId)}
+              chat={chat}
+              draftKey={newThreadKey(initiativeId, chat)}
               seats={seats}
               to={focus ?? seats[0] ?? ""}
-              subject={prefill?.subject || undefined}
-              body={prefill?.body || undefined}
+              subject={landed?.subject || undefined}
+              body={landed?.body || undefined}
               canPost={group.can_post}
               onDone={(tid) => { setPrefill(null); reload(); if (tid) goTo(tid); else if (threads.length) setTarget(threads[threads.length - 1].id); }}
               cancellable={threads.length > 0}
@@ -530,24 +539,32 @@ function ReplyBox(p: {
 /** Starting a thread, or branching one: subject, recipient, kind, body. A
  *  branch arrives with its subject set and the quoted message as the first
  *  lines, so the link back survives in the record itself. */
-function NewThread({ initiativeId, draftKey, seats, to: initialTo, subject: initialSubject, body: initialBody, quote, canPost = true, cancellable = true, onDone }: { initiativeId: string; draftKey: string; seats: string[]; to: string; subject?: string; body?: string; quote?: CellMessage; canPost?: boolean; cancellable?: boolean; onDone: (threadId: string | null) => void }) {
+function NewThread({ initiativeId, chat, draftKey, seats, to: initialTo, subject: initialSubject, body: initialBody, quote, canPost = true, cancellable = true, onDone }: { initiativeId: string; chat?: string; draftKey: string; seats: string[]; to: string; subject?: string; body?: string; quote?: CellMessage; canPost?: boolean; cancellable?: boolean; onDone: (threadId: string | null) => void }) {
   // leftovers-9 FR-1: subject and body are one draft, kept for the session
   // under draftKey; Escape closes the form and keeps it, a kept draft wins
   // over what the form was opened with, and only cancel or Start discards it.
-  const kept = useDraft<{ subject: string; body: string }>(draftKey);
+  // leftovers-10 FR-1: the draft is the chat's (draftKey names it) and keeps
+  // its addressee, so Start posts to whom it was typed for.
+  const kept = useDraft<{ subject: string; body: string; to?: string }>(draftKey);
   const subject = kept?.subject ?? initialSubject ?? "";
   const body = kept?.body ?? (quote ? `↳ from thread ${quote.thread_id}, ${quote.from}'s ${quote.kind}:\n> ${quote.body.slice(0, 300).replace(/\n/g, "\n> ")}\n\n` : (initialBody ?? ""));
-  const setSubject = (v: string) => drafts.keep(draftKey, { subject: v, body });
-  const setBody = (v: string) => drafts.keep(draftKey, { subject, body: v });
-  const [to, setTo] = useState(initialTo);
+  const [picked, setPicked] = useState(initialTo);
+  const to = kept?.to ?? picked;
+  const setSubject = (v: string) => drafts.keep(draftKey, { subject: v, body, to });
+  const setBody = (v: string) => drafts.keep(draftKey, { subject, body: v, to });
+  const setTo = (v: string) => { setPicked(v); if (kept) drafts.edit(draftKey, { to: v }); };
   const [kind, setKind] = useState("question");
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const wakes = to ? 1 : seats.length;
   const send = () => {
     if (!subject.trim() || !body.trim() || busy) return;
+    // A new thread posts what its own chat holds, never another chat's.
+    drafts.keep(draftKey, { subject, body, to });
+    const post = chat ? newThreadPost(drafts, initiativeId, chat) : { subject, body, to };
+    if (!post) return;
     setBusy(true);
-    api.postToCell(initiativeId, { thread_id: "", parent_id: "", to, kind, subject, body } as never).then(
+    api.postToCell(initiativeId, { thread_id: "", parent_id: "", kind, ...post } as never).then(
       (r) => { drafts.discard(draftKey); onDone(r.thread_id); },
       (e) => { setErr(String(e)); setBusy(false); },
     );

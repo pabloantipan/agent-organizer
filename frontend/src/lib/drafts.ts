@@ -9,10 +9,12 @@ import { useSyncExternalStore } from "react";
  *  Keys name what the words are about: a record (a ruling,
  *  `decision:<initiative>/<NNNN>`; a card comment, `card:<initiative>/<slug>`)
  *  or a thread (a message in the composer, `thread:<initiative>/<id>`; a
- *  new thread's subject and body together, `thread:<initiative>/new`, a
- *  branch's `thread:<initiative>/branch:<message id>`). A draft is its
- *  fields as strings; one whose fields are all blank is no draft, so
- *  keeping it discards the key. */
+ *  new thread's subject, body and addressee together, per chat,
+ *  `thread:<initiative>/new:<chat>`; a branch's
+ *  `thread:<initiative>/branch:<message id>`). A draft is its fields as
+ *  strings; one whose words are all blank is no draft, so keeping it
+ *  discards the key. The addressee and the kind (`to`, `kind`) are not
+ *  words: they ride a draft, they never make one. */
 export type DraftFields = Record<string, string>;
 /** A ruling's draft: the chosen option and the words. */
 export type Draft = { chosen: string; words: string };
@@ -20,10 +22,29 @@ export type Draft = { chosen: string; words: string };
 export const decisionKey = (initiative: string, number: string) => `decision:${initiative}/${number}`;
 export const cardKey = (initiative: string, slug: string) => `card:${initiative}/${slug}`;
 export const threadKey = (initiative: string, thread: string) => `thread:${initiative}/${thread}`;
-export const newThreadKey = (initiative: string) => threadKey(initiative, "new");
+/** A chat of Conversations: a seat's direct chat (`seat:<name>`), or the
+ *  channel, needs me, the reconciler's, the journal, the archive. */
+export const chatKey = (focus: string | null, view: string) => (focus ? `seat:${focus}` : view);
+/** A new thread's draft belongs to the chat it was typed in (leftovers-10
+ *  FR-1; design system, Focus and names: "a draft keeps its addressee"), so
+ *  another chat's form never shows it and its Start never sends it. */
+export const newThreadKey = (initiative: string, chat: string) => threadKey(initiative, `new:${chat}`);
 export const branchKey = (initiative: string, messageId: string) => threadKey(initiative, `branch:${messageId}`);
 
-const blank = (f: DraftFields) => Object.values(f).every((v) => v.trim() === "");
+const NOT_WORDS = new Set(["to", "kind"]);
+const blank = (f: DraftFields) => Object.entries(f).every(([k, v]) => NOT_WORDS.has(k) || v.trim() === "");
+
+/** A new thread as its chat's draft holds it. */
+export type NewThreadDraft = { subject: string; body: string; to: string };
+
+/** What a chat's Start posts: that chat's own draft with its own addressee,
+ *  or nothing when the chat has none. A draft typed in another chat is
+ *  never read here (leftovers-10 FR-1, T1). */
+export function newThreadPost(store: DraftStore, initiative: string, chat: string): NewThreadDraft | null {
+  const d = store.restore<Partial<NewThreadDraft>>(newThreadKey(initiative, chat));
+  if (!d || !(d.subject ?? "").trim() || !(d.body ?? "").trim()) return null;
+  return { subject: d.subject!, body: d.body!, to: d.to ?? "" };
+}
 
 export type DraftStore = {
   /** Keep `fields` under `key`, replacing what was there; all blank discards. */
