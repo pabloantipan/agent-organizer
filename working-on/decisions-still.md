@@ -5,7 +5,7 @@ repos: [organizer]
 branch: decisions-still
 seat: dst-build
 updated: 2026-10-05
-next: "dst-build: measure the cause (W1) in both engines and write it here, then fix (W2-W3, W0)"
+next: "dst-build: fix the stuck head so .stuck changes no geometry (W2), then W3, W0"
 depends_on: []
 boundary: ["frontend/src/components/DecisionsView.tsx, RuleDecisionBox.tsx", "frontend/src/styles/decisions.css, rule-box.css, global.css (.markdown rules only)", "frontend/src/lib/useScrollEdges.ts and lib/ tests", "not: Home, Conversations, Go, docs/design-system.md"]
 spec: "docs/specs/decisions-still.md (FR-1 to FR-3)"
@@ -30,3 +30,34 @@ Nothing on Decisions moves unless the operator moves it. Measure the cause first
 ## Blockers
 
 ## Notes
+- W1, the cause (measured 2026-10-05, dst-build). A feedback loop between the
+  stuck head's measure and the stuck head's own CSS. `DecisionsView.tsx:166-187`
+  sets `tall` (so `.dec-head.stuck`, line 296) when the expanded record's
+  `offsetHeight` exceeds the room under the section heading, and re-measures
+  from a ResizeObserver on the record (lines 183-184). But `.stuck` changes the
+  record's height: `decisions.css:73-79` adds the head's 1 px border-bottom,
+  drops `.dec-actions`' 4 px top padding (line 79) and the body's 1 px
+  border-top (line 78): the record is 4 px shorter stuck (0085: 673 -> 669 px,
+  head 78 -> 75, body top +3 px). Whenever the unstuck height is within 4 px
+  above the room, stuck makes it short, short unsticks it, unstuck makes it
+  tall: the class flips every frame, the body jumps 3 px, `--dec-box-max`
+  flips with it, and DecisionsView re-renders each time. Not the scroll edges
+  (colour only, no toggling seen) and not the refresh (no change on agents
+  events). Pablo's window height was in that band for 0085 (at 1245 wide).
+  - WKWebView (instrumented copy of `make review-build`, recorder via
+    runtime.LogInfo, never committed; fixture home with a copy of
+    working-on/decisions/, 0085 set waiting in the copy only), classic bars,
+    rail full: 1245x932 still (record 673 < room, never stuck); 1245x878, 0085
+    expanded: 52 box changes in 300 samples / 30 s, the head's class flipped
+    about 100 times a second (`wk-w1-1245x878-expanded-classic.log`,
+    `webkit-1245x878-W1-expanded-before.png`).
+  - Chromium (wails dev, same fixture), 1245x878, rail full, classic: 0085
+    expanded, 30 s: 3597 layout shifts (source `div.dec-body`, y 346 -> 343),
+    18030 mutations (`div.dec-head` class, `.dec` style --dec-box-max); scrolled
+    stuck: 18020 mutations; Playwright could not click Rule ("element is not
+    stable"). Rule open moves the band 12 px (the facts join the head), so at
+    878 it holds still. `chromium-1245x878-w1-full-classic.json`.
+    1245x932 and 1024x640: still in both engines.
+  - Also seen, not motion: every DecisionsView render re-sets the find
+    input's and the rule box radios' `name`/`type` attributes to the same
+    values (React's input update); no layout, no class.
