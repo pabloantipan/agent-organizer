@@ -161,6 +161,25 @@ describe("an Escape that ends a composition commits nothing (leftovers-10 FR-5, 
     expect(f.get()).toBe("caf");
   });
 
+  it("WKWebView as measured: the composition commits ´, then the Escape comes as keyCode 27 keyed ´", () => {
+    const f = run();
+    const st = { before: "caf", pending: false };    // compositionstart
+    f.set("caf´");                                    // insertCompositionText
+    f.set("caf´");                                    // insertFromComposition
+    imeCompositionEnd(st, f.set, (fn) => fn());       // compositionend, data ´
+    expect(imeEscapeKey(st, "´", 27, false, f.set)).toBe(true);
+    expect(f.get()).toBe("caf");
+  });
+
+  it("a plain Escape right after a composed é closes the box and keeps the é", () => {
+    const f = run();
+    const st = { before: "caf", pending: false };
+    f.set("café");
+    imeCompositionEnd(st, f.set, (fn) => fn());
+    expect(imeEscapeKey(st, "Escape", 27, false, f.set)).toBe(false);
+    expect(f.get()).toBe("café");
+  });
+
   it("Chromium: Escape while composing, then the composition ends: the field goes back", () => {
     const f = run();
     const st = { before: "caf", pending: false };

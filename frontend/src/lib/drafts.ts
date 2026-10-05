@@ -104,26 +104,33 @@ export const draftVerb = (verb: string, kept: boolean) => (kept ? `${verb} · dr
  *  Japanese candidate) belongs to the input method: it neither closes the
  *  box nor leaves the marked character in the draft (leftovers-10 FR-5).
  *  Chromium sends the Escape while composing (`isComposing`) and ends the
- *  composition after it; WebKit ends it first, committing the marked text,
- *  and then sends the Escape as keyCode 229. Either way the field goes back
- *  to what it held when the composition started. `before` is that value,
- *  `pending` an Escape seen while still composing. */
+ *  composition after it. WKWebView, measured on macOS with Option-e then
+ *  Escape: the composition ends first, committing `´`
+ *  (insertFromComposition, compositionend), and then the keydown arrives
+ *  with keyCode 27 and the committed character as its key, not "Escape"
+ *  (other engines send keyCode 229). Either way the field goes back to what
+ *  it held when the composition started. `before` is that value, `pending`
+ *  an Escape whose composition has not ended yet. */
 export type ImeState = { before: string | null; pending: boolean };
 
 /** One keydown: true when it is the input method's Escape, which the field
- *  then keeps from the box (preventDefault). WebKit's order restores here. */
+ *  then keeps from the box (preventDefault). */
 export function imeEscapeKey(st: ImeState, key: string, keyCode: number, composing: boolean, restore: (v: string) => void): boolean {
-  if (key !== "Escape" || !(composing || keyCode === 229)) {
+  const ime = (key === "Escape" && (composing || keyCode === 229)) || (keyCode === 27 && key !== "Escape");
+  if (!ime) {
     // Any other key after the composition ended: it is over, nothing to restore.
-    if (!composing) st.before = null;
+    if (!composing) { st.before = null; st.pending = false; }
     return false;
   }
-  if (composing) st.pending = true;
-  else if (st.before !== null) { restore(st.before); st.before = null; }
+  if (st.before !== null) {
+    if (composing) st.pending = true;
+    else { restore(st.before); st.before = null; }
+  }
   return true;
 }
 
-/** compositionend: Chromium's order restores here, after its own input. */
+/** compositionend: after an input method's Escape the commit that ends it is
+ *  undone, once the engine's own input has landed. */
 export function imeCompositionEnd(st: ImeState, restore: (v: string) => void, later: (fn: () => void) => void = (fn) => { setTimeout(fn, 0); }) {
   if (st.pending && st.before !== null) { const b = st.before; later(() => restore(b)); st.before = null; }
   st.pending = false;
