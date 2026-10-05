@@ -1,13 +1,13 @@
 ---
 title: Accept the leftovers-11 batch, with Needs me showing its oldest five, and launch its card
-status: proposed
+status: ruled
 raised: 2026-10-04
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-05
+ruled_by: pablo
 options: [accept as written, accept without the Needs me change, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [roles-and-needs-me-five]
 threads: []
 supersedes: []
@@ -52,6 +52,8 @@ this decision (median 0 d); basis: 19 single-wave tasks, this initiative.
 The FSE's: accept as written.
 
 ## Ruling
+
+pablo, 2026-10-05, in the organizer on lodestar: ok
 
 ## Consequences
 
