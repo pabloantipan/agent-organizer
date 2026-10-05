@@ -23,6 +23,8 @@ refresh (leftovers-4 FR-9 kept the DOM only when the HTML is unchanged).
 - **FR-2** With no input from the operator, nothing on Decisions moves: no
   layout shift, no change of an element's box, no class toggling, at any
   scroll position, with a record expanded, stuck, and with Rule open.
+- FR-2 clarified 2026-10-05 (dst-ui G3): marks driven by the clock (the
+  today line, `now`) move with time and are not motion in FR-2's sense.
 - **FR-3** The stuck head, the scroll edges and the refresh keep doing what
   their specs say (no behaviour removed to stop the motion).
 

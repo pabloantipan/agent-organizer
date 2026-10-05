@@ -918,4 +918,13 @@ sections below this one are history.
   spike pass a point it never ran. Gates for pointer behaviour name a
   by-hand or HID-level check. With the A14 and wrong-file slips, propose to
   hephaistos at the next one.
+- decisions-still: the motion is gone (W2 in every combination); UI review
+  failed on F1 (sev 3, older, hidden by the loop): Rule on a stuck head at
+  the band unsticks it; sent to aglaea. G2: W3 already needs B13 to pass, at
+  the band too; no amendment. G3: clock-driven marks exempt from FR-2
+  (spec noted). Next batch: G4 the review build's window must be titled
+  "Deltagos Review" (someone typed into the reviewer's fixture window at
+  18:47). Gate lesson, second this week: W2's windows never looped on main
+  (the loop lives in a 4 px band), so the row could not fail before the fix;
+  a gate for a measured defect must fail on main first (a sweep).
 
