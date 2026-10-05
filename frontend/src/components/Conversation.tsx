@@ -414,7 +414,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
               chat={chat}
               draftKey={newThreadKey(initiativeId, chat)}
               seats={seats}
-              to={focus ?? seats[0] ?? ""}
+              to={focus ?? ""}
               subject={landed?.subject || undefined}
               body={landed?.body || undefined}
               canPost={group.can_post}
@@ -535,7 +535,7 @@ function ReplyBox(p: {
         </select>
         <select value={to} onChange={(e) => setTo(e.target.value)} disabled={!writable} title="direct wakes one seat; everyone wakes them all" aria-label="Recipient">
           <option value="">everyone (wakes {p.wakesAll})</option>
-          {p.seats.filter((s) => s !== p.human).map((s) => <option key={s} value={s}>{s}</option>)}
+          {shownSeats(p.seats.filter((s) => s !== p.human), to).map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
         <span className={`meta wakes ${!to && wakes > 1 ? "hot" : ""}`}>wakes {wakes} seat{wakes === 1 ? "" : "s"}</span>
         <span className="spacer" />
@@ -545,6 +545,12 @@ function ReplyBox(p: {
     </div>
   );
 }
+
+/** The seats a recipient select offers: the cell's, plus the addressee when
+ *  it is not one of them (a seat that left the roster, a guess from a card),
+ *  so the select always shows whom Start or Send posts to (leftovers-11
+ *  FR-6: no post reaches a seat the form did not show). */
+const shownSeats = (seats: string[], to: string) => (to && !seats.includes(to) ? [...seats, to] : seats);
 
 /** Starting a thread, or branching one: subject, recipient, kind, body. A
  *  branch arrives with its subject set and the quoted message as the first
@@ -597,11 +603,13 @@ function NewThread({ initiativeId, chat, draftKey, seats, to: initialTo, subject
         <select value={kind} onChange={(e) => setKind(e.target.value)} disabled={!canPost} aria-label="Kind of message">{KINDS.map((k) => <option key={k} value={k}>{k}</option>)}</select>
         <select value={to} onChange={(e) => setTo(e.target.value)} disabled={!canPost} aria-label="Recipient">
           <option value="">everyone (wakes {seats.length})</option>
-          {seats.map((s) => <option key={s} value={s}>{s}</option>)}
+          {shownSeats(seats, to).map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
-        <span className={`meta wakes ${wakes > 1 ? "hot" : ""}`}>wakes {wakes} seat{wakes === 1 ? "" : "s"}</span>
         <span className="spacer" />
         {err && <span className="meta err">{err}</span>}
+        {/* The wake count sits beside Start, read before anything is sent
+            (design system, a composer's default addressee; leftovers-11 FR-6). */}
+        <span className={`meta wakes ${wakes > 1 ? "hot" : ""}`}>wakes {wakes} seat{wakes === 1 ? "" : "s"}</span>
         <button className="tiny-btn primary" onClick={send} disabled={busy || !canPost || !subject.trim() || !body.trim()}><Send size={12} /> {draftVerb(quote ? "Branch" : "Start", !!kept)}</button>
       </div>
     </div>
@@ -796,7 +804,7 @@ function RuleBox(p: { seats: string[]; defaultTo: string; where: string; escalat
       <div className="composer-row">
         <select value={to} onChange={(e) => setTo(e.target.value)} title="direct wakes one seat; everyone wakes them all">
           <option value="">everyone (wakes {p.seats.length})</option>
-          {p.seats.map((s) => <option key={s} value={s}>{s}</option>)}
+          {shownSeats(p.seats, to).map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
         <span className={`meta wakes ${!to && p.seats.length > 1 ? "hot" : ""}`}>wakes {to ? 1 : p.seats.length} seat{to || p.seats.length === 1 ? "" : "s"}</span>
         <span className="spacer" />
