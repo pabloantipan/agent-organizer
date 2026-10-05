@@ -349,10 +349,16 @@ keeps their place.
   record (a ruling, a comment, a message) and comes back when that box
   reopens, and the verb that reopens it says so (`Rule · draft`). No
   confirm on Escape (rule-words-and-dates, D1). A kept draft is marked wherever its
-  record or chat shows, collapsed rows included (`· draft` on the line and
+  record or chat shows **as something he acts on** (the To rule line, the
+  Needs me row, a chat in the list; not a Timeline row or a summary count),
+  collapsed rows included (`· draft` on the line and
   in its name). A draft keeps its addressee: a new-thread draft belongs to
   the chat it was typed in, never follows him to another seat's chat
   (drafts-and-slack, U2, U3).
+- **A composer's default addressee is the place it sits in**: a direct
+  chat addresses its seat, the channel addresses everyone. The wake count
+  (`wakes 6`) shows beside Start before anything is sent (drafts-per-chat,
+  U3).
 
 - **Checked in WKWebView**, the app's engine, not only Chromium. In
   WKWebView, macOS's Keyboard navigation setting (System Settings ›
