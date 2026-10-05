@@ -253,7 +253,10 @@ threads, supersedes chain. Superseded records stay, dimmed, linked forward. Dimm
 lozenge to 1.5:1 (leftovers-4). The superseded and withdrawn lozenges are
 the **neutral** badge (`--fg-muted` text, 6.7:1): out of the flow, named by
 their word, not by a hue. `--done` on its tint is 2.05:1 and is never a
-lozenge's text (markdown-and-labels, L9). A record's body never widens its view: code
+lozenge's text (markdown-and-labels, L9). A record's **line** never widens its view either: it stays one line, the
+number, status, ruler and date whole; the chosen option gives way first
+(ellipsis, whole in the hover and the name), then the title (decisions-still,
+0082's long option). A record's body never widens its view: code
 blocks and tables scroll inside themselves.
 *Nygard ADRs, MADR, GitHub Discussions answers.*
 
