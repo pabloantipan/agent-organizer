@@ -1,13 +1,13 @@
 ---
 title: Accept the leftovers-10 batch and launch its card after roles-ui
-status: proposed
+status: ruled
 raised: 2026-10-04
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-04
+ruled_by: pablo
 options: [accept as written, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [drafts-per-chat]
 threads: [01M445KCDF7VCPVAM81X56YYPW]
 supersedes: []
@@ -46,6 +46,8 @@ decision (median 0 d); basis: 17 single-wave tasks, this initiative.
 The FSE's: accept as written.
 
 ## Ruling
+
+pablo, 2026-10-04, in the organizer on lodestar: Ok
 
 ## Consequences
 
