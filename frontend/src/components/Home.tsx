@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState
 import { createPortal } from "react-dom";
 import { Briefcase, ChevronDown, ChevronRight, CircleDashed, Compass, Hammer, Hand, Play } from "lucide-react";
 import type { merge, model, service } from "../../wailsjs/go/models";
-import { inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, type NeedsMeRow } from "../lib/queue";
+import { inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, needsMeShown, NEEDS_ME_FIRST, type NeedsMeRow } from "../lib/queue";
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
 import { dateWords } from "../lib/dates";
@@ -30,7 +30,7 @@ import "../styles/roles.css";
  *  only while the list beside it keeps about 70 characters of goal (FR-21):
  *  Home's class is the window's, measured on the row. */
 export function Home() {
-  const { view, agents, widthClass: windowClass, roomy: windowRoomy, ruleDraft, dropRule } = useBoard();
+  const { view, agents, widthClass: windowClass, roomy: windowRoomy, ruleDraft, dropRule, needsMeFocus } = useBoard();
   const home = useRef<HTMLDivElement>(null);
   const { cls: widthClass, goalMin } = useHomeClass(home, windowClass, view);
   // A window wide enough for wide that Home measures too tight for it is
@@ -41,12 +41,31 @@ export function Home() {
   const gone = !!ruleDraft && !!view && !rows.some((r) => r.key === ruleDraft.key) ? ruleDraft.key : null;
   useEffect(() => { if (gone) dropRule(gone); }, [gone, dropRule]);
   useKeepScroll(home, widthClass, !!view);
+  // Needs me's first five (leftovers-11 FR-1): Ruled's pattern on Decisions.
+  // A landing on a row past the five, or a box open on one, shows them all.
+  const [showAll, setShowAll] = useState(false);
+  const past = (key: string | null | undefined) => !!key && rows.findIndex((r) => r.key === key) >= NEEDS_ME_FIRST;
+  const { shown, hidden } = needsMeShown(rows, showAll || past(needsMeFocus) || past(ruleDraft?.key), widthClass === "wide");
+  const more = useRef<HTMLButtonElement>(null);
+  const [moreFocus, setMoreFocus] = useState<{ to: "first" | "toggle"; seq: number } | null>(null);
+  // "Show the other N" hands focus to the first row it revealed, its verb;
+  // "Show only the oldest five" keeps it (Ruled's handover, row 3 there).
+  useEffect(() => {
+    if (!moreFocus) return;
+    setMoreFocus(null);
+    const target = moreFocus.to === "toggle"
+      ? more.current
+      : home.current?.querySelectorAll<HTMLElement>(".home-needs .ib-row")[NEEDS_ME_FIRST]?.querySelector<HTMLElement>(".ib-act button") ?? null;
+    target?.focus({ preventScroll: true });
+    target?.scrollIntoView({ block: "nearest" });
+  }, [moreFocus]);
+  const toggleMore = () => { setMoreFocus({ to: showAll ? "toggle" : "first", seq: Date.now() }); setShowAll(!showAll); };
   if (!view) return <div className="empty">Loading…</div>;
   return (
     <HomeClass.Provider value={widthClass}>
     <div ref={home} className={`home ${widthClass} ${roomy ? "roomy" : ""} ${agents?.roles?.length ? "with-roles" : ""}`} style={widthClass === "wide" ? { "--goal-min": `${goalMin}px` } as React.CSSProperties : undefined}>
       <section className="home-sec home-needs">
-        <h2 id={NEEDS_ME_HEADING} tabIndex={-1} className="sec-title">Needs me <span className="num sec-count">{rows.length}</span><span className="sec-sub">everything waiting on you, oldest first</span></h2>
+        <h2 id={NEEDS_ME_HEADING} tabIndex={-1} className="sec-title">Needs me · <span className="num sec-count">{rows.length}</span><span className="sec-sub">everything waiting on you, oldest first</span></h2>
         {rows.length === 0 ? (
           <div className="panel empty-state">
             <div>Nothing waits on you.</div>
@@ -54,7 +73,12 @@ export function Home() {
           </div>
         ) : (
           <div className="panel inbox">
-            {rows.map((r) => <InboxRow key={r.key} row={r} />)}
+            {shown.map((r) => <InboxRow key={r.key} row={r} />)}
+            {widthClass !== "wide" && rows.length > NEEDS_ME_FIRST && (hidden > 0 || showAll) && (
+              <button ref={more} type="button" className="ib-more" onClick={toggleMore}>
+                {hidden > 0 ? `Show the other ${hidden}` : `Show only the oldest ${NEEDS_ME_FIRST}`}
+              </button>
+            )}
           </div>
         )}
       </section>

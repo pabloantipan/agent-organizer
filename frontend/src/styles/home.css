@@ -191,3 +191,15 @@
 .home .port.empty-sig { --t-sig: ; }
 .home .port.empty-next .p-row > .p-next, .home .port.empty-next .p-head > :nth-child(8),
 .home .port.empty-sig .p-row > .p-sig, .home .port.empty-sig .p-head > :nth-child(7) { display: none; }
+
+/* Needs me's first five (leftovers-11 FR-1): one row after the oldest five,
+   Ruled's "Show the other N" on Decisions (decisions.css button.dec-more),
+   at compact and regular only. */
+.inbox > button.ib-more {
+  display: block; width: 100%; min-height: 32px; margin-top: var(--space-1); text-align: left; padding: 0 var(--space-3);
+  background: none; border: 1px dashed var(--border); border-radius: var(--r);
+  font-size: var(--font-size-md); color: var(--accent-fg); cursor: pointer;
+}
+.inbox > button.ib-more:hover { background: var(--surface-hover); }
+.inbox > button.ib-more:focus { outline: none; }
+.inbox > button.ib-more:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
