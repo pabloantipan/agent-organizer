@@ -190,7 +190,11 @@ and the body scroll under it.
   section heading.
 - When the record's end scrolls past, the head goes with it. The next
   record's line never sits under a stuck head.
-- A collapsed record and a record shorter than the view do not stick.
+- A collapsed record and a record shorter than the view do not stick. Whether a record is taller than the view is
+  decided **before** ruling and held while the box is open: the facts that
+  join the head while ruling never unstick it. A head that was stuck stays
+  stuck until the box closes (dst-ui F1, A2, 2026-10-05; "the box never
+  pushes the head up" wins).
 - With the rule box open, the box rides with Rule. If it is taller than the
   room under the stuck head, it is capped there and scrolls inside itself
   (Widths: a box is capped at the window). It never pushes the head up.
@@ -199,8 +203,8 @@ and the body scroll under it.
   one click away, at every width (lf7-ui A1, 2026-10-04).
 - A landing (§6) leaves room for both stuck layers: the section heading,
   then the record's head.
-- The stuck head has the panel's background and a 1 px `--border` at its
-  bottom, so the body visibly passes under it.
+- The stuck head has the panel's background and a 1 px `--border` line at its
+  bottom (a border or a hard inset shadow, no blur; dst-ui A1), so the body visibly passes under it.
 
 ### §9 The line's name says each thing once
 

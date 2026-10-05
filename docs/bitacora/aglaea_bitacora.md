@@ -79,3 +79,4 @@ its source).
 - 2026-10-05 — sup40 rn5-A1/A2: wake count beside Start or Send, neutral, magenta for a broadcast, never red (DS).
 - 2026-10-05 — sup41: a Ruled line's long chosen option gives way first, then the title; the line never widens the board (DS).
 - 2026-10-05 — floating-icon design spec (0088): icon, float, list panel, compact button.
+- 2026-10-05 — sup41 dst-ui A1/A2: tallness decided before ruling and held; inset line accepted (decisions-view §8).
