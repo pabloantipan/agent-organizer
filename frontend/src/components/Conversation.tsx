@@ -249,7 +249,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
         {noToken && <div id={noToken} className="chats-reason">no token for {human || "the human seat"} to post with; the cell bootstrap issues one</div>}
         <div className="cell-search">
           <Search size={12} />
-          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="search" />
+          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="search" aria-label={`Search ${initiativeId}'s conversations`} />
           {query && <button className="rail-icon" onClick={() => setQuery("")} aria-label="Clear search" title="Clear search"><X size={12} /></button>}
         </div>
         <button className={`chat ${!focus && view === "needs" ? "active" : ""} ${counts.needs > 0 ? "fresh hot" : ""}`} onClick={() => pick("needs")} title="escalated to you, or a message addressed to you with no reply from you after it"><Inbox size={12} /><span className="chat-name">needs me</span>{draftMark("needs", openThreads)}{counts.needs > 0 && <span className="chat-fresh hot">{counts.needs}</span>}</button>
@@ -520,10 +520,10 @@ function ReplyBox(p: {
         <textarea ref={ref} rows={2} value={body} aria-label={`Message to ${to || "the channel"}`} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setBody(e.target.value)} disabled={!writable} placeholder={writable ? "Type a message  (Enter to send, Shift+Enter for a new line)" : ""} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }} />
       </div>
       <div className="composer-row">
-        <select value={kind} onChange={(e) => setKind(e.target.value)} disabled={!writable}>
+        <select value={kind} onChange={(e) => setKind(e.target.value)} disabled={!writable} aria-label="Kind of message">
           {(p.status === "stalled" ? ["decision"] : KINDS).map((k) => <option key={k} value={k}>{k}</option>)}
         </select>
-        <select value={to} onChange={(e) => setTo(e.target.value)} disabled={!writable} title="direct wakes one seat; everyone wakes them all">
+        <select value={to} onChange={(e) => setTo(e.target.value)} disabled={!writable} title="direct wakes one seat; everyone wakes them all" aria-label="Recipient">
           <option value="">everyone (wakes {p.wakesAll})</option>
           {p.seats.filter((s) => s !== p.human).map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
@@ -582,8 +582,8 @@ function NewThread({ initiativeId, chat, draftKey, seats, to: initialTo, subject
         <textarea autoFocus={!!quote || !!initialSubject} rows={3} value={body} aria-label={`Message to ${to || "the channel"}`} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setBody(e.target.value)} placeholder="Type a message  (Enter to send, Shift+Enter for a new line)" disabled={!canPost} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } if (e.key === "Escape" && cancellable && !e.nativeEvent.isComposing) onDone(null); }} />
       </div>
       <div className="composer-row">
-        <select value={kind} onChange={(e) => setKind(e.target.value)} disabled={!canPost}>{KINDS.map((k) => <option key={k} value={k}>{k}</option>)}</select>
-        <select value={to} onChange={(e) => setTo(e.target.value)} disabled={!canPost}>
+        <select value={kind} onChange={(e) => setKind(e.target.value)} disabled={!canPost} aria-label="Kind of message">{KINDS.map((k) => <option key={k} value={k}>{k}</option>)}</select>
+        <select value={to} onChange={(e) => setTo(e.target.value)} disabled={!canPost} aria-label="Recipient">
           <option value="">everyone (wakes {seats.length})</option>
           {seats.map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
