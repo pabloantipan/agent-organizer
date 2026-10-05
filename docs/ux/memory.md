@@ -219,6 +219,13 @@ the initiatives touched. A drawer holds the detail. Show only. Talos and
 Hermione are one muted line. Roles are configured, not hard-coded; O1 asks
 about Daedalus.
 
+Floating icon (2026-10-05, `specs/floating-icon.md`, proposed, thread
+01M46K870W9YST0YV90F1S8GSE; 0088): a 56 px app-mark icon whose three bars
+breathe (Core Animation, decorative, still under Reduce motion); a two-layer
+shadow and a lift on hover and drag; its place remembered per display; a
+360 px list panel with search, a Home row, and the rail's order with signals;
+a top-bar `Compact to icon`. O1: should the icon show Needs me's count?
+
 ## Open questions
 
 - Q1 (Pablo, via the FSE, leftovers-4): does he use Tab in the app? In
