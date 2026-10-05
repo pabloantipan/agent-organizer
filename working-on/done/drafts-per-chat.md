@@ -1,10 +1,10 @@
 ---
 title: A new thread's draft belongs to its chat (no wrong seat woken), draft marks, any column gives slack, names, IME, dates
-status: next
+status: done
 repos: [organizer]
 branch: drafts-per-chat
 updated: 2026-10-04
-next: "review: drafts-per-chat, gate met (T1-T5, T0; both engines, classic and overlay; branch drafts-per-chat, 7 commits on main)"
+next: "merged 2242dbf; U2, U3 with aglaea; U1, G1, G2 for the FSE"
 depends_on: [roles-ui]
 boundary: ["frontend/src/lib/drafts.ts, lib/width.ts, lib/dates.ts and their tests", "frontend/src/components/Conversation.tsx and SlackView.tsx (drafts, names, times)", "frontend/src/components/DecisionsView.tsx (the To rule line's draft mark), Home.tsx (shareRoom's columns), Overview.tsx (the ruled date)", "frontend/src/components/RuleDecisionBox.tsx and CardDrawer.tsx (the IME guard only)", "not: Go, docs/design-system.md"]
 spec: "docs/specs/leftovers-10.md (FR-1 to FR-6); Aglaea's calls feeb8d6"
@@ -22,6 +22,7 @@ No draft wakes the wrong seat; the rest of drafts-and-slack's leftovers.
 - [x] T0: see `docs/specs/leftovers-10.md`, Acceptance
 
 ## Done
+- 2026-10-04 merged to main as 2242dbf after code review pass and UI review pass at af63e7f (both engines); seats ended (sup39)
 - 2026-10-04 dpc-build: FR-1 to FR-6 on drafts-per-chat (7 fix commits, rebased on main); T1-T5 hit-tested at 1512×945, rail strip, classic and overlay, in headless Chromium and in Deltagos Review.app (T2 in WKWebView classic only); T0 green from a clean clone. Evidence and choices: .wt-notes/dpc-build/progress.md
 - 2026-10-04 0084 ruled by pablo ("Ok"); sup39 launched by the FSE
 - 2026-10-04 cut from leftovers-10 by the FSE
