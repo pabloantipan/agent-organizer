@@ -118,6 +118,10 @@ type State = {
   openDecision: (initiativeId: string, number: string) => void;
   openSettings: () => void;
   selected: merge.BoardCard | null;
+  // The role whose drawer is open (transversal-roles, A click), by name;
+  // null when none. Show only: opening it starts nothing.
+  roleOpen: string | null;
+  openRole: (name: string | null) => void;
   filterMachine: string | null;
   filterClient: string | null;
   // The initiative on screen; null on Home and Settings.
@@ -274,6 +278,8 @@ export const useBoard = create<State>((set, get) => ({
   openDecision: (selectedInitiative, number) => set((st) => ({ ruleDraft: null, headerOpen: folded(), screen: "initiative", selectedInitiative, sub: "decisions", selected: null, needsMeFocus: null, stageFocus: null, decisionFocus: `${selectedInitiative}/${number}`, decisionSeq: st.decisionSeq + 1 })),
   openSettings: () => set({ ruleDraft: null, screen: "settings", selectedInitiative: null, needsMeFocus: null, decisionFocus: null }),
   selected: null,
+  roleOpen: null,
+  openRole: (roleOpen) => set({ roleOpen }),
   filterMachine: null,
   filterClient: null,
   selectedInitiative: null,

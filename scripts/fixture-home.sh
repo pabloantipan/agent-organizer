@@ -161,6 +161,12 @@ home="$tmp/home"
 
 a="$home/init-a"
 sed -i '' "s#\"/h/init-a\"#\"$a\"#" "$a/agents/cell.json"
+# The roles' bitácoras (roles-ui R2): each @D<n>@ is the date n days before
+# today, so the HAND-OFFs read as recent (and Daedalus's as older than a
+# week) whenever the fixture is laid.
+for f in "$home/agent-slack/docs/bitacora/hephaistos_bitacora.md" "$a/docs/bitacora/aglaea_bitacora.md" "$home/work/init-b/docs/bitacora/daedalus_bitacora.md"; do
+  perl -MPOSIX=strftime -pi -e 's/\@D(\d+)\@/strftime("%Y-%m-%d", localtime(time - $1 * 86400))/ge' "$f"
+done
 g() { git -C "$a" -c user.name=fixture -c user.email=fixture@example.invalid "$@"; }
 g init -q -b main
 g add -A
@@ -193,6 +199,21 @@ gm checkout -q main
 
 cp "$repo/testdata/fixture-health.json" "$tmp/health.json"
 [ -n "$live_mailbox" ] || asking_thread "$tmp/health.json" || true
+# A relay to Aglaea (roles-ui R3): a [for aglaea] thread to pablo with no
+# reply, open, in organizer-fixture's canned threads. The organizer cannot
+# read its messages (the mailbox does not hold it), so it has no sender and
+# no reply, which is what "waiting" needs. 0079 keeps it out of Needs me.
+[ -n "$live_mailbox" ] || python3 - "$tmp/health.json" <<'PY'
+import json, sys
+path = sys.argv[1]
+doc = json.load(open(path))
+p = doc["organizer-fixture"]
+p["threads"] = (p.get("threads") or []) + [{
+    "id": "01FIXTUREFORAGLAEA000000000", "subject": "[for aglaea] does the roles row fold at 1024 the way you meant",
+    "status": "open", "kind": "conversation", "participants": ["fse", "pablo"], "messages": 1,
+    "since_decision": 1, "undecided": False, "quiet_seconds": 7200, "age_seconds": 7200}]
+json.dump(doc, open(path, "w"), indent=1)
+PY
 cat > "$tmp/config.yaml" <<EOF
 machine: fixture
 roots:
@@ -205,6 +226,40 @@ zellij: /usr/bin/true
 probe_state_dir: ""
 EOF
 [ -n "$live_mailbox" ] || echo "canned_health: $tmp/health.json" >> "$tmp/config.yaml"
+# The transversal roles (docs/ux/specs/transversal-roles.md, R1-R4): the
+# default list's names and globs with every bitácora inside the fixture
+# home, never the real ones. Hephaistos keeps two HAND-OFFs (this machine's,
+# "fixture", and odyssey's), Aglaea a log without one, Ariadna none and
+# Daedalus a stale one; Talos and Hermione are named only.
+cat >> "$tmp/config.yaml" <<EOF
+roles:
+  - name: Hephaistos
+    description: "Forges the agent factory with Pablo: skills, seats, shared primitives"
+    sessions: "probe-hefesto*"
+    bitacora: $home/agent-slack/docs/bitacora/hephaistos_bitacora.md
+    here: true
+  - name: Aglaea
+    description: "Product designer: UI, user research and validation, one seat per initiative"
+    sessions: "*-probe-aglaea"
+    bitacora: <initiative>/docs/bitacora/aglaea_bitacora.md
+    here: true
+  - name: Ariadna
+    description: Business analyst beside a non-technical person
+    sessions: "*-probe-ariadna"
+    bitacora: <initiative>/docs/bitacora/ariadna_bitacora.md
+    here: true
+  - name: Daedalus
+    description: "Head of architecture: reviews a solution from an initiative's docs"
+    sessions: "*-probe-daedalus"
+    bitacora: <initiative>/docs/bitacora/daedalus_bitacora.md
+    here: true
+  - name: Talos
+    description: PLV infra, on odyssey
+    here: false
+  - name: Hermione
+    description: PLV infra, on odyssey
+    here: false
+EOF
 mkdir -p "$tmp/data"
 
 # The live agents of init-a, as probe would launch them: the family is the
@@ -215,6 +270,36 @@ standin "$a" AGENT_NAME=dev_bruno PROJECT_ID=$f AGENT_SESSION=$f-probe-bruno
 standin "$a" AGENT_NAME=sup10 PROJECT_ID=$f AGENT_SESSION=$f-probe-sup10
 standin "$a/.wt/build-help" AGENT_NAME=build-help PROJECT_ID=$f AGENT_SESSION=$f-probe-build-help
 standin "$a" AGENT_SESSION=$f-probe-sup9
+
+# The roles' sessions (R1, R4): two Hephaistos sessions, one in init-a and
+# one outside every initiative, and one Aglaea seat of init-a's cell; no
+# Ariadna or Daedalus. Each carries a statusline record in the fixture's
+# data dir, so the two Hephaistos sessions read different context fills.
+mkdir -p "$tmp/data/organizer/sessions"
+record() { # record <pid> <session> <cwd> <percent>
+  printf '{"pid":%s,"session_id":"fixture-%s","session":"%s","cwd":"%s","model":"claude-opus-5-5","used_percent":%s,"input_tokens":0,"window_size":200000,"cost_usd":0,"updated_at":"%s"}\n' \
+    "$1" "$2" "$2" "$3" "$4" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$tmp/data/organizer/sessions/$1.json"
+}
+standin "$a" AGENT_SESSION=probe-hefesto
+record "${pids##* }" probe-hefesto "$a" 42
+standin "$home/agent-slack" AGENT_SESSION=probe-hefesto-odd
+record "${pids##* }" probe-hefesto-odd "$home/agent-slack" 61
+standin "$a" AGENT_SESSION=$f-probe-aglaea
+record "${pids##* }" $f-probe-aglaea "$a" 28
+# Daedalus ran once in init-b two days ago and is gone: one ended run in the
+# fixture's own runs.jsonl, never the real one (not running · last seen).
+seen="$(date -u -v-2d +%Y-%m-%dT10:00:00Z)"
+printf '{"pid":999999,"session_id":"fixture-daedalus","session":"init-b-probe-daedalus","cwd":"%s","model":"claude-opus-5-5","used_percent":35,"input_tokens":0,"window_size":200000,"cost_usd":0,"first_seen":"%s","last_seen":"%s","ended":true}\n' \
+  "$home/work/init-b" "$seen" "$seen" > "$tmp/data/organizer/runs.jsonl"
+# Earlier Hephaistos sessions in four more initiatives, so its where reads
+# five initiatives, "+2" past three, and gives way at 1024 (R7).
+n=0
+for d in "$home/work/init-b" "$home/init-many" "$home/init-define" "$home/init-drafted"; do
+  n=$((n + 1))
+  at="$(date -u -v-$((n + 2))d +%Y-%m-%dT09:00:00Z)"
+  printf '{"pid":%s,"session_id":"fixture-hefesto-%s","session":"probe-hefesto-%s","cwd":"%s","model":"claude-opus-5-5","used_percent":50,"input_tokens":0,"window_size":200000,"cost_usd":0,"first_seen":"%s","last_seen":"%s","ended":true}\n' \
+    "$((999990 - n))" "$n" "$n" "$d" "$at" "$at" >> "$tmp/data/organizer/runs.jsonl"
+done
 echo "${pids# }" > "$tmp/agents.pid"
 
 echo "export ORGANIZER_CONFIG='$tmp/config.yaml'"

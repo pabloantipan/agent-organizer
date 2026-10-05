@@ -1,0 +1,125 @@
+/* The transversal roles (docs/ux/specs/transversal-roles.md): Home's Roles
+   section, the rail's Roles group and a role's drawer. Tier-2 role tokens
+   and the seven type sizes only; no nesting, no @layer, no color-mix
+   (Safari 15.0). */
+
+/* ---------- Home: the Roles section ---------- */
+/* The rows share the initiative rows' metrics (shell.css .p-row: padding,
+   gap, one line, the rank track left empty since roles take no rank) on a
+   grid of their own: name, state, doing now, mail, where. Name, state and
+   mail size to their widest row; doing now and where share the rest. */
+.roles-sec .sec-toggle {
+  display: inline-flex; align-items: center; gap: var(--space-1); padding: 0 var(--space-1); margin-left: calc(-1 * var(--space-1));
+  min-height: var(--control-sm); background: transparent; border: 1px solid transparent; border-radius: var(--radius-xs);
+  font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; cursor: pointer;
+}
+.roles-sec .sec-toggle:hover { color: var(--fg); background: var(--surface-hover); }
+.roles-sec .sec-toggle:focus { outline: none; }
+.roles-sec .sec-toggle:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.roles-list { display: grid; position: relative; }
+.r-row {
+  display: grid; position: relative;
+  grid-template-columns: 24px var(--r-name, max-content) var(--r-state, max-content) minmax(0, 1fr) var(--r-mail, max-content) minmax(0, max-content);
+  gap: var(--space-3); align-items: center; padding: var(--space-1-5) var(--space-3);
+  width: 100%; min-height: calc(var(--control-sm) + 2 * var(--space-1-5)); text-align: left;
+  background: transparent; border: 0; border-radius: 0; color: var(--fg); font: inherit; cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+.r-row + .r-row { box-shadow: 0 -1px 0 var(--border-subtle); }
+.r-row:hover { background: var(--surface-raised); }
+.r-row[aria-expanded="true"] { background: var(--surface-selected); }
+.r-row:focus { outline: none; }
+.r-row:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.r-row > * { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.r-name { font-family: var(--mono); font-size: var(--font-size-md); font-weight: var(--weight-medium); }
+.r-state { display: flex; align-items: center; font-size: var(--font-size-sm); color: var(--fg-muted); }
+.r-state.live { color: var(--fg); }
+.r-state .live-dot { flex: none; }
+.r-doing { font-size: var(--font-size-md); color: var(--fg-muted); }
+.r-doing .r-date { font-family: var(--mono); font-size: var(--font-size-sm); color: var(--fg); }
+.r-doing .r-date.stale, .rd-handoff-head .stale { color: var(--fg-subtle); }
+.r-doing.none { color: var(--fg-subtle); font-style: italic; }
+.r-mail { font-size: var(--font-size-sm); color: var(--tone); }
+.r-where { font-family: var(--mono); font-size: var(--font-size-sm); color: var(--fg-muted); }
+/* Widths, what gives way first: where, then doing now, decided on the
+   row's room (useRoleFit in Home.tsx), never on the class name. What gives
+   way stays in the row's hover and accessible name. */
+.roles-list.no-where .r-row { grid-template-columns: 24px var(--r-name, max-content) var(--r-state, max-content) minmax(0, 1fr) var(--r-mail, max-content); }
+.roles-list.no-where .r-where { display: none; }
+.roles-list.no-doing .r-row { grid-template-columns: 24px var(--r-name, max-content) var(--r-state, max-content) minmax(0, 1fr) var(--r-mail, max-content); }
+.roles-list.no-doing .r-doing { visibility: hidden; }
+.roles-elsewhere {
+  padding: var(--space-1-5) var(--space-3) var(--space-1-5) calc(var(--space-3) + 24px + var(--space-3));
+  font-size: var(--font-size-sm); color: var(--fg-subtle); box-shadow: 0 -1px 0 var(--border-subtle);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* Wide: Needs me is the right column; Roles heads the list column. */
+/* The spanning Needs me grows the list's row, not the Roles row. */
+.home.wide.with-roles { grid-template-rows: auto minmax(0, 1fr); }
+.home.wide > .home-roles { grid-column: 1; grid-row: 1; }
+.home.wide.with-roles > .home-list { grid-row: 2; }
+.home.wide.with-roles > .home-needs { grid-row: 1 / span 2; }
+
+/* ---------- the rail: the Roles group ---------- */
+.rail-group.roles { margin-bottom: var(--space-1); }
+.rail-item.role .rail-title { font-family: var(--font); }
+.rail-counts .m { color: var(--tone); }
+.strip-item.role { font-family: var(--font); font-size: var(--font-size-xs); font-weight: var(--weight-semibold); color: var(--fg-muted); }
+.strip-sep { width: 20px; height: 1px; background: var(--border-subtle); margin: var(--space-1) 0; flex: none; }
+
+/* ---------- a role's drawer ---------- */
+/* The card back's pattern (global.css .modal.card-back): capped at the
+   window, the head stays, the body scrolls with its edges. One column. */
+.modal.role-drawer { width: min(720px, 100%); }
+.modal.role-drawer::before { background: var(--accent); }
+.modal.role-drawer > .modal-body { display: block; }
+.rd-desc { font-size: var(--font-size-md); color: var(--fg-muted); }
+.rd-state { display: flex; align-items: center; margin-top: var(--space-1); font-size: var(--font-size-sm); color: var(--fg); }
+.rd-sec + .rd-sec { margin-top: var(--space-4); }
+.rd-sec > .section-label { margin-top: 0; }
+.rd-empty { margin: 0; color: var(--fg-muted); font-size: var(--font-size-md); }
+.rd-empty code { font-size: var(--font-size-sm); color: var(--fg); word-break: break-all; }
+.rd-list, .rd-log { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-0-5); }
+.rd-line {
+  display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) max-content max-content max-content; gap: var(--space-3); align-items: center;
+  width: 100%; padding: var(--space-1-5) var(--space-2); text-align: left; min-height: var(--control-md);
+  background: transparent; border: 1px solid transparent; border-radius: var(--radius-sm); color: var(--fg); font: inherit; cursor: pointer;
+}
+.rd-line:hover { background: var(--surface-hover); }
+.rd-line.static { cursor: default; }
+.rd-line.static:hover { background: transparent; }
+.rd-list li + li .rd-line { box-shadow: 0 -1px 0 var(--border-subtle); }
+.rd-line > * { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rd-main { font-size: var(--font-size-md); }
+.rd-main.mono { font-size: var(--font-size-sm); }
+.rd-meta { font-size: var(--font-size-sm); color: var(--fg-muted); }
+.rd-word { display: inline-flex; align-items: center; font-size: var(--font-size-sm); color: var(--fg-muted); }
+.rd-word.working, .rd-word.running { color: var(--fg); }
+.rd-num, .rd-age { font-family: var(--mono); font-size: var(--font-size-sm); color: var(--fg-muted); text-align: right; }
+.rd-line.mail { grid-template-columns: minmax(0, 1fr) max-content max-content; }
+/* Initiatives: plain text links in a comma list, never bordered buttons
+   (Amendment 1, A2: the rail is how an initiative is picked). */
+.rd-inits { margin: 0; font-size: var(--font-size-md); color: var(--fg-muted); }
+.rd-init { font-size: var(--font-size-sm); color: var(--accent-fg); text-decoration: none; }
+.rd-init:hover { text-decoration: underline; }
+.rd-init:focus { outline: none; }
+.rd-init:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
+.rd-bitacora + .rd-bitacora { margin-top: var(--space-3); padding-top: var(--space-3); box-shadow: 0 -1px 0 var(--border-subtle); }
+.rd-handoff-head { display: flex; align-items: baseline; gap: var(--space-2); font-size: var(--font-size-sm); }
+.rd-host { font-weight: var(--weight-semibold); color: var(--fg); }
+.rd-handoff-head .num { font-family: var(--mono); color: var(--fg); }
+.rd-stale { color: var(--fg-subtle); }
+.rd-path { font-size: var(--font-size-xs); color: var(--fg-subtle); word-break: break-all; margin: var(--space-0-5) 0 var(--space-2); }
+.rd-handoff { font-size: var(--font-size-md); }
+.rd-handoff pre { overflow-x: auto; }
+.rd-other { margin-top: var(--space-2); }
+.rd-other > summary { cursor: pointer; font-size: var(--font-size-sm); color: var(--fg-muted); min-height: var(--control-sm); display: flex; align-items: center; }
+.rd-other > summary:hover { color: var(--fg); }
+.rd-log li { font-size: var(--font-size-md); color: var(--fg-muted); }
+.rd-log .num { font-family: var(--mono); font-size: var(--font-size-sm); color: var(--fg); margin-right: var(--space-1); }
+
+/* A session line landed on its initiative's Agents (R5): the row shows as
+   selected while focus is in it (RoleDrawer.tsx, landOnSession). */
+.agents li.role-landed { background: var(--surface-selected); box-shadow: inset 2px 0 0 var(--accent); }
+.agents li.role-landed:focus { outline: none; }
+.agents li.role-landed:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }

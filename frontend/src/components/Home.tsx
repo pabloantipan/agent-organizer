@@ -15,7 +15,10 @@ import { nextDate, stageState } from "./InitiativeHeader";
 import { InitiativeDetail } from "./Initiatives";
 import { RuleDecisionBox } from "./RuleDecisionBox";
 import { CellStateLz, IN_DEFINITION_WAITS } from "./Crew";
+import { elsewhereLine, roleRow } from "../lib/roles";
+import { openRoleFrom } from "./RoleDrawer";
 import "../styles/home.css";
+import "../styles/roles.css";
 
 /** Home: what needs me, and where every initiative stands (FR-15, FR-16).
  *  Needs me is one list, oldest first, one verb per row; its length is the
@@ -41,7 +44,7 @@ export function Home() {
   if (!view) return <div className="empty">Loading…</div>;
   return (
     <HomeClass.Provider value={widthClass}>
-    <div ref={home} className={`home ${widthClass} ${roomy ? "roomy" : ""}`} style={widthClass === "wide" ? { "--goal-min": `${goalMin}px` } as React.CSSProperties : undefined}>
+    <div ref={home} className={`home ${widthClass} ${roomy ? "roomy" : ""} ${agents?.roles?.length ? "with-roles" : ""}`} style={widthClass === "wide" ? { "--goal-min": `${goalMin}px` } as React.CSSProperties : undefined}>
       <section className="home-sec home-needs">
         <h2 id={NEEDS_ME_HEADING} tabIndex={-1} className="sec-title">Needs me <span className="num sec-count">{rows.length}</span><span className="sec-sub">everything waiting on you, oldest first</span></h2>
         {rows.length === 0 ? (
@@ -55,6 +58,7 @@ export function Home() {
           </div>
         )}
       </section>
+      <Roles roles={agents?.roles ?? []} />
       <section className="home-sec home-list">
         <h2 className="sec-title">Initiatives <span className="sec-sub">by priority</span></h2>
         <Initiatives view={view} />
@@ -722,4 +726,102 @@ function useKeepScroll(home: React.RefObject<HTMLDivElement | null>, widthClass:
     const row = m.id ? el.querySelector<HTMLElement>(`.p-item[data-id="${CSS.escape(m.id)}"]`) : null;
     if (row) wrap.scrollTop += row.getBoundingClientRect().top - wrap.getBoundingClientRect().top - m.offset;
   }, [home, widthClass]);
+}
+
+const ROLES_OPEN_KEY = "home.roles.open";
+const storedRolesOpen = () => { try { return localStorage.getItem(ROLES_OPEN_KEY) !== "0"; } catch { return true; } };
+
+/** Roles (docs/ux/specs/transversal-roles.md, Home): between Needs me and
+ *  the initiatives, collapsible and remembered per machine, one row per role
+ *  that runs here (name, state with the live dot, doing now, mail, where),
+ *  then one muted line naming those that do not: no state, no click, no
+ *  count. A row opens the role's drawer, which starts nothing. No roles
+ *  configured, no section. A role's mail is not Needs me (0034). */
+function Roles({ roles }: { roles: model.Role[] }) {
+  const { roleOpen } = useBoard();
+  const [open, setOpen] = useState(storedRolesOpen);
+  const here = roles.filter((r) => r.here);
+  const elsewhere = elsewhereLine(roles);
+  const fit = useRoleFit(here.length, open);
+  if (roles.length === 0) return null;
+  const toggle = () => { const v = !open; setOpen(v); try { localStorage.setItem(ROLES_OPEN_KEY, v ? "1" : "0"); } catch { /* per-viewer */ } };
+  const rows = here.map((r) => roleRow(r));
+  return (
+    <section className="home-sec home-roles roles-sec">
+      <h2 className="sec-title">
+        <button className="sec-toggle" onClick={toggle} aria-expanded={open} aria-controls="home-roles-list">
+          {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}Roles
+        </button>
+        <span className="sec-sub">the transversal seats, show only</span>
+      </h2>
+      {open && (
+        <div id="home-roles-list" ref={fit.ref} className={`panel roles-list ${fit.hide.where ? "no-where" : ""} ${fit.hide.doing ? "no-doing" : ""}`} style={fit.style}>
+          {rows.map((x) => (
+            <button key={x.name} type="button" className="r-row" data-role={x.name} aria-label={x.label} title={x.label.split("; ").join("\n")} aria-haspopup="dialog" aria-expanded={roleOpen === x.name}
+              onClick={(e) => openRoleFrom(e.currentTarget, x.name)}>
+              <span className="r-rank" aria-hidden="true" />
+              <span className="r-name">{x.name}</span>
+              <span className={`r-state ${x.state.live ? "live" : ""}`}>{x.state.live && <i className={`live-dot ${x.state.working ? "working" : ""}`} />}<span className="num">{x.state.text}</span></span>
+              <span className={`r-doing ${x.doing.none ? "none" : ""}`}>{x.doing.date && <span className={`r-date ${x.doing.stale ? "stale" : ""}`}>{x.doing.date}</span>}{x.doing.date && x.doing.text ? " · " : ""}{x.doing.text}</span>
+              <span className="r-mail" title={x.mail.title}>{x.mail.text}</span>
+              <span className="r-where">{x.where.text}</span>
+            </button>
+          ))}
+          {elsewhere && <div className="roles-elsewhere">{elsewhere}</div>}
+        </div>
+      )}
+    </section>
+  );
+}
+
+/** Widths, what gives way first (design system; spec, Home): name, state
+ *  and mail size to their widest row and stay; where gives way first, then
+ *  doing now, each only when the row has no room for it at its floor (about
+ *  30 characters of doing now; where whole), and back as soon as it has. */
+const DOING_FLOOR = 200;
+function useRoleFit(n: number, open: boolean) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [state, setState] = useState<{ where: boolean; doing: boolean; name: number; st: number; mail: number }>({ where: false, doing: false, name: 0, st: 0, mail: 0 });
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || !open) return;
+    const measure = () => {
+      const rows = Array.from(el.querySelectorAll<HTMLElement>(".r-row"));
+      if (rows.length === 0) return;
+      const widest = (sel: string) => Math.ceil(Math.max(0, ...rows.map((r) => naturalOf(r.querySelector<HTMLElement>(sel)))));
+      const name = widest(".r-name"), st = widest(".r-state"), mail = widest(".r-mail");
+      // where may be out of the layout already (display: none): measured on its font.
+      const where = Math.ceil(Math.max(0, ...rows.map((r) => textWidth(r.querySelector<HTMLElement>(".r-where")))));
+      const cs = getComputedStyle(rows[0]);
+      const gap = parseFloat(cs.columnGap) || 0;
+      const inner = rows[0].clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      const fixed = 24 + name + st + mail + gap * 4;
+      const hideWhere = where > 0 && fixed + DOING_FLOOR + gap + where > inner;
+      const hideDoing = fixed + DOING_FLOOR > inner;
+      setState((p) => (p.where === hideWhere && p.doing === hideDoing && p.name === name && p.st === st && p.mail === mail ? p : { where: hideWhere, doing: hideDoing, name, st, mail }));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [n, open]);
+  const style = (state.name ? { "--r-name": `${state.name}px`, "--r-state": `${state.st}px`, "--r-mail": `${state.mail}px` } : {}) as React.CSSProperties;
+  return { ref, hide: { where: state.where, doing: state.doing }, style };
+}
+
+/** A cell's text width in its own font, laid out or not. */
+function textWidth(cell: HTMLElement | null): number {
+  const ctx = cell ? document.createElement("canvas").getContext("2d") : null;
+  if (!cell || !ctx) return 0;
+  const cs = getComputedStyle(cell);
+  ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+  return ctx.measureText((cell.textContent ?? "").trim()).width;
+}
+
+/** A cell's width with nothing cut: its content's, whatever its track. */
+function naturalOf(cell: HTMLElement | null): number {
+  if (!cell) return 0;
+  const r = document.createRange();
+  r.selectNodeContents(cell);
+  return r.getBoundingClientRect().width;
 }
