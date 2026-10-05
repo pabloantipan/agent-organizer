@@ -232,7 +232,7 @@ export function Rail() {
           const m = roleMail(r);
           return (
             <button key={`role:${r.name}`} type="button" className={`strip-item role ${roleOpen === r.name ? "active" : ""}`} data-role={r.name}
-              onClick={(ev) => openRoleFrom(ev.currentTarget, r.name)} aria-label={r.name} aria-haspopup="dialog" aria-expanded={roleOpen === r.name}
+              onClick={(ev) => openRoleFrom(ev.currentTarget, r.name)} aria-label={roleItemWords(r).join(", ")} aria-haspopup="dialog" aria-expanded={roleOpen === r.name}
               title={`${r.name}: ${st.text}${m.text ? `, ${m.text}` : m.unknown ? ", mailbox not reachable" : ""}`}>
               {initials.get(r.name)}
               {st.live && <i className={`live-dot ${st.working ? "working" : ""}`} />}
@@ -294,7 +294,7 @@ export function Rail() {
                   return (
                     <button key={r.name} type="button" className={`rail-item role ${roleOpen === r.name ? "active" : ""}`} data-role={r.name}
                       onClick={(ev) => openRoleFrom(ev.currentTarget, r.name)} aria-haspopup="dialog" aria-expanded={roleOpen === r.name}
-                      aria-label={`${r.name}: ${st.text}${m.text ? `; ${m.text}` : m.unknown ? "; mailbox not reachable" : ""}`} title={`${r.name}: ${st.text}`}>
+                      aria-label={roleItemName(r)} title={`${r.name}: ${st.text}`}>
                       <span className="rail-rank" aria-hidden="true" />
                       <span className="rail-main">
                         <span className="rail-title">{st.live && <span className={`live-dot ${st.working ? "working" : ""}`} />}{r.name}</span>
@@ -377,6 +377,17 @@ export function Rail() {
     </>
   );
 }
+
+/** What a role item is named by, in the full rail and the strip alike
+ *  (leftovers-11 FR-4): its name, its state and its mail, nothing for no
+ *  mail. The full rail reads `Aglaea: live · 28% context; 1 message waiting`,
+ *  the strip, whose item shows only initials, `Aglaea, live · 28% context,
+ *  1 message waiting`. */
+function roleItemWords(r: model.Role): string[] {
+  const m = roleMail(r);
+  return [r.name, roleState(r).text, m.text || (m.unknown ? "mailbox not reachable" : "")].filter(Boolean);
+}
+const roleItemName = (r: model.Role) => { const [name, ...rest] = roleItemWords(r); return rest.length ? `${name}: ${rest.join("; ")}` : name; };
 
 /** The per-viewer collapse key of the Roles group; it is not a stored group. */
 const ROLES = "roles";
