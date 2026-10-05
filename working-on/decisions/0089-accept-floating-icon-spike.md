@@ -1,13 +1,13 @@
 ---
 title: Accept the floating-icon spike before the feature is designed and built
-status: proposed
+status: ruled
 raised: 2026-10-05
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-05
+ruled_by: pablo
 options: [accept as written, skip the spike and build, send back]
-chosen:
+chosen: accept as written
 cards: [floating-icon-spike]
 threads: []
 supersedes: []
@@ -41,6 +41,8 @@ record yet, so the high end is raised.
 The FSE's: accept as written.
 
 ## Ruling
+
+pablo, 2026-10-05, in the organizer on lodestar: ok
 
 ## Consequences
 
