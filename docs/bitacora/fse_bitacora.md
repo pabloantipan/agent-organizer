@@ -874,3 +874,8 @@ sections below this one are history.
   A2 (1, drawer initiatives as text links), A1 (2, a design change to Needs
   me: at compact and regular, oldest five plus "Show the other N"; name it
   for Pablo in the accept record). For leftovers-11.
+- roles-ui merged 1ae5997 (cef69da); real-app review passed once unlocked.
+  ~1 h work, 4.5 h waiting on a locked screen, ~$26. Both roles waves ~1.5 h
+  (forecast 1.5-3 h). sup38 ended by me. Nothing building; 0084 waits.
+  Repetition: a locked screen stalls every UI review (first time); watch.
+
