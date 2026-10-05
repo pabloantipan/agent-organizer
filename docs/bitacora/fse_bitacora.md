@@ -888,4 +888,9 @@ sections below this one are history.
   RuleBox recipient select unnamed; builder note: stage/id keep ~40 px at
   1512 strip (needs --t-stage/--t-id). G2: T4's Japanese IME not on this Mac
   (accented verified). Nothing building; 0085 waits on Pablo.
+- 2026-10-05: Pablo reported Decisions "vibrates"; cut decisions-still. I
+  folded it into 0085 (2ab1550) a minute after he had ruled 0085 (f6e7aea):
+  an edit of a ruled record. Restored 0085 byte for byte and raised 0086
+  (3efa2b5). Lesson: before editing a proposed record, read its status at
+  HEAD, not from memory. sup40 runs roles-and-needs-me-five (window 400884).
 
