@@ -50,8 +50,9 @@ Nothing on Decisions moves unless the operator moves it. Measure the cause first
     working-on/decisions/, 0085 set waiting in the copy only), classic bars,
     rail full: 1245x932 still (record 673 < room, never stuck); 1245x878, 0085
     expanded: 52 box changes in 300 samples / 30 s, the head's class flipped
-    about 100 times a second (`wk-w1-1245x878-expanded-classic.log`,
-    `webkit-1245x878-W1-expanded-before.png`).
+    about 100 times a second (`wk-w1-1245x878-expanded-classic.log`; the
+    shot taken then captured the wrong window and was dropped; Chromium's
+    `chromium-1245x878-w1-expanded-full-classic.png` is the before shot).
   - Chromium (wails dev, same fixture), 1245x878, rail full, classic: 0085
     expanded, 30 s: 3597 layout shifts (source `div.dec-body`, y 346 -> 343),
     18030 mutations (`div.dec-head` class, `.dec` style --dec-box-max); scrolled
