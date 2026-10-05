@@ -79,6 +79,10 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   // The thread a landing from elsewhere (Answer, a card's Discuss) named:
   // it gets focus once its messages are in (initiative-header FR-6).
   const landing = useRef<string | null>(null);
+  // Threads whose messages were asked for at least once, read or not: a
+  // landing waits for the messages, never past an answer (leftovers-11 FR-2:
+  // a thread the mailbox cannot open still takes the focus).
+  const tried = useRef(new Set<string>());
   const [tick, setTick] = useState(0);
   const reload = useCallback(() => setTick((n) => n + 1), []);
   const { slackDraft, clearSlackDraft, applyAgents, view: boardView, setResolved, openCardLanding } = useBoard();
@@ -142,6 +146,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
     let live = true;
     const load = () => Promise.all(ids.split(",").map((id) => api.getCellThread(initiativeId, id).then((d) => [id, d] as const, () => null))).then((rs) => {
       if (!live) return;
+      for (const id of ids.split(",")) tried.current.add(id);
       setDetails((m) => { const n = { ...m }; for (const r of rs) if (r) n[r[0]] = r[1]; return n; });
     });
     load();
@@ -187,7 +192,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
       // A landing waits for the thread's messages, then puts the last one
       // asked of the human in view and focus on the thread's divider, never
       // on the page body (UI1, UI3).
-      if (!details[scrollTo]) return;
+      if (!details[scrollTo] && !tried.current.has(scrollTo)) return;
       const asked = [...el.querySelectorAll<HTMLElement>(".msg.for-me")].pop();
       el.scrollIntoView({ block: "start" });
       asked?.scrollIntoView({ block: "nearest" });
