@@ -1,10 +1,10 @@
 ---
 title: Roles on Home and in the rail, and a role's drawer - show only
-status: next
+status: done
 repos: [organizer]
 branch: roles-ui
 updated: 2026-10-04
-next: "review: code pass and UI pass in Chromium at ed9b5bf (A2, A3 met); ru-ui runs the WKWebView columns of R1-R7 when the Mac is unlocked, then merge (sup38)"
+next: "done: merged 1ae5997 (sup38); U1 (2), U2, U3, U4, U6 (1), the spec gaps and A1 (Needs me five then Show the other N, aglaea Amendment 1) are the FSE's"
 seat: ru-build
 depends_on: [roles-feed, drafts-and-slack]
 boundary: ["frontend/src/components/Home.tsx, Rail.tsx, a new RoleDrawer.tsx", "frontend/src/styles/home.css, shell.css (the rail group only), a roles stylesheet", "frontend/src/lib/ (a roles view helper) and its tests", "frontend/src/stores/board.store.ts (the drawer's open state and the rail group's collapse only)", "scripts/fixture-home.sh and testdata/fixture-overlay/ (the roles fixture R1-R4 read; added by sup38)", "frontend/src/components/AgentList.tsx (the row's data-session, tabIndex -1 and accessible name only, for A3; added by sup38)", "not: Go, docs/design-system.md"]
@@ -23,6 +23,7 @@ mail and its initiatives, and opens a role without starting anything.
 - [x] `XDG_DATA_HOME=$(mktemp -d) make test` from a clean checkout; `cd frontend && npm run build`; `wails build`
 
 ## Done
+- 2026-10-04 sup38 merged ed9b5bf to main as 1ae5997 (code pass, UI pass in Chromium and WKWebView, 8 configs); main green (go test ./internal/..., vitest 224); seats ended, threads closed
 - 2026-10-04 ru-build: A2 re-fixed after the code review (ed9b5bf): .rd-inits out of the list grid rule, so the initiatives read inline on one line; measured in Chromium at 1512x945 and 1024x609; tests and build row green
 - 2026-10-04 ru-build: Amendment 1 A3 (a session landing focuses the session's row by data-session and its name, 9a0b81c) and A2 (Initiatives as comma-separated text links, 582462b), rebased on main; R5 re-measured in Chromium at 1512x945 full and 1024x609 strip, overlay and classic; tests and build row green
 - 2026-10-04 sup38: aglaea's calls (f3535e7): A3 a defect against R5 (sev 2) and A2 (sev 1) go in before the merge; A1 is the next batch, for the FSE and Pablo
