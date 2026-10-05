@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AgentGroup, AgentsView, BoardView, CellThread } from "../hooks/useWails";
 import type { merge, model } from "../../wailsjs/go/models";
-import { launchVerb, missingPersonas, needsMeRows, needsMeThread, personaMissing, queueOf } from "./queue";
+import { launchVerb, missingPersonas, needsMeRows, needsMeShown, needsMeThread, NEEDS_ME_FIRST, personaMissing, queueOf } from "./queue";
 
 // Fixtures are plain objects: the generated classes carry methods the
 // functions under test never call, so each builder casts once.
@@ -143,5 +143,28 @@ describe("FR-9 (ui-leftovers): a missing persona file says who writes it", () =>
     expect(personaMissing([])).toBe("");
     expect(missingPersonas([{ name: "a", no_persona: false }, { name: "b", no_persona: true }])).toEqual(["b"]);
     expect(missingPersonas(undefined)).toEqual([]);
+  });
+});
+
+describe("needsMeShown (leftovers-11 FR-1)", () => {
+  const rows = Array.from({ length: 14 }, (_, i) => i);
+  it("shows the oldest five and counts the other nine at compact and regular", () => {
+    const { shown, hidden } = needsMeShown(rows, false, false);
+    expect(NEEDS_ME_FIRST).toBe(5);
+    expect(shown).toEqual([0, 1, 2, 3, 4]);
+    expect(hidden).toBe(9);
+  });
+  it("shows every row when all are asked for, or at wide", () => {
+    expect(needsMeShown(rows, true, false)).toEqual({ shown: rows, hidden: 0 });
+    expect(needsMeShown(rows, false, true)).toEqual({ shown: rows, hidden: 0 });
+  });
+  it("hides nothing at five or fewer, and one at six", () => {
+    expect(needsMeShown(rows.slice(0, 5), false, false)).toEqual({ shown: [0, 1, 2, 3, 4], hidden: 0 });
+    expect(needsMeShown([], false, false)).toEqual({ shown: [], hidden: 0 });
+    expect(needsMeShown(rows.slice(0, 6), false, false).hidden).toBe(1);
+  });
+  it("keeps the rows themselves, so the count stays needsMeRows' length", () => {
+    const { shown, hidden } = needsMeShown(rows, false, false);
+    expect(shown.length + hidden).toBe(rows.length);
   });
 });
