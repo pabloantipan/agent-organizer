@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from "react";
+import { useRef, useSyncExternalStore, type CompositionEvent, type KeyboardEvent } from "react";
 
 /** What was typed in a box, kept per key until it is posted or cancelled
  *  (responsive-home FR-9; leftovers-9 FR-1; design system, Focus and names:
@@ -99,3 +99,52 @@ export function useDrafts(store: DraftStore = drafts): DraftStore {
 
 /** A verb with a kept draft says so: `Rule · draft` (leftovers-9 FR-1). */
 export const draftVerb = (verb: string, kept: boolean) => (kept ? `${verb} · draft` : verb);
+
+/** An Escape that ends an input method's composition (a dead key's `´`, a
+ *  Japanese candidate) belongs to the input method: it neither closes the
+ *  box nor leaves the marked character in the draft (leftovers-10 FR-5).
+ *  Chromium sends the Escape while composing (`isComposing`) and ends the
+ *  composition after it; WebKit ends it first, committing the marked text,
+ *  and then sends the Escape as keyCode 229. Either way the field goes back
+ *  to what it held when the composition started. `before` is that value,
+ *  `pending` an Escape seen while still composing. */
+export type ImeState = { before: string | null; pending: boolean };
+
+/** One keydown: true when it is the input method's Escape, which the field
+ *  then keeps from the box (preventDefault). WebKit's order restores here. */
+export function imeEscapeKey(st: ImeState, key: string, keyCode: number, composing: boolean, restore: (v: string) => void): boolean {
+  if (key !== "Escape" || !(composing || keyCode === 229)) {
+    // Any other key after the composition ended: it is over, nothing to restore.
+    if (!composing) st.before = null;
+    return false;
+  }
+  if (composing) st.pending = true;
+  else if (st.before !== null) { restore(st.before); st.before = null; }
+  return true;
+}
+
+/** compositionend: Chromium's order restores here, after its own input. */
+export function imeCompositionEnd(st: ImeState, restore: (v: string) => void, later: (fn: () => void) => void = (fn) => { setTimeout(fn, 0); }) {
+  if (st.pending && st.before !== null) { const b = st.before; later(() => restore(b)); st.before = null; }
+  st.pending = false;
+}
+
+/** The guard for one field: spread `props` on it and call `escape(e)` first
+ *  in its onKeyDown; when it returns true the key is the input method's. */
+export function useImeEscape(set: (v: string) => void) {
+  const st = useRef<ImeState>({ before: null, pending: false });
+  const latest = useRef(set);
+  latest.current = set;
+  const restore = (v: string) => latest.current(v);
+  return {
+    props: {
+      onCompositionStart: (e: CompositionEvent<HTMLTextAreaElement | HTMLInputElement>) => { st.current = { before: e.currentTarget.value, pending: false }; },
+      onCompositionEnd: () => imeCompositionEnd(st.current, restore),
+    },
+    escape: (e: KeyboardEvent) => {
+      const ime = imeEscapeKey(st.current, e.key, e.keyCode, e.nativeEvent.isComposing, restore);
+      if (ime) e.preventDefault();
+      return ime;
+    },
+  };
+}

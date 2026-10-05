@@ -3,7 +3,7 @@ import { ArrowUpRight, AtSign, BookOpen, Archive, Check, ChevronDown, ChevronRig
 import { api, type AgentGroup, type CellMessage, type CellThread, type CellThreadView } from "../hooks/useWails";
 import { useBoard } from "../stores/board.store";
 import { notesAsContext } from "../lib";
-import { branchKey, chatKey, drafts, draftVerb, newThreadKey, newThreadPost, threadKey, useDraft, useDrafts } from "../lib/drafts";
+import { branchKey, chatKey, drafts, draftVerb, newThreadKey, newThreadPost, threadKey, useDraft, useDrafts, useImeEscape } from "../lib/drafts";
 import { askedCards, needsMeThread } from "../lib/queue";
 
 const KINDS = ["msg", "question", "answer", "status", "decision", "done", "claim", "yield"];
@@ -479,6 +479,9 @@ function ReplyBox(p: {
   const dk = threadKey(p.initiativeId, p.threadId);
   const body = useDraft<{ body: string }>(dk)?.body ?? "";
   const setBody = (b: string) => drafts.keep(dk, { body: b });
+  // leftovers-10 FR-5: an Escape that ends a composition leaves no marked
+  // character in the draft.
+  const ime = useImeEscape(setBody);
   const [kind, setKind] = useState(p.status === "stalled" ? "decision" : "msg");
   const [to, setTo] = useState(p.defaultTo);
   const [busy, setBusy] = useState(false);
@@ -517,7 +520,7 @@ function ReplyBox(p: {
       {p.status === "closed" && <div className="frozen">Closed. Reopen it to add anything.</div>}
       {!p.canPost && <div className="frozen">No token for {p.human || "the human seat"}: run the cell bootstrap to issue one.</div>}
       <div className="composer-line">
-        <textarea ref={ref} rows={2} value={body} aria-label={`Message to ${to || "the channel"}`} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setBody(e.target.value)} disabled={!writable} placeholder={writable ? "Type a message  (Enter to send, Shift+Enter for a new line)" : ""} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }} />
+        <textarea ref={ref} rows={2} value={body} aria-label={`Message to ${to || "the channel"}`} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setBody(e.target.value)} {...ime.props} disabled={!writable} placeholder={writable ? "Type a message  (Enter to send, Shift+Enter for a new line)" : ""} onKeyDown={(e) => { if (ime.escape(e)) return; if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } }} />
       </div>
       <div className="composer-row">
         <select value={kind} onChange={(e) => setKind(e.target.value)} disabled={!writable} aria-label="Kind of message">
@@ -553,6 +556,8 @@ function NewThread({ initiativeId, chat, draftKey, seats, to: initialTo, subject
   const setSubject = (v: string) => drafts.keep(draftKey, { subject: v, body, to });
   const setBody = (v: string) => drafts.keep(draftKey, { subject, body: v, to });
   const setTo = (v: string) => { setPicked(v); if (kept) drafts.edit(draftKey, { to: v }); };
+  const imeSubject = useImeEscape(setSubject);
+  const imeBody = useImeEscape(setBody);
   const [kind, setKind] = useState("question");
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -577,9 +582,9 @@ function NewThread({ initiativeId, chat, draftKey, seats, to: initialTo, subject
         {(cancellable || kept) && <button className="linkish meta" onClick={() => { drafts.discard(draftKey); if (cancellable) onDone(null); }}>cancel</button>}
       </div>
       {!canPost && <div className="frozen">No token for the human seat: run the cell bootstrap to issue one.</div>}
-      <input autoFocus={!quote && !initialSubject} value={subject} aria-label="Subject" autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setSubject(e.target.value)} placeholder="subject  (start with a card slug to link it: readiness-endpoint: …)" disabled={!canPost} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); (e.currentTarget.closest(".composer")?.querySelector("textarea") as HTMLTextAreaElement | null)?.focus(); } }} />
+      <input autoFocus={!quote && !initialSubject} value={subject} aria-label="Subject" autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setSubject(e.target.value)} {...imeSubject.props} placeholder="subject  (start with a card slug to link it: readiness-endpoint: …)" disabled={!canPost} onKeyDown={(e) => { if (imeSubject.escape(e)) return; if (e.key === "Enter") { e.preventDefault(); (e.currentTarget.closest(".composer")?.querySelector("textarea") as HTMLTextAreaElement | null)?.focus(); } }} />
       <div className="composer-line">
-        <textarea autoFocus={!!quote || !!initialSubject} rows={3} value={body} aria-label={`Message to ${to || "the channel"}`} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setBody(e.target.value)} placeholder="Type a message  (Enter to send, Shift+Enter for a new line)" disabled={!canPost} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } if (e.key === "Escape" && cancellable && !e.nativeEvent.isComposing) onDone(null); }} />
+        <textarea autoFocus={!!quote || !!initialSubject} rows={3} value={body} aria-label={`Message to ${to || "the channel"}`} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setBody(e.target.value)} {...imeBody.props} placeholder="Type a message  (Enter to send, Shift+Enter for a new line)" disabled={!canPost} onKeyDown={(e) => { if (imeBody.escape(e)) return; if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } if (e.key === "Escape" && cancellable) onDone(null); }} />
       </div>
       <div className="composer-row">
         <select value={kind} onChange={(e) => setKind(e.target.value)} disabled={!canPost} aria-label="Kind of message">{KINDS.map((k) => <option key={k} value={k}>{k}</option>)}</select>
@@ -768,6 +773,8 @@ function RuleBox(p: { seats: string[]; defaultTo: string; where: string; escalat
   const [to, setTo] = useState(p.defaultTo);
   const [text, setText] = useState("");
   const [next, setNext] = useState("");
+  const imeText = useImeEscape(setText);
+  const imeNext = useImeEscape(setNext);
   const ready = text.trim().length > 0 && !p.busy;
   const send = () => { if (ready) p.onRule(to, text, next); };
   return (
@@ -777,8 +784,8 @@ function RuleBox(p: { seats: string[]; defaultTo: string; where: string; escalat
         <span className="spacer" />
         <button className="linkish meta" onClick={p.onCancel}>cancel</button>
       </div>
-      <textarea autoFocus rows={3} value={text} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setText(e.target.value)} placeholder="What you decided  (Enter to rule, Shift+Enter for a new line)" onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } if (e.key === "Escape" && !e.nativeEvent.isComposing) p.onCancel(); }} />
-      <input value={next} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setNext(e.target.value)} placeholder="Next action  (one line: who does what; the seat writes it into the card)" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); send(); } if (e.key === "Escape") p.onCancel(); }} />
+      <textarea autoFocus rows={3} value={text} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setText(e.target.value)} {...imeText.props} placeholder="What you decided  (Enter to rule, Shift+Enter for a new line)" onKeyDown={(e) => { if (imeText.escape(e)) return; if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } if (e.key === "Escape") p.onCancel(); }} />
+      <input value={next} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setNext(e.target.value)} {...imeNext.props} placeholder="Next action  (one line: who does what; the seat writes it into the card)" onKeyDown={(e) => { if (imeNext.escape(e)) return; if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } if (e.key === "Escape") p.onCancel(); }} />
       <div className="composer-row">
         <select value={to} onChange={(e) => setTo(e.target.value)} title="direct wakes one seat; everyone wakes them all">
           <option value="">everyone (wakes {p.seats.length})</option>

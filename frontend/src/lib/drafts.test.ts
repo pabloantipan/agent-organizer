@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { branchKey, cardKey, chatKey, decisionKey, draftStore, draftVerb, newThreadKey, newThreadPost, threadKey } from "./drafts";
+import { branchKey, cardKey, chatKey, decisionKey, draftStore, draftVerb, imeCompositionEnd, imeEscapeKey, newThreadKey, newThreadPost, threadKey } from "./drafts";
 
 const A = decisionKey("init-a", "0004");
 const B = decisionKey("init-b", "0002");
@@ -142,5 +142,43 @@ describe("a new thread's draft belongs to its chat (leftovers-10 FR-1, T1)", () 
     const s = draftStore();
     s.keep(keyA, { subject: "only a subject", body: "", to: "fse" });
     expect(newThreadPost(s, "init-a", chatA)).toBeNull();
+  });
+});
+
+describe("an Escape that ends a composition commits nothing (leftovers-10 FR-5, T4)", () => {
+  const run = () => {
+    let value = "caf";
+    const set = (v: string) => { value = v; };
+    return { get: () => value, set };
+  };
+
+  it("WebKit: the composition ends first, committing ´, then Escape as 229: the field goes back", () => {
+    const f = run();
+    const st = { before: "caf", pending: false };   // compositionstart
+    f.set("caf´");                                   // marked text
+    imeCompositionEnd(st, f.set, (fn) => fn());      // committed
+    expect(imeEscapeKey(st, "Escape", 229, false, f.set)).toBe(true);
+    expect(f.get()).toBe("caf");
+  });
+
+  it("Chromium: Escape while composing, then the composition ends: the field goes back", () => {
+    const f = run();
+    const st = { before: "caf", pending: false };
+    f.set("caf´");
+    expect(imeEscapeKey(st, "Escape", 229, true, f.set)).toBe(true);
+    imeCompositionEnd(st, f.set, (fn) => fn());
+    expect(f.get()).toBe("caf");
+  });
+
+  it("a composition that ends by a letter keeps it, and a plain Escape is the box's", () => {
+    const f = run();
+    const st = { before: "caf", pending: false };
+    f.set("café");
+    imeCompositionEnd(st, f.set, (fn) => fn());
+    expect(imeEscapeKey(st, "e", 229, false, f.set)).toBe(false);
+    expect(f.get()).toBe("café");
+    expect(imeEscapeKey(st, "Escape", 27, false, f.set)).toBe(false);
+    expect(imeEscapeKey(st, "Escape", 229, false, f.set)).toBe(true);
+    expect(f.get()).toBe("café");
   });
 });

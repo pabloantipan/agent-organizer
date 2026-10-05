@@ -5,6 +5,7 @@ import { api } from "../hooks/useWails";
 import { recordSections } from "../lib/decisions";
 import { leadOf } from "../lib/queue";
 import { openBox } from "../lib/boxStack";
+import { useImeEscape } from "../lib/drafts";
 import { useBoard } from "../stores/board.store";
 import type { WidthClass } from "../lib/width";
 import "../styles/rule-box.css";
@@ -67,6 +68,7 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
   const { chosen, words } = draft ?? own;
   const setChosen = (chosen: string) => (draft ? draft.set({ chosen }) : setOwn((o) => ({ ...o, chosen })));
   const setWords = (words: string) => (draft ? draft.set({ words }) : setOwn((o) => ({ ...o, words })));
+  const ime = useImeEscape(setWords);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const title = useRef<HTMLSpanElement>(null);
@@ -180,10 +182,10 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
             composition or a correction is the field's, not the box's. */}
         <textarea rows={4} value={words} disabled={busy} placeholder="Why this option, in your words. They go under ## Ruling."
           autoCorrect="off" autoCapitalize="off" spellCheck={false}
-          onChange={(e) => setWords(e.target.value)}
+          onChange={(e) => setWords(e.target.value)} {...ime.props}
           onKeyDown={(e) => {
+            if (ime.escape(e)) return;
             if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) void rule();
-            if (e.key === "Escape" && (e.nativeEvent.isComposing || e.keyCode === 229)) e.preventDefault();
           }} />
       </label>
       {error && <div className="rb-error" role="alert">{error}</div>}
