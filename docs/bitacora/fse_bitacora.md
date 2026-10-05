@@ -910,4 +910,12 @@ sections below this one are history.
   decorative), O2 a global shortcut to the panel (if 0089 makes it cheap),
   O3 a Home row at the top of the list (her addition). Build spec waits on
   the spike's findings.
+- Spike review failed on Y1: drag and click driven in code, not by the
+  pointer; findings overstated (re-check did hide twice, 70 switches, the
+  full-screen check misfires mid-slide and is untested on two displays).
+  Suggested HID-level pointer events to sup42 before Pablo's hands.
+  Repetition (gate writing, third kind): "or the finding says why not" let a
+  spike pass a point it never ran. Gates for pointer behaviour name a
+  by-hand or HID-level check. With the A14 and wrong-file slips, propose to
+  hephaistos at the next one.
 
