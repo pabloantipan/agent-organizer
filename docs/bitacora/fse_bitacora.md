@@ -904,4 +904,10 @@ sections below this one are history.
   the other N", G2 landing on a hidden Needs me row, G3 V4's fixture had
   three roles not four, G4 FR-6 gated the new-thread form only (the reply
   composer too).
+- Floating icon: scope ruled 0088 (his words); spike raised 0089 (proposed);
+  aglaea's design proposed (16ae245, docs/ux/specs/floating-icon.md, F1-F9).
+  Her open points for Pablo: O1 a Needs me badge on the icon (left out:
+  decorative), O2 a global shortcut to the panel (if 0089 makes it cheap),
+  O3 a Home row at the top of the list (her addition). Build spec waits on
+  the spike's findings.
 
