@@ -883,4 +883,9 @@ sections below this one are history.
   first seat; a composer's default is the place it sits in, and the wake
   count shows beside Start. U2 no change (DS now says where a draft mark
   goes). leftovers-11 cut, 0085 proposed (a34ca66).
+- sup39 ended (drafts-per-chat ~60 min, ~$17). leftovers-12 collecting, all
+  sev 1: U1 Chromium sub-pixel cut on init-a's lozenge; G1 the needs-me
+  RuleBox recipient select unnamed; builder note: stage/id keep ~40 px at
+  1512 strip (needs --t-stage/--t-id). G2: T4's Japanese IME not on this Mac
+  (accented verified). Nothing building; 0085 waits on Pablo.
 
