@@ -11,6 +11,7 @@ spec: "docs/specs/leftovers-10.md (FR-1 to FR-6); Aglaea's calls feeb8d6"
 gate: "docs/specs/leftovers-10.md Acceptance, rows T1 to T5 and T0"
 ui_review: true
 seat: dpc-build
+review: pass
 ---
 
 ## Goal
@@ -28,6 +29,15 @@ No draft wakes the wrong seat; the rest of drafts-and-slack's leftovers.
 ## Next
 
 ## Blockers
+
+## Review
+- Verdict: pass (dpc-review, 2026-10-04), code and runnable checks; the WKWebView and visual rows are the UI reviewer's.
+- Commit reviewed: af63e7f (branch drafts-per-chat, 7 commits on main).
+- Unmet gate items: none.
+- T1: new-thread drafts keyed `thread:<i>/new:<chat>` with `to`; Start posts only `newThreadPost` of its own chat; prefill carries its chat; lib test covers A→B→A and posting A from B returns null.
+- T2: `· draft` on the collapsed line and `, draft` in its name. T3: `giveSlack` over shareRoom, with a test that a flexible column's slack goes first. T4: names on both selects of both forms and the search; `useImeEscape` (isComposing, 229, WKWebView's keyCode 27) in the composer, RuleDecisionBox and CardDrawer, runs before any close. T5: `timeWords` and `dateWords` in `lib/dates.ts`, no second helper. Drafts stay in memory (0081).
+- Boundary: all 12 changed paths inside it; no Go, no design-system.md.
+- T0 from a clean clone: make test (13 Go packages, 246 vitest), npm install/test/build, wails build all pass.
 
 ## Notes
 - FR-3: home.css gives stage and id no width variable, so their slack reaches the signals only in proportion (fr); at 1512 strip the stage still keeps ~40 px and the id ~45 px while the goal is cut. A `--t-stage`/`--t-id` (styles, outside this card) would close it.
