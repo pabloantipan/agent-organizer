@@ -878,4 +878,9 @@ sections below this one are history.
   ~1 h work, 4.5 h waiting on a locked screen, ~$26. Both roles waves ~1.5 h
   (forecast 1.5-3 h). sup38 ended by me. Nothing building; 0084 waits.
   Repetition: a locked screen stalls every UI review (first time); watch.
+- drafts-per-chat merged (dccabe0). leftovers-12 collecting: aglaea U3 (2,
+  pre-existing): the channel's new-thread form addresses everyone, not the
+  first seat; a composer's default is the place it sits in, and the wake
+  count shows beside Start. U2 no change (DS now says where a draft mark
+  goes). leftovers-11 cut, 0085 proposed (a34ca66).
 
