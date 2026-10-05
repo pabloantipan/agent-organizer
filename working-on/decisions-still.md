@@ -5,7 +5,7 @@ repos: [organizer]
 branch: decisions-still
 seat: dst-build
 updated: 2026-10-05
-next: "dst-build: fix the stuck head so .stuck changes no geometry (W2), then W3, W0"
+next: "review: decisions-still, gate met (W1-W3, W0; Chromium and WKWebView)"
 depends_on: []
 boundary: ["frontend/src/components/DecisionsView.tsx, RuleDecisionBox.tsx", "frontend/src/styles/decisions.css, rule-box.css, global.css (.markdown rules only)", "frontend/src/lib/useScrollEdges.ts and lib/ tests", "not: Home, Conversations, Go, docs/design-system.md"]
 spec: "docs/specs/decisions-still.md (FR-1 to FR-3)"
@@ -17,10 +17,11 @@ ui_review: true
 Nothing on Decisions moves unless the operator moves it. Measure the cause first.
 
 ## Gate
-- [ ] W1-W3: see `docs/specs/decisions-still.md`, Acceptance
-- [ ] W0: see `docs/specs/decisions-still.md`, Acceptance
+- [x] W1-W3: see `docs/specs/decisions-still.md`, Acceptance
+- [x] W0: see `docs/specs/decisions-still.md`, Acceptance
 
 ## Done
+- 2026-10-05 dst-build: fix 5e7fccb (.dec-head.stuck changes paint only: inset shadow, body border transparent, actions keep their padding) + guard test 1fc4140; branch decisions-still rebased on 682013f; W2 zero motion in both engines, W3 and W0 pass. Evidence in .wt-notes/dst-build/ (progress.md)
 - 2026-10-05 sup41: builder dst-build launched in .wt/decisions-still from main 37560ff
 - 2026-10-05 0086 ruled by pablo ("ok", 0d6bb82); sup41 launched by the FSE
 - 2026-10-05 cut by the FSE from Pablo's report ("this view 'vibrates'")
@@ -61,3 +62,18 @@ Nothing on Decisions moves unless the operator moves it. Measure the cause first
   - Also seen, not motion: every DecisionsView render re-sets the find
     input's and the rule box radios' `name`/`type` attributes to the same
     values (React's input update); no layout, no class.
+- W2 (fix at 46bdef7, rebased to 1fc4140 with no Decisions file changed on main):
+  orgcopy/0029 at 1245x932 and 1024x640, rail full and strip, classic and overlay, plus
+  orgcopy/0085 at 1245x878 (the window that looped); expanded, stuck, Rule open; 30 s each,
+  3 agents refreshes. Chromium: 0 layout shifts, 1 box state, 0 class/style mutations in
+  all 30 states. WKWebView (instrumented review build): 0 box changes in all 27 measured
+  states (0085 overlay's Rule state not driven: Rule off-window there; classic measured).
+- W3: Q2, B12, B13, L12 pass in Chromium (1024x640, rail full, classic and overlay) and
+  WKWebView (1024x640, rail full, overlay; B13 also classic): head at the heading's foot
+  before and after Rule, facts in the head, box below it and capped, head leaves with the
+  record's end; 0006's code block keeps scrollLeft 300, same node, over 40 s.
+- Found, not asked: the Decisions board overflows sideways when a Ruled line's chosen
+  option is long (organizer 0082: `.dec-meta`, global.css:756, nowrap and no shrink,
+  1043 px), scrollWidth 1175 at any narrower view; with a trackpad the board swings and
+  rubber-bands sideways. Input-driven, outside FR-2; what the line cuts is a design
+  question, sent to sup41.
