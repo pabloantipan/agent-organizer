@@ -69,20 +69,24 @@ button.dec-more:hover { background: var(--surface-hover); }
 /* Amendment 1 §8: a record taller than the view keeps its head (line and
    Rule) stuck under the section heading until the record ends; the body
    passes under it. The rule box rides with Rule, capped in the room under
-   the stuck head (--dec-box-max, measured), and scrolls inside itself. */
+   the stuck head (--dec-box-max, measured), and scrolls inside itself.
+   decisions-still FR-2: .stuck changes paint, never a size. DecisionsView
+   sets it from the record's height, so a .stuck that shrank the record
+   (a border, a padding) unstuck it again, every frame, whenever the record
+   was within those pixels of the room. The line under the head is an inset
+   shadow, and the body's top border turns transparent instead of going. */
 .dec-head.stuck {
   position: sticky; top: calc(var(--dec-stick) + var(--dec-sh)); z-index: var(--z-stuck-head);
-  background: var(--panel); border-bottom: 1px solid var(--border);
+  background: var(--panel); box-shadow: inset 0 -1px 0 var(--border);
   border-radius: var(--r) var(--r) 0 0;
 }
-.dec-head.stuck + .dec-body { border-top: 0; }
-.dec-head.stuck .dec-actions { padding: 0 var(--space-3) var(--space-2); }
+.dec-head.stuck + .dec-body { border-top-color: transparent; }
 /* The box's own placement under a stuck head is rule-box.css, .rb.capped;
-   here only its top: below the stuck head's action row and its border, so
+   here only its top: below the stuck head's action row and its line, so
    the head stays whole in view (leftovers-5 FR-2). */
 .dec-head.stuck .rb.capped {
-  top: calc(100% + var(--space-2) + 1px + var(--space-1));
-  max-height: calc(var(--dec-box-max, 60vh) - var(--space-2) - 1px);
+  top: calc(100% + var(--space-2) + var(--space-1));
+  max-height: calc(var(--dec-box-max, 60vh) - var(--space-2));
 }
 .dec-actions { padding-right: var(--space-3); }
 /* leftovers-8 FR-2 (A1, decisions-view §8): while ruling, the facts line is
