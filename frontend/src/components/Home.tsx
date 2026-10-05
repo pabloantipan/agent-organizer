@@ -876,14 +876,15 @@ function Roles({ roles }: { roles: model.Role[] }) {
   );
 }
 
-/** Widths, what gives way first (design system; spec, Home): name, state
- *  and mail size to their widest row and stay; where gives way first, then
+/** Widths, what gives way first (design system; spec, Home): name, state,
+ *  mail and where size to their widest row, so the rows share their tracks;
+ *  name, state and mail stay; where gives way first, then
  *  doing now, each only when the row has no room for it at its floor (about
  *  30 characters of doing now; where whole), and back as soon as it has. */
 const DOING_FLOOR = 200;
 function useRoleFit(n: number, open: boolean) {
   const ref = useRef<HTMLDivElement>(null);
-  const [state, setState] = useState<{ where: boolean; doing: boolean; name: number; st: number; mail: number }>({ where: false, doing: false, name: 0, st: 0, mail: 0 });
+  const [state, setState] = useState<{ where: boolean; doing: boolean; name: number; st: number; mail: number; wh: number }>({ where: false, doing: false, name: 0, st: 0, mail: 0, wh: 0 });
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el || !open) return;
@@ -900,14 +901,17 @@ function useRoleFit(n: number, open: boolean) {
       const fixed = 24 + name + st + mail + gap * 4;
       const hideWhere = where > 0 && fixed + DOING_FLOOR + gap + where > inner;
       const hideDoing = fixed + DOING_FLOOR > inner;
-      setState((p) => (p.where === hideWhere && p.doing === hideDoing && p.name === name && p.st === st && p.mail === mail ? p : { where: hideWhere, doing: hideDoing, name, st, mail }));
+      // Where sizes to its widest row too, so every row's doing now gets the
+      // same track and both start at one x on every row (leftovers-11 FR-5).
+      const wh = where > 0 ? where + 1 : 0;
+      setState((p) => (p.where === hideWhere && p.doing === hideDoing && p.name === name && p.st === st && p.mail === mail && p.wh === wh ? p : { where: hideWhere, doing: hideDoing, name, st, mail, wh }));
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
   }, [n, open]);
-  const style = (state.name ? { "--r-name": `${state.name}px`, "--r-state": `${state.st}px`, "--r-mail": `${state.mail}px` } : {}) as React.CSSProperties;
+  const style = (state.name ? { "--r-name": `${state.name}px`, "--r-state": `${state.st}px`, "--r-mail": `${state.mail}px`, ...(state.wh ? { "--r-where": `${state.wh}px` } : {}) } : {}) as React.CSSProperties;
   return { ref, hide: { where: state.where, doing: state.doing }, style };
 }
 
