@@ -5,7 +5,7 @@ repos: [organizer]
 branch: decisions-still
 seat: dst-build
 updated: 2026-10-05
-next: "review: decisions-still, gate met (W1-W3, W0; Chromium and WKWebView)"
+next: "review: decisions-still, F1 fixed, gate met (W1-W3 with the band rows, W0; Chromium and WKWebView)"
 depends_on: []
 boundary: ["frontend/src/components/DecisionsView.tsx, RuleDecisionBox.tsx", "frontend/src/styles/decisions.css, rule-box.css, global.css (.markdown rules only)", "frontend/src/lib/useScrollEdges.ts and lib/ tests", "not: Home, Conversations, Go, docs/design-system.md"]
 spec: "docs/specs/decisions-still.md (FR-1 to FR-3)"
@@ -22,6 +22,7 @@ Nothing on Decisions moves unless the operator moves it. Measure the cause first
 - [x] W0: see `docs/specs/decisions-still.md`, Acceptance
 
 ## Done
+- 2026-10-05 dst-build: F1 fixed (fa1f835: tallness decided before ruling and held while the box is open, lib/stuckHead.ts; ea490ae: vitest for the hold and the hard bottom line); band rows below; W0 at ea490ae
 - 2026-10-05 dst-build: fix 5e7fccb (.dec-head.stuck changes paint only: inset shadow, body border transparent, actions keep their padding) + guard test 1fc4140; branch decisions-still rebased on 682013f; W2 zero motion in both engines, W3 and W0 pass. Evidence in .wt-notes/dst-build/ (progress.md)
 - 2026-10-05 sup41: builder dst-build launched in .wt/decisions-still from main 37560ff
 - 2026-10-05 0086 ruled by pablo ("ok", 0d6bb82); sup41 launched by the FSE
@@ -89,6 +90,30 @@ Nothing on Decisions moves unless the operator moves it. Measure the cause first
 - W0: rerun from a clean clone at 1fc4140. make test passes (vitest 253/253), npm install/test/build pass, and wails build produces Deltagos.app. stuckHead.test.ts fails against main's decisions.css (border-bottom, border-top, padding), so the guard is real.
 - Boundary: only decisions.css and lib/stuckHead.test.ts changed.
 - Not covered by the gate: W2 boxes cover the head and body only. In WKWebView the Timeline's today line (`span.tz-today` left) moves by about 0.001 px on each refresh with no input. It is not visible, but FR-2 says nothing moves.
+- Review fixes (F1, A1), at ea490ae, branch rebased on 398645f. Tallness is decided
+  before ruling and held while the box is open (`lib/stuckHead.ts`, `stickNow`/`holdTall`,
+  used by `DecisionsView.tsx` in the tall measure; vitest in `lib/stuckHead.test.ts`).
+  A1: the stuck head's line is `box-shadow: inset 0 -1px 0 var(--border)` (no blur, no
+  spread), asserted by the same test file.
+  - W3 band, F1 (0085, 1245x868 to 1245x879 in 1 px steps, rail full, classic; head
+    stuck by a scroll, then Rule): Chromium before the fix (9b50992's DecisionsView): 12/12
+    fail, head 161 -> -166, Rule covered. After: 12/12 pass: still stuck, head top 161 = the
+    heading's foot before and after, Rule, the line and the box title hit-tested, box top
+    267 >= head bottom 263, capped, inside the board, unchanged 3 s later
+    (`chromium-F1band-full-classic-0085.json`). WKWebView (instrumented review build):
+    12/12 pass, head [161, 78 -> 102 px] stuck, box 267 capped, Rule and the box title
+    AX-hit-tested (`wk-F1band-full-classic-0085.txt`, shots at 868, 873, 879).
+  - B12/B13/Q2 at the band (0085, 1245x879 and 1245x868, rail full, classic; 300 px
+    scroll, since 0085 is a few px taller than the room and 600 px is past its end):
+    Chromium pass at both, landing via its Timeline row leaves the head whole under the
+    heading with Rule hit (head top 224, heading foot 169). WKWebView pass at both: landed
+    head 224, Rule hit; +300 head at 161, Rule hit; past the end head bottom 95 <= record
+    bottom 96. B13 per the band sweep above.
+  - W2 at the band (0085, 1245x879 and 1245x868, full, classic, expanded / stuck / Rule
+    open, 30 s, 3 refreshes each): Chromium 0 shifts, 1 box state, Rule state now stuck;
+    WKWebView 0 box changes, Rule state stuck and capped (`w2-*-band.txt`).
+  - W3 at the spec's rows rerun at ea490ae in Chromium (1024x640 full classic with L12,
+    overlay): pass.
 
 ## UI review
 - Reviewer dst-ui, 2026-10-05. Commit run: 1fc41403708759aa1de4071cc4005e8907642d47 (detached worktree `.wt/dst-ui`); every row below was measured on it. Before: main's `decisions.css` at 682013f swapped into my worktree (Chromium) and into an instrumented review build (WKWebView). Records: my own fixture home (`scripts/fixture-home.sh` from that checkout) plus `orgcopy`, a copy of the organizer's `working-on/decisions/` with 0029 and 0085 set waiting in the copy (as the builder's W2 did; 0087 waits as is), and init-a/0006 for L12. Evidence, drivers and logs: `.wt-notes/dst-ui/`.
