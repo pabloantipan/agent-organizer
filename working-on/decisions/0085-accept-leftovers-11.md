@@ -25,13 +25,19 @@ heading keep the total (`Needs me · 14`); wide is unchanged; what counts as
 Needs me does not change.
 
 The rest is roles-ui's small leftovers (`docs/specs/leftovers-11.md`, one
-card `roles-and-needs-me-five`, V1-V4): following a role's mail line or an
+card `roles-and-needs-me-five`, V1-V5): following a role's mail line or an
 initiative link puts focus on what it opened instead of the page; screen
 reader names for role items and session rows; role rows line up at 1024.
 
-It waits on drafts-per-chat (both change Home and Conversations).
+Added before your ruling (Aglaea, from drafts-per-chat's review, sev 2): a
+new thread started in the channel addresses everyone, not the first seat, and
+shows how many seats it wakes beside Start; in a direct chat it addresses
+that seat. Today the channel form defaults to one seat, which is the same
+wrong-seat risk drafts-per-chat just fixed.
 
-forecast: 40-80 min of wave time over 1 wave, after drafts-per-chat, plus
+drafts-per-chat has landed, so it can start at once.
+
+forecast: 40-80 min of wave time over 1 wave, plus
 this decision (median 0 d); basis: 19 single-wave tasks, this initiative.
 
 ## Options

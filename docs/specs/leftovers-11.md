@@ -31,6 +31,10 @@ After drafts-per-chat (both change `Home.tsx`, `Conversation.tsx`).
 - **FR-4** (U3) A role item in the rail strip is named with its state and
   mail (`Hephaistos, live, 2 messages waiting`).
 - **FR-5** (U4) Role rows share their column tracks at every class.
+- **FR-6** (drafts-per-chat's U3, sev 2, Aglaea dccabe0; added before
+  0085's ruling) A composer's default addressee is the place it sits in: in
+  the channel, a new thread addresses everyone, not the first seat; in a
+  direct chat, its seat. The wake count (`wakes 6`) shows beside Start.
 - Accepted as built, no work: U2 (a session's start reads `up 05:38`,
   Agents' own vocabulary; the spec's word "started" is amended to it); a
   session outside every initiative is shown as static text.
@@ -46,6 +50,7 @@ in `make review-build`, pinned; visual rows hit-tested in both engines.
 | V2 | 2 | a role's mail line; an initiative link in the drawer | `activeElement` is the thread's divider; the header title |
 | V3 | 3, 4 | the names log over a landed session row and a strip role item | the row's name says its visible state; the item's name carries state and mail |
 | V4 | 5 | Home at a 1024×640 window, rail as a strip, three roles | doing-now and where columns aligned across role rows (DOM: equal track starts) |
+| V5 | 6 | the channel's new-thread form; a direct chat's; Start in each | the channel defaults to everyone with `wakes N` beside Start; the direct chat to its seat; no post reaches a seat the form did not show |
 | V0 | all | `XDG_DATA_HOME=$(mktemp -d) make test` from a clean checkout; `cd frontend && npm run build`; `wails build` | pass |
 
 ## Boundary
@@ -54,7 +59,7 @@ in `make review-build`, pinned; visual rows hit-tested in both engines.
 `lib/queue.ts` (a helper for the first five only, `needsMeRows` unchanged)
 and `lib/` tests, the roles drawer and rail item components and their CSS,
 `Rail.tsx` (the role item's name), `AgentsView.tsx` (the landed row's name
-only), `Conversation.tsx` and `SlackView.tsx` (focus on a landing only),
+only), `Conversation.tsx` and `SlackView.tsx` (focus on a landing; the composer's default addressee and wake count, FR-6),
 `InitiativeHeader.tsx` (focus target only), `testdata/` and
 `scripts/fixture-home.sh` (a 14-row Needs me fixture). Not: Go,
 `docs/design-system.md`.
@@ -68,4 +73,4 @@ only), `Conversation.tsx` and `SlackView.tsx` (focus on a landing only),
 
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
-| `roles-and-needs-me-five` | V1–V4, V0 | drafts-per-chat | true |
+| `roles-and-needs-me-five` | V1–V5, V0 | drafts-per-chat | true |
