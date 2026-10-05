@@ -11,6 +11,7 @@ boundary: ["frontend/src/components/DecisionsView.tsx, RuleDecisionBox.tsx", "fr
 spec: "docs/specs/decisions-still.md (FR-1 to FR-3)"
 gate: "docs/specs/decisions-still.md Acceptance, rows W1 to W3 and W0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -78,3 +79,13 @@ Nothing on Decisions moves unless the operator moves it. Measure the cause first
   1043 px), scrollWidth 1175 at any narrower view; with a trackpad the board swings and
   rubber-bands sideways. Input-driven, outside FR-2; what the line cuts is a design
   question, sent to sup41.
+
+## Review
+- Verdict: pass. Commit reviewed: 1fc41403708759aa1de4071cc4005e8907642d47 (branch decisions-still). Unmet gate items: none. Reviewer: dst-review, 2026-10-05.
+- W1: the cause names decisions.css:73-79 and DecisionsView.tsx:166-187, measured in both engines; checked in the code (stuck: head +1 px border, actions -4 px top padding, body -1 px border = record 4 px shorter, fed back through the ResizeObserver measure). The diff removes exactly those three size changes. The rule box is absolute in every state, so it cannot feed the measure.
+- FR-3: sticky position, `--dec-box-max` and the facts line in the head while ruling are untouched (facts join on `isRuling`, not on `stuck`). RecordBody and useScrollEdges.ts are unchanged, so their callers are too.
+- W2: Chromium and WKWebView each cover all 24 required states (2 windows x rail full/strip x classic/overlay x 3 states), 30 s, 300 samples, 3 agents refreshes: 0 shifts, 0 box changes. The 0085 1245x878 overlay Rule gap sits outside the required matrix.
+- W3: Q2, B12, B13 and L12 pass in the recorded JSON and logs for both engines.
+- W0: rerun from a clean clone at 1fc4140. make test passes (vitest 253/253), npm install/test/build pass, and wails build produces Deltagos.app. stuckHead.test.ts fails against main's decisions.css (border-bottom, border-top, padding), so the guard is real.
+- Boundary: only decisions.css and lib/stuckHead.test.ts changed.
+- Not covered by the gate: W2 boxes cover the head and body only. In WKWebView the Timeline's today line (`span.tz-today` left) moves by about 0.001 px on each refresh with no input. It is not visible, but FR-2 says nothing moves.
