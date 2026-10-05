@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { holdTall, stickNow, type HeldTall } from "./stuckHead";
 // The stylesheet's text: vitest turns a CSS import into an empty module, ?raw
 // included, so it is read from disk. No @types/node here, hence the ignore.
 // @ts-ignore
@@ -41,5 +42,50 @@ describe(".dec-head.stuck changes paint, never a size", () => {
   it("flags a border or a padding that would shrink the record", () => {
     const bad = stuckRules(".dec-head.stuck { border-bottom: 1px solid red; } .dec-head.stuck .dec-actions { padding: 0; }");
     expect(bad.flatMap((r) => r.props.filter((p) => SIZING.test(p)))).toEqual(["border-bottom", "padding"]);
+  });
+});
+
+// §8 as amended (dst-ui F1, A2): tallness is decided before ruling and held
+// while the box is open. 0085 at 1245x868-879: 673 px reading, 661 ruling.
+describe("a stuck head stays stuck while ruling", () => {
+  const key = "orgcopy/0085";
+  // One record's life: read (tall), Rule opens (the facts make it short), box closes.
+  const walk = (steps: { measured: boolean; ruling: boolean }[]) => {
+    let held: HeldTall | null = null;
+    return steps.map(({ measured, ruling }) => {
+      const stick = stickNow(key, measured, ruling, held);
+      held = holdTall(key, measured, ruling, held);
+      return stick;
+    });
+  };
+
+  it("holds the reading answer when the ruling layout is shorter than the room", () => {
+    expect(walk([{ measured: true, ruling: false }, { measured: false, ruling: true }, { measured: false, ruling: true }])).toEqual([true, true, true]);
+  });
+
+  it("measures again once the box closes", () => {
+    expect(walk([{ measured: true, ruling: false }, { measured: false, ruling: true }, { measured: true, ruling: false }, { measured: false, ruling: false }])).toEqual([true, true, true, false]);
+  });
+
+  it("does not stick a short record that grows while ruling", () => {
+    expect(walk([{ measured: false, ruling: false }, { measured: true, ruling: true }])).toEqual([false, false]);
+  });
+
+  it("ignores another record's answer", () => {
+    expect(stickNow(key, false, true, { key: "orgcopy/0029", tall: true })).toBe(false);
+    expect(holdTall(key, false, true, { key: "orgcopy/0029", tall: true })).toBeNull();
+  });
+
+  it("measures when there is nothing held", () => {
+    expect(stickNow(key, true, true, null)).toBe(true);
+  });
+});
+
+describe("the stuck head's bottom line is hard", () => {
+  it("is a 1 px --border inset shadow with no blur and no spread", () => {
+    const rule = stuckRules(css).find((r) => r.selector === ".dec-head.stuck");
+    const decl = css.replace(/\/\*[\s\S]*?\*\//g, "").match(/\.dec-head\.stuck\s*\{([^}]*)\}/)![1];
+    expect(rule).toBeDefined();
+    expect(decl).toMatch(/box-shadow:\s*inset 0 -1px 0 var\(--border\)\s*;/);
   });
 });
