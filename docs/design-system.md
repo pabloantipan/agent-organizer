@@ -357,8 +357,10 @@ keeps their place.
   (drafts-and-slack, U2, U3).
 - **A composer's default addressee is the place it sits in**: a direct
   chat addresses its seat, the channel addresses everyone. The wake count
-  (`wakes 6`) shows beside Start before anything is sent (drafts-per-chat,
-  U3).
+  (`wakes 6 seats`) shows beside the commit, **Start or Send**, before
+  anything is sent (drafts-per-chat, U3; rn5-A2). It is neutral text
+  (`--fg-muted`); when it wakes every seat it takes the magenta tone as a
+  caution, **never red**, which is blocked's alone (rn5-A1).
 
 - **Checked in WKWebView**, the app's engine, not only Chromium. In
   WKWebView, macOS's Keyboard navigation setting (System Settings ›

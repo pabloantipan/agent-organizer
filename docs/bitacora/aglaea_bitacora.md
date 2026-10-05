@@ -76,3 +76,4 @@ its source).
 - 2026-10-04 — sup36: drafts keyed per chat with their addressee; '· draft' on collapsed rows (DS).
 - 2026-10-04 — sup38 roles-ui A1-A3: Needs me shows five then 'Show the other N' (for Pablo); drawer initiatives as text links; landing on the session row (R5 defect).
 - 2026-10-04 — sup39 U2/U3: draft marks only where he acts; the channel composer defaults to everyone with the wake count (DS).
+- 2026-10-05 — sup40 rn5-A1/A2: wake count beside Start or Send, neutral, magenta for a broadcast, never red (DS).
