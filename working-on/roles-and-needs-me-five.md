@@ -11,6 +11,7 @@ boundary: ["frontend/src/components/Home.tsx, frontend/src/styles/home.css (Need
 spec: "docs/specs/leftovers-11.md (FR-1 to FR-6); transversal-roles.md Amendment 1 (Aglaea, f3535e7)"
 gate: "docs/specs/leftovers-11.md Acceptance, rows V1 to V5 and V0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -25,6 +26,14 @@ Roles stay in view on Home with a long Needs me; the rest of roles-ui's leftover
 - 2026-10-05 sup40: worktree .wt/roles-and-needs-me-five from c147c6a, seat rn5-build; boundary names AgentList.tsx for FR-3 (rowName lives there), spec field says FR-6 as the boundary already did
 - 2026-10-05 0085 ruled by pablo ("ok", f6e7aea); sup40 launched by the FSE
 - 2026-10-04 cut from leftovers-11 by the FSE
+
+## Review
+- Verdict: pass (rn5-review, 2026-10-05)
+- Commit reviewed: eb2964e (branch roles-and-needs-me-five)
+- Unmet gate items: none
+- V0: clean clone at eb2964e, `XDG_DATA_HOME=$(mktemp -d) make test` with no prior build green (Go, 250 vitest tests), `npm install && npm test && npm run build` green, `wails build` built Deltagos.app.
+- V1-V5 from the diff and the builder's logs: needsMeShown with a vitest, needsMeRows unchanged, the button only off wide; landings focus `.tl-divider` and `.ihead-id`; rowName and the strip label read the visible state and mail; `--r-where` gives equal track starts (WKWebView: doing 372, where 776 on every row); every postToCell caller posts the `to` its select shows (shownSeats). Boundary: 11 paths, all inside.
+- Not in the gate: the ReplyBox's wake count is still apart from Send; the focused divider has no name of its own; the drawer says `running` where the row says `idle`.
 
 ## Next
 
