@@ -267,6 +267,10 @@ export function DecisionsView() {
     const isRuling = canRule && ruling === r.key;
     const dk = decisionKey(r.initiative, d.number);
     const hasDraft = kept.has(dk);
+    // leftovers-10 FR-2 (design system, Focus and names): a collapsed line
+    // whose record holds a draft says so, on the line and in its name; open,
+    // its Rule says it (`Rule · draft`).
+    const lineDraft = canRule && hasDraft && !isOpen;
     const focused = decisionFocus === r.key;
     const stuck = isOpen && tall?.key === r.key;
     const style: CSSProperties = { ...(focused ? { background: "var(--surface-selected)" } : {}), ...(stuck ? { "--dec-box-max": `${tall!.boxMax}px` } as CSSProperties : {}) };
@@ -291,14 +295,14 @@ export function DecisionsView() {
       <div key={r.key} data-dec={r.key} className={`dec ${d.status} ${isOpen ? "expanded" : ""} ${focused ? "focused" : ""}`} style={style}>
         <div className={`dec-head ${stuck ? "stuck" : ""}`}>
           {/* §9: the name says each visible fact once ("waiting" once). */}
-          <button className="dec-line" aria-expanded={isOpen} aria-label={lineName(d, now, all ? r.initiative : undefined, ruledOn)} onClick={() => toggle(r.key)} title={isOpen ? "collapse" : "show the record"}>
+          <button className="dec-line" aria-expanded={isOpen} aria-label={`${lineName(d, now, all ? r.initiative : undefined, ruledOn)}${lineDraft ? ", draft" : ""}`} onClick={() => toggle(r.key)} title={isOpen ? "collapse" : "show the record"}>
             <span className="dec-num mono">{d.number}</span>
             <span className="dec-title">{d.title}</span>
             {all && <span className="badge">{r.initiative}</span>}
             <span className={`badge dec-status ${d.status}`}>{statusWord(d.status)}</span>
             <span className="dec-meta">
               {d.status === "proposed"
-                ? <>{ownerPhrase(d.owner)} · <b>{waitedWords(age(d))}</b></>
+                ? <>{ownerPhrase(d.owner)} · <b>{waitedWords(age(d))}</b>{lineDraft && <> · draft</>}</>
                 : d.status === "ruled"
                   ? <>{d.chosen ? <>“{d.chosen}” · </> : null}{rulerWords(d.ruled_by)} · {ruledOn}{t && <> · {t}</>}</>
                   : d.superseded_by ? <>by {d.superseded_by}</> : null}

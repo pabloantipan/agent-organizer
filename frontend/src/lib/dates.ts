@@ -59,6 +59,17 @@ export function dateWords(d: Date | string | undefined | null, now: Date = today
   return at.getFullYear() === now.getFullYear() ? words : `${words} ${at.getFullYear()}`;
 }
 
+/** A moment as a person reads it (leftovers-10 FR-6): the day in words
+ *  (`today`, else dateWords) and the clock as `HH:MM`, so a message reads
+ *  `today 22:24` or `26 Sep 22:24`, never ISO or a locale's `Sep 26`. */
+export function timeWords(at: Date | number, now: Date = new Date()): string {
+  const d = typeof at === "number" ? new Date(at) : at;
+  if (isNaN(d.getTime())) return "";
+  const p = (n: number) => String(n).padStart(2, "0");
+  const day = d.toDateString() === now.toDateString() ? "today" : dateWords(d, now);
+  return `${day} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
 /** Monday-first grid of 6 weeks covering the month. */
 export function monthGrid(year: number, month: number): Date[] {
   const first = new Date(year, month, 1);

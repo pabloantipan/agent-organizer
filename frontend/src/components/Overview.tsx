@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { merge, model } from "../../wailsjs/go/models";
 import { api, type RunsView } from "../hooks/useWails";
-import { parseISO, today, daysBetween } from "../lib/dates";
+import { parseISO, today, daysBetween, dateWords } from "../lib/dates";
 import { useBoard } from "../stores/board.store";
 import { FsePanel } from "./FsePanel";
 import { PhaseWord } from "./InitiativeHeader";
@@ -54,7 +54,7 @@ function GateRow({ initiative, number, record }: { initiative: string; number: s
         {waiting ? (
           <span className="lz waiting">waiting <span className="num">{waited === null ? "" : `${waited}d`}</span></span>
         ) : ruled ? (
-          <span className="lz ruled">ruled <span className="num">{record.ruled}</span></span>
+          <span className="lz ruled">ruled <span className="num">{dateWords(record.ruled)}</span></span>
         ) : (
           <span className="lz">{record.status}</span>
         )}

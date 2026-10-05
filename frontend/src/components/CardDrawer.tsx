@@ -7,7 +7,7 @@ import { ageLabel, notesAsContext, shortHome, since } from "../lib";
 import { useBoard } from "../stores/board.store";
 import { readOnlyOf } from "../lib/queue";
 import { dateWords } from "../lib/dates";
-import { cardKey, drafts, draftVerb, useDraft } from "../lib/drafts";
+import { cardKey, drafts, draftVerb, useDraft, useImeEscape } from "../lib/drafts";
 import { openBox } from "../lib/boxStack";
 import { useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
 import { focusBoxBelow } from "./RuleDecisionBox";
@@ -183,6 +183,10 @@ function MyNotes({ card: c, readOnly }: { card: merge.BoardCard; readOnly: strin
   const setText = (t: string) => drafts.keep(dk, { text: t });
   const [editing, setEditing] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
+  // leftovers-10 FR-5: an Escape that ends a composition is the input
+  // method's; the marked character does not stay in the comment.
+  const imeNew = useImeEscape(setText);
+  const imeEdit = useImeEscape(setDraft);
   const [busy, setBusy] = useState(false);
   const me = account?.email || "";
   const submit = () => {
@@ -199,7 +203,7 @@ function MyNotes({ card: c, readOnly }: { card: merge.BoardCard; readOnly: strin
       ) : <div className="comment-new">
         <span className="avatar" title={me || "you"}>{initial(me)}</span>
         <div className="comment-box">
-          <textarea value={text} aria-label={`Comment on ${c.title || c.slug}`} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setText(e.target.value)} placeholder="Write a comment…  (Enter to save, Shift+Enter for a new line)" rows={text ? 3 : 1} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); submit(); } if (e.key === "Escape" && (e.nativeEvent.isComposing || e.keyCode === 229)) e.preventDefault(); }} />
+          <textarea value={text} aria-label={`Comment on ${c.title || c.slug}`} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setText(e.target.value)} {...imeNew.props} placeholder="Write a comment…  (Enter to save, Shift+Enter for a new line)" rows={text ? 3 : 1} onKeyDown={(e) => { if (imeNew.escape(e)) return; if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); submit(); } }} />
           {text && <div className="comment-actions"><button className="tiny-btn primary" onClick={submit} disabled={busy}><Send size={12} /> {draftVerb("Save", true)}</button><button className="tiny-btn ghost" onClick={() => drafts.discard(dk)}>Cancel</button></div>}
         </div>
       </div>}
@@ -216,7 +220,7 @@ function MyNotes({ card: c, readOnly }: { card: merge.BoardCard; readOnly: strin
               </div>
               {editing === n.id ? (
                 <div className="comment-box">
-                  <textarea autoFocus value={draft} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setDraft(e.target.value)} rows={3} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); editNote(c.initiative_id, c.slug, n.id, draft); setEditing(null); } if (e.key === "Escape") { e.preventDefault(); if (!e.nativeEvent.isComposing) setEditing(null); } }} />
+                  <textarea autoFocus value={draft} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setDraft(e.target.value)} {...imeEdit.props} rows={3} onKeyDown={(e) => { if (imeEdit.escape(e)) return; if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); editNote(c.initiative_id, c.slug, n.id, draft); setEditing(null); } if (e.key === "Escape") { e.preventDefault(); setEditing(null); } }} />
                   <div className="comment-actions"><button className="tiny-btn primary" onClick={() => { editNote(c.initiative_id, c.slug, n.id, draft); setEditing(null); }}>Save</button><button className="tiny-btn ghost" onClick={() => setEditing(null)}>Cancel</button></div>
                 </div>
               ) : (

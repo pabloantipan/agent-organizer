@@ -209,3 +209,47 @@ export function fixedColumns(tracks: number[], needs: number[]): number[] {
   if (want.every((n, k) => n <= tracks[k])) return tracks;
   return shareRoom(want, want, tracks.reduce((a, w) => a + w, 0)).widths;
 }
+
+/** No cell is cut while another column holds room it does not use, flexible
+ *  or fixed (leftovers-10 FR-3; design system, Widths). `tracks` are the
+ *  columns as the grid lays them out, `needs` what each takes on its widest
+ *  row. A column whose need fits its track gives what it does not use; the
+ *  cut ones take it, through shareRoom, so the least cut is made whole
+ *  first and the widest gives way first. A giver keeps its need and returns
+ *  only what the cut ones take, each in proportion to its slack. The sum is
+ *  kept: nothing is made up or lost. With nothing cut, or no slack, the
+ *  tracks come back as they were. */
+export function giveSlack(tracks: number[], needs: number[]): number[] {
+  const cut = tracks.map((t, k) => needs[k] > t);
+  const pool = tracks.reduce((a, t, k) => a + (cut[k] ? 0 : t - needs[k]), 0);
+  if (!cut.some(Boolean) || pool <= 0) return tracks;
+  const ci = tracks.map((_, k) => k).filter((k) => cut[k]);
+  const deficit = ci.reduce((a, k) => a + needs[k] - tracks[k], 0);
+  const given = Math.min(pool, deficit);
+  const room = ci.reduce((a, k) => a + tracks[k], 0) + given;
+  const share = shareRoom(ci.map((k) => needs[k]), ci.map((k) => tracks[k]), room).widths;
+  // shareRoom rounds a cut width down; what that leaves goes to the widest
+  // cut column, which stays cut, so the sum is kept.
+  const widest = share.reduce((m, _, j) => (needs[ci[j]] > needs[ci[m]] ? j : m), 0);
+  share[widest] += room - share.reduce((a, w) => a + w, 0);
+  return tracks.map((t, k) => {
+    if (cut[k]) return share[ci.indexOf(k)];
+    return t - (t - needs[k]) * (given / pool);
+  });
+}
+
+/** How a grid shares `total` among `fr` tracks (`weights`), none under its
+ *  floor (`mins`): the CSS rule, so Home can tell what its flexible columns
+ *  get before it asks them to give (leftovers-10 FR-3). A track whose share
+ *  is under its floor is held at the floor and the rest is shared again. */
+export function frTracks(weights: number[], mins: number[], total: number): number[] {
+  const fixed = weights.map((w) => w <= 0);
+  for (;;) {
+    const held = mins.reduce((a, m, k) => a + (fixed[k] ? m : 0), 0);
+    const sum = weights.reduce((a, w, k) => a + (fixed[k] ? 0 : w), 0);
+    const per = sum > 0 ? Math.max(0, total - held) / sum : 0;
+    const under = weights.findIndex((w, k) => !fixed[k] && w * per < mins[k]);
+    if (under < 0) return weights.map((w, k) => (fixed[k] ? mins[k] : w * per));
+    fixed[under] = true;
+  }
+}
