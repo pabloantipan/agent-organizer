@@ -5,6 +5,7 @@ import { useBoard } from "../stores/board.store";
 import { notesAsContext } from "../lib";
 import { branchKey, chatKey, drafts, draftVerb, newThreadKey, newThreadPost, threadKey, useDraft, useDrafts, useImeEscape } from "../lib/drafts";
 import { askedCards, needsMeThread } from "../lib/queue";
+import { timeWords } from "../lib/dates";
 
 const KINDS = ["msg", "question", "answer", "status", "decision", "done", "claim", "yield"];
 const POLL_MS = 5_000; // the open chat only; the list rides the agents feed
@@ -19,7 +20,8 @@ const ago = (s: number) => (s < 60 ? `${s}s` : s < 3600 ? `${Math.floor(s / 60)}
 const needsMe = needsMeThread;
 const needsReconciler = (t: CellThread) => t.status === "stalled" || t.undecided;
 const branchParent = (subject: string) => (subject.startsWith(BRANCH_PREFIX) ? subject.slice(BRANCH_PREFIX.length).trim() : "");
-const when = (ms: number) => { const d = new Date(ms); const today = new Date(); const sameDay = d.toDateString() === today.toDateString(); return (sameDay ? "" : d.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + " ") + d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }); };
+// Message times in words (design system, Principles; leftovers-10 FR-6).
+const when = (ms: number) => timeWords(ms);
 
 /** A thread is a direct chat between the human and one seat when the only
  *  posters are those two, or when the human opened it to that seat and it

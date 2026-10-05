@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dateWords, hasTime, parseISO, toISO } from "./dates";
+import { dateWords, hasTime, parseISO, timeWords, toISO } from "./dates";
 
 describe("parseISO", () => {
   it("reads a date-only string as local midnight", () => {
@@ -48,5 +48,19 @@ describe("dateWords", () => {
     expect(dateWords("someday", now)).toBe("someday");
     expect(dateWords("", now)).toBe("");
     expect(dateWords(undefined, now)).toBe("");
+  });
+});
+
+describe("timeWords (leftovers-10 FR-6)", () => {
+  const now = new Date(2026, 9, 4, 18, 0);
+  it("reads today's time as today and a clock", () => {
+    expect(timeWords(new Date(2026, 9, 4, 9, 5), now)).toBe("today 09:05");
+  });
+  it("reads another day in words, never ISO or a locale's month-first", () => {
+    expect(timeWords(new Date(2026, 8, 26, 22, 24).getTime(), now)).toBe("26 Sep 22:24");
+    expect(timeWords(new Date(2025, 11, 31, 23, 59), now)).toBe("31 Dec 2025 23:59");
+  });
+  it("gives nothing for an invalid time", () => {
+    expect(timeWords(Number.NaN, now)).toBe("");
   });
 });
