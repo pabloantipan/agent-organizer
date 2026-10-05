@@ -1,6 +1,6 @@
 # Decisions holds still: the build spec
 
-status: proposed (0085, added 2026-10-05)
+status: proposed (0086)
 by: the FSE, from Pablo's report, 2026-10-05: "this view 'vibrates' kinda
 rendering doesn't work properly" (screenshot: Decisions, organizer, To rule
 open, record 0085 expanded with its stuck head and Rule, at about 1245 px

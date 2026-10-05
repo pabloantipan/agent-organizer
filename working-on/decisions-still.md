@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: decisions-still
 updated: 2026-10-05
-next: "decide: pablo - accept 0085 (now with decisions-still); then the FSE starts its supervisor beside roles-and-needs-me-five"
+next: "decide: pablo - accept 0086 (decisions-still); then the FSE starts its supervisor"
 depends_on: []
 boundary: ["frontend/src/components/DecisionsView.tsx, RuleDecisionBox.tsx", "frontend/src/styles/decisions.css, rule-box.css, global.css (.markdown rules only)", "frontend/src/lib/useScrollEdges.ts and lib/ tests", "not: Home, Conversations, Go, docs/design-system.md"]
 spec: "docs/specs/decisions-still.md (FR-1 to FR-3)"
