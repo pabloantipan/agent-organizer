@@ -1,13 +1,13 @@
 ---
 title: Accept decisions-still (the Decisions view moves by itself) and launch it
-status: proposed
+status: ruled
 raised: 2026-10-05
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-05
+ruled_by: pablo
 options: [accept as written, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [decisions-still]
 threads: []
 supersedes: []
@@ -46,6 +46,8 @@ the cause is unmeasured.
 The FSE's: accept as written.
 
 ## Ruling
+
+pablo, 2026-10-05, in the organizer on lodestar: ok
 
 ## Consequences
 
