@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { COMPACT_FIXED, fixedColumns, REGULAR_FIXED, shareRoom, signalsNeed, compactColumns, FOLD, GOAL_MIN, homeClassOf, NEXT_W, railCollapsedFor, roomyOf, SIGNALS_MIN, SLACK, signalsShown, signalsThatFit, wideGoalRoom, widthClassOf, type Fold } from "./width";
+import { COMPACT_FIXED, fixedColumns, frTracks, giveSlack, REGULAR_FIXED, shareRoom, signalsNeed, compactColumns, FOLD, GOAL_MIN, homeClassOf, NEXT_W, railCollapsedFor, roomyOf, SIGNALS_MIN, SLACK, signalsShown, signalsThatFit, wideGoalRoom, widthClassOf, type Fold } from "./width";
 
 describe("widthClassOf", () => {
   it("puts each boundary in the class above it", () => {
@@ -259,5 +259,62 @@ describe("fixed columns' slack goes to cut cells first (leftovers-9 FR-2)", () =
     expect(w[1]).toBe(90);
     expect(w[0]).toBeGreaterThanOrEqual(109);
     expect(w[0] + w[1]).toBeLessThanOrEqual(200);
+  });
+});
+
+describe("giveSlack: any column gives its slack to cut cells (leftovers-10 FR-3, T3)", () => {
+  // Home at 1512 with the rail as a strip, regular, before the change:
+  // id, state, phase, goal, stage, signals, next date (chromium, classic).
+  const tracks = [187, 144, 96, 250, 208, 312, 96];
+  const needs = [123, 95, 69, 1565, 147, 336, 120];
+
+  it("a flexible column's slack goes first to the cut cells", () => {
+    // Only the stage holds room (61); the signals are cut by 24.
+    const w = giveSlack([200, 208, 312], [200, 147, 336]);
+    expect(w[2]).toBe(336);
+    expect(w[1]).toBe(208 - 24);
+    expect(w[0]).toBe(200);
+  });
+
+  it("makes the signals and the next date whole from the stage's, the id's and the fixed columns' slack", () => {
+    const w = giveSlack(tracks, needs);
+    expect(w[5]).toBeGreaterThanOrEqual(336);
+    expect(w[6]).toBeGreaterThanOrEqual(120);
+    w.forEach((x, k) => { if (k !== 3) expect(x).toBeGreaterThanOrEqual(needs[k] - 1e-9); });
+    const sum = (xs: number[]) => xs.reduce((a, x) => a + x, 0);
+    expect(sum(w)).toBeCloseTo(sum(tracks), 9);
+  });
+
+  it("leaves the tracks alone when nothing is cut or nothing is spare", () => {
+    expect(giveSlack([100, 100], [90, 80])).toEqual([100, 100]);
+    expect(giveSlack([100, 100], [100, 120])).toEqual([100, 100]);
+  });
+
+  it("with too little slack, the cut share it, the widest giving way first", () => {
+    // shareRoom's cap rounds down; the pixel it leaves goes to the widest.
+    expect(giveSlack([100, 100, 100], [60, 130, 200])).toEqual([60, 119, 121]);
+    expect(giveSlack([100, 100, 100], [60, 110, 200])).toEqual([60, 110, 130]);
+  });
+
+  it("a giver keeps its need and gives in proportion to its slack", () => {
+    const w = giveSlack([100, 100, 100], [80, 40, 120]);
+    expect(w[2]).toBe(120);
+    expect(w[0]).toBeCloseTo(100 - 20 * (20 / 80), 9);
+    expect(w[1]).toBeCloseTo(100 - 60 * (20 / 80), 9);
+  });
+});
+
+describe("frTracks: the grid's fr rule with floors", () => {
+  it("shares by weight", () => {
+    expect(frTracks([0.9, 1.2, 1], [0, 0, 0], 645.5).map(Math.round)).toEqual([187, 250, 208]);
+  });
+  it("holds a track at its floor and shares the rest", () => {
+    const w = frTracks([0.9, 1.2, 1], [200, 0, 0], 620);
+    expect(w[0]).toBe(200);
+    expect(w[1] + w[2]).toBeCloseTo(420, 9);
+    expect(w[1] / w[2]).toBeCloseTo(1.2, 9);
+  });
+  it("a weightless track is fixed at its floor", () => {
+    expect(frTracks([0, 1], [50, 0], 150)).toEqual([50, 100]);
   });
 });

@@ -9,7 +9,7 @@ import { dateWords } from "../lib/dates";
 import { draftVerb, useDraft } from "../lib/drafts";
 import { HEALTH, messages } from "../lib/health";
 import { ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
-import { compactColumns, fixedColumns, FOLD, GOAL_CHARS, GOAL_FLOOR_CHARS, goalFloor, homeClassOf, NO_EMPTY, REGULAR_FIXED, shareRoom, signalsNeed, signalsShown, wideGoalRoom, type Empty, type Fold, type WidthClass } from "../lib/width";
+import { compactColumns, fixedColumns, FOLD, frTracks, giveSlack, GOAL_CHARS, GOAL_FLOOR_CHARS, goalFloor, homeClassOf, NO_EMPTY, REGULAR_FIXED, shareRoom, signalsNeed, signalsShown, wideGoalRoom, type Empty, type Fold, type WidthClass } from "../lib/width";
 import { useBoard } from "../stores/board.store";
 import { nextDate, stageState } from "./InitiativeHeader";
 import { InitiativeDetail } from "./Initiatives";
@@ -263,7 +263,8 @@ const focusNeedsMe = () => document.getElementById(NEEDS_ME_HEADING)?.focus();
  *  and actions in place. */
 function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.getState>["view"]> }) {
   const { agents, openInitiative } = useBoard();
-  const compact = useContext(HomeClass) === "compact";
+  const homeClass = useContext(HomeClass);
+  const compact = homeClass === "compact";
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const all = view.board.initiatives ?? [];
   const folded = inactiveIds(view);
@@ -282,7 +283,7 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
   const empty: Empty = { next: items.length > 0 && items.every((r) => !r.next), sig: items.length > 0 && items.every((r) => r.sig.none) };
   const { ref, idWidth, narrow, fit, goalMin } = useFitIds(ids.join(" "), empty);
   const [sigFloor, reportSig] = useSigFloor();
-  const fixed = useFixedTracks(ref, empty.next);
+  const { vars: fixed, sigLift } = useTracks(ref, empty, homeClass === "regular" && !narrow, sigFloor, idWidth, goalMin);
   // Compact's row is one line; its goal and next date give way only when the
   // row has no room for them (FR-16), and come back when it has.
   const hides = { goal: compact && !fit.goal, next: compact && !fit.next && !empty.next };
@@ -295,7 +296,7 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
     );
   }
   return (
-    <div ref={ref} className={`panel port ${narrow && !compact ? "narrow" : ""} ${hides.goal ? "" : "fit-goal"} ${hides.next || empty.next ? "" : "fit-next"} ${empty.next ? "empty-next" : ""} ${empty.sig ? "empty-sig" : ""}`} role="table" style={{ ...(idWidth ? { "--id-w": `${idWidth}px` } : {}), ...(goalMin ? { "--goal-floor": `${goalMin}px` } : {}), ...(sigFloor ? { "--sig-floor": `${sigFloor}px` } : {}), ...fixed } as React.CSSProperties}>
+    <div ref={ref} className={`panel port ${narrow && !compact ? "narrow" : ""} ${hides.goal ? "" : "fit-goal"} ${hides.next || empty.next ? "" : "fit-next"} ${empty.next ? "empty-next" : ""} ${empty.sig ? "empty-sig" : ""}`} role="table" style={{ ...(idWidth ? { "--id-w": `${idWidth}px` } : {}), ...(goalMin ? { "--goal-floor": `${goalMin}px` } : {}), ...(sigFloor || sigLift ? { "--sig-floor": `${Math.max(sigFloor, sigLift)}px` } : {}), ...fixed } as React.CSSProperties}>
       <div className="p-head" role="row">
         <span className="num">#</span><span>initiative</span><span>state</span><span>phase</span><span>goal</span><span>stage</span><span>signals</span><span>next date</span><span />
       </div>
@@ -397,28 +398,77 @@ function useFitIds(key: string, empty: Empty = NO_EMPTY) {
   return { ref, idWidth, narrow, fit, goalMin };
 }
 
-/** leftovers-9 FR-2 (design system, Widths): no cell is cut while another
- *  column holds room it does not use. Regular's fixed columns (state, phase,
- *  next date; home.css --t-state, --t-phase, --t-next) give their slack to
- *  the cut ones (fixedColumns, through shareRoom): each column's need is its
- *  widest row, measured on a copy laid out at its natural width, so the
- *  measure does not depend on the track it sits in. An empty next date has
- *  no track (FR-20), so it is left to home.css. Measured after every render,
- *  since the state's words move with the agents feed; state is set only
- *  when a track changes. Other classes draw their own literal tracks and
- *  ignore these. */
-function useFixedTracks(ref: React.RefObject<HTMLDivElement | null>, emptyNext: boolean): Record<string, string> {
-  const [tracks, setTracks] = useState<number[] | null>(null);
+/** leftovers-9 FR-2, leftovers-10 FR-3 (design system, Widths): no cell is
+ *  cut while another column, flexible or fixed, holds room it does not use.
+ *  Each column's need is its widest row, measured on a copy laid out at its
+ *  natural width, so the measure does not depend on the track it sits in.
+ *
+ *  Regular, one line: the grid's own tracks (home.css, with Home's lifted)
+ *  and every column's need go to giveSlack, so the stage's, the id's and the
+ *  fixed columns' spare room reaches a cut signal cell or next date before
+ *  either is cut. The fixed columns (state, phase, next date; --t-state,
+ *  --t-phase, --t-next) take their share as widths; the signals take theirs
+ *  as a floor (--sig-floor), which the flexible columns (id, goal, stage,
+ *  fr tracks with no width of their own) make room for in proportion, so
+ *  the floor is held to what leaves the stage and the id whole and the goal
+ *  at its floor (frTracks). home.css gives the stage and the id no width
+ *  variable, so their spare room reaches the signals only through that
+ *  proportion; what they keep past it stays with them.
+ *
+ *  Other classes draw their own tracks; there the fixed columns share only
+ *  what they hold together (fixedColumns), as before. An empty next date has
+ *  no track (FR-20). Measured after every render, since the state's words
+ *  move with the agents feed; state is set only when a width changes. */
+function useTracks(ref: React.RefObject<HTMLDivElement | null>, empty: Empty, fluid: boolean, sigFloor: number, idWidth: number, goalMin: number): { vars: Record<string, string>; sigLift: number } {
+  const [t, setT] = useState<{ fixed: number[]; sig: number } | null>(null);
   const measure = () => {
     const el = ref.current;
     if (!el) return;
     const rows = Array.from(el.querySelectorAll<HTMLElement>(".p-row"));
     if (rows.length === 0) return;
-    const widest = (pick: (row: HTMLElement) => HTMLElement | null) => Math.max(0, ...rows.map((r) => { const c = pick(r); return c ? naturalWidth(c) : 0; }));
-    const needs = [widest((r) => r.querySelector(".p-state")), widest((r) => r.querySelector(".p-phase"))];
-    if (!emptyNext) needs.push(widest((r) => r.querySelector(".p-next")));
-    const next = fixedColumns(REGULAR_FIXED.slice(0, needs.length), needs);
-    setTracks((p) => (p && p.length === next.length && p.every((w, k) => w === next[k]) ? p : next));
+    const widest = (sel: string, nat: (c: HTMLElement) => number = naturalWidth) => Math.ceil(Math.max(0, ...rows.map((r) => { const c = r.querySelector<HTMLElement>(sel); return c ? nat(c) : 0; })));
+    const fixedNeeds = [widest(".p-state"), widest(".p-phase")];
+    if (!empty.next) fixedNeeds.push(widest(".p-next"));
+    let fixed = fixedColumns(REGULAR_FIXED.slice(0, fixedNeeds.length), fixedNeeds);
+    let sig = 0;
+    const base = fluid ? gridTracks(el, rows[0], sigFloor) : null;
+    if (base) {
+      // The template's tracks: rank, id, state, phase, goal, stage, then
+      // signals and next date unless empty, then the chevron.
+      const at = { id: 1, state: 2, phase: 3, goal: 4, stage: 5, sig: empty.sig ? -1 : 6, next: empty.next ? -1 : empty.sig ? 6 : 7 };
+      const cols = (["id", "state", "phase", "goal", "stage", "sig", "next"] as const).filter((c) => at[c] >= 0);
+      const need: Record<string, number> = {
+        id: Math.max(idWidth, widest(".p-id", (c) => c.scrollWidth)), state: fixedNeeds[0], phase: fixedNeeds[1], goal: base[at.goal], stage: widest(".p-stage"),
+        sig: empty.sig ? 0 : widest(".p-sig", sigWidth), next: empty.next ? 0 : fixedNeeds[2],
+      };
+      // The goal is the column that takes what the others leave (its words
+      // run long and end in an ellipsis by design, down to its floor of 30
+      // characters): it neither gives here nor competes with a cut signal
+      // or date for the slack.
+      const tracks = cols.map((c) => base[at[c]]);
+      const w = giveSlack(tracks, cols.map((c) => need[c]));
+      const of = (c: string) => w[cols.indexOf(c as never)];
+      const round = (x: number) => Math.round(x * 100) / 100;
+      // A fixed column sizes to its widest row; what it gives past what the
+      // cut ones took goes back to the flexible columns, the goal's share
+      // first by weight.
+      const sized = (c: "state" | "phase" | "next") => round(need[c] <= base[at[c]] ? need[c] : of(c));
+      fixed = [sized("state"), sized("phase"), ...(empty.next ? [] : [sized("next")])];
+      if (!empty.sig && of("sig") > base[at.sig] + 0.5) {
+        // The fr columns as the grid shares them: by their widths now, the
+        // id held at its floor when it already is, the signals at the lift.
+        const released = (base[at.state] - fixed[0]) + (base[at.phase] - fixed[1]) + (empty.next ? 0 : base[at.next] - fixed[2]);
+        const b = [base[at.id], base[at.goal], base[at.stage], base[at.sig]];
+        const total = b.reduce((a, x) => a + x, 0) + released;
+        const weights = [b[0] <= idWidth + 0.5 ? 0 : b[0], b[1], b[2], b[3] <= sigFloor + 0.5 ? 0 : b[3]];
+        const holds = (lift: number) => { const f = frTracks(weights, [idWidth, 0, 0, lift], total); return f[2] >= need.stage - 0.5 && f[0] >= need.id - 0.5 && f[1] >= Math.min(goalMin, b[1]) - 0.5; };
+        let lo = base[at.sig], hi = of("sig");
+        if (holds(hi)) lo = hi;
+        else for (let i = 0; i < 24; i++) { const m = (lo + hi) / 2; if (holds(m)) lo = m; else hi = m; }
+        sig = Math.floor(lo) > sigFloor ? Math.floor(lo) : 0;
+      }
+    }
+    setT((p) => (p && p.sig === sig && p.fixed.length === fixed.length && p.fixed.every((x, k) => x === fixed[k]) ? p : { fixed, sig }));
   };
   useLayoutEffect(measure);
   useLayoutEffect(() => {
@@ -428,9 +478,37 @@ function useFixedTracks(ref: React.RefObject<HTMLDivElement | null>, emptyNext: 
     ro.observe(el);
     return () => ro.disconnect();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  if (!tracks) return {};
-  const [state, phase, next] = tracks;
-  return { "--t-state": `${state}px`, "--t-phase": `${phase}px`, ...(next !== undefined ? { "--t-next": `${next}px` } : {}) };
+  if (!t) return { vars: {}, sigLift: 0 };
+  const [state, phase, next] = t.fixed;
+  return { vars: { "--t-state": `${state}px`, "--t-phase": `${phase}px`, ...(next !== undefined ? { "--t-next": `${next}px` } : {}) }, sigLift: t.sig };
+}
+
+/** The row's tracks in px as home.css lays them out with none of Home's
+ *  widths applied (the fixed columns' and the lifted signal floor), read
+ *  inside this frame and put back. */
+function gridTracks(port: HTMLElement, row: HTMLElement, sigFloor: number): number[] | null {
+  const names = ["--t-state", "--t-phase", "--t-next", "--sig-floor"];
+  const kept = names.map((n) => port.style.getPropertyValue(n));
+  names.slice(0, 3).forEach((n) => port.style.removeProperty(n));
+  port.style.setProperty("--sig-floor", `${sigFloor}px`);
+  const tpl = getComputedStyle(row).gridTemplateColumns;
+  names.forEach((n, k) => (kept[k] ? port.style.setProperty(n, kept[k]) : port.style.removeProperty(n)));
+  const px = tpl.split(" ").map(parseFloat);
+  return px.length >= 7 && px.every((x) => !isNaN(x)) ? px : null;
+}
+
+/** A signal cell's width with every signal whole and none folded. */
+function sigWidth(cell: HTMLElement): number {
+  const copy = cell.cloneNode(true) as HTMLElement;
+  copy.querySelectorAll(".sig-more, .sr-only").forEach((e) => e.remove());
+  copy.querySelectorAll<HTMLElement>("[data-off]").forEach((e) => e.removeAttribute("data-off"));
+  copy.setAttribute("aria-hidden", "true");
+  copy.style.cssText = "position:absolute;left:0;top:0;width:max-content;max-width:none;min-width:0;visibility:hidden;overflow:visible";
+  copy.querySelectorAll<HTMLElement>("*").forEach((e) => { e.style.maxWidth = "none"; e.style.overflow = "visible"; });
+  cell.parentElement!.appendChild(copy);
+  const w = copy.getBoundingClientRect().width;
+  copy.remove();
+  return w;
 }
 
 /** A cell's width with nothing cut: a hidden copy beside it, laid out at
