@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: floating-icon-spike
 updated: 2026-10-05
-next: "fis-build or Pablo: Y1 drag and click by the real pointer on the icon (Space 3), recorded, and the Findings corrected (driver drag is not the mouseDragged path; the 0.5 s re-check did hide twice)"
+next: "review: floating-icon-spike, review fixes in (findings 83e704e, pointer logging e91d2a7); Y1 pointer row pending, by hand: Pablo runs .wt-notes/fis-build/y1-pointer.sh"
 review: fail
 depends_on: []
 boundary: ["a spike branch floating-icon-spike, never merged", "docs/specs/floating-icon-spike.md (its Findings section) is the only file that comes back to main", "not: any production file on main"]
@@ -22,6 +22,7 @@ Know, with a recording and numbers, whether the 0088 behaviour can be built on W
 - [x] Y2: see `docs/specs/floating-icon-spike.md`, Acceptance
 
 ## Done
+- 2026-10-05 fis-build: review fixes: findings corrected (83e704e), real pointer paths log coordinates (e91d2a7), by-hand take script .wt-notes/fis-build/y1-pointer.sh prepared, not run
 - 2026-10-05 fis-build: spike on floating-icon-spike (b0ef83a, cec8595), findings ee49014; recording .wt-notes/fis-build/y1.mov; FR-1..4 yes with conditions
 - 2026-10-05 sup42: worktree .wt/floating-icon-spike from cda89ab; seat fis-build launched
 - 2026-10-05 0089 ruled by pablo ("ok", a2b53a0); sup42 launched by the FSE
