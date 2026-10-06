@@ -42,12 +42,28 @@
 # zellij, the probe layouts and discuss are pointed away in that config, so
 # nothing of this machine leaks into the fixture.
 #
+# --twenty and --empty export CLAUDE_CONFIG_DIR to an empty directory, so
+# Usage there shows "No sessions recorded yet" and never reads ~/.claude.
+#
 # --empty lays out a home with no initiatives at all (leftovers-13 FR-5), so
 # the floating list's "no initiatives" state (docs/ux/specs/floating-icon.md
 # §3) can be shown: the config's only root is an empty directory, and
 # zellij, the probe layouts and discuss are pointed away as in --twenty. It
 # starts no stand-in agent, since there is no initiative to put one in;
 # FIXTURE_AGENT_PIDS is exported empty, so there is nothing to kill.
+#
+# Usage (docs/specs/usage.md U1-U8): the default home also carries a usage
+# history, laid by testdata/fixture-usage/usage.py: synthetic transcripts
+# under $tmp/claude/projects (CLAUDE_CONFIG_DIR is exported to $tmp/claude,
+# since the ledger reads $CLAUDE_CONFIG_DIR/projects; never the real
+# ~/.claude) and their run records appended to the fixture's runs.jsonl.
+# Six weeks ending this one: a partial first week (from its Thursday), a
+# week with one session, a week with no sessions, last week, and this week
+# with a wave on init-a's w-review (wave1-build, wave1-review and sup11, whom
+# the temp copy's Notes name as its supervisor), an FSE session, a session
+# outside every initiative (Not attributed), one with no cost, a Haiku
+# sub-agent, and the running Hephaistos session (the probe-hefesto
+# stand-in's live record). The script's header in usage.py lists each.
 #
 # The FSE thread of G19 lives in the discuss mailbox, project organizer-fixture,
 # not on disk; the supervisor posted it once. Ruling it or the records only
@@ -155,8 +171,10 @@ EOF
     standin "$home/$init/.wt/$card"
   done < "$src/agents.txt"
   echo "$pids" > "$tmp/agents.pid"
+  mkdir -p "$tmp/claude"
   echo "export ORGANIZER_CONFIG='$tmp/config.yaml'"
   echo "export XDG_DATA_HOME='$tmp/data'"
+  echo "export CLAUDE_CONFIG_DIR='$tmp/claude'"
   echo "export FIXTURE_HOME='$home'"
   echo "export FIXTURE_AGENT_PIDS='${pids# }'"
   exit 0
@@ -177,8 +195,10 @@ probe_state_dir: ""
 discuss_state_dir: $tmp/discuss
 EOF
   : > "$tmp/agents.pid"
+  mkdir -p "$tmp/claude"
   echo "export ORGANIZER_CONFIG='$tmp/config.yaml'"
   echo "export XDG_DATA_HOME='$tmp/data'"
+  echo "export CLAUDE_CONFIG_DIR='$tmp/claude'"
   echo "export FIXTURE_HOME='$home'"
   echo "export FIXTURE_AGENT_PIDS=''"
   exit 0
@@ -200,6 +220,9 @@ sed -i '' "s#\"/h/init-a\"#\"$a\"#" "$a/agents/cell.json"
 for f in "$home/agent-slack/docs/bitacora/hephaistos_bitacora.md" "$a/docs/bitacora/aglaea_bitacora.md" "$home/work/init-b/docs/bitacora/daedalus_bitacora.md"; do
   perl -MPOSIX=strftime -pi -e 's/\@D(\d+)\@/strftime("%Y-%m-%d", localtime(time - $1 * 86400))/ge' "$f"
 done
+# The usage history (header): sup11 supervises w-review in the temp copy,
+# written before init-a's first commit so the checkout stays clean.
+printf '\n## Notes\n- sup11: launched wave1-build, then wave1-review\n' >> "$a/working-on/w-review.md"
 g() { git -C "$a" -c user.name=fixture -c user.email=fixture@example.invalid "$@"; }
 g init -q -b main
 g add -A
@@ -354,7 +377,12 @@ for d in "$home/work/init-b" "$home/init-many" "$home/init-define" "$home/init-d
 done
 echo "${pids# }" > "$tmp/agents.pid"
 
+# The usage history (header).
+mkdir -p "$tmp/claude"
+python3 "$repo/testdata/fixture-usage/usage.py" "$tmp/claude" "$tmp/data" "$home" fixture-probe-hefesto
+
 echo "export ORGANIZER_CONFIG='$tmp/config.yaml'"
 echo "export XDG_DATA_HOME='$tmp/data'"
+echo "export CLAUDE_CONFIG_DIR='$tmp/claude'"
 echo "export FIXTURE_HOME='$home'"
 echo "export FIXTURE_AGENT_PIDS='${pids# }'"
