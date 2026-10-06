@@ -11,7 +11,8 @@ import "../styles/float.css";
  *  §3): the Wails window, brought to this desktop at 360 wide, shows only
  *  this. A search, Home with Needs me's count, then the rail's order and
  *  groups, name and signals. A pick opens it full here; Escape (after
- *  clearing), a click outside or the icon send it home. */
+ *  clearing), a click outside or the icon send it home; a double-click on
+ *  the icon opens it full at the view it last showed. */
 export function FloatList() {
   const { view, agents, loading, openInitiative, goHome } = useBoard();
   const [open, setOpen] = useState(false);
@@ -33,6 +34,10 @@ export function FloatList() {
     setOpen(true);
   }), []);
   useEffect(() => EventsOn("floaticon:close", () => setOpen(false)), []);
+  // A double-click on the icon grew the list into the full window: the list
+  // goes and the view it covered, the last one shown, is what shows. The list
+  // never changes the store's view, so nothing is restored.
+  useEffect(() => EventsOn("floaticon:expand", () => setOpen(false)), []);
 
   const all = useMemo(() => floatList(view, agents), [view, agents]);
   const list = useMemo(() => filterList(all, query), [all, query]);

@@ -17,18 +17,25 @@
 #import <QuartzCore/QuartzCore.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include "floaticon_darwin.h"
 
 extern void floatIconClicked(char *origin);
 extern void floatIconClosed(void);
+extern void floatIconExpanded(void);
 extern void floatIconUnavailable(char *reason);
 
-static const CGFloat kTile = 56;
-static const CGFloat kRadius = 14;
-static const CGFloat kPad = 40;       // room for the dragging shadow, 0 16px 40px
+// The icon's size is per display (Amendment 1, F12): 56 pt, 72 or 88 by the
+// display's visible width. Everything drawn scales by size / 56: the radius,
+// the bars, the shadows and the panel's shadow margin. The inset, the first
+// place, the drag threshold and the list stay in points.
+static const CGFloat kBase = 56;      // the size the layers are drawn for
+static const CGFloat kBasePad = 40;   // room for the dragging shadow at 56, 0 16px 40px
 static const CGFloat kInset = 8;      // the tile stays this far inside the visible frame
 static const CGFloat kFirst = 24;     // first place: bottom right, this far in
 static const CGFloat kDragAt = 4;     // a press that moves more is a drag
+static CGFloat tileSz = kBase;        // the tile's side now, in points
+static CGFloat padSz = kBasePad;      // the panel's shadow margin now
 static const CGFloat kListW = 360;
 static const CGFloat kListMaxH = 480;
 static const CGFloat kListMinH = 160;
@@ -40,6 +47,7 @@ static const char *stateName[] = {"home", "listing", "compacted", "returning"};
 static NSPanel *panel;
 static CALayer *group;                // the tile and its shadows; scaled as one
 static CALayer *shadowNear, *shadowFar;
+static CALayer *tileLayer;           // the rounded square the bars sit on
 static NSArray<CALayer *> *bars;
 static NSWindow *mainWin;
 static NSWindow *marker;              // 1x1 window left on the home desktop
@@ -53,6 +61,8 @@ static NSWindowStyleMask homeStyle;
 static NSColor *homeBackground;
 static BOOL started;
 static FILE *logFile;
+static char *logPath;                 // the float log's path, kept for the check hook
+static dispatch_source_t usr1, usr2; // the check hooks, only with FLOAT_LOG
 static NSString *placePath;
 static NSMutableDictionary *places;   // display key -> {x, y} of the tile from the visible frame's origin
 
@@ -104,7 +114,20 @@ static NSString *screenKey(NSScreen *s) {
     return [NSString stringWithFormat:@"%u-%u-%u", CGDisplayVendorNumber(d), CGDisplayModelNumber(d), CGDisplaySerialNumber(d)];
 }
 
-static NSRect tileOf(NSRect win) { return NSMakeRect(NSMinX(win) + kPad, NSMinY(win) + kPad, kTile, kTile); }
+// A check's stand-in for every display's visible width, only with FLOAT_LOG
+// set: FLOAT_SIZE_WIDTH at start, then the number in <FLOAT_LOG>.width when
+// SIGUSR1 arrives (0 is the real width). One display can then show each size
+// and the screen-change path. 0 means none.
+static CGFloat widthStandIn;
+
+// The size for a display, by its visible width (F12): up to 1920 is 56,
+// to 2999 is 72, from 3000 is 88.
+static CGFloat sizeFor(NSScreen *s) {
+    CGFloat w = widthStandIn > 0 ? widthStandIn : NSWidth([s visibleFrame]);
+    return w >= 3000 ? 88 : w > 1920 ? 72 : 56;
+}
+
+static NSRect tileOf(NSRect win) { return NSMakeRect(NSMinX(win) + padSz, NSMinY(win) + padSz, tileSz, tileSz); }
 
 static NSScreen *screenAt(NSPoint p) {
     for (NSScreen *s in [NSScreen screens]) {
@@ -115,10 +138,12 @@ static NSScreen *screenAt(NSPoint p) {
 
 static NSRect clampTile(NSRect t, NSScreen *s) {
     NSRect v = NSInsetRect([s visibleFrame], kInset, kInset);
-    t.origin.x = MAX(NSMinX(v), MIN(NSMinX(t), NSMaxX(v) - kTile));
-    t.origin.y = MAX(NSMinY(v), MIN(NSMinY(t), NSMaxY(v) - kTile));
+    t.origin.x = MAX(NSMinX(v), MIN(NSMinX(t), NSMaxX(v) - tileSz));
+    t.origin.y = MAX(NSMinY(v), MIN(NSMinY(t), NSMaxY(v) - tileSz));
     return t;
 }
+
+static void sizeIcon(CGFloat size, NSString *why);
 
 static void savePlaces(void) {
     if (placePath) [places writeToFile:placePath atomically:YES];
@@ -132,13 +157,16 @@ static void placeIcon(void) {
     for (NSScreen *s in [NSScreen screens]) {
         if ([screenKey(s) isEqualToString:last]) scr = s;
     }
+    sizeIcon(sizeFor(scr), @"place");
     NSRect vis = [scr visibleFrame];
     NSDictionary *p = places[screenKey(scr)];
-    NSRect t = p ? NSMakeRect(NSMinX(vis) + [p[@"x"] doubleValue], NSMinY(vis) + [p[@"y"] doubleValue], kTile, kTile)
-                 : NSMakeRect(NSMaxX(vis) - kFirst - kTile, NSMinY(vis) + kFirst, kTile, kTile);
+    NSRect t = p ? NSMakeRect(NSMinX(vis) + [p[@"x"] doubleValue], NSMinY(vis) + [p[@"y"] doubleValue], tileSz, tileSz)
+                 : NSMakeRect(NSMaxX(vis) - kFirst - tileSz, NSMinY(vis) + kFirst, tileSz, tileSz);
     t = clampTile(t, scr);
-    [panel setFrameOrigin:NSMakePoint(NSMinX(t) - kPad, NSMinY(t) - kPad)];
-    flog(@"place: tile %@, inside %@", NSStringFromRect(tileOf([panel frame])), NSStringFromRect(NSInsetRect(vis, kInset, kInset)));
+    [panel setFrameOrigin:NSMakePoint(NSMinX(t) - padSz, NSMinY(t) - padSz)];
+    flog(@"place: tile %@, icon %.0f pt radius %.0f (panel frame read back %@), inside %@ of display %@ (visible width %.0f)",
+         NSStringFromRect(tileOf([panel frame])), NSWidth([panel frame]) - 2 * padSz, tileLayer.cornerRadius, NSStringFromRect([panel frame]),
+         NSStringFromRect(NSInsetRect(vis, kInset, kInset)), screenKey(scr), NSWidth(vis));
 }
 
 static void reanchorList(NSRect tile);
@@ -147,6 +175,12 @@ static void reanchorList(NSRect tile);
 static void dropAt(void) {
     NSRect t = tileOf([panel frame]);
     NSScreen *s = screenAt(NSMakePoint(NSMidX(t), NSMidY(t)));
+    // Dropped on a display of another size: the icon takes that size at
+    // once, about the same centre, then springs inside the display.
+    if (sizeFor(s) != tileSz) {
+        sizeIcon(sizeFor(s), @"drop");
+        t = tileOf([panel frame]);
+    }
     t = clampTile(t, s);
     NSRect vis = [s visibleFrame];
     places[screenKey(s)] = @{@"x" : @(NSMinX(t) - NSMinX(vis)), @"y" : @(NSMinY(t) - NSMinY(vis))};
@@ -155,7 +189,7 @@ static void dropAt(void) {
     // The window animator animates frame, not frameOrigin: an animated
     // setFrameOrigin: is dropped, which left the icon where the pointer let
     // go, under the Dock (Pablo's take 3). Animate the frame, then make sure.
-    NSRect target = NSMakeRect(NSMinX(t) - kPad, NSMinY(t) - kPad, NSWidth([panel frame]), NSHeight([panel frame]));
+    NSRect target = NSMakeRect(NSMinX(t) - padSz, NSMinY(t) - padSz, NSWidth([panel frame]), NSHeight([panel frame]));
     void (^landed)(void) = ^{
         if (!NSEqualRects([panel frame], target)) [panel setFrame:target display:YES];
         flog(@"drop: tile landed at %@, inside %@ with the 8 px inset, on %@", NSStringFromRect(tileOf([panel frame])),
@@ -181,7 +215,7 @@ static void clampIcon(NSString *why) {
     NSScreen *s = screenAt(NSMakePoint(NSMidX(t), NSMidY(t)));
     NSRect c = clampTile(t, s);
     if (NSEqualRects(c, t)) return;
-    [panel setFrameOrigin:NSMakePoint(NSMinX(c) - kPad, NSMinY(c) - kPad)];
+    [panel setFrameOrigin:NSMakePoint(NSMinX(c) - padSz, NSMinY(c) - padSz)];
     flog(@"clamp (%@): tile %@ -> %@, inside %@", why, NSStringFromRect(t), NSStringFromRect(tileOf([panel frame])),
          NSStringFromRect(NSInsetRect([s visibleFrame], kInset, kInset)));
 }
@@ -190,13 +224,18 @@ static void clampIcon(NSString *why) {
 
 typedef enum { LookResting, LookHover, LookPressed, LookDragging } Look;
 
+static Look look = LookResting;      // the look now, re-applied at a new size
+
+// §2's offsets and blur are for 56; they scale with the icon (F12).
 static void setShadow(CALayer *l, CGFloat y, CGFloat blur, CGFloat a) {
+    CGFloat k = tileSz / kBase;
     l.shadowOpacity = a;
-    l.shadowRadius = blur / 2;
-    l.shadowOffset = CGSizeMake(0, -y); // layer y is up
+    l.shadowRadius = blur * k / 2;
+    l.shadowOffset = CGSizeMake(0, -y * k); // layer y is up
 }
 
 static void setLook(Look k, double dur) {
+    look = k;
     BOOL still = reduceMotion();
     CGFloat scale = 1.0;
     [CATransaction begin];
@@ -416,6 +455,8 @@ static void reanchorList(NSRect tile) {
     flog(@"list follows the icon to %@", NSStringFromRect(f));
 }
 
+static double clickUpAt;              // wall time of the mouse-up that asked for the list, for the log
+
 static void bringList(void) {
     if (state == StateHome) {
         homeFrame = [mainWin frame];
@@ -442,18 +483,60 @@ static void bringList(void) {
         [NSApp activateIgnoringOtherApps:YES];
         flog(@"click +0.15s: onActive=%d frame=%@", [mainWin isOnActiveSpace], NSStringFromRect([mainWin frame]));
     });
+    // F11: read back, not assumed; the time is from the mouse-up.
+    if (clickUpAt > 0) {
+        flog(@"list front: isVisible=%d onActive=%d frame=%@, %.0f ms after the click", [mainWin isVisible], [mainWin isOnActiveSpace],
+             NSStringFromRect([mainWin frame]), (now() - clickUpAt) * 1000);
+        clickUpAt = 0;
+    }
     // The corner the list grows from: the one by the icon.
     NSString *origin = [NSString stringWithFormat:@"%@ %@", listAbove ? @"bottom" : @"top", NSMidX(tileOf([panel frame])) > NSMidX(f) ? @"right" : @"left"];
     floatIconClicked((char *)[origin UTF8String]);
     update(@"click", NO);
 }
 
+// A click on the icon with the list open closes it only once the
+// double-click interval has passed with no second press (Amendment 2): a
+// second press in time cancels the close and grows the open list, so
+// nothing blinks. Escape and a click outside still close at once.
+static unsigned closeGen;             // bumped to cancel a pending close
+static BOOL closePending;
+
+static void cancelClose(NSString *why) {
+    if (!closePending) return;
+    closePending = NO;
+    closeGen++;
+    flog(@"close cancelled (%@)", why);
+}
+
 static void iconClicked(void) {
     if (state == StateListing && [mainWin isOnActiveSpace] && [mainWin isVisible]) {
-        FloatIconDismiss();
+        unsigned gen = ++closeGen;
+        closePending = YES;
+        double wait = [NSEvent doubleClickInterval];
+        flog(@"close waits %.0f ms for a second click", wait * 1000);
+        after(wait, ^{
+            if (gen != closeGen || !closePending) return;
+            closePending = NO;
+            flog(@"close: no second click in %.0f ms", wait * 1000);
+            FloatIconDismiss();
+        });
         return;
     }
     bringList();
+}
+
+static void goFull(NSString *why);
+
+// A double-click (F10, F11): the list the first click opened grows into the
+// full window here, at the view the window last showed, which the frontend
+// keeps (the list never changes it). If the first click closed an open list
+// instead, the list comes back first, so the growth starts from it.
+static void doubleClicked(void) {
+    if (state == StateHome && [mainWin isVisible] && [mainWin isOnActiveSpace]) return; // already full here
+    if (state != StateListing || ![mainWin isVisible]) bringList();
+    floatIconExpanded(); // the frontend closes the list without touching the view
+    goFull(@"double-click");
 }
 
 // ---------- the panel ----------
@@ -471,6 +554,8 @@ static void iconClicked(void) {
 @property BOOL dragging;
 @property BOOL inside;
 @property BOOL pressing;
+@property NSTimeInterval lastClickUp; // event time of the last click's mouse-up; 0 after a double or a drag
+@property BOOL second;                // this press is the second of a double-click
 @end
 
 static FloatIconView *iconView;
@@ -487,7 +572,7 @@ static FloatIconView *iconView;
 // events needs no permission; only key events do.
 static BOOL overTile(NSPoint p) {
     NSRect t = tileOf([panel frame]);
-    CGFloat grow = kTile * 0.04; // the dragging scale, 1.08, covers hover's 1.06
+    CGFloat grow = tileSz * 0.04; // the dragging scale, 1.08, covers hover's 1.06
     return NSPointInRect(p, NSInsetRect(t, -grow, -grow));
 }
 
@@ -513,13 +598,13 @@ static void watchPointer(void) {
 // Only the tile takes the pointer; the shadow margin does not.
 - (NSView *)hitTest:(NSPoint)p {
     NSPoint q = [self convertPoint:p fromView:[self superview]];
-    return NSPointInRect(q, NSMakeRect(kPad, kPad, kTile, kTile)) ? self : nil;
+    return NSPointInRect(q, NSMakeRect(padSz, padSz, tileSz, tileSz)) ? self : nil;
 }
 
 - (void)updateTrackingAreas {
     [super updateTrackingAreas];
     for (NSTrackingArea *a in [self trackingAreas]) [self removeTrackingArea:a];
-    [self addTrackingArea:[[NSTrackingArea alloc] initWithRect:NSMakeRect(kPad, kPad, kTile, kTile)
+    [self addTrackingArea:[[NSTrackingArea alloc] initWithRect:NSMakeRect(padSz, padSz, tileSz, tileSz)
                                                        options:NSTrackingCursorUpdate | NSTrackingActiveAlways
                                                          owner:self
                                                       userInfo:nil]];
@@ -532,8 +617,13 @@ static void watchPointer(void) {
     self.originAt = [[self window] frame].origin;
     self.dragging = NO;
     self.pressing = YES;
+    // The system's interval, from the last click's mouse-up to this press.
+    NSTimeInterval gap = self.lastClickUp > 0 ? [e timestamp] - self.lastClickUp : -1;
+    self.second = [e clickCount] >= 2 || (gap >= 0 && gap <= [NSEvent doubleClickInterval]);
+    if (self.second) cancelClose(@"second press");
     setLook(LookPressed, 0.08);
-    flog(@"pointer down at %@", NSStringFromPoint(self.downAt));
+    flog(@"pointer down at %@ (clickCount %ld, %.0f ms after the last click, interval %.0f ms%@)", NSStringFromPoint(self.downAt), (long)[e clickCount],
+         gap * 1000, [NSEvent doubleClickInterval] * 1000, self.second ? @", second click" : @"");
 }
 
 - (void)mouseDragged:(NSEvent *)e {
@@ -557,6 +647,7 @@ static void watchPointer(void) {
     self.pressing = NO;
     if (self.dragging) {
         self.dragging = NO;
+        self.lastClickUp = 0; // a drag is never a click
         flog(@"pointer drag end (moved %.1f px)", moved);
         [panel setLevel:NSFloatingWindowLevel];
         dropAt();
@@ -565,6 +656,17 @@ static void watchPointer(void) {
         return;
     }
     setLook(self.inside ? LookHover : LookResting, 0.08);
+    clickUpAt = now();
+    if (self.second) {
+        // A third click starts over: it is a single click again.
+        self.lastClickUp = 0;
+        self.second = NO;
+        flog(@"pointer double-click (moved %.1f px)", moved);
+        doubleClicked();
+        return;
+    }
+    // At once, on mouse-up, with no wait for the interval (F11).
+    self.lastClickUp = [e timestamp];
     flog(@"pointer click (moved %.1f px)", moved);
     iconClicked();
 }
@@ -574,25 +676,75 @@ static void watchPointer(void) {
 - (NSAccessibilityRole)accessibilityRole { return NSAccessibilityButtonRole; }
 - (NSString *)accessibilityLabel { return @"Deltagos"; }
 - (NSString *)accessibilityHelp { return @"Opens the initiative list"; }
+// The press is a single click: it opens the list (a double-click has no
+// accessibility action; a pick in the list opens full).
 - (BOOL)accessibilityPerformPress {
     flog(@"accessibility press");
+    clickUpAt = now();
     iconClicked();
     return YES;
 }
 @end
 
-static CALayer *shadowLayer(CGRect r) {
-    CALayer *l = [CALayer layer];
-    l.frame = r;
-    CGPathRef path = CGPathCreateWithRoundedRect(CGRectMake(0, 0, r.size.width, r.size.height), kRadius, kRadius, NULL);
+static void shadowPath(CALayer *l) {
+    CGPathRef path = CGPathCreateWithRoundedRect(CGRectMake(0, 0, tileSz, tileSz), tileSz / 4, tileSz / 4, NULL);
     l.shadowPath = path;
     CGPathRelease(path);
-    l.shadowColor = CGColorGetConstantColor(kCGColorBlack);
-    return l;
+}
+
+// Lays the layers out for tileSz: the tile, its radius a quarter of it, the
+// bars and the shadows by tileSz / 56. Bounds and position, not frame, since
+// the group carries the look's scale.
+static void layoutLayers(void) {
+    CGFloat k = tileSz / kBase;
+    CGRect inner = CGRectMake(0, 0, tileSz, tileSz);
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
+    group.bounds = inner;
+    group.position = CGPointMake(padSz + tileSz / 2, padSz + tileSz / 2); // anchored at its centre, so it scales in place
+    for (CALayer *l in @[ shadowFar, shadowNear ]) {
+        l.frame = inner;
+        shadowPath(l);
+    }
+    tileLayer.frame = inner;
+    tileLayer.cornerRadius = tileSz / 4;
+    // Three bars, the app icon's mark, drawn at 56 and scaled.
+    CGFloat heights[3] = {30, 20, 25};
+    CGFloat bw = 8 * k, gap = 5 * k, x0 = (tileSz - (3 * bw + 2 * gap)) / 2, base = 13 * k;
+    for (NSUInteger i = 0; i < [bars count]; i++) {
+        CALayer *bar = bars[i];
+        bar.bounds = CGRectMake(0, 0, bw, heights[i] * k);
+        bar.position = CGPointMake(x0 + i * (bw + gap) + bw / 2, base);
+        bar.cornerRadius = 2 * k;
+    }
+    [CATransaction commit];
+}
+
+// The icon at a new size (F12): the panel grows or shrinks about the tile's
+// centre, the margin follows, the layers are laid out again and the look
+// re-applied; the caller clamps. Logged from the window read back.
+static void sizeIcon(CGFloat size, NSString *why) {
+    if (size == tileSz && NSWidth([panel frame]) == size + 2 * padSz) return;
+    NSRect was = tileOf([panel frame]);
+    tileSz = size;
+    padSz = round(kBasePad * size / kBase);
+    CGFloat side = tileSz + 2 * padSz;
+    NSRect f = NSMakeRect(round(NSMidX(was) - side / 2), round(NSMidY(was) - side / 2), side, side);
+    [panel setFrame:f display:NO];
+    [[panel contentView] setFrame:NSMakeRect(0, 0, side, side)];
+    layoutLayers();
+    setLook(look, 0);
+    [[panel contentView] updateTrackingAreas];
+    [[panel contentView] setNeedsDisplay:YES];
+    NSRect r = [panel frame];
+    flog(@"size (%@): icon %.0f pt, radius %.0f, shadow margin %.0f; panel frame read back %@, tile %@", why, NSWidth(r) - 2 * padSz,
+         tileLayer.cornerRadius, padSz, NSStringFromRect(r), NSStringFromRect(tileOf(r)));
 }
 
 static void build(void) {
-    CGFloat side = kTile + 2 * kPad;
+    tileSz = kBase;
+    padSz = kBasePad;
+    CGFloat side = tileSz + 2 * padSz;
     panel = [[FloatPanel alloc] initWithContentRect:NSMakeRect(0, 0, side, side)
                                           styleMask:NSWindowStyleMaskBorderless | NSWindowStyleMaskNonactivatingPanel
                                             backing:NSBackingStoreBuffered
@@ -609,42 +761,35 @@ static void build(void) {
 
     FloatIconView *v = [[FloatIconView alloc] initWithFrame:NSMakeRect(0, 0, side, side)];
     v.wantsLayer = YES;
-    CGRect tileR = CGRectMake(kPad, kPad, kTile, kTile);
     group = [CALayer layer];
-    group.frame = tileR; // anchored at its centre, so it scales in place
-    CGRect inner = CGRectMake(0, 0, kTile, kTile);
-    shadowFar = shadowLayer(inner);
-    shadowNear = shadowLayer(inner);
-    [group addSublayer:shadowFar];
-    [group addSublayer:shadowNear];
+    shadowFar = [CALayer layer];
+    shadowNear = [CALayer layer];
+    for (CALayer *l in @[ shadowFar, shadowNear ]) {
+        l.shadowColor = CGColorGetConstantColor(kCGColorBlack);
+        [group addSublayer:l];
+    }
 
-    CALayer *tile = [CALayer layer];
-    tile.frame = inner;
-    tile.cornerRadius = kRadius;
-    if (@available(macOS 11.0, *)) tile.cornerCurve = kCACornerCurveContinuous;
-    tile.backgroundColor = [hex(0x1a1523) CGColor];
-    tile.borderWidth = 1;
-    tile.borderColor = [[NSColor colorWithWhite:1 alpha:0.08] CGColor];
-    tile.masksToBounds = YES;
-    [group addSublayer:tile];
+    tileLayer = [CALayer layer];
+    if (@available(macOS 11.0, *)) tileLayer.cornerCurve = kCACornerCurveContinuous;
+    tileLayer.backgroundColor = [hex(0x1a1523) CGColor];
+    tileLayer.borderWidth = 1; // the hairline stays one point at every size
+    tileLayer.borderColor = [[NSColor colorWithWhite:1 alpha:0.08] CGColor];
+    tileLayer.masksToBounds = YES;
+    [group addSublayer:tileLayer];
     [v.layer addSublayer:group];
 
     // Three bars, the app icon's mark: now, blocked and next hues.
     unsigned hues[3] = {0xb06cff, 0xff4d63, 0xa9a0ff};
-    CGFloat heights[3] = {30, 20, 25};
-    CGFloat bw = 8, gap = 5, x0 = (kTile - (3 * bw + 2 * gap)) / 2, base = 13;
     NSMutableArray *bs = [NSMutableArray array];
     for (int i = 0; i < 3; i++) {
         CALayer *bar = [CALayer layer];
         bar.anchorPoint = CGPointMake(0.5, 0);
-        bar.bounds = CGRectMake(0, 0, bw, heights[i]);
-        bar.position = CGPointMake(x0 + i * (bw + gap) + bw / 2, base);
-        bar.cornerRadius = 2;
         bar.backgroundColor = [hex(hues[i]) CGColor];
-        [tile addSublayer:bar];
+        [tileLayer addSublayer:bar];
         [bs addObject:bar];
     }
     bars = bs;
+    layoutLayers();
     [panel setContentView:v];
     iconView = v;
     [panel setIgnoresMouseEvents:YES];
@@ -655,6 +800,26 @@ static void build(void) {
         if (!seen) { seen = YES; flog(@"pointer: global move monitor live"); }
         watchPointer();
     }];
+    // The float log says how a list closed (a take reads it back): the keys
+    // the list gets, and the window losing key, which is how a click outside
+    // or leaving the desktop reaches it.
+    [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskKeyDown handler:^NSEvent *(NSEvent *e) {
+        if (state == StateListing && [e window] == mainWin) {
+            unsigned short k = [e keyCode];
+            if (k == 53) flog(@"key: Escape");
+            else if (k == 36 || k == 76) flog(@"key: Return");
+            else if ([[e characters] length]) flog(@"key: typed %@", [e characters]);
+        }
+        return e;
+    }];
+    [[NSNotificationCenter defaultCenter] addObserverForName:NSWindowDidResignKeyNotification object:mainWin queue:[NSOperationQueue mainQueue]
+                                                  usingBlock:^(NSNotification *n) {
+                                                      if (state != StateListing) return;
+                                                      NSPoint p = [NSEvent mouseLocation];
+                                                      flog(@"list lost key: pointer at %@ (%@), list %@, app active=%d", NSStringFromPoint(p),
+                                                           overTile(p) ? @"over the icon" : NSPointInRect(p, [mainWin frame]) ? @"inside the list" : @"outside the list and the icon",
+                                                           NSStringFromRect([mainWin frame]), [NSApp isActive]);
+                                                  }];
     [NSEvent addLocalMonitorForEventsMatchingMask:moves handler:^NSEvent *(NSEvent *e) {
         watchPointer();
         return e;
@@ -674,10 +839,15 @@ static void build(void) {
     breathe();
 }
 
-void FloatIconStart(const char *logPath, const char *placeFile) {
-    char *lp = strdup(logPath), *pp = strdup(placeFile);
+void FloatIconStart(const char *logArg, const char *placeFile) {
+    char *lp = strdup(logArg), *pp = strdup(placeFile);
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (*lp) logFile = fopen(lp, "a");
+        if (*lp) {
+            logFile = fopen(lp, "a");
+            logPath = strdup(lp);
+            const char *w = getenv("FLOAT_SIZE_WIDTH");
+            if (w && *w) widthStandIn = atof(w);
+        }
         if (*pp) placePath = [NSString stringWithUTF8String:pp];
         free(lp);
         free(pp);
@@ -705,8 +875,35 @@ void FloatIconStart(const char *logPath, const char *placeFile) {
                     usingBlock:^(NSNotification *n) { breathe(); setLook(LookResting, 0); }];
         [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidChangeScreenParametersNotification object:nil
                                                            queue:[NSOperationQueue mainQueue]
-                                                      usingBlock:^(NSNotification *n) { placeIcon(); flog(@"screens changed: icon re-placed"); }];
-        flog(@"start: main=%@ min=%@ reduceMotion=%d ignoresMouse=%d", NSStringFromRect([mainWin frame]), NSStringFromSize(appMinSize), reduceMotion(), [panel ignoresMouseEvents]);
+                                                      usingBlock:^(NSNotification *n) {
+                                                          flog(@"screens changed (%lu displays): sizing and placing the icon again", (unsigned long)[[NSScreen screens] count]);
+                                                          placeIcon();
+                                                      }];
+        // With FLOAT_LOG set, SIGUSR1 posts the screen-parameters notification,
+        // so a check without a second display still runs that path.
+        if (logFile) {
+            signal(SIGUSR1, SIG_IGN);
+            usr1 = dispatch_source_create(DISPATCH_SOURCE_TYPE_SIGNAL, SIGUSR1, 0, dispatch_get_main_queue());
+            dispatch_source_set_event_handler(usr1, ^{
+                NSString *w = [NSString stringWithContentsOfFile:[NSString stringWithFormat:@"%s.width", logPath] encoding:NSUTF8StringEncoding error:nil];
+                if (w) widthStandIn = [w doubleValue];
+                flog(@"SIGUSR1: width stand-in %.0f; posting the screen-parameters notification", widthStandIn);
+                [[NSNotificationCenter defaultCenter] postNotificationName:NSApplicationDidChangeScreenParametersNotification object:NSApp];
+            });
+            dispatch_resume(usr1);
+            // SIGUSR2 runs what a double-click's second press and mouse-up
+            // run (not the click count, which only a pointer makes).
+            signal(SIGUSR2, SIG_IGN);
+            usr2 = dispatch_source_create(DISPATCH_SOURCE_TYPE_SIGNAL, SIGUSR2, 0, dispatch_get_main_queue());
+            dispatch_source_set_event_handler(usr2, ^{
+                flog(@"SIGUSR2: the double-click's second press and action, without a pointer");
+                cancelClose(@"second press");
+                clickUpAt = now();
+                doubleClicked();
+            });
+            dispatch_resume(usr2);
+        }
+        flog(@"start: main=%@ min=%@ reduceMotion=%d ignoresMouse=%d icon window %ld", NSStringFromRect([mainWin frame]), NSStringFromSize(appMinSize), reduceMotion(), [panel ignoresMouseEvents], (long)[panel windowNumber]);
         update(@"start", YES);
     });
 }
@@ -744,8 +941,7 @@ void FloatIconCompact(void) {
 
 // A pick: the window goes full on this desktop, which becomes its home; its
 // size and place are the ones it had at home, kept inside this display.
-void FloatIconFull(void) {
-    dispatch_async(dispatch_get_main_queue(), ^{
+static void goFull(NSString *why) {
         if (!started || state != StateListing) return;
         state = StateHome;
         NSScreen *s = [mainWin screen] ?: [NSScreen mainScreen];
@@ -755,12 +951,39 @@ void FloatIconFull(void) {
         f.size.height = MIN(NSHeight(f), NSHeight(v));
         f.origin.x = MAX(NSMinX(v), MIN(NSMinX(f), NSMaxX(v) - NSWidth(f)));
         f.origin.y = MAX(NSMinY(v), MIN(NSMinY(f), NSMaxY(v) - NSHeight(f)));
+        NSRect from = [mainWin frame]; // the list's frame, before its chrome changes
         restoreChrome();
-        [mainWin setFrame:f display:YES animate:!reduceMotion()];
+        // The growth keeps the house motion (Amendment 2): 200 ms, not
+        // setFrame:animate:'s own pace (about 0.36 s on the 3440); none under
+        // Reduce motion. The window animator animates the frame; if it did
+        // not land, it is set (the drop's lesson).
+        double t0 = now();
+        BOOL still = reduceMotion();
+        void (^grown)(void) = ^{
+            if (!NSEqualRects([mainWin frame], f)) [mainWin setFrame:f display:YES];
+            BOOL titled = ([mainWin styleMask] & NSWindowStyleMaskTitled) != 0;
+            flog(@"full (%@) read back: %@, growth %.0f ms%@ from %@ to %@, visible=%d onActive=%d key=%d state=%s", why,
+                 titled ? @"full window" : @"still the list", (now() - t0) * 1000, still ? @" (reduce motion: none)" : @"",
+                 NSStringFromRect(from), NSStringFromRect([mainWin frame]), [mainWin isVisible], [mainWin isOnActiveSpace], [mainWin isKeyWindow],
+                 stateName[state]);
+        };
+        if (still) {
+            [mainWin setFrame:f display:YES];
+            grown();
+        } else {
+            [NSAnimationContext runAnimationGroup:^(NSAnimationContext *c) {
+                c.duration = 0.2;
+                c.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
+                [[mainWin animator] setFrame:f display:YES];
+            } completionHandler:grown];
+        }
         markHome();
-        flog(@"full: frame=%@ min=%@", NSStringFromRect([mainWin frame]), NSStringFromSize([mainWin minSize]));
+        flog(@"full (%@): growing to %@ min=%@", why, NSStringFromRect(f), NSStringFromSize([mainWin minSize]));
         update(@"full", NO);
-    });
+}
+
+void FloatIconFull(void) {
+    dispatch_async(dispatch_get_main_queue(), ^{ goFull(@"pick"); });
 }
 
 // Pick nothing (§3, F7): the window leaves this desktop and returns to its
@@ -768,6 +991,7 @@ void FloatIconFull(void) {
 void FloatIconDismiss(void) {
     dispatch_async(dispatch_get_main_queue(), ^{
         if (!started || state != StateListing) return;
+        cancelClose(@"closed now");
         [mainWin orderOut:nil];
         restoreChrome();
         [mainWin setFrame:homeFrame display:NO];
