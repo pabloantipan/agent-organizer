@@ -268,6 +268,7 @@ export function DecisionsView() {
     const isOpen = expanded === r.key;
     const ruledOn = dateWords(parseISO(d.ruled) ?? now, now);
     const t = turnaroundWords(d.raised, d.ruled);
+    const chosen = d.status === "ruled" && d.chosen ? `“${d.chosen}”` : "";
     // FR-12, 0045: every proposed record offers Rule, whoever owns it.
     // FR-13: a record of an initiative that is not active offers none.
     const canRule = d.status === "proposed" && !readOnlyOf(view, r.initiative);
@@ -302,18 +303,25 @@ export function DecisionsView() {
       <div key={r.key} data-dec={r.key} className={`dec ${d.status} ${isOpen ? "expanded" : ""} ${focused ? "focused" : ""}`} style={style}>
         <div className={`dec-head ${stuck ? "stuck" : ""}`}>
           {/* §9: the name says each visible fact once ("waiting" once). */}
-          <button className="dec-line" aria-expanded={isOpen} aria-label={`${lineName(d, now, all ? r.initiative : undefined, ruledOn)}${lineDraft ? ", draft" : ""}`} onClick={() => toggle(r.key)} title={isOpen ? "collapse" : "show the record"}>
+          <button className="dec-line" ref={chosen ? watchLine : undefined} aria-expanded={isOpen} aria-label={`${lineName(d, now, all ? r.initiative : undefined, ruledOn)}${lineDraft ? ", draft" : ""}`} onClick={() => toggle(r.key)} title={`${chosen ? `${chosen} · ` : ""}${isOpen ? "collapse" : "show the record"}`}>
             <span className="dec-num mono">{d.number}</span>
-            <span className="dec-title">{d.title}</span>
+            <span className={`dec-title${d.title.length > TITLE_FLOOR ? " floored" : ""}`}>{d.title}</span>
             {all && <span className="badge">{r.initiative}</span>}
             <span className={`badge dec-status ${d.status}`}>{statusWord(d.status)}</span>
-            {/* FR-1: the chosen option is the line's own item, so it gives way first. */}
-            {d.status === "ruled" && d.chosen && <span className="dec-chosen" title={`“${d.chosen}”`}>“{d.chosen}”</span>}
+            {/* The chosen option and its separator are one item, so they drop
+                together (leftovers-13 FR-1): the option ellipsizes to its floor,
+                the title to its own, then watchLine drops both into the hover. */}
+            {chosen && (
+              <span className={`dec-opt${chosen.length > CHOSEN_FLOOR ? " floored" : ""}`}>
+                <span className="dec-chosen" title={chosen}>{chosen}</span>
+                <span className="dec-sep">·</span>
+              </span>
+            )}
             <span className="dec-meta">
               {d.status === "proposed"
                 ? <>{ownerPhrase(d.owner)} · <b>{waitedWords(age(d))}</b>{lineDraft && <> · draft</>}</>
                 : d.status === "ruled"
-                  ? <>{d.chosen ? "\u00a0· " : null}{rulerWords(d.ruled_by)} · {ruledOn}{t && <> · {t}</>}</>
+                  ? <>{rulerWords(d.ruled_by)} · {ruledOn}{t && <> · {t}</>}</>
                   : d.superseded_by ? <>by {d.superseded_by}</> : null}
             </span>
           </button>
@@ -513,6 +521,40 @@ function timelineCountOf(matched: number, total: number, hidden: number, hiddenH
  *  closing): the ruled record has left To rule, so focus goes to the waiting
  *  record that took its place (the next, else the one before), else to the
  *  To rule heading, and is brought into view under the sticky headings. */
+/** A Ruled line's floors (design system, Decision record; leftovers-13
+ *  FR-1), in characters: the chosen option gives way to about 8, then the
+ *  title to about 20. A text no longer than its floor never shrinks. */
+const CHOSEN_FLOOR = 9; // the quotes count: “accept as…”
+const TITLE_FLOOR = 20;
+
+/** Past both floors a line would overflow: its chosen option drops whole,
+ *  with its separator, and the title gives way below its floor. One
+ *  ResizeObserver over the lines that carry an option; on every resize all
+ *  of them are undropped, read once (one layout) and the overflowing ones
+ *  dropped, before the frame paints. The mark is an attribute React does
+ *  not own, so a re-render keeps it. Its whole text stays in the line's
+ *  hover and name. */
+const watched = new Set<HTMLElement>();
+const settleLines = (lines: Iterable<HTMLElement>) => {
+  const all = [...lines];
+  all.forEach((l) => l.removeAttribute("data-drop"));
+  const over = all.filter((l) => l.scrollWidth > l.clientWidth);
+  over.forEach((l) => l.setAttribute("data-drop", ""));
+};
+const lineSizes = typeof ResizeObserver === "undefined" ? null : new ResizeObserver((entries) => settleLines(entries.map((e) => e.target as HTMLElement)));
+if (typeof document !== "undefined") document.fonts?.ready.then(() => settleLines(watched));
+function watchLine(el: HTMLButtonElement | null) {
+  // React calls a ref callback with the element on mount and null on
+  // unmount; drop the lines that left the document then.
+  if (!el) {
+    watched.forEach((l) => { if (!l.isConnected) { lineSizes?.unobserve(l); watched.delete(l); } });
+    return;
+  }
+  if (watched.has(el)) return;
+  watched.add(el);
+  lineSizes?.observe(el);
+}
+
 function focusAfterRule(index: number) {
   const lines = document.querySelectorAll<HTMLButtonElement>(".dec-rule .dec button.dec-line");
   const target = lines[Math.max(0, index)] ?? lines[lines.length - 1] ?? document.getElementById("dec-rule-h");

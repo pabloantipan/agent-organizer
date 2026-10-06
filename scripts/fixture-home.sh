@@ -10,6 +10,7 @@
 #
 #   eval "$(scripts/fixture-home.sh --twenty)"   # twenty initiatives instead
 #   eval "$(scripts/fixture-home.sh --live-mailbox)"  # init-a's health from discuss
+#   eval "$(scripts/fixture-home.sh --empty)"    # a home with no initiatives
 #
 # Mailbox health (docs/specs/machine-explains-itself.md, A3): deaf and capped
 # cannot be made on demand, so the config's canned_health points at a copy of
@@ -40,6 +41,13 @@
 # FIXTURE_AGENT_PIDS; `kill $FIXTURE_AGENT_PIDS` ends them (they sleep 6 h).
 # zellij, the probe layouts and discuss are pointed away in that config, so
 # nothing of this machine leaks into the fixture.
+#
+# --empty lays out a home with no initiatives at all (leftovers-13 FR-5), so
+# the floating list's "no initiatives" state (docs/ux/specs/floating-icon.md
+# §3) can be shown: the config's only root is an empty directory, and
+# zellij, the probe layouts and discuss are pointed away as in --twenty. It
+# starts no stand-in agent, since there is no initiative to put one in;
+# FIXTURE_AGENT_PIDS is exported empty, so there is nothing to kill.
 #
 # The FSE thread of G19 lives in the discuss mailbox, project organizer-fixture,
 # not on disk; the supervisor posted it once. Ruling it or the records only
@@ -151,6 +159,28 @@ EOF
   echo "export XDG_DATA_HOME='$tmp/data'"
   echo "export FIXTURE_HOME='$home'"
   echo "export FIXTURE_AGENT_PIDS='${pids# }'"
+  exit 0
+fi
+if [ "${1:-}" = "--empty" ]; then
+  tmp="$(cd "$tmp" && pwd -P)"
+  home="$tmp/home"
+  mkdir -p "$tmp/data" "$tmp/discuss"
+  cat > "$tmp/config.yaml" <<EOF
+machine: fixture
+roots:
+  - $home
+max_depth: 3
+auth: off
+agent_binary: organizer-fixture-agent
+zellij: /usr/bin/true
+probe_state_dir: ""
+discuss_state_dir: $tmp/discuss
+EOF
+  : > "$tmp/agents.pid"
+  echo "export ORGANIZER_CONFIG='$tmp/config.yaml'"
+  echo "export XDG_DATA_HOME='$tmp/data'"
+  echo "export FIXTURE_HOME='$home'"
+  echo "export FIXTURE_AGENT_PIDS=''"
   exit 0
 fi
 live_mailbox=""

@@ -3,7 +3,9 @@ package main
 import (
 	"embed"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/logger"
@@ -32,7 +34,7 @@ func main() {
 		Logger:             appLogger(),
 		LogLevel:           logger.INFO,
 		LogLevelProduction: logger.INFO,
-		Title:              "Deltagos",
+		Title:              windowTitle(),
 		Width:              1440,
 		Height:             900,
 		MinWidth:           1024,
@@ -49,6 +51,29 @@ func main() {
 	if err != nil {
 		println("Error:", err.Error())
 	}
+}
+
+// windowTitle is the bundle's display name, else its name, else Deltagos:
+// the review build (scripts/review-build.sh renames its copy) says
+// "Deltagos Review", so nobody types into a reviewer's window thinking it
+// is the lead's (leftovers-13 FR-3). Outside a bundle (wails dev, go run)
+// there is no Info.plist and the title is Deltagos.
+func windowTitle() string {
+	exe, err := os.Executable()
+	if err != nil {
+		return "Deltagos"
+	}
+	plist := filepath.Join(filepath.Dir(filepath.Dir(exe)), "Info.plist")
+	if _, err := os.Stat(plist); err != nil {
+		return "Deltagos"
+	}
+	for _, key := range []string{"CFBundleDisplayName", "CFBundleName"} {
+		out, err := exec.Command("/usr/bin/plutil", "-extract", key, "raw", "-o", "-", plist).Output()
+		if name := strings.TrimSpace(string(out)); err == nil && name != "" {
+			return name
+		}
+	}
+	return "Deltagos"
 }
 
 // appLogger writes to ~/.local/share/organizer/organizer.log so a crash or a

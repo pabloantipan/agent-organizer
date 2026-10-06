@@ -557,7 +557,7 @@ button.counts.linkish { font-family: var(--mono); }
 .cell-stats { display: inline-flex; align-items: baseline; gap: 4px 6px; font-size: var(--font-size-sm); color: var(--muted); flex-wrap: wrap; }
 .cell-stats b { font-family: var(--mono); font-size: var(--font-size-md); color: var(--text); margin-left: 12px; }
 .cell-stats b:first-child { margin-left: 0; }
-.cell-stats b.hot, .cell-filters .hot .mono, .counter.hot, .wakes.hot, .tiny-btn.hot { color: var(--blocked); }
+.cell-stats b.hot, .cell-filters .hot .mono, .counter.hot, .tiny-btn.hot { color: var(--blocked); }
 .slack-body { display: grid; grid-template-columns: 1fr; gap: 14px; flex: 1; min-height: 0; }
 .slack-body.with-people { grid-template-columns: 1fr 250px; }
 .people { display: flex; flex-direction: column; min-height: 0; border-radius: var(--r); background: var(--panel); border: 1px solid var(--border); }
@@ -666,6 +666,8 @@ button.counts.linkish { font-family: var(--mono); }
 .composer select { padding: 3px 8px; font-size: var(--font-size-sm); border-radius: var(--radius-md); }
 .frozen { font-size: var(--font-size-sm); color: var(--blocked); padding: 6px 10px; border-radius: var(--radius-md); background: var(--blocked-soft); }
 .wakes { font-size: var(--font-size-xs); }
+/* Waking every seat is a caution, in the tone, never blocked's red. */
+.wakes.all { color: var(--tone); }
 .linkish.meta { font-size: var(--font-size-sm); color: var(--accent-fg); }
 
 /* discuss from the card back */
@@ -754,14 +756,10 @@ button.counts.linkish { font-family: var(--mono); }
 .dec-num { font-size: var(--font-size-xs); color: var(--dim); flex-shrink: 0; }
 .dec-title { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--font-size-md); }
 /* A record's line never widens its view (decisions-line-and-names FR-1):
-   number, status, ruler and date stay whole; the chosen option gives way
-   first, then the title: it starts at nothing and takes the room the title
-   leaves, up to its whole text, so a long option never shaves the title. */
+   number, status, ruler and date stay whole; the chosen option and the
+   title give way in the order decisions.css keeps (leftovers-13 FR-1). */
 .dec-num, .dec-line .badge, .dec-meta { flex-shrink: 0; }
 .dec-meta { font-size: var(--font-size-sm); color: var(--muted); white-space: nowrap; }
-.dec-chosen { flex: 1000 0 0; min-width: 0; max-width: max-content; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--font-size-sm); color: var(--muted); }
-/* The chosen option and the rest read as one meta: the line's gap closes. */
-.dec-chosen + .dec-meta { margin-left: -10px; }
 .dec-meta b { color: var(--text); font-weight: 600; }
 .badge.dec-status.proposed { background: var(--decision-waiting-bg); color: var(--decision-waiting); border-color: transparent; }
 .badge.dec-status.ruled { background: var(--decision-ruled-bg); color: #b9a3ff; border-color: transparent; }

@@ -93,3 +93,22 @@ button.dec-more:hover { background: var(--surface-hover); }
    the head's second row, stuck with it, between the record line and Rule;
    the box opens below the head, so the card links stay in view. */
 .dec-head > .dec-facts { padding: 0 var(--space-3) var(--space-1); }
+
+/* A Ruled line past its room (leftovers-13 FR-1; design system, Decision
+   record). The chosen option and its separator are one item (.dec-opt) that
+   gives way first: with a shrink a thousand times the title's it ellipsizes
+   down to its floor of about 8 characters, then the title down to about 20
+   (.floored, set only on a text longer than its floor). Past both floors
+   the line would overflow; DecisionsView's watchLine marks it data-drop and
+   the option leaves whole with its dot, the title giving way below its
+   floor. The option's whole text stays in the line's hover and name. */
+.dec-line { overflow: hidden; }
+.dec-opt { display: flex; align-items: baseline; gap: 4px; flex: 0 1000 auto; margin-right: -6px; font-size: var(--font-size-sm); color: var(--muted); white-space: nowrap; }
+/* The floor is the item's, not the text's: a nowrap text's min-content is
+   all of it. 8ch of option, the gap, and the dot's 1ch. */
+.dec-opt.floored { min-width: calc(9ch + 4px); }
+.dec-chosen { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.dec-sep { flex-shrink: 0; width: 1ch; text-align: center; }
+.dec-title.floored { min-width: 20ch; }
+.dec-line[data-drop] .dec-opt { display: none; }
+.dec-line[data-drop] .dec-title { min-width: 0; }

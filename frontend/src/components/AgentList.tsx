@@ -4,11 +4,11 @@ import { api, type Agent } from "../hooks/useWails";
 import { shortHome } from "../lib";
 import { ContextBar, WatcherBadge } from "./ContextBar";
 import { HEALTH, healthState, healthTitle, type HealthState } from "../lib/health";
+import { stateWord } from "../lib/stateWords";
 
-const STATE_LABEL: Record<string, string> = { working: "working", running: "idle", shell: "shell", exited: "exited" };
 /** The word a row shows for its state, which its accessible name reads too
  *  (leftovers-11 FR-3, WCAG 2.5.3): a running agent shows and is named idle. */
-const stateLabel = (a: Agent) => STATE_LABEL[a.state] ?? a.state;
+const stateLabel = (a: Agent) => stateWord(a.state);
 
 /** Rows of agents. Attach opens the zellij session in iTerm2 through the
  *  probe profile. Kill removes a probe (session, layout, profile; the
