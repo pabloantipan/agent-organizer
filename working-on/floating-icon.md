@@ -5,7 +5,7 @@ repos: [organizer]
 branch: floating-icon
 seat: fic-build
 updated: 2026-10-05
-next: "review: floating-icon, gate met, c48cdf2"
+next: "review: floating-icon, gate met, c2ee232"
 review: fail
 depends_on: []
 boundary: ["floaticon_darwin.m, floaticon_darwin.h, floaticon_darwin.go (new, darwin-only) and the hook in app.go", "frontend/src/components/FloatList.tsx (new) and its CSS; TopBar.tsx (the Compact to icon button); the store's openInitiative use only", "frontend/src/lib/ helpers and tests (list rows, search)", "scripts/ (a by-hand check script, like the spike's y1-pointer.sh)", "not: wails.json, build/darwin templates, other Go packages, docs/design-system.md"]
