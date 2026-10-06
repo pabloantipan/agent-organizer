@@ -1,13 +1,13 @@
 ---
 title: Accept the usage spec and launch its two cards; money in Usage only
-status: proposed
+status: ruled
 raised: 2026-10-06
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-06
+ruled_by: pablo
 options: ["accept as written, and money shows only in Usage (0020 narrowed)", "accept, and money shows wherever tokens do (0020 superseded)", "accept with amendments", "send back"]
-chosen:
+chosen: accept as written, and money shows only in Usage (0020 narrowed)
 cards: [usage-ledger, usage-view]
 threads: []
 supersedes: []
@@ -60,3 +60,5 @@ The FSE's and Aglaea's: accept as written, money only in Usage. One place
 for money keeps the cards about the work.
 
 ## Ruling
+
+pablo, 2026-10-06, in the organizer on lodestar: ok
