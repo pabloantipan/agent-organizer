@@ -754,14 +754,10 @@ button.counts.linkish { font-family: var(--mono); }
 .dec-num { font-size: var(--font-size-xs); color: var(--dim); flex-shrink: 0; }
 .dec-title { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--font-size-md); }
 /* A record's line never widens its view (decisions-line-and-names FR-1):
-   number, status, ruler and date stay whole; the chosen option gives way
-   first, then the title: it starts at nothing and takes the room the title
-   leaves, up to its whole text, so a long option never shaves the title. */
+   number, status, ruler and date stay whole; the chosen option and the
+   title give way in the order decisions.css keeps (leftovers-13 FR-1). */
 .dec-num, .dec-line .badge, .dec-meta { flex-shrink: 0; }
 .dec-meta { font-size: var(--font-size-sm); color: var(--muted); white-space: nowrap; }
-.dec-chosen { flex: 1000 0 0; min-width: 0; max-width: max-content; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--font-size-sm); color: var(--muted); }
-/* The chosen option and the rest read as one meta: the line's gap closes. */
-.dec-chosen + .dec-meta { margin-left: -10px; }
 .dec-meta b { color: var(--text); font-weight: 600; }
 .badge.dec-status.proposed { background: var(--decision-waiting-bg); color: var(--decision-waiting); border-color: transparent; }
 .badge.dec-status.ruled { background: var(--decision-ruled-bg); color: #b9a3ff; border-color: transparent; }
