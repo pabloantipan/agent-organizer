@@ -6,7 +6,7 @@ branch: roadmap-outline
 seat: ro-build
 stage: one-window
 updated: 2026-10-06
-next: "review: roadmap-outline, gate met (P1-P8, X0), fb184ee"
+next: "review: roadmap-outline, U1 and U3 fixed, X0 pass, a4ec349"
 depends_on: [roadmap-waves-scan]
 boundary: ["RoadmapView.tsx, Roadmap.tsx and its axis helpers, new outline components and css", "frontend/src/lib helpers and tests", "not: Go, the Calendar, Home"]
 spec: "docs/specs/roadmap-as-a-plan.md (FR-4; docs/ux/specs/roadmap-as-a-plan.md (1f2ded8))"
@@ -33,6 +33,7 @@ docs/specs/roadmap-as-a-plan.md, P1 to P8 and X0. Measured in the review build (
 
 ## Done
 - 2026-10-06 ro-build: Stages is the outline (2686d39 cardBar, 2d71f0d helpers and tests, 90000ed fitTo, fb184ee outline); gate met, branch rebased on main ee1f49c (main ahead only by card commits), unmerged.
+- 2026-10-06 ro-build: U1 and U3 fixed (f8de947, a4ec349), branch rebased on main d10daf6, unmerged. U1: after fitTo and any level change the double-clicked wave, the row under the pointer or the first row in view keeps its height on screen; WKWebView 1024×640, strip: fixture `the late card` wave y 360 → 360 (double-click → Days; `=` → Days and `-` → Fit from the row), real data (real config, temp data dir) sup48's merged wave y 399 → 399 (double-click → Hours); shots `.wt-notes/ro-build/webkit-1024x640-U1-*`. U3: the chevron's transition is under `prefers-reduced-motion: no-preference` (CSS read). X0 from a fresh clone: make test rc 0 (vitest 336), npm run build rc 0, wails build rc 0.
 
 ## Notes
 - Reduced motion checked by inspection only (animation under no-preference).
