@@ -97,7 +97,7 @@ func TestReadRunsWavesRoundsAndDot(t *testing.T) {
 		t.Fatalf("waves=%d %+v", len(waves), waves)
 	}
 	dot := waves[0]
-	if !dot.Dot || dot.Record != "2026-09-26-old-wave.md" || dot.Date != "2026-09-26" || dot.Task != "An older run, prose only" || len(dot.Rounds) != 0 {
+	if !dot.Dot || dot.Record != "2026-09-26-old-wave.md" || dot.Date != "2026-09-26" || dot.Task != "An older run, prose only" || dot.Rounds == nil || len(dot.Rounds) != 0 || dot.Cards == nil {
 		t.Errorf("dot=%+v", dot)
 	}
 	w1, w2 := waves[1], waves[2]

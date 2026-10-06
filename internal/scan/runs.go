@@ -61,6 +61,15 @@ func readRuns(root string, problems []model.Problem) ([]model.Wave, []model.Prob
 		}
 		out = append(out, waves...)
 	}
+	// [] rather than null on the board, a dot's included.
+	for i := range out {
+		if out[i].Cards == nil {
+			out[i].Cards = []string{}
+		}
+		if out[i].Rounds == nil {
+			out[i].Rounds = []model.Round{}
+		}
+	}
 	return out, problems
 }
 
