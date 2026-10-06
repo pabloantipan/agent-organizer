@@ -2,7 +2,7 @@ import { Fragment, useEffect, useRef, useState, type ReactElement } from "react"
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useBoard } from "../stores/board.store";
 import {
-  CUTS, KIND_NAMES, compact, groupWaves, money, reasonsWords, roleWords, rowDetail, shareWords, usageColumns,
+  CUTS, KIND_NAMES, compact, groupWaves, money, unknownMoney, unknownWords, reasonsWords, roleWords, rowDetail, shareWords, usageColumns,
   type Cut, type Kinds, type TaskRow, type UsageRow, type UsageSession,
 } from "../lib/usage";
 
@@ -36,9 +36,9 @@ export function UsageTable({ rows, cut, setCut, sessions }: { rows: UsageRow[]; 
     return Object.values(view?.board.columns ?? {}).flat().find((c) => c.initiative_id === initiative && c.slug === slug && c.local);
   };
   const shown: TaskRow[] = cut === "task" ? groupWaves(rows) : rows;
-  const cells = (r: { money?: number | null; tokens?: number } & Partial<Kinds>, m: { noCost?: string; share?: number; sessions?: number }) => (
+  const cells = (r: { money?: number | null; tokens?: number } & Partial<Kinds>, m: { noCost?: string; share?: number; sessions?: number; unknown?: boolean }) => (
     <>
-      <td className="c-num" title={m.noCost}>{money(r.money)}{m.noCost && r.money != null && <span className="no-cost">*</span>}</td>
+      <td className="c-num" title={m.noCost}>{m.unknown ? "—" : money(r.money)}{m.noCost && !m.unknown && r.money != null && <span className="no-cost">*</span>}</td>
       <td className="c-share" title={m.share != null ? shareWords(m.share) : undefined}>
         {m.share != null && <span className="share-bar" aria-label={shareWords(m.share)} role="img"><span style={{ width: `${Math.min(100, m.share * 100)}%` }} /></span>}
       </td>
@@ -81,7 +81,7 @@ export function UsageTable({ rows, cut, setCut, sessions }: { rows: UsageRow[]; 
               {cut === "task" && !r.not_attributed && r.initiative && !depth && <span className="name-meta mono">{r.initiative}{wave ? ` · ${r.cards!.length} cards` : ""}</span>}
             </span>
           </th>
-          {cells(r, { noCost: r.without_cost > 0 ? `excludes ${r.without_cost} session${r.without_cost === 1 ? "" : "s"} with no cost` : undefined, share: r.share, sessions: r.sessions })}
+          {cells(r, { unknown: unknownMoney(r), noCost: unknownMoney(r) ? unknownWords(r.sessions) : r.without_cost > 0 ? `excludes ${r.without_cost} session${r.without_cost === 1 ? "" : "s"} with no cost` : undefined, share: r.share, sessions: r.sessions })}
         </tr>
         {opens && isOpen && wave && r.children!.map((c) => <Fragment key={c.key}>{line(c, depth + 1)}</Fragment>)}
         {opens && isOpen && members.map((m) => {

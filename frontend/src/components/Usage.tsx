@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Usage as fetchUsage } from "../../wailsjs/go/main/App";
 import { useBoard } from "../stores/board.store";
 import {
-  changeWords, compact, forInitiative, hoursWords, kindsLargestFirst, money, sessionsWords, shiftWeek, totalsNotes, weekDays, weekLabel,
+  changeWords, compact, forInitiative, moneyOf, unknownMoney, unknownWords, hoursWords, kindsLargestFirst, money, sessionsWords, shiftWeek, totalsNotes, weekDays, weekLabel,
   type Cut, type UsageRow, type UsageSession, type UsageTotals, type WeekPoint,
 } from "../lib/usage";
 import { UsageChart } from "./UsageChart";
@@ -118,8 +118,8 @@ function Week({ data, thisWeek, cut, setCut, filter, onPick }: { data: UsageData
       <div className="usage-tiles">
         <div className="stat-tile">
           <span className="stat-label">Money</span>
-          <b className="stat-value num">{money(t.money)}</b>
-          <span className="stat-sub">{one ? `${filter} only` : changeWords(data.this_week.money, data.last_week.money)}</span>
+          <b className="stat-value num" title={unknownMoney(t) ? unknownWords(t.sessions) : undefined}>{moneyOf(t)}</b>
+          <span className="stat-sub">{one ? `${filter} only` : changeWords(data.this_week.money, data.last_week.money, { now: unknownMoney(data.this_week) ? data.this_week.sessions : 0, last: unknownMoney(data.last_week) })}</span>
           {notes.length > 0 && <span className="stat-sub">{notes.join(" · ")}</span>}
         </div>
         <div className="stat-tile">
@@ -184,7 +184,7 @@ function WeekPicker({ data, thisWeek, onPick }: { data: UsageData; thisWeek: str
           )}
           {(data.weeks ?? []).map((w) => (
             <button key={w.week} role="menuitem" className="num" aria-current={w.week === data.week} onClick={() => { onPick(w.week); close(true); }}>
-              <span>{w.week === thisWeek ? "This week" : weekDays(w)}</span><span className="wl-money">{money(w.money)}</span>
+              <span>{w.week === thisWeek ? "This week" : weekDays(w)}</span><span className="wl-money" title={unknownMoney(w) ? unknownWords(w.sessions) : undefined}>{moneyOf(w)}</span>
             </button>
           ))}
         </div>

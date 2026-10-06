@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { barLabel, compact, gridMoney, money, moneyGrid, sessionsWords, weekDays, type WeekPoint } from "../lib/usage";
+import { barLabel, compact, gridMoney, moneyGrid, moneyOf, sessionsWords, unknownMoney, unknownWords, weekDays, type WeekPoint } from "../lib/usage";
 
 const HEIGHT = 120;
+const STUB = 8;
 
 /** Money per week, the view's one chart (her §3; dataviz: one measure, one
  *  axis, one hue). Up to 12 bars, oldest first; the selected week is the
@@ -11,7 +12,7 @@ export function UsageChart({ history, week, thisWeek, onPick, every }: { history
   const [table, setTable] = useState(false);
   const [hover, setHover] = useState<string | null>(null);
   const grid = moneyGrid(Math.max(0, ...history.map((p) => p.money)));
-  const words = (p: WeekPoint) => `${p.week === thisWeek ? "This week, " : ""}${weekDays(p)} · ${money(p.money)} · ${compact(p.tokens)} tokens · ${sessionsWords(p.sessions)}`;
+  const words = (p: WeekPoint) => `${p.week === thisWeek ? "This week, " : ""}${weekDays(p)} · ${unknownMoney(p) ? unknownWords(p.sessions) : moneyOf(p)} · ${compact(p.tokens)} tokens · ${sessionsWords(p.sessions)}`;
   return (
     <section className="usage-sec" aria-label="money per week">
       <div className="usage-sec-head">
@@ -27,7 +28,7 @@ export function UsageChart({ history, week, thisWeek, onPick, every }: { history
             {[...history].reverse().map((p) => (
               <tr key={p.week} className={p.week === week ? "on" : ""} aria-current={p.week === week}>
                 <td><button className="link" onClick={() => onPick(p.week)}>{p.week === thisWeek ? "This week" : weekDays(p)}</button></td>
-                <td>{money(p.money)}</td><td>{compact(p.tokens)}</td><td>{p.sessions}</td>
+                <td title={unknownMoney(p) ? unknownWords(p.sessions) : undefined}>{moneyOf(p)}</td><td>{compact(p.tokens)}</td><td>{p.sessions}</td>
               </tr>
             ))}
           </tbody>
@@ -40,14 +41,16 @@ export function UsageChart({ history, week, thisWeek, onPick, every }: { history
             ))}
             <div className="chart-bars">
               {history.map((p) => {
-                const h = p.money > 0 ? Math.max(2, (p.money / grid.top) * HEIGHT) : 0;
+                // Wholly unknown money is an outlined stub, not a missing bar (UI3).
+                const unknown = unknownMoney(p);
+                const h = unknown ? STUB : p.money > 0 ? Math.max(2, (p.money / grid.top) * HEIGHT) : 0;
                 const on = p.week === week;
                 return (
                   <button key={p.week} className={`chart-bar ${on ? "on" : ""}`} onClick={() => onPick(p.week)}
                     onMouseEnter={() => setHover(p.week)} onMouseLeave={() => setHover(null)} onFocus={() => setHover(p.week)} onBlur={() => setHover(null)}
                     aria-label={words(p)} aria-pressed={on}>
-                    {on && <span className="chart-label num" style={{ bottom: h + 4 }}>{money(p.money)}</span>}
-                    <span className="chart-mark" style={{ height: h }} />
+                    {on && <span className="chart-label num" style={{ bottom: h + 4 }}>{moneyOf(p)}</span>}
+                    <span className={`chart-mark ${unknown ? "unknown" : ""}`} style={{ height: h }} />
                     {hover === p.week && <span className="chart-tip num" role="tooltip" style={{ bottom: h + (on ? 24 : 6) }}>{words(p)}</span>}
                   </button>
                 );

@@ -70,6 +70,18 @@ export function money(n: number | null | undefined): string {
   return `${sign}$${whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}.${cents}`;
 }
 
+/** Money wholly unknown (FR-5a, UI3): sessions ran and none carries a
+ *  cost. With `without_cost` it is counted; a week point has none, and there
+ *  $0 over sessions is unknown, since a session with tokens never costs
+ *  nothing (the ledger reads a $0 record as no cost). */
+export function unknownMoney(x: { money: number; sessions: number; without_cost?: number }): boolean {
+  if (!(x.sessions > 0)) return false;
+  return x.without_cost != null ? x.without_cost >= x.sessions && !(x.money > 0) : !(x.money > 0);
+}
+/** Money as a cell, a bar or a tile says it: `—` when wholly unknown. */
+export const moneyOf = (x: { money: number; sessions: number; without_cost?: number }) => (unknownMoney(x) ? "—" : money(x.money));
+export const unknownWords = (n: number) => `no cost recorded for ${n} session${n === 1 ? "" : "s"}`;
+
 /** A token count as data reads it: `25.0M`, `830k`, `8.3k`, `412`, `1.2B`. */
 export function compact(n: number): string {
   const a = Math.abs(n);
@@ -161,8 +173,11 @@ export function shiftWeek(week: string, n: number): string {
 }
 
 /** Money this week on last, in words and neutral ink (her Money tile):
- *  `+12% on last week ($75.10)`, `−8% on last week ($75.10)`. */
-export function changeWords(now: number, last: number): string {
+ *  `+12% on last week ($75.10)`, `−8% on last week ($75.10)`. A week whose
+ *  money is wholly unknown says so instead of a change (UI3). */
+export function changeWords(now: number, last: number, unknown: { now?: number; last?: boolean } = {}): string {
+  if (unknown.now) return unknownWords(unknown.now);
+  if (unknown.last) return "no cost recorded the week before";
   if (last <= 0) return now > 0 ? "nothing spent the week before" : "nothing spent the week before either";
   const pct = ((now - last) / last) * 100;
   const r = Math.round(pct);

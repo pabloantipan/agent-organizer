@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  agentsWeekLine, barLabel, changeWords, groupWaves, compact, duration, forInitiative, hoursWords, isoWeekOf, kindsLine,
+  agentsWeekLine, barLabel, changeWords, groupWaves, moneyOf, unknownMoney, compact, duration, forInitiative, hoursWords, isoWeekOf, kindsLine,
   money, moneyGrid, reasonsWords, roleWords, rowDetail, shareWords, shiftWeek, sortRows, startWords, totalsNotes,
   usageColumns, weekLabel, weekRange, type UsageRow, type UsageSession,
 } from "./usage";
@@ -197,5 +197,24 @@ describe("groupWaves", () => {
     expect(kids("organizer/wave:sup48")).toEqual(["organizer/other", "organizer/usage-view"]);
     expect(kids("organizer/wave:sup47")).toEqual(["organizer/usage-ledger"]);
     expect(kids("organizer/wave:sup46")).toEqual([]);
+  });
+});
+
+describe("unknown money", () => {
+  it("is unknown only when sessions ran and none carries a cost", () => {
+    expect(unknownMoney({ money: 0, sessions: 3, without_cost: 3 })).toBe(true);
+    expect(unknownMoney({ money: 4.2, sessions: 3, without_cost: 1 })).toBe(false);
+    expect(unknownMoney({ money: 0, sessions: 0, without_cost: 0 })).toBe(false);
+    expect(unknownMoney({ money: 0, sessions: 2 })).toBe(true);
+    expect(unknownMoney({ money: 0, sessions: 0 })).toBe(false);
+  });
+  it("reads — for unknown, never $0.00", () => {
+    expect(moneyOf({ money: 0, sessions: 7, without_cost: 7 })).toBe("—");
+    expect(moneyOf({ money: 0, sessions: 0 })).toBe("$0.00");
+    expect(moneyOf({ money: 12.5, sessions: 2, without_cost: 1 })).toBe("$12.50");
+  });
+  it("says unknown in the change words", () => {
+    expect(changeWords(0, 10, { now: 7 })).toBe("no cost recorded for 7 sessions");
+    expect(changeWords(10, 0, { last: true })).toBe("no cost recorded the week before");
   });
 });
