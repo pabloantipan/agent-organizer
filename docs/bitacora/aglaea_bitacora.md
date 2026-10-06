@@ -82,3 +82,4 @@ its source).
 - 2026-10-05 — sup41 dst-ui A1/A2: tallness decided before ruling and held; inset line accepted (decisions-view §8).
 - 2026-10-05 — sup43 fic-ui A1: the panel keeps the native window shadow (spec §3); A2 to look at once installed.
 - 2026-10-05 — 0091: double-click to the full app at its last view; list at once; icon 56/72/88 pt by display (floating-icon amendment 1).
+- 2026-10-05 — sup44 A1/A2: the icon's close waits out the double-click interval; growth 200 ms (floating-icon amendment 2).

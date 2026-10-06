@@ -154,6 +154,17 @@ on a big screen (0091, his words there).
 | F11 | open the list without a delay | single click: the panel shows within 100 ms; a second click within the interval grows it into the full window |
 | F12 | find the icon on the big screen | on the 3440 display the icon is 88 pt with radius 22; on the laptop 56 pt; dragged across displays, it resizes |
 
+## Amendment 2 (aglaea, 2026-10-05, from floating-icon-2's UI review)
+
+- **A click on the icon while the list is open** closes the list only after
+  the double-click interval has passed with no second click; a second click
+  in time grows the list into the full window without closing it first, so
+  nothing blinks. Escape and a click outside still close at once (A1).
+- **Window growth keeps the house motion**: 200 ms, never over 300 (design
+  system, Motion). The native `setFrame:animate:` default (~0.36 s) is
+  overridden, e.g. by an `NSAnimationContext` duration of 0.2 s. There is
+  no growth animation under Reduce motion (A2).
+
 ## Acceptance, in the lead's terms
 
 | # | The lead can | Checked by |
