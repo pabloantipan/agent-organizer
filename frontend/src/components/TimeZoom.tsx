@@ -3,7 +3,7 @@ import { flushSync } from "react-dom";
 import {
   GUTTER, HOUR, LABEL_GAP, LABEL_W, LEVEL_WORD, PX_HOUR, REVEAL_MARGIN, TICK_GAP, anchorScroll, axisGrowth, buttonAnchor, clampScroll, contextAt, dayMonth, deeper, fitIsWeekly,
   focusAfter, keptBy, overlaps, raised, revealScroll, scaleOf, seriesIndex, shallower, shiftInside, sideOf, skipStep, stackTitles, startOfDay,
-  addLocalDays, stepOf, ticksOf, todayAt, todayLabel, todayScroll, todayTick, windowOf,
+  addLocalDays, rowInView, stepOf, ticksOf, todayAt, todayLabel, todayScroll, todayTick, windowOf,
   type Box, type Level, type Scale, type Span, type ZoomButton,
 } from "../lib/axis";
 import { dateWords } from "../lib/dates";
@@ -36,6 +36,7 @@ export function useTimeZoom(o: ZoomOptions) {
   const [scrollX, setScrollX] = useState(0);
   const [now, setNow] = useState(() => Date.now());
   const pending = useRef<number | null>(null);
+  const keptRow = useRef<{ el: HTMLElement; top: number } | null>(null);
   const gesture = useRef({ done: false, acc: 0, timer: 0 as unknown as ReturnType<typeof setTimeout> });
 
   useEffect(() => { setLevel("fit"); }, [o.reset]);
@@ -76,12 +77,24 @@ export function useTimeZoom(o: ZoomOptions) {
       f.scrollLeft = pending.current;
       pending.current = null;
     }
+    // U1: the row the lead zoomed on stays at the height it had on screen,
+    // though the zoomed frame becomes its own scroller (or stops being one).
+    const keep = keptRow.current;
+    keptRow.current = null;
+    if (keep && keep.el.isConnected) keepRowAt(keep.el, keep.top);
     setScrollX(f.scrollLeft);
   }, [level, laneW]);
 
   const left = () => el.current?.scrollLeft ?? 0;
-  const zoomTo = (next: Level | null, anchor?: { at: number; offset: number }) => {
+  /** Which row a level change keeps in place: the one given (a wave
+   *  double-clicked, the row under the pointer), else the first row in view. */
+  const keepRow = (row?: HTMLElement | null) => {
+    const r = row ?? (el.current ? firstRowInView(el.current) : null);
+    keptRow.current = r ? { el: r, top: r.getBoundingClientRect().top } : null;
+  };
+  const zoomTo = (next: Level | null, anchor?: { at: number; offset: number }, row?: HTMLElement | null) => {
     if (!next || next === level) return;
+    keepRow(row);
     const a = anchor ?? buttonAnchor(scale, left(), view, now);
     pending.current = next === "fit" ? 0 : anchorScroll(scaleFor(next), a.at, a.offset, reserve, view);
     setLevel(next);
@@ -97,18 +110,19 @@ export function useTimeZoom(o: ZoomOptions) {
     return { at: scale.at(left() + offset), offset };
   };
   const api = {
-    zoomIn: (anchor?: { at: number; offset: number }) => zoomTo(deeper(level, o.hours), anchor),
-    zoomOut: (anchor?: { at: number; offset: number }) => zoomTo(shallower(level), anchor),
+    zoomIn: (anchor?: { at: number; offset: number }, row?: HTMLElement | null) => zoomTo(deeper(level, o.hours), anchor, row),
+    zoomOut: (anchor?: { at: number; offset: number }, row?: HTMLElement | null) => zoomTo(shallower(level), anchor, row),
     fit: () => zoomTo("fit"),
     today: () => { if (level !== "fit") scrollTo(todayScroll(scale, now, reserve, view)); },
     pan: (px: number) => scrollTo(left() + px),
     /** Zooms to fit a span (a wave's bar, double-clicked): Hours where it is
      *  offered and the span holds in the lane, else Days, centred on it. */
-    fitTo: (from: number, to: number) => {
+    fitTo: (from: number, to: number, row?: HTMLElement | null) => {
       const next: Level = o.hours && ((to - from) * PX_HOUR) / HOUR <= view - 2 * REVEAL_MARGIN ? "hours" : "days";
       const s = scaleFor(next);
       const x = clampScroll((s.x(from) + s.x(to)) / 2 - view / 2, s, reserve, view);
       if (next === level) { if (el.current) el.current.scrollLeft = x; return; }
+      keepRow(row);
       pending.current = x;
       setLevel(next);
     },
@@ -127,18 +141,19 @@ export function useTimeZoom(o: ZoomOptions) {
     if (!f) return;
     const g = gesture.current;
     const settle = () => { clearTimeout(g.timer); g.timer = setTimeout(() => { g.done = false; g.acc = 0; }, 250); };
-    const step = (dir: number, clientX?: number) => {
+    const step = (dir: number, clientX?: number, clientY?: number) => {
       if (g.done) return;
       g.done = true;
       const a = clientX === undefined ? undefined : pointerRef.current(clientX);
-      if (dir > 0) live.current.zoomIn(a); else live.current.zoomOut(a);
+      const row = clientX === undefined || clientY === undefined ? null : rowAt(f, clientX, clientY);
+      if (dir > 0) live.current.zoomIn(a, row); else live.current.zoomOut(a, row);
     };
     const onWheel = (e: WheelEvent) => {
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault();
         settle();
         g.acc += e.deltaY;
-        if (Math.abs(g.acc) >= 4) step(g.acc < 0 ? 1 : -1, e.clientX);
+        if (Math.abs(g.acc) >= 4) step(g.acc < 0 ? 1 : -1, e.clientX, e.clientY);
         return;
       }
       if (e.shiftKey && levelRef.current !== "fit") {
@@ -146,13 +161,13 @@ export function useTimeZoom(o: ZoomOptions) {
         f.scrollLeft += e.deltaX || e.deltaY;
       }
     };
-    type GestureLike = Event & { scale?: number; clientX?: number };
+    type GestureLike = Event & { scale?: number; clientX?: number; clientY?: number };
     const onGestureStart = (e: Event) => { e.preventDefault(); g.done = false; };
     const onGestureChange = (e: Event) => {
       e.preventDefault();
       const s = (e as GestureLike).scale ?? 1;
-      if (s > 1.08) step(1, (e as GestureLike).clientX);
-      else if (s < 0.92) step(-1, (e as GestureLike).clientX);
+      if (s > 1.08) step(1, (e as GestureLike).clientX, (e as GestureLike).clientY);
+      else if (s < 0.92) step(-1, (e as GestureLike).clientX, (e as GestureLike).clientY);
     };
     const onGestureEnd = (e: Event) => { e.preventDefault(); g.done = false; };
     f.addEventListener("wheel", onWheel, { passive: false });
@@ -195,6 +210,38 @@ export function useTimeZoom(o: ZoomOptions) {
   };
 }
 
+/** The graph's rows, not the axis row. */
+const rowsOf = (frame: HTMLElement) => Array.from(frame.querySelectorAll<HTMLElement>(".tz-row:not(.tz-axis-row)"));
+
+/** The row under a point in the frame, if any (pinch and ⌘+wheel). */
+function rowAt(frame: HTMLElement, x: number, y: number): HTMLElement | null {
+  const r = rowsOf(frame).find((e) => { const b = e.getBoundingClientRect(); return y >= b.top && y < b.bottom; });
+  return r ?? (document.elementFromPoint(x, y)?.closest<HTMLElement>(".tz-row:not(.tz-axis-row)") ?? null);
+}
+
+/** The first row whose body is in view: below the axis (which sticks) and
+ *  the window's top (the buttons and keys zoom). */
+function firstRowInView(frame: HTMLElement): HTMLElement | null {
+  const axis = frame.querySelector<HTMLElement>(".tz-axis-row")?.getBoundingClientRect().bottom ?? 0;
+  const rows = rowsOf(frame);
+  const i = rowInView(rows.map((e) => { const b = e.getBoundingClientRect(); return { top: b.top, bottom: b.bottom }; }), Math.max(axis, frame.getBoundingClientRect().top, 0));
+  return i < 0 ? null : rows[i];
+}
+
+/** Scrolls the row's scrollers, nearest first, until the row's top is back
+ *  at `top` on screen, as far as each scroller allows. */
+function keepRowAt(row: HTMLElement, top: number) {
+  for (let s = row.parentElement; s; s = s.parentElement) {
+    const d = row.getBoundingClientRect().top - top;
+    if (Math.abs(d) < 1) return;
+    const st = getComputedStyle(s);
+    if (!/(auto|scroll)/.test(st.overflowY) || s.scrollHeight <= s.clientHeight) continue;
+    s.scrollTop += d;
+  }
+  const d = row.getBoundingClientRect().top - top;
+  if (Math.abs(d) >= 1) document.scrollingElement?.scrollBy(0, d);
+}
+
 /** `[-] level [+]  Today  Fit`, the same on every graph and at every level
  *  (§A1.1): nothing mounts or unmounts, so the control keeps its width; a
  *  button that cannot act here is disabled, and when the one just pressed
@@ -214,7 +261,7 @@ export function ZoomControl({ z, note }: { z: Zoom; note?: string }) {
     if (!target) { act(); return; }
     const keyboard = e.detail === 0;
     const move = () => {
-      target.focus();
+      target.focus({ preventScroll: true }); // U1: the kept row is measured after this
       if (keyboard) {
         target.classList.add("tz-moved");
         target.addEventListener("blur", () => target.classList.remove("tz-moved"), { once: true });

@@ -251,7 +251,7 @@ function WaveRow({ r, ctx }: { r: Extract<OutlineRow, { kind: "wave" }>; ctx: Ou
     lane = (
       <>
         <span className={`ol-wave ${span.open ? "open" : ""}`} style={{ left, width }} title={`${task}: ${when}. Double-click to fit it`}
-          onDoubleClick={(e) => { e.stopPropagation(); z.fitTo(span.from, span.to); }} />
+          onDoubleClick={(e) => { e.stopPropagation(); z.fitTo(span.from, span.to, e.currentTarget.closest<HTMLElement>(".tz-row")); }} />
         {alsoText && <span className="ol-after" style={{ left: left + width + AFTER_GAP }}>{alsoText}</span>}
       </>
     );
