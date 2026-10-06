@@ -4,6 +4,21 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-06 (late night), roadmap-as-a-plan landed
+
+- **Last SHA seen:** 72f1435. Origin at e67dfda; push when Pablo asks.
+- **roadmap-as-a-plan done** (sup48 ended): f3bebd0, 2164474; 1 h 22 min vs
+  2-4 h, ~$36. Its run record's waves block parses on the board. Next
+  supervisor: sup49. Reinstall pending (Usage + Roadmap).
+- I broke roadmap.yaml:64 (unquoted ": " made an exit item a mapping);
+  fixed d10daf6. Quote any YAML string with ": ".
+- **leftovers-14** = leftovers lists in runs/2026-10-06-usage.md and
+  runs/2026-10-06-roadmap-as-a-plan.md, plus Aglaea's A1-A4 from both. Cut
+  as one accept record with a form; every row a seat's (0095); seat-pointer
+  usable once Hephaistos reports its live check (Pablo granted iTerm
+  permissions 2026-10-06).
+- The factory crashed and restarted ~18:00; sup48 resumed its seats.
+
 ## HAND-OFF — 2026-10-06 (night), usage landed, roadmap running
 
 - **Last SHA seen:** 5e37e5c. Origin at e67dfda (pushed by Pablo).
