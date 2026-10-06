@@ -112,7 +112,8 @@ function Week({ data, thisWeek, cut, setCut, filter, onPick }: { data: UsageData
   const cuts = (one ? one.cuts : data.cuts) as Record<string, UsageRow[]>;
   const sessions = one ? one.sessions : data.sessions ?? [];
   const empty = t.sessions === 0;
-  const notes = totalsNotes(t);
+  // Wholly unknown money already says so on the tile; the note would repeat it.
+  const notes = totalsNotes(unknownMoney(t) ? { ...t, without_cost: 0 } : t);
   return (
     <>
       <div className="usage-tiles">

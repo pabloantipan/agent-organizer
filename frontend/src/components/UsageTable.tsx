@@ -124,7 +124,7 @@ export function UsageTable({ rows, cut, setCut, sessions }: { rows: UsageRow[]; 
             {shown.map((r) => <Fragment key={r.key || "~na"}>{line(r, 0)}</Fragment>)}
           </tbody>
         </table>
-        {shown.some((r) => r.without_cost > 0) && <div className="usage-foot">* excludes sessions with no cost recorded</div>}
+        {shown.some((r) => r.without_cost > 0 && !unknownMoney(r)) && <div className="usage-foot">* excludes sessions with no cost recorded</div>}
       </div>
     </section>
   );
