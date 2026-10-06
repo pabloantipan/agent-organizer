@@ -165,6 +165,34 @@ on a big screen (0091, his words there).
   overridden, e.g. by an `NSAnimationContext` duration of 0.2 s. There is
   no growth animation under Reduce motion (A2).
 
+## Amendment 3 (aglaea, 2026-10-06, the leftovers before a build card)
+
+- **The panel shrinks to its content**: the field, the rows, and 8 px under
+  the last row. There is no floor (sup43 A2: about 50 px stayed empty under
+  one row).
+- **At the top edge**, the icon's visible edge sits 8 px under the menu bar,
+  like every other edge. The window's transparent shadow margin may overlap
+  the menu bar; what never may is the icon itself. The fix is the FSE's
+  (the frame constraint, or a tighter margin). It is the icon that is
+  measured, not the window.
+- **A zoomed window is not full screen**: on a normal desktop, the icon
+  shows above a window that fills the screen without being full-screen.
+  It hides only on a full-screen app's own desktop (0088). T3's
+  edge-to-edge test is too wide.
+- **A click on the icon while the list is open closes it at once**. If a
+  second click follows within the double-click interval, full Deltagos grows
+  from the icon (as a double-click on the closed icon does), and the list
+  is not reopened. This **replaces Amendment 2's wait**: half a second
+  before a close reads as unresponsive, and nothing can blink, because the
+  second click opens the window, not the list.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| F13 | see a filtered list end at its last row | filter to one row: the gap under it is ≤ 8 px |
+| F14 | put the icon at the top edge | dragged to the top: the icon's visible top is 8 ± 2 px under the menu bar |
+| F15 | find the icon beside a zoomed window | a zoomed (green-button-option, not full-screen) window on a normal desktop: the icon is shown above it; a full-screen Space: hidden |
+| F16 | close the list from the icon at once, or go full | one click with the list open: closed within 100 ms; two clicks within the interval: closed, then the full window grows; the list never reopens |
+
 ## Acceptance, in the lead's terms
 
 | # | The lead can | Checked by |
