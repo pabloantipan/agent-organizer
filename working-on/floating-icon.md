@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: floating-icon
 updated: 2026-10-05
-next: "decide: pablo - accept 0090 (the shape, and Aglaea's O1-O3); then the FSE starts its supervisor"
+next: "sup43 builds it (0090 ruled: v2 native panel, no badge, no shortcut, Home row)"
 depends_on: []
 boundary: ["floaticon_darwin.m, floaticon_darwin.h, floaticon_darwin.go (new, darwin-only) and the hook in app.go", "frontend/src/components/FloatList.tsx (new) and its CSS; TopBar.tsx (the Compact to icon button); the store's openInitiative use only", "frontend/src/lib/ helpers and tests (list rows, search)", "scripts/ (a by-hand check script, like the spike's y1-pointer.sh)", "not: wails.json, build/darwin templates, other Go packages, docs/design-system.md"]
 spec: "docs/ux/specs/floating-icon.md (Aglaea, 16ae245) and its Technical notes T1-T8; scope 0088; the spike's Findings (on main as afe792d)"
@@ -23,6 +23,7 @@ The Teams behaviour Pablo asked for in 0088, built the way the spike proved.
 - [ ] N4 (noted, not gated): a second, smaller display is untested on this Mac; the card says so
 
 ## Done
+- 2026-10-05 0090 ruled by pablo (v2 native panel; no badge; no shortcut for now; Home row); sup43 launched by the FSE
 - 2026-10-05 cut by the FSE from Aglaea's design and the spike's Findings
 
 ## Next

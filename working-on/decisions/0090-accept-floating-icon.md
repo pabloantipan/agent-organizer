@@ -1,13 +1,13 @@
 ---
 title: Accept the floating icon - its shape, and the badge, shortcut and Home row
-status: proposed
+status: ruled
 raised: 2026-10-05
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-05
+ruled_by: pablo
 options: [the shape (v2 native panel as the spike proved, a second webview window, Wails v3), O1 badge, O2 shortcut, O3 Home row]
-chosen:
+chosen: v2 native panel; O1 no badge; O2 no shortcut for now; O3 Home row yes
 cards: [floating-icon]
 threads: [01M46K870W9YST0YV90F1S8GSE]
 supersedes: []
@@ -57,6 +57,8 @@ The FSE's: the v2 native panel; O1 no (keep 0088's decorative icon); O2 no
 for now; O3 yes.
 
 ## Ruling
+
+pablo, 2026-10-05, in the FSE session on lodestar, answering the FSE's form: shape "v2 native panel (Recommended)"; O1 "No (Recommended)"; O2 "Not now (Recommended)"; O3 "Yes (Recommended)".
 
 ## Consequences
 
