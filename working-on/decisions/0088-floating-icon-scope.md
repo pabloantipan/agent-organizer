@@ -6,8 +6,8 @@ raised_by: fse
 owner: pablo
 ruled: 2026-10-05
 ruled_by: pablo
-options: [animation, desktops, how it compacts, list rows]
-chosen: decorative animation; every desktop, not over full-screen apps; compacts automatically on another desktop, plus a button on its own desktop; list rows show name and signals; the floating look of Teams
+options: ["decorative animation; every desktop, not over full-screen apps; compacts automatically on another desktop, plus a button on its own desktop; list rows show name and signals; the floating look of Teams"]
+chosen: "decorative animation; every desktop, not over full-screen apps; compacts automatically on another desktop, plus a button on its own desktop; list rows show name and signals; the floating look of Teams"
 cards: []
 threads: []
 supersedes: []

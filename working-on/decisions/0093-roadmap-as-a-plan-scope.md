@@ -6,8 +6,8 @@ raised_by: fse
 owner: pablo
 ruled: 2026-10-06
 ruled_by: pablo
-options: [what an iteration is, levels of detail, work outside any stage, who designs first]
-chosen: an iteration is a build/review round in a wave; four levels of detail; a new stage for the work outside any stage (0094); Aglaea designs, then the FSE specs
+options: ["an iteration is a build/review round in a wave; four levels of detail; a new stage for the work outside any stage (0094); Aglaea designs, then the FSE specs"]
+chosen: "an iteration is a build/review round in a wave; four levels of detail; a new stage for the work outside any stage (0094); Aglaea designs, then the FSE specs"
 cards: []
 threads: []
 supersedes: []

@@ -6,8 +6,8 @@ raised_by: fse
 owner: pablo
 ruled: 2026-10-06
 ruled_by: pablo
-options: [rows by hand as today, a row names Pablo only when no seat can check it, with the reason]
-chosen: a row names Pablo only when no seat can check it, with the reason
+options: ["rows by hand as today", "a row names Pablo only when no seat can check it, with the reason"]
+chosen: "a row names Pablo only when no seat can check it, with the reason"
 cards: []
 threads: []
 supersedes: []

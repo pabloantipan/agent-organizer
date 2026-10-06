@@ -6,8 +6,8 @@ raised_by: fse
 owner: pablo
 ruled: 2026-10-05
 ruled_by: pablo
-options: [the shape (v2 native panel as the spike proved, a second webview window, Wails v3), O1 badge, O2 shortcut, O3 Home row]
-chosen: v2 native panel; O1 no badge; O2 no shortcut for now; O3 Home row yes
+options: ["v2 native panel; O1 no badge; O2 no shortcut for now; O3 Home row yes"]
+chosen: "v2 native panel; O1 no badge; O2 no shortcut for now; O3 Home row yes"
 cards: [floating-icon]
 threads: [01M46K870W9YST0YV90F1S8GSE]
 supersedes: []

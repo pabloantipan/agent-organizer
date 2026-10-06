@@ -6,8 +6,8 @@ raised_by: fse
 owner: pablo
 ruled: 2026-10-05
 ruled_by: pablo
-options: [double-click expands the app, two buttons on the icon]
-chosen: double-click expands the app (two buttons only if double-click does not work); a larger icon on big screens
+options: ["double-click expands the app (two buttons only if double-click does not work); a larger icon on big screens"]
+chosen: "double-click expands the app (two buttons only if double-click does not work); a larger icon on big screens"
 cards: []
 threads: []
 supersedes: []

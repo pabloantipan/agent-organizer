@@ -6,8 +6,8 @@ raised_by: fse
 owner: pablo
 ruled: 2026-10-04
 ruled_by: pablo
-options: [placement, what each shows, odyssey-only roles, recognition and start]
-chosen: roles group in rail and Home; live+context, doing now, mail waiting, initiatives touched; Talos and Hermione named only; recognised by session name, show only
+options: ["roles group in rail and Home; live+context, doing now, mail waiting, initiatives touched; Talos and Hermione named only; recognised by session name, show only"]
+chosen: "roles group in rail and Home; live+context, doing now, mail waiting, initiatives touched; Talos and Hermione named only; recognised by session name, show only"
 cards: []
 threads: [01M3SBV952KNT4XMBTXMQHZDFC]
 supersedes: []
