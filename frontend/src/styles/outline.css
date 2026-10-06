@@ -1,0 +1,143 @@
+/* Roadmap › Stages as an outline (docs/ux/specs/roadmap-as-a-plan.md):
+   stage rows 32 px, everything under them 28 px, the 240 px label column
+   indented 12 px a level, marks over the shared TimeZoom axis. Tier-2
+   tokens only; Safari 15: no nesting, color-mix, oklch or @layer. */
+
+/* The toolbar line: the Stages | Cards | Calendar switch, then Detail, then
+   the zoom at the right. When the line cannot hold the three, Detail wraps
+   under the Stages switch, never into a menu. */
+.ol-head { align-items: flex-start; }
+.ol-switches { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); flex: 1 1 0; min-width: 0; }
+.ol-switches .seg { margin-bottom: 0; }
+.ol-detail button { white-space: nowrap; }
+
+/* Rows. */
+.ol-row { height: 28px; align-items: stretch; }
+.ol-row.ol-k-stage { height: 32px; }
+.ol-row.ol-k-stage.ol-k-current { background: var(--surface-selected); }
+.ol-row.ol-k-stage + .ol-row.ol-k-stage, .ol-row.ol-k-outside { box-shadow: inset 0 1px 0 var(--border-subtle); }
+.ol-row.ol-k-stage.ol-k-current .ol-after { background: var(--surface-selected); }
+.tz-frame.zoomed .ol-row.ol-k-stage.ol-k-current > .tz-label, .tz-frame.zoomed .ol-row.ol-k-stage.ol-k-current > .ol-lane { background: var(--surface-selected); }
+
+.ol-label {
+  display: flex; align-items: center; gap: var(--space-1-5); min-width: 0; height: 100%;
+  padding: 0 var(--space-2) 0 var(--space-2); margin: 0; border: 0; border-radius: var(--radius-sm);
+  background: transparent; color: var(--fg); font: inherit; font-size: var(--font-size-md); line-height: var(--line-md);
+  text-align: left; min-height: 0; white-space: nowrap; cursor: default;
+}
+.ol-label.act { cursor: pointer; }
+button.ol-label:hover, .ol-label.act:hover { background: var(--surface-hover); border: 0; }
+.ol-label:focus { outline: none; }
+.ol-label:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.tz-frame.zoomed .ol-row > .ol-label { background: var(--surface); }
+.tz-frame.zoomed .ol-row > button.ol-label:hover { background: var(--surface-hover); }
+.ol-chev { flex: 0 0 12px; width: 12px; font-size: 12px; line-height: 1; text-align: center; color: var(--fg-muted); }
+.ol-chev.open { transform: rotate(90deg); }
+.ol-n { flex: none; font-family: var(--mono); font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-subtle); }
+.ol-row.ol-k-stage.ol-k-current .ol-n { color: var(--status-now); font-weight: var(--weight-semibold); }
+.ol-title { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.ol-row.ol-k-stage .ol-title { font-weight: var(--weight-semibold); }
+.ol-row.ol-k-stage.ol-k-done .ol-title { color: var(--fg-muted); }
+.ol-title.subtle { color: var(--fg-subtle); }
+.ol-title.exit, .ol-title.rounds { font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); }
+.ol-title.rounds.none { font-style: italic; color: var(--fg-subtle); }
+.ol-word { flex: none; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); font-variant-numeric: tabular-nums; }
+.ol-word.current { color: var(--status-now); font-weight: var(--weight-semibold); }
+.ol-word.flight { color: var(--accent-fg); }
+.ol-sup { flex: none; font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-subtle); }
+.ol-label .lz { flex: none; }
+.ol-note { font-size: var(--font-size-sm); line-height: var(--line-sm); font-style: italic; color: var(--fg-subtle); overflow: hidden; text-overflow: ellipsis; }
+.ol-box { flex: 0 0 12px; width: 12px; height: 12px; box-sizing: border-box; border: 1.5px solid var(--fg-subtle); border-radius: 3px; font-size: 9px; line-height: 9px; text-align: center; color: var(--fg-on-accent); }
+.ol-box.met { background: var(--status-done); border-color: var(--status-done); }
+
+/* Lanes and their marks, each centred on its row. */
+.ol-lane { position: relative; }
+.ol-lane > * { position: absolute; }
+
+/* A stage's summary bar with end caps (Project's bracket). */
+.ol-sum { top: 19px; height: 5px; border-radius: 1px; }
+.ol-sum::before, .ol-sum::after { content: ""; position: absolute; top: 0; width: 3px; height: 10px; background: inherit; }
+.ol-sum::before { left: 0; border-bottom-right-radius: 3px; }
+.ol-sum::after { right: 0; border-bottom-left-radius: 3px; }
+.ol-sum.done { background: var(--status-done); }
+.ol-sum.current { background: var(--status-now); }
+.ol-sum.outside { background: transparent; border-top: 1.5px dashed var(--fg-subtle); height: 0; top: 19px; }
+.ol-sum.outside::before, .ol-sum.outside::after { top: -1.5px; width: 0; height: 10px; background: transparent; border-left: 1.5px dashed var(--fg-subtle); }
+.ol-row.ol-k-outside .ol-label .ol-title { font-weight: var(--weight-medium); }
+.ol-sdot { top: 16px; width: 12px; height: 12px; margin-left: -6px; border-radius: var(--radius-full); background: var(--status-done); }
+.ol-sdot.current, .ol-sdot.planned { background: var(--status-now); }
+.ol-planned { top: 8px; height: 16px; box-sizing: border-box; border: 1.5px dashed var(--status-next); border-radius: var(--radius-xs); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.ol-planned.current { border-color: var(--status-now); }
+.ol-appetite { font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-muted); white-space: nowrap; overflow: hidden; padding: 0 var(--space-1); }
+.ol-after { top: 50%; transform: translateY(-50%); z-index: var(--z-tz-pinned); padding: 0 2px; border-radius: var(--radius-xs); background: var(--surface); font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ol-after.rounds { color: var(--fg-muted); }
+.ol-fail { color: var(--tone); font-weight: var(--weight-semibold); }
+
+/* Decisions on the stage row: a 24 px button around an 11 px diamond. */
+.ol-gem { top: 0; width: 24px; height: 24px; min-height: 0; margin-left: -12px; padding: 0; border: 0; border-radius: var(--radius-sm); background: transparent; display: flex; align-items: center; justify-content: center; z-index: var(--z-raised); }
+.ol-gem:hover { background: transparent; border: 0; }
+.ol-gem > i { display: block; width: 11px; height: 11px; box-sizing: border-box; transform: rotate(45deg); border-radius: 2px; box-shadow: 0 0 0 2px var(--surface); }
+.ol-row.ol-k-stage.ol-k-current .ol-gem > i { box-shadow: 0 0 0 2px var(--surface-selected); }
+.ol-gem.raised > i, .ol-gem.waiting > i { background: var(--surface); border: 2px solid var(--decision-waiting); }
+.ol-gem.ruled > i { background: var(--decision-ruled); }
+.ol-gem:hover > i { transform: rotate(45deg) scale(1.2); }
+.ol-gem:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 0; }
+.ol-gem.folded { width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); }
+.ol-more { position: absolute; left: 18px; top: 4px; font-size: var(--font-size-xs); line-height: var(--line-xs); font-weight: var(--weight-semibold); color: var(--fg-muted); background: var(--surface); padding: 0 2px; border-radius: var(--radius-xs); }
+.ol-link { top: 12px; height: 0; border-top: 1px solid var(--decision-ruled); }
+.ol-link.waiting { border-top: 1px dashed var(--decision-waiting); }
+
+/* Exit items: a check at the day it was met. */
+.ol-met { top: 6px; transform: translateX(-50%); font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); }
+
+/* Waves: launch to merge in the accent; in flight to now, fading. */
+.ol-wave { top: 8px; height: 12px; border-radius: var(--radius-xs); background: var(--accent); cursor: zoom-in; }
+.ol-wave.open { -webkit-mask-image: linear-gradient(90deg, #000 70%, transparent); mask-image: linear-gradient(90deg, #000 70%, transparent); }
+.ol-wdot { top: 9px; width: 10px; height: 10px; margin-left: -5px; border-radius: var(--radius-full); background: var(--accent); }
+.tz-band.day > .ol-wdot { position: sticky; margin: 7px 0 0; }
+
+/* The Rounds row's segments. */
+.ol-seg { top: 8px; height: 12px; box-sizing: border-box; border-radius: 2px; display: flex; align-items: center; overflow: visible; }
+.ol-seg.built { background: var(--fg-subtle); }
+.ol-seg.pass { background: var(--accent); }
+.ol-seg.take { background: var(--status-next); }
+.ol-seg.fail, .ol-seg.merged.has-fail { background: var(--surface); border: 1.5px solid var(--tone); }
+.ol-seg.merged { background: var(--fg-subtle); }
+.ol-seg.open { -webkit-mask-image: linear-gradient(90deg, #000 60%, transparent); mask-image: linear-gradient(90deg, #000 60%, transparent); }
+.ol-segw { padding: 0 var(--space-1); font-size: 10px; line-height: 12px; font-weight: var(--weight-semibold); white-space: nowrap; overflow: hidden; color: var(--bg); }
+.ol-seg.pass .ol-segw { color: var(--fg-on-accent); }
+.ol-seg.fail .ol-segw { color: var(--tone); }
+.ol-x { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); font-size: 10px; line-height: 1; font-weight: var(--weight-bold); color: var(--tone); }
+.ol-seg.merged .ol-x { right: auto; left: calc(100% + 1px); }
+.ol-seg.merged.has-fail + .ol-after { margin-left: 8px; }
+
+/* Cards under their wave, by the Cards rules. */
+.ol-card { top: 9px; height: 10px; border-radius: var(--radius-xs); background: var(--status-next); opacity: .55; }
+.ol-card.now { background: var(--status-now); opacity: 1; }
+.ol-card.blocked { background: var(--status-blocked); }
+.ol-card.done { background: var(--status-done); opacity: 1; }
+.ol-card.open { -webkit-mask-image: linear-gradient(90deg, #000 70%, transparent); mask-image: linear-gradient(90deg, #000 70%, transparent); }
+.ol-card.overdue { box-shadow: 0 0 0 2px var(--status-blocked); }
+.ol-lane > .ol-cdot { top: 9px; }
+.ol-label .lz.next { background: var(--status-next-bg); color: var(--status-next); }
+.ol-label .lz.done { color: var(--fg-subtle); }
+
+/* In flight, the wave bar and its open round breathe; under reduced
+   motion nothing moves. */
+@media (prefers-reduced-motion: no-preference) {
+  .ol-chev { transition: transform var(--dur-fast) var(--ease-out); }
+  .ol-wave.open, .ol-seg.open { animation: ol-breathe 2.4s var(--ease-out) infinite alternate; }
+}
+@keyframes ol-breathe { from { opacity: 1; } to { opacity: .55; } }
+
+/* The legend. */
+.ol-key { display: inline-block; width: 18px; height: 8px; border-radius: var(--radius-xs); box-sizing: border-box; }
+.ol-key.sum.done { background: var(--status-done); }
+.ol-key.sum.current { background: var(--status-now); }
+.ol-key.planned { border: 1.5px dashed var(--status-next); }
+.ol-key.wave { background: var(--accent); }
+.ol-key.fail { width: 14px; background: var(--surface); border: 1.5px solid var(--tone); }
+.ol-gem-key { display: inline-block; width: 9px; height: 9px; box-sizing: border-box; transform: rotate(45deg); border-radius: 2px; }
+.ol-gem-key.waiting { border: 2px solid var(--decision-waiting); }
+.ol-gem-key.ruled { background: var(--decision-ruled); }
+.ol-foot > span { color: var(--fg-muted); }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  rowInView,
   HOUR, PX_DAY, PX_HOUR, REVEAL_MARGIN, TICK_GAP, TITLE_ROWS, anchorScroll, axisGrowth, buttonAnchor, contextAt, contextLabel, deeper,
   endOf, firstWholeUnit, focusAfter, todayLabel, todayTick, todayAt, stackTitles, offersHours, revealScroll, scaleOf, shallower, sideOf, startOfDay,
   ticksOf, shiftInside, overlaps, skipStep, keptBy, seriesIndex, fitIsWeekly, timesLabel, todayScroll, when, windowOf,
@@ -344,5 +345,18 @@ describe("a timed bar's times (A19)", () => {
     expect(timesLabel(a, null)).toBe("09:12–");
     expect(timesLabel(a, when("2026-10-05"))).toBe("09:12–");
     expect(timesLabel(when("2026-10-01")!, when("2026-10-05"))).toBe("");
+  });
+});
+
+describe("rowInView (U1)", () => {
+  const rows = [{ top: 100, bottom: 132 }, { top: 132, bottom: 160 }, { top: 160, bottom: 188 }];
+  it("is the first row whose body is below the visible top", () => {
+    expect(rowInView(rows, 0)).toBe(0);
+    expect(rowInView(rows, 140)).toBe(1);
+    expect(rowInView(rows, 159.5)).toBe(2);
+  });
+  it("falls back to the last row past them all, and -1 with none", () => {
+    expect(rowInView(rows, 400)).toBe(2);
+    expect(rowInView([], 0)).toBe(-1);
   });
 });

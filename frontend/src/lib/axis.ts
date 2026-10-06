@@ -449,3 +449,12 @@ export function axisGrowth(titles: Box[], top: number, current = 0): number {
   const slack = Math.min(...titles.map((t) => t.top)) - top;
   return Math.max(0, Math.ceil(current - slack - 0.5));
 }
+
+/** The row a zoom by button or key keeps in place (U1): the first whose
+ *  bottom is below the visible top (the stuck axis's foot or the window's
+ *  top), so a row half under the axis still counts; -1 with no rows. */
+export function rowInView(rows: { top: number; bottom: number }[], visibleTop: number): number {
+  if (rows.length === 0) return -1;
+  const i = rows.findIndex((r) => r.bottom > visibleTop + 1);
+  return i < 0 ? rows.length - 1 : i;
+}

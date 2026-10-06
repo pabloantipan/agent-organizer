@@ -2,6 +2,7 @@ import { useState, type ReactNode } from "react";
 import type { merge } from "../../wailsjs/go/models";
 import { DAY, toISO } from "../lib/dates";
 import { addLocalDays, dayMonth, endOf, hhmm, offersHours, startOfDay, timesLabel, when, type When } from "../lib/axis";
+import { cardBar } from "../lib/cardBar";
 import { useBoard } from "../stores/board.store";
 import { DayBand, EdgePointer, TimeFrame, ZoomControl, useTimeZoom } from "./TimeZoom";
 
@@ -25,25 +26,13 @@ export function Roadmap({ initiative, cards, collapsible = true, defaultOpen = f
   const [open, setOpen] = useState(defaultOpen);
   const nowMs = Date.now();
   const today = startOfDay(nowMs);
-  const todayW: When = { at: today, timed: false };
   const started = when(initiative.started);
   const target = when(initiative.target);
   const milestones = (initiative.milestones ?? [])
     .map((m) => ({ date: when(m.date), title: m.title }))
     .filter((m): m is { date: When; title: string } => !!m.date && !m.date.timed);
 
-  const rows: Row[] = cards.map((c) => {
-    const due = when(c.due);
-    const start = when(c.start) ?? when(c.branch_start) ?? when(c.updated) ?? todayW;
-    let end: When;
-    let openEnded = false;
-    if (due) end = due;
-    else if (c.status === "now") { end = todayW; openEnded = true; }
-    else end = when(c.branch_last) ?? start;
-    if (endOf(end) < start.at) end = start;
-    const dot = !openEnded && !start.timed && !end.timed && end.at <= start.at;
-    return { card: c, start, end, openEnded, dot, overdue: !!due && due.at < today };
-  });
+  const rows: Row[] = cards.map((c) => ({ card: c, ...cardBar(c, today) }));
 
   // The Fit span as built: every date and today, padded; then each date ends
   // at the end of its day.
