@@ -998,4 +998,10 @@ sections below this one are history.
   (78125ef); thread closed. Next batch, sev 1: ~50 px of empty panel under a
   single filtered row (the panel's height is its rows plus the field, with
   no minimum padding below).
+- decisions-still merged 10ba09a (12 h 42 min wall, ~3 h active; the rest an
+  idle Mac for the real-app review). sup41 ended. Cause: .dec-head.stuck made
+  the record 4 px shorter, a per-frame loop in a 4 px band. G1 (a height
+  sweep) is in my gate lessons; G4 (review window title) for the next batch.
+  sup45 runs decisions-line-and-names. Stray fixture dZk39O (23:34): asked
+  aglaea.
 
