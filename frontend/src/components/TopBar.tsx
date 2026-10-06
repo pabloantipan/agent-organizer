@@ -8,7 +8,7 @@ import { HelpView } from "./HelpView";
 import { FloatAvailable, FloatCompact } from "../../wailsjs/go/main/App";
 
 export function TopBar() {
-  const { screen, selectedInitiative, goHome, openSettings, view, loading, syncing, refresh, sync, error, lastMessage, account, lock, authMode, syncNote, setAccount, setLock, setOfflineChoice, agents } = useBoard();
+  const { screen, selectedInitiative, goHome, openSettings, openUsage, view, loading, syncing, refresh, sync, error, lastMessage, account, lock, authMode, syncNote, setAccount, setLock, setOfflineChoice, agents } = useBoard();
   // With auth off there is no identity: no account menu, no Sign in, no email,
   // and no Sync button either, since sync is a skip nobody can act on.
   const identity = authMode === "firebase";
@@ -37,6 +37,7 @@ export function TopBar() {
         {screen === "home" ? <b>Home</b> : <button className="crumb" onClick={() => { closeHelp(); goHome(); }}>Home</button>}
         {screen === "initiative" && selectedInitiative && <><span className="crumb-sep">/</span><b className="mono">{selectedInitiative}</b></>}
         {screen === "settings" && <><span className="crumb-sep">/</span><b>Settings</b></>}
+        {screen === "usage" && <><span className="crumb-sep">/</span><b>Usage</b></>}
         {helpTop !== null && <><span className="crumb-sep">/</span><b>Help</b></>}
       </nav>
       <span className="spacer" />
@@ -83,6 +84,9 @@ export function TopBar() {
         )}
       </span>}
       {floats && <button className="ghost gear" onClick={() => { closeHelp(); void FloatCompact(); }} title="Compact to icon (the icon floats on every desktop)" aria-label="Compact to icon"><CompactIcon /></button>}
+      {/* Usage (docs/ux/specs/usage.md): a quiet text button, no badge and no
+          number; Needs me is the one badge, and money stays inside the view. */}
+      <button className={`ghost usage-btn ${screen === "usage" && helpTop === null ? "on" : ""}`} onClick={() => { closeHelp(); openUsage(); }} title="Tokens and money, week by week" aria-pressed={screen === "usage" && helpTop === null}>Usage</button>
       <button className={`ghost gear ${helpTop !== null ? "on" : ""}`} onClick={toggleHelp} title="Help: how we build, from help_doc" aria-label="Help" aria-pressed={helpTop !== null}><CircleHelp size={14} /></button>
       <button className={`ghost gear ${screen === "settings" && helpTop === null ? "on" : ""}`} onClick={() => { closeHelp(); openSettings(); }} title="Settings" aria-label="Settings"><Settings size={14} /></button>
       {helpTop !== null && <HelpView top={helpTop} onClose={closeHelp} />}

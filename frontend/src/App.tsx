@@ -10,6 +10,7 @@ import { RoadmapView } from "./components/RoadmapView";
 import { DecisionsView } from "./components/DecisionsView";
 import { AgentsView } from "./components/AgentsView";
 import { SlackView } from "./components/SlackView";
+import { Usage } from "./components/Usage";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Gate } from "./components/Gate";
 import { CardDrawer } from "./components/CardDrawer";
@@ -57,6 +58,8 @@ export default function App() {
       <TopBar />
       {screen === "settings" ? (
         <main className="content"><ErrorBoundary name="Settings"><Settings /></ErrorBoundary></main>
+      ) : screen === "usage" ? (
+        <main className="content"><ErrorBoundary name="Usage"><Usage /></ErrorBoundary></main>
       ) : (
         <main className={`content with-rail ${railCollapsed ? "rail-strip" : ""}`}>
           <Rail />
