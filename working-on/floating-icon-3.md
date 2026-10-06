@@ -6,7 +6,7 @@ branch: floating-icon-3
 seat: fi3-build
 stage: one-window
 updated: 2026-10-06
-next: "sup46 runs it with the other leftovers-13 card (0096 ruled)"
+next: "fi3-build builds it on branch floating-icon-3 (sup46, wave 1)"
 depends_on: []
 boundary: ["floaticon_darwin.m, floaticon_darwin.h, floaticon_darwin.go", "frontend/src/components/FloatList.tsx, frontend/src/styles/float.css, frontend/src/lib/floatList.ts and its test", "scripts/floating-icon-by-hand.sh", "not: docs/ux/specs/floating-icon.md, the Ruled line, scripts/fixture-home.sh"]
 spec: "docs/specs/leftovers-13.md (FR-6 to FR-9); docs/ux/specs/floating-icon.md Amendment 3 (3bc5164)"

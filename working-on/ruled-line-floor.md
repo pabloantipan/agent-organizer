@@ -6,7 +6,7 @@ branch: ruled-line-floor
 seat: rlf-build
 stage: one-window
 updated: 2026-10-06
-next: "sup46 runs it with the other leftovers-13 card (0096 ruled)"
+next: "rlf-build builds it on branch ruled-line-floor (sup46, wave 1)"
 depends_on: []
 boundary: ["frontend/src/components/DecisionsView.tsx, decisions.css, global.css (.dec-meta and .wakes only)", "frontend/src/components/Conversation.tsx (rule box, WakeCount), Home.tsx (its rule box's wake count only)", "AgentList.tsx, Crew.tsx, RoleDrawer.tsx (the state word map only), one new lib/ module and its test", "main.go (the window title only)", "scripts/fixture-home.sh (--empty)", "not: docs/design-system.md, the floating panel's native code"]
 spec: "docs/specs/leftovers-13.md (FR-1 to FR-5); Aglaea 5c937df"
