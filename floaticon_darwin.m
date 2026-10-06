@@ -270,7 +270,10 @@ static BOOL fullScreenSpace(void) {
     return NO;
 }
 
+static void watchPointer(void);
+
 static void showIcon(void) {
+    after(0.25, ^{ watchPointer(); }); // it may appear under a still pointer
     if (reduceMotion()) {
         [panel setAlphaValue:1];
         [panel orderFrontRegardless];
@@ -445,8 +448,12 @@ static FloatIconView *iconView;
 // larger than the tile to hold its shadow, and a window takes every click on
 // its frame wherever it is drawn. So the panel ignores the pointer except
 // while the pointer is over the tile (its hover-scaled bounds) or a press
-// or drag is under way; a 20 Hz look at the pointer's place flips it, and
-// drives the hover look, since entered/exited cannot fire while ignored.
+// or drag is under way. Mouse-moved and dragged events flip it as they come:
+// a global monitor sees them while the panel ignores the pointer (other
+// apps get them), a local one while it takes them; nothing runs while the
+// pointer is still (re-review, c48cdf2). The same drives the hover look,
+// since entered/exited cannot fire while ignored. A global monitor of mouse
+// events needs no permission; only key events do.
 static BOOL overTile(NSPoint p) {
     NSRect t = tileOf([panel frame]);
     CGFloat grow = kTile * 0.04; // the dragging scale, 1.08, covers hover's 1.06
@@ -522,6 +529,7 @@ static void watchPointer(void) {
             dropAt();
         } completionHandler:nil];
         setLook(self.inside ? LookHover : LookResting, 0.16);
+        after(0.17, ^{ watchPointer(); }); // the panel moved under a still pointer
         return;
     }
     setLook(self.inside ? LookHover : LookResting, 0.08);
@@ -608,8 +616,17 @@ static void build(void) {
     [panel setContentView:v];
     iconView = v;
     [panel setIgnoresMouseEvents:YES];
-    NSTimer *pointer = [NSTimer timerWithTimeInterval:0.05 repeats:YES block:^(NSTimer *t) { watchPointer(); }];
-    [[NSRunLoop mainRunLoop] addTimer:pointer forMode:NSRunLoopCommonModes];
+    [panel setAcceptsMouseMovedEvents:YES]; // the local monitor sees moves over the margin
+    NSEventMask moves = NSEventMaskMouseMoved | NSEventMaskLeftMouseDragged;
+    [NSEvent addGlobalMonitorForEventsMatchingMask:moves handler:^(NSEvent *e) {
+        static BOOL seen;
+        if (!seen) { seen = YES; flog(@"pointer: global move monitor live"); }
+        watchPointer();
+    }];
+    [NSEvent addLocalMonitorForEventsMatchingMask:moves handler:^NSEvent *(NSEvent *e) {
+        watchPointer();
+        return e;
+    }];
     [v setToolTip:@"Deltagos"];
     // The window lists the button itself: a borderless panel's content view
     // is not offered to accessibility clients by default.
