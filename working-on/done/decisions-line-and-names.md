@@ -1,11 +1,11 @@
 ---
 title: The Ruled line never widens the board (no sideways swing), names and the wake count, Needs me's five landings
-status: now
+status: done
 repos: [organizer]
 branch: decisions-line-and-names
 seat: dln-build
 updated: 2026-10-06
-next: "pablo: X1 trackpad swipe by hand (steps in Notes, via the FSE thread), then sup45 merges; both reviews passed at 1ec2867"
+next: ""
 depends_on: [decisions-still]
 boundary: ["frontend/src/components/DecisionsView.tsx, frontend/src/styles/global.css (.dec-meta and the Ruled line only), decisions.css", "frontend/src/components/Conversation.tsx and SlackView.tsx (divider name, wake count)", "the roles drawer component (session state word)", "frontend/src/components/Home.tsx, frontend/src/styles/home.css (Needs me's focus and landing; stage and id tracks)", "frontend/src/lib/width.ts, lib/queue.ts (first-five helper only) and lib/ tests", "not: Go, docs/design-system.md"]
 spec: "docs/specs/leftovers-12.md (FR-1 to FR-7); Aglaea cb20fcf, 2203d7d"
@@ -18,10 +18,11 @@ review: pass
 The Decisions board never swings sideways; the rest of the last two waves' leftovers.
 
 ## Gate
-- [ ] X1-X5: see `docs/specs/leftovers-12.md`, Acceptance (met in both engines except X1's trackpad row, by hand for Pablo, and X4 row 12 not verified in WKWebView; table in `.wt-notes/dln-build/progress.md`)
+- [x] X1-X5: see `docs/specs/leftovers-12.md`, Acceptance (both engines; X1's swipe replaced by measurement per Pablo's ruling, dln-x1; X4 row 12 through the store only, spec gap G1)
 - [x] X0: see `docs/specs/leftovers-12.md`, Acceptance
 
 ## Done
+- 2026-10-06 sup45: merged to main as 81e0822; X0 green on the merged main from a clean clone; seats dln-build, dln-review, dln-ui, dln-x1 ended. Follow-ups for the FSE: dln-U1 floor and dln-U2 (aglaea answered, 5c937df), spec gaps G1, G2
 - 2026-10-06 dln-build: c381bb6 (FR-1), 638a84b (FR-2, FR-6), 87ee2d3 (FR-3), afbc690 (FR-4), f23a58c (FR-5), 1ec2867 (FR-7) on decisions-line-and-names, rebased on main 91fe1e0; X0 green from a clean checkout
 - 2026-10-06 sup45: seat dln-build, worktree .wt/decisions-line-and-names from main ce1675d
 - 2026-10-06 sup45 launched by the FSE
