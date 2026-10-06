@@ -4,8 +4,9 @@ status: now
 repos: [organizer]
 branch: floating-icon-2
 seat: fi2-build
+review: fail
 updated: 2026-10-05
-next: "pablo: the 15-s F7 click-outside take (fse is asking); then review: floating-icon-2 at 2efe4ba"
+next: "pablo: gate row 2, one by-hand take at 2efe4ba with F5 typed (click the icon, `pay`, Enter) and F7 (Escape twice, then a click outside the list), both by Pablo; then re-review"
 depends_on: [floating-icon]
 boundary: ["floaticon_darwin.m, floaticon_darwin.h, floaticon_darwin.go, floaticon_other.go (click count, size by display, scaled layers)", "frontend/src/components/FloatList.tsx (grow into the full window on the second click; the last view on double-click)", "frontend/src/stores/board.store.ts (the last view to restore, read only if already kept there)", "scripts/floating-icon-by-hand.sh (the new steps)", "not: other Go packages, wails.json, build/darwin templates, docs/design-system.md"]
 spec: "docs/ux/specs/floating-icon.md, Amendment 1 (Aglaea, 2c07195); ruling 0091"
@@ -36,6 +37,13 @@ app straight away, and the icon is big enough on a big screen.
 ## Next
 
 ## Blockers
+
+## Review
+- Verdict: fail. Commit reviewed: 2efe4ba275da8606db359dfa1abac22974ac0fda (branch `floating-icon-2`), with 0092 (38a8519) for F12.
+- Unmet: gate row 2. F5 typing and F7 (Escape twice, click outside) were not done by Pablo in any take; the seat's AX-opened keyboard run (`float-keys.log`) is not Pablo's take, and F7's click outside was done by no one. No single take covers F4, F5, F7, F8. N3 left open (supervisor's).
+- Met: F10, F11 (takes 1-3, read back from the window: `list front … ms after the click`, `full (double-click) read back: full window … key=1`); F12 by 0092 (56 on the laptop, 88 r22 on the 3440, read back from the panel frame; drag across displays untested); clean clone `make test` exit 0, npm 265 tests and build, `wails build` exit 0, `nm` 0 CGS/SLS. Code: list on mouse-up, second press by `doubleClickInterval`, drag past 4 pt clears the click, double-click grows the list via `goFull` and marks this desktop home, the list never touches the store's view; size by visible width (56 ≤1920, 72, 88 ≥3000), radius size/4, bars/shadows ×size/56 (breathing is a relative scale), inset/threshold in points, resize on screen change and on drop, clamps by `tileSz`. SIGUSR1/2 and FLOAT_SIZE_WIDTH only with FLOAT_LOG (set only by the by-hand script). Boundary: 4 paths, all inside.
+- Not in the gate: the growth is `setFrame:animate:` at about 0.36 s, not the spec's 200 ms (the pick was never 200 ms either); a screen change with the list open moves the icon, not the list; the list blinks out ~100 ms when a double-click starts on an open list (aglaea's call).
+- Reviewer: fi2-review, 2026-10-05
 
 ## Notes
 - 0092 (pablo): F12 accepted with the drag across displays untested; noted like floating-icon's N4.
