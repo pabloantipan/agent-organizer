@@ -76,8 +76,9 @@ initiatives, to pick one.
 - **Place and size**: anchored to the icon, opening toward the centre of the
   screen. 360 px wide; as tall as its rows up to 480 px, or 70% of the
   screen's height if smaller; then it scrolls its own list, with the scroll
-  edge. Radius 12, surface `--surface-overlay`, the same two-layer shadow as
-  the icon's hover. It opens in 160 ms from the icon's corner, with only a
+  edge. Radius 12, surface `--surface-overlay`. Its shadow is the window's
+  native macOS shadow, since the panel is its own window (accepted from
+  fic-ui A1, 2026-10-05; the icon keeps its two-layer shadow). It opens in 160 ms from the icon's corner, with only a
   fade under reduced motion.
 - **Head**: one search field, focused on open, placeholder `Find an
   initiative`, with no other title. It filters as he types, by id or goal

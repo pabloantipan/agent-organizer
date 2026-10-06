@@ -80,3 +80,4 @@ its source).
 - 2026-10-05 — sup41: a Ruled line's long chosen option gives way first, then the title; the line never widens the board (DS).
 - 2026-10-05 — floating-icon design spec (0088): icon, float, list panel, compact button.
 - 2026-10-05 — sup41 dst-ui A1/A2: tallness decided before ruling and held; inset line accepted (decisions-view §8).
+- 2026-10-05 — sup43 fic-ui A1: the panel keeps the native window shadow (spec §3); A2 to look at once installed.
