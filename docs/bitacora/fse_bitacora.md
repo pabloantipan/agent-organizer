@@ -927,4 +927,8 @@ sections below this one are history.
   18:47). Gate lesson, second this week: W2's windows never looped on main
   (the loop lives in a 4 px band), so the row could not fail before the fix;
   a gate for a measured defect must fail on main first (a sweep).
+- Spike: Pablo's pointer takes at 16:43; sup42's relay to its builder sat
+  unsubmitted (pasted, no Enter) until 21:00: ~4 h lost. sup42's own trap;
+  it goes in its run record. If it recurs in another wave, raise to
+  hephaistos (supervise: check the pane after every send).
 
