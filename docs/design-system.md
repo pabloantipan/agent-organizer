@@ -255,7 +255,10 @@ the **neutral** badge (`--fg-muted` text, 6.7:1): out of the flow, named by
 their word, not by a hue. `--done` on its tint is 2.05:1 and is never a
 lozenge's text (markdown-and-labels, L9). A record's **line** never widens its view either: it stays one line, the
 number, status, ruler and date whole; the chosen option gives way first
-(ellipsis, whole in the hover and the name), then the title (decisions-still,
+(ellipsis, whole in the hover and the name) down to a floor of about 8
+characters (`“accept as…”`), then the title down to about 20; past both
+floors the chosen option drops whole, with its separator, never leaving a
+stray `·` (dln-U1), then the title (decisions-still,
 0082's long option). A record's body never widens its view: code
 blocks and tables scroll inside themselves.
 *Nygard ADRs, MADR, GitHub Discussions answers.*
@@ -360,7 +363,7 @@ keeps their place.
   (drafts-and-slack, U2, U3).
 - **A composer's default addressee is the place it sits in**: a direct
   chat addresses its seat, the channel addresses everyone. The wake count
-  (`wakes 6 seats`) shows beside the commit, **Start or Send**, before
+  (`wakes 6 seats`) shows beside the commit, **Start, Send or Rule**, before
   anything is sent (drafts-per-chat, U3; rn5-A2). It is neutral text
   (`--fg-muted`); when it wakes every seat it takes the magenta tone as a
   caution, **never red**, which is blocked's alone (rn5-A1).
