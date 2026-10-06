@@ -45,6 +45,37 @@ app straight away, and the icon is big enough on a big screen.
 - Not in the gate: the growth is `setFrame:animate:` at about 0.36 s, not the spec's 200 ms (the pick was never 200 ms either); a screen change with the list open moves the icon, not the list; the list blinks out ~100 ms when a double-click starts on an open list (aglaea's call).
 - Reviewer: fi2-review, 2026-10-05
 
+## UI review
+- Verdict: pass (no severity 4 or 3 against the spec). Commit run: 2efe4ba275da8606db359dfa1abac22974ac0fda, `make review-build` (Deltagos Review.app, `cl.antipan.organizer.review`) on the `--twenty` fixture, real WKWebView and the native panel, the S34CG50 3440×1440 as the only display NSScreen reports (the laptop panel's lid was closed). Float log and shots in `.wt-notes/fi2-ui/` (`float-3440.log`, t = log epoch). Pointer rows from Pablo's takes 1-3 (`.wt-notes/fi2-build/by-hand-*.log`, `take2/views.png`). This passes the UI; the gate row 2 fail in ## Review (F5 typed and F7 by Pablo) still stands, and I could not close it either.
+- Findings:
+  - U1 (sev 1). What the lead cannot do: see the double-click growth finish in 200 ms; it takes about 0.36 s. Where: double-click and a pick, every display. Evidence: the builder's measure (`setFrame:display:animate:`, Notes); pick has the same timing, so the two stay consistent, which is what the spec's continuity asks for. Proposal: leave it unless Pablo finds it slow; if it's changed, change both together (NSAnimationContext with 0.2 s).
+  - U2 (sev 1). What the lead cannot do: nothing is blocked. The hairline stays 1 pt at 88, so it is relatively thinner than at 56. Where: the tile edge on the 3440 (`icon88.png`). Evidence: code (`borderWidth = 1`, commented on purpose); hard to see at 1x. Proposal: keep it (a hairline is a hairline); spec gap S2.
+- Table:
+
+| # | How checked | Result |
+|---|---|---|
+| F12 88 on the 3440 | my run: `size (place): icon 88 pt, radius 22 … panel frame read back {{3265, 64}, {214, 214}}` (+0.0); shot `icon88-crop.png`; bars measured 11/12/11 px wide, full height 46, base fixed while breathing (`breathe-1..6.png`, `measure.py`) | met |
+| F12 drawn as the 56 scaled, not a 56 in a larger tile | 88 and 56 side by side on the same display through the SIGUSR1 width stand-in, the 56 shot upscaled ×88/56 (`icon-88-vs-56.png`): bars, gaps and corner match within a pixel of rounding; the soft two-layer shadow scales (code: offsets and blur × size/56) | met |
+| F12 56 on the laptop | Pablo's take 3 read-back (`icon 56 pt radius 14 … visible width 1512`); not on the laptop in my run (only one display online) | met (his take) |
+| F12 resize dragged across displays | 0092: accepted untested. The screen-change path re-sized 88↔56 cleanly 26 times in my run (`float-3440.log` +58 to +303) | not verified (ruled) |
+| List panel beside the 88 icon | AX press on the compacted icon: `list front … frame={{3056, 223}, {360, 480}}, 3 ms`; right edge = the tile's right edge (3416), 8 pt above the tile top (215), above the Dock (visible from 103), well under the menu bar; search focused, Home row `Home · 9 need you`, rows rank/id/signals, `5 waiting 1 blocked +4` whole (`list-88-crop.png`) | met (§3, F6) |
+| F11 list at once | Pablo takes 1-3: `list front … 2-16 ms after the click`; my AX press 3 ms | met |
+| F11 second click grows it | Pablo takes 1-3: `clickCount 2 … second click` then `full (double-click) read back: full window … key=1`, 15 times, 0 `still the list` | met |
+| F10 full at the last view | Pablo take 2 frames `take2/views.png` (billing-api · Roadmap, field-app · Roadmap, ops-dashboard · Decisions, Home) | met |
+| F1 second desktop | my run: Ctrl→ to desktop 2: `space-change: … here=0 … icon shown` (+30.0, +122.5, +158.6, +195.1), icon at its place ~1.3 s after the switch (`t2` shots); back home `here=1 … icon hidden` | met |
+| F1 full-screen desktop | not tried: making one would take over Pablo's screen while he was using it | not verified |
+| F3 breathing at 88 | `breathe-1..6.png`: the now bar 38-46 px (0.83), the three bars out of phase | met; Reduce motion not re-checked (code path unchanged) |
+| F4 | Pablo takes 1-3 (drag past 4 pt, drops clamped, same spot across desktops) | met (his takes) |
+| F5 typed `pay` | not done by Pablo in any take; the seat's keyboard run only. I sent no keystrokes because the person at the machine had Chrome in front, and they would have gone into it | not verified |
+| F7 | the click outside: in my run a blur closed the list (`dismiss: state=compacted … icon stays`, +343.3, window ordered out) while someone at the machine brought Chrome to the front. I did not see whether it was a click; Escape twice by Pablo not done | partly; not verified as Pablo's take |
+| F8 | someone at the machine pressed Compact in my run: `compact from {{1000, 383}, {1440, 932}}`, `state=compacted`, the icon then on every desktop including home (+251.6); Pablo takes 1-3 | met |
+| F9 | AX query: role AXButton, description `Deltagos`, help `Opens the initiative list` | met (name); keys not re-run |
+
+- Spec gaps (for the FSE): S1 the size bands overlap at 1920 ("56 up to 1920, 72 from 1920"); the build gives 56 at exactly 1920, so write it that way. S2 whether the 1 px hairline and the 24 px first place scale with the icon (built: neither does). S3 a screen change with the list open moves the icon but not the list (builder's note); the spec doesn't say whether the list follows.
+- For aglaea: A1 the ~100 ms blink when a double-click starts on an open list (the first click closes it, the second reopens and grows it; Notes, take 2). Should a click on the icon with the list open wait out the double-click interval before closing? A2 should the growth's 200 ms be enforced, or is the native ~0.36 s the house motion for window growth (U1)?
+- Not verified: F12's drag across displays (0092; only one display online); F1 on a full-screen desktop; F5 typed and F7 Escape-twice as Pablo's take; F3 under Reduce motion at 88; hover/drag looks at 88 (code scales them; not shot). In my run, desktop changes the person at the machine made while I was testing briefly looked like the app pulling them home after a shrink. A controlled set with no human input (HID idle growing) showed 0 of 4, so I don't count it as a finding (`trials.txt`).
+- Reviewer: fi2-ui, 2026-10-05
+
 ## Notes
 - 0092 (pablo): F12 accepted with the drag across displays untested; noted like floating-icon's N4.
 - fi2-build, take 2: Pablo often clicks once (list), then double-clicks to expand. The double's first click closes the open list (a click on the icon closes it, §3) and its second brings it back and grows it, so the list blinks out for about 100 ms before the growth (log +77.6-78.2, +101.6-102.3, +119.4-120.0). It ends right; a design call for aglaea whether a click on the icon with the list open should wait the double-click interval before closing (it would lag the close by up to 0.5 s).
