@@ -154,6 +154,13 @@ function WeekPicker({ data, thisWeek, onPick }: { data: UsageData; thisWeek: str
   const list = useRef<HTMLDivElement>(null);
   const first = data.weeks?.length ? data.weeks[data.weeks.length - 1].week : data.week;
   const point: WeekPoint = data.history?.find((p) => p.week === data.week) ?? { week: data.week, start: data.this_week.start, money: 0, tokens: 0, sessions: 0 };
+  // An arrow that disables itself on the press hands focus to the label
+  // first, so the keyboard stays on the picker (FR-5a, UI4).
+  const step = (n: number) => {
+    const w = shiftWeek(data.week, n);
+    if (w <= first || w >= thisWeek) label.current?.focus();
+    onPick(w);
+  };
   const close = useCallback((back: boolean) => { setOpen(false); if (back) label.current?.focus(); }, []);
   useEffect(() => {
     if (!open) return;
@@ -172,9 +179,9 @@ function WeekPicker({ data, thisWeek, onPick }: { data: UsageData; thisWeek: str
   };
   return (
     <span className="week-picker">
-      <button className="ghost icon" onClick={() => onPick(shiftWeek(data.week, -1))} disabled={data.week <= first} aria-label="The week before" title="The week before"><ChevronLeft size={14} /></button>
+      <button className="ghost icon" onClick={() => step(-1)} disabled={data.week <= first} aria-label="The week before" title="The week before"><ChevronLeft size={14} /></button>
       <button ref={label} className="ghost week-label num" onClick={() => setOpen(!open)} aria-expanded={open} aria-haspopup="true" title="Pick a recorded week">{weekLabel(point, thisWeek)}</button>
-      <button className="ghost icon" onClick={() => onPick(shiftWeek(data.week, 1))} disabled={data.week >= thisWeek} aria-label="The week after" title="The week after"><ChevronRight size={14} /></button>
+      <button className="ghost icon" onClick={() => step(1)} disabled={data.week >= thisWeek} aria-label="The week after" title="The week after"><ChevronRight size={14} /></button>
       {open && (
         <div className="week-list" ref={list} role="menu" aria-label="recorded weeks" onKeyDown={onKey}>
           {!(data.weeks ?? []).some((w) => w.week === thisWeek) && (
