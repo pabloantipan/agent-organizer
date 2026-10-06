@@ -187,6 +187,11 @@ function Section({ label, children }: { label: string; children: React.ReactNode
   );
 }
 
+/** leftovers-12 FR-4: a session's state in the word its Agents row shows
+ *  (AgentList's STATE_LABEL: a running agent that is not working is idle). */
+const ROW_WORD: Record<string, string> = { working: "working", running: "idle", shell: "shell", exited: "exited" };
+const rowWord = (s: model.RoleSession) => ROW_WORD[sessionWord(s)] ?? sessionWord(s);
+
 function SessionLine({ s, onGo }: { s: model.RoleSession; onGo: () => void }) {
   const ctx = s.context == null ? "" : `${Math.round(s.context)}% context`;
   const started = sessionStarted(s);
@@ -194,7 +199,7 @@ function SessionLine({ s, onGo }: { s: model.RoleSession; onGo: () => void }) {
     <>
       <span className="rd-main mono">{s.name}</span>
       <span className="rd-meta">{s.initiative || "outside every initiative"}</span>
-      <span className={`rd-word ${s.state}`}>{(s.state === "working" || s.state === "running") && <i className={`live-dot ${s.working ? "working" : ""}`} aria-hidden="true" />}{sessionWord(s)}</span>
+      <span className={`rd-word ${s.state}`}>{(s.state === "working" || s.state === "running") && <i className={`live-dot ${s.working ? "working" : ""}`} aria-hidden="true" />}{rowWord(s)}</span>
       <span className="rd-num num">{ctx}</span>
       <span className="rd-meta num">{started}</span>
     </>
@@ -202,7 +207,7 @@ function SessionLine({ s, onGo }: { s: model.RoleSession; onGo: () => void }) {
   if (!s.initiative) return <li><div className="rd-line static" title="not in any initiative: it has no Agents to land on">{parts}</div></li>;
   return (
     <li>
-      <button className="rd-line" onClick={onGo} aria-label={`${s.name} in ${s.initiative}: ${sessionWord(s)}${ctx ? `, ${ctx}` : ""}; open its Agents`}>{parts}</button>
+      <button className="rd-line" onClick={onGo} aria-label={`${s.name} in ${s.initiative}: ${rowWord(s)}${ctx ? `, ${ctx}` : ""}; open its Agents`}>{parts}</button>
     </li>
   );
 }
