@@ -12,7 +12,7 @@ boundary: ["frontend/src/components/Usage.tsx and styles/usage.css (new)", "the 
 spec: "docs/specs/usage.md (FR-5, FR-6; docs/ux/specs/usage.md (b104480))"
 gate: "docs/specs/usage.md Acceptance, rows U1 to U9 and X0"
 ui_review: true
-review: fail
+review: pass
 ---
 
 ## Goal
@@ -50,17 +50,17 @@ docs/specs/usage.md, U1 to U9 and X0. Shots in `.wt-notes/uv-build/` (named belo
 - 2026-10-06 uv-build: Usage view (FR-5) and money only in Usage (FR-6) on usage-view, e0767d1..d338be6; fixture usage history; gate met U1-U9, X0.
 
 ## Review
-- Verdict: **fail** (code, checks and recorded evidence; the WKWebView rows are uv-ui's).
-- Commit reviewed: 175824828d292c1930da96e3e4715dabcc0a184f (branch usage-view, rebased on main e67dfda; spec with Amendment 2, gate U1-U10 and X0).
-- Unmet gate items: U10 (the wave row, FR-5a, in the filtered By task view).
-- U10, wave row: the unfiltered By task meets it. `groupWaves` takes a supervisor row with two or more `cards`, sums money, share, tokens, the four kinds, sessions and without_cost from its card rows, takes them off the top level, and keeps Not attributed last. The vitest covers 3 cases, and uv-build's real-home W41 shot shows sup47 at $35.52 = $21.36 + $9.66 + $4.50. **But** Usage filtered to one initiative recomputes its cuts in `forInitiative`, which sets a task row's `cards` to `[s.task]`. A multi-card supervisor's task is `wave:supN` (Go `attribute.go`), and SessionRow carries no cards, so that row has one card and `groupWaves` skips it. That is the view the Agents week line opens, and it opens on By task (`usageFilter ? "task"`). A scratch vitest at 1758248 (removed): sessions sup (`wave:sup47`, $10), b1 (`usage-ledger`, $40), b2 (`usage-view`, $30) through `groupWaves(forInitiative(…).cuts.task)` gives three top-level rows, `usage-ledger` $40, `usage-view` $30, `wave:sup47` $10, where FR-5a wants one $80 row. The fixture cannot show this: its only wave (sup11) has one card.
-- U10, the rest: met. `moneyOf`/`unknownMoney` reads `—` only when sessions ran and none has a cost (tile, bar as an outlined stub, week list, table, rows), the partial rows keep `$x*`, and the vitest covers it. ‹ and › hand focus to the week label when they disable themselves (`step`). At compact the top bar folds the version into the brand's hover. TopBar.tsx is in the boundary.
-- X0, fresh clone at 1758248, no prior build: `XDG_DATA_HOME=$(mktemp -d) make test` 0 (every Go package ok, 304 vitest); `npm install && npm test && npm run build` 0; `wails build` 0. The clone and fixtures are removed.
-- U9: my grep (`$` amounts, `"$`, `cost_usd`, `cost_from`, `money`, `dollar`, `cost`) outside Usage*.tsx, lib/usage*.ts and usage.css finds only comments and `CSS.escape` selectors. Met.
-- Fixture from the clone at 1758248: `organizer usage --json` unchanged from d338be6 ($72.85, 7 sessions, 1 running, 1 without cost; Not attributed last in every cut). Diff: no Go, no wailsjs, every path inside the boundary.
-- Findings still open from the first round: `--violet-7` in usage.css is a tier-1 primitive; a picked past week says "on last week" for the week before it; the chart drops later weeks (UI2, Go); the empty Not attributed row in every cut. New: a wave whose cards a later wave claimed keeps `· 2 cards` in its meta with nothing under it (groupWaves sup46 test case).
-- Gate gap: no gate row checks the filtered view. U10 should name it, or the fixture should gain a multi-card wave so the default and filtered By task can both be checked without the real home.
-- First round, d338be6: pass, unmet none (9fa5021), before Amendment 2 and U10.
+- Verdict: **pass** (code, checks and recorded evidence; the WKWebView rows are uv-ui's).
+- Commit reviewed: ad7dbf3d5d69b9b82b8d8d2d3927b430cfbf614e (branch usage-view, rework 2: 885ef92, 265b4f6, ad7dbf3; gate U1-U10 and X0).
+- Unmet gate items: none.
+- U10, wave row, both cuts: `forInitiative(sessions, id, data.cuts.task)` now takes each task row's `cards` from the week's task cut under the same key, so the filtered supervisor row carries `[w-nogate, w-queued]`, and `UsageTable` runs `groupWaves` on every By task. The vitest "one initiative's waves" is my case of the last round: filtered, $10 + $40 + $30 is one $80 row with both cards under it. Its second case shows the old split when no task rows are passed. The fixture's `organizer usage --json` now holds `wave:sup12` ($6.10, cards w-nogate and w-queued) beside `w-queued` $14.30 and `w-nogate` $9.20. Run through the shipped helpers in a scratch vitest (removed), it gives one `wave:sup12` row of $29.60, both in the default cut and filtered to init-a. No card row repeats at the top level, and Not attributed is last. The wave's meta now counts the cards under it (`· N cards` only when there are any), which closes my sup46 note.
+- U10, the rest: unchanged from 1758248 and met (— only when money is wholly unknown, focus on the picker, the top bar folds the version at compact).
+- X0, fresh clone at ad7dbf3, no prior build: `XDG_DATA_HOME=$(mktemp -d) make test` 0 (every Go package ok, 306 vitest); `npm install && npm test && npm run build` 0; `wails build` 0. The clone and fixture are removed.
+- U9: my grep outside Usage*.tsx, lib/usage*.ts and usage.css finds only TopBar's comment and the Usage button's title words. No Go and no wailsjs in the diff, and every path is inside the boundary.
+- Fixture: this week is now $102.45 with 10 sessions, since sup12's wave added three. The card's U1 line still quotes $72.85 and 7 sessions from before ad7dbf3; that is stale evidence, not a defect.
+- Open, not blocking (from the earlier rounds): `--violet-7` in usage.css is a tier-1 primitive; a picked past week says "on last week" for the week before it; the chart drops later weeks (UI2, Go); the empty Not attributed row shows in every cut.
+- Round 2, 1758248: fail, unmet U10 (eeed5cb): the filtered By task split a multi-card wave.
+- Round 1, d338be6: pass, unmet none (9fa5021), before Amendment 2.
 - Reviewer: uv-review, 2026-10-06.
 
 ## UI review
