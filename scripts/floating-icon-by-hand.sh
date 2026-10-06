@@ -1,19 +1,18 @@
 #!/bin/zsh
-# floating-icon-by-hand.sh — the lead's pointer take for the floating icon
-# (docs/ux/specs/floating-icon.md). This is the short take left after takes
-# 1-4: F7 by pointer (Escape twice, a click outside) and Amendment 2's
-# double-click on a list already open, which grows it without a blink. The
-# float log names each close (key: Escape, list lost key with the pointer's
-# place) and the recording shows the pointer (-C). A seat may not post
-# pointer events, so these steps are done by hand. (F10-F12, F4, F5 and F8
-# were taken in takes 1-4, recorded on the card.)
+# floating-icon-by-hand.sh — an optional look at the floating icon for the lead
+# (docs/ux/specs/floating-icon.md, Amendment 3: F13-F16). NOT A GATE: every
+# gate row is checked by the seats with synthetic events (0095); this is only
+# for Pablo's own eyes and hands, if he wants them. The float log names each
+# close (dismiss (icon) with its time from the click, key: Escape, list lost
+# key with the pointer's place), each growth (from the list or from the icon)
+# and each full-screen test, and the recording shows the pointer (-C).
 #
 # Builds nothing: it launches the build already in this checkout
 # (build/bin/Deltagos.app, from `wails build`) under a throwaway fixture
 # home of twenty initiatives, records the main display, prints the steps,
 # and on Enter (or Ctrl+C, or any failure) quits the app and the fixture's
 # stand-in agents. Each run writes its own recording and float log under
-# NOTES (default: the fi2-build notes), and prints the log's lines at the end.
+# NOTES (default: the fi3-build notes), and prints the log's lines at the end.
 # The recording is a fixed one minute, the steps' length with room:
 # screencapture -v keeps its file only when it ends by itself (SIGINT and
 # SIGTERM lose it), so it is left to end, and its own file name means a later
@@ -22,7 +21,7 @@
 #   scripts/floating-icon-by-hand.sh        # from desktop 1, in a terminal
 set -u
 ROOT=${0:A:h:h}
-NOTES=${NOTES:-/Users/pabloantipan/organizer/.wt-notes/fi2-build}
+NOTES=${NOTES:-/Users/pabloantipan/organizer/.wt-notes/fi3-build}
 APP=$ROOT/build/bin/Deltagos.app/Contents/MacOS/organizer
 [[ -x $APP ]] || { echo "no build at $APP: run wails build in $ROOT first"; exit 1; }
 mkdir -p $NOTES
@@ -57,18 +56,23 @@ END=$(date -v+${RECORD_S}S +%H:%M:%S)
 cat <<'STEPS'
 
 Recording for one minute. Deltagos (this build) is full on this desktop.
-About thirty seconds:
+About forty seconds, all optional:
 
   ctrl+→ to desktop 2 (the icon is bottom right). Then:
 
-  a. Click the icon (the list opens). Press Escape, then Escape again: the
-     list goes.
-  b. Click the icon. Click the empty desktop beside the list (not the icon):
-     the list goes.
-  c. Click the icon and wait until the list is open (a second). THEN
-     double-click the icon: the open list grows into the full window, with
-     no blink.
-  d. ctrl+← to desktop 1, this terminal, and press Enter.
+  a. (F16) Click the icon: the list opens. Click the icon again: the list
+     goes at once, no wait.
+  b. (F16) Click the icon, wait a second, then double-click it: the list goes
+     and the full window grows out of the icon; the list does not come back.
+  c. ctrl+← to desktop 1: the window lives on desktop 2 now, so the icon is
+     here. (F13) Click the icon and type `pay`: the list
+     ends 8 px under partner-payouts. Delete a letter, type `zzz`: it follows.
+     Escape twice.
+  d. (F14) Drag the icon to the top of the screen: it stops 8 px under the
+     menu bar, as at the other edges.
+  e. (F15) Zoom a window of yours (option-click its green button): the icon
+     stays above it. A full-screen app's desktop has no icon.
+  f. Press Enter in this terminal.
 
 STEPS
 echo "(The recording ends by itself at $END.)"

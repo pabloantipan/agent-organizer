@@ -31,8 +31,10 @@
 .fl-search::placeholder { color: var(--fg-subtle); }
 .fl-search:focus { outline: 2px solid var(--focus-ring); outline-offset: 0; border-color: transparent; }
 
+/* The list ends 8 px under its last row (Amendment 3): the bottom padding
+   and the scroll edge's 1 px line make the 8. */
 .fl-body {
-  flex: 1; min-height: 0; overflow-y: auto; padding: 0 var(--space-2) var(--space-2);
+  flex: 1; min-height: 0; overflow-y: auto; padding: 0 var(--space-2) calc(var(--space-2) - 1px);
   border-top: 1px solid transparent; border-bottom: 1px solid transparent;
 }
 /* The scroll edge (design system, Widths). */

@@ -71,7 +71,8 @@ export function FloatList() {
     return () => { window.removeEventListener("focus", onFocus); window.removeEventListener("blur", onBlur); };
   }, [open]);
 
-  // As tall as the rows, up to the native limit (480 or 70% of the display).
+  // As tall as the rows, up to the native limit (480 or 70% of the display),
+  // with no floor: it follows the filter as rows come and go (Amendment 3).
   useLayoutEffect(() => {
     if (!open) return;
     const el = panel.current, body = scroller.current, rows = body?.firstElementChild as HTMLElement | null;
