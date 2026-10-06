@@ -4,6 +4,36 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-06 (morning), both tasks landed; roadmap revisited
+
+- **Last SHA seen:** fe65c2c. Origin still at 42efe71; push only when asked.
+- **Landed and ended:** sup44 floating-icon-2 (74e9b0a; Pablo accepted the
+  open-list double-click on the seat proof, d2db765) and sup45
+  decisions-line-and-names (81e0822; X1 by measurement, Pablo's ruling).
+  Both supervisors killed, tokens revoked, threads closed. Next: sup46.
+- **Reinstall pending** from main once Pablo quits Deltagos (`make install`,
+  then `git checkout -- frontend/wailsjs/runtime/`).
+- **Roadmap:** 0094 ruled, stage `one-window` added after
+  discovery-in-a-cell, 23 unstaged cards joined (0cc0703). Stage 5's exits
+  are both open: (a) needs Draft the cell run on a real initiative (none
+  has; camp, hestia, organizer cells were not drafted), (b) is camp's. I
+  recommended a record closing it with (b) moved to camp; Pablo not asked
+  again yet.
+- **Roadmap as a plan (0093, ruled):** Aglaea's spec
+  docs/ux/specs/roadmap-as-a-plan.md (1f2ded8, P1-P8). Blocked on O1, run
+  records with machine-readable waves and rounds: asked Hephaistos, thread
+  01M48N3N043J0BNH5VGF51QRJB. Then the build spec and an accept record.
+- **0095 ruled:** a gate row names Pablo only when no seat can check it,
+  with the reason. dln-x1 proved a seat can synthesize a phased trackpad
+  swipe in WKWebView. Asked Hephaistos for a shared input driver, thread
+  01M48W0YEC3H6WFX62WMKV4K8X.
+- **leftovers-13** as listed below, plus sup45's G1 (X4 row 12 unreachable),
+  G2 (X1 gates only 0082's line), the inline magenta, and Aglaea's A3
+  (~0.5 s single-click wait on the open list). Cut as one accept record with
+  a form, applying 0095 to every row.
+- **Repetition log:** by-hand rows for Pablo, 7 on 2026-10-06 alone
+  (floating-icon-2 takes 1-5, N3, X1); generalized as 0095.
+
 ## HAND-OFF — 2026-10-06, session ended by Pablo; two tasks wait on his hands
 
 Read first: `agents/fse.md`, the fse skill (spec-craft 5b and supervise §7
