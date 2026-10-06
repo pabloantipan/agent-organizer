@@ -4,6 +4,40 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-05 (evening), two tasks closing, floating icon next
+
+Read first: `agents/fse.md`, the fse skill (reread it: Hephaistos changed
+spec-craft 5b and supervise §7 on 2026-10-04), then this section.
+
+- **Last SHA seen:** d559e1d. Pushed to origin up to 42efe71 (2026-10-04);
+  push again when Pablo asks.
+- **Running:**
+  - sup41, `decisions-still` (0086): vibration fixed, F1 fixed; waits on the
+    UI recheck at the band. When it lands: end sup41, reinstall the app, and
+    launch `decisions-line-and-names` (0087 ruled, the 0082 sideways swing).
+  - sup42, `floating-icon-spike` (0089): review passed (d559e1d); its
+    Findings (d8d6585 on branch floating-icon-spike) must reach main. End
+    sup42 on its `done`; keep the spike branch.
+- **Next for me:** the floating icon's build spec from the spike's Findings
+  and Aglaea's design (`docs/ux/specs/floating-icon.md`, 16ae245), then an
+  accept record carrying her three questions for Pablo: a Needs me badge on
+  the icon (O1), a global shortcut (O2), the Home row (O3). Scope: 0088.
+- **Collected for the next leftovers batch:** dst-ui G4 (the review build's
+  window titled "Deltagos Review"; someone typed into it), and whatever the
+  two closing reports add. Compact Home's base cap still needs Aglaea.
+- **How I end a supervisor:** `probe -k sup<n>`, `discuss-api token rm`,
+  close the task's threads one by one
+  (`~/claudecode/scripts/discuss-threads organizer sup<n> '<seat>-*'`, then
+  `discuss-hook close <id>` each: a batch stops at the first error),
+  `organizer clean`, remove its prelude and prompt files.
+- **Rules I broke and must not again:** editing a record after Pablo ruled
+  it (0085, restored in 3efa2b5): check a record's status at HEAD first.
+  Gates: a row must be able to fail on main, and pointer rows name who
+  performs them (proposed to Hephaistos 2026-10-05).
+- **Pablo's working pattern:** he rules accept records with "ok" in the app
+  or "go"/"accepted" here; he wants several questions as a question form,
+  not prose; UI reviews need the Mac unlocked and the review window visible.
+
 ## HAND-OFF — 2026-09-30 (3), 0069 ruled; sup25 not started; restart by Pablo
 
 Read first: `agents/fse.md`, the fse skill, `references/standing-up.md`
