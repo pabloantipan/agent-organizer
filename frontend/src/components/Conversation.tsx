@@ -339,7 +339,8 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
             const subj = t.subject || t.id.slice(0, 8);
             return (
               <section key={t.id} id={`thread-${t.id}`} className={`tl-thread ${target === t.id ? "target" : ""} ${needsMe(t) ? "hot" : ""}`}>
-                <div className="tl-divider" tabIndex={-1} onClick={() => { setTarget(t.id); setReplyTo(null); setBranchFrom(null); }} title="reply into this thread">
+                {/* leftovers-12 FR-2: a landing focuses the divider, so it is named by its thread. */}
+                <div className="tl-divider" tabIndex={-1} role="group" aria-label={`Thread ${t.subject || "(no subject)"}, ${status}${status === "open" && t.since_decision > 0 ? `, ${t.since_decision} of 12` : ""}`} onClick={() => { setTarget(t.id); setReplyTo(null); setBranchFrom(null); }} title="reply into this thread">
                   <span className="tl-subj">{t.subject || "(no subject)"}</span>
                   <span className="tl-meta">
                     {status !== "open" && <span className={`badge thread ${status}`}>{status}</span>}
@@ -802,7 +803,7 @@ function RuleBox(p: { seats: string[]; defaultTo: string; where: string; escalat
       <textarea autoFocus rows={3} value={text} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setText(e.target.value)} {...imeText.props} placeholder="What you decided  (Enter to rule, Shift+Enter for a new line)" onKeyDown={(e) => { if (imeText.escape(e)) return; if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } if (e.key === "Escape") p.onCancel(); }} />
       <input value={next} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setNext(e.target.value)} {...imeNext.props} placeholder="Next action  (one line: who does what; the seat writes it into the card)" onKeyDown={(e) => { if (imeNext.escape(e)) return; if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } if (e.key === "Escape") p.onCancel(); }} />
       <div className="composer-row">
-        <select value={to} onChange={(e) => setTo(e.target.value)} title="direct wakes one seat; everyone wakes them all">
+        <select value={to} onChange={(e) => setTo(e.target.value)} title="direct wakes one seat; everyone wakes them all" aria-label="Recipient">
           <option value="">everyone (wakes {p.seats.length})</option>
           {shownSeats(p.seats, to).map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
