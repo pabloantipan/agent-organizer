@@ -989,4 +989,9 @@ sections below this one are history.
   Code review failed only on row 2 (F5, F7 by Pablo's hand); a 45 s take
   asked. For aglaea later: the growth runs ~0.36 s (spec 200 ms), and the
   list blinks out ~100 ms when a double-click starts on an open list.
+- aglaea, floating-icon.md Amendment 2 (44443ea), both sev 1, for a
+  follow-up after floating-icon-2: A1 a click on the icon with the list open
+  closes it only after the double-click interval (a second click grows it;
+  no blink); A2 the growth at 200 ms (NSAnimationContext 0.2), never over
+  300, none under Reduce motion.
 
