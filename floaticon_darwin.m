@@ -5,7 +5,7 @@
 // not, never on a full-screen app's desktop and never key. A click brings the
 // Wails window to this desktop as the initiative list (the frontend's
 // FloatList, told by the Wails event floaticon:list); a pick makes it full
-// here, Escape or a click outside sends it home. Public API only.
+// here, Escape, a click outside or the icon sends it home. Public API only.
 //
 // Two Wails v2 internals are leaned on (T5): the window is found by its class
 // name, WailsWindow, in [NSApp windows], and its minimum size lives twice, in
@@ -61,6 +61,7 @@ static NSSize appMinSize;             // Wails' minimum as configured, put back 
 static CGFloat listHeight = kListMaxH;
 static NSWindowStyleMask homeStyle;
 static NSColor *homeBackground;
+static NSWindowAnimationBehavior homeAnimation;
 static BOOL started;
 static FILE *logFile;
 static char *logPath;                 // the float log's path, kept for the check hook
@@ -425,7 +426,12 @@ static void listChrome(void) {
     if (!([mainWin styleMask] & NSWindowStyleMaskTitled)) return; // already
     homeStyle = [mainWin styleMask];
     homeBackground = [mainWin backgroundColor];
+    homeAnimation = [mainWin animationBehavior];
     [mainWin setStyleMask:NSWindowStyleMaskBorderless | NSWindowStyleMaskResizable];
+    // A borderless window gets AppKit's shrink-and-fade when ordered out
+    // (about 0.3 s on screen after isVisible says no): the list closes at
+    // once (Amendment 3), so none.
+    [mainWin setAnimationBehavior:NSWindowAnimationBehaviorNone];
     [mainWin setOpaque:NO];
     [mainWin setBackgroundColor:[NSColor clearColor]];
     NSView *cv = [mainWin contentView];
@@ -447,6 +453,7 @@ static void restoreChrome(void) {
     cv.layer.cornerRadius = 0;
     cv.layer.masksToBounds = NO;
     [mainWin setStyleMask:homeStyle];
+    [mainWin setAnimationBehavior:homeAnimation];
     [mainWin setOpaque:YES];
     if (homeBackground) [mainWin setBackgroundColor:homeBackground];
 }
@@ -518,32 +525,15 @@ static void bringList(void) {
     update(@"click", NO);
 }
 
-// A click on the icon with the list open closes it only once the
-// double-click interval has passed with no second press (Amendment 2): a
-// second press in time cancels the close and grows the open list, so
-// nothing blinks. Escape and a click outside still close at once.
-static unsigned closeGen;             // bumped to cancel a pending close
-static BOOL closePending;
+static void dismissList(NSString *why);
+static void growFromIcon(NSString *why);
 
-static void cancelClose(NSString *why) {
-    if (!closePending) return;
-    closePending = NO;
-    closeGen++;
-    flog(@"close cancelled (%@)", why);
-}
-
+// A click on the icon with the list open closes it at once (Amendment 3,
+// which replaces Amendment 2's wait); a second click within the double-click
+// interval then grows the full window from the icon, never the list again.
 static void iconClicked(void) {
     if (state == StateListing && [mainWin isOnActiveSpace] && [mainWin isVisible]) {
-        unsigned gen = ++closeGen;
-        closePending = YES;
-        double wait = [NSEvent doubleClickInterval];
-        flog(@"close waits %.0f ms for a second click", wait * 1000);
-        after(wait, ^{
-            if (gen != closeGen || !closePending) return;
-            closePending = NO;
-            flog(@"close: no second click in %.0f ms", wait * 1000);
-            FloatIconDismiss();
-        });
+        dismissList(@"icon");
         return;
     }
     bringList();
@@ -554,12 +544,16 @@ static void goFull(NSString *why);
 // A double-click (F10, F11): the list the first click opened grows into the
 // full window here, at the view the window last showed, which the frontend
 // keeps (the list never changes it). If the first click closed an open list
-// instead, the list comes back first, so the growth starts from it.
+// instead, the full window grows from the icon and the list stays closed
+// (Amendment 3).
 static void doubleClicked(void) {
     if (state == StateHome && [mainWin isVisible] && [mainWin isOnActiveSpace]) return; // already full here
-    if (state != StateListing || ![mainWin isVisible]) bringList();
-    floatIconExpanded(); // the frontend closes the list without touching the view
-    goFull(@"double-click");
+    if (state == StateListing && [mainWin isVisible]) {
+        floatIconExpanded(); // the frontend closes the list without touching the view
+        goFull(@"double-click");
+        return;
+    }
+    growFromIcon(@"double-click after a close");
 }
 
 // ---------- the panel ----------
@@ -648,7 +642,6 @@ static void watchPointer(void) {
     // The system's interval, from the last click's mouse-up to this press.
     NSTimeInterval gap = self.lastClickUp > 0 ? [e timestamp] - self.lastClickUp : -1;
     self.second = [e clickCount] >= 2 || (gap >= 0 && gap <= [NSEvent doubleClickInterval]);
-    if (self.second) cancelClose(@"second press");
     setLook(LookPressed, 0.08);
     flog(@"pointer down at %@ (clickCount %ld, %.0f ms after the last click, interval %.0f ms%@)", NSStringFromPoint(self.downAt), (long)[e clickCount],
          gap * 1000, [NSEvent doubleClickInterval] * 1000, self.second ? @", second click" : @"");
@@ -925,7 +918,6 @@ void FloatIconStart(const char *logArg, const char *placeFile) {
             usr2 = dispatch_source_create(DISPATCH_SOURCE_TYPE_SIGNAL, SIGUSR2, 0, dispatch_get_main_queue());
             dispatch_source_set_event_handler(usr2, ^{
                 flog(@"SIGUSR2: the double-click's second press and action, without a pointer");
-                cancelClose(@"second press");
                 clickUpAt = now();
                 doubleClicked();
             });
@@ -969,16 +961,21 @@ void FloatIconCompact(void) {
 
 // A pick: the window goes full on this desktop, which becomes its home; its
 // size and place are the ones it had at home, kept inside this display.
+// The full window's frame on a display: its home size and place, kept inside.
+static NSRect fullFrameOn(NSScreen *s) {
+    NSRect v = [s visibleFrame];
+    NSRect f = homeFrame;
+    f.size.width = MIN(NSWidth(f), NSWidth(v));
+    f.size.height = MIN(NSHeight(f), NSHeight(v));
+    f.origin.x = MAX(NSMinX(v), MIN(NSMinX(f), NSMaxX(v) - NSWidth(f)));
+    f.origin.y = MAX(NSMinY(v), MIN(NSMinY(f), NSMaxY(v) - NSHeight(f)));
+    return f;
+}
+
 static void goFull(NSString *why) {
         if (!started || state != StateListing) return;
         state = StateHome;
-        NSScreen *s = [mainWin screen] ?: [NSScreen mainScreen];
-        NSRect v = [s visibleFrame];
-        NSRect f = homeFrame;
-        f.size.width = MIN(NSWidth(f), NSWidth(v));
-        f.size.height = MIN(NSHeight(f), NSHeight(v));
-        f.origin.x = MAX(NSMinX(v), MIN(NSMinX(f), NSMaxX(v) - NSWidth(f)));
-        f.origin.y = MAX(NSMinY(v), MIN(NSMinY(f), NSMaxY(v) - NSHeight(f)));
+        NSRect f = fullFrameOn([mainWin screen] ?: [NSScreen mainScreen]);
         NSRect from = [mainWin frame]; // the list's frame, before its chrome changes
         restoreChrome();
         // The growth keeps the house motion (Amendment 2): 200 ms, not
@@ -1014,21 +1011,78 @@ void FloatIconFull(void) {
     dispatch_async(dispatch_get_main_queue(), ^{ goFull(@"pick"); });
 }
 
+// The second click of a double-click whose first closed the list (Amendment
+// 3): the full window grows out of the icon here, as Compact shrinks into
+// it, at the view it last showed; the list is not shown again. This desktop
+// becomes its home.
+static void growFromIcon(NSString *why) {
+    if (!started || (state != StateReturning && state != StateCompacted) || [mainWin isVisible]) return;
+    NSRect tile = tileOf([panel frame]);
+    NSRect f = fullFrameOn(screenAt(NSMakePoint(NSMidX(tile), NSMidY(tile))));
+    state = StateHome;
+    restoreChrome();
+    [mainWin setMinSize:NSMakeSize(1, 1)]; // the growth starts at the tile; userMinSize is put back after
+    [mainWin setFrame:tile display:NO];
+    double t0 = now();
+    BOOL still = reduceMotion();
+    [mainWin setAlphaValue:still ? 1 : 0];
+    orderHere(mainWin, ^{
+        [mainWin makeKeyAndOrderFront:nil];
+        [NSApp activateIgnoringOtherApps:YES];
+    });
+    void (^grown)(void) = ^{
+        if (!NSEqualRects([mainWin frame], f)) [mainWin setFrame:f display:YES];
+        [mainWin setAlphaValue:1];
+        setMin(appMinSize);
+        BOOL titled = ([mainWin styleMask] & NSWindowStyleMaskTitled) != 0;
+        flog(@"full (%@) read back: %@, growth %.0f ms%@ from the icon %@ to %@, visible=%d onActive=%d key=%d state=%s", why,
+             titled ? @"full window" : @"still the list", (now() - t0) * 1000, still ? @" (reduce motion: none)" : @"",
+             NSStringFromRect(tile), NSStringFromRect([mainWin frame]), [mainWin isVisible], [mainWin isOnActiveSpace], [mainWin isKeyWindow],
+             stateName[state]);
+    };
+    if (still) {
+        [mainWin setFrame:f display:YES];
+        grown();
+    } else {
+        [NSAnimationContext runAnimationGroup:^(NSAnimationContext *c) {
+            c.duration = 0.2;
+            c.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
+            [[mainWin animator] setFrame:f display:YES];
+            [[mainWin animator] setAlphaValue:1];
+        } completionHandler:grown];
+    }
+    floatIconExpanded(); // the list is already closed; the view it covered shows
+    markHome();
+    flog(@"full (%@): growing from the icon %@ to %@, %.0f ms after the click, the list not reopened", why, NSStringFromRect(tile),
+         NSStringFromRect(f), clickUpAt > 0 ? (now() - clickUpAt) * 1000 : -1);
+    clickUpAt = 0;
+    update(@"full", NO);
+}
+
 // Pick nothing (§3, F7): the window leaves this desktop and returns to its
 // home the next time that desktop is active; from Compact, it compacts again.
+static void dismissList(NSString *why) {
+    if (!started || state != StateListing) return;
+    [mainWin orderOut:nil];
+    BOOL gone = ![mainWin isVisible];
+    restoreChrome();
+    [mainWin setFrame:homeFrame display:NO];
+    state = listFromCompact ? StateCompacted : StateReturning;
+    floatIconClosed();
+    [NSApp deactivate]; // focus goes back to what was in front
+    // F16 reads the close back: isVisible after the order-out, and for the
+    // icon's click its time from the mouse-up.
+    NSString *at = @"";
+    if (clickUpAt > 0) {
+        at = [NSString stringWithFormat:@", %.0f ms after the click", (now() - clickUpAt) * 1000];
+        clickUpAt = 0;
+    }
+    flog(@"dismiss (%@): list isVisible=%d%@; %s min=%@", why, !gone, at, stateName[state], NSStringFromSize([mainWin minSize]));
+    update(@"dismiss", NO);
+}
+
 void FloatIconDismiss(void) {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if (!started || state != StateListing) return;
-        cancelClose(@"closed now");
-        [mainWin orderOut:nil];
-        restoreChrome();
-        [mainWin setFrame:homeFrame display:NO];
-        state = listFromCompact ? StateCompacted : StateReturning;
-        floatIconClosed();
-        [NSApp deactivate]; // focus goes back to what was in front
-        flog(@"dismiss: %s min=%@", stateName[state], NSStringFromSize([mainWin minSize]));
-        update(@"dismiss", NO);
-    });
+    dispatch_async(dispatch_get_main_queue(), ^{ dismissList(@"frontend"); });
 }
 
 // The list's height as its rows need it (§3): up to 480, or 70% of the
