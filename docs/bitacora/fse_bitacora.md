@@ -4,6 +4,21 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-06 (late afternoon), stage 5 closed
+
+- **Last SHA seen:** 78a18ab. Installed app: bb0563a (both leftovers-13 cards).
+- **0097 ruled:** discovery-in-a-cell done 2026-10-06, `one-window` current.
+  Camp's move relayed to camp's FSE via Hephaistos (thread
+  01M491YXX4SETKNJFJZSSWX5KB, closed on post).
+- **Scanner problems on ruled records (repetition, 6 records):** a scope
+  record answers several questions, so `chosen` is never one of `options`
+  (0082, 0088, 0090, 0091, 0093), and 0095's options list split on a comma
+  inside an unquoted item. Not fixed: ruled records are not edited without
+  Pablo. Second recurrence, so propose generalizing: either the working-on
+  skill gives scope records a shape (options as the questions, chosen as a
+  map) the scanner accepts, or I write scope records with one quoted option
+  per full answer. Ask Pablo / Hephaistos.
+
 ## HAND-OFF — 2026-10-06 (afternoon), leftovers-13 landed
 
 - **Last SHA seen:** cd80c93. Origin still at 42efe71.
