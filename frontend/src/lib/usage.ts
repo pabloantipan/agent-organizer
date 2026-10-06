@@ -261,6 +261,10 @@ export function usageColumns(width: number): { kinds: boolean; sessions: boolean
   return { kinds: width >= withKinds, sessions: width >= withSessions };
 }
 
+/** The Sessions list keeps its model column from this width; below it the
+ *  model goes into the row's hover so the session names are not cut. */
+export const SESSIONS_MODEL_FROM = 1180;
+
 /** The hover and accessible name of a row whose kind columns gave way. */
 export function rowDetail(r: Kinds & { name: string; sessions: number }, cols: { kinds: boolean; sessions: boolean }): string {
   const parts: string[] = [];

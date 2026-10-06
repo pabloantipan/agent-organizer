@@ -122,6 +122,8 @@ button.link.name-text { flex-shrink: 1; min-height: 0; }
 .usage-sessions th:nth-child(6) { width: 13%; }
 .usage-sessions th:nth-child(7) { width: 96px; }
 .usage-sessions th:nth-child(8), .usage-sessions th:nth-child(9) { width: 104px; }
+.usage-sessions.no-model th:nth-child(7), .usage-sessions.no-model th:nth-child(8) { width: 104px; }
+.usage-sessions.no-model th:nth-child(6) { width: 88px; }
 .usage-sessions .c-num { width: auto; }
 .usage-sessions tbody th { font-weight: var(--weight-regular); color: var(--fg); }
 .usage-sessions .cut { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
