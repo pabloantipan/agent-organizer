@@ -538,13 +538,21 @@ function ReplyBox(p: {
           <option value="">everyone (wakes {p.wakesAll})</option>
           {shownSeats(p.seats.filter((s) => s !== p.human), to).map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
-        <span className={`meta wakes ${!to && wakes > 1 ? "hot" : ""}`}>wakes {wakes} seat{wakes === 1 ? "" : "s"}</span>
         <span className="spacer" />
         {err && <span className="meta err">{err}</span>}
+        <WakeCount wakes={wakes} all={!to && wakes > 1} />
         <button className="tiny-btn primary" onClick={send} disabled={!writable || !body.trim() || busy} title="send"><Send size={12} /> {draftVerb("Send", !!body)}</button>
       </div>
     </div>
   );
+}
+
+/** The wake count, read before anything is sent (leftovers-12 FR-3, the
+ *  design system's composer rule): neutral text beside Start or Send; when
+ *  it wakes every seat it takes the magenta tone as a caution, never the
+ *  blocked red. */
+function WakeCount({ wakes, all }: { wakes: number; all: boolean }) {
+  return <span className="meta wakes" style={all ? { color: "var(--tone)" } : undefined}>wakes {wakes} seat{wakes === 1 ? "" : "s"}</span>;
 }
 
 /** The seats a recipient select offers: the cell's, plus the addressee when
@@ -610,7 +618,7 @@ function NewThread({ initiativeId, chat, draftKey, seats, to: initialTo, subject
         {err && <span className="meta err">{err}</span>}
         {/* The wake count sits beside Start, read before anything is sent
             (design system, a composer's default addressee; leftovers-11 FR-6). */}
-        <span className={`meta wakes ${wakes > 1 ? "hot" : ""}`}>wakes {wakes} seat{wakes === 1 ? "" : "s"}</span>
+        <WakeCount wakes={wakes} all={!to && wakes > 1} />
         <button className="tiny-btn primary" onClick={send} disabled={busy || !canPost || !subject.trim() || !body.trim()}><Send size={12} /> {draftVerb(quote ? "Branch" : "Start", !!kept)}</button>
       </div>
     </div>
@@ -807,7 +815,7 @@ function RuleBox(p: { seats: string[]; defaultTo: string; where: string; escalat
           <option value="">everyone (wakes {p.seats.length})</option>
           {shownSeats(p.seats, to).map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
-        <span className={`meta wakes ${!to && p.seats.length > 1 ? "hot" : ""}`}>wakes {to ? 1 : p.seats.length} seat{to || p.seats.length === 1 ? "" : "s"}</span>
+        <WakeCount wakes={to ? 1 : p.seats.length} all={!to && p.seats.length > 1} />
         <span className="spacer" />
         {p.err && <span className="meta err">{p.err}</span>}
         <button className="tiny-btn primary" onClick={send} disabled={!ready}><Gavel size={12} /> Rule</button>
