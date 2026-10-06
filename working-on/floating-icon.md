@@ -6,7 +6,7 @@ branch: floating-icon
 seat: fic-build
 updated: 2026-10-05
 next: "review: floating-icon, F4 F5 re-shown at 22aafc1 (take 4), 22aafc1"
-review: fail
+review: pass
 depends_on: []
 boundary: ["floaticon_darwin.m, floaticon_darwin.h, floaticon_darwin.go (new, darwin-only) and the hook in app.go", "frontend/src/components/FloatList.tsx (new) and its CSS; TopBar.tsx (the Compact to icon button); the store's openInitiative use only", "frontend/src/lib/ helpers and tests (list rows, search)", "scripts/ (a by-hand check script, like the spike's y1-pointer.sh)", "not: wails.json, build/darwin templates, other Go packages, docs/design-system.md"]
 spec: "docs/ux/specs/floating-icon.md (Aglaea, 16ae245) and its Technical notes T1-T8; scope 0088; the spike's Findings (on main as afe792d)"
@@ -39,6 +39,18 @@ The Teams behaviour Pablo asked for in 0088, built the way the spike proved.
 ## Next
 
 ## Review
+- Second re-review: pass at 22aafc1, the branch head. 22aafc1 = c2ee232 + a8a9fff, 65b7ec9 and 22aafc1, with no rebase in between.
+- Commit reviewed: 22aafc1.
+- Unmet: none.
+- F4, met at 22aafc1 in Pablo's take 4 (`by-hand-20261005-222305`). Drags start past 4 px. On the recording frames, the icon stays over the Dock while dragged (`take4/dock.png` t 59.5-60.4) and every drop on the Dock, its middle included, ends just above it (`dock-mid.png`; read back as tile y 111, the 8 px inset). Drops into the menu bar end below it (`menubar.png`). The places hold across desktop switches. 22aafc1 fixes the drop that ended under the Dock: the animated `setFrameOrigin` was dropped, so takes 1-2's Dock rows had come from a computed target. The fix animates the frame, sets it if it did not land, logs the frame read back, clamps on every update and raises the icon above the Dock while dragging.
+- F5, met. Pablo's pointer click opens the list on arrival (5c: 0.15-0.32 s after reaching the tile) and his row click opens it full (`take4/pick.png`). `pay` + Enter is the seat's, by sup43's call: `pay-check.png` shows partner-payouts filtered and then full, and `float-pay.log` agrees.
+- a8a9fff replaces the 20 Hz poll with global and local mouse-moved/dragged monitors, so nothing runs while the pointer is still. A global mouse monitor needs no permission (`float-mon.log`: "global move monitor live").
+- In a fresh clone at 22aafc1, `XDG_DATA_HOME=$(mktemp -d) make test` passes (Go, 265 vitests), `wails build` passes, nm shows 0 CGS/SLS symbols and the linux build compiles. Every changed path is inside the boundary as read (91ce09d).
+- N3 stays met by the installed c48cdf2 build. The post-merge reinstall from main is sup43's.
+- Outside the gate: 5b (a click beside the tile reaching the window under it) is right by reading. The panel ignores the pointer whenever it is off the tile's hover bounds, and monitors flip that on every move. It has not been shown by hand: take 3's clicks off the tile only closed an open list. At the top edge the tile lands about 40 px under the menu bar, not 8, because macOS keeps the whole 136 px panel below it. That is never under the menu bar, but it is further in than the spec's 8 px. The UI review ran at 898f9a9, before c48cdf2 and 22aafc1 changed how the icon takes the pointer, hovers and drops.
+- Reviewer: fic-review, 2026-10-05.
+
+### Re-review, c48cdf2
 - Re-review: fail at c48cdf2. Branch head c2ee232 carries the same patches (`git range-diff`), rebased onto main's card commits. N3 is now met. F4 and F5 are not demonstrated at c48cdf2: c48cdf2 changed how the icon takes the pointer, and no real-pointer take has run since.
 - Commit reviewed: c48cdf2.
 - Unmet: F4, F5.
