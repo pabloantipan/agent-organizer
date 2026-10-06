@@ -23,3 +23,4 @@ docs/specs/usage.md, U1 to U9 and X0.
 ## Notes
 - 0099 ruled 2026-10-06; supervisor sup47, spawned by the FSE.
 - 2026-10-06 sup47: usage-ledger merged as 6e4e004; wave 2 launched from a031a67. The new screen needs one line in App.tsx (the screen switch), read as part of "the store's screen (one entry)".
+- 2026-10-06 sup47: boundary widened by one clause, `frontend/src/components/ContextBar.tsx:13` (the statusline cost in the context bar's hover on Agents), which U9 (FR-6, 0099) requires dropping; no other session owns it.
