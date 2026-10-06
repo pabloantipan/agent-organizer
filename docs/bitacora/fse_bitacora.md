@@ -1004,4 +1004,9 @@ sections below this one are history.
   sweep) is in my gate lessons; G4 (review window title) for the next batch.
   sup45 runs decisions-line-and-names. Stray fixture dZk39O (23:34): asked
   aglaea.
+- decisions-line-and-names: both reviews passed at 1ec2867; merge waits on
+  Pablo's X1 trackpad swipe. Next batch: G1 X4 row 12 has no UI path (row 10
+  checked instead); G2 no row for a long title on a ruled line (dln-U1, with
+  aglaea); the state word map is now a third copy (AgentList, Crew,
+  RoleDrawer); .wakes.hot dead CSS (global.css:560).
 
