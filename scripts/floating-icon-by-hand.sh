@@ -59,14 +59,17 @@ F4  move it
   3. Drag it down onto the Dock and let go: it stays just above it.
   4. Drag it to the middle of the right edge and let go.
   5. ctrl+→ to desktop 3: the icon is in the same spot.
-  5b. Put the icon over a window, then click that window just beside the
-      icon (a few mm off its edge): the window gets the click. Rest the
-      pointer on the icon: it lifts (hover).
+  5b. Drag the icon over another app's window, then click that window just
+      beside the icon (a few mm off its edge): that window comes to the
+      front (it got the click). Rest the pointer on the icon: it lifts.
+  5c. Move the pointer from far away onto the icon and click at once, with
+      no pause: the list opens. Press Escape: it goes.
 
 F5  pick by typing
   6. Click the icon. The list opens by it, with the search field focused.
   7. Drag the icon a little with the list open: the list follows it.
-  8. Type  pay  and press Enter: partner-payouts opens full, here on desktop 3.
+  8. Type  pay  (keyboard only, do not click a row) and press Enter:
+     partner-payouts opens full, here on desktop 3.
 
 F7  get out without moving anything
   9. ctrl+← to desktop 2. Click the icon; press Escape twice (no clicks):
