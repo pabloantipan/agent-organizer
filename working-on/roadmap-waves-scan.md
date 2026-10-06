@@ -6,7 +6,7 @@ branch: roadmap-waves-scan
 seat: rws-build
 stage: one-window
 updated: 2026-10-06
-next: "sup48 runs it, wave 1"
+next: "rws-build building, wave 1 (sup48)"
 depends_on: [usage-view]
 boundary: ["internal/scan (runs reader and tests), internal/model (Wave, Round), internal/merge", "app.go (type stubs only), frontend/wailsjs regenerated, testdata/fixture-overlay (run records)", "not: the run record template, internal/session"]
 spec: "docs/specs/roadmap-as-a-plan.md (FR-1 to FR-3)"
