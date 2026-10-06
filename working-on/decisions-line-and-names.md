@@ -5,7 +5,7 @@ repos: [organizer]
 branch: decisions-line-and-names
 seat: dln-build
 updated: 2026-10-06
-next: "review: decisions-line-and-names, X0 met; X1-X5 met in Chromium and WKWebView but X1's trackpad swipe (Pablo, by hand) and X4 row 12 in WKWebView (not verified)"
+next: "pablo: X1 trackpad swipe by hand (steps in Notes, via the FSE thread), then sup45 merges; both reviews passed at 1ec2867"
 depends_on: [decisions-still]
 boundary: ["frontend/src/components/DecisionsView.tsx, frontend/src/styles/global.css (.dec-meta and the Ruled line only), decisions.css", "frontend/src/components/Conversation.tsx and SlackView.tsx (divider name, wake count)", "the roles drawer component (session state word)", "frontend/src/components/Home.tsx, frontend/src/styles/home.css (Needs me's focus and landing; stage and id tracks)", "frontend/src/lib/width.ts, lib/queue.ts (first-five helper only) and lib/ tests", "not: Go, docs/design-system.md"]
 spec: "docs/specs/leftovers-12.md (FR-1 to FR-7); Aglaea cb20fcf, 2203d7d"
