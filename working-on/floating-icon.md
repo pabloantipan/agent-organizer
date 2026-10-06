@@ -48,4 +48,4 @@ The Teams behaviour Pablo asked for in 0088, built the way the spike proved.
 - fic-build: F9's panel was opened by AXPress on the icon (the VoiceOver path), not a pointer event; the reviewer judges whether that fits the seat's "no AppleScript clicks". The native file is ~695 lines, over the 250-300 forecast (states for listing, returning and compacted, the looks, places per display). `screencapture -v` loses its file on SIGINT/SIGTERM, so the by-hand recording is a fixed 4 minutes, one file per run.
 The spike branch `floating-icon-spike` holds working code to start from.
 
-Boundary as read by sup43 (consequences, not additions): the one line in `frontend/src/App.tsx` that mounts FloatList, and the regenerated `frontend/wailsjs` bindings for new App methods. Nothing else outside the boundary.
+Boundary as read by sup43 (consequences, not additions): the one line in `frontend/src/App.tsx` that mounts FloatList, the regenerated `frontend/wailsjs` bindings for new App methods, and `floaticon_other.go` (the non-darwin no-op the darwin-only files need; named in the task prompt, missing here until the code review's finding 1). Nothing else outside the boundary.
