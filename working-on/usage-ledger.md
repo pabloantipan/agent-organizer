@@ -6,7 +6,7 @@ branch: usage-ledger
 seat: ul-build
 stage: one-window
 updated: 2026-10-06
-next: "review: usage-ledger, gate met (G1-G5, X0), 30a53cf"
+next: "review: usage-ledger, gate met (G1-G5, X0), 0c8a44b"
 depends_on: []
 boundary: ["internal/usage (new) and its tests and testdata", "internal/service (one Usage method), internal/cli (the usage command), app.go (one bound method), frontend/wailsjs regenerated", "not: internal/session record format, the runs.jsonl writer"]
 spec: "docs/specs/usage.md (FR-1 to FR-4)"
@@ -24,7 +24,7 @@ docs/specs/usage.md, G1 to G5 and X0.
 - [x] G3 `TestCostSplitByDayAndNullWithoutRecord`: $3 split over two days by tokens (sums to $3); the session without a record `cost: null`, `without_cost: 1`
 - [x] G4 `--week 2026-W41 --by task` on the real home: rlf-build/review/ui under ruled-line-floor, fi3-build/review/ui under floating-icon-3, sup46 under the wave row `sup46 · floating-icon-3, ruled-line-floor`; none Not attributed (output under Done)
 - [x] G5 `--by role` 2026-W41: builder, ui reviewer, supervisor, pair, reviewer, fse, then Not attributed (0 this week: every W41 session has a role; its reasons print when there are some, `TestUsageCmdOverATranscript`)
-- [x] X0 fresh clone of a466d21 (same code as 30a53cf) under .wt-notes/ul-build: `XDG_DATA_HOME=$(mktemp -d) make test` (go all ok, vitest 279), `npm run build`, `wails build` all exit 0
+- [x] X0 fresh clone of a466d21 (same code as 0c8a44b) under .wt-notes/ul-build: `XDG_DATA_HOME=$(mktemp -d) make test` (go all ok, vitest 279), `npm run build`, `wails build` all exit 0
 - Scan cost on the real home (467 transcripts, 1.17 GB): first run 5.66 s, second 0.22 s (only live sessions' new bytes)
 
 ## Notes
@@ -34,7 +34,7 @@ docs/specs/usage.md, G1 to G5 and X0.
 - Choices (ledger fields, offsets, role table, JSON shape): .wt-notes/ul-build/progress.md.
 
 ## Done
-- 2026-10-06 ul-build: internal/usage (ledger, attribution, report) f786be3; Service.Usage 3b0b2ce; `organizer usage` f63726b; App.Usage + wailsjs 30a53cf. Branch usage-ledger, rebased on main 87d9f17 (X0 ran at a466d21, same code before the rebase over card-only commits), unmerged.
+- 2026-10-06 ul-build: internal/usage (ledger, attribution, report) df02d32; Service.Usage 1873765; `organizer usage` 90b1ff2; App.Usage + wailsjs 0c8a44b. Branch usage-ledger, rebased on main 4d8106a (X0 ran at a466d21, same code before the rebase over card-only commits), unmerged.
 
 G4, `organizer usage --week 2026-W41 --by task`:
 ```
