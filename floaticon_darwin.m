@@ -317,34 +317,55 @@ static void markHome(void) {
     flog(@"home marked");
 }
 
-// A full-screen desktop (T3): another app's normal window covers the whole
-// display the icon is on. FullScreenNone does not keep a CanJoinAllSpaces
-// panel off it. Read only at a desktop-change notification, after the slide:
-// mid-slide the list holds both desktops' windows (the spike's misfire).
+// A full-screen desktop (T3, narrowed by Amendment 3): FullScreenNone does
+// not keep a CanJoinAllSpaces panel off it, so the window list is read. A
+// window that covers the whole display is not enough: a zoomed window does
+// when the menu bar hides itself, and so does any borderless one, on a normal
+// desktop where the icon belongs (F15). What only a full-screen Space has is
+// the Dock's backdrop: a Dock window over the whole display above the
+// wallpaper and below the desktop icons' level (it is also what a split view
+// stands on, where no single window covers the display). Should a macOS drop
+// the backdrop, a covering window on a desktop with no Finder desktop is
+// taken as full screen, the old test kept honest. Read only at a
+// desktop-change notification, after the slide: mid-slide the list holds
+// both desktops' windows (the spike's misfire).
 static BOOL fullScreenSpace(void) {
     NSScreen *scr = [panel screen] ?: [NSScreen mainScreen];
     NSRect f = [scr frame];
     CGFloat top = NSMaxY([[NSScreen screens][0] frame]);
     CGRect want = CGRectMake(NSMinX(f), top - NSMaxY(f), NSWidth(f), NSHeight(f)); // CG: y down from the first display's top
-    NSArray *list = CFBridgingRelease(CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, kCGNullWindowID));
-    pid_t me = getpid();
+    NSArray *list = CFBridgingRelease(CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly, kCGNullWindowID));
+    int desktopLevel = CGWindowLevelForKey(kCGDesktopWindowLevelKey), iconsLevel = CGWindowLevelForKey(kCGDesktopIconWindowLevelKey);
+    pid_t me = getpid(), cover = 0;
+    BOOL backdrop = NO, desktop = NO;
     for (NSDictionary *w in list) {
-        if ([w[(id)kCGWindowLayer] intValue] != 0 || [w[(id)kCGWindowOwnerPID] intValue] == me) continue;
         CGRect r;
         if (!CGRectMakeWithDictionaryRepresentation((CFDictionaryRef)w[(id)kCGWindowBounds], &r)) continue;
-        if (fabs(r.origin.x - want.origin.x) < 1 && fabs(r.origin.y - want.origin.y) < 1 &&
-            r.size.width >= want.size.width - 1 && r.size.height >= want.size.height - 1) {
-            flog(@"full-screen window of pid %d", [w[(id)kCGWindowOwnerPID] intValue]);
-            return YES;
-        }
+        BOOL whole = fabs(r.origin.x - want.origin.x) < 1 && fabs(r.origin.y - want.origin.y) < 1 &&
+                     r.size.width >= want.size.width - 1 && r.size.height >= want.size.height - 1;
+        if (!whole) continue;
+        int layer = [w[(id)kCGWindowLayer] intValue];
+        pid_t pid = [w[(id)kCGWindowOwnerPID] intValue];
+        if (layer == 0 && pid != me && !cover) cover = pid;
+        else if (layer == iconsLevel) desktop = YES;
+        else if (layer > desktopLevel && layer < iconsLevel && [w[(id)kCGWindowOwnerName] isEqualToString:@"Dock"]) backdrop = YES;
     }
-    return NO;
+    BOOL fs = backdrop || (cover && !desktop);
+    if (cover || backdrop) flog(@"full-screen test: window over the whole display %@, Dock backdrop %d, Finder desktop %d: %@",
+                                cover ? [NSString stringWithFormat:@"of pid %d", cover] : @"none", backdrop, desktop,
+                                fs ? @"a full-screen Space" : @"a normal desktop");
+    return fs;
 }
 
 static void watchPointer(void);
 
 static void showIcon(void) {
     after(0.25, ^{ watchPointer(); }); // it may appear under a still pointer
+    // Read back, not assumed: on screen is the window server's word.
+    after(0.3, ^{
+        flog(@"icon read back: isVisible=%d on screen=%d alpha=%.2f frame=%@", [panel isVisible],
+             ([panel occlusionState] & NSWindowOcclusionStateVisible) != 0, [panel alphaValue], NSStringFromRect([panel frame]));
+    });
     if (reduceMotion()) {
         [panel setAlphaValue:1];
         [panel orderFrontRegardless];
