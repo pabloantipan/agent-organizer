@@ -6,7 +6,7 @@ branch: roadmap-waves-scan
 seat: rws-build
 stage: one-window
 updated: 2026-10-06
-next: "review: roadmap-waves-scan, gate met W1-W4 X0, 6675e90"
+next: "review: roadmap-waves-scan, gate met W1-W4 X0, 7c65191"
 depends_on: [usage-view]
 boundary: ["internal/scan (runs reader and tests), internal/model (Wave, Round), internal/merge", "app.go (type stubs only), frontend/wailsjs regenerated, testdata/fixture-overlay (run records)", "not: the run record template, internal/session"]
 spec: "docs/specs/roadmap-as-a-plan.md (FR-1 to FR-3)"
@@ -43,14 +43,14 @@ docs/specs/roadmap-as-a-plan.md, W1 to W4 and X0.
       build n/a, review "" (in flight)
   runs problems: []   other initiatives: waves []
   ```
-- [x] X0: fresh clone of the branch at 6675e90: `XDG_DATA_HOME=$(mktemp -d)
+- [x] X0: fresh clone of the branch at 7c65191: `XDG_DATA_HOME=$(mktemp -d)
   make test` (go vet, all Go packages ok, vitest 306/306), `cd frontend &&
   npm run build`, `wails build`: all pass. Clone removed.
 
 ## Done
 - rws-build, 2026-10-06: runs reader, stage join, problems, merge, fixture,
-  bindings on `roadmap-waves-scan` (c97e26c, bb73e8f, 8d82fa6, 6675e90),
-  rebased on main 963a439. Gate W1-W4, X0 met.
+  bindings on `roadmap-waves-scan` (8dc56d2, baf2ffc, 004f508, 7c65191),
+  rebased on main ee3ba7b. Gate W1-W4, X0 met.
 
 ## Notes
 - For roadmap-outline: `waves` is one list per initiative, oldest record
