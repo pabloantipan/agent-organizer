@@ -9,8 +9,7 @@ import { healthState } from "../lib/health";
 import { missingPersonas, personaMissing } from "../lib/queue";
 import { useBoard } from "../stores/board.store";
 import { escapeCloses, useConfirmFocus } from "../lib/focus";
-
-const STATE_LABEL: Record<string, string> = { working: "working", running: "idle", shell: "shell", exited: "exited" };
+import { stateWord } from "../lib/stateWords";
 
 /** What a cell in definition waits on (decision 0030): no seat has had a
  *  session or a run, so the roster is still being written. */
@@ -168,7 +167,7 @@ function SeatRow({ seat, readOnly, confirm, setConfirm, flash, onMessage }: { se
   const { opener: killBtn, commit: killCommit } = useConfirmFocus(asking);
   return (
     <li className={state} data-seat={seat.name} tabIndex={-1}>
-      <span className={`a-state ${state}`}><i />{STATE_LABEL[state] ?? state}</span>
+      <span className={`a-state ${state}`}><i />{stateWord(state)}</span>
       <span className="a-name"><span className="ident">{seat.name}</span></span>
       {seat.no_persona && (
         <span className="lz warning" title={`agents/${seat.name}.md is missing; the drafting session writes it, or write it by the persona-agents skill`}>

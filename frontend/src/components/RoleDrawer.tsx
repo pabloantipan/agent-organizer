@@ -8,6 +8,7 @@ import { openBox } from "../lib/boxStack";
 import { useScrollEdges } from "../lib/useScrollEdges";
 import { focusBoxBelow } from "./RuleDecisionBox";
 import { ageWords, noSessionLine, otherHandOffLine, roleState, sessionStarted, sessionWord } from "../lib/roles";
+import { stateWord } from "../lib/stateWords";
 import "../styles/roles.css";
 
 // A role's drawer (docs/ux/specs/transversal-roles.md, A click): the card
@@ -188,9 +189,8 @@ function Section({ label, children }: { label: string; children: React.ReactNode
 }
 
 /** leftovers-12 FR-4: a session's state in the word its Agents row shows
- *  (AgentList's STATE_LABEL: a running agent that is not working is idle). */
-const ROW_WORD: Record<string, string> = { working: "working", running: "idle", shell: "shell", exited: "exited" };
-const rowWord = (s: model.RoleSession) => ROW_WORD[sessionWord(s)] ?? sessionWord(s);
+ *  (lib/stateWords: a running agent that is not working is idle). */
+const rowWord = (s: model.RoleSession) => stateWord(sessionWord(s));
 
 function SessionLine({ s, onGo }: { s: model.RoleSession; onGo: () => void }) {
   const ctx = s.context == null ? "" : `${Math.round(s.context)}% context`;
