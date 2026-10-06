@@ -29,6 +29,16 @@ export function DraftCell(arg1:string,arg2:boolean):Promise<string>;
 
 export function EditNote(arg1:string,arg2:string,arg3:string,arg4:string):Promise<void>;
 
+export function FloatAvailable():Promise<boolean>;
+
+export function FloatCompact():Promise<void>;
+
+export function FloatDismiss():Promise<void>;
+
+export function FloatListHeight(arg1:number):Promise<void>;
+
+export function FloatPick():Promise<void>;
+
 export function GetAccount():Promise<auth.Account>;
 
 export function GetAgents():Promise<service.AgentsView>;

@@ -46,6 +46,26 @@ export function EditNote(arg1, arg2, arg3, arg4) {
   return window['go']['main']['App']['EditNote'](arg1, arg2, arg3, arg4);
 }
 
+export function FloatAvailable() {
+  return window['go']['main']['App']['FloatAvailable']();
+}
+
+export function FloatCompact() {
+  return window['go']['main']['App']['FloatCompact']();
+}
+
+export function FloatDismiss() {
+  return window['go']['main']['App']['FloatDismiss']();
+}
+
+export function FloatListHeight(arg1) {
+  return window['go']['main']['App']['FloatListHeight'](arg1);
+}
+
+export function FloatPick() {
+  return window['go']['main']['App']['FloatPick']();
+}
+
 export function GetAccount() {
   return window['go']['main']['App']['GetAccount']();
 }
