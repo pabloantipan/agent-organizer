@@ -6,7 +6,7 @@ branch: usage-ledger
 seat: ul-build
 stage: one-window
 updated: 2026-10-06
-next: "sup47 runs it (0099 ruled), wave 1"
+next: "ul-build builds it in .wt/usage-ledger (sup47, wave 1, launched 15:21)"
 depends_on: []
 boundary: ["internal/usage (new) and its tests and testdata", "internal/service (one Usage method), internal/cli (the usage command), app.go (one bound method), frontend/wailsjs regenerated", "not: internal/session record format, the runs.jsonl writer"]
 spec: "docs/specs/usage.md (FR-1 to FR-4)"
