@@ -6,7 +6,8 @@ branch: usage-ledger
 seat: ul-build
 stage: one-window
 updated: 2026-10-06
-next: "review: usage-ledger, gate met (G1-G5, X0), 0c8a44b"
+next: "G2: count each streamed message's final usage (its last line, across passes), then re-run G2 against a script that does; G3 pending the amended row (517b3a5)"
+review: fail
 depends_on: []
 boundary: ["internal/usage (new) and its tests and testdata", "internal/service (one Usage method), internal/cli (the usage command), app.go (one bound method), frontend/wailsjs regenerated", "not: internal/session record format, the runs.jsonl writer"]
 spec: "docs/specs/usage.md (FR-1 to FR-4)"
@@ -95,3 +96,16 @@ reviewer  $19.68  7%  34.1M  653  158k  32.7M  1.2M  11
 fse  $12.55  5%  199.0M  823  192k  194.6M  4.3M  3  
 Not attributed  $0.00  0%  0  0  0  0  0  0  
 ```
+
+## Review
+- Verdict: **fail** at 0c8a44bf7e76f4563bb83adb47939fc377829d58 (branch usage-ledger). Unmet: G2. G3 pending (FR-2/G3 amended in 517b3a5 while this review ran; sup47 asked for G3 to be judged only at the new SHA). G1, G4, G5, X0 met.
+- X0: fresh clone at 0c8a44b, `XDG_DATA_HOME=$(mktemp -d) make test` (go all ok, vitest 279), `npm install && npm run build`, `wails build` all exit 0.
+- G1: `TestIngestSumsOncePerMessageAndRereadsNothing` passes and tests what the row says (msg_1 ×3 once, sub-agent on its parent, split by day, second pass 0 bytes). Its fixture repeats msg_1 with identical usage, which real transcripts do not (below).
+- G2 (unmet): on a fresh ledger (copies of runs.jsonl and sessions/) W40 prints input 25,443 · output 6,890,421 · cache read 2,084,340,296 · cache write 38,419,158 = 2,129,675,318, 205 sessions; my own script (.wt-notes/ul-review/check/mysum.py) gets exactly that when it takes each message id's *first* line. But the first line is a partial snapshot: on the real home 634 repeated ids carry different usage across their lines, always output_tokens growing (e.g. thinking line 7, final tool_use line 846, same id, stop_reason null then tool_use). Summing each id's final line gives output 6,979,139 (+88,718, 1.3% of W40 output). The ledger undercounts output; the builder's script shares the choice, so the match proves nothing. A fix must take the final usage per id and, when a stream straddles two passes (`LastID`), add the delta.
+- G4: W41 by task, fresh ledger: rlf-build/review/ui under organizer/ruled-line-floor, fi3-build/review/ui under organizer/floating-icon-3, sup46 under `sup46 · floating-icon-3, ruled-line-floor`; none Not attributed.
+- G5: by role W41: builder, ui reviewer, supervisor, pair, reviewer, fse, then Not attributed ($0, 0 sessions, so no reasons this week; the reason path is tested in `TestUsageCmdOverATranscript`). Task cut's Not attributed gives reasons (fse ×3, pair, `no card names sup3` for hestia-probe-sup3, `no initiative root above ~` for probe-hefesto).
+- Second pass: 0 files read, 0 bytes, unchanged. First pass 5.0 s over 468 files, 1.18 GB.
+- Boundary: every changed path inside it; internal/session and the runs.jsonl writer untouched; no network or exec in the new code. Local days and local Monday weeks throughout, no UTC edge error.
+- Durability (not gated): ledger and offsets are two separate renames, ledger first; a crash between them re-reads the grown bytes next pass and double counts them. No fsync before rename.
+- Cost evidence (not deciding): at 0c8a44b a $0 record is read as no cost; FR-2 as first written gave no-cost only to a session with no record, so that was outside it; Amendment 1 now addresses $0 records. W40 shows `without_cost: 3`, $788.00.
+- Reviewer: ul-review, 2026-10-06.
