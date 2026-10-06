@@ -8,6 +8,8 @@ import { CellStateLz, Crew } from "./Crew";
 import { missingPersonas, queueOf, readOnlyOf } from "../lib/queue";
 import { escapeCloses, useConfirmFocus } from "../lib/focus";
 import { CleanButton } from "./Retire";
+import { Usage as fetchUsage } from "../../wailsjs/go/main/App";
+import { agentsWeekLine } from "../lib/usage";
 
 const REFRESH_MS = 10_000;
 
@@ -46,6 +48,7 @@ export function AgentsView() {
           sampled {since(view.sampled_at)} · every {REFRESH_MS / 1000}s
         </span>
         {sel && <CellStateLz cell={sel.cell} missing={missingPersonas(sel.crew)} />}
+        {sel && <WeekLine initiativeId={sel.id} />}
         <span className="spacer" />
         {sel?.cell && selQ && selQ.total > 0 && <button className="tiny-btn ghost hot" onClick={() => openSlack(sel.id, null)} title="escalated to you, or asked of you: threads and cards">{selQ.total} need you</button>}
         {sel && !readOnly && <NewAgent initiativeId={sel.id} />}
@@ -233,4 +236,20 @@ function DraftCell({ initiativeId }: { initiativeId: string }) {
       </div>
     </div>
   );
+}
+
+/** The initiative's week in tokens (docs/ux/specs/usage.md, From an
+ *  initiative; 0020: tokens, never money, outside Usage). It links to Usage
+ *  filtered to this initiative; nothing shows while the week has none. */
+function WeekLine({ initiativeId }: { initiativeId: string }) {
+  const { openUsage } = useBoard();
+  const [line, setLine] = useState<string | null>(null);
+  useEffect(() => {
+    let live = true;
+    setLine(null);
+    fetchUsage("").then((v) => { if (live) setLine(agentsWeekLine(v.cuts?.initiative, initiativeId)); }, () => undefined);
+    return () => { live = false; };
+  }, [initiativeId]);
+  if (!line) return null;
+  return <button className="ghost tiny-btn week-line num" onClick={() => openUsage(initiativeId)} title={`Usage for ${initiativeId} this week`}>{line}</button>;
 }

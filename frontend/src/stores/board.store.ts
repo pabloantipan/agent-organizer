@@ -8,8 +8,9 @@ import { stageFocusOf } from "../lib/stageFocus";
 import { railCollapsedFor, roomyOf, widthClassOf, type WidthClass } from "../lib/width";
 
 /** Navigation is Home, one initiative under its header with six sub-views,
- *  or Settings behind the gear (FR-14). */
-export type Screen = "home" | "initiative" | "settings";
+ *  Settings behind the gear (FR-14), or Usage, the week's tokens and money
+ *  across every initiative (docs/specs/usage.md FR-5). */
+export type Screen = "home" | "initiative" | "settings" | "usage";
 export type Sub = "overview" | "work" | "roadmap" | "decisions" | "conversations" | "agents";
 
 /** The identity mode of the backend. "off" is the default and means there is
@@ -117,6 +118,10 @@ type State = {
   openNeedsMe: (key: string) => void;
   openDecision: (initiativeId: string, number: string) => void;
   openSettings: () => void;
+  // Usage, optionally filtered to one initiative (Agents' week line).
+  openUsage: (initiative?: string | null) => void;
+  usageFilter: string | null;
+  setUsageFilter: (initiative: string | null) => void;
   selected: merge.BoardCard | null;
   // The role whose drawer is open (transversal-roles, A click), by name;
   // null when none. Show only: opening it starts nothing.
@@ -277,6 +282,9 @@ export const useBoard = create<State>((set, get) => ({
   openNeedsMe: (needsMeFocus) => set({ headerOpen: folded(), screen: "home", selectedInitiative: null, selected: null, needsMeFocus, decisionFocus: null }),
   openDecision: (selectedInitiative, number) => set((st) => ({ ruleDraft: null, headerOpen: folded(), screen: "initiative", selectedInitiative, sub: "decisions", selected: null, needsMeFocus: null, stageFocus: null, decisionFocus: `${selectedInitiative}/${number}`, decisionSeq: st.decisionSeq + 1 })),
   openSettings: () => set({ ruleDraft: null, screen: "settings", selectedInitiative: null, needsMeFocus: null, decisionFocus: null }),
+  openUsage: (initiative = null) => set({ ruleDraft: null, screen: "usage", selectedInitiative: null, needsMeFocus: null, decisionFocus: null, usageFilter: initiative }),
+  usageFilter: null,
+  setUsageFilter: (usageFilter) => set({ usageFilter }),
   selected: null,
   roleOpen: null,
   openRole: (roleOpen) => set({ roleOpen }),

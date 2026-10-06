@@ -4,13 +4,14 @@ import { HEALTH, healthState, healthTitle } from "../lib/health";
 const k = (n: number) => (n >= 1000 ? `${Math.round(n / 1000)}k` : `${n}`);
 
 /** Context window fill of one agent, as its own statusline last reported it.
- *  Nothing rendered when the statusline hook has not fired for the process. */
+ *  Nothing rendered when the statusline hook has not fired for the process.
+ *  Tokens only: money shows in Usage and nowhere else (FR-6, 0099). */
 export function ContextBar({ c }: { c?: ContextStatus | null }) {
   if (!c) return null;
   if (!c.window_size) return <span className="ctx meta" title="no API response yet">ctx ?</span>;
   const pct = Math.max(0, Math.min(100, Math.round(c.used_percent)));
   const level = pct >= 85 ? "hot" : pct >= 60 ? "warm" : "";
-  const title = `${k(c.input_tokens)} / ${k(c.window_size)} tokens${c.model ? ` · ${c.model}` : ""}${c.cost_usd ? ` · $${c.cost_usd.toFixed(2)}` : ""}`;
+  const title = `${k(c.input_tokens)} / ${k(c.window_size)} tokens${c.model ? ` · ${c.model}` : ""}`;
   return (
     <span className={`ctx ${level}`} title={title}>
       <span className="ctx-track"><i style={{ width: `${pct}%` }} /></span>

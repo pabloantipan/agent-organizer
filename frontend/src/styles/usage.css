@@ -1,0 +1,136 @@
+/* Usage (docs/specs/usage.md FR-5, docs/ux/specs/usage.md): the week's
+   tokens and money. Tier-2 role tokens and the seven type sizes; no
+   nesting, @layer, color-mix or oklch (Safari 15.0). .seg, .sec-title,
+   .sec-sub and .empty-state come from shell.css. */
+
+.usage {
+  /* The chart's one hue (dataviz): the accent is the selected week, a
+     lighter step of the same violet the others (2.25:1 on the ground; the
+     hover, the direct label and Show as table carry the values). */
+  --usage-bar: var(--accent);
+  --usage-bar-rest: var(--violet-7);
+  display: grid; gap: var(--space-6); align-content: start; max-width: 1480px; min-width: 0;
+  padding: var(--space-2) var(--space-2) var(--space-8);
+}
+.usage.loading { opacity: 0.7; transition: opacity var(--dur-base) var(--ease-out); }
+.usage .num { font-variant-numeric: tabular-nums; }
+.usage .mono { font-family: var(--mono); font-size: var(--font-size-sm); }
+.usage .spacer { flex: 1 1 auto; }
+
+/* ---------- the head: title, week picker, This Mac only ---------- */
+.usage-head { display: flex; align-items: center; gap: var(--space-3); min-width: 0; flex-wrap: wrap; }
+.usage-head h1 { margin: 0; font-size: var(--font-size-2xl); line-height: var(--line-2xl); font-weight: var(--weight-semibold); }
+.usage-line { font-size: var(--font-size-md); line-height: var(--line-md); color: var(--fg-muted); }
+.usage-line.err { color: var(--danger); }
+.week-picker { position: relative; display: inline-flex; align-items: center; gap: var(--space-0-5); }
+.week-picker .icon { min-width: var(--control-md); justify-content: center; padding: 0; }
+.week-label { color: var(--fg); font-size: var(--font-size-md); }
+.week-list {
+  position: absolute; top: calc(100% + var(--space-1)); left: var(--control-md); z-index: var(--z-box);
+  display: grid; min-width: 240px; max-height: 320px; overflow-y: auto; padding: var(--space-1);
+  background: var(--surface-overlay); border-radius: var(--radius-md); box-shadow: var(--shadow-overlay);
+}
+.week-list button {
+  justify-content: space-between; gap: var(--space-6); background: transparent; border-color: transparent;
+  color: var(--fg); font-size: var(--font-size-md); font-weight: var(--weight-regular);
+}
+.week-list button:hover { background: var(--surface-hover); border-color: transparent; }
+.week-list button[aria-current="true"] { background: var(--surface-selected); }
+.week-list .wl-money { color: var(--fg-muted); }
+.usage-mac { font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-subtle); cursor: default; border-radius: var(--radius-xs); }
+.usage-filter { color: var(--fg); background: var(--surface-selected); font-size: var(--font-size-sm); }
+
+/* the top bar's quiet text button: on is selected, never the accent */
+.usage-btn { color: var(--fg-muted); }
+.usage-btn.on { color: var(--fg); background: var(--surface-selected); }
+
+/* ---------- three stat tiles: always one row ---------- */
+.usage-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+.stat-tile { display: grid; gap: var(--space-1); align-content: start; padding: var(--space-3) var(--space-4) var(--space-4); background: var(--surface); border-radius: var(--radius-lg); min-width: 0; }
+.stat-label { font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); }
+.stat-value { font-size: var(--font-size-3xl); line-height: var(--line-3xl); font-weight: var(--weight-bold); color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stat-sub { font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); }
+.stat-sub .usage-kind { white-space: nowrap; }
+.stat-sub .usage-kind + .usage-kind::before { content: " · "; white-space: normal; }
+
+/* ---------- sections ---------- */
+.usage-sec { display: grid; gap: var(--space-2); min-width: 0; }
+.usage-sec-head { display: flex; align-items: baseline; gap: var(--space-2); max-width: 1008px; }
+.usage-sec .seg { justify-self: start; margin-bottom: 0; }
+
+/* ---------- the money chart ---------- */
+.chart { display: grid; gap: var(--space-1-5); padding-left: 48px; max-width: 960px; }
+.chart-plot { position: relative; }
+.chart-grid { position: absolute; left: 0; right: 0; height: 0; border-top: 1px solid var(--border-subtle); }
+.chart-grid-label { position: absolute; right: calc(100% + var(--space-2)); top: -8px; font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-subtle); white-space: nowrap; }
+.chart-bars { position: absolute; inset: 0; display: flex; align-items: flex-end; gap: 2px; }
+.chart-bar {
+  position: relative; flex: 1 1 0; min-width: 0; height: 100%; padding: 0; border: 0; border-radius: 0;
+  background: transparent; display: flex; align-items: flex-end; justify-content: center;
+}
+.chart-bar:hover { background: var(--border-subtle); border: 0; }
+.chart-bar:focus-visible { outline-offset: 0; }
+.chart-mark { display: block; width: 100%; border-radius: var(--radius-xs) var(--radius-xs) 0 0; background: var(--usage-bar-rest); }
+.chart-bar.on .chart-mark { background: var(--usage-bar); }
+/* money wholly unknown: an outlined stub of the same hue (UI3) */
+.chart-mark.unknown, .chart-bar.on .chart-mark.unknown { background: transparent; border: 1px dashed var(--usage-bar-rest); border-bottom: 0; box-sizing: border-box; }
+.chart-bar.on .chart-mark.unknown { border-color: var(--usage-bar); }
+.chart-label { position: absolute; left: 50%; transform: translateX(-50%); font-size: var(--font-size-sm); line-height: var(--line-sm); font-weight: var(--weight-semibold); color: var(--fg); white-space: nowrap; }
+.chart-tip {
+  position: absolute; left: 50%; transform: translateX(-50%); z-index: var(--z-raised);
+  padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); background: var(--surface-overlay); box-shadow: var(--shadow-overlay);
+  font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg); white-space: nowrap; pointer-events: none;
+}
+.chart-bar:first-child .chart-tip { left: 0; transform: none; }
+.chart-bar:last-child .chart-tip { left: auto; right: 0; transform: none; }
+.chart-axis { display: flex; gap: 2px; }
+.chart-axis span { flex: 1 1 0; min-width: 0; text-align: center; font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-subtle); white-space: nowrap; overflow: hidden; text-overflow: clip; }
+.chart-axis span.on { color: var(--fg); font-weight: var(--weight-semibold); }
+.usage-weeks { border-collapse: collapse; font-size: var(--font-size-md); max-width: 560px; }
+.usage-weeks th, .usage-weeks td { padding: var(--space-1) var(--space-3) var(--space-1) 0; text-align: right; }
+.usage-weeks th:first-child, .usage-weeks td:first-child { text-align: left; }
+.usage-weeks th { font-size: var(--font-size-sm); font-weight: var(--weight-medium); color: var(--fg-subtle); }
+.usage-weeks tr.on td { color: var(--fg); font-weight: var(--weight-semibold); }
+
+/* ---------- the table ---------- */
+.usage-table-wrap { min-width: 0; }
+.usage-table { width: 100%; border-collapse: collapse; table-layout: auto; font-size: var(--font-size-md); line-height: var(--line-md); }
+.usage-table th, .usage-table td { padding: var(--space-1) var(--space-3) var(--space-1) 0; text-align: left; font-weight: var(--weight-regular); vertical-align: middle; }
+.usage-table thead th { font-size: var(--font-size-sm); line-height: var(--line-sm); font-weight: var(--weight-medium); color: var(--fg-subtle); border-bottom: 1px solid var(--border); }
+.usage-table tbody tr { border-bottom: 1px solid var(--border-subtle); }
+.usage-table tbody tr:hover { background: var(--surface-hover); }
+.usage-table .c-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; width: 1%; }
+.usage-table .c-name { width: auto; min-width: 260px; max-width: 0; }
+.usage-table .c-share { width: 112px; }
+.name-cell { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.name-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--fg); border-radius: var(--radius-xs); }
+button.link.name-text { flex-shrink: 1; min-height: 0; }
+.name-meta { flex-shrink: 0; font-size: var(--font-size-sm); color: var(--fg-subtle); white-space: nowrap; }
+.disclose { min-height: var(--control-sm); min-width: var(--control-sm); padding: 0; justify-content: center; }
+.usage-table tr.na .name-text, .usage-table tr.na td { color: var(--fg-subtle); }
+.usage-table tr.member th, .usage-table tr.member td { font-size: var(--font-size-sm); color: var(--fg-muted); }
+.share-bar { display: block; height: 6px; border-radius: var(--radius-xs); background: var(--bg-sunken); overflow: hidden; }
+.share-bar > span { display: block; height: 100%; background: var(--usage-bar); border-radius: var(--radius-xs); }
+.usage-table tr.na .share-bar > span { background: var(--usage-bar-rest); }
+.no-cost { color: var(--fg-subtle); margin-left: 2px; }
+.usage-foot { margin-top: var(--space-1-5); font-size: var(--font-size-sm); color: var(--fg-subtle); }
+
+/* ---------- sessions ---------- */
+.usage-disclose { justify-self: start; color: var(--fg); font-size: var(--font-size-md); padding-left: var(--space-1); }
+.usage-sessions { table-layout: fixed; }
+.usage-sessions th:nth-child(1) { width: 128px; }
+.usage-sessions th:nth-child(3) { width: 12%; }
+.usage-sessions th:nth-child(5) { width: 96px; }
+.usage-sessions th:nth-child(6) { width: 13%; }
+.usage-sessions th:nth-child(7) { width: 96px; }
+.usage-sessions th:nth-child(8), .usage-sessions th:nth-child(9) { width: 104px; }
+.usage-sessions.no-model th:nth-child(5) { width: 92px; }
+.usage-sessions.no-model th:nth-child(6) { width: 80px; }
+.usage-sessions.no-model th:nth-child(7), .usage-sessions.no-model th:nth-child(8) { width: 92px; }
+.usage-sessions .c-num { width: auto; }
+.usage-sessions tbody th { font-weight: var(--weight-regular); color: var(--fg); }
+.usage-sessions .cut { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.usage-sessions .nowrap { white-space: nowrap; }
+.usage-sessions .muted { color: var(--fg-subtle); }
+.so-far { font-size: var(--font-size-xs); color: var(--fg-subtle); }
+.running-word { color: var(--live); }
