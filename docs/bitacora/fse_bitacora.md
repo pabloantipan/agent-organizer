@@ -1009,4 +1009,9 @@ sections below this one are history.
   checked instead); G2 no row for a long title on a ruled line (dln-U1, with
   aglaea); the state word map is now a third copy (AgentList, Crew,
   RoleDrawer); .wakes.hot dead CSS (global.css:560).
+- aglaea on dln (5c937df), for a later card: U1 (2) the chosen option keeps
+  ~8 characters with its ellipsis, then the title gives way to ~20; past
+  both floors the option drops whole with its separator (no stray dot) and
+  stays in hover and name; gate the 13 lines at 1024x640, rail full. U2 (1)
+  the wake count also sits next to the rule box's Rule.
 
