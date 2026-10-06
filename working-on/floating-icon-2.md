@@ -5,7 +5,7 @@ repos: [organizer]
 branch: floating-icon-2
 seat: fi2-build
 review: fail
-updated: 2026-10-05
+updated: 2026-10-06
 next: "pablo: the short take for Amendment 2, F5 typed and F7 (scripts/floating-icon-by-hand.sh in .wt/floating-icon-2, about one minute), through sup44"
 depends_on: [floating-icon]
 boundary: ["floaticon_darwin.m, floaticon_darwin.h, floaticon_darwin.go, floaticon_other.go (click count, size by display, scaled layers)", "frontend/src/components/FloatList.tsx (grow into the full window on the second click; the last view on double-click)", "frontend/src/stores/board.store.ts (the last view to restore, read only if already kept there)", "scripts/floating-icon-by-hand.sh (the new steps)", "not: other Go packages, wails.json, build/darwin templates, docs/design-system.md"]
@@ -49,35 +49,31 @@ app straight away, and the icon is big enough on a big screen.
 - Reviewer: fi2-review, 2026-10-05
 
 ## UI review
-- Verdict: pass (no severity 4 or 3 against the spec). Commit run: 2efe4ba275da8606db359dfa1abac22974ac0fda, `make review-build` (Deltagos Review.app, `cl.antipan.organizer.review`) on the `--twenty` fixture, real WKWebView and the native panel, the S34CG50 3440×1440 as the only display NSScreen reports (the laptop panel's lid was closed). Float log and shots in `.wt-notes/fi2-ui/` (`float-3440.log`, t = log epoch). Pointer rows from Pablo's takes 1-3 (`.wt-notes/fi2-build/by-hand-*.log`, `take2/views.png`). This passes the UI; the gate row 2 fail in ## Review (F5 typed and F7 by Pablo) still stands, and I could not close it either.
-- Findings:
-  - U1 (sev 1). What the lead cannot do: see the double-click growth finish in 200 ms; it takes about 0.36 s. Where: double-click and a pick, every display. Evidence: the builder's measure (`setFrame:display:animate:`, Notes); pick has the same timing, so the two stay consistent, which is what the spec's continuity asks for. Proposal: leave it unless Pablo finds it slow; if it's changed, change both together (NSAnimationContext with 0.2 s).
-  - U2 (sev 1). What the lead cannot do: nothing is blocked. The hairline stays 1 pt at 88, so it is relatively thinner than at 56. Where: the tile edge on the 3440 (`icon88.png`). Evidence: code (`borderWidth = 1`, commented on purpose); hard to see at 1x. Proposal: keep it (a hairline is a hairline); spec gap S2.
-- Table:
+- The first UI review passed at 2efe4ba (fi2-ui, 2026-10-05; its findings U1-U2, gaps S1-S3 and A1-A2 are carried below where still open).
+- Verdict: pass (no severity 4 or 3 against the spec). Commit run: 25ecc11da277b488b0b60bdb2306e84c7a94e15f, `make review-build` (Deltagos Review.app, `cl.antipan.organizer.review`) on the `--twenty` fixture, real WKWebView and the native panel, the S34CG50 3440×1440 the only display online. No pointer events: the icon pressed through its accessibility button (`axicon`, the button described `Deltagos` only), the double-click's second press through the build's SIGUSR2 hook (FLOAT_LOG only), keys typed only while the review app was frontmost. Evidence in `.wt-notes/fi2-ui/r2/` (`float-r2b.log`, t = log epoch; `growth.mov`, `growth-sheet.png`). **The one pointer row of Amendment 2, a double-click on the open list by Pablo, is not verified: no `by-hand-*.log` newer than 23:30 had landed by 01:39 (status posted to sup44 at 23:35, no reply).** The gate's Amendment 2 row stays open for that take.
+- Findings: none new. U1 (growth 0.36 s) is fixed by Amendment 2 (198-199 ms read back). U2 (the 1 pt hairline at 88) stands, sev 1, as S2.
+- Table (all at 25ecc11):
 
 | # | How checked | Result |
 |---|---|---|
-| F12 88 on the 3440 | my run: `size (place): icon 88 pt, radius 22 … panel frame read back {{3265, 64}, {214, 214}}` (+0.0); shot `icon88-crop.png`; bars measured 11/12/11 px wide, full height 46, base fixed while breathing (`breathe-1..6.png`, `measure.py`) | met |
-| F12 drawn as the 56 scaled, not a 56 in a larger tile | 88 and 56 side by side on the same display through the SIGUSR1 width stand-in, the 56 shot upscaled ×88/56 (`icon-88-vs-56.png`): bars, gaps and corner match within a pixel of rounding; the soft two-layer shadow scales (code: offsets and blur × size/56) | met |
-| F12 56 on the laptop | Pablo's take 3 read-back (`icon 56 pt radius 14 … visible width 1512`); not on the laptop in my run (only one display online) | met (his take) |
-| F12 resize dragged across displays | 0092: accepted untested. The screen-change path re-sized 88↔56 cleanly 26 times in my run (`float-3440.log` +58 to +303) | not verified (ruled) |
-| List panel beside the 88 icon | AX press on the compacted icon: `list front … frame={{3056, 223}, {360, 480}}, 3 ms`; right edge = the tile's right edge (3416), 8 pt above the tile top (215), above the Dock (visible from 103), well under the menu bar; search focused, Home row `Home · 9 need you`, rows rank/id/signals, `5 waiting 1 blocked +4` whole (`list-88-crop.png`) | met (§3, F6) |
-| F11 list at once | Pablo takes 1-3: `list front … 2-16 ms after the click`; my AX press 3 ms | met |
-| F11 second click grows it | Pablo takes 1-3: `clickCount 2 … second click` then `full (double-click) read back: full window … key=1`, 15 times, 0 `still the list` | met |
-| F10 full at the last view | Pablo take 2 frames `take2/views.png` (billing-api · Roadmap, field-app · Roadmap, ops-dashboard · Decisions, Home) | met |
-| F1 second desktop | my run: Ctrl→ to desktop 2: `space-change: … here=0 … icon shown` (+30.0, +122.5, +158.6, +195.1), icon at its place ~1.3 s after the switch (`t2` shots); back home `here=1 … icon hidden` | met |
-| F1 full-screen desktop | not tried: making one would take over Pablo's screen while he was using it | not verified |
-| F3 breathing at 88 | `breathe-1..6.png`: the now bar 38-46 px (0.83), the three bars out of phase | met; Reduce motion not re-checked (code path unchanged) |
-| F4 | Pablo takes 1-3 (drag past 4 pt, drops clamped, same spot across desktops) | met (his takes) |
-| F5 typed `pay` | not done by Pablo in any take; the seat's keyboard run only. I sent no keystrokes because the person at the machine had Chrome in front, and they would have gone into it | not verified |
-| F7 | the click outside: in my run a blur closed the list (`dismiss: state=compacted … icon stays`, +343.3, window ordered out) while someone at the machine brought Chrome to the front. I did not see whether it was a click; Escape twice by Pablo not done | partly; not verified as Pablo's take |
-| F8 | someone at the machine pressed Compact in my run: `compact from {{1000, 383}, {1440, 932}}`, `state=compacted`, the icon then on every desktop including home (+251.6); Pablo takes 1-3 | met |
-| F9 | AX query: role AXButton, description `Deltagos`, help `Opens the initiative list` | met (name); keys not re-run |
+| A2 click on the open icon waits the interval | my run: AX press with the list open → `close waits 500 ms for a second click` (+215.905), list still on screen at +0.2 s (window list), `close: no second click in 500 ms` (+216.428), dismissed +216.441 and off screen at +0.8 s | met |
+| A2 a second press in time grows it, no blink | my run: AX press then SIGUSR2 100 ms later → `close cancelled (second press)`, `full (double-click) read back: full window, growth 198 ms from {{3056, 223}, {360, 480}} to {{1000, 383}, {1440, 932}} … key=1` (+224.589). Screen recording `growth.mov` (36 fps): the window changes from 0.87 s to 1.06 s, every frame shows the list or the part-grown window, none without it (`growth-sheet.png`) | met (no pointer) |
+| A2 the same by Pablo's double-click | his take not landed | not verified |
+| A2 200 ms, never over 300 | read back 198 ms (double-click), 199 ms (pick, +303.778); the seat's 201, 203 ms; frames ≈190 ms | met |
+| A2 none under Reduce motion | the seat's `float-a2-rm1.log`: `growth 1 ms (reduce motion: none)`; code: `setFrame:` without the animator when `reduceMotion()`. Not toggled here (a system setting) | met (seat's log + code) |
+| A2 Escape and click outside close at once | Escape twice, typed: `da` filtered, Escape cleared (`esc1.png`), Escape closed: `dismiss` with no `close waits` line (+317.412); click outside: code path `FloatIconDismiss` cancels a pending close, no wait | Escape met; click outside not verified (pointer) |
+| F5 typed | AX-opened list, typed `pay` (`list-pay.png`: partner-payouts alone, `5 waiting 1 blocked +4`), Enter → `full (pick) read back: full window, growth 199 ms`, partner-payouts · Overview (`pick-full-s.png`) | met (keys mine; Pablo's typed take pending) |
+| F12 88 on the 3440 | `size (place): icon 88 pt, radius 22 … panel frame read back {{3265, 64}, {214, 214}}`; `icon88-d2.png` same drawing as at 2efe4ba | no regression |
+| List beside the 88 icon | `list front … frame={{3056, 223}, {360, 480}}, 4-12 ms` as at 2efe4ba (`list-88.png`) | no regression |
+| F11 list at once | AX press: list front 4-12 ms; Pablo takes 1-3 at 2efe4ba (the open-at-once path is unchanged by 3286b59) | no regression |
+| F1 second desktop | `space-change: … here=0 … icon shown` on desktop 2 and 3, `here=1 … icon hidden` home | no regression |
+| F10, F4, F8, F9 | unchanged code paths since 2efe4ba (3286b59 touches only the close, the second press and `goFull`'s animation); passed then | not re-run |
 
-- Spec gaps (for the FSE): S1 the size bands overlap at 1920 ("56 up to 1920, 72 from 1920"); the build gives 56 at exactly 1920, so write it that way. S2 whether the 1 px hairline and the 24 px first place scale with the icon (built: neither does). S3 a screen change with the list open moves the icon but not the list (builder's note); the spec doesn't say whether the list follows.
-- For aglaea: A1 the ~100 ms blink when a double-click starts on an open list (the first click closes it, the second reopens and grows it; Notes, take 2). Should a click on the icon with the list open wait out the double-click interval before closing? A2 should the growth's 200 ms be enforced, or is the native ~0.36 s the house motion for window growth (U1)?
-- Not verified: F12's drag across displays (0092; only one display online); F1 on a full-screen desktop; F5 typed and F7 Escape-twice as Pablo's take; F3 under Reduce motion at 88; hover/drag looks at 88 (code scales them; not shot). In my run, desktop changes the person at the machine made while I was testing briefly looked like the app pulling them home after a shrink. A controlled set with no human input (HID idle growing) showed 0 of 4, so I don't count it as a finding (`trials.txt`).
-- Reviewer: fi2-ui, 2026-10-05
+- Spec gaps (for the FSE): S1 the size bands overlap at 1920 (built: 56 at 1920). S2 whether the hairline and the 24 pt first place scale (built: neither). S3 a screen change with the list open moves the icon, not the list. S4 (new) with the list open, a press that becomes a drag within the interval cancels the pending close (`cancelClose` on mouse-down) and the list stays open; the spec does not say whether a drag from an open list should close it.
+- For aglaea: A1 answered by Amendment 2. A3 (new) a single click on the open icon now leaves the list up for the full double-click interval (500 ms here) before it goes: as the spec chose; worth a look in Pablo's take that it does not read as an unresponsive click.
+- Not verified: Pablo's double-click on an open list (take pending); F7's click outside by pointer (no take has done it); F12 across displays (0092); F1 on a full-screen desktop; Reduce motion in my own run.
+- Note on my run: my first AX helper pressed every button of the app and hit the fixture window's close button, which quit my instance (fixture only); relaunched and pressed only the icon after that.
+- Reviewer: fi2-ui, 2026-10-06
 
 ## Notes
 - 0092 (pablo): F12 accepted with the drag across displays untested; noted like floating-icon's N4.
