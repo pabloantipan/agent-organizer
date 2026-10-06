@@ -10,7 +10,8 @@ docs/ux/specs/usage.md. Weeks are relative to today, Monday first, local:
   W-2  none (a week with no sessions inside the history)
   W-1  last week: four sessions, so this week's money has a change
   W0   this week: a wave on init-a's w-review (wave1-build, wave1-review,
-       sup11 its supervisor), an FSE session, a session outside every
+       sup11 its supervisor), a two-card wave (sup12 over w-queued and
+       w-nogate, wave1-queued-build and wave1-nogate-build), an FSE session, a session outside every
        initiative (Not attributed), a session with no cost, a Haiku
        sub-agent, and the running Hephaistos session (the stand-in whose
        live record is fixture-probe-hefesto)
@@ -104,6 +105,10 @@ session("fixture-u-w1d", many, "probe-hefesto-w1", at(-1, 4, 16), 60, (90_000, 4
 session("fixture-u-build", a, "organizer-fixture-probe-wave1-build", at(0, 0, 9, 5), 140, (420_000, 210_000, 14 * M, 600_000), record=31.20, sub=(40_000, 12_000, 300_000, 20_000))
 session("fixture-u-review", a, "organizer-fixture-probe-wave1-review", at(0, 0, 12, 10), 55, (160_000, 60_000, 5 * M, 220_000), record=11.85)
 session("fixture-u-sup", a, "organizer-fixture-probe-sup11", at(0, 0, 8, 40), 260, (130_000, 70_000, 6 * M, 180_000), record=12.40)
+# A wave of two cards: sup12 over w-queued and w-nogate, a builder each.
+session("fixture-u-sup12", a, "organizer-fixture-probe-sup12", at(0, 0, 11), 180, (90_000, 40_000, 3 * M, 110_000), record=6.10)
+session("fixture-u-qbuild", a, "organizer-fixture-probe-wave1-queued-build", at(0, 0, 11, 20), 100, (200_000, 90_000, 7 * M, 260_000), record=14.30)
+session("fixture-u-nbuild", a, "organizer-fixture-probe-wave1-nogate-build", at(0, 0, 14, 10), 70, (150_000, 60_000, 4_500_000, 180_000), record=9.20)
 # An FSE session: in init-a, on no single card.
 session("fixture-u-fse", a, "organizer-fixture-probe-fse", at(0, 0, 16), 40, (70_000, 30_000, 1_600_000, 60_000), record=4.95)
 # Outside every initiative: Not attributed, with its reason.

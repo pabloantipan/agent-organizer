@@ -60,7 +60,9 @@
 # Six weeks ending this one: a partial first week (from its Thursday), a
 # week with one session, a week with no sessions, last week, and this week
 # with a wave on init-a's w-review (wave1-build, wave1-review and sup11, whom
-# the temp copy's Notes name as its supervisor), an FSE session, a session
+# the temp copy's Notes name as its supervisor), a wave of two cards (sup12,
+# named in w-queued's and w-nogate's Notes, with one builder per card), an
+# FSE session, a session
 # outside every initiative (Not attributed), one with no cost, a Haiku
 # sub-agent, and the running Hephaistos session (the probe-hefesto
 # stand-in's live record). The script's header in usage.py lists each.
@@ -223,6 +225,8 @@ done
 # The usage history (header): sup11 supervises w-review in the temp copy,
 # written before init-a's first commit so the checkout stays clean.
 printf '\n## Notes\n- sup11: launched wave1-build, then wave1-review\n' >> "$a/working-on/w-review.md"
+# and sup12 supervises w-queued and w-nogate: a wave of two cards.
+for c in w-queued w-nogate; do printf '\n## Notes\n- sup12: launched the %s builder\n' "$c" >> "$a/working-on/$c.md"; done
 g() { git -C "$a" -c user.name=fixture -c user.email=fixture@example.invalid "$@"; }
 g init -q -b main
 g add -A
