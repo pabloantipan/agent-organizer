@@ -12,6 +12,7 @@ boundary: ["RoadmapView.tsx, Roadmap.tsx and its axis helpers, new outline compo
 spec: "docs/specs/roadmap-as-a-plan.md (FR-4; docs/ux/specs/roadmap-as-a-plan.md (1f2ded8))"
 gate: "docs/specs/roadmap-as-a-plan.md Acceptance, rows P1 to P8 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -41,3 +42,14 @@ docs/specs/roadmap-as-a-plan.md, P1 to P8 and X0. Measured in the review build (
 - No fixture initiative has waves and no roadmap; that state is covered in vitest only.
 - 0100 ruled 2026-10-06; launches when usage-view is in done/.
 - supervisor sup48, spawned by the FSE 2026-10-06.
+
+## Review
+- Verdict: pass (code, checks, recorded evidence; the WKWebView visual rows are ro-ui's).
+- Commit reviewed: fb184ee1c39ffeae75df48517f2161c3b75df1d1 (branch head at review time).
+- Unmet gate items: none.
+- X0 from a fresh clone: `XDG_DATA_HOME=$(mktemp -d) make test` rc 0 (Go ok, vitest 334); `npm install && npm test && npm run build` rc 0; `wails build` rc 0.
+- Boundary: 8 paths, all inside (StageRoadmap, Roadmap, TimeZoom `fitTo`, new OutlineRows, lib/outline, lib/cardBar, outline.test, styles/outline.css). No Go, no wailsjs.
+- In the code: step is `useState(1)`, reset per initiative, no storage; the switch clears chevrons; zoom kept across steps; a dot wave draws on its record date, a wave or round with no times draws nothing (0022); diamonds are buttons named by `decisionName`, open via `openDecision`; outline.css has no oklch, color-mix, nesting or @layer, tier-2 tokens only; the in-flight breathe sits under `no-preference`.
+- Findings: (1) the chevron's 100 ms rotate transition is not under the reduced-motion guard, against the States row "nothing animates" (not a gate row). (2) The vitest "back to step 1" case calls a pure function twice and proves nothing; the restore really rests on `setStep` clearing `open`, shown only by the WebKit AX check. (3) Hours at step 3 reads as Days at step 2 and comes back at 3: the spec's "the step never changes the zoom" and "Hours only from step 3" (0070) disagree, and the build took 0070's side; the FSE should write that into the spec. (4) Diamond buttons sit inside `role=tree` outside any treeitem, and ↑↓ pressed on a focused diamond move the row focus. (5) "Every stage is done" at step 1 is in no test and no fixture. (6) `styles/roadmap.css` keeps unused `srm-detail`/`srm-gem` rules: dead weight, harmless, a cleanup card.
+- Gate gap: P7's "wraps under Stages" never happens in WebKit at 1024 (the short words fit); it was seen only in Chromium.
+- Reviewer: ro-review (reviewer seat), 2026-10-06.
