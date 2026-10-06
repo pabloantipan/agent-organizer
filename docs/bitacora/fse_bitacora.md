@@ -4,6 +4,18 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-06 (night), usage landed, roadmap running
+
+- **Last SHA seen:** 5e37e5c. Origin at e67dfda (pushed by Pablo).
+- **usage done** (sup47 ended): 6e4e004, 58eb28c; 1 h 43 min vs 2-4 h,
+  $44.46. Spec amendments 1 (cost from transcripts) and 2 (wave row whole,
+  UI3-5). Leftovers in runs/2026-10-06-usage.md "Leftovers" plus Aglaea
+  A1-A4: next batch (leftovers-14) with leftovers-13's list above.
+- **Running:** sup48, roadmap-as-a-plan (0100), window 425868. Next: sup49.
+- **Reinstall** pending (usage view); Pablo may wait for the roadmap.
+- A Deltagos Review from the root's build/bin has run since 15:25, not a
+  task's; told Pablo, not killed.
+
 ## HAND-OFF — 2026-10-06 (evening), usage and roadmap ruled
 
 - **Last SHA seen:** 73d5083. Installed app bb0563a.
