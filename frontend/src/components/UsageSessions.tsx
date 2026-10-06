@@ -42,7 +42,7 @@ export function UsageSessions({ sessions }: { sessions: UsageSession[] }) {
                 return (
                   <tr key={s.id} className={s.running ? "running" : ""} title={[model ? "" : s.model, kindsLine(s)].filter(Boolean).join(" · ")}>
                     <td className="num nowrap">{startWords(s.start)}</td>
-                    <th scope="row" className="mono cut" title={s.id}>{s.name || s.id.slice(0, 8)}</th>
+                    <th scope="row" className="mono cut" title={s.name ? `${s.name} · ${s.id}` : s.id}>{s.name || s.id.slice(0, 8)}</th>
                     <td className="mono cut">{s.initiative || <span className="muted" title={s.reason}>—</span>}</td>
                     <td className="cut" title={s.task ? `${s.initiative}/${s.task}` : s.reason || undefined}>{s.task_title || s.task || <span className="muted">—</span>}</td>
                     <td className="cut">{s.role ? roleWords(s.role) : <span className="muted">—</span>}</td>
