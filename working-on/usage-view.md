@@ -6,7 +6,7 @@ branch: usage-view
 seat: uv-build
 stage: one-window
 updated: 2026-10-06
-next: "review: usage-view, gate met (U1-U9, X0), d338be6"
+next: "review: usage-view, rework for UI1, UI3-UI5 done, gate met (U1-U10, X0), 1758248"
 depends_on: [usage-ledger]
 boundary: ["frontend/src/components/Usage.tsx and styles/usage.css (new)", "the top bar and board.store.ts screen (one entry), AgentsView.tsx (the week line only)", "frontend/src/lib helpers and tests, scripts/fixture-home.sh (a ledger)", "not: Go"]
 spec: "docs/specs/usage.md (FR-5, FR-6; docs/ux/specs/usage.md (b104480))"
@@ -29,10 +29,15 @@ docs/specs/usage.md, U1 to U9 and X0. Shots in `.wt-notes/uv-build/` (named belo
 - [x] U6 running: Sessions row `running`, `4.8M so far`, `$9.80 so far`; tiles "1 running", "includes 1 running". `wkwebview-1512x945-U6-sessions-running.png`.
 - [x] U7 `This Mac only` at the right of the picker (hover names the other Mac), and "excludes 1 session with no cost" on the money tile, `—` and `*` on its rows. `wkwebview-1512x945-U1-this-week.png`, `-U6-sessions-running.png`. The hover was checked in the DOM, not screenshotted.
 - [x] U8 1024×640 window (609 content): tiles in one row, kind columns fold into the row's hover, the Sessions model column folds before names; Chromium 1024×609 measured scrollWidth 1024 = viewport, table 961 = its wrap. `wkwebview-1024x640-U8-this-week.png`, `-U8-sessions.png`, `-U8-session-row-hover.png`, `chromium-1024x640-U8-fold.png`.
-- [x] U9 money only in Usage, after dropping ContextBar's cost (a2c4982):
+- [x] U9 money only in Usage, after dropping ContextBar's cost (936ddc0 after the rebases):
   `grep -rnE 'cost_usd|costUSD|cost_from|\.money\b|money\(|\$\{?[0-9]|"\$"|toFixed\(2\)|dollar' src --include='*.ts' --include='*.tsx' --include='*.css' | grep -vE 'src/components/Usage[A-Za-z]*\.tsx|src/lib/usage(\.test)?\.ts|src/styles/usage\.css'` in `frontend/` →
   `src/components/Overview.tsx:16: /** … token figures, never dollars (0020). */` (a comment), nothing else. No test asserted the $.
-- [x] X0 fresh clone of usage-view at 2224d63 (before the rebase onto 10064bf, which only moved cards): `XDG_DATA_HOME=$(mktemp -d) make test` 0 (Go ok, 298 vitest), `npm run build` 0, `wails build` 0. Clone removed.
+- [x] U10 (FR-5a, rework after uv-ui's UI1, UI3-UI5; WKWebView review build, real home = a temp copy of runs.jsonl and sessions/, real config and transcripts read only):
+  - waves By task, real home W41, 1512×945: sup47 is one row $35.52 (6 sessions) = "The Usage view" $21.36 (uv-build, uv-review, uv-ui) + "Every Claude session's tokens" $9.66 + organizer-probe-sup47 $4.50; sup46 $34.25 = $16.48 + $13.78 + $3.99; sup43 one row; no card row repeated at top level. `wkwebview-1512x945-U10-realhome-W41-waves-open.png`. Fixture single-card wave unchanged (sup11 + wave1-build + wave1-review). `wkwebview-1512x945-U10-fixture-single-card-wave.png`. vitest `groupWaves` (3 cases).
+  - unknown cost: real home "from 19 Aug" (7 sessions, none with cost): tile `—` "no cost recorded for 7 sessions", its bar an outlined stub, Not attributed `—`; 24–30 Aug says "no cost recorded the week before". `wkwebview-1512x945-U10-first-week-focus-and-unknown.png`, `-U10-focus-on-back-arrow.png`.
+  - ‹ to the first week by keyboard (Option-Shift-Tab to ‹, Enter): ‹ disables and the focus ring is on the week label. Same shot.
+  - 1024×640 during a rescan (real home): `scanning…` shown, the top bar on one line; the version folds into the brand's hover at compact. `wkwebview-1024x640-U10-rescan-topbar.png`.
+- [x] X0 fresh clone of usage-view at 1758248 (rebased on main 2026-10-06 after e67dfda): `XDG_DATA_HOME=$(mktemp -d) make test` 0 (Go ok, 304 vitest), `npm run build` 0, `wails build` 0. The clone `.wt-notes/uv-build/x0-clone` is left: its removal was refused (the shell sat in it).
 
 ## Notes
 - 0099 ruled 2026-10-06; supervisor sup47, spawned by the FSE.
@@ -103,3 +108,4 @@ States: no data yet (`--empty`, WK screenshot: title and the one line, nothing e
 - No data yet and the Agents week line in Chromium (WKWebView only).
 - Loading (`Reading this Mac's sessions…`): read once by accessibility on the real home, no screenshot.
 - Reviewer: uv-ui, 2026-10-06.
+- 2026-10-06 uv-build: rework for uv-ui's review: UI1 (ba3a94f), UI3 (1625757, 1758248), UI4 (8f2d022), UI5 (14450d5, TopBar's version folds at compact); U10 met; head 1758248. Found, not asked: the ledger matches sup43 to usage-ledger because that card quotes "sup43 launched fic-build" in a note (Go `supervisedBy`); the view gives a card two waves claim to the later supervisor. UI2, UI6, UI7 not built (FSE's next batch).
