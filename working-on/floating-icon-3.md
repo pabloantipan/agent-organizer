@@ -12,6 +12,7 @@ boundary: ["floaticon_darwin.m, floaticon_darwin.h, floaticon_darwin.go", "front
 spec: "docs/specs/leftovers-13.md (FR-6 to FR-9); docs/ux/specs/floating-icon.md Amendment 3 (3bc5164)"
 gate: "docs/specs/leftovers-13.md, card floating-icon-3, rows F13 to F16 and X0; every row by the seat (0095)"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -35,3 +36,13 @@ docs/specs/leftovers-13.md, F13-F16 and X0. Every row by fi3-build with CGEvent 
 - fi3-build: entering full screen fires two space changes; the first, mid-slide, still shows the icon for about a second before the second hides it (T3's floor, unchanged). Leaving full screen, main left the icon hidden on the normal desktop; the branch shows it.
 - fi3-build: once (run b1) the log said `icon shown` while the window server kept the panel off screen over several desktop changes; not reproduced in two more runs. The float log now reads every show back (`icon read back: … on screen=`).
 - fi3-build: rlf-build's review build activates itself on desktop 2 and moved the screen under these runs; rows were re-run when it did.
+
+## Review
+- Verdict: **pass** (code review; the built-app rows are re-driven by fi3-ui).
+- Commit reviewed: 453c4c6acdef734f6df4dca691d2a76f2dac42d4 (branch `floating-icon-3`).
+- Unmet gate items: none.
+- Checks: fresh clone at 453c4c6, `XDG_DATA_HOME=$(mktemp -d) make test` 0 (go ok, vitest 276), `npm install && npm test && npm run build` 0, `wails build` 0; `nm` of the bundle's binary: 0 CGS/SLS symbols. Boundary: 4 paths changed (`floaticon_darwin.m`, `FloatList.tsx`, `float.css`, `scripts/floating-icon-by-hand.sh`), all inside.
+- Code: FR-6 `kListMinH` 160 → 64 guard, height = field + rows + 7 px padding + 1 px edge, ResizeObserver on the rows follows each keystroke; FR-7 `constrainFrameRect:` returns the frame, `clampTile` still insets the tile 8 on all four sides at every size (place, drop, clamp); FR-8 Dock backdrop test, fallback covering window without Finder desktop, public CGWindowList only; FR-9 `iconClicked` dismisses at once, `doubleClicked` after a close goes to `growFromIcon` (never `bringList`), order-out animation off while the list, `kDragAt` 4 unchanged.
+- Evidence re-read: F14 hairline 8 px under the menu bar re-measured from `f14-b3-88/w1512/w2560.png` (main 63); F13 pixel column of `f13-b3-pay.png` ~8 px under the row; F15/F16 from `float-b3.log` and `watch-b3-f16b.txt` (read-backs, not targets).
+- Gate note for the FSE: F15's "main: hidden both" did not hold (a zoomed window stops under the menu bar, main showed the icon too); the row's failing case on main is only the edge-to-edge window, which the builder showed. The fallback still hides the icon for a covering window on a normal desktop when Finder's desktop window is absent (`CreateDesktop` off); no row covers it.
+- Reviewer: fi3-review, 2026-10-06.
