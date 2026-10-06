@@ -226,6 +226,10 @@ export function Unlock(arg1) {
   return window['go']['main']['App']['Unlock'](arg1);
 }
 
+export function Usage(arg1) {
+  return window['go']['main']['App']['Usage'](arg1);
+}
+
 export function Version() {
   return window['go']['main']['App']['Version']();
 }

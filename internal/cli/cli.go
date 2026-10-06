@@ -31,7 +31,7 @@ import (
 var Version = "dev"
 
 // Subcommands the binary recognises. Anything else launches the GUI.
-var Subcommands = []string{"status", "board", "sync", "prompt", "run", "runs", "decisions", "rule", "agents", "roles", "crew", "draft-cell", "retire", "clean", "statusline", "factory-key", "login", "logout", "whoami", "doctor", "config", "version", "--version", "help"}
+var Subcommands = []string{"status", "board", "sync", "prompt", "run", "runs", "usage", "decisions", "rule", "agents", "roles", "crew", "draft-cell", "retire", "clean", "statusline", "factory-key", "login", "logout", "whoami", "doctor", "config", "version", "--version", "help"}
 
 // IsSubcommand reports whether arg names a CLI subcommand.
 func IsSubcommand(arg string) bool {
@@ -71,6 +71,8 @@ func runWith(args []string, stdout, stderr io.Writer, now func() time.Time) int 
 		return runCmd(cfg, args[1:], stdout, stderr, now)
 	case "runs":
 		return runsCmd(cfg, args[1:], stdout, stderr, now)
+	case "usage":
+		return usageCmd(cfg, args[1:], stdout, stderr, now)
 	case "decisions":
 		return decisionsCmd(cfg, args[1:], stdout, stderr, now)
 	case "rule":
@@ -156,6 +158,7 @@ func usage(w io.Writer) {
   organizer prompt <initiative> [--run] print the agent review prompt; --run opens a terminal running the agent with it
   organizer run <initiative> <card> [--print] hand a card to a builder; refuses a card without spec, gate and boundary. --print shows the launch line
   organizer runs [initiative] [--json] every agent session recorded, per card: model, wall time, context at end, cost
+  organizer usage [--week YYYY-Www] [--by initiative|role|task|model] [--json] a week's tokens by kind and money, from every Claude transcript on this Mac
   organizer decisions [initiative] [--json] decision records: the open queue by age, rulings with turnaround
   organizer rule <initiative> <NNNN> --chosen <option> --words <text>  write the owner's ruling into a proposed record and commit that one file
   organizer agents                    agent processes and sessions grouped per initiative
