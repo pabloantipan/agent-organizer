@@ -341,7 +341,11 @@ static void listChrome(void) {
     [mainWin invalidateShadow];
 }
 
+// Wails' minimum comes back whatever the chrome was: a list brought from
+// native full screen kept its title bar, and the minimum must not stay at
+// the list's (code review, 898f9a9).
 static void restoreChrome(void) {
+    setMin(appMinSize);
     if (homeStyle == 0 || ([mainWin styleMask] & NSWindowStyleMaskTitled)) return;
     NSView *cv = [mainWin contentView];
     cv.layer.cornerRadius = 0;
@@ -349,7 +353,6 @@ static void restoreChrome(void) {
     [mainWin setStyleMask:homeStyle];
     [mainWin setOpaque:YES];
     if (homeBackground) [mainWin setBackgroundColor:homeBackground];
-    setMin(appMinSize);
 }
 
 static CGFloat listMaxH(NSScreen *s) { return MIN(kListMaxH, floor(NSHeight([s visibleFrame]) * 0.7)); }
@@ -672,7 +675,7 @@ void FloatIconFull(void) {
         restoreChrome();
         [mainWin setFrame:f display:YES animate:!reduceMotion()];
         markHome();
-        flog(@"full: frame=%@", NSStringFromRect([mainWin frame]));
+        flog(@"full: frame=%@ min=%@", NSStringFromRect([mainWin frame]), NSStringFromSize([mainWin minSize]));
         update(@"full", NO);
     });
 }
@@ -688,7 +691,7 @@ void FloatIconDismiss(void) {
         state = listFromCompact ? StateCompacted : StateReturning;
         floatIconClosed();
         [NSApp deactivate]; // focus goes back to what was in front
-        flog(@"dismiss: %s", stateName[state]);
+        flog(@"dismiss: %s min=%@", stateName[state], NSStringFromSize([mainWin minSize]));
         update(@"dismiss", NO);
     });
 }
