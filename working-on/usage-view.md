@@ -64,43 +64,37 @@ docs/specs/usage.md, U1 to U9 and X0. Shots in `.wt-notes/uv-build/` (named belo
 - Reviewer: uv-review, 2026-10-06.
 
 ## UI review
-- Round 1, d338be6: fail on UI1 (sev 3, a multi-card wave split By task on the real home); sev 2 UI2–UI5; shots in `.wt-notes/uv-ui/r1/` (commit f641d2f).
-- Round 2, commit run: 175824828d292c1930da96e3e4715dabcc0a184f (detached worktree). WKWebView: `make review-build PLATFORM="darwin/arm64 -debug"` (debug only for Web Inspector; version `v0.2.0-1308-g1758248`), `Deltagos Review.app` on `scripts/fixture-home.sh` and on a temp copy of this Mac's runs.jsonl + sessions/ (real config and transcripts read only). Chromium: `wails dev -devserver localhost:34605` on the fixture, headless Chrome (`chromium.mjs`, `chromium.log`). DOM reads in `measure.log`, shots in `.wt-notes/uv-ui/`.
-- Verdict: **fail**, on UI10 (sev 3, U4/U10 in the filtered view). This is the defect uv-review found; I confirm it in WKWebView. Every other U10 clause and UI1, UI3, UI4 and UI5 are fixed.
+- Round 1, d338be6: fail on UI1 (sev 3, a multi-card wave split By task on the real home); sev 2 UI2–UI5 (f641d2f; shots `.wt-notes/uv-ui/r1/`).
+- Round 2, 1758248: fail on UI10 (sev 3, the filtered By task still split multi-card waves); UI1, UI3, UI4 and UI5 fixed; U1–U3 and U5–U8 pass in both engines (b400ac1; shots and logs `.wt-notes/uv-ui/r2/`).
+- Round 3, commit run: ad7dbf3d5d69b9b82b8d8d2d3927b430cfbf614e (detached worktree). WKWebView only, as sup47 asked: `make review-build PLATFORM="darwin/arm64 -debug"` (debug only for Web Inspector; version `v0.2.0-1313-gad7dbf3`), `Deltagos Review.app` on `scripts/fixture-home.sh` and on a temp copy of this Mac's runs.jsonl + sessions/ (real config and transcripts read only). DOM reads in `.wt-notes/uv-ui/measure.log`, shots in `.wt-notes/uv-ui/`.
+- Verdict: **pass**. No severity 4 or 3 is left against the spec.
 
-### Findings
-- **UI10 (3) In the filtered view, a multi-card wave still splits.** What: from organizer's Agents week line (`organizer only`), By task, the lead cannot read sup47's wave in one row. Where: real home, W41, `wkwebview-1512x945-U10-realhome-filtered-split.png`; `measure.log` `real-filtered-organizer-task`. Evidence: `sup43 ·`, `sup46 ·` and `sup47 ·` open to the supervisor alone, and their cards are top-level rows again. The unfiltered view nests them (`real-W41-task`), so the filtered cut (`forInitiative`) misses FR-5a. Proposal: build the filtered task cut with the same wave nesting as the default one, and add a multi-card wave to the fixture (sup47 says uv-build is on it).
-- UI1 fixed (unfiltered): sup47 is one row, $37.65 = the Usage view $23.33 + the ledger $9.66 + sup47 $4.66, 6 sessions. Its cards are nested with their sessions, the supervisor sits at the wave's level, and card rows are not repeated at top level. sup46 ($34.25) and sup43 ($29.86) work the same way (`wkwebview-1512x945-U10-realhome-wave-rows.png`).
-- UI3 fixed: the first real week (from 19 Aug, 7 sessions, no cost) reads `—` with `no cost recorded for 7 sessions` on the tile, the cut rows, the bar's name and the week list. The bar is a dashed stub. In the fixture, `session —` and `init-b —`, and `*` with its footnote stay only where some money is known (`$72.11*`, `$17.40*`) (`wkwebview-1512x945-U10-realhome-first-week-unknown.png`).
-- UI4 fixed: › onto this week and ‹ onto the first week keep focus on the week label, in both engines (WK `real-first-week-focus`, Chromium `U5 focus after › disables`).
-- UI5 fixed: at 1024×640 during a rescan (`scanning…` on screen) the top bar is one line, 45 px. The version folds into the brand's hover (`Deltagos v0.2.0-1308-g1758248`), and the crumb reads `Home / Usage` whole, fixture and real (`wkwebview-1024x640-U10-topbar-during-rescan.png`, `-U10-fixture-topbar-during-rescan.png`).
-- UI11 (1) `sup43 · floating-icon, usage-ledger, usage-view · 3 cards` nests only one card: the ledger also gives sup43 the two cards sup47 ran (Go attribution, FR-3), so the count and the title promise rows that are not there. For the FSE.
-- Out of this card per sup47, not failed: UI2 (chart ends at the picked week), UI6 (reason words), UI7 (running on a past week). Still recorded: UI8 (resting bars 2.2:1), UI9 (`Show the 1 sessions`).
+### Round 3 checks
+| # | How (WKWebView) | Result |
+|---|---|---|
+| U4/U10 fixture, default | By task with every disclosure opened (AXPress), DOM: `sup12 · w-nogate, w-queued · 2 cards` $29.60 = Queued wave card $14.30 + Wave card with no gate $9.20 + sup12 $6.10, 3 sessions; the cards are nested with their builders and the supervisor sits at the wave's level; sup11's one-card wave is unchanged (`wkwebview-1512x945-U10-fixture-task-default.png`) | pass |
+| U4/U10 fixture, filtered | Home › init-a › Agents › `This week · 49.6M tokens` › `init-a only`, By task: sup12 nested the same, $29.60; Not attributed drops to init-a's $14.75 (`-U10-fixture-task-filtered.png`) | pass |
+| U4/U10 real, default | W41 By task: `sup47 · 2 cards` $42.54 (6 sessions), `sup46 · 2 cards` $34.25 (7), each with its cards nested and the supervisor at the wave's level; card rows not repeated at top level | pass |
+| U4/U10 real, filtered | Home › organizer › Agents › week line › `organizer only`, By task: sup47 $42.54 = the Usage view $27.73 + the ledger $9.66 + sup47 $5.15; sup46 $34.25 = $16.48 + $13.78 + $3.99; sup43 shows `1 card` (`-U10-realhome-filtered-waves.png`) | pass |
+| U1 | DOM: fixture $102.45, `+104% on last week ($50.15)`, `includes 1 running · excludes 1 session with no cost`, kinds largest first, 10 sessions · 17 h · 1 running; real $363.13, `−59% on last week ($895.89)`, 48 sessions | pass |
+| U5 | keys on the week label: Enter, Down, Down, Enter picks 14–20 Sep and focus returns to the label; tiles follow; › by Enter to this week keeps focus on the label | pass |
+| U8 | 1024×640 window: `scrollWidth === clientWidth` 1024 for document and body, main 1010/1010, table 962/962, tiles in one row; top bar one line, 45 px, during a rescan (`wkwebview-1024x640-U8-fixture-rescan.png`) | pass |
 
-### U1–U10 (round 2)
-| # | WKWebView (review build) | Chromium (wails dev) | Result |
-|---|---|---|---|
-| U1 | DOM + screenshot: fixture $72.85, `+45% on last week ($50.15)` neutral ink, kinds largest first, 7 sessions · 11 h · 1 running; real $357.94, 48 sessions, 10 running | DOM | pass |
-| U2 | DOM: 6 bars (8 real), one hue, selected labelled, bar names, a dashed stub for an unknown week | DOM, hover tip, table | pass |
-| U3 | DOM per cut, fixture and real: by money, Not attributed last with reasons | DOM per cut | pass |
-| U4 | fixture wave (sup11, build, review) and real unfiltered waves one row each; real **filtered** splits | fixture DOM | **fail (UI10)** |
-| U5 | keys: Enter, Down, Down, Enter picks 14–20 Sep, focus back on the label; Tab order unchanged | same; Escape returns focus | pass |
-| U6 | DOM: `running`, `so far`, tile counts | DOM | pass |
-| U7 | DOM: `This Mac only` name and hover; no-cost note where money is partly known | DOM | pass |
-| U8 | 1024×640: `scrollWidth === clientWidth` 1024 for the document and body, wraps 962/962, kinds in the row hover, tiles in one row | 1024×608: 1024/1024, 976/976 | pass |
-| U9 | not re-run: the diff d338be6..1758248 adds no money outside Usage* (TopBar.tsx changes only the version fold) | — | pass (round 1 grep) |
-| U10 | real: unfiltered waves one row (pass), filtered split (fail); unknown week `—` (pass); ‹ to first week keeps focus (pass); 1024 rescan one line (pass) | focus clause pass | **fail (filtered wave)** |
-
-States, round 2: a week with one session, a week with no sessions, partial first week, unattributed, running, cost unknown (now `—`) and narrow all pass in WK; no data yet was not re-run because its branch is unchanged in the diff (round 1 pass).
+### Recorded, not failed
+- UI2 (the chart ends at the picked week), UI6 (reason words) and UI7 (running on a past week) are out of this card per sup47. UI8 (resting bars at 2.2:1) and UI9 (`Show the 1 sessions`) are severity 1.
+- UI11 (1, Go, the FSE's): sup43's title still names usage-ledger, a card sup47 ran. Its meta now says `1 card` and it nests that one card, so the count no longer promises missing rows.
 
 ### Spec gaps (for the FSE)
-- S1 U10 names "By task on the real home" but not the filtered view (Agents' week line) the lead reaches by the same table; gate both.
+- S1 Gate the filtered view (Agents' week line) next to the default one wherever a cut is checked; it is built by its own path (`forInitiative`), which is how round 2's UI10 slipped.
 - S2 A supervisor credited with cards another supervisor ran (UI11, FR-3).
 
 ### Design questions (for aglaea)
-- A1–A4 from round 1 stand (tablist stops, a zero-token tile line, `Last week ·` vs the list, the unknown-week stub, now built as a dashed outline).
+- A1 The segmented control is a tablist where every tab is a Tab stop. One stop with arrow keys instead?
+- A2 A week with no sessions shows `input 0 · output 0 · cache read 0 · cache write 0`. Show `No tokens` instead?
+- A3 The picker says `Last week · 28 Sep–4 Oct` but its list says `28 Sep–4 Oct`. One form?
+- A4 A week with no recorded cost now draws a dashed stub for its bar. Keep it?
 
 ### Not verified
-- Both machines present; the error states; the Agents line in Chromium; no data yet at 1758248 (unchanged code, see States).
+- Round 3 did not re-run Chromium, U2, U3, U6, U7 or U9 (round 2: pass; the rework touches only the task cut and the fixture), the states table or the keyboard walk.
+- Both machines present; the error states (no path to drive them).
 - Reviewer: uv-ui, 2026-10-06.
-- 2026-10-06 uv-build: rework 2 for uv-review: filtered waves (885ef92), wave meta (265b4f6), fixture two-card wave (ad7dbf3); head ad7dbf3. Other stand-ins in organizer-fixture.TWrSl4 are not this seat's and were left running.
