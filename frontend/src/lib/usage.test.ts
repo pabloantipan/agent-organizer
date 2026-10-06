@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  agentsWeekLine, barLabel, changeWords, compact, duration, forInitiative, hoursWords, isoWeekOf, kindsLine,
+  agentsWeekLine, barLabel, changeWords, groupWaves, compact, duration, forInitiative, hoursWords, isoWeekOf, kindsLine,
   money, moneyGrid, reasonsWords, roleWords, rowDetail, shareWords, shiftWeek, sortRows, startWords, totalsNotes,
   usageColumns, weekLabel, weekRange, type UsageRow, type UsageSession,
 } from "./usage";
@@ -164,5 +164,38 @@ describe("agentsWeekLine", () => {
     expect(agentsWeekLine(rows, "organizer")).toBe("This week · 3.2M tokens");
     expect(agentsWeekLine(rows, "camp")).toBeNull();
     expect(agentsWeekLine(rows, "organizer")).not.toContain("$");
+  });
+});
+
+describe("groupWaves", () => {
+  const r = (key: string, money: number, o: Partial<UsageRow> = {}): UsageRow => ({ ...row(key, money, money * 1000), initiative: "organizer", ...o });
+  const rows = [
+    r("organizer/usage-ledger", 40, { cards: ["usage-ledger"], members: [{ id: "b1", name: "ul-build", role: "builder" }] }),
+    r("organizer/wave:sup47", 10, { name: "sup47 · usage-ledger, usage-view", cards: ["usage-ledger", "usage-view"], members: [{ id: "s", name: "sup47", role: "supervisor" }] }),
+    r("organizer/usage-view", 30, { cards: ["usage-view"] }),
+    r("organizer/other", 35, { cards: ["other"] }),
+    { ...row("", 5, 5, true) },
+  ];
+  const out = groupWaves(rows);
+  it("puts a supervisor's cards under its wave and sums them", () => {
+    expect(out.map((x) => x.key)).toEqual(["organizer/wave:sup47", "organizer/other", ""]);
+    expect(out[0].money).toBe(80);
+    expect(out[0].tokens).toBe(80_000);
+    expect(out[0].sessions).toBe(3);
+    expect(out[0].children!.map((c) => c.key)).toEqual(["organizer/usage-ledger", "organizer/usage-view"]);
+    expect(out[0].own!.members![0].role).toBe("supervisor");
+  });
+  it("leaves single-card rows and Not attributed alone", () => {
+    expect(out[1].children).toBeUndefined();
+    expect(out.at(-1)!.not_attributed).toBe(true);
+    expect(groupWaves([rows[0], rows[2]]).map((x) => x.key)).toEqual(["organizer/usage-ledger", "organizer/usage-view"]);
+  });
+  it("gives a card claimed by two waves to the later supervisor", () => {
+    const two = groupWaves([...rows, r("organizer/wave:sup46", 50, { name: "sup46 · usage-ledger", cards: ["usage-ledger", "gone"] }),
+      r("organizer/wave:sup48", 5, { name: "sup48 · usage-view, other", cards: ["usage-view", "other"] })]);
+    const kids = (k: string) => two.find((x) => x.key === k)!.children!.map((c) => c.key);
+    expect(kids("organizer/wave:sup48")).toEqual(["organizer/other", "organizer/usage-view"]);
+    expect(kids("organizer/wave:sup47")).toEqual(["organizer/usage-ledger"]);
+    expect(kids("organizer/wave:sup46")).toEqual([]);
   });
 });

@@ -273,6 +273,41 @@ export function rowDetail(r: Kinds & { name: string; sessions: number }, cols: {
   return parts.join(" · ");
 }
 
+// ---------- waves (By task) ----------
+
+/** A By task row as the table shows it: a supervisor's wave carries its
+ *  cards' rows and its own sessions' row; a card row only its sessions. */
+export type TaskRow = UsageRow & { children?: UsageRow[]; own?: UsageRow };
+
+const SUMMED = ["money", "share", "input", "output", "cache_read", "cache_write", "tokens", "sessions", "without_cost"] as const;
+
+/** By task, a supervisor's wave is one row (her §4, U4): the row App.Usage
+ *  gives the supervisor (two or more `cards`) takes the rows of those cards
+ *  under it, sums them with its own sessions, and the card rows leave the
+ *  top level. A card two waves claim goes to the later supervisor (the
+ *  higher supN: a card is finished by the last wave that names it; the
+ *  ledger can match a supervisor a card only mentions), else the first by
+ *  money. A single-card supervisor is already counted on its card's row. */
+export function groupWaves(rows: UsageRow[]): TaskRow[] {
+  const byKey = new Map(rows.map((r) => [r.key, r]));
+  const taken = new Set<string>();
+  const waves = new Map<string, TaskRow>();
+  const supN = (r: UsageRow) => {
+    const m = /^sup(\d+)\b/.exec(r.name) ?? /^sup(\d+)$/.exec(r.members?.find((x) => x.role === "supervisor")?.name.replace(/^.*probe-/, "") ?? "");
+    return m ? +m[1] : -1;
+  };
+  for (const r of sortRows(rows).sort((a, b) => supN(b) - supN(a))) {
+    if (r.not_attributed || (r.cards?.length ?? 0) < 2 || !r.initiative) continue;
+    const children = r.cards!.map((c) => byKey.get(`${r.initiative}/${c}`))
+      .filter((c): c is UsageRow => !!c && c.key !== r.key && !taken.has(c.key) && !waves.has(c.key));
+    children.forEach((c) => taken.add(c.key));
+    const wave: TaskRow = { ...r, own: r, children: sortRows(children) };
+    for (const c of children) for (const k of SUMMED) wave[k] += c[k];
+    waves.set(r.key, wave);
+  }
+  return sortRows(rows.filter((r) => !taken.has(r.key)).map((r) => waves.get(r.key) ?? r));
+}
+
 // ---------- one initiative (the Agents line's link) ----------
 
 const PAIRLESS = new Set(["fse", "persona", "pair", "session"]);

@@ -106,7 +106,6 @@ button.link.name-text { flex-shrink: 1; min-height: 0; }
 .disclose { min-height: var(--control-sm); min-width: var(--control-sm); padding: 0; justify-content: center; }
 .usage-table tr.na .name-text, .usage-table tr.na td { color: var(--fg-subtle); }
 .usage-table tr.member th, .usage-table tr.member td { font-size: var(--font-size-sm); color: var(--fg-muted); }
-.usage-table tr.member .name-cell { padding-left: calc(var(--control-sm) + var(--space-2)); }
 .share-bar { display: block; height: 6px; border-radius: var(--radius-xs); background: var(--bg-sunken); overflow: hidden; }
 .share-bar > span { display: block; height: 100%; background: var(--usage-bar); border-radius: var(--radius-xs); }
 .usage-table tr.na .share-bar > span { background: var(--usage-bar-rest); }
