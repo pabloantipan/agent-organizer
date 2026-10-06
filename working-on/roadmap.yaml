@@ -61,7 +61,7 @@ stages:
         met: 2026-10-06    # floating-icon-2 merged, 74e9b0a
       - text: a decision is read and ruled in the app with the record in view (decisions-view, rule-box-and-stages)
         met: 2026-10-04    # rule-box-and-stages, the last of them, in done/
-      - the Roadmap reads as a plan: stages, waves, iterations, cards and decisions at four levels (0093)
+      - "the Roadmap reads as a plan: stages, waves, iterations, cards and decisions at four levels (0093)"
       - no UI leftover older than one batch (leftovers-13 landed)
     gates: ["0093"]
     appetite: three waves    # the roadmap view, leftovers-13, one spare (0094)
