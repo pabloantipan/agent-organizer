@@ -1,0 +1,2 @@
+{"type":"user","cwd":"/tmp/scratch","sessionId":"s-plain","timestamp":"2026-10-05T12:00:00.000Z","message":{"role":"user","content":"hi"}}
+{"type":"assistant","cwd":"/tmp/scratch","sessionId":"s-plain","timestamp":"2026-10-05T12:00:03.000Z","message":{"id":"msg_p","model":"claude-sonnet-5-5","usage":{"input_tokens":5,"output_tokens":5,"cache_read_input_tokens":0,"cache_creation_input_tokens":90}}}
