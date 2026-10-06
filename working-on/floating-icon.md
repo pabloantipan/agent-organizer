@@ -5,7 +5,8 @@ repos: [organizer]
 branch: floating-icon
 seat: fic-build
 updated: 2026-10-05
-next: "review: floating-icon, gate met but N3 install+Finder (deferred by the FSE to just before the merge), 898f9a9"
+next: "N3: make install, launch /Applications/Deltagos.app from Finder, record the icon on another desktop (fic-build, sup43 calls back); then re-review"
+review: fail
 depends_on: []
 boundary: ["floaticon_darwin.m, floaticon_darwin.h, floaticon_darwin.go (new, darwin-only) and the hook in app.go", "frontend/src/components/FloatList.tsx (new) and its CSS; TopBar.tsx (the Compact to icon button); the store's openInitiative use only", "frontend/src/lib/ helpers and tests (list rows, search)", "scripts/ (a by-hand check script, like the spike's y1-pointer.sh)", "not: wails.json, build/darwin templates, other Go packages, docs/design-system.md"]
 spec: "docs/ux/specs/floating-icon.md (Aglaea, 16ae245) and its Technical notes T1-T8; scope 0088; the spike's Findings (on main as afe792d)"
@@ -32,6 +33,14 @@ The Teams behaviour Pablo asked for in 0088, built the way the spike proved.
 - 2026-10-05 cut by the FSE from Aglaea's design and the spike's Findings
 
 ## Next
+
+## Review
+- fail: every gate item is met at 898f9a9 except N3. The installed app (`make install`) was never launched from Finder, and that was the one thing the spike left unproven. The FSE deferred it until after the reviews, but a review can only pass a gate it can check.
+- Commit reviewed: 898f9a9 (branch head, unchanged).
+- Unmet: N3, only its make install + Finder part. Its other parts pass in a fresh clone: `XDG_DATA_HOME=$(mktemp -d) make test` (Go, 265 vitests), `npm test`, `npm run build`, `wails build`. N4 is noted, not gated.
+- Met: F1-F9 from the code, the seat's evidence and Pablo's takes 1-2. N1: nm shows 0 CGS/SLS symbols, and T5 logs "floating icon off" to organizer.log (float-t5.log). N2: float-n2.log shows 20 switches with no misfire. The code checks all hold: T3, T4, T5, the 4 px drag, the 8 px inset per display, Reduce motion, AX button "Deltagos", a linux build, the floatList vitests, choosing a row through openInitiative, and no card writes.
+- Findings outside the gate: (1) `floaticon_other.go` is outside the boundary as written and as read. It is needed for non-darwin builds, so the boundary should name it. (2) If the main window is in native full screen when the icon is clicked, `listChrome` returns early, `restoreChrome` never puts `setMin(appMinSize)` back, and the 1024x640 minimum stays at 360x160. (3) The icon's transparent 40 px shadow margin swallows clicks on every desktop (the seat's "Found, not asked"). (4) TopBar and FloatList import `wailsjs` directly instead of `hooks/useWails.ts`.
+- Reviewer: fic-review, 2026-10-05.
 
 ## Blockers
 
