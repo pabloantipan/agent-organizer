@@ -1,13 +1,13 @@
 ---
 title: "stage discovery-in-a-cell: close it on what this initiative can show, camp's move goes to camp"
-status: proposed
+status: ruled
 raised: 2026-10-06
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-06
+ruled_by: pablo
 options: [close now with (a) re-cut and (b) moved, keep open until a real draft, leave as is]
-chosen:
+chosen: close now with (a) re-cut and (b) moved
 cards: []
 threads: []
 supersedes: []
@@ -49,3 +49,6 @@ use is not this initiative's to produce. Cost: one roadmap commit and one
 post to camp's FSE.
 
 ## Ruling
+
+pablo, 2026-10-06, in the FSE session on lodestar: "do as recomended"
+(option 1).

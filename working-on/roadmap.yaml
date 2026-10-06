@@ -42,8 +42,10 @@ stages:
     phase: building
     outcome: an initiative in discovery has a cell fed with its business context, and its move to building is a ruled record
     exit:
-      - a cell being defined shows as such, with seats drafted from goal, scope and people.md
-      - camp moves from discovery to building through a ruled record
+      - text: a cell being defined shows as such, with seats drafted from goal, scope and people.md (on the fixture; the first real draft is watched, not gated, 0097)
+        met: 2026-09-29
+      # camp's move from discovery to building is camp's gate, on camp's roadmap (0097)
+    done: 2026-10-06      # closed by 0097
     forecast:              # recomputed by the FSE (docs/estimating.md), never hand-set
       range: "no cards left: amendment 1 landed in 37 min over 2 waves (forecast 40–65)"
       waves: 0
