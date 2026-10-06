@@ -34,6 +34,9 @@ type BoardInitiative struct {
 	Problems    []model.Problem   `json:"problems"`
 	Agents      []model.Agent     `json:"agents"`
 	Decisions   []model.Decision  `json:"decisions"`
+	// Waves are the run records' waves, each with the stages it built
+	// (roadmap-as-a-plan FR-1, FR-2).
+	Waves []model.Wave `json:"waves"`
 	// FSE is the initiative's Forward Software Engineer activity (FR-11).
 	FSE     model.FSEActivity `json:"fse"`
 	Live    int               `json:"live"`
@@ -97,6 +100,7 @@ func Build(local model.Snapshot, remote []model.Snapshot, order model.Order, now
 				RepoStates: si.RepoStates,
 				Problems:   si.Problems,
 				Decisions:  si.Decisions,
+				Waves:      si.Waves,
 				FSE:        si.FSE,
 			}
 			// No scope is two empty lists on the board, also for a snapshot
@@ -106,6 +110,10 @@ func Build(local model.Snapshot, remote []model.Snapshot, order model.Order, now
 			}
 			if bi.Scope.Out == nil {
 				bi.Scope.Out = []string{}
+			}
+			// No runs/ is no waves: [] on the board, also for an older snapshot.
+			if bi.Waves == nil {
+				bi.Waves = []model.Wave{}
 			}
 			for _, m := range machinesByID[si.ID] {
 				if m != s.Machine {

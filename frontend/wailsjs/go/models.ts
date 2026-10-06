@@ -274,6 +274,7 @@ export namespace merge {
 	    problems: model.Problem[];
 	    agents: model.Agent[];
 	    decisions: model.Decision[];
+	    waves: model.Wave[];
 	    fse: model.FSEActivity;
 	    live: number;
 	    working: number;
@@ -317,6 +318,7 @@ export namespace merge {
 	        this.problems = this.convertValues(source["problems"], model.Problem);
 	        this.agents = this.convertValues(source["agents"], model.Agent);
 	        this.decisions = this.convertValues(source["decisions"], model.Decision);
+	        this.waves = this.convertValues(source["waves"], model.Wave);
 	        this.fse = this.convertValues(source["fse"], model.FSEActivity);
 	        this.live = source["live"];
 	        this.working = source["working"];
@@ -1158,6 +1160,30 @@ export namespace model {
 	
 	
 	
+	export class Round {
+	    card: string;
+	    kind: string;
+	    start: string;
+	    end: string;
+	    result: string;
+	    reviewer: string;
+	    reason: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Round(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.card = source["card"];
+	        this.kind = source["kind"];
+	        this.start = source["start"];
+	        this.end = source["end"];
+	        this.result = source["result"];
+	        this.reviewer = source["reviewer"];
+	        this.reason = source["reason"];
+	    }
+	}
 	export class Scope {
 	    in: string[];
 	    out: string[];
@@ -1244,6 +1270,56 @@ export namespace model {
 	        this.quiet_seconds = source["quiet_seconds"];
 	        this.missing = source["missing"];
 	        this.blocked_on = this.convertValues(source["blocked_on"], Blocker);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Wave {
+	    record: string;
+	    date: string;
+	    dot: boolean;
+	    wave: number;
+	    supervisor: string;
+	    task: string;
+	    cards: string[];
+	    launched: string;
+	    merged: string;
+	    rounds: Round[];
+	    stages: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Wave(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.record = source["record"];
+	        this.date = source["date"];
+	        this.dot = source["dot"];
+	        this.wave = source["wave"];
+	        this.supervisor = source["supervisor"];
+	        this.task = source["task"];
+	        this.cards = source["cards"];
+	        this.launched = source["launched"];
+	        this.merged = source["merged"];
+	        this.rounds = this.convertValues(source["rounds"], Round);
+	        this.stages = source["stages"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
