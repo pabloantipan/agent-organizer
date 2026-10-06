@@ -4,6 +4,59 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-06, session ended by Pablo; two tasks wait on his hands
+
+Read first: `agents/fse.md`, the fse skill (spec-craft 5b and supervise §7
+changed 2026-10-04), then this section. The entries below it are history.
+
+- **Last SHA seen:** c86af80. Pushed to origin up to 42efe71 (2026-10-04);
+  push again only when Pablo asks.
+- **Installed app:** main at 4b3291a (v0.2.0-1180, 2026-10-05). Reinstall
+  (`make install`, then `git checkout -- frontend/wailsjs/runtime/`, a mode
+  churn) after the two tasks below merge.
+- **Running, both waiting on Pablo's hands:**
+  - sup44, `floating-icon-2` (0091, 0092, Amendment 2 folded in by Pablo):
+    both reviews passed at 25ecc11. Left: Pablo's one-minute take
+    (`cd ~/organizer/.wt/floating-icon-2 && scripts/floating-icon-by-hand.sh`;
+    on desktop 2: click, Escape twice; click, click beside; click, then
+    double-click with the list open; desktop 3: click, type pay, Enter; back
+    to desktop 1, Enter), then N3 (Pablo quits Deltagos; make install and a
+    Finder launch), then the merge. Ask him whether the ~0.5 s wait of a
+    single click on an open list feels unresponsive (Aglaea's A3).
+  - sup45, `decisions-line-and-names` (0087): both reviews passed at
+    1ec2867. Left: Pablo's X1 trackpad swipe, steps on thread
+    01M47SHFRTRVE8P4FXRB4070V5 (fixture shell, Deltagos Review from the
+    worktree, Decisions > Ruled > 0082, swipe at 1512x945 and 1024x640, then
+    quit and `kill ${=FIXTURE_AGENT_PIDS}`). sup45 merges on his result.
+  - End each supervisor on its `done`: `probe -k sup<n>`, `discuss-api token
+    rm organizer sup<n>`, close the task's threads one by one
+    (`~/claudecode/scripts/discuss-threads organizer sup<n> '<seat>-*'`, then
+    `discuss-hook close <id>` each), `organizer clean`, remove its prelude
+    and prompt files. Next supervisor number: sup46.
+- **Next batch (leftovers-13), collected in the entries below:** Aglaea's
+  dln-U1 (a ruled line's chosen option floors at ~8 characters, then drops
+  whole with its separator) and dln-U2 (wake count next to the rule box's
+  Rule); the floating panel's ~50 px under one filtered row; the icon ~40 px
+  below the menu bar at the top edge; the list's no-match, no-initiatives
+  and still-scanning states with no fixture; a zoomed window hides the icon
+  (ask Aglaea if intended); the review build's window titled "Deltagos
+  Review" (someone typed into it); the state word map now in three copies
+  (AgentList, Crew, RoleDrawer); `.wakes.hot` dead CSS (global.css:560);
+  dln G1 (X4 row 12 has no UI path). Cut it as one accept record with a
+  form for Pablo.
+- **Open with Hephaistos:** my two spec-craft lines (a gate row must fail on
+  main; pointer rows name who performs them), sent 2026-10-05, no answer yet.
+- **Mailbox:** 31 open organizer threads, nearly all sup44's and sup45's
+  live task threads; they close when those tasks end.
+- **Rules I broke this run, not again:** editing a record after Pablo ruled
+  it (0085, restored); deferring a gate row past its own review (N3); a gate
+  that let a spike pass a point it never ran. Check a record's status at
+  HEAD before editing it.
+- **Pablo:** answers scoping questions best as a form (memory
+  `pablo-questions-as-a-form`); rules accept records with "ok" in the app;
+  by-hand takes need the Mac unlocked; real-app reviews need the review
+  window visible.
+
 ## HAND-OFF — 2026-10-05 (evening), two tasks closing, floating icon next
 
 Read first: `agents/fse.md`, the fse skill (reread it: Hephaistos changed
