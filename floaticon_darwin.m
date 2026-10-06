@@ -140,6 +140,8 @@ static void placeIcon(void) {
     [panel setFrameOrigin:NSMakePoint(NSMinX(t) - kPad, NSMinY(t) - kPad)];
 }
 
+static void reanchorList(NSRect tile);
+
 // After a drop: kept inside the display under the tile's centre, remembered there.
 static void dropAt(void) {
     NSRect t = tileOf([panel frame]);
@@ -151,6 +153,7 @@ static void dropAt(void) {
     savePlaces();
     [[panel animator] setFrameOrigin:NSMakePoint(NSMinX(t) - kPad, NSMinY(t) - kPad)];
     flog(@"drop: tile %@ on %@", NSStringFromRect(t), screenKey(s));
+    reanchorList(t);
 }
 
 // ---------- the look: §2's table ----------
@@ -352,9 +355,8 @@ static void restoreChrome(void) {
 static CGFloat listMaxH(NSScreen *s) { return MIN(kListMaxH, floor(NSHeight([s visibleFrame]) * 0.7)); }
 
 // The list's frame: 360 wide, beside the icon, opening toward the screen's centre.
-static NSRect listFrame(CGFloat h) {
-    NSRect t = tileOf([panel frame]);
-    NSScreen *s = [panel screen] ?: [NSScreen mainScreen];
+static NSRect listFrameAt(NSRect t, CGFloat h) {
+    NSScreen *s = screenAt(NSMakePoint(NSMidX(t), NSMidY(t)));
     NSRect vis = [s visibleFrame];
     h = MAX(kListMinH, MIN(h, listMaxH(s)));
     BOOL right = NSMidX(t) > NSMidX(vis);
@@ -364,6 +366,17 @@ static NSRect listFrame(CGFloat h) {
     f.origin.x = MAX(NSMinX(v), MIN(NSMinX(f), NSMaxX(v) - kListW));
     f.origin.y = MAX(NSMinY(v), MIN(NSMinY(f), NSMaxY(v) - h));
     return f;
+}
+
+static NSRect listFrame(CGFloat h) { return listFrameAt(tileOf([panel frame]), h); }
+
+// The list follows the icon when it is dragged while the list is open here
+// (the lead's take: dropped elsewhere, the list stayed behind).
+static void reanchorList(NSRect tile) {
+    if (state != StateListing || ![mainWin isVisible] || ![mainWin isOnActiveSpace]) return;
+    NSRect f = listFrameAt(tile, NSHeight([mainWin frame]));
+    [[mainWin animator] setFrame:f display:YES];
+    flog(@"list follows the icon to %@", NSStringFromRect(f));
 }
 
 static void bringList(void) {
@@ -378,6 +391,9 @@ static void bringList(void) {
     state = StateListing;
     listChrome();
     setMin(NSMakeSize(kListW, kListMinH));
+    // The rows' height comes from the frontend at once; a height left from
+    // the last filter would open it short and then jump (the lead's take).
+    listHeight = kListMaxH;
     NSRect f = listFrame(listHeight);
     [mainWin setAlphaValue:1];
     [mainWin setFrame:f display:YES];
