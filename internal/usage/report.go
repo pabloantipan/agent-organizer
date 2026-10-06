@@ -97,6 +97,7 @@ type SessionRow struct {
 	CacheWrite int64     `json:"cache_write"`
 	Tokens     int64     `json:"tokens"`
 	Money      *float64  `json:"money"`
+	CostFrom   string    `json:"cost_from"` // record, transcript, or empty with no money
 }
 
 // View is the week as the CLI prints it and App.Usage returns it.
@@ -413,6 +414,9 @@ func sessions(ls []Line, running map[string]bool) []SessionRow {
 		s.Output += l.Output
 		s.CacheRead += l.CacheRead
 		s.CacheWrite += l.CacheWrite
+		if l.CostFrom != "" {
+			s.CostFrom = l.CostFrom
+		}
 		if l.Cost != nil {
 			x := *l.Cost
 			if s.Money != nil {

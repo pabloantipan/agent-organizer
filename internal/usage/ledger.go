@@ -74,6 +74,10 @@ type Line struct {
 	// Cost is this day's share of the session's cost, by its share of the
 	// session's tokens; null when no record of the session carries a cost.
 	Cost *float64 `json:"cost"`
+	// CostFrom says where the session's cost came from: "record" (the
+	// statusline, runs.jsonl or a live record) or "transcript" (its
+	// cost-state); empty with a null cost.
+	CostFrom string `json:"cost_from,omitempty"`
 }
 
 // Model is the day's main model: the one with the most tokens.
@@ -103,13 +107,22 @@ type sessionMeta struct {
 	Cwd   string `json:"cwd,omitempty"`
 	Pair  string `json:"pair,omitempty"` // a pair skill the session loaded
 	Fixed bool   `json:"fixed,omitempty"`
+	// TranscriptCost is the largest totalCostUSD of the transcript's
+	// cost-state entries, Claude Code's own running total for the session.
+	TranscriptCost float64 `json:"transcript_cost,omitempty"`
 }
 
 // offsets is the file beside the ledger that makes reading incremental.
 type offsets struct {
+	// Version changes when the offsets start recording something earlier
+	// passes skipped; an older file is dropped and the ledger rebuilt.
+	Version  int                     `json:"version"`
 	Files    map[string]*fileState   `json:"files"`
 	Sessions map[string]*sessionMeta `json:"sessions"`
 }
+
+// offsetsVersion 2 records the transcripts' cost-state (FR-2 Amendment 1).
+const offsetsVersion = 2
 
 // CostSource is one record of a session's cumulative cost: a runs.jsonl run
 // or a live statusline record. Claude Code's total is cumulative across a
@@ -184,6 +197,13 @@ func Ingest(o Options) (Stats, error) {
 		byKey[l.SessionID+"|"+l.Day] = &l
 	}
 	offs := loadOffsets(o.OffsetsPath)
+	if offs.Version != offsetsVersion {
+		// Offsets from before this version skipped what this one reads:
+		// read every transcript again, rebuilding the ledger from them.
+		offs = &offsets{Version: offsetsVersion, Files: map[string]*fileState{}, Sessions: map[string]*sessionMeta{}}
+		byKey = map[string]*Line{}
+		st.Changed = true
+	}
 	grown := map[string]bool{}
 
 	err = filepath.WalkDir(o.ProjectsDir, func(p string, d fs.DirEntry, err error) error {
@@ -256,7 +276,7 @@ func Ingest(o Options) (Stats, error) {
 		bySession[l.SessionID] = append(bySession[l.SessionID], l)
 	}
 	costs := foldCosts(o.Costs)
-	changed := len(grown) > 0
+	changed := len(grown) > 0 || st.Changed
 	for sid, ls := range bySession {
 		meta := offs.Sessions[sid]
 		if meta == nil {
@@ -288,7 +308,7 @@ func Ingest(o Options) (Stats, error) {
 				}
 			}
 		}
-		if splitCost(ls, costs[sid]) {
+		if splitCost(ls, costOf(costs[sid], meta)) {
 			changed = true
 		}
 	}
@@ -358,6 +378,7 @@ var (
 	markName      = []byte(`"type":"agent-name"`)
 	markTitle     = []byte(`"type":"custom-title"`)
 	markCwd       = []byte(`"cwd":"`)
+	markCost      = []byte(`"type":"cost-state"`)
 )
 
 // readFrom reads complete lines from the file's offset to its end, calls add
@@ -414,6 +435,14 @@ func readFrom(p string, fsx *fileState, meta *sessionMeta, loc *time.Location, a
 					meta.Name = e.CustomTitle
 				}
 			}
+		case !sub && bytes.Contains(b, markCost):
+			var c struct {
+				Type  string  `json:"type"`
+				Total float64 `json:"totalCostUSD"`
+			}
+			if json.Unmarshal(b, &c) == nil && c.Type == "cost-state" && c.Total > meta.TranscriptCost {
+				meta.TranscriptCost = c.Total
+			}
 		default:
 			if !sub && meta.Cwd == "" && bytes.Contains(b, markCwd) {
 				var e entry
@@ -466,10 +495,30 @@ func foldCosts(srcs []CostSource) map[string]CostSource {
 	return out
 }
 
+// sessionCost is a session's cost and where it came from.
+type sessionCost struct {
+	USD  float64
+	From string // "record", "transcript", or empty: no cost
+}
+
+// costOf picks a session's cost (FR-2, Amendment 1): the statusline's from
+// runs.jsonl or a live record, else the transcript's own cost-state. A
+// record of $0 is no record, so a session the record left at $0 and the
+// transcript prices takes the transcript's. Neither is no cost.
+func costOf(c CostSource, meta *sessionMeta) sessionCost {
+	switch {
+	case c.HasCost && c.CostUSD > 0:
+		return sessionCost{USD: c.CostUSD, From: "record"}
+	case meta != nil && meta.TranscriptCost > 0:
+		return sessionCost{USD: meta.TranscriptCost, From: "transcript"}
+	}
+	return sessionCost{}
+}
+
 // splitCost puts the session's cost on its days by each day's share of its
-// tokens. A session no record covers keeps null on every day; a session with
-// a record but no tokens has nowhere to put it. Reports whether it moved.
-func splitCost(ls []*Line, c CostSource) bool {
+// tokens. A session with no cost keeps null on every day; one with a cost
+// but no tokens has nowhere to put it. Reports whether it moved.
+func splitCost(ls []*Line, c sessionCost) bool {
 	var total int64
 	for _, l := range ls {
 		total += l.Total()
@@ -477,12 +526,13 @@ func splitCost(ls []*Line, c CostSource) bool {
 	changed := false
 	for _, l := range ls {
 		var next *float64
-		if c.HasCost && total > 0 {
-			v := c.CostUSD * float64(l.Total()) / float64(total)
-			next = &v
+		from := ""
+		if c.From != "" && total > 0 {
+			v := c.USD * float64(l.Total()) / float64(total)
+			next, from = &v, c.From
 		}
-		if !sameCost(l.Cost, next) {
-			l.Cost = next
+		if !sameCost(l.Cost, next) || l.CostFrom != from {
+			l.Cost, l.CostFrom = next, from
 			changed = true
 		}
 	}

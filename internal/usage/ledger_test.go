@@ -71,7 +71,7 @@ func TestIngestSumsOncePerMessageAndRereadsNothing(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if st.Files != 3 || st.BytesRead == 0 || !st.Changed {
+	if st.Files != 5 || st.BytesRead == 0 || !st.Changed {
 		t.Fatalf("first pass: %+v", st)
 	}
 	days := byDay(LoadLedger(o.LedgerPath), "s-main")
@@ -128,53 +128,101 @@ func TestIngestSumsOncePerMessageAndRereadsNothing(t *testing.T) {
 	}
 }
 
-// G3: a session with a record has its cost split over its days by tokens;
-// one without has null and is counted as without cost.
-func TestCostSplitByDayAndNullWithoutRecord(t *testing.T) {
+// G3 (FR-2, Amendment 1), four sessions: one with a record has the record's
+// cost split by day (its transcript's own cost-state does not override it);
+// one with only a transcript cost-state has the transcript's; one whose
+// record says $0 and whose transcript prices it has the transcript's; one
+// with neither has null and is counted as without cost.
+func TestCostFourCases(t *testing.T) {
 	costs := []CostSource{
 		{SessionID: "s-main", CostUSD: 2, HasCost: true},
 		// A resumed session reports its cumulative cost again: the largest wins.
 		{SessionID: "s-main", CostUSD: 3, HasCost: true, Session: "org-probe-rlf-build"},
+		// The statusline's open line, before any cost: $0 is no record.
+		{SessionID: "s-zero", CostUSD: 0, HasCost: true},
 	}
 	o := opts(t, copyFixture(t), costs)
 	if _, err := Ingest(o); err != nil {
 		t.Fatal(err)
 	}
 	lines := LoadLedger(o.LedgerPath)
+	near := func(a, b float64) bool { return a-b < 1e-9 && b-a < 1e-9 }
+	sum := func(sid string) (float64, string, int) {
+		var c float64
+		from, nulls := "", 0
+		for _, l := range byDay(lines, sid) {
+			if l.Cost == nil {
+				nulls++
+				continue
+			}
+			c += *l.Cost
+			from = l.CostFrom
+		}
+		return c, from, nulls
+	}
+
+	// 1. A record: $3, split by tokens, not the transcript's $9.50.
 	days := byDay(lines, "s-main")
 	t5, t6 := days["2026-10-05"].Total(), days["2026-10-06"].Total()
-	c5, c6 := days["2026-10-05"].Cost, days["2026-10-06"].Cost
-	if c5 == nil || c6 == nil {
-		t.Fatalf("s-main costs = %v %v", c5, c6)
+	c5 := days["2026-10-05"].Cost
+	if c5 == nil || !near(*c5, 3*float64(t5)/float64(t5+t6)) {
+		t.Errorf("s-main 2026-10-05 cost = %v, want its token share of $3", c5)
 	}
-	if want := 3 * float64(t5) / float64(t5+t6); *c5 < want-1e-9 || *c5 > want+1e-9 {
-		t.Errorf("2026-10-05 cost = %v, want %v", *c5, want)
+	if c, from, _ := sum("s-main"); !near(c, 3) || from != "record" {
+		t.Errorf("s-main = $%v from %q, want $3 from the record", c, from)
 	}
-	if s := *c5 + *c6; s < 3-1e-9 || s > 3+1e-9 {
-		t.Errorf("split sums to %v, want 3", s)
+	// 2. Only the transcript: its last cost-state, $1.00, split 1:3 by tokens.
+	if c, from, _ := sum("s-trans"); !near(c, 1) || from != "transcript" {
+		t.Errorf("s-trans = $%v from %q, want $1 from the transcript", c, from)
 	}
-	if plain := byDay(lines, "s-plain")["2026-10-05"]; plain.Cost != nil {
-		t.Errorf("s-plain cost = %v, want null", *plain.Cost)
+	if d := byDay(lines, "s-trans")["2026-10-05"].Cost; d == nil || !near(*d, 0.25) {
+		t.Errorf("s-trans 2026-10-05 = %v, want $0.25 (4 of 16 tokens)", d)
+	}
+	// 3. A $0 record the transcript prices higher: the transcript's.
+	if c, from, _ := sum("s-zero"); !near(c, 61.5) || from != "transcript" {
+		t.Errorf("s-zero = $%v from %q, want $61.50 from the transcript", c, from)
+	}
+	// 4. Neither: null, and counted.
+	if _, _, nulls := sum("s-plain"); nulls != 1 {
+		t.Errorf("s-plain should have a null cost")
 	}
 
 	v, err := Build(lines, "2026-W41", map[string]bool{"s-main": true}, time.UTC)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if v.ThisWeek.WithoutCost != 1 || v.ThisWeek.Sessions != 2 || v.ThisWeek.Running != 1 {
+	if v.ThisWeek.WithoutCost != 1 || v.ThisWeek.Sessions != 4 || v.ThisWeek.Running != 1 {
 		t.Errorf("week totals = %+v", v.ThisWeek)
 	}
-	if m := v.ThisWeek.Money; m < 3-1e-9 || m > 3+1e-9 {
-		t.Errorf("week money = %v, want 3", m)
+	if !near(v.ThisWeek.Money, 3+1+61.5) {
+		t.Errorf("week money = %v, want 65.5", v.ThisWeek.Money)
 	}
-	var plain *SessionRow
-	for i := range v.Sessions {
-		if v.Sessions[i].ID == "s-plain" {
-			plain = &v.Sessions[i]
+	for _, s := range v.Sessions {
+		if s.ID == "s-plain" && (s.Money != nil || s.CostFrom != "") {
+			t.Errorf("s-plain in the session list = %+v, want money null", s)
+		}
+		if s.ID == "s-zero" && s.CostFrom != "transcript" {
+			t.Errorf("s-zero cost_from = %q", s.CostFrom)
 		}
 	}
-	if plain == nil || plain.Money != nil {
-		t.Errorf("s-plain in the session list = %+v, want money null", plain)
+}
+
+// An offsets file from before the transcripts' cost-state was read is
+// dropped, and the ledger rebuilt, so old sessions get their cost.
+func TestOldOffsetsRebuild(t *testing.T) {
+	o := opts(t, copyFixture(t), nil)
+	if _, err := Ingest(o); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(o.OffsetsPath, []byte(`{"files":{},"sessions":{}}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	st, err := Ingest(o)
+	if err != nil || st.FilesRead != 5 || !st.Changed {
+		t.Fatalf("rebuild pass: %+v %v", st, err)
+	}
+	if d := byDay(LoadLedger(o.LedgerPath), "s-main")["2026-10-05"]; d.Messages != 2 {
+		t.Errorf("rebuilt line counted twice or lost: %+v", d)
 	}
 }
 
