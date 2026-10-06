@@ -4,6 +4,23 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-06 (evening), usage and roadmap ruled
+
+- **Last SHA seen:** 73d5083. Installed app bb0563a.
+- **Running:** sup47, usage (0099: usage-ledger then usage-view, money only
+  in Usage, 0020 narrowed). Window 424585. Next supervisor: sup48.
+- **Queued:** 0100 ruled, roadmap-waves-scan then roadmap-outline; launch
+  when usage-view is in done/ (shared app.go, wailsjs, fixture).
+- **Off-machine usage:** agent-slack 0011 ruled hestia (a usage resource in
+  discuss-record, forwarded to Hestia). Hestia's FSE builds the resource; the
+  organizer's push card waits until that resource exists. Odyssey's usage
+  is out for now (unasked).
+- **seat-pointer** (claudecode 525e0c4, 1f43e0d) waits on Pablo granting
+  iTerm Accessibility and Screen Recording; keep pointer rows naming Pablo
+  until Hephaistos reports the live check passed.
+- **Records format:** quote every option; chosen is one of them (memory
+  decision-options-quoted, 8573b88 fixed six).
+
 ## HAND-OFF — 2026-10-06 (late afternoon), stage 5 closed
 
 - **Last SHA seen:** 78a18ab. Installed app: bb0563a (both leftovers-13 cards).
