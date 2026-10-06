@@ -1,7 +1,7 @@
 import { isValidElement, useCallback, useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import {
-  GUTTER, LABEL_GAP, LABEL_W, LEVEL_WORD, TICK_GAP, anchorScroll, axisGrowth, buttonAnchor, clampScroll, contextAt, dayMonth, deeper, fitIsWeekly,
+  GUTTER, HOUR, LABEL_GAP, LABEL_W, LEVEL_WORD, PX_HOUR, REVEAL_MARGIN, TICK_GAP, anchorScroll, axisGrowth, buttonAnchor, clampScroll, contextAt, dayMonth, deeper, fitIsWeekly,
   focusAfter, keptBy, overlaps, raised, revealScroll, scaleOf, seriesIndex, shallower, shiftInside, sideOf, skipStep, stackTitles, startOfDay,
   addLocalDays, stepOf, ticksOf, todayAt, todayLabel, todayScroll, todayTick, windowOf,
   type Box, type Level, type Scale, type Span, type ZoomButton,
@@ -102,6 +102,16 @@ export function useTimeZoom(o: ZoomOptions) {
     fit: () => zoomTo("fit"),
     today: () => { if (level !== "fit") scrollTo(todayScroll(scale, now, reserve, view)); },
     pan: (px: number) => scrollTo(left() + px),
+    /** Zooms to fit a span (a wave's bar, double-clicked): Hours where it is
+     *  offered and the span holds in the lane, else Days, centred on it. */
+    fitTo: (from: number, to: number) => {
+      const next: Level = o.hours && ((to - from) * PX_HOUR) / HOUR <= view - 2 * REVEAL_MARGIN ? "hours" : "days";
+      const s = scaleFor(next);
+      const x = clampScroll((s.x(from) + s.x(to)) / 2 - view / 2, s, reserve, view);
+      if (next === level) { if (el.current) el.current.scrollLeft = x; return; }
+      pending.current = x;
+      setLevel(next);
+    },
   };
   const live = useRef(api);
   live.current = api;
