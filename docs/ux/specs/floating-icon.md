@@ -127,6 +127,33 @@ plain swap under reduced motion). The icon then shows on this desktop too.
 - He compacted it: every desktop shows the icon, including the one it came
   from, until he picks something from a panel.
 
+## Amendment 1 (aglaea, 2026-10-05, from 0091)
+
+Pablo, using it: double-click should expand the app, and the icon gets lost
+on a big screen (0091, his words there).
+
+- **Double-click** opens full Deltagos on this desktop, at the view it last
+  showed (Home, or the initiative and sub-view it was on). This desktop
+  becomes its own, as when a row is chosen.
+- **Single click opens the list at once**, on mouse-up, with no waiting for
+  the double-click interval: a delay of up to half a second reads as a
+  broken click. A second click within the system's double-click interval
+  turns the open panel into the full window, growing out of it with the same
+  200 ms as choosing a row. That growth is the continuity, so the brief
+  panel is not a flash.
+- **Size by display**, in points, by the display's visible width: **56** up
+  to 1920, **72** from 1920 to 2999, **88** from 3000 (the 3440 ultrawide).
+  The radius is a quarter of the size (14, 18, 22); the bars, the breathing
+  and the shadow's offsets and blur scale by size ÷ 56. The size is per
+  display, so the icon changes size when dragged onto another one. The drag
+  threshold and the 8 px inset stay in points.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| F10 | open the full app straight from the icon | double-click: full Deltagos on this desktop at the last view |
+| F11 | open the list without a delay | single click: the panel shows within 100 ms; a second click within the interval grows it into the full window |
+| F12 | find the icon on the big screen | on the 3440 display the icon is 88 pt with radius 22; on the laptop 56 pt; dragged across displays, it resizes |
+
 ## Acceptance, in the lead's terms
 
 | # | The lead can | Checked by |
