@@ -31,7 +31,7 @@ button.ol-label:hover, .ol-label.act:hover { background: var(--surface-hover); b
 .ol-label:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
 .tz-frame.zoomed .ol-row > .ol-label { background: var(--surface); }
 .tz-frame.zoomed .ol-row > button.ol-label:hover { background: var(--surface-hover); }
-.ol-chev { flex: 0 0 12px; width: 12px; font-size: 12px; line-height: 1; text-align: center; color: var(--fg-muted); transition: transform var(--dur-fast) var(--ease-out); }
+.ol-chev { flex: 0 0 12px; width: 12px; font-size: 12px; line-height: 1; text-align: center; color: var(--fg-muted); }
 .ol-chev.open { transform: rotate(90deg); }
 .ol-n { flex: none; font-family: var(--mono); font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-subtle); }
 .ol-row.ol-k-stage.ol-k-current .ol-n { color: var(--status-now); font-weight: var(--weight-semibold); }
@@ -125,6 +125,7 @@ button.ol-label:hover, .ol-label.act:hover { background: var(--surface-hover); b
 /* In flight, the wave bar and its open round breathe; under reduced
    motion nothing moves. */
 @media (prefers-reduced-motion: no-preference) {
+  .ol-chev { transition: transform var(--dur-fast) var(--ease-out); }
   .ol-wave.open, .ol-seg.open { animation: ol-breathe 2.4s var(--ease-out) infinite alternate; }
 }
 @keyframes ol-breathe { from { opacity: 1; } to { opacity: .55; } }
