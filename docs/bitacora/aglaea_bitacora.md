@@ -87,3 +87,4 @@ its source).
 - 2026-10-06 — sup45 dln-U1/U2: chosen floor ~8 chars then drops with its dot; wake count beside Rule too (DS).
 - 2026-10-06 — roadmap-as-a-plan design spec (0093): outline, rounds row, diamonds, four-step switch.
 - 2026-10-06 — floating-icon amendment 3: panel to content; 8 px under menu bar; zoomed is not full screen; icon click closes at once (replaces A2's wait).
+- 2026-10-06 — usage design spec (0098): top-level view, tiles, one chart, one table with four cuts.

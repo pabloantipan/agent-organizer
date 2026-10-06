@@ -234,6 +234,14 @@ the only magenta outline with a `✕`; the switch steps are Current stage /
 All stages / + Waves / + Rounds and cards, opening on 1; zoom and step are
 independent; `Outside any stage` row if 0094 is not accepted.
 
+Usage (2026-10-06, `specs/usage.md`, proposed, thread
+01M492E4X6K04P266W8BVYAKCZ; 0098): a top-level Usage view (a quiet top-bar
+text button, no badge); a week picker; three tiles (money with its change in
+words, tokens with the four kinds as words, sessions); one chart (money per
+week, one hue); one table with four cuts (initiative, role, task, model) and
+`Not attributed` always last; a Sessions list. Money only in Usage, tokens
+elsewhere (0020 narrowed by 0098).
+
 ## Open questions
 
 - Q1 (Pablo, via the FSE, leftovers-4): does he use Tab in the app? In
