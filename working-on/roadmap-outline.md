@@ -59,7 +59,29 @@ docs/specs/roadmap-as-a-plan.md, P1 to P8 and X0. Measured in the review build (
 
 ro-ui (UI reviewer), 2026-10-06, branch `roadmap-outline` at **fb184ee** (every row was checked on that commit). WKWebView: `make review-build` (`Deltagos Review.app`) at 1024×640 on the fixture, plus the real config with a temp data dir. Chromium: `wails dev` on the fixture, 1024×609. Shots in `.wt-notes/ro-ui/`.
 
-**Verdict: fail** on U1 (sev 3, FR-4 "double-click to fit… anchored on it"). Every P row passes as Aglaea wrote it.
+**Verdict at a4ec349 (re-review): pass.** U1 and U3 are fixed. U1b (sev 2) is recorded below and does not block. P1-P8 show no regression.
+Earlier verdict at fb184ee: fail on U1 (sev 3, FR-4 "double-click to fit… anchored on it"). Every P row passed as Aglaea wrote it.
+
+### Re-review at a4ec349 (rebased on main d10daf6; fixes f8de947, a4ec349)
+
+Fresh detached worktree, `make review-build`, WKWebView 1024×640 on the fixture and on the real config with a temp data dir. Shots `webkit-1024x640-RR-*`.
+
+- **U1 fixed.** The y values are screen AX tops of the row:
+  - Fixture, step 4: double-clicking `the late card` wave (low in the outline, window y 396) gives Days with the row still at 499 before and after (`RR-U1-fixture-before`, `RR-U1-fixture-dblclick`).
+  - Fixture, step 3: Zoom in from Fit keeps every row where it was (Stage 1 at 397, Outside at 665, the late card at 725; the anchor is the first row in view; `RR-U1-fixture-step3-fit`, `…-zoomin`).
+  - Real data, step 4: double-clicking sup47's second wave gives Hours with the row at 514 before and after, the frame showing the wave and its `9 rounds · 3 fail` (`RR-U1-real-before`, `RR-U1-real-dblclick`). At fb184ee the same press left it at 1874.
+  - P5 again: `the joins, first wave` stays at 601, Hours, magenta fail segment, `✕ fail · gate row 2` (`RR-P5-hours-dblclick`).
+- **U3 fixed.** `.ol-chev`'s transition now sits inside `@media (prefers-reduced-motion: no-preference)` (outline.css:128). Playwright Chromium with `reducedMotion: reduce`: the chevron has `all 0s`, the in-flight bars have animation `none`, and `document.getAnimations()` is 0.
+- **U1b (2), new: a kept row in the bottom band goes under the zoomed frame's edge.** *Cannot:* see a wave double-clicked in the bottom ~50 px of a 1024×640 window. *Where:* fixture step 3, `the late card` at window y 608-636 (`RR-U1-fixture-step3-dblclick-bottom`). *Evidence:* after the double-click (Days) the row keeps screen y 725, but the zoomed frame (`max-height`, its own horizontal scrollbar and the legend under it) ends near window y 585, so the row is hidden; the frame's vertical scrollbar shows more below. `keepRowAt` restores the top but does not clamp it into the frame's visible box. Rows above that band (the common case) stay in view. *Proposal:* after keeping the row, if it is below the frame's visible bottom, scroll the frame by the difference so the whole row shows.
+- **Regression pass in WKWebView:**
+  - P1: Current, one stage, two open items, Outside.
+  - P2: Fit at every step, and back to 1 restores.
+  - P3: 0004 at step 2 is still a named button.
+  - P5: as above.
+  - P6: Outside last with `· 5 cards`.
+  - P7: the AX web area equals the window, there is no horizontal bar, and the switch sits on the toolbar line.
+  - P8: from `+ Rounds and cards`, → wraps to Current. Tab reaches Stage 2. ↓ moves through the exit items to Outside, then ↓ → walks to `Card Later card…`. Enter opens its card back with focus on the title, and Escape returns to the card row.
+  - All pass. U2 (pre-existing, Decisions' landing in WebKit) was not rechecked: DecisionsView is unchanged.
 
 ### Findings
 
