@@ -14,6 +14,7 @@ import (
 	"organizer/internal/merge"
 	"organizer/internal/model"
 	"organizer/internal/service"
+	"organizer/internal/usage"
 )
 
 // App is the Wails-bound surface. It stays thin; logic lives in service.
@@ -430,6 +431,17 @@ func (a *App) Runs(initiativeID string) service.RunsView {
 		return service.RunsView{}
 	}
 	return a.svc.InitiativeRuns(initiativeID)
+}
+
+// Usage is one week of tokens by kind and money for every Claude session on
+// this Mac (docs/specs/usage.md FR-4), YYYY-Www or empty for this week; the
+// same value `organizer usage --json` prints. Money shows only in the Usage
+// view (0099).
+func (a *App) Usage(week string) (usage.View, error) {
+	if a.svc == nil {
+		return usage.View{}, errString(a.err)
+	}
+	return a.svc.Usage(week)
 }
 
 // RuleDecision writes the owner's ruling into a proposed decision record and

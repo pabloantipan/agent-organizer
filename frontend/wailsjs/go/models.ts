@@ -2002,3 +2002,293 @@ export namespace service {
 
 }
 
+export namespace usage {
+	
+	export class Reason {
+	    reason: string;
+	    sessions: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Reason(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.reason = source["reason"];
+	        this.sessions = source["sessions"];
+	    }
+	}
+	export class RowSession {
+	    id: string;
+	    name: string;
+	    role: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RowSession(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.role = source["role"];
+	    }
+	}
+	export class Row {
+	    key: string;
+	    name: string;
+	    initiative?: string;
+	    cards?: string[];
+	    money: number;
+	    share: number;
+	    input: number;
+	    output: number;
+	    cache_read: number;
+	    cache_write: number;
+	    tokens: number;
+	    sessions: number;
+	    without_cost: number;
+	    not_attributed: boolean;
+	    reasons?: Reason[];
+	    members?: RowSession[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Row(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.key = source["key"];
+	        this.name = source["name"];
+	        this.initiative = source["initiative"];
+	        this.cards = source["cards"];
+	        this.money = source["money"];
+	        this.share = source["share"];
+	        this.input = source["input"];
+	        this.output = source["output"];
+	        this.cache_read = source["cache_read"];
+	        this.cache_write = source["cache_write"];
+	        this.tokens = source["tokens"];
+	        this.sessions = source["sessions"];
+	        this.without_cost = source["without_cost"];
+	        this.not_attributed = source["not_attributed"];
+	        this.reasons = this.convertValues(source["reasons"], Reason);
+	        this.members = this.convertValues(source["members"], RowSession);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	export class SessionRow {
+	    id: string;
+	    name: string;
+	    initiative: string;
+	    task: string;
+	    task_title: string;
+	    role: string;
+	    reason?: string;
+	    model: string;
+	    // Go type: time
+	    start: any;
+	    // Go type: time
+	    end: any;
+	    minutes: number;
+	    running: boolean;
+	    input: number;
+	    output: number;
+	    cache_read: number;
+	    cache_write: number;
+	    tokens: number;
+	    money?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SessionRow(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.initiative = source["initiative"];
+	        this.task = source["task"];
+	        this.task_title = source["task_title"];
+	        this.role = source["role"];
+	        this.reason = source["reason"];
+	        this.model = source["model"];
+	        this.start = this.convertValues(source["start"], null);
+	        this.end = this.convertValues(source["end"], null);
+	        this.minutes = source["minutes"];
+	        this.running = source["running"];
+	        this.input = source["input"];
+	        this.output = source["output"];
+	        this.cache_read = source["cache_read"];
+	        this.cache_write = source["cache_write"];
+	        this.tokens = source["tokens"];
+	        this.money = source["money"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Stats {
+	    files: number;
+	    files_read: number;
+	    bytes_read: number;
+	    sessions: number;
+	    lines: number;
+	    changed: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Stats(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.files = source["files"];
+	        this.files_read = source["files_read"];
+	        this.bytes_read = source["bytes_read"];
+	        this.sessions = source["sessions"];
+	        this.lines = source["lines"];
+	        this.changed = source["changed"];
+	    }
+	}
+	export class Totals {
+	    week: string;
+	    start: string;
+	    end: string;
+	    money: number;
+	    input: number;
+	    output: number;
+	    cache_read: number;
+	    cache_write: number;
+	    tokens: number;
+	    sessions: number;
+	    hours: number;
+	    running: number;
+	    without_cost: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Totals(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.week = source["week"];
+	        this.start = source["start"];
+	        this.end = source["end"];
+	        this.money = source["money"];
+	        this.input = source["input"];
+	        this.output = source["output"];
+	        this.cache_read = source["cache_read"];
+	        this.cache_write = source["cache_write"];
+	        this.tokens = source["tokens"];
+	        this.sessions = source["sessions"];
+	        this.hours = source["hours"];
+	        this.running = source["running"];
+	        this.without_cost = source["without_cost"];
+	    }
+	}
+	export class WeekPoint {
+	    week: string;
+	    start: string;
+	    money: number;
+	    tokens: number;
+	    sessions: number;
+	    from?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new WeekPoint(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.week = source["week"];
+	        this.start = source["start"];
+	        this.money = source["money"];
+	        this.tokens = source["tokens"];
+	        this.sessions = source["sessions"];
+	        this.from = source["from"];
+	    }
+	}
+	export class View {
+	    machine: string;
+	    week: string;
+	    this_week: Totals;
+	    last_week: Totals;
+	    first_day: string;
+	    history: WeekPoint[];
+	    weeks: WeekPoint[];
+	    cuts: Record<string, Array<Row>>;
+	    sessions: SessionRow[];
+	    stats: Stats;
+	
+	    static createFrom(source: any = {}) {
+	        return new View(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.machine = source["machine"];
+	        this.week = source["week"];
+	        this.this_week = this.convertValues(source["this_week"], Totals);
+	        this.last_week = this.convertValues(source["last_week"], Totals);
+	        this.first_day = source["first_day"];
+	        this.history = this.convertValues(source["history"], WeekPoint);
+	        this.weeks = this.convertValues(source["weeks"], WeekPoint);
+	        this.cuts = this.convertValues(source["cuts"], Array<Row>, true);
+	        this.sessions = this.convertValues(source["sessions"], SessionRow);
+	        this.stats = this.convertValues(source["stats"], Stats);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+

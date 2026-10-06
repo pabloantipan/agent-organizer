@@ -6,6 +6,7 @@ import {service} from '../models';
 import {auth} from '../models';
 import {main} from '../models';
 import {config} from '../models';
+import {usage} from '../models';
 
 export function AddNote(arg1:string,arg2:string,arg3:string):Promise<model.Note>;
 
@@ -118,5 +119,7 @@ export function StopAgent(arg1:number):Promise<void>;
 export function SyncNow():Promise<service.SyncResult>;
 
 export function Unlock(arg1:string):Promise<service.LockState>;
+
+export function Usage(arg1:string):Promise<usage.View>;
 
 export function Version():Promise<string>;
