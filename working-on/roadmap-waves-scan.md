@@ -6,7 +6,7 @@ branch: roadmap-waves-scan
 seat: rws-build
 stage: one-window
 updated: 2026-10-06
-next: "pablo: accept 0100, then the FSE starts the supervisor after the usage task"
+next: "waits on the usage task (sup47); then the FSE starts its supervisor (0100 ruled)"
 depends_on: [usage-view]
 boundary: ["internal/scan (runs reader and tests), internal/model (Wave, Round), internal/merge", "app.go (type stubs only), frontend/wailsjs regenerated, testdata/fixture-overlay (run records)", "not: the run record template, internal/session"]
 spec: "docs/specs/roadmap-as-a-plan.md (FR-1 to FR-3)"
@@ -21,3 +21,4 @@ ui_review: false
 docs/specs/roadmap-as-a-plan.md, W1 to W4 and X0.
 
 ## Notes
+- 0100 ruled 2026-10-06; launches when usage-view is in done/.

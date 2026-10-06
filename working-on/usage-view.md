@@ -6,7 +6,7 @@ branch: usage-view
 seat: uv-build
 stage: one-window
 updated: 2026-10-06
-next: "pablo: accept 0099, then the FSE starts the supervisor"
+next: "sup47 runs it (0099 ruled), wave 2, after usage-ledger"
 depends_on: [usage-ledger]
 boundary: ["frontend/src/components/Usage.tsx and styles/usage.css (new)", "the top bar and board.store.ts screen (one entry), AgentsView.tsx (the week line only)", "frontend/src/lib helpers and tests, scripts/fixture-home.sh (a ledger)", "not: Go"]
 spec: "docs/specs/usage.md (FR-5, FR-6; docs/ux/specs/usage.md (b104480))"
@@ -21,3 +21,4 @@ ui_review: true
 docs/specs/usage.md, U1 to U9 and X0.
 
 ## Notes
+- 0099 ruled 2026-10-06; supervisor sup47, spawned by the FSE.
