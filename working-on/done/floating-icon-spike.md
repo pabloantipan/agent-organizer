@@ -22,6 +22,7 @@ Know, with a recording and numbers, whether the 0088 behaviour can be built on W
 - [x] Y2: see `docs/specs/floating-icon-spike.md`, Acceptance
 
 ## Done
+- 2026-10-05 sup42: Findings on main as afe792d (from 4a708f0); branch floating-icon-spike kept, unmerged; seats ended, threads closed; run record runs/2026-10-05-floating-icon-spike.md
 - 2026-10-05 fis-build: Pablo's by-hand pointer take written into the Findings (d8d6585); y1-pointer.mov is run 1's recorder, covering run 2's actions
 - 2026-10-05 fis-build: review fixes: findings corrected (83e704e), real pointer paths log coordinates (e91d2a7), by-hand take script .wt-notes/fis-build/y1-pointer.sh prepared, not run
 - 2026-10-05 fis-build: spike on floating-icon-spike (b0ef83a, cec8595), findings ee49014; recording .wt-notes/fis-build/y1.mov; FR-1..4 yes with conditions
