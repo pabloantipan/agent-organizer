@@ -976,4 +976,13 @@ sections below this one are history.
   only; T3 hides the icon for any edge-to-edge layer-0 window, so a zoomed
   (not full-screen) window would hide it on a normal desktop: ask Aglaea
   whether intended. A1/A2 with aglaea. Waiting on Pablo quitting Deltagos.
+- floating-icon merged f80ba80 (1 h 22 min vs 1.5-3 h, $24.22; four by-hand
+  takes; take 3 found the Dock bug). sup43 ended. Pablo's installed app is
+  c48cdf2: make install from main when he quits Deltagos, then tell aglaea
+  (A2, thread 01M47BRRXN8ZDFZZ6T3PV8VRVM, left open). Next batch: click
+  beside the icon verified by code only; second display untested (laptop
+  lid for floating-icon-2's F12); the icon sits ~40 px below the menu bar at
+  the top edge, not 8; §3 states without fixture; zoomed windows hide it.
+  sup44 runs floating-icon-2. Eight fixture stand-ins from 19:53 (sup41's?)
+  expire ~01:53; told sup41.
 
