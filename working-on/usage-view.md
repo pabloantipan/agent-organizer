@@ -12,6 +12,7 @@ boundary: ["frontend/src/components/Usage.tsx and styles/usage.css (new)", "the 
 spec: "docs/specs/usage.md (FR-5, FR-6; docs/ux/specs/usage.md (b104480))"
 gate: "docs/specs/usage.md Acceptance, rows U1 to U9 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -41,3 +42,15 @@ docs/specs/usage.md, U1 to U9 and X0. Shots in `.wt-notes/uv-build/` (named belo
 
 ## Done
 - 2026-10-06 uv-build: Usage view (FR-5) and money only in Usage (FR-6) on usage-view, e0767d1..d338be6; fixture usage history; gate met U1-U9, X0.
+
+## Review
+- Verdict: **pass** (code, checks and recorded evidence; the WKWebView rows are uv-ui's).
+- Commit reviewed: d338be61eee6bf8504e07bade8eea37db380312e (branch usage-view).
+- Unmet gate items: none.
+- X0, fresh clone at d338be6, no prior build: `XDG_DATA_HOME=$(mktemp -d) make test` 0 (every Go package ok, 298 vitest); `npm install && npm test && npm run build` 0; `wails build` 0. Clone and fixture removed.
+- U9: my own grep over `frontend/src` (`$` amounts, `"$`, `cost_usd`, `cost_from`, `money`, `dollar`, `cost`) outside Usage*.tsx, lib/usage*.ts, usage.css: comments only (Overview.tsx:16, ContextBar.tsx:8, AgentsView.tsx:242, TopBar.tsx:88, board.store.ts:11). ContextBar's `$` dropped.
+- Fixture from the clone: `CLAUDE_CONFIG_DIR` under the temp home, transcripts and runs there only. `organizer usage --json`: this week $72.85, +45% on $50.15, 36.3M (cache read 33.4M, cache write 1.3M, input 1.1M, output 487k), 7 sessions, 10.75 h, 1 running, 1 without cost; history from 3 Sep (W36 partial), W38 one session, W39 none; By task "Wave card in review" with sup11, wave1-build, wave1-review; Not attributed last in all four cuts with its reasons. Matches U1, U3, U4, U5, U6, U7 and the card's shots.
+- Code: no price table, money only formatted or summed from App.Usage (forInitiative sums sessions' own money); top bar Usage button has no badge or number; Agents line tokens only (`agentsWeekLine`); usage.css has no oklch, color-mix, nesting or @layer. Boundary: every path inside it (App.tsx screen switch and ContextBar cost clause as the supervisor accepted); no Go, no wailsjs.
+- Findings, none blocking: (1) `--usage-bar-rest: var(--violet-7)` in usage.css reads a tier-1 primitive from a component; the design system wants a tier-2 role (or a tier-3 token declared with the roles). (2) A picked past week compares with "last week" (`changeWords`), so 21–27 Sep reads "−100% on last week ($11.60)"; it means the week before. (3) Picking an older week drops the later bars from the chart (Go's History ends at the selected week, out of this card's boundary), so the no-sessions state's "the chart still shows the other weeks" holds only for earlier weeks and a chart click cannot go forward; the FSE should decide whether the ledger returns the full 12 weeks. (4) A row whose only session has no cost reads `$0.00*`, not `—`. (5) The empty Not attributed row (0 sessions) shows in every cut, so a one-session week has two rows, not "one row (100%)"; consistent with "never hidden".
+- Gate gap: U1–U8 check the default week; nothing checks the filtered view (Agents' week line → Usage for one initiative), which recomputes tiles and cuts in the frontend.
+- Reviewer: uv-review, 2026-10-06.
