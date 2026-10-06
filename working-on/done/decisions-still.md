@@ -1,11 +1,11 @@
 ---
 title: Decisions holds still - the view moves by itself while a record is read (Pablo's report)
-status: now
+status: done
 repos: [organizer]
 branch: decisions-still
 seat: dst-build
 updated: 2026-10-06
-next: "review: decisions-still, F1 fixed, gate met (W1-W3 with the band rows, W0; Chromium and WKWebView)"
+next: ""
 depends_on: []
 boundary: ["frontend/src/components/DecisionsView.tsx, RuleDecisionBox.tsx", "frontend/src/styles/decisions.css, rule-box.css, global.css (.markdown rules only)", "frontend/src/lib/useScrollEdges.ts and lib/ tests", "not: Home, Conversations, Go, docs/design-system.md"]
 spec: "docs/specs/decisions-still.md (FR-1 to FR-3)"
@@ -22,6 +22,7 @@ Nothing on Decisions moves unless the operator moves it. Measure the cause first
 - [x] W0: see `docs/specs/decisions-still.md`, Acceptance
 
 ## Done
+- 2026-10-06 sup41: merged to main as 10ba09a (6230714..10ba09a, rebased on ee41225 with the four patches unchanged; make test and npm build green there); code review pass and UI recheck pass at ea490ae; seats ended
 - 2026-10-05 Pablo, in the FSE session: "vibration: I don't see again" (his observation, relayed by the FSE; the UI recheck at the band still decides the gate)
 - 2026-10-05 dst-build: F1 fixed (fa1f835: tallness decided before ruling and held while the box is open, lib/stuckHead.ts; ea490ae: vitest for the hold and the hard bottom line); band rows below; W0 at ea490ae
 - 2026-10-05 dst-build: fix 5e7fccb (.dec-head.stuck changes paint only: inset shadow, body border transparent, actions keep their padding) + guard test 1fc4140; branch decisions-still rebased on 682013f; W2 zero motion in both engines, W3 and W0 pass. Evidence in .wt-notes/dst-build/ (progress.md)
