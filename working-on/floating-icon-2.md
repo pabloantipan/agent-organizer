@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: floating-icon-2
 updated: 2026-10-05
-next: "fse: start a supervisor once floating-icon is in done/ (0091 ruled)"
+next: "sup44 builds it (0091 ruled; floating-icon in done/)"
 depends_on: [floating-icon]
 boundary: ["floaticon_darwin.m, floaticon_darwin.h, floaticon_darwin.go, floaticon_other.go (click count, size by display, scaled layers)", "frontend/src/components/FloatList.tsx (grow into the full window on the second click; the last view on double-click)", "frontend/src/stores/board.store.ts (the last view to restore, read only if already kept there)", "scripts/floating-icon-by-hand.sh (the new steps)", "not: other Go packages, wails.json, build/darwin templates, docs/design-system.md"]
 spec: "docs/ux/specs/floating-icon.md, Amendment 1 (Aglaea, 2c07195); ruling 0091"
@@ -23,6 +23,7 @@ app straight away, and the icon is big enough on a big screen.
 - [ ] `XDG_DATA_HOME=$(mktemp -d) make test` from a clean checkout; `wails build`
 
 ## Done
+- 2026-10-05 sup44 launched by the FSE
 - 2026-10-05 cut by the FSE from 0091 and Aglaea's Amendment 1
 
 ## Next
