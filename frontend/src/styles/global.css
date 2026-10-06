@@ -557,7 +557,7 @@ button.counts.linkish { font-family: var(--mono); }
 .cell-stats { display: inline-flex; align-items: baseline; gap: 4px 6px; font-size: var(--font-size-sm); color: var(--muted); flex-wrap: wrap; }
 .cell-stats b { font-family: var(--mono); font-size: var(--font-size-md); color: var(--text); margin-left: 12px; }
 .cell-stats b:first-child { margin-left: 0; }
-.cell-stats b.hot, .cell-filters .hot .mono, .counter.hot, .wakes.hot, .tiny-btn.hot { color: var(--blocked); }
+.cell-stats b.hot, .cell-filters .hot .mono, .counter.hot, .tiny-btn.hot { color: var(--blocked); }
 .slack-body { display: grid; grid-template-columns: 1fr; gap: 14px; flex: 1; min-height: 0; }
 .slack-body.with-people { grid-template-columns: 1fr 250px; }
 .people { display: flex; flex-direction: column; min-height: 0; border-radius: var(--r); background: var(--panel); border: 1px solid var(--border); }
@@ -666,6 +666,8 @@ button.counts.linkish { font-family: var(--mono); }
 .composer select { padding: 3px 8px; font-size: var(--font-size-sm); border-radius: var(--radius-md); }
 .frozen { font-size: var(--font-size-sm); color: var(--blocked); padding: 6px 10px; border-radius: var(--radius-md); background: var(--blocked-soft); }
 .wakes { font-size: var(--font-size-xs); }
+/* Waking every seat is a caution, in the tone, never blocked's red. */
+.wakes.all { color: var(--tone); }
 .linkish.meta { font-size: var(--font-size-sm); color: var(--accent-fg); }
 
 /* discuss from the card back */
