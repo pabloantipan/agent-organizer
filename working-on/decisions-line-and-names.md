@@ -11,6 +11,7 @@ boundary: ["frontend/src/components/DecisionsView.tsx, frontend/src/styles/globa
 spec: "docs/specs/leftovers-12.md (FR-1 to FR-7); Aglaea cb20fcf, 2203d7d"
 gate: "docs/specs/leftovers-12.md Acceptance, rows X1 to X5 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -30,6 +31,13 @@ The Decisions board never swings sideways; the rest of the last two waves' lefto
 ## Next
 
 ## Blockers
+
+## Review
+- Verdict: pass (code review; X1's trackpad swipe stays Pablo's by hand, the WKWebView visuals dln-ui's).
+- Commit reviewed: 1ec28674c5df5c10f333150035af2dfa0e460274 (branch decisions-line-and-names).
+- Unmet gate items: none. X0 run here from a clean clone (make test with a fresh XDG_DATA_HOME, npm install/test/build, wails build: all exit 0, 276 vitest). X1 from the code (`.dec-chosen` flex 1000 0 0, min-width 0, max-width max-content, ellipsis, `title` and `lineName` whole; only bounded parts keep flex-shrink 0) and dln-build's measurements in both engines. X4 row 12: the landing path (`pastFirst` → showAll → Shell focuses the verb) is engine-independent, measured in Chromium and, past the five via 0074, in WKWebView.
+- Not in the gate: FR-4's word map is a third copy (AgentList, Crew, RoleDrawer `ROW_WORD`); the boundary left no shared place for one function. `.wakes.hot` (global.css:560) is now dead CSS. The wake count's magenta is an inline style, and the chosen/meta join relies on `margin-left: -10px` matching the line's 10 px gap.
+- Reviewer: dln-review, 2026-10-06.
 
 ## Notes
 - 2026-10-06 dln-build, by hand for Pablo (X1, never passed by the seat): `make review-build` in .wt/decisions-line-and-names; fresh shell there, `eval "$(scripts/fixture-home.sh)"`, copy `working-on/decisions/*.md` into `$FIXTURE_HOME/init-nopeople/working-on/decisions/`; run `build/bin/Deltagos Review.app/Contents/MacOS/organizer`; window 1512×945, then 1024×640; init-nopeople › Decisions › Ruled › "Show the other 82"; 0082 in view; two-finger swipe left and right over the list, slow then fast. Pass: nothing moves or rubber-bands sideways, 0082's chosen ends in "…" and is whole on hover. Optionally the same on the real home's organizer Decisions.
