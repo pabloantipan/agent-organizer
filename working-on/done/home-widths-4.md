@@ -1,5 +1,6 @@
 ---
 title: Home widths, fourth pass - empty columns give way first, urgent signals never fold, wide measured on the row; Escape, the opener, names
+stage: one-window
 status: done
 repos: [organizer]
 branch: home-widths-4

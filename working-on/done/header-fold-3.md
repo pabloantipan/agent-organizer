@@ -1,5 +1,6 @@
 ---
 title: The header, third pass - the stage stays in the bar at compact, tiles open their own stage, the fold tested
+stage: one-window
 status: done
 repos: [organizer]
 branch: header-fold-3

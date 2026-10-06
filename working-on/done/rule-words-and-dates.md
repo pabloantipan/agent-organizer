@@ -1,5 +1,6 @@
 ---
 title: The rule box's tables scroll, the facts line stays while ruling, his words kept verbatim, dates in words, make test from a clean checkout
+stage: one-window
 status: done
 repos: [organizer]
 branch: rule-words-and-dates

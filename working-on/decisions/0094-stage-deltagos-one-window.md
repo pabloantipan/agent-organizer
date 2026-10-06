@@ -1,13 +1,13 @@
 ---
 title: A stage for the work outside any stage - Deltagos is the lead's one window
-status: proposed
+status: ruled
 raised: 2026-10-06
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-06
+ruled_by: pablo
 options: [add the stage as drafted, add it with other exit items, no stage]
-chosen:
+chosen: add the stage as drafted
 cards: []
 threads: []
 supersedes: []
@@ -60,3 +60,6 @@ open-ended like the leftover batches did.
 Cost: one commit (roadmap.yaml plus `stage:` on 23 done cards); no code.
 
 ## Ruling
+
+pablo, 2026-10-06, in the FSE session on lodestar: "0094 accepted as
+recommebnde" (option 1, the stage as drafted).

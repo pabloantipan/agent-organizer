@@ -1,5 +1,6 @@
 ---
 title: Escape closes the top box only, a rule box never covers its opener, stage landings show their detail, duplicate stage ids said plainly
+stage: one-window
 status: done
 repos: [organizer]
 branch: rule-box-and-stages

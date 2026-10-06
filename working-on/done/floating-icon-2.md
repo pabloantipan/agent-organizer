@@ -1,5 +1,6 @@
 ---
 title: Floating icon, second pass - double-click opens the full app at once; the icon grows on big screens
+stage: one-window
 status: done
 repos: [organizer]
 branch: floating-icon-2

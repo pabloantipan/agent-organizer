@@ -1,5 +1,6 @@
 ---
 title: Roles on Home and in the rail, and a role's drawer - show only
+stage: one-window
 status: done
 repos: [organizer]
 branch: roles-ui

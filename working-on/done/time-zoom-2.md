@@ -1,5 +1,6 @@
 ---
 title: Time zoom, second pass - focus kept at the ends, Today only where it moves, readable day bands, whole marks after a pointer
+stage: one-window
 status: done
 repos: [organizer]
 branch: time-zoom-2

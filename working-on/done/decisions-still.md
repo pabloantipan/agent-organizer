@@ -1,5 +1,6 @@
 ---
 title: Decisions holds still - the view moves by itself while a record is read (Pablo's report)
+stage: one-window
 status: done
 repos: [organizer]
 branch: decisions-still

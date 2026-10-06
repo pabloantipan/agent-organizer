@@ -1,5 +1,6 @@
 ---
 title: Deltagos floats as an icon on other desktops; click for the initiative list; Compact to icon
+stage: one-window
 status: done
 repos: [organizer]
 branch: floating-icon

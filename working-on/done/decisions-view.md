@@ -1,5 +1,6 @@
 ---
 title: Decisions as the operator's main view - find, a summary line, sections that fold, the Timeline last and closed
+stage: one-window
 status: done
 repos: [organizer]
 branch: decisions-view

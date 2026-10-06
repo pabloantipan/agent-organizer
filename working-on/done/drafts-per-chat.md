@@ -1,5 +1,6 @@
 ---
 title: A new thread's draft belongs to its chat (no wrong seat woken), draft marks, any column gives slack, names, IME, dates
+stage: one-window
 status: done
 repos: [organizer]
 branch: drafts-per-chat

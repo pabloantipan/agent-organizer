@@ -1,5 +1,6 @@
 ---
 title: Record bodies never widen the view, dimmed by token not opacity, no cut axis label, the rule box's own placement
+stage: one-window
 status: done
 repos: [organizer]
 branch: markdown-and-labels

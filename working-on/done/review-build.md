@@ -1,5 +1,6 @@
 ---
 title: A review build with its own bundle id, so reviewers stop writing into the lead's app
+stage: one-window
 status: done
 repos: [organizer]
 branch: review-build

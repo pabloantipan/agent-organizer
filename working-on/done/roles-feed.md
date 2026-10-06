@@ -1,5 +1,6 @@
 ---
 title: The roles feed - configured roles, their sessions, hand-off, mail and initiatives on the agents feed
+stage: one-window
 status: done
 repos: [organizer]
 branch: roles-feed

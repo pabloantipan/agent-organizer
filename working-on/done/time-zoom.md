@@ -1,5 +1,6 @@
 ---
 title: Time zoom on every Gantt-style axis - Fit, Days, and Hours where a mark has a time
+stage: one-window
 status: done
 repos: [organizer]
 branch: time-zoom

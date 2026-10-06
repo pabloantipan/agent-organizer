@@ -1,5 +1,6 @@
 ---
 title: Decisions and zoom polish - focus kept at the zoom's ends, a sticky axis, finds open their sections, honest empty and hidden counts
+stage: one-window
 status: done
 repos: [organizer]
 branch: zoom-decisions-polish

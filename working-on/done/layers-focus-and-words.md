@@ -1,5 +1,6 @@
 ---
 title: One layer order (the card back above the rule box), focus back to the box below, the scrim under the top bar, blocked never folds, edges and words
+stage: one-window
 status: done
 repos: [organizer]
 branch: layers-focus-and-words

@@ -1,5 +1,6 @@
 ---
 title: The document never scrolls; signals fold against floors in rendered width; the scroll edge visible; names and dates
+stage: one-window
 status: done
 repos: [organizer]
 branch: home-signals-5

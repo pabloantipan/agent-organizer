@@ -1,5 +1,6 @@
 ---
 title: Escape keeps what he wrote (rule box, comments, composer), and Home's fixed columns give their slack to cut cells
+stage: one-window
 status: done
 repos: [organizer]
 branch: drafts-and-slack

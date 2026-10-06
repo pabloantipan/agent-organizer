@@ -1,5 +1,6 @@
 ---
 title: Spike - can Deltagos float as a native icon on other desktops (macOS, Wails v2)?
+stage: one-window
 status: done
 repos: [organizer]
 branch: floating-icon-spike

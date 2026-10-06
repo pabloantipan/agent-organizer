@@ -1,5 +1,6 @@
 ---
 title: Today said at Days, focus after a ruling and after Show the other N, titles that stack, finds that store nothing
+stage: one-window
 status: done
 repos: [organizer]
 branch: timeline-and-find-6

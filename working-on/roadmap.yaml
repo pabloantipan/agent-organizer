@@ -50,6 +50,19 @@ stages:
       waits: "exit (a): a draft shown on a real initiative (Pablo); exit (b) is camp's"
       basis: "23 cards in 10 single-wave tasks, this initiative"
       as_of: 2026-09-29
+  - id: one-window
+    title: Deltagos is the lead's one window
+    phase: building
+    outcome: the lead reads, rules and plans every initiative from Deltagos, on any desktop, without a terminal for status
+    exit:
+      - text: Deltagos is one click away on every desktop (floating icon, 0088-0092)
+        met: 2026-10-06    # floating-icon-2 merged, 74e9b0a
+      - text: a decision is read and ruled in the app with the record in view (decisions-view, rule-box-and-stages)
+        met: 2026-10-04    # rule-box-and-stages, the last of them, in done/
+      - the Roadmap reads as a plan: stages, waves, iterations, cards and decisions at four levels (0093)
+      - no UI leftover older than one batch (leftovers-13 landed)
+    gates: ["0093"]
+    appetite: three waves    # the roadmap view, leftovers-13, one spare (0094)
   - id: decisions-owned-and-used
     title: Decisions have real owners, and their data is used
     phase: building
