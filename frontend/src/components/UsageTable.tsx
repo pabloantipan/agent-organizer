@@ -78,7 +78,7 @@ export function UsageTable({ rows, cut, setCut, sessions }: { rows: UsageRow[]; 
                 <span className={`name-text ${(cut === "model" || cut === "initiative") && !r.not_attributed ? "mono" : ""}`} tabIndex={hover ? 0 : undefined}
                   aria-label={hover ? `${name}: ${hover}` : undefined}>{name}</span>
               )}
-              {cut === "task" && !r.not_attributed && r.initiative && !depth && <span className="name-meta mono">{r.initiative}{wave ? ` · ${r.cards!.length} cards` : ""}</span>}
+              {cut === "task" && !r.not_attributed && r.initiative && !depth && <span className="name-meta mono">{r.initiative}{wave && r.children!.length > 0 ? ` · ${r.children!.length} card${r.children!.length === 1 ? "" : "s"}` : ""}</span>}
             </span>
           </th>
           {cells(r, { unknown: unknownMoney(r), noCost: unknownMoney(r) ? unknownWords(r.sessions) : r.without_cost > 0 ? `excludes ${r.without_cost} session${r.without_cost === 1 ? "" : "s"} with no cost` : undefined, share: r.share, sessions: r.sessions })}
