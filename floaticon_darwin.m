@@ -436,7 +436,37 @@ static void iconClicked(void) {
 @property NSPoint originAt;
 @property BOOL dragging;
 @property BOOL inside;
+@property BOOL pressing;
 @end
+
+static FloatIconView *iconView;
+
+// Clicks beside the tile pass through (code review, 898f9a9): the panel is
+// larger than the tile to hold its shadow, and a window takes every click on
+// its frame wherever it is drawn. So the panel ignores the pointer except
+// while the pointer is over the tile (its hover-scaled bounds) or a press
+// or drag is under way; a 20 Hz look at the pointer's place flips it, and
+// drives the hover look, since entered/exited cannot fire while ignored.
+static BOOL overTile(NSPoint p) {
+    NSRect t = tileOf([panel frame]);
+    CGFloat grow = kTile * 0.04; // the dragging scale, 1.08, covers hover's 1.06
+    return NSPointInRect(p, NSInsetRect(t, -grow, -grow));
+}
+
+static void watchPointer(void) {
+    if (![panel isVisible]) return;
+    BOOL busy = iconView.pressing || iconView.dragging;
+    BOOL over = overTile([NSEvent mouseLocation]);
+    BOOL take = busy || over;
+    if ([panel ignoresMouseEvents] == take) {
+        [panel setIgnoresMouseEvents:!take];
+        flog(@"pointer %@", take ? @"over the tile: icon takes clicks" : @"off the tile: clicks pass through");
+    }
+    if (!busy && over != iconView.inside) {
+        iconView.inside = over;
+        setLook(over ? LookHover : LookResting, 0.12);
+    }
+}
 
 @implementation FloatIconView
 - (BOOL)acceptsFirstMouse:(NSEvent *)e { return YES; }
@@ -452,19 +482,18 @@ static void iconClicked(void) {
     [super updateTrackingAreas];
     for (NSTrackingArea *a in [self trackingAreas]) [self removeTrackingArea:a];
     [self addTrackingArea:[[NSTrackingArea alloc] initWithRect:NSMakeRect(kPad, kPad, kTile, kTile)
-                                                       options:NSTrackingMouseEnteredAndExited | NSTrackingCursorUpdate | NSTrackingActiveAlways
+                                                       options:NSTrackingCursorUpdate | NSTrackingActiveAlways
                                                          owner:self
                                                       userInfo:nil]];
 }
 
 - (void)cursorUpdate:(NSEvent *)e { [[NSCursor pointingHandCursor] set]; }
-- (void)mouseEntered:(NSEvent *)e { self.inside = YES; if (!self.dragging) setLook(LookHover, 0.12); }
-- (void)mouseExited:(NSEvent *)e { self.inside = NO; if (!self.dragging) setLook(LookResting, 0.12); }
 
 - (void)mouseDown:(NSEvent *)e {
     self.downAt = [NSEvent mouseLocation];
     self.originAt = [[self window] frame].origin;
     self.dragging = NO;
+    self.pressing = YES;
     setLook(LookPressed, 0.08);
     flog(@"pointer down at %@", NSStringFromPoint(self.downAt));
 }
@@ -484,6 +513,7 @@ static void iconClicked(void) {
 - (void)mouseUp:(NSEvent *)e {
     NSPoint p = [NSEvent mouseLocation];
     CGFloat moved = hypot(p.x - self.downAt.x, p.y - self.downAt.y);
+    self.pressing = NO;
     if (self.dragging) {
         self.dragging = NO;
         flog(@"pointer drag end (moved %.1f px)", moved);
@@ -576,6 +606,10 @@ static void build(void) {
     }
     bars = bs;
     [panel setContentView:v];
+    iconView = v;
+    [panel setIgnoresMouseEvents:YES];
+    NSTimer *pointer = [NSTimer timerWithTimeInterval:0.05 repeats:YES block:^(NSTimer *t) { watchPointer(); }];
+    [[NSRunLoop mainRunLoop] addTimer:pointer forMode:NSRunLoopCommonModes];
     [v setToolTip:@"Deltagos"];
     // The window lists the button itself: a borderless panel's content view
     // is not offered to accessibility clients by default.
@@ -623,7 +657,7 @@ void FloatIconStart(const char *logPath, const char *placeFile) {
         [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidChangeScreenParametersNotification object:nil
                                                            queue:[NSOperationQueue mainQueue]
                                                       usingBlock:^(NSNotification *n) { placeIcon(); flog(@"screens changed: icon re-placed"); }];
-        flog(@"start: main=%@ min=%@ reduceMotion=%d", NSStringFromRect([mainWin frame]), NSStringFromSize(appMinSize), reduceMotion());
+        flog(@"start: main=%@ min=%@ reduceMotion=%d ignoresMouse=%d", NSStringFromRect([mainWin frame]), NSStringFromSize(appMinSize), reduceMotion(), [panel ignoresMouseEvents]);
         update(@"start", YES);
     });
 }

@@ -59,6 +59,9 @@ F4  move it
   3. Drag it down onto the Dock and let go: it stays just above it.
   4. Drag it to the middle of the right edge and let go.
   5. ctrl+→ to desktop 3: the icon is in the same spot.
+  5b. Put the icon over a window, then click that window just beside the
+      icon (a few mm off its edge): the window gets the click. Rest the
+      pointer on the icon: it lifts (hover).
 
 F5  pick by typing
   6. Click the icon. The list opens by it, with the search field focused.
