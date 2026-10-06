@@ -1,13 +1,13 @@
 ---
 title: Accept the Roadmap-as-a-plan spec and launch its two cards after usage
-status: proposed
+status: ruled
 raised: 2026-10-06
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-06
+ruled_by: pablo
 options: ["accept as written", "accept with amendments", "send back"]
-chosen:
+chosen: accept as written
 cards: [roadmap-waves-scan, roadmap-outline]
 threads: []
 supersedes: []
@@ -53,3 +53,5 @@ records 2026-10-06), a scan reader plus a view counted as two.
 The FSE's: accept as written.
 
 ## Ruling
+
+pablo, 2026-10-06, in the organizer on lodestar: ok
