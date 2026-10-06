@@ -4,6 +4,24 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-06 (afternoon), leftovers-13 landed
+
+- **Last SHA seen:** cd80c93. Origin still at 42efe71.
+- **sup46 ended** (leftovers-13: floating-icon-3 8679b54, ruled-line-floor
+  77f436b; 52 min vs 60-120, ~$25, nothing asked of Pablo: 0095 held).
+  Next supervisor: sup47. Reinstall waits for Pablo to quit Deltagos.
+- **Collected for leftovers-14** (runs/2026-10-06-leftovers-13.md, "Left for
+  the next batch"): spec gaps F15 main column, covering-window fallback
+  unrowed, U-G1 8 px in empty states, G2 L1 drop path unreachable >=1024,
+  G3 L3's Deltagos.app shares Pablo's bundle id, G4 fixture Roles read real
+  sessions, boundary too narrow on global.css; dln-x1's measure.sh still
+  unguarded; for aglaea U-D1, A1, A2, U1 (sev 1).
+- **Synthetic input**: a seat paste ruled a fixture thread (0ab607a), and
+  CGEvent mouse-downs stopped landing system-wide from ~13:13. Both sent to
+  Hephaistos on the driver thread 01M48W0YEC3H6WFX62WMKV4K8X.
+- **Still open:** stage 5 close-out record (Pablo not answered); 0093 waits
+  on Hephaistos's run-record shape.
+
 ## HAND-OFF — 2026-10-06 (morning), both tasks landed; roadmap revisited
 
 - **Last SHA seen:** fe65c2c. Origin still at 42efe71; push only when asked.
