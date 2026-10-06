@@ -548,6 +548,11 @@ static void doubleClicked(void) {
 @implementation FloatPanel
 - (BOOL)canBecomeKeyWindow { return NO; }
 - (BOOL)canBecomeMainWindow { return NO; }
+// AppKit keeps a window's top under the menu bar, which with the shadow
+// margin left the tile 40 px (at 56) under it, not 8 (Amendment 3, F14).
+// clampTile keeps the tile itself inside the visible frame with the inset;
+// the transparent margin may lie under the menu bar.
+- (NSRect)constrainFrameRect:(NSRect)r toScreen:(NSScreen *)s { return r; }
 @end
 
 @interface FloatIconView : NSView
