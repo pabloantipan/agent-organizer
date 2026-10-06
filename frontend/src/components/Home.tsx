@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState
 import { createPortal } from "react-dom";
 import { Briefcase, ChevronDown, ChevronRight, CircleDashed, Compass, Hammer, Hand, Play } from "lucide-react";
 import type { merge, model, service } from "../../wailsjs/go/models";
-import { inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, needsMeShown, NEEDS_ME_FIRST, type NeedsMeRow } from "../lib/queue";
+import { inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, needsMeShown, NEEDS_ME_FIRST, pastFirst, type NeedsMeRow } from "../lib/queue";
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
 import { dateWords } from "../lib/dates";
@@ -42,10 +42,13 @@ export function Home() {
   useEffect(() => { if (gone) dropRule(gone); }, [gone, dropRule]);
   useKeepScroll(home, widthClass, !!view);
   // Needs me's first five (leftovers-11 FR-1): Ruled's pattern on Decisions.
-  // A landing on a row past the five, or a box open on one, shows them all.
+  // A landing on a row past the five opens the rest, as "Show the other N"
+  // would, so the toggle then offers the five back (leftovers-12 FR-5); a box
+  // open on one shows them all.
   const [showAll, setShowAll] = useState(false);
-  const past = (key: string | null | undefined) => !!key && rows.findIndex((r) => r.key === key) >= NEEDS_ME_FIRST;
-  const { shown, hidden } = needsMeShown(rows, showAll || past(needsMeFocus) || past(ruleDraft?.key), widthClass === "wide");
+  const landedPast = pastFirst(rows, needsMeFocus);
+  useEffect(() => { if (landedPast) setShowAll(true); }, [landedPast, needsMeFocus]);
+  const { shown, hidden } = needsMeShown(rows, showAll || pastFirst(rows, ruleDraft?.key), widthClass === "wide");
   const more = useRef<HTMLButtonElement>(null);
   const [moreFocus, setMoreFocus] = useState<{ to: "first" | "toggle"; seq: number } | null>(null);
   // "Show the other N" hands focus to the first row it revealed, its verb;
@@ -163,7 +166,12 @@ function Shell({ row, reason, tone, subject, context, children }: { row: NeedsMe
   const { needsMeFocus, ruleDraft } = useBoard();
   const ref = useRef<HTMLDivElement>(null);
   const focused = needsMeFocus === row.key;
-  useEffect(() => { if (focused) ref.current?.scrollIntoView({ block: "center", behavior: "smooth" }); }, [focused]);
+  // A landing puts the row in view and focus on its verb (leftovers-12 FR-5).
+  useEffect(() => {
+    if (!focused) return;
+    ref.current?.querySelector<HTMLElement>(".ib-act button")?.focus({ preventScroll: true });
+    ref.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [focused]);
   return (
     <div ref={ref} className={`ib-row ${focused ? "focused" : ""} ${ruleDraft?.key === row.key ? "ruling" : ""}`} data-key={row.key} title={context}>
       <span className={`lz ${tone}`}>{reason}</span>

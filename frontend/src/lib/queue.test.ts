@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AgentGroup, AgentsView, BoardView, CellThread } from "../hooks/useWails";
 import type { merge, model } from "../../wailsjs/go/models";
-import { launchVerb, missingPersonas, needsMeRows, needsMeShown, needsMeThread, NEEDS_ME_FIRST, personaMissing, queueOf } from "./queue";
+import { launchVerb, missingPersonas, needsMeRows, needsMeShown, needsMeThread, NEEDS_ME_FIRST, pastFirst, personaMissing, queueOf } from "./queue";
 
 // Fixtures are plain objects: the generated classes carry methods the
 // functions under test never call, so each builder casts once.
@@ -166,5 +166,20 @@ describe("needsMeShown (leftovers-11 FR-1)", () => {
   it("keeps the rows themselves, so the count stays needsMeRows' length", () => {
     const { shown, hidden } = needsMeShown(rows, false, false);
     expect(shown.length + hidden).toBe(rows.length);
+  });
+});
+
+describe("pastFirst (leftovers-12 FR-5)", () => {
+  const rows = Array.from({ length: 14 }, (_, i) => ({ key: `k${i + 1}` }));
+  it("is true for a row behind Show the other N: row 6 and row 12", () => {
+    expect(pastFirst(rows, "k6")).toBe(true);
+    expect(pastFirst(rows, "k12")).toBe(true);
+  });
+  it("is false for the first five, an unknown key and no key", () => {
+    expect(pastFirst(rows, "k1")).toBe(false);
+    expect(pastFirst(rows, "k5")).toBe(false);
+    expect(pastFirst(rows, "nope")).toBe(false);
+    expect(pastFirst(rows, null)).toBe(false);
+    expect(pastFirst(rows, undefined)).toBe(false);
   });
 });
