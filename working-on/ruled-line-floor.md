@@ -12,6 +12,7 @@ boundary: ["frontend/src/components/DecisionsView.tsx, decisions.css, global.css
 spec: "docs/specs/leftovers-13.md (FR-1 to FR-5); Aglaea 5c937df"
 gate: "docs/specs/leftovers-13.md Acceptance, rows L1 to L5 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -37,3 +38,11 @@ docs/specs/leftovers-13.md, L1-L5 and X0. Evidence in .wt-notes/rlf-build/ (prog
 - 0096 ruled 2026-10-06; supervisor sup46, spawned by the FSE.
 - L1 on main 382cc2e (94 records copied into init-nopeople, 93 Ruled lines with a chosen option; sweep in .wt-notes/rlf-build): WKWebView 1024x640 full 18 under the ~8-char floor, 13 stray `·`; 1024 strip 1/1; 1512 full and strip 0/0. Chromium 1024 full 15/11, strip 1/1, 1512 0/0. `.board-wrap` scrollWidth == clientWidth in all eight.
 - L1 cause: `frontend/src/styles/global.css:762` `.dec-chosen { flex: 1000 0 0; min-width: 0 }` starts the option at 0 and gives it only what the title leaves, so it has no floor; and its separator is not in it: `DecisionsView.tsx:316` puts `\u00a0· ` at the head of `.dec-meta`, so an option at 0 px leaves the dot.
+
+## Review
+- Verdict: pass. Commit reviewed: 982b6febd4750826a96155daefdb953ea4c599ab (branch ruled-line-floor). Unmet gate items: none.
+- X0 re-run in a clean clone of that commit: `XDG_DATA_HOME=$(mktemp -d) make test` (go 13 ok, vitest 279), npm install/test/build, `wails build` all exit 0. L4 greps there: the map literal only in `lib/stateWords.ts`, no `.wakes.hot`, no inline style on WakeCount; vitest 3/3. `fixture-home.sh --empty` exits 0, root an empty dir. L1-L3, L5 from the recorded sweep.log, l2.log, l3.log, l5.log (L5 built at e4404a4, same tree as 982b6fe in frontend/, main.go, scripts/).
+- Code: FR-1 option shrinks 1000x the title to an 8ch floor, title to 20ch, then `data-drop` hides option and dot together; whole text in `title` and `aria-label` (`lineName`); `.dec-line` overflow hidden. FR-2 count is Rule's neighbour in Conversations' RuleBox (card and thread rows); Home's RuleDecisionBox has no count. FR-3 Info.plist name, Deltagos fallback, review-build.sh unchanged.
+- Boundary finding: `global.css` loses the `.dec-chosen` rule (moved to decisions.css), outside ".dec-meta and .wakes only". FR-1 needs it (the card's own cause is global.css:762), so the boundary text is too narrow, not the build. FSE's.
+- Not gated: a title of 20 chars or less keeps `min-width: 0` and can ellipsize to nothing before the option drops; the sweep does not check titles. The `--empty` fixture's roles read this machine's real sessions.
+- Reviewer: rlf-review, 2026-10-06.
