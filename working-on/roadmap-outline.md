@@ -6,7 +6,7 @@ branch: roadmap-outline
 seat: ro-build
 stage: one-window
 updated: 2026-10-06
-next: "review: roadmap-outline, gate met (P1-P8, X0), 8dcae76"
+next: "review: roadmap-outline, gate met (P1-P8, X0), fb184ee"
 depends_on: [roadmap-waves-scan]
 boundary: ["RoadmapView.tsx, Roadmap.tsx and its axis helpers, new outline components and css", "frontend/src/lib helpers and tests", "not: Go, the Calendar, Home"]
 spec: "docs/specs/roadmap-as-a-plan.md (FR-4; docs/ux/specs/roadmap-as-a-plan.md (1f2ded8))"
@@ -31,7 +31,7 @@ docs/specs/roadmap-as-a-plan.md, P1 to P8 and X0. Measured in the review build (
 - [x] X0 fresh clone: make test rc 0 (vitest 334), npm run build rc 0, wails build rc 0
 
 ## Done
-- 2026-10-06 ro-build: Stages is the outline (249829f cardBar, 962c21c helpers and tests, 726ab26 fitTo, 8dcae76 outline); gate met, branch rebased on main, unmerged.
+- 2026-10-06 ro-build: Stages is the outline (2686d39 cardBar, 2d71f0d helpers and tests, 90000ed fitTo, fb184ee outline); gate met, branch rebased on main ee1f49c (main ahead only by card commits), unmerged.
 
 ## Notes
 - Reduced motion checked by inspection only (animation under no-preference).
