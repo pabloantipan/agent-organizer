@@ -965,4 +965,9 @@ sections below this one are history.
   unsubmitted (pasted, no Enter) until 21:00: ~4 h lost. sup42's own trap;
   it goes in its run record. If it recurs in another wave, raise to
   hephaistos (supervise: check the pane after every send).
+- floating-icon (0090 ruled via the form: v2 panel, no badge, no shortcut,
+  Home row): sup43; Pablo's two by-hand takes done (21:40, 21:49). I
+  deferred N3 past the review; the review failed on it (254fdaa). Lesson: a
+  gate row cannot be postponed past its own review; to protect his app,
+  amend the row instead. Pablo chose to quit Deltagos and run N3 now.
 
