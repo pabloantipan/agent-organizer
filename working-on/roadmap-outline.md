@@ -1,12 +1,12 @@
 ---
 title: "The Roadmap as an outline: stages, waves, rounds and cards over the axis, decisions as diamonds, four detail steps"
-status: next
+status: now
 repos: [organizer]
 branch: roadmap-outline
 seat: ro-build
 stage: one-window
 updated: 2026-10-06
-next: "sup48 runs it, wave 2, after roadmap-waves-scan"
+next: "ro-build building, wave 2 (sup48)"
 depends_on: [roadmap-waves-scan]
 boundary: ["RoadmapView.tsx, Roadmap.tsx and its axis helpers, new outline components and css", "frontend/src/lib helpers and tests", "not: Go, the Calendar, Home"]
 spec: "docs/specs/roadmap-as-a-plan.md (FR-4; docs/ux/specs/roadmap-as-a-plan.md (1f2ded8))"
