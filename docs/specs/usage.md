@@ -55,6 +55,11 @@ message: `input_tokens`, `output_tokens`, `cache_read_input_tokens`,
   tiles, the money chart, the table with four cuts, the Sessions list, the
   Agents line, every state she names.
 - **FR-6** Money appears only in Usage (0099 asks Pablo to narrow 0020 so).
+- **FR-5a** (Amendment 2, 2026-10-06, the FSE, from uv-ui's review): a wave
+  row By task is its supervisor's session plus every session of its cards,
+  one row, its money whole (UI1, S1); money wholly unknown reads `—`, never
+  `$0.00` (UI3); focus stays on the week picker when ‹ or › disables itself
+  (UI4); the top bar does not wrap at 1024 while a scan runs (UI5).
 
 ## Acceptance → gate
 
@@ -66,6 +71,7 @@ message: `input_tokens`, `output_tokens`, `cache_read_input_tokens`,
 | G4 | 3 | `organizer usage --week 2026-W41 --by task` on the real home | sup46's, rlf-build's, rlf-review's, rlf-ui's, fi3-*'s sessions under leftovers-13's cards (worktrees already removed); nothing of theirs `Not attributed` |
 | G5 | 3 | `--by role` for 2026-W41 | supervisor, builder, reviewer, ui reviewer, fse, pair rows; `Not attributed` last with reasons |
 | U1-U8 | 5 | Aglaea's rows, in `make review-build` on a fixture ledger (`scripts/fixture-home.sh` gains one) and on the real home | as her spec |
+| U10 | 5a | By task on the real home, a wave of two or more cards (leftovers-13); a week with a session of unknown cost; ‹ to the first week; 1024×640 during a rescan | one row per wave with its whole money; `—`; focus on the picker; the top bar on one line |
 | U9 | 6 | grep the frontend for `$` outside Usage | none on cards, waves or Agents |
 | X0 | all | `XDG_DATA_HOME=$(mktemp -d) make test` from a clean checkout; `cd frontend && npm run build`; `wails build` | pass |
 
