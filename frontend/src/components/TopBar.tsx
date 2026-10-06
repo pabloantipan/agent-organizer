@@ -8,7 +8,7 @@ import { HelpView } from "./HelpView";
 import { FloatAvailable, FloatCompact } from "../../wailsjs/go/main/App";
 
 export function TopBar() {
-  const { screen, selectedInitiative, goHome, openSettings, openUsage, view, loading, syncing, refresh, sync, error, lastMessage, account, lock, authMode, syncNote, setAccount, setLock, setOfflineChoice, agents } = useBoard();
+  const { screen, selectedInitiative, goHome, openSettings, openUsage, widthClass, view, loading, syncing, refresh, sync, error, lastMessage, account, lock, authMode, syncNote, setAccount, setLock, setOfflineChoice, agents } = useBoard();
   // With auth off there is no identity: no account menu, no Sign in, no email,
   // and no Sync button either, since sync is a skip nobody can act on.
   const identity = authMode === "firebase";
@@ -32,7 +32,10 @@ export function TopBar() {
   const closeHelp = useCallback(() => setHelpTop(null), []);
   return (
     <header className="topbar" ref={bar}>
-      <span className="brand" title={version ? `Deltagos ${version}` : "Deltagos"}>Deltagos{version && <span className="brand-version">{version}</span>}</span>
+      {/* At compact the version folds into the brand's hover first, so the
+          bar stays one line at 1024 with Usage and a scan's wider label
+          (FR-5a, UI5). */}
+      <span className="brand" title={version ? `Deltagos ${version}` : "Deltagos"}>Deltagos{version && widthClass !== "compact" && <span className="brand-version">{version}</span>}</span>
       <nav className="crumbs" aria-label="where you are">
         {screen === "home" ? <b>Home</b> : <button className="crumb" onClick={() => { closeHelp(); goHome(); }}>Home</button>}
         {screen === "initiative" && selectedInitiative && <><span className="crumb-sep">/</span><b className="mono">{selectedInitiative}</b></>}
