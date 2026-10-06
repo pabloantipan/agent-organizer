@@ -38,6 +38,7 @@ func (a *App) startup(ctx context.Context) {
 	}
 	a.svc = svc
 	go a.agentTicker(ctx)
+	floatIconStart(ctx)
 }
 
 // agentTicker re-samples agents and pushes the view to the frontend as the

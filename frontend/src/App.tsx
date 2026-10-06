@@ -13,6 +13,7 @@ import { SlackView } from "./components/SlackView";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Gate } from "./components/Gate";
 import { CardDrawer } from "./components/CardDrawer";
+import { FloatList } from "./components/FloatList";
 import { useBoard } from "./stores/board.store";
 import { api, type AgentsView as AgentsPayload } from "./hooks/useWails";
 import { EventsOn } from "../wailsjs/runtime/runtime";
@@ -63,6 +64,7 @@ export default function App() {
         </main>
       )}
       <CardDrawer />
+      <FloatList />
     </div>
     </Gate>
   );

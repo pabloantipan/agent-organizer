@@ -1,0 +1,68 @@
+/* The floating icon's list panel (docs/ux/specs/floating-icon.md §3). The
+   Wails window is 360 wide while it shows, so the panel fills it. Tier-2
+   tokens only; no nesting, no @layer, no color-mix (Safari 15.0). */
+
+.fl-scrim { position: fixed; inset: 0; z-index: var(--z-modal); background: var(--surface-overlay); }
+
+.fl {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  background: var(--surface-overlay); border-radius: var(--radius-lg);
+  color: var(--fg); font-size: var(--font-size-md); line-height: var(--line-md);
+  animation: fl-open 160ms var(--ease-out);
+}
+/* It opens from the icon's corner. */
+.fl.bottom-right { transform-origin: bottom right; }
+.fl.bottom-left { transform-origin: bottom left; }
+.fl.top-right { transform-origin: top right; }
+.fl.top-left { transform-origin: top left; }
+@keyframes fl-open { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes fl-fade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .fl { animation: fl-fade 160ms linear; } }
+
+.fl-head {
+  display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-3) var(--space-3) var(--space-2); color: var(--fg-subtle);
+}
+.fl-search {
+  flex: 1; min-width: 0; height: var(--control-md);
+  background: var(--input-bg); color: var(--fg); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 0 var(--space-2); font: inherit; font-size: var(--font-size-md);
+}
+.fl-search::placeholder { color: var(--fg-subtle); }
+.fl-search:focus { outline: 2px solid var(--focus-ring); outline-offset: 0; border-color: transparent; }
+
+.fl-body {
+  flex: 1; min-height: 0; overflow-y: auto; padding: 0 var(--space-2) var(--space-2);
+  border-top: 1px solid transparent; border-bottom: 1px solid transparent;
+}
+/* The scroll edge (design system, Widths). */
+.fl-body.edge-top { border-top-color: var(--fg-subtle); }
+.fl-body.edge-bottom { border-bottom-color: var(--fg-subtle); }
+
+.fl-row {
+  display: flex; align-items: center; gap: var(--space-2); width: 100%; height: 36px;
+  padding: 0 var(--space-2); border: 0; border-radius: var(--radius-sm);
+  background: transparent; color: var(--fg); text-align: left; font: inherit; cursor: pointer;
+}
+.fl-row:hover { background: var(--surface-hover); border: 0; }
+.fl-row.on { background: var(--surface-selected); box-shadow: inset 2px 0 0 var(--accent); }
+.fl-row.folded .fl-id { color: var(--fg-muted); }
+.fl-rank { flex: 0 0 20px; font-family: var(--mono); font-size: var(--font-size-sm); color: var(--fg-subtle); text-align: right; }
+.fl-id { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-size: var(--font-size-sm); }
+.fl-home-t { font-weight: var(--weight-semibold); }
+.fl-sig { flex: 1 1 0; min-width: 0; display: flex; justify-content: flex-end; gap: var(--space-1); overflow: hidden; }
+.fl-sig .lz { flex: 0 1 auto; min-width: 0; }
+.fl-sig .lz.blocked, .fl-sig .lz.waiting { flex-shrink: 0; }
+.lz.fl-more { background: var(--surface-raised); color: var(--fg-muted); }
+
+.fl-group {
+  display: flex; align-items: center; gap: var(--space-1); width: 100%;
+  margin-top: var(--space-2); padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-subtle);
+  background: transparent; border: 0; text-align: left; font-weight: var(--weight-semibold);
+}
+button.fl-fold { cursor: pointer; }
+button.fl-fold:hover { color: var(--fg-muted); background: transparent; border: 0; }
+
+.fl-note { padding: var(--space-2) var(--space-2); color: var(--fg-muted); font-size: var(--font-size-sm); line-height: var(--line-sm); }
+.fl-clear { margin-left: var(--space-1); }
