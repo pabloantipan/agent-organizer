@@ -1,13 +1,13 @@
 ---
 title: Accept the leftovers-13 batch and launch its card
-status: proposed
+status: ruled
 raised: 2026-10-06
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-06
+ruled_by: pablo
 options: [accept as written, accept with amendments, send back]
-chosen:
+chosen: accept as written
 cards: [ruled-line-floor, floating-icon-3]
 threads: []
 supersedes: []
@@ -60,3 +60,5 @@ The FSE's: accept as written.
 On acceptance: the FSE starts one supervisor (sup46) for both cards.
 
 ## Ruling
+
+pablo, 2026-10-06, in the FSE session on lodestar: "accepthed all".
