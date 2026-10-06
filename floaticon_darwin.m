@@ -495,9 +495,32 @@ static void bringList(void) {
     update(@"click", NO);
 }
 
+// A click on the icon with the list open closes it only once the
+// double-click interval has passed with no second press (Amendment 2): a
+// second press in time cancels the close and grows the open list, so
+// nothing blinks. Escape and a click outside still close at once.
+static unsigned closeGen;             // bumped to cancel a pending close
+static BOOL closePending;
+
+static void cancelClose(NSString *why) {
+    if (!closePending) return;
+    closePending = NO;
+    closeGen++;
+    flog(@"close cancelled (%@)", why);
+}
+
 static void iconClicked(void) {
     if (state == StateListing && [mainWin isOnActiveSpace] && [mainWin isVisible]) {
-        FloatIconDismiss();
+        unsigned gen = ++closeGen;
+        closePending = YES;
+        double wait = [NSEvent doubleClickInterval];
+        flog(@"close waits %.0f ms for a second click", wait * 1000);
+        after(wait, ^{
+            if (gen != closeGen || !closePending) return;
+            closePending = NO;
+            flog(@"close: no second click in %.0f ms", wait * 1000);
+            FloatIconDismiss();
+        });
         return;
     }
     bringList();
@@ -597,6 +620,7 @@ static void watchPointer(void) {
     // The system's interval, from the last click's mouse-up to this press.
     NSTimeInterval gap = self.lastClickUp > 0 ? [e timestamp] - self.lastClickUp : -1;
     self.second = [e clickCount] >= 2 || (gap >= 0 && gap <= [NSEvent doubleClickInterval]);
+    if (self.second) cancelClose(@"second press");
     setLook(LookPressed, 0.08);
     flog(@"pointer down at %@ (clickCount %ld, %.0f ms after the last click, interval %.0f ms%@)", NSStringFromPoint(self.downAt), (long)[e clickCount],
          gap * 1000, [NSEvent doubleClickInterval] * 1000, self.second ? @", second click" : @"");
@@ -847,12 +871,13 @@ void FloatIconStart(const char *logArg, const char *placeFile) {
                 [[NSNotificationCenter defaultCenter] postNotificationName:NSApplicationDidChangeScreenParametersNotification object:NSApp];
             });
             dispatch_resume(usr1);
-            // SIGUSR2 runs what a double-click's second mouse-up runs (not
-            // the click count, which only a pointer makes).
+            // SIGUSR2 runs what a double-click's second press and mouse-up
+            // run (not the click count, which only a pointer makes).
             signal(SIGUSR2, SIG_IGN);
             usr2 = dispatch_source_create(DISPATCH_SOURCE_TYPE_SIGNAL, SIGUSR2, 0, dispatch_get_main_queue());
             dispatch_source_set_event_handler(usr2, ^{
-                flog(@"SIGUSR2: the double-click's action, without a pointer");
+                flog(@"SIGUSR2: the double-click's second press and action, without a pointer");
+                cancelClose(@"second press");
                 clickUpAt = now();
                 doubleClicked();
             });
@@ -906,17 +931,35 @@ static void goFull(NSString *why) {
         f.size.height = MIN(NSHeight(f), NSHeight(v));
         f.origin.x = MAX(NSMinX(v), MIN(NSMinX(f), NSMaxX(v) - NSWidth(f)));
         f.origin.y = MAX(NSMinY(v), MIN(NSMinY(f), NSMaxY(v) - NSHeight(f)));
+        NSRect from = [mainWin frame]; // the list's frame, before its chrome changes
         restoreChrome();
-        [mainWin setFrame:f display:YES animate:!reduceMotion()];
-        markHome();
-        flog(@"full (%@): frame=%@ min=%@", why, NSStringFromRect([mainWin frame]), NSStringFromSize([mainWin minSize]));
-        update(@"full", NO);
-        // Read back once the growth and the activation are over: full, not the list.
-        after(0.3, ^{
+        // The growth keeps the house motion (Amendment 2): 200 ms, not
+        // setFrame:animate:'s own pace (about 0.36 s on the 3440); none under
+        // Reduce motion. The window animator animates the frame; if it did
+        // not land, it is set (the drop's lesson).
+        double t0 = now();
+        BOOL still = reduceMotion();
+        void (^grown)(void) = ^{
+            if (!NSEqualRects([mainWin frame], f)) [mainWin setFrame:f display:YES];
             BOOL titled = ([mainWin styleMask] & NSWindowStyleMaskTitled) != 0;
-            flog(@"full (%@) read back: %@, frame=%@, visible=%d onActive=%d key=%d state=%s", why, titled ? @"full window" : @"still the list",
-                 NSStringFromRect([mainWin frame]), [mainWin isVisible], [mainWin isOnActiveSpace], [mainWin isKeyWindow], stateName[state]);
-        });
+            flog(@"full (%@) read back: %@, growth %.0f ms%@ from %@ to %@, visible=%d onActive=%d key=%d state=%s", why,
+                 titled ? @"full window" : @"still the list", (now() - t0) * 1000, still ? @" (reduce motion: none)" : @"",
+                 NSStringFromRect(from), NSStringFromRect([mainWin frame]), [mainWin isVisible], [mainWin isOnActiveSpace], [mainWin isKeyWindow],
+                 stateName[state]);
+        };
+        if (still) {
+            [mainWin setFrame:f display:YES];
+            grown();
+        } else {
+            [NSAnimationContext runAnimationGroup:^(NSAnimationContext *c) {
+                c.duration = 0.2;
+                c.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
+                [[mainWin animator] setFrame:f display:YES];
+            } completionHandler:grown];
+        }
+        markHome();
+        flog(@"full (%@): growing to %@ min=%@", why, NSStringFromRect(f), NSStringFromSize([mainWin minSize]));
+        update(@"full", NO);
 }
 
 void FloatIconFull(void) {
@@ -928,6 +971,7 @@ void FloatIconFull(void) {
 void FloatIconDismiss(void) {
     dispatch_async(dispatch_get_main_queue(), ^{
         if (!started || state != StateListing) return;
+        cancelClose(@"closed now");
         [mainWin orderOut:nil];
         restoreChrome();
         [mainWin setFrame:homeFrame display:NO];
