@@ -994,4 +994,8 @@ sections below this one are history.
   closes it only after the double-click interval (a second click grows it;
   no blink); A2 the growth at 200 ms (NSAnimationContext 0.2), never over
   300, none under Reduce motion.
+- Installed main 4b3291a (v0.2.0-1180). aglaea's A2 passed on a review build
+  (78125ef); thread closed. Next batch, sev 1: ~50 px of empty panel under a
+  single filtered row (the panel's height is its rows plus the field, with
+  no minimum padding below).
 
