@@ -38,7 +38,9 @@ static CGFloat tileSz = kBase;        // the tile's side now, in points
 static CGFloat padSz = kBasePad;      // the panel's shadow margin now
 static const CGFloat kListW = 360;
 static const CGFloat kListMaxH = 480;
-static const CGFloat kListMinH = 160;
+// Not a floor (Amendment 3: the list ends 8 px under its last row): only a
+// guard below the shortest content, the field and one line.
+static const CGFloat kListMinH = 64;
 static const CGFloat kGap = 8;        // between the icon and the list
 
 typedef enum { StateHome, StateListing, StateCompacted, StateReturning } FloatState;
