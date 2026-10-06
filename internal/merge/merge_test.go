@@ -188,3 +188,24 @@ func TestBuildCarriesFSEActivity(t *testing.T) {
 		t.Errorf("initiative with no FSE: %+v", byID["bare"].FSE)
 	}
 }
+
+// roadmap-as-a-plan FR-1: the waves ride onto the board as scanned, stages
+// and all, and an initiative without runs/ carries [] rather than null.
+func TestBuildCarriesWaves(t *testing.T) {
+	with := si("with", "acme")
+	with.Waves = []model.Wave{{Record: "2026-10-06-w.md", Date: "2026-10-06", Number: 1, Supervisor: "sup1",
+		Cards: []string{"a"}, Stages: []string{"early"}, Rounds: []model.Round{{Card: "a", Kind: "build", Result: "n/a"}}}}
+	local := model.Snapshot{Machine: "here", Initiatives: []model.ScannedInitiative{with, si("without", "acme")}}
+	b := Build(local, nil, model.Order{}, time.Now())
+	got := map[string]BoardInitiative{}
+	for _, bi := range b.Initiatives {
+		got[bi.ID] = bi
+	}
+	if w := got["with"].Waves; len(w) != 1 || w[0].Supervisor != "sup1" || len(w[0].Rounds) != 1 || w[0].Stages[0] != "early" {
+		t.Errorf("waves=%+v", w)
+	}
+	j, _ := json.Marshal(got["without"])
+	if !strings.Contains(string(j), `"waves":[]`) {
+		t.Errorf("without runs: %s", j)
+	}
+}

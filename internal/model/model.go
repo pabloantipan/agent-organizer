@@ -467,7 +467,10 @@ type ScannedInitiative struct {
 	Initiative
 	Cards []Card `json:"cards"`
 	// Decisions are working-on/decisions/ records, in number order.
-	Decisions  []Decision  `json:"decisions"`
+	Decisions []Decision `json:"decisions"`
+	// Waves are the run records' waves under <root>/runs/, oldest record
+	// first; a record with no waves block is one Wave with Dot set.
+	Waves      []Wave      `json:"waves"`
 	RepoStates []RepoState `json:"repos_state"`
 	Problems   []Problem   `json:"problems"`
 	Agents     []Agent     `json:"agents"`
