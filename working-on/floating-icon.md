@@ -5,7 +5,7 @@ repos: [organizer]
 branch: floating-icon
 seat: fic-build
 updated: 2026-10-05
-next: "review: floating-icon, gate met, c2ee232"
+next: "F4/F5 at c48cdf2: Pablo reruns scripts/floating-icon-by-hand.sh steps 1-8 with 5b on the installed build (real pointer: click, drag, pass-through beside the tile); then re-review"
 review: fail
 depends_on: []
 boundary: ["floaticon_darwin.m, floaticon_darwin.h, floaticon_darwin.go (new, darwin-only) and the hook in app.go", "frontend/src/components/FloatList.tsx (new) and its CSS; TopBar.tsx (the Compact to icon button); the store's openInitiative use only", "frontend/src/lib/ helpers and tests (list rows, search)", "scripts/ (a by-hand check script, like the spike's y1-pointer.sh)", "not: wails.json, build/darwin templates, other Go packages, docs/design-system.md"]
@@ -36,6 +36,17 @@ The Teams behaviour Pablo asked for in 0088, built the way the spike proved.
 ## Next
 
 ## Review
+- Re-review: fail at c48cdf2. Branch head c2ee232 carries the same patches (`git range-diff`), rebased onto main's card commits. N3 is now met. F4 and F5 are not demonstrated at c48cdf2: c48cdf2 changed how the icon takes the pointer, and no real-pointer take has run since.
+- Commit reviewed: c48cdf2.
+- Unmet: F4, F5.
+- N3 met. `make install` was run at c48cdf2, and the installed binary prints `Deltagos v0.2.0-1141-gc48cdf2` (22:06). It was launched with `open` (LaunchServices, the same path a Finder launch takes, so the app does not inherit the terminal's TCC grants), and `n3-finder-other-crop.png` shows the icon on another desktop. In a fresh clone at c48cdf2, `XDG_DATA_HOME=$(mktemp -d) make test` passes (Go, 265 vitests), `wails build` passes, nm shows 0 CGS/SLS symbols, and the linux build compiles.
+- Finding 2 is fixed (daedb1c). `restoreChrome` now calls `setMin(appMinSize)` before its early return, and `float-fs.log` shows `full: … min={1024, 640}` after a list opened from native full screen.
+- Finding 3's fix (c48cdf2) is right by reading. But it moves the icon's whole pointer entry: the panel ignores mouse events unless a 20 Hz poll finds the pointer over the tile. The evidence is a start log (`ignoresMouse=1`) and an AXPress (`float-pass.log`), and neither is a pointer. Pablo's takes 1-2 (F4 drag and the 4 px threshold, F5 click) ran on 898f9a9, where the panel always took the pointer, and the UI review also ran on 898f9a9 only. A click landing within 50 ms of reaching the tile now passes through. Step 5b of the script exists but has not been run.
+- 898f9a9..c48cdf2, rebase aside: only `floaticon_darwin.m` (the two fixes and their log lines) and `scripts/floating-icon-by-hand.sh` (step 5b) changed. The rest of that diff is main's card and bitacora commits.
+- Not covered by the gate: the 20 Hz timer wakes the main thread for as long as the icon is shown, which is most of the day. A global mouse-moved monitor (`addGlobalMonitorForEventsMatchingMask:`) would cost nothing while the pointer is still.
+- Reviewer: fic-review, 2026-10-05.
+
+### First review, 898f9a9
 - fail: every gate item is met at 898f9a9 except N3. The installed app (`make install`) was never launched from Finder, and that was the one thing the spike left unproven. The FSE deferred it until after the reviews, but a review can only pass a gate it can check.
 - Commit reviewed: 898f9a9 (branch head, unchanged).
 - Unmet: N3, only its make install + Finder part. Its other parts pass in a fresh clone: `XDG_DATA_HOME=$(mktemp -d) make test` (Go, 265 vitests), `npm test`, `npm run build`, `wails build`. N4 is noted, not gated.
