@@ -1,12 +1,12 @@
 ---
 title: The Ruled line drops its chosen option cleanly, the wake count beside Rule, the review window says Review, one word map
-status: now
+status: done
 repos: [organizer]
 branch: ruled-line-floor
 seat: rlf-build
 stage: one-window
 updated: 2026-10-06
-next: "review: ruled-line-floor, gate met (L1-L5, X0), 982b6fe"
+next: "merged to main as 77f436b (sup46)"
 depends_on: []
 boundary: ["frontend/src/components/DecisionsView.tsx, decisions.css, global.css (.dec-meta and .wakes only)", "frontend/src/components/Conversation.tsx (rule box, WakeCount), Home.tsx (its rule box's wake count only)", "AgentList.tsx, Crew.tsx, RoleDrawer.tsx (the state word map only), one new lib/ module and its test", "main.go (the window title only)", "scripts/fixture-home.sh (--empty)", "not: docs/design-system.md, the floating panel's native code"]
 spec: "docs/specs/leftovers-13.md (FR-1 to FR-5); Aglaea 5c937df"
