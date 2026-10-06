@@ -23,3 +23,5 @@ docs/specs/leftovers-13.md, L1-L5 and X0.
 
 ## Notes
 - 0096 ruled 2026-10-06; supervisor sup46, spawned by the FSE.
+- L1 on main 382cc2e (94 records copied into init-nopeople, 93 Ruled lines with a chosen option; sweep in .wt-notes/rlf-build): WKWebView 1024x640 full 18 under the ~8-char floor, 13 stray `·`; 1024 strip 1/1; 1512 full and strip 0/0. Chromium 1024 full 15/11, strip 1/1, 1512 0/0. `.board-wrap` scrollWidth == clientWidth in all eight.
+- L1 cause: `frontend/src/styles/global.css:762` `.dec-chosen { flex: 1000 0 0; min-width: 0 }` starts the option at 0 and gives it only what the title leaves, so it has no floor; and its separator is not in it: `DecisionsView.tsx:316` puts `\u00a0· ` at the head of `.dec-meta`, so an option at 0 px leaves the dot.
