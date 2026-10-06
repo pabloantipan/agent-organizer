@@ -107,7 +107,7 @@ export function Usage() {
 }
 
 function Week({ data, thisWeek, cut, setCut, filter, onPick }: { data: UsageData; thisWeek: string; cut: Cut; setCut: (c: Cut) => void; filter: string | null; onPick: (w: string) => void }) {
-  const one = useMemo(() => (filter ? forInitiative(data.sessions ?? [], filter) : null), [data, filter]);
+  const one = useMemo(() => (filter ? forInitiative(data.sessions ?? [], filter, data.cuts?.task ?? []) : null), [data, filter]);
   const t = one ? one.totals : data.this_week;
   const cuts = (one ? one.cuts : data.cuts) as Record<string, UsageRow[]>;
   const sessions = one ? one.sessions : data.sessions ?? [];

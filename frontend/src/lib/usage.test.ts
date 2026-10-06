@@ -218,3 +218,26 @@ describe("unknown money", () => {
     expect(changeWords(10, 0, { last: true })).toBe("no cost recorded the week before");
   });
 });
+
+describe("one initiative's waves", () => {
+  // uv-review's case: a supervisor's wave over two cards, filtered to its
+  // initiative, is one row of $80 By task, as it is unfiltered.
+  const ss = [
+    sess("s", { task: "wave:sup47", task_title: "sup47 · usage-ledger, usage-view", role: "supervisor", name: "organizer-probe-sup47", money: 10 }),
+    sess("b1", { task: "usage-ledger", task_title: "Ledger", money: 40 }),
+    sess("b2", { task: "usage-view", task_title: "View", money: 30 }),
+  ];
+  const week = [
+    { ...row("organizer/wave:sup47", 10, 100), name: "sup47 · usage-ledger, usage-view", initiative: "organizer", cards: ["usage-ledger", "usage-view"] },
+    { ...row("organizer/usage-ledger", 40, 100), initiative: "organizer", cards: ["usage-ledger"] },
+    { ...row("organizer/usage-view", 30, 100), initiative: "organizer", cards: ["usage-view"] },
+  ];
+  it("groups the filtered task cut into one wave row", () => {
+    const out = groupWaves(forInitiative(ss, "organizer", week).cuts.task);
+    expect(out.filter((r) => !r.not_attributed).map((r) => [r.key, r.money])).toEqual([["organizer/wave:sup47", 80]]);
+    expect(out[0].children!.map((c) => c.key)).toEqual(["organizer/usage-ledger", "organizer/usage-view"]);
+  });
+  it("without the week's task rows a session's card is its own", () => {
+    expect(groupWaves(forInitiative(ss, "organizer").cuts.task).filter((r) => !r.not_attributed)).toHaveLength(3);
+  });
+});

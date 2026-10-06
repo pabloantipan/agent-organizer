@@ -344,11 +344,15 @@ function keyOf(cut: Cut, s: UsageSession): [string, string] {
 
 /** One initiative's share of the week, from its session rows: the tiles,
  *  the four cuts and the list. Money is the sessions' own, summed. By model,
- *  a session counts under its main model (the rows carry one model each). */
-export function forInitiative(sessions: UsageSession[], initiative: string): {
+ *  a session counts under its main model (the rows carry one model each).
+ *  By task, a row keeps the cards the week's task cut gives the same key
+ *  (`taskRows`), so a supervisor's wave groups here as it does unfiltered
+ *  (FR-5a); session rows carry no cards of their own. */
+export function forInitiative(sessions: UsageSession[], initiative: string, taskRows: UsageRow[] = []): {
   totals: Omit<UsageTotals, "week" | "start" | "end">; cuts: Record<Cut, UsageRow[]>; sessions: UsageSession[];
 } {
   const mine = sessions.filter((s) => s.initiative === initiative);
+  const cardsOf = new Map(taskRows.filter((r) => r.key && r.cards?.length).map((r) => [r.key, r.cards!]));
   const totals = { money: 0, input: 0, output: 0, cache_read: 0, cache_write: 0, tokens: 0, sessions: mine.length, hours: 0, running: 0, without_cost: 0 };
   for (const s of mine) {
     for (const k of KIND_KEYS) totals[k] += s[k] ?? 0;
@@ -366,7 +370,7 @@ export function forInitiative(sessions: UsageSession[], initiative: string): {
       let r = rows.get(key);
       if (!r) {
         r = { key, name: key ? name : NOT_ATTRIBUTED, money: 0, share: 0, input: 0, output: 0, cache_read: 0, cache_write: 0, tokens: 0, sessions: 0, without_cost: 0, not_attributed: !key };
-        if (cut === "task" && key) { r.initiative = s.initiative; r.cards = [s.task]; r.members = []; }
+        if (cut === "task" && key) { r.initiative = s.initiative; r.cards = cardsOf.get(key) ?? [s.task]; r.members = []; }
         rows.set(key, r);
       }
       for (const k of KIND_KEYS) r[k] += s[k] ?? 0;
