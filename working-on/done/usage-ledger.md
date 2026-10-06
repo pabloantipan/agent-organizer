@@ -1,12 +1,12 @@
 ---
 title: Every Claude session's tokens by kind and money, per day, attributed to initiative, role and task, and organizer usage
-status: now
+status: done
 repos: [organizer]
 branch: usage-ledger
 seat: ul-build
 stage: one-window
 updated: 2026-10-06
-next: "review: usage-ledger, gate met (G1-G5, X0; review findings and FR-2 Amendment 1 folded in), 7594a07"
+next: "merged as 6e4e004 (sup47)"
 review: pass
 depends_on: []
 boundary: ["internal/usage (new) and its tests and testdata", "internal/service (one Usage method), internal/cli (the usage command), app.go (one bound method), frontend/wailsjs regenerated", "not: internal/session record format, the runs.jsonl writer"]
@@ -113,3 +113,4 @@ Not attributed  $0.00  0%  0  0  0  0  0  0
 - Boundary: every changed path is inside it. internal/session and the runs.jsonl writer are untouched, and the new code makes no network call and runs no exec. Days and Monday weeks are local time, with no UTC edge error.
 - Not gated, for the FSE: a generation mismatch (a crash between the two renames) or an offsets version bump rebuilds the whole ledger from the transcripts. A session whose transcript is gone by then loses its lines, and every session is re-attributed from the cards as they stand then, not kept from when it was first seen (FR-3). Today the oldest transcript is from 2026-08-19, so nothing is lost yet, but the ledger is called the only copy of the history. Keeping lines for sessions whose transcript has vanished would close that.
 - Reviewer: ul-review, 2026-10-06.
+- 2026-10-06 sup47: merged as 6e4e004 after ul-review passed at 7594a07; card to done/.
