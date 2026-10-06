@@ -1,10 +1,12 @@
 #!/bin/zsh
 # floating-icon-by-hand.sh — the lead's pointer take for the floating icon
-# (docs/ux/specs/floating-icon.md). This take is the short one left after
-# takes 1-3 and Amendment 2: F7 by pointer (Escape twice, a click outside),
-# F5 by typing, and a double-click on the open list that grows it without a
-# blink. A seat may not post pointer events, so these steps are done by hand.
-# (F10-F12, F4 and F8 were taken in takes 1-3, recorded on the card.)
+# (docs/ux/specs/floating-icon.md). This is the short take left after takes
+# 1-4: F7 by pointer (Escape twice, a click outside) and Amendment 2's
+# double-click on a list already open, which grows it without a blink. The
+# float log names each close (key: Escape, list lost key with the pointer's
+# place) and the recording shows the pointer (-C). A seat may not post
+# pointer events, so these steps are done by hand. (F10-F12, F4, F5 and F8
+# were taken in takes 1-4, recorded on the card.)
 #
 # Builds nothing: it launches the build already in this checkout
 # (build/bin/Deltagos.app, from `wails build`) under a throwaway fixture
@@ -12,7 +14,7 @@
 # and on Enter (or Ctrl+C, or any failure) quits the app and the fixture's
 # stand-in agents. Each run writes its own recording and float log under
 # NOTES (default: the fi2-build notes), and prints the log's lines at the end.
-# The recording is a fixed two minutes, the steps' length with room:
+# The recording is a fixed one minute, the steps' length with room:
 # screencapture -v keeps its file only when it ends by itself (SIGINT and
 # SIGTERM lose it), so it is left to end, and its own file name means a later
 # run cannot overwrite it.
@@ -28,7 +30,7 @@ STAMP=$(date +%Y%m%d-%H%M%S)
 MOV=$NOTES/by-hand-$STAMP.mov
 export FLOAT_LOG=$NOTES/by-hand-$STAMP.log
 
-APP_PID= REC= RECORD_S=120
+APP_PID= REC= RECORD_S=60
 cleanup() {
   trap - EXIT INT TERM
   [[ -n $APP_PID ]] && kill $APP_PID 2>/dev/null
@@ -48,14 +50,14 @@ APP_PID=$!
 sleep 5
 kill -0 $APP_PID 2>/dev/null || { echo "the app did not start; see $NOTES/by-hand-$STAMP.out"; exit 1; }
 
-screencapture -v -V $RECORD_S -x $MOV &
+screencapture -v -C -V $RECORD_S -x $MOV &
 REC=$!
 END=$(date -v+${RECORD_S}S +%H:%M:%S)
 
 cat <<'STEPS'
 
-Recording for two minutes. Deltagos (this build, a fixture of twenty
-initiatives) is full on this desktop. About one minute:
+Recording for one minute. Deltagos (this build) is full on this desktop.
+About thirty seconds:
 
   ctrl+→ to desktop 2 (the icon is bottom right). Then:
 
@@ -63,11 +65,10 @@ initiatives) is full on this desktop. About one minute:
      list goes.
   b. Click the icon. Click the empty desktop beside the list (not the icon):
      the list goes.
-  c. Click the icon (the list opens). Then double-click the icon while the
-     list is open: the list grows into the full window, with no blink.
-  d. ctrl+→ to desktop 3. Click the icon, type  pay  on the keyboard (no
-     row click) and press Enter: partner-payouts opens full.
-  e. ctrl+← twice to desktop 1, this terminal, and press Enter.
+  c. Click the icon and wait until the list is open (a second). THEN
+     double-click the icon: the open list grows into the full window, with
+     no blink.
+  d. ctrl+← to desktop 1, this terminal, and press Enter.
 
 STEPS
 echo "(The recording ends by itself at $END.)"
