@@ -6,7 +6,7 @@ branch: usage-view
 seat: uv-build
 stage: one-window
 updated: 2026-10-06
-next: "U10 (FR-5a): in Usage filtered to one initiative (the Agents week line, which lands By task), a multi-card wave is still three rows: forInitiative gives the supervisor row cards [wave:supN], so groupWaves skips it; make it one row there too"
+next: "review: usage-view, rework 2 (filtered waves, wave meta, fixture two-card wave) done, gate met (U1-U10, X0), ad7dbf3"
 depends_on: [usage-ledger]
 boundary: ["frontend/src/components/Usage.tsx and styles/usage.css (new)", "the top bar and board.store.ts screen (one entry), AgentsView.tsx (the week line only)", "frontend/src/lib helpers and tests, scripts/fixture-home.sh (a ledger)", "not: Go"]
 spec: "docs/specs/usage.md (FR-5, FR-6; docs/ux/specs/usage.md (b104480))"
@@ -37,7 +37,8 @@ docs/specs/usage.md, U1 to U9 and X0. Shots in `.wt-notes/uv-build/` (named belo
   - unknown cost: real home "from 19 Aug" (7 sessions, none with cost): tile `—` "no cost recorded for 7 sessions", its bar an outlined stub, Not attributed `—`; 24–30 Aug says "no cost recorded the week before". `wkwebview-1512x945-U10-first-week-focus-and-unknown.png`, `-U10-focus-on-back-arrow.png`.
   - ‹ to the first week by keyboard (Option-Shift-Tab to ‹, Enter): ‹ disables and the focus ring is on the week label. Same shot.
   - 1024×640 during a rescan (real home): `scanning…` shown, the top bar on one line; the version folds into the brand's hover at compact. `wkwebview-1024x640-U10-rescan-topbar.png`.
-- [x] X0 fresh clone of usage-view at 1758248 (rebased on main 2026-10-06 after e67dfda): `XDG_DATA_HOME=$(mktemp -d) make test` 0 (Go ok, 304 vitest), `npm run build` 0, `wails build` 0. The clone `.wt-notes/uv-build/x0-clone` is left: its removal was refused (the shell sat in it).
+  - rework 2 (uv-review's fail at 1758248): Usage filtered to one initiative (Agents' week line → `init-a only`, By task) groups a wave too: `forInitiative` keeps the cards the week's task cut gives each key (885ef92; vitest "one initiative's waves", uv-review's sup47 $10 + $40 + $30 = one $80 row). The fixture gains a two-card wave, sup12 over w-queued and w-nogate with a builder each (ad7dbf3): default By task `sup12 · w-nogate, w-queued` $29.60 = $14.30 + $9.20 + $6.10, `wkwebview-1512x945-U10-fixture-two-card-wave.png`; filtered, the same row, `-U10-fixture-two-card-wave-filtered.png`. A wave's `· N cards` now counts the card rows under it and is gone at none (265b4f6; unit-checked, not reshot on the real home). Fixture totals this week are now $102.45, 10 sessions.
+- [x] X0 fresh clone of usage-view at ad7dbf3 (rebased on main): `XDG_DATA_HOME=$(mktemp -d) make test` 0 (Go ok, 306 vitest), `npm run build` 0, `wails build` 0. Clones removed, the earlier one included.
 
 ## Notes
 - 0099 ruled 2026-10-06; supervisor sup47, spawned by the FSE.
@@ -102,3 +103,4 @@ States, round 2: a week with one session, a week with no sessions, partial first
 ### Not verified
 - Both machines present; the error states; the Agents line in Chromium; no data yet at 1758248 (unchanged code, see States).
 - Reviewer: uv-ui, 2026-10-06.
+- 2026-10-06 uv-build: rework 2 for uv-review: filtered waves (885ef92), wave meta (265b4f6), fixture two-card wave (ad7dbf3); head ad7dbf3. Other stand-ins in organizer-fixture.TWrSl4 are not this seat's and were left running.
