@@ -1,12 +1,10 @@
 #!/bin/zsh
 # floating-icon-by-hand.sh — the lead's pointer take for the floating icon
-# (docs/ux/specs/floating-icon.md, T7 and Amendment 1: F10, F11, F12, and
-# F4, F5, F7, F8 again since click handling changed). A seat may not post
-# pointer events, so these rows are done by hand.
-#
-# Needs the laptop lid OPEN before it starts: F12 drags the icon from the
-# 3440 display onto the built-in one, as a second display. Close the lid only
-# after the take.
+# (docs/ux/specs/floating-icon.md). This take is the short one left after
+# takes 1-3 and Amendment 2: F7 by pointer (Escape twice, a click outside),
+# F5 by typing, and a double-click on the open list that grows it without a
+# blink. A seat may not post pointer events, so these steps are done by hand.
+# (F10-F12, F4 and F8 were taken in takes 1-3, recorded on the card.)
 #
 # Builds nothing: it launches the build already in this checkout
 # (build/bin/Deltagos.app, from `wails build`) under a throwaway fixture
@@ -14,11 +12,10 @@
 # and on Enter (or Ctrl+C, or any failure) quits the app and the fixture's
 # stand-in agents. Each run writes its own recording and float log under
 # NOTES (default: the fi2-build notes), and prints the log's lines at the end.
-# The recording is a fixed six minutes, the steps' length with room:
+# The recording is a fixed two minutes, the steps' length with room:
 # screencapture -v keeps its file only when it ends by itself (SIGINT and
 # SIGTERM lose it), so it is left to end, and its own file name means a later
-# run cannot overwrite it. It records the main display only, so the built-in
-# display's part of F12 is in the float log (size lines read from the window).
+# run cannot overwrite it.
 #
 #   scripts/floating-icon-by-hand.sh        # from desktop 1, in a terminal
 set -u
@@ -31,7 +28,7 @@ STAMP=$(date +%Y%m%d-%H%M%S)
 MOV=$NOTES/by-hand-$STAMP.mov
 export FLOAT_LOG=$NOTES/by-hand-$STAMP.log
 
-APP_PID= REC= RECORD_S=360
+APP_PID= REC= RECORD_S=120
 cleanup() {
   trap - EXIT INT TERM
   [[ -n $APP_PID ]] && kill $APP_PID 2>/dev/null
@@ -57,62 +54,20 @@ END=$(date -v+${RECORD_S}S +%H:%M:%S)
 
 cat <<'STEPS'
 
-Recording for six minutes. Deltagos (this build, a fixture of twenty
-initiatives) is full on this desktop, on Home. The laptop lid is open.
-About five minutes, at an easy pace:
+Recording for two minutes. Deltagos (this build, a fixture of twenty
+initiatives) is full on this desktop. About one minute:
 
-F12 the size
-  1. ctrl+→ to desktop 2. The icon appears bottom right, after the slide:
-     larger than before on this display (88 pt).
+  ctrl+→ to desktop 2 (the icon is bottom right). Then:
 
-F11 single click, then double-click
-  2. Click the icon once: the list shows at once, by the icon. Press Escape:
-     it goes.
-  3. Click the icon and click again quickly (a double-click): the list shows
-     and grows into the full window, here on desktop 2, on Home.
-
-F10 the last view
-  4. In Deltagos, click billing-api in the rail, then its Roadmap tab.
-  5. ctrl+→ to desktop 3. Double-click the icon: Deltagos opens full here,
-     on billing-api, Roadmap.
-  6. Click Home in the top bar's crumbs. ctrl+← to desktop 2. Double-click
-     the icon: full here, on Home.
-
-F4  move it (again: the click handling changed)
-  7. ctrl+→ to desktop 3. Drag the icon up into the menu bar and let go with
-     the pointer in the menu bar: it springs back to just below it.
-  8. Drag it down over the middle of the Dock and let go with the pointer on
-     the Dock: it stays visible over the Dock while you drag, then springs
-     up to just above it. Twice, the second time slowly.
-  9. Drag it to the middle of the right edge and let go.
- 10. ctrl+← twice to desktop 1, then ctrl+→ twice back to desktop 3: the
-     icon is in the same spot on each.
- 11. Move the pointer from far away onto the icon and click at once: the
-     list opens. Press Escape: it goes.
-
-F12 across displays
- 12. Drag the icon onto the laptop's display and let go there: it shrinks
-     (56 pt). Drag it back onto this display and let go: it grows again
-     (88 pt).
-
-F5  pick by typing
- 13. Click the icon. The list opens by it, with the search field focused.
- 14. Drag the icon a little with the list open: the list follows it.
- 15. Type  pay  (keyboard only) and press Enter: partner-payouts opens full,
-     here on desktop 3.
-
-F7  get out without moving anything
- 16. ctrl+← to desktop 2. Click the icon; press Escape twice (no clicks):
-     the list goes, the icon stays.
- 17. Click the icon again, then click the empty desktop beside the list
-     (not the icon): it goes.
- 18. ctrl+→ to desktop 3: Deltagos is still full there.
-
-F8  compact by hand
- 19. In Deltagos's top bar, press Compact to icon (just left of the ?):
-     the window shrinks into the icon, which stays on this desktop.
- 20. ctrl+← to desktop 2: the icon is there too.
- 21. ctrl+← to desktop 1, back to this terminal, and press Enter.
+  a. Click the icon (the list opens). Press Escape, then Escape again: the
+     list goes.
+  b. Click the icon. Click the empty desktop beside the list (not the icon):
+     the list goes.
+  c. Click the icon (the list opens). Then double-click the icon while the
+     list is open: the list grows into the full window, with no blink.
+  d. ctrl+→ to desktop 3. Click the icon, type  pay  on the keyboard (no
+     row click) and press Enter: partner-payouts opens full.
+  e. ctrl+← twice to desktop 1, this terminal, and press Enter.
 
 STEPS
 echo "(The recording ends by itself at $END.)"
