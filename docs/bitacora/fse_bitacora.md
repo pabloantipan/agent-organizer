@@ -970,4 +970,10 @@ sections below this one are history.
   deferred N3 past the review; the review failed on it (254fdaa). Lesson: a
   gate row cannot be postponed past its own review; to protect his app,
   amend the row instead. Pablo chose to quit Deltagos and run N3 now.
+- floating-icon UI review passed (898f9a9). Gaps for the next batch: the
+  list's no-match, no-initiatives and still-scanning states never shown and
+  no fixture names them; the not-active group folded last proven by code
+  only; T3 hides the icon for any edge-to-edge layer-0 window, so a zoomed
+  (not full-screen) window would hide it on a normal desktop: ask Aglaea
+  whether intended. A1/A2 with aglaea. Waiting on Pablo quitting Deltagos.
 
