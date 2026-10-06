@@ -2116,6 +2116,7 @@ export namespace usage {
 	    cache_write: number;
 	    tokens: number;
 	    money?: number;
+	    cost_from: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new SessionRow(source);
@@ -2141,6 +2142,7 @@ export namespace usage {
 	        this.cache_write = source["cache_write"];
 	        this.tokens = source["tokens"];
 	        this.money = source["money"];
+	        this.cost_from = source["cost_from"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
