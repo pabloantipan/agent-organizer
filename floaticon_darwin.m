@@ -138,6 +138,7 @@ static void placeIcon(void) {
                  : NSMakeRect(NSMaxX(vis) - kFirst - kTile, NSMinY(vis) + kFirst, kTile, kTile);
     t = clampTile(t, scr);
     [panel setFrameOrigin:NSMakePoint(NSMinX(t) - kPad, NSMinY(t) - kPad)];
+    flog(@"place: tile %@, inside %@", NSStringFromRect(tileOf([panel frame])), NSStringFromRect(NSInsetRect(vis, kInset, kInset)));
 }
 
 static void reanchorList(NSRect tile);
@@ -151,9 +152,38 @@ static void dropAt(void) {
     places[screenKey(s)] = @{@"x" : @(NSMinX(t) - NSMinX(vis)), @"y" : @(NSMinY(t) - NSMinY(vis))};
     places[@"last"] = screenKey(s);
     savePlaces();
-    [[panel animator] setFrameOrigin:NSMakePoint(NSMinX(t) - kPad, NSMinY(t) - kPad)];
-    flog(@"drop: tile %@ on %@", NSStringFromRect(t), screenKey(s));
+    // The window animator animates frame, not frameOrigin: an animated
+    // setFrameOrigin: is dropped, which left the icon where the pointer let
+    // go, under the Dock (Pablo's take 3). Animate the frame, then make sure.
+    NSRect target = NSMakeRect(NSMinX(t) - kPad, NSMinY(t) - kPad, NSWidth([panel frame]), NSHeight([panel frame]));
+    void (^landed)(void) = ^{
+        if (!NSEqualRects([panel frame], target)) [panel setFrame:target display:YES];
+        flog(@"drop: tile landed at %@, inside %@ with the 8 px inset, on %@", NSStringFromRect(tileOf([panel frame])),
+             NSStringFromRect(NSInsetRect(vis, kInset, kInset)), screenKey(s));
+    };
+    if (reduceMotion()) {
+        [panel setFrame:target display:YES];
+        landed();
+    } else {
+        [NSAnimationContext runAnimationGroup:^(NSAnimationContext *c) {
+            c.duration = 0.16;
+            [[panel animator] setFrame:target display:YES];
+        } completionHandler:landed];
+    }
     reanchorList(t);
+}
+
+// Inside the visible frame with the inset wherever the icon stands now: a
+// desktop switch, a display change or the Dock shown, hidden, resized or
+// moved to another side can leave a good place outside it.
+static void clampIcon(NSString *why) {
+    NSRect t = tileOf([panel frame]);
+    NSScreen *s = screenAt(NSMakePoint(NSMidX(t), NSMidY(t)));
+    NSRect c = clampTile(t, s);
+    if (NSEqualRects(c, t)) return;
+    [panel setFrameOrigin:NSMakePoint(NSMinX(c) - kPad, NSMinY(c) - kPad)];
+    flog(@"clamp (%@): tile %@ -> %@, inside %@", why, NSStringFromRect(t), NSStringFromRect(tileOf([panel frame])),
+         NSStringFromRect(NSInsetRect([s visibleFrame], kInset, kInset)));
 }
 
 // ---------- the look: §2's table ----------
@@ -297,6 +327,7 @@ static void restoreChrome(void);
 
 // fsCheck: only a desktop-change notification may read the window list.
 static void update(NSString *why, BOOL fsCheck) {
+    clampIcon(why);
     BOOL back = NO;
     if (state == StateReturning && [marker isOnActiveSpace]) {
         back = YES;
@@ -512,6 +543,9 @@ static void watchPointer(void) {
     if (!self.dragging) {
         self.dragging = YES;
         setLook(LookDragging, 0.12);
+        // Over the Dock while dragging, so it never vanishes under it; back
+        // to the floating level on the drop.
+        [panel setLevel:NSStatusWindowLevel];
         flog(@"pointer drag start (moved %.1f px)", hypot(dx, dy));
     }
     [[self window] setFrameOrigin:NSMakePoint(self.originAt.x + dx, self.originAt.y + dy)];
@@ -524,10 +558,8 @@ static void watchPointer(void) {
     if (self.dragging) {
         self.dragging = NO;
         flog(@"pointer drag end (moved %.1f px)", moved);
-        [NSAnimationContext runAnimationGroup:^(NSAnimationContext *c) {
-            c.duration = 0.16;
-            dropAt();
-        } completionHandler:nil];
+        [panel setLevel:NSFloatingWindowLevel];
+        dropAt();
         setLook(self.inside ? LookHover : LookResting, 0.16);
         after(0.17, ^{ watchPointer(); }); // the panel moved under a still pointer
         return;

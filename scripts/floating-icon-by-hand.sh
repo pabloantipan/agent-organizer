@@ -55,8 +55,12 @@ initiatives) is full on this desktop. About three minutes, at an easy pace:
 
 F4  move it
   1. ctrl+→ to desktop 2. The icon appears bottom right, after the slide.
-  2. Drag it up into the menu bar and let go: it stays just below it.
-  3. Drag it down onto the Dock and let go: it stays just above it.
+  2. Drag it up into the menu bar and let go with the pointer in the menu
+     bar: it springs back to just below it.
+  3. Drag it down over the middle of the Dock, between two Dock icons, and
+     let go with the pointer on the Dock: it stays visible over the Dock
+     while you drag, then springs up to just above it. Do it twice, the
+     second time slowly.
   4. Drag it to the middle of the right edge and let go.
   5. ctrl+→ to desktop 3: the icon is in the same spot.
   5b. Drag the icon over another app's window, then click that window just
@@ -67,7 +71,8 @@ F4  move it
 
 F5  pick by typing
   6. Click the icon. The list opens by it, with the search field focused.
-  7. Drag the icon a little with the list open: the list follows it.
+  7. Drag the icon a little with the list open: the list follows it. Then
+     drag it onto the Dock and let go there: icon and list end above it.
   8. Type  pay  (keyboard only, do not click a row) and press Enter:
      partner-payouts opens full, here on desktop 3.
 
