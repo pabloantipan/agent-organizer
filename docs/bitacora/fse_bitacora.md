@@ -985,4 +985,8 @@ sections below this one are history.
   the top edge, not 8; §3 states without fixture; zoomed windows hide it.
   sup44 runs floating-icon-2. Eight fixture stand-ins from 19:53 (sup41's?)
   expire ~01:53; told sup41.
+- floating-icon-2: 0092 ruled (F12 accepted, drag across displays untested).
+  Code review failed only on row 2 (F5, F7 by Pablo's hand); a 45 s take
+  asked. For aglaea later: the growth runs ~0.36 s (spec 200 ms), and the
+  list blinks out ~100 ms when a double-click starts on an open list.
 
