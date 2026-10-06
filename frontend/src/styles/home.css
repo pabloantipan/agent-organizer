@@ -5,15 +5,18 @@
    seven type sizes only; no nesting, no @layer, no color-mix (Safari 15.0). */
 
 .home .p-head, .home .p-row {
-  grid-template-columns: 24px minmax(0, 0.9fr) var(--t-state, 144px) var(--t-phase, 96px) var(--t-goal, minmax(0, 1.2fr)) minmax(0, 1fr) var(--t-sig, minmax(var(--sig-floor, 0px), 1.5fr)) var(--t-next, 96px) 24px;
+  grid-template-columns: 24px var(--t-id, minmax(0, 0.9fr)) var(--t-state, 144px) var(--t-phase, 96px) var(--t-goal, minmax(0, 1.2fr)) var(--t-stage, minmax(0, 1fr)) var(--t-sig, minmax(var(--sig-floor, 0px), 1.5fr)) var(--t-next, 96px) 24px;
   gap: var(--space-3);
   padding: var(--space-1-5) var(--space-3);
 }
 /* FR-2 (lead-side-fixes): the id column is never narrower than the longest
    id (--id-w, measured by useFitIds in Home.tsx) */
 .home .port .p-head, .home .port .p-row {
-  grid-template-columns: 24px minmax(var(--id-w, 0px), 0.9fr) var(--t-state, 144px) var(--t-phase, 96px) var(--t-goal, minmax(0, 1.2fr)) minmax(0, 1fr) var(--t-sig, minmax(var(--sig-floor, 0px), 1.5fr)) var(--t-next, 96px) 24px;
+  grid-template-columns: 24px var(--t-id, minmax(var(--id-w, 0px), 0.9fr)) var(--t-state, 144px) var(--t-phase, 96px) var(--t-goal, minmax(0, 1.2fr)) var(--t-stage, minmax(0, 1fr)) var(--t-sig, minmax(var(--sig-floor, 0px), 1.5fr)) var(--t-next, 96px) 24px;
 }
+/* --t-id and --t-stage (leftovers-12 FR-7): while a cell is cut, the id and
+   the stage size to their widest row and their slack goes to the cut ones,
+   as the fixed columns' does (useTracks in Home.tsx). */
 .home .p-id { max-width: none; }
 /* The row holds its visually hidden text (.p-stage's and the signals'
    sr-only spans, compact's hidden goal and date): positioned, so that text
@@ -137,7 +140,7 @@
 
 /* Regular's top (FR-3): the goal column takes the room the cap gives. */
 .home.roomy .port .p-head, .home.roomy .port .p-row {
-  grid-template-columns: 24px minmax(var(--id-w, 0px), 0.9fr) var(--t-state, 144px) var(--t-phase, 96px) var(--t-goal, minmax(0, 2.2fr)) minmax(0, 1fr) var(--t-sig, minmax(var(--sig-floor, 0px), 1.5fr)) var(--t-next, 96px) 24px;
+  grid-template-columns: 24px var(--t-id, minmax(var(--id-w, 0px), 0.9fr)) var(--t-state, 144px) var(--t-phase, 96px) var(--t-goal, minmax(0, 2.2fr)) var(--t-stage, minmax(0, 1fr)) var(--t-sig, minmax(var(--sig-floor, 0px), 1.5fr)) var(--t-next, 96px) 24px;
 }
 
 /* Wide (FR-4, from 2200 since FR-13): stage and signals at their full

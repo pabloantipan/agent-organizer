@@ -443,16 +443,16 @@ function useFitIds(key: string, empty: Empty = NO_EMPTY) {
  *  as a floor (--sig-floor), which the flexible columns (id, goal, stage,
  *  fr tracks with no width of their own) make room for in proportion, so
  *  the floor is held to what leaves the stage and the id whole and the goal
- *  at its floor (frTracks). home.css gives the stage and the id no width
- *  variable, so their spare room reaches the signals only through that
- *  proportion; what they keep past it stays with them.
+ *  at its floor (frTracks). While a cell is cut, the stage and the
+ *  id size to their widest row as well (--t-stage, --t-id; leftovers-12
+ *  FR-7), so their spare room reaches the cut cells in full.
  *
  *  Other classes draw their own tracks; there the fixed columns share only
  *  what they hold together (fixedColumns), as before. An empty next date has
  *  no track (FR-20). Measured after every render, since the state's words
  *  move with the agents feed; state is set only when a width changes. */
 function useTracks(ref: React.RefObject<HTMLDivElement | null>, empty: Empty, fluid: boolean, sigFloor: number, idWidth: number, goalMin: number): { vars: Record<string, string>; sigLift: number } {
-  const [t, setT] = useState<{ fixed: number[]; sig: number } | null>(null);
+  const [t, setT] = useState<{ fixed: number[]; sig: number; id?: number; stage?: number } | null>(null);
   const measure = () => {
     const el = ref.current;
     if (!el) return;
@@ -463,6 +463,7 @@ function useTracks(ref: React.RefObject<HTMLDivElement | null>, empty: Empty, fl
     if (!empty.next) fixedNeeds.push(widest(".p-next"));
     let fixed = fixedColumns(REGULAR_FIXED.slice(0, fixedNeeds.length), fixedNeeds);
     let sig = 0;
+    let idW: number | undefined, stageW: number | undefined;
     const base = fluid ? gridTracks(el, rows[0], sigFloor) : null;
     if (base) {
       // The template's tracks: rank, id, state, phase, goal, stage, then
@@ -470,7 +471,7 @@ function useTracks(ref: React.RefObject<HTMLDivElement | null>, empty: Empty, fl
       const at = { id: 1, state: 2, phase: 3, goal: 4, stage: 5, sig: empty.sig ? -1 : 6, next: empty.next ? -1 : empty.sig ? 6 : 7 };
       const cols = (["id", "state", "phase", "goal", "stage", "sig", "next"] as const).filter((c) => at[c] >= 0);
       const need: Record<string, number> = {
-        id: Math.max(idWidth, widest(".p-id", (c) => c.scrollWidth)), state: fixedNeeds[0], phase: fixedNeeds[1], goal: base[at.goal], stage: widest(".p-stage"),
+        id: Math.max(idWidth, widest(".p-id")), state: fixedNeeds[0], phase: fixedNeeds[1], goal: base[at.goal], stage: widest(".p-stage"),
         sig: empty.sig ? 0 : widest(".p-sig", sigWidth), next: empty.next ? 0 : fixedNeeds[2],
       };
       // The goal is the column that takes what the others leave (its words
@@ -486,21 +487,29 @@ function useTracks(ref: React.RefObject<HTMLDivElement | null>, empty: Empty, fl
       // first by weight.
       const sized = (c: "state" | "phase" | "next") => round(need[c] <= base[at[c]] ? need[c] : of(c));
       fixed = [sized("state"), sized("phase"), ...(empty.next ? [] : [sized("next")])];
+      // leftovers-12 FR-7: while a cell is cut, the id and the stage size to
+      // their widest row too (--t-id, --t-stage), so what they do not use
+      // reaches the cut cells instead of staying with them by proportion.
+      // The id's need is its natural width, border included (scrollWidth
+      // leaves the border and the fraction out).
+      const anyCut = cols.some((c) => need[c] > base[at[c]] + 0.5);
+      if (anyCut && need.id < base[at.id] - 0.5) idW = need.id;
+      if (anyCut && need.stage < base[at.stage] - 0.5) stageW = need.stage;
       if (!empty.sig && of("sig") > base[at.sig] + 0.5) {
         // The fr columns as the grid shares them: by their widths now, the
         // id held at its floor when it already is, the signals at the lift.
         const released = (base[at.state] - fixed[0]) + (base[at.phase] - fixed[1]) + (empty.next ? 0 : base[at.next] - fixed[2]);
         const b = [base[at.id], base[at.goal], base[at.stage], base[at.sig]];
         const total = b.reduce((a, x) => a + x, 0) + released;
-        const weights = [b[0] <= idWidth + 0.5 ? 0 : b[0], b[1], b[2], b[3] <= sigFloor + 0.5 ? 0 : b[3]];
-        const holds = (lift: number) => { const f = frTracks(weights, [idWidth, 0, 0, lift], total); return f[2] >= need.stage - 0.5 && f[0] >= need.id - 0.5 && f[1] >= Math.min(goalMin, b[1]) - 0.5; };
+        const weights = [idW !== undefined || b[0] <= idWidth + 0.5 ? 0 : b[0], b[1], stageW !== undefined ? 0 : b[2], b[3] <= sigFloor + 0.5 ? 0 : b[3]];
+        const holds = (lift: number) => { const f = frTracks(weights, [idW ?? idWidth, 0, stageW ?? 0, lift], total); return f[2] >= need.stage - 0.5 && f[0] >= need.id - 0.5 && f[1] >= Math.min(goalMin, b[1]) - 0.5; };
         let lo = base[at.sig], hi = of("sig");
         if (holds(hi)) lo = hi;
         else for (let i = 0; i < 24; i++) { const m = (lo + hi) / 2; if (holds(m)) lo = m; else hi = m; }
         sig = Math.floor(lo) > sigFloor ? Math.floor(lo) : 0;
       }
     }
-    setT((p) => (p && p.sig === sig && p.fixed.length === fixed.length && p.fixed.every((x, k) => x === fixed[k]) ? p : { fixed, sig }));
+    setT((p) => (p && p.sig === sig && p.id === idW && p.stage === stageW && p.fixed.length === fixed.length && p.fixed.every((x, k) => x === fixed[k]) ? p : { fixed, sig, id: idW, stage: stageW }));
   };
   useLayoutEffect(measure);
   useLayoutEffect(() => {
@@ -512,16 +521,16 @@ function useTracks(ref: React.RefObject<HTMLDivElement | null>, empty: Empty, fl
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   if (!t) return { vars: {}, sigLift: 0 };
   const [state, phase, next] = t.fixed;
-  return { vars: { "--t-state": `${state}px`, "--t-phase": `${phase}px`, ...(next !== undefined ? { "--t-next": `${next}px` } : {}) }, sigLift: t.sig };
+  return { vars: { "--t-state": `${state}px`, "--t-phase": `${phase}px`, ...(next !== undefined ? { "--t-next": `${next}px` } : {}), ...(t.id !== undefined ? { "--t-id": `${t.id}px` } : {}), ...(t.stage !== undefined ? { "--t-stage": `${t.stage}px` } : {}) }, sigLift: t.sig };
 }
 
 /** The row's tracks in px as home.css lays them out with none of Home's
  *  widths applied (the fixed columns' and the lifted signal floor), read
  *  inside this frame and put back. */
 function gridTracks(port: HTMLElement, row: HTMLElement, sigFloor: number): number[] | null {
-  const names = ["--t-state", "--t-phase", "--t-next", "--sig-floor"];
+  const names = ["--t-state", "--t-phase", "--t-next", "--t-id", "--t-stage", "--sig-floor"];
   const kept = names.map((n) => port.style.getPropertyValue(n));
-  names.slice(0, 3).forEach((n) => port.style.removeProperty(n));
+  names.slice(0, 5).forEach((n) => port.style.removeProperty(n));
   port.style.setProperty("--sig-floor", `${sigFloor}px`);
   const tpl = getComputedStyle(row).gridTemplateColumns;
   names.forEach((n, k) => (kept[k] ? port.style.setProperty(n, kept[k]) : port.style.removeProperty(n)));
@@ -674,10 +683,12 @@ function OneLine({ id, children }: { id: string; children: React.ReactNode }) {
     const more = el.querySelector<HTMLElement>(".sig-more");
     const gap = parseFloat(getComputedStyle(el).columnGap) || 0;
     // A lozenge's natural width: a shrunk one hides the rest in its text
-    // span (FR-14), not in its own overflow.
+    // span (FR-14), not in its own overflow. Only what overflows is added to
+    // the fractional box: scrollWidth alone rounds 142.73 up to 143, and five
+    // such roundings capped a lozenge that fit (leftovers-12 FR-7, dpc-U1).
     const natural = (c: HTMLElement) => {
       const t = c.querySelector<HTMLElement>(".lz-t");
-      return Math.max(c.getBoundingClientRect().width + (t ? t.scrollWidth - t.clientWidth : 0), c.scrollWidth);
+      return c.getBoundingClientRect().width + Math.max(t ? t.scrollWidth - t.clientWidth : 0, c.scrollWidth - c.clientWidth);
     };
     const folds = items.map((c): Fold => (c.dataset.fold === undefined ? null : (Number(c.dataset.fold) as Fold)));
     // Each lozenge's floor in rendered width (leftovers-5 FR-8): waiting
@@ -705,10 +716,11 @@ function OneLine({ id, children }: { id: string; children: React.ReactNode }) {
     on.forEach((k, j) => { if (share.widths[j] < nat[k]) items[k].style.maxWidth = `${share.widths[j]}px`; });
     // A shown signal may still be cut by its ellipsis (the first one when
     // the cell is tight, any one at the lozenge's cap): then the hover names
-    // it whole.
+    // it whole. A cap under the natural width is a cut, however small.
+    const capped = new Set(on.filter((k, j) => share.widths[j] < nat[k]));
     const whole = items.filter((_, k) => shown[k]).filter((c) => {
       const t = c.querySelector<HTMLElement>(".lz-t") ?? c;
-      return t.scrollWidth > t.clientWidth + 1;
+      return capped.has(items.indexOf(c)) || t.scrollWidth > t.clientWidth + 1;
     }).map((c) => (c.textContent ?? "").replace(/\s+/g, " ").trim()).join("\n");
     setCut((p) => (p && p.whole === whole && p.rest.join("|") === rest.join("|") ? p : { rest, whole }));
   };
