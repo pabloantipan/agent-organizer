@@ -26,9 +26,14 @@ message: `input_tokens`, `output_tokens`, `cache_read_input_tokens`,
   and day, rewritten when a day grows). It reads transcripts incrementally
   (by size and offset), so a rescan of an unchanged home reads nothing.
 - **FR-2** Cost per session from `runs.jsonl` and live session records
-  (the statusline's cumulative `cost_usd`), split over its days in
-  proportion to the day's tokens; a session with no record has no cost, and
-  says so.
+  (the statusline's cumulative `cost_usd`), else from the transcript's own
+  cost state, split over its days in proportion to the day's tokens; a
+  record of $0 for a session the transcript prices higher takes the
+  transcript's. A session with neither has no cost, and says so.
+  (Amendment 1, 2026-10-06, the FSE: ul-build found 62 of 360 sessions
+  with no recorded cost, 51 of them worth $3,371.94 by their transcripts
+  against $1,202.41 recorded for all others; where both exist they agree
+  within 0.2%. As first written the view undercounted money about 3x.)
 - **FR-3** Every session is attributed, once, when first seen, and the
   attribution is kept in the ledger so it survives the worktree:
   initiative (longest initiative-root prefix of the cwd; for a worktree
@@ -57,7 +62,7 @@ message: `input_tokens`, `output_tokens`, `cache_read_input_tokens`,
 |---|---|---|---|
 | G1 | 1 | Go test over a fixture transcript with a streamed message repeated three times and a sub-agent file | each kind summed once per `message.id`; the sub-agent counted; a second run reads 0 bytes |
 | G2 | 1, 4 | `organizer usage --week 2026-W40 --json` on the real home vs a one-off script summing the same transcripts | totals equal to the token |
-| G3 | 2 | a session with a record and one without | cost split by day; the other `cost: null`, counted in "without cost" |
+| G3 | 2 | a session with a record; one with only a transcript cost state; one with a $0 record and a transcript cost; one with neither | cost split by day; the transcript's cost; the transcript's cost; `cost: null`, counted in "without cost" |
 | G4 | 3 | `organizer usage --week 2026-W41 --by task` on the real home | sup46's, rlf-build's, rlf-review's, rlf-ui's, fi3-*'s sessions under leftovers-13's cards (worktrees already removed); nothing of theirs `Not attributed` |
 | G5 | 3 | `--by role` for 2026-W41 | supervisor, builder, reviewer, ui reviewer, fse, pair rows; `Not attributed` last with reasons |
 | U1-U8 | 5 | Aglaea's rows, in `make review-build` on a fixture ledger (`scripts/fixture-home.sh` gains one) and on the real home | as her spec |
