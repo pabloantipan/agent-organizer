@@ -46,3 +46,31 @@ docs/specs/leftovers-13.md, L1-L5 and X0. Evidence in .wt-notes/rlf-build/ (prog
 - Boundary finding: `global.css` loses the `.dec-chosen` rule (moved to decisions.css), outside ".dec-meta and .wakes only". FR-1 needs it (the card's own cause is global.css:762), so the boundary text is too narrow, not the build. FSE's.
 - Not gated: a title of 20 chars or less keeps `min-width: 0` and can ellipsize to nothing before the option drops; the sweep does not check titles. The `--empty` fixture's roles read this machine's real sessions.
 - Reviewer: rlf-review, 2026-10-06.
+
+## UI review
+- Commit run: 982b6febd4750826a96155daefdb953ea4c599ab, detached worktree `.wt/rlf-ui`; `make review-build` for L3/L5, a `-debug` review build for the DOM reads, `wails dev` + headless Chrome for Chromium; fixture from `scripts/fixture-home.sh` with the organizer's 94 records copied into init-nopeople (93 Ruled lines with a chosen option), `--empty` for L5. Evidence: `.wt-notes/rlf-ui/` (sweep.log, order.log, l2.log, l3.log, l4.log, l5.log, l1-ax-dropped.txt, shots `<engine>-<w>x<h>-<row>-<state>.png`).
+- Verdict: **pass**. No finding of severity 4 or 3.
+
+| Row | WKWebView (Deltagos Review.app) | Chromium (headless Chrome, wails dev) | Result |
+|---|---|---|---|
+| L1 | measurement: sweep.js + my order.js through Web Inspector, 1024×640 and 1512×945 window frames, rail full and strip; the drop path with `.decisions` narrowed to 420 px, then restored; accessibility query of a dropped line's name and AXHelp (0095); screenshots | measurement: same two scripts at 1024×640, 1512×945 (gated) plus 900, 760, 640 wide; drop at 760 and undo on widening | pass: 0 under the floor, 0 stray `·`, `.board-wrap` sw = cw in all 4+4 configs; no title cut while its option was above its floor; WK 90 dropped / Chromium 10 dropped, each whole in `title` and `aria-label`, undone on widening |
+| L2 | accessibility query (AX frames of the count's text runs and Rule) + pixel sample from screenshots; card row and thread row, one seat and everyone, at 1024×640 full and 1512×945 strip; opened by AXPress, closed with cancel, never submitted | measurement (l2.js): card and thread rows, one and all, 1024/1512 × full/strip | pass: count is Rule's next element, same row (centres within 0.5 px), gap 7 px by AX (8 px by DOM); one seat ≈ `--muted` (#aca5ba sampled, #b5afc3 computed), all ≈ `--tone` (#d533e8 sampled, #d946ef computed) |
+| L3 | System Events, `name of every window` by pid, both launched from `build/bin` with the fixture env, quit by pid | n/a (native window) | pass: "Deltagos Review" and "Deltagos" (see spec gap G3 on the bundle id) |
+| L4 | grep at 982b6fe + vitest | (same) | pass: the map only in `lib/stateWords.ts:6`; no `.wakes.hot`; no inline colour on the count; AgentList, Crew, RoleDrawer import `stateWord`; vitest 3/3 (InitiativeHeader's `stateWord` is an unrelated local helper for stages) |
+| L5 | screenshot: `--empty`, review build, the desktop to the right (ctrl+→), icon AXPress, list window 360×160 | n/a (native panel) | pass: `Find an initiative` / `Home` / `No initiatives yet. Deltagos finds them under the roots in its settings.`, word for word §3 |
+
+- **U1 (sev 1)** — what: on a line whose option is short but over the 9-character threshold, the gap after the `·` is wider than on every other line (`“write it” ·      by pablo`), so the meta looks loose on those rows. Where: Decisions › Ruled, 0019 (16 px), 0039/0044/0046 `“exit met”` (9 px), 0064 `“file only”` (10 px), both engines, every size; elsewhere 4 px. Evidence: order.log `gapAfterDot [4,9,10,16]`; `.dec-opt.floored { min-width: calc(9ch + 4px) }` is wider than those texts, and the slack lands after the dot. Severity 1, cosmetic. Proposal: set `.floored` only when the option's text is wider than its floor, measured rather than counted in characters, or keep the dot tight to the text (e.g. let the slack fall before it).
+- Spec gaps (FSE):
+  - G1: FR-2 says "Needs me's and Conversations'" rule boxes, but Home's Needs me box (RuleDecisionBox) rules a record and wakes nobody, so it has no count to move. The build's reading is right; the FR should name Conversations' needs-me RuleBox, card and thread rows.
+  - G2: L1's drop path can't happen at any real window size (MinWidth 1024 still leaves the narrowest line 730 px). It was shown only by narrowing below the window floor. Say in the spec that the drop is a guard, or gate it by narrowing.
+  - G3: L3 asks to launch the branch's `Deltagos.app`, whose bundle id is `cl.antipan.organizer`: Pablo's running app and the WebKit storage a review must not touch. I changed only its `CFBundleIdentifier` (to `.rlfui`, in place in `build/bin`, re-signed ad hoc), so its names stayed exactly as built. The row should say so.
+  - G4: the fixture's Roles read this machine's real sessions. The fixture's Home and rail showed "Hephaistos: 2 sessions · 61% context" and "Aglaea: live" (also on `--empty`). FR-5 is silent about roles.
+- For aglaea:
+  - A1: after an ellipsis the space before the dot is wider than after it (`“accept …  · by pablo`), because the cut keeps the word's trailing space. Should it be trimmed?
+  - A2: a title of 20 characters or fewer has no floor (`min-width: 0`), so in principle it can shrink to nothing while its option stays. That is code reading only and unreachable at ≥ 1024 (the code reviewer saw it too). Should a short title never shrink, so the option drops first?
+- Not verified:
+  - The branch's `Deltagos.app` under its own bundle id (refused: the boundary, G3).
+  - L5's words by accessibility query. The open panel was not in the process's AX window list, so only the screenshot was read.
+  - Keyboard and focus (not in the spec).
+  - Hit tests by click. Synthetic CGEvent mouse-downs did not land in this session (only the hover moved), so every press went through AXPress or AXShowMenu (the Web Inspector included). Console input went through `wkrun`, which refuses unless the focused AX element is the inspector's Console prompt and posts keys to the pid only. No rule box or composer was open while it ran, and nothing was submitted or posted.
+- Reviewer: rlf-ui, 2026-10-06.
