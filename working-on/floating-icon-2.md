@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: floating-icon-2
 seat: fi2-build
-review: fail
+review: pass
 updated: 2026-10-06
 next: "review: floating-icon-2, gate met but N3 (supervisor, after both reviews); F12 by 0092 and the open-list double-click by Pablo's call on d2db765, each with its pointer case untested; head 77cbf82"
 depends_on: [floating-icon]
@@ -45,11 +45,14 @@ app straight away, and the icon is big enough on a big screen.
 ## Blockers
 
 ## Review
-- Verdict: fail. Commit reviewed: 2efe4ba275da8606db359dfa1abac22974ac0fda (branch `floating-icon-2`), with 0092 (38a8519) for F12.
-- Unmet: gate row 2. F5 typing and F7 (Escape twice, click outside) were not done by Pablo in any take; the seat's AX-opened keyboard run (`float-keys.log`) is not Pablo's take, and F7's click outside was done by no one. No single take covers F4, F5, F7, F8. N3 left open (supervisor's).
-- Met: F10, F11 (takes 1-3, read back from the window: `list front … ms after the click`, `full (double-click) read back: full window … key=1`); F12 by 0092 (56 on the laptop, 88 r22 on the 3440, read back from the panel frame; drag across displays untested); clean clone `make test` exit 0, npm 265 tests and build, `wails build` exit 0, `nm` 0 CGS/SLS. Code: list on mouse-up, second press by `doubleClickInterval`, drag past 4 pt clears the click, double-click grows the list via `goFull` and marks this desktop home, the list never touches the store's view; size by visible width (56 ≤1920, 72, 88 ≥3000), radius size/4, bars/shadows ×size/56 (breathing is a relative scale), inset/threshold in points, resize on screen change and on drop, clamps by `tileSz`. SIGUSR1/2 and FLOAT_SIZE_WIDTH only with FLOAT_LOG (set only by the by-hand script). Boundary: 4 paths, all inside.
-- Not in the gate: the growth is `setFrame:animate:` at about 0.36 s, not the spec's 200 ms (the pick was never 200 ms either); a screen change with the list open moves the icon, not the list; the list blinks out ~100 ms when a double-click starts on an open list (aglaea's call).
-- Reviewer: fi2-review, 2026-10-05
+- Verdict: pass. Commit reviewed: 77cbf82 (branch `floating-icon-2`, on main d2db765); its tree differs from 06dedac only in this card, so the clean clone at 06dedac covers it (`make test` exit 0, npm 274 tests and build, `wails build` exit 0, `nm` 0 CGS/SLS). Earlier passes at 2efe4ba (fail, row 2) and 25ecc11 (code checks) are superseded; `git range-diff` shows every rebased commit identical.
+- Unmet: none. N3 left open (supervisor's).
+- Row 2: F5 typed by Pablo at 25ecc11 (`take-a2/t66.5.png`: `pay` in the search, partner-payouts alone; `full (pick) read back … growth 200 ms`); F7 by Pablo at 06dedac (`by-hand-20261006-093513.log`: `key: Escape` then dismiss; `key: typed d`/`f`, Escape clears to height 480, Escape closes; six `list lost key … outside the list and the icon` each followed by `dismiss`); F4, F8 from takes 1-3, code paths unchanged since (Amendment 2 touches only the click on an open list). The row's "same take" is not literal: the four rows span takes 1-4 plus the 30-s take.
+- Amendment 2: code meets it (deferred close by `doubleClickInterval`, `cancelClose` on a second press, Escape and click outside close at once, growth 0.2 s through `NSAnimationContext`, none under Reduce motion, elapsed time and frames read back in the completion handler). Pablo's growth read back 193-200 ms; the wait ran as built in his take (`close waits 500 ms`, `close: no second click in 500 ms`). The open-list double-click by pointer was never done in his hands; met only by his call on d2db765 ("Accept the recorded proof", recorded on this card, no decision record unlike 0092) on the seat's proof (`float-a2-final.log`: `close cancelled (second press)`, no dismiss, growth 201 ms).
+- F10-F12: as before; F12 by 0092 (drag across displays untested).
+- Code: list on mouse-up; second press by the system interval; drag past 4 pt is never a click; double-click grows the open list and marks this desktop home; the list never touches the store's view; size by visible width (56 ≤1920, 72, 88 ≥3000), radius size/4, bars/shadows ×size/56, inset/threshold in points, resize on screen change and drop, clamps by `tileSz`; logs read the window back. SIGUSR1/2, FLOAT_SIZE_WIDTH and the key/resign-key log lines act only with FLOAT_LOG (set only by the by-hand script). Boundary: 4 paths, all inside.
+- Not in the gate: two pointer cases rest on rulings, not hands (drag across displays, open-list double-click); a click then a drag within the interval cancels the pending close, so the list stays open and follows; a screen change with the list open moves the icon, not the list; with FLOAT_LOG set the log records characters typed in the search.
+- Reviewer: fi2-review, 2026-10-06
 
 ## UI review
 - The first UI review passed at 2efe4ba (fi2-ui, 2026-10-05; its findings U1-U2, gaps S1-S3 and A1-A2 are carried below where still open).
