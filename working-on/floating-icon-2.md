@@ -5,7 +5,7 @@ repos: [organizer]
 branch: floating-icon-2
 seat: fi2-build
 updated: 2026-10-05
-next: "fi2-build builds it in .wt/floating-icon-2 (sup44)"
+next: "pablo: the by-hand take (scripts/floating-icon-by-hand.sh in .wt/floating-icon-2, lid open), through sup44"
 depends_on: [floating-icon]
 boundary: ["floaticon_darwin.m, floaticon_darwin.h, floaticon_darwin.go, floaticon_other.go (click count, size by display, scaled layers)", "frontend/src/components/FloatList.tsx (grow into the full window on the second click; the last view on double-click)", "frontend/src/stores/board.store.ts (the last view to restore, read only if already kept there)", "scripts/floating-icon-by-hand.sh (the new steps)", "not: other Go packages, wails.json, build/darwin templates, docs/design-system.md"]
 spec: "docs/ux/specs/floating-icon.md, Amendment 1 (Aglaea, 2c07195); ruling 0091"
@@ -24,6 +24,7 @@ app straight away, and the icon is big enough on a big screen.
 - [ ] `XDG_DATA_HOME=$(mktemp -d) make test` from a clean checkout; `wails build`
 
 ## Done
+- 2026-10-05 fi2-build: built on `floating-icon-2` (86224b8 click count, last view, size by display; 2efe4ba by-hand script; rebased on 56c532d). Seat's proof in `.wt-notes/fi2-build/` (progress.md): F12 88 pt radius 22 read back from the panel (`float-screens.log`, panel 214 = 88 + 2×63), 56/72 proportions measured on window shots, the screen-change path via SIGUSR1; F11 list front 12 ms after an AX press (`float-ax.log`; the AX press is a single click, not a double-click); F10's action via SIGUSR2 (not the click count): full at Home and at partner-payouts (`float-double.log`, `dbl-*-crop.png`). Clean-clone `make test`, `wails build`, 0 CGS/SLS green. `board.store.ts` untouched: the list never changes the view. Waiting: Pablo's take (double-click, drag across displays, F4 F5 F7 F8)
 - 2026-10-05 sup44 launched by the FSE
 - 2026-10-05 cut by the FSE from 0091 and Aglaea's Amendment 1
 
@@ -32,6 +33,7 @@ app straight away, and the icon is big enough on a big screen.
 ## Blockers
 
 ## Notes
+- fi2-build: the growth to full takes about 0.36 s on the 3440 display (`setFrame:display:animate:`, the call a pick already used), not the spec's 200 ms. 1920 exactly is 56. A screen change with the list open re-places the icon, not the list.
 Aglaea's calls: a single click opens the list at once (within 100 ms); a
 second click within the double-click interval grows it into the full window
 (200 ms, as choosing a row) at the view last shown, and this desktop becomes
