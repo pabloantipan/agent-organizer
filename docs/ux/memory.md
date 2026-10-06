@@ -226,6 +226,14 @@ shadow and a lift on hover and drag; its place remembered per display; a
 360 px list panel with search, a Home row, and the rail's order with signals;
 a top-bar `Compact to icon`. O1: should the icon show Needs me's count?
 
+Roadmap as a plan (2026-10-06, `specs/roadmap-as-a-plan.md`, proposed, thread
+01M48N0AYS5SC7N243336DDARW; 0093): an outline over the shared axis (stage →
+wave → one Rounds row of segments + cards); decisions are diamonds on the
+stage row (raised hollow, ruled solid, joined by a line); a failed round is
+the only magenta outline with a `✕`; the switch steps are Current stage /
+All stages / + Waves / + Rounds and cards, opening on 1; zoom and step are
+independent; `Outside any stage` row if 0094 is not accepted.
+
 ## Open questions
 
 - Q1 (Pablo, via the FSE, leftovers-4): does he use Tab in the app? In

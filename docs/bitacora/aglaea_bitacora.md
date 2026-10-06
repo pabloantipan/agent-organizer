@@ -85,3 +85,4 @@ its source).
 - 2026-10-05 — sup44 A1/A2: the icon's close waits out the double-click interval; growth 200 ms (floating-icon amendment 2).
 - 2026-10-05 — A2 checked on main 4b3291a (Deltagos Review.app, --twenty): the filtered list shrinks 480 to 160; ~50 px empty under one row (sev 1).
 - 2026-10-06 — sup45 dln-U1/U2: chosen floor ~8 chars then drops with its dot; wake count beside Rule too (DS).
+- 2026-10-06 — roadmap-as-a-plan design spec (0093): outline, rounds row, diamonds, four-step switch.
