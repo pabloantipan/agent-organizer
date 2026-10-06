@@ -154,4 +154,42 @@ plain swap under reduced motion). The icon then shows on this desktop too.
 
 ## Technical notes
 
-(left for the FSE)
+by the FSE, 2026-10-05, from the spike's Findings (branch
+`floating-icon-spike`, d8d6585; card in `done/`, 0089) and scope 0088.
+
+- **T1, the shape (0090 decides it).** Recommended, as the spike proved on
+  Wails v2: a native non-activating `NSPanel` for the icon (Objective-C,
+  darwin-only, about 250-300 lines, `floaticon_darwin.m/.h` plus Go glue),
+  the main Wails window as the list panel and the full app. The
+  alternatives, and their costs, are in 0090.
+- **T2, desktops.** Show and hide on `NSWorkspaceActiveSpaceDidChangeNotification`
+  plus `-[NSWindow isOnActiveSpace]`; no private API (no `CGS*`/`SLS*`
+  symbols in the binary). The icon appears about 1.2 s after a switch
+  starts, after the slide: the floor with public API.
+- **T3, full-screen desktops.** `FullScreenNone` is not enough. Hide the icon
+  when another app's layer-0 window covers a whole display
+  (`CGWindowListCopyWindowInfo`: owner pid, layer, bounds), checked only
+  after the slide (the spike's 0.5 s re-check misfired twice mid-slide) and
+  again on the next notification. Tried on one display only; a second,
+  smaller display is untested and a gate row says so.
+- **T4, bringing Deltagos here.** `NSWindowCollectionBehaviorMoveToActiveSpace`
+  around `setFrame` and `orderFrontRegardless`, restored 150 ms later, then
+  activate. Never `orderFront` a window ordered out on another Space without
+  it (it pulls the user back there). "Pick nothing" returns the window home
+  through a 1x1 `Managed` marker window on the home Space, re-ordered on
+  arrival. The list size (360x520) is set with `setFrame`; the 1024x640
+  minimum (Wails' `userMinSize`) is restored when it goes full.
+- **T5, Wails internals it leans on:** the window found by class name
+  `WailsWindow` in `[NSApp windows]`, and `userMinSize`. Both are named in a
+  comment and a startup check logs if either is missing (no crash, no icon).
+- **T6, the list panel** is the frontend (`FloatList.tsx`), shown on the
+  Wails event `floaticon:list`; rows from the board in the rail's order and
+  groups, signals in the fold order; choosing one is `openInitiative`.
+- **T7, by hand.** Pointer drag, the 4 px click threshold, and the panel by
+  pointer are checked by Pablo with a script like the spike's
+  `y1-pointer.sh` (the seats may not post synthetic pointer events).
+- **T8, nothing new for signing**: no entitlement; `codesign --options
+  runtime` as today.
+- Spec check (spec-craft 5b, with the gate lines proposed 2026-10-05): every
+  F row fails on main today (there is no icon); pointer rows name Pablo;
+  files by grep (`TopBar.tsx`, `app.go`, `WailsWindow`). Result: holds.
