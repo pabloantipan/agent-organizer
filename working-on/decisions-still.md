@@ -22,6 +22,7 @@ Nothing on Decisions moves unless the operator moves it. Measure the cause first
 - [x] W0: see `docs/specs/decisions-still.md`, Acceptance
 
 ## Done
+- 2026-10-05 Pablo, in the FSE session: "vibration: I don't see again" (his observation, relayed by the FSE; the UI recheck at the band still decides the gate)
 - 2026-10-05 dst-build: F1 fixed (fa1f835: tallness decided before ruling and held while the box is open, lib/stuckHead.ts; ea490ae: vitest for the hold and the hard bottom line); band rows below; W0 at ea490ae
 - 2026-10-05 dst-build: fix 5e7fccb (.dec-head.stuck changes paint only: inset shadow, body border transparent, actions keep their padding) + guard test 1fc4140; branch decisions-still rebased on 682013f; W2 zero motion in both engines, W3 and W0 pass. Evidence in .wt-notes/dst-build/ (progress.md)
 - 2026-10-05 sup41: builder dst-build launched in .wt/decisions-still from main 37560ff
