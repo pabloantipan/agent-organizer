@@ -1,10 +1,11 @@
 ---
 title: Floating icon, second pass - double-click opens the full app at once; the icon grows on big screens
-status: next
+status: now
 repos: [organizer]
 branch: floating-icon-2
+seat: fi2-build
 updated: 2026-10-05
-next: "sup44 builds it (0091 ruled; floating-icon in done/)"
+next: "fi2-build builds it in .wt/floating-icon-2 (sup44)"
 depends_on: [floating-icon]
 boundary: ["floaticon_darwin.m, floaticon_darwin.h, floaticon_darwin.go, floaticon_other.go (click count, size by display, scaled layers)", "frontend/src/components/FloatList.tsx (grow into the full window on the second click; the last view on double-click)", "frontend/src/stores/board.store.ts (the last view to restore, read only if already kept there)", "scripts/floating-icon-by-hand.sh (the new steps)", "not: other Go packages, wails.json, build/darwin templates, docs/design-system.md"]
 spec: "docs/ux/specs/floating-icon.md, Amendment 1 (Aglaea, 2c07195); ruling 0091"
