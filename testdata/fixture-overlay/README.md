@@ -107,3 +107,12 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
   with log lines and no HAND-OFF, and `work/init-b/.../daedalus_bitacora.md`
   with a HAND-OFF ten days old (stale); Ariadna has none. Their `@D<n>@`
   marks are dated n days before today by the script
+- `init-a/runs/`, three run records for the Roadmap's waves
+  (roadmap-as-a-plan W4): `2026-09-20-prose-only.md` has no waves block and
+  is a dot; `2026-09-24-joins-wave.md` is sup11's wave on w-review (joins)
+  with a build, a failed review, a rework, a pass and Pablo's take;
+  `2026-09-28-across-stages.md` is sup12's wave on w-queued, w-nogate
+  (joins) and `working-on/done/w-founded.md` (foundations, done), so it sits
+  under two stages, with a review and a UI review passing, then sup13's wave
+  on w-later, which joins no stage and is open with its review in flight.
+  `runs/` is in `.gitignore`, so these and `w-founded.md` are force-added

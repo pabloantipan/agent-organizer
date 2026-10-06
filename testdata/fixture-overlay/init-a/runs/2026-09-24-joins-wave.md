@@ -3,7 +3,7 @@ waves:
   - wave: 1
     supervisor: sup11
     task: "the joins, first wave"
-    cards: [w-review, w-queued]
+    cards: [w-review]
     launched: 2026-09-24T10:05-03:00
     merged: 2026-09-24T13:40-03:00
     rounds:
@@ -35,7 +35,7 @@ waves:
         result: pass
         reviewer: wave1-review
         reason: "G1-G2 met at abc1235"
-      - card: w-queued
+      - card: w-review
         kind: take
         start: 2026-09-24T13:00-03:00
         end: 2026-09-24T13:35-03:00
@@ -46,5 +46,5 @@ waves:
 
 # The joins, first wave (fixture)
 
-Two cards in the joins stage: a build, a failed review, a rework, a pass,
+One card in the joins stage: a build, a failed review, a rework, a pass,
 and Pablo's take.

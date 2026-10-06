@@ -3,7 +3,7 @@ waves:
   - wave: 1
     supervisor: sup12
     task: "foundations and joins together"
-    cards: [w-founded, w-nogate]
+    cards: [w-queued, w-nogate, w-founded]
     launched: 2026-09-28T09:00-03:00
     merged: 2026-09-28T12:15-03:00
     rounds:
@@ -36,7 +36,7 @@ waves:
         reviewer: sup12-ui
         reason: "no sev 4 or 3"
   - wave: 2
-    supervisor: sup12
+    supervisor: sup13
     task: "the late card, outside any stage"
     cards: [w-later]
     launched: 2026-10-05T16:00-03:00
@@ -54,11 +54,11 @@ waves:
         start: 2026-10-05T17:35-03:00
         end:
         result:
-        reviewer: sup12-review
+        reviewer: sup13-review
         reason: ""
 ---
 
 # Foundations and joins together, then the late card (fixture)
 
-Wave 1's cards sit in two stages (w-founded, done, in foundations; w-nogate
-in joins). Wave 2's card joins no stage and is still in review.
+Wave 1's cards sit in two stages (w-queued and w-nogate in joins;
+w-founded, done, in foundations). Wave 2's card joins no stage and is still in review.
