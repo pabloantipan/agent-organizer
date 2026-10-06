@@ -95,9 +95,35 @@ func (l Line) Model() string {
 type fileState struct {
 	Session string `json:"session"`
 	Offset  int64  `json:"offset"`
-	// LastID is the last message id counted: a streamed message repeats its
-	// id on consecutive lines, possibly across two passes.
-	LastID string `json:"last_id,omitempty"`
+	// Last is the last message counted. A streamed message repeats its id
+	// on consecutive lines with its usage growing (the first line is a
+	// snapshot taken mid-stream), possibly across two passes: a repeat adds
+	// only what grew, to the day and model it was first counted under.
+	Last *counted `json:"last,omitempty"`
+}
+
+// counted is one message as the ledger has counted it so far.
+type counted struct {
+	ID    string    `json:"id"`
+	Day   string    `json:"day"`
+	Model string    `json:"model"`
+	TS    time.Time `json:"ts"`
+	Kinds Kinds     `json:"kinds"`
+}
+
+// grow raises c to k field by field and returns what it rose by. Usage
+// only grows within a stream; a smaller repeat adds nothing.
+func (c *counted) grow(k Kinds) Kinds {
+	up := func(have *int64, now int64) int64 {
+		if now <= *have {
+			return 0
+		}
+		d := now - *have
+		*have = now
+		return d
+	}
+	return Kinds{up(&c.Kinds.Input, k.Input), up(&c.Kinds.Output, k.Output),
+		up(&c.Kinds.CacheRead, k.CacheRead), up(&c.Kinds.CacheWrite, k.CacheWrite)}
 }
 
 // sessionMeta is what a transcript says about its session once, near its
@@ -116,13 +142,19 @@ type sessionMeta struct {
 type offsets struct {
 	// Version changes when the offsets start recording something earlier
 	// passes skipped; an older file is dropped and the ledger rebuilt.
-	Version  int                     `json:"version"`
-	Files    map[string]*fileState   `json:"files"`
-	Sessions map[string]*sessionMeta `json:"sessions"`
+	Version int `json:"version"`
+	// Generation is the ledger's header generation these offsets were
+	// written with. The two files are renamed one after the other; a crash
+	// between leaves them on different generations, and a mismatch is
+	// read as "start over", never as a second count of the grown bytes.
+	Generation int64                   `json:"generation"`
+	Files      map[string]*fileState   `json:"files"`
+	Sessions   map[string]*sessionMeta `json:"sessions"`
 }
 
-// offsetsVersion 2 records the transcripts' cost-state (FR-2 Amendment 1).
-const offsetsVersion = 2
+// offsetsVersion 2 records the transcripts' cost-state (FR-2 Amendment 1);
+// 3 counts a streamed message's final usage, not its first snapshot.
+const offsetsVersion = 3
 
 // CostSource is one record of a session's cumulative cost: a runs.jsonl run
 // or a live statusline record. Claude Code's total is cumulative across a
@@ -190,6 +222,7 @@ func Ingest(o Options) (Stats, error) {
 	}
 	defer unlock()
 
+	gen := ledgerGeneration(o.LedgerPath)
 	lines := LoadLedger(o.LedgerPath)
 	byKey := map[string]*Line{}
 	for i := range lines {
@@ -197,9 +230,10 @@ func Ingest(o Options) (Stats, error) {
 		byKey[l.SessionID+"|"+l.Day] = &l
 	}
 	offs := loadOffsets(o.OffsetsPath)
-	if offs.Version != offsetsVersion {
-		// Offsets from before this version skipped what this one reads:
-		// read every transcript again, rebuilding the ledger from them.
+	if offs.Version != offsetsVersion || offs.Generation != gen {
+		// Offsets from before this version skipped what this one reads, or
+		// they and the ledger were not written together: read every
+		// transcript again, rebuilding the ledger from them.
 		offs = &offsets{Version: offsetsVersion, Files: map[string]*fileState{}, Sessions: map[string]*sessionMeta{}}
 		byKey = map[string]*Line{}
 		st.Changed = true
@@ -238,7 +272,7 @@ func Ingest(o Options) (Stats, error) {
 			meta = &sessionMeta{}
 			offs.Sessions[sid] = meta
 		}
-		n, err := readFrom(p, fsx, meta, o.Loc, func(day string, ts time.Time, model string, k Kinds) {
+		n, err := readFrom(p, fsx, meta, o.Loc, func(day string, ts time.Time, model string, k Kinds, first bool) {
 			key := sid + "|" + day
 			l := byKey[key]
 			if l == nil {
@@ -252,7 +286,9 @@ func Ingest(o Options) (Stats, error) {
 			mk := l.Models[model]
 			mk.Add(k)
 			l.Models[model] = mk
-			l.Messages++
+			if first {
+				l.Messages++
+			}
 			if ts.Before(l.First) {
 				l.First = ts
 			}
@@ -319,12 +355,14 @@ func Ingest(o Options) (Stats, error) {
 	}
 	sortLines(out)
 	st.Sessions, st.Lines, st.Changed = len(bySession), len(out), changed
-	if changed {
-		if err := writeLedger(o.LedgerPath, out); err != nil {
+	if changed || st.BytesRead > 0 || st.FilesRead > 0 {
+		// Both files move to the next generation together: the ledger
+		// first, then the offsets. A crash between them is a mismatch the
+		// next pass rebuilds from, never grown bytes counted twice.
+		offs.Generation = gen + 1
+		if err := writeLedger(o.LedgerPath, offs.Generation, out); err != nil {
 			return st, err
 		}
-	}
-	if changed || st.BytesRead > 0 || st.FilesRead > 0 {
 		if err := writeJSON(o.OffsetsPath, offs); err != nil {
 			return st, err
 		}
@@ -385,7 +423,7 @@ var (
 // for every assistant message not counted before, and advances the offset
 // past the last complete line. A line still being written is left for the
 // next pass. Returns the bytes consumed.
-func readFrom(p string, fsx *fileState, meta *sessionMeta, loc *time.Location, add func(day string, ts time.Time, model string, k Kinds)) (int64, error) {
+func readFrom(p string, fsx *fileState, meta *sessionMeta, loc *time.Location, add func(day string, ts time.Time, model string, k Kinds, first bool)) (int64, error) {
 	f, err := os.Open(p)
 	if err != nil {
 		return 0, nil
@@ -396,7 +434,10 @@ func readFrom(p string, fsx *fileState, meta *sessionMeta, loc *time.Location, a
 	}
 	r := bufio.NewReaderSize(f, 1<<20)
 	var read int64
-	seen := map[string]bool{}
+	seen := map[string]*counted{}
+	if fsx.Last != nil {
+		seen[fsx.Last.ID] = fsx.Last
+	}
 	sub := strings.Contains(p, string(filepath.Separator)+"subagents"+string(filepath.Separator))
 	for {
 		b, err := r.ReadBytes('\n')
@@ -412,11 +453,18 @@ func readFrom(p string, fsx *fileState, meta *sessionMeta, loc *time.Location, a
 				break
 			}
 			id := e.Message.ID
-			if id == "" || id == fsx.LastID || seen[id] || e.Message.Model == "<synthetic>" {
+			if id == "" || e.Message.Model == "<synthetic>" {
 				break
 			}
-			seen[id] = true
-			fsx.LastID = id
+			u := e.Message.Usage
+			k := Kinds{u.Input, u.Output, u.CacheRead, u.CacheWrite}
+			if c := seen[id]; c != nil {
+				if d := c.grow(k); d.Total() > 0 {
+					add(c.Day, c.TS, c.Model, d, false)
+				}
+				fsx.Last = c
+				break
+			}
 			ts, err := time.Parse(time.RFC3339Nano, e.Timestamp)
 			if err != nil {
 				break
@@ -424,8 +472,10 @@ func readFrom(p string, fsx *fileState, meta *sessionMeta, loc *time.Location, a
 			if !sub && meta.Cwd == "" && e.Cwd != "" {
 				meta.Cwd = e.Cwd
 			}
-			u := e.Message.Usage
-			add(ts.In(loc).Format("2006-01-02"), ts, e.Message.Model, Kinds{u.Input, u.Output, u.CacheRead, u.CacheWrite})
+			c := &counted{ID: id, Day: ts.In(loc).Format("2006-01-02"), Model: e.Message.Model, TS: ts, Kinds: k}
+			seen[id] = c
+			fsx.Last = c
+			add(c.Day, ts, c.Model, k, true)
 		case !sub && (bytes.Contains(b, markName) || bytes.Contains(b, markTitle)):
 			var e entry
 			if json.Unmarshal(b, &e) == nil {
@@ -583,8 +633,32 @@ func LoadLedger(path string) []Line {
 	return out
 }
 
-func writeLedger(path string, ls []Line) error {
+// ledgerHeader is the ledger's first line; LoadLedger skips it, since it
+// has no session.
+type ledgerHeader struct {
+	Generation int64 `json:"generation"`
+}
+
+// ledgerGeneration reads the header of the ledger; 0 for none.
+func ledgerGeneration(path string) int64 {
+	f, err := os.Open(path)
+	if err != nil {
+		return 0
+	}
+	defer f.Close()
+	line, _ := bufio.NewReader(f).ReadBytes('\n')
+	var h ledgerHeader
+	if json.Unmarshal(line, &h) != nil {
+		return 0
+	}
+	return h.Generation
+}
+
+func writeLedger(path string, gen int64, ls []Line) error {
 	var buf bytes.Buffer
+	hb, _ := json.Marshal(ledgerHeader{Generation: gen})
+	buf.Write(hb)
+	buf.WriteByte('\n')
 	for _, l := range ls {
 		b, err := json.Marshal(l)
 		if err != nil {
@@ -618,12 +692,33 @@ func writeJSON(path string, v any) error {
 	return writeAtomic(path, b)
 }
 
+// writeAtomic writes beside the file, syncs, renames over it, and syncs
+// the directory, so a crash leaves the old file or the new one whole.
 func writeAtomic(path string, b []byte) error {
 	tmp := path + ".tmp"
-	if err := os.WriteFile(tmp, b, 0o600); err != nil {
+	f, err := os.OpenFile(tmp, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
+	if err != nil {
 		return err
 	}
-	return os.Rename(tmp, path)
+	if _, err := f.Write(b); err != nil {
+		f.Close()
+		return err
+	}
+	if err := f.Sync(); err != nil {
+		f.Close()
+		return err
+	}
+	if err := f.Close(); err != nil {
+		return err
+	}
+	if err := os.Rename(tmp, path); err != nil {
+		return err
+	}
+	if d, err := os.Open(filepath.Dir(path)); err == nil {
+		_ = d.Sync()
+		d.Close()
+	}
+	return nil
 }
 
 func lockFile(path string) (func(), error) {

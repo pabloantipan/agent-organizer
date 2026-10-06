@@ -1,6 +1,7 @@
 package usage
 
 import (
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -102,16 +103,25 @@ func TestIngestSumsOncePerMessageAndRereadsNothing(t *testing.T) {
 		t.Errorf("second pass over an unchanged home: %+v, want 0 bytes and no change", st)
 	}
 
-	// The session goes on: a new message and one more repeat of the last one
-	// (a stream that crosses passes). Only the new bytes are read.
+	// The session goes on, and a stream crosses two passes: msg_3's
+	// mid-stream snapshot is complete when the pass runs, its final line
+	// half-written. Only the new bytes are read, and msg_3 is counted once.
 	main := filepath.Join(o.ProjectsDir, "-home-p-org", "s-main.jsonl")
-	f, _ := os.OpenFile(main, os.O_APPEND|os.O_WRONLY, 0o644)
-	add := `{"type":"assistant","sessionId":"s-main","timestamp":"2026-10-06T10:00:09.000Z","message":{"id":"msg_s","model":"<synthetic>","usage":{"input_tokens":0,"output_tokens":0,"cache_read_input_tokens":0,"cache_creation_input_tokens":0}}}` + "\n" +
-		`{"type":"assistant","sessionId":"s-main","timestamp":"2026-10-06T11:00:00.000Z","message":{"id":"msg_3","model":"claude-opus-5-5","usage":{"input_tokens":1,"output_tokens":1,"cache_read_input_tokens":1,"cache_creation_input_tokens":1}}}` + "\n" +
-		`{"type":"assistant","sessionId":"s-main","timestamp":"2026-10-06T11:00:01.000Z","message":{"id":"msg_3","model":"claude-opus-5-5","usage":{"input_tokens":1,"output_tokens":1,"cache_read_input_tokens":1,"cache_creation_input_tokens":1}}}` + "\n" +
-		`{"type":"assistant","sessionId":"s-main","timestamp":"2026-10-06T11:00:02.000Z","message":{"id":"msg_4","model":"claude-opus-5-5","usa`
-	f.WriteString(add)
-	f.Close()
+	appendTo := func(text string) {
+		f, err := os.OpenFile(main, os.O_APPEND|os.O_WRONLY, 0o644)
+		if err != nil {
+			t.Fatal(err)
+		}
+		f.WriteString(text)
+		f.Close()
+	}
+	msg3 := func(out, write int) string {
+		return fmt.Sprintf(`{"type":"assistant","sessionId":"s-main","timestamp":"2026-10-06T11:00:00.000Z","message":{"id":"msg_3","model":"claude-opus-5-5","usage":{"input_tokens":1,"output_tokens":%d,"cache_read_input_tokens":1,"cache_creation_input_tokens":%d}}}`, out, write)
+	}
+	appendTo(`{"type":"assistant","sessionId":"s-main","timestamp":"2026-10-06T10:00:09.000Z","message":{"id":"msg_s","model":"<synthetic>","usage":{"input_tokens":0,"output_tokens":0,"cache_read_input_tokens":0,"cache_creation_input_tokens":0}}}` + "\n" +
+		msg3(1, 1) + "\n" + msg3(1, 1) + "\n")
+	final := msg3(40, 3) + "\n"
+	appendTo(final[:50])
 	st, err = Ingest(o)
 	if err != nil {
 		t.Fatal(err)
@@ -120,11 +130,52 @@ func TestIngestSumsOncePerMessageAndRereadsNothing(t *testing.T) {
 		t.Errorf("third pass: %+v, want only the grown file read", st)
 	}
 	d6 = byDay(LoadLedger(o.LedgerPath), "s-main")["2026-10-06"]
-	if d6.Kinds != (Kinds{Input: 21, Output: 201, CacheRead: 2001, CacheWrite: 1}) {
-		t.Errorf("after growth 2026-10-06 = %+v: msg_3 once, the half-written line not yet", d6.Kinds)
+	if d6.Kinds != (Kinds{Input: 21, Output: 201, CacheRead: 2001, CacheWrite: 1}) || d6.Messages != 2 {
+		t.Errorf("after the snapshot 2026-10-06 = %+v (%d messages): msg_3's snapshot once, its final line not yet", d6.Kinds, d6.Messages)
 	}
-	if !d6.Last.Equal(time.Date(2026, 10, 6, 11, 0, 0, 0, time.UTC)) {
+
+	// The final line lands, then a new message: msg_3 adds only what grew.
+	appendTo(final[50:] + `{"type":"assistant","sessionId":"s-main","timestamp":"2026-10-06T12:00:00.000Z","message":{"id":"msg_4","model":"claude-opus-5-5","usage":{"input_tokens":2,"output_tokens":2,"cache_read_input_tokens":2,"cache_creation_input_tokens":2}}}` + "\n")
+	if _, err := Ingest(o); err != nil {
+		t.Fatal(err)
+	}
+	d6 = byDay(LoadLedger(o.LedgerPath), "s-main")["2026-10-06"]
+	if d6.Kinds != (Kinds{Input: 23, Output: 242, CacheRead: 2003, CacheWrite: 5}) || d6.Messages != 3 {
+		t.Errorf("after the stream ended 2026-10-06 = %+v (%d messages): msg_3 at its final usage once, msg_4 once", d6.Kinds, d6.Messages)
+	}
+	if !d6.Last.Equal(time.Date(2026, 10, 6, 12, 0, 0, 0, time.UTC)) {
 		t.Errorf("last = %v", d6.Last)
+	}
+}
+
+// A crash between the ledger's rename and the offsets' leaves them on two
+// generations; the next pass rebuilds rather than count grown bytes twice.
+func TestCrashBetweenRenamesDoesNotDoubleCount(t *testing.T) {
+	o := opts(t, copyFixture(t), nil)
+	if _, err := Ingest(o); err != nil {
+		t.Fatal(err)
+	}
+	stale, err := os.ReadFile(o.OffsetsPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	main := filepath.Join(o.ProjectsDir, "-home-p-org", "s-main.jsonl")
+	f, _ := os.OpenFile(main, os.O_APPEND|os.O_WRONLY, 0o644)
+	f.WriteString(`{"type":"assistant","sessionId":"s-main","timestamp":"2026-10-06T12:00:00.000Z","message":{"id":"msg_c","model":"claude-opus-5-5","usage":{"input_tokens":5,"output_tokens":5,"cache_read_input_tokens":5,"cache_creation_input_tokens":5}}}` + "\n")
+	f.Close()
+	if _, err := Ingest(o); err != nil {
+		t.Fatal(err)
+	}
+	want := byDay(LoadLedger(o.LedgerPath), "s-main")["2026-10-06"].Kinds
+	// The new ledger landed, the new offsets did not.
+	if err := os.WriteFile(o.OffsetsPath, stale, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Ingest(o); err != nil {
+		t.Fatal(err)
+	}
+	if got := byDay(LoadLedger(o.LedgerPath), "s-main")["2026-10-06"].Kinds; got != want {
+		t.Errorf("after the crash 2026-10-06 = %+v, want %+v (msg_c once)", got, want)
 	}
 }
 
