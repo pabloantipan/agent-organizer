@@ -5,6 +5,7 @@ import { useBoard } from "../stores/board.store";
 import { since } from "../lib";
 import { needsMeRows } from "../lib/queue";
 import { HelpView } from "./HelpView";
+import { FloatAvailable, FloatCompact } from "../../wailsjs/go/main/App";
 
 export function TopBar() {
   const { screen, selectedInitiative, goHome, openSettings, view, loading, syncing, refresh, sync, error, lastMessage, account, lock, authMode, syncNote, setAccount, setLock, setOfflineChoice, agents } = useBoard();
@@ -18,6 +19,10 @@ export function TopBar() {
   const machines = view?.board.machines ?? [];
   const [version, setVersion] = useState("");
   useEffect(() => { api.version().then(setVersion, () => undefined); }, []);
+  // Compact to icon (floating-icon §4) only where the icon runs: macOS, past
+  // its startup check.
+  const [floats, setFloats] = useState(false);
+  useEffect(() => { FloatAvailable().then(setFloats, () => undefined); }, []);
   // The Help (A2) is the factory's, not an initiative's: it lies over
   // whatever screen is open, under this bar, and closing it returns there.
   // Each open reads help_doc again.
@@ -77,9 +82,21 @@ export function TopBar() {
           </div>
         )}
       </span>}
+      {floats && <button className="ghost gear" onClick={() => { closeHelp(); void FloatCompact(); }} title="Compact to icon (the icon floats on every desktop)" aria-label="Compact to icon"><CompactIcon /></button>}
       <button className={`ghost gear ${helpTop !== null ? "on" : ""}`} onClick={toggleHelp} title="Help: how we build, from help_doc" aria-label="Help" aria-pressed={helpTop !== null}><CircleHelp size={14} /></button>
       <button className={`ghost gear ${screen === "settings" && helpTop === null ? "on" : ""}`} onClick={() => { closeHelp(); openSettings(); }} title="Settings" aria-label="Settings"><Settings size={14} /></button>
       {helpTop !== null && <HelpView top={helpTop} onClose={closeHelp} />}
     </header>
+  );
+}
+
+/** The three bars shrinking into a corner (floating-icon §4): an arrow
+ *  toward the bottom-right corner, where the bars stand small. */
+function CompactIcon() {
+  return (
+    <svg width={14} height={14} viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M2 2l5 5M7 3.5V7H3.5" />
+      <path d="M9 13v-2.5M11 13V9.5M13 13v-1.5" />
+    </svg>
   );
 }
