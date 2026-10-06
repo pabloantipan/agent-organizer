@@ -1,12 +1,12 @@
 ---
 title: "The Usage view: this week's tokens and money, past weeks, by initiative, role, task and model"
-status: now
+status: done
 repos: [organizer]
 branch: usage-view
 seat: uv-build
 stage: one-window
 updated: 2026-10-06
-next: "review: usage-view, rework 2 (filtered waves, wave meta, fixture two-card wave) done, gate met (U1-U10, X0), ad7dbf3"
+next: "merged as 58eb28c (sup47)"
 depends_on: [usage-ledger]
 boundary: ["frontend/src/components/Usage.tsx and styles/usage.css (new)", "the top bar and board.store.ts screen (one entry), AgentsView.tsx (the week line only)", "frontend/src/lib helpers and tests, scripts/fixture-home.sh (a ledger)", "not: Go"]
 spec: "docs/specs/usage.md (FR-5, FR-6; docs/ux/specs/usage.md (b104480))"
@@ -98,3 +98,4 @@ docs/specs/usage.md, U1 to U9 and X0. Shots in `.wt-notes/uv-build/` (named belo
 - Round 3 did not re-run Chromium, U2, U3, U6, U7 or U9 (round 2: pass; the rework touches only the task cut and the fixture), the states table or the keyboard walk.
 - Both machines present; the error states (no path to drive them).
 - Reviewer: uv-ui, 2026-10-06.
+- 2026-10-06 sup47: merged as 58eb28c after uv-review and uv-ui passed at ad7dbf3; card to done/.
