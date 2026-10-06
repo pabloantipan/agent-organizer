@@ -307,11 +307,13 @@ export function DecisionsView() {
             <span className="dec-title">{d.title}</span>
             {all && <span className="badge">{r.initiative}</span>}
             <span className={`badge dec-status ${d.status}`}>{statusWord(d.status)}</span>
+            {/* FR-1: the chosen option is the line's own item, so it gives way first. */}
+            {d.status === "ruled" && d.chosen && <span className="dec-chosen" title={`“${d.chosen}”`}>“{d.chosen}”</span>}
             <span className="dec-meta">
               {d.status === "proposed"
                 ? <>{ownerPhrase(d.owner)} · <b>{waitedWords(age(d))}</b>{lineDraft && <> · draft</>}</>
                 : d.status === "ruled"
-                  ? <>{d.chosen ? <>“{d.chosen}” · </> : null}{rulerWords(d.ruled_by)} · {ruledOn}{t && <> · {t}</>}</>
+                  ? <>{d.chosen ? "\u00a0· " : null}{rulerWords(d.ruled_by)} · {ruledOn}{t && <> · {t}</>}</>
                   : d.superseded_by ? <>by {d.superseded_by}</> : null}
             </span>
           </button>

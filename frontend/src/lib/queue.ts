@@ -174,3 +174,10 @@ export function needsMeShown<T>(rows: T[], showAll: boolean, wide: boolean): { s
   if (showAll || wide || rows.length <= NEEDS_ME_FIRST) return { shown: rows, hidden: 0 };
   return { shown: rows.slice(0, NEEDS_ME_FIRST), hidden: rows.length - NEEDS_ME_FIRST };
 }
+
+/** Whether the row named by key sits behind "Show the other N" (leftovers-12
+ *  FR-5): a landing on it opens the rest first. False for no key, a key not
+ *  in the rows, or one of the first five. */
+export function pastFirst(rows: { key: string }[], key: string | null | undefined): boolean {
+  return !!key && rows.findIndex((r) => r.key === key) >= NEEDS_ME_FIRST;
+}
