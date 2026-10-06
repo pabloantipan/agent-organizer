@@ -62,19 +62,21 @@ F4  move it
 
 F5  pick by typing
   6. Click the icon. The list opens by it, with the search field focused.
-  7. Type  pay  and press Enter: partner-payouts opens full, here on desktop 3.
+  7. Drag the icon a little with the list open: the list follows it.
+  8. Type  pay  and press Enter: partner-payouts opens full, here on desktop 3.
 
 F7  get out without moving anything
-  8. ctrl+← to desktop 2. Click the icon; press Escape twice: the list goes,
-     the icon stays.
-  9. Click the icon again, then click the desktop outside the list: it goes.
- 10. ctrl+→ to desktop 3: Deltagos is still full there.
+  9. ctrl+← to desktop 2. Click the icon; press Escape twice (no clicks):
+     the list goes, the icon stays.
+ 10. Click the icon again, then click the empty desktop beside the list
+     (not the icon): it goes.
+ 11. ctrl+→ to desktop 3: Deltagos is still full there.
 
 F8  compact by hand
- 11. In Deltagos's top bar, press Compact to icon (just left of the ?):
+ 12. In Deltagos's top bar, press Compact to icon (just left of the ?):
      the window shrinks into the icon, which stays on this desktop.
- 12. ctrl+← to desktop 2: the icon is there too.
- 13. ctrl+← to desktop 1, back to this terminal.
+ 13. ctrl+← to desktop 2: the icon is there too.
+ 14. ctrl+← to desktop 1, back to this terminal.
 
 STEPS
 echo "(The recording ends by itself at $END.)"
