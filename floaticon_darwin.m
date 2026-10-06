@@ -800,6 +800,26 @@ static void build(void) {
         if (!seen) { seen = YES; flog(@"pointer: global move monitor live"); }
         watchPointer();
     }];
+    // The float log says how a list closed (a take reads it back): the keys
+    // the list gets, and the window losing key, which is how a click outside
+    // or leaving the desktop reaches it.
+    [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskKeyDown handler:^NSEvent *(NSEvent *e) {
+        if (state == StateListing && [e window] == mainWin) {
+            unsigned short k = [e keyCode];
+            if (k == 53) flog(@"key: Escape");
+            else if (k == 36 || k == 76) flog(@"key: Return");
+            else if ([[e characters] length]) flog(@"key: typed %@", [e characters]);
+        }
+        return e;
+    }];
+    [[NSNotificationCenter defaultCenter] addObserverForName:NSWindowDidResignKeyNotification object:mainWin queue:[NSOperationQueue mainQueue]
+                                                  usingBlock:^(NSNotification *n) {
+                                                      if (state != StateListing) return;
+                                                      NSPoint p = [NSEvent mouseLocation];
+                                                      flog(@"list lost key: pointer at %@ (%@), list %@, app active=%d", NSStringFromPoint(p),
+                                                           overTile(p) ? @"over the icon" : NSPointInRect(p, [mainWin frame]) ? @"inside the list" : @"outside the list and the icon",
+                                                           NSStringFromRect([mainWin frame]), [NSApp isActive]);
+                                                  }];
     [NSEvent addLocalMonitorForEventsMatchingMask:moves handler:^NSEvent *(NSEvent *e) {
         watchPointer();
         return e;
