@@ -90,6 +90,27 @@ type Scope struct {
 	Out []string `yaml:"out" json:"out"`
 }
 
+// UnmarshalYAML accepts the documented {in, out} map and also scope written
+// as one string (plain or folded `>-` prose), which owners do write: the
+// string becomes the one item of In. Without this a prose scope failed the
+// whole initiative.yaml and lost its goal, measure and the rest.
+func (s *Scope) UnmarshalYAML(n *yaml.Node) error {
+	if n.Kind == yaml.ScalarNode {
+		*s = Scope{}
+		if t := strings.TrimSpace(n.Value); t != "" && n.Tag != "!!null" {
+			s.In = []string{t}
+		}
+		return nil
+	}
+	type plain Scope
+	var p plain
+	if err := n.Decode(&p); err != nil {
+		return err
+	}
+	*s = Scope(p)
+	return nil
+}
+
 // Stage phases (the working-on skill, Roadmap): discovery finds the edge of the
 // problem and ends in decisions; building is specs, cards and waves. Any other
 // value is reported by the scan and dropped.
@@ -427,7 +448,15 @@ func (a Agent) Live() bool { return a.State == AgentWorking || a.State == AgentR
 type Problem struct {
 	Path string `json:"path"`
 	Msg  string `json:"msg"`
+	// Unread marks a file the scan could not read at all (no frontmatter,
+	// YAML that does not parse, a misnamed decision record): what it holds is
+	// missing from the board, so a card or an ask in it vanishes. The other
+	// problems are about files that were read and are shown.
+	Unread bool `json:"unread"`
 }
+
+// UnreadProblem is a Problem for a file the scan dropped.
+func UnreadProblem(path, msg string) Problem { return Problem{Path: path, Msg: msg, Unread: true} }
 
 // FSEActivity is what the board carries about an initiative's Forward Software
 // Engineer: the hand-off it left for its next session and the commits it signed

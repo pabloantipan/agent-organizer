@@ -32,18 +32,18 @@ func readDecisions(dir string, problems []model.Problem) ([]model.Decision, []mo
 		p := filepath.Join(dir, e.Name())
 		m := decisionName.FindStringSubmatch(e.Name())
 		if m == nil {
-			problems = append(problems, model.Problem{Path: p, Msg: "decision file name is not NNNN-slug.md"})
+			problems = append(problems, model.UnreadProblem(p, "decision file name is not NNNN-slug.md"))
 			continue
 		}
 		d := model.Decision{Number: m[1], Slug: m[2], Path: p}
 		b, err := os.ReadFile(p)
 		if err != nil {
-			problems = append(problems, model.Problem{Path: p, Msg: err.Error()})
+			problems = append(problems, model.UnreadProblem(p, err.Error()))
 			continue
 		}
 		body, err := parseFrontmatter(string(b), &d)
 		if err != nil {
-			problems = append(problems, model.Problem{Path: p, Msg: err.Error()})
+			problems = append(problems, model.UnreadProblem(p, err.Error()))
 			continue
 		}
 		d.Body = body

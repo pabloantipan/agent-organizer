@@ -938,6 +938,7 @@ export namespace model {
 	export class Problem {
 	    path: string;
 	    msg: string;
+	    unread: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Problem(source);
@@ -947,6 +948,7 @@ export namespace model {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.path = source["path"];
 	        this.msg = source["msg"];
+	        this.unread = source["unread"];
 	    }
 	}
 	
