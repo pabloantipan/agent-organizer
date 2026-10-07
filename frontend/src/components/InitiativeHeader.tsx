@@ -5,6 +5,8 @@ import { dateWords, parseISO, today } from "../lib/dates";
 import { api } from "../hooks/useWails";
 import { firstWaiting, phaseRuns, stagePosition, waitingChip } from "../lib/header";
 import { leadOf, readOnlyOf } from "../lib/queue";
+import { unreadFiles, unreadLabel } from "../lib/unread";
+import { UnreadFiles } from "./UnreadFiles";
 import { useScrollEdges } from "../lib/useScrollEdges";
 import { useBoard, type Sub } from "../stores/board.store";
 import "../styles/header.css";
@@ -196,6 +198,10 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
   const barStage = !headerOpen || compact;
   const openRef = useRef<HTMLDivElement>(null);
   const edges = useScrollEdges(openRef, headerOpen);
+  // Files the scan could not read, counted beside the decisions waiting:
+  // what they hold is on no sub-view, so the header says so and lists them.
+  const unread = unreadFiles(i.problems);
+  const [unreadOpen, setUnreadOpen] = useState(false);
   return (
     <header className={`ihead ${headerOpen ? "open" : "folded"} ${widthClass}`}>
       <div className="ihead-bar">
@@ -218,6 +224,10 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
         {chip && first ? (
           <button className="lz waiting ihead-chip" onClick={() => openDecision(i.id, first)} title="open Decisions on the first record waiting on a ruling">{chip}</button>
         ) : headerOpen ? <span className="ihead-nochip">no decision waiting</span> : null}
+        {unread.length > 0 && (
+          <button className="lz warning ihead-chip" aria-expanded={unreadOpen} aria-controls={`ihead-unread-${i.id}`} onClick={() => setUnreadOpen(!unreadOpen)}
+            title="the files the scan skipped, with why; fix them and they read again">{unreadLabel(unread.length)}</button>
+        )}
         {i.target && <span className="ihead-target">target <b className="num">{dateWords(i.target)}</b></span>}
         {!headerOpen && <span className={`ihead-goal-line ${i.goal ? "" : "missing"}`} title={i.goal || undefined}>{i.goal || "no goal yet"}</span>}
         <span className="spacer" />
@@ -225,6 +235,7 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
           <ChevronDown size={14} aria-hidden /> {headerOpen ? "Hide details" : "Details"}
         </button>
       </div>
+      {unreadOpen && unread.length > 0 && <UnreadFiles id={`ihead-unread-${i.id}`} files={unread} root={i.path} local={i.local} />}
       {headerOpen && (
         <div ref={openRef} id={`ihead-open-${i.id}`} className={`ihead-open ${edges.top ? "edge-top" : ""} ${edges.bottom ? "edge-bottom" : ""}`}>
           <div className="ihead-cols">

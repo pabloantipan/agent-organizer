@@ -1,6 +1,7 @@
 import type { AgentGroup, AgentsView, BoardView, CellThread, Seat } from "../hooks/useWails";
 import type { merge, model } from "../../wailsjs/go/models";
 import { parseISO } from "./dates";
+import { unreadFiles, type UnreadFile } from "./unread";
 
 /** One definition of the human's queue, used by the tab badge, the mailbox
  *  list, the Agents pill and the Slack chat list, so every count agrees.
@@ -85,8 +86,9 @@ export function queueOf(group: AgentGroup, view: BoardView | null) {
 }
 
 /** One row of Needs me: a decision waiting on a ruling, a thread asking the
- *  human, a card addressed to them, a seat mail cannot reach, or a cell in
- *  definition waiting on its first launch. `since` is
+ *  human, a card addressed to them, a seat mail cannot reach, a cell in
+ *  definition waiting on its first launch, or an initiative with files the
+ *  scan could not read (undated, last; gone when the files read again). `since` is
  *  when it started waiting (null when the source has no date, and those sort
  *  last); `key` is what openNeedsMe and the Solved marks name it by. */
 export type NeedsMeRow =
@@ -94,7 +96,8 @@ export type NeedsMeRow =
   | { kind: "thread"; key: string; initiative: string; since: Date | null; thread: CellThread }
   | { kind: "card"; key: string; initiative: string; since: Date | null; card: merge.BoardCard }
   | { kind: "seat"; key: string; initiative: string; since: Date | null; seat: Seat }
-  | { kind: "launch"; key: string; initiative: string; since: null; cell: model.Cell; missing: string | null };
+  | { kind: "launch"; key: string; initiative: string; since: null; cell: model.Cell; missing: string | null }
+  | { kind: "unread"; key: string; initiative: string; since: null; path: string; files: UnreadFile[] };
 
 const day = (s: string | undefined) => parseISO(s?.slice(0, 10));
 
@@ -110,6 +113,7 @@ const day = (s: string | undefined) => parseISO(s?.slice(0, 10));
  *  seat in roster order, and launchVerb turns it into the row's words. */
 export function needsMeRows(view: BoardView | null, agents: AgentsView | null, now = new Date()): NeedsMeRow[] {
   const rows: NeedsMeRow[] = [];
+  const unread: NeedsMeRow[] = [];
   // An initiative on two machines reports its records twice; the local scan wins.
   const seen = new Set<string>();
   const groups = new Map((agents?.groups ?? []).map((g) => [g.id, g]));
@@ -122,6 +126,10 @@ export function needsMeRows(view: BoardView | null, agents: AgentsView | null, n
     for (const d of i.decisions ?? []) {
       if (d.status === "proposed" && ownedByLead(d, lead)) rows.push({ kind: "decision", key: `decision:${i.id}/${d.number}`, initiative: i.id, since: day(d.raised), decision: d });
     }
+    // Files the scan could not read: whatever ask they hold is missing from
+    // every other row, so the initiative gets one row that says so.
+    const files = unreadFiles(i.problems);
+    if (files.length > 0) unread.push({ kind: "unread", key: `unread:${i.id}`, initiative: i.id, since: null, path: i.path, files });
   }
   for (const g of agents?.groups ?? []) {
     if (!g.cell || folded.has(g.id)) continue;
@@ -140,7 +148,7 @@ export function needsMeRows(view: BoardView | null, agents: AgentsView | null, n
       rows.push({ kind: "launch", key: `launch:${g.id}`, initiative: g.id, since: null, cell: g.cell, missing });
     }
   }
-  return rows;
+  return rows.concat(unread);
 }
 
 /** The verb and blocker of a cell-in-definition row (FR-3): a cell that
