@@ -98,7 +98,7 @@ function InitiativeScreen() {
   }
   return (
     <div className="initiative-screen">
-      <InitiativeHeader initiative={initiative} />
+      <InitiativeHeader key={initiative.id} initiative={initiative} />
       <div ref={body} className={`board-wrap ${sub === "conversations" ? "slack-wrap" : ""}`}>
         {sub === "overview" && <ErrorBoundary name="Overview"><Overview initiative={initiative} /></ErrorBoundary>}
         {sub === "work" && <ErrorBoundary name="Board"><Board /></ErrorBoundary>}

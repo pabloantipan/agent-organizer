@@ -92,7 +92,7 @@ type Scope struct {
 
 // UnmarshalYAML accepts the documented {in, out} map and also scope written
 // as one string (plain or folded `>-` prose), which owners do write: the
-// string becomes the one item of In. Without this a prose scope failed the
+// string becomes the one item of In; a bare list becomes In. Without this a prose scope failed the
 // whole initiative.yaml and lost its goal, measure and the rest.
 func (s *Scope) UnmarshalYAML(n *yaml.Node) error {
 	if n.Kind == yaml.ScalarNode {
@@ -100,6 +100,14 @@ func (s *Scope) UnmarshalYAML(n *yaml.Node) error {
 		if t := strings.TrimSpace(n.Value); t != "" && n.Tag != "!!null" {
 			s.In = []string{t}
 		}
+		return nil
+	}
+	if n.Kind == yaml.SequenceNode {
+		var in []string
+		if err := n.Decode(&in); err != nil {
+			return err
+		}
+		*s = Scope{In: in}
 		return nil
 	}
 	type plain Scope

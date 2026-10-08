@@ -68,6 +68,7 @@ func TestInitiativeScopeAsStringKeepsTheInitiative(t *testing.T) {
 		{"plain string", "scope: Everything about certificates\n", []string{"Everything about certificates"}, nil},
 		{"folded prose", "scope: >-\n  Designed for all 36,\n  built one at a time.\n", []string{"Designed for all 36, built one at a time."}, nil},
 		{"empty", "scope:\n", nil, nil},
+		{"list", "scope: [a, b]\n", []string{"a", "b"}, nil},
 		{"absent", "", nil, nil},
 	}
 	for _, c := range cases {
