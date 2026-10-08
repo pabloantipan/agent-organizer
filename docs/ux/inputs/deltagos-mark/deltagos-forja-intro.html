@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Deltagos – Forja intro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100,400;125,700&display=swap">
+<style>
+:root{
+  /* Lemnos night: a deep forge-indigo ground instead of neutral black */
+  --ground:#1A1433;
+  --belt:#9D80FF;     /* the D */
+  --gear:#FF6A4A;     /* the big gear: ember */
+  --gear2:#FFC25A;    /* the small gear: molten bronze */
+  --ink:#F2EDFF;
+  --ink-soft:#A99FCB;
+  --btn:#2A2150;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --ground:#EFEAFB; --belt:#5634D6; --gear:#D9452A; --gear2:#B87400;
+    --ink:#1A1433; --ink-soft:#5D5480; --btn:#DFD7F5;
+  }
+}
+:root[data-theme="light"]{
+  --ground:#EFEAFB; --belt:#5634D6; --gear:#D9452A; --gear2:#B87400;
+  --ink:#1A1433; --ink-soft:#5D5480; --btn:#DFD7F5;
+}
+:root[data-theme="dark"]{
+  --ground:#1A1433; --belt:#9D80FF; --gear:#FF6A4A; --gear2:#FFC25A;
+  --ink:#F2EDFF; --ink-soft:#A99FCB; --btn:#2A2150;
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--ground);color:var(--ink);overflow:hidden}
+
+.stage{
+  height:100%;
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
+  gap:clamp(16px,4vw,64px);
+  padding:clamp(16px,4vw,48px);
+}
+.mark{width:min(50vmin,460px);max-width:100%;flex:none}
+.mark svg{display:block;width:100%;height:auto;overflow:visible}
+
+/* Wordmark: a wide, heavy grotesk whose stroke weight answers the D's belt,
+   so mark and name read as one machined object rather than "logo + caption". */
+.word{display:flex;flex-direction:column;gap:clamp(10px,1.6vw,22px)}
+.word h1{
+  margin:0;
+  font-family:'Archivo','Helvetica Neue',Arial,sans-serif;
+  font-stretch:125%;
+  font-variation-settings:'wdth' 125;
+  font-weight:700;
+  font-size:clamp(44px,7.6vw,118px);
+  line-height:.9;
+  letter-spacing:-0.02em;
+  color:var(--ink);
+}
+.word p{
+  margin:0;
+  max-width:30ch;
+  font-family:'Archivo','Helvetica Neue',Arial,sans-serif;
+  font-weight:400;
+  font-size:clamp(16px,1.55vw,22px);
+  line-height:1.45;
+  color:var(--ink-soft);
+}
+
+@media (max-aspect-ratio: 1/1){
+  .stage{flex-direction:column}
+  .mark{width:min(64vw,340px)}
+  .word{align-items:center;text-align:center}
+}
+
+.controls{
+  position:fixed;right:max(16px,env(safe-area-inset-right,0px));
+  bottom:calc(16px + env(safe-area-inset-bottom,0px));
+  display:flex;gap:8px;
+}
+.controls button{
+  width:44px;height:44px;padding:0;border:0;border-radius:50%;
+  display:grid;place-items:center;
+  background:var(--btn);color:var(--ink-soft);cursor:pointer;
+}
+.controls button:hover{color:var(--ink)}
+.controls svg{width:16px;height:16px;fill:currentColor}
+.controls .play{display:none}
+.controls button[aria-pressed="true"] .play{display:block}
+.controls button[aria-pressed="true"] .pause{display:none}
+.controls button:focus-visible{outline:2px solid var(--belt);outline-offset:3px}
+</style>
+</head>
+<body>
+<main class="stage" id="stage">
+  <div class="mark">
+    <svg viewBox="20 17 64 66" role="img" aria-label="Deltagos mark: a belt forming the letter D, with three grouped gaps travelling along it, over two meshing gears">
+      <!-- Closed D loop used for measuring (not drawn) -->
+      <path id="track" d="M27 30 Q27 24 33 24 L48 24 C68 24 77 37 77 50 C77 63 68 76 48 76 L33 76 Q27 76 27 70 Z" fill="none" stroke="none"></path>
+      <defs>
+        <!-- cuts the V notches into the start of each stroke segment (the arrows' tails) -->
+        <mask id="tailNotch" maskUnits="userSpaceOnUse" x="-10" y="-10" width="120" height="120">
+          <rect x="-10" y="-10" width="120" height="120" fill="#fff"></rect>
+          <g id="notches" fill="#000"></g>
+        </mask>
+        <!-- the D's full silhouette (stroke + counter): the gears are only visible inside it -->
+        <mask id="dShape" maskUnits="userSpaceOnUse" x="-10" y="-10" width="120" height="120">
+          <path d="M27 30 Q27 24 33 24 L48 24 C68 24 77 37 77 50 C77 63 68 76 48 76 L33 76 Q27 76 27 70 Z" fill="#fff" stroke="#fff" stroke-width="9" stroke-linejoin="round"></path>
+        </mask>
+      </defs>
+      <!-- gears sit behind the D; whatever falls outside the letter is hidden -->
+      <g mask="url(#dShape)">
+        <g id="gearWrap">
+          <path id="gear" fill="var(--gear)" fill-rule="evenodd"></path>
+        </g>
+        <g id="gearWrap2">
+          <path id="gear2" fill="var(--gear2)" fill-rule="evenodd"></path>
+        </g>
+      </g>
+      <path id="dform" mask="url(#tailNotch)" d="M27 30 Q27 24 33 24 L48 24 C68 24 77 37 77 50 C77 63 68 76 48 76 L33 76 Q27 76 27 70 Z" fill="none" stroke="var(--belt)" stroke-width="9" stroke-linejoin="round" stroke-linecap="butt" ></path>
+      <!-- the arrows' points at the end of each stroke segment, same colour so it reads as one form -->
+      <g id="tips" fill="var(--belt)"></g>
+    </svg>
+  </div>
+  <div class="word">
+    <h1 id="wordmark">Deltagos</h1>
+    <p id="sub">From deltos, the writing tablet, and strategos, the general.</p>
+  </div>
+</main>
+
+<div class="controls">
+  <button id="pause" type="button" aria-pressed="false" aria-label="Pause animation">
+    <svg class="pause" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.5" height="12" rx="1"></rect><rect x="9.5" y="2" width="3.5" height="12" rx="1"></rect></svg>
+    <svg class="play" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.2v11.6a.8.8 0 0 0 1.2.7l9.4-5.8a.8.8 0 0 0 0-1.4L5.2 1.5A.8.8 0 0 0 4 2.2z"></path></svg>
+  </button>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  // ---- tuning ----
+  var SPEED = 24;          // average belt speed, SVG units per second
+  var GAPS = 3;            // number of empty spaces, travelling together as a group
+  var SPACING = 13;        // distance from one gap to the next within the group, SVG units
+  var VARY = 0.65;         // speed change along the D: 0 = constant, 0.65 = from 35% to 165% of SPEED
+  var CLOSE = [0.5, 0.85]; // a gap shrinks as the speed where it sits rises through this band, and is closed above it
+  var GAP = 5.25;          // longest a gap gets (where the D is slowest), SVG units
+  var TIP = 3.2;            // length of the pointed end (sits inside the gap)
+  var NOTCH = 3.2;          // depth of the V notch cut into the start
+  var HALF = 4.5;          // half the stroke width (stroke-width 9)
+  // Gear: large enough to overflow the D, centred 70% of the way along the 45° diagonal
+  // from the counter's centre (52,50) to the D's outer edge, so it sits low and to the right.
+  // Few, fat, shallow teeth that share one pitch so the two gears mesh.
+  var GEAR = {cx:66.8, cy:64.8, teeth:10, rOut:25.5, rIn:20.83, hole:7.65, phase:27};
+  // Small gear: further along the same 45° diagonal, up and to the left, meshing with the big one.
+  // Centres 36.4 apart (checked: teeth never overlap while turning); it turns twice as fast, the other way.
+  var D45 = 36.4 / Math.SQRT2;
+  var GEAR2 = {cx:GEAR.cx - D45, cy:GEAR.cy - D45, teeth:5, rOut:13.9, rIn:9.25, hole:3.5, phase:27};
+
+  var svgNS = 'http://www.w3.org/2000/svg';
+  var track = document.getElementById('track');
+  var dform = document.getElementById('dform');
+  var gearWrap = document.getElementById('gearWrap');
+  var gear = document.getElementById('gear');
+  var gearWrap2 = document.getElementById('gearWrap2');
+  var gear2 = document.getElementById('gear2');
+  var pauseBtn = document.getElementById('pause');
+  var tipLayer = document.getElementById('tips');
+  var notchLayer = document.getElementById('notches');
+  var tips = [], notches = [];
+  for (var gi = 0; gi < GAPS; gi++){
+    tips.push(tipLayer.appendChild(document.createElementNS(svgNS, 'polygon')));
+    notches.push(notchLayer.appendChild(document.createElementNS(svgNS, 'polygon')));
+  }
+
+  var L = track.getTotalLength();
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function mod(a, n){ return ((a % n) + n) % n; }
+
+  // Fastest at the outermost point of the bowl, slowest on the opposite side (the stem).
+  var FAST_AT = 0;
+  (function(){
+    var best = -Infinity;
+    for (var d = 0; d < L; d += 0.5){
+      var x = track.getPointAtLength(d).x;
+      if (x > best){ best = x; FAST_AT = d; }
+    }
+  })();
+  // c runs from -1 (slowest, on the stem) to 1 (fastest, at the bowl)
+  function phase(d){ return Math.cos(2 * Math.PI * (mod(d, L) - FAST_AT) / L); }
+  function speedAt(d){ return SPEED * (1 + VARY * phase(d)); }
+  function smoothstep(a, b, x){ var u = Math.min(1, Math.max(0, (x - a) / (b - a))); return u*u*(3 - 2*u); }
+  // how open the gap is: 1 = fully open, 0 = closed (the D looks whole at top speed)
+  function openness(d){ return 1 - smoothstep(CLOSE[0], CLOSE[1], phase(d)); }
+
+  // ---- gear geometry ----
+  function gearPath(g){
+    var n = g.teeth, step = Math.PI*2/n, ht = step*0.33, tt = step*0.2, d = '', ph = g.phase*Math.PI/180;
+    function p(r, a){ return (g.cx + r*Math.cos(a)).toFixed(2) + ' ' + (g.cy + r*Math.sin(a)).toFixed(2); }
+    for (var k = 0; k < n; k++){
+      var a = k*step - Math.PI/2 + ph;
+      d += (k === 0 ? 'M' : 'L') + p(g.rIn, a - ht) + 'L' + p(g.rOut, a - tt) + 'L' + p(g.rOut, a + tt) + 'L' + p(g.rIn, a + ht);
+    }
+    d += 'Z';
+    d += 'M' + (g.cx + g.hole) + ' ' + g.cy + 'A' + g.hole + ' ' + g.hole + ' 0 1 0 ' + (g.cx - g.hole) + ' ' + g.cy +
+         'A' + g.hole + ' ' + g.hole + ' 0 1 0 ' + (g.cx + g.hole) + ' ' + g.cy + 'Z';
+    return d;
+  }
+  gear.setAttribute('d', gearPath(GEAR));
+  gear2.setAttribute('d', gearPath(GEAR2));
+
+  // ---- render ----
+  // The D is one stroke; its dash pattern leaves the gaps, and shifting the dash offset moves them
+  // around the letter. The gears turn with the belt.
+
+  // point on the D at distance d, plus unit tangent and normal there
+  function frame(d){
+    var a = track.getPointAtLength(mod(d, L)), b = track.getPointAtLength(mod(d + 0.5, L));
+    var tx = b.x - a.x, ty = b.y - a.y, m = Math.hypot(tx, ty) || 1;
+    tx /= m; ty /= m;
+    return {x:a.x, y:a.y, tx:tx, ty:ty, nx:-ty, ny:tx};
+  }
+  function pts(list){ return list.map(function(q){ return q[0].toFixed(2) + ',' + q[1].toFixed(2); }).join(' '); }
+
+  // The gaps travel as a group, SPACING apart. Section i starts at travel + i*SPACING (its notched tail)
+  // and runs to just before the next section's tail (its pointed head); the last, long section closes
+  // the loop. Each gap's length follows the speed at its spot: long where the D is slow, closed where it is fastest.
+  function render(travel){
+    var starts = [], gaps = [];
+    for (var i = 0; i < GAPS; i++){
+      starts.push(travel + i*SPACING);
+      var o = openness(starts[i] - GAP);
+      gaps.push(o < 0.06 ? 0 : GAP * o);
+    }
+    // dash pattern: section i drawn, then the gap in front of section i+1
+    var dash = [];
+    for (var j = 0; j < GAPS; j++){
+      var len = j < GAPS - 1 ? SPACING : L - (GAPS - 1)*SPACING;
+      var g = gaps[(j + 1) % GAPS];
+      dash.push((len - g).toFixed(2), g.toFixed(2));
+    }
+    dform.setAttribute('stroke-dasharray', dash.join(' '));
+    dform.setAttribute('stroke-dashoffset', (-mod(travel, L)).toFixed(2));
+
+    var W = HALF + 0.8;
+    for (var n = 0; n < GAPS; n++){
+      var k = gaps[n] / GAP, start = starts[n], gap = gaps[n];
+      if (k < 0.06){                       // closed: no point or notch, so no hairline seam
+        tips[n].setAttribute('points', '');
+        notches[n].setAttribute('points', '');
+        continue;
+      }
+      // pointed head of the section behind this gap
+      var h = frame(start - gap - 0.15);
+      var hp = track.getPointAtLength(mod(start - gap + TIP*k, L));
+      tips[n].setAttribute('points', pts([
+        [h.x + h.nx*HALF, h.y + h.ny*HALF], [hp.x, hp.y], [h.x - h.nx*HALF, h.y - h.ny*HALF]
+      ]));
+      // notched tail of the section in front of this gap
+      var t0 = frame(start - 0.3*k);
+      var tp = track.getPointAtLength(mod(start + NOTCH*k, L));
+      notches[n].setAttribute('points', pts([
+        [t0.x + t0.nx*W, t0.y + t0.ny*W], [tp.x, tp.y], [t0.x - t0.nx*W, t0.y - t0.ny*W]
+      ]));
+    }
+
+    var spin = (travel / GEAR.rOut) * 180/Math.PI;
+    gearWrap.setAttribute('transform', 'rotate(' + spin.toFixed(2) + ' ' + GEAR.cx + ' ' + GEAR.cy + ')');
+    var spin2 = -spin * GEAR.teeth / GEAR2.teeth;
+    gearWrap2.setAttribute('transform', 'rotate(' + spin2.toFixed(2) + ' ' + GEAR2.cx.toFixed(2) + ' ' + GEAR2.cy.toFixed(2) + ')');
+  }
+
+  // ---- loop ----
+  var last = performance.now(), paused = false, travel = 0;
+
+  function tick(now){
+    var dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    if (!paused){
+      travel += speedAt(travel - GAP) * dt;        // the belt's pace is set by where the first gap is
+      render(travel);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  pauseBtn.addEventListener('click', function(){
+    paused = !paused;
+    pauseBtn.setAttribute('aria-label', paused ? 'Play animation' : 'Pause animation');
+    pauseBtn.setAttribute('aria-pressed', String(paused));
+  });
+
+  if (reduce){
+    render(0);                        // static mark, no motion
+    document.querySelector('.controls').style.display = 'none';
+  } else {
+    requestAnimationFrame(tick);
+  }
+})();
+</script>
+</body>
+</html>
