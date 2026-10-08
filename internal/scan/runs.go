@@ -47,7 +47,7 @@ func readRuns(root string, problems []model.Problem) ([]model.Wave, []model.Prob
 		p := filepath.Join(dir, e.Name())
 		b, err := os.ReadFile(p)
 		if err != nil {
-			problems = append(problems, model.Problem{Path: p, Msg: err.Error()})
+			problems = append(problems, model.UnreadProblem(p, err.Error()))
 			continue
 		}
 		waves, probs := parseRun(p, string(b))
@@ -85,7 +85,7 @@ func parseRun(path, content string) ([]model.Wave, []model.Problem) {
 		Waves []model.Wave `yaml:"waves"`
 	}
 	if err := yaml.Unmarshal([]byte(front), &doc); err != nil {
-		return nil, []model.Problem{{Path: path, Msg: "run record waves: " + err.Error()}}
+		return nil, []model.Problem{model.UnreadProblem(path, "run record waves: "+err.Error())}
 	}
 	return doc.Waves, checkWaves(path, doc.Waves)
 }

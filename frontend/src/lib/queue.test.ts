@@ -183,3 +183,28 @@ describe("pastFirst (leftovers-12 FR-5)", () => {
     expect(pastFirst(rows, undefined)).toBe(false);
   });
 });
+
+describe("needsMeRows: files the scan could not read", () => {
+  const withProblems = (id: string, problems: Partial<model.Problem>[], status = "active") =>
+    ({ id, local: true, status, path: `/h/${id}`, decisions: [{ number: "0001", status: "proposed", owner: "pablo", raised: "2026-09-01" }], problems }) as unknown as merge.BoardInitiative;
+
+  it("adds one row per initiative with unread files, after the dated rows", () => {
+    const view = board([withProblems("a", [
+      { path: "/h/a/working-on/x.md", msg: "no frontmatter: file must start with ---", unread: true },
+      { path: "/h/a/working-on/y.md", msg: "yaml: line 4: block sequence entries are not allowed in this context", unread: true },
+      { path: "/h/a/working-on/z.md", msg: "missing title", unread: false },
+    ])]);
+    const rows = needsMeRows(view, agents(group("a")));
+    expect(rows.map((r) => r.key)).toEqual(["decision:a/0001", "unread:a"]);
+    const row = rows[1];
+    expect(row.kind === "unread" && row.files.map((f) => f.path)).toEqual(["/h/a/working-on/x.md", "/h/a/working-on/y.md"]);
+  });
+
+  it("adds no row for problems on files that were read, or for an initiative that is not active", () => {
+    const view = board([
+      withProblems("a", [{ path: "/h/a/working-on/z.md", msg: "missing title", unread: false }]),
+      withProblems("b", [{ path: "/h/b/working-on/x.md", msg: "no frontmatter", unread: true }], "archived"),
+    ]);
+    expect(kinds(view, agents()).filter((k) => k.startsWith("unread:"))).toEqual([]);
+  });
+});

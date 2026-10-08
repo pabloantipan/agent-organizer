@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState
 import { createPortal } from "react-dom";
 import { Briefcase, ChevronDown, ChevronRight, CircleDashed, Compass, Hammer, Hand, Play } from "lucide-react";
 import type { merge, model, service } from "../../wailsjs/go/models";
+import { oneLine, underRoot, unreadLabel } from "../lib/unread";
+import { UnreadFiles } from "./UnreadFiles";
 import { inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, needsMeShown, NEEDS_ME_FIRST, pastFirst, type NeedsMeRow } from "../lib/queue";
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
@@ -76,7 +78,7 @@ export function Home() {
           </div>
         ) : (
           <div className="panel inbox">
-            {shown.map((r) => <InboxRow key={r.key} row={r} />)}
+            {shown.map((r) => r.kind === "unread" ? <UnreadRow key={r.key} row={r} /> : <InboxRow key={r.key} row={r} />)}
             {widthClass !== "wide" && rows.length > NEEDS_ME_FIRST && (hidden > 0 || showAll) && (
               <button ref={more} type="button" className="ib-more" onClick={toggleMore}>
                 {hidden > 0 ? `Show the other ${hidden}` : `Show only the oldest ${NEEDS_ME_FIRST}`}
@@ -190,6 +192,8 @@ function InboxRow({ row }: { row: NeedsMeRow }) {
   switch (row.kind) {
     case "decision":
       return <DecisionRow row={row} decision={row.decision} />;
+    case "unread":
+      return <UnreadRow row={row} />;
     case "thread": {
       const t = row.thread;
       const escalated = t.status === "escalated";
@@ -236,6 +240,28 @@ function InboxRow({ row }: { row: NeedsMeRow }) {
       );
     }
   }
+}
+
+/** An initiative with files the scan could not read: one row, the count as
+ *  its subject, the first file as its context, and a Show disclosure that
+ *  lists every path with its reason under the row. Nothing to rule: the fix
+ *  is in the files, and the row leaves when they read again. */
+function UnreadRow({ row }: { row: Extract<NeedsMeRow, { kind: "unread" }> }) {
+  const [open, setOpen] = useState(false);
+  const local = useBoard((s) => !!s.view?.board.initiatives?.some((i) => i.id === row.initiative && i.local));
+  const first = row.files[0];
+  const rest = row.files.length - 1;
+  const listId = `unread-${row.initiative}`;
+  return (
+    <>
+      <Shell row={row} reason="unreadable" tone="warning"
+        subject={<><span className="mono">{row.initiative}</span> · {unreadLabel(row.files.length)}</>}
+        context={`${underRoot(first.path, row.path)}: ${oneLine(first.reasons[0] ?? "")}${rest > 0 ? ` · and ${rest} more` : ""}`}>
+        <button className="act" aria-expanded={open} aria-controls={listId} aria-label={`${open ? "Hide" : "Show"} the ${unreadLabel(row.files.length)} in ${row.initiative}`} onClick={() => setOpen(!open)}>{open ? "Hide" : "Show"}</button>
+      </Shell>
+      {open && <UnreadFiles id={listId} files={row.files} root={row.path} local={local} />}
+    </>
+  );
 }
 
 /** A decision waiting on a ruling. Its action is a slot: RuleAction opens
