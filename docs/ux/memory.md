@@ -262,6 +262,20 @@ popover. It never stops a session.
 The FSE took it as written (dd657fd, cards ram-sample then ram-view,
 `ui_review`). Per-session memory is the footprint summed over the process
 tree. O2 (magenta, not red) is in accept record 0103 for Pablo.
+0102 ruled A (magenta and periwinkle gears); 0103 accepted as written.
+
+Initiatives, awake and asleep (2026-10-09, `specs/initiatives-view.md`,
+proposed, thread 01M4GK4QY61MGNM1SWN8FV876Q; 0104 A). A top-level view
+(`Initiatives` left of Usage, no number), cards in Awake, Asleep, then a
+closed Archived fold, in the rail's order. The head reads `n of 4 awake`,
+neutral, with `the limit` at four and magenta over it. Sleep confirms in
+place when anything is live or waiting; Wake asks nothing and is
+aria-disabled at four, naming the four awake. Deltagos never passes
+`--force`. The factory's own words are shown verbatim on failure, then what
+is true. The rail's `Not active` splits into `Asleep (n)` and `Archived (n)`:
+archived ones are not asleep, and the factory refuses them. Agents rows get
+a Memory column that never folds. Words: awake/asleep replace active/paused
+on screen.
 
 ## Open questions
 
