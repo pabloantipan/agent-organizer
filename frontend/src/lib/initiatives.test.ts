@@ -41,6 +41,9 @@ describe("the head's count (§1, I2)", () => {
     expect(countWords(4, 4, 3, ["camp"]).title).toBe("the factory counts 3; it does not see camp");
     expect(countWords(3, 4, 3, ["camp"]).title).toBe("");
   });
+  it("is the count alone when the factory is missing or failing (I15)", () => {
+    expect(countWords(10, null)).toEqual({ text: "10 awake", over: false, title: "" });
+  });
   it("reads none awake", () => {
     expect(countWords(0, 4).text).toBe("0 of 4 awake");
   });

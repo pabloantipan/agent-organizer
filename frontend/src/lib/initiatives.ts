@@ -26,7 +26,7 @@ export function sleepyWord(status: string | undefined): string {
   return st === "archived" && s !== "archived" ? s : st;
 }
 
-/** The factory's limit when it answered, else the four of its rule. */
+/** The factory's rule, when it answered without a `(limit N)`. */
 export const DEFAULT_LIMIT = 4;
 
 const NUMBER_WORDS = ["none", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
@@ -35,9 +35,12 @@ export const numberWord = (n: number) => NUMBER_WORDS[n] ?? String(n);
 const capital = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 /** The head's count (her §1): neutral under the limit and at it, magenta
- *  over it, with its hover. `factoryAwake` is the factory's own count when
+ *  over it, with its hover; `10 awake` alone when the factory is missing or
+ *  failing, since then there is no limit (`limit` null). `factoryAwake` is the factory's own count when
  *  it differs (an initiative it does not see): the hover says so. */
-export function countWords(awake: number, limit: number, factoryAwake: number | null = null, blind: string[] = []): { text: string; over: boolean; title: string } {
+export function countWords(awake: number, limit: number | null, factoryAwake: number | null = null, blind: string[] = []): { text: string; over: boolean; title: string } {
+  // No factory answer, no limit to measure against (I15): the count alone.
+  if (limit === null) return { text: `${awake} awake`, over: false, title: "" };
   const over = awake > limit;
   const text = `${awake} of ${limit} awake${awake === limit ? " · the limit" : over ? " · over the limit" : ""}`;
   const hover: string[] = [];

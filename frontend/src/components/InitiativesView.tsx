@@ -74,10 +74,11 @@ export function InitiativesView() {
   });
   const sections = sectionsOf(cards);
   const awakeLocal = sections.awake.filter((c) => c.local);
-  const limit = factory?.ok && factory.limit > 0 ? factory.limit : DEFAULT_LIMIT;
+  // Missing or failing, the factory has no limit to show (I15).
+  const limit = factory?.found && factory.ok ? (factory.limit > 0 ? factory.limit : DEFAULT_LIMIT) : null;
   const blind = cards.filter((c) => c.local && c.i.factory_blind && c.state === "awake").map((c) => c.id);
   const count = countWords(awakeLocal.length, limit, factory?.ok ? factory.awake : null, blind);
-  const atLimit = awakeLocal.length >= limit;
+  const atLimit = limit !== null && awakeLocal.length >= limit;
   const noFactory = factoryLine(factory);
   const rows = needsMeRows(view, agents);
   const most = mostMemory(agents, awakeLocal.map((c) => c.id));
