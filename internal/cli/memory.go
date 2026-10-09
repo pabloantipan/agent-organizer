@@ -37,21 +37,22 @@ func memoryCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now f
 		fmt.Fprintln(stderr, "memory could not be read:", r.Reason)
 		return 1
 	}
-	printMemory(stdout, *r.Memory, r.Sessions)
+	printMemory(stdout, *r.Memory, r.Sessions, r.MemSource)
 	return 0
 }
 
 // printMemory writes pressure, free of total, then every initiative biggest
 // first with its total and each of its sessions under it, unassigned last
-// (FR-3, amendment 2). The feed's top five is in --json only.
-func printMemory(w io.Writer, m model.Memory, sessions []model.MemorySession) {
+// (FR-3, amendment 2), and whether the agents' bytes are footprints or
+// resident sizes (Amendment 4). The feed's top five is in --json only.
+func printMemory(w io.Writer, m model.Memory, sessions []model.MemorySession, source string) {
 	fmt.Fprintf(w, "pressure  %s\n", m.Pressure)
 	fmt.Fprintf(w, "free      %s of %s GB\n", gb(m.FreeBytes), gb(m.TotalBytes))
 	if len(sessions) == 0 {
 		fmt.Fprintln(w, "no agent sessions running")
 		return
 	}
-	fmt.Fprintf(w, "agents    %s GB\n\n", gb(m.AgentsBytes))
+	fmt.Fprintf(w, "agents    %s GB (%s)\n\n", gb(m.AgentsBytes), source)
 	tw := tabwriter.NewWriter(w, 0, 4, 2, ' ', 0)
 	rows := make([]model.MemoryInitiative, 0, len(m.ByInitiative))
 	for _, r := range m.ByInitiative {

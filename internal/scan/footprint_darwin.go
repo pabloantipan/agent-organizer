@@ -19,6 +19,10 @@ import "C"
 
 import "fmt"
 
+// MemSource names what Agent.MemBytes sums in this build: the footprint, a
+// process whose footprint cannot be read by its resident size.
+const MemSource = "footprint"
+
 // Footprint is a process's physical footprint (ri_phys_footprint from
 // proc_pid_rusage), the figure Activity Monitor's Memory column shows. It
 // fails for another user's process.

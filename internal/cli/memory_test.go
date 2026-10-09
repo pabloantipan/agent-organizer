@@ -35,9 +35,9 @@ func TestPrintMemoryListsEverySession(t *testing.T) {
 		},
 	}
 	var out bytes.Buffer
-	printMemory(&out, m, all)
+	printMemory(&out, m, all, "resident size")
 	got := out.String()
-	for _, want := range []string{"pressure  high", "free      3.0 of 24.0 GB", "unassigned", "pid 42"} {
+	for _, want := range []string{"pressure  high", "free      3.0 of 24.0 GB", "unassigned", "pid 42", "(resident size)"} {
 		if !strings.Contains(got, want) {
 			t.Errorf("output lacks %q:\n%s", want, got)
 		}

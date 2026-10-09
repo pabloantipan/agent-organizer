@@ -142,7 +142,11 @@ func memoryBySession(inits []model.ScannedInitiative, unassigned []model.Agent) 
 type MemoryReport struct {
 	Memory   *model.Memory         `json:"memory"`
 	Sessions []model.MemorySession `json:"sessions"`
-	Reason   string                `json:"memory_reason,omitempty"`
+	// MemSource is what the agents' bytes are: "footprint" (a process whose
+	// footprint cannot be read counts its resident size) or, in a build
+	// without cgo, "resident size" for every process (Amendment 4).
+	MemSource string `json:"mem_source"`
+	Reason    string `json:"memory_reason,omitempty"`
 }
 
 // Memory reads this Mac once for `organizer memory`: processes and sessions
@@ -156,7 +160,7 @@ func (s *Service) Memory() MemoryReport {
 	o.Agents.SessionsDir = ""
 	snap := scan.Run(o)
 	m, why := s.sampleMemoryLocked(snap.Initiatives, snap.Unassigned)
-	r := MemoryReport{Memory: m, Reason: why, Sessions: []model.MemorySession{}}
+	r := MemoryReport{Memory: m, Reason: why, Sessions: []model.MemorySession{}, MemSource: scan.MemSource}
 	if m != nil {
 		r.Sessions, _, _ = memoryBySession(snap.Initiatives, snap.Unassigned)
 		if m.Warn {
