@@ -46,7 +46,7 @@ magenta and periwinkle. Today the floating icon draws three bars
 |---|---|---|---|
 | F17 | 1 | the review build's icon at 56/72/88 pt, shots | the D, its moving gaps and both turning gears read; colours as FR-1 |
 | F18 | 3 | Finder and Dock at large, 32 and 16 px (`iconutil` output, shots) | still frame; 32 px D and gears, no gaps; 16 px D alone; nothing smears |
-| F20-F22 | 3 | Aglaea's rows (floating-icon Amendment 5): the Dock on lodestar from the installed review build, Finder at 16 and 32 px, the two files byte for byte | as her spec; no grey frame |
+| F20-F22 | 3 | F20/F21 (Amendment 2, 2026-10-09, the FSE, from sup50, 0108): the built bundle's icon rendered through IconServices (`NSWorkspace icon(forFile:)` on `build/bin/Deltagos Review.app`, at 16, 32, 128 and 512 pt @1x/@2x, to PNGs), the path the Dock and Finder draw from, judged by the UI review; no Dock or Finder window driven. F22 the two files byte for byte | as Aglaea's spec; no grey frame in the renders. The live Dock look is Pablo's after `make install`, not a gate row |
 | F19 | 2, 4 | Reduce motion on: icon and Help header | still frame; nothing turns or travels |
 | H1 | 4 | Help header, shot beside `deltagos-mark-drawn.html` | same form and motion, wordmark and subtitle |
 | X0 | all | `make test`, `cd frontend && npm run build`, `wails build`, the floating icon's existing F-rows | pass |
