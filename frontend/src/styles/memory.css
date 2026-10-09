@@ -15,7 +15,7 @@
 
 .memory-pop {
   position: absolute; top: calc(100% + var(--space-1-5)); right: 0;
-  width: 560px; max-width: calc(100vw - 32px);
+  width: 640px; max-width: calc(100vw - 32px);
   box-sizing: border-box; padding: var(--space-3) var(--space-4);
   background: var(--surface-overlay); color: var(--fg);
   border-radius: var(--radius-lg); box-shadow: var(--shadow-overlay);
