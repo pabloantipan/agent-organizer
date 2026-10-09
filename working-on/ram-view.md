@@ -22,5 +22,6 @@ on the top bar and on the floating icon, with one warning at critical.
 docs/specs/ram-indicator.md, M1 to M8, N1 and X0.
 
 ## Notes
+- 2026-10-09 sup49: boundary widened by `App.tsx`'s screen switch only, to mount AgentsView with no initiative selected so an unassigned session's `Agents ›` lands on the unassigned group, as the design says.
 - 2026-10-09 sup49: boundary widened by one setter, `Service.SetMemoryReader` in `internal/service/memory.go` and its test, so the fake reading reaches the service from `app.go` (ram-sample was asked for an injectable reader and left it unexported).
 - 2026-10-09: supervisor sup49 (window 7535), spawned by the FSE.
