@@ -6,7 +6,7 @@ branch: ram-sample
 seat: rs-build
 stage: one-window
 updated: 2026-10-09
-next: "G4: `organizer memory` must list the crew's sessions by name with their initiative (the top-5 cap hides all six camp seats); or the FSE amends G4 against FR-3's cap"
+next: "review: ram-sample, gate met (G4 re-checked through the command after 0107 A), b0364f9"
 review: fail
 depends_on: []
 boundary: ["new internal/memory and its tests", "internal/scan/agents.go (ps columns, footprint, tree sum), model.Agent (mem_bytes)", "internal/service (AgentsView.memory, level times, warn rule), internal/cli (memory command), frontend/wailsjs regenerated", "not: the top bar, the floating icon, any view, posting the notification"]
@@ -25,6 +25,7 @@ docs/specs/ram-indicator.md, G1 to G7 and X0. Evidence in `.wt-notes/rs-build/`.
 - [x] G2 12:28:22: kernel level 2, ours `high`, Activity Monitor's pressure graph yellow (agree); free ours 3.86 GB vs AM 24.00 − 20.25 = 3.75 GB (Δ 0.11). `g2-final-*.{json,txt,png}`.
 - [x] G3 scan TestAgentMemTree over `testdata/memory/ps-tree.txt`: agent + 2 children + grandchild, one child's footprint fails → its rss; a nested agent counts only its own tree. Top order and cap 5: service TestMemorySummary.
 - [x] G4 12:22:13, 12 live sessions (camp crew ×6 of ccint-camp-monorepo, organizer-probe-{fse,sup49,rs-build}, hestia-probe-fse, a resumed organizer session, one unassigned terminal): each tree vs `footprint(1)` over the same pids, max Δ 4.0 % (my own tree, changing), others ≤ 0.3 %. `g4-compare.txt`, `g4-trees.tsv`, `am-memory.png`.
+  - Re-check after review fail + 0107 A (b0364f9), 13:21:09: `organizer memory` lists every session by name under its initiative, unassigned last: camp crew ×6 under ccint-camp-monorepo, organizer ×5, hestia ×1, unassigned `pid 1636`. Each session's bytes from `--json` vs `footprint(1)` over its tree, read right after: max Δ +1.2 % (my own tree), others ≤ 0.4 %. `g4-command.txt`, `g4-command.json`, `g4-command-compare.{sh,txt}`.
 - [x] G5 service TestMemoryWarnRule (spec's sequence, warn exactly twice; high throughout never) + TestMemoryWarnOpenedAtCritical.
 - [x] G6 service TestMemorySinceAndCriticalEnd: since 4 min back; was_critical_until 14:32 at +29 min, empty at +31.
 - [x] G7 service TestMemorySummary: two initiatives + unassigned = three rows summing to agents_bytes, biggest first.
@@ -34,6 +35,8 @@ docs/specs/ram-indicator.md, G1 to G7 and X0. Evidence in `.wt-notes/rs-build/`.
 - 2026-10-09: FR-1..FR-4 on `ram-sample` (11e790f, dea2936, ff3d2d1, 29cd12a, 10c206e), rebased on main 8fa9e0e; JSON shape and choices in `.wt-notes/rs-build/progress.md`.
 
 - 2026-10-09: gate met, G1-G7 and X0; branch `ram-sample` head 10c206e, unmerged, for review.
+
+- 2026-10-09: review fix: `organizer memory` lists every session grouped by initiative (FR-3 amendment 2, 0107 A), b0364f9; X0 re-run on a clean clone: make test exit 0 (vitest 343), wails build exit 0 (`x0b-*.txt`). Branch rebased on main 9e3855b.
 
 ## Notes
 - 2026-10-09 rs-build: spec FR-1's free formula ("total minus app memory, wired and compressed") reads ~1 GB above Activity Monitor on macOS 26 (4.4 vs 3.35 GB): AM's Memory Used is Physical − Cached Files. Implemented free = free + speculative + file-backed pages (vm_stat), which matched AM within 0.05 GB on three shots. The spec's parenthesis wants amending.
