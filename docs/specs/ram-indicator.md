@@ -78,13 +78,17 @@ and reads no memory at all.
 
 ## Acceptance → gate (ram-sample)
 
+Amendment 3, 2026-10-09, 0108: G2 and G4 read commands, not Activity
+Monitor on screen; the reviewer waited on the lead being idle.
+
+
 | # | FR | Check | Expected (fails on main) |
 |---|---|---|---|
 | G1 | 1 | Go test with a fake sysctl / vm_stat reader for levels 1, 2, 4 and a failed read | `normal`, `high`, `critical`; `memory: null` with a reason |
-| G2 | 1, 3 | `organizer memory --json` on the real home vs `sysctl kern.memorystatus_vm_pressure_level` and Activity Monitor's Memory tab read at the same minute | same pressure; free within 0.5 GB of Activity Monitor's total minus used |
+| G2 | 1, 3 | `organizer memory --json` on the real home vs `sysctl kern.memorystatus_vm_pressure_level` and `vm_stat` read in the same minute (no screenshot, 0108) | same pressure; free within 0.5 GB of the `vm_stat` figure FR-1 names |
 | G3 | 2 | Go test over a fixture `ps` output with an agent, two children and a grandchild, and a fake footprint reader that fails for one child | the agent's `mem_bytes` is the four summed, the failed one by resident size; top ordered biggest first, capped at five |
 | G7 | 2 | Go test: agents under two initiatives and one unassigned | `by_initiative` has three rows whose totals sum to `agents_bytes`, biggest first |
-| G4 | 2, 3 | `organizer memory` on the real home with a crew up | the crew's sessions listed by name with their initiative; each tree's sum within 5% of Activity Monitor's Memory column summed over the same pids |
+| G4 | 2, 3 | `organizer memory` on the real home with a crew up (no screenshot, 0108) | every crew session listed by name under its initiative; each tree's sum within 5% of `top -l 1 -stats pid,mem` (or `footprint`) summed over the same pids |
 | G5 | 4 | Go test, fake clock: normal → critical (warns) → normal 5 min → critical (no) → normal 12 min → critical 25 min after the first (no) → normal 12 min → critical 40 min after the first (warns); high throughout another run | `warn` exactly twice; never at high or recovery |
 | G6 | 1 | Go test: high for 4 min; critical ending at 14:32 | `since` 4 min back; `was_critical_until` 14:32 for 30 min, then empty |
 | X0 | all | `XDG_DATA_HOME=$(mktemp -d) make test` from a clean checkout; `wails build` | pass |

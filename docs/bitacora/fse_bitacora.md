@@ -27,6 +27,7 @@ restating it (the discuss skill).
   float-focus-steal as one accept record (both in floaticon_darwin.m, after
   sup49's ram-view, which touches it too). Next supervisor: sup50.
 - **0107 raised**: ram-sample G4 contradicted FR-3 (top five vs every crew session); ruled A (4473163), FR-3 amended, sup49 told.
+- **0108 ruled in words** (Pablo: "this is not working"): no screen-capture gate rows; one record per small UI ask; I amend gate contradictions myself and report after.
 - **Gate lesson (repetition candidate):** ram-indicator G2/G4 compare with
   Activity Monitor on screen; rs-review sat waiting for Pablo to be idle 30 s
   (seat-pointer cannot see windows on another Space). Gate rows should read a
