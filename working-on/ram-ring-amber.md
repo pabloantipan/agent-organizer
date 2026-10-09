@@ -12,6 +12,7 @@ boundary: ["floaticon_darwin.m (the ring layer: always on, colour by level, the 
 spec: "docs/ux/specs/ram-indicator.md Amendment 2 (7bb03f4)"
 gate: "this card's Gate section, rows R1 to R5"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -33,3 +34,9 @@ critical in `--amber-9`, on the icon, the top bar and the panel line.
 ## Notes
 - 2026-10-09: added to sup50's task (window 8383) by the FSE.
 - 2026-10-09, ra-build: R1's light and dark wallpaper are the icon's window shot alone (`screencapture -o -l`) composited over #ffffff and #000000; Pablo's wallpaper was not changed. The popover's pressure line turned amber too ("for memory only"), not a gate row.
+
+## Review
+- Verdict: pass, f329879 (R1-R5 met; R5 rerun from a clean clone at f329879: make test, npm run build, wails build all exit 0).
+- Unmet gate rows: none.
+- Notes: R1's light wallpaper is a composite over #ffffff, not a real wallpaper (0108 allows it). `floatIconMemory`'s comment in `floaticon_darwin.go` still says "anything else ... draws nothing"; stale since the ring draws the tone (Go was outside the boundary).
+- Reviewer: ra-review, 2026-10-09.
