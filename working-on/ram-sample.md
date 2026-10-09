@@ -51,3 +51,4 @@ Verdict: **fail**. Commit reviewed: `10c206e3f8d2a24eb8c1bf9ee49a3c22d47862f2` (
 - Not covered by the gate: `RefreshAgents` has seven callers, including the bound `App.RefreshAgents`. `warn` is consumed by whichever caller samples first, so `ram-view` must post from every Go-side path, or a frontend refresh can swallow the warning. A `CGO_ENABLED=0` build silently falls back to RSS, which overstates; the release build must keep cgo. Resumed sessions show as a uuid in `top`.
 
 Reviewer: rs-review, 2026-10-09.
+- 2026-10-09: G4 fail is a spec contradiction (FR-3 top five vs G4 every crew session); 0107 asks Pablo which way. rs-build waits on it for G4 only.

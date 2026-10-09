@@ -6,7 +6,7 @@ restating it (the discuss skill).
 
 ## HAND-OFF — 2026-10-09, RAM indicator (0101) spec drafted
 
-- **Last SHA seen:** 735b244. Next supervisor: sup49.
+- **Last SHA seen:** 6b0ccbe. Next supervisor: sup49.
 - **0101 ruled**; Aglaea's design spec landed (6d84a12, M1-M8). Build spec
   `docs/specs/ram-indicator.md` amended to it; cards `ram-sample`,
   `ram-view` cut (both pass `run --print`); accept **0103** raised with
@@ -26,6 +26,7 @@ restating it (the discuss skill).
   docs/ux/specs/initiatives-view.md. Next: the deltagos-mark card plus
   float-focus-steal as one accept record (both in floaticon_darwin.m, after
   sup49's ram-view, which touches it too). Next supervisor: sup50.
+- **0107 raised**: ram-sample G4 contradicted FR-3 (top five vs every crew session); recommend A (CLI lists every session). On the ruling, amend FR-3/G4 and tell sup49.
 - **Gate lesson (repetition candidate):** ram-indicator G2/G4 compare with
   Activity Monitor on screen; rs-review sat waiting for Pablo to be idle 30 s
   (seat-pointer cannot see windows on another Space). Gate rows should read a
