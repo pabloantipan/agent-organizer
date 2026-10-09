@@ -1,0 +1,188 @@
+import { describe, expect, it } from "vitest";
+import {
+  afterLine, confirmLines, countWords, factoryLine, isLimitRefusal, limitLine, listWords, memoryLine, mostMemory,
+  nextLine, progressLine, refusedWakeName, sectionsOf, sessionsLine, sinceLine, sleepyOf, sleepyWord, waitLine, waitingOf, doneLine, firstLine,
+} from "./initiatives";
+
+const GB = 1024 ** 3;
+const words = (d: string) => (d === "2026-10-14" ? "14 Oct" : d === "2026-10-02" ? "2 Oct" : d);
+
+describe("the words of a status (The words)", () => {
+  it("active and empty are awake, paused asleep, the rest archived", () => {
+    expect(sleepyOf("active")).toBe("awake");
+    expect(sleepyOf("")).toBe("awake");
+    expect(sleepyOf(undefined)).toBe("awake");
+    expect(sleepyOf("paused")).toBe("asleep");
+    expect(sleepyOf("archived")).toBe("archived");
+    expect(sleepyOf("done")).toBe("archived");
+  });
+  it("an unknown status is shown as written", () => {
+    expect(sleepyWord("done")).toBe("done");
+    expect(sleepyWord("paused")).toBe("asleep");
+    expect(sleepyWord("archived")).toBe("archived");
+  });
+});
+
+describe("the head's count (§1, I2)", () => {
+  it("is neutral under the limit", () => {
+    expect(countWords(3, 4)).toEqual({ text: "3 of 4 awake", over: false, title: "" });
+  });
+  it("says the limit at four", () => {
+    expect(countWords(4, 4).text).toBe("4 of 4 awake · the limit");
+    expect(countWords(4, 4).over).toBe(false);
+  });
+  it("is over the limit above four, with its hover", () => {
+    const c = countWords(5, 4);
+    expect(c.text).toBe("5 of 4 awake · over the limit");
+    expect(c.over).toBe(true);
+    expect(c.title).toBe("one was woken past the limit outside Deltagos; put one to sleep");
+  });
+  it("names the initiative the factory does not see when the counts differ", () => {
+    expect(countWords(4, 4, 3, ["camp"]).title).toBe("the factory counts 3; it does not see camp");
+    expect(countWords(3, 4, 3, ["camp"]).title).toBe("");
+  });
+  it("reads none awake", () => {
+    expect(countWords(0, 4).text).toBe("0 of 4 awake");
+  });
+});
+
+describe("the sessions line (§3)", () => {
+  it("awake, with frozen and working only when there are any", () => {
+    expect(sessionsLine("awake", 4, 1, 0)).toBe("4 sessions live · 1 frozen");
+    expect(sessionsLine("awake", 6, 0, 0)).toBe("6 sessions live");
+    expect(sessionsLine("awake", 1, 0, 1)).toBe("1 session live · 1 working");
+    expect(sessionsLine("awake", 0, 0, 0)).toBe("no sessions live");
+  });
+  it("asleep", () => {
+    expect(sessionsLine("asleep", 0, 3, 0)).toBe("3 sessions frozen");
+    expect(sessionsLine("asleep", 0, 1, 0)).toBe("1 session frozen");
+    expect(sessionsLine("asleep", 0, 0, 0)).toBe("no sessions frozen");
+  });
+  it("while it runs (§6)", () => {
+    expect(progressLine("sleep", 4)).toBe("freezing 4 sessions…");
+    expect(progressLine("wake", 3)).toBe("thawing 3 sessions…");
+    expect(progressLine("wake", 1)).toBe("thawing 1 session…");
+  });
+});
+
+describe("the memory line (§3, States)", () => {
+  const feed = { memory: { pressure: "normal", by_initiative: [{ initiative: "organizer", bytes: 9.8 * GB }, { initiative: "camp", bytes: 11.2 * GB }, { initiative: "", bytes: GB, unassigned: true }] } };
+  it("is the initiative's total", () => {
+    expect(memoryLine(feed, "organizer", false).text).toBe("Memory 9.8 GB");
+  });
+  it("hovers the biggest sessions", () => {
+    expect(memoryLine(feed, "camp", false, ["andrea 3.1 GB"]).title).toBe("biggest: andrea 3.1 GB");
+  });
+  it("reads none running when nothing of it runs", () => {
+    expect(memoryLine(feed, "hestia", false).text).toBe("Memory: none running");
+  });
+  it("is a dash while reading and when the read failed", () => {
+    expect(memoryLine(null, "x", false)).toEqual({ text: "Memory —", title: "reading memory…" });
+    expect(memoryLine({ memory: null }, "x", false)).toEqual({ text: "Memory —", title: "reading memory…" });
+    expect(memoryLine({ memory: null, memory_reason: "vm_stat failed" }, "x", false)).toEqual({ text: "Memory —", title: "memory could not be read" });
+  });
+  it("marks the most at high or critical, never at normal", () => {
+    expect(mostMemory(feed, ["organizer", "camp"])).toBeNull();
+    const high = { memory: { ...feed.memory, pressure: "high" } };
+    expect(mostMemory(high, ["organizer", "camp"])).toBe("camp");
+    expect(mostMemory(high, ["organizer"])).toBe("organizer");
+    expect(memoryLine(high, "camp", true).text).toBe("Memory 11.2 GB · the most");
+  });
+});
+
+describe("the next and since lines (§3)", () => {
+  it("names the kind and the date in words", () => {
+    expect(nextLine({ date: "2026-10-14", what: "due · w-review" }, words).text).toBe("Next: due 14 Oct");
+    expect(nextLine({ date: "2026-10-14", what: "target" }, words).text).toBe("Next: target 14 Oct");
+    expect(nextLine(null, words)).toMatchObject({ text: "Next: no date", none: true });
+  });
+  it("asleep since, only when the factory's comment says so", () => {
+    expect(sinceLine("2026-10-02", words)).toBe("asleep since 2 Oct");
+    expect(sinceLine("", words)).toBeNull();
+  });
+});
+
+describe("Sleep's confirm (§4, I4)", () => {
+  const none = { decision: 0, thread: 0, card: 0, other: 0 };
+  it("is her example", () => {
+    const c = confirmLines("organizer", 4, ["fse"], { decision: 2, thread: 1, card: 0, other: 0 }, false);
+    expect(c.question).toBe("Sleep organizer?");
+    expect(c.commit).toBe("Sleep organizer");
+    expect(c.lines).toEqual([
+      "4 sessions freeze: their conversations are kept and mail waits.",
+      "1 is working now: fse.",
+      "2 decisions and 1 thread waiting on you leave Needs me until it wakes.",
+    ]);
+  });
+  it("is empty with nothing live and nothing waiting, so Sleep runs at once", () => {
+    expect(confirmLines("x", 0, [], none, true).lines).toEqual([]);
+  });
+  it("says only what is true", () => {
+    expect(confirmLines("x", 1, [], none, false).lines).toEqual(["1 session freezes: its conversation is kept and mail waits."]);
+    expect(confirmLines("x", 0, [], { decision: 1, thread: 0, card: 2, other: 0 }, false).lines).toEqual(["1 decision and 2 cards waiting on you leave Needs me until it wakes."]);
+  });
+  it("adds Home's line when it is the last awake", () => {
+    expect(confirmLines("x", 2, ["a", "b"], none, true).lines).toEqual([
+      "2 sessions freeze: their conversations are kept and mail waits.",
+      "2 are working now: a and b.",
+      "Home will be empty until one wakes.",
+    ]);
+  });
+  it("counts the Needs me rows of that initiative only", () => {
+    const rows = [{ kind: "decision", initiative: "a" }, { kind: "thread", initiative: "a" }, { kind: "decision", initiative: "b" }, { kind: "seat", initiative: "a" }];
+    expect(waitingOf(rows, "a")).toEqual({ decision: 1, thread: 1, card: 0, other: 1 });
+  });
+});
+
+describe("Wake at the limit (§5, I6)", () => {
+  it("names the four awake", () => {
+    expect(limitLine(["agent-slack", "camp", "hestia", "organizer"])).toBe("Four are awake: agent-slack, camp, hestia, organizer. Put one to sleep to wake another.");
+  });
+  it("names a refused Wake with its reason", () => {
+    expect(refusedWakeName("hestia", 4)).toBe("Wake hestia: four are awake");
+  });
+});
+
+describe("while it runs and after (§6, States)", () => {
+  it("one at a time", () => {
+    expect(waitLine({ id: "organizer", action: "sleep" })).toBe("Wait for organizer to finish sleeping.");
+    expect(waitLine({ id: "hestia", action: "wake" })).toBe("Wait for hestia to finish waking.");
+  });
+  it("the live region's words", () => {
+    expect(doneLine("organizer", "sleep")).toBe("organizer is asleep");
+    expect(doneLine("hestia", "wake")).toBe("hestia is awake");
+  });
+  it("tells the factory's limit refusal from a failure", () => {
+    expect(isLimitRefusal({ exit_code: 1, output: "4 initiatives are awake (limit 4): put one to sleep first" })).toBe(true);
+    expect(isLimitRefusal({ exit_code: 3, output: "boom" })).toBe(false);
+    expect(firstLine("\n  seat-freeze: no such session\nmore")).toBe("seat-freeze: no such session");
+  });
+  it("says what is true after a failure", () => {
+    expect(afterLine("organizer", "sleep", "active", [])).toBe("Nothing changed.");
+    expect(afterLine("organizer", "sleep", "paused", ["fse"])).toBe("organizer is asleep, but 1 session still runs: fse.");
+    expect(afterLine("organizer", "sleep", "paused", ["a", "b"])).toBe("organizer is asleep, but 2 sessions still run: a and b.");
+    expect(afterLine("hestia", "wake", "paused", [])).toBe("Nothing changed.");
+    expect(afterLine("hestia", "wake", "active", [])).toBe("hestia is awake.");
+  });
+});
+
+describe("the factory's line (States)", () => {
+  it("missing, failing, answering", () => {
+    expect(factoryLine({ found: false, ok: false, limit: 0, awake: 0 })).toBe("Sleep and Wake need the factory command, which is not on this Mac.");
+    expect(factoryLine({ found: true, ok: false, reason: "python3: not found", limit: 0, awake: 0 })).toBe("Sleep and Wake need the factory, which did not answer: python3: not found.");
+    expect(factoryLine({ found: true, ok: true, limit: 4, awake: 3 })).toBeNull();
+  });
+});
+
+describe("sections (§2)", () => {
+  it("awake, asleep, archived, each in the given order", () => {
+    const s = sectionsOf([{ id: "c", state: "asleep" as const, local: true }, { id: "a", state: "awake" as const, local: true }, { id: "z", state: "archived" as const, local: true }, { id: "b", state: "awake" as const, local: true }]);
+    expect(s.awake.map((i) => i.id)).toEqual(["a", "b"]);
+    expect(s.asleep.map((i) => i.id)).toEqual(["c"]);
+    expect(s.archived.map((i) => i.id)).toEqual(["z"]);
+  });
+  it("lists in words", () => {
+    expect(listWords(["a"])).toBe("a");
+    expect(listWords(["a", "b", "c"])).toBe("a, b and c");
+  });
+});
