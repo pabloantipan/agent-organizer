@@ -6,7 +6,7 @@ branch: app-icon-composer
 seat: aic-build
 stage: one-window
 updated: 2026-10-09
-next: "aic-build builds on branch app-icon-composer (sup50, ring-and-icon task)"
+next: "review: app-icon-composer, A1-A4 met (A2 as worded, see Notes), e1d2de5"
 depends_on: [deltagos-mark]
 boundary: ["build/darwin (Assets.car from Deltagos.icon, the Info.plist template's CFBundleIconName)", "the Makefile or build script step that compiles it into the bundle", ".github/workflows/release.yml (its build step only)", "not: the mark's drawing, the floating icon, the frontend"]
 spec: "this card's Spec section; docs/ux/specs/floating-icon.md Amendment 6 (f9ee762)"
@@ -33,10 +33,16 @@ for macOS 12-15, never the icns actool generates. Never resave the `.icon` in
 Icon Composer; regenerate with `export.sh`. Her rows F23 and F24 are A1 and A2.
 
 ## Gate
-- [ ] A1 IconServices renders of the built bundle at 16, 32, 128 and 512 pt @1x/@2x on lodestar (macOS 26.1): no grey plate
-- [ ] A2 the same bundle on macOS 12-15 (or its plist and `iconfile.icns` proven unchanged for them): the current icon
-- [ ] A4 the release build carries the same icons: `.github/workflows/release.yml` builds through `make build` (or copies `iconfile.icns` and `Assets.car` the same way), since `wails build` alone regenerates an icns without the 16 and 32 px cuts (sup50's finding, 2026-10-09); proven by running the workflow's build steps locally
-- [ ] A3 `make test`, `wails build`, `make review-build` pass
+- [x] A1 IconServices renders of the built bundle at 16, 32, 128 and 512 pt @1x/@2x on lodestar (macOS 26.1): no grey plate — `.wt-notes/aic-build/iconservices-960x320-A1-built-over-control.png`, `.wt-notes/aic-build/iconservices-960x320-A1-review-over-control.png`, `a1-*iconservices.txt`; cache ruled out by a no-car control at a fresh path (plate) and new-id / new-version copies (clean), progress.md
+- [x] A2 the same bundle on macOS 12-15 (or its plist and `iconfile.icns` proven unchanged for them): the current icon — `.wt-notes/aic-build/a2-proof.txt` (icns sha256 = main's, template adds only CFBundleIconName); caveat in Notes
+- [x] A4 the release build carries the same icons: `.github/workflows/release.yml` builds through `make build` (or copies `iconfile.icns` and `Assets.car` the same way), since `wails build` alone regenerates an icns without the 16 and 32 px cuts (sup50's finding, 2026-10-09); proven by running the workflow's build steps locally — `.wt-notes/aic-build/a4-workflow-steps.txt` (universal bundle and DMG carry the committed icns and car byte for byte)
+- [x] A3 `make test`, `wails build`, `make review-build` pass — `.wt-notes/aic-build/a3-clean-*.txt`, from a clean clone
 
 ## Notes
 - 2026-10-09: added to sup50's task (window 8383) by the FSE.
+- 2026-10-09 (aic-build): Wails v2.15's darwin packager writes only the binary, Info.plist and an icns encoded from `build/appicon.png` (`packageApplicationForDarwin`); nothing else goes in, so `make build` copies `build/darwin/Assets.car` after it. The car is committed because actool reads a `.icon` only from Xcode 26, which the macos-14 release runner lacks; `scripts/app-icon-car.sh` regenerates it after `export.sh`.
+- 2026-10-09 (aic-build), for the designer: the car also holds actool's flattened legacy renditions named `Deltagos`, and a same-name appiconset cannot replace them (the .icon wins). An older macOS that reads `CFBundleIconName` may draw those and not `iconfile.icns`: no 16 px D-alone cut, and actool's glass edge (`.wt-notes/aic-build/car-640x320-A2-car-legacy-over-icns.png`). Unproven without a macOS 12-15 Mac.
+- 2026-10-09 (aic-build): release.yml's Test step fails on a clean checkout (`frontend/dist` missing, built only by the later build step), the same on main; outside this card's boundary.
+
+## Done
+- 2026-10-09: Assets.car from Deltagos.icon in the bundle with CFBundleIconName, iconfile.icns unchanged, release built through make build; A1-A4 met (7f410ec, e1d2de5).
