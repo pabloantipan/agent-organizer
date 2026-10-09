@@ -6,7 +6,7 @@ branch: initiatives-view
 seat: iv-build
 stage: one-window
 updated: 2026-10-09
-next: "waits on 0106 (accept), initiatives-sleep and ram-view merged"
+next: "0106 accepted 2026-10-09; sup51 runs it after initiatives-sleep"
 depends_on: [initiatives-sleep, ram-view]
 boundary: ["new InitiativesView.tsx and css, the top bar and the store's screen", "Rail.tsx (folds), Home.tsx (one line), InitiativeHeader.tsx (asleep line), AgentsView.tsx and AgentList.tsx (Memory column)", "frontend/src/lib helpers and tests, scripts/fixture-home.sh", "not: Go"]
 spec: "docs/specs/initiatives-view.md (FR-5; docs/ux/specs/initiatives-view.md (e577d08))"

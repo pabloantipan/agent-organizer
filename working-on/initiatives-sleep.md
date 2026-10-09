@@ -6,7 +6,7 @@ branch: initiatives-sleep
 seat: is-build
 stage: one-window
 updated: 2026-10-09
-next: "waits on 0106 (accept)"
+next: "0106 accepted 2026-10-09; the FSE spawns sup51 when ram-view lands in done/ (first of two; beside sup50)"
 depends_on: []
 boundary: ["new internal/service/sleep.go and tests", "internal/scan (status comment, frozen dirs), model.Initiative (asleep_since, frozen, factory_blind)", "app.go (Sleep, Wake, Factory), testdata, frontend/wailsjs regenerated", "not: the factory scripts, writing initiative.yaml"]
 spec: "docs/specs/initiatives-view.md (FR-1 to FR-4)"

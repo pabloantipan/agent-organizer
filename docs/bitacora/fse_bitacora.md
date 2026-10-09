@@ -6,7 +6,7 @@ restating it (the discuss skill).
 
 ## HAND-OFF — 2026-10-09, RAM indicator (0101) spec drafted
 
-- **Last SHA seen:** 81b9f59. Next supervisor: sup49.
+- **Last SHA seen:** 735b244. Next supervisor: sup49.
 - **0101 ruled**; Aglaea's design spec landed (6d84a12, M1-M8). Build spec
   `docs/specs/ram-indicator.md` amended to it; cards `ram-sample`,
   `ram-view` cut (both pass `run --print`); accept **0103** raised with
@@ -26,7 +26,7 @@ restating it (the discuss skill).
   docs/ux/specs/initiatives-view.md. Next: the deltagos-mark card plus
   float-focus-steal as one accept record (both in floaticon_darwin.m, after
   sup49's ram-view, which touches it too). Next supervisor: sup50.
-- **0105 accepted** (81b9f59): spawn sup50 (float-focus-steal, then deltagos-mark) when ram-view is in done/. 0106 still waits on Pablo.
+- **0105 accepted** (81b9f59): spawn sup50 (float-focus-steal, then deltagos-mark) when ram-view is in done/. **0106 accepted** (735b244): spawn sup51 (initiatives-sleep, then initiatives-view) at the same moment, beside sup50.
 - Aglaea's initiatives-view design (e577d08) → build spec, cards
   initiatives-sleep and initiatives-view, accept **0106** raised. 0105
   (mark + focus fix) raised. Both wait on Pablo; both run after sup49.
