@@ -11,7 +11,7 @@ review: "pass at 6e661b5, rc-review 2026-10-09"
 depends_on: [ram-view]
 boundary: ["frontend/src/styles/tokens.css (one token, --fg-on-tone #1a1523)", "the memory chip's and the float list's memory-line css, the memory button's selector", "the memory popover component (the was-critical line, aria-labels)", "the Agents landing's focus target (aria-label only)", "not: Go, native code, any other use of --tone"]
 spec: "docs/ux/specs/ram-indicator.md Amendment 1 (229506e); docs/design-system.md contrast row"
-gate: "this card's Gate section, rows C1 to C3"
+gate: "this card's Gate section, rows C1 to C6"
 ui_review: false
 ---
 
