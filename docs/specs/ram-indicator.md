@@ -59,6 +59,14 @@ and reads no memory at all.
   rides the feed as `Memory.warn` (true on the one sample that warns), so
   `ram-view` posts it and tests read it.
 
+- **Amendment 4** (2026-10-09, the FSE, from rs-review at 10c206e, per
+  0108): FR-1's free memory is free + speculative + file-backed pages, as
+  built and checked against Activity Monitor (3.01 vs 3.09 GB). FR-4's
+  `warn` is consumed by whichever caller samples first (`RefreshAgents` has
+  seven callers), so `ram-view` posts the notification from the Go side on
+  the sample that warns, never from the frontend. A build without cgo falls
+  back to resident size silently; `organizer memory` says which it used.
+
 ## Requirements, card `ram-view` (frontend + native), after `ram-sample`
 
 - **FR-5** Aglaea's design as written (`docs/ux/specs/ram-indicator.md`):
