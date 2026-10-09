@@ -6,8 +6,8 @@ branch: ram-view
 seat: rv-build
 stage: one-window
 updated: 2026-10-09
-next: "N1: the notification's title, body and click from another desktop, unverified (macOS refused the ad-hoc review bundle); Pablo checks it in /Applications/Deltagos.app (steps in Notes), and the FSE says whether that may follow the merge, since the row wants it before"
-review: fail
+next: "pablo: N1 after the merge: run make install (it replaces the app you are using), then the N1 steps in Notes; a fail there is a fix card (spec Amendment 5)"
+review: pass
 depends_on: [ram-sample]
 boundary: ["new top-bar memory component, popover and css (tier-2 tokens)", "the store (popover state, Agents › focus), AgentsView.tsx (focus a row by agent id only)", "floaticon_darwin.m/.h/.go (ring, panel line), new notify_darwin.m/.go and notify_other.go, app.go (post on warn, the click)", "scripts/fixture-home.sh (the fake reading)", "not: Go under internal/, the Deltagos mark (0102)"]
 spec: "docs/specs/ram-indicator.md (FR-5 to FR-7; docs/ux/specs/ram-indicator.md (6d84a12))"
@@ -48,6 +48,7 @@ N1 — pablo, after merge and make install: quit Deltagos; in a terminal run `OR
 - Reviewer, the unassigned landing: in the fixture (`eval "$(scripts/fixture-home.sh --memory high)"`), open the memory popover, `… 3 more`, then `Agents ›` on `probe-hefesto-odd` (no initiative): crumbs `Home / Agents`, every initiative's Agents, the row focused under "outside every initiative" (`.wt-notes/rv-build/wkwebview-1440x932-M3-unassigned-landing.png`).
 
 ## Review
+- sup49, 2026-10-09, per spec Amendment 5 (f268ced, the FSE under 0108): review re-marked **pass** with N1 pending Pablo in the installed app after the merge; rv-review's only unmet row was N1, rv-ui passed M1-M8 at 4a96d66.
 - Verdict: **fail**, on N1 alone (rv-review, code and checks; the WKWebView rows are rv-ui's).
 - Commit reviewed: `4a96d66df2b78463ed2b5fd0e81b3732aece63ed` (branch ram-view).
 - Unmet: N1. It was never seen: `requestAuthorization` was refused for the review bundle (`UNErrorDomain 1`, status denied, in the fixture's organizer.log). The row's fallback (Pablo, installed app) is a check after the merge, but the gate wants it before. The FSE decides which.
