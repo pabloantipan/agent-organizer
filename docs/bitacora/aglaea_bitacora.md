@@ -128,3 +128,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-09 — app icon exported (Amendment 5, iconset, icns, export.sh) and ram-indicator Amendment 2 (ring always, amber pressure); 7bb03f4.
 - 2026-10-09 — dm-build's 16x16 diff: iconutil ARGB re-encodes translucent corners in the 16 and 32 slots; icns is the authority; F22 amended, no file change.
 - 2026-10-09 — Deltagos.icon exported (Amendment 6): PNG layers since CoreSVG drops masks; IconServices shows no plate on macOS 26.1 (f9ee762).
+- 2026-10-09 — dm-ui U2/U3: Help mark rests after 4.5 s, hover replays; mark aria-hidden in the lockup (Amendment 7, 8c6249d).
