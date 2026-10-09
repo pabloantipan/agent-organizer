@@ -6,7 +6,7 @@ branch: ram-chip-contrast
 seat: rc-build
 stage: one-window
 updated: 2026-10-09
-next: "review: ram-chip-contrast, gate met (C1-C3), 56e64a0"
+next: "rc-build: C4, C5, C6 (added by the FSE at d827872), then review"
 depends_on: [ram-view]
 boundary: ["frontend/src/styles/tokens.css (one token, --fg-on-tone #1a1523)", "the memory chip's and the float list's memory-line css, the memory button's selector", "the memory popover component (the was-critical line, aria-labels)", "the Agents landing's focus target (aria-label only)", "not: Go, native code, any other use of --tone"]
 spec: "docs/ux/specs/ram-indicator.md Amendment 1 (229506e); docs/design-system.md contrast row"
