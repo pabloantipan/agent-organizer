@@ -168,12 +168,53 @@ The critical chip's text is the ground's ink, `--fg-on-tone` (#1a1523 on
 tone. The same holds wherever text sits on a `--tone` fill (the panel's
 memory line at critical).
 
+## Amendment 2 (proposed, 2026-10-09): the ring always on, pressure in amber
+
+Pablo, 2026-10-09, after the ring showed on the floating icon: "the border
+pink brilliant arround the icon helped me a lot to find the app quickly.
+So, not now, but keeping it and maybe using an orange tone when ram spikes
+up, would be a good upgrade"; then, the same evening: "we can tell Aglaea
+doing both" (`said`, relayed by the FSE). The ring is also how he finds the
+icon on a busy desktop, so it stays at every level. Memory pressure moves to
+a second hue. Orange needs no new colour: `--amber-9` (#ffb020) is already
+the warning hue (`--warning`, the context bar past 50%). Red stays blocked's.
+
+| Level | On the icon (§2 replaced) | Top bar (§1 amended) |
+|---|---|---|
+| normal | a 2 px ring in the tone (`--tone`), 2 px outside the tile: the one he saw | `▣ 12 GB free`, subtle, as before |
+| high | the ring turns amber, 2 px | `▣ 3.1 GB free · high`, text and glyph in amber (9.8:1 on the ground) |
+| critical | amber at 3 px, breathing 1 to 0.5 over 1.6 s; steady under Reduce motion | the chip: amber fill, text in the ground's ink (`--fg-on-warning`, 9.8:1) |
+| no reading, or reading failed | the tone ring, as normal | `▣ —` as before |
+
+- **One hue for pressure everywhere**: the top bar, the panel's memory line
+  and the icon all use amber for high and critical, so the ring and the bar
+  say the same thing. This replaces the magenta of §1, §2 and Amendment 1
+  for memory only. The tone keeps every other use.
+- **A 1 px keyline in the ground** (#1a1523) sits just outside the ring, at
+  every level. Amber on a white wallpaper is 1.8:1 and the tone 3.5:1. The
+  dark keyline holds both rings against any wallpaper (17.9:1 on white).
+- **Never colour alone**: the ring's width (2, then 3 px) and the breathing
+  carry the level, and the icon's name keeps the word (`Deltagos, memory
+  high`). Under Reduce motion, critical is the steady 3 px ring.
+- **Not a badge**: the ring carries no number and no count, so FR-14 holds.
+- **Amber is not red**: the amber and blocked's red stay apart for colour
+  vision (deutan and protan both keep amber far lighter than #ff4d63).
+  Amber's other use, context past 50%, is the same meaning: a resource
+  running low.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| M9 | find the icon at any level | at normal the 2 px tone ring with its dark keyline shows on a light and a dark wallpaper |
+| M10 | tell memory pressure from findability | high: an amber 2 px ring; critical: amber 3 px, breathing (steady under Reduce motion); the top bar's high text and critical chip are amber with the ground's ink |
+
+Rows M2 and M4 read "amber" for "the magenta tone" once this is accepted.
+
 ## Open questions
 
 - **O1** (FSE): "memory" per session means its process tree's resident
   memory. Say if the OS gives a better per-tree figure (footprint).
 - **O2** (Pablo, only if the FSE wants it confirmed): critical drawn in
-  magenta, not red. Red is blocked's, and Activity Monitor's red would make
+  magenta, not red (Amendment 2 proposes amber). Red is blocked's, and Activity Monitor's red would make
   the two read alike.
 
 ## Technical notes

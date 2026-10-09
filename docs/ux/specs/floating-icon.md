@@ -261,6 +261,75 @@ hues for status.
 | F18 | see a clean mark at small sizes | the 32 px cut shows the D and the gears, still; the 16 px cut shows the D alone; no gap or tooth smears |
 | F19 | have it still under Reduce motion | the still frame; nothing turns or travels |
 
+## Amendment 5 (aglaea, 2026-10-09): the app icon, drawn and exported
+
+Pablo, 2026-10-09: "we still need to update app icon with new design"
+(`said`, relayed by the FSE). Amendment 4 named the app icon; this
+amendment makes it complete for a builder. **The builder does not redraw
+it**: the files are in `docs/ux/inputs/deltagos-mark/app-icon/`, generated
+by `export.sh` from `export.html`, which uses the drawing's geometry with
+travel 0 and gears option A (0102).
+
+| File | What it is |
+|---|---|
+| `deltagos-icon-1024.svg` | the master: the whole still frame on the tile, with the template shadow |
+| `deltagos-icon-32.svg` | the 32 px cut: D and gears, no gaps, a heavier stroke |
+| `deltagos-icon-16.svg` | the 16 px cut: the D alone, heavier still |
+| `Deltagos.iconset/` | the ten PNG slots, each from its own cut |
+| `iconfile.icns` | the iconset compiled with `iconutil` |
+| `appicon.png` | the 1024 PNG, the size Wails' `build/appicon.png` takes |
+
+**The tile** follows the macOS icon grid on a 1024 canvas:
+
+- a rounded square 824 px wide at 100 px from each edge, corner radius
+  185.4;
+- filled with the ground (#1a1523);
+- edged inside by a hairline of 8% white, one device pixel at the size it
+  is drawn for (4 at 1024);
+- Apple's template shadow (black 30%, 10 px down, 10 px blur), at 128 px
+  and up only.
+
+The floating icon's own tile keeps its quarter-size radius and live shadow
+(§2): it is a window, not a file.
+
+**The mark** is centred on the tile. Its width is a share of the tile's
+width:
+
+| Cut | Share | Stroke (of 64 units) |
+|---|---|---|
+| whole | 74% | 9, the drawing's |
+| 32 px | 80% | 11 |
+| 16 px | 84% | 13 |
+
+A cut grows its stroke so the D keeps about 1.5 device pixels.
+
+**Which slot takes which cut:**
+
+| Slot | Pixels | Cut |
+|---|---|---|
+| 16 | 16 | the D alone |
+| 16@2x, 32 | 32 | D and gears, still |
+| 32@2x, and every slot from 128 to 512@2x | 64 to 1024 | the whole still frame |
+
+**For the builder** (card deltagos-mark, FR-3):
+
+- Copy `iconfile.icns` to `build/darwin/iconfile.icns`, which Wails uses
+  before it would generate one from `build/appicon.png`.
+- Copy `appicon.png` over `build/appicon.png`, so the two agree.
+- Nothing else changes. To change the mark, edit `export.html` and run
+  `export.sh`; never edit the PNGs by hand.
+
+**Rabbit hole: macOS 26.** It may draw a legacy icon inside its own grey
+rounded square when the art does not fill the grid's shape. The tile here
+is the grid's shape exactly, so it should be taken as is. Icon Composer's
+`.icon` format is out of this card's scope.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| F20 | recognise Deltagos in the Dock and Finder | a Dock shot on lodestar (macOS 26.1): the tile, the D and both gears, with no grey frame around it |
+| F21 | read it small | Finder's list view (16 px) shows the D alone; the sidebar or a 32 px slot shows the D and the gears; neither is a smear |
+| F22 | trust the files are the drawing | `build/darwin/iconfile.icns` and `build/appicon.png` match the files in `docs/ux/inputs/deltagos-mark/app-icon/`, byte for byte |
+
 ## Acceptance, in the lead's terms
 
 | # | The lead can | Checked by |

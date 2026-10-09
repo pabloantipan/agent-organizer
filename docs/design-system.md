@@ -94,6 +94,7 @@ Violet 10 is darker than 9 so white stays readable on a hovered button.
 | white on `--accent` | 5.0 | primary button label |
 | white on `--accent-hover` | 5.9 | hovered primary button |
 | `--fg-on-tone` (#1a1523) on `--tone` | 5.2 | text on a magenta fill (the memory-critical chip); **white on `--tone` is 3.5, never text** |
+| `--fg-on-warning` (#1a1523) on `--warning` (amber) | 9.8 | text on an amber fill (memory critical, if ram-indicator Amendment 2 is accepted) |
 | now / blocked / next on raised | 4.8 / 4.8 / 6.8 | status words |
 | waiting / ruled-fg on raised | 6.4 / — | decision words; ruled is a fill (3.3), its word uses `--decision-ruled-fg` |
 

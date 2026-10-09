@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Deltagos Icon Export</title>
+<!-- The app icon's source: the mark's still frame (deltagos-mark-drawn.html,
+     travel 0) on the macOS icon tile, plus the 32 and 16 px cuts, written out
+     as self-contained SVGs with literal colours. Regenerate with export.sh. -->
+</head>
+<body>
+<script>
+(function(){
+  'use strict';
+  // Geometry and tuning: deltagos-mark-drawn.html, unchanged.
+  var GAPS=3, SPACING=13, VARY=0.65, CLOSE=[0.5,0.85], GAP=5.25, TIP=3.2, NOTCH=3.2, HALF=4.5;
+  var GEAR={cx:66.8,cy:64.8,teeth:10,rOut:25.5,rIn:20.83,hole:7.65,phase:27};
+  var D45=36.4/Math.SQRT2;
+  var GEAR2={cx:GEAR.cx-D45,cy:GEAR.cy-D45,teeth:5,rOut:13.9,rIn:9.25,hole:3.5,phase:27};
+  var D='M27 30 Q27 24 33 24 L48 24 C68 24 77 37 77 50 C77 63 68 76 48 76 L33 76 Q27 76 27 70 Z';
+  // Colours: tokens.css; gears option A, ruled 0102.
+  var C={ground:'#1a1523', accent:'#8a3ffc', big:'#d946ef', small:'#a9a0ff', edge:'rgba(255,255,255,0.08)'};
+  var NS='http://www.w3.org/2000/svg';
+  function mod(a,n){return((a%n)+n)%n}
+  function gearPath(g){
+    var n=g.teeth,step=Math.PI*2/n,ht=step*0.33,tt=step*0.2,d='',ph=g.phase*Math.PI/180;
+    function p(r,a){return(g.cx+r*Math.cos(a)).toFixed(2)+' '+(g.cy+r*Math.sin(a)).toFixed(2)}
+    for(var k=0;k<n;k++){var a=k*step-Math.PI/2+ph;
+      d+=(k===0?'M':'L')+p(g.rIn,a-ht)+'L'+p(g.rOut,a-tt)+'L'+p(g.rOut,a+tt)+'L'+p(g.rIn,a+ht)}
+    d+='ZM'+(g.cx+g.hole)+' '+g.cy+'A'+g.hole+' '+g.hole+' 0 1 0 '+(g.cx-g.hole)+' '+g.cy+'A'+g.hole+' '+g.hole+' 0 1 0 '+(g.cx+g.hole)+' '+g.cy+'Z';
+    return d;
+  }
+  // A measuring path, to walk the D as the drawing does.
+  var probe=document.createElementNS(NS,'svg'); probe.innerHTML='<path d="'+D+'"/>';
+  document.body.appendChild(probe);
+  var track=probe.firstChild, L=track.getTotalLength(), FAST_AT=0, best=-Infinity;
+  for(var s=0;s<L;s+=0.5){var x=track.getPointAtLength(s).x;if(x>best){best=x;FAST_AT=s}}
+  function phase(d){return Math.cos(2*Math.PI*(mod(d,L)-FAST_AT)/L)}
+  function smooth(a,b,x){var u=Math.min(1,Math.max(0,(x-a)/(b-a)));return u*u*(3-2*u)}
+  function openness(d){return 1-smooth(CLOSE[0],CLOSE[1],phase(d))}
+  function frame(d){var a=track.getPointAtLength(mod(d,L)),b=track.getPointAtLength(mod(d+0.5,L));
+    var tx=b.x-a.x,ty=b.y-a.y,m=Math.hypot(tx,ty)||1;tx/=m;ty/=m;return{x:a.x,y:a.y,nx:-ty,ny:tx}}
+  function pts(l){return l.map(function(q){return q[0].toFixed(2)+','+q[1].toFixed(2)}).join(' ')}
+
+  // The mark at travel 0 (the still frame), in its own 64x66 viewBox.
+  // cut: null (whole), "32" (D and gears, no gaps) or "16" (D alone).
+  function mark(cut, stroke){
+    var gears=cut!=='16', gaps=!cut, out='', dash='', tips='', notches='';
+    if(gaps){
+      var travel=0, starts=[], g=[];
+      for(var i=0;i<GAPS;i++){starts.push(travel+i*SPACING);var o=openness(starts[i]-GAP);g.push(o<0.06?0:GAP*o)}
+      var arr=[];
+      for(var j=0;j<GAPS;j++){var len=j<GAPS-1?SPACING:L-(GAPS-1)*SPACING,gg=g[(j+1)%GAPS];arr.push((len-gg).toFixed(2),gg.toFixed(2))}
+      dash=' stroke-dasharray="'+arr.join(' ')+'" stroke-dashoffset="'+(-mod(travel,L)).toFixed(2)+'"';
+      var W=HALF+0.8;
+      for(var n=0;n<GAPS;n++){
+        var k=g[n]/GAP,start=starts[n],gap=g[n]; if(k<0.06) continue;
+        var h=frame(start-gap-0.15),hp=track.getPointAtLength(mod(start-gap+TIP*k,L));
+        tips+='<polygon points="'+pts([[h.x+h.nx*HALF,h.y+h.ny*HALF],[hp.x,hp.y],[h.x-h.nx*HALF,h.y-h.ny*HALF]])+'"/>';
+        var t0=frame(start-0.3*k),tp=track.getPointAtLength(mod(start+NOTCH*k,L));
+        notches+='<polygon points="'+pts([[t0.x+t0.nx*W,t0.y+t0.ny*W],[tp.x,tp.y],[t0.x-t0.nx*W,t0.y-t0.ny*W]])+'"/>';
+      }
+    }
+    out+='<defs>'+
+      '<mask id="notch" maskUnits="userSpaceOnUse" x="-10" y="-10" width="120" height="120"><rect x="-10" y="-10" width="120" height="120" fill="#fff"/><g fill="#000">'+notches+'</g></mask>'+
+      '<mask id="inside" maskUnits="userSpaceOnUse" x="-10" y="-10" width="120" height="120"><path d="'+D+'" fill="#fff" stroke="#fff" stroke-width="'+stroke+'" stroke-linejoin="round"/></mask>'+
+      '</defs>';
+    if(gears) out+='<g mask="url(#inside)"><path fill="'+C.big+'" fill-rule="evenodd" d="'+gearPath(GEAR)+'"/><path fill="'+C.small+'" fill-rule="evenodd" d="'+gearPath(GEAR2)+'"/></g>';
+    out+='<path mask="url(#notch)" d="'+D+'" fill="none" stroke="'+C.accent+'" stroke-width="'+stroke+'" stroke-linejoin="round" stroke-linecap="butt"'+dash+'/>';
+    if(tips) out+='<g fill="'+C.accent+'">'+tips+'</g>';
+    return out;
+  }
+
+  // The macOS icon grid on a 1024 canvas: the tile 824 square at 100, corner
+  // radius 185.4; the mark at `share` of the tile's width, centred.
+  // edge: the tile's 8% white hairline, in canvas units (one device pixel at
+  // the size it is drawn for). shadow: Apple's template drop shadow, large sizes only.
+  function icon(o){
+    var t=824, x0=100, mw=t*o.share, mh=mw*66/64, mx=512-mw/2, my=512-mh/2, e=o.edge;
+    var s='<svg xmlns="'+NS+'" width="1024" height="1024" viewBox="0 0 1024 1024">';
+    if(o.shadow) s+='<defs><filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feGaussianBlur in="SourceAlpha" stdDeviation="10"/><feOffset dy="10"/><feComponentTransfer><feFuncA type="linear" slope="0.3"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
+    s+='<g'+(o.shadow?' filter="url(#shadow)"':'')+'><rect x="'+x0+'" y="'+x0+'" width="'+t+'" height="'+t+'" rx="185.4" fill="'+C.ground+'"/></g>';
+    s+='<rect x="'+(x0+e/2)+'" y="'+(x0+e/2)+'" width="'+(t-e)+'" height="'+(t-e)+'" rx="'+(185.4-e/2)+'" fill="none" stroke="'+C.edge+'" stroke-width="'+e+'"/>';
+    s+='<svg x="'+mx.toFixed(2)+'" y="'+my.toFixed(2)+'" width="'+mw.toFixed(2)+'" height="'+mh.toFixed(2)+'" viewBox="20 17 64 66" overflow="visible">'+mark(o.cut,o.stroke)+'</svg>';
+    return s+'</svg>\n';
+  }
+
+  var files={
+    'deltagos-icon-1024.svg': icon({share:0.74, cut:null, stroke:9,  edge:4,  shadow:true}),
+    'deltagos-icon-32.svg':   icon({share:0.80, cut:'32', stroke:11, edge:32, shadow:false}),
+    'deltagos-icon-16.svg':   icon({share:0.84, cut:'16', stroke:13, edge:64, shadow:false})
+  };
+  probe.remove();
+  for(var f in files){var pre=document.createElement('pre');pre.id=f;pre.textContent=files[f];document.body.appendChild(pre)}
+})();
+</script>
+</body>
+</html>
