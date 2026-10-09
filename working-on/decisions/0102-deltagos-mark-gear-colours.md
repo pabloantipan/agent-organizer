@@ -1,13 +1,13 @@
 ---
 title: The Deltagos mark - the gears' colours
-status: proposed
+status: ruled
 raised: 2026-10-09
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-09
+ruled_by: pablo
 options: ["A: magenta and periwinkle", "B: plum steel", "C: ember and amber, as the sketch"]
-chosen:
+chosen: "A: magenta and periwinkle"
 cards: []
 threads: ["01M4CKBP8N0MGTVP3E0BCZB7JB"]
 supersedes: []
@@ -50,3 +50,7 @@ state (0101, `docs/specs/ram-indicator.md`) are drawn on it; Aglaea draws
 the RAM states next. Native constraint for the build card: Core Animation
 does the gears turning and constant-speed gap travel; points, notches and
 varying speed need per-frame path work and may be dropped at 56 pt.
+
+## Ruling
+
+pablo, 2026-10-09, in the organizer on lodestar: ok
