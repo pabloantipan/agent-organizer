@@ -6,7 +6,7 @@ branch: float-focus-steal
 seat: ffs-build
 stage: one-window
 updated: 2026-10-09
-next: "ffs-build: cause found (S1, see Cause); building the fix on float-focus-steal, then S2"
+next: "ffs-build: fix e9ce3f5 on float-focus-steal; its retest and S2 wait for lodestar's screen to unlock (locked since 16:36)"
 depends_on: []
 boundary: ["floaticon_darwin.m and floaticon_darwin.go, and their check scripts", "not: the frontend, the Go service, the mark (0102)"]
 spec: "this card's Spec section"
