@@ -28,7 +28,7 @@ restating it (the discuss skill).
   sup49's ram-view, which touches it too). Next supervisor: sup50.
 - **0107 raised**: ram-sample G4 contradicted FR-3 (top five vs every crew session); ruled A (4473163), FR-3 amended, sup49 told.
 - **0108 ruled in words** (Pablo: "this is not working"): no screen-capture gate rows; one record per small UI ask; I amend gate contradictions myself and report after.
-- **Seats launched deaf:** rs-build and rs-review run without AGENT_NAME/DISCUSS_TOKEN (tokens exist); rs-review's 1:17 PM fail post got 401 and the re-review sat idle. Told sup49. Repetition: sup2 2026-09-27 had the same (prelude without identity).
+- **Seats launched deaf:** rs-build and rs-review run without AGENT_NAME/DISCUSS_TOKEN (tokens exist); rs-review's 1:17 PM fail post got 401 and the re-review sat idle. Told sup49. Cause (sup49): probe did not copy the seats' preludes into ~/.local/state/probe; seats ran deaf and not lean. Relayed [for hephaistos]. Repetition: sup2 2026-09-27.
 - **Gate lesson (repetition candidate):** ram-indicator G2/G4 compare with
   Activity Monitor on screen; rs-review sat waiting for Pablo to be idle 30 s
   (seat-pointer cannot see windows on another Space). Gate rows should read a
