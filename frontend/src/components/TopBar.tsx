@@ -9,7 +9,7 @@ import { MemoryButton } from "./MemoryButton";
 import { FloatAvailable, FloatCompact } from "../../wailsjs/go/main/App";
 
 export function TopBar() {
-  const { screen, selectedInitiative, goHome, openSettings, openUsage, widthClass, view, loading, syncing, refresh, sync, error, lastMessage, account, lock, authMode, syncNote, setAccount, setLock, setOfflineChoice, agents } = useBoard();
+  const { screen, selectedInitiative, goHome, openSettings, openUsage, openInitiatives, widthClass, view, loading, syncing, refresh, sync, error, lastMessage, account, lock, authMode, syncNote, setAccount, setLock, setOfflineChoice, agents } = useBoard();
   // With auth off there is no identity: no account menu, no Sign in, no email,
   // and no Sync button either, since sync is a skip nobody can act on.
   const identity = authMode === "firebase";
@@ -43,6 +43,7 @@ export function TopBar() {
         {screen === "initiative" && !selectedInitiative && <><span className="crumb-sep">/</span><b>Agents</b></>}
         {screen === "settings" && <><span className="crumb-sep">/</span><b>Settings</b></>}
         {screen === "usage" && <><span className="crumb-sep">/</span><b>Usage</b></>}
+        {screen === "initiatives" && <><span className="crumb-sep">/</span><b>Initiatives</b></>}
         {helpTop !== null && <><span className="crumb-sep">/</span><b>Help</b></>}
       </nav>
       <span className="spacer" />
@@ -89,6 +90,10 @@ export function TopBar() {
         )}
       </span>}
       {floats && <button className="ghost gear" onClick={() => { closeHelp(); void FloatCompact(); }} title="Compact to icon (the icon floats on every desktop)" aria-label="Compact to icon"><CompactIcon /></button>}
+      {/* Initiatives (docs/ux/specs/initiatives-view.md): left of Usage, a
+          quiet text button with no number and no badge; the count of the
+          awake is inside the view (FR-14). */}
+      <button className={`ghost usage-btn ${screen === "initiatives" && helpTop === null ? "on" : ""}`} onClick={() => { closeHelp(); openInitiatives(); }} title="Every initiative as a card: awake, asleep and archived" aria-pressed={screen === "initiatives" && helpTop === null}>Initiatives</button>
       {/* Usage (docs/ux/specs/usage.md): a quiet text button, no badge and no
           number; Needs me is the one badge, and money stays inside the view. */}
       <button className={`ghost usage-btn ${screen === "usage" && helpTop === null ? "on" : ""}`} onClick={() => { closeHelp(); openUsage(); }} title="Tokens and money, week by week" aria-pressed={screen === "usage" && helpTop === null}>Usage</button>

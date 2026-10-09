@@ -166,8 +166,12 @@ export function confirmLines(id: string, live: number, working: string[], waitin
 /** Wake refused at the limit (her §5): the Asleep head's line and each
  *  refused Wake's accessible name. */
 export function limitLine(awakeIds: string[]): string {
-  return `${capital(numberWord(awakeIds.length))} are awake: ${awakeIds.join(", ")}. Put one to sleep to wake another.`;
+  const p = limitParts(awakeIds.length);
+  return `${p.lead}${awakeIds.join(", ")}${p.tail}`;
 }
+/** The same line in its parts, for the head, where each name is a link to
+ *  that card's Sleep. */
+export const limitParts = (n: number) => ({ lead: `${capital(numberWord(n))} are awake: `, tail: ". Put one to sleep to wake another." });
 export const refusedWakeName = (id: string, awake: number) => `Wake ${id}: ${numberWord(awake)} are awake`;
 
 /** A press while another Sleep or Wake runs (her §6). */
@@ -231,4 +235,22 @@ export function storedArchivedOpen(): boolean {
 export function storeArchivedOpen(open: boolean): boolean {
   try { localStorage.setItem(ARCHIVED_KEY, open ? "1" : "0"); } catch { /* per-viewer convenience */ }
   return open;
+}
+
+/** One Agents row's Memory cell (her Agents section): its figure, or `—`
+ *  with why. `feed` is the agents payload's reading. */
+export function agentMemory(a: { pid: number; state: string; mem_bytes?: number }, feed: MemoryFeed): { text: string; title: string } {
+  if (a.pid <= 0 || a.state === "exited" || a.state === "off") return { text: "—", title: "not running" };
+  if (!feed?.memory) return { text: "—", title: feed?.memory_reason ? "memory could not be read" : "reading memory…" };
+  if (!a.mem_bytes || a.mem_bytes <= 0) return { text: "—", title: "reading memory…" };
+  return { text: `${gb(a.mem_bytes)} GB`, title: "this process tree's footprint" };
+}
+
+/** A group's total in its head (her Agents section): the same number as its
+ *  card, `Memory 9.8 GB`; null when nothing of it runs or there is no
+ *  reading. `id` "" is the sessions outside every initiative. */
+export function groupMemory(feed: MemoryFeed, id: string): string | null {
+  if (!feed?.memory) return null;
+  const m = (feed.memory.by_initiative ?? []).find((x) => (id === "" ? !!x.unassigned : !x.unassigned && x.initiative === id));
+  return m && m.bytes > 0 ? `Memory ${gb(m.bytes)} GB` : null;
 }

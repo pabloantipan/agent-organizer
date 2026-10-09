@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  afterLine, confirmLines, countWords, factoryLine, isLimitRefusal, limitLine, listWords, memoryLine, mostMemory,
+  agentMemory, groupMemory, afterLine, confirmLines, countWords, factoryLine, isLimitRefusal, limitLine, listWords, memoryLine, mostMemory,
   nextLine, progressLine, refusedWakeName, sectionsOf, sessionsLine, sinceLine, sleepyOf, sleepyWord, waitLine, waitingOf, doneLine, firstLine,
 } from "./initiatives";
 
@@ -184,5 +184,23 @@ describe("sections (§2)", () => {
   it("lists in words", () => {
     expect(listWords(["a"])).toBe("a");
     expect(listWords(["a", "b", "c"])).toBe("a, b and c");
+  });
+});
+
+describe("Agents' Memory column (I10)", () => {
+  const feed = { memory: { pressure: "normal", by_initiative: [{ initiative: "organizer", bytes: 9.8 * GB }, { initiative: "", bytes: 2 * GB, unassigned: true }] } };
+  it("is the row's figure", () => {
+    expect(agentMemory({ pid: 7, state: "working", mem_bytes: 1.4 * GB }, feed)).toMatchObject({ text: "1.4 GB" });
+  });
+  it("is a dash with its reason when unread", () => {
+    expect(agentMemory({ pid: 0, state: "exited" }, feed)).toEqual({ text: "—", title: "not running" });
+    expect(agentMemory({ pid: 7, state: "running", mem_bytes: 5 }, null)).toEqual({ text: "—", title: "reading memory…" });
+    expect(agentMemory({ pid: 7, state: "running", mem_bytes: 5 }, { memory: null, memory_reason: "x" })).toEqual({ text: "—", title: "memory could not be read" });
+  });
+  it("totals a group the way its card does", () => {
+    expect(groupMemory(feed, "organizer")).toBe("Memory 9.8 GB");
+    expect(groupMemory(feed, "")).toBe("Memory 2 GB");
+    expect(groupMemory(feed, "camp")).toBeNull();
+    expect(groupMemory(null, "organizer")).toBeNull();
   });
 });
