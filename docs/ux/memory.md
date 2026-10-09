@@ -242,6 +242,15 @@ week, one hue); one table with four cuts (initiative, role, task, model) and
 `Not attributed` always last; a Sessions list. Money only in Usage, tokens
 elsewhere (0020 narrowed by 0098).
 
+The Deltagos mark (2026-10-09, floating-icon Amendment 4; drawing at
+`docs/ux/inputs/deltagos-mark/deltagos-mark-drawn.html`). Pablo's D with
+travelling gaps and two gears, recoloured: the D in the accent, the big gear
+magenta, the small gear periwinkle (option A; B is plum, C his ember and
+amber, for him to rule). Cuts: 32 px is the D and gears, still; 16 px is
+the D alone. No splash; the app icon is the still frame. Natively, the
+gears turn and the gaps travel at constant speed (the points and notches
+need per-frame work).
+
 ## Open questions
 
 - Q1 (Pablo, via the FSE, leftovers-4): does he use Tab in the app? In

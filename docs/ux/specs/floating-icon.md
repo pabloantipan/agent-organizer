@@ -193,6 +193,74 @@ on a big screen (0091, his words there).
 | F15 | find the icon beside a zoomed window | a zoomed (green-button-option, not full-screen) window on a normal desktop: the icon is shown above it; a full-screen Space: hidden |
 | F16 | close the list from the icon at once, or go full | one click with the list open: closed within 100 ms; two clicks within the interval: closed, then the full window grows; the list never reopens |
 
+## Amendment 4 (aglaea, 2026-10-09, Pablo's Deltagos mark)
+
+Pablo, 2026-10-07: "take a look to Deltagos_icon at ~/Downloads, you will
+find there a guide, not a definition, else a sugestion for the floating
+icon of the app"; then, 2026-10-09: "adjust pallete to current one and
+let's draw it" (`said`, relayed by the FSE). The sketch is in
+`docs/ux/inputs/deltagos-mark/` (`deltagos-forja-intro.html`, its hand-off
+`.md`). The recoloured drawing is `deltagos-mark-drawn.html` there, with a
+screenshot, `deltagos-mark-drawn.png`.
+
+**The mark replaces the three bars** of §1 on the floating icon: a D drawn
+as one stroke, three gaps travelling round it with points and notches,
+faster on the bowl than on the stem, and two meshing gears seen through
+the D. The form and the motion are the sketch's, unchanged. The colours are
+the app's:
+
+| Form | Sketch | Here | Token |
+|---|---|---|---|
+| ground | #1A1433 | #1a1523 | `--bg` |
+| the D | #9D80FF | #8a3ffc | `--accent` (a fill: allowed) |
+| big gear | #FF6A4A ember | #d946ef | `--magenta-9`, the tone |
+| small gear | #FFC25A amber | #a9a0ff | `--periwinkle-9` (option A, below) |
+| wordmark | Archivo 125 wide, 700 | Manrope 800 | bundled |
+
+There is no light variant (dark only).
+
+- **Sizes.** At 56, 72 and 88 pt the whole mark reads, animated, on the
+  tile of §2. The animation stays decorative (0088): it says nothing about
+  state.
+- **Small sizes get their own cuts**, since the whole mark turns to mush
+  at 16 px (the gaps are about 1 px, the teeth under half a pixel). At
+  **32 px**, the D and the gears, still, with no gaps. At **16 px**, the D
+  alone. The drawing shows each cut beside the whole mark.
+- **Reduced motion**: the still frame (travel 0), with gaps and gears in
+  place and nothing moving.
+- **What the native icon can do simply** (0089, NSPanel with Core
+  Animation): the gears turning (one rotation animation each) and the gaps
+  travelling at a constant speed (`CAShapeLayer`'s `lineDashPhase`). The
+  points, the notches and the varying speed need the path walked every
+  frame. At 56 pt the points are about 2 px, so the native icon may drop
+  them and keep a constant speed. The full motion lives where a web view
+  draws it. The FSE says which in Technical notes.
+- **Where else.** The **app icon** (Dock and Finder) becomes the still frame
+  on the same tile, with the 32 and 16 px cuts for the small sizes. **No
+  splash screen**: the app opens on Home, and nothing should make him wait
+  for an animation. The mark with its wordmark and subtitle belongs where
+  the app names itself, in the Help's header (and an About line, if one
+  exists).
+
+**For Pablo to rule: the gears' colours.** The design system allows one
+accent, the magenta tone, and red for blocked alone, and keeps the status
+hues for status.
+
+- **A (proposed)**: magenta and periwinkle. It uses only the palette's
+  hues, and it bends one rule: periwinkle is the *next* status hue, used
+  here as decoration. The current app icon's bars already bend it the same
+  way.
+- **B**: plum steel (`--plum-9`, `--plum-7`). It bends nothing, but the
+  gears go quiet and the mark loses its warmth.
+- **C**: the sketch's ember and amber. It brings in two hues the app has
+  nowhere else, and ember sits close to blocked's red.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| F17 | recognise Deltagos's mark on the floating icon at every size | 56/72/88 pt shots: the D, its gaps and both gears read |
+| F18 | see a clean mark at small sizes | the 32 px cut shows the D and the gears, still; the 16 px cut shows the D alone; no gap or tooth smears |
+| F19 | have it still under Reduce motion | the still frame; nothing turns or travels |
+
 ## Acceptance, in the lead's terms
 
 | # | The lead can | Checked by |

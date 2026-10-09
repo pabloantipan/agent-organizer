@@ -119,3 +119,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-06 — floating-icon amendment 3: panel to content; 8 px under menu bar; zoomed is not full screen; icon click closes at once (replaces A2's wait).
 - 2026-10-06 — usage design spec (0098): top-level view, tiles, one chart, one table with four cuts.
 - 2026-10-09 — session cleaned up; 3 FSE messages waiting (RAM indicator, the Deltagos mark and Pablo's ruling to recolour and draw it); seat identity lost on resume.
+- 2026-10-09 — the Deltagos mark recoloured and drawn (deltagos-mark-drawn.html, .png); floating-icon Amendment 4, gears' colours A/B/C for Pablo.
