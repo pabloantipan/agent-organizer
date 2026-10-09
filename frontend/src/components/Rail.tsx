@@ -5,12 +5,14 @@ import type { merge, model } from "../../wailsjs/go/models";
 import type { Group } from "../hooks/useWails";
 import { move, uniq } from "../lib";
 import { inactiveIds } from "../lib/queue";
+import { sleepyOf, sleepyWord } from "../lib/initiatives";
 import { useBoard } from "../stores/board.store";
 import { CellStateLz, definitionWaits } from "./Crew";
 import { missingPersonas } from "../lib/queue";
 import { roleInitials, roleMail, roleState } from "../lib/roles";
 import { openRoleFrom, RoleDrawer } from "./RoleDrawer";
 import "../styles/roles.css";
+import "../styles/initiatives.css";
 
 type Entry = { id: string; title: string; client: string; status: string; now: number; blocked: number; next: number; machines: string[]; live: number; working: number; cell?: model.Cell | null; missing: string[] };
 
@@ -19,10 +21,12 @@ type Entry = { id: string; title: string; client: string; status: string; now: n
  *  group is a visual section of it. Groups live in the manual order, so
  *  they sync with it. Drag an initiative within or across groups, drag a
  *  group header to reorder groups, click a name to rename it. Initiatives
- *  that are not active (FR-9) leave every group and sit in one last
- *  "Not active" group, collapsed by default, that only opens them. */
+ *  that are not active (FR-9) leave every group and sit in two last folds,
+ *  closed by default, that only open them: "Asleep (n)" (paused, with a
+ *  link to Initiatives, where they wake) and "Archived (n)" (every other
+ *  status; docs/ux/specs/initiatives-view.md, The rail). */
 export function Rail() {
-  const { view, agents, selectedInitiative, setSelectedInitiative, reorderInitiatives, setGroups, railCollapsed, setRailCollapsed, roleOpen } = useBoard();
+  const { view, agents, selectedInitiative, setSelectedInitiative, reorderInitiatives, setGroups, railCollapsed, setRailCollapsed, roleOpen, openInitiatives } = useBoard();
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() => {
     try { return JSON.parse(localStorage.getItem("rail.collapsed") || "{}"); } catch { return {}; }
   });
@@ -55,6 +59,10 @@ export function Rail() {
   const folded = inactiveIds(view);
   const activeIds = ids.filter((id) => !folded.has(id));
   const foldedIds = ids.filter((id) => folded.has(id));
+  // The two folds (initiatives-view, The rail): asleep (paused) apart from
+  // archived and every other status, which the factory cannot wake.
+  const asleepIds = foldedIds.filter((id) => sleepyOf(byId.get(id)!.status) === "asleep");
+  const archivedIds = foldedIds.filter((id) => sleepyOf(byId.get(id)!.status) !== "asleep");
   const active = activeIds.map((id) => byId.get(id)!);
   const totals = active.reduce(
     (a, e) => ({ now: a.now + e.now, blocked: a.blocked + e.blocked, next: a.next + e.next }),
@@ -83,7 +91,7 @@ export function Rail() {
   const roles = allRoles.filter((r) => r.here);
   const initials = roleInitials(allRoles.map((r) => r.name));
 
-  const isCollapsed = (key: string) => (key === FOLD ? collapsed[key] ?? true : !!collapsed[key]);
+  const isCollapsed = (key: string) => (key === FOLD || key === ARCHIVED ? collapsed[key] ?? true : !!collapsed[key]);
   const toggle = (key: string) => {
     const next = { ...collapsed, [key]: !isCollapsed(key) };
     setCollapsed(next);
@@ -221,6 +229,27 @@ export function Rail() {
     );
   };
 
+  // A folded initiative opens (read-only) and never drags.
+  const foldList = (list: string[]) => (
+    <div className="rail-group-list">
+      {list.map((id) => {
+        const e = byId.get(id)!;
+        return (
+          <button key={id} type="button" className={`rail-item folded ${selectedInitiative === id ? "active" : ""}`} onClick={() => setSelectedInitiative(id)} title={e.title}>
+            <span className="rail-rank" aria-hidden="true" />
+            <span className="rail-main">
+              <span className="rail-title">{e.id}</span>
+              <span className="rail-meta">
+                <span className="badge rail-status">{sleepyWord(e.status)}</span>
+                {e.client && <span className="badge client">{e.client}</span>}
+              </span>
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+
   if (railCollapsed) {
     return (
       <>
@@ -252,6 +281,11 @@ export function Rail() {
             {defining(e) && <PencilRuler className="strip-defining" size={10} strokeWidth={2.25} aria-label="cell in definition" />}
           </button>
         ))}
+        {/* Each fold is its count alone at the strip, its word in the hover;
+            it opens Initiatives, where they are cards. */}
+        {foldedIds.length > 0 && <span className="strip-sep" aria-hidden="true" />}
+        {asleepIds.length > 0 && <button className="strip-item strip-fold" onClick={() => openInitiatives()} title={`Asleep (${asleepIds.length}): ${asleepIds.join(", ")}. Wake one from Initiatives`} aria-label={`Asleep, ${asleepIds.length}: open Initiatives`}><span className="strip-rank">{asleepIds.length}</span></button>}
+        {archivedIds.length > 0 && <button className="strip-item strip-fold" onClick={() => openInitiatives()} title={`Archived (${archivedIds.length}): ${archivedIds.join(", ")}`} aria-label={`Archived, ${archivedIds.length}: open Initiatives`}><span className="strip-rank">{archivedIds.length}</span></button>}
       </nav>
       <RoleDrawer />
       </>
@@ -342,33 +376,28 @@ export function Rail() {
             </section>
           ))}
         </DragDropContext>
-        {foldedIds.length > 0 && (
-          <section className="rail-group folded" aria-label="Not active">
+        {asleepIds.length > 0 && (
+          <section className="rail-group folded" aria-label="Asleep">
             <div className="rail-group-head fixed">
               <button className="rail-chevron" onClick={() => toggle(FOLD)} aria-expanded={!isCollapsed(FOLD)} title={isCollapsed(FOLD) ? "expand" : "collapse"}>
                 {isCollapsed(FOLD) ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
               </button>
-              <span className="rail-group-name" title="paused, archived or otherwise not active; opens, never drags">Not active ({foldedIds.length})</span>
+              <span className="rail-group-name" title="asleep: opens read-only; wake one from Initiatives">Asleep ({asleepIds.length})</span>
+              <span className="spacer" />
+              <button className="rail-fold-link" onClick={() => openInitiatives()} title="asleep: opens read-only; wake one from Initiatives">Initiatives ›</button>
             </div>
-            {!isCollapsed(FOLD) && (
-              <div className="rail-group-list">
-                {foldedIds.map((id) => {
-                  const e = byId.get(id)!;
-                  return (
-                    <button key={id} type="button" className={`rail-item folded ${selectedInitiative === id ? "active" : ""}`} onClick={() => setSelectedInitiative(id)} title={e.title}>
-                      <span className="rail-rank" aria-hidden="true" />
-                      <span className="rail-main">
-                        <span className="rail-title">{e.id}</span>
-                        <span className="rail-meta">
-                          <span className="badge rail-status">{e.status}</span>
-                          {e.client && <span className="badge client">{e.client}</span>}
-                        </span>
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+            {!isCollapsed(FOLD) && foldList(asleepIds)}
+          </section>
+        )}
+        {archivedIds.length > 0 && (
+          <section className="rail-group folded" aria-label="Archived">
+            <div className="rail-group-head fixed">
+              <button className="rail-chevron" onClick={() => toggle(ARCHIVED)} aria-expanded={!isCollapsed(ARCHIVED)} title={isCollapsed(ARCHIVED) ? "expand" : "collapse"}>
+                {isCollapsed(ARCHIVED) ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+              </button>
+              <span className="rail-group-name" title="archived: opens read-only; the factory leaves it alone">Archived ({archivedIds.length})</span>
+            </div>
+            {!isCollapsed(ARCHIVED) && foldList(archivedIds)}
           </section>
         )}
       </div>
@@ -391,8 +420,11 @@ const roleItemName = (r: model.Role) => { const [name, ...rest] = roleItemWords(
 
 /** The per-viewer collapse key of the Roles group; it is not a stored group. */
 const ROLES = "roles";
-/** The per-viewer collapse key of the Not active group; it is not a stored group. */
-const FOLD = "inactive";
+/** The per-viewer collapse keys of the Asleep and Archived folds, both
+ *  closed by default; they are not stored groups. New keys, so a viewer who
+ *  had opened Not active starts with both closed. */
+const FOLD = "asleep";
+const ARCHIVED = "archived";
 /** The rail's toggle is a disclosure of the rail (responsive-home FR-11). */
 const RAIL_ID = "rail";
 
