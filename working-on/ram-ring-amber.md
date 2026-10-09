@@ -6,7 +6,7 @@ branch: ram-ring-amber
 seat: ra-build
 stage: one-window
 updated: 2026-10-09
-next: "waits on 0109 (accept); sup50 runs it after deltagos-mark (shared floaticon_darwin.m)"
+next: "sup50 runs it (0109 accepted 2026-10-09), wave 3, beside app-icon-composer"
 depends_on: [deltagos-mark]
 boundary: ["floaticon_darwin.m (the ring layer: always on, colour by level, the 1 px keyline)", "frontend/src/styles/tokens.css (--fg-on-warning)", "the memory button's and the float list's memory-line css", "not: Go, the mark's own layers, any other use of --tone"]
 spec: "docs/ux/specs/ram-indicator.md Amendment 2 (7bb03f4)"
@@ -26,3 +26,6 @@ critical in `--amber-9`, on the icon, the top bar and the panel line.
 - [ ] R3 (M10) the top bar's high text and critical chip are amber, the chip's text `--fg-on-warning`, contrast >= 4.5:1 computed and logged
 - [ ] R4 no reading or a failed reading shows the tone ring, as normal
 - [ ] R5 `make test`, `cd frontend && npm run build`, `wails build` pass
+
+## Notes
+- 2026-10-09: added to sup50's task (window 8383) by the FSE.

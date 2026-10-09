@@ -6,7 +6,7 @@ branch: app-icon-composer
 seat: aic-build
 stage: one-window
 updated: 2026-10-09
-next: "waits on 0110 (accept); then the FSE spawns a supervisor"
+next: "sup50 runs it (0110 accepted 2026-10-09), wave 3, beside ram-ring-amber"
 depends_on: [deltagos-mark]
 boundary: ["build/darwin (Assets.car from Deltagos.icon, the Info.plist template's CFBundleIconName)", "the Makefile or build script step that compiles it into the bundle", "not: the mark's drawing, the floating icon, the frontend"]
 spec: "this card's Spec section; docs/ux/specs/floating-icon.md Amendment 6 (f9ee762)"
@@ -36,3 +36,6 @@ Icon Composer; regenerate with `export.sh`. Her rows F23 and F24 are A1 and A2.
 - [ ] A1 IconServices renders of the built bundle at 16, 32, 128 and 512 pt @1x/@2x on lodestar (macOS 26.1): no grey plate
 - [ ] A2 the same bundle on macOS 12-15 (or its plist and `iconfile.icns` proven unchanged for them): the current icon
 - [ ] A3 `make test`, `wails build`, `make review-build` pass
+
+## Notes
+- 2026-10-09: added to sup50's task (window 8383) by the FSE.
