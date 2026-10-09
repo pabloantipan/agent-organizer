@@ -1,0 +1,39 @@
+#!/bin/sh
+# The fixture's fake `factory` (scripts/fixture-home.sh puts it first on
+# PATH): testdata/factory/factory, the Go tests' fake, acting on the fixture
+# copy only, driven by files in $FIXTURE_FACTORY_DIR (@DIR@ when laid):
+#   roots  the initiative roots it sees, one per line (init-blind is not one)
+#   limit  its limit (default 12)
+#   delay  seconds sleep and wake take, so the in-progress state shows (default 3)
+#   mode   ok (default) | refuse (sleep and wake refuse with the limit words,
+#          as when its own count differs) | fail (they exit 3, nothing
+#          changed) | partial (sleep writes paused, then exits 3 naming a
+#          session it could not freeze) | awake-fail (even `awake` fails)
+# The factory missing is not a mode: Deltagos falls back to ~/bin/factory, so
+# that state needs HOME and PATH without it ($FIXTURE_NOFACTORY_ENV).
+dir="@DIR@"
+mode=$(cat "$dir/mode" 2>/dev/null || echo ok)
+limit=$(cat "$dir/limit" 2>/dev/null || echo 12)
+delay=$(cat "$dir/delay" 2>/dev/null || echo 3)
+FAKE_FACTORY_ROOTS=$(grep . "$dir/roots" | tr '\n' ':')
+FAKE_FACTORY_LIMIT=$limit
+FAKE_FACTORY_LOG="$dir/calls.log"
+export FAKE_FACTORY_ROOTS FAKE_FACTORY_LIMIT FAKE_FACTORY_LOG
+cmd=${1:-awake}
+case "$mode:$cmd" in
+  awake-fail:*) echo "$*" >>"$FAKE_FACTORY_LOG"; echo "factory: python3 not found (fixture awake-fail)" >&2; exit 3 ;;
+esac
+case "$cmd" in
+  sleep|wake)
+    sleep "$delay"
+    case "$mode" in
+      refuse) echo "$*" >>"$FAKE_FACTORY_LOG"; echo "$limit initiatives are awake (limit $limit): put one to sleep first (factory awake, factory sleep <id>)" >&2; exit 1 ;;
+      fail) echo "$*" >>"$FAKE_FACTORY_LOG"; echo "seat-freeze: zellij did not answer (fixture fail)" >&2; exit 3 ;;
+      partial)
+        if [ "$cmd" = sleep ]; then
+          "$dir/factory-real" "$@" >/dev/null || exit $?
+          echo "seat-freeze: could not freeze $2-probe-ana (fixture partial)" >&2; exit 3
+        fi ;;
+    esac ;;
+esac
+exec "$dir/factory-real" "$@"

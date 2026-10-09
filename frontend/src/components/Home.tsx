@@ -14,6 +14,8 @@ import { ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
 import { compactColumns, fixedColumns, FOLD, frTracks, giveSlack, GOAL_CHARS, GOAL_FLOOR_CHARS, goalFloor, homeClassOf, NO_EMPTY, REGULAR_FIXED, shareRoom, signalsNeed, signalsShown, wideGoalRoom, type Empty, type Fold, type WidthClass } from "../lib/width";
 import { useBoard } from "../stores/board.store";
 import { nextDate, stageState } from "./InitiativeHeader";
+import { sleepyOf } from "../lib/initiatives";
+import "../styles/initiatives.css";
 import { InitiativeDetail } from "./Initiatives";
 import { RuleDecisionBox } from "./RuleDecisionBox";
 import { CellStateLz, IN_DEFINITION_WAITS } from "./Crew";
@@ -320,7 +322,7 @@ const focusNeedsMe = () => document.getElementById(NEEDS_ME_HEADING)?.focus();
  *  the initiative; the chevron shows its goal, next date, repos, problems
  *  and actions in place. */
 function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.getState>["view"]> }) {
-  const { agents, openInitiative } = useBoard();
+  const { agents, openInitiative, openInitiatives } = useBoard();
   const homeClass = useContext(HomeClass);
   const compact = homeClass === "compact";
   const [open, setOpen] = useState<Record<string, boolean>>({});
@@ -345,15 +347,21 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
   // Compact's row is one line; its goal and next date give way only when the
   // row has no room for them (FR-16), and come back when it has.
   const hides = { goal: compact && !fit.goal, next: compact && !fit.next && !empty.next };
+  // Asleep ones leave Home (0042); one muted line keeps them findable, and
+  // with none awake the empty state links to where they wake
+  // (docs/ux/specs/initiatives-view.md, Where it lives; States, none awake).
+  const asleep = asleepCount(view);
   if (ids.length === 0) {
     return (
       <div className="panel empty-state">
-        <div>{folded.size > 0 ? "No active initiatives." : "No initiatives found."}</div>
-        <div className="sub">{folded.size > 0 ? "The rest sit under Not active at the bottom of the rail." : "Add a root that holds a working-on/initiative.yaml in Settings."}</div>
+        <div>{folded.size > 0 ? "None awake." : "No initiatives found."}</div>
+        <div className="sub">{folded.size > 0 ? "The rest sit under Asleep and Archived at the bottom of the rail." : "Add a root that holds a working-on/initiative.yaml in Settings."}</div>
+        {folded.size > 0 && <button className="ghost home-wake-link" onClick={() => openInitiatives()}>Wake one in Initiatives ›</button>}
       </div>
     );
   }
   return (
+    <>
     <div ref={ref} className={`panel port ${narrow && !compact ? "narrow" : ""} ${hides.goal ? "" : "fit-goal"} ${hides.next || empty.next ? "" : "fit-next"} ${empty.next ? "empty-next" : ""} ${empty.sig ? "empty-sig" : ""}`} role="table" style={{ ...(idWidth ? { "--id-w": `${idWidth}px` } : {}), ...(goalMin ? { "--goal-floor": `${goalMin}px` } : {}), ...(sigFloor || sigLift ? { "--sig-floor": `${Math.max(sigFloor, sigLift)}px` } : {}), ...fixed } as React.CSSProperties}>
       <div className="p-head" role="row">
         <span className="num">#</span><span>initiative</span><span>state</span><span>phase</span><span>goal</span><span>stage</span><span>signals</span><span>next date</span><span />
@@ -381,7 +389,21 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
       })}
       </SigNeed.Provider>
     </div>
+    {asleep > 0 && <div className="home-asleep">{asleep} asleep · <button className="home-asleep-link" onClick={() => openInitiatives()}>Initiatives ›</button></div>}
+    </>
   );
+}
+
+/** How many initiatives sleep (`paused`), each judged by its local row. */
+function asleepCount(view: NonNullable<ReturnType<typeof useBoard.getState>["view"]>) {
+  const seen = new Set<string>();
+  let n = 0;
+  for (const i of [...(view.board.initiatives ?? [])].sort((a, b) => Number(b.local) - Number(a.local))) {
+    if (seen.has(i.id)) continue;
+    seen.add(i.id);
+    if (sleepyOf(i.status) === "asleep") n++;
+  }
+  return n;
 }
 
 type Next = ReturnType<typeof nextDate>;

@@ -1,4 +1,5 @@
 import type { AgentGroup, AgentsView, BoardView, CellThread, Seat } from "../hooks/useWails";
+import { sleepyWord } from "./initiatives";
 import type { merge, model } from "../../wailsjs/go/models";
 import { parseISO } from "./dates";
 import { unreadFiles, type UnreadFile } from "./unread";
@@ -47,8 +48,9 @@ export function inactiveIds(view: BoardView | null) {
 }
 
 /** FR-13 (0042): the one read-only flag. An initiative that is not active
- *  opens read-only: null when it is writable, else its status word
- *  ("archived", "paused", …) for the header's "<status>: read-only". Each
+ *  opens read-only: null when it is writable, else its word for the
+ *  header's "<word>: read-only": `asleep` for paused, `archived`, or a
+ *  status Deltagos has no word for as written (initiatives-view I14). Each
  *  view derives it here once and passes it down; no component reads a
  *  status itself. Judged by the local row, as inactiveIds is. */
 export function readOnlyOf(view: BoardView | null, id: string | null | undefined): string | null {
@@ -56,7 +58,7 @@ export function readOnlyOf(view: BoardView | null, id: string | null | undefined
   const rows = (view?.board.initiatives ?? []).filter((i) => i.id === id);
   const row = rows.find((i) => i.local) ?? rows[0];
   if (!row || isActive(row)) return null;
-  return (row.status ?? "").trim().toLowerCase();
+  return sleepyWord(row.status);
 }
 
 /** A relay to a transversal role (`[for <role>] …`, 0079): posted to the

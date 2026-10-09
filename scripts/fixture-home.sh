@@ -79,6 +79,24 @@
 # sub-agent, and the running Hephaistos session (the probe-hefesto
 # stand-in's live record). The script's header in usage.py lists each.
 #
+# Initiatives (docs/specs/initiatives-view.md, I1-I13): the default home also
+# lays testdata/fixture-sleep: init-asleep (paused, "sleeping since" a week
+# ago, one frozen session under the fixture's probe state dir, with its
+# exited layout), init-archived, and init-blind (active, four levels down,
+# and not among the roots the fake factory sees: camp's case). A fake
+# `factory` goes first on PATH ($FIXTURE_FACTORY_DIR/bin): it acts on this
+# copy only, never runs the real one, and logs each call to calls.log there.
+# Drive it with files in $FIXTURE_FACTORY_DIR, read at every call:
+#   echo 10 > "$FIXTURE_FACTORY_DIR/limit"    # the limit (default 12; 10
+#                                              # awake: 11 under, 10 at, 9 over)
+#   echo refuse > "$FIXTURE_FACTORY_DIR/mode"  # ok | refuse | fail | partial | awake-fail
+#   echo 0 > "$FIXTURE_FACTORY_DIR/delay"      # seconds sleep and wake take (default 3)
+# then Rescan. One or none awake: `factory sleep <id>` from this shell (the
+# fake, on PATH) for the others, then Rescan. The factory missing cannot be a
+# mode, since Deltagos falls back to ~/bin/factory: launch the app under
+# `env $FIXTURE_NOFACTORY_ENV` (a HOME without bin/factory and a PATH
+# without the fake).
+#
 # The FSE thread of G19 lives in the discuss mailbox, project organizer-fixture,
 # not on disk; the supervisor posted it once. Ruling it or the records only
 # touches this temp copy.
@@ -247,6 +265,20 @@ home="$tmp/home"
 
 a="$home/init-a"
 sed -i '' "s#\"/h/init-a\"#\"$a\"#" "$a/agents/cell.json"
+# Initiatives (header): the asleep, archived and factory-blind initiatives,
+# the frozen session, and the fake factory over this copy.
+(cd "$repo/testdata/fixture-sleep" && tar --exclude=./README.md --exclude=./factory -cf - .) | (cd "$home" && tar -xf -)
+since="$(date -v-7d +%Y-%m-%d)"
+sed -i '' "s/@SINCE@/$since/" "$home/init-asleep/working-on/initiative.yaml"
+mkdir -p "$tmp/probe/frozen/init-asleep-probe-otter"
+echo "$home/init-asleep" > "$tmp/probe/frozen/init-asleep-probe-otter/cwd"
+printf 'layout {\n  cwd "%s"\n}\n' "$home/init-asleep" > "$tmp/probe/init-asleep-probe-otter.kdl"
+fd="$tmp/factory"
+mkdir -p "$fd/bin"
+cp "$repo/testdata/factory/factory" "$fd/factory-real"
+sed "s#@DIR@#$fd#" "$repo/testdata/fixture-sleep/factory" > "$fd/bin/factory"
+chmod +x "$fd/factory-real" "$fd/bin/factory"
+mkdir -p "$tmp/nohome"
 # The roles' bitácoras (roles-ui R2): each @D<n>@ is the date n days before
 # today, so the HAND-OFFs read as recent (and Daedalus's as older than a
 # week) whenever the fixture is laid.
@@ -333,7 +365,7 @@ ignore_dirs: [node_modules, Library]
 auth: off
 agent_binary: organizer-fixture-agent
 zellij: /usr/bin/true
-probe_state_dir: ""
+probe_state_dir: $tmp/probe
 EOF
 [ -n "$live_mailbox" ] || echo "canned_health: $tmp/health.json" >> "$tmp/config.yaml"
 # The transversal roles (docs/ux/specs/transversal-roles.md, R1-R4): the
@@ -416,8 +448,13 @@ echo "${pids# }" > "$tmp/agents.pid"
 mkdir -p "$tmp/claude"
 python3 "$repo/testdata/fixture-usage/usage.py" "$tmp/claude" "$tmp/data" "$home" fixture-probe-hefesto
 
+# The roots the fake factory sees: every initiative laid, init-blind apart.
+find "$home" -path '*/working-on/initiative.yaml' -not -path '*/.*' -not -path "$home/init-blind/*" | sed 's#/working-on/initiative.yaml$##' | sort > "$fd/roots"
 echo "export ORGANIZER_CONFIG='$tmp/config.yaml'"
 echo "export XDG_DATA_HOME='$tmp/data'"
 echo "export CLAUDE_CONFIG_DIR='$tmp/claude'"
 echo "export FIXTURE_HOME='$home'"
 echo "export FIXTURE_AGENT_PIDS='${pids# }'"
+echo "export FIXTURE_FACTORY_DIR='$fd'"
+echo "export PATH='$fd/bin':\"\$PATH\""
+echo "export FIXTURE_NOFACTORY_ENV='HOME=$tmp/nohome PATH=/usr/bin:/bin:/usr/sbin:/sbin'"

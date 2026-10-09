@@ -11,6 +11,7 @@ import { DecisionsView } from "./components/DecisionsView";
 import { AgentsView } from "./components/AgentsView";
 import { SlackView } from "./components/SlackView";
 import { Usage } from "./components/Usage";
+import { InitiativesView } from "./components/InitiativesView";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Gate } from "./components/Gate";
 import { CardDrawer } from "./components/CardDrawer";
@@ -58,6 +59,8 @@ export default function App() {
       <TopBar />
       {screen === "settings" ? (
         <main className="content"><ErrorBoundary name="Settings"><Settings /></ErrorBoundary></main>
+      ) : screen === "initiatives" ? (
+        <main className="content"><ErrorBoundary name="Initiatives"><InitiativesView /></ErrorBoundary></main>
       ) : screen === "usage" ? (
         <main className="content"><ErrorBoundary name="Usage"><Usage /></ErrorBoundary></main>
       ) : (

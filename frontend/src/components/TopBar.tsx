@@ -9,7 +9,7 @@ import { MemoryButton } from "./MemoryButton";
 import { FloatAvailable, FloatCompact } from "../../wailsjs/go/main/App";
 
 export function TopBar() {
-  const { screen, selectedInitiative, goHome, openSettings, openUsage, widthClass, view, loading, syncing, refresh, sync, error, lastMessage, account, lock, authMode, syncNote, setAccount, setLock, setOfflineChoice, agents } = useBoard();
+  const { screen, selectedInitiative, goHome, openSettings, openUsage, openInitiatives, widthClass, view, loading, syncing, refresh, sync, error, lastMessage, account, lock, authMode, syncNote, setAccount, setLock, setOfflineChoice, agents } = useBoard();
   // With auth off there is no identity: no account menu, no Sign in, no email,
   // and no Sync button either, since sync is a skip nobody can act on.
   const identity = authMode === "firebase";
@@ -18,6 +18,7 @@ export function TopBar() {
   const needsMe = needsMeRows(view, agents).length;
   const [menu, setMenu] = useState(false);
   const machines = view?.board.machines ?? [];
+  const machinesLine = view ? `${machines.length} machine${machines.length === 1 ? "" : "s"} · remote ${since(view.pulled_at)}` : "";
   const [version, setVersion] = useState("");
   useEffect(() => { api.version().then(setVersion, () => undefined); }, []);
   // Compact to icon (floating-icon §4) only where the icon runs: macOS, past
@@ -36,24 +37,24 @@ export function TopBar() {
       {/* At compact the version folds into the brand's hover first, so the
           bar stays one line at 1024 with Usage and a scan's wider label
           (FR-5a, UI5). */}
-      <span className="brand" title={version ? `Deltagos ${version}` : "Deltagos"}>Deltagos{version && widthClass !== "compact" && <span className="brand-version">{version}</span>}</span>
+      {/* At compact the idle machines line folds into the brand's hover too,
+          so the bar keeps one line with Initiatives beside Usage
+          (initiatives-view I13); errors and sync notes never fold. */}
+      <span className="brand" title={[version ? `Deltagos ${version}` : "Deltagos", widthClass === "compact" && machinesLine].filter(Boolean).join("\n")}>Deltagos{version && widthClass !== "compact" && <span className="brand-version">{version}</span>}</span>
       <nav className="crumbs" aria-label="where you are">
         {screen === "home" ? <b>Home</b> : <button className="crumb" onClick={() => { closeHelp(); goHome(); }}>Home</button>}
         {screen === "initiative" && selectedInitiative && <><span className="crumb-sep">/</span><b className="mono">{selectedInitiative}</b></>}
         {screen === "initiative" && !selectedInitiative && <><span className="crumb-sep">/</span><b>Agents</b></>}
         {screen === "settings" && <><span className="crumb-sep">/</span><b>Settings</b></>}
         {screen === "usage" && <><span className="crumb-sep">/</span><b>Usage</b></>}
+        {screen === "initiatives" && <><span className="crumb-sep">/</span><b>Initiatives</b></>}
         {helpTop !== null && <><span className="crumb-sep">/</span><b>Help</b></>}
       </nav>
       <span className="spacer" />
       {error && <span className="meta err">{error}</span>}
       {!error && syncNote && <span className="meta warn" title="Sync is paused; showing the last pull">{syncNote}</span>}
       {!error && !syncNote && lastMessage && <span className="meta">{lastMessage}</span>}
-      {!error && !lastMessage && view && (
-        <span className="meta">
-          {machines.length} machine{machines.length === 1 ? "" : "s"} · remote {since(view.pulled_at)}
-        </span>
-      )}
+      {!error && !lastMessage && machinesLine && widthClass !== "compact" && <span className="meta">{machinesLine}</span>}
       <button className={`needs-me ${screen === "home" ? "on" : ""}`} onClick={() => { closeHelp(); goHome(); }} title="everything waiting on you">
         <Inbox size={14} /> Needs me{needsMe > 0 && <span className="badge-count num">{needsMe}</span>}
       </button>
@@ -89,6 +90,10 @@ export function TopBar() {
         )}
       </span>}
       {floats && <button className="ghost gear" onClick={() => { closeHelp(); void FloatCompact(); }} title="Compact to icon (the icon floats on every desktop)" aria-label="Compact to icon"><CompactIcon /></button>}
+      {/* Initiatives (docs/ux/specs/initiatives-view.md): left of Usage, a
+          quiet text button with no number and no badge; the count of the
+          awake is inside the view (FR-14). */}
+      <button className={`ghost usage-btn ${screen === "initiatives" && helpTop === null ? "on" : ""}`} onClick={() => { closeHelp(); openInitiatives(); }} title="Every initiative as a card: awake, asleep and archived" aria-pressed={screen === "initiatives" && helpTop === null}>Initiatives</button>
       {/* Usage (docs/ux/specs/usage.md): a quiet text button, no badge and no
           number; Needs me is the one badge, and money stays inside the view. */}
       <button className={`ghost usage-btn ${screen === "usage" && helpTop === null ? "on" : ""}`} onClick={() => { closeHelp(); openUsage(); }} title="Tokens and money, week by week" aria-pressed={screen === "usage" && helpTop === null}>Usage</button>

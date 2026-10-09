@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AgentGroup, AgentsView, BoardView, CellThread } from "../hooks/useWails";
 import type { merge, model } from "../../wailsjs/go/models";
-import { launchVerb, missingPersonas, needsMeRows, needsMeShown, needsMeThread, NEEDS_ME_FIRST, pastFirst, personaMissing, queueOf } from "./queue";
+import { launchVerb, missingPersonas, needsMeRows, needsMeShown, needsMeThread, NEEDS_ME_FIRST, pastFirst, personaMissing, queueOf, readOnlyOf } from "./queue";
 
 // Fixtures are plain objects: the generated classes carry methods the
 // functions under test never call, so each builder casts once.
@@ -206,5 +206,20 @@ describe("needsMeRows: files the scan could not read", () => {
       withProblems("b", [{ path: "/h/b/working-on/x.md", msg: "no frontmatter", unread: true }], "archived"),
     ]);
     expect(kinds(view, agents()).filter((k) => k.startsWith("unread:"))).toEqual([]);
+  });
+});
+
+describe("readOnlyOf: the read-only word (initiatives-view I14)", () => {
+  const withStatus = (status: string) => ({ ...initiative("a"), status }) as merge.BoardInitiative;
+  it("says asleep for a paused initiative, never paused", () => {
+    expect(readOnlyOf(board([withStatus("paused")]), "a")).toBe("asleep");
+  });
+  it("says archived, or a status it has no word for as written", () => {
+    expect(readOnlyOf(board([withStatus("archived")]), "a")).toBe("archived");
+    expect(readOnlyOf(board([withStatus("done")]), "a")).toBe("done");
+  });
+  it("is null for an awake one", () => {
+    expect(readOnlyOf(board([withStatus("active")]), "a")).toBeNull();
+    expect(readOnlyOf(board([withStatus("")]), "a")).toBeNull();
   });
 });

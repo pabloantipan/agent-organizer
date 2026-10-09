@@ -9,8 +9,10 @@ import { railCollapsedFor, roomyOf, widthClassOf, type WidthClass } from "../lib
 
 /** Navigation is Home, one initiative under its header with six sub-views,
  *  Settings behind the gear (FR-14), or Usage, the week's tokens and money
- *  across every initiative (docs/specs/usage.md FR-5). */
-export type Screen = "home" | "initiative" | "settings" | "usage";
+ *  across every initiative (docs/specs/usage.md FR-5), or Initiatives, every
+ *  initiative as a card, awake, asleep and archived, with Sleep and Wake
+ *  (docs/specs/initiatives-view.md FR-5). */
+export type Screen = "home" | "initiative" | "settings" | "usage" | "initiatives";
 export type Sub = "overview" | "work" | "roadmap" | "decisions" | "conversations" | "agents";
 
 /** The identity mode of the backend. "off" is the default and means there is
@@ -133,6 +135,12 @@ type State = {
   openUsage: (initiative?: string | null) => void;
   usageFilter: string | null;
   setUsageFilter: (initiative: string | null) => void;
+  // Initiatives (initiatives-view §Where it lives), optionally landing on one
+  // card's control: "wake:<id>" (the header's Wake in Initiatives ›) puts
+  // focus on that card's Wake. The view consumes it and clears it.
+  openInitiatives: (focus?: string | null) => void;
+  initiativesFocus: string | null;
+  clearInitiativesFocus: () => void;
   selected: merge.BoardCard | null;
   // The role whose drawer is open (transversal-roles, A click), by name;
   // null when none. Show only: opening it starts nothing.
@@ -303,6 +311,9 @@ export const useBoard = create<State>((set, get) => ({
   openUsage: (initiative = null) => set({ ruleDraft: null, screen: "usage", selectedInitiative: null, needsMeFocus: null, decisionFocus: null, usageFilter: initiative }),
   usageFilter: null,
   setUsageFilter: (usageFilter) => set({ usageFilter }),
+  openInitiatives: (initiativesFocus = null) => set({ ruleDraft: null, screen: "initiatives", selectedInitiative: null, needsMeFocus: null, decisionFocus: null, initiativesFocus }),
+  initiativesFocus: null,
+  clearInitiativesFocus: () => set({ initiativesFocus: null }),
   selected: null,
   roleOpen: null,
   openRole: (roleOpen) => set({ roleOpen }),

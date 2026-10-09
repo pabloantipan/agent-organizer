@@ -1,0 +1,113 @@
+/* Initiatives (docs/ux/specs/initiatives-view.md): every initiative as a
+   card, awake, asleep, then archived, with Sleep and Wake. Tier-2 role
+   tokens and the seven type sizes only; no nesting, @layer, color-mix or
+   oklch (Safari 15.0). Over the limit is the magenta tone, never red (red is
+   blocked's alone); Sleep and Wake are default (secondary) buttons, never
+   the accent fill. .sec-title, .lz and .sr-only come from shell.css. */
+
+.ivw {
+  position: relative; /* the live region's .sr-only stays inside the scroller */
+  display: grid; gap: var(--space-6); align-content: start; max-width: 1480px; min-width: 0;
+  padding: var(--space-2) var(--space-2) var(--space-8);
+}
+.ivw .spacer { flex: 1 1 auto; }
+.ivw .mono { font-family: var(--mono); }
+
+/* ---------- the head: title and the count ---------- */
+.ivw-head { display: flex; align-items: baseline; gap: var(--space-3); min-width: 0; flex-wrap: wrap; }
+.ivw-head h1 { margin: 0; font-size: var(--font-size-2xl); line-height: var(--line-2xl); font-weight: var(--weight-semibold); color: var(--fg); }
+.ivw-count { font-size: var(--font-size-lg); line-height: var(--line-lg); font-weight: var(--weight-medium); color: var(--fg); white-space: nowrap; }
+.ivw-count.over { color: var(--tone); }
+.ivw-line { font-size: var(--font-size-md); line-height: var(--line-md); color: var(--fg-muted); }
+
+/* ---------- sections ---------- */
+.ivw-sec { display: grid; gap: var(--space-3); min-width: 0; }
+.ivw-fold {
+  display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--control-sm); padding: 0 var(--space-1);
+  background: transparent; border-color: transparent; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit;
+}
+.ivw-fold:hover { background: var(--surface-hover); border-color: transparent; color: var(--fg); }
+.ic-empty { font-size: var(--font-size-md); line-height: var(--line-md); color: var(--fg-subtle); }
+.ivw-link {
+  display: inline; min-height: 0; padding: 0; border: 0; background: transparent;
+  color: var(--accent-fg); font-size: inherit; font-weight: var(--weight-medium); text-decoration: underline; text-underline-offset: 2px;
+}
+.ivw-link:hover { background: transparent; border: 0; color: var(--fg); }
+
+/* Cards in as many columns as fit: two at 1024, four at 1512 (I13). */
+.ivw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: var(--space-3); min-width: 0; }
+@media (max-width: 760px) { .ivw-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- the card: a tile, surface 2, radius 8, no white ---------- */
+.ic {
+  display: grid; gap: var(--space-1); align-content: start; min-width: 0;
+  padding: var(--space-3); border-radius: var(--radius-md);
+  background: var(--surface-raised); border: 1px solid var(--border-subtle);
+}
+.ic-head { display: flex; align-items: center; gap: var(--space-2); min-width: 0; flex-wrap: wrap; }
+.ic-id {
+  min-height: var(--control-sm); padding: 0 var(--space-1); margin-left: calc(-1 * var(--space-1));
+  background: transparent; border-color: transparent; color: var(--fg);
+  font-size: var(--font-size-md); font-weight: var(--weight-semibold); overflow-wrap: anywhere; text-align: left;
+}
+.ic-id:hover { background: var(--surface-hover); border-color: transparent; text-decoration: underline; }
+/* .lz is inline-flex, where text-overflow does nothing: a long client clipped mid-word */
+.lz.ic-client { display: inline-block; }
+.lz.ic-word.awake { background: var(--accent-muted); color: var(--accent-fg); }
+.lz.ic-word.asleep, .lz.ic-word.archived { background: var(--status-done-bg); color: var(--fg-muted); }
+.ic-goal {
+  font-size: var(--font-size-md); line-height: var(--line-md); color: var(--fg);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+}
+.ic-goal.missing, .ic-line.missing { color: var(--fg-subtle); }
+.ic-line { font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); min-width: 0; overflow-wrap: anywhere; }
+.ic-foot { display: flex; justify-content: flex-end; margin-top: var(--space-1); }
+.ic-act[aria-disabled="true"] { opacity: .45; cursor: default; }
+.ic-act[aria-disabled="true"]:hover { background: var(--button-bg); border-color: var(--border); }
+
+/* Sleep's confirm, in place of the card's lower half (§4). */
+.ic-confirm { display: grid; gap: var(--space-1); margin-top: var(--space-1); padding-top: var(--space-2); border-top: 1px solid var(--border-subtle); }
+.ic-q { font-size: var(--font-size-md); line-height: var(--line-md); font-weight: var(--weight-semibold); color: var(--fg); }
+.ic-confirm .ic-line { color: var(--fg); }
+.ic-buttons { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-1); }
+
+/* What a card says under itself: wait, the limit, a refusal, a failure. */
+.ic-note { display: grid; gap: var(--space-1); font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg); border-radius: var(--radius-xs); }
+.ic-note:focus { outline: none; }
+.ic-note:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.ic-words {
+  margin: 0; padding: var(--space-1) var(--space-2); border-radius: var(--radius-xs); background: var(--bg-sunken);
+  font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg); white-space: pre-wrap; overflow-wrap: anywhere;
+}
+
+/* ---------- the rail's folds (The rail) ---------- */
+.rail-fold-link {
+  min-height: var(--control-sm); padding: 0 var(--space-1); background: transparent; border-color: transparent;
+  color: var(--accent-fg); font-size: var(--font-size-sm); font-weight: var(--weight-medium); white-space: nowrap;
+}
+.rail-fold-link:hover { background: var(--surface-hover); border-color: transparent; color: var(--fg); }
+/* At the strip a fold is its count alone, set apart from the ranks above it. */
+.strip-item.strip-fold { color: var(--fg-subtle); border-color: var(--border-subtle); }
+.strip-item.strip-fold:hover { color: var(--fg); }
+
+/* ---------- Home: the asleep line under the last initiative row ---------- */
+.home-asleep { padding: var(--space-2) var(--space-1) 0; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-subtle); }
+.home-asleep-link {
+  display: inline; min-height: 0; padding: 0; border: 0; background: transparent;
+  color: var(--accent-fg); font-size: inherit; font-weight: var(--weight-medium);
+}
+.home-asleep-link:hover { background: transparent; border: 0; color: var(--fg); text-decoration: underline; }
+.empty-state .home-wake-link { color: var(--accent-fg); }
+
+/* ---------- the header of an asleep initiative ---------- */
+.ihead-wake-link {
+  min-height: var(--control-sm); padding: 0 var(--space-1); background: transparent; border-color: transparent;
+  color: var(--accent-fg); font-size: var(--font-size-sm); font-weight: var(--weight-medium); white-space: nowrap;
+}
+.ihead-wake-link:hover { background: var(--surface-hover); border-color: transparent; color: var(--fg); }
+
+/* ---------- Agents: memory on every row ---------- */
+/* Right-aligned and tabular in neutral ink; a fixed width so the figures
+   line up row under row, and no shrink, so it never folds. */
+.a-mem { flex: 0 0 auto; min-width: 52px; text-align: right; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); white-space: nowrap; }
+.a-group-mem { white-space: nowrap; }
