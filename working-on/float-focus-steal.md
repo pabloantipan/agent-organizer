@@ -73,3 +73,6 @@ log, epoch seconds), `s1-frontmost.log` (frontmost app with desktop number),
 
 ## Notes
 - 2026-10-09: supervisor sup50 (window 8383), spawned by the FSE.
+- 2026-10-09, ffs-build: the fix's retest is met at 18:46:57: the system's hand-on reached Deltagos Review on desktop 2, was refused, and went to Chrome 25 ms later with no desktop change (`.wt-notes/ffs-build/fix-float.log`, `fix-frontmost.log`, `fix-steps.log`; `scripts/focus-steal-check.sh`, ef9caac). For a few milliseconds the frontmost log still names Deltagos Review: macOS activates it before the refusal can hand activation on.
+- 2026-10-09, ffs-build: in S2, each move that lands on desktop 2 while Review's window is the topmost one there makes macOS activate Review. The app orders nothing (event 13, no `orderFront` in `s2-float.log`). Any app whose window is on top of the desktop you arrive at gets the same. Read literally, "only after the two uses" counts these arrivals. Pablo also clicked the review app himself at 18:56:51-18:57:05 (compact, list, double-click).
+- decide: S2's arrivals at Review's own home: options "count the arrival activation at its own home as the lead's act (no desktop pulled, no window ordered front)" | "rerun S2 with another app's window above Review on desktop 2"
