@@ -33,6 +33,9 @@ type Options struct {
 	Now        func() time.Time
 	// Agent discovery; nil disables it.
 	Agents *AgentOptions
+	// FrozenDir is seat-freeze's frozen sessions dir (probe_state_dir's
+	// frozen/); empty reads none.
+	FrozenDir string
 }
 
 func (o Options) now() time.Time {
@@ -101,6 +104,7 @@ func Run(opts Options) model.Snapshot {
 	for _, r := range roots {
 		snap.Initiatives = append(snap.Initiatives, ReadInitiative(r, opts))
 	}
+	assignFrozen(snap.Initiatives, opts.FrozenDir)
 	if len(problems) > 0 && len(snap.Initiatives) > 0 {
 		snap.Initiatives[0].Problems = append(problems, snap.Initiatives[0].Problems...)
 	}
@@ -126,6 +130,7 @@ func ReadInitiative(root string, opts Options) model.ScannedInitiative {
 		si.Problems = append(si.Problems, model.UnreadProblem(filepath.Join(wo, initiativeFile), "initiative.yaml: "+err.Error()))
 	}
 	si.Path = root
+	si.AsleepSince = asleepSince(b)
 	if si.ID == "" {
 		si.ID = filepath.Base(root)
 	}
