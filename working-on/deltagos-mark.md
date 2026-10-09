@@ -12,6 +12,7 @@ boundary: ["floaticon_darwin.m/.h/.go (the tile's layers only)", "build/appicon.
 spec: "docs/specs/deltagos-mark.md (FR-1 to FR-4; docs/ux/specs/floating-icon.md Amendment 4)"
 gate: "docs/specs/deltagos-mark.md Acceptance, rows F17 to F22, H1 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -41,3 +42,12 @@ docs/specs/deltagos-mark.md, F17 to F22, H1 and X0. Evidence in
 - 2026-10-09, dm-build: decide on the grey plate answered by the FSE, spec Amendment 3 (cfefac8): recorded, not failed; new card app-icon-composer takes the format.
 - 2026-10-09, dm-build: icon_16x16 and icon_32x32 decode to other pixels than the exported slots because Aglaea's own `iconutil` stores those two as raw ARGB (`ic04`/`ic05`), not PNG; alpha and every opaque pixel match, only semi-transparent edge pixels differ in colour. Wails and the Makefile line do not touch the bytes (sha256 equal).
 - 2026-10-09, dm-build: the Help's mark moves for as long as Help is open; the drawing had a Pause button, the spec has none (WCAG 2.2.2). For Aglaea.
+
+## Review
+- Verdict: pass at 5c61b3f. Unmet gate rows: none.
+- Reviewer: dm-review, 2026-10-09. Evidence of my own in `.wt-notes/dm-review/` (clean clone of 5c61b3f, removed after).
+- X0 from the clean clone: `make test` (go ok, vitest 372 passed), `npm run build`, `wails build` exit 0. Existing F-rows: the diff to `floaticon_darwin.m` touches only the tile's layers, `breathe()` and a `FLOAT_SHOW_ICON` stand-in gated on `FLOAT_LOG`; F2 and F12 seen in the builder's shots and log, the ring by `float-ring.log`; F3's bars are replaced by F17/F19 (Amendment 4).
+- F18/F22 from the clone's `make review-build`: both files and both bundles' icns sha256-equal to `app-icon/` (b087f05…, 774b539…), signatures valid; iconutil slots: 16 the D alone, 16@2x and 32 the D and gears.
+- F20/F21: my IconServices renders of the clone's `Deltagos Review.app` match the builder's numbers line for line; the grey plate shows at 16 and 32 pt only, recorded under Amendment 3.
+- F17, F19, H1: the builder's native shots (a/b differ; reduce-motion a/b sha-equal), logs, and vitest; the Help mark's constants and loop match `deltagos-mark-drawn.html`.
+- Not covered by the gate: a bare `wails build` (X0's own command and `.github/workflows/release.yml`) ships a regenerated icns (81bdf58…, no 16/32 cuts); only `make build` copies the exported one. The spec's rabbit hole says Wails reads `build/darwin/iconfile.icns`; it does not. Amendment 3 says the plate shows "at every size"; the renders show it at 16 and 32 pt only.
