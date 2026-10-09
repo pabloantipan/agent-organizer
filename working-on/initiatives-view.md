@@ -33,6 +33,7 @@ docs/specs/initiatives-view.md, I1 to I13 and X0, plus:
 - 2026-10-09 iv-build: the WKWebView rows wait on lodestar's locked screen, and must not overlap ffs-build's S2 (a second Deltagos Review in front spoils its frontmost-app log).
 - 2026-10-09 iv-build: CardDrawer and Conversation still say `paused: read-only` (`readOnlyOf` in `lib/queue.ts`, outside the boundary).
 - 2026-10-09 iv-build: at 1024 the top bar wrapped on Initiatives and Usage once the button was added; the idle machines line now folds into the brand's hover at compact (for Aglaea's look).
+- 2026-10-09 iv-build: under 0108's rule (sup51, ~19:05): no desktop switching, seat-pointer only into the Deltagos Review window with --wait and never a lower --idle. The WKWebView pass runs first in `.wt-notes/iv-build/wkheadless` (a real WKWebView, offscreen, activation policy prohibited: never frontmost, no Space, no input events; DOM events and focus read by JS) against the fixture, with shots `wk-<w>x<h>-<row>-<state>.png`. Rows that still need the Review window are done through seat-pointer only if that works within the rule; any that can't are listed here, proven by the Chromium run plus wkheadless. It still waits for sup51's go.
 - 2026-10-09 the FSE: boundary widened by Crew.tsx (Memory column on crew seat rows only), spec Amendment 2 (0108).
 
 ## Review
