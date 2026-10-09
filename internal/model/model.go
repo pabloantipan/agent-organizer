@@ -366,6 +366,11 @@ type Agent struct {
 	// Card is the open card this agent works, nil when no card answers to it
 	// or two do. Joined by the agents feed, never by the scan of a card file.
 	Card *CardJoin `json:"card"`
+	// MemBytes is the physical footprint of the agent's process and every
+	// descendant (MCP servers, node, shells), resident size where the
+	// footprint cannot be read; another agent's tree is not counted twice.
+	// Zero for a session with no agent process.
+	MemBytes uint64 `json:"mem_bytes"`
 }
 
 // CardJoin is the answer to "which card is this agent on": the card it was

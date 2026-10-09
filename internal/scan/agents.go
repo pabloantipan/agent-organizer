@@ -50,6 +50,11 @@ type AgentOptions struct {
 	// means path matching only.
 	Cards    []session.CardRef
 	BranchOf func(cwd string) string
+	// PS runs ps with these arguments and returns its output; nil runs it.
+	PS func(args ...string) string
+	// Footprint reads a process's physical footprint; nil is Footprint.
+	// Where it fails, the process counts by its resident size from ps.
+	Footprint func(pid int) (uint64, error)
 }
 
 type zsession struct {
@@ -165,30 +170,47 @@ func zellijSessions(o AgentOptions) map[string]zsession {
 	return res
 }
 
+// psRow is one process of the table: enough to walk the tree and to fall
+// back to resident size.
+type psRow struct {
+	ppid int
+	rss  uint64 // bytes
+}
+
 // agentProcesses reads the process table for the agent binary and resolves
 // each process's working directory in one lsof call. `-E` appends each
-// process's environment, which is where a persona's identity lives.
+// process's environment, which is where a persona's identity lives. The same
+// call gives every process's parent and resident size, so each agent's
+// memory is its whole tree (memTree).
 func agentProcesses(o AgentOptions) []model.Agent {
-	out := runCmd("ps", o.Timeout, "-axEo", "pid=,etime=,tty=,time=,command=")
+	ps := o.PS
+	if ps == nil {
+		ps = func(args ...string) string { return runCmd("ps", o.Timeout, args...) }
+	}
+	out := ps("-axEo", "pid=,ppid=,rss=,etime=,tty=,time=,command=")
 	var procs []model.Agent
+	table := map[int]psRow{}
 	for _, line := range strings.Split(out, "\n") {
 		f := strings.Fields(line)
-		if len(f) < 5 {
-			continue
-		}
-		cmd := f[4]
-		if filepath.Base(cmd) != o.AgentBinary {
+		if len(f) < 7 {
 			continue
 		}
 		pid, err := strconv.Atoi(f[0])
 		if err != nil {
 			continue
 		}
-		args := strings.Join(f[5:], " ")
+		ppid, _ := strconv.Atoi(f[1])
+		rss, _ := strconv.ParseUint(f[2], 10, 64)
+		table[pid] = psRow{ppid: ppid, rss: rss * 1024}
+		cmd := f[6]
+		if filepath.Base(cmd) != o.AgentBinary {
+			continue
+		}
+		args := strings.Join(f[7:], " ")
 		if helperProcess(args) {
 			continue
 		}
-		a := model.Agent{PID: pid, Uptime: f[1], TTY: f[2], CPUSeconds: parseCPUTime(f[3]), State: model.AgentRunning}
+		a := model.Agent{PID: pid, Uptime: f[3], TTY: f[4], CPUSeconds: parseCPUTime(f[5]), State: model.AgentRunning}
 		a.Session, a.Persona, a.Cell = identity(args)
 		if a.Session != "" {
 			a.Name = a.Session
@@ -209,6 +231,7 @@ func agentProcesses(o AgentOptions) []model.Agent {
 	if len(procs) == 0 {
 		return nil
 	}
+	memTree(o, table, procs)
 	ids := make([]string, len(procs))
 	for i, p := range procs {
 		ids[i] = strconv.Itoa(p.PID)
@@ -231,6 +254,50 @@ func agentProcesses(o AgentOptions) []model.Agent {
 	}
 	attachSessions(o, procs)
 	return procs
+}
+
+// memTree sets each agent's MemBytes to the footprint of its process and
+// every descendant. A descendant that is itself an agent is that agent's to
+// count, with its tree, so nothing is counted twice.
+func memTree(o AgentOptions, table map[int]psRow, procs []model.Agent) {
+	read := o.Footprint
+	if read == nil {
+		read = Footprint
+	}
+	children := map[int][]int{}
+	for pid, r := range table {
+		if r.ppid != pid {
+			children[r.ppid] = append(children[r.ppid], pid)
+		}
+	}
+	agent := make(map[int]bool, len(procs))
+	for _, p := range procs {
+		agent[p.PID] = true
+	}
+	for i := range procs {
+		var sum uint64
+		seen := map[int]bool{}
+		stack := []int{procs[i].PID}
+		for len(stack) > 0 {
+			pid := stack[len(stack)-1]
+			stack = stack[:len(stack)-1]
+			if seen[pid] {
+				continue
+			}
+			seen[pid] = true
+			if b, err := read(pid); err == nil {
+				sum += b
+			} else {
+				sum += table[pid].rss
+			}
+			for _, c := range children[pid] {
+				if !agent[c] {
+					stack = append(stack, c)
+				}
+			}
+		}
+		procs[i].MemBytes = sum
+	}
 }
 
 // helperProcess reports Claude Code's own background plumbing: the daemon

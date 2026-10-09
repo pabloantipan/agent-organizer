@@ -23,6 +23,7 @@ import (
 	"organizer/internal/discuss"
 	"organizer/internal/keychain"
 	"organizer/internal/lock"
+	"organizer/internal/memory"
 	"organizer/internal/merge"
 	"organizer/internal/model"
 	"organizer/internal/prompt"
@@ -42,6 +43,15 @@ type Service struct {
 	openers   map[string]facts
 	// roleFiles caches the bitácoras and runs.jsonl the roles read (roles.go).
 	roleFiles roleFiles
+	// memReader reads this Mac's memory; mem tracks its levels over the
+	// samples, and memory/memReason are the last reading or why it failed.
+	memReader memory.Reader
+	mem       memTracker
+	memory    *model.Memory
+	memReason string
+	// OnMemoryWarn, when set, gets the reading of every sample that warns
+	// (FR-4), whichever caller took it, after the service lock is released.
+	OnMemoryWarn func(model.Memory)
 
 	Auth *auth.Manager
 	Lock *lock.Lock
@@ -75,7 +85,7 @@ func New() (*Service, error) {
 // NewWith is for tests and the CLI's injected clock.
 func NewWith(cfg config.Config, st cache.State, now func() time.Time) *Service {
 	kc := keychain.Default()
-	s := &Service{cfg: cfg, state: st, now: now, Auth: auth.NewManager(cfg.FirebaseAPIKey, kc), Lock: lock.New(kc)}
+	s := &Service{cfg: cfg, state: st, now: now, memReader: memory.System{}, Auth: auth.NewManager(cfg.FirebaseAPIKey, kc), Lock: lock.New(kc)}
 	s.unlocked = !s.Lock.Enabled()
 	return s
 }
@@ -443,11 +453,18 @@ type AgentsView struct {
 	// same sample; none when config says roles: [].
 	Roles     []model.Role `json:"roles"`
 	SampledAt time.Time    `json:"sampled_at"`
+	// Memory is this Mac's memory, read with the same sample (ram-indicator
+	// FR-1); nil before the first reading or when it failed, and then
+	// MemoryReason says why.
+	Memory       *model.Memory `json:"memory"`
+	MemoryReason string        `json:"memory_reason,omitempty"`
 }
 
 // RefreshAgents re-samples processes and sessions only (no git, no card
 // parsing), regroups them onto the cached local snapshot, and returns the view.
 func (s *Service) RefreshAgents() AgentsView {
+	var warned *model.Memory
+	defer func() { s.memoryWarned(warned) }()
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	opts := s.agentOptions()
@@ -459,12 +476,27 @@ func (s *Service) RefreshAgents() AgentsView {
 	// Agents tab — sees the same answer without a rescan (FR-6 to FR-8).
 	joinAgentCards(s.state.Local.Initiatives, opts.BranchOf, s.now())
 	s.rememberCPU(s.state.Local)
+	s.memory, s.memReason = s.sampleMemoryLocked(s.state.Local.Initiatives, s.state.Local.Unassigned)
 	_ = cache.Save(s.state)
-	return s.agentsViewLocked()
+	v := s.agentsViewLocked()
+	// warn is true on the one sample that warns; a view built later from the
+	// same reading must not warn again. The hook gets it whoever called.
+	if s.memory != nil {
+		if s.memory.Warn {
+			m := *s.memory
+			warned = &m
+		}
+		s.memory.Warn = false
+	}
+	return v
 }
 
 func (s *Service) agentsViewLocked() AgentsView {
-	v := AgentsView{SampledAt: s.now(), Unassigned: s.state.Local.Unassigned}
+	v := AgentsView{SampledAt: s.now(), Unassigned: s.state.Local.Unassigned, MemoryReason: s.memReason}
+	if s.memory != nil {
+		m := *s.memory
+		v.Memory = &m
+	}
 	var cells []RoleCell
 	read := map[string]bool{}
 	for i := range s.state.Local.Initiatives {
