@@ -91,10 +91,13 @@ func memoryWarning(machine string, m model.Memory) (string, string) {
 }
 
 // gbText is the frontend's gb (lib/memory.ts): GB of 2^30 to one decimal, a
-// whole number without .0.
+// whole number without .0, and "< 0.1" for something that would read 0.
 func gbText(b uint64) string {
-	s := fmt.Sprintf("%.1f", float64(b)/(1<<30))
-	return strings.TrimSuffix(s, ".0")
+	s := strings.TrimSuffix(fmt.Sprintf("%.1f", float64(b)/(1<<30)), ".0")
+	if s == "0" && b > 0 {
+		return "< 0.1"
+	}
+	return s
 }
 
 // memoryNotificationClicked is the warning's click: Deltagos full on this
