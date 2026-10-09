@@ -216,3 +216,14 @@ func TestOnMemoryWarn(t *testing.T) {
 		t.Fatalf("hook got %+v, want one critical reading with warn", got)
 	}
 }
+
+// A reader set from outside is the one the service samples, with its times
+// and warn rule.
+func TestSetMemoryReader(t *testing.T) {
+	s := NewWith(config.Config{}, cache.State{}, func() time.Time { return t0 })
+	s.SetMemoryReader(fakeMem{level: "4"})
+	r := s.Memory()
+	if r.Memory == nil || r.Memory.Pressure != memory.Critical || !r.Memory.Warn {
+		t.Fatalf("got %+v, want the set reader's critical, warning", r)
+	}
+}

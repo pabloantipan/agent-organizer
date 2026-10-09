@@ -76,6 +76,15 @@ func (s *Service) sampleMemoryLocked(inits []model.ScannedInitiative, unassigned
 	return m, ""
 }
 
+// SetMemoryReader replaces where the memory numbers come from, so a review
+// build forces a level (ORGANIZER_MEMORY_FAKE, read in app.go) while the
+// levels' times and the warn rule run as they do for real.
+func (s *Service) SetMemoryReader(r memory.Reader) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.memReader = r
+}
+
 // memoryWarned hands a reading that warns to OnMemoryWarn. Callers run it
 // after releasing s.mu, so the hook may call back into the service.
 func (s *Service) memoryWarned(m *model.Memory) {
