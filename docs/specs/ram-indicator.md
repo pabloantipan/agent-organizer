@@ -106,8 +106,13 @@ Monitor on screen; the reviewer waited on the lead being idle.
 | # | FR | Check | Expected (fails on main) |
 |---|---|---|---|
 | M1-M8 | 5-7 | Aglaea's rows, in `make review-build` on the fixture, with the reading forced per level (a `ORGANIZER_MEMORY_FAKE=normal|high|critical|fail` env read only by the fixture build path, documented in `scripts/fixture-home.sh`) and on the real home at normal | as her spec |
-| N1 | 6 | in the review build, force critical: the notification's title and body; click it from another desktop | as §3; Deltagos on the current desktop, popover open. If macOS refuses notifications to the ad-hoc signed bundle, the row is checked in `/Applications/Deltagos.app` by Pablo and the card says so |
+| N1 | 6 | in the review build, force critical: the notification's title and body; click it from another desktop | as §3; Deltagos on the current desktop, popover open. macOS refuses the ad-hoc review bundle (`UNErrorDomain 1`), so N1 is checked by Pablo in `/Applications/Deltagos.app` **after the merge and `make install`**, steps in the card's Notes; the card stays `now` until he reports it, and a fail is a fix card (Amendment 5, 0108) |
 | X0 | all | as above, plus `cd frontend && npm run build` | pass |
+
+Amendment 5, 2026-10-09, the FSE, from rv-review at 4a96d66: N1 follows
+the merge (above). `ORGANIZER_MEMORY_FAKE` is read by every build, the
+installed one included, since N1's steps need it there; it only forces a
+reading, never stops anything.
 
 ## Boundary
 
