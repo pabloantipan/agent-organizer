@@ -38,8 +38,10 @@ export function AgentsView() {
     if (!el) return;
     el.classList.add("memory-landed");
     el.addEventListener("blur", () => el.classList.remove("memory-landed"), { once: true });
-    el.focus();
-    el.scrollIntoView({ block: "nearest" });
+    el.focus({ preventScroll: true });
+    // After the screen's own scroll to the top, which runs after this
+    // (a parent's effect), so the landing is not scrolled away again.
+    requestAnimationFrame(() => el.scrollIntoView({ block: "nearest" }));
   }, [agentFocus, view, clearAgentFocus]);
 
   if (!view) return <div className="empty">Sampling processes…</div>;
