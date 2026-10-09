@@ -3,36 +3,66 @@
 The Product Designer seat beside the organizer's FSE (0053). HAND-OFF at the
 top; one dated line per session below.
 
-## HAND-OFF — 2026-10-04, at the context cap
+## HAND-OFF — 2026-10-09, session cleaned up
 
 Read first: the `aglaea` skill, `agents/aglaea.md`, `docs/ux/memory.md`,
 `docs/ux/principles.md`, `docs/design-system.md` (**mine since 0054**; the app
-is **Deltagos**, 0066; amended many times on 2026-10-03/04, every line cites
-its source).
+is **Deltagos**, 0066; amended almost daily, every line cites its source).
 
-- **Doing:** nothing in flight. The pattern of these days: the FSE asks me to
-  rank each wave's UI leftovers (`docs/ux/reviews/<date>-rank-leftovers-N.md`,
-  N = 3…8 so far), and supervisors (sup31–35) send design questions mid-wave
-  ("[for aglaea]"). I answer in one message, put the rule in the design system,
-  and send the FSE a msg with the row for its next batch.
-- **Last answered:** sup35 (d06e265): Escape keeps drafts per record (`Rule ·
-  draft`), and Home's fixed columns give their slack to cut cells. Both were
-  sent to the FSE for leftovers-9.
-- **My design specs (proposed, ruled into cards):** `docs/ux/specs/roadmap-time-zoom.md`
-  (amendment 1; 0070, 0071, 0073), `docs/ux/specs/decisions-view.md` (0072;
-  amendment 1 and later notes on §8: the facts line joins the stuck head while
-  ruling), `responsive-home.md`, `initiative-header.md`.
-- **Waits on Pablo:** Q1 of leftovers-4: does he use Tab in the app? Tab in
-  WKWebView reaches buttons only with macOS Keyboard navigation on. Not
-  answered yet; it goes through the FSE.
-- **Reviews now run** in `Deltagos Review.app` (bundle id
-  `cl.antipan.organizer.review`), so Pablo's storage is safe. Ask for
-  WKWebView shots every time; Chromium has missed sev 3s.
-- **Tooling:** as in `memory.md`, "How I look at it". Post with `discuss-hook
-  post --to <seat> --kind answer --thread <id> "<body>"`, then
-  `discuss-hook ack <id>`.
-- **Also sent:** `docs/ux/specs/transversal-roles.md` (0082), proposed; O1 (Daedalus) and O2 to the FSE.
-- **Next action:** read mail; if none, stay silent.
+- **Mail waiting, undelivered (3, all from the FSE).** Read them with the
+  read-only inbox (below); they will be delivered on the first turn of a
+  seat that has its identity:
+  1. **ram-indicator (0101)**, thread 01M4CK6VQ11WY8YJW9YWQ4C63T: a design
+     spec `docs/ux/specs/ram-indicator.md`. It covers macOS memory pressure
+     (normal, warn, critical, free GB) in the top bar, quiet at normal,
+     beside Needs me (still the one badge) and Usage; a hover listing the
+     biggest agent sessions by memory, linking to their Agents rows; how the
+     floating icon shows warn and critical without a second badge; the
+     critical notification's words, rate and click; and every state
+     (no reading, normal, warn, critical, back to normal, reduced motion,
+     1024). Sampling is the 10 s agents tick.
+  2. **The Deltagos mark**, thread 01M4CKBP8N0MGTVP3E0BCZB7JB: Pablo's
+     sketch in `docs/ux/inputs/deltagos-mark/` (a D as one violet stroke with
+     three travelling gaps, two meshing gears in ember and amber, an Archivo
+     wordmark, its own palette).
+  3. **Pablo's ruling on it, 2026-10-09** (a decision in the same thread):
+     "adjust pallete to current one and let's draw it". Recolour it to our
+     tokens (#1a1523 ground, #8a3ffc accent, magenta tone, Manrope; dark
+     only, no gradients), keeping the form and motion, and **draw it**: an
+     HTML page in `docs/ux/inputs/deltagos-mark/` or a published artifact,
+     at 56/72/88 pt and at 16/32 px, plus reduced motion's static frame. Say
+     which rule the gears' extra colours bend, as a question for Pablo. Then
+     amend `docs/ux/specs/floating-icon.md`. **Do this first**, since it
+     shapes how the icon shows RAM (0101 may share its build card).
+- **Seat identity.** A resumed session can come up without `AGENT_NAME` and
+  `PROJECT_ID`, and then no hook delivers mail. The fix is to relaunch the
+  seat through its prelude (`organizer-probe-aglaea`). To look by hand
+  without consuming anything:
+  `line="$(discuss-api token env organizer aglaea)"; eval "export ${line% claude}"`
+  (zsh will not word-split an unquoted variable, and the line ends in
+  `claude`, so never `eval` it whole), then
+  `curl -s -H "Authorization: Bearer $DISCUSS_TOKEN" http://127.0.0.1:9494/projects/organizer/agents/aglaea/inbox`.
+  `discuss-hook drain` refuses by hand, which is correct. Never print the
+  token. On 2026-10-07 it was printed once into the session's output, and
+  Pablo was told he may rotate it (`discuss-api token add organizer aglaea`).
+- **The pattern of the work.** The FSE asks for design specs (proposed,
+  Technical notes left to it) and for rankings of each wave's UI leftovers
+  (`docs/ux/reviews/<date>-rank-leftovers-N.md`). Supervisors send
+  "[for aglaea]" design calls mid-wave. I answer in one message, put the
+  rule in the design system or the spec, and send the FSE a msg with the
+  row for its next batch.
+- **My design specs** in `docs/ux/specs/`: roadmap-time-zoom, decisions-view,
+  responsive-home, initiative-header, transversal-roles (0082, amendment 1),
+  floating-icon (0088, amendments 1-3: double-click, sizes 56/72/88 pt,
+  close at once), roadmap-as-a-plan (0093), usage (0098: money only in
+  Usage, tokens elsewhere per 0020).
+- **Waits on Pablo:** Q1 of leftovers-4 (does he use Tab? WKWebView reaches
+  buttons only with Keyboard navigation on).
+- **Checking the built app:** use `Deltagos Review.app` from a detached
+  worktree (`make review-build`) with the fixture, never the installed app.
+  `memory.md` "How I look at it" says how to drive the native panel and how
+  to clean up (`pkill -f <fixture dir>`).
+- **Next action:** do the three messages above, mark first.
 
 ## Log
 
@@ -88,3 +118,4 @@ its source).
 - 2026-10-06 — roadmap-as-a-plan design spec (0093): outline, rounds row, diamonds, four-step switch.
 - 2026-10-06 — floating-icon amendment 3: panel to content; 8 px under menu bar; zoomed is not full screen; icon click closes at once (replaces A2's wait).
 - 2026-10-06 — usage design spec (0098): top-level view, tiles, one chart, one table with four cuts.
+- 2026-10-09 — session cleaned up; 3 FSE messages waiting (RAM indicator, the Deltagos mark and Pablo's ruling to recolour and draw it); seat identity lost on resume.
