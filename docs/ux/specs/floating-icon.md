@@ -371,7 +371,7 @@ the icns as `app-icon/Deltagos.icon/`, by the same `export.sh`.
 | # | The lead can | Checked by |
 |---|---|---|
 | F23 | see Deltagos without a grey plate on macOS 26 | IconServices renders of the built bundle at 16, 32, 128 and 512 pt: the dark tile to its edge, no light plate; the gears inside the D |
-| F24 | keep the old icon on older macOS | the bundle's `CFBundleIconFile` still names `iconfile.icns`, byte for byte the one in `app-icon/` |
+| F24 | see a recognisable icon on older macOS | the bundle's `CFBundleIconFile` still names `iconfile.icns`, byte for byte the one in `app-icon/`. Amended 2026-10-09 (aic-ui U1): macOS 11 to 15 may draw the asset catalog's flattened rendition of the `.icon` instead, without the 16 px D-alone cut. That is accepted: it is the same mark, as macOS 26 draws it. Revisit only if a Mac of Pablo's on 12 to 15 shows it badly |
 
 ## Amendment 7 (aglaea, 2026-10-09): the Help header's mark rests, and is named once
 
