@@ -1,13 +1,13 @@
 ---
 title: The app icon in Apple's new format, so macOS 26 drops the grey plate - scope and accept
-status: proposed
+status: ruled
 raised: 2026-10-09
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-09
+ruled_by: pablo
 options: ["accept as written", "accept with amendments", "send back"]
-chosen:
+chosen: accept as written
 cards: [app-icon-composer]
 threads: []
 supersedes: []
@@ -47,3 +47,7 @@ reviews ~30 min).
 ## Recommendation
 
 The FSE's: accept as written.
+
+## Ruling
+
+pablo, 2026-10-09, in the organizer on lodestar: do as recomended (in the FSE session on lodestar, answering 0109 and 0110 together)
