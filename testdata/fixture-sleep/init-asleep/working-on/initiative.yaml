@@ -1,0 +1,9 @@
+id: init-asleep
+title: An initiative put to sleep
+client: personal
+status: paused   # sleeping since @SINCE@ (factory sleep; four-awake rule, 2026-10-09)
+goal: Show what an asleep initiative looks like in Initiatives
+target: 2026-11-20
+started: 2026-09-01
+machine: fixture
+repos: []

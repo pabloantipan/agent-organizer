@@ -1,0 +1,8 @@
+id: init-archived
+title: An archived initiative
+client: ccint
+status: archived
+goal: Show that archived is neither awake nor asleep
+started: 2026-06-01
+machine: fixture
+repos: []
