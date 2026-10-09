@@ -26,6 +26,12 @@ restating it (the discuss skill).
   docs/ux/specs/initiatives-view.md. Next: the deltagos-mark card plus
   float-focus-steal as one accept record (both in floaticon_darwin.m, after
   sup49's ram-view, which touches it too). Next supervisor: sup50.
+- **Gate lesson (repetition candidate):** ram-indicator G2/G4 compare with
+  Activity Monitor on screen; rs-review sat waiting for Pablo to be idle 30 s
+  (seat-pointer cannot see windows on another Space). Gate rows should read a
+  CLI equivalent (`top -l 1 -stats pid,mem`, `footprint`) unless the screen
+  itself is what is checked. Second time a GUI-capture row collides with
+  Pablo using the Mac → propose a spec-craft rule.
 - **0105 accepted** (81b9f59): spawn sup50 (float-focus-steal, then deltagos-mark) when ram-view is in done/. **0106 accepted** (735b244): spawn sup51 (initiatives-sleep, then initiatives-view) at the same moment, beside sup50.
 - Aglaea's initiatives-view design (e577d08) → build spec, cards
   initiatives-sleep and initiatives-view, accept **0106** raised. 0105
