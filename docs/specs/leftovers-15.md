@@ -57,6 +57,14 @@ initiatives-view's UI review U1-U6 and code review 3, 4, 5's FloatList note:
   the 10 s tick (a test proves it); a factory call times out after 20 s and
   releases the busy lock, saying so.
 
+## Requirements, card `lf15-ring-breath` (native)
+
+- **FR-15** Aglaea's ram-indicator Amendment 2 as amended (56f0244): at
+  critical the amber ring breathes in width, not opacity: full opacity,
+  3 to 4.5 px and back over 1.6 s, the 1 px ground keyline following its
+  outer edge at full opacity; a steady 3 px under Reduce motion (A1: at half
+  opacity amber on white all but vanished).
+
 ## Acceptance → gate
 
 | # | FR | Check | Expected (fails on main) |
@@ -69,6 +77,7 @@ initiatives-view's UI review U1-U6 and code review 3, 4, 5's FloatList note:
 | B1 | 12 | `git status --porcelain` after `make install` on a clean tree | empty |
 | B2 | 13 | the workflow's steps run locally from a clean clone (`act` or the steps by hand) | Test passes |
 | B3 | 14 | Go test: the tick path with a fake factory that records calls; a fake factory that sleeps 60 s | zero calls on ticks; timeout at 20 s, lock released, message |
+| R1 | 15 | review build, `ORGANIZER_MEMORY_FAKE=critical`, the icon window shot (`screencapture -l`) at the trough and the peak, composited over white and over the dark ground (no wallpaper changed) | full-opacity amber with its keyline in both frames, 3 and 4.5 px; Reduce motion: steady 3 px |
 | X0 | all | `XDG_DATA_HOME=$(mktemp -d) make test`, `cd frontend && npm run build`, `wails build` | pass |
 
 ## Boundary
@@ -82,11 +91,11 @@ lib helper, `scripts/fixture-home.sh` (`--memory none`).
 `lf15-build-drift`: `Makefile`, `.github/workflows/release.yml`,
 `internal/service/sleep.go` and its tests, `wails.json`/`go.mod` if the
 version pin needs it. Not: the floating icon's native code.
+`lf15-ring-breath`: `floaticon_darwin.m` (the ring layer's animation only).
 
 ## Not in this batch
 
-Aglaea's open answers (initiatives-view A1-A3, ram-ring-amber A1: the
-critical trough on white) wait for her; the factory's depth (camp invisible)
+Aglaea's open answers (initiatives-view A1-A3) wait for her; the factory's depth (camp invisible)
 is Hephaistos's.
 
 ## Cards
@@ -97,3 +106,4 @@ is Hephaistos's.
 | `lf15-initiatives-polish` | P1-P7, X0 | — | true |
 | `lf15-help-mark` | H1, X0 | — | false |
 | `lf15-build-drift` | B1-B3, X0 | — | false |
+| `lf15-ring-breath` | R1, X0 | — | true |

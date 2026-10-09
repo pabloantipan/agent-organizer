@@ -8,7 +8,7 @@ ruled:
 ruled_by:
 options: ["accept as written", "accept with amendments", "send back"]
 chosen:
-cards: [lf15-names-and-notices, lf15-initiatives-polish, lf15-help-mark, lf15-build-drift]
+cards: [lf15-names-and-notices, lf15-initiatives-polish, lf15-help-mark, lf15-build-drift, lf15-ring-breath]
 threads: []
 supersedes: []
 superseded_by:
@@ -16,7 +16,7 @@ superseded_by:
 
 ## Question
 
-Today's reviews left small findings, none blocking. One batch, four cards
+Today's reviews left small findings, none blocking. One batch, five cards
 that share no files, run side by side (`docs/specs/leftovers-15.md`):
 
 1. **Names and notices**: a session named one way everywhere (no more
@@ -31,8 +31,10 @@ that share no files, run side by side (`docs/specs/leftovers-15.md`):
 4. **Build drift**: `make install` stops dirtying the tree, the release
    workflow's tests pass on a clean checkout, and the factory check runs
    only on a rescan, with a 20 s timeout.
+5. **Ring breath**: at critical the amber ring swells 3 to 4.5 px instead of
+   fading, so it stays visible on a white wallpaper (Aglaea, 56f0244).
 
-No check drives your screen. Aglaea's open answers and the factory's depth
+No check drives your screen. Aglaea's other open answers and the factory's depth
 are not in it.
 
 forecast: 1-2 h of wave time over 1 wave (four builders in parallel), plus
