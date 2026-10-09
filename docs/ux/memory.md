@@ -342,6 +342,10 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - **Hand a builder files, not a drawing.** A page that animates the mark
   is not an icon: an export script with the cuts, slots and grid is what
   ends the guessing.
+- **Icon Composer's renderer drops SVG masks.** Layers of a `.icon` are
+  rasterised PNGs (rsvg), and the first group in `icon.json` is the top.
+  Check a `.icon` by compiling it with actool into a throwaway bundle and
+  drawing it with IconServices (`.wt-notes/dm-build/iconservices.swift`).
 - **A byte-for-byte gate must name its authority.** iconutil re-encodes
   the 16 and 32 px slots (ARGB), so an icns never decodes back to its
   iconset exactly. Gate the shipped file, not the inputs.
