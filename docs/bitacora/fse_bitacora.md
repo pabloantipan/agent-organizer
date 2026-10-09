@@ -4,6 +4,19 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-09, RAM indicator (0101) spec drafted
+
+- **Last SHA seen:** 01fd2b3. Next supervisor: sup49.
+- **0101 ruled** (2026-10-07, lodestar): pressure + free GB + biggest
+  agents, top bar and floating icon, this Mac, notify on critical. Build
+  spec `docs/specs/ram-indicator.md` drafted, proposed: `ram-sample` (Go)
+  is fully specced; `ram-view` waits on Aglaea's design spec, asked in
+  thread 01M4CK6VQ11WY8YJW9YWQ4C63T and undelivered: her seat lost its
+  identity on resume (her bitácora, 2026-10-09). No cards cut, no accept
+  record yet: both cards launch under one record once her rows exist.
+- Aglaea does the Deltagos mark first (it shapes how the icon shows RAM).
+- Still pending from before: leftovers-14 accept record; reinstall.
+
 ## HAND-OFF — 2026-10-06 (late night), roadmap-as-a-plan landed
 
 - **Last SHA seen:** 72f1435. Origin at e67dfda; push when Pablo asks.
