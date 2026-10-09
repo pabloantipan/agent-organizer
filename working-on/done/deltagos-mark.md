@@ -1,12 +1,12 @@
 ---
 title: "The Deltagos mark on the floating icon, the app icon and the Help header"
-status: now
+status: done
 repos: [organizer]
 branch: deltagos-mark
 seat: dm-build
 stage: one-window
 updated: 2026-10-09
-next: "review: deltagos-mark, F17-F22 H1 X0 met (F20/F21 per Amendment 3), 5c61b3f"
+next: "done: merged to main by sup50; app-icon-composer takes the format (U1); U2, A2 for aglaea"
 depends_on: [ram-view]
 boundary: ["floaticon_darwin.m/.h/.go (the tile's layers only)", "build/appicon.png and build/darwin/iconfile.icns (copied from docs/ux/inputs/deltagos-mark/app-icon/, never redrawn)", "new DeltagosMark.tsx and css, HelpView.tsx (header)", "not: the panel's list, activation paths (float-focus-steal), the RAM ring's logic"]
 spec: "docs/specs/deltagos-mark.md (FR-1 to FR-4; docs/ux/specs/floating-icon.md Amendment 4)"
