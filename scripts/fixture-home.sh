@@ -11,6 +11,18 @@
 #   eval "$(scripts/fixture-home.sh --twenty)"   # twenty initiatives instead
 #   eval "$(scripts/fixture-home.sh --live-mailbox)"  # init-a's health from discuss
 #   eval "$(scripts/fixture-home.sh --empty)"    # a home with no initiatives
+#   eval "$(scripts/fixture-home.sh --memory critical)"  # memory forced, with any of the above
+#
+# Memory (docs/specs/ram-indicator.md, Acceptance (ram-view)): --memory
+# normal|high|critical|fail, anywhere among the options, exports
+# ORGANIZER_MEMORY_FAKE=@$FIXTURE_MEMORY_FILE and that file holding the level,
+# read by app.go only (memfake.go): a 32 GB Mac with 12 GB free at normal,
+# 3.1 at high and 1.2 at critical, or a failed read. The app reads the file
+# at every 10 s sample, so `echo normal > "$FIXTURE_MEMORY_FILE"` walks the
+# levels without a restart (critical then normal shows "Was critical
+# until"). Only the numbers are forced: the service's since, was critical
+# until and warn rule run as for real. Without --memory the app reads this
+# Mac.
 #
 # Mailbox health (docs/specs/machine-explains-itself.md, A3): deaf and capped
 # cannot be made on demand, so the config's canned_health points at a copy of
@@ -71,6 +83,25 @@
 # not on disk; the supervisor posted it once. Ruling it or the records only
 # touches this temp copy.
 set -euo pipefail
+
+# --memory <level> is taken out of the options wherever it is; the rest
+# keep their place.
+args=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --memory)
+      case "${2:-}" in normal|high|critical|fail) ;; *) echo "--memory takes normal, high, critical or fail" >&2; exit 2 ;; esac
+      memfile=$(mktemp -t organizer-memory-level)
+      echo "$2" > "$memfile"
+      echo "export FIXTURE_MEMORY_FILE='$memfile'"
+      echo "export ORGANIZER_MEMORY_FAKE='@$memfile'"
+      shift 2 ;;
+    *) args+=("$1"); shift ;;
+  esac
+done
+set -- ${args[@]+"${args[@]}"}
+# A shell that evaluated an earlier --memory keeps it otherwise.
+[ -n "${memfile:-}" ] || echo "unset ORGANIZER_MEMORY_FAKE FIXTURE_MEMORY_FILE"
 
 # standin <dir> [VAR=value ...]: one stand-in agent, a process named after
 # the fixture's agent_binary that sleeps 6 h, in <dir>, with only the identity
