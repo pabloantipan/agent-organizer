@@ -523,6 +523,34 @@ func (a *App) RuleDecision(initiativeID, number, chosen, words string) error {
 	return a.svc.RuleDecision(initiativeID, number, chosen, words)
 }
 
+// Sleep puts an initiative to sleep through `factory sleep <id>` and returns
+// the factory's words and the state after the rescan (initiatives-view FR-1).
+// A second Sleep or Wake while one runs is refused as busy.
+func (a *App) Sleep(initiativeID string) (service.SleepResult, error) {
+	if a.svc == nil {
+		return service.SleepResult{}, errString(a.err)
+	}
+	return a.svc.Sleep(initiativeID)
+}
+
+// Wake wakes an initiative through `factory wake <id>`, never --force: at the
+// limit the factory refuses and its words come back (0104 A).
+func (a *App) Wake(initiativeID string) (service.SleepResult, error) {
+	if a.svc == nil {
+		return service.SleepResult{}, errString(a.err)
+	}
+	return a.svc.Wake(initiativeID)
+}
+
+// Factory is what the last rescan learned from `factory awake`: found or
+// not, its limit, the roots it sees, and the control each initiative gets.
+func (a *App) Factory() service.FactoryView {
+	if a.svc == nil {
+		return service.FactoryView{Reason: a.err}
+	}
+	return a.svc.Factory()
+}
+
 // MilestoneType exists only so the Wails generator emits model.Milestone in
 // models.ts; nested slice element types are otherwise skipped.
 func (a *App) MilestoneType() model.Milestone { return model.Milestone{} }

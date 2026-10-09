@@ -53,6 +53,11 @@ type Service struct {
 	// (FR-4), whichever caller took it, after the service lock is released.
 	OnMemoryWarn func(model.Memory)
 
+	// sleepMu lets one factory sleep or wake run at a time (sleep.go);
+	// factory is the last `factory awake`, nil before the first rescan.
+	sleepMu sync.Mutex
+	factory *FactoryView
+
 	Auth *auth.Manager
 	Lock *lock.Lock
 	// unlocked is per process: true once the passcode was verified, or when
@@ -252,6 +257,7 @@ func (s *Service) scanOptions(git bool) scan.Options {
 		GitTimeout: time.Duration(s.cfg.GitTimeoutSeconds) * time.Second,
 		Now:        s.now,
 		Agents:     s.agentOptions(),
+		FrozenDir:  frozenDir(s.cfg),
 	}
 }
 
@@ -573,6 +579,7 @@ func (s *Service) Scan(git bool) model.Snapshot {
 	snap := scan.Run(s.scanOptions(git))
 	snap.Machine = s.cfg.Machine
 	s.state.Local = snap
+	s.stampFactoryLocked()
 	s.rememberCPU(snap)
 	_ = cache.Save(s.state)
 	return snap
@@ -580,10 +587,11 @@ func (s *Service) Scan(git bool) model.Snapshot {
 
 // Board rescans locally and merges with the last remote pull.
 func (s *Service) Board() merge.Board {
-	local := s.Scan(true)
+	s.Scan(true)
+	s.refreshFactory()
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	b := merge.Build(local, s.state.Remote, s.state.Order, s.now())
+	b := merge.Build(s.state.Local, s.state.Remote, s.state.Order, s.now())
 	s.stampThreadsLocked(&b)
 	return b
 }

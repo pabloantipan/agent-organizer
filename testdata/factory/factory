@@ -1,0 +1,52 @@
+#!/bin/sh
+# A fake `factory` for the sleep tests (internal/service/sleep_test.go): the
+# argv and output lines of ~/claudecode/scripts/factory/sleep.sh, without
+# freezing anything. Driven by the environment:
+#   FAKE_FACTORY_LOG    file that gets one line per call: the argv
+#   FAKE_FACTORY_ROOTS  colon-separated initiative roots the factory sees
+#   FAKE_FACTORY_LIMIT  the limit (default 4)
+#   FAKE_FACTORY_FAIL   when set, print it on stderr and exit 3
+#   FAKE_FACTORY_HOLD   when set, wait until this file exists before acting
+[ -n "${FAKE_FACTORY_LOG:-}" ] && echo "$*" >>"$FAKE_FACTORY_LOG"
+if [ -n "${FAKE_FACTORY_FAIL:-}" ]; then echo "$FAKE_FACTORY_FAIL" >&2; exit 3; fi
+if [ -n "${FAKE_FACTORY_HOLD:-}" ]; then
+  while [ ! -f "$FAKE_FACTORY_HOLD" ]; do sleep 0.05; done
+fi
+limit=${FAKE_FACTORY_LIMIT:-4}
+
+# status <root>: the first word after status:, active when there is none
+status() { s=$(sed -n 's/^status:[[:space:]]*\([a-z]*\).*/\1/p' "$1/working-on/initiative.yaml" | head -1); echo "${s:-active}"; }
+idof() { sed -n 's/^id:[[:space:]]*//p' "$1/working-on/initiative.yaml" | head -1; }
+roots() { echo "${FAKE_FACTORY_ROOTS:-}" | tr ':' '\n' | grep .; }
+lookup() { roots | while read -r r; do [ "$(idof "$r")" = "$1" ] && echo "$r"; done | head -1; }
+awake_n() { roots | while read -r r; do [ "$(status "$r")" = active ] && echo x; done | grep -c .; }
+set_status() {
+  f="$1/working-on/initiative.yaml"
+  sed "s/^status:.*/status: $2   # $3/" "$f" >"$f.tmp" && mv "$f.tmp" "$f"
+}
+
+cmd=${1:-awake}; shift 2>/dev/null
+case "$cmd" in
+  awake)
+    roots | while read -r r; do [ "$(status "$r")" = active ] && printf '  awake  %-22s %-36s 0 seats\n' "$(idof "$r")" "$r"; done
+    roots | while read -r r; do [ "$(status "$r")" = paused ] && printf '  asleep %-22s %-36s 0 frozen\n' "$(idof "$r")" "$r"; done
+    n=$(awake_n); echo "$n awake (limit $limit)"; [ "$n" -le "$limit" ] ;;
+  sleep)
+    r=$(lookup "$1"); [ -n "$r" ] || { echo "no initiative $1" >&2; exit 2; }
+    [ "$(status "$r")" = archived ] && { echo "$1 is archived" >&2; exit 2; }
+    set_status "$r" paused "sleeping since $(date +%F) (factory sleep; four-awake rule, 2026-10-09)"
+    echo "$1 asleep" ;;
+  wake)
+    [ "${1:-}" = --force ] && { echo "the fake refuses --force: Deltagos never passes it" >&2; exit 9; }
+    r=$(lookup "$1"); [ -n "$r" ] || { echo "no initiative $1" >&2; exit 2; }
+    [ "$(status "$r")" = archived ] && { echo "$1 is archived" >&2; exit 2; }
+    if [ "$(status "$r")" != active ]; then
+      n=$(awake_n)
+      if [ "$n" -ge "$limit" ]; then
+        echo "$n initiatives are awake (limit $limit): put one to sleep first (factory awake, factory sleep <id>)" >&2; exit 1
+      fi
+      set_status "$r" active "awake since $(date +%F) (factory wake)"
+    fi
+    echo "$1 awake" ;;
+  *) echo "usage: factory awake | sleep <initiative> | wake [--force] <initiative>" >&2; exit 2 ;;
+esac

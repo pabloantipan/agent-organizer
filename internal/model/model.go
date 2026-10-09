@@ -80,9 +80,33 @@ type Initiative struct {
 	// scan; false when the root is not in a repo or git fails.
 	CharterModified bool `yaml:"-" json:"charter_modified"`
 
+	// AsleepSince is the date in the comment the factory writes beside a
+	// paused status (`status: paused   # sleeping since 2026-10-09 (…)`),
+	// read by the scan; empty for any other status or comment, never a
+	// problem (initiatives-view FR-2, O1).
+	AsleepSince string `yaml:"-" json:"asleep_since"`
+	// Frozen are the probe sessions seat-freeze left under
+	// ~/.local/state/probe/frozen/ whose cwd falls in this root and in no
+	// deeper scanned root, by session name, sorted. Filled by the scan.
+	Frozen []string `yaml:"-" json:"frozen"`
+	// FactoryBlind is an initiative Deltagos scans and `factory awake` does
+	// not list (FR-3): the factory cannot sleep or wake it. Stamped by the
+	// service from the last `factory awake`, on a rescan only; false when the
+	// factory is missing or failed, since then nothing is known.
+	FactoryBlind bool `yaml:"-" json:"factory_blind"`
+
 	// Path is the initiative root directory (the parent of working-on/).
 	Path string `yaml:"-" json:"path"`
 }
+
+// Initiative statuses the factory reads and writes (sleep.sh): active is
+// awake, paused is asleep, and archived is neither, since the factory refuses
+// to sleep or wake it (FR-4). An empty status is active, as the factory reads it.
+const (
+	InitiativeActive   = "active"
+	InitiativePaused   = "paused"
+	InitiativeArchived = "archived"
+)
 
 // Scope is initiative.yaml's scope: {in, out}.
 type Scope struct {
