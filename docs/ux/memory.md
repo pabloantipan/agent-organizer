@@ -283,6 +283,16 @@ ram-view's review: white on --tone at 13 px is 3.5:1. The chip text became
 --fg-on-tone (the ground's ink, 5.2:1), a design-system row (229506e). The
 memory button sits after Usage, before Help, as built (b23bf10).
 
+Input, not now (Pablo, 2026-10-09, via the FSE, thread
+01M4HB027RH19CF9627T1F1PXP): "the border pink brilliant arround the icon
+helped me a lot to find the app quickly ... keeping it and maybe using an
+orange tone when ram spikes up". The ring doubles as a findability aid. A
+later design note: a ring always (the tone, quiet), with memory pressure
+moved to a second hue. Orange is close to `--amber-9` (#ffb020), already
+the warning hue (context past 50%), so pressure would join warning, not
+take a new colour; red stays blocked's. Measure the ring against
+wallpapers, and keep the word in the icon's name. Write it when asked.
+
 ## Open questions
 
 - Q1 (Pablo, via the FSE, leftovers-4): does he use Tab in the app? In
