@@ -342,6 +342,9 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - **Hand a builder files, not a drawing.** A page that animates the mark
   is not an icon: an export script with the cuts, slots and grid is what
   ends the guessing.
+- **A byte-for-byte gate must name its authority.** iconutil re-encodes
+  the 16 and 32 px slots (ARGB), so an icns never decodes back to its
+  iconset exactly. Gate the shipped file, not the inputs.
 - **Measure every fill's text before naming it.** I wrote "white text" on
   the magenta tone without measuring; it is 3.5:1. Any new fill gets its ink
   measured and a contrast row in the design system in the same commit.

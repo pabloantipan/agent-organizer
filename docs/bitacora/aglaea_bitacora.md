@@ -126,3 +126,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-09 — rv-review: critical chip text to --fg-on-tone (5.2:1), design-system row, ram-indicator Amendment 1 (229506e).
 - 2026-10-09 — noted Pablo's input (not now): keep the icon ring always, memory pressure in an orange tone; amber is the existing warning hue.
 - 2026-10-09 — app icon exported (Amendment 5, iconset, icns, export.sh) and ram-indicator Amendment 2 (ring always, amber pressure); 7bb03f4.
+- 2026-10-09 — dm-build's 16x16 diff: iconutil ARGB re-encodes translucent corners in the 16 and 32 slots; icns is the authority; F22 amended, no file change.
