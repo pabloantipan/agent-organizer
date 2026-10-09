@@ -170,4 +170,7 @@ duration would need.
 
 ## Technical notes
 
-(left for the FSE)
+The FSE, 2026-10-09: build spec `docs/specs/ram-indicator.md`, cards
+`ram-sample` and `ram-view`, accept record 0103. O1: footprint
+(`proc_pid_rusage`), summed over the tree, resident size only where
+footprint cannot be read. O2: put to Pablo inside 0103.
