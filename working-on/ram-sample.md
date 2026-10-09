@@ -6,7 +6,8 @@ branch: ram-sample
 seat: rs-build
 stage: one-window
 updated: 2026-10-09
-next: "review: ram-sample, gate met (G1-G7, X0), 10c206e"
+next: "G4: `organizer memory` must list the crew's sessions by name with their initiative (the top-5 cap hides all six camp seats); or the FSE amends G4 against FR-3's cap"
+review: fail
 depends_on: []
 boundary: ["new internal/memory and its tests", "internal/scan/agents.go (ps columns, footprint, tree sum), model.Agent (mem_bytes)", "internal/service (AgentsView.memory, level times, warn rule), internal/cli (memory command), frontend/wailsjs regenerated", "not: the top bar, the floating icon, any view, posting the notification"]
 spec: "docs/specs/ram-indicator.md (FR-1 to FR-4)"
@@ -37,3 +38,16 @@ docs/specs/ram-indicator.md, G1 to G7 and X0. Evidence in `.wt-notes/rs-build/`.
 ## Notes
 - 2026-10-09 rs-build: spec FR-1's free formula ("total minus app memory, wired and compressed") reads ~1 GB above Activity Monitor on macOS 26 (4.4 vs 3.35 GB): AM's Memory Used is Physical − Cached Files. Implemented free = free + speculative + file-backed pages (vm_stat), which matched AM within 0.05 GB on three shots. The spec's parenthesis wants amending.
 - 2026-10-09: supervisor sup49 (window 7535), spawned by the FSE.
+
+## Review
+Verdict: **fail**. Commit reviewed: `10c206e3f8d2a24eb8c1bf9ee49a3c22d47862f2` (branch `ram-sample`). Unmet: **G4**.
+
+- G1, G3, G5, G6, G7: the named tests pass in a clean clone; read them: the fakes cover sysctl, vm_stat, ps and footprint, and the clock; G5's run is the spec's sequence (the middle "normal 12 min" holds a high spell; still out of critical), G6's times are the spec's.
+- G2 met, 13:16: kernel 1, ours `normal`, Activity Monitor's graph green; free 3.01 GB vs AM 24.00 − 20.91 = 3.09 GB (Δ 0.08). Evidence `.wt-notes/rs-review/` (`am-memory.png`, `g2c-*`, `g4c-*`, `x0-*`); the builder's 12:28 shot agrees too.
+- **G4 unmet**: with the camp crew up (6 seats), `organizer memory` lists none of them by name, only `ccint-camp-monorepo  6 agents  3.2 GB`. Same in the builder's `g2-final-memory.txt` and in both of my runs: FR-3 prints the top 5 sessions, and those are organizer's and an unassigned terminal. The builder's per-tree check went through a temporary helper over `scan.Agents`, not the command. The sizes are right: my top-5 trees vs `footprint -p` summed over the same pids were ≤0.2 %, except my own changing tree at 4.9 %, and `footprint` equals AM's Memory column (pid 1636: 339 MB both). For the FSE: G4 conflicts with FR-3's cap whenever a crew has more than five seats or isn't the biggest. Either the command lists every session (and the popover keeps 5), or G4 is rewritten.
+- X0 met: clean clone, `XDG_DATA_HOME=$(mktemp -d) make test` exit 0 (go all ok, vitest 343), `wails build` exit 0.
+- Code: a failed read is `memory: null` + `memory_reason`, never zeros. Memory is sampled inside `RefreshAgents`, with no new ticker or loop. Footprint (`proc_pid_rusage`, cgo) is summed over descendants, with RSS only where it fails. Only sysctl, vm_stat and ps are run; nothing is signalled. Boundary clean: no frontend source, `app.go` or `floaticon_darwin.*` change; `wailsjs/go/models.ts` only.
+- Spec amendment for the FSE: FR-1's free formula. The builder uses free + speculative + file-backed pages, because "total minus app, wired and compressed" reads about 1 GB above AM on macOS 26. Confirmed against AM above. Not a fail.
+- Not covered by the gate: `RefreshAgents` has seven callers, including the bound `App.RefreshAgents`. `warn` is consumed by whichever caller samples first, so `ram-view` must post from every Go-side path, or a frontend refresh can swallow the warning. A `CGO_ENABLED=0` build silently falls back to RSS, which overstates; the release build must keep cgo. Resumed sessions show as a uuid in `top`.
+
+Reviewer: rs-review, 2026-10-09.
