@@ -46,6 +46,14 @@ export function MemoryPopover({ opener, onClose }: { opener: RefObject<HTMLButto
     }
   };
 
+  // … N more unmounts on press: focus goes to the first row it revealed
+  // (Focus and names: a control that unmounts hands focus on).
+  useEffect(() => {
+    if (!more) return;
+    const next = Array.from(box.current?.querySelectorAll<HTMLElement>(".memory-session") ?? []).slice(POPOVER_TOP).map((li) => li.querySelector<HTMLElement>("button")).find(Boolean);
+    (next ?? box.current)?.focus();
+  }, [more]);
+
   const rows = sessionRows(agents);
   const shown = more ? rows : rows.slice(0, POPOVER_TOP);
   const was = m && wasCriticalLine(m);
@@ -70,7 +78,9 @@ export function MemoryPopover({ opener, onClose }: { opener: RefObject<HTMLButto
             : (
               <>
                 <div className="memory-pop-head">Biggest agent sessions</div>
-                <ul className="memory-sessions">
+                {/* One name width for every row, the longest name's, so the
+                    columns line up and the initiative gives way first. */}
+                <ul className="memory-sessions" style={{ ["--ms-name-w" as string]: `${Math.max(...shown.map((r) => r.name.length))}ch` }}>
                   {shown.map((r) => <SessionLine key={`${r.initiative}/${r.name}`} r={r} go={openAgentRow} />)}
                 </ul>
                 {!more && rows.length > POPOVER_TOP && (

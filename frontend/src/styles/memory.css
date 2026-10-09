@@ -36,13 +36,17 @@
 .memory-pressure.high, .memory-pressure.critical { color: var(--tone); font-weight: var(--weight-semibold); }
 
 /* Columns: name, initiative, state, memory, the link, the same on every row.
-   The name takes its whole width first and the initiative the rest, so the
+   The name takes its whole width first (the same on every row) and the
+   initiative the rest, so the
    initiative column gives way first (the 1024 row): it shrinks to nothing
    and cuts with an ellipsis before the name does. A grid per row,
    not display: contents, which takes the row out of WebKit's accessibility
    tree. */
 .memory-sessions { list-style: none; margin: 0; padding: 0; display: grid; row-gap: var(--space-0-5); }
-.memory-session { display: grid; grid-template-columns: minmax(120px, max-content) minmax(0, 1fr) 56px 64px 72px; column-gap: var(--space-3); align-items: center; }
+/* ch is the mono face's here, the name's, so --ms-name-w (the longest
+   name's length, set on the list) is that name's width. */
+.memory-session { display: grid; grid-template-columns: minmax(120px, var(--ms-name-w, 24ch)) minmax(0, 1fr) 56px 64px 72px; column-gap: var(--space-3); align-items: center; min-height: var(--control-sm); font-family: var(--mono); font-size: var(--font-size-sm); }
+.memory-session > .ms-state, .memory-session > .ms-mem, .memory-session > .ms-go { font-family: var(--font); font-size: var(--font-size-md); }
 .memory-session > span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ms-name { font-family: var(--mono); font-size: var(--font-size-sm); }
 .ms-init { font-family: var(--mono); font-size: var(--font-size-sm); color: var(--fg-muted); }
