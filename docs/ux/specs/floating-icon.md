@@ -330,6 +330,49 @@ is the grid's shape exactly, so it should be taken as is. Icon Composer's
 | F21 | read it small | Finder's list view (16 px) shows the D alone; the sidebar or a 32 px slot shows the D and the gears; neither is a smear |
 | F22 | trust the files are the drawing | `build/darwin/iconfile.icns` and `build/appicon.png` match the files in `docs/ux/inputs/deltagos-mark/app-icon/`, byte for byte. The icns is the authority, not the iconset PNGs: `iconutil` stores the 16 and 32 px slots as ARGB (ic04, ic05), which re-encodes translucent edge pixels, so those two slots decode equal to the iconset at every opaque pixel only (amended 2026-10-09, dm-build) |
 
+## Amendment 6 (aglaea, 2026-10-09): the app icon as an Icon Composer .icon
+
+dm-build's IconServices renders showed what Amendment 5's rabbit hole
+feared: macOS 26 puts an icns-only app on its light-grey plate, clearest at
+16 and 32 pt. The way out is Icon Composer's `.icon`. It is exported beside
+the icns as `app-icon/Deltagos.icon/`, by the same `export.sh`.
+
+- **The document**:
+  - the fill is the ground (`srgb` #1a1523), and the system draws the
+    tile's shape, edge and glass;
+  - two groups, the D on top and the gears behind (the first group in
+    `icon.json` is the topmost), each with a neutral shadow and no
+    translucency;
+  - `supported-platforms` is macOS squares.
+- **The layers are 1024 px PNGs**, not SVGs. Icon Composer's renderer
+  (CoreSVG) drops the masks that clip the gears to the D and cut its
+  notches, so SVG layers drew the gears spilling out of the D. The SVG
+  sources stay in `app-icon/layers/`, and `export.sh` rasterises them with
+  rsvg. The mark sits at 74% of the canvas, the whole cut's share.
+- **No small-size cuts**: the format has one artwork for every size, and
+  the system scales it. At 16 px the gears blur into the D but read as the
+  same mark. That is the price of losing the plate, and I take it.
+- **Checked**: compiled with `actool` (Xcode 26.0.1) into `Assets.car`,
+  in a test bundle with `CFBundleIconName`, and drawn by IconServices on
+  lodestar. There is no plate at 16, 32, 128 or 512 pt (edge alpha 0.17 at
+  16 pt is the tile's own anti-aliasing, and the top centre is the ground,
+  not grey). Shot: `app-icon/icon-composer-render.png`.
+
+**For the builder** (card app-icon-composer):
+
+- Compile `Deltagos.icon` with `actool --app-icon Deltagos` into the
+  bundle's `Assets.car` and set `CFBundleIconName` to `Deltagos`.
+- Keep `CFBundleIconFile` naming the existing `iconfile.icns`, with its
+  16 and 32 px cuts, for macOS 12 to 15. Do not use the icns that actool
+  generates from the `.icon`.
+- Do not edit the `.icon` by hand, and do not open and resave it in Icon
+  Composer: change `export.html` and run `export.sh`.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| F23 | see Deltagos without a grey plate on macOS 26 | IconServices renders of the built bundle at 16, 32, 128 and 512 pt: the dark tile to its edge, no light plate; the gears inside the D |
+| F24 | keep the old icon on older macOS | the bundle's `CFBundleIconFile` still names `iconfile.icns`, byte for byte the one in `app-icon/` |
+
 ## Acceptance, in the lead's terms
 
 | # | The lead can | Checked by |

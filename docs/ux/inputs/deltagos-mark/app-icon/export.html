@@ -84,7 +84,23 @@
     return s+'</svg>\n';
   }
 
+  // Icon Composer layers (.icon): the system draws the tile, its shape and
+  // its glass, so each layer is the mark alone on a 1024 canvas, at the
+  // whole cut's share of it. The gears carry their clip; the D its gaps.
+  // CoreSVG ignores these masks, so export.sh rasterises each layer to PNG.
+  function layer(which){
+    var mw=1024*0.74, mh=mw*66/64, mx=512-mw/2, my=512-mh/2, m=mark(null,9);
+    // keep only this layer's drawing from the mark
+    var defs=m.slice(0,m.indexOf('</defs>')+7), rest=m.slice(defs.length);
+    var gears=rest.slice(0,rest.indexOf('<path mask='));
+    var d=rest.slice(gears.length);
+    return '<svg xmlns="'+NS+'" width="1024" height="1024" viewBox="0 0 1024 1024">'+
+      '<svg x="'+mx.toFixed(2)+'" y="'+my.toFixed(2)+'" width="'+mw.toFixed(2)+'" height="'+mh.toFixed(2)+'" viewBox="20 17 64 66" overflow="visible">'+
+      defs+(which==='gears'?gears:d)+'</svg></svg>\n';
+  }
   var files={
+    'layers/gears.svg': layer('gears'),
+    'layers/d.svg': layer('d'),
     'deltagos-icon-1024.svg': icon({share:0.74, cut:null, stroke:9,  edge:4,  shadow:true}),
     'deltagos-icon-32.svg':   icon({share:0.80, cut:'32', stroke:11, edge:32, shadow:false}),
     'deltagos-icon-16.svg':   icon({share:0.84, cut:'16', stroke:13, edge:64, shadow:false})

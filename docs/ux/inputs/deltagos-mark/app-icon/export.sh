@@ -11,6 +11,7 @@ python3 - "$dom" "$here" <<'PY'
 import html, re, sys
 dom, out = sys.argv[1], sys.argv[2]
 for name, body in re.findall(r'<pre id="([^"]+)">(.*?)</pre>', open(dom).read(), re.S):
+    import os; os.makedirs(os.path.dirname(f"{out}/{name}"), exist_ok=True)
     open(f"{out}/{name}", "w").write(html.unescape(body))
 PY
 set=$here/Deltagos.iconset; rm -rf "$set"; mkdir -p "$set"
@@ -29,4 +30,58 @@ png 1024 512  "$set/icon_512x512.png"
 png 1024 1024 "$set/icon_512x512@2x.png"
 cp "$set/icon_512x512@2x.png" "$here/appicon.png"
 iconutil -c icns "$set" -o "$here/iconfile.icns"
+# Icon Composer's renderer (CoreSVG) drops the masks that clip the gears and
+# notch the D, so its layers are 1024 px PNGs rasterised here, not the SVGs.
+mkdir -p "$here/Deltagos.icon/Assets"
+for l in gears d; do rsvg-convert -w 1024 -h 1024 "$here/layers/$l.svg" -o "$here/Deltagos.icon/Assets/$l.png"; done
+# The Icon Composer document: the ground as the fill, the gears behind, the D
+# in front. macOS 26 draws it without the grey plate it puts round an icns.
+cat > "$here/Deltagos.icon/icon.json" <<'JSON'
+{
+  "fill" : {
+    "solid" : "srgb:0.10196,0.08235,0.13725,1.00000"
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "image-name" : "d.png",
+          "name" : "d"
+        }
+      ],
+      "name" : "D",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : false,
+        "value" : 0.5
+      }
+    },
+    {
+      "layers" : [
+        {
+          "image-name" : "gears.png",
+          "name" : "gears"
+        }
+      ],
+      "name" : "Gears",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : false,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "squares" : [
+      "macOS"
+    ]
+  }
+}
+JSON
 echo "wrote $(ls "$here" | tr '\n' ' ')"

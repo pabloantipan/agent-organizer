@@ -1,0 +1,46 @@
+{
+  "fill" : {
+    "solid" : "srgb:0.10196,0.08235,0.13725,1.00000"
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "image-name" : "d.png",
+          "name" : "d"
+        }
+      ],
+      "name" : "D",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : false,
+        "value" : 0.5
+      }
+    },
+    {
+      "layers" : [
+        {
+          "image-name" : "gears.png",
+          "name" : "gears"
+        }
+      ],
+      "name" : "Gears",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : false,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "squares" : [
+      "macOS"
+    ]
+  }
+}
