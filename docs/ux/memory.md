@@ -251,6 +251,15 @@ the D alone. No splash; the app icon is the still frame. Natively, the
 gears turn and the gaps travel at constant speed (the points and notches
 need per-frame work).
 
+Memory on this Mac (2026-10-09, `specs/ram-indicator.md`, proposed, thread
+01M4CK6VQ11WY8YJW9YWQ4C63T; 0101). The OS's pressure levels, worded normal,
+high and critical, in magenta and never red. In the top bar, `▣ 12 GB free`
+in subtle text, high in magenta, critical as a chip; a click popover with
+the five biggest sessions (process trees) and `Agents ›`. On the icon, a
+ring at high, breathing at critical. One notification per entry into
+critical (10 min out of critical, 30 min floor); clicking it opens the
+popover. It never stops a session.
+
 ## Open questions
 
 - Q1 (Pablo, via the FSE, leftovers-4): does he use Tab in the app? In

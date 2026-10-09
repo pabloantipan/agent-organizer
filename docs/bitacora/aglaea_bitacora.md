@@ -62,7 +62,7 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
   worktree (`make review-build`) with the fixture, never the installed app.
   `memory.md` "How I look at it" says how to drive the native panel and how
   to clean up (`pkill -f <fixture dir>`).
-- **Next action:** do the three messages above, mark first.
+- **Done 2026-10-09:** the mark (e1cdce1) and the RAM indicator spec. Next action: read mail; if none, stay silent.
 
 ## Log
 
@@ -120,3 +120,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-06 — usage design spec (0098): top-level view, tiles, one chart, one table with four cuts.
 - 2026-10-09 — session cleaned up; 3 FSE messages waiting (RAM indicator, the Deltagos mark and Pablo's ruling to recolour and draw it); seat identity lost on resume.
 - 2026-10-09 — the Deltagos mark recoloured and drawn (deltagos-mark-drawn.html, .png); floating-icon Amendment 4, gears' colours A/B/C for Pablo.
+- 2026-10-09 — ram-indicator design spec (0101): top bar, popover, icon ring, critical notification.
