@@ -276,6 +276,9 @@ is true. The rail's `Not active` splits into `Asleep (n)` and `Archived (n)`:
 archived ones are not asleep, and the factory refuses them. Agents rows get
 a Memory column that never folds. Words: awake/asleep replace active/paused
 on screen.
+The FSE took it as written (build spec docs/specs/initiatives-view.md,
+accept 0106). The asleep-since date is read from the status comment; frozen
+sessions are read from probe's frozen dir; archived apart needs no ruling.
 
 ## Open questions
 
