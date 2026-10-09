@@ -6,9 +6,8 @@ import "../styles/memory.css";
  *  §2), under the search field, at high and critical only: `Memory high ·
  *  3.1 GB free` (critical in the chip), then the three biggest sessions,
  *  name, memory and `Agents ›`. Choosing one is a pick, as choosing an
- *  initiative is: Deltagos full on this desktop, at that Agents row. A
- *  session outside every initiative has no row to land on and is not a
- *  choice. Nothing at normal. */
+ *  initiative is: Deltagos full on this desktop, at that Agents row (one
+ *  outside every initiative in the unassigned group). Nothing at normal. */
 export function MemoryFloatLine({ onPick }: { onPick: (initiative: string, agentId: string) => void }) {
   const agents = useBoard((s) => s.agents);
   const state = memoryState(agents);
@@ -19,16 +18,13 @@ export function MemoryFloatLine({ onPick }: { onPick: (initiative: string, agent
     <div className="fl-memory" role="group" aria-label={line}>
       <span className={`fl-memory-line ${state}`}>{line}</span>
       {rows.map((r) => {
-        const body = (
-          <>
+        return (
+          <button key={`${r.initiative}/${r.name}`} type="button" className="fl-memory-row" aria-label={`Agents ${r.name}, ${r.initiative || "outside every initiative"}, ${gb(r.bytes)} GB`} onClick={() => onPick(r.initiative, r.agentId)}>
             <span className="ms-name mono">{r.name}</span>
             <span className="ms-mem num">{gb(r.bytes)} GB</span>
-            <span className="ms-go">{r.initiative ? "Agents ›" : ""}</span>
-          </>
+            <span className="ms-go">Agents ›</span>
+          </button>
         );
-        return r.initiative
-          ? <button key={`${r.initiative}/${r.name}`} type="button" className="fl-memory-row" aria-label={`Agents ${r.name}, ${gb(r.bytes)} GB`} onClick={() => onPick(r.initiative, r.agentId)}>{body}</button>
-          : <div key={`/${r.name}`} className="fl-memory-row" aria-label={`${r.name}, outside every initiative, ${gb(r.bytes)} GB`}>{body}</div>;
       })}
     </div>
   );
