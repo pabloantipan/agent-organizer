@@ -1,13 +1,13 @@
 ---
 title: Accept the Initiatives view (sleep and wake) and launch its two cards after the RAM indicator
-status: proposed
+status: ruled
 raised: 2026-10-09
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-09
+ruled_by: pablo
 options: ["accept as written", "accept with amendments", "send back"]
-chosen:
+chosen: accept as written
 cards: [initiatives-sleep, initiatives-view]
 threads: ["01M4GK4QY61MGNM1SWN8FV876Q"]
 supersedes: []
@@ -56,3 +56,7 @@ It can run beside 0105's floating-icon task: they share no file.
 ## Recommendation
 
 The FSE's: accept as written.
+
+## Ruling
+
+pablo, 2026-10-09, in the organizer on lodestar: ok
