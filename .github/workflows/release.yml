@@ -27,10 +27,10 @@ jobs:
         run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.15.0
       - name: Test
         run: go vet ./... && go test ./...
+      # Through make, so the bundle carries build/darwin/iconfile.icns (with its
+      # 16 and 32 px cuts) and Assets.car, not the icns Wails generates.
       - name: Build universal app
-        run: |
-          VERSION="${GITHUB_REF_NAME:-dev}"
-          wails build -clean -platform darwin/universal -ldflags "-X main.version=$VERSION"
+        run: make build PLATFORM=darwin/universal VERSION="${GITHUB_REF_NAME:-dev}"
       # Signing and notarization run only when the secrets exist. Without them
       # the DMG is unsigned and the READ ME inside explains the quarantine step.
       - name: Sign and notarize
