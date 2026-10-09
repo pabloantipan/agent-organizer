@@ -6,7 +6,7 @@ restating it (the discuss skill).
 
 ## HAND-OFF — 2026-10-09, RAM indicator (0101) spec drafted
 
-- **Last SHA seen:** 6d84a12. Next supervisor: sup49.
+- **Last SHA seen:** c566466. Next supervisor: sup49.
 - **0101 ruled**; Aglaea's design spec landed (6d84a12, M1-M8). Build spec
   `docs/specs/ram-indicator.md` amended to it; cards `ram-sample`,
   `ram-view` cut (both pass `run --print`); accept **0103** raised with
@@ -20,6 +20,12 @@ restating it (the discuss skill).
   0042), so ask 2 is a rename plus the count. RAM per initiative went into
   0103 as Amendment 1 (by_initiative, G7). `factory awake` misses camp
   (maxdepth 3 under ~, camp is at depth 4); told Hephaistos.
+- 2026-10-09 later: **0102 ruled A**, **0103 accepted** (sup49 spawned,
+  window 7535, ram-sample then ram-view), **0104 ruled A** (Initiatives
+  view; asleep stays out of Needs me, Pablo's plain "ok"). Asked Aglaea for
+  docs/ux/specs/initiatives-view.md. Next: the deltagos-mark card plus
+  float-focus-steal as one accept record (both in floaticon_darwin.m, after
+  sup49's ram-view, which touches it too). Next supervisor: sup50.
 - **float-focus-steal** card cut (launchable, gate S1-S4): Deltagos came
   front by itself 11:33; candidates in floaticon_darwin.m (orderHere on
   space-change), not verified.
