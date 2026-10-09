@@ -1,0 +1,9 @@
+    1     0   12000 10-00:00:00 ??   1:00.00 /sbin/launchd
+  500     1    4000 01:00:00 ttys001  0:01.00 -zsh TERM=xterm-256color
+  600   500  400000 01:00:00 ttys001  2:10.00 claude -n organizer-probe-rs-build AGENT_SESSION=organizer-probe-rs-build
+  601   600   90000 01:00:00 ttys001  0:05.00 node /opt/mcp/server.js
+  602   600   50000 01:00:00 ttys001  0:01.00 /bin/zsh -c go test ./...
+  603   602  120000 00:30 ttys001  0:20.00 /usr/local/go/bin/go test ./...
+  700   500  300000 00:20:00 ttys002  1:00.00 claude -n camp-probe-andrea AGENT_NAME=po_andrea PROJECT_ID=camp
+  701   700  800000 00:20:00 ttys002  0:30.00 claude -p subtask
+  800     1   70000 02:00:00 ??   0:01.00 claude daemon
