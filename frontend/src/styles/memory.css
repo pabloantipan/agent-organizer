@@ -1,0 +1,68 @@
+/* Memory on this Mac: the top-bar button and its popover
+   (docs/ux/specs/ram-indicator.md §1). Tier-2 tokens only; high and
+   critical take the magenta tone, never red (red is blocked's; 0103 O2).
+   Safari 15 floor: no nesting, color-mix or oklch. */
+
+.memory { position: relative; display: inline-flex; }
+
+.memory-btn { display: inline-flex; align-items: center; gap: var(--space-1-5); color: var(--fg-subtle); white-space: nowrap; }
+.memory-btn .memory-text { font-variant-numeric: tabular-nums; }
+.memory-btn.high { color: var(--tone); }
+.memory-btn.critical { background: var(--tone); color: var(--fg-on-accent); border-radius: var(--radius-sm); }
+.memory-btn.critical:hover { background: var(--tone); color: var(--fg-on-accent); }
+.memory-btn[aria-expanded="true"]:not(.critical) { background: var(--surface-selected); }
+.memory-btn.critical[aria-expanded="true"] { box-shadow: 0 0 0 2px var(--surface-selected); }
+
+.memory-pop {
+  position: absolute; top: calc(100% + var(--space-1-5)); right: 0;
+  width: 560px; max-width: calc(100vw - 32px);
+  box-sizing: border-box; padding: var(--space-3) var(--space-4);
+  background: var(--surface-overlay); color: var(--fg);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-overlay);
+  font-size: var(--font-size-md); line-height: var(--line-md);
+  z-index: var(--z-modal);
+}
+.memory-pop:focus { outline: none; }
+.memory-pop:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.memory-pop-title { font-weight: var(--weight-semibold); margin-bottom: var(--space-2); }
+.memory-pop-note { margin: var(--space-1) 0; color: var(--fg-muted); }
+.memory-pop-head { color: var(--fg-muted); font-size: var(--font-size-sm); margin-bottom: var(--space-1); }
+.memory-pop-rule { height: 1px; background: var(--border-subtle); margin: var(--space-2) 0; }
+.memory-pop-foot { margin: 0; color: var(--fg-muted); font-size: var(--font-size-sm); }
+
+.memory-facts { display: grid; grid-template-columns: max-content 1fr; gap: var(--space-0-5) var(--space-4); margin: 0; }
+.memory-facts dt { color: var(--fg-muted); }
+.memory-facts dd { margin: 0; font-variant-numeric: tabular-nums; }
+.memory-pressure.high, .memory-pressure.critical { color: var(--tone); font-weight: var(--weight-semibold); }
+
+/* Columns: name, initiative, state, memory, the link, the same on every row.
+   The initiative column gives way first (the 1024 row): it shrinks to
+   nothing and cuts with an ellipsis before the name does. A grid per row,
+   not display: contents, which takes the row out of WebKit's accessibility
+   tree. */
+.memory-sessions { list-style: none; margin: 0; padding: 0; display: grid; row-gap: var(--space-0-5); }
+.memory-session { display: grid; grid-template-columns: minmax(120px, 2fr) minmax(0, 1.4fr) 56px 64px 72px; column-gap: var(--space-3); align-items: center; }
+.memory-session > span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ms-name { font-family: var(--mono); font-size: var(--font-size-sm); }
+.ms-init { font-family: var(--mono); font-size: var(--font-size-sm); color: var(--fg-muted); }
+.ms-state { color: var(--fg-muted); font-size: var(--font-size-sm); }
+.ms-state.working { color: var(--live); }
+.ms-mem { text-align: right; font-variant-numeric: tabular-nums; }
+.ms-go { color: var(--accent-fg); }
+.memory-more { margin-top: var(--space-1); color: var(--fg-muted); }
+
+/* A session's Agents › landing: the row shows its selected state; the ring
+   is for the keyboard (Focus and names). */
+.agents li.memory-landed { background: var(--surface-selected); }
+.agents li.memory-landed:focus { outline: none; }
+.agents li.memory-landed:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+
+/* The floating icon's panel line (§2), at high and critical. */
+.fl-memory { display: grid; gap: var(--space-0-5); padding: var(--space-1-5) var(--space-3); border-bottom: 1px solid var(--border-subtle); font-size: var(--font-size-md); }
+.fl-memory-line { color: var(--tone); font-weight: var(--weight-semibold); font-variant-numeric: tabular-nums; }
+.fl-memory-line.critical { justify-self: start; background: var(--tone); color: var(--fg-on-accent); border-radius: var(--radius-sm); padding: 0 var(--space-1-5); }
+.fl-memory-row { display: grid; grid-template-columns: minmax(0, 1fr) max-content max-content; column-gap: var(--space-3); align-items: center; width: 100%; text-align: left; background: transparent; border: 0; border-radius: var(--radius-sm); padding: var(--space-0-5) var(--space-1-5); color: var(--fg); font: inherit; cursor: pointer; }
+.fl-memory-row:hover { background: var(--surface-hover); }
+.fl-memory-row:focus { outline: none; }
+.fl-memory-row:focus-visible { outline: 2px solid var(--focus-ring); }
+.fl-memory-row .ms-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

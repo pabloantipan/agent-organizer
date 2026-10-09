@@ -10,6 +10,7 @@ import { escapeCloses, useConfirmFocus } from "../lib/focus";
 import { CleanButton } from "./Retire";
 import { Usage as fetchUsage } from "../../wailsjs/go/main/App";
 import { agentsWeekLine } from "../lib/usage";
+import { agentTarget } from "../lib/agentFocus";
 
 const REFRESH_MS = 10_000;
 
@@ -17,11 +18,29 @@ const REFRESH_MS = 10_000;
  *  samples every ten seconds and pushes the "agents" event; this view only
  *  renders the latest payload. Working = CPU time grew between samples. */
 export function AgentsView() {
-  const { selectedInitiative, setSelectedInitiative, agents: view, applyAgents, openSlack, view: board } = useBoard();
+  const { selectedInitiative, setSelectedInitiative, agents: view, applyAgents, openSlack, view: board, agentFocus, clearAgentFocus } = useBoard();
 
   useEffect(() => {
     if (!view) api.getAgents().then(applyAgents, () => undefined);
   }, [view, applyAgents]);
+
+  // A memory session's Agents › (ram-indicator §1) lands on its row: focused,
+  // brought into view, and marked as selected until focus leaves it.
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!agentFocus || !view) return;
+    const t = agentTarget(view.groups, agentFocus);
+    const section = t && box.current?.querySelector(`[data-group="${CSS.escape(t.group)}"]`);
+    const el = !t || !section ? null
+      : "seat" in t ? section.querySelector<HTMLElement>(`.crew-seats > li[data-seat="${CSS.escape(t.seat)}"]`)
+      : section.querySelectorAll<HTMLElement>("ul.agents:not(.crew-seats) > li")[t.index];
+    clearAgentFocus();
+    if (!el) return;
+    el.classList.add("memory-landed");
+    el.addEventListener("blur", () => el.classList.remove("memory-landed"), { once: true });
+    el.focus();
+    el.scrollIntoView({ block: "nearest" });
+  }, [agentFocus, view, clearAgentFocus]);
 
   if (!view) return <div className="empty">Sampling processes…</div>;
   // FR-13: an initiative that is not active is watched, not driven; the flag
@@ -40,7 +59,7 @@ export function AgentsView() {
   const selQ = sel ? queueOf(sel, board) : null;
 
   return (
-    <div className="agents-view">
+    <div className="agents-view" ref={box}>
       <div className="board-head">
         {!selectedInitiative && <h1>Agents</h1>}
         <span className="meta">
@@ -59,7 +78,7 @@ export function AgentsView() {
         const q = queueOf(g, board);
         const ro = readOnlyOf(board, g.id);
         return (
-        <section key={g.id} className="agent-group">
+        <section key={g.id} className="agent-group" data-group={g.id}>
           {!selectedInitiative && (
           <header className="agent-group-head">
             <span className="agent-group-title" onClick={() => setSelectedInitiative(g.id)} title="Show only this initiative">

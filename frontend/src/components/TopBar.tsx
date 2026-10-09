@@ -5,6 +5,7 @@ import { useBoard } from "../stores/board.store";
 import { since } from "../lib";
 import { needsMeRows } from "../lib/queue";
 import { HelpView } from "./HelpView";
+import { MemoryButton } from "./MemoryButton";
 import { FloatAvailable, FloatCompact } from "../../wailsjs/go/main/App";
 
 export function TopBar() {
@@ -90,6 +91,8 @@ export function TopBar() {
       {/* Usage (docs/ux/specs/usage.md): a quiet text button, no badge and no
           number; Needs me is the one badge, and money stays inside the view. */}
       <button className={`ghost usage-btn ${screen === "usage" && helpTop === null ? "on" : ""}`} onClick={() => { closeHelp(); openUsage(); }} title="Tokens and money, week by week" aria-pressed={screen === "usage" && helpTop === null}>Usage</button>
+      {/* Memory on this Mac (ram-indicator §1): after Usage, a button, never a badge. */}
+      <MemoryButton />
       <button className={`ghost gear ${helpTop !== null ? "on" : ""}`} onClick={toggleHelp} title="Help: how we build, from help_doc" aria-label="Help" aria-pressed={helpTop !== null}><CircleHelp size={14} /></button>
       <button className={`ghost gear ${screen === "settings" && helpTop === null ? "on" : ""}`} onClick={() => { closeHelp(); openSettings(); }} title="Settings" aria-label="Settings"><Settings size={14} /></button>
       {helpTop !== null && <HelpView top={helpTop} onClose={closeHelp} />}
