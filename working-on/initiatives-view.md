@@ -6,7 +6,7 @@ branch: initiatives-view
 seat: iv-build
 stage: one-window
 updated: 2026-10-09
-next: "short code re-review of initiatives-view at eeb875b (sup51); iv-build: the WKWebView pass of I1-I13 after sup50's S2 and S3 free the screen"
+next: "iv-build: the WKWebView pass of I1-I13 after sup50's S2 and S3 free the screen"
 depends_on: [initiatives-sleep, ram-view]
 boundary: ["new InitiativesView.tsx and css, the top bar and the store's screen", "Rail.tsx (folds), Home.tsx (one line), InitiativeHeader.tsx (asleep line), AgentsView.tsx, AgentList.tsx and Crew.tsx (Memory column)", "frontend/src/lib helpers and tests (readOnlyOf's word included), scripts/fixture-home.sh", "not: Go"]
 spec: "docs/specs/initiatives-view.md (FR-5; docs/ux/specs/initiatives-view.md (e577d08))"
@@ -47,3 +47,13 @@ docs/specs/initiatives-view.md, I1 to I13 and X0, plus:
 - Gate gaps: I11 checks the header's word only, not every place that says `paused`; no row runs the real home outside WKWebView.
 - Reviewer: iv-review, 2026-10-09.
 - 2026-10-09 the FSE: I14-I15 from the code review's findings 1 and 5 (0108). Findings 2 (Wake refused at Deltagos's count, camp included: kept, Deltagos's count is the true one; the factory's depth fix is Hephaistos's), 3 and 4 go to leftovers.
+
+### Re-review (I14, I15)
+- 2026-10-09. Verdict: pass. Commit reviewed: eeb875b on `initiatives-view`.
+- Unmet gate items: none.
+- Since fbc0992: the branch was rebased onto main (31cf2e2); `git range-diff` shows its nine commits identical to fbc0992's, and the tree at e187b1e differs from fbc0992 only by main's card and bitácora. New are 2012d81 and eeb875b, frontend only (`lib/queue.ts`, `lib/initiatives.ts`, their tests, `InitiativeHeader.tsx`, `AgentsView.tsx`, `InitiativesView.tsx`), all inside the boundary; no Go change.
+- I14: `readOnlyOf` returns `sleepyWord(status)`; the header lozenge's text and hover, CardDrawer (Discuss and Comments), Conversation and AgentsView all print it unchanged, so a paused initiative reads `asleep: read-only` everywhere; the Wake link checks `readOnly === "asleep"`. Vitest `queue.test.ts` covers asleep, archived, an unknown status as written, and null. No user-visible `paused: read-only` or `not active:` left in the frontend.
+- I15: `limit` is null unless the factory is found and answers; `countWords(n, null)` gives `n awake`, never over, no hover; `atLimit` is false, so no limit line and no refused Wake. Vitest in `initiatives.test.ts`; the builder's Chromium shots at 1024 (missing, failing) show `10 awake` and the factory line, matching `flows.log` lines 85-86.
+- X0 from a clean clone at eeb875b, through `test-lease`: `XDG_DATA_HOME=$(mktemp -d) make test` exit 0 (400 vitest), `npm install && npm test && npm run build` exit 0.
+- Findings (none blocks): FloatList's group label still says `Not active (n)`; it is a group name, not a read-only word, and outside I14's places.
+- Reviewer: iv-rereview, 2026-10-09.
