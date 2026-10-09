@@ -6,7 +6,7 @@ branch: float-focus-steal
 seat: ffs-build
 stage: one-window
 updated: 2026-10-09
-next: "ffs-build builds on branch float-focus-steal (sup50 wave 1): prove the cause (S1), then fix"
+next: "ffs-build: cause found (S1, see Cause); building the fix on float-focus-steal, then S2"
 depends_on: []
 boundary: ["floaticon_darwin.m and floaticon_darwin.go, and their check scripts", "not: the frontend, the Go service, the mark (0102)"]
 spec: "this card's Spec section"
@@ -44,6 +44,32 @@ orders the main window front or activates the app.
 - [ ] S3 the floating icon's existing checks (F-rows of floating-icon-2)
   still pass
 - [ ] S4 `make test`, `wails build` pass
+
+## Cause (S1, ffs-build, 2026-10-09)
+None of the card's candidates: the steal is macOS's own fallback activation,
+made possible by the icon. The floating icon is a window on every desktop
+(CanJoinAllSpaces), so on any desktop Deltagos counts as an app with a window
+there. When the app in front on a desktop quits (or hides), macOS activates
+the most recent app that has a window on that desktop; if that is Deltagos,
+AppKit makes its main window key (`_handleActivatedEvent` →
+`_NXShowKeyAndMain`, no call of ours) and, the window being on its home
+desktop, "switch to a Space with open windows" moves the lead there.
+Reproduced on lodestar in the review build (Deltagos Review home on desktop 3
+of 5): a stand-in app on desktop 4, Deltagos used on desktop 3, back to 4,
+the stand-in quits at 16:20:48.507 → Deltagos Review activated 16:20:48.507
+on desktop 4, main window became key with `onActive=0`, desktop 3 at
+16:20:49.136 (exp8). Control (exp9): the same order with a plain app B (a
+window only on desktop 5) next in line: the quit went to Finder, not B.
+Contributing: `dismissList`'s `[NSApp deactivate]` does nothing on this macOS
+(Darwin 25): after every list close Deltagos stays the active app with no
+window on the desktop until the lead activates something else (exp2, exp6),
+so it is the most recent app more often; exp6 shows the fallback picking it
+then (no desktop change, the window being ordered out). The candidates
+`orderHere`/`update`, `markHome` and both `activateIgnoringOtherApps` logged
+only at the lead's own acts (the added activation log names every one).
+Evidence in `.wt-notes/ffs-build/`: `s1-float.log` (float and activation
+log, epoch seconds), `s1-frontmost.log` (frontmost app with desktop number),
+`s1-steps.log` (each step's time), experiments listed in `progress.md`.
 
 ## Notes
 - 2026-10-09: supervisor sup50 (window 8383), spawned by the FSE.
