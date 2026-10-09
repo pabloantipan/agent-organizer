@@ -6,7 +6,7 @@ branch: deltagos-mark
 seat: dm-build
 stage: one-window
 updated: 2026-10-09
-next: "waits on 0105 (accept) and ram-view merged (shared floaticon_darwin.m)"
+next: "0105 accepted 2026-10-09; sup50 runs it after float-focus-steal, once ram-view is in done/"
 depends_on: [ram-view]
 boundary: ["floaticon_darwin.m/.h/.go (the tile's layers only)", "build/appicon.png and the darwin icon files", "new DeltagosMark.tsx and css, HelpView.tsx (header)", "not: the panel's list, activation paths (float-focus-steal), the RAM ring's logic"]
 spec: "docs/specs/deltagos-mark.md (FR-1 to FR-4; docs/ux/specs/floating-icon.md Amendment 4)"
