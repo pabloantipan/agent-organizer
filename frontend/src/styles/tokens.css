@@ -74,6 +74,7 @@
   --fg-disabled: var(--plum-8);      /* decoration and disabled only, never read text */
   --fg-on-accent: #ffffff;
   --fg-on-tone: #1a1523;          /* 5.2:1 on --tone: text and glyph on the magenta fill, never white */
+  --fg-on-warning: #1a1523;       /* 9.8:1 on --warning: text and glyph on the amber fill (the memory chip), never white (1.8:1) */
 
   /* borders: felt, not seen (Linear); structure comes from spacing first */
   --border-subtle: rgba(255, 255, 255, 0.05);

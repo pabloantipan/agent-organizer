@@ -411,24 +411,39 @@ static void breathe(void) {
                                                             kMarkSpeed, kMarkLength / kMarkSpeed, 2 * M_PI * kGear.rOut / kMarkSpeed, M_PI * kGear.rOut / kMarkSpeed]);
 }
 
-// ---------- memory: the ring (docs/ux/specs/ram-indicator.md §2) ----------
+// ---------- memory: the ring (docs/ux/specs/ram-indicator.md §2, Amendment 2) ----------
 
-// Outside the tile, so it never touches the mark or its animation: 2 pt from
-// the tile's edge, 2 pt wide at high, 3 at critical, breathing in opacity
-// 1 to 0.5 over 1.6 s (0.8 each way) at critical, steady under Reduce
-// motion; nothing at normal. Points, not scaled with the icon: the design
-// gives the ring in px, as a mark of the edge, not of the tile's drawing.
+// Outside the tile, so it never touches the mark or its animation, 2 pt from
+// the tile's edge, at every level, since the ring is also how the lead finds
+// the icon (0109): the tone at normal, with no reading and with a failed
+// one; amber (--amber-9) at high; amber 3 pt at critical, breathing in
+// opacity 1 to 0.5 over 1.6 s (0.8 each way), steady under Reduce motion.
+// A 1 pt keyline in the ground (#1a1523) sits just outside the ring at every
+// level and does not breathe: it holds the ring on a light wallpaper (amber
+// on white is 1.8:1, the ground 17.9:1). Points, not scaled with the icon:
+// the design gives the ring in px, as a mark of the edge, not of the tile's
+// drawing.
 static const CGFloat kRingGap = 2;
+static const CGFloat kKeyline = 1;
+static CAShapeLayer *keyline;          // the ground's 1 pt edge outside the ring
+
+static CGPathRef ringPath(CGFloat out) {
+    CGRect r = CGRectInset(CGRectMake(0, 0, tileSz, tileSz), -out, -out);
+    return CGPathCreateWithRoundedRect(r, tileSz / 4 + out, tileSz / 4 + out, NULL);
+}
 
 static void layoutRing(void) {
     CGFloat w = [memLevel isEqualToString:@"critical"] ? 3 : 2;
-    CGFloat out = kRingGap + w / 2;
-    CGRect r = CGRectInset(CGRectMake(0, 0, tileSz, tileSz), -out, -out);
-    CGPathRef path = CGPathCreateWithRoundedRect(r, tileSz / 4 + out, tileSz / 4 + out, NULL);
+    CGPathRef path = ringPath(kRingGap + w / 2);
     ring.frame = CGRectMake(0, 0, tileSz, tileSz);
     ring.path = path;
     ring.lineWidth = w;
     CGPathRelease(path);
+    CGPathRef edge = ringPath(kRingGap + w + kKeyline / 2);
+    keyline.frame = ring.frame;
+    keyline.path = edge;
+    keyline.lineWidth = kKeyline;
+    CGPathRelease(edge);
 }
 
 static void applyRing(void) {
@@ -438,7 +453,9 @@ static void applyRing(void) {
     [CATransaction begin];
     [CATransaction setDisableActions:YES];
     layoutRing();
-    ring.hidden = !(high || critical);
+    ring.strokeColor = [hex(high || critical ? 0xffb020 : 0xd946ef) CGColor]; // --amber-9 for pressure, else --tone (Amendment 2)
+    ring.hidden = NO;
+    keyline.hidden = NO;
     ring.opacity = 1;
     [ring removeAnimationForKey:@"breathe"];
     if (critical && !still) {
@@ -454,7 +471,9 @@ static void applyRing(void) {
     [CATransaction commit];
     [iconViewForRing() setToolTip:[memLevel isEqualToString:@"normal"] ? @"Deltagos" : [NSString stringWithFormat:@"Deltagos, memory %@", memLevel]];
     NSAccessibilityPostNotification(iconViewForRing(), NSAccessibilityTitleChangedNotification);
-    flog(@"memory ring: %@ (%@)", memLevel, high ? @"2 pt" : critical ? (still ? @"3 pt, steady (reduce motion)" : @"3 pt, breathing") : @"none");
+    flog(@"memory ring: %@ (%@, keyline 1 pt #1a1523)", memLevel,
+         high ? @"amber #ffb020 2 pt" : critical ? (still ? @"amber #ffb020 3 pt, steady (reduce motion)" : @"amber #ffb020 3 pt, breathing")
+              : @"tone #d946ef 2 pt");
 }
 
 // ---------- desktops ----------
@@ -1055,9 +1074,14 @@ static void build(void) {
         [group addSublayer:l];
     }
 
+    keyline = [CAShapeLayer layer];
+    keyline.fillColor = nil;
+    keyline.strokeColor = [hex(0x1a1523) CGColor]; // the ground, #1a1523, the tile's own fill
+    keyline.hidden = YES;
+    [group addSublayer:keyline];
     ring = [CAShapeLayer layer];
     ring.fillColor = nil;
-    ring.strokeColor = [hex(0xd946ef) CGColor]; // --tone, magenta-9: caution, never red (design system; 0103 O2)
+    ring.strokeColor = [hex(0xd946ef) CGColor]; // --tone until the first applyRing; amber for pressure, never red
     ring.hidden = YES;
     [group addSublayer:ring];
 

@@ -7,7 +7,7 @@ import { MemoryPopover } from "./MemoryPopover";
 import "../styles/memory.css";
 
 /** Memory on this Mac in the top bar (docs/ux/specs/ram-indicator.md §1):
- *  the glyph and the free memory, quiet at normal, the magenta tone with the
+ *  the glyph and the free memory, quiet at normal, amber (--warning) with the
  *  word at high, a filled chip at critical. It is a button, never a badge:
  *  it carries no count (Needs me is the one badge, FR-14). Pressing it opens
  *  the popover; the warning's click opens it too (§3, the "memory:open"
