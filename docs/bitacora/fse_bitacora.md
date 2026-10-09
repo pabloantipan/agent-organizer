@@ -6,7 +6,7 @@ restating it (the discuss skill).
 
 ## HAND-OFF — 2026-10-09, RAM indicator (0101) spec drafted
 
-- **Last SHA seen:** 0f80bdd. Next supervisor: sup49.
+- **Last SHA seen:** 5221db2. Next supervisor: sup49.
 - **0101 ruled**; Aglaea's design spec landed (6d84a12, M1-M8). Build spec
   `docs/specs/ram-indicator.md` amended to it; cards `ram-sample`,
   `ram-view` cut (both pass `run --print`); accept **0103** raised with
@@ -34,6 +34,7 @@ restating it (the discuss skill).
 - 16:0x: ram-view merged 0f80bdd (N1 is Pablo's after make install; ram-chip-contrast left with sup49). **sup50** (window 8383, float-focus-steal then deltagos-mark) and **sup51** (window 8385, initiatives-sleep then initiatives-view) spawned, identities checked. Next supervisor: sup52. Prompts carry the prelude workaround, 0108 and the forecast-as-deadline rule.
 - **leftovers-15** also: review builds post real notifications ("Memory critical on fixture", 16:50); first install had notifications off for Deltagos until Pablo allowed them (say so in the install notes).
 - **20:1x:** initiatives-view merged 7c829fe, ram-ring-amber merged 679a5a6. sup51 ended (task 3h57 wall, 1h51 work, inside). app-icon-composer A2 reworded under 0108 (d5b0e03), re-review then merge. Next supervisor: sup52.
+- **20:4x:** sup50 ended (ring-and-icon 17 min, under). No supervisor running. **0111** raised: leftovers-15 as five parallel cards (spec docs/specs/leftovers-15.md), forecast 1-2 h. Open beyond it: Aglaea's initiatives-view A1-A3; camp invisible to factory (Hephaistos); seat-pointer --pid waits on Pablo's merge. Next supervisor: sup52, as a tab of a window on my desktop.
 - **20:3x installed** 0b475b7 for Pablo (everything of today). `make install` leaves frontend/wailsjs/runtime/ modified each time (the wails CLI regenerates its runtime: a version drift between the CLI and go.mod); restored by checkout both times: leftovers-15.
 - **leftovers-15, full list so far:** ram-view U4 (session named two ways), U5 (resume UUID as name), "no reading yet" unreachable, review builds post real notifications; initiatives-view CR 3 (blind linked to a Sleep), 4 (empty-Home line), UI U1-U6 (Memory column alignment, row name says a number when unread, 'Initiatives ›' lands focus nowhere, 'asleep since' on the day, '1 decision … leave', fold chevrons unnamed), A1-A3 for aglaea, code notes (board runs factory awake, a hung factory holds the busy lock 3 min, no test the tick never runs factory); Help mark F25-F26 (Aglaea Amendment 7); release.yml Test step fails on a clean checkout (frontend/dist missing); app-icon U1 settled by Aglaea (968ce34): the car's rendition is accepted on 11-15, revisit only if a 12-15 Mac shows it badly; "no Mac of Pablo's runs" 12-15 today (her claim, not verified).
 - **sup50 task 1 closed** (19:51): float-focus-steal c94c28c, deltagos-mark 634a0f3; 3h51m wall vs 2-5 h, ~2h07m of it a locked screen. Run record runs/2026-10-09-sup50-one-window.md. Findings: release.yml uses wails build (icon cuts lost) → app-icon-composer A4; U2 Help mark never stops (WCAG 2.2.2) and U3 named twice → Aglaea answered (floating-icon Amendment 7, 8c6249d, rows F25-F26): Help mark moves 4.5 s then stops, hover replays; mark aria-hidden in the lockup. Into leftovers-15. sup50 asked to run ram-ring-amber + app-icon-composer as a new task (run record of its own).
