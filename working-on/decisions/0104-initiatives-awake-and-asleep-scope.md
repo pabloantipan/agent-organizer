@@ -1,13 +1,13 @@
 ---
 title: Initiatives as cards - sleep and wake, awake first, memory per initiative and agent - scope
-status: proposed
+status: ruled
 raised: 2026-10-09
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-09
+ruled_by: pablo
 options: ["A: an Initiatives view of cards with Sleep and Wake; Wake refuses a fifth; the rail's fold is Asleep; memory on each card and on every Agents row", "B: as A, but Wake at the limit offers Wake anyway", "C: no new view; Sleep and Wake on Home's rows and the initiative header; the rest as A"]
-chosen:
+chosen: "A: an Initiatives view of cards with Sleep and Wake; Wake refuses a fifth; the rail's fold is Asleep; memory on each card and on every Agents row"
 cards: []
 threads: ["01M4GHM3YT12YSA67HK1DB45M5"]
 supersedes: []
@@ -72,3 +72,7 @@ ruling); `factory wake --force` stays on the command line for the rare case.
   the same set Deltagos does.
 - Aglaea designs the view, its states and words; the FSE specs and cuts
   the cards after 0103's task (they share the top bar and the Agents rows).
+
+## Ruling
+
+pablo, 2026-10-09, in the organizer on lodestar: ok
