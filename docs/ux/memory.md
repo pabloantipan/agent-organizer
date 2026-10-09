@@ -279,6 +279,9 @@ on screen.
 The FSE took it as written (build spec docs/specs/initiatives-view.md,
 accept 0106). The asleep-since date is read from the status comment; frozen
 sessions are read from probe's frozen dir; archived apart needs no ruling.
+ram-view's review: white on --tone at 13 px is 3.5:1. The chip text became
+--fg-on-tone (the ground's ink, 5.2:1), a design-system row (229506e). The
+memory button sits after Usage, before Help, as built (b23bf10).
 
 ## Open questions
 
@@ -322,6 +325,9 @@ sessions are read from probe's frozen dir; archived apart needs no ruling.
 - Pressing an action that starts a real session (Draft the cell's Open,
   Bring crew up) is out of a review's reach; read the code path and say so.
 
+- **Measure every fill's text before naming it.** I wrote "white text" on
+  the magenta tone without measuring; it is 3.5:1. Any new fill gets its ink
+  measured and a contrast row in the design system in the same commit.
 - **A count needs its noun.** "3 waiting" failed header-fold's blind reader;
   0068 made it "3 decisions waiting". Shortening a label past its noun saves
   width and costs meaning.

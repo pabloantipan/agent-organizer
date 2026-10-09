@@ -123,3 +123,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-09 — ram-indicator design spec (0101): top bar, popover, icon ring, critical notification.
 - 2026-10-09 — initiatives-view design spec (0104 A): cards awake/asleep, Sleep confirms, Wake refused at four, rail folds Asleep and Archived, memory on Agents rows.
 - 2026-10-09 — ram-view: memory button stays after Usage, before Help; Rescan not moved; spec §1 amended (b23bf10).
+- 2026-10-09 — rv-review: critical chip text to --fg-on-tone (5.2:1), design-system row, ram-indicator Amendment 1 (229506e).
