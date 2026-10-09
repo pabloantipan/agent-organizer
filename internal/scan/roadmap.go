@@ -27,7 +27,7 @@ func readRoadmap(wo string, problems []model.Problem) ([]model.Stage, []model.Pr
 		Stages []model.Stage `yaml:"stages"`
 	}
 	if err := yamlUnmarshal(b, &doc); err != nil {
-		return nil, append(problems, model.Problem{Path: p, Msg: "roadmap.yaml: " + err.Error()})
+		return nil, append(problems, model.UnreadProblem(p, "roadmap.yaml: "+err.Error()))
 	}
 	stages := doc.Stages
 	problems = append(problems, checkStages(p, stages)...)

@@ -4,6 +4,7 @@ package scan
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -122,7 +123,7 @@ func ReadInitiative(root string, opts Options) model.ScannedInitiative {
 		return si
 	}
 	if err := yamlUnmarshal(b, &si.Initiative); err != nil {
-		si.Problems = append(si.Problems, model.Problem{Path: filepath.Join(wo, initiativeFile), Msg: "initiative.yaml: " + err.Error()})
+		si.Problems = append(si.Problems, model.UnreadProblem(filepath.Join(wo, initiativeFile), "initiative.yaml: "+err.Error()))
 	}
 	si.Path = root
 	if si.ID == "" {
@@ -169,6 +170,9 @@ func readCards(dir string, archived bool, cards []model.Card, problems []model.P
 			continue
 		}
 		p := filepath.Join(dir, e.Name())
+		if isLedger(p) {
+			continue
+		}
 		c, probs := readCard(p, archived)
 		cards = append(cards, c)
 		problems = append(problems, probs...)
@@ -185,11 +189,11 @@ func readCard(path string, archived bool) (model.Card, []model.Problem) {
 	var problems []model.Problem
 	b, err := os.ReadFile(path)
 	if err != nil {
-		return c, []model.Problem{{Path: path, Msg: err.Error()}}
+		return c, []model.Problem{model.UnreadProblem(path, err.Error())}
 	}
 	body, err := parseFrontmatter(string(b), &c)
 	if err != nil {
-		return c, []model.Problem{{Path: path, Msg: err.Error()}}
+		return c, []model.Problem{model.UnreadProblem(path, err.Error())}
 	}
 	c.Body = body
 	if archived && c.Status == "" {
@@ -340,7 +344,7 @@ func readCell(root string, problems []model.Problem) (*model.Cell, []model.Probl
 	}
 	var c model.Cell
 	if err := json.Unmarshal(b, &c); err != nil {
-		return nil, append(problems, model.Problem{Path: p, Msg: "cell.json: " + err.Error()})
+		return nil, append(problems, model.UnreadProblem(p, "cell.json: "+err.Error()))
 	}
 	if c.Project == "" {
 		return nil, append(problems, model.Problem{Path: p, Msg: "cell.json: project is required"})
@@ -352,4 +356,29 @@ func readCell(root string, problems []model.Problem) (*model.Cell, []model.Probl
 		problems = append(problems, model.Problem{Path: p, Msg: fmt.Sprintf("cell.json: drafted %q is not a date (YYYY-MM-DD)", c.Drafted)})
 	}
 	return &c, problems
+}
+
+// ledgerNames are the files the working-on skill's neighbours keep in
+// working-on/ that are not cards: Hermione's Jira ledgers and the ticket list.
+var ledgerNames = map[string]bool{"tickets.md": true, "jira-map.md": true, "jira-estimates.md": true}
+
+// isLedger reports whether a .md file in working-on/ is a ledger rather than a
+// card, so the scan skips it without a problem: tickets.md, jira-map.md,
+// jira-estimates.md and jira-report-*.md always, and any other jira-*.md that
+// has no frontmatter. Any other name without frontmatter stays a problem, since
+// that is a card that lost its frontmatter.
+func isLedger(path string) bool {
+	name := filepath.Base(path)
+	if ledgerNames[name] || strings.HasPrefix(name, "jira-report-") {
+		return true
+	}
+	if !strings.HasPrefix(name, "jira-") {
+		return false
+	}
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return false
+	}
+	_, _, err = splitFrontmatter(string(b))
+	return errors.Is(err, errNoFrontmatter)
 }

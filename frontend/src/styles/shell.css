@@ -154,6 +154,17 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .init-repos .missing { grid-column: 2 / -1; color: var(--danger); }
 .init-repos .dirty { color: var(--tone); }
 .init-problem { font-size: var(--font-size-sm); color: var(--warning); }
+/* The files a scan could not read (Needs me's unreadable row, the initiative
+   header's count): path in mono, the reason muted, Open in editor on a local
+   file. Under an inbox row it is indented to the row's subject column. */
+.unread-files { list-style: none; margin: 0; padding: 0 0 var(--space-2); display: grid; gap: var(--space-1); font-size: var(--font-size-sm); line-height: var(--line-sm); }
+.inbox > .unread-files { padding-left: calc(var(--space-2) + 112px + var(--space-3)); padding-right: var(--space-2); }
+.ihead > .unread-files { padding-top: var(--space-1); }
+.unread-files li { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-3); min-width: 0; }
+.unread-path { color: var(--fg); overflow-wrap: anywhere; }
+.unread-why { color: var(--fg-muted); flex: 1 1 24ch; min-width: 0; overflow-wrap: anywhere; }
+.home.compact .inbox > .unread-files { padding-left: var(--space-2); }
+.unread-files button.linkish { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--accent-fg); }
 .init-detail .init-actions { margin-top: var(--space-2); }
 
 /* ---------- one initiative: header over six sub-views ---------- */
