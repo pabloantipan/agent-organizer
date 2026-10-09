@@ -6,7 +6,7 @@ branch: ram-sample
 seat: rs-build
 stage: one-window
 updated: 2026-10-09
-next: "rs-build: X0 (clean-clone make test + wails build) queued on test-lease, which waits while pressure is high; then review"
+next: "review: ram-sample, gate met (G1-G7, X0), 10c206e"
 depends_on: []
 boundary: ["new internal/memory and its tests", "internal/scan/agents.go (ps columns, footprint, tree sum), model.Agent (mem_bytes)", "internal/service (AgentsView.memory, level times, warn rule), internal/cli (memory command), frontend/wailsjs regenerated", "not: the top bar, the floating icon, any view, posting the notification"]
 spec: "docs/specs/ram-indicator.md (FR-1 to FR-4)"
@@ -27,10 +27,12 @@ docs/specs/ram-indicator.md, G1 to G7 and X0. Evidence in `.wt-notes/rs-build/`.
 - [x] G5 service TestMemoryWarnRule (spec's sequence, warn exactly twice; high throughout never) + TestMemoryWarnOpenedAtCritical.
 - [x] G6 service TestMemorySinceAndCriticalEnd: since 4 min back; was_critical_until 14:32 at +29 min, empty at +31.
 - [x] G7 service TestMemorySummary: two initiatives + unassigned = three rows summing to agents_bytes, biggest first.
-- [ ] X0 `go vet ./... && go test ./...` green in the worktree; clean-clone `make test` + `wails build` queued on test-lease.
+- [x] X0 clean clone of `ram-sample`: `XDG_DATA_HOME=$(mktemp -d) make test` exit 0 (go all ok, vitest 22 files / 343 tests), `wails build` exit 0. `x0-make-test.txt`, `x0-wails-build.txt`.
 
 ## Done
-- 2026-10-09: FR-1..FR-4 on `ram-sample` (e4fc0c7, 3e48f60, 4c3cc5b, a24e12c, 4ff5d6b), rebased on main 9332b03; JSON shape and choices in `.wt-notes/rs-build/progress.md`.
+- 2026-10-09: FR-1..FR-4 on `ram-sample` (11e790f, dea2936, ff3d2d1, 29cd12a, 10c206e), rebased on main 8fa9e0e; JSON shape and choices in `.wt-notes/rs-build/progress.md`.
+
+- 2026-10-09: gate met, G1-G7 and X0; branch `ram-sample` head 10c206e, unmerged, for review.
 
 ## Notes
 - 2026-10-09 rs-build: spec FR-1's free formula ("total minus app memory, wired and compressed") reads ~1 GB above Activity Monitor on macOS 26 (4.4 vs 3.35 GB): AM's Memory Used is Physical − Cached Files. Implemented free = free + speculative + file-backed pages (vm_stat), which matched AM within 0.05 GB on three shots. The spec's parenthesis wants amending.
