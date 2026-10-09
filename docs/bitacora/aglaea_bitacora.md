@@ -130,3 +130,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-09 — Deltagos.icon exported (Amendment 6): PNG layers since CoreSVG drops masks; IconServices shows no plate on macOS 26.1 (f9ee762).
 - 2026-10-09 — dm-ui U2/U3: Help mark rests after 4.5 s, hover replays; mark aria-hidden in the lockup (Amendment 7, 8c6249d).
 - 2026-10-09 — aic-ui U1: accepted the .icon's flattened rendition on macOS 11-15; F24 amended (968ce34).
+- 2026-10-09 — ram-ring-amber A1: critical breathes in width 3-4.5 px at full opacity (56f0244).
