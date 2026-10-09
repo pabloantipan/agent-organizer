@@ -292,6 +292,10 @@ moved to a second hue. Orange is close to `--amber-9` (#ffb020), already
 the warning hue (context past 50%), so pressure would join warning, not
 take a new colour; red stays blocked's. Measure the ring against
 wallpapers, and keep the word in the icon's name. Write it when asked.
+Written the same evening as ram-indicator Amendment 2 (7bb03f4): the tone
+ring always on, amber at high and critical everywhere, a 1 px ground keyline.
+The app icon is exported (floating-icon Amendment 5, `inputs/deltagos-mark/
+app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 
 ## Open questions
 
@@ -335,6 +339,9 @@ wallpapers, and keep the word in the icon's name. Write it when asked.
 - Pressing an action that starts a real session (Draft the cell's Open,
   Bring crew up) is out of a review's reach; read the code path and say so.
 
+- **Hand a builder files, not a drawing.** A page that animates the mark
+  is not an icon: an export script with the cuts, slots and grid is what
+  ends the guessing.
 - **Measure every fill's text before naming it.** I wrote "white text" on
   the magenta tone without measuring; it is 3.5:1. Any new fill gets its ink
   measured and a contrast row in the design system in the same commit.
