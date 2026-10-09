@@ -1,12 +1,12 @@
 ---
 title: "The memory indicator: top-bar button and popover, the floating icon's ring and panel line, the notification at critical"
-status: next
+status: now
 repos: [organizer]
 branch: ram-view
 seat: rv-build
 stage: one-window
 updated: 2026-10-09
-next: "sup49 runs it after ram-sample (0103 accepted 2026-10-09)"
+next: "decide: may rv-build place MemoryFloatLine in FloatList.tsx (outside the boundary) for M4's panel line? Then M4 closes and the card goes to review; N1 is Pablo's in /Applications/Deltagos.app"
 depends_on: [ram-sample]
 boundary: ["new top-bar memory component, popover and css (tier-2 tokens)", "the store (popover state, Agents › focus), AgentsView.tsx (focus a row by agent id only)", "floaticon_darwin.m/.h/.go (ring, panel line), new notify_darwin.m/.go and notify_other.go, app.go (post on warn, the click)", "scripts/fixture-home.sh (the fake reading)", "not: Go under internal/, the Deltagos mark (0102)"]
 spec: "docs/specs/ram-indicator.md (FR-5 to FR-7; docs/ux/specs/ram-indicator.md (6d84a12))"
