@@ -39,7 +39,11 @@ and reads no memory at all.
   its agents. `Memory.top` lists the five biggest sessions this machine
   runs, biggest first: session name (else pid), initiative, bytes, and the
   agent's id for `Agents ›`; `Memory.agents_bytes` is all agent sessions
-  together. (Aglaea's O1: footprint, not resident size; resident size
+  together, and `Memory.by_initiative` is every initiative's total and its
+  agent count, unassigned agents as one more row, biggest first (Amendment
+  1, 2026-10-09, the FSE: Pablo asked for "a monitor of how ram is being
+  used by each initiavie, each agent", relayed by Hephaistos; the reading
+  is cheap here, and where it is shown is 0104's). (Aglaea's O1: footprint, not resident size; resident size
   counts shared pages once per process and overstates a tree.)
 - **FR-3** `organizer memory [--json]` prints the same reading once:
   pressure, free of total in GB to one decimal, then the top sessions.
@@ -74,6 +78,7 @@ and reads no memory at all.
 | G1 | 1 | Go test with a fake sysctl / vm_stat reader for levels 1, 2, 4 and a failed read | `normal`, `high`, `critical`; `memory: null` with a reason |
 | G2 | 1, 3 | `organizer memory --json` on the real home vs `sysctl kern.memorystatus_vm_pressure_level` and Activity Monitor's Memory tab read at the same minute | same pressure; free within 0.5 GB of Activity Monitor's total minus used |
 | G3 | 2 | Go test over a fixture `ps` output with an agent, two children and a grandchild, and a fake footprint reader that fails for one child | the agent's `mem_bytes` is the four summed, the failed one by resident size; top ordered biggest first, capped at five |
+| G7 | 2 | Go test: agents under two initiatives and one unassigned | `by_initiative` has three rows whose totals sum to `agents_bytes`, biggest first |
 | G4 | 2, 3 | `organizer memory` on the real home with a crew up | the crew's sessions listed by name with their initiative; each tree's sum within 5% of Activity Monitor's Memory column summed over the same pids |
 | G5 | 4 | Go test, fake clock: normal → critical (warns) → normal 5 min → critical (no) → normal 12 min → critical 25 min after the first (no) → normal 12 min → critical 40 min after the first (warns); high throughout another run | `warn` exactly twice; never at high or recovery |
 | G6 | 1 | Go test: high for 4 min; critical ending at 14:32 | `since` 4 min back; `was_critical_until` 14:32 for 30 min, then empty |
@@ -136,5 +141,5 @@ reading). Not: Go under `internal/`, the mark (0102).
 
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
-| `ram-sample` | G1-G6, X0 | — | false |
+| `ram-sample` | G1-G7, X0 | — | false |
 | `ram-view` | M1-M8, N1, X0 | ram-sample | true |

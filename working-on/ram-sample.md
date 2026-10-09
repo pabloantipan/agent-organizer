@@ -10,7 +10,7 @@ next: "waits on 0103 (accept); then the FSE spawns the task's supervisor"
 depends_on: []
 boundary: ["new internal/memory and its tests", "internal/scan/agents.go (ps columns, footprint, tree sum), model.Agent (mem_bytes)", "internal/service (AgentsView.memory, level times, warn rule), internal/cli (memory command), frontend/wailsjs regenerated", "not: the top bar, the floating icon, any view, posting the notification"]
 spec: "docs/specs/ram-indicator.md (FR-1 to FR-4)"
-gate: "docs/specs/ram-indicator.md Acceptance (ram-sample), rows G1 to G6 and X0"
+gate: "docs/specs/ram-indicator.md Acceptance (ram-sample), rows G1 to G7 and X0"
 ui_review: false
 ---
 
@@ -19,4 +19,4 @@ ui_review: false
 This card is the reading; `ram-view` draws it.
 
 ## Gate
-docs/specs/ram-indicator.md, G1 to G6 and X0.
+docs/specs/ram-indicator.md, G1 to G7 and X0.

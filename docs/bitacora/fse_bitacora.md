@@ -13,6 +13,16 @@ restating it (the discuss skill).
   forecast 1.5-3 h over 2 waves. O1 settled as footprint (proc_pid_rusage);
   O2 (critical magenta) put to Pablo inside 0103. On accept: write the
   supervisor prompt, spawn sup49.
+- **Pablo's three asks** (via Hephaistos, thread 01M4GHM3YT12YSA67HK1DB45M5):
+  initiatives as cards with sleep/wake, awake first in the rail, RAM per
+  initiative and agent. Raised **0104** (scope, recommend A). Found: the
+  rail already folds non-active (paused) initiatives at the bottom (0036,
+  0042), so ask 2 is a rename plus the count. RAM per initiative went into
+  0103 as Amendment 1 (by_initiative, G7). `factory awake` misses camp
+  (maxdepth 3 under ~, camp is at depth 4); told Hephaistos.
+- **float-focus-steal** card cut (launchable, gate S1-S4): Deltagos came
+  front by itself 11:33; candidates in floaticon_darwin.m (orderHere on
+  space-change), not verified.
 - Aglaea drew the Deltagos mark (e1cdce1, floating-icon Amendment 4,
   F17-F19). Gear colours raised as **0102** (proposed, recommend A). The
   mark's build card waits on 0102; Technical notes for it: the native icon

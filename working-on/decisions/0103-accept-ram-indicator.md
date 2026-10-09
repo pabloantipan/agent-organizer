@@ -25,7 +25,9 @@ Two cards, one after the other:
 1. **ram-sample**: every 10 s, with the agents (no daemon, nothing when the
    app is closed), read the OS's memory pressure, free GB, and each agent
    session's memory counted over everything it started; `organizer memory`
-   prints it.
+   prints it. It also totals memory per initiative (your ask of today,
+   "how ram is being used by each initiavie, each agent"); where those
+   totals show is 0104.
 2. **ram-view**: Aglaea's design (`docs/ux/specs/ram-indicator.md`): a quiet
    `▣ 12 GB free` in the top bar, `· high` in magenta, a filled `Memory
    critical` chip; a popover with the five biggest sessions, each `Agents ›`;
