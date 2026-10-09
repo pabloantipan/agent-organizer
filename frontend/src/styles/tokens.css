@@ -73,6 +73,7 @@
   --fg-subtle: var(--plum-10);       /* 4.5:1 on overlay — tertiary text, timestamps */
   --fg-disabled: var(--plum-8);      /* decoration and disabled only, never read text */
   --fg-on-accent: #ffffff;
+  --fg-on-tone: #1a1523;          /* 5.2:1 on --tone: text and glyph on the magenta fill, never white */
 
   /* borders: felt, not seen (Linear); structure comes from spacing first */
   --border-subtle: rgba(255, 255, 255, 0.05);

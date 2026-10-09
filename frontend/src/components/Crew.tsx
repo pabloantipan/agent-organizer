@@ -166,7 +166,7 @@ function SeatRow({ seat, readOnly, confirm, setConfirm, flash, onMessage }: { se
   const health = healthState({ watcher: seat.watcher, deaf: seat.deaf, capped: seat.capped });
   const { opener: killBtn, commit: killCommit } = useConfirmFocus(asking);
   return (
-    <li className={state} data-seat={seat.name} tabIndex={-1}>
+    <li className={state} data-seat={seat.name} tabIndex={-1} aria-label={`${session || seat.session} (${seat.name}, ${stateWord(state)})`}>
       <span className={`a-state ${state}`}><i />{stateWord(state)}</span>
       <span className="a-name"><span className="ident">{seat.name}</span></span>
       {seat.no_persona && (
