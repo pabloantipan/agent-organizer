@@ -74,7 +74,7 @@ Violet 10 is darker than 9 so white stays readable on a hovered button.
 |---|---|---|
 | surfaces | `--bg-sunken` `--bg` `--surface` `--surface-raised` `--surface-overlay` | lighter as they rise; a shadow never marks elevation alone |
 | states | `--surface-hover` `--surface-pressed` `--surface-selected` | selected is a violet tint, not a border |
-| text | `--fg` `--fg-muted` `--fg-subtle` `--fg-disabled` `--fg-on-accent` | four steps (table below) |
+| text | `--fg` `--fg-muted` `--fg-subtle` `--fg-disabled` `--fg-on-accent` `--fg-on-tone` | four steps, plus ink on the two fills (table below) |
 | borders | `--border-subtle` `--border` `--border-strong` `--border-accent` `--focus-ring` | white at 5/9/16%; accent only for selection and focus |
 | accent | `--accent` `--accent-hover` `--accent-muted` `--accent-fg` | fill, hover fill, tint, text |
 | status | `--status-{now,blocked,next,done,review}` and `-bg` | hue for marks and text, tint for backgrounds |
@@ -93,6 +93,7 @@ Violet 10 is darker than 9 so white stays readable on a hovered button.
 | `--accent-fg` on ground | 8.9 | accent-coloured text and links |
 | white on `--accent` | 5.0 | primary button label |
 | white on `--accent-hover` | 5.9 | hovered primary button |
+| `--fg-on-tone` (#1a1523) on `--tone` | 5.2 | text on a magenta fill (the memory-critical chip); **white on `--tone` is 3.5, never text** |
 | now / blocked / next on raised | 4.8 / 4.8 / 6.8 | status words |
 | waiting / ruled-fg on raised | 6.4 / — | decision words; ruled is a fill (3.3), its word uses `--decision-ruled-fg` |
 

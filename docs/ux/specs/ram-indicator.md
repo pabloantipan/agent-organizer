@@ -55,7 +55,7 @@ and no bubble. Needs me stays the one badge (FR-14).
 |---|---|---|
 | normal | `▣ 12 GB free` | `--fg-subtle`, as quiet as the version line |
 | high | `▣ 3.1 GB free · high` | text and glyph in the magenta tone |
-| critical | `▣ Memory critical · 1.2 GB free` | a chip: magenta fill, white text, radius 6 |
+| critical | `▣ Memory critical · 1.2 GB free` | a chip: magenta fill, text and glyph in the ground's ink (`--fg-on-tone`, 5.2:1; white on the tone is 3.5:1 and fails), radius 6 |
 
 - It is a button. Its name is `Memory: high, 3.1 GB free of 32 GB`, and its
   hover title is the same.
@@ -160,6 +160,13 @@ duration would need.
 | M6 | trust that it never stops anything | no control in the popover, ring or notification stops a session |
 | M7 | read it at 1024 | the short form with the word in the name; no horizontal scroll |
 | M8 | use it by keyboard | Tab reaches the button, Enter opens the popover with focus inside, Escape returns focus to the button |
+
+## Amendment 1 (2026-10-09, rv-review c4eafe3)
+
+The critical chip's text is the ground's ink, `--fg-on-tone` (#1a1523 on
+#d946ef, 5.2:1), not white (3.5:1, under 4.5 at 13 px). The fill stays the
+tone. The same holds wherever text sits on a `--tone` fill (the panel's
+memory line at critical).
 
 ## Open questions
 
