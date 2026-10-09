@@ -12,6 +12,7 @@ describe("gb", () => {
     expect(gb(25769803776)).toBe("24");
     expect(gb(1.25 * G)).toBe("1.3");
     expect(gb(0)).toBe("0");
+    expect(gb(20 * 1024 ** 2)).toBe("< 0.1");
   });
 });
 

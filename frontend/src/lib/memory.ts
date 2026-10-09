@@ -31,9 +31,11 @@ export function memoryState(agents: { memory?: MemoryReading | null; memory_reas
 const GiB = 1024 ** 3;
 
 /** Bytes as GB to one decimal, Activity Monitor's GB (2^30, so 24 GB of
- *  hw.memsize reads 24), a trailing .0 dropped: 12, 3.1, 0.4. */
+ *  hw.memsize reads 24), a trailing .0 dropped: 12, 3.1, 0.4; something
+ *  under a twentieth of a GB is `< 0.1`, never a 0 that reads as nothing. */
 export function gb(bytes: number): string {
   const v = Math.round((Math.max(0, bytes) / GiB) * 10) / 10;
+  if (v === 0 && bytes > 0) return "< 0.1";
   return Number.isInteger(v) ? String(v) : v.toFixed(1);
 }
 
