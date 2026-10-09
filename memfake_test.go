@@ -9,31 +9,35 @@ import (
 	"organizer/internal/model"
 )
 
-// The stand-ins answer the real reader as Aglaea's figures, per level, and
-// fail as a failed read; @file follows the file at every sample.
+// The fake reads Aglaea's figures per level and fails as a failed read;
+// @file follows the file at every sample.
 func TestMemoryFake(t *testing.T) {
 	file := filepath.Join(t.TempDir(), "level")
-	t.Setenv("PATH", os.Getenv("PATH"))
 	t.Setenv(memoryFakeEnv, "@"+file)
-	if _, err := memoryFake(); err != nil {
-		t.Fatal(err)
+	r, ok := memoryFake()
+	if !ok {
+		t.Fatal("no fake with the env set")
 	}
 	for _, c := range []struct {
 		level string
 		free  float64
 	}{{"normal", 12}, {"high", 3.1}, {"critical", 1.2}} {
 		os.WriteFile(file, []byte(c.level+"\n"), 0o644)
-		r, err := memory.Read(memory.System{})
+		got, err := memory.Read(r)
 		if err != nil {
 			t.Fatalf("%s: %v", c.level, err)
 		}
-		if r.Pressure != c.level || r.TotalBytes != 32<<30 || gbText(r.FreeBytes) != gbText(uint64(c.free*(1<<30))) {
-			t.Errorf("%s: got %+v", c.level, r)
+		if got.Pressure != c.level || got.TotalBytes != 32<<30 || gbText(got.FreeBytes) != gbText(uint64(c.free*(1<<30))) {
+			t.Errorf("%s: got %+v", c.level, got)
 		}
 	}
 	os.WriteFile(file, []byte("fail"), 0o644)
-	if _, err := memory.Read(memory.System{}); err == nil {
+	if _, err := memory.Read(r); err == nil {
 		t.Error("fail: read succeeded")
+	}
+	t.Setenv(memoryFakeEnv, "")
+	if _, ok := memoryFake(); ok {
+		t.Error("a fake with the env unset")
 	}
 }
 

@@ -42,13 +42,12 @@ func (a *App) startup(ctx context.Context) {
 	}
 	a.svc = svc
 	// The memory reading (docs/specs/ram-indicator.md): a review forces its
-	// numbers only (memfake.go), so since, was_critical_until and the warn
+	// reader only (memfake.go), so since, was_critical_until and the warn
 	// rule run as they do for real; the warning is posted here, Go-side, on
 	// the sample that warns whoever took it (Amendment 4).
-	if dir, err := memoryFake(); err != nil {
-		wruntime.LogErrorf(ctx, "%s: %v; the real reading stands", memoryFakeEnv, err)
-	} else if dir != "" {
-		wruntime.LogInfof(ctx, "memory reading forced by %s=%s (stand-ins in %s)", memoryFakeEnv, os.Getenv(memoryFakeEnv), dir)
+	if r, ok := memoryFake(); ok {
+		svc.SetMemoryReader(r)
+		wruntime.LogInfof(ctx, "memory reading forced by %s=%s", memoryFakeEnv, os.Getenv(memoryFakeEnv))
 	}
 	svc.OnMemoryWarn = a.memoryWarn
 	notifyStart(a)
