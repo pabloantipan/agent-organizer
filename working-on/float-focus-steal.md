@@ -1,12 +1,12 @@
 ---
 title: "Deltagos comes to the front by itself and pulls Pablo off his desktop: find which path activates it, and stop it"
-status: next
+status: now
 repos: [organizer]
 branch: float-focus-steal
 seat: ffs-build
 stage: one-window
 updated: 2026-10-09
-next: "sup50 runs it (0105); first of two"
+next: "ffs-build builds on branch float-focus-steal (sup50 wave 1): prove the cause (S1), then fix"
 depends_on: []
 boundary: ["floaticon_darwin.m and floaticon_darwin.go, and their check scripts", "not: the frontend, the Go service, the mark (0102)"]
 spec: "this card's Spec section"
