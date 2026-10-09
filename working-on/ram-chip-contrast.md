@@ -6,7 +6,7 @@ branch: ram-chip-contrast
 seat: rc-build
 stage: one-window
 updated: 2026-10-09
-next: "sup49 runs it after ram-view merges (same task, 0103)"
+next: "review: ram-chip-contrast, gate met (C1-C3), 56e64a0"
 depends_on: [ram-view]
 boundary: ["frontend/src/styles/tokens.css (one token, --fg-on-tone #1a1523)", "the memory chip's and the float list's memory-line css, the memory button's selector", "the memory popover component (the was-critical line, aria-labels)", "the Agents landing's focus target (aria-label only)", "not: Go, native code, any other use of --tone"]
 spec: "docs/ux/specs/ram-indicator.md Amendment 1 (229506e); docs/design-system.md contrast row"
@@ -20,12 +20,15 @@ Aglaea's ruling on her own design (229506e): text and glyph on the tone fill
 take `--fg-on-tone` #1a1523, 5.2:1 on #d946ef; white never sits on the tone.
 
 ## Gate
-- [ ] C1 the top bar's critical chip (fixture `--memory critical`, review build): text and ▣ glyph computed colour #1a1523 on #d946ef, contrast >= 4.5:1 (computed from the WKWebView's computed styles, logged)
-- [ ] C2 the floating panel's memory line at critical: the same
+- [x] C1 the top bar's critical chip (fixture `--memory critical`, review build): text and ▣ glyph computed colour #1a1523 on #d946ef, contrast >= 4.5:1 (computed from the WKWebView's computed styles, logged) — text, stroke and color #1a1523 on #d946ef, 5.17:1: `.wt-notes/rc-build/c1-c2.txt`
+- [x] C2 the floating panel's memory line at critical: the same — #1a1523 on #d946ef, 5.17:1: `.wt-notes/rc-build/c1-c2.txt`
 - [ ] C4 rv-ui U1: the top bar's normal reading computes `--fg-subtle`, not `--fg-muted` (the selector outranks `button.ghost`)
 - [ ] C5 rv-ui U3: the crew-seat landing focuses an element with an accessible name (aria-label naming the session)
 - [ ] C6 `Was critical until HH:MM` shows only at normal after critical, never at high (vitest over the popover's state helper)
-- [ ] C3 `cd frontend && npm test && npm run build`, `wails build` pass
+- [x] C3 `cd frontend && npm test && npm run build`, `wails build` pass — vitest 362/362, build and wails build exit 0: `.wt-notes/rc-build/c3-*.log`
 
 ## Notes
 - 2026-10-09 the FSE: C4-C6 added from rv-ui's findings on ram-view (sup49's done report); same files, so this card, not a new one (0108).
+
+## Done
+- 2026-10-09 rc-build: `--fg-on-tone` #1a1523 in tokens.css; chip text, ▣ glyph and the float panel's critical line use it (56e64a0, branch ram-chip-contrast, unmerged, on main). Measured 5.17:1 in the debug review build's Web Inspector; the panel line opened by dispatching `floaticon:list` in the webview.
