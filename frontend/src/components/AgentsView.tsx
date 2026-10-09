@@ -11,7 +11,7 @@ import { CleanButton } from "./Retire";
 import { Usage as fetchUsage } from "../../wailsjs/go/main/App";
 import { agentsWeekLine } from "../lib/usage";
 import { agentTarget } from "../lib/agentFocus";
-import { groupMemory, sleepyWord } from "../lib/initiatives";
+import { groupMemory } from "../lib/initiatives";
 
 const REFRESH_MS = 10_000;
 
@@ -75,7 +75,7 @@ export function AgentsView() {
         <span className="spacer" />
         {sel?.cell && selQ && selQ.total > 0 && <button className="tiny-btn ghost hot" onClick={() => openSlack(sel.id, null)} title="escalated to you, or asked of you: threads and cards">{selQ.total} need you</button>}
         {sel && !readOnly && <NewAgent initiativeId={sel.id} />}
-        {readOnly ? <span className="meta">{sleepyWord(readOnly)}: read-only</span> : <CleanButton />}
+        {readOnly ? <span className="meta">{readOnly}: read-only</span> : <CleanButton />}
       </div>
       {groups.length === 0 && <div className="empty">No agents{selectedInitiative ? " in this initiative" : ""}.</div>}
       {groups.map((g) => {
