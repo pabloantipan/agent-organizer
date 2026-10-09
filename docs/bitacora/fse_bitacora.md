@@ -6,7 +6,7 @@ restating it (the discuss skill).
 
 ## HAND-OFF — 2026-10-09, RAM indicator (0101) spec drafted
 
-- **Last SHA seen:** 4473163. Next supervisor: sup49.
+- **Last SHA seen:** 0f80bdd. Next supervisor: sup49.
 - **0101 ruled**; Aglaea's design spec landed (6d84a12, M1-M8). Build spec
   `docs/specs/ram-indicator.md` amended to it; cards `ram-sample`,
   `ram-view` cut (both pass `run --print`); accept **0103** raised with
@@ -28,6 +28,7 @@ restating it (the discuss skill).
   sup49's ram-view, which touches it too). Next supervisor: sup50.
 - **0107 raised**: ram-sample G4 contradicted FR-3 (top five vs every crew session); ruled A (4473163), FR-3 amended, sup49 told.
 - **0108 ruled in words** (Pablo: "this is not working"): no screen-capture gate rows; one record per small UI ask; I amend gate contradictions myself and report after.
+- 16:0x: ram-view merged 0f80bdd (N1 is Pablo's after make install; ram-chip-contrast left with sup49). **sup50** (window 8383, float-focus-steal then deltagos-mark) and **sup51** (window 8385, initiatives-sleep then initiatives-view) spawned, identities checked. Next supervisor: sup52. Prompts carry the prelude workaround, 0108 and the forecast-as-deadline rule.
 - RAM task overrun (3 h 14 min at 15:2x vs 1.5-3 h). sup49: ram-sample verdict ~15:50; ram-view 2-3 h more (N1 may need Pablo). Re-forecast total ~5.5-6.5 h. Causes: deaf seats (~1 h), 0107, 0108.
 - **Overruns unnoticed** (Pablo: "if we forecast 40min for a tast and it's run 80min ... somthing is going wrong!"): relayed [for hephaistos], thread 01M4GTXEHBBVMB3W8945PNN6GV, with the run-record evidence and a candidate (forecast as deadline; post at the band top, Needs me at 2x). Until ruled, I check a running task's card commits against its forecast at each wake.
 - **Seats launched deaf:** rs-build and rs-review run without AGENT_NAME/DISCUSS_TOKEN (tokens exist); rs-review's 1:17 PM fail post got 401 and the re-review sat idle. Told sup49. Cause (sup49): probe did not copy the seats' preludes into ~/.local/state/probe; seats ran deaf and not lean. Relayed [for hephaistos]; carded as agent-slack seat-identity (Pablo "do"), building. Until it merges, every supervisor prompt says: place the prelude in ~/.local/state/probe yourself and check the env after launch. Repetition: sup2 2026-09-27.

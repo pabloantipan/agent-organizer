@@ -6,7 +6,7 @@ branch: float-focus-steal
 seat: ffs-build
 stage: one-window
 updated: 2026-10-09
-next: "0105 accepted 2026-10-09; the FSE spawns sup50 when ram-view lands in done/ (first of two)"
+next: "sup50 runs it (0105); first of two"
 depends_on: []
 boundary: ["floaticon_darwin.m and floaticon_darwin.go, and their check scripts", "not: the frontend, the Go service, the mark (0102)"]
 spec: "this card's Spec section"
@@ -44,3 +44,6 @@ orders the main window front or activates the app.
 - [ ] S3 the floating icon's existing checks (F-rows of floating-icon-2)
   still pass
 - [ ] S4 `make test`, `wails build` pass
+
+## Notes
+- 2026-10-09: supervisor sup50 (window 8383), spawned by the FSE.
