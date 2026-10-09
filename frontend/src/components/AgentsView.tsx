@@ -11,6 +11,7 @@ import { CleanButton } from "./Retire";
 import { Usage as fetchUsage } from "../../wailsjs/go/main/App";
 import { agentsWeekLine } from "../lib/usage";
 import { agentTarget } from "../lib/agentFocus";
+import { groupMemory, sleepyWord } from "../lib/initiatives";
 
 const REFRESH_MS = 10_000;
 
@@ -66,6 +67,7 @@ export function AgentsView() {
         {!selectedInitiative && <h1>Agents</h1>}
         <span className="meta">
           {selectedInitiative ? (sel ? `${countsOf(sel)} · ` : "") : `${totals.n} agents, ${totals.live} live, ${totals.working} working · `}
+          {sel && groupMemory(view, sel.id) && <span className="num">{groupMemory(view, sel.id)} · </span>}
           sampled {since(view.sampled_at)} · every {REFRESH_MS / 1000}s
         </span>
         {sel && <CellStateLz cell={sel.cell} missing={missingPersonas(sel.crew)} />}
@@ -73,7 +75,7 @@ export function AgentsView() {
         <span className="spacer" />
         {sel?.cell && selQ && selQ.total > 0 && <button className="tiny-btn ghost hot" onClick={() => openSlack(sel.id, null)} title="escalated to you, or asked of you: threads and cards">{selQ.total} need you</button>}
         {sel && !readOnly && <NewAgent initiativeId={sel.id} />}
-        {readOnly ? <span className="meta">{readOnly}: read-only</span> : <CleanButton />}
+        {readOnly ? <span className="meta">{sleepyWord(readOnly)}: read-only</span> : <CleanButton />}
       </div>
       {groups.length === 0 && <div className="empty">No agents{selectedInitiative ? " in this initiative" : ""}.</div>}
       {groups.map((g) => {
@@ -88,6 +90,7 @@ export function AgentsView() {
               <span className="ident">{g.id}</span>
               {g.client && <span className="badge client">{g.client}</span>}
               <span className="meta">{countsOf(g)}</span>
+              {groupMemory(view, g.id) && <span className="meta num a-group-mem">{groupMemory(view, g.id)}</span>}
               <CellStateLz cell={g.cell} missing={missingPersonas(g.crew)} />
             </span>
             <span className="spacer" />
@@ -110,6 +113,7 @@ export function AgentsView() {
             <Bot size={14} />
             <span className="ident">outside every initiative</span>
             <span className="meta">{view.unassigned.length}</span>
+            {groupMemory(view, "") && <span className="meta num a-group-mem">{groupMemory(view, "")}</span>}
           </header>
           <AgentList agents={view.unassigned} />
         </section>

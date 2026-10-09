@@ -5,6 +5,10 @@ import { shortHome } from "../lib";
 import { ContextBar, WatcherBadge } from "./ContextBar";
 import { HEALTH, healthState, healthTitle, type HealthState } from "../lib/health";
 import { stateWord } from "../lib/stateWords";
+import { agentMemory } from "../lib/initiatives";
+import { gb } from "../lib/memory";
+import { useBoard } from "../stores/board.store";
+import "../styles/initiatives.css";
 
 /** The word a row shows for its state, which its accessible name reads too
  *  (leftovers-11 FR-3, WCAG 2.5.3): a running agent shows and is named idle. */
@@ -45,6 +49,7 @@ export function AgentList({ agents, root, local = true, readOnly = false, onMess
                 : <WatcherBadge watcher={a.watcher} deaf={a.deaf} capped={a.capped} undelivered={a.undelivered} />}
               <span className={`badge kind ${a.kind}`}>{a.kind}</span>
               <ContextBar c={a.context} />
+              <MemoryCell a={a} />
               <span className="meta mono a-proc">{a.pid > 0 ? `${a.tty} · up ${a.uptime}` : a.created ? `session ${a.created}` : "layout only"}</span>
               <span className="meta mono a-dir" title={a.dir}>{sub}</span>
               {!readOnly && <span className="a-actions">
@@ -88,12 +93,23 @@ export function AgentList({ agents, root, local = true, readOnly = false, onMess
   );
 }
 
+/** The row's Memory (initiatives-view, Agents: memory on every row): its
+ *  footprint, tabular and right-aligned in neutral ink, or `—` with why.
+ *  It never folds; it does not re-sort rows. A crew seat's row shows the
+ *  same cell. */
+export function MemoryCell({ a }: { a: { pid: number; state: string; mem_bytes?: number } | null | undefined }) {
+  const agents = useBoard((s) => s.agents);
+  const m = a ? agentMemory(a, agents) : { text: "—", title: "not running" };
+  return <span className="a-mem num" title={m.title} aria-label={`Memory ${m.text === "—" ? `unknown, ${m.title}` : m.text}`}>{m.text}</span>;
+}
+
 /** A row's accessible name, what a landing on it reads first (a role's
  *  session line, transversal-roles A3): its session, the state word the row
  *  shows (leftovers-11 FR-3), and context. */
 function rowName(a: Agent): string {
   const ctx = a.context ? `, ${Math.round(a.context.used_percent)}% context` : "";
-  return `${a.session || a.short || a.name}, ${stateLabel(a)}${ctx}`;
+  const mem = a.pid > 0 && a.mem_bytes > 0 ? `, ${gb(a.mem_bytes)} GB memory` : "";
+  return `${a.session || a.short || a.name}, ${stateLabel(a)}${ctx}${mem}`;
 }
 
 /** Why a row's health word is what it is and what to do about it, from the
