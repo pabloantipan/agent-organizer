@@ -46,7 +46,12 @@ and reads no memory at all.
   is cheap here, and where it is shown is 0104's). (Aglaea's O1: footprint, not resident size; resident size
   counts shared pages once per process and overstates a tree.)
 - **FR-3** `organizer memory [--json]` prints the same reading once:
-  pressure, free of total in GB to one decimal, then the top sessions.
+  pressure, free of total in GB to one decimal, then every initiative
+  biggest first with its total, and under it every one of its agent
+  sessions by name with its memory; unassigned sessions last. `--json`
+  carries the same, plus the feed's top five. (Amendment 2, 2026-10-09,
+  0107 A: the review found G4 asked for every crew session while FR-3 said
+  the top five; the top five stays the feed's, for the popover.)
 - **FR-4** The service decides when to warn: on an entry into `critical`,
   only when the pressure has been out of critical for at least 10 minutes
   before it and the last warning is at least 30 minutes old (Aglaea §3; the

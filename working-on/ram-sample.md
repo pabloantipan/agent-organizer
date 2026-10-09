@@ -52,3 +52,4 @@ Verdict: **fail**. Commit reviewed: `10c206e3f8d2a24eb8c1bf9ee49a3c22d47862f2` (
 
 Reviewer: rs-review, 2026-10-09.
 - 2026-10-09: G4 fail is a spec contradiction (FR-3 top five vs G4 every crew session); 0107 asks Pablo which way. rs-build waits on it for G4 only.
+- 2026-10-09: 0107 ruled A; FR-3 amended (every session grouped by initiative). G4 stands as written; re-review G4 only.
