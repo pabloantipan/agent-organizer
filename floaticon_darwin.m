@@ -28,7 +28,7 @@ extern void floatIconUnavailable(char *reason);
 
 // The icon's size is per display (Amendment 1, F12): 56 pt, 72 or 88 by the
 // display's visible width. Everything drawn scales by size / 56: the radius,
-// the bars, the shadows and the panel's shadow margin. The inset, the first
+// the mark, the shadows and the panel's shadow margin. The inset, the first
 // place, the drag threshold and the list stay in points.
 static const CGFloat kBase = 56;      // the size the layers are drawn for
 static const CGFloat kBasePad = 40;   // room for the dragging shadow at 56, 0 16px 40px
@@ -50,8 +50,10 @@ static const char *stateName[] = {"home", "listing", "compacted", "returning"};
 static NSPanel *panel;
 static CALayer *group;                // the tile and its shadows; scaled as one
 static CALayer *shadowNear, *shadowFar;
-static CALayer *tileLayer;           // the rounded square the bars sit on
-static NSArray<CALayer *> *bars;
+static CALayer *tileLayer;           // the rounded square the mark sits on
+static CALayer *markLayer;           // the mark, in the drawing's 100-unit space (y down)
+static CAShapeLayer *dLayer;         // the D, its gaps a dash pattern
+static CAShapeLayer *bigGear, *smallGear;
 static CAShapeLayer *ring;            // the memory ring outside the tile (ram-indicator §2)
 static NSString *memLevel = @"normal"; // the memory reading's level, for the ring and the name
 static NSView *iconViewForRing(void);
@@ -270,27 +272,143 @@ static void setLook(Look k, double dur) {
     [CATransaction commit];
 }
 
-// The bars breathe (§1): scale.y 0.82 to 1.0 and back over 2.4 s, staggered
-// 0.3 s; under Reduce motion they stand still at full height.
+// ---------- the mark (floating-icon Amendment 4, 0102) ----------
+
+// Geometry and constants from docs/ux/inputs/deltagos-mark/deltagos-mark-handoff.md,
+// unchanged: the gears mesh only with these numbers. The icon keeps the gears
+// turning and the gaps travelling at a constant speed; the points, the notches
+// and the varying speed are the Help's (about 2 px at 56 pt).
+static const CGFloat kMarkSpeed = 24;       // SPEED, units/s
+static const CGFloat kMarkShare = 0.74;     // the mark's width on the tile
+static const CGFloat kMarkStroke = 9;       // HALF 4.5 each side
+typedef struct { CGFloat cx, cy, teeth, rOut, rIn, hole, phase; } Gear;
+static const Gear kGear = {66.8, 64.8, 10, 25.5, 20.83, 7.65, 27};
+#define kD45 (36.4 / M_SQRT2)
+static const Gear kGear2 = {66.8 - kD45, 64.8 - kD45, 5, 13.9, 9.25, 3.5, 27};
+// The still frame's dash (travel 0, every gap at its longest, GAP 5.25 at
+// SPACING 13), as the exported app icon draws it; the D is 177.05 long.
+static const CGFloat kMarkDash[6] = {7.75, 5.25, 7.75, 5.25, 145.80, 5.25};
+static const CGFloat kMarkLength = 177.05;
+
+// M27 30 Q27 24 33 24 L48 24 C68 24 77 37 77 50 C77 63 68 76 48 76 L33 76 Q27 76 27 70 Z
+static CGPathRef markD(void) {
+    CGMutablePathRef p = CGPathCreateMutable();
+    CGPathMoveToPoint(p, NULL, 27, 30);
+    CGPathAddQuadCurveToPoint(p, NULL, 27, 24, 33, 24);
+    CGPathAddLineToPoint(p, NULL, 48, 24);
+    CGPathAddCurveToPoint(p, NULL, 68, 24, 77, 37, 77, 50);
+    CGPathAddCurveToPoint(p, NULL, 77, 63, 68, 76, 48, 76);
+    CGPathAddLineToPoint(p, NULL, 33, 76);
+    CGPathAddQuadCurveToPoint(p, NULL, 27, 76, 27, 70);
+    CGPathCloseSubpath(p);
+    return p;
+}
+
+// gearPath of the drawing: root half-width 0.33 of a step, tip 0.2, a hole
+// filled even-odd.
+static CGPathRef gearPath(Gear g) {
+    CGMutablePathRef p = CGPathCreateMutable();
+    int n = (int)g.teeth;
+    CGFloat step = 2 * M_PI / n, ht = step * 0.33, tt = step * 0.2, ph = g.phase * M_PI / 180;
+    for (int k = 0; k < n; k++) {
+        CGFloat a = k * step - M_PI / 2 + ph;
+        CGPoint q[4] = {{g.cx + g.rIn * cos(a - ht), g.cy + g.rIn * sin(a - ht)}, {g.cx + g.rOut * cos(a - tt), g.cy + g.rOut * sin(a - tt)},
+                        {g.cx + g.rOut * cos(a + tt), g.cy + g.rOut * sin(a + tt)}, {g.cx + g.rIn * cos(a + ht), g.cy + g.rIn * sin(a + ht)}};
+        if (k == 0) CGPathMoveToPoint(p, NULL, q[0].x, q[0].y);
+        else CGPathAddLineToPoint(p, NULL, q[0].x, q[0].y);
+        for (int j = 1; j < 4; j++) CGPathAddLineToPoint(p, NULL, q[j].x, q[j].y);
+    }
+    CGPathCloseSubpath(p);
+    CGPathAddEllipseInRect(p, NULL, CGRectMake(g.cx - g.hole, g.cy - g.hole, 2 * g.hole, 2 * g.hole));
+    return p;
+}
+
+static CAShapeLayer *gearLayer(Gear g, unsigned color) {
+    CAShapeLayer *l = [CAShapeLayer layer];
+    CGPathRef p = gearPath(g);
+    l.path = p;
+    CGPathRelease(p);
+    l.fillRule = kCAFillRuleEvenOdd;
+    l.fillColor = [hex(color) CGColor];
+    l.bounds = CGRectMake(0, 0, 100, 100);
+    l.anchorPoint = CGPointMake(g.cx / 100, g.cy / 100); // turns about its centre
+    l.position = CGPointMake(g.cx, g.cy);
+    return l;
+}
+
+// The mark's layers, in the drawing's units: the gears behind, clipped to the
+// D's silhouette (the path filled and stroked 9), then the D stroked 9 with a
+// butt cap and round joins. markLayer flips y, so the drawing's coordinates
+// and its rotation signs (positive turns clockwise) hold as written.
+static void buildMark(void) {
+    markLayer = [CALayer layer];
+    markLayer.bounds = CGRectMake(20, 17, 64, 66); // the drawing's viewBox
+    CGPathRef d = markD();
+    CALayer *gears = [CALayer layer];
+    gears.frame = CGRectMake(0, 0, 100, 100);
+    CAShapeLayer *inside = [CAShapeLayer layer];
+    inside.frame = CGRectMake(0, 0, 100, 100);
+    inside.path = d;
+    inside.fillColor = inside.strokeColor = CGColorGetConstantColor(kCGColorWhite);
+    inside.lineWidth = kMarkStroke;
+    inside.lineJoin = kCALineJoinRound;
+    gears.mask = inside;
+    bigGear = gearLayer(kGear, 0xd946ef);    // --magenta-9 (0102 A)
+    smallGear = gearLayer(kGear2, 0xa9a0ff); // --periwinkle-9
+    [gears addSublayer:bigGear];
+    [gears addSublayer:smallGear];
+    [markLayer addSublayer:gears];
+    dLayer = [CAShapeLayer layer];
+    dLayer.frame = CGRectMake(0, 0, 100, 100);
+    dLayer.path = d;
+    dLayer.fillColor = nil;
+    dLayer.strokeColor = [hex(0x8a3ffc) CGColor]; // --accent
+    dLayer.lineWidth = kMarkStroke;
+    dLayer.lineJoin = kCALineJoinRound;
+    dLayer.lineCap = kCALineCapButt;
+    NSMutableArray *dash = [NSMutableArray array];
+    for (int i = 0; i < 6; i++) [dash addObject:@(kMarkDash[i])];
+    dLayer.lineDashPattern = dash;
+    dLayer.lineDashPhase = 0; // travel 0, the still frame
+    [markLayer addSublayer:dLayer];
+    CGPathRelease(d);
+    [tileLayer addSublayer:markLayer];
+}
+
+// The mark on the tile: 74% of its width, centred (the drawing's tile).
+static void layoutMark(void) {
+    CGFloat s = tileSz * kMarkShare / 64;
+    markLayer.position = CGPointMake(tileSz / 2, tileSz / 2);
+    markLayer.transform = CATransform3DMakeScale(s, -s, 1);
+}
+
+static CABasicAnimation *forever(NSString *key, CGFloat to, CFTimeInterval dur) {
+    CABasicAnimation *a = [CABasicAnimation animationWithKeyPath:key];
+    a.fromValue = @0;
+    a.toValue = @(to);
+    a.duration = dur;
+    a.repeatCount = HUGE_VALF;
+    a.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
+    return a;
+}
+
+// The mark's motion, decorative (0088), in place of the bars' breathing: the
+// gaps travel round the D at SPEED (the dash phase goes back one D length per
+// lap, as the drawing's dashoffset = -travel), the big gear turns at
+// SPEED / rOut, clockwise, the small one twice as fast the other way
+// (teeth 10 to 5). Under Reduce motion, the still frame: travel 0.
 static void breathe(void) {
     BOOL still = reduceMotion();
-    CFTimeInterval t0 = CACurrentMediaTime();
-    for (NSUInteger i = 0; i < [bars count]; i++) {
-        CALayer *bar = bars[i];
-        [bar removeAnimationForKey:@"breathe"];
-        if (still) continue;
-        CABasicAnimation *a = [CABasicAnimation animationWithKeyPath:@"transform.scale.y"];
-        a.fromValue = @0.82;
-        a.toValue = @1.0;
-        a.duration = 1.2;
-        a.autoreverses = YES;
-        a.repeatCount = HUGE_VALF;
-        a.beginTime = t0 + i * 0.3;
-        a.fillMode = kCAFillModeBackwards;
-        a.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-        [bar addAnimation:a forKey:@"breathe"];
+    for (CALayer *l in @[ dLayer, bigGear, smallGear ]) [l removeAnimationForKey:@"breathe"];
+    if (!still) {
+        CFTimeInterval turn = 2 * M_PI * kGear.rOut / kMarkSpeed; // 6.68 s
+        [dLayer addAnimation:forever(@"lineDashPhase", -kMarkLength, kMarkLength / kMarkSpeed) forKey:@"breathe"];
+        [bigGear addAnimation:forever(@"transform.rotation.z", 2 * M_PI, turn) forKey:@"breathe"];
+        [smallGear addAnimation:forever(@"transform.rotation.z", -2 * M_PI, turn * kGear2.teeth / kGear.teeth) forKey:@"breathe"];
     }
-    flog(@"breathe: %@", still ? @"still (reduce motion)" : @"on");
+    flog(@"breathe: %@", still ? @"still (reduce motion): the mark's still frame, travel 0, gears at rest"
+                               : [NSString stringWithFormat:@"on: the mark's gaps travel %.0f units/s (a lap %.2f s), big gear a turn in %.2f s clockwise, small in %.2f s the other way",
+                                                            kMarkSpeed, kMarkLength / kMarkSpeed, 2 * M_PI * kGear.rOut / kMarkSpeed, M_PI * kGear.rOut / kMarkSpeed]);
 }
 
 // ---------- memory: the ring (docs/ux/specs/ram-indicator.md §2) ----------
@@ -869,10 +987,9 @@ static void shadowPath(CALayer *l) {
 }
 
 // Lays the layers out for tileSz: the tile, its radius a quarter of it, the
-// bars and the shadows by tileSz / 56. Bounds and position, not frame, since
+// mark and the shadows by tileSz / 56. Bounds and position, not frame, since
 // the group carries the look's scale.
 static void layoutLayers(void) {
-    CGFloat k = tileSz / kBase;
     CGRect inner = CGRectMake(0, 0, tileSz, tileSz);
     [CATransaction begin];
     [CATransaction setDisableActions:YES];
@@ -884,15 +1001,7 @@ static void layoutLayers(void) {
     }
     tileLayer.frame = inner;
     tileLayer.cornerRadius = tileSz / 4;
-    // Three bars, the app icon's mark, drawn at 56 and scaled.
-    CGFloat heights[3] = {30, 20, 25};
-    CGFloat bw = 8 * k, gap = 5 * k, x0 = (tileSz - (3 * bw + 2 * gap)) / 2, base = 13 * k;
-    for (NSUInteger i = 0; i < [bars count]; i++) {
-        CALayer *bar = bars[i];
-        bar.bounds = CGRectMake(0, 0, bw, heights[i] * k);
-        bar.position = CGPointMake(x0 + i * (bw + gap) + bw / 2, base);
-        bar.cornerRadius = 2 * k;
-    }
+    layoutMark();
     if (ring) layoutRing();
     [CATransaction commit];
 }
@@ -961,17 +1070,7 @@ static void build(void) {
     [group addSublayer:tileLayer];
     [v.layer addSublayer:group];
 
-    // Three bars, the app icon's mark: now, blocked and next hues.
-    unsigned hues[3] = {0xb06cff, 0xff4d63, 0xa9a0ff};
-    NSMutableArray *bs = [NSMutableArray array];
-    for (int i = 0; i < 3; i++) {
-        CALayer *bar = [CALayer layer];
-        bar.anchorPoint = CGPointMake(0.5, 0);
-        bar.backgroundColor = [hex(hues[i]) CGColor];
-        [tileLayer addSublayer:bar];
-        [bs addObject:bar];
-    }
-    bars = bs;
+    buildMark();
     layoutLayers();
     [panel setContentView:v];
     iconView = v;
@@ -1123,6 +1222,15 @@ void FloatIconStart(const char *logArg, const char *placeFile) {
         }
         flog(@"start: main=%@ min=%@ reduceMotion=%d ignoresMouse=%d icon window %ld", NSStringFromRect([mainWin frame]), NSStringFromSize(appMinSize), reduceMotion(), [panel ignoresMouseEvents], (long)[panel windowNumber]);
         update(@"start", YES);
+        // A check's stand-in for another desktop, only with FLOAT_LOG:
+        // FLOAT_SHOW_ICON=1 shows the icon here at start, so its window can
+        // be shot (screencapture -l) without moving between desktops. The
+        // next desktop change decides again.
+        const char *show = getenv("FLOAT_SHOW_ICON");
+        if (logFile && show && strcmp(show, "1") == 0 && ![panel isVisible]) {
+            showIcon();
+            flog(@"FLOAT_SHOW_ICON: icon shown on the home desktop for a check");
+        }
     });
 }
 

@@ -1,0 +1,21 @@
+/* The Deltagos mark (DeltagosMark.tsx; floating-icon Amendment 4, 0102):
+   one colour per form, the D in the accent (a fill), the big gear the
+   magenta tone, the small gear periwinkle. Tier-2 tokens where they exist. */
+.dmark { display: block; flex: none; overflow: visible; }
+.dmark-d { stroke: var(--accent); }
+.dmark-tips { fill: var(--accent); }
+.dmark-big { fill: var(--magenta-9); }
+.dmark-small { fill: var(--periwinkle-9); }
+
+/* The lockup: the mark, the wordmark in Manrope 800 and the subtitle. 800 is
+   the wordmark's alone (Amendment 4's colour table); the UI stays at 700 and
+   under. */
+.dmark-lockup { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+.dmark-words { display: flex; flex-direction: column; gap: var(--space-0-5); min-width: 0; }
+.dmark-wordmark {
+  margin: 0; font-weight: 800; font-size: var(--font-size-3xl); line-height: var(--line-3xl);
+  letter-spacing: -0.02em; color: var(--fg);
+}
+.dmark-subtitle { margin: 0; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); }
+/* In the Help's header, a hairline between the lockup and the Help's title. */
+.help-head .dmark-lockup { padding-right: var(--space-3); border-right: 1px solid var(--border-subtle); }
