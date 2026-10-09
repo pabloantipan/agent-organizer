@@ -123,7 +123,8 @@ store (the popover's open state, `Agents ›` focus), `AgentsView.tsx` (focus
 a row by agent id only), `floaticon_darwin.m/.h/.go` (the ring and the
 panel's line), a new `notify_darwin.m/.go` and `notify_other.go`, `app.go`
 (posting on `warn`, the click), `scripts/fixture-home.sh` (the fake
-reading). Not: Go under `internal/`, the mark (0102).
+reading). Plus `Service.SetMemoryReader` in `internal/service/memory.go` and
+its test, so the fake reading reaches the service (sup49, 796fb5f). Not: Go under `internal/`, the mark (0102).
 
 ## No-gos
 
