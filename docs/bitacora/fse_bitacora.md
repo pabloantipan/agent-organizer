@@ -6,7 +6,7 @@ restating it (the discuss skill).
 
 ## HAND-OFF — 2026-10-09, RAM indicator (0101) spec drafted
 
-- **Last SHA seen:** 01fd2b3. Next supervisor: sup49.
+- **Last SHA seen:** e1cdce1. Next supervisor: sup49.
 - **0101 ruled** (2026-10-07, lodestar): pressure + free GB + biggest
   agents, top bar and floating icon, this Mac, notify on critical. Build
   spec `docs/specs/ram-indicator.md` drafted, proposed: `ram-sample` (Go)
@@ -14,7 +14,11 @@ restating it (the discuss skill).
   thread 01M4CK6VQ11WY8YJW9YWQ4C63T and undelivered: her seat lost its
   identity on resume (her bitácora, 2026-10-09). No cards cut, no accept
   record yet: both cards launch under one record once her rows exist.
-- Aglaea does the Deltagos mark first (it shapes how the icon shows RAM).
+- Aglaea drew the Deltagos mark (e1cdce1, floating-icon Amendment 4,
+  F17-F19). Gear colours raised as **0102** (proposed, recommend A). The
+  mark's build card waits on 0102; Technical notes for it: the native icon
+  keeps gears turning and constant-speed lineDashPhase, may drop points,
+  notches and varying speed at 56 pt. She draws the RAM states next.
 - Still pending from before: leftovers-14 accept record; reinstall.
 
 ## HAND-OFF — 2026-10-06 (late night), roadmap-as-a-plan landed
