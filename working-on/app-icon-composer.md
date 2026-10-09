@@ -17,8 +17,9 @@ ui_review: true
 ## Spec
 deltagos-mark shipped the mark as `iconfile.icns` (floating-icon Amendment 5).
 macOS 26 draws any `.icns`-only app on its own light-grey plate: dm-build's
-IconServices renders show it at 16 and 32 pt and as a light plate around the
-dark tile from 128 pt (`.wt-notes/dm-build/f20-f21-iconservices.txt`). Aglaea
+IconServices renders show it at 16 and 32 pt (Finder lists and sidebar), while
+128 pt and up render clean (dm-ui's UI review U1, 5523e32;
+`.wt-notes/dm-ui/f20-f21-iconservices.txt`). Aglaea
 named this as a rabbit hole; Icon Composer's `.icon` (or an asset-catalog
 app icon) is the format macOS 26 draws without a plate. Requires: Aglaea's
 `.icon` export; how Wails v2.15 bundles it (an `Assets.car` via `actool`
