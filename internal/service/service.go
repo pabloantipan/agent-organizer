@@ -49,6 +49,9 @@ type Service struct {
 	mem       memTracker
 	memory    *model.Memory
 	memReason string
+	// OnMemoryWarn, when set, gets the reading of every sample that warns
+	// (FR-4), whichever caller took it, after the service lock is released.
+	OnMemoryWarn func(model.Memory)
 
 	Auth *auth.Manager
 	Lock *lock.Lock
@@ -460,6 +463,8 @@ type AgentsView struct {
 // RefreshAgents re-samples processes and sessions only (no git, no card
 // parsing), regroups them onto the cached local snapshot, and returns the view.
 func (s *Service) RefreshAgents() AgentsView {
+	var warned *model.Memory
+	defer func() { s.memoryWarned(warned) }()
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	opts := s.agentOptions()
@@ -475,8 +480,12 @@ func (s *Service) RefreshAgents() AgentsView {
 	_ = cache.Save(s.state)
 	v := s.agentsViewLocked()
 	// warn is true on the one sample that warns; a view built later from the
-	// same reading must not warn again.
+	// same reading must not warn again. The hook gets it whoever called.
 	if s.memory != nil {
+		if s.memory.Warn {
+			m := *s.memory
+			warned = &m
+		}
 		s.memory.Warn = false
 	}
 	return v

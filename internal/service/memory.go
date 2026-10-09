@@ -76,6 +76,14 @@ func (s *Service) sampleMemoryLocked(inits []model.ScannedInitiative, unassigned
 	return m, ""
 }
 
+// memoryWarned hands a reading that warns to OnMemoryWarn. Callers run it
+// after releasing s.mu, so the hook may call back into the service.
+func (s *Service) memoryWarned(m *model.Memory) {
+	if m != nil && s.OnMemoryWarn != nil {
+		s.OnMemoryWarn(*m)
+	}
+}
+
 // memorySummary is the feed's cut: the five biggest sessions, agents
 // together, and each initiative.
 func memorySummary(inits []model.ScannedInitiative, unassigned []model.Agent) ([]model.MemorySession, uint64, []model.MemoryInitiative) {
@@ -140,6 +148,8 @@ type MemoryReport struct {
 // Memory reads this Mac once for `organizer memory`: processes and sessions
 // only, no git, and nothing written (no cache, no statusline records).
 func (s *Service) Memory() MemoryReport {
+	var warned *model.Memory
+	defer func() { s.memoryWarned(warned) }()
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	o := s.scanOptions(false)
@@ -149,6 +159,10 @@ func (s *Service) Memory() MemoryReport {
 	r := MemoryReport{Memory: m, Reason: why, Sessions: []model.MemorySession{}}
 	if m != nil {
 		r.Sessions, _, _ = memoryBySession(snap.Initiatives, snap.Unassigned)
+		if m.Warn {
+			w := *m
+			warned = &w
+		}
 	}
 	return r
 }

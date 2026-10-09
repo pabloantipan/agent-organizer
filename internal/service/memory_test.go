@@ -191,3 +191,28 @@ func TestSampleMemory(t *testing.T) {
 		t.Error("top and by_initiative must be empty lists, not null")
 	}
 }
+
+// FR-4, Amendment 4: OnMemoryWarn gets the sample that warns, once per entry,
+// whoever sampled, and runs after the lock is released.
+func TestOnMemoryWarn(t *testing.T) {
+	now := t0
+	s := NewWith(config.Config{}, cache.State{}, func() time.Time { return now })
+	var got []model.Memory
+	s.OnMemoryWarn = func(m model.Memory) {
+		s.mu.Lock() // deadlocks if the hook ran under the service lock
+		s.mu.Unlock()
+		got = append(got, m)
+	}
+	s.memReader = fakeMem{level: "1"}
+	s.Memory()
+	s.memReader = fakeMem{level: "4"}
+	r := s.Memory()
+	if r.Memory == nil || !r.Memory.Warn {
+		t.Fatalf("entry into critical did not warn: %+v", r)
+	}
+	now = now.Add(10 * time.Second)
+	s.Memory() // still critical: no second warning
+	if len(got) != 1 || got[0].Pressure != memory.Critical || !got[0].Warn {
+		t.Fatalf("hook got %+v, want one critical reading with warn", got)
+	}
+}
