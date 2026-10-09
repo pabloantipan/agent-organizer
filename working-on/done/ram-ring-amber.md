@@ -1,12 +1,12 @@
 ---
 title: "The floating icon's ring always on in the tone, memory pressure in amber everywhere"
-status: now
+status: done
 repos: [organizer]
 branch: ram-ring-amber
 seat: ra-build
 stage: one-window
 updated: 2026-10-09
-next: "review: ram-ring-amber, R1-R5 met (R1 on white and black composites, not Pablo's wallpaper), f329879"
+next: "done: merged to main by sup50; A1 (critical trough on light wallpapers) for aglaea"
 depends_on: [deltagos-mark]
 boundary: ["floaticon_darwin.m (the ring layer: always on, colour by level, the 1 px keyline)", "frontend/src/styles/tokens.css (--fg-on-warning)", "the memory button's and the float list's memory-line css", "not: Go, the mark's own layers, any other use of --tone"]
 spec: "docs/ux/specs/ram-indicator.md Amendment 2 (7bb03f4)"
