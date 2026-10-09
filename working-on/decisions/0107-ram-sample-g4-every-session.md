@@ -1,13 +1,13 @@
 ---
 title: ram-sample G4 contradicts the top-five cap - list every session, or narrow the check
-status: proposed
+status: ruled
 raised: 2026-10-09
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-09
+ruled_by: pablo
 options: ["A: organizer memory lists every agent session grouped by initiative; the feed's top five stays for the popover", "B: G4 checks only the top five and camp's total in by_initiative"]
-chosen:
+chosen: "A: organizer memory lists every agent session grouped by initiative; the feed's top five stays for the popover"
 cards: [ram-sample]
 threads: []
 supersedes: []
@@ -43,3 +43,7 @@ from the terminal.
 ## Note
 
 The fault is the FSE's: a gate row that asked for more than its requirement.
+
+## Ruling
+
+pablo, 2026-10-09, in the organizer on lodestar: ok
