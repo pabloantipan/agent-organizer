@@ -5,6 +5,8 @@ import { dateWords, parseISO, today } from "../lib/dates";
 import { api } from "../hooks/useWails";
 import { firstWaiting, phaseRuns, stagePosition, waitingChip } from "../lib/header";
 import { leadOf, readOnlyOf } from "../lib/queue";
+import { sleepyOf, sleepyWord } from "../lib/initiatives";
+import "../styles/initiatives.css";
 import { unreadFiles, unreadLabel } from "../lib/unread";
 import { UnreadFiles } from "./UnreadFiles";
 import { useScrollEdges } from "../lib/useScrollEdges";
@@ -181,7 +183,7 @@ const SUBS: { id: Sub; label: string }[] = [
  *  landing stores "folded" (FR-11, board.store). No badge on a sub-view:
  *  Needs me is the one count. */
 export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardInitiative }) {
-  const { sub, openInitiative, openDecision, openStage, view, agents, headerOpen, setHeaderOpen, widthClass } = useBoard();
+  const { sub, openInitiative, openDecision, openStage, openInitiatives, view, agents, headerOpen, setHeaderOpen, widthClass } = useBoard();
   const lead = leadOf((agents?.groups ?? []).find((g) => g.id === i.id));
   const chip = waitingChip(i.decisions, lead);
   const first = firstWaiting(i.decisions);
@@ -210,7 +212,10 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
         <h1 className="ihead-id" tabIndex={-1} data-initiative={i.id}>
           {i.id}
           {i.client && <span className="lz tone">{i.client}</span>}
-          {readOnly && <span className="lz read-only" title="not active: nothing here can be ruled, moved, commented, posted or started"><Lock size={12} aria-hidden /> {readOnly}: read-only</span>}
+          {readOnly && <span className="lz read-only" title="not active: nothing here can be ruled, moved, commented, posted or started"><Lock size={12} aria-hidden /> {sleepyWord(readOnly)}: read-only</span>}
+          {/* Asleep: the header carries no Wake (0104 A over C); the link
+              lands on its card in Initiatives with focus on its Wake. */}
+          {readOnly && sleepyOf(readOnly) === "asleep" && <button className="ihead-wake-link" onClick={() => openInitiatives(`wake:${i.id}`)}>Wake in Initiatives ›</button>}
         </h1>
         {barStage && (shown ? (
           <button className="ihead-stage" onClick={() => openStage(i.id, shownAt)} title={`${shown.title || shown.id}: open it in Roadmap`}
