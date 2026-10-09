@@ -188,7 +188,7 @@ export function InitiativesView() {
         <div className="ic-head">
           <button id={`ic-id-${c.id}`} className="ic-id mono" onClick={() => openInitiative(c.id, "overview")}
             title={c.state === "awake" ? `open ${c.id}` : `open ${c.id}, read-only`}>{c.id}</button>
-          {i.client && <span className="lz tone">{i.client}</span>}
+          {i.client && <span className="lz tone ic-client" title={i.client}>{i.client}</span>}
           <span className={`lz ic-word ${c.state}`}>{sleepyWord(i.status)}</span>
         </div>
         <div className={`ic-goal ${i.goal ? "" : "missing"}`} title={i.goal || undefined}>{i.goal || "no goal yet"}</div>

@@ -51,6 +51,8 @@
   font-size: var(--font-size-md); font-weight: var(--weight-semibold); overflow-wrap: anywhere; text-align: left;
 }
 .ic-id:hover { background: var(--surface-hover); border-color: transparent; text-decoration: underline; }
+/* .lz is inline-flex, where text-overflow does nothing: a long client clipped mid-word */
+.lz.ic-client { display: inline-block; }
 .lz.ic-word.awake { background: var(--accent-muted); color: var(--accent-fg); }
 .lz.ic-word.asleep, .lz.ic-word.archived { background: var(--status-done-bg); color: var(--fg-muted); }
 .ic-goal {
