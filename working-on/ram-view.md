@@ -6,7 +6,7 @@ branch: ram-view
 seat: rv-build
 stage: one-window
 updated: 2026-10-09
-next: "pablo: N1 after the merge: run make install (it replaces the app you are using), then the N1 steps in Notes; a fail there is a fix card (spec Amendment 5)"
+next: "N1 passed by Pablo 2026-10-09 18:5x in /Applications/Deltagos.app (v0.2.0-1468-g3aec651); the card goes to done/ on his word"
 review: pass
 depends_on: [ram-sample]
 boundary: ["new top-bar memory component, popover and css (tier-2 tokens)", "the store (popover state, Agents › focus), AgentsView.tsx (focus a row by agent id only)", "floaticon_darwin.m/.h/.go (ring, panel line), new notify_darwin.m/.go and notify_other.go, app.go (post on warn, the click)", "scripts/fixture-home.sh (the fake reading)", "not: Go under internal/, the Deltagos mark (0102)"]
@@ -106,3 +106,4 @@ N1 — pablo, after merge and make install: quit Deltagos; in a terminal run `OR
 ### Found, not asked
 - `seat-pointer`'s exit-7 hint (`open -a "Deltagos Review"`) launched another seat's review bundle (`.wt-notes/dst-build/instr/…`, pid 31230) with no fixture env, against the real home, for ~30 s, until I killed it. It wrote REC lines to the real `~/.local/share/organizer/organizer.log` and may have saved `state.json` (mtime 15:53). With several review bundles on disk, `open -a` by name is unsafe; raise by pid (`System Events … unix id`). For Hephaistos (seat-pointer).
 - Reviewer: rv-ui, 2026-10-09.
+- 2026-10-09 the FSE, N1 with Pablo: `make install` at 3aec651; notifications were off for Deltagos (authorization status 1) until Pablo allowed them in System Settings; relaunched with ORGANIZER_MEMORY_FAKE=critical: log `authorization granted`, `notification posted: Memory critical on lodestar`; Pablo's screenshot shows the banner (title and body with three sessions), and his click opened Deltagos with the memory popover open. Seen alongside: a "Memory critical on fixture" notification at 16:50 from a review run (review builds should not post real notifications; leftovers-15).
