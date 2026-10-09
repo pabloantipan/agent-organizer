@@ -30,6 +30,8 @@ export function DraftCell(arg1:string,arg2:boolean):Promise<string>;
 
 export function EditNote(arg1:string,arg2:string,arg3:string,arg4:string):Promise<void>;
 
+export function Factory():Promise<service.FactoryView>;
+
 export function FloatAvailable():Promise<boolean>;
 
 export function FloatCompact():Promise<void>;
@@ -114,6 +116,8 @@ export function SignOut():Promise<void>;
 
 export function SignUp(arg1:string,arg2:string):Promise<auth.Account>;
 
+export function Sleep(arg1:string):Promise<service.SleepResult>;
+
 export function StageType():Promise<model.Stage>;
 
 export function StopAgent(arg1:number):Promise<void>;
@@ -125,3 +129,5 @@ export function Unlock(arg1:string):Promise<service.LockState>;
 export function Usage(arg1:string):Promise<usage.View>;
 
 export function Version():Promise<string>;
+
+export function Wake(arg1:string):Promise<service.SleepResult>;

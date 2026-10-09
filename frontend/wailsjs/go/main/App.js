@@ -46,6 +46,10 @@ export function EditNote(arg1, arg2, arg3, arg4) {
   return window['go']['main']['App']['EditNote'](arg1, arg2, arg3, arg4);
 }
 
+export function Factory() {
+  return window['go']['main']['App']['Factory']();
+}
+
 export function FloatAvailable() {
   return window['go']['main']['App']['FloatAvailable']();
 }
@@ -214,6 +218,10 @@ export function SignUp(arg1, arg2) {
   return window['go']['main']['App']['SignUp'](arg1, arg2);
 }
 
+export function Sleep(arg1) {
+  return window['go']['main']['App']['Sleep'](arg1);
+}
+
 export function StageType() {
   return window['go']['main']['App']['StageType']();
 }
@@ -236,4 +244,8 @@ export function Usage(arg1) {
 
 export function Version() {
   return window['go']['main']['App']['Version']();
+}
+
+export function Wake(arg1) {
+  return window['go']['main']['App']['Wake'](arg1);
 }
