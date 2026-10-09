@@ -6,7 +6,7 @@ branch: float-focus-steal
 seat: ffs-build
 stage: one-window
 updated: 2026-10-09
-next: "launchable; runs in the same task as 0103 or alone, Pablo's call"
+next: "waits on 0105 (accept); can run beside sup49 only if ram-view has not started (shared floaticon_darwin.m)"
 depends_on: []
 boundary: ["floaticon_darwin.m and floaticon_darwin.go, and their check scripts", "not: the frontend, the Go service, the mark (0102)"]
 spec: "this card's Spec section"
