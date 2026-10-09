@@ -1,12 +1,12 @@
 ---
 title: "The app icon in Icon Composer's .icon format, so macOS 26 draws it without its grey plate"
-status: next
+status: now
 repos: [organizer]
 branch: app-icon-composer
 seat: aic-build
 stage: one-window
 updated: 2026-10-09
-next: "sup50 runs it (0110 accepted 2026-10-09), wave 3, beside ram-ring-amber"
+next: "aic-build builds on branch app-icon-composer (sup50, ring-and-icon task)"
 depends_on: [deltagos-mark]
 boundary: ["build/darwin (Assets.car from Deltagos.icon, the Info.plist template's CFBundleIconName)", "the Makefile or build script step that compiles it into the bundle", ".github/workflows/release.yml (its build step only)", "not: the mark's drawing, the floating icon, the frontend"]
 spec: "this card's Spec section; docs/ux/specs/floating-icon.md Amendment 6 (f9ee762)"
