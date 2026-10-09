@@ -68,8 +68,8 @@ factory scripts, `initiative.yaml` writes.
 
 `initiatives-view`: a new `InitiativesView.tsx` and css, the top bar and the
 store's `screen`, `Rail.tsx` (the folds), `Home.tsx` (one line),
-`InitiativeHeader.tsx` (the asleep line), `AgentsView.tsx`/`AgentList.tsx`
-(the Memory column), `lib/` helpers and tests, `scripts/fixture-home.sh`.
+`InitiativeHeader.tsx` (the asleep line), `AgentsView.tsx`/`AgentList.tsx`/`Crew.tsx`
+(the Memory column; `Crew.tsx` added by Amendment 2, the crew seats' rows), `lib/` helpers and tests, `scripts/fixture-home.sh`.
 Not: Go.
 
 ## No-gos
