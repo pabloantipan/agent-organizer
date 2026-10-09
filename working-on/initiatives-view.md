@@ -8,7 +8,7 @@ stage: one-window
 updated: 2026-10-09
 next: "code review of initiatives-view at fbc0992 (sup51); iv-build: the WKWebView pass of I1-I13 after sup50's S2 and S3 free the screen"
 depends_on: [initiatives-sleep, ram-view]
-boundary: ["new InitiativesView.tsx and css, the top bar and the store's screen", "Rail.tsx (folds), Home.tsx (one line), InitiativeHeader.tsx (asleep line), AgentsView.tsx, AgentList.tsx and Crew.tsx (Memory column)", "frontend/src/lib helpers and tests, scripts/fixture-home.sh", "not: Go"]
+boundary: ["new InitiativesView.tsx and css, the top bar and the store's screen", "Rail.tsx (folds), Home.tsx (one line), InitiativeHeader.tsx (asleep line), AgentsView.tsx, AgentList.tsx and Crew.tsx (Memory column)", "frontend/src/lib helpers and tests (readOnlyOf's word included), scripts/fixture-home.sh", "not: Go"]
 spec: "docs/specs/initiatives-view.md (FR-5; docs/ux/specs/initiatives-view.md (e577d08))"
 gate: "docs/specs/initiatives-view.md Acceptance, rows I1 to I13 and X0"
 ui_review: true
@@ -20,7 +20,9 @@ review: pass
 first, memory per initiative and per agent.
 
 ## Gate
-docs/specs/initiatives-view.md, I1 to I13 and X0.
+docs/specs/initiatives-view.md, I1 to I13 and X0, plus:
+- [ ] I14 every read-only word says `asleep` for a paused initiative, never `paused` or `not active` (header lozenge hover, CardDrawer, Conversation): `readOnlyOf` returns the sleepy word; vitest
+- [ ] I15 factory missing or failing: the head shows the count with no limit and no `over the limit`, plus the factory line (the fixture shows `10 awake`, not `10 of 4 awake · over the limit`); vitest and a Chromium shot
 
 ## Done
 - 2026-10-09: view, top-bar button, rail folds, Home line, asleep header, Agents Memory column, fixture and fake factory on `initiatives-view` (f39d0d0); every state run in Chromium at 1024 and 1512 (`.wt-notes/iv-build/flows.log`, `chromium-*.png`); X0 pass from a clean clone at fbc0992 (`.wt-notes/iv-build/x0.txt`, `x0-make.txt`); crew seat rows show Memory too.
@@ -44,3 +46,4 @@ docs/specs/initiatives-view.md, I1 to I13 and X0.
 - Findings (none blocks): (1) the header lozenge's hover still says "not active: …", and CardDrawer and Conversation still say `paused: read-only` (outside the boundary; `readOnlyOf` returning `sleepyWord` fixes all); the design says awake/asleep in every word. (2) Wake is refused at Deltagos's count, which includes factory-blind awake ones, so on the real home (camp blind) Deltagos can refuse a Wake the factory would allow; the builder's stated choice, consistent with "the head's count is Deltagos's". (3) The Asleep head's limit line links blind initiatives "to their Sleep", which they lack; focus falls back to the id. (4) A sole awake initiative with nothing live or waiting sleeps at once without "Home will be empty until one wakes." (I4 allows it; the States row "one initiative" reads as a confirm). (5) With the factory missing or failing the limit falls back to 4, so the fixture shows `10 of 4 awake · over the limit` in magenta with a hover blaming the command line.
 - Gate gaps: I11 checks the header's word only, not every place that says `paused`; no row runs the real home outside WKWebView.
 - Reviewer: iv-review, 2026-10-09.
+- 2026-10-09 the FSE: I14-I15 from the code review's findings 1 and 5 (0108). Findings 2 (Wake refused at Deltagos's count, camp included: kept, Deltagos's count is the true one; the factory's depth fix is Hephaistos's), 3 and 4 go to leftovers.
