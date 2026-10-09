@@ -6,7 +6,8 @@ branch: app-icon-composer
 seat: aic-build
 stage: one-window
 updated: 2026-10-09
-next: "review: app-icon-composer, A1-A4 met (A2 as worded, see Notes), e1d2de5"
+next: "A2: the plist is not unchanged (CFBundleIconName + Assets.car added), so what macOS 12-15 draws needs a 12-15 Mac or a reworded row; gate question for sup50"
+review: fail
 depends_on: [deltagos-mark]
 boundary: ["build/darwin (Assets.car from Deltagos.icon, the Info.plist template's CFBundleIconName)", "the Makefile or build script step that compiles it into the bundle", ".github/workflows/release.yml (its build step only)", "not: the mark's drawing, the floating icon, the frontend"]
 spec: "this card's Spec section; docs/ux/specs/floating-icon.md Amendment 6 (f9ee762)"
@@ -66,3 +67,11 @@ Icon Composer; regenerate with `export.sh`. Her rows F23 and F24 are A1 and A2.
 - **Spec gap (for the FSE):** F24's check (plist names the icns, icns byte-equal) proves the files, not what macOS 12-15 draws when `CFBundleIconName` is also set. A2 passed as worded while its intent ("keep the old icon on older macOS") is likely unmet.
 - **For aglaea:** U1, accept the car's rendition on macOS 12-15 or keep the icns there.
 - **Not verified:** what macOS 12-15 actually draws (no such Mac); the Dock and Finder on screen (no driven input, by the FSE's word, 2026-10-09 19:20); the universal release bundle (A4, the code reviewer's).
+
+## Review
+- **Verdict: fail.** Unmet: A2. Reviewer aic-review, 2026-10-09, on e1d2de5.
+- A1 met: fresh clone, `make review-build`, IconServices renders at a fresh path (`.wt-notes/aic-review/r-1791587004/`): top-centre at 16 pt is the ground (0.21, 0.20, 0.24); the no-car control (`r-ctl-1791587004/`) shows the plate (0.90). Paths must be absolute: relative ones render the generic document icon.
+- A3 met: `make test` (go test, 372 vitest), `wails build`, `make review-build` all exit 0 from a fresh clone, under test-lease (`.wt-notes/aic-review/a3-*.txt`).
+- A4 met: re-ran `make build PLATFORM=darwin/universal VERSION=dev` and `make-dmg.sh` at e1d2de5 (the builder's run was at 41fb72f): x86_64 + arm64; bundle and DMG carry `Assets.car` 45ae2a9c… and `iconfile.icns` b087f053…, byte-equal to `build/darwin/`.
+- A2 unmet: its fallback proof is "its plist and `iconfile.icns` proven unchanged"; the icns is, the plist is not (it gains `CFBundleIconName`, and the bundle gains a car with flattened `Deltagos` renditions). On macOS 11 and later a `CFBundleIconName` with an app icon in the car is the documented first choice, so "the current icon" on 12-15 is unproven and likely false (the Notes and the UI review's U1 say the same). Not decidable here without a macOS 12-15 Mac: a gate question for sup50 (reword A2 to what 12-15 may draw, per aglaea, or prove it on a 12-15 Mac).
+- Not covered by the gate: release.yml's Test step fails on a clean checkout (`frontend/dist` missing), the same on main.
