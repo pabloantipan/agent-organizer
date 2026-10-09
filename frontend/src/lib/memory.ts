@@ -85,10 +85,11 @@ export function pressureLine(m: MemoryReading, now: number): string {
 }
 
 /** `Was critical until 14:32`, the half hour after a critical spell ends
- *  (the service drops it after 30 min); null otherwise. Local 24 h time. */
+ *  (the service drops it after 30 min), at normal only: at high the line
+ *  reads as still in trouble; null otherwise. Local 24 h time. */
 export function wasCriticalLine(m: MemoryReading): string | null {
   const t = ms(m.was_critical_until);
-  if (t === null || m.pressure === "critical") return null;
+  if (t === null || m.pressure === "critical" || m.pressure === "high") return null;
   const d = new Date(t);
   return `Was critical until ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }

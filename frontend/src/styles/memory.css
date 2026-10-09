@@ -5,13 +5,17 @@
 
 .memory { position: relative; display: inline-flex; }
 
-.memory-btn { display: inline-flex; align-items: center; gap: var(--space-1-5); color: var(--fg-subtle); white-space: nowrap; }
-.memory-btn .memory-text { font-variant-numeric: tabular-nums; }
-.memory-btn.high { color: var(--tone); }
-.memory-btn.critical { background: var(--tone); color: var(--fg-on-tone); border-radius: var(--radius-sm); }
-.memory-btn.critical:hover { background: var(--tone); color: var(--fg-on-tone); }
-.memory-btn[aria-expanded="true"]:not(.critical) { background: var(--surface-selected); }
-.memory-btn.critical[aria-expanded="true"] { box-shadow: 0 0 0 2px var(--surface-selected); }
+/* .memory button.memory-btn (0,2,1), not .memory-btn: button.ghost (0,1,1),
+   later in the bundle, and its :hover (0,2,1) would win otherwise, the
+   normal reading drawing --muted and the critical chip losing its fill on
+   hover. */
+.memory button.memory-btn { display: inline-flex; align-items: center; gap: var(--space-1-5); color: var(--fg-subtle); white-space: nowrap; }
+.memory button.memory-btn .memory-text { font-variant-numeric: tabular-nums; }
+.memory button.memory-btn.high { color: var(--tone); }
+.memory button.memory-btn.critical { background: var(--tone); color: var(--fg-on-tone); border-radius: var(--radius-sm); }
+.memory button.memory-btn.critical:hover { background: var(--tone); color: var(--fg-on-tone); }
+.memory button.memory-btn[aria-expanded="true"]:not(.critical) { background: var(--surface-selected); }
+.memory button.memory-btn.critical[aria-expanded="true"] { box-shadow: 0 0 0 2px var(--surface-selected); }
 
 .memory-pop {
   position: absolute; top: calc(100% + var(--space-1-5)); right: 0;

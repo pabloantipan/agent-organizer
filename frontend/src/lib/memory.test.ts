@@ -64,11 +64,12 @@ describe("the popover's lines", () => {
     expect(duration(125 * 60000)).toBe("2 h 5 min");
     expect(duration(120 * 60000)).toBe("2 h");
   });
-  it("keeps Was critical until for as long as the reading carries it, never while critical", () => {
+  it("keeps Was critical until at normal for as long as the reading carries it, never at high or critical", () => {
     const until = new Date(at(14, 32)).toISOString();
     expect(wasCriticalLine(reading({ was_critical_until: until }))).toBe("Was critical until 14:32");
     expect(wasCriticalLine(reading())).toBeNull();
     expect(wasCriticalLine(reading({ pressure: "critical", was_critical_until: until }))).toBeNull();
+    expect(wasCriticalLine(reading({ pressure: "high", was_critical_until: until }))).toBeNull();
   });
   it("says free of total and the agents' share of what is in use", () => {
     expect(freeLine(reading({ free_bytes: 3.1 * G }))).toBe("3.1 GB of 32 GB");
