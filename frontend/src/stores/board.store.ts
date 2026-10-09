@@ -119,7 +119,8 @@ type State = {
   setMemoryOpen: (open: boolean) => void;
   // agentFocus is the Agents row a memory session's Agents › lands on, by
   // agent id (<session>#<pid>, Memory.top's agent_id). AgentsView focuses it
-  // and clears it.
+  // and clears it. A session with no initiative lands on every initiative's
+  // Agents (screen initiative, none selected), where the unassigned group is.
   agentFocus: string | null;
   openAgentRow: (initiativeId: string, agentId: string) => void;
   clearAgentFocus: () => void;
@@ -291,7 +292,8 @@ export const useBoard = create<State>((set, get) => ({
   setMemoryOpen: (memoryOpen) => set({ memoryOpen }),
   agentFocus: null,
   // A landing, like openAgentsAt: the header folds and the popover closes.
-  openAgentRow: (selectedInitiative, agentFocus) => set({ ruleDraft: null, headerOpen: folded(), screen: "initiative", selectedInitiative, sub: "agents", selected: null, needsMeFocus: null, decisionFocus: null, agentFocus, memoryOpen: false }),
+  // No initiative is every initiative's Agents, where the unassigned group is.
+  openAgentRow: (initiative, agentFocus) => set({ ruleDraft: null, headerOpen: folded(), screen: "initiative", selectedInitiative: initiative || null, sub: "agents", selected: null, needsMeFocus: null, decisionFocus: null, agentFocus, memoryOpen: false }),
   clearAgentFocus: () => set({ agentFocus: null }),
   // A navigation by hand: the header takes the lead's stored choice again.
   openInitiative: (selectedInitiative, sub) => set({ ruleDraft: null, headerOpen: storedHeaderOpen(), screen: "initiative", selectedInitiative, sub, needsMeFocus: null, decisionFocus: null, stageFocus: null }),

@@ -40,6 +40,7 @@ export function TopBar() {
       <nav className="crumbs" aria-label="where you are">
         {screen === "home" ? <b>Home</b> : <button className="crumb" onClick={() => { closeHelp(); goHome(); }}>Home</button>}
         {screen === "initiative" && selectedInitiative && <><span className="crumb-sep">/</span><b className="mono">{selectedInitiative}</b></>}
+        {screen === "initiative" && !selectedInitiative && <><span className="crumb-sep">/</span><b>Agents</b></>}
         {screen === "settings" && <><span className="crumb-sep">/</span><b>Settings</b></>}
         {screen === "usage" && <><span className="crumb-sep">/</span><b>Usage</b></>}
         {helpTop !== null && <><span className="crumb-sep">/</span><b>Help</b></>}

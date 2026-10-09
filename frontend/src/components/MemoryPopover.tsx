@@ -98,8 +98,8 @@ export function MemoryPopover({ opener, onClose }: { opener: RefObject<HTMLButto
 
 /** One session: name (mono), initiative or —, state, memory, Agents ›. The
  *  initiative column gives way first when the window is narrow (1024 row);
- *  its text stays in the row's name. A session outside every initiative has
- *  no Agents row to land on, so no link. */
+ *  its text stays in the row's name. A session outside every initiative
+ *  lands on the unassigned group of every initiative's Agents. */
 function SessionLine({ r, go }: { r: SessionRow; go: (initiative: string, agentId: string) => void }) {
   const where = r.initiative || "outside every initiative";
   return (
@@ -108,9 +108,7 @@ function SessionLine({ r, go }: { r: SessionRow; go: (initiative: string, agentI
       <span className="ms-init mono" title={where}>{r.initiative || "—"}</span>
       <span className={`ms-state ${r.state}`}>{stateWord(r.state)}</span>
       <span className="ms-mem num">{gb(r.bytes)} GB</span>
-      {r.initiative
-        ? <button type="button" className="ghost tiny-btn ms-go" aria-label={`Agents ${r.name}`} title={`${r.initiative} Agents, this session's row`} onClick={() => go(r.initiative, r.agentId)}>Agents ›</button>
-        : <span className="ms-go" />}
+      <button type="button" className="ghost tiny-btn ms-go" aria-label={`Agents ${r.name}`} title={r.initiative ? `${r.initiative} Agents, this session's row` : "Agents, outside every initiative, this session's row"} onClick={() => go(r.initiative, r.agentId)}>Agents ›</button>
     </li>
   );
 }

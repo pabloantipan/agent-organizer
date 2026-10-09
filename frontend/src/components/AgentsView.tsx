@@ -29,7 +29,7 @@ export function AgentsView() {
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!agentFocus || !view) return;
-    const t = agentTarget(view.groups, agentFocus);
+    const t = agentTarget(view.groups, agentFocus, view.unassigned);
     const section = t && box.current?.querySelector(`[data-group="${CSS.escape(t.group)}"]`);
     const el = !t || !section ? null
       : "seat" in t ? section.querySelector<HTMLElement>(`.crew-seats > li[data-seat="${CSS.escape(t.seat)}"]`)
@@ -103,7 +103,7 @@ export function AgentsView() {
         );
       })}
       {!selectedInitiative && (view.unassigned?.length ?? 0) > 0 && (
-        <section className="agent-group">
+        <section className="agent-group" data-group="">
           <header className="agent-group-head static">
             <Bot size={14} />
             <span className="ident">outside every initiative</span>
