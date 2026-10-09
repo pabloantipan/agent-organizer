@@ -51,6 +51,9 @@ static CALayer *group;                // the tile and its shadows; scaled as one
 static CALayer *shadowNear, *shadowFar;
 static CALayer *tileLayer;           // the rounded square the bars sit on
 static NSArray<CALayer *> *bars;
+static CAShapeLayer *ring;            // the memory ring outside the tile (ram-indicator §2)
+static NSString *memLevel = @"normal"; // the memory reading's level, for the ring and the name
+static NSView *iconViewForRing(void);
 static NSWindow *mainWin;
 static NSWindow *marker;              // 1x1 window left on the home desktop
 static FloatState state = StateHome;
@@ -287,6 +290,52 @@ static void breathe(void) {
         [bar addAnimation:a forKey:@"breathe"];
     }
     flog(@"breathe: %@", still ? @"still (reduce motion)" : @"on");
+}
+
+// ---------- memory: the ring (docs/ux/specs/ram-indicator.md §2) ----------
+
+// Outside the tile, so it never touches the mark or its animation: 2 pt from
+// the tile's edge, 2 pt wide at high, 3 at critical, breathing in opacity
+// 1 to 0.5 over 1.6 s (0.8 each way) at critical, steady under Reduce
+// motion; nothing at normal. Points, not scaled with the icon: the design
+// gives the ring in px, as a mark of the edge, not of the tile's drawing.
+static const CGFloat kRingGap = 2;
+
+static void layoutRing(void) {
+    CGFloat w = [memLevel isEqualToString:@"critical"] ? 3 : 2;
+    CGFloat out = kRingGap + w / 2;
+    CGRect r = CGRectInset(CGRectMake(0, 0, tileSz, tileSz), -out, -out);
+    CGPathRef path = CGPathCreateWithRoundedRect(r, tileSz / 4 + out, tileSz / 4 + out, NULL);
+    ring.frame = CGRectMake(0, 0, tileSz, tileSz);
+    ring.path = path;
+    ring.lineWidth = w;
+    CGPathRelease(path);
+}
+
+static void applyRing(void) {
+    if (!ring) return;
+    BOOL high = [memLevel isEqualToString:@"high"], critical = [memLevel isEqualToString:@"critical"];
+    BOOL still = reduceMotion();
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
+    layoutRing();
+    ring.hidden = !(high || critical);
+    ring.opacity = 1;
+    [ring removeAnimationForKey:@"breathe"];
+    if (critical && !still) {
+        CABasicAnimation *a = [CABasicAnimation animationWithKeyPath:@"opacity"];
+        a.fromValue = @1.0;
+        a.toValue = @0.5;
+        a.duration = 0.8;
+        a.autoreverses = YES;
+        a.repeatCount = HUGE_VALF;
+        a.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+        [ring addAnimation:a forKey:@"breathe"];
+    }
+    [CATransaction commit];
+    [iconViewForRing() setToolTip:[memLevel isEqualToString:@"normal"] ? @"Deltagos" : [NSString stringWithFormat:@"Deltagos, memory %@", memLevel]];
+    NSAccessibilityPostNotification(iconViewForRing(), NSAccessibilityTitleChangedNotification);
+    flog(@"memory ring: %@ (%@)", memLevel, high ? @"2 pt" : critical ? (still ? @"3 pt, steady (reduce motion)" : @"3 pt, breathing") : @"none");
 }
 
 // ---------- desktops ----------
@@ -581,6 +630,7 @@ static void doubleClicked(void) {
 @end
 
 static FloatIconView *iconView;
+static NSView *iconViewForRing(void) { return iconView; }
 
 // Clicks beside the tile pass through (code review, 898f9a9): the panel is
 // larger than the tile to hold its shadow, and a window takes every click on
@@ -695,7 +745,10 @@ static void watchPointer(void) {
 // Accessibility (F9): a button named Deltagos that opens the list.
 - (BOOL)isAccessibilityElement { return YES; }
 - (NSAccessibilityRole)accessibilityRole { return NSAccessibilityButtonRole; }
-- (NSString *)accessibilityLabel { return @"Deltagos"; }
+// The name adds the memory level at high and critical (ram-indicator §2).
+- (NSString *)accessibilityLabel {
+    return [memLevel isEqualToString:@"normal"] ? @"Deltagos" : [NSString stringWithFormat:@"Deltagos, memory %@", memLevel];
+}
 - (NSString *)accessibilityHelp { return @"Opens the initiative list"; }
 // The press is a single click: it opens the list (a double-click has no
 // accessibility action; a pick in the list opens full).
@@ -738,6 +791,7 @@ static void layoutLayers(void) {
         bar.position = CGPointMake(x0 + i * (bw + gap) + bw / 2, base);
         bar.cornerRadius = 2 * k;
     }
+    if (ring) layoutRing();
     [CATransaction commit];
 }
 
@@ -789,6 +843,12 @@ static void build(void) {
         l.shadowColor = CGColorGetConstantColor(kCGColorBlack);
         [group addSublayer:l];
     }
+
+    ring = [CAShapeLayer layer];
+    ring.fillColor = nil;
+    ring.strokeColor = [hex(0xd946ef) CGColor]; // --tone, magenta-9: caution, never red (design system; 0103 O2)
+    ring.hidden = YES;
+    [group addSublayer:ring];
 
     tileLayer = [CALayer layer];
     if (@available(macOS 11.0, *)) tileLayer.cornerCurve = kCACornerCurveContinuous;
@@ -858,6 +918,7 @@ static void build(void) {
     else if (look && strcmp(look, "pressed") == 0) setLook(LookPressed, 0);
     else if (look && strcmp(look, "dragging") == 0) setLook(LookDragging, 0);
     breathe();
+    applyRing();
 }
 
 void FloatIconStart(const char *logArg, const char *placeFile) {
@@ -893,7 +954,7 @@ void FloatIconStart(const char *logArg, const char *placeFile) {
         [wc addObserverForName:NSWorkspaceActiveSpaceDidChangeNotification object:nil queue:[NSOperationQueue mainQueue]
                     usingBlock:^(NSNotification *n) { update(@"space-change", YES); }];
         [wc addObserverForName:NSWorkspaceAccessibilityDisplayOptionsDidChangeNotification object:nil queue:[NSOperationQueue mainQueue]
-                    usingBlock:^(NSNotification *n) { breathe(); setLook(LookResting, 0); }];
+                    usingBlock:^(NSNotification *n) { breathe(); applyRing(); setLook(LookResting, 0); }];
         [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidChangeScreenParametersNotification object:nil
                                                            queue:[NSOperationQueue mainQueue]
                                                       usingBlock:^(NSNotification *n) {
@@ -1099,5 +1160,34 @@ void FloatIconListHeight(int height) {
         f.size.height = h;
         [mainWin setFrame:f display:YES];
         flog(@"list height %.0f", h);
+    });
+}
+
+// The memory reading's level from each sample (ram-indicator §2): the ring
+// and the icon's name follow it. Only a change is applied.
+void FloatIconMemory(const char *level) {
+    NSString *l = [NSString stringWithUTF8String:level];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *want = [l isEqualToString:@"high"] || [l isEqualToString:@"critical"] ? l : @"normal";
+        if ([want isEqualToString:memLevel]) return;
+        memLevel = want;
+        if (started) applyRing();
+    });
+}
+
+// The memory notification's click (ram-indicator §3): Deltagos full on this
+// desktop, through the paths a click and a double-click on the icon already
+// take, nothing of its own: a list open here grows full; a window returning
+// home or compacted grows from the icon; a window at home on another
+// desktop is brought here as the list a click brings, then grown full as a
+// double-click grows it. A window already here is left to the system, which
+// activated the app for the click.
+void FloatIconBringFull(void) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (!started) return;
+        flog(@"memory notification: state=%s visible=%d onActive=%d", stateName[state], [mainWin isVisible], [mainWin isOnActiveSpace]);
+        if (state == StateHome && [mainWin isVisible] && [mainWin isOnActiveSpace]) return;
+        if (state == StateHome) bringList();
+        doubleClicked();
     });
 }

@@ -7,6 +7,8 @@ package main
 import "context"
 
 func floatIconStart(context.Context) {}
+func floatIconMemory(string)         {}
+func floatIconBringFull()            {}
 
 func (a *App) FloatAvailable() bool { return false }
 func (a *App) FloatCompact()        {}
