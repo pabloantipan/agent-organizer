@@ -76,9 +76,16 @@ func (s *Service) sampleMemoryLocked(inits []model.ScannedInitiative, unassigned
 	return m, ""
 }
 
-// memorySummary groups the agents' trees by session (a crew or probe session
-// sums its agents) and by initiative, biggest first.
+// memorySummary is the feed's cut: the five biggest sessions, agents
+// together, and each initiative.
 func memorySummary(inits []model.ScannedInitiative, unassigned []model.Agent) ([]model.MemorySession, uint64, []model.MemoryInitiative) {
+	all, total, by := memoryBySession(inits, unassigned)
+	return all[:min(len(all), memoryTop)], total, by
+}
+
+// memoryBySession groups the agents' trees by session (a crew or probe
+// session sums its agents) and by initiative, biggest first.
+func memoryBySession(inits []model.ScannedInitiative, unassigned []model.Agent) ([]model.MemorySession, uint64, []model.MemoryInitiative) {
 	sessions := map[string]*model.MemorySession{}
 	var order []string
 	var total uint64
@@ -118,20 +125,30 @@ func memorySummary(inits []model.ScannedInitiative, unassigned []model.Agent) ([
 		top = append(top, *sessions[k])
 	}
 	sort.SliceStable(top, func(i, j int) bool { return top[i].Bytes > top[j].Bytes })
-	if len(top) > memoryTop {
-		top = top[:memoryTop]
-	}
 	sort.SliceStable(by, func(i, j int) bool { return by[i].Bytes > by[j].Bytes })
 	return top, total, by
 }
 
+// MemoryReport is `organizer memory`'s reading: the feed's, plus every
+// agent session biggest first, not only the five the popover shows (0107).
+type MemoryReport struct {
+	Memory   *model.Memory         `json:"memory"`
+	Sessions []model.MemorySession `json:"sessions"`
+	Reason   string                `json:"memory_reason,omitempty"`
+}
+
 // Memory reads this Mac once for `organizer memory`: processes and sessions
 // only, no git, and nothing written (no cache, no statusline records).
-func (s *Service) Memory() (*model.Memory, string) {
+func (s *Service) Memory() MemoryReport {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	o := s.scanOptions(false)
 	o.Agents.SessionsDir = ""
 	snap := scan.Run(o)
-	return s.sampleMemoryLocked(snap.Initiatives, snap.Unassigned)
+	m, why := s.sampleMemoryLocked(snap.Initiatives, snap.Unassigned)
+	r := MemoryReport{Memory: m, Reason: why, Sessions: []model.MemorySession{}}
+	if m != nil {
+		r.Sessions, _, _ = memoryBySession(snap.Initiatives, snap.Unassigned)
+	}
+	return r
 }

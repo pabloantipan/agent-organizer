@@ -23,55 +23,63 @@ func memoryCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now f
 		return 2
 	}
 	st, _ := cache.Load()
-	m, why := service.NewWith(cfg, st, now).Memory()
+	r := service.NewWith(cfg, st, now).Memory()
 	if asJSON {
 		enc := json.NewEncoder(stdout)
 		enc.SetIndent("", "  ")
-		_ = enc.Encode(struct {
-			Memory       *model.Memory `json:"memory"`
-			MemoryReason string        `json:"memory_reason,omitempty"`
-		}{m, why})
-		if m == nil {
+		_ = enc.Encode(r)
+		if r.Memory == nil {
 			return 1
 		}
 		return 0
 	}
-	if m == nil {
-		fmt.Fprintln(stderr, "memory could not be read:", why)
+	if r.Memory == nil {
+		fmt.Fprintln(stderr, "memory could not be read:", r.Reason)
 		return 1
 	}
-	fmt.Fprintf(stdout, "pressure  %s\n", m.Pressure)
-	fmt.Fprintf(stdout, "free      %s of %s GB\n", gb(m.FreeBytes), gb(m.TotalBytes))
-	if len(m.Top) == 0 {
-		fmt.Fprintln(stdout, "no agent sessions running")
-		return 0
+	printMemory(stdout, *r.Memory, r.Sessions)
+	return 0
+}
+
+// printMemory writes pressure, free of total, then every initiative biggest
+// first with its total and each of its sessions under it, unassigned last
+// (FR-3, amendment 2). The feed's top five is in --json only.
+func printMemory(w io.Writer, m model.Memory, sessions []model.MemorySession) {
+	fmt.Fprintf(w, "pressure  %s\n", m.Pressure)
+	fmt.Fprintf(w, "free      %s of %s GB\n", gb(m.FreeBytes), gb(m.TotalBytes))
+	if len(sessions) == 0 {
+		fmt.Fprintln(w, "no agent sessions running")
+		return
 	}
-	fmt.Fprintf(stdout, "agents    %s GB\n\n", gb(m.AgentsBytes))
-	tw := tabwriter.NewWriter(stdout, 0, 4, 2, ' ', 0)
-	fmt.Fprintln(tw, "top sessions")
-	for _, s := range m.Top {
-		fmt.Fprintf(tw, "  %s\t%s\t%s GB\n", s.Name, orDash(s.Initiative), gb(s.Bytes))
-	}
-	fmt.Fprintln(tw, "by initiative")
+	fmt.Fprintf(w, "agents    %s GB\n\n", gb(m.AgentsBytes))
+	tw := tabwriter.NewWriter(w, 0, 4, 2, ' ', 0)
+	rows := make([]model.MemoryInitiative, 0, len(m.ByInitiative))
 	for _, r := range m.ByInitiative {
+		if !r.Unassigned {
+			rows = append(rows, r)
+		}
+	}
+	for _, r := range m.ByInitiative {
+		if r.Unassigned {
+			rows = append(rows, r)
+		}
+	}
+	for _, r := range rows {
 		name := r.Initiative
 		if r.Unassigned {
 			name = "unassigned"
 		}
-		fmt.Fprintf(tw, "  %s\t%d agents\t%s GB\n", name, r.Agents, gb(r.Bytes))
+		fmt.Fprintf(tw, "%s\t%d agents\t%s GB\n", name, r.Agents, gb(r.Bytes))
+		for _, s := range sessions {
+			if s.Initiative == r.Initiative {
+				fmt.Fprintf(tw, "  %s\t\t%s GB\n", s.Name, gb(s.Bytes))
+			}
+		}
 	}
 	_ = tw.Flush()
-	return 0
 }
 
 // gb is bytes in GB as Activity Monitor counts them (2^30), to one decimal.
 func gb(b uint64) string {
 	return fmt.Sprintf("%.1f", float64(b)/(1<<30))
-}
-
-func orDash(s string) string {
-	if s == "" {
-		return "-"
-	}
-	return s
 }
