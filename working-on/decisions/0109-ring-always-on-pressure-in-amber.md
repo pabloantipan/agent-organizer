@@ -1,13 +1,13 @@
 ---
 title: The floating icon's ring always on, memory pressure in amber - scope and accept
-status: proposed
+status: ruled
 raised: 2026-10-09
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-09
+ruled_by: pablo
 options: ["accept as written", "accept with amendments", "send back"]
-chosen:
+chosen: accept as written
 cards: [ram-ring-amber]
 threads: []
 supersedes: []
@@ -49,3 +49,7 @@ basis: this initiative's single-card UI tasks, 52-90 min (run records
 ## Recommendation
 
 The FSE's: accept as written.
+
+## Ruling
+
+pablo, 2026-10-09, in the organizer on lodestar: do as recomended (in the FSE session on lodestar, answering 0109 and 0110 together)
