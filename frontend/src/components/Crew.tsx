@@ -4,7 +4,7 @@ import { Retire } from "./Retire";
 import { api, type AgentGroup, type Seat } from "../hooks/useWails";
 import type { model } from "../../wailsjs/go/models";
 import { ContextBar, WatcherBadge } from "./ContextBar";
-import { HealthWhy } from "./AgentList";
+import { HealthWhy, MemoryCell } from "./AgentList";
 import { healthState } from "../lib/health";
 import { missingPersonas, personaMissing } from "../lib/queue";
 import { useBoard } from "../stores/board.store";
@@ -177,6 +177,7 @@ function SeatRow({ seat, readOnly, confirm, setConfirm, flash, onMessage }: { se
       <WatcherBadge watcher={seat.watcher} deaf={seat.deaf} capped={seat.capped} undelivered={seat.undelivered} />
       {(seat.owes?.length ?? 0) > 0 && <span className="badge owes" title={seat.owes.map((o) => o.subject || o.id).join("\n")}>owes {seat.owes.length}</span>}
       <ContextBar c={a?.context} />
+      <MemoryCell a={a} />
       <span className="meta mono a-proc">{a && a.pid > 0 ? `${a.tty} · up ${a.uptime}` : a?.created ? `session ${a.created}` : a ? "layout only" : seat.session}</span>
       {!readOnly && <span className="a-actions">
         {onMessage && !asking && <button className="tiny-btn" onClick={() => onMessage(seat.name)} title={`write to ${seat.name}`} aria-label={`Message ${seat.name}`}><MessageSquare size={13} /> Message</button>}
