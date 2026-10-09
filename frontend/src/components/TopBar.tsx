@@ -18,6 +18,7 @@ export function TopBar() {
   const needsMe = needsMeRows(view, agents).length;
   const [menu, setMenu] = useState(false);
   const machines = view?.board.machines ?? [];
+  const machinesLine = view ? `${machines.length} machine${machines.length === 1 ? "" : "s"} · remote ${since(view.pulled_at)}` : "";
   const [version, setVersion] = useState("");
   useEffect(() => { api.version().then(setVersion, () => undefined); }, []);
   // Compact to icon (floating-icon §4) only where the icon runs: macOS, past
@@ -36,7 +37,10 @@ export function TopBar() {
       {/* At compact the version folds into the brand's hover first, so the
           bar stays one line at 1024 with Usage and a scan's wider label
           (FR-5a, UI5). */}
-      <span className="brand" title={version ? `Deltagos ${version}` : "Deltagos"}>Deltagos{version && widthClass !== "compact" && <span className="brand-version">{version}</span>}</span>
+      {/* At compact the idle machines line folds into the brand's hover too,
+          so the bar keeps one line with Initiatives beside Usage
+          (initiatives-view I13); errors and sync notes never fold. */}
+      <span className="brand" title={[version ? `Deltagos ${version}` : "Deltagos", widthClass === "compact" && machinesLine].filter(Boolean).join("\n")}>Deltagos{version && widthClass !== "compact" && <span className="brand-version">{version}</span>}</span>
       <nav className="crumbs" aria-label="where you are">
         {screen === "home" ? <b>Home</b> : <button className="crumb" onClick={() => { closeHelp(); goHome(); }}>Home</button>}
         {screen === "initiative" && selectedInitiative && <><span className="crumb-sep">/</span><b className="mono">{selectedInitiative}</b></>}
@@ -50,11 +54,7 @@ export function TopBar() {
       {error && <span className="meta err">{error}</span>}
       {!error && syncNote && <span className="meta warn" title="Sync is paused; showing the last pull">{syncNote}</span>}
       {!error && !syncNote && lastMessage && <span className="meta">{lastMessage}</span>}
-      {!error && !lastMessage && view && (
-        <span className="meta">
-          {machines.length} machine{machines.length === 1 ? "" : "s"} · remote {since(view.pulled_at)}
-        </span>
-      )}
+      {!error && !lastMessage && machinesLine && widthClass !== "compact" && <span className="meta">{machinesLine}</span>}
       <button className={`needs-me ${screen === "home" ? "on" : ""}`} onClick={() => { closeHelp(); goHome(); }} title="everything waiting on you">
         <Inbox size={14} /> Needs me{needsMe > 0 && <span className="badge-count num">{needsMe}</span>}
       </button>
