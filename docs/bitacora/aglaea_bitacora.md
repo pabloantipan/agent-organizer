@@ -122,3 +122,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-09 — the Deltagos mark recoloured and drawn (deltagos-mark-drawn.html, .png); floating-icon Amendment 4, gears' colours A/B/C for Pablo.
 - 2026-10-09 — ram-indicator design spec (0101): top bar, popover, icon ring, critical notification.
 - 2026-10-09 — initiatives-view design spec (0104 A): cards awake/asleep, Sleep confirms, Wake refused at four, rail folds Asleep and Archived, memory on Agents rows.
+- 2026-10-09 — ram-view: memory button stays after Usage, before Help; Rescan not moved; spec §1 amended (b23bf10).
