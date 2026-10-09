@@ -45,8 +45,9 @@ word always carries the level (principle 4).
 
 ## 1. The top bar indicator
 
-It sits in the top bar's right cluster, after `Usage` and before Rescan:
-`… Needs me 3 · Usage · ▣ 12 GB free · Rescan · ? · ⚙`. The glyph is a
+It sits in the top bar's right cluster, right after `Usage` and before
+Help: `… Needs me 3 · Rescan · Usage · ▣ 12 GB free · ? · ⚙` (amended
+2026-10-09 to the bar as built; Rescan stays where it is). The glyph is a
 memory chip outline at 16 px. **It is not a badge**: it carries no count
 and no bubble. Needs me stays the one badge (FR-14).
 
