@@ -328,7 +328,7 @@ is the grid's shape exactly, so it should be taken as is. Icon Composer's
 |---|---|---|
 | F20 | recognise Deltagos in the Dock and Finder | a Dock shot on lodestar (macOS 26.1): the tile, the D and both gears, with no grey frame around it |
 | F21 | read it small | Finder's list view (16 px) shows the D alone; the sidebar or a 32 px slot shows the D and the gears; neither is a smear |
-| F22 | trust the files are the drawing | `build/darwin/iconfile.icns` and `build/appicon.png` match the files in `docs/ux/inputs/deltagos-mark/app-icon/`, byte for byte |
+| F22 | trust the files are the drawing | `build/darwin/iconfile.icns` and `build/appicon.png` match the files in `docs/ux/inputs/deltagos-mark/app-icon/`, byte for byte. The icns is the authority, not the iconset PNGs: `iconutil` stores the 16 and 32 px slots as ARGB (ic04, ic05), which re-encodes translucent edge pixels, so those two slots decode equal to the iconset at every opaque pixel only (amended 2026-10-09, dm-build) |
 
 ## Acceptance, in the lead's terms
 
