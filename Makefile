@@ -10,6 +10,9 @@ WAILS   ?= $(shell command -v wails 2>/dev/null || echo $(HOME)/go/bin/wails)
 
 build: ## build the .app for this machine
 	$(WAILS) build -clean -platform $(PLATFORM) -ldflags "$(LDFLAGS)"
+	@# Wails 2.15 always makes the .icns from build/appicon.png; the exported one
+	@# (floating-icon Amendment 5) carries the 16 and 32 px cuts, so it replaces it.
+	cp build/darwin/iconfile.icns "$(APP)/Contents/Resources/iconfile.icns" && codesign --force --deep --sign - "$(APP)"
 
 review-build: build ## build/bin/Deltagos Review.app: a copy under cl.antipan.organizer.review for reviewers
 	scripts/review-build.sh "$(APP)"
