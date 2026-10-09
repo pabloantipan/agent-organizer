@@ -29,6 +29,11 @@ magenta and periwinkle. Today the floating icon draws three bars
 - **FR-2** Reduce motion: the still frame (travel 0), nothing turns.
 - **FR-3** The app icon (Dock, Finder) is the still frame on the tile; the
   32 px cut is the D and gears with no gaps, the 16 px cut the D alone.
+  (Amendment 1, 2026-10-09, the FSE: Aglaea exported it, floating-icon
+  Amendment 5, 7bb03f4. The builder copies
+  `docs/ux/inputs/deltagos-mark/app-icon/iconfile.icns` to
+  `build/darwin/iconfile.icns` and its `appicon.png` over
+  `build/appicon.png`, and draws nothing.)
 - **FR-4** The Help's header shows the full mark with its full motion (the
   web drawing ported to a React component, points, notches and varying
   speed kept), the wordmark "Deltagos" in Manrope 800 and the subtitle
@@ -41,6 +46,7 @@ magenta and periwinkle. Today the floating icon draws three bars
 |---|---|---|---|
 | F17 | 1 | the review build's icon at 56/72/88 pt, shots | the D, its moving gaps and both turning gears read; colours as FR-1 |
 | F18 | 3 | Finder and Dock at large, 32 and 16 px (`iconutil` output, shots) | still frame; 32 px D and gears, no gaps; 16 px D alone; nothing smears |
+| F20-F22 | 3 | Aglaea's rows (floating-icon Amendment 5): the Dock on lodestar from the installed review build, Finder at 16 and 32 px, the two files byte for byte | as her spec; no grey frame |
 | F19 | 2, 4 | Reduce motion on: icon and Help header | still frame; nothing turns or travels |
 | H1 | 4 | Help header, shot beside `deltagos-mark-drawn.html` | same form and motion, wordmark and subtitle |
 | X0 | all | `make test`, `cd frontend && npm run build`, `wails build`, the floating icon's existing F-rows | pass |
@@ -54,9 +60,9 @@ paths (card `float-focus-steal`), the RAM ring's logic (`ram-view`).
 
 ## Rabbit holes
 
-- **Small-size cuts.** Wails makes the `.icns` from `build/appicon.png`
-  alone; per-size cuts need a hand-built `.icns` (`iconutil`) that the build
-  keeps. The builder checks how Wails v2.15 takes one and records it.
+- **Small-size cuts.** Settled by Amendment 1: Wails uses
+  `build/darwin/iconfile.icns` before generating one; macOS 26 may frame an
+  icon that does not fill the grid (Aglaea's rabbit hole, F20 checks it).
 - **Gear meshing** was checked numerically in the sketch; keep the
   constants exactly, or the teeth overlap.
 
@@ -64,5 +70,5 @@ paths (card `float-focus-steal`), the RAM ring's logic (`ram-view`).
 
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
-| `deltagos-mark` | F17-F19, H1, X0 | ram-view (both touch `floaticon_darwin.m`) | true |
+| `deltagos-mark` | F17-F22, H1, X0 | ram-view (both touch `floaticon_darwin.m`) | true |
 | `float-focus-steal` | its S1-S4 | — | false |

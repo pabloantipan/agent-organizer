@@ -8,9 +8,9 @@ stage: one-window
 updated: 2026-10-09
 next: "sup50 runs it after float-focus-steal (0105)"
 depends_on: [ram-view]
-boundary: ["floaticon_darwin.m/.h/.go (the tile's layers only)", "build/appicon.png and the darwin icon files", "new DeltagosMark.tsx and css, HelpView.tsx (header)", "not: the panel's list, activation paths (float-focus-steal), the RAM ring's logic"]
+boundary: ["floaticon_darwin.m/.h/.go (the tile's layers only)", "build/appicon.png and build/darwin/iconfile.icns (copied from docs/ux/inputs/deltagos-mark/app-icon/, never redrawn)", "new DeltagosMark.tsx and css, HelpView.tsx (header)", "not: the panel's list, activation paths (float-focus-steal), the RAM ring's logic"]
 spec: "docs/specs/deltagos-mark.md (FR-1 to FR-4; docs/ux/specs/floating-icon.md Amendment 4)"
-gate: "docs/specs/deltagos-mark.md Acceptance, rows F17 to F19, H1 and X0"
+gate: "docs/specs/deltagos-mark.md Acceptance, rows F17 to F22, H1 and X0"
 ui_review: true
 ---
 
@@ -19,7 +19,7 @@ ui_review: true
 itself.
 
 ## Gate
-docs/specs/deltagos-mark.md, F17 to F19, H1 and X0.
+docs/specs/deltagos-mark.md, F17 to F22, H1 and X0.
 
 ## Notes
 - 2026-10-09: supervisor sup50 (window 8383), spawned by the FSE.
