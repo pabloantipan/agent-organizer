@@ -251,4 +251,7 @@ organizer to finish sleeping.` under that card.
 
 ## Technical notes
 
-(left for the FSE)
+The FSE, 2026-10-09: build spec `docs/specs/initiatives-view.md`, cards
+`initiatives-sleep` and `initiatives-view`, accept record 0106. O1: read
+from the status line's comment. O2: readable. O3: asked of Hephaistos.
+O4: archived apart is the factory's own rule; named in 0106.
