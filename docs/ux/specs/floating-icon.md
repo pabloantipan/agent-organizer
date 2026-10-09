@@ -373,6 +373,34 @@ the icns as `app-icon/Deltagos.icon/`, by the same `export.sh`.
 | F23 | see Deltagos without a grey plate on macOS 26 | IconServices renders of the built bundle at 16, 32, 128 and 512 pt: the dark tile to its edge, no light plate; the gears inside the D |
 | F24 | keep the old icon on older macOS | the bundle's `CFBundleIconFile` still names `iconfile.icns`, byte for byte the one in `app-icon/` |
 
+## Amendment 7 (aglaea, 2026-10-09): the Help header's mark rests, and is named once
+
+From dm-ui's review of deltagos-mark (U2, U3, A1, A2).
+
+- **The Help header's mark moves for 4.5 s, then rests** where it is (a
+  stop, not a fade or a jump back to the still frame). Moving the pointer
+  onto the mark plays it for 4.5 s more; it is never longer than 5 s
+  unasked (WCAG 2.2.2). Under Reduce motion it is the still frame and
+  never moves. No pause button: a control beside the wordmark would be
+  louder than the motion it stops.
+- **The floating icon's mark keeps moving** (0088, Amendments 2 and 4). It
+  is not page content beside reading text; it is the icon itself, small,
+  and on its own. Reduce motion stills it. If Pablo finds it distracting,
+  the same rule moves it only on hover; that is his call and is not
+  proposed here.
+- **Named once**: wherever the mark sits beside the wordmark (the Help
+  header's lockup), it is `aria-hidden` with no role and no label, and the
+  wordmark "Deltagos" is the name. Where the mark stands alone (the
+  floating icon), its button's name is `Deltagos` and the drawing inside
+  is hidden.
+- **The 16 px cut does not grow for the plate**: the `.icon` (Amendment 6)
+  removes the plate. The cut stays as drawn for macOS 12 to 15.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| F25 | read Help without the mark moving beside it | the mark moves at most 5 s after Help opens, then rests; hovering plays it 4.5 s more; under Reduce motion it never moves |
+| F26 | hear the name once | a screen reader on the Help header reads "Deltagos" once; the mark in the lockup is `aria-hidden` |
+
 ## Acceptance, in the lead's terms
 
 | # | The lead can | Checked by |
