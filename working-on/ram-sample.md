@@ -6,7 +6,7 @@ branch: ram-sample
 seat: rs-build
 stage: one-window
 updated: 2026-10-09
-next: "waits on 0103 (accept); then the FSE spawns the task's supervisor"
+next: "sup49 runs it (0103 accepted 2026-10-09); first of two"
 depends_on: []
 boundary: ["new internal/memory and its tests", "internal/scan/agents.go (ps columns, footprint, tree sum), model.Agent (mem_bytes)", "internal/service (AgentsView.memory, level times, warn rule), internal/cli (memory command), frontend/wailsjs regenerated", "not: the top bar, the floating icon, any view, posting the notification"]
 spec: "docs/specs/ram-indicator.md (FR-1 to FR-4)"
@@ -20,3 +20,6 @@ This card is the reading; `ram-view` draws it.
 
 ## Gate
 docs/specs/ram-indicator.md, G1 to G7 and X0.
+
+## Notes
+- 2026-10-09: supervisor sup49 (window 7535), spawned by the FSE.
