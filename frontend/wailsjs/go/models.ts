@@ -590,6 +590,7 @@ export namespace model {
 	    undelivered: number;
 	    no_identity: boolean;
 	    card?: CardJoin;
+	    mem_bytes: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Agent(source);
@@ -618,6 +619,7 @@ export namespace model {
 	        this.undelivered = source["undelivered"];
 	        this.no_identity = source["no_identity"];
 	        this.card = this.convertValues(source["card"], CardJoin);
+	        this.mem_bytes = source["mem_bytes"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -843,6 +845,94 @@ export namespace model {
 	        this.initiatives = source["initiatives"];
 	    }
 	}
+	export class MemoryInitiative {
+	    initiative: string;
+	    unassigned: boolean;
+	    bytes: number;
+	    agents: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new MemoryInitiative(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.initiative = source["initiative"];
+	        this.unassigned = source["unassigned"];
+	        this.bytes = source["bytes"];
+	        this.agents = source["agents"];
+	    }
+	}
+	export class MemorySession {
+	    name: string;
+	    initiative: string;
+	    bytes: number;
+	    agent_id: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new MemorySession(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.initiative = source["initiative"];
+	        this.bytes = source["bytes"];
+	        this.agent_id = source["agent_id"];
+	    }
+	}
+	export class Memory {
+	    pressure: string;
+	    // Go type: time
+	    since: any;
+	    since_opened: boolean;
+	    // Go type: time
+	    was_critical_until?: any;
+	    total_bytes: number;
+	    free_bytes: number;
+	    top: MemorySession[];
+	    agents_bytes: number;
+	    by_initiative: MemoryInitiative[];
+	    warn: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new Memory(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.pressure = source["pressure"];
+	        this.since = this.convertValues(source["since"], null);
+	        this.since_opened = source["since_opened"];
+	        this.was_critical_until = this.convertValues(source["was_critical_until"], null);
+	        this.total_bytes = source["total_bytes"];
+	        this.free_bytes = source["free_bytes"];
+	        this.top = this.convertValues(source["top"], MemorySession);
+	        this.agents_bytes = source["agents_bytes"];
+	        this.by_initiative = this.convertValues(source["by_initiative"], MemoryInitiative);
+	        this.warn = source["warn"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
 	export class Milestone {
 	    date: string;
 	    title: string;
@@ -1641,6 +1731,8 @@ export namespace service {
 	    roles: model.Role[];
 	    // Go type: time
 	    sampled_at: any;
+	    memory?: model.Memory;
+	    memory_reason?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new AgentsView(source);
@@ -1652,6 +1744,8 @@ export namespace service {
 	        this.unassigned = this.convertValues(source["unassigned"], model.Agent);
 	        this.roles = this.convertValues(source["roles"], model.Role);
 	        this.sampled_at = this.convertValues(source["sampled_at"], null);
+	        this.memory = this.convertValues(source["memory"], model.Memory);
+	        this.memory_reason = source["memory_reason"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
