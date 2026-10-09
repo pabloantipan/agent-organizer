@@ -1,6 +1,6 @@
 ---
 title: "Deltagos comes to the front by itself and pulls Pablo off his desktop: find which path activates it, and stop it"
-status: now
+status: done
 repos: [organizer]
 branch: float-focus-steal
 seat: ffs-build
@@ -12,6 +12,7 @@ boundary: ["floaticon_darwin.m and floaticon_darwin.go, and their check scripts"
 spec: "this card's Spec section"
 gate: "this card's Gate section, rows S1 to S4"
 ui_review: false
+review: pass
 ---
 
 ## Spec
@@ -45,6 +46,13 @@ orders the main window front or activates the app.
   Met from logs and code, no driven input (FSE ~19:21): F1, F7 (click outside), F8, F10, F11, F12, F16 and the A2 growth (200 ms) read back from Pablo's own pointer on the fix build (`.wt-notes/ffs-build/s3-evidence.txt`, `progress.md` § S3 rows). Not re-run, code untouched by the fix: F2-F6, F9, F13-F15, F17-F19; Escape not exercised (same `dismissList` as the click outside); F9's AX read not taken (the review app was gone after the stop)
 - [x] S4 `make test`, `wails build` pass
   Met at 33cf4ff from a clean clone (removed): go vet + go test ok, vitest 362/362, `wails build` exit 0, 0 CGS/SLS symbols (`.wt-notes/ffs-build/s4-make-test.out`, `s4-wails-build.out`)
+
+## Review
+Pass at 33cf4ff (branch unmoved). Unmet gate rows: none. Reviewer ffs-review, 2026-10-09.
+- S1: exp8 reads as § Cause: stand-in quit 16:20:48.502, Review activated 48.507 on desktop 4 (`_handleActivatedEvent`, event 13, no orderFront of ours since 16:20:38), desktop 3 at 49.136.
+- S2 (as amended under 0108, the stop ~19:20): 32 scripted moves plus 11 of Pablo's, none landing on Review; Review activated only at launch 18:48:22, on arrivals at desktop 2 where it was topmost, and at Pablo's click (event 1) and icon double-click 18:56:51-18:56:58. Ran 19 min, not 30, by the stop. Retest 18:46:57: hand-on refused, handed to Chrome, no desktop change.
+- S3: logged rows hold. The rows that were not re-run are drawing, placement and drag, and the fix does not touch them. The changed `dismissList` branch (app active) is exercised by F16's icon close.
+- S4: rerun from a fresh clone: make test 0 (vitest 362/362), wails build 0, 0 CGS/SLS symbols.
 
 ## Cause (S1, ffs-build, 2026-10-09)
 None of the card's candidates: the steal is macOS's own fallback activation,
