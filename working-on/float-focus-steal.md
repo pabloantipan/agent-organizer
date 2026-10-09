@@ -37,10 +37,7 @@ orders the main window front or activates the app.
 - [ ] S1 the cause named with evidence: a FLOAT_LOG run (or an added
   activation log) showing which call activated or ordered front the window
   at an unrequested moment, reproduced on lodestar
-- [ ] S2 after the fix, with "switch to a Space with open windows" on: 30
-  minutes moving between three desktops with Deltagos home on desktop 2 and
-  the icon used twice; the frontmost-app log shows Deltagos only after the
-  two uses
+- [ ] S2 after the fix, with "switch to a Space with open windows" on: 30 minutes moving between three desktops with Deltagos home on desktop 2 and the icon used twice; the frontmost-app log shows Deltagos activated only after the two uses, or on arriving at desktop 2 where its window is the topmost (the lead's own move; macOS does this for any app), and never a desktop change the lead did not make (amended by the FSE under 0108, 2026-10-09: ffs-build's question at 95de4fb)
 - [ ] S3 the floating icon's existing checks (F-rows of floating-icon-2)
   still pass
 - [ ] S4 `make test`, `wails build` pass
@@ -75,4 +72,4 @@ log, epoch seconds), `s1-frontmost.log` (frontmost app with desktop number),
 - 2026-10-09: supervisor sup50 (window 8383), spawned by the FSE.
 - 2026-10-09, ffs-build: the fix's retest is met at 18:46:57: the system's hand-on reached Deltagos Review on desktop 2, was refused, and went to Chrome 25 ms later with no desktop change (`.wt-notes/ffs-build/fix-float.log`, `fix-frontmost.log`, `fix-steps.log`; `scripts/focus-steal-check.sh`, ef9caac). For a few milliseconds the frontmost log still names Deltagos Review: macOS activates it before the refusal can hand activation on.
 - 2026-10-09, ffs-build: in S2, each move that lands on desktop 2 while Review's window is the topmost one there makes macOS activate Review. The app orders nothing (event 13, no `orderFront` in `s2-float.log`). Any app whose window is on top of the desktop you arrive at gets the same. Read literally, "only after the two uses" counts these arrivals. Pablo also clicked the review app himself at 18:56:51-18:57:05 (compact, list, double-click).
-- decide: S2's arrivals at Review's own home: options "count the arrival activation at its own home as the lead's act (no desktop pulled, no window ordered front)" | "rerun S2 with another app's window above Review on desktop 2"
+- answered by the FSE (0108): the arrival at its own home counts as the lead's act; S2 reworded. No rerun needed for it.
