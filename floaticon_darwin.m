@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+#include <errno.h>
 #include "floaticon_darwin.h"
 
 extern void floatIconClicked(char *origin);
@@ -342,7 +343,9 @@ static void applyRing(void) {
 
 // The marker is how the home desktop is known: a window that is not on all
 // desktops stays where it was ordered in, and isOnActiveSpace is public.
-static void orderHere(NSWindow *w, dispatch_block_t then) {
+static void orderHere(NSWindow *w, NSString *why, dispatch_block_t then) {
+    flog(@"activation: orderFrontRegardless %@ (%@) by %@, app active=%d", w == mainWin ? @"main window" : w == marker ? @"home marker" : @"window",
+         why, NSStringFromRect([w frame]), [NSApp isActive]);
     NSWindowCollectionBehavior b = [w collectionBehavior];
     [w setCollectionBehavior:(b & ~NSWindowCollectionBehaviorCanJoinAllSpaces) | NSWindowCollectionBehaviorMoveToActiveSpace];
     [w orderFrontRegardless];
@@ -352,7 +355,7 @@ static void orderHere(NSWindow *w, dispatch_block_t then) {
     });
 }
 
-static void markHome(void) {
+static void markHome(NSString *why) {
     if (!marker) {
         marker = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 1, 1) styleMask:NSWindowStyleMaskBorderless backing:NSBackingStoreBuffered defer:NO];
         [marker setOpaque:NO];
@@ -363,7 +366,7 @@ static void markHome(void) {
         [marker setCollectionBehavior:NSWindowCollectionBehaviorIgnoresCycle | NSWindowCollectionBehaviorManaged];
     }
     [marker orderOut:nil];
-    orderHere(marker, nil);
+    orderHere(marker, [NSString stringWithFormat:@"markHome from %@", why], nil);
     flog(@"home marked");
 }
 
@@ -445,7 +448,7 @@ static void update(NSString *why, BOOL fsCheck) {
         back = YES;
         restoreChrome();
         [mainWin setFrame:homeFrame display:NO];
-        orderHere(mainWin, nil);
+        orderHere(mainWin, [NSString stringWithFormat:@"update(%@), returning and the home marker on the active desktop", why], nil);
         state = StateHome;
         flog(@"%@: home desktop active, window back", why);
     }
@@ -534,6 +537,102 @@ static void reanchorList(NSRect tile) {
     flog(@"list follows the icon to %@", NSStringFromRect(f));
 }
 
+// ---------- activation: only the lead's own acts (float-focus-steal) ----------
+
+// The icon is a window on every desktop, so macOS counts Deltagos as an app
+// with a window wherever the lead is. When the app in front quits or hides,
+// macOS hands activation to the most recent such app; for Deltagos AppKit
+// then makes the main window key, and with "switch to a Space with open
+// windows" on, a main window at home on another desktop pulls the lead there.
+// That activation is refused here: the window goes back home the way a
+// dismissed list does (Returning, ordered in when its desktop is next shown)
+// and activation goes where macOS would have sent it without the icon.
+static double leadActAt;               // our own activation for a lead's act (a click, a double-click, the notification)
+static double otherLeftAt;             // another app quit or hid
+static pid_t frontPid;                 // the last other app in front
+static NSRunningApplication *beforeList; // the app in front when the list opened
+
+static BOOL gonePid(pid_t pid) { return pid > 0 && kill(pid, 0) == -1 && errno == ESRCH; }
+
+// Another app's normal window, topmost on this desktop; nil when there is none.
+static NSRunningApplication *topOther(void) {
+    NSArray *list = CFBridgingRelease(CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, kCGNullWindowID));
+    pid_t me = getpid();
+    for (NSDictionary *w in list) {
+        if ([w[(id)kCGWindowLayer] intValue] != 0) continue;
+        pid_t pid = [w[(id)kCGWindowOwnerPID] intValue];
+        if (pid == me || gonePid(pid)) continue;
+        NSRunningApplication *a = [NSRunningApplication runningApplicationWithProcessIdentifier:pid];
+        if (a && [a activationPolicy] == NSApplicationActivationPolicyRegular && ![a isHidden]) return a;
+    }
+    return nil;
+}
+
+static BOOL onThisDesktop(NSRunningApplication *a) {
+    if (!a || [a isTerminated] || [a isHidden]) return NO;
+    NSArray *list = CFBridgingRelease(CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, kCGNullWindowID));
+    for (NSDictionary *w in list)
+        if ([w[(id)kCGWindowLayer] intValue] == 0 && [w[(id)kCGWindowOwnerPID] intValue] == [a processIdentifier]) return YES;
+    return NO;
+}
+
+// Activation goes to an app on this desktop, never to one whose windows are
+// elsewhere (that would move the lead too): the preferred one if it has a
+// window here, else the topmost other window's app, else Finder, which owns
+// every desktop.
+static void handActivation(NSRunningApplication *prefer, NSString *why) {
+    NSRunningApplication *to = onThisDesktop(prefer) ? prefer : topOther();
+    if (!to) to = [[NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.apple.finder"] firstObject];
+    BOOL ok = [to activateWithOptions:0];
+    flog(@"activation: handed to %@ pid %d (%@): %d", [to localizedName], [to processIdentifier], why, ok);
+}
+
+static void leadAct(void) { leadActAt = now(); }
+
+// The app is about to become active. Ours, for a lead's act, passes; so does
+// any activation with no app just gone (the Dock, Cmd-Tab, a click on a
+// window: the lead's). The system's hand-on after another app quit or hid is
+// refused when Deltagos has no window on this desktop.
+static void willBecomeActive(void) {
+    if (!started) return;
+    BOOL ours = now() - leadActAt < 1;
+    BOOL handedOn = now() - otherLeftAt < 0.5 || gonePid(frontPid) ||
+                    [[NSRunningApplication runningApplicationWithProcessIdentifier:frontPid] isHidden];
+    if (ours || !handedOn) return;
+    BOOL away = [mainWin isVisible] && ![mainWin isOnActiveSpace];
+    if ([mainWin isVisible] && !away) return; // a window here: no desktop moves
+    if ([mainWin styleMask] & NSWindowStyleMaskFullScreen) return; // its own Space; left to the system
+    if (away && state == StateHome) {
+        homeFrame = [mainWin frame];
+        [mainWin orderOut:nil];
+        state = StateReturning;
+    }
+    flog(@"activation: refused the system's hand-on (pid %d left), main window %@; state=%s", frontPid,
+         away ? @"sent home (returning)" : @"not shown", stateName[state]);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        handActivation(nil, @"the system's hand-on refused");
+        update(@"hand-on refused", NO);
+    });
+}
+
+static void watchOthers(void) {
+    NSNotificationCenter *wc = [[NSWorkspace sharedWorkspace] notificationCenter];
+    pid_t me = getpid();
+    [wc addObserverForName:NSWorkspaceDidActivateApplicationNotification object:nil queue:[NSOperationQueue mainQueue]
+                usingBlock:^(NSNotification *n) {
+                    NSRunningApplication *a = n.userInfo[NSWorkspaceApplicationKey];
+                    if ([a processIdentifier] != me) frontPid = [a processIdentifier];
+                }];
+    for (NSString *name in @[ NSWorkspaceDidTerminateApplicationNotification, NSWorkspaceDidHideApplicationNotification ])
+        [wc addObserverForName:name object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *n) {
+            NSRunningApplication *a = n.userInfo[NSWorkspaceApplicationKey];
+            if ([a processIdentifier] != me) otherLeftAt = now();
+        }];
+    // Not the main queue: it must run before AppKit makes the window key.
+    [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationWillBecomeActiveNotification object:NSApp queue:nil
+                                                  usingBlock:^(NSNotification *n) { willBecomeActive(); }];
+}
+
 static double clickUpAt;              // wall time of the mouse-up that asked for the list, for the log
 
 static void bringList(void) {
@@ -545,6 +644,7 @@ static void bringList(void) {
     } else if (state == StateReturning) {
         listFromCompact = NO;
     }
+    if (![NSApp isActive]) beforeList = [[NSWorkspace sharedWorkspace] frontmostApplication];
     state = StateListing;
     listChrome();
     setMin(NSMakeSize(kListW, kListMinH));
@@ -557,7 +657,9 @@ static void bringList(void) {
     flog(@"click: list at %@ (from %@)", NSStringFromRect(f), listFromCompact ? @"compact" : @"home");
     // Window first, activate after: activating while the window is on another
     // desktop switches the user there.
-    orderHere(mainWin, ^{
+    orderHere(mainWin, @"bringList", ^{
+        flog(@"activation: makeKeyAndOrderFront and activateIgnoringOtherApps by bringList, app active=%d", [NSApp isActive]);
+        leadAct();
         [mainWin makeKeyAndOrderFront:nil];
         [NSApp activateIgnoringOtherApps:YES];
         flog(@"click +0.15s: onActive=%d frame=%@", [mainWin isOnActiveSpace], NSStringFromRect([mainWin frame]));
@@ -921,6 +1023,39 @@ static void build(void) {
     applyRing();
 }
 
+// The activation log (float-focus-steal S1), only with FLOAT_LOG: every time
+// the app becomes or stops being active, or the main window becomes key or
+// main, with the state, the desktop, the event being handled and the calls
+// that led there, so an activation nobody asked for names its caller (ours,
+// or the system's: an event, an Apple event, the window server).
+static void logActivation(NSString *what) {
+    NSEvent *e = [NSApp currentEvent];
+    NSAppleEventDescriptor *ae = [[NSAppleEventManager sharedAppleEventManager] currentAppleEvent];
+    NSArray *stack = [NSThread callStackSymbols];
+    NSMutableArray *frames = [NSMutableArray array];
+    for (NSUInteger i = 2; i < MIN(stack.count, 22); i++) {
+        NSString *f = [stack[i] stringByReplacingOccurrencesOfString:@"  +" withString:@" " options:NSRegularExpressionSearch range:NSMakeRange(0, [stack[i] length])];
+        [frames addObject:f];
+    }
+    flog(@"activation: %@; state=%s main visible=%d onActive=%d key=%d marker onActive=%d; event %@; apple event %@; stack: %@", what,
+         stateName[state], [mainWin isVisible], [mainWin isOnActiveSpace], [mainWin isKeyWindow], [marker isOnActiveSpace],
+         e ? [NSString stringWithFormat:@"type %lu window %ld", (unsigned long)[e type], (long)[e windowNumber]] : @"none",
+         ae ? [NSString stringWithFormat:@"%@", ae] : @"none", [frames componentsJoinedByString:@" | "]);
+}
+
+static void watchActivation(void) {
+    NSNotificationCenter *c = [NSNotificationCenter defaultCenter];
+    NSDictionary *names = @{
+        NSApplicationWillBecomeActiveNotification : @"app will become active",
+        NSApplicationDidBecomeActiveNotification : @"app did become active",
+        NSApplicationDidResignActiveNotification : @"app resigned active",
+    };
+    for (NSString *n in names)
+        [c addObserverForName:n object:NSApp queue:nil usingBlock:^(NSNotification *x) { logActivation(names[n]); }];
+    [c addObserverForName:NSWindowDidBecomeKeyNotification object:mainWin queue:nil usingBlock:^(NSNotification *x) { logActivation(@"main window became key"); }];
+    [c addObserverForName:NSWindowDidBecomeMainNotification object:mainWin queue:nil usingBlock:^(NSNotification *x) { logActivation(@"main window became main"); }];
+}
+
 void FloatIconStart(const char *logArg, const char *placeFile) {
     char *lp = strdup(logArg), *pp = strdup(placeFile);
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -948,8 +1083,9 @@ void FloatIconStart(const char *logArg, const char *placeFile) {
         places = [NSMutableDictionary dictionaryWithContentsOfFile:placePath ?: @""] ?: [NSMutableDictionary dictionary];
         build();
         placeIcon();
-        markHome();
+        markHome(@"start");
         started = YES;
+        watchOthers();
         NSNotificationCenter *wc = [[NSWorkspace sharedWorkspace] notificationCenter];
         [wc addObserverForName:NSWorkspaceActiveSpaceDidChangeNotification object:nil queue:[NSOperationQueue mainQueue]
                     usingBlock:^(NSNotification *n) { update(@"space-change", YES); }];
@@ -983,6 +1119,7 @@ void FloatIconStart(const char *logArg, const char *placeFile) {
                 doubleClicked();
             });
             dispatch_resume(usr2);
+            watchActivation();
         }
         flog(@"start: main=%@ min=%@ reduceMotion=%d ignoresMouse=%d icon window %ld", NSStringFromRect([mainWin frame]), NSStringFromSize(appMinSize), reduceMotion(), [panel ignoresMouseEvents], (long)[panel windowNumber]);
         update(@"start", YES);
@@ -1063,7 +1200,7 @@ static void goFull(NSString *why) {
                 [[mainWin animator] setFrame:f display:YES];
             } completionHandler:grown];
         }
-        markHome();
+        markHome(why);
         flog(@"full (%@): growing to %@ min=%@", why, NSStringFromRect(f), NSStringFromSize([mainWin minSize]));
         update(@"full", NO);
 }
@@ -1087,7 +1224,9 @@ static void growFromIcon(NSString *why) {
     double t0 = now();
     BOOL still = reduceMotion();
     [mainWin setAlphaValue:still ? 1 : 0];
-    orderHere(mainWin, ^{
+    orderHere(mainWin, [NSString stringWithFormat:@"growFromIcon(%@)", why], ^{
+        flog(@"activation: makeKeyAndOrderFront and activateIgnoringOtherApps by growFromIcon(%@), app active=%d", why, [NSApp isActive]);
+        leadAct();
         [mainWin makeKeyAndOrderFront:nil];
         [NSApp activateIgnoringOtherApps:YES];
     });
@@ -1113,7 +1252,7 @@ static void growFromIcon(NSString *why) {
         } completionHandler:grown];
     }
     floatIconExpanded(); // the list is already closed; the view it covered shows
-    markHome();
+    markHome(why);
     flog(@"full (%@): growing from the icon %@ to %@, %.0f ms after the click, the list not reopened", why, NSStringFromRect(tile),
          NSStringFromRect(f), clickUpAt > 0 ? (now() - clickUpAt) * 1000 : -1);
     clickUpAt = 0;
@@ -1130,7 +1269,11 @@ static void dismissList(NSString *why) {
     [mainWin setFrame:homeFrame display:NO];
     state = listFromCompact ? StateCompacted : StateReturning;
     floatIconClosed();
-    [NSApp deactivate]; // focus goes back to what was in front
+    // Focus goes back to what was in front: [NSApp deactivate] alone leaves
+    // Deltagos active with no window here (Darwin 25), the most recent app
+    // for macOS to hand activation to later. A click outside already moved it.
+    if ([NSApp isActive]) handActivation(beforeList, @"the list closed");
+    beforeList = nil;
     // F16 reads the close back: isVisible after the order-out, and for the
     // icon's click its time from the mouse-up.
     NSString *at = @"";
