@@ -82,6 +82,9 @@ function InitiativeScreen() {
   // or initiative opens at its top, not at the scroll the last one left.
   const body = useRef<HTMLDivElement>(null);
   useEffect(() => { body.current?.scrollTo(0, 0); }, [selectedInitiative, sub]);
+  // Every initiative's Agents, with the sessions outside every initiative:
+  // where a memory session with no initiative lands (ram-indicator §1).
+  if (!selectedInitiative && sub === "agents") return <div ref={body} className="board-wrap"><ErrorBoundary name="AgentsView"><AgentsView /></ErrorBoundary></div>;
   if (!view) return <div className="board-wrap"><div className="empty">Loading…</div></div>;
   const rows = (view.board.initiatives ?? []).filter((i) => i.id === selectedInitiative);
   const initiative = rows.find((i) => i.local) ?? rows[0];

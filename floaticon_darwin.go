@@ -115,5 +115,18 @@ func (a *App) FloatPick() { C.FloatIconFull() }
 // FloatDismiss is picking nothing: the window goes back home.
 func (a *App) FloatDismiss() { C.FloatIconDismiss() }
 
+// floatIconMemory hands the ring the memory reading's level (ram-indicator
+// §2): "normal", "high" or "critical"; anything else, no reading included,
+// draws nothing.
+func floatIconMemory(level string) {
+	l := C.CString(level)
+	defer C.free(unsafe.Pointer(l))
+	C.FloatIconMemory(l)
+}
+
+// floatIconBringFull brings Deltagos full to this desktop for the memory
+// notification's click (§3).
+func floatIconBringFull() { C.FloatIconBringFull() }
+
 // FloatListHeight sizes the list to its rows, within §3's limits.
 func (a *App) FloatListHeight(height int) { C.FloatIconListHeight(C.int(height)) }

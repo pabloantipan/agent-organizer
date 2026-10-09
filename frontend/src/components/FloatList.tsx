@@ -5,6 +5,7 @@ import { FloatDismiss, FloatListHeight, FloatPick } from "../../wailsjs/go/main/
 import { useBoard } from "../stores/board.store";
 import { filterList, floatList, focusOrder, foldSignals, HOME, homeCount, homeLabel, type FloatRow, type Signal } from "../lib/floatList";
 import { useScrollEdges } from "../lib/useScrollEdges";
+import { MemoryFloatLine } from "./MemoryFloatLine";
 import "../styles/float.css";
 
 /** The list panel the floating icon opens (docs/ux/specs/floating-icon.md
@@ -14,7 +15,7 @@ import "../styles/float.css";
  *  clearing), a click outside or the icon send it home; a double-click on
  *  the icon opens it full at the view it last showed. */
 export function FloatList() {
-  const { view, agents, loading, openInitiative, goHome } = useBoard();
+  const { view, agents, loading, openInitiative, goHome, openAgentRow } = useBoard();
   const [open, setOpen] = useState(false);
   const [origin, setOrigin] = useState("bottom right");
   const [query, setQuery] = useState("");
@@ -56,6 +57,13 @@ export function FloatList() {
     setOpen(false);
     if (key === HOME) goHome();
     else openInitiative(key, useBoard.getState().sub);
+    void FloatPick().catch(() => undefined);
+  };
+  // A memory session (ram-indicator §2) is a pick too: full here, at its
+  // Agents row.
+  const pickAgent = (initiative: string, agentId: string) => {
+    setOpen(false);
+    openAgentRow(initiative, agentId);
     void FloatPick().catch(() => undefined);
   };
 
@@ -169,6 +177,7 @@ export function FloatList() {
             autoComplete="off"
           />
         </div>
+        <MemoryFloatLine onPick={pickAgent} />
         <div ref={scroller} id="fl-list" role="listbox" aria-label="Initiatives" className={`fl-body ${edges.top ? "edge-top" : ""} ${edges.bottom ? "edge-bottom" : ""}`}>
           <div className="fl-rows">
           {!query.trim() && (

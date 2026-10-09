@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"os"
+	"strings"
 	"time"
 
 	"organizer/internal/auth"
@@ -38,9 +41,75 @@ func (a *App) startup(ctx context.Context) {
 		return
 	}
 	a.svc = svc
+	// The memory reading (docs/specs/ram-indicator.md): a review forces its
+	// reader only (memfake.go), so since, was_critical_until and the warn
+	// rule run as they do for real; the warning is posted here, Go-side, on
+	// the sample that warns whoever took it (Amendment 4).
+	if r, ok := memoryFake(); ok {
+		svc.SetMemoryReader(r)
+		wruntime.LogInfof(ctx, "memory reading forced by %s=%s", memoryFakeEnv, os.Getenv(memoryFakeEnv))
+	}
+	svc.OnMemoryWarn = a.memoryWarn
+	notifyStart(a)
 	go a.agentTicker(ctx)
 	floatIconStart(ctx)
 }
+
+// refreshAgents samples agents and memory once; the floating icon's ring
+// follows the reading wherever the window is (ram-indicator §2).
+func (a *App) refreshAgents() service.AgentsView {
+	v := a.svc.RefreshAgents()
+	level := ""
+	if v.Memory != nil {
+		level = v.Memory.Pressure
+	}
+	floatIconMemory(level)
+	return v
+}
+
+// memoryWarn posts the warning at critical (Aglaea's §3): title
+// "Memory critical on <machine>", body the free memory and the three
+// biggest sessions. The service decides when (once per entry, never twice in
+// 30 min); this only words and posts it.
+func (a *App) memoryWarn(m model.Memory) {
+	title, body := memoryWarning(a.svc.Config().Machine, m)
+	notifyPost(title, body)
+	wruntime.LogInfof(a.ctx, "memory warning posted: %s: %s", title, body)
+}
+
+func memoryWarning(machine string, m model.Memory) (string, string) {
+	body := gbText(m.FreeBytes) + " GB free."
+	var big []string
+	for _, s := range m.Top[:min(3, len(m.Top))] {
+		big = append(big, s.Name+" "+gbText(s.Bytes)+" GB")
+	}
+	if len(big) > 0 {
+		body += " Biggest: " + strings.Join(big, ", ") + "."
+	}
+	return "Memory critical on " + machine, body
+}
+
+// gbText is the frontend's gb (lib/memory.ts): GB of 2^30 to one decimal, a
+// whole number without .0, and "< 0.1" for something that would read 0.
+func gbText(b uint64) string {
+	s := strings.TrimSuffix(fmt.Sprintf("%.1f", float64(b)/(1<<30)), ".0")
+	if s == "0" && b > 0 {
+		return "< 0.1"
+	}
+	return s
+}
+
+// memoryNotificationClicked is the warning's click: Deltagos full on this
+// desktop with the memory popover open (§3).
+func (a *App) memoryNotificationClicked() {
+	floatIconBringFull()
+	wruntime.EventsEmit(a.ctx, "memory:open")
+}
+
+// MemoryNotifications says whether the warning can reach him: "on", "off"
+// (for Deltagos, in System Settings; the popover says so), "not asked" or
+// "no bundle".
+func (a *App) MemoryNotifications() string { return notifyState() }
 
 // agentTicker re-samples agents and pushes the view to the frontend as the
 // "agents" event, so every tab updates without focus or a manual rescan.
@@ -53,7 +122,7 @@ func (a *App) agentTicker(ctx context.Context) {
 	// First sample right away so the UI does not wait a full period; the
 	// second one, ten seconds later, is the first that can tell working from idle.
 	a.svc.Scan(false)
-	wruntime.EventsEmit(ctx, "agents", a.svc.RefreshAgents())
+	wruntime.EventsEmit(ctx, "agents", a.refreshAgents())
 	t := time.NewTicker(agentsEvery)
 	defer t.Stop()
 	for {
@@ -61,7 +130,7 @@ func (a *App) agentTicker(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-t.C:
-			wruntime.EventsEmit(ctx, "agents", a.svc.RefreshAgents())
+			wruntime.EventsEmit(ctx, "agents", a.refreshAgents())
 		}
 	}
 }
@@ -279,7 +348,7 @@ func (a *App) GetAgents() service.AgentsView {
 	if a.svc == nil {
 		return service.AgentsView{}
 	}
-	return a.svc.RefreshAgents()
+	return a.refreshAgents()
 }
 
 // CreateAgent starts a new probe for an initiative (empty name = animal name).
@@ -360,7 +429,7 @@ func (a *App) Retire(o service.RetireOptions) (service.RetireReport, error) {
 	}
 	r, err := a.svc.Retire(o)
 	if err == nil {
-		wruntime.EventsEmit(a.ctx, "agents", a.svc.RefreshAgents())
+		wruntime.EventsEmit(a.ctx, "agents", a.refreshAgents())
 	}
 	return r, err
 }
@@ -372,7 +441,7 @@ func (a *App) Clean() (service.RetireReport, error) {
 	}
 	r, err := a.svc.Clean()
 	if err == nil {
-		wruntime.EventsEmit(a.ctx, "agents", a.svc.RefreshAgents())
+		wruntime.EventsEmit(a.ctx, "agents", a.refreshAgents())
 	}
 	return r, err
 }
@@ -398,7 +467,7 @@ func (a *App) KillAgent(session string) error {
 	if err := a.svc.KillAgent(session); err != nil {
 		return err
 	}
-	wruntime.EventsEmit(a.ctx, "agents", a.svc.RefreshAgents())
+	wruntime.EventsEmit(a.ctx, "agents", a.refreshAgents())
 	return nil
 }
 
@@ -411,7 +480,7 @@ func (a *App) StopAgent(pid int) error {
 		return err
 	}
 	time.Sleep(300 * time.Millisecond)
-	wruntime.EventsEmit(a.ctx, "agents", a.svc.RefreshAgents())
+	wruntime.EventsEmit(a.ctx, "agents", a.refreshAgents())
 	return nil
 }
 

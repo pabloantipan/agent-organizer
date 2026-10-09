@@ -4,3 +4,5 @@ void FloatIconCompact(void);
 void FloatIconFull(void);
 void FloatIconDismiss(void);
 void FloatIconListHeight(int height);
+void FloatIconMemory(const char *level);
+void FloatIconBringFull(void);
