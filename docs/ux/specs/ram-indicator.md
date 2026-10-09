@@ -183,7 +183,7 @@ the warning hue (`--warning`, the context bar past 50%). Red stays blocked's.
 |---|---|---|
 | normal | a 2 px ring in the tone (`--tone`), 2 px outside the tile: the one he saw | `▣ 12 GB free`, subtle, as before |
 | high | the ring turns amber, 2 px | `▣ 3.1 GB free · high`, text and glyph in amber (9.8:1 on the ground) |
-| critical | amber at 3 px, breathing 1 to 0.5 over 1.6 s; steady under Reduce motion | the chip: amber fill, text in the ground's ink (`--fg-on-warning`, 9.8:1) |
+| critical | amber at 3 px, breathing in width to 4.5 px over 1.6 s at full opacity (amended, below); steady 3 px under Reduce motion | the chip: amber fill, text in the ground's ink (`--fg-on-warning`, 9.8:1) |
 | no reading, or reading failed | the tone ring, as normal | `▣ —` as before |
 
 - **One hue for pressure everywhere**: the top bar, the panel's memory line
@@ -208,6 +208,14 @@ the warning hue (`--warning`, the context bar past 50%). Red stays blocked's.
 | M10 | tell memory pressure from findability | high: an amber 2 px ring; critical: amber 3 px, breathing (steady under Reduce motion); the top bar's high text and critical chip are amber with the ground's ink |
 
 Rows M2 and M4 read "amber" for "the magenta tone" once this is accepted.
+
+**Amended 2026-10-09 (ram-ring-amber UI review, A1)**: critical breathes in
+**width, not opacity**. The ring stays at full opacity and swells from 3 to
+4.5 px and back over 1.6 s, with the 1 px ground keyline following its
+outer edge at full opacity. At opacity 0.5, amber on a white wallpaper
+faded to almost nothing (1.8:1 at full, less at half). Under Reduce motion
+it is a steady 3 px ring. The M10 row reads "3 to 4.5 px, breathing in
+width".
 
 ## Open questions
 
