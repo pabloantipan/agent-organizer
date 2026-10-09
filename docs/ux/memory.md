@@ -259,6 +259,9 @@ the five biggest sessions (process trees) and `Agents ›`. On the icon, a
 ring at high, breathing at critical. One notification per entry into
 critical (10 min out of critical, 30 min floor); clicking it opens the
 popover. It never stops a session.
+The FSE took it as written (dd657fd, cards ram-sample then ram-view,
+`ui_review`). Per-session memory is the footprint summed over the process
+tree. O2 (magenta, not red) is in accept record 0103 for Pablo.
 
 ## Open questions
 
