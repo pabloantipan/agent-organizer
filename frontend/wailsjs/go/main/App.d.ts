@@ -62,6 +62,8 @@ export function KillAgent(arg1:string):Promise<void>;
 
 export function LockNow():Promise<service.LockState>;
 
+export function MemoryNotifications():Promise<string>;
+
 export function MilestoneType():Promise<model.Milestone>;
 
 export function OpenInEditor(arg1:string):Promise<void>;

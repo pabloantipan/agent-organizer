@@ -110,6 +110,10 @@ export function LockNow() {
   return window['go']['main']['App']['LockNow']();
 }
 
+export function MemoryNotifications() {
+  return window['go']['main']['App']['MemoryNotifications']();
+}
+
 export function MilestoneType() {
   return window['go']['main']['App']['MilestoneType']();
 }
