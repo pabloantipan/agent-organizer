@@ -1,13 +1,13 @@
 ---
 title: Accept the Deltagos mark and the focus-steal fix, one task after the RAM indicator
-status: proposed
+status: ruled
 raised: 2026-10-09
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-09
+ruled_by: pablo
 options: ["accept as written", "accept with amendments", "send back"]
-chosen:
+chosen: accept as written
 cards: [float-focus-steal, deltagos-mark]
 threads: []
 supersedes: []
@@ -48,3 +48,7 @@ plus this decision; basis: this initiative's three floating-icon tasks,
 
 The FSE's: accept as written. If the focus steal costs you more than the
 wait, say so and it runs now, beside sup49, before ram-view reaches the icon.
+
+## Ruling
+
+pablo, 2026-10-09, in the organizer on lodestar: ok
