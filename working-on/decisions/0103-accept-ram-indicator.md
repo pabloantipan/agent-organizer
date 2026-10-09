@@ -1,13 +1,13 @@
 ---
 title: Accept the RAM indicator spec and launch its two cards
-status: proposed
+status: ruled
 raised: 2026-10-09
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-09
+ruled_by: pablo
 options: ["accept as written", "accept with amendments", "send back"]
-chosen:
+chosen: accept as written
 cards: [ram-sample, ram-view]
 threads: ["01M4CK6VQ11WY8YJW9YWQ4C63T"]
 supersedes: []
@@ -64,3 +64,7 @@ roadmap-as-a-plan 1 h 22 min (run records 2026-10-06).
 
 The FSE's: accept as written. ram-view does not wait on 0102 (the mark's
 colours): the ring sits outside the tile.
+
+## Ruling
+
+pablo, 2026-10-09, in the organizer on lodestar: ok
