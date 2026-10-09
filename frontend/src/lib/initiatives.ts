@@ -190,13 +190,14 @@ export const isLimitRefusal = (r: { exit_code: number; output: string }) => r.ex
 
 /** What is true after a failed Sleep or Wake, from the rescan (her States,
  *  factory failing): `Nothing changed.` when the status is still what it
- *  was; else the new state and the sessions that still run against it. */
-export function afterLine(id: string, action: "sleep" | "wake", status: string, running: string[]): string {
+ *  was; else the new state and the sessions that still run against it:
+ *  `running` counts them, `names` names each once. */
+export function afterLine(id: string, action: "sleep" | "wake", status: string, running: number, names: string[] = []): string {
   const st = sleepyOf(status);
   const target: Sleepy = action === "sleep" ? "asleep" : "awake";
   if (st !== target) return "Nothing changed.";
-  if (action === "sleep" && running.length > 0) {
-    return `${id} is asleep, but ${running.length} ${running.length === 1 ? "session still runs" : "sessions still run"}: ${listWords(running)}.`;
+  if (action === "sleep" && running > 0) {
+    return `${id} is asleep, but ${running} ${running === 1 ? "session still runs" : "sessions still run"}${names.length ? `: ${listWords(names)}` : ""}.`;
   }
   return `${id} is ${target}.`;
 }

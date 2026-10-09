@@ -158,11 +158,11 @@ describe("while it runs and after (§6, States)", () => {
     expect(firstLine("\n  seat-freeze: no such session\nmore")).toBe("seat-freeze: no such session");
   });
   it("says what is true after a failure", () => {
-    expect(afterLine("organizer", "sleep", "active", [])).toBe("Nothing changed.");
-    expect(afterLine("organizer", "sleep", "paused", ["fse"])).toBe("organizer is asleep, but 1 session still runs: fse.");
-    expect(afterLine("organizer", "sleep", "paused", ["a", "b"])).toBe("organizer is asleep, but 2 sessions still run: a and b.");
-    expect(afterLine("hestia", "wake", "paused", [])).toBe("Nothing changed.");
-    expect(afterLine("hestia", "wake", "active", [])).toBe("hestia is awake.");
+    expect(afterLine("organizer", "sleep", "active", 0)).toBe("Nothing changed.");
+    expect(afterLine("organizer", "sleep", "paused", 1, ["fse"])).toBe("organizer is asleep, but 1 session still runs: fse.");
+    expect(afterLine("organizer", "sleep", "paused", 3, ["a", "b"])).toBe("organizer is asleep, but 3 sessions still run: a and b.");
+    expect(afterLine("hestia", "wake", "paused", 0)).toBe("Nothing changed.");
+    expect(afterLine("hestia", "wake", "active", 0)).toBe("hestia is awake.");
   });
 });
 

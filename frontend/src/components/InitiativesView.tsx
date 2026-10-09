@@ -52,6 +52,9 @@ export function InitiativesView() {
   // only reads the answer, so it is cheap on every board change.
   const board = view?.board;
   useEffect(() => { Factory().then(setFactory, () => setFactory(null)); }, [board]);
+  // Sessions and memory ride the 10 s agents feed; a view opened before its
+  // first tick asks for it, so Sleep's confirm never misses a live session.
+  useEffect(() => { if (!agents) api.getAgents().then(applyAgents, () => undefined); }, [agents, applyAgents]);
 
   // Every initiative once, judged by its local row, in the board's order
   // (the rail's priority).
@@ -65,7 +68,7 @@ export function InitiativesView() {
     return {
       id, i, local: !!i.local, machine: i.machine, state: sleepyOf(i.status),
       live: i.local ? (g?.live ?? i.live ?? 0) : 0,
-      working: live.filter((a) => a.state === "working").map((a) => a.short || a.session || a.name),
+      working: uniq(live.filter((a) => a.state === "working").map((a) => a.short || a.session || a.name)),
       frozen: i.frozen?.length ?? 0,
     };
   });
@@ -93,17 +96,19 @@ export function InitiativesView() {
 
   useEffect(() => {
     if (!land) return;
-    focusIn(land.id, land.to === "id" ? ".ic-id" : land.to === "note" ? ".ic-note" : ".ic-act");
+    // A card with no button (the factory missing, or blind) takes focus on its id.
+    if (!focusIn(land.id, land.to === "id" ? ".ic-id" : land.to === "note" ? ".ic-note" : ".ic-act")) focusIn(land.id, ".ic-id");
     setLand(null);
   }, [land, focusIn]);
 
-  // The header's Wake in Initiatives › lands on that card's Wake.
+  // The header's Wake in Initiatives › lands on that card's Wake, once the
+  // factory's answer has drawn it.
   useEffect(() => {
-    if (!initiativesFocus || !view) return;
+    if (!initiativesFocus || !view || !factory) return;
     const [, id] = initiativesFocus.split(":");
     clearInitiativesFocus();
     if (id) setLand({ id, to: "action", seq: Date.now() });
-  }, [initiativesFocus, view, clearInitiativesFocus]);
+  }, [initiativesFocus, view, factory, clearInitiativesFocus]);
 
   const run = async (c: Card, action: Action) => {
     setConfirm(null);
@@ -138,7 +143,7 @@ export function InitiativesView() {
     } else {
       const still = (fresh?.groups ?? []).find((g) => g.id === c.id)?.agents?.filter((a) => a.pid > 0 && a.state !== "exited").map((a) => a.short || a.session || a.name) ?? [];
       const said = after ? firstLine(after.words) : firstLine(err ?? "");
-      setNote(c.id, { kind: "failed", action, words: said, after: afterLine(c.id, action, status, still), agents: action === "sleep" && sleepyOf(status) === "asleep" && still.length > 0 });
+      setNote(c.id, { kind: "failed", action, words: said, after: afterLine(c.id, action, status, still.length, uniq(still)), agents: action === "sleep" && sleepyOf(status) === "asleep" && still.length > 0 });
     }
     setLand({ id: c.id, to: "note", seq: Date.now() });
   };
@@ -169,7 +174,8 @@ export function InitiativesView() {
     const since = c.state === "asleep" ? sinceLine(i.asleep_since, (d) => dateWords(d)) : null;
     const top = bySession.filter((s) => s.initiative === c.id).slice(0, 3).map((s) => sessionBytes(s.name, s.bytes));
     const mem = c.local ? memoryLine(agents, c.id, most === c.id, top) : null;
-    const note = notes[c.id];
+    // A refusal at the limit goes stale once the limit no longer holds.
+    const note = notes[c.id]?.kind === "limit" && !atLimit ? undefined : notes[c.id];
     const asking = confirm === c.id;
     const conf = asking ? confirmLines(c.id, c.live, c.working, waitingOf(rows, c.id), awakeLocal.length === 1) : null;
     const action: Action | null = c.state === "awake" ? "sleep" : c.state === "asleep" ? "wake" : null;
