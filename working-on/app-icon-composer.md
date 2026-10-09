@@ -46,3 +46,23 @@ Icon Composer; regenerate with `export.sh`. Her rows F23 and F24 are A1 and A2.
 
 ## Done
 - 2026-10-09: Assets.car from Deltagos.icon in the bundle with CFBundleIconName, iconfile.icns unchanged, release built through make build; A1-A4 met (7f410ec, e1d2de5).
+
+## UI review
+- Run by aic-ui (ui reviewer), 2026-10-09, on e1d2de5 (the branch tip throughout). Own detached worktree, `test-lease run -- make review-build` (exit 0), icons rendered through IconServices (`NSWorkspace.icon(forFile:)`, aic-build's `iconservices.swift`, rebuilt) from copies at a fresh path never used before, beside a no-car control (Assets.car and CFBundleIconName removed, re-signed). No app launched, no input driven. Shots: `.wt-notes/aic-ui/`.
+- **Verdict: pass.** No severity 4 or 3.
+
+| Row | How checked | Result |
+|---|---|---|
+| A1 (F23) | IconServices renders of the built `Deltagos.app` and `Deltagos Review.app` at 16, 32, 128, 512 pt @1x/@2x, beside the control; edge alpha and top-centre pixel per size (`a1-iconservices.txt`, `a1-review-iconservices.txt`, `a1-control-iconservices.txt`); the sheet `iconservices-960x480-A1-built-review-control.png` (rows: built, Review, control) | met. No plate at any size: top-centre at 16 pt is the ground (0.21, 0.20, 0.24), the control's is the plate (0.90); edge alpha 0.17 at 16 pt in both is anti-aliasing, 0 opaque edge px. The tile reaches its edge, the gears sit inside the D, the mark reads at 32 pt and up. Same numbers as aic-build's |
+| A2 (F24) | built plist: `CFBundleIconFile` = iconfile, `CFBundleIconName` = Deltagos, `LSMinimumSystemVersion` 12.0; sha256 of the bundle's `iconfile.icns` = `app-icon/iconfile.icns` = main's (b087f053…); car in both bundles = `build/darwin/Assets.car` (45ae2a9c…); `xcrun assetutil --info` of the car; legacy renditions drawn with `legacy.swift` over the icns (`car-640x320-A2-car-legacy-over-icns.png`, `car-320x160-A2-16px-car-vs-icns.png`) | met as worded (plist and icns unchanged). What an older macOS draws is U1 |
+
+- **U1 (2) — on macOS 12-15 the lead likely sees actool's rendition, not the icns with its cuts.**
+  1. What the lead cannot do: see the 16 px D-alone cut and the 32 px cut on an older Mac; there the Dock and Finder show the one-artwork mark.
+  2. Where: `.wt-notes/aic-ui/car-640x320-A2-car-legacy-over-icns.png` (top: car, bottom: icns, at 16@2x, 32@2x, 128@2x, 512@2x).
+  3. Evidence: the car carries `Icon Image` renditions named `Deltagos` at 16, 32, 64, 128, 256 and 1024 @2x only (assetutil). From macOS 10.13 an app whose plist names `CFBundleIconName` with an app icon in its car is drawn from the car, `CFBundleIconFile` being the fallback for older systems (Apple's documented behaviour, `heuristic`: no macOS 12-15 Mac to prove it). In the shot, the car's 16 pt shows D and gears where the icns shows the D alone, and at 128 and 512 pt a light glass rim where the icns has its 8% hairline; the mark, tile and colours otherwise match. On a non-Retina screen the 16 pt @1x is downsampled from 32 px.
+  4. Severity 2: the mark still reads, and it is the same one-artwork trade Amendment 6 accepted on macOS 26; lodestar runs 26.1.
+  5. Proposal: aglaea decides whether macOS 12-15 may take the car's rendition (F24 reworded to what is drawn), or wants the icns kept there; the builder found a same-name appiconset does not displace the .icon's renditions.
+- **U2 (1) — at 16 pt @1x on macOS 26 the gears blur into the D** (sheet, first cell): a purple smear inside the D, readable as the mark. As designed (Amendment 6, "the price of losing the plate"); recorded only.
+- **Spec gap (for the FSE):** F24's check (plist names the icns, icns byte-equal) proves the files, not what macOS 12-15 draws when `CFBundleIconName` is also set. A2 passed as worded while its intent ("keep the old icon on older macOS") is likely unmet.
+- **For aglaea:** U1, accept the car's rendition on macOS 12-15 or keep the icns there.
+- **Not verified:** what macOS 12-15 actually draws (no such Mac); the Dock and Finder on screen (no driven input, by the FSE's word, 2026-10-09 19:20); the universal release bundle (A4, the code reviewer's).
