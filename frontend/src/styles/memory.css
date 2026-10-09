@@ -8,8 +8,8 @@
 .memory-btn { display: inline-flex; align-items: center; gap: var(--space-1-5); color: var(--fg-subtle); white-space: nowrap; }
 .memory-btn .memory-text { font-variant-numeric: tabular-nums; }
 .memory-btn.high { color: var(--tone); }
-.memory-btn.critical { background: var(--tone); color: var(--fg-on-accent); border-radius: var(--radius-sm); }
-.memory-btn.critical:hover { background: var(--tone); color: var(--fg-on-accent); }
+.memory-btn.critical { background: var(--tone); color: var(--fg-on-tone); border-radius: var(--radius-sm); }
+.memory-btn.critical:hover { background: var(--tone); color: var(--fg-on-tone); }
 .memory-btn[aria-expanded="true"]:not(.critical) { background: var(--surface-selected); }
 .memory-btn.critical[aria-expanded="true"] { box-shadow: 0 0 0 2px var(--surface-selected); }
 
@@ -65,7 +65,7 @@
 /* The floating icon's panel line (§2), at high and critical. */
 .fl-memory { display: grid; gap: var(--space-0-5); padding: var(--space-1-5) var(--space-3); border-bottom: 1px solid var(--border-subtle); font-size: var(--font-size-md); }
 .fl-memory-line { color: var(--tone); font-weight: var(--weight-semibold); font-variant-numeric: tabular-nums; }
-.fl-memory-line.critical { justify-self: start; background: var(--tone); color: var(--fg-on-accent); border-radius: var(--radius-sm); padding: 0 var(--space-1-5); }
+.fl-memory-line.critical { justify-self: start; background: var(--tone); color: var(--fg-on-tone); border-radius: var(--radius-sm); padding: 0 var(--space-1-5); }
 .fl-memory-row { display: grid; grid-template-columns: minmax(0, 1fr) max-content max-content; column-gap: var(--space-3); align-items: center; width: 100%; text-align: left; background: transparent; border: 0; border-radius: var(--radius-sm); padding: var(--space-0-5) var(--space-1-5); color: var(--fg); font: inherit; cursor: pointer; }
 .fl-memory-row:hover { background: var(--surface-hover); }
 .fl-memory-row:focus { outline: none; }
