@@ -6,7 +6,7 @@ branch: app-icon-composer
 seat: aic-build
 stage: one-window
 updated: 2026-10-09
-next: "A2: the plist is not unchanged (CFBundleIconName + Assets.car added), so what macOS 12-15 draws needs a 12-15 Mac or a reworded row; gate question for sup50"
+next: "A2 reworded by the FSE (0108); re-review A2 only, then merge"
 review: fail
 depends_on: [deltagos-mark]
 boundary: ["build/darwin (Assets.car from Deltagos.icon, the Info.plist template's CFBundleIconName)", "the Makefile or build script step that compiles it into the bundle", ".github/workflows/release.yml (its build step only)", "not: the mark's drawing, the floating icon, the frontend"]
@@ -35,7 +35,7 @@ Icon Composer; regenerate with `export.sh`. Her rows F23 and F24 are A1 and A2.
 
 ## Gate
 - [x] A1 IconServices renders of the built bundle at 16, 32, 128 and 512 pt @1x/@2x on lodestar (macOS 26.1): no grey plate — `.wt-notes/aic-build/iconservices-960x320-A1-built-over-control.png`, `.wt-notes/aic-build/iconservices-960x320-A1-review-over-control.png`, `a1-*iconservices.txt`; cache ruled out by a no-car control at a fresh path (plate) and new-id / new-version copies (clean), progress.md
-- [x] A2 the same bundle on macOS 12-15 (or its plist and `iconfile.icns` proven unchanged for them): the current icon — `.wt-notes/aic-build/a2-proof.txt` (icns sha256 = main's, template adds only CFBundleIconName); caveat in Notes
+- [x] A2 macOS 12-15: `iconfile.icns` byte for byte in the bundle and `CFBundleIconFile` on it; what 12-15 draw with `CFBundleIconName` set (likely the car's flattened rendition, no 16 px D-alone cut) is recorded (U1), not proven: no 12-15 Mac at hand; checked on the other laptop if it runs macOS 15 or older (amended by the FSE under 0108 after the review's A2 fail at 95bc56a; sup50's option a) — `.wt-notes/aic-build/a2-proof.txt`, `car-640x320-A2-car-legacy-over-icns.png`
 - [x] A4 the release build carries the same icons: `.github/workflows/release.yml` builds through `make build` (or copies `iconfile.icns` and `Assets.car` the same way), since `wails build` alone regenerates an icns without the 16 and 32 px cuts (sup50's finding, 2026-10-09); proven by running the workflow's build steps locally — `.wt-notes/aic-build/a4-workflow-steps.txt` (universal bundle and DMG carry the committed icns and car byte for byte)
 - [x] A3 `make test`, `wails build`, `make review-build` pass — `.wt-notes/aic-build/a3-clean-*.txt`, from a clean clone
 
