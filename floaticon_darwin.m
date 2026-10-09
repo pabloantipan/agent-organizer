@@ -342,7 +342,9 @@ static void applyRing(void) {
 
 // The marker is how the home desktop is known: a window that is not on all
 // desktops stays where it was ordered in, and isOnActiveSpace is public.
-static void orderHere(NSWindow *w, dispatch_block_t then) {
+static void orderHere(NSWindow *w, NSString *why, dispatch_block_t then) {
+    flog(@"activation: orderFrontRegardless %@ (%@) by %@, app active=%d", w == mainWin ? @"main window" : w == marker ? @"home marker" : @"window",
+         why, NSStringFromRect([w frame]), [NSApp isActive]);
     NSWindowCollectionBehavior b = [w collectionBehavior];
     [w setCollectionBehavior:(b & ~NSWindowCollectionBehaviorCanJoinAllSpaces) | NSWindowCollectionBehaviorMoveToActiveSpace];
     [w orderFrontRegardless];
@@ -352,7 +354,7 @@ static void orderHere(NSWindow *w, dispatch_block_t then) {
     });
 }
 
-static void markHome(void) {
+static void markHome(NSString *why) {
     if (!marker) {
         marker = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 1, 1) styleMask:NSWindowStyleMaskBorderless backing:NSBackingStoreBuffered defer:NO];
         [marker setOpaque:NO];
@@ -363,7 +365,7 @@ static void markHome(void) {
         [marker setCollectionBehavior:NSWindowCollectionBehaviorIgnoresCycle | NSWindowCollectionBehaviorManaged];
     }
     [marker orderOut:nil];
-    orderHere(marker, nil);
+    orderHere(marker, [NSString stringWithFormat:@"markHome from %@", why], nil);
     flog(@"home marked");
 }
 
@@ -445,7 +447,7 @@ static void update(NSString *why, BOOL fsCheck) {
         back = YES;
         restoreChrome();
         [mainWin setFrame:homeFrame display:NO];
-        orderHere(mainWin, nil);
+        orderHere(mainWin, [NSString stringWithFormat:@"update(%@), returning and the home marker on the active desktop", why], nil);
         state = StateHome;
         flog(@"%@: home desktop active, window back", why);
     }
@@ -557,7 +559,8 @@ static void bringList(void) {
     flog(@"click: list at %@ (from %@)", NSStringFromRect(f), listFromCompact ? @"compact" : @"home");
     // Window first, activate after: activating while the window is on another
     // desktop switches the user there.
-    orderHere(mainWin, ^{
+    orderHere(mainWin, @"bringList", ^{
+        flog(@"activation: makeKeyAndOrderFront and activateIgnoringOtherApps by bringList, app active=%d", [NSApp isActive]);
         [mainWin makeKeyAndOrderFront:nil];
         [NSApp activateIgnoringOtherApps:YES];
         flog(@"click +0.15s: onActive=%d frame=%@", [mainWin isOnActiveSpace], NSStringFromRect([mainWin frame]));
@@ -921,6 +924,39 @@ static void build(void) {
     applyRing();
 }
 
+// The activation log (float-focus-steal S1), only with FLOAT_LOG: every time
+// the app becomes or stops being active, or the main window becomes key or
+// main, with the state, the desktop, the event being handled and the calls
+// that led there, so an activation nobody asked for names its caller (ours,
+// or the system's: an event, an Apple event, the window server).
+static void logActivation(NSString *what) {
+    NSEvent *e = [NSApp currentEvent];
+    NSAppleEventDescriptor *ae = [[NSAppleEventManager sharedAppleEventManager] currentAppleEvent];
+    NSArray *stack = [NSThread callStackSymbols];
+    NSMutableArray *frames = [NSMutableArray array];
+    for (NSUInteger i = 2; i < MIN(stack.count, 22); i++) {
+        NSString *f = [stack[i] stringByReplacingOccurrencesOfString:@"  +" withString:@" " options:NSRegularExpressionSearch range:NSMakeRange(0, [stack[i] length])];
+        [frames addObject:f];
+    }
+    flog(@"activation: %@; state=%s main visible=%d onActive=%d key=%d marker onActive=%d; event %@; apple event %@; stack: %@", what,
+         stateName[state], [mainWin isVisible], [mainWin isOnActiveSpace], [mainWin isKeyWindow], [marker isOnActiveSpace],
+         e ? [NSString stringWithFormat:@"type %lu window %ld", (unsigned long)[e type], (long)[e windowNumber]] : @"none",
+         ae ? [NSString stringWithFormat:@"%@", ae] : @"none", [frames componentsJoinedByString:@" | "]);
+}
+
+static void watchActivation(void) {
+    NSNotificationCenter *c = [NSNotificationCenter defaultCenter];
+    NSDictionary *names = @{
+        NSApplicationWillBecomeActiveNotification : @"app will become active",
+        NSApplicationDidBecomeActiveNotification : @"app did become active",
+        NSApplicationDidResignActiveNotification : @"app resigned active",
+    };
+    for (NSString *n in names)
+        [c addObserverForName:n object:NSApp queue:nil usingBlock:^(NSNotification *x) { logActivation(names[n]); }];
+    [c addObserverForName:NSWindowDidBecomeKeyNotification object:mainWin queue:nil usingBlock:^(NSNotification *x) { logActivation(@"main window became key"); }];
+    [c addObserverForName:NSWindowDidBecomeMainNotification object:mainWin queue:nil usingBlock:^(NSNotification *x) { logActivation(@"main window became main"); }];
+}
+
 void FloatIconStart(const char *logArg, const char *placeFile) {
     char *lp = strdup(logArg), *pp = strdup(placeFile);
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -948,7 +984,7 @@ void FloatIconStart(const char *logArg, const char *placeFile) {
         places = [NSMutableDictionary dictionaryWithContentsOfFile:placePath ?: @""] ?: [NSMutableDictionary dictionary];
         build();
         placeIcon();
-        markHome();
+        markHome(@"start");
         started = YES;
         NSNotificationCenter *wc = [[NSWorkspace sharedWorkspace] notificationCenter];
         [wc addObserverForName:NSWorkspaceActiveSpaceDidChangeNotification object:nil queue:[NSOperationQueue mainQueue]
@@ -983,6 +1019,7 @@ void FloatIconStart(const char *logArg, const char *placeFile) {
                 doubleClicked();
             });
             dispatch_resume(usr2);
+            watchActivation();
         }
         flog(@"start: main=%@ min=%@ reduceMotion=%d ignoresMouse=%d icon window %ld", NSStringFromRect([mainWin frame]), NSStringFromSize(appMinSize), reduceMotion(), [panel ignoresMouseEvents], (long)[panel windowNumber]);
         update(@"start", YES);
@@ -1063,7 +1100,7 @@ static void goFull(NSString *why) {
                 [[mainWin animator] setFrame:f display:YES];
             } completionHandler:grown];
         }
-        markHome();
+        markHome(why);
         flog(@"full (%@): growing to %@ min=%@", why, NSStringFromRect(f), NSStringFromSize([mainWin minSize]));
         update(@"full", NO);
 }
@@ -1087,7 +1124,8 @@ static void growFromIcon(NSString *why) {
     double t0 = now();
     BOOL still = reduceMotion();
     [mainWin setAlphaValue:still ? 1 : 0];
-    orderHere(mainWin, ^{
+    orderHere(mainWin, [NSString stringWithFormat:@"growFromIcon(%@)", why], ^{
+        flog(@"activation: makeKeyAndOrderFront and activateIgnoringOtherApps by growFromIcon(%@), app active=%d", why, [NSApp isActive]);
         [mainWin makeKeyAndOrderFront:nil];
         [NSApp activateIgnoringOtherApps:YES];
     });
@@ -1113,7 +1151,7 @@ static void growFromIcon(NSString *why) {
         } completionHandler:grown];
     }
     floatIconExpanded(); // the list is already closed; the view it covered shows
-    markHome();
+    markHome(why);
     flog(@"full (%@): growing from the icon %@ to %@, %.0f ms after the click, the list not reopened", why, NSStringFromRect(tile),
          NSStringFromRect(f), clickUpAt > 0 ? (now() - clickUpAt) * 1000 : -1);
     clickUpAt = 0;
