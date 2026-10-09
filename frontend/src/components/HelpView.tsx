@@ -6,6 +6,7 @@ import { Help } from "../../wailsjs/go/main/App";
 import type { service } from "../../wailsjs/go/models";
 import { openBox } from "../lib/boxStack";
 import { focusBoxBelow } from "./RuleDecisionBox";
+import { DeltagosLockup } from "./DeltagosMark";
 import "../styles/help.css";
 
 type Section = { id: string; depth: number; title: string };
@@ -69,6 +70,9 @@ export function HelpView({ top, onClose }: { top: number; onClose: () => void })
   return (
     <section className="help" style={{ top }} role="dialog" aria-label="Help">
       <header className="help-head">
+        {/* Where the app names itself: the mark, its wordmark and subtitle
+            (docs/specs/deltagos-mark.md FR-4). */}
+        <DeltagosLockup />
         <h1 className="help-title">Help</h1>
         {doc && <span className="help-source mono" title={`read from ${doc.key}`}>{doc.path}</span>}
         <span className="spacer" />
