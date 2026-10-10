@@ -111,17 +111,55 @@ export function panelLine(state: MemoryState, m: MemoryReading | null | undefine
 /** One agent session as the popover lists it. */
 export type SessionRow = { name: string; initiative: string; bytes: number; agentId: string; state: string };
 
-type FeedAgent = { session: string; pid: number; state: string; mem_bytes?: number };
+type FeedAgent = { session: string; pid: number; state: string; mem_bytes?: number; card?: { key: string } | null };
 type FeedGroup = { id: string; agents?: FeedAgent[] | null };
 type Feed = { memory?: MemoryReading | null; groups?: FeedGroup[] | null; unassigned?: FeedAgent[] | null };
 
+const RESUME_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** The agent's real session name, empty when it has none or the name is a
+ *  resume UUID (`claude --resume <uuid>`). */
+export const sessionName = (session: string): string => (RESUME_ID.test(session) ? "" : session);
+
+/** A session's one name (docs/specs/leftovers-15.md FR-1), the twin of the
+ *  service's sessionLabel (internal/service/sessionname.go), which names the
+ *  reading's five: its session name, else its card's seat, else
+ *  `<initiative> session` (`unassigned session` outside every initiative);
+ *  the pid goes in the hover (`sessionHover`), never in the name. */
+export function sessionLabel(session: string, initiative: string, seat: string): string {
+  return sessionName(session) || seat || `${initiative || "unassigned"} session`;
+}
+
+/** The hover of a session's name: the name and its pid, from the Agents row
+ *  key `<session>#<pid>`. */
+export function sessionHover(name: string, agentId: string): string {
+  const pid = agentId.slice(agentId.lastIndexOf("#") + 1);
+  return pid ? `${name}, pid ${pid}` : name;
+}
+
+/** Each open card's seat by its key `<initiative>/<slug>` (CardJoin.key),
+ *  from the board's columns. */
+export function cardSeats(columns: Record<string, { initiative_id: string; slug: string; seat?: string }[] | null | undefined> | null | undefined): Map<string, string> {
+  const seats = new Map<string, string>();
+  for (const cards of Object.values(columns ?? {})) for (const c of cards ?? []) if (c.seat) seats.set(`${c.initiative_id}/${c.slug}`, c.seat);
+  return seats;
+}
+
+/** The grouping key of a session, the service's: a named session sums its
+ *  agents, an unnamed (or resumed) one is its pid's alone. */
+const sessionKey = (initiative: string, agentId: string): string => {
+  const i = agentId.lastIndexOf("#");
+  const name = sessionName(agentId.slice(0, i));
+  return `${initiative}\u0000${name || agentId.slice(i)}`;
+};
+
 /** Every agent session this Mac runs, biggest first: the reading's five
- *  (`Memory.top`, the service's cut) and after them the rest, grouped the
- *  same way from each agent's `mem_bytes` (initiative and session name,
- *  else `pid <n>`; a process with no pid counts nowhere). The state is the
- *  session's first agent's, found by the agent id the row's `Agents ›`
- *  lands on (`<session>#<pid>`). */
-export function sessionRows(feed: Feed | null | undefined): SessionRow[] {
+ *  (`Memory.top`, the service's cut, named there) and after them the rest,
+ *  grouped and named the same way from each agent's `mem_bytes` (a process
+ *  with no pid counts nowhere). seats is `cardSeats` of the board, for the
+ *  rest's names. The state is the session's first agent's, found by the
+ *  agent id the row's `Agents ›` lands on (`<session>#<pid>`). */
+export function sessionRows(feed: Feed | null | undefined, seats: Map<string, string> = new Map()): SessionRow[] {
   if (!feed?.memory) return [];
   const byId = new Map<string, FeedAgent>();
   const rest = new Map<string, SessionRow>();
@@ -130,17 +168,16 @@ export function sessionRows(feed: Feed | null | undefined): SessionRow[] {
       if (a.pid <= 0) continue;
       const agentId = `${a.session}#${a.pid}`;
       byId.set(agentId, a);
-      const name = a.session || `pid ${a.pid}`;
-      const key = `${initiative}\u0000${name}`;
+      const key = sessionKey(initiative, agentId);
       const row = rest.get(key);
       if (row) row.bytes += a.mem_bytes ?? 0;
-      else rest.set(key, { name, initiative, bytes: a.mem_bytes ?? 0, agentId, state: a.state });
+      else rest.set(key, { name: sessionLabel(a.session, initiative, (a.card && seats.get(a.card.key)) || ""), initiative, bytes: a.mem_bytes ?? 0, agentId, state: a.state });
     }
   };
   for (const g of feed.groups ?? []) add(g.id, g.agents);
   add("", feed.unassigned);
   const top = (feed.memory.top ?? []).map((t) => {
-    rest.delete(`${t.initiative}\u0000${t.name}`);
+    rest.delete(sessionKey(t.initiative, t.agent_id));
     return { name: t.name, initiative: t.initiative, bytes: t.bytes, agentId: t.agent_id, state: byId.get(t.agent_id)?.state ?? "running" };
   });
   return [...top, ...[...rest.values()].sort((a, b) => b.bytes - a.bytes)];

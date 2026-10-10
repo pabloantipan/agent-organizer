@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { agentsLine, buttonName, buttonText, duration, freeLine, gb, memoryState, panelLine, pressureLine, sessionRows, wasCriticalLine, type MemoryReading } from "./memory";
+import { agentsLine, buttonName, buttonText, duration, freeLine, gb, memoryState, panelLine, pressureLine, cardSeats, sessionHover, sessionLabel, sessionRows, wasCriticalLine, type MemoryReading } from "./memory";
 
 const G = 1024 ** 3;
 const at = (h: number, m: number) => new Date(2026, 9, 9, h, m).getTime();
@@ -96,12 +96,41 @@ describe("sessionRows", () => {
       unassigned: [a("", 9, 0.5), a("gone", 0, 3)],
     };
     const rows = sessionRows(feed);
-    expect(rows.map((r) => r.name)).toEqual(["s1", "s2", "s3", "s4", "s5", "s7", "s6", "pid 9"]);
+    expect(rows.map((r) => r.name)).toEqual(["s1", "s2", "s3", "s4", "s5", "s7", "s6", "unassigned session"]);
     expect(rows[0].state).toBe("working");
     expect(rows[5].bytes).toBe(3 * G);
     expect(rows[7]).toMatchObject({ initiative: "", agentId: "#9" });
   });
   it("is empty without a reading", () => {
     expect(sessionRows({ memory: null, groups: [] })).toEqual([]);
+  });
+  // N1 (leftovers-15 FR-1): past the five, a session is its name, else its
+  // card's seat, else `<initiative> session`; never a resume UUID or a bare
+  // pid, and two unnamed sessions stay two rows.
+  it("names the rest one way, never a UUID or a bare pid", () => {
+    const uuid = "1030fdd4-5b2e-4c8a-9f61-0a3d2e7c9b10";
+    const top = ["s1", "s2", "s3", "s4", "s5"].map((n, i) => ({ name: n, initiative: "x", bytes: (20 - i) * G, agent_id: `${n}#${i + 1}` }));
+    const feed = {
+      memory: reading({ top }),
+      groups: [{ id: "x", agents: [
+        ...top.map((t, i) => a(t.name, i + 1, 20 - i)),
+        { ...a(uuid, 11, 4), card: { key: "x/lf15-names" } },
+        { ...a("", 12, 3), card: { key: "x/loose" } },
+        a(uuid, 13, 2),
+        a("", 14, 1),
+      ] }],
+      unassigned: [a("0f0e0d0c-0b0a-4908-8706-050403020100", 30, 0.5)],
+    };
+    const seats = cardSeats({ now: [{ initiative_id: "x", slug: "lf15-names", seat: "ln-build" }, { initiative_id: "x", slug: "loose", seat: "" }] });
+    const rows = sessionRows(feed, seats).slice(5);
+    expect(rows.map((r) => r.name)).toEqual(["ln-build", "x session", "x session", "x session", "unassigned session"]);
+    expect(rows.map((r) => r.agentId)).toEqual([`${uuid}#11`, "#12", `${uuid}#13`, "#14", "0f0e0d0c-0b0a-4908-8706-050403020100#30"]);
+    expect(sessionHover(rows[1].name, rows[1].agentId)).toBe("x session, pid 12");
+  });
+  it("labels like the service", () => {
+    expect(sessionLabel("organizer-probe-sup52", "organizer", "ln-build")).toBe("organizer-probe-sup52");
+    expect(sessionLabel("1030FDD4-5B2E-4C8A-9F61-0A3D2E7C9B10", "organizer", "ln-build")).toBe("ln-build");
+    expect(sessionLabel("", "organizer", "")).toBe("organizer session");
+    expect(sessionLabel("", "", "")).toBe("unassigned session");
   });
 });

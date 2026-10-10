@@ -2,7 +2,7 @@ import { useEffect, useId, useLayoutEffect, useRef, useState, type RefObject } f
 import { MemoryNotifications } from "../../wailsjs/go/main/App";
 import { useBoard } from "../stores/board.store";
 import { stateWord } from "../lib/stateWords";
-import { agentsLine, freeLine, gb, memoryState, POPOVER_TOP, pressureLine, sessionRows, wasCriticalLine, type SessionRow } from "../lib/memory";
+import { agentsLine, freeLine, gb, memoryState, POPOVER_TOP, pressureLine, cardSeats, sessionHover, sessionRows, wasCriticalLine, type SessionRow } from "../lib/memory";
 
 /** The memory popover (docs/ux/specs/ram-indicator.md §1 and States): this
  *  Mac's pressure, free memory and the agents' share, then the biggest agent
@@ -54,7 +54,7 @@ export function MemoryPopover({ opener, onClose }: { opener: RefObject<HTMLButto
     (next ?? box.current)?.focus();
   }, [more]);
 
-  const rows = sessionRows(agents);
+  const rows = sessionRows(agents, cardSeats(view?.board.columns));
   const shown = more ? rows : rows.slice(0, POPOVER_TOP);
   const was = m && wasCriticalLine(m);
 
@@ -81,7 +81,7 @@ export function MemoryPopover({ opener, onClose }: { opener: RefObject<HTMLButto
                 {/* One name width for every row, the longest name's, so the
                     columns line up and the initiative gives way first. */}
                 <ul className="memory-sessions" style={{ ["--ms-name-w" as string]: `${Math.max(...shown.map((r) => r.name.length))}ch` }}>
-                  {shown.map((r) => <SessionLine key={`${r.initiative}/${r.name}`} r={r} go={openAgentRow} />)}
+                  {shown.map((r) => <SessionLine key={r.agentId} r={r} go={openAgentRow} />)}
                 </ul>
                 {!more && rows.length > POPOVER_TOP && (
                   <button type="button" className="ghost tiny-btn memory-more" onClick={() => setMore(true)}>… {rows.length - POPOVER_TOP} more</button>
@@ -104,7 +104,7 @@ function SessionLine({ r, go }: { r: SessionRow; go: (initiative: string, agentI
   const where = r.initiative || "outside every initiative";
   return (
     <li className="memory-session" aria-label={`${r.name}, ${where}, ${stateWord(r.state)}, ${gb(r.bytes)} GB`}>
-      <span className="ms-name mono" title={r.name}>{r.name}</span>
+      <span className="ms-name mono" title={sessionHover(r.name, r.agentId)}>{r.name}</span>
       <span className="ms-init mono" title={where}>{r.initiative || "—"}</span>
       <span className={`ms-state ${r.state}`}>{stateWord(r.state)}</span>
       <span className="ms-mem num">{gb(r.bytes)} GB</span>
