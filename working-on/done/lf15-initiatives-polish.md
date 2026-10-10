@@ -1,12 +1,12 @@
 ---
 title: "The Initiatives view's and Agents' polish from its reviews"
-status: now
+status: done
 repos: [organizer]
 branch: lf15-initiatives-polish
 seat: lp-build
 stage: one-window
 updated: 2026-10-09
-next: "review: lf15-initiatives-polish, gate met (P1-P7 on the review build, X0), 8545263"
+next: "merged; V2-V4 and the FR-10 gap with the FSE"
 review: pass
 depends_on: []
 boundary: ["the spec's Boundary for this card"]
