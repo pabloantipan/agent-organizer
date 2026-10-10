@@ -7,6 +7,7 @@ restating it (the discuss skill).
 ## HAND-OFF — 2026-10-09 evening, leftovers-15 running
 
 - **Last SHA seen:** 0db55d6. Next supervisor: sup53.
+- **Note (Pablo ~00:2x, "place a note for this"):** Initiatives card should open its initiative and give its details; review the top bar's button disposition. Sent to aglaea for design; becomes leftovers-17. **0112 ruled** (b5d2b19, "ok"): spawn sup53 for leftovers-16.
 - **00:0x sup52:** 4 of 5 lf15 merged in 61 min (help-mark 100a41b, ring-breath 238310e, build-drift ca2506b, initiatives-polish 54866d5). names-and-notices held on N2 (TCC); I amended N2 at 0db55d6 (0108), sup52 re-judges and merges. Gate miss is mine again: a row that reads a TCC-protected store (add to the satisfiability check). Leftovers-16 candidates: V2-V4, FR-10 counts archived, FR-4 width (asked aglaea), ring A1 (aglaea), statusline samples. AX-on-own-process route sent [for hephaistos].
 - **leftovers-15 boundary miss (mine):** the spec called the five cards disjoint; sup52 found `lib/memory.ts` and `AgentList.tsx` shared by ln and lp (FR-1 renames the row in the Agents list). sup52 split ownership and sequenced the merge (lp first). Lesson: when an FR changes a name "everywhere", list every file that draws it in the Boundary.
 - **0111 ruled** (6f56bb8); **sup52** runs the five lf15 cards as a tab of my window 5498 (pid 97731), forecast 1-2 h. On its closing report: end it (probe -k, token rm, clean), then `make install` from main and restore `frontend/wailsjs/runtime/` if B1 did not land.
