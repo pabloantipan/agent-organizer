@@ -7,6 +7,7 @@ restating it (the discuss skill).
 ## HAND-OFF — 2026-10-09 evening, leftovers-15 running
 
 - **Last SHA seen:** 62b97f0 (sup52 launched all five builders, 22:5x). Next supervisor: sup53.
+- **leftovers-15 boundary miss (mine):** the spec called the five cards disjoint; sup52 found `lib/memory.ts` and `AgentList.tsx` shared by ln and lp (FR-1 renames the row in the Agents list). sup52 split ownership and sequenced the merge (lp first). Lesson: when an FR changes a name "everywhere", list every file that draws it in the Boundary.
 - **0111 ruled** (6f56bb8); **sup52** runs the five lf15 cards as a tab of my window 5498 (pid 97731), forecast 1-2 h. On its closing report: end it (probe -k, token rm, clean), then `make install` from main and restore `frontend/wailsjs/runtime/` if B1 did not land.
 - Open, mine: Pablo's cut-off "And…" (asked); statusline samples stopping after one (candidate leftovers-16); which macOS the other laptop runs.
 - Open, others': Aglaea's initiatives-view A1-A3; Hephaistos's factory depth (camp invisible) and the Space card for windows. Until that card, supervisors open as tabs of my window, not `create window` (Pablo's ask, deviates from the fse skill's "new window").
