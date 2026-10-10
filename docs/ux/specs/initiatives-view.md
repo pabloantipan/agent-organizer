@@ -254,6 +254,113 @@ From initiatives-view's UI review (A1 to A3) and lf15-initiatives-polish's
 | I15 | trust Asleep means asleep everywhere | the rail and the floating list both show `Asleep (n)` for paused ones only and `Archived (n)` apart |
 | I16 | read an empty Memory cell | an off seat: `—`, named `Memory: not running`; a failed reading: `Memory: could not be read`; before the first: `Memory: reading…` |
 
+## Amendment 2 (aglaea, 2026-10-10): the card opens; Details; the top bar
+
+Pablo, 2026-10-10, with screenshots of Initiatives and the top bar: "On
+clicking the card I should be able to go to the initiative. Also, getting
+details of the project. We need to review [the top bar] button
+disposition" (`said`, relayed by the FSE as a note, not urgent).
+
+### 1. The card opens its initiative
+
+- **The whole card is the link**, not only its id: a press anywhere on the
+  card that is not one of its buttons opens the initiative on **Overview**.
+  An asleep one opens read-only, as before. In markup, the id stays the one
+  link, and a stretched hit area covers the card under its buttons, so
+  there is still one link per card for the keyboard and a screen reader
+  (name: `Open organizer`).
+- **Hover**: the card's surface rises one step (surface 2 to raised) and the
+  pointer is a hand. Sleep, Wake and Details keep their own hover and never
+  open the initiative.
+- An open Sleep confirm stops the card from opening: the press goes to the
+  confirm.
+
+### 2. Details: the charter and the workspace, in place
+
+"Details" means what the initiative *is* (its charter) and where it
+*lives* (its workspace). Today the first is in the initiative header's
+Details and the second is Home's chevron. The card shows both, reusing both,
+so there is one definition of each.
+
+- A **`Details` text button with a chevron** sits on the card's action line,
+  left of Sleep or Wake. It is the same chevron as Home's row and is named
+  `Details of organizer`, with `aria-expanded`.
+- Opened, the card **spans the whole grid row** and grows downward. The
+  cards after it flow below, and nothing overlays. Two columns, one under
+  the other below 1280:
+
+```
+organizer  [personal]  awake                              [Details ▴] [Sleep]
+Charter                                   Workspace
+Goal     One board for every initiative   Repos     organizer  main · clean
+Measure  Pablo opens it first each day              (Home's chevron detail,
+Target   31 Oct                                      as is: repos, problems,
+Scope    In: …  Out: …                               specs, editor, terminal,
+Stage    one-window — "the app in one                review prompt)
+         window" (3 of 5)
+```
+
+- **Charter** comes from `initiative.yaml` and the roadmap, verbatim (the
+  lead's words):
+  - the goal in full;
+  - `measure`;
+  - `target` as a date in words;
+  - `scope` as two short lists, `In` and `Out`;
+  - the current stage with its outcome and position (`3 of 5`).
+  
+  Each missing field is one muted line (`no measure yet`). These are the
+  header's Details fields, in the same words.
+- **Workspace** is Home's chevron detail, mounted as is (`InitiativeDetail`).
+  Any change to it shows in both places. An asleep initiative's workspace
+  follows 0042, so actions that start or post are hidden.
+- One card open at a time. Opening another closes the first. Escape, with
+  focus inside the open details, closes them and returns focus to `Details`.
+- At 1024×640 the two columns stack; no line is cut and the page does not
+  scroll sideways.
+
+### 3. The top bar, ordered by kind
+
+As built it reads: `Deltagos v… · Home / Initiatives · 1 machine · remote
+24d ago · Needs me 24 · Rescan · ⇲ · Initiatives · Usage · ▣ 7.8 GB free
+· ? · ⚙`. Places are split from the crumbs, a stale sync line shows with
+sync off, and the app's own controls sit between the places. Grouped by
+kind, left to right:
+
+```
+Deltagos  Home  Initiatives  Usage  / organizer        ▣ 7.8 GB free │ Needs me 24  Rescan │ ⇲  ?  ⚙
+└ brand ┘ └──────── where you are ────────┘            └ this Mac ──┘ └── your work ──┘ └ the app ┘
+```
+
+| Group | Holds | Look |
+|---|---|---|
+| brand | `Deltagos`; the version moves into its hover at every width | as now |
+| where you are | the three places as quiet text tabs, `Home`, `Initiatives`, `Usage`, with the current one marked (accent underline, `aria-current="page"`); then, inside a place, the crumb: `/ organizer` or `/ Settings` | one nav, named `Places` |
+| this Mac | the memory button (ram-indicator); the sync line **only with `auth: firebase`** (`1 machine · remote 2h ago`) | subtle |
+| your work | `Needs me` with the one badge, then `Rescan` (and `Sync` with firebase) | as now |
+| the app | Compact to icon, Help, Settings, icons only | as now |
+
+- Groups are separated by 16 px of space, not lines. The single bar `│`
+  in the sketch only marks the groups and is not drawn.
+- **Needs me stays the one badge** (FR-14). It stays where the eye ends,
+  right of the Mac's state, so `24` reads as work and not as a place.
+- **Home is a place now, not only a crumb.** `Needs me` still goes Home, so
+  two controls lead there: the tab says where you are, and Needs me says
+  what waits. Help's crumb (`/ Help`) stays as it is.
+- **With `auth: off` the sync line is gone**: `remote 24d ago` with sync
+  off reads as a fault. With firebase it stays, and turns magenta past a
+  day stale (as `syncNote` does today).
+- **At 1024** (the compact class), the places stay. The memory button takes
+  its short form (ram-indicator), and the crumb's initiative id clamps with
+  its hover. The bar stays one line.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| I17 | open an initiative from its card | a press on the card's body (not its buttons) opens it on Overview; asleep opens read-only; the keyboard reaches one link per card, named `Open <id>` |
+| I18 | read an initiative's details from its card | `Details` opens the card across the row with Charter (goal, measure, target, scope in and out, stage with outcome) and Workspace (Home's chevron detail); missing fields read `no … yet`; Escape closes and returns focus |
+| I19 | find the places together | the top bar shows `Home`, `Initiatives`, `Usage` as one nav after the brand, the current one marked, and the crumb after them inside a place |
+| I20 | read the bar by kind | left to right: brand, places, then the Mac's state, Needs me and Rescan, then Compact, Help and Settings; no sync line with auth off |
+| I21 | keep it on one line at 1024 | at 1024×640 with the rail open, the bar is one line; the version is in the brand's hover; the memory button is short |
+
 ## Acceptance, in the lead's terms
 
 | # | The lead can | Checked by |
