@@ -1,12 +1,12 @@
 ---
 title: "Overview and Help fit at 1024"
-status: next
+status: now
 repos: [organizer]
 branch: lf18-narrow
 seat: nw-build
 stage: one-window
 updated: 2026-10-10
-next: "sup55 builds it (0114 ruled, launched 2026-10-10)"
+next: "nw-build building: Overview stack below 880 px pane, Help body width"
 depends_on: []
 boundary: ["docs/specs/leftovers-18.md Boundary, lf18-narrow"]
 spec: "docs/specs/leftovers-18.md (FR-8, FR-9; initiatives-view Amendment 3, I27)"
