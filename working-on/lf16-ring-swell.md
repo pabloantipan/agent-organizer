@@ -1,6 +1,6 @@
 ---
 title: "At critical the ring swells 3 to 6 px"
-status: next
+status: now
 repos: [organizer]
 branch: lf16-ring-swell
 seat: s6-build

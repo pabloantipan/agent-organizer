@@ -1,6 +1,6 @@
 ---
 title: "The strip's folds get glyphs; the floating list splits Asleep from Archived"
-status: next
+status: now
 repos: [organizer]
 branch: lf16-folds
 seat: fo-build
