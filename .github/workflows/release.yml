@@ -25,8 +25,13 @@ jobs:
         with: { node-version: 22, cache: pnpm, cache-dependency-path: frontend/pnpm-lock.yaml }
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.15.0
+      # main.go embeds frontend/dist, so the Go packages do not compile until
+      # the frontend is built (leftovers-15 FR-13); make test then skips both.
+      - name: Build frontend
+        working-directory: frontend
+        run: pnpm install --frozen-lockfile && pnpm run build
       - name: Test
-        run: go vet ./... && go test ./...
+        run: make test
       # Through make, so the bundle carries build/darwin/iconfile.icns (with its
       # 16 and 32 px cuts) and Assets.car, not the icns Wails generates.
       - name: Build universal app
