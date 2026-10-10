@@ -1,12 +1,12 @@
 ---
 title: "At critical the amber ring breathes in width at full opacity, not in opacity"
-status: now
+status: done
 repos: [organizer]
 branch: lf15-ring-breath
 seat: lr-build
 stage: one-window
 updated: 2026-10-09
-next: "review: lf15-ring-breath, gate met (R1, X0), 18e4fcf"
+next: "merged; A1 for aglaea via fse"
 depends_on: []
 boundary: ["floaticon_darwin.m (the ring layer's animation only)", "not: the mark's layers, activation paths, the frontend"]
 spec: "docs/specs/leftovers-15.md (FR-15; docs/ux/specs/ram-indicator.md Amendment 2 as amended 56f0244)"
