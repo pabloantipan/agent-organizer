@@ -7,10 +7,13 @@ import (
 	"strings"
 
 	"organizer/internal/memory"
+	"organizer/internal/service"
 )
 
 // memoryFakeEnv forces the memory reading for a review (docs/specs/ram-indicator.md,
-// Acceptance (ram-view)): normal, high, critical or fail, or @<file> to read
+// Acceptance (ram-view)): normal, high, critical or fail, none (no sample
+// yet, so the popover stays at "Reading memory…", leftovers-15 FR-3), or
+// @<file> to read
 // one of those words from the file at every sample, so a reviewer walks the
 // levels (critical, then normal for "Was critical until") without a
 // restart. Unset, the real reading. It replaces only the service's reader
@@ -46,8 +49,10 @@ func (f fakeMemory) level() (string, error) {
 		return w, nil
 	case "fail":
 		return "", errors.New("forced to fail by " + memoryFakeEnv)
+	case "none":
+		return "", service.ErrNoSample
 	}
-	return "", fmt.Errorf("%s=%q is not normal, high, critical or fail", memoryFakeEnv, w)
+	return "", fmt.Errorf("%s=%q is not normal, high, critical, fail or none", memoryFakeEnv, w)
 }
 
 const fakeGiB = 1 << 30

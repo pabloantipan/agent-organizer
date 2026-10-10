@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"sort"
 	"strconv"
 	"time"
@@ -63,10 +64,19 @@ func (t *memTracker) observe(now time.Time, level string) (since time.Time, open
 	return t.since, t.sinceOpened, wasCritUntil, warn
 }
 
+// ErrNoSample is a reader's "nothing read yet": the reading is the state
+// before the first sample (memory null, no reason), the popover's "Reading
+// memory…", not a failed read. Only the fixture's `--memory none` returns it
+// (memfake.go, leftovers-15 FR-3).
+var ErrNoSample = errors.New("no memory sample yet")
+
 // sampleMemoryLocked reads this Mac once and joins it with the agents already
 // sampled. A failed read is nil and the reason, never zeros.
 func (s *Service) sampleMemoryLocked(inits []model.ScannedInitiative, unassigned []model.Agent) (*model.Memory, string) {
 	r, err := memory.Read(s.memReader)
+	if errors.Is(err, ErrNoSample) {
+		return nil, ""
+	}
 	if err != nil {
 		return nil, err.Error()
 	}

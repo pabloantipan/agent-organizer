@@ -14,10 +14,12 @@
 #   eval "$(scripts/fixture-home.sh --memory critical)"  # memory forced, with any of the above
 #
 # Memory (docs/specs/ram-indicator.md, Acceptance (ram-view)): --memory
-# normal|high|critical|fail, anywhere among the options, exports
+# normal|high|critical|fail|none, anywhere among the options, exports
 # ORGANIZER_MEMORY_FAKE=@$FIXTURE_MEMORY_FILE and that file holding the level,
 # read by app.go only (memfake.go): a 32 GB Mac with 12 GB free at normal,
-# 3.1 at high and 1.2 at critical, or a failed read. The app reads the file
+# 3.1 at high and 1.2 at critical, or a failed read; none is no sample yet,
+# so the memory popover stays at "Reading memory…" (leftovers-15 FR-3). A
+# forced reading never posts a notification. The app reads the file
 # at every 10 s sample, so `echo normal > "$FIXTURE_MEMORY_FILE"` walks the
 # levels without a restart (critical then normal shows "Was critical
 # until"). Only the numbers are forced: the service's since, was critical
@@ -108,7 +110,7 @@ args=()
 while [ $# -gt 0 ]; do
   case "$1" in
     --memory)
-      case "${2:-}" in normal|high|critical|fail) ;; *) echo "--memory takes normal, high, critical or fail" >&2; exit 2 ;; esac
+      case "${2:-}" in normal|high|critical|fail|none) ;; *) echo "--memory takes normal, high, critical, fail or none" >&2; exit 2 ;; esac
       memfile=$(mktemp -t organizer-memory-level)
       echo "$2" > "$memfile"
       echo "export FIXTURE_MEMORY_FILE='$memfile'"

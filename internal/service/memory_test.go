@@ -220,6 +220,12 @@ func TestSampleMemory(t *testing.T) {
 	if m != nil || why == "" {
 		t.Fatalf("failed read: memory %+v reason %q", m, why)
 	}
+	// N3: a reader with no sample yet is memory null and no reason, the
+	// popover's "Reading memory…", not a failed read.
+	s.memReader = fakeMem{err: ErrNoSample}
+	if m, why = s.sampleMemoryLocked(nil, nil); m != nil || why != "" {
+		t.Fatalf("no sample yet: memory %+v reason %q", m, why)
+	}
 	s.memReader = fakeMem{level: "4"}
 	m, why = s.sampleMemoryLocked(nil, nil)
 	if m == nil || why != "" {

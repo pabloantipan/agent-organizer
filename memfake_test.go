@@ -1,12 +1,14 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"organizer/internal/memory"
 	"organizer/internal/model"
+	"organizer/internal/service"
 )
 
 // The fake reads Aglaea's figures per level and fails as a failed read;
@@ -30,6 +32,11 @@ func TestMemoryFake(t *testing.T) {
 		if got.Pressure != c.level || got.TotalBytes != 32<<30 || gbText(got.FreeBytes) != gbText(uint64(c.free*(1<<30))) {
 			t.Errorf("%s: got %+v", c.level, got)
 		}
+	}
+	// N3 (leftovers-15 FR-3): none is no sample yet, not a failed read.
+	os.WriteFile(file, []byte("none"), 0o644)
+	if _, err := memory.Read(r); !errors.Is(err, service.ErrNoSample) {
+		t.Errorf("none: %v, want service.ErrNoSample", err)
 	}
 	os.WriteFile(file, []byte("fail"), 0o644)
 	if _, err := memory.Read(r); err == nil {
