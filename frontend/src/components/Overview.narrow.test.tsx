@@ -39,6 +39,9 @@ describe("Help's body at 1024 (leftovers-18 FR-9)", () => {
     expect(s).toMatch(/\.help-doc \{[^}]*overflow-wrap: anywhere;/);
     expect(s).not.toMatch(/max-width: 760px/);
   });
+  it("does not inherit the top bar's nowrap, since Help mounts inside it", () => {
+    expect(s).toMatch(/\.help \{[^}]*white-space: normal;/);
+  });
   it("lets tables and code scroll in their own box with whole words", () => {
     expect(s).toMatch(/\.help-doc :where\(pre, table\) \{ overflow-wrap: normal; \}/);
     expect(s).toMatch(/\.help-doc pre \{[^}]*overflow-x: auto;/);

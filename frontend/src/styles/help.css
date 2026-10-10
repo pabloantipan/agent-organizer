@@ -4,6 +4,10 @@
   position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--z-modal);
   display: grid; grid-template-rows: auto auto minmax(0, 1fr);
   background: var(--bg); color: var(--fg);
+  /* Help mounts inside the top bar (TopBar.tsx), whose nowrap it would
+     inherit: the body's lines then never wrapped and ran past the pane at
+     1024 (leftovers-18 FR-9). */
+  white-space: normal;
 }
 .help-head {
   display: flex; align-items: center; gap: var(--space-3);
