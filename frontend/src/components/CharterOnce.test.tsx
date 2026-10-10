@@ -128,3 +128,18 @@ describe("H4: the header's pills wrap inside the header (FR-7)", () => {
     expect(css).toMatch(/\.ihead \.ihead-id \{[^}]*flex-wrap: wrap[^}]*min-width: 0/);
   });
 });
+
+describe("H5: the sub-tabs mark the current one aria-current true, never page (FR-7b)", () => {
+  it("on every sub-view, one sub-tab is current with true and none says page", () => {
+    const i = init({});
+    for (const sub of ["overview", "work", "roadmap", "decisions", "conversations", "agents"]) {
+      useBoard.setState({ view: viewOf([i]), agents: null, headerOpen: false, sub, widthClass: "wide" } as never);
+      const h = renderToStaticMarkup(<InitiativeHeader initiative={i} />);
+      const nav = h.slice(h.indexOf('<nav class="subtabs"'), h.indexOf("</nav>"));
+      expect(nav).not.toContain('aria-current="page"');
+      expect([...nav.matchAll(/aria-current="true"/g)]).toHaveLength(1);
+      expect(nav).toMatch(/<button class="on" aria-current="true">/);
+      expect(h).not.toContain('aria-current="page"');
+    }
+  });
+});

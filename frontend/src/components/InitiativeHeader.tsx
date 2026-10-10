@@ -207,9 +207,11 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
           <StageStrip i={i} compact={compact} />
         </div>
       )}
+      {/* The current sub-view is "true", not "page": the top bar's place
+          holds the screen's one "page" (leftovers-18 FR-7b, I22). */}
       <nav className="subtabs" aria-label="initiative views">
         {SUBS.map((s) => (
-          <button key={s.id} className={s.id === sub ? "on" : ""} aria-current={s.id === sub ? "page" : undefined} onClick={() => openInitiative(i.id, s.id)}>
+          <button key={s.id} className={s.id === sub ? "on" : ""} aria-current={s.id === sub ? "true" : undefined} onClick={() => openInitiative(i.id, s.id)}>
             {s.label}
           </button>
         ))}
