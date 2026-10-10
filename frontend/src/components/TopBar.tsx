@@ -4,6 +4,7 @@ import { api } from "../hooks/useWails";
 import { useBoard, type Screen } from "../stores/board.store";
 import { since } from "../lib";
 import { needsMeRows } from "../lib/queue";
+import { markOf, syncStale, type Place } from "../lib/place";
 import { HelpView } from "./HelpView";
 import { MemoryButton } from "./MemoryButton";
 import { FloatAvailable, FloatCompact } from "../../wailsjs/go/main/App";
@@ -19,6 +20,13 @@ export function TopBar() {
   const [menu, setMenu] = useState(false);
   const machines = view?.board.machines ?? [];
   const machinesLine = view ? `${machines.length} machine${machines.length === 1 ? "" : "s"} · remote ${since(view.pulled_at)}` : "";
+  // With firebase at the compact class the bar folds (initiatives-view A3
+  // §2, I24): the memory button is short, the sync line goes into Sync's
+  // name and hover (`Sync · stale` past a day), the account becomes an icon
+  // last in the app group, and the title clamps to 12 characters.
+  const fold = identity && widthClass === "compact";
+  const stale = fold && syncStale(view?.pulled_at);
+  const syncName = machinesLine ? `Sync. ${machinesLine.replace(" · ", ", ")}` : "Sync";
   const [version, setVersion] = useState("");
   useEffect(() => { api.version().then(setVersion, () => undefined); }, []);
   // Compact to icon (floating-icon §4) only where the icon runs: macOS, past
@@ -35,34 +43,61 @@ export function TopBar() {
   const help = helpTop !== null;
   const go = (to: () => void) => () => { closeHelp(); to(); };
   // The sync line is firebase's alone (FR-4): with auth off `remote 24d ago`
-  // reads as a fault. At compact the idle line folds into the brand's hover;
+  // reads as a fault. At compact the idle line folds into Sync (A3 §2);
   // errors and sync notes never fold.
   const status = error ? <span className="meta err">{error}</span>
     : identity && syncNote ? <span className="meta warn" title="Sync is paused; showing the last pull">{syncNote}</span>
     : lastMessage ? <span className="meta">{lastMessage}</span>
-    : identity && machinesLine && widthClass !== "compact" ? <span className="meta">{machinesLine}</span>
+    : identity && machinesLine && !fold ? <span className="meta">{machinesLine}</span>
     : null;
+  const accountMenu = identity && (
+    <span className={`account ${fold ? "icon" : ""}`}>
+      {fold ? (
+        <button className="ghost gear account-btn" onClick={() => setMenu(!menu)} title={account?.signed_in ? account.email : "not signed in"} aria-label={account?.signed_in ? `Account ${account.email}` : "Account, not signed in"} aria-haspopup="menu" aria-expanded={menu}>
+          <UserRound size={14} />
+        </button>
+      ) : (
+        <button className="ghost" onClick={() => setMenu(!menu)} title={account?.signed_in ? account.email : "not signed in"}>
+          <UserRound size={14} /> {account?.signed_in ? account.email : "sign in"}
+        </button>
+      )}
+      {menu && (
+        <div className="menu" onMouseLeave={() => setMenu(false)}>
+          {account?.signed_in ? (
+            <>
+              <div className="menu-head mono">{account.email}</div>
+              <button className="ghost" onClick={async () => { await api.signOut(); setAccount(await api.getAccount()); setOfflineChoice(false); setMenu(false); }}><LogOut size={13} /> Sign out</button>
+            </>
+          ) : (
+            <button className="ghost" onClick={() => { setOfflineChoice(false); setMenu(false); }}><UserRound size={13} /> Sign in</button>
+          )}
+          <button className="ghost" onClick={async () => { setLock(await api.lockNow()); setMenu(false); }}><Lock size={13} /> Lock now</button>
+        </div>
+      )}
+    </span>
+  );
   return (
-    <header className="topbar" ref={bar}>
+    <header className={`topbar ${fold ? "fold" : ""}`} ref={bar}>
       {/* The bar by kind (leftovers-17 FR-3): brand · where you are · this
           Mac · your work · the app, 16 px between groups and no rules. The
           version is in the brand's hover at every width (FR-5). */}
-      <span className="brand" title={[version ? `Deltagos ${version}` : "Deltagos", identity && widthClass === "compact" && machinesLine].filter(Boolean).join("\n")}>Deltagos</span>
+      <span className="brand" title={version ? `Deltagos ${version}` : "Deltagos"}>Deltagos</span>
       <Where screen={screen} selectedInitiative={selectedInitiative} help={help} go={go} goHome={goHome} openInitiatives={openInitiatives} openUsage={openUsage} />
       <span className="tb-group tb-mac">
         <MemoryButton />
         {status}
       </span>
       <span className="tb-group tb-work">
-        <button className={`needs-me ${screen === "home" ? "on" : ""}`} onClick={go(goHome)} title="everything waiting on you">
+        {/* A verb that goes Home, not a place: never `.on` (A3 §1, U3). */}
+        <button className="needs-me" onClick={go(goHome)} title="everything waiting on you">
           <Inbox size={14} /> Needs me{needsMe > 0 && <span className="badge-count num">{needsMe}</span>}
         </button>
         <button className="ghost" onClick={refresh} disabled={loading} title="Rescan local disk">
           <RefreshCw size={14} className={loading ? "spin" : ""} /> {loading ? "scanning…" : "Rescan"}
         </button>
         {identity && (
-          <button className="primary" onClick={sync} disabled={syncing} title="Push this machine, pull all">
-            <RefreshCcwDot size={14} className={syncing ? "spin" : ""} /> {syncing ? "syncing…" : "Sync"}
+          <button className={stale ? "ghost" : "primary"} onClick={sync} disabled={syncing} title={fold ? `${syncName}\nPush this machine, pull all` : "Push this machine, pull all"} aria-label={fold ? syncName : undefined}>
+            <RefreshCcwDot size={14} className={syncing ? "spin" : ""} /> {syncing ? "syncing…" : stale ? <>Sync · <span className="sync-stale">stale</span></> : "Sync"}
           </button>
         )}
       </span>
@@ -72,25 +107,9 @@ export function TopBar() {
             <Lock size={14} /> Lock
           </button>
         )}
-        {identity && <span className="account">
-          <button className="ghost" onClick={() => setMenu(!menu)} title={account?.signed_in ? account.email : "not signed in"}>
-            <UserRound size={14} /> {account?.signed_in ? account.email : "sign in"}
-          </button>
-          {menu && (
-            <div className="menu" onMouseLeave={() => setMenu(false)}>
-              {account?.signed_in ? (
-                <>
-                  <div className="menu-head mono">{account.email}</div>
-                  <button className="ghost" onClick={async () => { await api.signOut(); setAccount(await api.getAccount()); setOfflineChoice(false); setMenu(false); }}><LogOut size={13} /> Sign out</button>
-                </>
-              ) : (
-                <button className="ghost" onClick={() => { setOfflineChoice(false); setMenu(false); }}><UserRound size={13} /> Sign in</button>
-              )}
-              <button className="ghost" onClick={async () => { setLock(await api.lockNow()); setMenu(false); }}><Lock size={13} /> Lock now</button>
-            </div>
-          )}
-        </span>}
+        {!fold && accountMenu}
         <AppControls floats={floats} help={help} settings={screen === "settings"} onCompact={() => { closeHelp(); void FloatCompact(); }} onHelp={toggleHelp} onSettings={go(openSettings)} />
+        {fold && accountMenu}
       </span>
       {help && <HelpView top={helpTop} onClose={closeHelp} />}
     </header>
@@ -99,24 +118,24 @@ export function TopBar() {
 
 type WhereProps = { screen: Screen; selectedInitiative: string | null; help: boolean; go: (to: () => void) => () => void; goHome: () => void; openInitiatives: () => void; openUsage: () => void };
 
-/** Where you are (initiatives-view Amendment 2, I19): Home, Initiatives and
- *  Usage as one nav named Places, then the crumb inside a place. An
- *  initiative, its Agents and Settings sit under Home, as their crumbs
- *  always did; Help lies over whatever place is open and adds `/ Help`. */
+/** Where you are (initiatives-view Amendment 3, I22, I23): Home,
+ *  Initiatives and Usage as one nav named Places, then, inside an
+ *  initiative, its id as the screen's title, after the places with the
+ *  group gap and no slash. One mark per screen: the place, or on an
+ *  initiative the title, with Initiatives as its parent (`placeOf`).
+ *  Settings and Help mark their own icon and show no crumb. */
 export function Where({ screen, selectedInitiative, help, go, goHome, openInitiatives, openUsage }: WhereProps) {
-  const place = placeOf(screen);
-  const crumb = screen === "initiative" ? selectedInitiative ?? "Agents" : screen === "settings" ? "Settings" : null;
+  const crumb = screen === "initiative" && !help ? selectedInitiative ?? "Agents" : null;
   return (
     <span className="tb-group tb-where">
       <nav className="places" aria-label="Places">
-        <PlaceTab label="Home" current={place === "home"} onClick={go(goHome)} title="Needs me and every initiative" />
-        <PlaceTab label="Initiatives" current={place === "initiatives"} onClick={go(openInitiatives)} title="Every initiative as a card: awake, asleep and archived" />
-        <PlaceTab label="Usage" current={place === "usage"} onClick={go(openUsage)} title="Tokens and money, week by week" />
+        <PlaceTab label="Home" place="home" screen={screen} help={help} onClick={go(goHome)} title="Needs me and every initiative" />
+        <PlaceTab label="Initiatives" place="initiatives" screen={screen} help={help} onClick={go(openInitiatives)} title="Every initiative as a card: awake, asleep and archived" />
+        <PlaceTab label="Usage" place="usage" screen={screen} help={help} onClick={go(openUsage)} title="Tokens and money, week by week" />
       </nav>
-      {(crumb || help) && (
+      {crumb && (
         <span className="crumbs">
-          {crumb && <><span className="crumb-sep">/</span><b className={screen === "initiative" && selectedInitiative ? "mono crumb-id" : undefined} title={crumb}>{crumb}</b></>}
-          {help && <><span className="crumb-sep">/</span><b>Help</b></>}
+          <b className={selectedInitiative ? "mono crumb-id" : undefined} title={crumb} aria-current="page">{crumb}</b>
         </span>
       )}
     </span>
@@ -124,30 +143,26 @@ export function Where({ screen, selectedInitiative, help, go, goHome, openInitia
 }
 
 /** The app's own controls, icons only: Compact to icon (only where the
- *  icon runs), Help, Settings. */
+ *  icon runs), Help, Settings. Help and Settings are screens of no place,
+ *  so the open one is the screen's mark (I22). */
 export function AppControls({ floats, help, settings, onCompact, onHelp, onSettings }: { floats: boolean; help: boolean; settings: boolean; onCompact: () => void; onHelp: () => void; onSettings: () => void }) {
+  const onSettingsPage = settings && !help;
   return (
     <>
       {floats && <button className="ghost gear" onClick={onCompact} title="Compact to icon (the icon floats on every desktop)" aria-label="Compact to icon"><CompactIcon /></button>}
-      <button className={`ghost gear ${help ? "on" : ""}`} onClick={onHelp} title="Help: how we build, from help_doc" aria-label="Help" aria-pressed={help}><CircleHelp size={14} /></button>
-      <button className={`ghost gear ${settings && !help ? "on" : ""}`} onClick={onSettings} title="Settings" aria-label="Settings"><Settings size={14} /></button>
+      <button className={`ghost gear ${help ? "on" : ""}`} onClick={onHelp} title="Help: how we build, from help_doc" aria-label="Help" aria-current={help ? "page" : undefined}><CircleHelp size={14} /></button>
+      <button className={`ghost gear ${onSettingsPage ? "on" : ""}`} onClick={onSettings} title="Settings" aria-label="Settings" aria-current={onSettingsPage ? "page" : undefined}><Settings size={14} /></button>
     </>
   );
 }
 
-export type Place = "home" | "initiatives" | "usage";
-
-/** The place a screen lives in: an initiative, its Agents and Settings are
- *  under Home, the way their crumbs read before the places were a nav. */
-export function placeOf(screen: Screen): Place {
-  return screen === "initiatives" ? "initiatives" : screen === "usage" ? "usage" : "home";
-}
-
-/** One place as a quiet text tab; the current one is `aria-current="page"`
- *  with the accent underline (I19). */
-function PlaceTab({ label, current, onClick, title }: { label: string; current: boolean; onClick: () => void; title: string }) {
+/** One place as a quiet text tab: the current one is `aria-current="page"`
+ *  with the accent underline; the parent of the open initiative carries the
+ *  underline in --fg-subtle and no `aria-current`, still a link (I22). */
+function PlaceTab({ label, place, screen, help, onClick, title }: { label: string; place: Place; screen: Screen; help: boolean; onClick: () => void; title: string }) {
+  const mark = markOf(place, screen, help);
   return (
-    <button type="button" className={`place-tab ${current ? "on" : ""}`} aria-current={current ? "page" : undefined} onClick={onClick} title={title}>{label}</button>
+    <button type="button" className={`place-tab ${mark === "current" ? "on" : mark === "parent" ? "parent" : ""}`} aria-current={mark === "current" ? "page" : undefined} onClick={onClick} title={title}>{label}</button>
   );
 }
 
