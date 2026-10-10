@@ -6,7 +6,7 @@ branch: lf15-names-and-notices
 seat: ln-build
 stage: one-window
 updated: 2026-10-09
-next: "waits on 0111 (accept)"
+next: "sup52 builds it (0111 ruled, wave launched 2026-10-09)"
 depends_on: []
 boundary: ["the spec's Boundary for this card"]
 spec: "docs/specs/leftovers-15.md (FR-1 to FR-3)"
