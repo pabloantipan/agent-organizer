@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useRef, useState } from "react";
 import { ChevronDown, ChevronRight, Code2, FileText, Lock, Route } from "lucide-react";
 import type { merge, model } from "../../wailsjs/go/models";
 import { dateWords, parseISO, today } from "../lib/dates";
@@ -8,6 +8,7 @@ import { leadOf, readOnlyOf } from "../lib/queue";
 import "../styles/initiatives.css";
 import { unreadFiles, unreadLabel } from "../lib/unread";
 import { UnreadFiles } from "./UnreadFiles";
+import { Charter } from "./Charter";
 import { useScrollEdges } from "../lib/useScrollEdges";
 import { useBoard, type Sub } from "../stores/board.store";
 import "../styles/header.css";
@@ -47,33 +48,6 @@ export function nextDate(i: merge.BoardInitiative, cards: merge.BoardCard[]): { 
 export function PhaseWord({ phase }: { phase?: string }) {
   if (!phase) return null;
   return <span className="lz phase" title={`phase: ${phase}`}>{phase}</span>;
-}
-
-/** Scope in and out (twenty-at-a-glance FR-4), in the owner's words, each
- *  side clamped to two lines like the goal (initiative-header FR-1), or "no
- *  scope yet" when both lists are empty. */
-function ScopeLines({ id, scope }: { id: string; scope?: model.Scope }) {
-  const inScope = scope?.in ?? [];
-  const outScope = scope?.out ?? [];
-  if (inScope.length === 0 && outScope.length === 0) {
-    return <div className="ihead-scope missing"><span className="lbl">Scope</span>no scope yet</div>;
-  }
-  const line = (label: string, name: string, items: string[]) => (
-    <Clamped key={`${label}-${id}`} name={name} className="ihead-scope">
-      <span className="lbl">{label}</span>
-      {items.length === 0 ? (
-        <span className="none">none written</span>
-      ) : (
-        <ul>{items.map((x, k) => <li key={k}>{x}</li>)}</ul>
-      )}
-    </Clamped>
-  );
-  return (
-    <>
-      {line("In scope", "Scope in", inScope)}
-      {line("Out of scope", "Scope out", outScope)}
-    </>
-  );
 }
 
 const stateWord = (s: model.Stage) => {
@@ -137,35 +111,6 @@ function StageStrip({ i, compact }: { i: merge.BoardInitiative; compact: boolean
   );
 }
 
-/** A header line clamped to two lines (FR-10): "more" shows the rest and
- *  "less" folds it again; no control when the text fits. Whether it is
- *  clamped is measured, so it follows the window width. The control is named
- *  by what it opens, "Goal, more" (initiative-header FR-15). */
-function Clamped({ name, className, children }: { name: string; className: string; children: ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [open, setOpen] = useState(false);
-  const [clamped, setClamped] = useState(false);
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el || open) return;
-    const measure = () => setClamped(el.scrollHeight > el.clientHeight + 1);
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [open, children]);
-  return (
-    <div className={`clamp-line ${className}`}>
-      <div ref={ref} className={`clamp-text ${open ? "" : "clamped"}`}>{children}</div>
-      {(clamped || open) && (
-        <button className="clamp-more" aria-expanded={open} aria-label={`${name}, ${open ? "less" : "more"}`} onClick={() => setOpen(!open)}>
-          {open ? "less" : "more"}
-        </button>
-      )}
-    </div>
-  );
-}
-
 const SUBS: { id: Sub; label: string }[] = [
   { id: "overview", label: "Overview" },
   { id: "work", label: "Work" },
@@ -177,8 +122,9 @@ const SUBS: { id: Sub; label: string }[] = [
 
 /** The initiative header (FR-17; initiative-header FR-1): folded by default
  *  to one bar (id, stage, waiting chip, target, the goal on one line,
- *  Details); open, the charter (goal, measure, scope, where they are written)
- *  and the stage strip. The stored choice is the lead's Details toggle, and a
+ *  Details); open, the Charter (goal, measure, target, scope, stage; the
+ *  same component as an Initiatives card's Details, leftovers-17 FR-2),
+ *  where it is written, and the stage strip. The stored choice is the lead's Details toggle, and a
  *  landing stores "folded" (FR-11, board.store). No badge on a sub-view:
  *  Needs me is the one count. */
 export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardInitiative }) {
@@ -242,18 +188,7 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
       {unreadOpen && unread.length > 0 && <UnreadFiles id={`ihead-unread-${i.id}`} files={unread} root={i.path} local={i.local} />}
       {headerOpen && (
         <div ref={openRef} id={`ihead-open-${i.id}`} className={`ihead-open ${edges.top ? "edge-top" : ""} ${edges.bottom ? "edge-bottom" : ""}`}>
-          <div className="ihead-cols">
-            <div className="ihead-col">
-              <Clamped key={`goal-${i.id}`} name="Goal" className={`ihead-goal ${i.goal ? "" : "missing"}`}>
-                <span className="lbl">Goal</span>
-                {i.goal || "no goal yet"}
-              </Clamped>
-              {i.measure && <Clamped key={`measure-${i.id}`} name="Measure" className="ihead-measure"><span className="lbl">Measure</span>{i.measure}</Clamped>}
-            </div>
-            <div className="ihead-col">
-              <ScopeLines id={i.id} scope={i.scope} />
-            </div>
-          </div>
+          <Charter i={i} clamp />
           {/* 0064, file only: where the charter is written, whether git sees it
               edited and not committed on this machine, and the way to change
               it. The app writes nothing to the file. */}

@@ -1,0 +1,10 @@
+/* The charter (leftovers-17 FR-2): what an initiative is, in the lead's
+   words, in the header's Details and on an Initiatives card's Details. The
+   header's layout (.ihead-cols, .ihead-goal, .ihead-measure) stays in
+   shell.css; these are the lines both places share. Tier-2 role tokens and
+   the seven type sizes only; no nesting, @layer or color-mix (Safari 15.0). */
+.charter .lbl { font-size: var(--font-size-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--fg-subtle); margin-right: var(--space-2); font-style: normal; }
+.charter-line { font-size: var(--font-size-md); line-height: var(--line-md); color: var(--fg-muted); max-width: 72ch; min-width: 0; overflow-wrap: anywhere; }
+.charter-line.ihead-goal { font-size: var(--font-size-lg); line-height: var(--line-lg); color: var(--fg); }
+.charter .missing, .charter .none { color: var(--fg-subtle); font-style: italic; }
+.charter .missing .lbl { font-style: normal; }
