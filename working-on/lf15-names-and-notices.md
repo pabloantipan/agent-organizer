@@ -6,7 +6,7 @@ branch: lf15-names-and-notices
 seat: ln-build
 stage: one-window
 updated: 2026-10-09
-next: "sup53 re-judges N2 against 0db55d6 (spec Amendment 1), then merges; sup52 ended"
+next: "review: ln-review2 re-judges N2 (Amendment 1, 0db55d6) at a3ed8a7, rebased on main (sup53)"
 depends_on: []
 boundary: ["the spec's Boundary for this card"]
 spec: "docs/specs/leftovers-15.md (FR-1 to FR-3)"
