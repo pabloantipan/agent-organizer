@@ -101,8 +101,10 @@ func memorySummary(inits []model.ScannedInitiative, unassigned []model.Agent) ([
 }
 
 // memoryBySession groups the agents' trees by session (a crew or probe
-// session sums its agents) and by initiative, biggest first.
+// session sums its agents) and by initiative, biggest first. A session with
+// no real name is its pid's alone, named by sessionLabel.
 func memoryBySession(inits []model.ScannedInitiative, unassigned []model.Agent) ([]model.MemorySession, uint64, []model.MemoryInitiative) {
+	seats := cardSeats(inits)
 	sessions := map[string]*model.MemorySession{}
 	var order []string
 	var total uint64
@@ -115,14 +117,13 @@ func memoryBySession(inits []model.ScannedInitiative, unassigned []model.Agent) 
 			}
 			row.Bytes += a.MemBytes
 			row.Agents++
-			name := a.Session
-			if name == "" {
-				name = "pid " + strconv.Itoa(a.PID)
+			key := initiative + "\x00" + sessionName(a)
+			if sessionName(a) == "" {
+				key += "#" + strconv.Itoa(a.PID)
 			}
-			key := initiative + "\x00" + name
 			ms, ok := sessions[key]
 			if !ok {
-				ms = &model.MemorySession{Name: name, Initiative: initiative, AgentID: a.Session + "#" + strconv.Itoa(a.PID)}
+				ms = &model.MemorySession{Name: sessionLabel(a, initiative, seatOf(a, seats)), Initiative: initiative, AgentID: a.Session + "#" + strconv.Itoa(a.PID)}
 				sessions[key] = ms
 				order = append(order, key)
 			}
@@ -168,6 +169,9 @@ func (s *Service) Memory() MemoryReport {
 	o := s.scanOptions(false)
 	o.Agents.SessionsDir = ""
 	snap := scan.Run(o)
+	// The card join the feed makes, so a session is named by its card's
+	// seat here as it is in the popover.
+	joinAgentCards(snap.Initiatives, o.Agents.BranchOf, s.now())
 	m, why := s.sampleMemoryLocked(snap.Initiatives, snap.Unassigned)
 	r := MemoryReport{Memory: m, Reason: why, Sessions: []model.MemorySession{}, MemSource: scan.MemSource}
 	if m != nil {

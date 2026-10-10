@@ -20,7 +20,7 @@ func TestPrintMemoryListsEverySession(t *testing.T) {
 	big := []model.MemorySession{
 		{Name: "organizer-probe-a", Initiative: "organizer", Bytes: 900 << 20},
 		{Name: "organizer-probe-b", Initiative: "organizer", Bytes: 800 << 20},
-		{Name: "pid 42", Bytes: 700 << 20},
+		{Name: "unassigned session", Bytes: 700 << 20, AgentID: "#42"},
 		{Name: "hestia-probe-fse", Initiative: "hestia", Bytes: 600 << 20},
 	}
 	all := append(big, sessions...)
@@ -37,7 +37,7 @@ func TestPrintMemoryListsEverySession(t *testing.T) {
 	var out bytes.Buffer
 	printMemory(&out, m, all, "resident size")
 	got := out.String()
-	for _, want := range []string{"pressure  high", "free      3.0 of 24.0 GB", "unassigned", "pid 42", "(resident size)"} {
+	for _, want := range []string{"pressure  high", "free      3.0 of 24.0 GB", "unassigned", "  unassigned session", "pid 42", "(resident size)"} {
 		if !strings.Contains(got, want) {
 			t.Errorf("output lacks %q:\n%s", want, got)
 		}

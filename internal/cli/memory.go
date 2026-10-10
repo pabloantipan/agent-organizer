@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 	"text/tabwriter"
 	"time"
 
@@ -44,7 +45,9 @@ func memoryCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now f
 // printMemory writes pressure, free of total, then every initiative biggest
 // first with its total and each of its sessions under it, unassigned last
 // (FR-3, amendment 2), and whether the agents' bytes are footprints or
-// resident sizes (Amendment 4). The feed's top five is in --json only.
+// resident sizes (Amendment 4). The feed's top five is in --json only. A
+// session reads as the popover names it (leftovers-15 FR-1), its pid in the
+// last column where the popover has it in the hover.
 func printMemory(w io.Writer, m model.Memory, sessions []model.MemorySession, source string) {
 	fmt.Fprintf(w, "pressure  %s\n", m.Pressure)
 	fmt.Fprintf(w, "free      %s of %s GB\n", gb(m.FreeBytes), gb(m.TotalBytes))
@@ -73,11 +76,19 @@ func printMemory(w io.Writer, m model.Memory, sessions []model.MemorySession, so
 		fmt.Fprintf(tw, "%s\t%d agents\t%s GB\n", name, r.Agents, gb(r.Bytes))
 		for _, s := range sessions {
 			if s.Initiative == r.Initiative {
-				fmt.Fprintf(tw, "  %s\t\t%s GB\n", s.Name, gb(s.Bytes))
+				fmt.Fprintf(tw, "  %s\t\t%s GB\t%s\n", s.Name, gb(s.Bytes), pidOf(s.AgentID))
 			}
 		}
 	}
 	_ = tw.Flush()
+}
+
+// pidOf is `pid N` from an Agents row key, `<session>#<pid>`.
+func pidOf(agentID string) string {
+	if i := strings.LastIndexByte(agentID, '#'); i >= 0 && i < len(agentID)-1 {
+		return "pid " + agentID[i+1:]
+	}
+	return ""
 }
 
 // gb is bytes in GB as Activity Monitor counts them (2^30), to one decimal.

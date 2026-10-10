@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -135,7 +136,7 @@ func TestMemorySummary(t *testing.T) {
 	}
 	wantTop := []model.MemorySession{
 		{Name: "camp-probe-andrea", Initiative: "camp", Bytes: 800, AgentID: "camp-probe-andrea#20"},
-		{Name: "pid 30", Bytes: 400, AgentID: "#30"},
+		{Name: "unassigned session", Bytes: 400, AgentID: "#30"},
 		{Name: "organizer-probe-rs-build", Initiative: "organizer", Bytes: 300, AgentID: "organizer-probe-rs-build#10"},
 		{Name: "organizer-probe-sup49", Initiative: "organizer", Bytes: 200, AgentID: "organizer-probe-sup49#11"},
 		{Name: "probe-hefesto", Bytes: 60, AgentID: "probe-hefesto#31"},
@@ -146,6 +147,46 @@ func TestMemorySummary(t *testing.T) {
 	for i, w := range wantTop {
 		if top[i] != w {
 			t.Errorf("top[%d] %+v, want %+v", i, top[i], w)
+		}
+	}
+}
+
+// N1 (leftovers-15 FR-1): a session is its name, else its card's seat, else
+// `<initiative> session`; never a resume UUID, never a bare pid. Two unnamed
+// sessions of one initiative stay two rows (the pid tells them apart in the
+// hover), and a resumed one is named like an unnamed one.
+func TestMemorySessionNames(t *testing.T) {
+	uuid := "1030fdd4-5b2e-4c8a-9f61-0a3d2e7c9b10"
+	inits := []model.ScannedInitiative{
+		{Initiative: model.Initiative{ID: "organizer"},
+			Cards: []model.Card{{Slug: "lf15-names", Status: model.StatusNow, Seat: "ln-build"}, {Slug: "loose", Status: model.StatusNow}},
+			Agents: []model.Agent{
+				{PID: 10, Session: "organizer-probe-sup52", MemBytes: 900},
+				{PID: 11, Session: uuid, MemBytes: 800, Card: &model.CardJoin{Key: "organizer/lf15-names"}},
+				{PID: 12, MemBytes: 700, Card: &model.CardJoin{Key: "organizer/loose"}},
+				{PID: 13, Session: uuid, MemBytes: 600},
+				{PID: 14, MemBytes: 500},
+			}},
+	}
+	unassigned := []model.Agent{{PID: 30, Session: "0f0e0d0c-0b0a-4908-8706-050403020100", MemBytes: 400}}
+	all, _, _ := memoryBySession(inits, unassigned)
+	want := []model.MemorySession{
+		{Name: "organizer-probe-sup52", Initiative: "organizer", Bytes: 900, AgentID: "organizer-probe-sup52#10"},
+		{Name: "ln-build", Initiative: "organizer", Bytes: 800, AgentID: uuid + "#11"},
+		{Name: "organizer session", Initiative: "organizer", Bytes: 700, AgentID: "#12"},
+		{Name: "organizer session", Initiative: "organizer", Bytes: 600, AgentID: uuid + "#13"},
+		{Name: "organizer session", Initiative: "organizer", Bytes: 500, AgentID: "#14"},
+		{Name: "unassigned session", Bytes: 400, AgentID: "0f0e0d0c-0b0a-4908-8706-050403020100#30"},
+	}
+	if len(all) != len(want) {
+		t.Fatalf("sessions %+v, want %d", all, len(want))
+	}
+	for i, w := range want {
+		if all[i] != w {
+			t.Errorf("session[%d] %+v, want %+v", i, all[i], w)
+		}
+		if strings.HasPrefix(all[i].Name, "pid ") || resumeID.MatchString(all[i].Name) {
+			t.Errorf("session[%d] named %q", i, all[i].Name)
 		}
 	}
 }
