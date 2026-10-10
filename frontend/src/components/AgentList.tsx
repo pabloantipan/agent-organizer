@@ -5,8 +5,7 @@ import { shortHome } from "../lib";
 import { ContextBar, WatcherBadge } from "./ContextBar";
 import { HEALTH, healthState, healthTitle, type HealthState } from "../lib/health";
 import { stateWord } from "../lib/stateWords";
-import { agentMemory } from "../lib/initiatives";
-import { gb } from "../lib/memory";
+import { agentMemory, rowMemoryWords, type MemoryFeed } from "../lib/initiatives";
 import { useBoard } from "../stores/board.store";
 import "../styles/initiatives.css";
 
@@ -21,6 +20,7 @@ const stateLabel = (a: Agent) => stateWord(a.state);
 export function AgentList({ agents, root, local = true, readOnly = false, onMessage }: { agents: Agent[]; root?: string; local?: boolean; readOnly?: boolean; onMessage?: (persona: string) => void }) {
   const [confirm, setConfirm] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
+  const feed = useBoard((s) => s.agents);
   if (!agents || agents.length === 0) return <div className="meta">No agents here.</div>;
   const flash = (m: string) => { setNote(m); window.setTimeout(() => setNote(null), 3000); };
   const run = (p: Promise<void>, ok: string) => p.then(() => flash(ok), (e) => flash(String(e))).finally(() => setConfirm(null));
@@ -37,7 +37,7 @@ export function AgentList({ agents, root, local = true, readOnly = false, onMess
           const asking = confirm === key;
           const health = healthState({ watcher: a.watcher, deaf: a.deaf, capped: a.capped, noIdentity: a.no_identity });
           return (
-            <li key={key} className={a.state} data-session={a.session || undefined} tabIndex={-1} aria-label={rowName(a)}>
+            <li key={key} className={a.state} data-session={a.session || undefined} tabIndex={-1} aria-label={rowName(a, feed)}>
               <span className={`a-state ${a.state}`}><i />{stateLabel(a)}</span>
               <span className="a-name">
                 {a.family && <span className="a-family">{a.family}</span>}
@@ -49,7 +49,6 @@ export function AgentList({ agents, root, local = true, readOnly = false, onMess
                 : <WatcherBadge watcher={a.watcher} deaf={a.deaf} capped={a.capped} undelivered={a.undelivered} />}
               <span className={`badge kind ${a.kind}`}>{a.kind}</span>
               <ContextBar c={a.context} />
-              <MemoryCell a={a} />
               <span className="meta mono a-proc">{a.pid > 0 ? `${a.tty} · up ${a.uptime}` : a.created ? `session ${a.created}` : "layout only"}</span>
               <span className="meta mono a-dir" title={a.dir}>{sub}</span>
               {!readOnly && <span className="a-actions">
@@ -84,6 +83,7 @@ export function AgentList({ agents, root, local = true, readOnly = false, onMess
                   </button>
                 )}
               </span>}
+              <MemoryCell a={a} />
               {health && health !== "alive" && <HealthWhy state={health} />}
             </li>
           );
@@ -96,7 +96,9 @@ export function AgentList({ agents, root, local = true, readOnly = false, onMess
 /** The row's Memory (initiatives-view, Agents: memory on every row): its
  *  footprint, tabular and right-aligned in neutral ink, or `—` with why.
  *  It never folds; it does not re-sort rows. A crew seat's row shows the
- *  same cell. */
+ *  same cell. It is the row's last cell on its first line, a fixed track at
+ *  the row's right edge, so the figures line up row under row whatever the
+ *  cells and actions before it (leftovers-15 FR-4). */
 export function MemoryCell({ a }: { a: { pid: number; state: string; mem_bytes?: number } | null | undefined }) {
   const agents = useBoard((s) => s.agents);
   const m = a ? agentMemory(a, agents) : { text: "—", title: "not running" };
@@ -105,10 +107,13 @@ export function MemoryCell({ a }: { a: { pid: number; state: string; mem_bytes?:
 
 /** A row's accessible name, what a landing on it reads first (a role's
  *  session line, transversal-roles A3): its session, the state word the row
- *  shows (leftovers-11 FR-3), and context. */
-function rowName(a: Agent): string {
+ *  shows (leftovers-11 FR-3), context and memory. */
+function rowName(a: Agent, feed: MemoryFeed): string {
   const ctx = a.context ? `, ${Math.round(a.context.used_percent)}% context` : "";
-  const mem = a.pid > 0 && a.mem_bytes > 0 ? `, ${gb(a.mem_bytes)} GB memory` : "";
+  // The cell's own words, so the name never reads a number the screen does
+  // not show (leftovers-15 FR-5).
+  const words = rowMemoryWords(a, feed);
+  const mem = words ? `, ${words}` : "";
   return `${a.session || a.short || a.name}, ${stateLabel(a)}${ctx}${mem}`;
 }
 

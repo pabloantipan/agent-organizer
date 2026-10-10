@@ -107,7 +107,15 @@
 .ihead-wake-link:hover { background: var(--surface-hover); border-color: transparent; color: var(--fg); }
 
 /* ---------- Agents: memory on every row ---------- */
-/* Right-aligned and tabular in neutral ink; a fixed width so the figures
-   line up row under row, and no shrink, so it never folds. */
-.a-mem { flex: 0 0 auto; min-width: 52px; text-align: right; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); white-space: nowrap; }
+/* A fixed track at the row's right edge (leftovers-15 FR-4): the cell is
+   the last on the row's first line, with a fixed width and no shrink, so
+   its x is the same on every row whatever cells and actions come before
+   it. Right-aligned and tabular in neutral ink; it never folds. The
+   actions' auto margin pushes them against it; a row without actions
+   pushes the cell itself. */
+.a-mem { flex: 0 0 64px; width: 64px; margin-left: auto; text-align: right; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); white-space: nowrap; }
+.a-actions + .a-mem { margin-left: 0; }
 .a-group-mem { white-space: nowrap; }
+/* A row's health line takes its own line, so the Memory track stays the
+   first line's last cell. */
+.agents li > .a-health { flex: 1 0 100%; }
