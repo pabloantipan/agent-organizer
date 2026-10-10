@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"organizer/internal/config"
@@ -26,12 +27,15 @@ import (
 // ErrSleepBusy is a Sleep or Wake asked while another one runs.
 var ErrSleepBusy = errors.New("a factory sleep or wake is already running")
 
-// factoryTimeout bounds one factory call. Sleep freezes every seat of the
-// initiative one by one, so it gets far more than awake needs.
-const (
-	factoryTimeout      = 3 * time.Minute
-	factoryAwakeTimeout = 30 * time.Second
-)
+// factoryTimeout bounds every factory call, awake, sleep and wake alike
+// (leftovers-15 FR-14): past it the factory's process group is stopped, the
+// busy lock is released and the result says it timed out. A var so tests can
+// shorten it.
+var factoryTimeout = 20 * time.Second
+
+// factoryWaitDelay is how long a stopped factory's children may keep its
+// output open before the pipes are closed on them anyway.
+const factoryWaitDelay = 2 * time.Second
 
 // factoryFallbackDirs are where factory is looked for when it is not on PATH:
 // `install.sh links` puts it in ~/bin, which an app opened from Finder does
@@ -144,26 +148,58 @@ func (s *Service) sleepWake(action, id string) (SleepResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), factoryTimeout)
 	defer cancel()
 	out, code, err := runFactory(ctx, bin, action, id)
+	timeout := errors.Is(err, errFactoryTimeout)
+	if timeout {
+		// Not a Go error: the words are the result, and the rescan below
+		// shows whatever the stopped factory had already changed.
+		out, code, err = timedOut(out, action+" "+id), -1, nil
+	}
 	if err != nil {
 		return SleepResult{}, err
 	}
 	r := SleepResult{ID: id, Action: action, OK: code == 0, ExitCode: code, Output: out}
 
 	s.Scan(true)
-	r.Factory = s.refreshFactory()
+	if timeout {
+		// A factory that just hung would likely hang `factory awake` too and
+		// hold the lock another 20 s: keep the last reading instead.
+		r.Factory = s.Factory()
+	} else {
+		r.Factory = s.refreshFactory()
+	}
 	if after, ok := s.localInitiative(id); ok {
 		r.Status, r.AsleepSince, r.Frozen, r.FactoryBlind = after.Status, after.AsleepSince, after.Frozen, after.FactoryBlind
 	}
 	return r, nil
 }
 
+// errFactoryTimeout is a factory call stopped at factoryTimeout.
+var errFactoryTimeout = errors.New("factory timed out")
+
+// timedOut is the words a timed-out call leaves: what the factory printed
+// before it was stopped, then why it stopped.
+func timedOut(out, what string) string {
+	if out != "" && !strings.HasSuffix(out, "\n") {
+		out += "\n"
+	}
+	return out + fmt.Sprintf("factory %s timed out after %s; Deltagos stopped it", what, factoryTimeout)
+}
+
 // runFactory runs factory with args and returns its combined output and exit
-// code. An error is only a factory that could not be started at all.
+// code. An error is a factory that could not be started at all, or
+// errFactoryTimeout with what it printed so far. The factory runs in its own
+// process group so a timeout stops its children too, and the output pipes
+// are closed factoryWaitDelay later whatever still holds them.
 func runFactory(ctx context.Context, bin string, args ...string) (string, int, error) {
 	cmd := exec.CommandContext(ctx, bin, args...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	cmd.Cancel = func() error { return syscall.Kill(-cmd.Process.Pid, syscall.SIGTERM) }
+	cmd.WaitDelay = factoryWaitDelay
 	b, err := cmd.CombinedOutput()
 	var ee *exec.ExitError
 	switch {
+	case errors.Is(ctx.Err(), context.DeadlineExceeded):
+		return string(b), -1, errFactoryTimeout
 	case err == nil:
 		return string(b), 0, nil
 	case errors.As(err, &ee):
@@ -212,10 +248,12 @@ func (s *Service) refreshFactory() FactoryView {
 		v.Reason = err.Error()
 	} else {
 		v.Found, v.OnPath, v.Path = true, onPath, bin
-		ctx, cancel := context.WithTimeout(context.Background(), factoryAwakeTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), factoryTimeout)
 		out, code, err := runFactory(ctx, bin, "awake")
 		cancel()
-		if err != nil {
+		if errors.Is(err, errFactoryTimeout) {
+			v.Reason = timedOut("", "awake")
+		} else if err != nil {
 			v.Reason = err.Error()
 		} else {
 			parseAwake(&v, out, code)

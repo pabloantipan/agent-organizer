@@ -281,3 +281,86 @@ func TestParseAwakeOverTheLimitIsStillAReading(t *testing.T) {
 		t.Fatal(got)
 	}
 }
+
+// B3: `factory awake` runs on a rescan only. The agents tick (app.go's
+// agentTicker: one Scan(false), then RefreshAgents every 10 s) never calls
+// the factory; Board, the rescan, calls it once.
+func TestFactoryAwakeNeverOnTheTick(t *testing.T) {
+	f := newSleepFixture(t) // its Board is the one rescan so far
+	if got := f.argv(t); strings.Join(got, "|") != "awake" {
+		t.Fatalf("after the first rescan: %q", got)
+	}
+	f.s.Scan(false)
+	for range 3 {
+		f.s.RefreshAgents()
+	}
+	if got := f.argv(t); len(got) != 1 {
+		t.Fatalf("the tick called the factory: %q", got)
+	}
+	f.s.Board()
+	if got := f.argv(t); strings.Join(got, "|") != "awake|awake" {
+		t.Fatalf("a rescan should call factory awake once: %q", got)
+	}
+}
+
+// B3: a factory that hangs is stopped at factoryTimeout, the busy lock is
+// released and the result says so. The fake sleeps 60 s in a child, so a
+// timeout that killed only the shell would still wait for the pipe.
+// ORGANIZER_REAL_FACTORY_TIMEOUT=1 runs it at the real 20 s.
+func TestFactoryCallTimesOut(t *testing.T) {
+	if factoryTimeout != 20*time.Second {
+		t.Fatalf("factoryTimeout = %s, want 20s", factoryTimeout)
+	}
+	f := newSleepFixture(t)
+	if os.Getenv("ORGANIZER_REAL_FACTORY_TIMEOUT") == "" {
+		old := factoryTimeout
+		factoryTimeout = time.Second
+		t.Cleanup(func() { factoryTimeout = old })
+	}
+	hang := t.TempDir()
+	script := "#!/bin/sh\necho \"$*\" >>\"$FAKE_FACTORY_LOG\"\necho \"started $*\"\nsleep 60\necho never\n"
+	if err := os.WriteFile(filepath.Join(hang, "factory"), []byte(script), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", hang+":/usr/bin:/bin")
+
+	start := time.Now()
+	r, err := f.s.Sleep("a")
+	took := time.Since(start)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if took < factoryTimeout || took > factoryTimeout+factoryWaitDelay+3*time.Second {
+		t.Fatalf("sleep returned after %s, want about %s", took, factoryTimeout)
+	}
+	want := "started sleep a\nfactory sleep a timed out after " + factoryTimeout.String() + "; Deltagos stopped it"
+	if r.OK || r.ExitCode != -1 || r.Output != want {
+		t.Fatalf("timed-out sleep: %+v", r)
+	}
+	if r.Status != "active" {
+		t.Fatalf("after the timeout: status %q", r.Status)
+	}
+	t.Logf("sleep a: stopped after %s: %q", took.Round(time.Millisecond), r.Output)
+
+	// The lock is free: the next call reaches the factory instead of busy.
+	if !f.s.sleepMu.TryLock() {
+		t.Fatal("busy lock still held after the timeout")
+	}
+	f.s.sleepMu.Unlock()
+	if _, err := f.s.Wake("e"); errors.Is(err, ErrSleepBusy) {
+		t.Fatal("wake after a timeout: busy")
+	}
+
+	// factory awake, on a rescan, times out the same way and says so.
+	f.s.Board()
+	v := f.s.Factory()
+	if v.OK || !v.Found || v.Reason != "factory awake timed out after "+factoryTimeout.String()+"; Deltagos stopped it" {
+		t.Fatalf("timed-out awake: %+v", v)
+	}
+	t.Logf("awake: %q", v.Reason)
+	// The rescan after the timed-out sleep did not ask the hung factory again.
+	want2 := []string{"awake", "sleep a", "wake e", "awake"}
+	if got := f.argv(t); strings.Join(got, "|") != strings.Join(want2, "|") {
+		t.Fatalf("argv:\n got %q\nwant %q", got, want2)
+	}
+}
