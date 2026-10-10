@@ -6,7 +6,7 @@ branch: lf15-initiatives-polish
 seat: lp-build
 stage: one-window
 updated: 2026-10-09
-next: "P1 (U1): run the review build on the fixture and log the Memory cell x per Agents row (or the FSE amends P1/P3 to vitest under 0108); then P3 (U3): AX focus on the title after Initiatives ›"
+next: "review: lf15-initiatives-polish, gate met (P1-P7 on the review build, X0), 8545263"
 review: fail
 depends_on: []
 boundary: ["the spec's Boundary for this card"]
@@ -20,14 +20,15 @@ Leftovers from 2026-10-09's reviews (0111).
 
 ## Gate
 docs/specs/leftovers-15.md, P1 to P7 and X0. Evidence in `.wt-notes/lp-build/` (`progress.md` says how to reach each state on the fixture).
-- [x] P1-P7 (FR-4 to FR-10): vitest per helper, `p-rows.log`: P1 `memoryTrack.test.tsx` (U1), P2 `rowMemoryWords`/`groupMemory`, P3 `landingOf` + `landing.test.ts` (U3), P4 since today/leaves/fold names, P5 `limitNames`, P6 `confirmLines` last awake, P7 `inactiveLabel`.
-- [x] X0: `x0.txt`, clean clone at ee56253: `XDG_DATA_HOME=$(mktemp -d) make test` exit 0 (440 vitest), `cd frontend && npm run build` exit 0, `wails build` exit 0.
+- [x] P1-P7 (FR-4 to FR-10): vitest per helper, `p-rows.log` (P2 `rowMemoryWords`/`groupMemory`, P3 `landingOf`/`landing.test.ts`, P4 since today/leaves/fold names, P5 `limitNames`, P6 `confirmLines` last awake, P7 `inactiveLabel`, P1 `memoryTrack.test.tsx`); review build at 8545263 on the fixture, my own `Deltagos Review` (pid saved, quit by it), AXPress on that pid only, AX reads: U1 `u1-memory-x.log` (every `.a-mem` x at 2334 at 1440×900 rail open, 1904 at 1024×640, wrapped rows and crew seats included; `ax-agents-1440.txt`, `ax-agents-1024.txt`, `wk-1440x900-P1-agents-init-a.png`, `wk-1024x640-P1-agents-init-a.png`); U3 `u3-focus.log` (`AXFocused` = heading `Initiatives` after Home's and after the rail's `Initiatives ›`, nothing focused before).
+- [x] X0: `x0.txt`, clean clone at 8545263: `XDG_DATA_HOME=$(mktemp -d) make test` exit 0 (440 vitest), `cd frontend && npm run build` exit 0, `wails build` exit 0.
 
 ## Done
 - 2026-10-09 lp-build: f9711b7 (lib words + vitest), a20dcbb (Memory cell last on the row, a fixed 64 px right-aligned track; row name `memory unknown`), cdfdaf8 (title landing, limit links only with a Sleep, chevron names, `Asleep (n)`), ee56253 (U1/U3 tests); rebased on main at 2de137c, unmerged.
+- 2026-10-09 lp-build, after lp-ui's V1: 8545263 makes the actions and the Memory cell one tail pushed to the row's right edge on any line (no `.a-actions + .a-mem` override), and gives the other agent rows the crew block's 11 px inset so both lists share one track (V2 too). P1 and P3 measured on my own review build by AXPress and AX reads; rebased on main at e5029a2 (branch head 8545263 after the rebase; commits renamed 2329439, e63fdc2, cc4b00a, a7949d6), unmerged.
 
 ## Notes
-- U1 and U3 were proved by vitest, not on the review build (sup52, 2026-10-09): the review build was built but not launched, since the launch waited for Pablo to be idle and he was not. **No AX focus read and no window x measurement were done.** U1 is the rendered row order plus the stylesheet's fixed track (fails on main's AgentList), not pixels; U3 is the store plus `applyLanding` against a stand-in `document.activeElement`. There is no jsdom: adding it means `package.json`, outside the boundary.
+- U1 and U3 were first proved by vitest only (sup52's instruction, beyond the gate); lp-review failed P1 and P3 for it, and lp-ui's V1 found the wrap. Both are now read on the review build (Gate). The launch waited for 60 s of Pablo's idle, since a launch can take focus; no seat-pointer, keys or clicks were used (seat-pointer refused earlier: a point outside the window, then the Dock covering).
 - The Memory cell now comes after the actions in the DOM, so a row's reading order puts the figure after the buttons; the row's accessible name carries it first.
 - FloatList's fold also holds archived initiatives, so `Asleep (n)` counts them (FR-10 as written).
 - The fixture writes init-asleep's since date as 7 days ago; to see `asleep since today`, edit that date in the copy and Rescan.
