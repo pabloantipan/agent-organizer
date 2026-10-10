@@ -40,10 +40,6 @@
 .usage-mac { font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-subtle); cursor: default; border-radius: var(--radius-xs); }
 .usage-filter { color: var(--fg); background: var(--surface-selected); font-size: var(--font-size-sm); }
 
-/* the top bar's quiet text button: on is selected, never the accent */
-.usage-btn { color: var(--fg-muted); }
-.usage-btn.on { color: var(--fg); background: var(--surface-selected); }
-
 /* ---------- three stat tiles: always one row ---------- */
 .usage-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
 .stat-tile { display: grid; gap: var(--space-1); align-content: start; padding: var(--space-3) var(--space-4) var(--space-4); background: var(--surface); border-radius: var(--radius-lg); min-width: 0; }
