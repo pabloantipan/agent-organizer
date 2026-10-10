@@ -4,7 +4,7 @@
    does, never red (red is blocked's) and no longer the tone (0109).
    Safari 15 floor: no nesting, color-mix or oklch. */
 
-.memory { position: relative; display: inline-flex; }
+.memory { position: relative; display: inline-flex; flex-shrink: 0; }
 
 /* .memory button.memory-btn (0,2,1), not .memory-btn: button.ghost (0,1,1),
    later in the bundle, and its :hover (0,2,1) would win otherwise, the
