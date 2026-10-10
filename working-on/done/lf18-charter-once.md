@@ -1,6 +1,6 @@
 ---
 title: "A fact shows once: Charter omit, card hover on body, readOnly detail, header pills wrap"
-status: now
+status: done
 repos: [organizer]
 branch: lf18-charter-once
 seat: co-build
@@ -12,6 +12,7 @@ boundary: ["docs/specs/leftovers-18.md Boundary, lf18-charter-once"]
 spec: "docs/specs/leftovers-18.md (FR-4 to FR-7b; initiatives-view Amendment 3, I25-I27)"
 gate: "docs/specs/leftovers-18.md Acceptance, rows H1, H2, H3, H4, H5 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -51,3 +52,14 @@ docs/specs/leftovers-18.md, rows H1, H2, H3, H4, H5 and X0.
 - Spec gaps for the FSE: H2 asks for a "computed style on the review process", which needs a pointer hover that 0108 forbids on the review app (AXPress cannot hover). The row should name Chromium on wails dev, or vitest alone, as its screen evidence. Amendment 3 §4 does not say whether the id link counts as the body (U1).
 - Design questions, for aglaea: U1 (does hovering the id raise the card?).
 - Not verified in WKWebView: H2's hover (no pointer input allowed). Its evidence is vitest plus co-build's Chromium computed styles. Also not checked: the document's `scrollWidth` (AX cannot read it; the absence of a horizontal scroll bar and the pill frames stand in for it, and co-build's Chromium run gives 1024 = 1024).
+
+## Review
+- **pass.** Reviewer co-review, 2026-10-10, on 242dc0c. The branch was rebased to e4757ef during the review; `git diff main...e4757ef` is the same patch as `main...242dc0c` (index lines aside), so the verdict stands for e4757ef. Evidence under `.wt-notes/co-review/`.
+- H1: diff read (`Charter` `omit`, `COLUMNS` plus one `Field` per name; `HEADER_OMITS` = target, stage; open card's `ic-goal` behind `!open`). vitest `CharterOnce.test.tsx` H1 passes. Review app AX at 1024×640, open header: Charter labels GOAL, MEASURE, SCOPE, no Target or Stage line; bar keeps `target 20 Nov` and the stage button (`ax-h4-open.txt`). Chromium: open init-asleep card shows the goal once.
+- H2: diff read (`raisesOn` = `pressOf(...) === "open"` on `.ic-main`'s mouseover, cleared on leave; `.ic:not(.open):hover` replaced by `.ic.raised`). vitest H2 passes. Computed style rerun by me in headless Chromium on my own `wails dev` at 242dc0c (`h2-h4-chromium-1024x640.json`): rgb(46,39,60) and `.raised` on the body, closed and open, for init-a and init-asleep; rest rgb(39,32,51) over Details, Sleep, Wake and the open details.
+- H3: diff read (`readOnly` through `InitiativeDetail` to `Actions`; `CardDetails` passes it). vitest H3 passes. grep of `frontend/src/styles` for `last-of-type`, `ic-ws.read-only`, `read-only.local`: nothing.
+- H4: review app (own pid) AX-resized to 1024×640, rail open, on init-asleep with every pill: header 1250-2024, every pill's right edge ≤ 2004, folded and open, no AXScrollBar (`ax-h4-folded.txt`, `ax-h4-open.txt`, `review-1024x640-H4-folded.png`). Chromium: `scrollWidth` 1024 = `clientWidth` 1024, folded and open, no sideways scroller; with main's nowrap injected the header runs to 1878.
+- H5: diff read (`aria-current` "true"). vitest H5 passes on all six sub-views; AX shows Overview `.on`.
+- X0: fresh clone at 242dc0c: `make test` (Go ok, vitest 36 files / 496 tests), `npm install && npm run build`, `wails build` all exit 0. Porcelain at 242dc0c alone: the three `wailsjs/runtime` flips and `package-lock.json` (lf18-build-drift, not then on the branch). The same commit merged onto main (with lf18-build-drift), then `wails build`: porcelain empty (`x0-merged-porcelain.txt`); that is the state e4757ef carries.
+- Unmet: none.
+- Gate gaps: H2's "computed style on the review process" cannot run under 0108 (a hover needs pointer input); it was checked in Chromium, as the UI review also notes. H4's `scrollWidth` is not readable through AX either; Chromium gives it.
