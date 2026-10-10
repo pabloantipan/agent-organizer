@@ -287,23 +287,34 @@ export function applyLanding(
  *  `Expand Asleep`, `Collapse Archived`. */
 export const foldName = (collapsed: boolean, group: string) => `${collapsed ? "Expand" : "Collapse"} ${group}`;
 
+/** The three names of an empty Memory cell (initiatives-view I16,
+ *  leftovers-16 FR-4): every `—` on an Agents row or crew seat is one of
+ *  these, and "unknown" is none of them. */
+export const MEMORY_OFF = "Memory: not running";
+export const MEMORY_FAILED = "Memory: could not be read";
+export const MEMORY_READING = "Memory: reading…";
+const empty = (name: string) => ({ text: "—", name, title: name });
+
 /** One Agents row's Memory cell (her Agents section): its figure, or `—`
- *  with why. `feed` is the agents payload's reading. */
-export function agentMemory(a: { pid: number; state: string; mem_bytes?: number }, feed: MemoryFeed): { text: string; title: string } {
-  if (a.pid <= 0 || a.state === "exited" || a.state === "off") return { text: "—", title: "not running" };
-  if (!feed?.memory) return { text: "—", title: feed?.memory_reason ? "memory could not be read" : "reading memory…" };
-  if (!a.mem_bytes || a.mem_bytes <= 0) return { text: "—", title: "reading memory…" };
-  return { text: `${gb(a.mem_bytes)} GB`, title: "this process tree's footprint" };
+ *  named by why. `feed` is the agents payload's reading; `a` null is a
+ *  crew seat with no process. `name` is the cell's accessible name,
+ *  `title` its hover: the name again for `—`, what the figure counts else. */
+export function agentMemory(a: { pid: number; state: string; mem_bytes?: number } | null | undefined, feed: MemoryFeed): { text: string; name: string; title: string } {
+  if (!a || a.pid <= 0 || a.state === "exited" || a.state === "off") return empty(MEMORY_OFF);
+  if (!feed?.memory) return empty(feed?.memory_reason ? MEMORY_FAILED : MEMORY_READING);
+  if (!a.mem_bytes || a.mem_bytes <= 0) return empty(MEMORY_READING);
+  return { text: `${gb(a.mem_bytes)} GB`, name: `Memory ${gb(a.mem_bytes)} GB`, title: "this process tree's footprint" };
 }
 
 /** The memory words of an Agents row's accessible name (leftovers-15
- *  FR-5): the figure the cell shows, `memory unknown` when the cell shows
- *  `—` for a running row (no reading yet, or it failed), nothing for a row
- *  that does not run (its state already says so). */
+ *  FR-5): the figure the cell shows, the cell's own name in lower case when
+ *  it shows `—` for a running row (`memory: reading…`, `memory: could not
+ *  be read`), nothing for a row that does not run (its state already says
+ *  so). */
 export function rowMemoryWords(a: { pid: number; state: string; mem_bytes?: number }, feed: MemoryFeed): string {
   const m = agentMemory(a, feed);
-  if (m.title === "not running") return "";
-  return m.text === "—" ? "memory unknown" : `${m.text} memory`;
+  if (m.name === MEMORY_OFF) return "";
+  return m.text === "—" ? `m${m.name.slice(1)}` : `${m.text} memory`;
 }
 
 /** A group's total in its head (her Agents section): the same number as its

@@ -210,9 +210,10 @@ describe("Agents' Memory column (I10)", () => {
     expect(agentMemory({ pid: 7, state: "working", mem_bytes: 1.4 * GB }, feed)).toMatchObject({ text: "1.4 GB" });
   });
   it("is a dash with its reason when unread", () => {
-    expect(agentMemory({ pid: 0, state: "exited" }, feed)).toEqual({ text: "—", title: "not running" });
-    expect(agentMemory({ pid: 7, state: "running", mem_bytes: 5 }, null)).toEqual({ text: "—", title: "reading memory…" });
-    expect(agentMemory({ pid: 7, state: "running", mem_bytes: 5 }, { memory: null, memory_reason: "x" })).toEqual({ text: "—", title: "memory could not be read" });
+    expect(agentMemory({ pid: 0, state: "exited" }, feed)).toMatchObject({ text: "—", name: "Memory: not running" });
+    expect(agentMemory(null, feed)).toMatchObject({ text: "—", name: "Memory: not running" });
+    expect(agentMemory({ pid: 7, state: "running", mem_bytes: 5 }, null)).toMatchObject({ text: "—", name: "Memory: reading…" });
+    expect(agentMemory({ pid: 7, state: "running", mem_bytes: 5 }, { memory: null, memory_reason: "x" })).toMatchObject({ text: "—", name: "Memory: could not be read" });
   });
   it("totals a group the way its card does", () => {
     expect(groupMemory(feed, "organizer")).toBe("Memory 9.8 GB");
@@ -224,11 +225,11 @@ describe("Agents' Memory column (I10)", () => {
     expect(groupMemory({ memory: null, memory_reason: "x" }, "organizer")).toBe("Memory —");
     expect(groupMemory({ memory: null, memory_reason: "x" }, "")).toBe("Memory —");
   });
-  it("P2 (FR-5): a row's name says memory unknown, never a number the cell does not show", () => {
+  it("P2 (FR-5): a row's name says the cell's words, never a number the cell does not show", () => {
     const row = { pid: 7, state: "running", mem_bytes: 0.05 * GB };
-    expect(rowMemoryWords(row, { memory: null, memory_reason: "x" })).toBe("memory unknown");
-    expect(rowMemoryWords(row, null)).toBe("memory unknown");
-    expect(rowMemoryWords({ pid: 7, state: "running", mem_bytes: 0 }, feed)).toBe("memory unknown");
+    expect(rowMemoryWords(row, { memory: null, memory_reason: "x" })).toBe("memory: could not be read");
+    expect(rowMemoryWords(row, null)).toBe("memory: reading…");
+    expect(rowMemoryWords({ pid: 7, state: "running", mem_bytes: 0 }, feed)).toBe("memory: reading…");
     expect(rowMemoryWords({ pid: 7, state: "working", mem_bytes: 1.4 * GB }, feed)).toBe("1.4 GB memory");
     expect(rowMemoryWords({ pid: 0, state: "exited" }, { memory: null, memory_reason: "x" })).toBe("");
   });

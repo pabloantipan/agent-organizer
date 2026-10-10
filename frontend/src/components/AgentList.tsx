@@ -99,15 +99,16 @@ export function AgentList({ agents, root, local = true, readOnly = false, onMess
 }
 
 /** The row's Memory (initiatives-view, Agents: memory on every row): its
- *  footprint, tabular and right-aligned in neutral ink, or `—` with why.
+ *  footprint, tabular and right-aligned in neutral ink, or `—` named by
+ *  why, one of the three names in lib/initiatives (leftovers-16 FR-4).
  *  It never folds; it does not re-sort rows. A crew seat's row shows the
  *  same cell. It is the row's last cell on its first line, a fixed track at
  *  the row's right edge, so the figures line up row under row whatever the
  *  cells and actions before it (leftovers-15 FR-4). */
 export function MemoryCell({ a }: { a: { pid: number; state: string; mem_bytes?: number } | null | undefined }) {
   const agents = useBoard((s) => s.agents);
-  const m = a ? agentMemory(a, agents) : { text: "—", title: "not running" };
-  return <span className="a-mem num" title={m.title} aria-label={`Memory ${m.text === "—" ? `unknown, ${m.title}` : m.text}`}>{m.text}</span>;
+  const m = agentMemory(a, agents);
+  return <span className="a-mem num" title={m.title} aria-label={m.name}>{m.text}</span>;
 }
 
 /** A row's accessible name, what a landing on it reads first (a role's
