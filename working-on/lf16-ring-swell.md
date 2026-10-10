@@ -6,7 +6,7 @@ branch: lf16-ring-swell
 seat: s6-build
 stage: one-window
 updated: 2026-10-10
-next: "sup53 builds it (0112 ruled, launched 2026-10-10)"
+next: "build: s6-build on lf16-ring-swell (sup53, launched 2026-10-10)"
 depends_on: []
 boundary: ["floaticon_darwin.m (the ring breath constants and animation only)", "not: the mark, activation paths, the frontend"]
 spec: "docs/specs/leftovers-16.md (FR-1; docs/ux/specs/ram-indicator.md as amended b3295f2)"
