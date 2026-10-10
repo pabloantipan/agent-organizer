@@ -1,13 +1,13 @@
 ---
 title: Accept leftovers 17 - the Initiatives card opens and shows details; the top bar by kind
-status: proposed
+status: ruled
 raised: 2026-10-10
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-10
+ruled_by: pablo
 options: ["accept as written", "accept with amendments", "send back"]
-chosen:
+chosen: accept as written
 cards: [lf17-initiative-card, lf17-top-bar]
 threads: []
 supersedes: []
@@ -47,3 +47,7 @@ leftovers-15, 4 cards in 61 min with reviews, this initiative.
 ## Recommendation
 
 The FSE's: accept as written.
+
+## Ruling
+
+pablo, 2026-10-10, in the organizer on lodestar: accepted
