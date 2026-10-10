@@ -42,7 +42,7 @@ function StageLine({ stages }: { stages: model.Stage[] }) {
   return (
     <div className="charter-line">
       <span className="lbl">Stage</span>
-      <span className="mono">{s.title || s.id}</span>
+      <span>{s.title || s.id}</span>
       {s.outcome ? <> — “{s.outcome}”</> : <span className="none"> — no outcome yet</span>}
       {" "}<span className="num">({pos.current + 1} of {stages.length})</span>
     </div>

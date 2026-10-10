@@ -216,7 +216,7 @@ export function InitiativesView() {
     const open = details === c.id;
     const detailsId = `ic-details-${c.id}`;
     return (
-      <article key={c.id} className={`ic ${c.state} ${open ? "open" : ""}`} data-card={c.id} aria-labelledby={`ic-id-${c.id}`}
+      <article key={c.id} className={`ic ${c.state} ${open ? "open" : ""}`} data-card={c.id} aria-label={c.id}
         onKeyDown={open ? escapeCloses(() => closeDetails(c.id)) : undefined}>
         <div className="ic-main" onClick={pressCard(c, asking)}>
           <div className="ic-head">
