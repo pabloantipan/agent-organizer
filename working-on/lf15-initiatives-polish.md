@@ -7,7 +7,7 @@ seat: lp-build
 stage: one-window
 updated: 2026-10-09
 next: "review: lf15-initiatives-polish, gate met (P1-P7 on the review build, X0), 8545263"
-review: fail
+review: pass
 depends_on: []
 boundary: ["the spec's Boundary for this card"]
 spec: "docs/specs/leftovers-15.md (FR-4 to FR-10)"
@@ -67,17 +67,17 @@ For aglaea: none new (A1-A3 of initiatives-view still open).
 Not verified in WKWebView: P7 (FloatList's label, by code and `floatList.test.ts`); the visible focus ring on the title (the window was never key, so no ring shows; `:focus-visible` read from the CSS); Home's `Wake one in Initiatives ›` (none-awake state, same `openInitiatives("title")` call); keyboard Tab order.
 
 ## Review
-**Fail.** The diff does what FR-4 to FR-10 ask, and X0 passes. The P1-P7 row on main also asks for the review build on the fixture for U1 (cell x equal on every row, logged) and U3 (AX focus on the title). Neither was done, and I could not do them either.
+**Pass**, at 8545263546318dc3d650e36318a4396f1a4dd834 (re-review; the fail at ee56253 on P1 and P3 is superseded).
 
-- X0: met. Fresh clone at ee56253 under `.wt-notes/lp-review/clean`: `XDG_DATA_HOME=$(mktemp -d) test-lease run -- make test` exit 0 (29 files, 440 vitest), `npm install && npm run build` exit 0, `wails build` exit 0 (logs `.wt-notes/lp-review/x0-*.log`).
-- P1 (FR-4, U1): **unmet.** In the diff the cell moves last on the row (`AgentList.tsx`, `Crew.tsx`) and gets a fixed 64 px right-aligned track (`initiatives.css`). `memoryTrack.test.tsx` proves DOM order and the CSS text, not an x. No x per row was logged from the review build, which the row asks for. The card and progress.md both say so.
-- P2 (FR-5): met. `rowMemoryWords` builds `memory unknown` from the cell's own words, and `groupMemory` returns `Memory —` when there is no reading. Read in the diff and tested.
-- P3 (FR-6, U3): **unmet.** The diff has `openInitiatives("title")` on Home's two links and the rail's fold link, plus an `h1` with tabIndex -1 that `applyLanding` focuses. `landing.test.ts` uses a stand-in `activeElement`. The row asks for an AX focus read on the review build, and none was done.
-- P4 (FR-7): met. `sinceLine` gives `today` on the same local day, `leaves` agrees with a total of 1, and `foldName` names all four rail chevrons. Read in the diff and tested.
-- P5 (FR-8): met. `limitNames` makes a link only when `canAct`; the others are a plain mono span.
-- P6 (FR-9): met. `confirmLines` always pushes the empty-Home line when last awake.
-- P7 (FR-10): met. `inactiveLabel` gives `Asleep (n)` in FloatList (the label, aria-label and filtered head).
-- Why I did not run U1/U3 myself: at ~23:10 Pablo's HID idle read 0-4 s across a minute. Launching `Deltagos Review` takes focus, which 0108 and the task rules forbid, so I used no other evidence for the screen halves and did not wait.
-- Gate note for sup52/FSE: sup52 told the builder to use vitest for U1/U3, but the spec on main was not amended. Under 0108 the FSE amends a gate row, not the supervisor. Either amend P1/P3 or run both on the review build while Pablo is idle.
-- Unmet: P1, P3.
-- Reviewer lp-review, 2026-10-09, commit ee562539410a2a41d11b96742f273c91176a3424.
+- X0: met. Fresh clone at 8545263 under `.wt-notes/lp-review/clean`: `XDG_DATA_HOME=$(mktemp -d) test-lease run -- make test` exit 0 (29 files, 440 vitest), `npm install && npm run build` exit 0, `wails build` exit 0 (logs `.wt-notes/lp-review/x0-*.log`).
+- P1 (FR-4, U1): met. 8545263 makes the actions and the cell one `.a-tail`, `margin-left: auto`, `justify-content: flex-end`, and drops the `margin-left: 0` override that caused V1; the agent rows get 21 px of right padding so they match the crew block's inset. Review build evidence, read from the builder's AX dumps: `ax-agents-1440.txt` and `ax-agents-1024.txt` hold 8 `.a-mem` frames for 8 rows (3 crew seats, 5 agents), every one at x 2334 (1440×900) and 1904 (1024×640), wrapped rows (taller pitch) included; it matches `u1-memory-x.log`. `wk-1024x640-P1-agents-init-a.png` shows one column, crew and agents.
+- P2 (FR-5): met. `rowMemoryWords` gives `memory unknown`, `groupMemory` gives `Memory —` (diff plus vitest; lp-ui saw both on its build).
+- P3 (FR-6, U3): met. `u3-focus.log`: AXPress on Home's `.home-asleep-link` and on the rail's `.rail-fold-link` (the builder's own pid), and `AXFocused` = AXHeading `Initiatives` both times, nothing focused before. The diff has `openInitiatives("title")`, the `h1` with tabIndex -1, and `applyLanding`.
+- P4 (FR-7): met. `sinceLine` gives `today`, `leaves` matches a total of 1, `foldName` names all four chevrons (diff plus vitest; lp-ui saw them on its build).
+- P5 (FR-8): met. `limitNames` links only `canAct` (diff plus vitest; lp-ui saw init-blind as a plain span).
+- P6 (FR-9): met. `confirmLines` always adds the empty-Home line when last awake.
+- P7 (FR-10): met. `inactiveLabel` gives `Asleep (n)` in FloatList (diff plus `floatList.test.ts`; the gate asks vitest here).
+- Not covered by the gate: `Asleep (n)` counts archived ones too (lp-ui V3); `groupMemory` shows `Memory —` on groups with nothing running before the first reading; a crew seat that is off has a Memory cell named `Memory unknown, not running` (lp-ui V4).
+- Status left at `now` and the card left in place: `## UI review` still reads fail (on ee56253).
+- Unmet: none.
+- Reviewer lp-review, 2026-10-09, commit 8545263546318dc3d650e36318a4396f1a4dd834.
