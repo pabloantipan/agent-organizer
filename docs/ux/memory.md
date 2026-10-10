@@ -279,6 +279,11 @@ on screen.
 The FSE took it as written (build spec docs/specs/initiatives-view.md,
 accept 0106). The asleep-since date is read from the status comment; frozen
 sessions are read from probe's frozen dir; archived apart needs no ruling.
+2026-10-10, Amendment 1 (b3295f2): the strip's folds are a moon and a box over
+their counts; FloatList splits Asleep and Archived as the rail does; an
+empty Memory cell has three words only: not running, could not be read,
+reading…. An inline confirm is part of the page and does not hold the
+keyboard (design-system rule).
 ram-view's review: white on --tone at 13 px is 3.5:1. The chip text became
 --fg-on-tone (the ground's ink, 5.2:1), a design-system row (229506e). The
 memory button sits after Usage, before Help, as built (b23bf10).
