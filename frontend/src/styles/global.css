@@ -53,7 +53,9 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
 /* shell */
 .shell { display: grid; grid-template-rows: auto 1fr; height: 100%; }
 .topbar {
-  display: flex; align-items: center; gap: var(--space-3);
+  /* groups by kind, 16 px apart and no rules between them (leftovers-17
+     FR-3); one line at every width (FR-5) */
+  display: flex; align-items: center; gap: var(--space-4); flex-wrap: nowrap; white-space: nowrap;
   padding: var(--space-2) var(--space-4); border-bottom: 1px solid var(--border-subtle); background: var(--bg);
   -webkit-app-region: drag;
   /* above the content's layers and an inline box's scrim, under a drawer
@@ -61,7 +63,7 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
   position: relative; z-index: var(--z-topbar);
 }
 .topbar * { -webkit-app-region: no-drag; }
-.brand { font-weight: 600; font-size: var(--font-size-lg); letter-spacing: .01em; }
+.brand { flex-shrink: 0; font-weight: 600; font-size: var(--font-size-lg); letter-spacing: .01em; }
 .brand::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: var(--radius-xs); background: var(--accent); margin-right: 8px; vertical-align: 1px; }
 .content { overflow: auto; padding: 16px; }
 .content.with-rail { display: grid; grid-template-columns: 250px 1fr; padding: 0; overflow: hidden; }
@@ -526,7 +528,6 @@ button.linkish:hover { color: var(--accent-fg); text-decoration: underline; }
 .init-sep { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
 button.counts.linkish { font-family: var(--mono); }
 
-.brand-version { font-family: var(--mono); font-weight: 400; font-size: var(--font-size-xs); color: var(--dim); margin-left: 8px; }
 
 /* gate: lock and sign-in */
 .gate { height: 100%; display: grid; place-items: center; background: var(--bg); }

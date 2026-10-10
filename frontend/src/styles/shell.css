@@ -45,7 +45,23 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .empty-state button { margin-top: var(--space-2); }
 
 /* ---------- top bar: crumbs, the one badge, the gear ---------- */
-.crumbs { display: flex; align-items: center; gap: var(--space-2); margin-left: var(--space-2); font-size: var(--font-size-md); color: var(--fg-muted); min-width: 0; }
+/* The bar's groups (leftovers-17 FR-3): inside one, 8 px; between them the
+   bar's own 16 px gap. The Mac's group takes the free space on its left, so
+   it and everything after it sit right. */
+.tb-group { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.tb-where { flex: 0 1 auto; }
+.tb-mac { margin-left: auto; flex: 0 1 auto; }
+.tb-mac > .meta { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.tb-work, .tb-app { flex-shrink: 0; }
+/* The places as quiet text tabs; the current one carries the accent
+   underline (I19). */
+.places { display: flex; align-items: center; gap: var(--space-1); flex-shrink: 0; }
+.places .place-tab { background: transparent; border-color: transparent; color: var(--fg-muted); padding: 2px var(--space-2); min-height: var(--control-sm); border-radius: var(--radius-xs); }
+.places .place-tab:hover { color: var(--fg); background: var(--surface-hover); border-color: transparent; }
+.places .place-tab.on { color: var(--fg); box-shadow: inset 0 -2px 0 var(--accent); border-radius: 0; }
+.crumbs { display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-md); color: var(--fg-muted); min-width: 0; }
+/* At 1024 the initiative's id clamps; its hover says it whole (FR-5). */
+.crumbs b.crumb-id { max-width: 22ch; }
 .crumbs b { color: var(--fg); font-weight: var(--weight-medium); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .crumbs b.mono { font-size: var(--font-size-md); }
 .crumb { background: transparent; border-color: transparent; color: var(--fg-muted); padding: 2px var(--space-2); min-height: var(--control-sm); }
