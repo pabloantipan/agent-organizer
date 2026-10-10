@@ -127,13 +127,12 @@ describe("C2: Details, the Charter and the Workspace (FR-2)", () => {
     expect(h).toContain("Review with agent");
   });
 
-  it("not awake, the Workspace is marked read-only and its agent start is hidden by the stylesheet (0042)", () => {
-    expect(details(init({ status: "paused" }), true)).toMatch(/class="ic-ws read-only local"/);
-    const css = readFileSync(new URL("../styles/initiatives.css", import.meta.url), "utf8") as string;
-    expect(css).toContain(".ic-ws.read-only.local .init-actions > button:last-of-type { display: none; }");
+  it("not awake, the Workspace drops its agent start by InitiativeDetail's readOnly (0042; leftovers-18 FR-6)", () => {
+    expect(details(init({ status: "paused" }), true)).not.toContain("Review with agent");
+    expect(details(init({}), false)).toContain("Review with agent");
   });
 
-  it("the header and the card render the same Charter component, with the same words", () => {
+  it("the header and the card render the same Charter component; the header's leaves out target and stage (leftovers-18 FR-4)", () => {
     const i = init({});
     useBoard.setState({ view: viewOf([i]), agents: null, headerOpen: true, sub: "overview", widthClass: "wide" } as never);
     const head = renderToStaticMarkup(<InitiativeHeader initiative={i} />);
@@ -147,7 +146,8 @@ describe("C2: Details, the Charter and the Workspace (FR-2)", () => {
     };
     const card = charterOf(details(i));
     expect(card.length).toBeGreaterThan(40);
-    expect(charterOf(head)).toBe(card.replace(/ Workspace$/, ""));
+    const strip = (t: string) => t.replace(/ Target 31 Oct/, "").replace(/ Stage one-window — “the app in one window” \(3 of 5\)/, "");
+    expect(charterOf(head)).toBe(strip(card.replace(/ Workspace$/, "")));
   });
 
   it("one open at a time: Details on the same card closes, on another replaces it", () => {

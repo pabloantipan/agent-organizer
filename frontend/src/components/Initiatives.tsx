@@ -7,8 +7,9 @@ import { useBoard } from "../stores/board.store";
 
 /** What the Initiatives tab showed when a row was open, now folded into
  *  Home: the repos with branch, dirt and last commit, the scanner's
- *  problems, and the actions on the initiative's root. */
-export function InitiativeDetail({ i }: { i: merge.BoardInitiative }) {
+ *  problems, and the actions on the initiative's root. `readOnly` (an
+ *  asleep initiative, 0042) drops what starts an agent. */
+export function InitiativeDetail({ i, readOnly = false }: { i: merge.BoardInitiative; readOnly?: boolean }) {
   const repos = i.repos_state ?? [];
   return (
     <div className="init-detail">
@@ -46,7 +47,7 @@ export function InitiativeDetail({ i }: { i: merge.BoardInitiative }) {
           ))}
         </>
       )}
-      <Actions id={i.id} path={i.path} local={i.local} />
+      <Actions id={i.id} path={i.path} local={i.local} readOnly={readOnly} />
     </div>
   );
 }
@@ -94,7 +95,7 @@ function specLabel(entry: string, file: string): string {
   return rest || file.split("/").pop() || file;
 }
 
-function Actions({ id, path, local }: { id: string; path: string; local: boolean }) {
+function Actions({ id, path, local, readOnly }: { id: string; path: string; local: boolean; readOnly: boolean }) {
   const [note, setNote] = useState<string | null>(null);
   const { openInitiative } = useBoard();
   const flash = (m: string) => { setNote(m); window.setTimeout(() => setNote(null), 2500); };
@@ -107,7 +108,7 @@ function Actions({ id, path, local }: { id: string; path: string; local: boolean
       {local && <button onClick={() => api.openInEditor(path)}><Code2 size={14} /> Editor</button>}
       {local && <button onClick={() => api.openTerminal(path)}><Terminal size={14} /> Terminal</button>}
       {local && <button onClick={() => api.copyReviewPrompt(id).then(() => flash("review prompt copied"), (e) => flash(String(e)))}><Copy size={14} /> Copy review prompt</button>}
-      {local && <button onClick={() => api.runReview(id).then(() => flash("terminal opened with the agent"), (e) => flash(String(e)))}><Bot size={14} /> Review with agent</button>}
+      {local && !readOnly && <button onClick={() => api.runReview(id).then(() => flash("terminal opened with the agent"), (e) => flash(String(e)))}><Bot size={14} /> Review with agent</button>}
       {note && <span className="init-detail-none">{note}</span>}
     </div>
   );
