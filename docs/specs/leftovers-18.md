@@ -27,7 +27,8 @@ panel open.
   memory short; the sync line into Sync's name and hover (past a day stale:
   `Sync · stale`, stale in magenta, a word, not a dot); the account to a
   28 px icon named `Account <email>`, last in the app group; then the title
-  clamps to 12ch. Never wraps; Settings is never pushed off (I24).
+  clamps to 12ch; fifth, Rescan to its glyph, named `Rescan` (Amendment 2).
+  Never wraps; Settings is never pushed off (I24).
 
 ## Requirements, card `lf18-charter-once` (frontend)
 
@@ -99,6 +100,12 @@ also carry `aria-current="page"` and live in `InitiativeHeader.tsx`
 (lf18-charter-once's). FR-7b and H5 go to lf18-charter-once; K1's AX check
 runs after both merge (charter-once merges first); K1's vitest is the top
 bar's alone.
+
+Amendment 2, 2026-10-10, the FSE (0108, from sup55 and cm-build): with
+the four folds the bar measured 1066 px at 1024 (22-character id, 30-character
+email, badge 15, `Sync · stale`), so FR-3 contradicted its own "Settings is
+never pushed off". A fifth fold, Rescan to its glyph named `Rescan`, fits with
+9.5 px spare. Told to Aglaea after (0108).
 
 ## Boundary
 
