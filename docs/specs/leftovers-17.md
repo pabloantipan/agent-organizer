@@ -63,6 +63,14 @@ Not: `lib/initiatives.ts` (sup53's lf16-memory-words), `Rail.tsx`.
 top bar's rules in `styles/shell.css`, their tests. Not: the rail's rules in
 `shell.css` (lf16-folds may edit them), the store beyond reading.
 
+Amendment 1, 2026-10-10, the FSE (from sup54 at launch): the Boundary missed
+the css the components import. \`lf17-top-bar\` also owns the \`.topbar\`,
+\`.brand\` and \`.brand-version\` rules in \`styles/global.css\` and the memory
+button's rules in \`styles/memory.css\` (not \`.memory-pop\` or the float
+line's). \`lf17-initiative-card\` also owns the Details rules of
+\`styles/header.css\` and the Initiatives view's rules of
+\`styles/initiatives.css\`.
+
 ## No-gos
 
 - No new screen; Details is in place, not a drawer or a route.
