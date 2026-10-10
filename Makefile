@@ -43,7 +43,9 @@ uninstall: ## remove the app under either name and the CLI link
 test: ## go vet, go test, then the frontend's vitest run
 	@# main.go embeds frontend/dist: from a clean checkout, build it first
 	@# (leftovers-8 FR-8), installing the frontend's packages if missing.
-	test -d frontend/node_modules || (cd frontend && npm install)
+	@# The lockfile is pnpm's: npm must not leave a package-lock.json behind
+	@# (leftovers-18 FR-11).
+	test -d frontend/node_modules || (cd frontend && npm install --no-package-lock)
 	test -f frontend/dist/index.html || (cd frontend && npm run build)
 	go vet ./... && go test ./...
 	cd frontend && npm test
