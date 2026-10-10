@@ -92,8 +92,11 @@ export function TopBar() {
         <button className="needs-me" onClick={go(goHome)} title="everything waiting on you">
           <Inbox size={14} /> Needs me{needsMe > 0 && <span className="badge-count num">{needsMe}</span>}
         </button>
-        <button className="ghost" onClick={refresh} disabled={loading} title="Rescan local disk">
-          <RefreshCw size={14} className={loading ? "spin" : ""} /> {loading ? "scanning…" : "Rescan"}
+        {/* Folded, Rescan keeps its glyph and its name: at 1024 the four
+            folds of A3 §2 leave the bar 42 px over with Needs me's badge
+            and `Sync · stale` (measured, cm-build's progress.md). */}
+        <button className={`ghost ${fold ? "gear" : ""}`} onClick={refresh} disabled={loading} title="Rescan local disk" aria-label={fold ? (loading ? "Rescan, scanning" : "Rescan") : undefined}>
+          <RefreshCw size={14} className={loading ? "spin" : ""} />{fold ? null : <> {loading ? "scanning…" : "Rescan"}</>}
         </button>
         {identity && (
           <button className={stale ? "ghost" : "primary"} onClick={sync} disabled={syncing} title={fold ? `${syncName}\nPush this machine, pull all` : "Push this machine, pull all"} aria-label={fold ? syncName : undefined}>

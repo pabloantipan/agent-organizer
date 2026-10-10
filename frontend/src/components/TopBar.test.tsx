@@ -180,6 +180,8 @@ describe("the signed-in bar at 1024 (K3, I24)", () => {
     expect(html).not.toContain("machine · remote");
     expect(html).toMatch(/aria-label="Sync\. 1 machine, remote 2h ago">/);
     expect(html).toMatch(/> Sync<\/button>/);
+    // Rescan folds to its glyph, keeping its name (not in A3 §2; measured).
+    expect(html).toMatch(/<button class="ghost gear" title="Rescan local disk" aria-label="Rescan"><svg[^]*?<\/svg><\/button>/);
     // The account: an icon named with the email, its hover the email, last.
     expect(html).toMatch(new RegExp(`<button class="ghost gear account-btn" title="${email}" aria-label="Account ${email}" aria-haspopup="menu" aria-expanded="false"><svg`));
     expect(html).not.toContain(`> ${email}<`);
@@ -200,6 +202,7 @@ describe("the signed-in bar at 1024 (K3, I24)", () => {
     expect(html).not.toContain("topbar fold");
     expect(html).toContain("1 machine · remote 2h ago");
     expect(html).not.toContain("account-btn");
+    expect(html).toContain("</svg> Rescan</button>");
     expect(ascending(at(html, `${email}<`, 'aria-label="Help"'))).toBe(true);
     expect(html).not.toContain("sync-stale");
   });
