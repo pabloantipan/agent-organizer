@@ -3,7 +3,8 @@ import { ChevronDown, ChevronRight, Search } from "lucide-react";
 import { EventsOn } from "../../wailsjs/runtime/runtime";
 import { FloatDismiss, FloatListHeight, FloatPick } from "../../wailsjs/go/main/App";
 import { useBoard } from "../stores/board.store";
-import { filterList, inactiveLabel, floatList, focusOrder, foldSignals, HOME, homeCount, homeLabel, type FloatRow, type Signal } from "../lib/floatList";
+import { filterList, floatList, focusOrder, foldSignals, HOME, homeCount, homeLabel, type FloatRow, type FoldsOpen, type Signal } from "../lib/floatList";
+import { foldLabel, type Fold } from "../lib/folds";
 import { useScrollEdges } from "../lib/useScrollEdges";
 import { MemoryFloatLine } from "./MemoryFloatLine";
 import "../styles/float.css";
@@ -20,7 +21,7 @@ export function FloatList() {
   const [origin, setOrigin] = useState("bottom right");
   const [query, setQuery] = useState("");
   const [active, setActive] = useState<string | null>(null);
-  const [inactiveOpen, setInactiveOpen] = useState(false);
+  const [foldsOpen, setFoldsOpen] = useState<FoldsOpen>(CLOSED);
   const panel = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
@@ -29,7 +30,7 @@ export function FloatList() {
   useEffect(() => EventsOn("floaticon:list", (o?: string) => {
     setOrigin(typeof o === "string" && o ? o : "bottom right");
     setQuery("");
-    setInactiveOpen(false);
+    setFoldsOpen(CLOSED);
     setActive(null);
     focused.current = false;
     setOpen(true);
@@ -42,7 +43,7 @@ export function FloatList() {
 
   const all = useMemo(() => floatList(view, agents), [view, agents]);
   const list = useMemo(() => filterList(all, query), [all, query]);
-  const order = useMemo(() => focusOrder(list, query, inactiveOpen), [list, query, inactiveOpen]);
+  const order = useMemo(() => focusOrder(list, query, foldsOpen), [list, query, foldsOpen]);
   const needs = homeCount(view, agents);
   // The first match is highlighted as he types; Home when there is no query.
   const current = active && order.includes(active) ? active : order[0] ?? null;
@@ -95,7 +96,7 @@ export function FloatList() {
     const ro = new ResizeObserver(report);
     ro.observe(rows);
     return () => ro.disconnect();
-  }, [open, list, inactiveOpen, view]);
+  }, [open, list, foldsOpen, view]);
 
   const edges = useScrollEdges(scroller, open);
 
@@ -133,8 +134,8 @@ export function FloatList() {
   };
 
   const reading = !view && loading;
-  const none = !!view && all.sections.length === 0 && all.inactive.length === 0;
-  const noMatch = !!query.trim() && !none && list.sections.length === 0 && list.inactive.length === 0;
+  const none = !!view && all.sections.length === 0 && all.asleep.length === 0 && all.archived.length === 0;
+  const noMatch = !!query.trim() && !none && list.sections.length === 0 && list.asleep.length === 0 && list.archived.length === 0;
   const optionId = (key: string) => `fl-${key.replace(/\W/g, "-")}`;
 
   const row = (r: FloatRow, folded = false) => (
@@ -156,6 +157,22 @@ export function FloatList() {
       <Signals signals={r.signals} id={r.id} />
     </button>
   );
+
+  // The rail's two folds (leftovers-16 FR-3): Asleep the paused ones only,
+  // Archived the rest, each closed by default and open under a query.
+  const foldGroup = (f: Fold, rows: FloatRow[]) => {
+    const shown = foldsOpen[f] || !!query.trim();
+    return (
+      <div key={f} role="group" aria-label={foldLabel(f)}>
+        {query.trim() ? <div className="fl-group">{foldLabel(f)}</div> : (
+          <button type="button" className="fl-group fl-fold" aria-expanded={foldsOpen[f]} onClick={() => setFoldsOpen({ ...foldsOpen, [f]: !foldsOpen[f] })}>
+            {foldsOpen[f] ? <ChevronDown size={12} /> : <ChevronRight size={12} />} {foldLabel(f, rows.length)}
+          </button>
+        )}
+        {shown && rows.map((r) => row(r, true))}
+      </div>
+    );
+  };
 
   return (
     <div className="fl-scrim">
@@ -200,22 +217,15 @@ export function FloatList() {
               {s.rows.map((r) => row(r))}
             </div>
           ))}
-          {list.inactive.length > 0 && (
-            <div role="group" aria-label={inactiveLabel()}>
-              {query.trim() ? <div className="fl-group">{inactiveLabel()}</div> : (
-                <button type="button" className="fl-group fl-fold" aria-expanded={inactiveOpen} onClick={() => setInactiveOpen(!inactiveOpen)}>
-                  {inactiveOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />} {inactiveLabel(list.inactive.length)}
-                </button>
-              )}
-              {(inactiveOpen || query.trim()) && list.inactive.map((r) => row(r, true))}
-            </div>
-          )}
+          {(["asleep", "archived"] as const).map((f) => list[f].length > 0 && foldGroup(f, list[f]))}
           </div>
         </div>
       </div>
     </div>
   );
 }
+
+const CLOSED: FoldsOpen = { asleep: false, archived: false };
 
 /** Characters a row's signals have beside its rank and id: the panel is a
  *  fixed 360, so the room is the id's length away from the rest. */

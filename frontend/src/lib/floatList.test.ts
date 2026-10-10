@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { AgentGroup, AgentsView, BoardView } from "../hooks/useWails";
 import type { merge, model } from "../../wailsjs/go/models";
-import { inactiveLabel, filterList, floatList, focusOrder, foldSignals, HOME, homeCount, homeLabel, matches, type FloatRow, type Signal } from "./floatList";
+import { filterList, floatList, focusOrder, foldSignals, HOME, homeCount, homeLabel, matches, type FloatRow, type Signal } from "./floatList";
 import { needsMeRows } from "./queue";
+import { foldLabel } from "./folds";
 
 // Plain objects, cast once, as queue.test.ts does.
 const initiative = (id: string, i: Partial<merge.BoardInitiative> = {}) =>
@@ -46,13 +47,14 @@ describe("floatList: the rail's order and groups", () => {
     const view = board([initiative("a"), initiative("old", { status: "archived" }), initiative("c")], [], [{ name: "g", initiatives: ["old", "c"] } as model.Group]);
     const l = floatList(view, null);
     expect(l.sections.flatMap((s) => ids(s.rows))).toEqual(["c", "a"]);
-    expect(ids(l.inactive)).toEqual(["old"]);
-    expect(l.inactive[0].rank).toBeNull();
+    expect(ids(l.archived)).toEqual(["old"]);
+    expect(l.asleep).toEqual([]);
+    expect(l.archived[0].rank).toBeNull();
     expect(l.sections[0].rows[0].rank).toBe(2); // "c" is rank 2 of the active, "old" takes none
   });
 
   it("is empty with no initiatives", () => {
-    expect(floatList(board([]), null)).toEqual({ sections: [], inactive: [] });
+    expect(floatList(board([]), null)).toEqual({ sections: [], asleep: [], archived: [] });
   });
 });
 
@@ -125,7 +127,7 @@ describe("search", () => {
     const l = filterList(floatList(view, null), "pay");
     expect(l.sections.map((s) => s.name)).toEqual(["ungrouped"]);
     expect(ids(l.sections[0].rows)).toEqual(["partner-payouts"]);
-    expect(ids(l.inactive)).toEqual(["old-pay"]);
+    expect(ids(l.asleep)).toEqual(["old-pay"]);
   });
 });
 
@@ -134,12 +136,12 @@ describe("focusOrder", () => {
   const l = floatList(view, null);
 
   it("starts on Home, then the rows; the not-active ones only when their group is open", () => {
-    expect(focusOrder(l, "", false)).toEqual([HOME, "a", "b"]);
-    expect(focusOrder(l, "", true)).toEqual([HOME, "a", "b", "z"]);
+    expect(focusOrder(l, "", { asleep: false, archived: false })).toEqual([HOME, "a", "b"]);
+    expect(focusOrder(l, "", { asleep: true, archived: false })).toEqual([HOME, "a", "b", "z"]);
   });
 
   it("drops Home under a query and starts on the first match", () => {
-    expect(focusOrder(filterList(l, "b"), "b", false)).toEqual(["b"]);
+    expect(focusOrder(filterList(l, "b"), "b", { asleep: false, archived: false })).toEqual(["b"]);
   });
 });
 
@@ -158,9 +160,41 @@ describe("the Home row", () => {
   });
 });
 
-describe("the not-active fold's label (leftovers-15 FR-10)", () => {
-  it("P7: says Asleep (n), not Not active", () => {
-    expect(inactiveLabel(3)).toBe("Asleep (3)");
-    expect(inactiveLabel()).toBe("Asleep");
+describe("the rail's two folds (leftovers-16 F2)", () => {
+  const view = board([
+    initiative("a"),
+    initiative("nap", { status: "paused" }),
+    initiative("old", { status: "archived" }),
+    initiative("done-x", { status: "done" }),
+    initiative("b", { status: "Active" }),
+    initiative("nap2", { status: "paused" }),
+  ]);
+  const l = floatList(view, null);
+
+  it("counts paused initiatives only as asleep, every other status as archived", () => {
+    expect(l.sections.flatMap((s) => ids(s.rows))).toEqual(["a", "b"]);
+    expect(ids(l.asleep)).toEqual(["nap", "nap2"]);
+    expect(ids(l.archived)).toEqual(["old", "done-x"]);
+    expect(foldLabel("asleep", l.asleep.length)).toBe("Asleep (2)");
+    expect(foldLabel("archived", l.archived.length)).toBe("Archived (2)");
+  });
+
+  it("never calls an archived initiative asleep", () => {
+    const only = floatList(board([initiative("a"), initiative("old", { status: "archived" })]), null);
+    expect(only.asleep).toEqual([]);
+    expect(ids(only.archived)).toEqual(["old"]);
+  });
+
+  it("leaves Archived empty, so absent, when nothing is archived", () => {
+    const only = floatList(board([initiative("a"), initiative("nap", { status: "paused" })]), null);
+    expect(ids(only.asleep)).toEqual(["nap"]);
+    expect(only.archived).toEqual([]);
+  });
+
+  it("filters both folds, and walks each only when it is open", () => {
+    expect(ids(filterList(l, "old").archived)).toEqual(["old"]);
+    expect(filterList(l, "old").asleep).toEqual([]);
+    expect(focusOrder(l, "", { asleep: false, archived: true })).toEqual([HOME, "a", "b", "old", "done-x"]);
+    expect(focusOrder(l, "", { asleep: true, archived: true })).toEqual([HOME, "a", "b", "nap", "nap2", "old", "done-x"]);
   });
 });

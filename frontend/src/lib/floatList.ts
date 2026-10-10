@@ -5,6 +5,7 @@ import type { AgentsView, BoardView, Group } from "../hooks/useWails";
 import type { merge, service } from "../../wailsjs/go/models";
 import { signalOwners, waitingDecisions } from "./decisions";
 import { inactiveIds, leadOf, needsMeRows } from "./queue";
+import { sleepyOf } from "./initiatives";
 import { FOLD } from "./width";
 
 export type SignalKind = "waiting" | "blocked" | "now" | "live" | "cell" | "problems";
@@ -17,12 +18,11 @@ export type Signal = { kind: SignalKind; text: string; floor?: string; fold: num
 
 export type FloatRow = { id: string; goal: string; rank: number | null; signals: Signal[] };
 export type FloatSection = { name: string; rows: FloatRow[] };
-/** The fold of initiatives that are not active, as FloatList labels it
- *  (leftovers-15 FR-10): `Asleep (3)`; `Asleep` alone while filtering. */
-export const INACTIVE_GROUP = "Asleep";
-export const inactiveLabel = (n?: number) => (n === undefined ? INACTIVE_GROUP : `${INACTIVE_GROUP} (${n})`);
-
-export type FloatList = { sections: FloatSection[]; inactive: FloatRow[] };
+/** The initiatives that are not active sit in the rail's two folds
+ *  (leftovers-16 FR-3): `asleep` the paused ones only, `archived` the rest,
+ *  each labelled by `foldLabel` (lib/folds.ts) (`Asleep (3)`, the word alone while
+ *  filtering) and shown only when it holds any. */
+export type FloatList = { sections: FloatSection[]; asleep: FloatRow[]; archived: FloatRow[] };
 
 const uniq = <T,>(xs: T[]) => Array.from(new Set(xs));
 
@@ -63,9 +63,12 @@ export function floatList(view: BoardView | null, agents: AgentsView | null): Fl
   const folded = inactiveIds(view);
   const active = ids.filter((id) => !folded.has(id));
   const rank = new Map(active.map((id, k) => [id, k + 1]));
-  const row = (id: string): FloatRow => {
+  const rowOf = (id: string) => {
     const rows = all.filter((i) => i.id === id);
-    const i = rows.find((r) => r.local) ?? rows[0];
+    return { rows, i: rows.find((r) => r.local) ?? rows[0] };
+  };
+  const row = (id: string): FloatRow => {
+    const { rows, i } = rowOf(id);
     const cards = (["now", "blocked", "next"] as const).flatMap((st) => (cols[st] ?? []).filter((c) => c.initiative_id === id));
     return { id, goal: i.goal ?? "", rank: rank.get(id) ?? null, signals: signalsOf(i, rows, cards, groups.get(id)) };
   };
@@ -81,7 +84,11 @@ export function floatList(view: BoardView | null, agents: AgentsView | null): Fl
     if (rest.length) sections.push({ name: "ungrouped", rows: rest.map(row) });
     sections = sections.filter((s) => s.rows.length > 0);
   }
-  return { sections, inactive: ids.filter((id) => folded.has(id)).map(row) };
+  // The rail's split (Rail.tsx): paused is asleep, every other status archived.
+  const foldedIds = ids.filter((id) => folded.has(id));
+  const asleep = foldedIds.filter((id) => sleepyOf(rowOf(id).i.status) === "asleep");
+  const archived = foldedIds.filter((id) => sleepyOf(rowOf(id).i.status) !== "asleep");
+  return { sections, asleep: asleep.map(row), archived: archived.map(row) };
 }
 
 /** Every word of the query, in any order, in the id or the goal. */
@@ -97,17 +104,22 @@ export function filterList(list: FloatList, query: string): FloatList {
   if (!query.trim()) return list;
   return {
     sections: list.sections.map((s) => ({ ...s, rows: s.rows.filter((r) => matches(r, query)) })).filter((s) => s.rows.length > 0),
-    inactive: list.inactive.filter((r) => matches(r, query)),
+    asleep: list.asleep.filter((r) => matches(r, query)),
+    archived: list.archived.filter((r) => matches(r, query)),
   };
 }
 
+/** Which of the two folds are open in the list. */
+export type FoldsOpen = { asleep: boolean; archived: boolean };
+
 /** What the keyboard moves through, top to bottom: Home, unless a query
- *  hides it, then every row shown. The not-active rows count only when
- *  their group is open. */
-export function focusOrder(list: FloatList, query: string, inactiveOpen: boolean): string[] {
+ *  hides it, then every row shown. A fold's rows count only when it is
+ *  open, or under a query. */
+export function focusOrder(list: FloatList, query: string, open: FoldsOpen): string[] {
   const out = query.trim() ? [] : [HOME];
   for (const s of list.sections) out.push(...s.rows.map((r) => r.id));
-  if (inactiveOpen || query.trim()) out.push(...list.inactive.map((r) => r.id));
+  if (open.asleep || query.trim()) out.push(...list.asleep.map((r) => r.id));
+  if (open.archived || query.trim()) out.push(...list.archived.map((r) => r.id));
   return out;
 }
 
