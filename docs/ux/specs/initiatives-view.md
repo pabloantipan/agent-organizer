@@ -361,6 +361,100 @@ Deltagos  Home  Initiatives  Usage  / organizer        ▣ 7.8 GB free │ Needs
 | I20 | read the bar by kind | left to right: brand, places, then the Mac's state, Needs me and Rescan, then Compact, Help and Settings; no sync line with auth off |
 | I21 | keep it on one line at 1024 | at 1024×640 with the rail open, the bar is one line; the version is in the brand's hover; the memory button is short |
 
+## Amendment 3 (aglaea, 2026-10-10): one mark for "you are here"; firebase at 1024; once per screen
+
+From leftovers-17's reviews (`working-on/done/lf17-top-bar.md` U1-U4,
+`lf17-initiative-card.md` U1-U3, Q1), relayed by the FSE. Each answer
+replaces the line of Amendment 2 it names.
+
+### 1. One "you are here" mark per screen (U1, U2, U3)
+
+Every screen marks **one** control as current (`aria-current="page"` and
+the accent underline or `--surface-selected`), never two:
+
+| Screen | Current | Also shown | Crumb |
+|---|---|---|---|
+| Home | `Home` tab | `Needs me` is plain: it is a verb that goes Home, not a place | none |
+| Initiatives | `Initiatives` tab | | none |
+| Usage | `Usage` tab | | none |
+| an initiative | the title `organizer` | the `Initiatives` tab as its **parent**: the underline in `--fg-subtle`, no `aria-current`, still a link | the title |
+| Settings | the gear (`.on`, `aria-current="page"`) | no tab marked | none |
+| Help | `?` (`.on`, `aria-current="page"`) | no tab marked; Help's own body may say where it came from | none |
+
+- **An initiative belongs to Initiatives**, the place that lists them all,
+  whichever door opened it (rail, Home row, card). That is the U2 answer:
+  `placeOf` maps an initiative to Initiatives, and Settings and Help to no
+  place.
+- **The crumb loses its slash and becomes the screen's title** (U1). It sits
+  after the places with the 16 px group gap, in `--fg` at the bar's size,
+  mono since it is an id, clamped with its hover as before. Without the
+  slash, `Usage / organizer` no longer reads as a child of Usage. The tabs
+  never move between screens, so the eye keeps their places.
+- **Settings and Help have no crumb** (replaces A2's "Help's crumb stays as
+  it is"): their own icon is the mark, and their page heading names them.
+- **Needs me drops `.on`** (U3). Its badge stays the one badge (FR-14).
+
+### 2. The bar with `auth: firebase` at 1024 (U4)
+
+FR-5 holds in **both** auth modes. With firebase the bar adds the sync line,
+`Sync` and the account, about 440 px against 232 free. In the compact
+class they fold in this order, and each comes back when the bar has room:
+
+1. the memory button takes its short form (as now);
+2. **the sync line goes into `Sync`**: its name and hover read `Sync. 1
+   machine, remote 2h ago`. Past a day stale the button reads `Sync ·
+   stale` with `stale` in magenta (a word, not a dot: Needs me keeps the
+   one badge);
+3. **the account becomes an icon button** (a person glyph, 28 px), named
+   `Account <email>`, the email in its hover and its menu. It sits in the
+   app group, last, after Settings;
+4. the title (an initiative id) clamps to 12 characters with its hover.
+
+Help and Settings are never pushed past the edge, and the bar never wraps.
+
+### 3. A fact shows once per screen (card Q1, U2)
+
+Keep **one** Charter component with one field set. A host that already
+shows a field on the same screen tells the Charter to leave it out
+(`omit`); the definition of each field stays in one place.
+
+- **The header's Details omit Target and Stage**: the bar shows the target
+  and the strip shows the stage, both always in view. The bar's target and
+  the strip label stay. The open header is that much shorter (0038).
+- **An open card hides its head's goal line**, since the Charter shows the
+  goal in full right below it.
+- The card's Charter keeps every field: nothing else on the card shows the
+  target or the stage's outcome.
+
+### 4. The card's hover (card U3)
+
+The card rises on hover of its **body** (the stretched link), not when the
+pointer is on Details, Sleep or Wake. An open card rises as well, since a
+press on its body still opens the initiative.
+
+### 5. Nothing runs past the right edge at 1024
+
+Seen at 1024×640 with the rail open; each gives way inside its own box:
+
+- **The initiative header's pills wrap** to a second line in the header (a
+  header holds a few facts, not a row of signals, so wrapping is allowed
+  there). They are never clipped or scrolled.
+- **Overview's columns stack** when the main pane is under 880 px: the FSE
+  column goes below the first, full width. The rule is set by the pane's
+  width, not the window's, since the rail changes it.
+- **Help's body** is `max-width: min(72ch, 100%)`. Long paths and ids break
+  (`overflow-wrap: anywhere`), and a table or code block scrolls inside its
+  own box with the edge line (design system, Widths).
+
+| # | The lead can | Checked by |
+|---|---|---|
+| I22 | see where he is, once | on each of Home, Initiatives, Usage, an initiative, Settings and Help, exactly one element has `aria-current="page"` and one current mark; on an initiative, `Initiatives` carries the parent underline and no `aria-current`; Needs me is never `.on` |
+| I23 | read the title as the initiative's, not Usage's | inside an initiative the bar shows the id after the places with no slash; Settings and Help show no crumb |
+| I24 | keep one line with firebase | at 1024×640, rail open, `auth: firebase` signed in with a 30-character email on an initiative with a 22-character id: the bar is one line and Settings ends inside the window; the sync words are in Sync's name and hover; the account is an icon named with the email (a vitest of the signed-in bar plus the computed widths, if the fixture cannot sign in) |
+| I25 | read each fact once | the header's open Details show no Target and no Stage lines; an open card shows the goal once; one Charter component, with `omit` |
+| I26 | see which press opens the card | hover on Details, Sleep or Wake does not raise the card; hover on its body does, open or closed |
+| I27 | read every view at 1024 | at 1024×640, rail open: the header's pills wrap inside the header, Overview stacks its columns, Help's body breaks long words; nothing runs past the right edge and the document does not scroll sideways |
+
 ## Acceptance, in the lead's terms
 
 | # | The lead can | Checked by |

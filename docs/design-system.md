@@ -345,6 +345,13 @@ keeps their place.
 - **The ring is for the keyboard**: after a pointer landing, the target shows
   its selected state, and the focus ring shows only under `:focus-visible`,
   as the engine decides (leftovers-5, hf3-U2).
+- **One "you are here" per screen**: exactly one control carries
+  `aria-current="page"` and the current mark. A parent place may show a
+  quiet underline (`--fg-subtle`) with no `aria-current`; a verb that
+  navigates (Needs me) is never marked current (initiatives-view A3).
+- **A fact shows once per screen**: a shared component that repeats a field
+  its host already shows takes an `omit`, never a second field set
+  (initiatives-view A3, the header's Charter).
 - **An inline confirm is part of the page, not a box** (Sleep's confirm on
   its card): it has no scrim and does not hold the keyboard. Focus lands on
   its Cancel, Escape cancels, and Tab may leave it; it stays open until
