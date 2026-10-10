@@ -1,13 +1,13 @@
 ---
 title: Accept leftovers 16 - the ring's swell, the folds, the Memory cell's words
-status: proposed
+status: ruled
 raised: 2026-10-10
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-10
+ruled_by: pablo
 options: ["accept as written", "accept with amendments", "send back"]
-chosen:
+chosen: accept as written
 cards: [lf16-ring-swell, lf16-folds, lf16-memory-words]
 threads: []
 supersedes: []
@@ -46,3 +46,7 @@ in 61 min with reviews, this initiative.
 ## Recommendation
 
 The FSE's: accept as written.
+
+## Ruling
+
+pablo, 2026-10-10, in the organizer on lodestar: ok
