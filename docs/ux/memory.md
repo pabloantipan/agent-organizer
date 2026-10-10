@@ -372,6 +372,14 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
   screenshot, against my own A1 (0065 fixed it). Check the acceptance rows
   against each other before sending.
 
+- 2026-10-10, initiatives-view A3 (237db96): a crumb placed right after a
+  tab row reads as the last tab's child, so a slashless title with a gap is
+  safer than a crumb; give every screen one `aria-current`, and name the
+  owning place for screens reached from many doors (an initiative belongs to
+  Initiatives; Settings and Help to none). A width gate must name its auth
+  mode: firebase adds ~440 px to the bar. A shared component takes `omit`
+  rather than a second field set (a fact once per screen).
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).
