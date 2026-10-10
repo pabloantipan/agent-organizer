@@ -4,70 +4,12 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
-## HAND-OFF — 2026-10-09, RAM indicator (0101) spec drafted
+## HAND-OFF — 2026-10-09 evening, leftovers-15 running
 
-- **Last SHA seen:** 5221db2. Next supervisor: sup49.
-- **0101 ruled**; Aglaea's design spec landed (6d84a12, M1-M8). Build spec
-  `docs/specs/ram-indicator.md` amended to it; cards `ram-sample`,
-  `ram-view` cut (both pass `run --print`); accept **0103** raised with
-  forecast 1.5-3 h over 2 waves. O1 settled as footprint (proc_pid_rusage);
-  O2 (critical magenta) put to Pablo inside 0103. On accept: write the
-  supervisor prompt, spawn sup49.
-- **Pablo's three asks** (via Hephaistos, thread 01M4GHM3YT12YSA67HK1DB45M5):
-  initiatives as cards with sleep/wake, awake first in the rail, RAM per
-  initiative and agent. Raised **0104** (scope, recommend A). Found: the
-  rail already folds non-active (paused) initiatives at the bottom (0036,
-  0042), so ask 2 is a rename plus the count. RAM per initiative went into
-  0103 as Amendment 1 (by_initiative, G7). `factory awake` misses camp
-  (maxdepth 3 under ~, camp is at depth 4); told Hephaistos.
-- 2026-10-09 later: **0102 ruled A**, **0103 accepted** (sup49 spawned,
-  window 7535, ram-sample then ram-view), **0104 ruled A** (Initiatives
-  view; asleep stays out of Needs me, Pablo's plain "ok"). Asked Aglaea for
-  docs/ux/specs/initiatives-view.md. Next: the deltagos-mark card plus
-  float-focus-steal as one accept record (both in floaticon_darwin.m, after
-  sup49's ram-view, which touches it too). Next supervisor: sup50.
-- **0107 raised**: ram-sample G4 contradicted FR-3 (top five vs every crew session); ruled A (4473163), FR-3 amended, sup49 told.
-- **0108 ruled in words** (Pablo: "this is not working"): no screen-capture gate rows; one record per small UI ask; I amend gate contradictions myself and report after.
-- 18:23 sup51 at 2h18, will pass 3 h by ~1 h: ~1h30-1h50 of screen work after the unlock. Kept its seats idle (relaunch risks deaf seats); locked time counted apart in its run record.
-- 17:24 both tasks wait on lodestar's screen (locked 16:36): sup50 S2 first, then sup51's WKWebView rows (~1 h after unlock). sup51 overruns 3 h if locked past ~18:30. Repetition: screen-bound gate rows stall when Pablo is away (3rd time today); candidate for Hephaistos: a review display that is not the lead's session.
-- **RAM task closed** (sup49 ended 16:5x, token revoked, clean run): 3 cards merged (c29db18, 0f80bdd, 1c6a03c); forecast 1.5-3 h over 2 waves vs **4 h 48 min over 3 waves**, ~$31. Causes: deaf seats ~1 h, test-lease held by pressure ~30 min, 0107, a third card mid-task. Run record runs/2026-10-09-ram-indicator.md. Open: ram-view N1 (Pablo, after make install). Note: `organizer clean` also deleted the exited probe-hefesto session (resumable).
-- 16:0x: ram-view merged 0f80bdd (N1 is Pablo's after make install; ram-chip-contrast left with sup49). **sup50** (window 8383, float-focus-steal then deltagos-mark) and **sup51** (window 8385, initiatives-sleep then initiatives-view) spawned, identities checked. Next supervisor: sup52. Prompts carry the prelude workaround, 0108 and the forecast-as-deadline rule.
-- **leftovers-15** also: review builds post real notifications ("Memory critical on fixture", 16:50); first install had notifications off for Deltagos until Pablo allowed them (say so in the install notes).
-- **20:1x:** initiatives-view merged 7c829fe, ram-ring-amber merged 679a5a6. sup51 ended (task 3h57 wall, 1h51 work, inside). app-icon-composer A2 reworded under 0108 (d5b0e03), re-review then merge. Next supervisor: sup52.
-- **0111 ruled** (Pablo, "accepted, go"; 6f56bb8). **sup52** spawned as a tab of my window 5498 (pid 97731, identity and model checked), five lf15 cards, one wave, forecast 1-2 h. Hephaistos: precondition 10 now names the machine a row runs on (claudecode 8f01264). Statusline samples stopping after one (ra-*/aic-* seats) is ours: `organizer statusline` is the recorder; lead unverified, a pane never redrawn may stop sampling. Candidate for leftovers-16.
-- **20:4x:** sup50 ended (ring-and-icon 17 min, under). No supervisor running. **0111** raised: leftovers-15 as five parallel cards (spec docs/specs/leftovers-15.md), forecast 1-2 h. Open beyond it: Aglaea's initiatives-view A1-A3; camp invisible to factory (Hephaistos); seat-pointer --pid waits on Pablo's merge. Next supervisor: sup52, as a tab of a window on my desktop.
-- **20:3x installed** 0b475b7 for Pablo (everything of today). `make install` leaves frontend/wailsjs/runtime/ modified each time (the wails CLI regenerates its runtime: a version drift between the CLI and go.mod); restored by checkout both times: leftovers-15.
-- **leftovers-15, full list so far:** ram-view U4 (session named two ways), U5 (resume UUID as name), "no reading yet" unreachable, review builds post real notifications; initiatives-view CR 3 (blind linked to a Sleep), 4 (empty-Home line), UI U1-U6 (Memory column alignment, row name says a number when unread, 'Initiatives ›' lands focus nowhere, 'asleep since' on the day, '1 decision … leave', fold chevrons unnamed), A1-A3 for aglaea, code notes (board runs factory awake, a hung factory holds the busy lock 3 min, no test the tick never runs factory); Help mark F25-F26 (Aglaea Amendment 7); release.yml Test step fails on a clean checkout (frontend/dist missing); app-icon U1 settled by Aglaea (968ce34): the car's rendition is accepted on 11-15, revisit only if a 12-15 Mac shows it badly; "no Mac of Pablo's runs" 12-15 today (her claim, not verified).
-- **sup50 task 1 closed** (19:51): float-focus-steal c94c28c, deltagos-mark 634a0f3; 3h51m wall vs 2-5 h, ~2h07m of it a locked screen. Run record runs/2026-10-09-sup50-one-window.md. Findings: release.yml uses wails build (icon cuts lost) → app-icon-composer A4; U2 Help mark never stops (WCAG 2.2.2) and U3 named twice → Aglaea answered (floating-icon Amendment 7, 8c6249d, rows F25-F26): Help mark moves 4.5 s then stops, hover replays; mark aria-hidden in the lockup. Into leftovers-15. sup50 asked to run ram-ring-amber + app-icon-composer as a new task (run record of its own).
-- **19:11 seat wipe:** ffs-build's `pkill -f "frontmost-log.swift" -U $(id -u)` killed every zellij server (macOS pkill reads -U and 501 as patterns). Hephaistos resumed fse, aglaea, hestia-fse; camp stays down (Pablo). I resumed sup50 (8383) and sup51 (12747) by conversation id; sup51 relaunches iv-build. Rule in every supervisor prompt from now: kill only by saved pid, never pkill -f / pgrep patterns / killall. No organizer code uses them.
-- **Windows on the FSE's desktop** (Pablo ~19:30: "every new window associated to agents for that initiative should be spawned in the same Desktop"): from sup52 on, spawn supervisors as tabs of a window on my desktop, not `create window`. Proper fix relayed [for hephaistos].
-- **S2 stopped on Pablo's word** (~19:20, "switcheses Desktop to right ... it's annoying"): I wrote a gate row (S2) that had a builder drive his desktops for 30 min. Killed the script; S2 from logs. Rule for every spec: no gate row drives Pablo's desktops or input; screen checks only in the review app's own window while he is idle. Told sup50 and sup51.
-- **Pablo input, not now** (~19:05): the pink ring around the floating icon helped him find the app; keep a ring always, use an orange tone when RAM spikes. Sent to Aglaea; she will propose ring always on (quiet tone) and pressure in --amber-9 #ffb020, the existing warning hue (no new colour). One record when Pablo says when.
-- **N1 passed** with Pablo 18:5x (installed 3aec651). ram-view to done/ on his word.
-- **leftovers-15** also takes initiatives-view CR findings 3 (blind initiatives linked to a Sleep they lack) and 4 (sole awake initiative sleeps without the empty-Home line).
-- **leftovers-15 (from ram-view rv-ui):** U4 popover and landing name a session two ways; U5 a resume UUID shown as a session name (spec gap: name fallback); "no reading yet" unreachable in the app. U1, U3 and was-critical-at-high went into ram-chip-contrast (C4-C6).
-- RAM task overrun (3 h 14 min at 15:2x vs 1.5-3 h). sup49: ram-sample verdict ~15:50; ram-view 2-3 h more (N1 may need Pablo). Re-forecast total ~5.5-6.5 h. Causes: deaf seats (~1 h), 0107, 0108.
-- **Overruns unnoticed** (Pablo: "if we forecast 40min for a tast and it's run 80min ... somthing is going wrong!"): relayed [for hephaistos], thread 01M4GTXEHBBVMB3W8945PNN6GV, with the run-record evidence and a candidate (forecast as deadline; post at the band top, Needs me at 2x). Until ruled, I check a running task's card commits against its forecast at each wake.
-- **Seats launched deaf:** rs-build and rs-review run without AGENT_NAME/DISCUSS_TOKEN (tokens exist); rs-review's 1:17 PM fail post got 401 and the re-review sat idle. Told sup49. Cause (sup49): probe did not copy the seats' preludes into ~/.local/state/probe; seats ran deaf and not lean. Relayed [for hephaistos]; seat-identity LIVE (claudecode 572bdd6..c4f7783): probe resumes by conversation id, refuses a missing prelude, recreates EXITED seats with a prelude. Supervisor prompts may drop the place-the-prelude workaround; keep the env check after launch. Repetition: sup2 2026-09-27.
-- **Gate lesson (repetition candidate):** ram-indicator G2/G4 compare with
-  Activity Monitor on screen; rs-review sat waiting for Pablo to be idle 30 s
-  (seat-pointer cannot see windows on another Space). Gate rows should read a
-  CLI equivalent (`top -l 1 -stats pid,mem`, `footprint`) unless the screen
-  itself is what is checked. Second time a GUI-capture row collides with
-  Pablo using the Mac → propose a spec-craft rule.
-- **0105 accepted** (81b9f59): spawn sup50 (float-focus-steal, then deltagos-mark) when ram-view is in done/. **0106 accepted** (735b244): spawn sup51 (initiatives-sleep, then initiatives-view) at the same moment, beside sup50.
-- Aglaea's initiatives-view design (e577d08) → build spec, cards
-  initiatives-sleep and initiatives-view, accept **0106** raised. 0105
-  (mark + focus fix) raised. Both wait on Pablo; both run after sup49.
-- **float-focus-steal** card cut (launchable, gate S1-S4): Deltagos came
-  front by itself 11:33; candidates in floaticon_darwin.m (orderHere on
-  space-change), not verified.
-- Aglaea drew the Deltagos mark (e1cdce1, floating-icon Amendment 4,
-  F17-F19). Gear colours raised as **0102** (proposed, recommend A). The
-  mark's build card waits on 0102; Technical notes for it: the native icon
-  keeps gears turning and constant-speed lineDashPhase, may drop points,
-  notches and varying speed at 56 pt. She draws the RAM states next.
-- Still pending from before: leftovers-14 accept record; reinstall.
+- **Last SHA seen:** cf2ffdc. Next supervisor: sup53.
+- **0111 ruled** (6f56bb8); **sup52** runs the five lf15 cards as a tab of my window 5498 (pid 97731), forecast 1-2 h. On its closing report: end it (probe -k, token rm, clean), then `make install` from main and restore `frontend/wailsjs/runtime/` if B1 did not land.
+- Open, mine: Pablo's cut-off "And…" (asked); statusline samples stopping after one (candidate leftovers-16); which macOS the other laptop runs.
+- Open, others': Aglaea's initiatives-view A1-A3; Hephaistos's factory depth (camp invisible) and the Space card for windows. Until that card, supervisors open as tabs of my window, not `create window` (Pablo's ask, deviates from the fse skill's "new window").
 
 ## HAND-OFF — 2026-10-06 (late night), roadmap-as-a-plan landed
 

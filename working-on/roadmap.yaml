@@ -65,6 +65,12 @@ stages:
       - no UI leftover older than one batch (leftovers-13 landed)
     gates: ["0093"]
     appetite: three waves    # the roadmap view, leftovers-13, one spare (0094)
+    forecast:              # recomputed by the FSE (docs/estimating.md), never hand-set
+      range: "1-2 h over 1 wave: leftovers-15, five cards (0111); exit (c), the Roadmap at four levels, not yet carded"
+      waves: 1
+      waits: "none on Pablo: no gate row needs his screen (0108)"
+      basis: "today's tasks, this initiative: ram-indicator, one-window, initiatives-view, ring-and-icon run records"
+      as_of: 2026-10-09
   - id: decisions-owned-and-used
     title: Decisions have real owners, and their data is used
     phase: building
