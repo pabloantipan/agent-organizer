@@ -1,13 +1,13 @@
 ---
 title: Accept leftovers 15 - today's review findings in four small cards
-status: proposed
+status: ruled
 raised: 2026-10-09
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-09
+ruled_by: pablo
 options: ["accept as written", "accept with amendments", "send back"]
-chosen:
+chosen: accept as written
 cards: [lf15-names-and-notices, lf15-initiatives-polish, lf15-help-mark, lf15-build-drift, lf15-ring-breath]
 threads: []
 supersedes: []
@@ -50,3 +50,7 @@ builds and ~30 min reviews (sup50 ring-and-icon 17 min for two cards).
 ## Recommendation
 
 The FSE's: accept as written.
+
+## Ruling
+
+pablo, 2026-10-09, in the organizer on lodestar: accepted, go
