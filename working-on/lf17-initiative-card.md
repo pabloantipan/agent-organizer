@@ -12,6 +12,7 @@ boundary: ["InitiativesView.tsx and css", "a Charter component extracted from In
 spec: "docs/specs/leftovers-17.md (FR-1, FR-2; docs/ux/specs/initiatives-view.md Amendment 2, I17-I18)"
 gate: "docs/specs/leftovers-17.md Acceptance, rows C1, C2 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -65,3 +66,12 @@ Not verified in WKWebView:
 - Keyboard Tab order (Q1 of the memory).
 - Archived cards' Details: the fold was closed, same code path.
 - The focus ring after AXPress may be WebKit treating it as keyboard focus, not judged.
+
+## Review
+Pass: C1, C2 and X0 met at 870e0ad (fresh clone, review build of that clone on the fixture, my own pid; evidence in `.wt-notes/ic-review/`).
+
+- C1: vitest C1 block passes in `make test`. AX on my review app: 11 cards, 11 AXLinks, each `Open <id>` (`r-c1-initiatives.txt`); AXPress on a body line of init-a opened init-a on Overview (`r-c1-after-body-press.txt`); AXPress on `Open init-b` the same (`r-c1-link-press.txt`); AXPress on Details stayed on Initiatives; with init-a's Sleep confirm open a body press stayed and focus went to Cancel (`r-c1-confirm-body-press.txt`); a body press on init-asleep opened it on Overview, `asleep: read-only` (`r-c1-asleep-body-press.txt`).
+- C2: vitest C2 block passes (fields, each missing `no … yet`, Escape and focus via source, one at a time, same Charter in header and card, stacking rule). On screen: init-a's Charter verbatim from its initiative.yaml and roadmap, goal in full, `1 Oct`, `The joins — “every card says who is on it” (2 of 4)`, Workspace present (`r-c2-details-1440.txt/.png`); init-b shows each `no … yet`; Details on init-b closed init-a's, cards below flow (`r-c2-one-at-a-time.txt`); at 1024×640 Charter stacks over Workspace (`r-c2-details-1024.txt/.png`); asleep Workspace has no Review with agent (`r-c2-asleep-details.txt`). Escape itself was not pressed on screen (no synthetic keys); vitest covers it.
+- X0: `make test` (Go ok, vitest 473/473), `npm run build`, `wails build` all exit 0 (`x0-*.log`).
+
+Unmet: none. Reviewer ic-review, 2026-10-10, commit 870e0ad.
