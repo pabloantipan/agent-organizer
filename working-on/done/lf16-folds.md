@@ -1,17 +1,18 @@
 ---
 title: "The strip's folds get glyphs; the floating list splits Asleep from Archived"
-status: now
+status: done
 repos: [organizer]
 branch: lf16-folds
 seat: fo-build
 stage: one-window
 updated: 2026-10-10
-next: "review: lf16-folds, gate met (F1, F2 as amended at 96cc356, X0), 79f3898"
+next: "merge lf16-folds (79f3898) to main"
 depends_on: []
 boundary: ["Rail.tsx (strip fold buttons)", "FloatList.tsx", "lib/floatList.ts", "their css and tests", "not: lib/initiatives.ts"]
 spec: "docs/specs/leftovers-16.md (FR-2, FR-3; docs/ux/specs/initiatives-view.md Amendment 1, I14-I15)"
 gate: "docs/specs/leftovers-16.md Acceptance, rows F1, F2 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -31,6 +32,14 @@ docs/specs/leftovers-16.md, rows F1, F2 and X0.
 ## Notes
 - The floating icon's panel is outside the app's AX windows; opening the list by AX needs a system-wide hit test plus AXPress, refused by this session's permission check (`.wt-notes/fo-build/progress.md`).
 - One appearing for one: `Asleep, 1 initiative` (the spec writes `n initiatives`).
+
+## Review
+- Verdict: **pass**. Reviewer fo-review, 2026-10-10, on 79f3898 (branch lf16-folds), from a fresh clone at that SHA (removed after). Evidence in `.wt-notes/fo-review/`.
+- F1 (FR-2): vitest `Rail.strip.test.tsx`, `folds.test.ts` (lucide-moon over the asleep count, lucide-archive over the archived count, 14 px, svg aria-hidden, names `Asleep, 3 initiatives` / `Archived, 1 initiative`; `F1-F2-vitest.log`, 29 pass). Review build (`make review-build`) on the fixture, launched by me with saved pid, rail collapsed by AXPress on `.strip-toggle`; AX tree of that pid (`ax-strip.txt` lines 39-40): `Asleep, 1 initiative` `.strip-fold.asleep`, `Archived, 1 initiative` `.strip-fold.archived`, below the ranks. Window shot `screencapture -o -l` (`F1-strip-crop.png`): a moon over 1, a box over 1, muted. Met; `1 initiative` is the singular of `n initiatives`.
+- F2 (FR-3, Amendment 1): vitest of `lib/floatList.ts` over active, paused, archived and done initiatives (paused only in `asleep`, the rest in `archived`, none archived called asleep, Archived empty at zero) and `FloatList.test.tsx` rendering `FloatFolds`, the component `FloatList.tsx` mounts: `Asleep (2)`, `Archived (2)`; only `Asleep (1)` with no archived, only `Archived (1)` with no paused, nothing at zero. Met.
+- X0: `XDG_DATA_HOME=$(mktemp -d) test-lease run -- make test` (Go ok, vitest 456 pass), `npm install && test-lease run -- npm run build`, `test-lease run -- wails build`, all exit 0 (`X0-*.log`). Met.
+- Unmet rows: none.
+- Outside the gate: the new `lib/folds.ts` is not named in the boundary (only imported by the boundary's files); the UI review was on 1543640, and 79f3898 since moved the folds' JSX into `FloatFolds` (covered by the render test, not seen on screen).
 
 ## UI review
 - 2026-10-10 fo-ui, on 1543640 (all rows; sup53 said the branch moves for a FloatList.tsx render test only, not rechecked on the new head). Verdict: **pass**, no sev 4 or 3.
