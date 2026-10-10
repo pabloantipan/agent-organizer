@@ -36,7 +36,13 @@
 .help-section.d1 { color: var(--fg); font-weight: var(--weight-semibold); }
 .help-section.d3 { padding-left: var(--space-5); }
 .help-doc { overflow-y: auto; padding: var(--space-6) var(--space-8) var(--space-12); font-size: var(--font-size-lg); line-height: 1.6; }
-.help-doc > * { max-width: 760px; }
+/* leftovers-18 FR-9 (I27): the body holds a reading measure and never runs
+   past the pane; a long word or path breaks anywhere. Tables and fenced
+   blocks keep their words whole and scroll in their own box, with the
+   edge line (global.css .markdown, useMarkdownEdges). */
+.help-doc { min-width: 0; overflow-x: hidden; overflow-wrap: anywhere; }
+.help-doc > * { max-width: min(72ch, 100%); }
+.help-doc :where(pre, table) { overflow-wrap: normal; }
 /* leftovers-7 FR-5 (design system, Widths): the document's 1 px edges where
    content hides past them (HelpView, useScrollEdges). */
 .help-doc { border-top: 1px solid transparent; border-bottom: 1px solid transparent; }
