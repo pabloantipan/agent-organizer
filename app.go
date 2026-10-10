@@ -45,12 +45,13 @@ func (a *App) startup(ctx context.Context) {
 	// reader only (memfake.go), so since, was_critical_until and the warn
 	// rule run as they do for real; the warning is posted here, Go-side, on
 	// the sample that warns whoever took it (Amendment 4).
-	if r, ok := memoryFake(); ok {
+	r, faked := memoryFake()
+	if faked {
 		svc.SetMemoryReader(r)
 		wruntime.LogInfof(ctx, "memory reading forced by %s=%s", memoryFakeEnv, os.Getenv(memoryFakeEnv))
 	}
 	svc.OnMemoryWarn = a.memoryWarn
-	notifyStart(a)
+	notifyStart(a, faked)
 	go a.agentTicker(ctx)
 	floatIconStart(ctx)
 }
@@ -70,11 +71,34 @@ func (a *App) refreshAgents() service.AgentsView {
 // memoryWarn posts the warning at critical (Aglaea's §3): title
 // "Memory critical on <machine>", body the free memory and the three
 // biggest sessions. The service decides when (once per entry, never twice in
-// 30 min); this only words and posts it.
+// 30 min); this only words and posts it. It is logged either way; only the
+// installed app posts it (notifyRefusal), and notify_darwin.m logs whether
+// the centre took it.
 func (a *App) memoryWarn(m model.Memory) {
 	title, body := memoryWarning(a.svc.Config().Machine, m)
+	wruntime.LogInfof(a.ctx, "memory warning: %s: %s", title, body)
 	notifyPost(title, body)
-	wruntime.LogInfof(a.ctx, "memory warning posted: %s: %s", title, body)
+}
+
+// installedBundle is the bundle id of the installed app, the one bundle
+// that posts system notifications (leftovers-15 FR-2).
+const installedBundle = "cl.antipan.organizer"
+
+// notifyRefusal says why this run posts no notification, "" when it may: a
+// review build (cl.antipan.organizer.review) or any other bundle is not the
+// installed app, and a run whose memory reading is forced (memfake.go, the
+// fixture's --memory) warns of a Mac that is not in trouble. Outside a
+// bundle notify_darwin.m refuses on its own.
+func notifyRefusal(bundleID string, faked bool) string {
+	switch {
+	case bundleID == "":
+		return ""
+	case bundleID != installedBundle:
+		return "bundle " + bundleID + " is not the installed app"
+	case faked:
+		return "memory reading forced by " + memoryFakeEnv
+	}
+	return ""
 }
 
 func memoryWarning(machine string, m model.Memory) (string, string) {
@@ -107,8 +131,8 @@ func (a *App) memoryNotificationClicked() {
 }
 
 // MemoryNotifications says whether the warning can reach him: "on", "off"
-// (for Deltagos, in System Settings; the popover says so), "not asked" or
-// "no bundle".
+// (for Deltagos, in System Settings; the popover says so), "not asked",
+// "no bundle" or "not installed" (a review build or a fixture run).
 func (a *App) MemoryNotifications() string { return notifyState() }
 
 // agentTicker re-samples agents and pushes the view to the frontend as the

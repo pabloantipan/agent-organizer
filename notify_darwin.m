@@ -8,7 +8,10 @@
 //
 // UNUserNotificationCenter needs a bundle: run outside one (wails dev, the
 // bare binary) it raises, so the centre is never touched and the state
-// reads "no bundle".
+// reads "no bundle". Only the installed bundle posts (leftovers-15 FR-2):
+// Go decides from NotifyBundleID and the run (notifyRefusal in app.go), and
+// a review build or a fixture run never asks the centre for anything, so it
+// is not even registered there; the state reads "not the installed app".
 
 #import <Cocoa/Cocoa.h>
 #import <UserNotifications/UserNotifications.h>
@@ -26,7 +29,7 @@ static void nlog(NSString *fmt, ...) {
 }
 
 // The last state read from the centre: 0 not asked yet, 1 allowed, 2 off
-// for Deltagos, 3 no bundle (nothing can be posted). Read on every post and
+// for Deltagos, 3 no bundle, 4 not the installed app (nothing is posted). Read on every post and
 // every NotifyState, since he may switch them in System Settings meanwhile.
 static _Atomic int state = 0;
 static BOOL bundled;
@@ -64,13 +67,20 @@ static void readSettings(void) {
     }];
 }
 
+// The running bundle's identifier, "" outside a bundle.
+const char *NotifyBundleID(void) {
+    NSString *id = [[NSBundle mainBundle] bundleIdentifier];
+    return id ? [id UTF8String] : "";
+}
+
 // Asks once (the system remembers the answer) and sets the delegate the
 // click arrives through. Called at startup, so the first critical can post.
-void NotifyStart(void) {
-    bundled = [[NSBundle mainBundle] bundleIdentifier] != nil;
+// refused is Go's reason this run posts nothing, "" when it may post.
+void NotifyStart(const char *refused) {
+    bundled = [[NSBundle mainBundle] bundleIdentifier] != nil && refused[0] == 0;
     if (!bundled) {
-        state = 3;
-        nlog(@"notifications: not in a bundle, none will be posted");
+        state = [[NSBundle mainBundle] bundleIdentifier] != nil ? 4 : 3;
+        nlog(@"notifications: %s, none will be posted", refused[0] ? refused : "not in a bundle");
         return;
     }
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -88,7 +98,7 @@ void NotifyStart(void) {
 
 void NotifyPost(const char *title, const char *body) {
     if (!bundled) {
-        nlog(@"notification not posted: not in a bundle");
+        nlog(@"notification not posted: %s", state == 4 ? "not the installed app" : "not in a bundle");
         return;
     }
     UNMutableNotificationContent *n = [UNMutableNotificationContent new];

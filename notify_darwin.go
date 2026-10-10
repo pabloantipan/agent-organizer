@@ -7,7 +7,8 @@ package main
 #cgo CFLAGS: -x objective-c -fobjc-arc
 #cgo LDFLAGS: -framework Cocoa -framework UserNotifications
 #include <stdlib.h>
-void NotifyStart(void);
+const char *NotifyBundleID(void);
+void NotifyStart(const char *refused);
 void NotifyPost(const char *title, const char *body);
 int NotifyState(void);
 */
@@ -22,9 +23,11 @@ import (
 // notifyApp is the app the click reaches; set once at startup.
 var notifyApp *App
 
-func notifyStart(a *App) {
+func notifyStart(a *App, faked bool) {
 	notifyApp = a
-	C.NotifyStart()
+	r := C.CString(notifyRefusal(C.GoString(C.NotifyBundleID()), faked))
+	defer C.free(unsafe.Pointer(r))
+	C.NotifyStart(r)
 }
 
 func notifyPost(title, body string) {
@@ -35,9 +38,10 @@ func notifyPost(title, body string) {
 }
 
 // notifyState is the centre's last word: "not asked", "on", "off" (for
-// Deltagos, in System Settings) or "no bundle".
+// Deltagos, in System Settings), "no bundle" or "not installed" (a review
+// build or a fixture run, which posts nothing).
 func notifyState() string {
-	return [...]string{"not asked", "on", "off", "no bundle"}[C.NotifyState()]
+	return [...]string{"not asked", "on", "off", "no bundle", "not installed"}[C.NotifyState()]
 }
 
 //export notifyClicked
