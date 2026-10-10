@@ -4,32 +4,53 @@ import { dateWords } from "../lib/dates";
 import { stagePosition } from "../lib/header";
 import "../styles/charter.css";
 
+/** A charter field, by name. */
+export type CharterField = "goal" | "measure" | "target" | "scope" | "stage";
+
 /** What the initiative is, in the lead's words (leftovers-17 FR-2,
  *  initiatives-view Amendment 2 §2): the goal, the measure, the target in
  *  words, scope in and out, and the current stage with its outcome and
  *  position, verbatim from initiative.yaml and the roadmap, each missing one
  *  a muted `no … yet`. One component for the header's Details and the
  *  Initiatives card's Details, so the two never drift. `clamp` folds the
- *  long lines to two (the header, FR-10); the card shows them in full. */
-export function Charter({ i, clamp = false }: { i: merge.BoardInitiative; clamp?: boolean }) {
-  const line = (key: string, name: string, cls: string, label: string, text: ReactNode) => (
-    <Line key={`${key}-${i.id}`} clamp={clamp} name={name} className={cls}><span className="lbl">{label}</span>{text}</Line>
-  );
+ *  long lines to two (the header, FR-10); the card shows them in full.
+ *  `omit` drops the fields the host already shows: a fact shows once per
+ *  screen (leftovers-18 FR-4, initiatives-view A3 I25). */
+export function Charter({ i, clamp = false, omit = [] }: { i: merge.BoardInitiative; clamp?: boolean; omit?: CharterField[] }) {
+  const cols = COLUMNS.map((col) => col.filter((f) => !omit.includes(f))).filter((col) => col.length > 0);
   return (
     <div className="charter ihead-cols" data-charter={i.id}>
-      <div className="charter-col ihead-col">
-        {line("goal", "Goal", `ihead-goal ${i.goal ? "" : "missing"}`, "Goal", i.goal || "no goal yet")}
-        {line("measure", "Measure", `ihead-measure ${i.measure ? "" : "missing"}`, "Measure", i.measure || "no measure yet")}
+      {cols.map((col, k) => (
+        <div key={k} className="charter-col ihead-col">
+          {col.map((f) => <Field key={`${f}-${i.id}`} f={f} i={i} clamp={clamp} />)}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** The fields in their two columns: what and how it is judged, then where
+ *  it is bounded and where it stands. */
+const COLUMNS: CharterField[][] = [["goal", "measure", "target"], ["scope", "stage"]];
+
+/** Each field defined once. */
+function Field({ f, i, clamp }: { f: CharterField; i: merge.BoardInitiative; clamp: boolean }) {
+  switch (f) {
+    case "goal":
+      return <Line clamp={clamp} name="Goal" className={`ihead-goal ${i.goal ? "" : "missing"}`}><span className="lbl">Goal</span>{i.goal || "no goal yet"}</Line>;
+    case "measure":
+      return <Line clamp={clamp} name="Measure" className={`ihead-measure ${i.measure ? "" : "missing"}`}><span className="lbl">Measure</span>{i.measure || "no measure yet"}</Line>;
+    case "target":
+      return (
         <div className={`charter-line ihead-target-line ${i.target ? "" : "missing"}`}>
           <span className="lbl">Target</span>{i.target ? <span className="num">{dateWords(i.target)}</span> : "no target yet"}
         </div>
-      </div>
-      <div className="charter-col ihead-col">
-        <ScopeLines id={i.id} scope={i.scope} clamp={clamp} />
-        <StageLine stages={i.stages ?? []} />
-      </div>
-    </div>
-  );
+      );
+    case "scope":
+      return <ScopeLines id={i.id} scope={i.scope} clamp={clamp} />;
+    case "stage":
+      return <StageLine stages={i.stages ?? []} />;
+  }
 }
 
 /** The current stage with its outcome and its place (`3 of 5`); every stage
