@@ -30,3 +30,12 @@ docs/specs/leftovers-16.md, rows F1, F2 and X0.
 ## Notes
 - The floating icon's panel is outside the app's AX windows; opening the list by AX needs a system-wide hit test plus AXPress, refused by this session's permission check (`.wt-notes/fo-build/progress.md`).
 - One appearing for one: `Asleep, 1 initiative` (the spec writes `n initiatives`).
+
+## UI review
+- 2026-10-10 fo-ui, on 1543640 (all rows; sup53 said the branch moves for a FloatList.tsx render test only, not rechecked on the new head). Verdict: **pass**, no sev 4 or 3.
+- F1 (FR-2), checked in WKWebView: `Deltagos Review` built from 1543640, own pid, fixture, rail collapsed by AXPress on `.strip-toggle`. AX: `Asleep, 1 initiative` and `Archived, 1 initiative`, `.strip-fold.asleep|archived`, 33x40, below the ranks after the separator (`.wt-notes/fo-ui/ax-strip.txt` lines 40-41). Shot `wk-1440x932-F1-strip(-crop).png`: a moon over 1, a box over 1, muted; glyph and count measure 5.1:1 on the strip, and 33x40 is over the 24 px target. vitest `Rail.strip.test.tsx`, `folds.test.ts`: 14 px, svg aria-hidden, hover = name then ids.
+- F2 (FR-3), checked from code and vitest only (`vitest-F1-F2.log`, 25 pass): `floatList` sorts paused into `asleep` and every other inactive status into `archived` with the rail's `sleepyOf`. `FloatList.tsx` draws `Asleep (n)` and then `Archived (n)`, each only when it has rows, each closed by default, both open under a query, and keyboard order follows the open folds. No archived row is labelled asleep.
+- Findings: none at sev 2 or above. U1 (sev 1, words): the strip says `Asleep, 1 initiative` and the spec says `n initiatives`; the singular is the right reading. Proposal: accept it in the spec.
+- Spec gaps for the FSE: (1) singular vs plural, as above. (2) Whether each fold in the floating list opens on its own or both together; the build opens them separately. (3) Amended F2 asks for a render test of `FloatList.tsx`, and 1543640 has none (fo-build is adding it).
+- For aglaea: none.
+- Not verified in WKWebView: the floating list open (F2's screen). Pressing the icon runs `bringList` → `activateIgnoringOtherApps` (`floaticon_darwin.m:828`), which takes focus from Pablo's desktop (0108), so it was not pressed. Also not seen: the strip hover tooltip, which no screen shot can show without a pointer; the title text is covered by vitest.
