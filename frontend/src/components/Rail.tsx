@@ -5,7 +5,7 @@ import type { merge, model } from "../../wailsjs/go/models";
 import type { Group } from "../hooks/useWails";
 import { move, uniq } from "../lib";
 import { inactiveIds } from "../lib/queue";
-import { sleepyOf, sleepyWord } from "../lib/initiatives";
+import { foldName, sleepyOf, sleepyWord } from "../lib/initiatives";
 import { useBoard } from "../stores/board.store";
 import { CellStateLz, definitionWaits } from "./Crew";
 import { missingPersonas } from "../lib/queue";
@@ -202,7 +202,7 @@ export function Rail() {
     const isEditing = editing === i && !s.fixed;
     return (
       <div className={`rail-group-head ${s.fixed ? "fixed" : ""}`} {...(handle ?? {})}>
-        <button className="rail-chevron" onClick={() => toggle(s.key)} aria-expanded={!collapsed[s.key]} title={collapsed[s.key] ? "expand" : "collapse"}>
+        <button className="rail-chevron" onClick={() => toggle(s.key)} aria-expanded={!collapsed[s.key]} aria-label={foldName(!!collapsed[s.key], s.name)} title={foldName(!!collapsed[s.key], s.name)}>
           {collapsed[s.key] ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
         </button>
         {isEditing ? (
@@ -314,7 +314,7 @@ export function Rail() {
         {roles.length > 0 && (
           <section className="rail-group roles" aria-label="Roles">
             <div className="rail-group-head fixed">
-              <button className="rail-chevron" onClick={() => toggle(ROLES)} aria-expanded={!isCollapsed(ROLES)} title={isCollapsed(ROLES) ? "expand" : "collapse"}>
+              <button className="rail-chevron" onClick={() => toggle(ROLES)} aria-expanded={!isCollapsed(ROLES)} aria-label={foldName(isCollapsed(ROLES), "Roles")} title={foldName(isCollapsed(ROLES), "Roles")}>
                 {isCollapsed(ROLES) ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
               </button>
               <span className="rail-group-name" title="the transversal seats: show only, not priorities">Roles</span>
@@ -379,12 +379,12 @@ export function Rail() {
         {asleepIds.length > 0 && (
           <section className="rail-group folded" aria-label="Asleep">
             <div className="rail-group-head fixed">
-              <button className="rail-chevron" onClick={() => toggle(FOLD)} aria-expanded={!isCollapsed(FOLD)} title={isCollapsed(FOLD) ? "expand" : "collapse"}>
+              <button className="rail-chevron" onClick={() => toggle(FOLD)} aria-expanded={!isCollapsed(FOLD)} aria-label={foldName(isCollapsed(FOLD), "Asleep")} title={foldName(isCollapsed(FOLD), "Asleep")}>
                 {isCollapsed(FOLD) ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
               </button>
               <span className="rail-group-name" title="asleep: opens read-only; wake one from Initiatives">Asleep ({asleepIds.length})</span>
               <span className="spacer" />
-              <button className="rail-fold-link" onClick={() => openInitiatives()} title="asleep: opens read-only; wake one from Initiatives">Initiatives ›</button>
+              <button className="rail-fold-link" onClick={() => openInitiatives("title")} title="asleep: opens read-only; wake one from Initiatives">Initiatives ›</button>
             </div>
             {!isCollapsed(FOLD) && foldList(asleepIds)}
           </section>
@@ -392,7 +392,7 @@ export function Rail() {
         {archivedIds.length > 0 && (
           <section className="rail-group folded" aria-label="Archived">
             <div className="rail-group-head fixed">
-              <button className="rail-chevron" onClick={() => toggle(ARCHIVED)} aria-expanded={!isCollapsed(ARCHIVED)} title={isCollapsed(ARCHIVED) ? "expand" : "collapse"}>
+              <button className="rail-chevron" onClick={() => toggle(ARCHIVED)} aria-expanded={!isCollapsed(ARCHIVED)} aria-label={foldName(isCollapsed(ARCHIVED), "Archived")} title={foldName(isCollapsed(ARCHIVED), "Archived")}>
                 {isCollapsed(ARCHIVED) ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
               </button>
               <span className="rail-group-name" title="archived: opens read-only; the factory leaves it alone">Archived ({archivedIds.length})</span>

@@ -356,7 +356,7 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
       <div className="panel empty-state">
         <div>{folded.size > 0 ? "None awake." : "No initiatives found."}</div>
         <div className="sub">{folded.size > 0 ? "The rest sit under Asleep and Archived at the bottom of the rail." : "Add a root that holds a working-on/initiative.yaml in Settings."}</div>
-        {folded.size > 0 && <button className="ghost home-wake-link" onClick={() => openInitiatives()}>Wake one in Initiatives ›</button>}
+        {folded.size > 0 && <button className="ghost home-wake-link" onClick={() => openInitiatives("title")}>Wake one in Initiatives ›</button>}
       </div>
     );
   }
@@ -389,7 +389,7 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
       })}
       </SigNeed.Provider>
     </div>
-    {asleep > 0 && <div className="home-asleep">{asleep} asleep · <button className="home-asleep-link" onClick={() => openInitiatives()}>Initiatives ›</button></div>}
+    {asleep > 0 && <div className="home-asleep">{asleep} asleep · <button className="home-asleep-link" onClick={() => openInitiatives("title")}>Initiatives ›</button></div>}
     </>
   );
 }

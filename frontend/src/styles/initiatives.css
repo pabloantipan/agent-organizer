@@ -16,6 +16,9 @@
 /* ---------- the head: title and the count ---------- */
 .ivw-head { display: flex; align-items: baseline; gap: var(--space-3); min-width: 0; flex-wrap: wrap; }
 .ivw-head h1 { margin: 0; font-size: var(--font-size-2xl); line-height: var(--line-2xl); font-weight: var(--weight-semibold); color: var(--fg); }
+/* Initiatives › lands focus here (leftovers-15 FR-6); a ring only for the keyboard. */
+.ivw-head h1:focus { outline: none; }
+.ivw-head h1:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-sm); }
 .ivw-count { font-size: var(--font-size-lg); line-height: var(--line-lg); font-weight: var(--weight-medium); color: var(--fg); white-space: nowrap; }
 .ivw-count.over { color: var(--tone); }
 .ivw-line { font-size: var(--font-size-md); line-height: var(--line-md); color: var(--fg-muted); }

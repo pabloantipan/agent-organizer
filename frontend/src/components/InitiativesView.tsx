@@ -9,7 +9,7 @@ import { dateWords } from "../lib/dates";
 import { needsMeRows } from "../lib/queue";
 import { sessionRows } from "../lib/memory";
 import {
-  afterLine, confirmLines, countWords, DEFAULT_LIMIT, doneLine, factoryLine, firstLine, isLimitRefusal, limitLine, limitParts,
+  afterLine, confirmLines, countWords, DEFAULT_LIMIT, doneLine, factoryLine, firstLine, isLimitRefusal, landingOf, limitLine, limitNames, limitParts,
   memoryLine, mostMemory, nextLine, progressLine, refusedWakeName, sectionsOf, sessionBytes, sessionsLine, sinceLine,
   sleepyOf, sleepyWord, storeArchivedOpen, storedArchivedOpen, waitingOf, waitLine, type Sleepy,
 } from "../lib/initiatives";
@@ -47,6 +47,7 @@ export function InitiativesView() {
   // (done), its note (a refused Wake), or its control.
   const [land, setLand] = useState<{ id: string; to: "id" | "note" | "action"; seq: number } | null>(null);
   const box = useRef<HTMLDivElement>(null);
+  const title = useRef<HTMLHeadingElement>(null);
 
   // What the last rescan learned of the factory; Board() asks it, Factory()
   // only reads the answer, so it is cheap on every board change.
@@ -102,13 +103,20 @@ export function InitiativesView() {
     setLand(null);
   }, [land, focusIn]);
 
-  // The header's Wake in Initiatives › lands on that card's Wake, once the
-  // factory's answer has drawn it.
+  // Home's and the rail's Initiatives › land on the view's title as soon as
+  // it draws (leftovers-15 FR-6); the header's Wake in Initiatives › on
+  // that card's Wake, once the factory's answer has drawn it.
   useEffect(() => {
-    if (!initiativesFocus || !view || !factory) return;
-    const [, id] = initiativesFocus.split(":");
+    const to = landingOf(initiativesFocus);
+    if (!to || !view) return;
+    if (to.to === "title") {
+      clearInitiativesFocus();
+      title.current?.focus({ preventScroll: true });
+      return;
+    }
+    if (!factory) return;
     clearInitiativesFocus();
-    if (id) setLand({ id, to: "action", seq: Date.now() });
+    setLand({ id: to.id, to: "action", seq: Date.now() });
   }, [initiativesFocus, view, factory, clearInitiativesFocus]);
 
   const run = async (c: Card, action: Action) => {
@@ -232,7 +240,7 @@ export function InitiativesView() {
   return (
     <div className="ivw" ref={box}>
       <div className="ivw-head">
-        <h1>Initiatives</h1>
+        <h1 ref={title} tabIndex={-1}>Initiatives</h1>
         <span className="spacer" />
         <span className={`ivw-count num ${count.over ? "over" : ""}`} title={count.title || undefined}>{count.text}</span>
       </div>
@@ -246,8 +254,11 @@ export function InitiativesView() {
         {atLimit && sections.asleep.some(canAct) && (
           <div className="ivw-line">
             {limitParts(awakeLocal.length).lead}
-            {awakeLocal.map((a, k) => (
-              <span key={a.id}>{k > 0 && ", "}<button className="ivw-link mono" onClick={() => setLand({ id: a.id, to: "action", seq: Date.now() })} aria-label={`${a.id}: go to its Sleep`}>{a.id}</button></span>
+            {/* Only one with a Sleep is a link to it (leftovers-15 FR-8). */}
+            {limitNames(awakeLocal, canAct).map((a, k) => (
+              <span key={a.id}>{k > 0 && ", "}{a.link
+                ? <button className="ivw-link mono" onClick={() => setLand({ id: a.id, to: "action", seq: Date.now() })} aria-label={`${a.id}: go to its Sleep`}>{a.id}</button>
+                : <span className="mono">{a.id}</span>}</span>
             ))}
             {limitParts(awakeLocal.length).tail}
           </div>

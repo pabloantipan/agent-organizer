@@ -3,7 +3,7 @@ import { ChevronDown, ChevronRight, Search } from "lucide-react";
 import { EventsOn } from "../../wailsjs/runtime/runtime";
 import { FloatDismiss, FloatListHeight, FloatPick } from "../../wailsjs/go/main/App";
 import { useBoard } from "../stores/board.store";
-import { filterList, floatList, focusOrder, foldSignals, HOME, homeCount, homeLabel, type FloatRow, type Signal } from "../lib/floatList";
+import { filterList, inactiveLabel, floatList, focusOrder, foldSignals, HOME, homeCount, homeLabel, type FloatRow, type Signal } from "../lib/floatList";
 import { useScrollEdges } from "../lib/useScrollEdges";
 import { MemoryFloatLine } from "./MemoryFloatLine";
 import "../styles/float.css";
@@ -201,10 +201,10 @@ export function FloatList() {
             </div>
           ))}
           {list.inactive.length > 0 && (
-            <div role="group" aria-label="Not active">
-              {query.trim() ? <div className="fl-group">Not active</div> : (
+            <div role="group" aria-label={inactiveLabel()}>
+              {query.trim() ? <div className="fl-group">{inactiveLabel()}</div> : (
                 <button type="button" className="fl-group fl-fold" aria-expanded={inactiveOpen} onClick={() => setInactiveOpen(!inactiveOpen)}>
-                  {inactiveOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />} Not active ({list.inactive.length})
+                  {inactiveOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />} {inactiveLabel(list.inactive.length)}
                 </button>
               )}
               {(inactiveOpen || query.trim()) && list.inactive.map((r) => row(r, true))}
