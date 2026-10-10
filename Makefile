@@ -10,10 +10,9 @@ WAILS   ?= $(shell command -v wails 2>/dev/null || echo $(HOME)/go/bin/wails)
 
 build: ## build the .app for this machine
 	$(WAILS) build -clean -platform $(PLATFORM) -ldflags "$(LDFLAGS)"
-	@# Wails 2.15 rewrites frontend/wailsjs/runtime/ byte for byte but 0644,
-	@# and git holds those three files 0755: put the mode back so a build
-	@# leaves the tree clean (leftovers-15 FR-12).
-	chmod 755 frontend/wailsjs/runtime/*
+	@# Wails 2.15 rewrites frontend/wailsjs/runtime/ byte for byte at 0644, and
+	@# git holds those three files 0644, so neither this nor a bare wails build
+	@# dirties the tree (leftovers-15 FR-12, leftovers-18 FR-11).
 	@# Wails 2.15 always makes the .icns from build/appicon.png; the exported one
 	@# (floating-icon Amendment 5) carries the 16 and 32 px cuts, so it replaces it.
 	@# Wails copies no other resource, so the Icon Composer car (Amendment 6,
