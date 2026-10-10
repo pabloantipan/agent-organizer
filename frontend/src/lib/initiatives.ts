@@ -6,6 +6,7 @@
  *  view only draws what these return. */
 
 import { gb } from "./memory";
+import { parseISO, today } from "./dates";
 
 /** awake (`active`, or no status), asleep (`paused`), or archived (anything
  *  else: the factory refuses to sleep or wake it, so it is never asleep). */
@@ -126,9 +127,14 @@ export function nextLine(next: { date: string; what: string } | null, words: (d:
   return { text: `Next: ${kind} ${words(next.date)}`, title: `${words(next.date)} · ${next.what}`, none: false };
 }
 
-/** `asleep since 2 Oct`, when the factory's comment says so; null else. */
-export const sinceLine = (asleepSince: string | undefined, words: (d: string) => string) =>
-  asleepSince ? `asleep since ${words(asleepSince)}` : null;
+/** `asleep since 2 Oct`, when the factory's comment says so, and `asleep
+ *  since today` on the day (the design system's dates); null else. */
+export function sinceLine(asleepSince: string | undefined, words: (d: string) => string, now: Date = today()): string | null {
+  if (!asleepSince) return null;
+  const at = parseISO(asleepSince);
+  const same = !!at && at.getFullYear() === now.getFullYear() && at.getMonth() === now.getMonth() && at.getDate() === now.getDate();
+  return `asleep since ${same ? "today" : words(asleepSince)}`;
+}
 
 /** What waits on the lead for one initiative: its Needs me rows by kind. */
 export type Waiting = { decision: number; thread: number; card: number; other: number };
@@ -160,10 +166,20 @@ export function confirmLines(id: string, live: number, working: string[], waitin
       waiting.card > 0 && plural(waiting.card, "card"),
       waiting.other > 0 && `${waiting.other} other ${waiting.other === 1 ? "row" : "rows"}`,
     ].filter(Boolean) as string[];
-    lines.push(`${listWords(parts)} waiting on you leave Needs me until it wakes.`);
+    // The verb agrees with the count: one row leaves, two or more leave.
+    lines.push(`${listWords(parts)} waiting on you ${waitingTotal(waiting) === 1 ? "leaves" : "leave"} Needs me until it wakes.`);
   }
-  if (lines.length > 0 && lastAwake) lines.push("Home will be empty until one wakes.");
+  // The last awake one always asks, even with nothing live or waiting: Home
+  // empties (leftovers-15 FR-9).
+  if (lastAwake) lines.push("Home will be empty until one wakes.");
   return { question: `Sleep ${id}?`, lines, commit: `Sleep ${id}` };
+}
+
+/** The Asleep head's limit line as parts (leftovers-15 FR-8): each awake
+ *  one named, a link to its Sleep only when it has one (`canSleep`); a
+ *  factory-blind or remote one is named without a link. */
+export function limitNames<T extends { id: string }>(awake: T[], canSleep: (a: T) => boolean): { id: string; link: boolean }[] {
+  return awake.map((a) => ({ id: a.id, link: canSleep(a) }));
 }
 
 /** Wake refused at the limit (her §5): the Asleep head's line and each
@@ -241,6 +257,19 @@ export function storeArchivedOpen(open: boolean): boolean {
   return open;
 }
 
+/** Where a landing on the view puts focus (leftovers-15 FR-6): `title`
+ *  lands on the view's heading (Home's and the rail's `Initiatives ›`),
+ *  `wake:<id>` on that card's Wake (the header's link); anything else, none. */
+export function landingOf(focus: string | null | undefined): { to: "title" } | { to: "action"; id: string } | null {
+  if (focus === "title") return { to: "title" };
+  const m = /^wake:(.+)$/.exec(focus ?? "");
+  return m ? { to: "action", id: m[1] } : null;
+}
+
+/** A rail fold's chevron, named with its row (leftovers-15 FR-7):
+ *  `Expand Asleep`, `Collapse Archived`. */
+export const foldName = (collapsed: boolean, group: string) => `${collapsed ? "Expand" : "Collapse"} ${group}`;
+
 /** One Agents row's Memory cell (her Agents section): its figure, or `—`
  *  with why. `feed` is the agents payload's reading. */
 export function agentMemory(a: { pid: number; state: string; mem_bytes?: number }, feed: MemoryFeed): { text: string; title: string } {
@@ -250,11 +279,22 @@ export function agentMemory(a: { pid: number; state: string; mem_bytes?: number 
   return { text: `${gb(a.mem_bytes)} GB`, title: "this process tree's footprint" };
 }
 
+/** The memory words of an Agents row's accessible name (leftovers-15
+ *  FR-5): the figure the cell shows, `memory unknown` when the cell shows
+ *  `—` for a running row (no reading yet, or it failed), nothing for a row
+ *  that does not run (its state already says so). */
+export function rowMemoryWords(a: { pid: number; state: string; mem_bytes?: number }, feed: MemoryFeed): string {
+  const m = agentMemory(a, feed);
+  if (m.title === "not running") return "";
+  return m.text === "—" ? "memory unknown" : `${m.text} memory`;
+}
+
 /** A group's total in its head (her Agents section): the same number as its
- *  card, `Memory 9.8 GB`; null when nothing of it runs or there is no
- *  reading. `id` "" is the sessions outside every initiative. */
+ *  card, `Memory 9.8 GB`; `Memory —` before the first reading or when it
+ *  failed (leftovers-15 FR-5); null when nothing of it runs. `id` "" is
+ *  the sessions outside every initiative. */
 export function groupMemory(feed: MemoryFeed, id: string): string | null {
-  if (!feed?.memory) return null;
+  if (!feed?.memory) return "Memory —";
   const m = (feed.memory.by_initiative ?? []).find((x) => (id === "" ? !!x.unassigned : !x.unassigned && x.initiative === id));
   return m && m.bytes > 0 ? `Memory ${gb(m.bytes)} GB` : null;
 }

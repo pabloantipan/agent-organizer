@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   agentMemory, groupMemory, afterLine, confirmLines, countWords, factoryLine, isLimitRefusal, limitLine, listWords, memoryLine, mostMemory,
-  nextLine, progressLine, refusedWakeName, sectionsOf, sessionsLine, sinceLine, sleepyOf, sleepyWord, waitLine, waitingOf, doneLine, firstLine,
+  nextLine, progressLine, refusedWakeName, sectionsOf, limitNames, landingOf, foldName, rowMemoryWords, sessionsLine, sinceLine, sleepyOf, sleepyWord, waitLine, waitingOf, doneLine, firstLine,
 } from "./initiatives";
 
 const GB = 1024 ** 3;
@@ -103,6 +103,12 @@ describe("the next and since lines (§3)", () => {
     expect(sinceLine("2026-10-02", words)).toBe("asleep since 2 Oct");
     expect(sinceLine("", words)).toBeNull();
   });
+  it("P4 (FR-7): asleep since today on the day", () => {
+    const now = new Date(2026, 9, 9);
+    expect(sinceLine("2026-10-09", words, now)).toBe("asleep since today");
+    expect(sinceLine("2026-10-02", words, now)).toBe("asleep since 2 Oct");
+    expect(sinceLine("2025-10-09", (d) => d, now)).toBe("asleep since 2025-10-09");
+  });
 });
 
 describe("Sleep's confirm (§4, I4)", () => {
@@ -118,7 +124,15 @@ describe("Sleep's confirm (§4, I4)", () => {
     ]);
   });
   it("is empty with nothing live and nothing waiting, so Sleep runs at once", () => {
-    expect(confirmLines("x", 0, [], none, true).lines).toEqual([]);
+    expect(confirmLines("x", 0, [], none, false).lines).toEqual([]);
+  });
+  it("P6 (FR-9): the last awake one asks even with nothing live or waiting", () => {
+    expect(confirmLines("x", 0, [], none, true).lines).toEqual(["Home will be empty until one wakes."]);
+  });
+  it("P4 (FR-7): one row leaves, more leave", () => {
+    expect(confirmLines("x", 0, [], { decision: 1, thread: 0, card: 0, other: 0 }, false).lines).toEqual(["1 decision waiting on you leaves Needs me until it wakes."]);
+    expect(confirmLines("x", 0, [], { decision: 0, thread: 0, card: 0, other: 1 }, false).lines).toEqual(["1 other row waiting on you leaves Needs me until it wakes."]);
+    expect(confirmLines("x", 0, [], { decision: 1, thread: 1, card: 0, other: 0 }, false).lines).toEqual(["1 decision and 1 thread waiting on you leave Needs me until it wakes."]);
   });
   it("says only what is true", () => {
     expect(confirmLines("x", 1, [], none, false).lines).toEqual(["1 session freezes: its conversation is kept and mail waits."]);
@@ -204,6 +218,35 @@ describe("Agents' Memory column (I10)", () => {
     expect(groupMemory(feed, "organizer")).toBe("Memory 9.8 GB");
     expect(groupMemory(feed, "")).toBe("Memory 2 GB");
     expect(groupMemory(feed, "camp")).toBeNull();
-    expect(groupMemory(null, "organizer")).toBeNull();
+  });
+  it("P2 (FR-5): the head reads Memory — with memory unread", () => {
+    expect(groupMemory(null, "organizer")).toBe("Memory —");
+    expect(groupMemory({ memory: null, memory_reason: "x" }, "organizer")).toBe("Memory —");
+    expect(groupMemory({ memory: null, memory_reason: "x" }, "")).toBe("Memory —");
+  });
+  it("P2 (FR-5): a row's name says memory unknown, never a number the cell does not show", () => {
+    const row = { pid: 7, state: "running", mem_bytes: 0.05 * GB };
+    expect(rowMemoryWords(row, { memory: null, memory_reason: "x" })).toBe("memory unknown");
+    expect(rowMemoryWords(row, null)).toBe("memory unknown");
+    expect(rowMemoryWords({ pid: 7, state: "running", mem_bytes: 0 }, feed)).toBe("memory unknown");
+    expect(rowMemoryWords({ pid: 7, state: "working", mem_bytes: 1.4 * GB }, feed)).toBe("1.4 GB memory");
+    expect(rowMemoryWords({ pid: 0, state: "exited" }, { memory: null, memory_reason: "x" })).toBe("");
+  });
+});
+
+describe("the view's landings and the rail's folds (leftovers-15)", () => {
+  it("P3 (FR-6): Initiatives › lands on the title, the header's Wake link on that Wake", () => {
+    expect(landingOf("title")).toEqual({ to: "title" });
+    expect(landingOf("wake:init-asleep")).toEqual({ to: "action", id: "init-asleep" });
+    expect(landingOf(null)).toBeNull();
+    expect(landingOf("")).toBeNull();
+  });
+  it("P4 (FR-7): fold chevrons carry their row", () => {
+    expect(foldName(true, "Asleep")).toBe("Expand Asleep");
+    expect(foldName(false, "Archived")).toBe("Collapse Archived");
+  });
+  it("P5 (FR-8): the limit line links only those with a Sleep", () => {
+    const awake = [{ id: "init-a", blind: false }, { id: "init-blind", blind: true }];
+    expect(limitNames(awake, (a) => !a.blind)).toEqual([{ id: "init-a", link: true }, { id: "init-blind", link: false }]);
   });
 });

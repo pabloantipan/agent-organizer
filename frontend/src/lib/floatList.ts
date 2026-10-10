@@ -17,6 +17,11 @@ export type Signal = { kind: SignalKind; text: string; floor?: string; fold: num
 
 export type FloatRow = { id: string; goal: string; rank: number | null; signals: Signal[] };
 export type FloatSection = { name: string; rows: FloatRow[] };
+/** The fold of initiatives that are not active, as FloatList labels it
+ *  (leftovers-15 FR-10): `Asleep (3)`; `Asleep` alone while filtering. */
+export const INACTIVE_GROUP = "Asleep";
+export const inactiveLabel = (n?: number) => (n === undefined ? INACTIVE_GROUP : `${INACTIVE_GROUP} (${n})`);
+
 export type FloatList = { sections: FloatSection[]; inactive: FloatRow[] };
 
 const uniq = <T,>(xs: T[]) => Array.from(new Set(xs));

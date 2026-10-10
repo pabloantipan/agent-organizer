@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AgentGroup, AgentsView, BoardView } from "../hooks/useWails";
 import type { merge, model } from "../../wailsjs/go/models";
-import { filterList, floatList, focusOrder, foldSignals, HOME, homeCount, homeLabel, matches, type FloatRow, type Signal } from "./floatList";
+import { inactiveLabel, filterList, floatList, focusOrder, foldSignals, HOME, homeCount, homeLabel, matches, type FloatRow, type Signal } from "./floatList";
 import { needsMeRows } from "./queue";
 
 // Plain objects, cast once, as queue.test.ts does.
@@ -155,5 +155,12 @@ describe("the Home row", () => {
     expect(homeLabel(3)).toBe("Home · 3 need you");
     expect(homeLabel(1)).toBe("Home · 1 needs you");
     expect(homeLabel(0)).toBe("Home");
+  });
+});
+
+describe("the not-active fold's label (leftovers-15 FR-10)", () => {
+  it("P7: says Asleep (n), not Not active", () => {
+    expect(inactiveLabel(3)).toBe("Asleep (3)");
+    expect(inactiveLabel()).toBe("Asleep");
   });
 });
