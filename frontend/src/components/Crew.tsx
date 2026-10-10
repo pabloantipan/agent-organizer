@@ -178,6 +178,7 @@ function SeatRow({ seat, readOnly, confirm, setConfirm, flash, onMessage }: { se
       {(seat.owes?.length ?? 0) > 0 && <span className="badge owes" title={seat.owes.map((o) => o.subject || o.id).join("\n")}>owes {seat.owes.length}</span>}
       <ContextBar c={a?.context} />
       <span className="meta mono a-proc">{a && a.pid > 0 ? `${a.tty} · up ${a.uptime}` : a?.created ? `session ${a.created}` : a ? "layout only" : seat.session}</span>
+      <span className="a-tail">
       {!readOnly && <span className="a-actions">
         {onMessage && !asking && <button className="tiny-btn" onClick={() => onMessage(seat.name)} title={`write to ${seat.name}`} aria-label={`Message ${seat.name}`}><MessageSquare size={13} /> Message</button>}
         {asking && session && (
@@ -195,6 +196,7 @@ function SeatRow({ seat, readOnly, confirm, setConfirm, flash, onMessage }: { se
         )}
       </span>}
       <MemoryCell a={a} />
+      </span>
       {health && health !== "alive" && <HealthWhy state={health} />}
     </li>
   );

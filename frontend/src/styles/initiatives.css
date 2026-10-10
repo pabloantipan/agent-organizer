@@ -111,13 +111,18 @@
 
 /* ---------- Agents: memory on every row ---------- */
 /* A fixed track at the row's right edge (leftovers-15 FR-4): the cell is
-   the last on the row's first line, with a fixed width and no shrink, so
-   its x is the same on every row whatever cells and actions come before
-   it. Right-aligned and tabular in neutral ink; it never folds. The
-   actions' auto margin pushes them against it; a row without actions
-   pushes the cell itself. */
-.a-mem { flex: 0 0 64px; width: 64px; margin-left: auto; text-align: right; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); white-space: nowrap; }
-.a-actions + .a-mem { margin-left: 0; }
+   the last item of the row's tail (its actions, then Memory), and the tail
+   is pushed to the row's right edge on whatever line it lands, with its
+   own lines packed to the end, so the cell's x is the same on every row,
+   wrapped or not. Fixed width, no shrink, right-aligned and tabular in
+   neutral ink; it never folds. */
+.a-tail { display: inline-flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 4px 12px; margin-left: auto; min-width: 0; max-width: 100%; }
+.a-tail > .a-actions { margin-left: 0; }
+.a-mem { flex: 0 0 64px; width: 64px; text-align: right; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); white-space: nowrap; }
+/* Crew seats sit inside the crew block's 10 px padding and 1 px border, so
+   the other agent rows keep the same 11 px more on their right: one track
+   for both lists. */
+ul.agents:not(.crew-seats) > li { padding-right: 21px; }
 .a-group-mem { white-space: nowrap; }
 /* A row's health line takes its own line, so the Memory track stays the
    first line's last cell. */

@@ -51,6 +51,9 @@ export function AgentList({ agents, root, local = true, readOnly = false, onMess
               <ContextBar c={a.context} />
               <span className="meta mono a-proc">{a.pid > 0 ? `${a.tty} · up ${a.uptime}` : a.created ? `session ${a.created}` : "layout only"}</span>
               <span className="meta mono a-dir" title={a.dir}>{sub}</span>
+              {/* Actions and Memory are one tail at the row's right edge, so
+                  the cell holds its track on whatever line the tail lands. */}
+              <span className="a-tail">
               {!readOnly && <span className="a-actions">
                 {onMessage && a.persona && !asking && <button className="tiny-btn" onClick={() => onMessage(a.persona)} title={`write to ${a.persona}`}><MessageSquare size={13} /> Message</button>}
                 {local && asking && a.session && (
@@ -84,6 +87,7 @@ export function AgentList({ agents, root, local = true, readOnly = false, onMess
                 )}
               </span>}
               <MemoryCell a={a} />
+              </span>
               {health && health !== "alive" && <HealthWhy state={health} />}
             </li>
           );

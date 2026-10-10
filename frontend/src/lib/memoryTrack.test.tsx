@@ -11,10 +11,11 @@ import type { Agent, AgentGroup } from "../hooks/useWails";
 // U1 (leftovers-15 FR-4): every Agents row's Memory cell sits in one fixed,
 // right-aligned track. No DOM library is a dependency here (no layout in
 // jsdom either), so this proves the two halves the x rests on: in every
-// row the cell is the last cell of the first line (only the health line,
-// which takes its own line, may follow), and the stylesheet gives that
-// cell a fixed width, no shrink, right alignment, and the row's right edge.
-// Rows of one list share a width, so their cells share an x.
+// row the cell is the last item of the row's tail (actions, then Memory),
+// the tail the row's last cell (only the health line, on its own line,
+// follows), and the stylesheet pushes the tail to the row's right edge on
+// any line with its own lines packed to the end, the cell fixed and right-
+// aligned. The x itself is measured on the review build (progress.md).
 
 const GB = 1024 ** 3;
 const agent = (over: Partial<Agent>): Agent => ({
@@ -29,6 +30,7 @@ const rows = (html: string) => [...html.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/g)
 function afterMemory(row: string): string {
   const m = /<span class="a-mem num"[^>]*>[^<]*<\/span>/.exec(row);
   expect(m, row).not.toBeNull();
+  expect(row.lastIndexOf('<span class="a-tail">'), row).toBeGreaterThan(-1);
   return row.slice(m!.index + m![0].length);
 }
 
@@ -44,7 +46,7 @@ describe("U1: the Memory cell's fixed track", () => {
     for (const readOnly of [false, true]) {
       const rs = list(readOnly);
       expect(rs).toHaveLength(4);
-      for (const r of rs) expect(afterMemory(r)).toMatch(/^(<span class="meta a-health">[^<]*<\/span>)?$/);
+      for (const r of rs) expect(afterMemory(r)).toMatch(/^<\/span>(<span class="meta a-health">[^<]*<\/span>)?$/);
     }
   });
 
@@ -58,13 +60,13 @@ describe("U1: the Memory cell's fixed track", () => {
     } as unknown as AgentGroup;
     const rs = rows(renderToStaticMarkup(<Crew group={group} onMessage={() => undefined} />));
     expect(rs).toHaveLength(2);
-    for (const r of rs) expect(afterMemory(r)).toMatch(/^(<span class="meta a-health">[^<]*<\/span>)?$/);
+    for (const r of rs) expect(afterMemory(r)).toMatch(/^<\/span>(<span class="meta a-health">[^<]*<\/span>)?$/);
   });
 
   it("has a fixed, right-aligned track at the row's right edge in the stylesheet", () => {
     const css: string = readFileSync(new URL("../styles/initiatives.css", import.meta.url), "utf8");
     const rule = (sel: string) => {
-      const m = new RegExp(`(^|\\n)${sel.replace(/[.+>]/g, (c) => `\\${c}`)}\\s*\\{([^}]*)\\}`).exec(css);
+      const m = new RegExp(`(^|\\n)${sel.replace(/[.+>()*]/g, (c) => `\\${c}`)}\\s*\\{([^}]*)\\}`).exec(css);
       expect(m, sel).not.toBeNull();
       return m![2];
     };
@@ -72,8 +74,12 @@ describe("U1: the Memory cell's fixed track", () => {
     expect(mem).toMatch(/flex:\s*0 0 64px/);
     expect(mem).toMatch(/width:\s*64px/);
     expect(mem).toMatch(/text-align:\s*right/);
-    expect(mem).toMatch(/margin-left:\s*auto/);
-    expect(rule(".a-actions + .a-mem")).toMatch(/margin-left:\s*0/);
+    expect(mem).not.toMatch(/margin-left/);
+    const tail = rule(".a-tail");
+    expect(tail).toMatch(/margin-left:\s*auto/);
+    expect(tail).toMatch(/justify-content:\s*flex-end/);
+    expect(css).not.toMatch(/\.a-actions \+ \.a-mem/);
+    expect(rule("ul.agents:not(.crew-seats) > li")).toMatch(/padding-right:\s*21px/);
     expect(rule(".agents li > .a-health")).toMatch(/flex:\s*1 0 100%/);
   });
 });
