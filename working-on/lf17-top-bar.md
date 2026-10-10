@@ -6,7 +6,7 @@ branch: lf17-top-bar
 seat: tb-build
 stage: one-window
 updated: 2026-10-10
-next: "review: lf17-top-bar, gate met (T1, T2, X0), 14cd470"
+next: "review: lf17-top-bar, gate met (T1, T2, X0), 26025ca"
 depends_on: []
 boundary: ["TopBar.tsx", "MemoryButton.tsx (short form only)", "the top bar rules in styles/shell.css", "their tests"]
 spec: "docs/specs/leftovers-17.md (FR-3 to FR-5; docs/ux/specs/initiatives-view.md Amendment 2, I19-I21)"
@@ -25,7 +25,7 @@ docs/specs/leftovers-17.md, rows T1, T2 and X0.
 - [x] X0: `XDG_DATA_HOME=$(mktemp -d) make test`, `cd frontend && npm run build`, `wails build` — `.wt-notes/tb-build/x0-clean-make-test.log`, `x0-npm-build.log`, `x0-wails-build.log`
 
 ## Done
-- 2026-10-10 tb-build: top bar by kind (Places nav, crumb, Mac, work, app), sync line firebase-only, version in the brand's hover, crumb id clamped; 8397cd3, 14cd470 on lf17-top-bar; choices in `.wt-notes/tb-build/progress.md`
+- 2026-10-10 tb-build: top bar by kind (Places nav, crumb, Mac, work, app), sync line firebase-only, version in the brand's hover, crumb id clamped; c73a9a4, 26025ca on lf17-top-bar; choices in `.wt-notes/tb-build/progress.md`
 
 ## Notes
 - WebKit's AX exposes neither `aria-current` nor a span's `title`; both halves are proven in vitest.
