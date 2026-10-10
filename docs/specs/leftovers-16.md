@@ -42,10 +42,15 @@ else renders, logs or vitest.
 |---|---|---|---|
 | R1 | 1 | review build, `ORGANIZER_MEMORY_FAKE=critical` on the fixture, the icon window shot (`screencapture -o -l`) at trough and peak, composited over white and the dark ground; `FLOAT_REDUCE_MOTION=1` | full-opacity amber with its keyline, 3 and 6 px; Reduce motion steady 3 px |
 | F1 | 2 | vitest of the strip; the review build on the fixture, rail collapsed, AX tree of its own process | a moon over the asleep count, a box over the archived count; names `Asleep, n initiatives`, `Archived, n initiatives` |
-| F2 | 3 | vitest of `lib/floatList.ts` with active, paused and archived initiatives; the fixture's floating list read by AX on the review process | `Asleep (n)` = paused only; `Archived (n)` apart, absent at zero |
+| F2 | 3 | vitest of `lib/floatList.ts` with active, paused and archived initiatives, and of `FloatList.tsx` rendered over the same (Amendment 1) | `Asleep (n)` = paused only; `Archived (n)` apart, absent at zero |
 | M1 | 4 | vitest over an off seat, a failed reading and no reading yet, for an Agents row and a crew seat | `—` with the three names exactly; no "unknown" for an off seat |
 | M2 | 5 | review build on the fixture at 1024×640 and 1440×900, rail open: each Memory cell's x read from the AX tree of its own process | equal x on every row at each size |
 | X0 | all | `XDG_DATA_HOME=$(mktemp -d) make test`, `cd frontend && npm run build`, `wails build` | pass |
+
+Amendment 1, 2026-10-10, the FSE (0108, from fo-build at 1543640): F2's
+AX half is dropped. The floating list opens only by a press on the floating
+icon, which the seat could not post without input on Pablo's desktop; a
+render test of `FloatList.tsx` proves the same words.
 
 ## Boundary
 
