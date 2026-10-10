@@ -6,7 +6,7 @@ branch: lf16-folds
 seat: fo-build
 stage: one-window
 updated: 2026-10-10
-next: "waits on 0112 (accept)"
+next: "sup53 builds it (0112 ruled, launched 2026-10-10)"
 depends_on: []
 boundary: ["Rail.tsx (strip fold buttons)", "FloatList.tsx", "lib/floatList.ts", "their css and tests", "not: lib/initiatives.ts"]
 spec: "docs/specs/leftovers-16.md (FR-2, FR-3; docs/ux/specs/initiatives-view.md Amendment 1, I14-I15)"
