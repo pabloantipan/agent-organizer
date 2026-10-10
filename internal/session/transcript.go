@@ -94,7 +94,7 @@ func withTail(run Run, t Tail) (Run, bool) {
 			run.UsedPercent = 100 * float64(t.InputTokens) / float64(run.WindowSize)
 		}
 		if t.At.After(run.LastSeen) {
-			run.LastSeen = t.At
+			run.LastSeen = t.At.In(run.LastSeen.Location()) // one zone per line
 		}
 		used = true
 	}
