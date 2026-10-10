@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
+import { ChevronDown, ChevronRight, ChevronUp } from "lucide-react";
 import { api } from "../hooks/useWails";
 import type { merge, service } from "../../wailsjs/go/models";
 import { Factory, Sleep, Wake } from "../../wailsjs/go/main/App";
@@ -15,6 +15,8 @@ import {
 } from "../lib/initiatives";
 import { escapeCloses } from "../lib/focus";
 import { nextDate } from "./InitiativeHeader";
+import { Charter } from "./Charter";
+import { InitiativeDetail } from "./Initiatives";
 import "../styles/initiatives.css";
 
 type Action = "sleep" | "wake";
@@ -24,6 +26,20 @@ type Note =
   | { kind: "limit"; text: string }
   | { kind: "refused"; words: string }
   | { kind: "failed"; action: Action; words: string; after: string; agents: boolean };
+
+/** What a press on a card's body does (leftovers-17 FR-1, I17): a control
+ *  inside it keeps its own press (the id link, Sleep, Wake, Details, the
+ *  confirm's buttons and the confirm itself); with Sleep's confirm open the
+ *  press goes to the confirm; anywhere else it opens the initiative. */
+export function pressOf(target: { closest(sel: string): unknown } | null, asking: boolean): "own" | "confirm" | "open" {
+  if (!target || target.closest(CONTROLS)) return "own";
+  return asking ? "confirm" : "open";
+}
+const CONTROLS = "a, button, input, select, textarea, [role=group], .ic-note";
+
+/** The one card whose Details are open after a press on a card's Details:
+ *  the same card closes, another one replaces it (FR-2: one at a time). */
+export const detailsAfter = (open: string | null, pressed: string): string | null => (open === pressed ? null : pressed);
 
 type Card = {
   id: string; state: Sleepy; local: boolean; i: merge.BoardInitiative;
@@ -42,6 +58,7 @@ export function InitiativesView() {
   const [confirm, setConfirm] = useState<string | null>(null);
   const [running, setRunning] = useState<{ id: string; action: Action; sessions: number } | null>(null);
   const [notes, setNotes] = useState<Record<string, Note>>({});
+  const [details, setDetails] = useState<string | null>(null);
   const [announce, setAnnounce] = useState("");
   // Where focus goes once the view has drawn the new state: a card's id
   // (done), its note (a refused Wake), or its control.
@@ -164,6 +181,17 @@ export function InitiativesView() {
     setConfirm(c.id);
   };
 
+  // Escape inside the open details closes them and returns focus to their
+  // Details button (FR-2); the confirm's own Escape stops first.
+  const closeDetails = (id: string) => { setDetails(null); focusIn(id, ".ic-more"); };
+  // A press on the card's body (FR-1): a text selection is not a press.
+  const pressCard = (c: Card, asking: boolean) => (e: MouseEvent) => {
+    if (window.getSelection?.()?.toString()) return;
+    const what = pressOf(e.target as Element, asking);
+    if (what === "open") openInitiative(c.id, "overview");
+    else if (what === "confirm") focusIn(c.id, ".ic-confirm .ghost");
+  };
+
   const cancel = (id: string) => { setConfirm(null); setLand({ id, to: "action", seq: Date.now() }); };
 
   const toggleArchived = () => setArchivedOpen(storeArchivedOpen(!archivedOpen));
@@ -185,46 +213,58 @@ export function InitiativesView() {
     const refused = action === "wake" && atLimit;
     const sessions = isRunning ? progressLine(running.action, running.sessions) : sessionsLine(c.state, c.live, c.frozen, c.working.length);
     const noteId = `ic-note-${c.id}`;
+    const open = details === c.id;
+    const detailsId = `ic-details-${c.id}`;
     return (
-      <article key={c.id} className={`ic ${c.state}`} data-card={c.id} aria-labelledby={`ic-id-${c.id}`}>
-        <div className="ic-head">
-          <button id={`ic-id-${c.id}`} className="ic-id mono" onClick={() => openInitiative(c.id, "overview")}
-            title={c.state === "awake" ? `open ${c.id}` : `open ${c.id}, read-only`}>{c.id}</button>
-          {i.client && <span className="lz tone ic-client" title={i.client}>{i.client}</span>}
-          <span className={`lz ic-word ${c.state}`}>{sleepyWord(i.status)}</span>
-        </div>
-        <div className={`ic-goal ${i.goal ? "" : "missing"}`} title={i.goal || undefined}>{i.goal || "no goal yet"}</div>
-        {c.state !== "archived" && <div className="ic-line num" aria-live={isRunning ? "polite" : undefined}>{sessions}</div>}
-        {mem && c.state !== "archived" && <div className="ic-line num" title={mem.title || undefined}>{mem.text}</div>}
-        <div className={`ic-line ${next.none ? "missing" : ""}`} title={next.title}>{next.text}</div>
-        {since && <div className="ic-line">{since}</div>}
-        {c.state === "archived" && <div className="ic-line missing">archived: the factory leaves it alone</div>}
-        {!c.local && c.state !== "archived" && <div className="ic-line missing">on {c.machine}: Sleep and Wake run on that Mac</div>}
-        {c.local && c.state !== "archived" && c.i.factory_blind && (
-          <div className="ic-line missing" title={i.path}>The factory does not see this initiative, so it can't sleep or wake from here.</div>
-        )}
-        {conf && (
-          <div className="ic-confirm" role="group" aria-labelledby={`ic-q-${c.id}`} onKeyDown={escapeCloses(() => cancel(c.id))}>
-            <div id={`ic-q-${c.id}`} className="ic-q">{conf.question}</div>
-            {conf.lines.map((l) => <div key={l} className="ic-line">{l}</div>)}
-            <div className="ic-buttons">
-              <button onClick={() => void run(c, "sleep")}>{conf.commit}</button>
-              <ConfirmCancel onCancel={() => cancel(c.id)} />
+      <article key={c.id} className={`ic ${c.state} ${open ? "open" : ""}`} data-card={c.id} aria-label={c.id}
+        onKeyDown={open ? escapeCloses(() => closeDetails(c.id)) : undefined}>
+        <div className="ic-main" onClick={pressCard(c, asking)}>
+          <div className="ic-head">
+            {/* The card's one link (FR-1): the body's press opens the same. */}
+            <a id={`ic-id-${c.id}`} className="ic-id mono" href={`#${c.id}`} aria-label={`Open ${c.id}`}
+              onClick={(e) => { e.preventDefault(); openInitiative(c.id, "overview"); }}
+              title={c.state === "awake" ? `open ${c.id}` : `open ${c.id}, read-only`}>{c.id}</a>
+            {i.client && <span className="lz tone ic-client" title={i.client}>{i.client}</span>}
+            <span className={`lz ic-word ${c.state}`}>{sleepyWord(i.status)}</span>
+          </div>
+          <div className={`ic-goal ${i.goal ? "" : "missing"}`} title={i.goal || undefined}>{i.goal || "no goal yet"}</div>
+          {c.state !== "archived" && <div className="ic-line num" aria-live={isRunning ? "polite" : undefined}>{sessions}</div>}
+          {mem && c.state !== "archived" && <div className="ic-line num" title={mem.title || undefined}>{mem.text}</div>}
+          <div className={`ic-line ${next.none ? "missing" : ""}`} title={next.title}>{next.text}</div>
+          {since && <div className="ic-line">{since}</div>}
+          {c.state === "archived" && <div className="ic-line missing">archived: the factory leaves it alone</div>}
+          {!c.local && c.state !== "archived" && <div className="ic-line missing">on {c.machine}: Sleep and Wake run on that Mac</div>}
+          {c.local && c.state !== "archived" && c.i.factory_blind && (
+            <div className="ic-line missing" title={i.path}>The factory does not see this initiative, so it can't sleep or wake from here.</div>
+          )}
+          {conf && (
+            <div className="ic-confirm" role="group" aria-labelledby={`ic-q-${c.id}`} onKeyDown={escapeCloses(() => cancel(c.id))}>
+              <div id={`ic-q-${c.id}`} className="ic-q">{conf.question}</div>
+              {conf.lines.map((l) => <div key={l} className="ic-line">{l}</div>)}
+              <div className="ic-buttons">
+                <button onClick={() => void run(c, "sleep")}>{conf.commit}</button>
+                <ConfirmCancel onCancel={() => cancel(c.id)} />
+              </div>
             </div>
-          </div>
-        )}
-        {note && <NoteLine id={noteId} note={note} onAgents={() => openInitiative(c.id, "agents")} />}
-        {!conf && action && canAct(c) && (
-          <div className="ic-foot">
-            {refused ? (
-              <button className="ic-act" aria-disabled="true" aria-label={refusedWakeName(c.id, awakeLocal.length)} aria-describedby={note ? noteId : undefined} onClick={() => press(c, "wake")}>Wake</button>
-            ) : (
-              <button className="ic-act" disabled={isRunning} aria-label={isRunning ? undefined : `${action === "sleep" ? "Sleep" : "Wake"} ${c.id}`} aria-describedby={note ? noteId : undefined} onClick={() => press(c, action)}>
-                {isRunning ? (running.action === "sleep" ? "Sleeping…" : "Waking…") : action === "sleep" ? "Sleep" : "Wake"}
+          )}
+          {note && <NoteLine id={noteId} note={note} onAgents={() => openInitiative(c.id, "agents")} />}
+          {!conf && (
+            <div className="ic-foot">
+              <button className="ic-more" aria-expanded={open} aria-controls={open ? detailsId : undefined} aria-label={`Details of ${c.id}`}
+                onClick={() => setDetails(detailsAfter(details, c.id))}>
+                Details {open ? <ChevronUp size={14} aria-hidden /> : <ChevronDown size={14} aria-hidden />}
               </button>
-            )}
-          </div>
-        )}
+              {action && canAct(c) && (refused ? (
+                <button className="ic-act" aria-disabled="true" aria-label={refusedWakeName(c.id, awakeLocal.length)} aria-describedby={note ? noteId : undefined} onClick={() => press(c, "wake")}>Wake</button>
+              ) : (
+                <button className="ic-act" disabled={isRunning} aria-label={isRunning ? undefined : `${action === "sleep" ? "Sleep" : "Wake"} ${c.id}`} aria-describedby={note ? noteId : undefined} onClick={() => press(c, action)}>
+                  {isRunning ? (running.action === "sleep" ? "Sleeping…" : "Waking…") : action === "sleep" ? "Sleep" : "Wake"}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        {open && <CardDetails id={detailsId} i={i} readOnly={c.state !== "awake"} />}
       </article>
     );
   };
@@ -271,6 +311,26 @@ export function InitiativesView() {
         </section>
       )}
       <div className="sr-only" role="status" aria-live="polite">{announce}</div>
+    </div>
+  );
+}
+
+/** A card's Details, open across its row (FR-2, I18): the Charter (the
+ *  header's Details, one component) and the Workspace (Home's chevron detail,
+ *  mounted as is). Not awake, the Workspace hides what starts an agent
+ *  (0042), by a rule in initiatives.css, since InitiativeDetail is not
+ *  this card's to edit. */
+export function CardDetails({ id, i, readOnly }: { id: string; i: merge.BoardInitiative; readOnly: boolean }) {
+  return (
+    <div id={id} className="ic-details" role="region" aria-label={`Details of ${i.id}`}>
+      <section className="ic-charter" aria-labelledby={`${id}-charter`}>
+        <h3 id={`${id}-charter`} className="sec-title">Charter</h3>
+        <Charter i={i} />
+      </section>
+      <section className={`ic-ws ${readOnly ? "read-only" : ""} ${i.local ? "local" : ""}`} aria-labelledby={`${id}-ws`}>
+        <h3 id={`${id}-ws`} className="sec-title">Workspace</h3>
+        <InitiativeDetail i={i} />
+      </section>
     </div>
   );
 }
