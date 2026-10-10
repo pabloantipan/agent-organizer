@@ -417,9 +417,10 @@ static void breathe(void) {
 // the tile's edge, at every level, since the ring is also how the lead finds
 // the icon (0109): the tone at normal, with no reading and with a failed
 // one; amber (--amber-9) at high; amber 3 pt at critical, breathing in
-// width at full opacity, 3 to 4.5 pt and back over 1.6 s (0.8 each way; the
+// width at full opacity, 3 to 6 pt and back over 1.6 s (0.8 each way; the
 // inner edge stays 2 pt from the tile, the ring swells outward), a steady
-// 3 pt under Reduce motion (Amendment 2 as amended, 56f0244). A 1 pt keyline
+// 3 pt under Reduce motion (Amendment 2 as amended, 56f0244; 6 pt since
+// b3295f2, leftovers-16 FR-1: 1.5 pt did not pull the eye from the edge). A 1 pt keyline
 // in the ground (#1a1523) sits just outside the ring at every level, at full
 // opacity, and follows its outer edge: it holds the ring on a light wallpaper
 // (amber on white is 1.8:1, the ground 17.9:1). Points, not scaled with the icon:
@@ -434,7 +435,7 @@ static CGPathRef ringPath(CGFloat out) {
     return CGPathCreateWithRoundedRect(r, tileSz / 4 + out, tileSz / 4 + out, NULL);
 }
 
-static const CGFloat kBreathPeak = 4.5; // critical's widest, at full opacity
+static const CGFloat kBreathPeak = 6; // critical's widest, at full opacity
 static const CFTimeInterval kBreathHalf = 0.8; // 1.6 s a breath, there and back
 
 // One leg of the breath on a layer: from the 3 pt shape to the peak's, there
