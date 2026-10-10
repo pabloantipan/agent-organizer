@@ -1,12 +1,12 @@
 ---
 title: "An empty Memory cell has three words, and stays on its track"
-status: next
+status: now
 repos: [organizer]
 branch: lf16-memory-words
 seat: mw-build
 stage: one-window
 updated: 2026-10-10
-next: "waits on lf15-names-and-notices in done/ and merged, then sup53 launches mw-build"
+next: "build: mw-build on lf16-memory-words (sup53, launched 2026-10-10)"
 depends_on: [lf15-names-and-notices]
 boundary: ["lib/initiatives.ts (Memory cell helpers)", "AgentList.tsx", "Crew.tsx", "their css and tests"]
 spec: "docs/specs/leftovers-16.md (FR-4, FR-5; docs/ux/specs/initiatives-view.md Amendment 1, I16)"
