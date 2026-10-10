@@ -3,7 +3,7 @@ import { ChevronDown, ChevronRight, Search } from "lucide-react";
 import { EventsOn } from "../../wailsjs/runtime/runtime";
 import { FloatDismiss, FloatListHeight, FloatPick } from "../../wailsjs/go/main/App";
 import { useBoard } from "../stores/board.store";
-import { filterList, floatList, focusOrder, foldSignals, HOME, homeCount, homeLabel, type FloatRow, type FoldsOpen, type Signal } from "../lib/floatList";
+import { filterList, floatList, focusOrder, foldSignals, HOME, homeCount, homeLabel, type FloatList as FloatListT, type FloatRow, type FoldsOpen, type Signal } from "../lib/floatList";
 import { foldLabel, type Fold } from "../lib/folds";
 import { useScrollEdges } from "../lib/useScrollEdges";
 import { MemoryFloatLine } from "./MemoryFloatLine";
@@ -158,22 +158,6 @@ export function FloatList() {
     </button>
   );
 
-  // The rail's two folds (leftovers-16 FR-3): Asleep the paused ones only,
-  // Archived the rest, each closed by default and open under a query.
-  const foldGroup = (f: Fold, rows: FloatRow[]) => {
-    const shown = foldsOpen[f] || !!query.trim();
-    return (
-      <div key={f} role="group" aria-label={foldLabel(f)}>
-        {query.trim() ? <div className="fl-group">{foldLabel(f)}</div> : (
-          <button type="button" className="fl-group fl-fold" aria-expanded={foldsOpen[f]} onClick={() => setFoldsOpen({ ...foldsOpen, [f]: !foldsOpen[f] })}>
-            {foldsOpen[f] ? <ChevronDown size={12} /> : <ChevronRight size={12} />} {foldLabel(f, rows.length)}
-          </button>
-        )}
-        {shown && rows.map((r) => row(r, true))}
-      </div>
-    );
-  };
-
   return (
     <div className="fl-scrim">
       <div ref={panel} className={`fl ${origin.replace(" ", "-")}`} role="dialog" aria-label="Initiatives" onKeyDown={onKey}>
@@ -217,7 +201,7 @@ export function FloatList() {
               {s.rows.map((r) => row(r))}
             </div>
           ))}
-          {(["asleep", "archived"] as const).map((f) => list[f].length > 0 && foldGroup(f, list[f]))}
+          <FloatFolds list={list} query={query} open={foldsOpen} onToggle={(f) => setFoldsOpen({ ...foldsOpen, [f]: !foldsOpen[f] })} row={(r) => row(r, true)} />
           </div>
         </div>
       </div>
@@ -226,6 +210,27 @@ export function FloatList() {
 }
 
 const CLOSED: FoldsOpen = { asleep: false, archived: false };
+
+/** The rail's two folds (leftovers-16 FR-3): `Asleep (n)` the paused ones
+ *  only, then `Archived (n)` the rest, each only when it holds any, closed
+ *  until opened and open under a query. */
+export function FloatFolds({ list, query, open, onToggle, row }: { list: Pick<FloatListT, Fold>; query: string; open: FoldsOpen; onToggle: (f: Fold) => void; row: (r: FloatRow) => React.ReactNode }) {
+  const q = !!query.trim();
+  return (
+    <>
+      {(["asleep", "archived"] as const).filter((f) => list[f].length > 0).map((f) => (
+        <div key={f} role="group" aria-label={foldLabel(f)}>
+          {q ? <div className="fl-group">{foldLabel(f)}</div> : (
+            <button type="button" className="fl-group fl-fold" aria-expanded={open[f]} onClick={() => onToggle(f)}>
+              {open[f] ? <ChevronDown size={12} /> : <ChevronRight size={12} />} {foldLabel(f, list[f].length)}
+            </button>
+          )}
+          {(open[f] || q) && list[f].map(row)}
+        </div>
+      ))}
+    </>
+  );
+}
 
 /** Characters a row's signals have beside its rank and id: the panel is a
  *  fixed 360, so the room is the id's length away from the rest. */
