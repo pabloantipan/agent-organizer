@@ -70,7 +70,7 @@ initiatives-view's UI review U1-U6 and code review 3, 4, 5's FloatList note:
 | # | FR | Check | Expected (fails on main) |
 |---|---|---|---|
 | N1 | 1 | Go test over agents with a name, a seat only, neither; `organizer memory` and the warning body on the fixture | one name each, the same in all four places; no UUID, no bare pid |
-| N2 | 2 | review build with `ORGANIZER_MEMORY_FAKE=critical` on the fixture: its log, and the notification center's database for the review bundle id | warning logged, nothing posted |
+| N2 | 2 | review build with `ORGANIZER_MEMORY_FAKE=critical` on the fixture: its log; and a Go test (`TestNotifyRefusal`) that the post path returns before `UNUserNotificationCenter` for any bundle id but `cl.antipan.organizer` (Amendment 1) | warning logged, the refusal line, no `notification posted`; the test passes |
 | N3 | 3 | fixture `--memory none`, popover in the review build (seat-pointer --pid while idle) or vitest of the state | `Reading memory…` |
 | P1-P7 | 4-10 | vitest for each helper; the review build on the fixture for U1 (cell x equal on every row, logged) and U3 (AX focus on the title) | as each FR |
 | H1 | 11 | vitest with fake timers; a headless check that the animation stops at 4.5 s; AX tree of the lockup | stops, replays on hover, never under Reduce motion; one name |
@@ -79,6 +79,13 @@ initiatives-view's UI review U1-U6 and code review 3, 4, 5's FloatList note:
 | B3 | 14 | Go test: the tick path with a fake factory that records calls; a fake factory that sleeps 60 s | zero calls on ticks; timeout at 20 s, lock released, message |
 | R1 | 15 | review build, `ORGANIZER_MEMORY_FAKE=critical`, the icon window shot (`screencapture -l`) at the trough and the peak, composited over white and over the dark ground (no wallpaper changed) | full-opacity amber with its keyline in both frames, 3 and 4.5 px; Reduce motion: steady 3 px |
 | X0 | all | `XDG_DATA_HOME=$(mktemp -d) make test`, `cd frontend && npm run build`, `wails build` | pass |
+
+Amendment 1, 2026-10-10, the FSE (0108, from sup52 and ln-review at
+70463fd): N2's notification-centre database half is dropped. The database
+(`~/Library/Group Containers/group.com.apple.usernoted`) is TCC-protected,
+so no seat can read it without Full Disk Access, and precondition 10 says a
+row nobody in hand can run is not satisfiable. The log and the code path
+prove the same claim.
 
 ## Boundary
 
