@@ -37,6 +37,12 @@ type Run struct {
 	InputTokens int     `json:"input_tokens"`
 	WindowSize  int     `json:"window_size"`
 	CostUSD     float64 `json:"cost_usd"`
+	// Samples is how many statusline runs fed the record (0: not counted,
+	// a record older than the count). FromTranscript says the final values
+	// were read from the transcript's tail; a final line with samples 1 and
+	// no transcript has only the first sample, and says so.
+	Samples        int  `json:"samples,omitempty"`
+	FromTranscript bool `json:"from_transcript,omitempty"`
 	// The card this session was working on, when one matched. Empty is
 	// honest: a session in a directory no card claims has no card.
 	Initiative string `json:"initiative,omitempty"`
@@ -214,7 +220,10 @@ func underRoot(path, root string) bool {
 
 // Retire is the archive pass. Every record on disk is folded into the log —
 // an open line the first time it is seen — and every record whose process is
-// gone is written with its final values and then deleted. It is Prune plus a
+// gone is written with its final values and then deleted. The final values
+// are the last sample's, overtaken by the transcript's tail when it has one:
+// the statusline samples only when Claude Code draws it, the transcript does
+// not wait for a draw. It is Prune plus a
 // memory, and it must run before the scan prunes, or the numbers are lost.
 //
 // branchOf answers "which branch is this directory on", so the archiver can
@@ -241,6 +250,7 @@ func Retire(dir, path string, alive map[int]bool, grace time.Duration, now time.
 			Persona: rec.Persona, Cell: rec.Cell, Cwd: rec.Cwd, Model: rec.Model,
 			UsedPercent: rec.UsedPercent, InputTokens: rec.InputTokens,
 			WindowSize: rec.WindowSize, CostUSD: rec.CostUSD,
+			Samples:   rec.Samples,
 			FirstSeen: rec.UpdatedAt, LastSeen: rec.UpdatedAt,
 		}
 		branch := ""
@@ -261,6 +271,9 @@ func Retire(dir, path string, alive map[int]bool, grace time.Duration, now time.
 		switch {
 		case dead:
 			run.Ended = true
+			if t, ok := ReadTail(rec.Transcript); ok {
+				run, run.FromTranscript = withTail(run, t)
+			}
 			lines = append(lines, run)
 			retired = append(retired, pid)
 		case !seen:
