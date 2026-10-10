@@ -32,6 +32,39 @@ docs/specs/leftovers-15.md, P1 to P7 and X0. Evidence in `.wt-notes/lp-build/` (
 - FloatList's fold also holds archived initiatives, so `Asleep (n)` counts them (FR-10 as written).
 - The fixture writes init-asleep's since date as 7 days ago; to see `asleep since today`, edit that date in the copy and Rescan.
 
+## UI review
+lp-ui, 2026-10-09, on ee56253 (the branch did not move): **fail**, sev 3: V1.
+
+How it was checked: `make review-build` in a detached worktree, `Deltagos Review` started on `fixture-home.sh --memory normal` (pid saved, quit by it), 1440×900 window plus 1024×640 by setting my own window's AX size. seat-pointer refused (exit 7: a Dock-layer window covers the points, and I do not bring windows to the front), so every press was an AXPress on my own process and every reading an AX dump (`AXFocused`, frames); no pointer, keys or focus on Pablo's desktop. Shots and dumps in `.wt-notes/lp-ui/` (`wk-<w>x<h>-<row>-<state>.png`, `ax-*.txt`, `u1-memory-x.log`, the reader `ax.swift`). Vitest 440/440.
+
+| Row | FR | State, how | Result |
+|---|---|---|---|
+| P1 | 4 | init-a › Agents, rail open, AX x of each `.a-mem` | **fails**: see V1 |
+| P2 | 5 | `echo fail` to the memory file, 15 s, AX | pass: rows `…, idle, memory unknown`, summary `Memory —` |
+| P3 | 6 | AXPress on Home's `Initiatives ›` and on the rail's Asleep `Initiatives ›` | pass: `AXFocused` = heading `Initiatives` both times (nothing focused before) |
+| P4 | 7 | init-asleep dated today + Rescan; Sleep init-b; rail AX | pass: `asleep since today`; `1 decision waiting on you leaves Needs me…`; chevrons `Expand Roles`, `Collapse Asleep`, `Collapse Archived` |
+| P5 | 8 | factory limit 10, ten awake | pass: init-blind a plain span, the nine others `<id>: go to its Sleep` buttons |
+| P6 | 9 | every other initiative paused in the fixture copy, Sleep init-c (nothing live or waiting) | pass: the confirm shows `Home will be empty until one wakes.` alone |
+| P7 | 10 | not reached (the list opens from the native icon) | code and vitest only |
+
+**V1 (3) The Memory column still breaks: on rows that wrap, the figure drops to the start of a new line, under the state word.**
+- What the lead cannot do: run an eye down Memory to compare seats (U1's task) at the app's default size.
+- Where: init-a › Agents, the two `build-help` rows at 1440×900 with the rail open (`wk-1440x900-P1-agents-normal.png`), the second `aglaea` row at 1024×640 (`wk-1024x640-P1-agents-normal.png`).
+- Evidence: AX x of the cells (`u1-memory-x.log`): 1440, agents rows 2331 except two at 1281; 1024, 1915 except one at 1281. The cause is `.a-actions + .a-mem { margin-left: 0 }`: when the line breaks between the actions and the cell, the cell starts the new line at the left. P1's own check ("cell x equal on every row") fails; the builder's vitest proves DOM order and CSS, not layout.
+- Severity 3: the one thing FR-4 asks is not true at the default window, and the stray `< 0.1 GB` on its own line reads as part of the next line.
+- Proposal: keep the cell at the right on any line (drop the `margin-left: 0` override so its own auto margin holds, or wrap actions and cell in one unit that does not break), then measure x on the review build at 1440 with the rail open and at 1024.
+
+Recorded, not a fail:
+- **V2 (1)** the crew seats' track sits 11 px left of the agents list's (2320 vs 2331, the crew box's inset): two columns side by side, not one. Proposal: same right inset, or accept it as two lists.
+- **V3 (2)** FloatList's `Asleep (n)` counts archived initiatives too (the builder's note; the fixture would read `Asleep (2)` beside the rail's `Asleep (1)` and `Archived (1)`). An archived one is called asleep where Wake does not apply.
+- **V4 (1)** a crew seat that is off has a Memory cell named `Memory unknown, not running`: unknown says the reading failed when nothing runs. The row name already handles this right (FR-5).
+
+Spec gaps (for the FSE): FR-10 says `Asleep (n)` but the group also holds archived ones (V3: split it, or name it for both); FR-4 named no width or rail state for "row under row" (P1's check needed 1440 rail open and 1024).
+
+For aglaea: none new (A1-A3 of initiatives-view still open).
+
+Not verified in WKWebView: P7 (FloatList's label, by code and `floatList.test.ts`); the visible focus ring on the title (the window was never key, so no ring shows; `:focus-visible` read from the CSS); Home's `Wake one in Initiatives ›` (none-awake state, same `openInitiatives("title")` call); keyboard Tab order.
+
 ## Review
 **Fail.** The diff does what FR-4 to FR-10 ask, and X0 passes. The P1-P7 row on main also asks for the review build on the fixture for U1 (cell x equal on every row, logged) and U3 (AX focus on the title). Neither was done, and I could not do them either.
 
