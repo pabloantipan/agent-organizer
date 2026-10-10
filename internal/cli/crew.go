@@ -72,6 +72,7 @@ func statuslineCmd(cfg config.Config, stdin io.Reader, stdout, stderr io.Writer,
 		return 1
 	}
 	rec.PID = session.AgentPID(os.Getppid(), cfg.AgentBinary)
+	rec = session.Counted(session.Dir(), rec)
 	if err := session.Write(session.Dir(), rec); err != nil {
 		fmt.Fprintln(stderr, "organizer statusline:", err)
 	}
