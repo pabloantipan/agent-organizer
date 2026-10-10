@@ -89,9 +89,12 @@
   color: var(--accent-fg); font-size: var(--font-size-sm); font-weight: var(--weight-medium); white-space: nowrap;
 }
 .rail-fold-link:hover { background: var(--surface-hover); border-color: transparent; color: var(--fg); }
-/* At the strip a fold is its count alone, set apart from the ranks above it. */
-.strip-item.strip-fold { color: var(--fg-subtle); border-color: var(--border-subtle); }
+/* At the strip a fold is a muted glyph over its count (A1), set apart from
+   the ranks above it, so the count does not read as a rank. */
+.strip-item.strip-fold { flex-direction: column; gap: 1px; height: 40px; color: var(--fg-subtle); border-color: var(--border-subtle); }
 .strip-item.strip-fold:hover { color: var(--fg); }
+.strip-item.strip-fold .strip-fold-glyph { flex: none; color: inherit; }
+.strip-item.strip-fold .strip-rank { line-height: 1; }
 
 /* ---------- Home: the asleep line under the last initiative row ---------- */
 .home-asleep { padding: var(--space-2) var(--space-1) 0; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-subtle); }

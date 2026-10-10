@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { ArrowLeft, ChevronDown, ChevronRight, FolderPlus, Layers, PanelLeftClose, PanelLeftOpen, Pencil, PencilRuler, X } from "lucide-react";
+import { Archive, ArrowLeft, ChevronDown, ChevronRight, FolderPlus, Layers, Moon, PanelLeftClose, PanelLeftOpen, Pencil, PencilRuler, X } from "lucide-react";
 import { DragDropContext, Draggable, Droppable, type DraggableProvidedDragHandleProps, type DropResult } from "@hello-pangea/dnd";
 import type { merge, model } from "../../wailsjs/go/models";
 import type { Group } from "../hooks/useWails";
 import { move, uniq } from "../lib";
 import { inactiveIds } from "../lib/queue";
 import { foldName, sleepyOf, sleepyWord } from "../lib/initiatives";
+import { stripFolds } from "../lib/folds";
 import { useBoard } from "../stores/board.store";
 import { CellStateLz, definitionWaits } from "./Crew";
 import { missingPersonas } from "../lib/queue";
@@ -281,11 +282,10 @@ export function Rail() {
             {defining(e) && <PencilRuler className="strip-defining" size={10} strokeWidth={2.25} aria-label="cell in definition" />}
           </button>
         ))}
-        {/* Each fold is its count alone at the strip, its word in the hover;
-            it opens Initiatives, where they are cards. */}
+        {/* Each fold is a muted glyph over its count, so it does not read as
+            a rank; it opens Initiatives, where they are cards. */}
         {foldedIds.length > 0 && <span className="strip-sep" aria-hidden="true" />}
-        {asleepIds.length > 0 && <button className="strip-item strip-fold" onClick={() => openInitiatives()} title={`Asleep (${asleepIds.length}): ${asleepIds.join(", ")}. Wake one from Initiatives`} aria-label={`Asleep, ${asleepIds.length}: open Initiatives`}><span className="strip-rank">{asleepIds.length}</span></button>}
-        {archivedIds.length > 0 && <button className="strip-item strip-fold" onClick={() => openInitiatives()} title={`Archived (${archivedIds.length}): ${archivedIds.join(", ")}`} aria-label={`Archived, ${archivedIds.length}: open Initiatives`}><span className="strip-rank">{archivedIds.length}</span></button>}
+        <StripFoldButtons asleep={asleepIds} archived={archivedIds} onOpen={() => openInitiatives()} />
       </nav>
       <RoleDrawer />
       </>
@@ -454,3 +454,22 @@ function Counts({ now, blocked, next }: { now: number; blocked: number; next: nu
 /** FR-1 (rail): the cell's state, the same mark as the Crew header and Home;
  *  in the collapsed strip the icon alone, the word in the item's hover. */
 const defining = (e: Entry) => e.cell?.state === "in_definition";
+
+/** The strip's folds (leftovers-16 FR-2; initiatives-view A1): a moon over
+ *  the asleep count, a box over the archived count, each named
+ *  `Asleep, n initiatives`. */
+export function StripFoldButtons({ asleep, archived, onOpen }: { asleep: string[]; archived: string[]; onOpen: () => void }) {
+  return (
+    <>
+      {stripFolds(asleep, archived).map((f) => {
+        const Glyph = f.fold === "asleep" ? Moon : Archive;
+        return (
+          <button key={f.fold} className={`strip-item strip-fold ${f.fold}`} onClick={onOpen} title={f.title} aria-label={f.name}>
+            <Glyph className="strip-fold-glyph" size={14} aria-hidden="true" />
+            <span className="strip-rank">{f.n}</span>
+          </button>
+        );
+      })}
+    </>
+  );
+}
