@@ -8,7 +8,10 @@
 .ov-main { display: grid; gap: var(--space-6); min-width: 0; }
 .ov-sec { display: grid; gap: var(--space-2); min-width: 0; }
 .ov .panel { background: var(--surface); border-radius: var(--radius-lg); }
-@media (max-width: 900px) { .ov { grid-template-columns: minmax(0, 1fr); } }
+/* leftovers-18 FR-8: under 880 px of Overview's own pane (not the window)
+   the FSE column stacks below the first; Overview.tsx measures the pane and
+   sets .stacked. */
+.ov.stacked { grid-template-columns: minmax(0, 1fr); }
 
 /* ---------- the current stage: gates and exit ---------- */
 .gate-list { display: grid; gap: var(--space-2); padding: var(--space-3) var(--space-4) var(--space-4); }
