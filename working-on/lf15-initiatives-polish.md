@@ -34,37 +34,31 @@ docs/specs/leftovers-15.md, P1 to P7 and X0. Evidence in `.wt-notes/lp-build/` (
 - The fixture writes init-asleep's since date as 7 days ago; to see `asleep since today`, edit that date in the copy and Rescan.
 
 ## UI review
-lp-ui, 2026-10-09, on ee56253 (the branch did not move): **fail**, sev 3: V1.
+lp-ui, 2026-10-09, on 8545263546318dc3d650e36318a4396f1a4dd834 (re-review after the branch moved; every row re-checked on this commit): **pass**, sev 4/3: none. The fail at ee56253 (V1) is superseded.
 
-How it was checked: `make review-build` in a detached worktree, `Deltagos Review` started on `fixture-home.sh --memory normal` (pid saved, quit by it), 1440×900 window plus 1024×640 by setting my own window's AX size. seat-pointer refused (exit 7: a Dock-layer window covers the points, and I do not bring windows to the front), so every press was an AXPress on my own process and every reading an AX dump (`AXFocused`, frames); no pointer, keys or focus on Pablo's desktop. Shots and dumps in `.wt-notes/lp-ui/` (`wk-<w>x<h>-<row>-<state>.png`, `ax-*.txt`, `u1-memory-x.log`, the reader `ax.swift`). Vitest 440/440.
+How it was checked: a fresh detached worktree at 8545263, `npm install`, vitest 440/440, `test-lease run -- make review-build`, my own `Deltagos Review` on a fresh `fixture-home.sh --memory normal` (launched after 60 s of Pablo idle, pid saved, quit by it). The window was 1440×900; 1024×640 was set through my own window's AX size. Every press was an AXPress on my pid and every reading an AX dump (`AXFocused`, frames). No seat-pointer, pointer, keys, Space or focus change on Pablo's desktop. Shots and dumps are in `.wt-notes/lp-ui/` (`wk-<w>x<h>-<row>-<state>.png`, `ax-*.txt`, `u1-memory-x.log`, the reader `ax.swift`); round 1 (ee56253) is in `.wt-notes/lp-ui/r1/`.
 
 | Row | FR | State, how | Result |
 |---|---|---|---|
-| P1 | 4 | init-a › Agents, rail open, AX x of each `.a-mem` | **fails**: see V1 |
-| P2 | 5 | `echo fail` to the memory file, 15 s, AX | pass: rows `…, idle, memory unknown`, summary `Memory —` |
-| P3 | 6 | AXPress on Home's `Initiatives ›` and on the rail's Asleep `Initiatives ›` | pass: `AXFocused` = heading `Initiatives` both times (nothing focused before) |
-| P4 | 7 | init-asleep dated today + Rescan; Sleep init-b; rail AX | pass: `asleep since today`; `1 decision waiting on you leaves Needs me…`; chevrons `Expand Roles`, `Collapse Asleep`, `Collapse Archived` |
-| P5 | 8 | factory limit 10, ten awake | pass: init-blind a plain span, the nine others `<id>: go to its Sleep` buttons |
-| P6 | 9 | every other initiative paused in the fixture copy, Sleep init-c (nothing live or waiting) | pass: the confirm shows `Home will be empty until one wakes.` alone |
-| P7 | 10 | not reached (the list opens from the native icon) | code and vitest only |
+| P1 | 4 | init-a › Agents, rail open, AX x of each `.a-mem`, at 1440×900 and 1024×640 | pass: all 8 cells (3 crew seats, 5 agents) at x 2334 (1440) and 1904 (1024), including the rows that wrap (build-help at 1440, aglaea and build-help at 1024); one column for crew and agents (`u1-memory-x.log`, `wk-*-P1-agents-normal.png`) |
+| P2 | 5 | `echo fail` to the memory file, 15 s, AX | pass: every running row's name ends `memory unknown`; the summary reads `Memory —` (`wk-1440x900-P2-agents-memfail.png`) |
+| P3 | 6 | AXPress on Home's `Initiatives ›`, then on the rail's Asleep `Initiatives ›` | pass: `AXFocused` = AXHeading `Initiatives` both times; before each press, the web area or nothing had focus |
+| P4 | 7 | init-asleep dated today in the copy; Sleep init-b, then Cancel; rail AX | pass: `asleep since today`; `1 decision waiting on you leaves Needs me until it wakes.`; chevrons `Expand Roles`, `Collapse Asleep`, `Collapse Archived` |
+| P5 | 8 | factory limit 10, ten awake | pass: init-blind is a plain span; the nine others are `<id>: go to its Sleep` buttons |
+| P6 | 9 | all but init-c paused in the fixture copy, Rescan, Sleep init-c (nothing live or waiting), then Cancel | pass: the confirm holds only `Home will be empty until one wakes.` |
+| P7 | 10 | not reached (the list opens from the native icon) | by code and `floatList.test.ts` only; FloatList is unchanged since ee56253 |
 
-**V1 (3) The Memory column still breaks: on rows that wrap, the figure drops to the start of a new line, under the state word.**
-- What the lead cannot do: run an eye down Memory to compare seats (U1's task) at the app's default size.
-- Where: init-a › Agents, the two `build-help` rows at 1440×900 with the rail open (`wk-1440x900-P1-agents-normal.png`), the second `aglaea` row at 1024×640 (`wk-1024x640-P1-agents-normal.png`).
-- Evidence: AX x of the cells (`u1-memory-x.log`): 1440, agents rows 2331 except two at 1281; 1024, 1915 except one at 1281. The cause is `.a-actions + .a-mem { margin-left: 0 }`: when the line breaks between the actions and the cell, the cell starts the new line at the left. P1's own check ("cell x equal on every row") fails; the builder's vitest proves DOM order and CSS, not layout.
-- Severity 3: the one thing FR-4 asks is not true at the default window, and the stray `< 0.1 GB` on its own line reads as part of the next line.
-- Proposal: keep the cell at the right on any line (drop the `margin-left: 0` override so its own auto margin holds, or wrap actions and cell in one unit that does not break), then measure x on the review build at 1440 with the rail open and at 1024.
+Earlier findings:
+- **V1 (3) fixed** in 8545263: the actions and Memory are one `.a-tail` pushed to the right edge, so a wrapped row keeps the cell on the track (P1 above).
+- **V2 (1) fixed**: the agent rows take the crew block's 11 px inset, so crew and agents share x 2334.
+- **V3 (2) open, not a fail**: FloatList's `Asleep (n)` also counts archived initiatives (FR-10 as written), so on the fixture it would read `Asleep (2)` beside the rail's `Asleep (1)` and `Archived (1)`. That calls an archived initiative asleep, where Wake does not apply. Proposal: count asleep ones only and give archived its own fold, or name the fold for both.
+- **V4 (1) open, not a fail**: a crew seat that is off has a Memory cell named `Memory unknown, not running`. "Unknown" says the reading failed, when nothing runs. The row name is already right (FR-5). Proposal: name the cell `not running`.
 
-Recorded, not a fail:
-- **V2 (1)** the crew seats' track sits 11 px left of the agents list's (2320 vs 2331, the crew box's inset): two columns side by side, not one. Proposal: same right inset, or accept it as two lists.
-- **V3 (2)** FloatList's `Asleep (n)` counts archived initiatives too (the builder's note; the fixture would read `Asleep (2)` beside the rail's `Asleep (1)` and `Archived (1)`). An archived one is called asleep where Wake does not apply.
-- **V4 (1)** a crew seat that is off has a Memory cell named `Memory unknown, not running`: unknown says the reading failed when nothing runs. The row name already handles this right (FR-5).
+Spec gaps (for the FSE): FR-10 says `Asleep (n)` for a group that also holds archived ones (V3). FR-4 names no window width or rail state for "row under row"; P1 needed 1440 with the rail open and 1024 to show the wrap.
 
-Spec gaps (for the FSE): FR-10 says `Asleep (n)` but the group also holds archived ones (V3: split it, or name it for both); FR-4 named no width or rail state for "row under row" (P1's check needed 1440 rail open and 1024).
+For aglaea: none new (A1-A3 of initiatives-view are still open).
 
-For aglaea: none new (A1-A3 of initiatives-view still open).
-
-Not verified in WKWebView: P7 (FloatList's label, by code and `floatList.test.ts`); the visible focus ring on the title (the window was never key, so no ring shows; `:focus-visible` read from the CSS); Home's `Wake one in Initiatives ›` (none-awake state, same `openInitiatives("title")` call); keyboard Tab order.
+Not verified in WKWebView: P7 (FloatList's label); the visible focus ring on the title (`:focus-visible` read from the CSS, since AXPress is not a keyboard landing); Home's `Wake one in Initiatives ›` in the none-awake state (the same `openInitiatives("title")` call); keyboard Tab order.
 
 ## Review
 **Pass**, at 8545263546318dc3d650e36318a4396f1a4dd834 (re-review; the fail at ee56253 on P1 and P3 is superseded).
