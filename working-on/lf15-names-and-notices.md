@@ -1,12 +1,12 @@
 ---
 title: "One name per session everywhere, notifications only from the installed app, the memory popover's reading state reachable"
-status: next
+status: now
 repos: [organizer]
 branch: lf15-names-and-notices
 seat: ln-build
 stage: one-window
 updated: 2026-10-09
-next: "sup52 builds it (0111 ruled, wave launched 2026-10-09)"
+next: "building: ln-build in .wt/lf15-names-and-notices (sup52, launched 2026-10-09 22:5x)"
 depends_on: []
 boundary: ["the spec's Boundary for this card"]
 spec: "docs/specs/leftovers-15.md (FR-1 to FR-3)"
