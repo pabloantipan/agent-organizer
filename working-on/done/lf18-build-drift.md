@@ -1,6 +1,6 @@
 ---
 title: "A bare wails build leaves the tree clean; dead usage css removed"
-status: now
+status: done
 repos: [organizer]
 branch: lf18-build-drift
 seat: bd-build
@@ -12,6 +12,7 @@ boundary: ["docs/specs/leftovers-18.md Boundary, lf18-build-drift"]
 spec: "docs/specs/leftovers-18.md (FR-11, FR-12)"
 gate: "docs/specs/leftovers-18.md Acceptance, rows D1, D2 and X0"
 ui_review: false
+review: pass
 ---
 
 ## Goal
@@ -29,3 +30,13 @@ docs/specs/leftovers-18.md, rows D1, D2 and X0.
 
 ## Notes
 - X0 from a clean clone also left an untracked frontend/package-lock.json (make test's npm install); the spec didn't anticipate it, fixed in the Makefile (9eed8e6).
+
+## Review
+Pass: D1, D2 and X0 met at 9eed8e6; unmet rows: none.
+
+- D1: fresh clone at 9eed8e6, bare `wails build` (exit 0), `git status --porcelain` empty. On main it failed: the three runtime files flipped 100755 to 100644 (`.wt-notes/bd-build/d1-before.log`); the diff stores them 0644 and drops the Makefile chmod.
+- D2: `grep -rn usage-btn frontend/src` printed nothing (exit 1); the diff removes only `.usage-btn` and its comment from `usage.css`.
+- X0: on a second fresh clone, `XDG_DATA_HOME=$(mktemp -d) make test` passed (every Go package ok, 35 files and 486 vitest), then `cd frontend && npm run build` and `wails build` both exited 0, and `git status --porcelain` was empty.
+- Boundary: `Makefile`, `frontend/wailsjs/runtime/` (modes only), `styles/usage.css` (`.usage-btn` only). Nothing outside it.
+- Unmet: none. Reviewer bd-review, 2026-10-10, commit 9eed8e6313bb4e7562de4dae6c61e4d998ae2403.
+- Not covered by the gate: a bare `npm install` in `frontend/` still leaves an untracked `package-lock.json`, since the lockfile is pnpm's. X0 as written doesn't run it, so it isn't a failure.
