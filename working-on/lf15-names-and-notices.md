@@ -28,7 +28,7 @@ docs/specs/leftovers-15.md, N1 to N3 and X0.
 ## Done
 - FR-1 and FR-2 built on lf15-names-and-notices (30ed83b, c5c881e, 47625ec), unit-tested; X0 passed pre-rebase. Progress and repro: .wt-notes/ln-build/progress.md.
 
-- Gate met but for N2's notification db read; FR-3 and the Agents landing done under sup52's grants (memfake.go; AgentList.tsx :44, :112 and its import). Head db874e1.
+- Gate met but for N2's notification db read; FR-3 and the Agents landing done under sup52's grants (memfake.go; AgentList.tsx :44, :112 and its import). Head 70463fd (rebased on 54866d5, AgentList name change kept on top of lp-build's).
 
 ## Notes
 - The usernoted database is TCC-protected and could not be read from ln-build's session; N2 rests on the app's log and the code path that never calls the centre.
