@@ -1,18 +1,18 @@
 ---
 title: "One name per session everywhere, notifications only from the installed app, the memory popover's reading state reachable"
-status: now
+status: done
 repos: [organizer]
 branch: lf15-names-and-notices
 seat: ln-build
 stage: one-window
-updated: 2026-10-09
+updated: 2026-10-10
 next: "review: ln-review2 re-judges N2 (Amendment 1, 0db55d6) at a3ed8a7, rebased on main (sup53)"
 depends_on: []
 boundary: ["the spec's Boundary for this card"]
 spec: "docs/specs/leftovers-15.md (FR-1 to FR-3)"
 gate: "docs/specs/leftovers-15.md Acceptance, rows N1 to N3 and X0"
 ui_review: false
-review: fail
+review: pass
 ---
 
 ## Goal
@@ -42,3 +42,8 @@ Fail on N2 only: its notification-centre database half could not be run (TCC); N
 - X0: met. On a fresh clone at 70463fd, `make test` (Go and 443 vitest), `npm run build` and `wails build` all pass.
 - Unmet: N2 (database half only).
 - Reviewer ln-review, 2026-10-09, commit 70463fd1bcb581a1dc10d637dd5f4efd27f3a5c0, rebased on main 54866d5 (supersedes the review of db874e1). Evidence in .wt-notes/ln-review/ev2/.
+
+Pass: N2 as amended (Amendment 1, 0db55d6) is met at a3ed8a7; with ln-review's N1, N3 and X0 above, every gate row is met.
+- N2: met. From a fresh clone at a3ed8a7, `make review-build` (through test-lease) built `Deltagos Review.app` (cl.antipan.organizer.review), and `go test -run TestNotifyRefusal .` passes. The test covers the installed id posting, the installed id refused while faked, the review id faked or not, and another id. In notify_darwin.m, NotifyStart returns before `UNUserNotificationCenter` when Go gives a refusal, and NotifyPost and readSettings return on `!bundled`. The review build ran on the fixture with `--memory critical` (`ORGANIZER_MEMORY_FAKE=@file` holding `critical`). Its organizer.log reads `notifications: bundle cl.antipan.organizer.review is not the installed app, none will be posted`, then `memory warning: Memory critical on fixture: 1.2 GB free. Biggest: …`, then `notification not posted: not the installed app`. No `notification posted` line and no authorization line.
+- Unmet: none.
+- Reviewer ln-review2, 2026-10-10, commit a3ed8a70f994b740a54ff3d1d984127dd4de99e5 (branch not moved). Evidence in .wt-notes/ln-review2/ev/. The clone was removed, and the app and fixture stand-ins were killed by saved pid.
