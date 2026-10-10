@@ -1,11 +1,12 @@
 ---
 title: "At critical the ring swells 3 to 6 px"
-status: now
+status: done
 repos: [organizer]
 branch: lf16-ring-swell
 seat: s6-build
 stage: one-window
 updated: 2026-10-10
+review: pass
 next: "review: lf16-ring-swell, R1 and X0 met, 823b571"
 depends_on: []
 boundary: ["floaticon_darwin.m (the ring breath constants and animation only)", "not: the mark, activation paths, the frontend"]
@@ -28,3 +29,11 @@ docs/specs/leftovers-16.md, rows R1 and X0.
 
 ## Notes
 - The Go test `floaticon_darwin_test.go` reads the .m as text; the task prompt allowed a test beside the file, the card's boundary does not name it.
+
+## Review
+Pass: R1 and X0 met at 823b571.
+
+- R1: `make review-build` in a clean clone at 823b571, fixture `--memory critical` (ORGANIZER_MEMORY_FAKE=@file holding critical), my own process, `screencapture -o -l` of the icon window (1x, 214 px), middle row measured: 32 motion frames span 3 to 6 px of opaque amber, inner edge fixed (gap kept), a 1 px ground keyline (25,21,31 at alpha 253–255) just outside at trough and peak; peak and trough composited over white and #1a1523 keep amber, keyline and gap; `FLOAT_REDUCE_MOTION=1`: 16 frames all 3 px, keyline 1, log "3 pt, steady (reduce motion)". Evidence: `.wt-notes/s6-review/r1/`, `float-*.log`.
+- X0: same clean clone, `npm install`, `XDG_DATA_HOME=$(mktemp -d) make test` (go ok, vitest 440 passed), `npm run build`, `wails build`, all exit 0 (`.wt-notes/s6-review/x0-*.log`). Clone removed.
+
+Unmet rows: none. Reviewer s6-review, 2026-10-10, commit 823b571.
