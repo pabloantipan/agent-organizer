@@ -284,6 +284,12 @@ their counts; FloatList splits Asleep and Archived as the rail does; an
 empty Memory cell has three words only: not running, could not be read,
 reading…. An inline confirm is part of the page and does not hold the
 keyboard (design-system rule).
+Amendment 2 (9b9f8e6): the whole card opens its initiative (stretched link);
+Details = charter (header's fields) + workspace (Home's InitiativeDetail),
+in place across the row. The top bar is grouped by kind: brand, places
+(Home, Initiatives, Usage as tabs) and the crumb, then the Mac's state,
+your work (Needs me, Rescan), the app (Compact, Help, Settings); no sync
+line with auth off.
 ram-view's review: white on --tone at 13 px is 3.5:1. The chip text became
 --fg-on-tone (the ground's ink, 5.2:1), a design-system row (229506e). The
 memory button sits after Usage, before Help, as built (b23bf10).

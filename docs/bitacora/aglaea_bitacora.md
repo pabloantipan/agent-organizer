@@ -132,3 +132,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-09 — aic-ui U1: accepted the .icon's flattened rendition on macOS 11-15; F24 amended (968ce34).
 - 2026-10-09 — ram-ring-amber A1: critical breathes in width 3-4.5 px at full opacity (56f0244).
 - 2026-10-10 — leftovers-16 answers: ring swell 3-6 px; strip fold glyphs; Asleep/Archived apart in FloatList; Memory cell words; inline confirm rule (b3295f2).
+- 2026-10-10 — initiatives-view Amendment 2: card opens, Details (charter + Home's workspace), top bar grouped by kind, places as tabs (9b9f8e6).
