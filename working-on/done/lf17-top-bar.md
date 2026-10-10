@@ -1,6 +1,6 @@
 ---
 title: "The top bar reads by kind and stays one line at 1024"
-status: now
+status: done
 repos: [organizer]
 branch: lf17-top-bar
 seat: tb-build
@@ -12,6 +12,7 @@ boundary: ["TopBar.tsx", "MemoryButton.tsx (short form only)", "the top bar rule
 spec: "docs/specs/leftovers-17.md (FR-3 to FR-5; docs/ux/specs/initiatives-view.md Amendment 2, I19-I21)"
 gate: "docs/specs/leftovers-17.md Acceptance, rows T1, T2 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -30,6 +31,15 @@ docs/specs/leftovers-17.md, rows T1, T2 and X0.
 ## Notes
 - WebKit's AX exposes neither `aria-current` nor a span's `title`; both halves are proven in vitest.
 - `styles/usage.css` `.usage-btn` is now unused (outside this card's boundary).
+
+## Review
+**Verdict: pass.** tb-review, 2026-10-10, on 26025ca (the pinned commit; the branch did not move). Evidence under `.wt-notes/tb-review/`.
+
+- T1: vitest `TopBar.test.tsx` rerun at 26025ca, 13 pass: order by kind (firebase, on an initiative), one place `aria-current` per screen, crumb only inside a place, `/ Help`, Compact·Help·Settings, no rule, no sync line, Sync or `auth off` note with auth off on every screen. AX tree of my own review build (fixture, auth off, own pid): `ax-start.txt` (Home, 1440), `ax-1024.txt` (init-a), `ax-1024-settings.txt`. In each: Deltagos · group `Places` (Home `.on`, Initiatives, Usage) · `/ init-a` or `/ Settings` (none on Home) · memory · Needs me, Rescan · Compact, Help, Settings. No sync line.
+- T2: own build at 1024×640 with the rail open (250 wide) on init-a. `.topbar` is 1024×45, the same as 1440×45. Every control sits on y 165-170 and Settings ends at x 2008, inside the 2024 edge. Memory is short (`7.4 GB`, 85 against 112 px). Window shot `T2-1024x640-rail-open.png` (`screencapture -o -l`): one line, no version inline. The version in the brand's hover is read from the diff (`title` is `Deltagos <version>` at every width, no `brand-version` span). WebKit's AX does not expose it, and the vitest does not prove it either: effects do not run, so `version` is empty there.
+- X0: fresh clone at 26025ca. `XDG_DATA_HOME=$(mktemp -d) make test` passes (go 16 ok, vitest 34 files / 473). `npm install && npm run build` and `wails build` each exit 0. Logs `x0-*.log`. The clone was removed afterwards.
+
+Unmet rows: none.
 
 ## UI review
 tb-ui, 2026-10-10, on 26025ca (the pinned commit; the branch did not move). Review build `Deltagos Review.app` on the fixture (auth off), WKWebView, own pid; shots and AX under `.wt-notes/tb-ui/`.
