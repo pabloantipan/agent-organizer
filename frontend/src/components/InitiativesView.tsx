@@ -9,7 +9,7 @@ import { dateWords } from "../lib/dates";
 import { needsMeRows } from "../lib/queue";
 import { sessionRows } from "../lib/memory";
 import {
-  afterLine, confirmLines, countWords, DEFAULT_LIMIT, doneLine, factoryLine, firstLine, isLimitRefusal, landingOf, limitLine, limitNames, limitParts,
+  afterLine, applyLanding, confirmLines, countWords, DEFAULT_LIMIT, doneLine, factoryLine, firstLine, isLimitRefusal, limitLine, limitNames, limitParts,
   memoryLine, mostMemory, nextLine, progressLine, refusedWakeName, sectionsOf, sessionBytes, sessionsLine, sinceLine,
   sleepyOf, sleepyWord, storeArchivedOpen, storedArchivedOpen, waitingOf, waitLine, type Sleepy,
 } from "../lib/initiatives";
@@ -107,16 +107,10 @@ export function InitiativesView() {
   // it draws (leftovers-15 FR-6); the header's Wake in Initiatives › on
   // that card's Wake, once the factory's answer has drawn it.
   useEffect(() => {
-    const to = landingOf(initiativesFocus);
-    if (!to || !view) return;
-    if (to.to === "title") {
-      clearInitiativesFocus();
-      title.current?.focus({ preventScroll: true });
-      return;
-    }
-    if (!factory) return;
+    const r = applyLanding(initiativesFocus, { view: !!view, factory: !!factory }, title.current);
+    if (!r.done) return;
     clearInitiativesFocus();
-    setLand({ id: to.id, to: "action", seq: Date.now() });
+    if (r.card) setLand({ id: r.card, to: "action", seq: Date.now() });
   }, [initiativesFocus, view, factory, clearInitiativesFocus]);
 
   const run = async (c: Card, action: Action) => {

@@ -266,6 +266,23 @@ export function landingOf(focus: string | null | undefined): { to: "title" } | {
   return m ? { to: "action", id: m[1] } : null;
 }
 
+/** What the view does with a landing once it can (FR-6): a `title`
+ *  landing focuses the heading as soon as the board has drawn; a Wake
+ *  landing waits for the factory's answer, then lands on that card. Returns
+ *  whether the landing was consumed (the store's focus is then cleared) and
+ *  the card to land on, if any. */
+export function applyLanding(
+  focus: string | null | undefined,
+  ready: { view: boolean; factory: boolean },
+  title: { focus: (o?: { preventScroll?: boolean }) => void } | null,
+): { done: boolean; card?: string } {
+  const to = landingOf(focus);
+  if (!to || !ready.view) return { done: false };
+  if (to.to === "title") { title?.focus({ preventScroll: true }); return { done: true }; }
+  if (!ready.factory) return { done: false };
+  return { done: true, card: to.id };
+}
+
 /** A rail fold's chevron, named with its row (leftovers-15 FR-7):
  *  `Expand Asleep`, `Collapse Archived`. */
 export const foldName = (collapsed: boolean, group: string) => `${collapsed ? "Expand" : "Collapse"} ${group}`;
