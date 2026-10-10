@@ -41,6 +41,9 @@ panel open.
   initiative, replacing the css rule tied to button order (sup54's U4).
 - **FR-7** The initiative header's pills wrap inside the header at 1024
   (I27, the header's part).
+- **FR-7b** The initiative's sub-view tabs (`.subtabs` in
+  `InitiativeHeader.tsx`) mark the current one with `aria-current="true"`,
+  not `"page"`, so the screen has one `"page"` (I22; Amendment 1).
 
 ## Requirements, card `lf18-narrow` (frontend)
 
@@ -80,6 +83,7 @@ panel open.
 | H1 | 4 | vitest: header Details and an open card render the one Charter; header passes `omit` | no Target and no Stage lines in the header's Details; the goal shown once on an open card |
 | H2 | 5 | vitest of the hover class on body, Details, Sleep, Wake, open and closed; computed style on the review process | raised on body only |
 | H3 | 6 | vitest of `InitiativeDetail` with `readOnly`; grep of the old css rule | Review with agent hidden by the prop; the order-tied rule gone |
+| H5 | 7b | vitest of the sub-tabs | the current sub-tab has `aria-current="true"`; none has `"page"` |
 | H4 | 7 | review build at 1024×640 rail open on an initiative with every pill: the header's AX frame and the document's `scrollWidth` | pills inside the header; `scrollWidth` equal to `clientWidth` |
 | W1 | 8 | review build at 1024×640 rail open on Overview, and at 1440×900: the columns' AX frames | stacked below 880 px of pane, side by side at 1440 |
 | W2 | 9 | review build at 1024×640 on Help with the longest page; computed styles of the body, a table and a code block | no sideways document scroll; tables and code scroll in their own box |
@@ -88,6 +92,13 @@ panel open.
 | D1 | 11 | from a clean clone: `wails build`, then `git status --porcelain` | empty |
 | D2 | 12 | `grep -rn usage-btn frontend/src` | nothing |
 | X0 | all | `XDG_DATA_HOME=$(mktemp -d) make test`, `cd frontend && npm run build`, `wails build` (then `git status --porcelain` empty, D1) | pass |
+
+Amendment 1, 2026-10-10, the FSE (0108, from sup55): K1 could not be met
+inside lf18-current-mark's boundary, since the initiative's sub-view tabs
+also carry `aria-current="page"` and live in `InitiativeHeader.tsx`
+(lf18-charter-once's). FR-7b and H5 go to lf18-charter-once; K1's AX check
+runs after both merge (charter-once merges first); K1's vitest is the top
+bar's alone.
 
 ## Boundary
 
@@ -127,7 +138,7 @@ leftovers-15 to 17).
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf18-current-mark` | K1-K3, X0 | — | true |
-| `lf18-charter-once` | H1-H4, X0 | — | true |
+| `lf18-charter-once` | H1-H5, X0 | — | true |
 | `lf18-narrow` | W1, W2, X0 | — | true |
 | `lf18-statusline` | S1, S2, X0 | — | false |
 | `lf18-build-drift` | D1, D2, X0 | — | false |
