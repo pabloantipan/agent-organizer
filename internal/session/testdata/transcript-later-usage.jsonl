@@ -1,0 +1,7 @@
+{"type":"user","timestamp":"2026-10-10T16:32:47.281Z","sessionId":"s-one","message":{"role":"user","content":"task"}}
+{"type":"assistant","timestamp":"2026-10-10T16:32:50.000Z","sessionId":"s-one","isSidechain":false,"message":{"model":"claude-opus-5-5","role":"assistant","usage":{"input_tokens":3,"cache_creation_input_tokens":20000,"cache_read_input_tokens":30000,"output_tokens":100}}}
+{"type":"assistant","timestamp":"2026-10-10T16:34:00.000Z","sessionId":"s-one","isSidechain":true,"message":{"model":"claude-haiku-5-5","role":"assistant","usage":{"input_tokens":9,"cache_creation_input_tokens":0,"cache_read_input_tokens":900000,"output_tokens":5}}}
+this line is not json
+{"type":"assistant","timestamp":"2026-10-10T16:35:36.817Z","sessionId":"s-one","isSidechain":false,"message":{"model":"claude-opus-5-5","role":"assistant","usage":{"input_tokens":2,"cache_creation_input_tokens":211,"cache_read_input_tokens":85135,"output_tokens":541}}}
+{"type":"user","timestamp":"2026-10-10T16:35:36.869Z","sessionId":"s-one","message":{"role":"user","content":"ok"}}
+{"type":"cost-state","sessionId":"s-one","totalCostUSD":1.0598626000000004,"totalAPIDuration":99921,"modelUsage":{"claude-opus-5-5":{"costUSD":1.0598626000000004}}}

@@ -37,6 +37,9 @@ type Record struct {
 	WindowSize  int       `json:"window_size"`
 	CostUSD     float64   `json:"cost_usd"`
 	UpdatedAt   time.Time `json:"updated_at"`
+	// Samples counts the statusline runs that wrote this record for this
+	// session id; zero on a record written before it was counted.
+	Samples int `json:"samples,omitempty"`
 }
 
 // Status converts a record to the shape the UI reads.
@@ -147,6 +150,21 @@ func AgentPID(start int, agentBinary string) int {
 		pid = ppid
 	}
 	return start
+}
+
+// Counted sets r.Samples from the record already on disk for r's pid: one
+// more when it is the same session, one when it is new or another session.
+func Counted(dir string, r Record) Record {
+	r.Samples = 1
+	b, err := os.ReadFile(filepath.Join(dir, strconv.Itoa(r.PID)+".json"))
+	if err != nil {
+		return r
+	}
+	var prev Record
+	if json.Unmarshal(b, &prev) == nil && prev.SessionID == r.SessionID && prev.Samples > 0 {
+		r.Samples = prev.Samples + 1
+	}
+	return r
 }
 
 // Write stores the record as <pid>.json, atomically.
