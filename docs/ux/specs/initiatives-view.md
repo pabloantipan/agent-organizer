@@ -218,6 +218,42 @@ organizer to finish sleeping.` under that card.
   for. Other columns give way first, by the Widths rule.
 - Sorting stays as it is. Memory does not re-sort rows under the pointer.
 
+## Amendment 1 (aglaea, 2026-10-10): from the build's reviews
+
+From initiatives-view's UI review (A1 to A3) and lf15-initiatives-polish's
+(V2 to V4).
+
+- **The rail's strip, A1**: at 46 px, each fold is a glyph over its count,
+  not a bare count. `Asleep` is a moon (lucide `Moon`, 14 px) and
+  `Archived` is a box (lucide `Archive`). Both are muted, with the fold's
+  word and count in the hover and the name (`Asleep, 11 initiatives`). Bare
+  counts under the rank numbers read as ranks.
+- **Sleep's confirm and the keyboard, A2**: it is an inline confirm, not a
+  box (design system, Focus and names). Focus lands on Cancel, Escape
+  cancels, and Tab may leave it; it stays open until Cancel, Escape, Sleep
+  or another card's confirm.
+- **A3**: Tab in WKWebView stays with Pablo (Q1). No change.
+- **V2**: fixed in the build (one track for crew and agents).
+- **The floating list's folds, V3**: as the rail, two folds: `Asleep (n)`
+  counts paused initiatives only, then `Archived (n)` holds the rest. It
+  shows only when there are any. An archived initiative is never called
+  asleep, since Wake does not apply to it.
+- **An off seat's Memory cell, V4**: it shows `—`, and its name and hover
+  are `Memory: not running`. "Unknown" is kept for a reading that failed
+  (`Memory: could not be read`) and for before the first reading (`Memory:
+  reading…`). These three are the only words for an empty Memory cell, on
+  every Agents row and crew seat.
+- **Widths for the Agents rows** (FR-4's gap): checked at 1024×640 with the
+  rail open and at 1440×900 with the rail open (design system, Widths:
+  gate sizes are window sizes plus the rail state). The Memory cell stays
+  on the right edge's track at both, wrapped or not.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| I14 | tell the strip's folds from ranks | at the 46 px strip, a moon over the asleep count and a box over the archived count; the hover names each |
+| I15 | trust Asleep means asleep everywhere | the rail and the floating list both show `Asleep (n)` for paused ones only and `Archived (n)` apart |
+| I16 | read an empty Memory cell | an off seat: `—`, named `Memory: not running`; a failed reading: `Memory: could not be read`; before the first: `Memory: reading…` |
+
 ## Acceptance, in the lead's terms
 
 | # | The lead can | Checked by |

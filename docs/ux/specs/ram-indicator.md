@@ -217,6 +217,14 @@ faded to almost nothing (1.8:1 at full, less at half). Under Reduce motion
 it is a steady 3 px ring. The M10 row reads "3 to 4.5 px, breathing in
 width".
 
+**Amended 2026-10-10 (lf15-ring-breath A1)**: the swell is **3 to 6 px**,
+not 4.5. A 1.5 px change on a 56 to 88 pt icon is visible when looked at,
+but too small to pull the eye from the edge of a 3440 ultrawide, where the
+opacity breath did. Doubling the width is the change peripheral vision
+catches. It stays at full opacity, with the keyline following it. Whether it
+pulls the eye is Pablo's look in use, not a gate row. The gate's frames read
+3 and 6 px.
+
 ## Open questions
 
 - **O1** (FSE): "memory" per session means its process tree's resident

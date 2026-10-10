@@ -345,6 +345,10 @@ keeps their place.
 - **The ring is for the keyboard**: after a pointer landing, the target shows
   its selected state, and the focus ring shows only under `:focus-visible`,
   as the engine decides (leftovers-5, hf3-U2).
+- **An inline confirm is part of the page, not a box** (Sleep's confirm on
+  its card): it has no scrim and does not hold the keyboard. Focus lands on
+  its Cancel, Escape cancels, and Tab may leave it; it stays open until
+  Cancel, Escape, its commit or another confirm opens (initiatives-view A2).
 - **An open box keeps the keyboard** (a rule box, a sheet, a dialog): Tab
   and Shift+Tab loop inside it until Escape, Cancel or its commit closes
   it. One box at a time; a box that covers content has a scrim. **The scrim
