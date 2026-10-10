@@ -8,7 +8,7 @@ import { leadOf, readOnlyOf } from "../lib/queue";
 import "../styles/initiatives.css";
 import { unreadFiles, unreadLabel } from "../lib/unread";
 import { UnreadFiles } from "./UnreadFiles";
-import { Charter } from "./Charter";
+import { Charter, type CharterField } from "./Charter";
 import { useScrollEdges } from "../lib/useScrollEdges";
 import { useBoard, type Sub } from "../stores/board.store";
 import "../styles/header.css";
@@ -111,6 +111,10 @@ function StageStrip({ i, compact }: { i: merge.BoardInitiative; compact: boolean
   );
 }
 
+/** What the header's open Details already show elsewhere: the target on the
+ *  bar, the stage in the strip's label (a fact shows once per screen). */
+export const HEADER_OMITS: CharterField[] = ["target", "stage"];
+
 const SUBS: { id: Sub; label: string }[] = [
   { id: "overview", label: "Overview" },
   { id: "work", label: "Work" },
@@ -122,8 +126,9 @@ const SUBS: { id: Sub; label: string }[] = [
 
 /** The initiative header (FR-17; initiative-header FR-1): folded by default
  *  to one bar (id, stage, waiting chip, target, the goal on one line,
- *  Details); open, the Charter (goal, measure, target, scope, stage; the
- *  same component as an Initiatives card's Details, leftovers-17 FR-2),
+ *  Details); open, the Charter (goal, measure, scope; the same component as
+ *  an Initiatives card's Details, leftovers-17 FR-2, less what the bar and
+ *  the strip show, leftovers-18 FR-4),
  *  where it is written, and the stage strip. The stored choice is the lead's Details toggle, and a
  *  landing stores "folded" (FR-11, board.store). No badge on a sub-view:
  *  Needs me is the one count. */
@@ -188,7 +193,9 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
       {unreadOpen && unread.length > 0 && <UnreadFiles id={`ihead-unread-${i.id}`} files={unread} root={i.path} local={i.local} />}
       {headerOpen && (
         <div ref={openRef} id={`ihead-open-${i.id}`} className={`ihead-open ${edges.top ? "edge-top" : ""} ${edges.bottom ? "edge-bottom" : ""}`}>
-          <Charter i={i} clamp />
+          {/* The bar keeps the target and the strip below says the stage,
+              so the Charter leaves both out (leftovers-18 FR-4, I25). */}
+          <Charter i={i} clamp omit={HEADER_OMITS} />
           {/* 0064, file only: where the charter is written, whether git sees it
               edited and not committed on this machine, and the way to change
               it. The app writes nothing to the file. */}
@@ -200,9 +207,11 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
           <StageStrip i={i} compact={compact} />
         </div>
       )}
+      {/* The current sub-view is "true", not "page": the top bar's place
+          holds the screen's one "page" (leftovers-18 FR-7b, I22). */}
       <nav className="subtabs" aria-label="initiative views">
         {SUBS.map((s) => (
-          <button key={s.id} className={s.id === sub ? "on" : ""} aria-current={s.id === sub ? "page" : undefined} onClick={() => openInitiative(i.id, s.id)}>
+          <button key={s.id} className={s.id === sub ? "on" : ""} aria-current={s.id === sub ? "true" : undefined} onClick={() => openInitiative(i.id, s.id)}>
             {s.label}
           </button>
         ))}

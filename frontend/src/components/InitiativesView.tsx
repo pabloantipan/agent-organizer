@@ -37,6 +37,11 @@ export function pressOf(target: { closest(sel: string): unknown } | null, asking
 }
 const CONTROLS = "a, button, input, select, textarea, [role=group], .ic-note";
 
+/** Whether a pointer over the card raises it (leftovers-18 FR-5, I26): only
+ *  where a press opens the initiative, so its body, open or closed; never
+ *  over Details, Sleep, Wake or any control that keeps its own press. */
+export const raisesOn = (target: { closest(sel: string): unknown } | null): boolean => pressOf(target, false) === "open";
+
 /** The one card whose Details are open after a press on a card's Details:
  *  the same card closes, another one replaces it (FR-2: one at a time). */
 export const detailsAfter = (open: string | null, pressed: string): string | null => (open === pressed ? null : pressed);
@@ -59,6 +64,8 @@ export function InitiativesView() {
   const [running, setRunning] = useState<{ id: string; action: Action; sessions: number } | null>(null);
   const [notes, setNotes] = useState<Record<string, Note>>({});
   const [details, setDetails] = useState<string | null>(null);
+  // The card the pointer raises, by its body only (FR-5).
+  const [raised, setRaised] = useState<string | null>(null);
   const [announce, setAnnounce] = useState("");
   // Where focus goes once the view has drawn the new state: a card's id
   // (done), its note (a refused Wake), or its control.
@@ -216,9 +223,10 @@ export function InitiativesView() {
     const open = details === c.id;
     const detailsId = `ic-details-${c.id}`;
     return (
-      <article key={c.id} className={`ic ${c.state} ${open ? "open" : ""}`} data-card={c.id} aria-label={c.id}
+      <article key={c.id} className={`ic ${c.state} ${open ? "open" : ""} ${raised === c.id ? "raised" : ""}`} data-card={c.id} aria-label={c.id}
         onKeyDown={open ? escapeCloses(() => closeDetails(c.id)) : undefined}>
-        <div className="ic-main" onClick={pressCard(c, asking)}>
+        <div className="ic-main" onClick={pressCard(c, asking)}
+          onMouseOver={(e) => setRaised(raisesOn(e.target as Element) ? c.id : null)} onMouseLeave={() => setRaised(null)}>
           <div className="ic-head">
             {/* The card's one link (FR-1): the body's press opens the same. */}
             <a id={`ic-id-${c.id}`} className="ic-id mono" href={`#${c.id}`} aria-label={`Open ${c.id}`}
@@ -227,7 +235,8 @@ export function InitiativesView() {
             {i.client && <span className="lz tone ic-client" title={i.client}>{i.client}</span>}
             <span className={`lz ic-word ${c.state}`}>{sleepyWord(i.status)}</span>
           </div>
-          <div className={`ic-goal ${i.goal ? "" : "missing"}`} title={i.goal || undefined}>{i.goal || "no goal yet"}</div>
+          {/* Open, the Charter below says the goal in full (FR-4, I25). */}
+          {!open && <div className={`ic-goal ${i.goal ? "" : "missing"}`} title={i.goal || undefined}>{i.goal || "no goal yet"}</div>}
           {c.state !== "archived" && <div className="ic-line num" aria-live={isRunning ? "polite" : undefined}>{sessions}</div>}
           {mem && c.state !== "archived" && <div className="ic-line num" title={mem.title || undefined}>{mem.text}</div>}
           <div className={`ic-line ${next.none ? "missing" : ""}`} title={next.title}>{next.text}</div>
@@ -316,10 +325,9 @@ export function InitiativesView() {
 }
 
 /** A card's Details, open across its row (FR-2, I18): the Charter (the
- *  header's Details, one component) and the Workspace (Home's chevron detail,
- *  mounted as is). Not awake, the Workspace hides what starts an agent
- *  (0042), by a rule in initiatives.css, since InitiativeDetail is not
- *  this card's to edit. */
+ *  header's Details, one component) and the Workspace (Home's chevron detail).
+ *  Not awake, the Workspace is read-only and hides what starts an agent
+ *  (0042; leftovers-18 FR-6). */
 export function CardDetails({ id, i, readOnly }: { id: string; i: merge.BoardInitiative; readOnly: boolean }) {
   return (
     <div id={id} className="ic-details" role="region" aria-label={`Details of ${i.id}`}>
@@ -327,9 +335,9 @@ export function CardDetails({ id, i, readOnly }: { id: string; i: merge.BoardIni
         <h3 id={`${id}-charter`} className="sec-title">Charter</h3>
         <Charter i={i} />
       </section>
-      <section className={`ic-ws ${readOnly ? "read-only" : ""} ${i.local ? "local" : ""}`} aria-labelledby={`${id}-ws`}>
+      <section className="ic-ws" aria-labelledby={`${id}-ws`}>
         <h3 id={`${id}-ws`} className="sec-title">Workspace</h3>
-        <InitiativeDetail i={i} />
+        <InitiativeDetail i={i} readOnly={readOnly} />
       </section>
     </div>
   );

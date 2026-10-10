@@ -27,3 +27,16 @@
 /* Not active opens read-only (FR-13, 0042): the words say it, with a lock;
    neutral on purpose, since nothing here waits on anyone. */
 .lz.read-only { border: 1px solid var(--border-strong); color: var(--fg-muted); max-width: none; }
+
+/* The bar's pills wrap inside the header (leftovers-18 FR-7, I27): at 1024
+   with the rail open the id, client, read-only mark, Wake link, stage,
+   chips and target do not fit one line, and the bar (shell.css: one flex
+   line) ran past the right edge. Here the bar and the id's own group wrap;
+   each pill keeps its words on one line. Doubled class to win over
+   shell.css whatever the load order. */
+.ihead .ihead-bar { flex-wrap: wrap; row-gap: var(--space-1); padding: var(--space-1) 0; }
+.ihead .ihead-id { flex: 0 1 auto; flex-wrap: wrap; row-gap: var(--space-1); min-width: 0; max-width: 100%; }
+.ihead .ihead-stage { max-width: 100%; }
+/* Folded, the goal keeps room for a few words: short of it, it takes the
+   next line rather than shrinking to nothing beside the pills. */
+.ihead .ihead-goal-line { min-width: min(20ch, 100%); }

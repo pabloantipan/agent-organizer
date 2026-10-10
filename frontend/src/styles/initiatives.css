@@ -48,10 +48,12 @@
   background: var(--surface-raised); border: 1px solid var(--border-subtle);
 }
 /* The body is the press that opens the initiative (leftovers-17 FR-1): a
-   hand, and the surface rises one step on hover; its buttons keep their own
-   hover. An open card stays put, its details are read, not pressed. */
+   hand, and the surface rises one step while the pointer is on the body,
+   open or closed; over Details, Sleep, Wake or the open details it does not
+   (leftovers-18 FR-5, I26). .raised is set from the pointer, since Safari
+   15.0 has no :has(). */
 .ic-main { display: grid; gap: var(--space-1); align-content: start; min-width: 0; cursor: pointer; }
-.ic:not(.open):hover { background: var(--surface-hover); }
+.ic.raised { background: var(--surface-hover); }
 .ic-head { display: flex; align-items: center; gap: var(--space-2); min-width: 0; flex-wrap: wrap; }
 /* The card's one link, named `Open <id>`. */
 .ic-id {
@@ -92,9 +94,6 @@
 .ic-details .sec-title { margin: 0; }
 /* Home's chevron detail, as is, minus its own tile: it sits on the card. */
 .ic-ws .init-detail { background: transparent; padding: 0; border-radius: 0; }
-/* Not awake, nothing here starts an agent (0042): InitiativeDetail's last
-   button, a local initiative's Review with agent, is hidden. */
-.ic-ws.read-only.local .init-actions > button:last-of-type { display: none; }
 .ic-act[aria-disabled="true"] { opacity: .45; cursor: default; }
 .ic-act[aria-disabled="true"]:hover { background: var(--button-bg); border-color: var(--border); }
 
