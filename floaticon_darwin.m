@@ -417,10 +417,12 @@ static void breathe(void) {
 // the tile's edge, at every level, since the ring is also how the lead finds
 // the icon (0109): the tone at normal, with no reading and with a failed
 // one; amber (--amber-9) at high; amber 3 pt at critical, breathing in
-// opacity 1 to 0.5 over 1.6 s (0.8 each way), steady under Reduce motion.
-// A 1 pt keyline in the ground (#1a1523) sits just outside the ring at every
-// level and does not breathe: it holds the ring on a light wallpaper (amber
-// on white is 1.8:1, the ground 17.9:1). Points, not scaled with the icon:
+// width at full opacity, 3 to 4.5 pt and back over 1.6 s (0.8 each way; the
+// inner edge stays 2 pt from the tile, the ring swells outward), a steady
+// 3 pt under Reduce motion (Amendment 2 as amended, 56f0244). A 1 pt keyline
+// in the ground (#1a1523) sits just outside the ring at every level, at full
+// opacity, and follows its outer edge: it holds the ring on a light wallpaper
+// (amber on white is 1.8:1, the ground 17.9:1). Points, not scaled with the icon:
 // the design gives the ring in px, as a mark of the edge, not of the tile's
 // drawing.
 static const CGFloat kRingGap = 2;
@@ -432,8 +434,33 @@ static CGPathRef ringPath(CGFloat out) {
     return CGPathCreateWithRoundedRect(r, tileSz / 4 + out, tileSz / 4 + out, NULL);
 }
 
+static const CGFloat kBreathPeak = 4.5; // critical's widest, at full opacity
+static const CFTimeInterval kBreathHalf = 0.8; // 1.6 s a breath, there and back
+
+// One leg of the breath on a layer: from the 3 pt shape to the peak's, there
+// and back. Ring and keyline get the same timing in the same transaction, so
+// the keyline's inner edge stays on the ring's outer one.
+static void breatheTo(CAShapeLayer *l, CGPathRef to, CGFloat toWidth) {
+    CABasicAnimation *p = [CABasicAnimation animationWithKeyPath:@"path"];
+    p.fromValue = (__bridge id)l.path;
+    p.toValue = (__bridge id)to;
+    CABasicAnimation *w = [CABasicAnimation animationWithKeyPath:@"lineWidth"];
+    w.fromValue = @(l.lineWidth);
+    w.toValue = @(toWidth);
+    CAAnimationGroup *g = [CAAnimationGroup animation];
+    g.animations = @[ p, w ];
+    g.duration = kBreathHalf;
+    g.autoreverses = YES;
+    g.repeatCount = HUGE_VALF;
+    g.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+    [l addAnimation:g forKey:@"breathe"];
+}
+
+// The ring's resting shape for the level, and at critical (not under Reduce
+// motion) the breath, rebuilt here so a resize breathes at the new size.
 static void layoutRing(void) {
-    CGFloat w = [memLevel isEqualToString:@"critical"] ? 3 : 2;
+    BOOL critical = [memLevel isEqualToString:@"critical"];
+    CGFloat w = critical ? 3 : 2;
     CGPathRef path = ringPath(kRingGap + w / 2);
     ring.frame = CGRectMake(0, 0, tileSz, tileSz);
     ring.path = path;
@@ -444,6 +471,16 @@ static void layoutRing(void) {
     keyline.path = edge;
     keyline.lineWidth = kKeyline;
     CGPathRelease(edge);
+    [ring removeAnimationForKey:@"breathe"];
+    [keyline removeAnimationForKey:@"breathe"];
+    if (critical && !reduceMotion()) {
+        CGPathRef wide = ringPath(kRingGap + kBreathPeak / 2);
+        CGPathRef wideEdge = ringPath(kRingGap + kBreathPeak + kKeyline / 2);
+        breatheTo(ring, wide, kBreathPeak);
+        breatheTo(keyline, wideEdge, kKeyline);
+        CGPathRelease(wide);
+        CGPathRelease(wideEdge);
+    }
 }
 
 static void applyRing(void) {
@@ -457,22 +494,12 @@ static void applyRing(void) {
     ring.hidden = NO;
     keyline.hidden = NO;
     ring.opacity = 1;
-    [ring removeAnimationForKey:@"breathe"];
-    if (critical && !still) {
-        CABasicAnimation *a = [CABasicAnimation animationWithKeyPath:@"opacity"];
-        a.fromValue = @1.0;
-        a.toValue = @0.5;
-        a.duration = 0.8;
-        a.autoreverses = YES;
-        a.repeatCount = HUGE_VALF;
-        a.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-        [ring addAnimation:a forKey:@"breathe"];
-    }
+    keyline.opacity = 1;
     [CATransaction commit];
     [iconViewForRing() setToolTip:[memLevel isEqualToString:@"normal"] ? @"Deltagos" : [NSString stringWithFormat:@"Deltagos, memory %@", memLevel]];
     NSAccessibilityPostNotification(iconViewForRing(), NSAccessibilityTitleChangedNotification);
-    flog(@"memory ring: %@ (%@, keyline 1 pt #1a1523)", memLevel,
-         high ? @"amber #ffb020 2 pt" : critical ? (still ? @"amber #ffb020 3 pt, steady (reduce motion)" : @"amber #ffb020 3 pt, breathing")
+    flog(@"memory ring: %@ (%@, keyline 1 pt #1a1523 on its outer edge)", memLevel,
+         high ? @"amber #ffb020 2 pt" : critical ? (still ? @"amber #ffb020 3 pt, steady (reduce motion)" : [NSString stringWithFormat:@"amber #ffb020 at full opacity, breathing in width %.1f to %.1f pt and back over %.1f s", 3.0, kBreathPeak, 2 * kBreathHalf])
               : @"tone #d946ef 2 pt");
 }
 
