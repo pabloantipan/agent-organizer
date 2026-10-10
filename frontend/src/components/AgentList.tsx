@@ -6,6 +6,7 @@ import { ContextBar, WatcherBadge } from "./ContextBar";
 import { HEALTH, healthState, healthTitle, type HealthState } from "../lib/health";
 import { stateWord } from "../lib/stateWords";
 import { agentMemory, rowMemoryWords, type MemoryFeed } from "../lib/initiatives";
+import { agentLabel } from "../lib/memory";
 import { useBoard } from "../stores/board.store";
 import "../styles/initiatives.css";
 
@@ -41,7 +42,7 @@ export function AgentList({ agents, root, local = true, readOnly = false, onMess
               <span className={`a-state ${a.state}`}><i />{stateLabel(a)}</span>
               <span className="a-name">
                 {a.family && <span className="a-family">{a.family}</span>}
-                <span className="ident">{a.short || a.name}</span>
+                <span className="ident">{a.short || agentLabel(a, useBoard.getState().view?.board)}</span>
               </span>
               {a.persona && <span className="badge persona" title={a.cell ? `${a.cell} cell` : "persona"}>{a.persona}</span>}
               {health === "no identity"
@@ -118,7 +119,7 @@ function rowName(a: Agent, feed: MemoryFeed): string {
   // not show (leftovers-15 FR-5).
   const words = rowMemoryWords(a, feed);
   const mem = words ? `, ${words}` : "";
-  return `${a.session || a.short || a.name}, ${stateLabel(a)}${ctx}${mem}`;
+  return `${agentLabel(a, useBoard.getState().view?.board)}, ${stateLabel(a)}${ctx}${mem}`;
 }
 
 /** Why a row's health word is what it is and what to do about it, from the

@@ -145,6 +145,24 @@ export function cardSeats(columns: Record<string, { initiative_id: string; slug:
   return seats;
 }
 
+type BoardLike = { initiatives?: { id: string; path: string }[] | null; columns?: Parameters<typeof cardSeats>[0] } | null | undefined;
+
+/** An Agents row's name (the `Agents ›` landing, FR-1), the popover's: the
+ *  session name, else its card's seat, else `<initiative> session`, the
+ *  initiative being the card's, else the one whose root holds the agent's
+ *  directory (longest root, as the scan assigns it). */
+export function agentLabel(a: { session: string; dir?: string; card?: { key: string } | null }, board: BoardLike): string {
+  const seat = (a.card && cardSeats(board?.columns).get(a.card.key)) || "";
+  let initiative = a.card ? a.card.key.slice(0, a.card.key.indexOf("/")) : "";
+  if (!initiative && a.dir) {
+    let best = -1;
+    for (const i of board?.initiatives ?? []) {
+      if (i.path && (a.dir === i.path || a.dir.startsWith(i.path + "/")) && i.path.length > best) { best = i.path.length; initiative = i.id; }
+    }
+  }
+  return sessionLabel(a.session, initiative, seat);
+}
+
 /** The grouping key of a session, the service's: a named session sums its
  *  agents, an unnamed (or resumed) one is its pid's alone. */
 const sessionKey = (initiative: string, agentId: string): string => {

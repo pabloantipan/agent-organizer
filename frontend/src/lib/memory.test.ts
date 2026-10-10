@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { agentsLine, buttonName, buttonText, duration, freeLine, gb, memoryState, panelLine, pressureLine, cardSeats, sessionHover, sessionLabel, sessionRows, wasCriticalLine, type MemoryReading } from "./memory";
+import { agentsLine, buttonName, buttonText, duration, freeLine, gb, memoryState, panelLine, pressureLine, agentLabel, cardSeats, sessionHover, sessionLabel, sessionRows, wasCriticalLine, type MemoryReading } from "./memory";
 
 const G = 1024 ** 3;
 const at = (h: number, m: number) => new Date(2026, 9, 9, h, m).getTime();
@@ -126,6 +126,15 @@ describe("sessionRows", () => {
     expect(rows.map((r) => r.name)).toEqual(["ln-build", "x session", "x session", "x session", "unassigned session"]);
     expect(rows.map((r) => r.agentId)).toEqual([`${uuid}#11`, "#12", `${uuid}#13`, "#14", "0f0e0d0c-0b0a-4908-8706-050403020100#30"]);
     expect(sessionHover(rows[1].name, rows[1].agentId)).toBe("x session, pid 12");
+  });
+  it("names an Agents row the same way", () => {
+    const board = { initiatives: [{ id: "organizer", path: "/h/organizer" }, { id: "wt", path: "/h/organizer/.wt/x" }], columns: { now: [{ initiative_id: "organizer", slug: "c", seat: "ln-build" }] } };
+    const uuid = "1030fdd4-5b2e-4c8a-9f61-0a3d2e7c9b10";
+    expect(agentLabel({ session: "organizer-probe-sup52", dir: "/h/organizer" }, board)).toBe("organizer-probe-sup52");
+    expect(agentLabel({ session: uuid, dir: "/h/organizer/.wt/c", card: { key: "organizer/c" } }, board)).toBe("ln-build");
+    expect(agentLabel({ session: uuid, dir: "/h/organizer/sub" }, board)).toBe("organizer session");
+    expect(agentLabel({ session: "", dir: "/h/organizer/.wt/x/y" }, board)).toBe("wt session");
+    expect(agentLabel({ session: "", dir: "/elsewhere" }, board)).toBe("unassigned session");
   });
   it("labels like the service", () => {
     expect(sessionLabel("organizer-probe-sup52", "organizer", "ln-build")).toBe("organizer-probe-sup52");
