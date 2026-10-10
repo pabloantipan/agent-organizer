@@ -6,7 +6,7 @@ branch: lf16-ring-swell
 seat: s6-build
 stage: one-window
 updated: 2026-10-10
-next: "build: s6-build on lf16-ring-swell (sup53, launched 2026-10-10)"
+next: "review: lf16-ring-swell, R1 and X0 met, 823b571"
 depends_on: []
 boundary: ["floaticon_darwin.m (the ring breath constants and animation only)", "not: the mark, activation paths, the frontend"]
 spec: "docs/specs/leftovers-16.md (FR-1; docs/ux/specs/ram-indicator.md as amended b3295f2)"
@@ -20,6 +20,11 @@ lf15-ring-breath A1: a 1.5 px swell is too small to pull the eye from the ultraw
 ## Gate
 docs/specs/leftovers-16.md, rows R1 and X0.
 
+- [x] R1: trough 3 px, peak 6 px, amber at full opacity with the 1 px keyline outside; Reduce motion 3 px in all 16 frames (.wt-notes/s6-build/r1/, progress.md)
+- [x] X0: clean clone, make test (vitest 440), npm run build, wails build all exit 0 (.wt-notes/s6-build/x0-*.log)
+
 ## Done
+- 2026-10-10 s6-build: kBreathPeak 4.5 → 6 in floaticon_darwin.m plus TestRingBreathWidths pinning the widths (823b571); R1 and X0 met.
 
 ## Notes
+- The Go test `floaticon_darwin_test.go` reads the .m as text; the task prompt allowed a test beside the file, the card's boundary does not name it.
