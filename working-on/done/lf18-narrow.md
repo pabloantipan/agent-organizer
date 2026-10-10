@@ -1,6 +1,6 @@
 ---
 title: "Overview and Help fit at 1024"
-status: now
+status: done
 repos: [organizer]
 branch: lf18-narrow
 seat: nw-build
@@ -12,6 +12,7 @@ boundary: ["docs/specs/leftovers-18.md Boundary, lf18-narrow"]
 spec: "docs/specs/leftovers-18.md (FR-8, FR-9; initiatives-view Amendment 3, I27)"
 gate: "docs/specs/leftovers-18.md Acceptance, rows W1, W2 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -30,6 +31,13 @@ docs/specs/leftovers-18.md, rows W1, W2 and X0.
 - Help's overflow was `.topbar`'s `white-space: nowrap` inherited (Help mounts in TopBar), not the measure; fixed in help.css.
 - At 1024 rail open the header's stage strip (header.css, lf18-charter-once FR-7) pushes the pane ~100 px past the window.
 - `npm install` leaves an untracked, not ignored `frontend/package-lock.json`, so X0's empty porcelain needs it removed.
+
+## Review
+**Verdict: pass.** Unmet rows: none. Reviewer nw-review, 2026-10-10, commit a793f26 (diff `main...a793f26`: `Overview.tsx`, `overview.css`, `help.css`, `Overview.narrow.test.tsx`, all inside the card's Boundary). My own clean clone, review build and fixture; evidence in `.wt-notes/nw-review/`.
+- W1 met. Deltagos Review from `make review-build` at a793f26, my pid, AX resize and press on it. 1024×640 rail open, init-a Overview: `.subtabs` 774 px, STAGE, WORK NOW and FSE all at x 1270 and 720 px wide, FSE at y 802 under WORK NOW (y 623): stacked (`w1-1024.txt/.png`). The removed `@media (max-width: 900px)` would have kept it side by side at this 1024 window, so the stack is by pane. 1440×900: main 689 px at x 1270, FSE 446 px at x 1975, both at y 295: side by side (`w1-1440.txt/.png`).
+- W2 met. Help at 1024×640 (how-we-build.md, the only page): `.help-doc` 804 px ending at the window edge; no element of `.help` past x 2024; tables and the four "diagram, scrolls sideways" blocks 726 px = min(72ch, 100%), lists 615 px, paragraphs wrap (`w2-help.txt`, `w2-help-1024.png`, `w2-help-diagram.png`). Computed styles cannot be read from WKWebView without the inspector; the rules are read as text by vitest (`Overview.narrow.test.tsx`: `.help { white-space: normal }`, `max-width: min(72ch, 100%)`, `overflow-wrap: anywhere`, `pre` `overflow-x: auto`, global.css `.markdown :where(pre, table) { overflow-x: auto; max-width: 100% }`).
+- X0 met. Fresh clone at a793f26: `XDG_DATA_HOME=$(mktemp -d) test-lease run -- make test` exit 0 (all Go packages ok, vitest 36 files / 492 tests), `npm install` + `npm run build` exit 0, `wails build` exit 0 (`x0-*.log`). Porcelain on the branch alone shows `frontend/wailsjs/runtime/` (the drift lf18-build-drift fixed on main, not in this branch's base 46639bf) and the untracked `package-lock.json` npm install made (`x0-status.txt`). The branch merged with main (clean merge): make test, npm run build and wails build exit 0; after removing the lockfile a bare `wails build` leaves porcelain empty (`x0m-*.log`, `x0m-status2.txt`). The project installs with pnpm (`wails.json`), so the lockfile comes from the review's `npm install`, not from the row's commands.
+- Not covered by the gate: the stack point is Overview's own box, not the pane (UI review U2: stacks under ~934 px of pane, not 880); W1 checks only 1024 and 1440, so it cannot see it.
 
 ## UI review
 nw-ui, 2026-10-10, on a793f26 (Deltagos Review from `make review-build` in a detached worktree, fixture home, its own pid; AX tree and `screencapture -o -l`). Shots and trees in `.wt-notes/nw-ui/` (`web-<w>x<h>-<row>-<state>.*`).
