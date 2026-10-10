@@ -1,17 +1,18 @@
 ---
 title: "An empty Memory cell has three words, and stays on its track"
-status: now
+status: done
 repos: [organizer]
 branch: lf16-memory-words
 seat: mw-build
 stage: one-window
 updated: 2026-10-10
-next: "review: lf16-memory-words, gate met (M1, M2, X0), 7094fef"
+next: "done: M1, M2, X0 met in review (mw-review), UI review pass, 7094fef"
 depends_on: [lf15-names-and-notices]
 boundary: ["lib/initiatives.ts (Memory cell helpers)", "AgentList.tsx", "Crew.tsx", "their css and tests"]
 spec: "docs/specs/leftovers-16.md (FR-4, FR-5; docs/ux/specs/initiatives-view.md Amendment 1, I16)"
 gate: "docs/specs/leftovers-16.md Acceptance, rows M1, M2 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -29,6 +30,13 @@ docs/specs/leftovers-16.md, rows M1, M2 and X0.
 
 ## Notes
 - The top bar's memory button still reads `memory unknown` on a failed read (`lib/memory.ts`, outside this card); ram-indicator's States table names it so.
+
+## Review
+- Verdict: **pass**. mw-review, 2026-10-10, on 7094fef (the branch did not move; its frontend equals 80823c4's, where mw-build measured M2).
+- M1 met: `npx vitest run src/lib/memoryWords.test.tsx` in a clean clone at 7094fef, 4/4 pass. It renders AgentList and Crew (an off row, a running row; a seat with a running agent, a null agent, an exited agent) under no reading, a failed reading and a reading, asserts `—` named exactly `Memory: not running` / `Memory: could not be read` / `Memory: reading…`, hover equal to the name, and no "unknown" in either markup. The diff removes the `Memory unknown, …` label that main put on every `—`; Crew reaches the same `MemoryCell`.
+- M2 met: my own `make review-build` from the clean clone, fixture `--memory normal`, own pid, rail open (250 px), init-a > Agents by AXPress, window sized by AXSize on my own window. All 12 `.a-mem` cells at x 2320 at 1440x900 and x 1904 at 1024x640, wrapped rows (taller pitch) included (`.wt-notes/mw-review/ax-agents-{1440,1024}.txt`).
+- X0 met: clean clone at 7094fef, `XDG_DATA_HOME=$(mktemp -d) test-lease run -- make test` exit 0 (447 vitest + go), `npm install && npm run build` exit 0, `wails build` exit 0.
+- Unmet rows: none.
 
 ## UI review
 - 2026-10-10 mw-ui, on 7094fef (all rows; the branch did not move). Verdict: **pass**, no sev 4 or 3.
