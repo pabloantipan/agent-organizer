@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { merge, model } from "../../wailsjs/go/models";
 import { api, type RunsView } from "../hooks/useWails";
 import { parseISO, today, daysBetween, dateWords } from "../lib/dates";
@@ -228,11 +228,31 @@ function WorkSummary({ initiative: i }: { initiative: BoardInitiative }) {
   );
 }
 
+/** Under this width of Overview's own pane the FSE column stacks below the
+ *  first (leftovers-18 FR-8, I27). The pane, not the window: the rail open
+ *  at 1024 leaves Overview about 780 px, which the window cannot tell. */
+export const OV_STACK_BELOW = 880;
+
+export const ovStacks = (paneWidth: number) => paneWidth > 0 && paneWidth < OV_STACK_BELOW;
+
 /** Overview of one initiative (FR-18): the current stage's gates and exit
- *  items and the work summary on the left, the FSE panel on the right. */
+ *  items and the work summary on the left, the FSE panel on the right, or
+ *  below them in a narrow pane (WKWebView's Safari 15 floor has no container
+ *  queries, so the pane is measured). */
 export function Overview({ initiative }: { initiative: BoardInitiative }) {
+  const pane = useRef<HTMLDivElement>(null);
+  const [stacked, setStacked] = useState(false);
+  useLayoutEffect(() => {
+    const el = pane.current;
+    if (!el) return;
+    const measure = () => setStacked(ovStacks(el.clientWidth));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   return (
-    <div className="ov">
+    <div ref={pane} className={stacked ? "ov stacked" : "ov"}>
       <div className="ov-main">
         <StageGates initiative={initiative} />
         <WorkSummary initiative={initiative} />
