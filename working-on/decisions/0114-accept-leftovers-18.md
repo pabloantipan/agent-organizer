@@ -1,13 +1,13 @@
 ---
 title: Accept leftovers 18 - one current mark, a fact once, every view at 1024, the statusline, the build's last drift
-status: proposed
+status: ruled
 raised: 2026-10-10
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-10
+ruled_by: pablo
 options: ["accept as written", "accept with amendments", "send back"]
-chosen:
+chosen: accept as written
 cards: [lf18-current-mark, lf18-charter-once, lf18-narrow, lf18-statusline, lf18-build-drift]
 threads: []
 supersedes: []
@@ -50,3 +50,7 @@ forecast: 30 min-1 h over 1 wave (five builders); basis: leftovers-15 to 17,
 ## Recommendation
 
 The FSE's: accept as written.
+
+## Ruling
+
+pablo, 2026-10-10, in the organizer on lodestar: go
