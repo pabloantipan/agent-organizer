@@ -29,6 +29,7 @@ docs/specs/leftovers-18.md, rows K1, K2, K3 and X0.
 - 2026-10-10 cm-build: placeOf (lib/place.ts), one current mark, crumb without slash, Needs me never on, firebase fold at compact plus the fifth fold (Rescan glyph); gate met at 5d358df (428f498, 5d358df).
 
 ## Notes
+- K1 on an initiative: the AX tree today also shows the header sub-tab `Overview` with aria-current=page (InitiativeHeader.tsx:205, co-build's), a second mark beside the bar's title; it moves to aria-current="true" in lf18-charter-once (46639bf, H5). K1's AX check on an initiative reruns after both merge. Dumps as they stand: .wt-notes/cm-build/ax-initiative-from-*.txt.
 - K3 cannot run on the review app with auth: firebase: the keychain service `cl.antipan.organizer` is shared with the real app, so it would read the real refresh token. Widths measured in an offscreen WKWebView with the built css instead (progress.md).
 - Folds 1-4 measured 1066 px at 1024 with Needs me's badge and `Sync · stale`; the fifth fold (Rescan glyph) was added and accepted (24d052e). 9.5 px spare remains.
 - Stale Sync is a ghost button, not primary: magenta on the accent fill is 1.4:1.
