@@ -134,3 +134,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-10 — leftovers-16 answers: ring swell 3-6 px; strip fold glyphs; Asleep/Archived apart in FloatList; Memory cell words; inline confirm rule (b3295f2).
 - 2026-10-10 — initiatives-view Amendment 2: card opens, Details (charter + Home's workspace), top bar grouped by kind, places as tabs (9b9f8e6).
 - 2026-10-10 — leftovers-17 review answers: initiatives-view Amendment 3 (one current mark, firebase bar folds at 1024, Charter omit, 1024 overflows), rows I22-I27; two design-system rules (237db96).
+- 2026-10-10 — accepted the FSE's fifth fold (Rescan to its glyph) into initiatives-view A3 §2.

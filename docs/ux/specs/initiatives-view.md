@@ -409,6 +409,11 @@ class they fold in this order, and each comes back when the bar has room:
    `Account <email>`, the email in its hover and its menu. It sits in the
    app group, last, after Settings;
 4. the title (an initiative id) clamps to 12 characters with its hover.
+5. **Rescan becomes its glyph** (↻), named `Rescan` (aria-label and
+   hover). Added by the FSE after cm-build measured folds 1-4 at 1066 px in
+   WebKit (leftovers-18 FR-3 Amendment 2, 24d052e); accepted. It fits with
+   9.5 px spare, so the next control added to the bar needs a fold of its
+   own first.
 
 Help and Settings are never pushed past the edge, and the bar never wraps.
 

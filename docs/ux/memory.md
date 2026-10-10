@@ -380,6 +380,8 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
   mode: firebase adds ~440 px to the bar. A shared component takes `omit`
   rather than a second field set (a fact once per screen).
 
+- 2026-10-10: my firebase folds were estimated, not measured, and fell 42 px short in WebKit; a fold list needs a measured bar, worst case (long id, long email, two-digit badge, stale), before it is handed over.
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).
