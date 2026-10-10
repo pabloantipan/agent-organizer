@@ -117,27 +117,47 @@ export const stepTravel = (travel: number, dt: number) => travel + speedAt(trave
 const REDUCE = "(prefers-reduced-motion: reduce)";
 export const prefersReducedMotion = () => typeof window !== "undefined" && !!window.matchMedia?.(REDUCE).matches;
 
-/** Runs the mark's loop through `paint` until the returned stop is called;
- *  under Reduce motion it paints the still frame and schedules nothing. */
-export function runMark(paint: (f: MarkFrame) => void, raf: (cb: (now: number) => void) => number = requestAnimationFrame, caf: (id: number) => void = cancelAnimationFrame): () => void {
+/** How long the mark moves after it shows and after each hover: 4.5 s,
+ *  never over 5 s unasked (floating-icon Amendment 7, F25; WCAG 2.2.2). */
+export const PLAY_MS = 4500;
+
+export type MarkRun = { stop: () => void; play: () => void };
+
+/** Runs the mark's loop through `paint` for `ms` of frames, then rests where
+ *  it is (no repaint, no jump back to the still frame); `play` moves it `ms`
+ *  more from where it rests. Under Reduce motion it paints the still frame
+ *  and schedules nothing, and `play` does nothing. */
+export function runMark(paint: (f: MarkFrame) => void, ms = PLAY_MS, raf: (cb: (now: number) => void) => number = requestAnimationFrame, caf: (id: number) => void = cancelAnimationFrame): MarkRun {
   paint(markFrame(0));
-  if (prefersReducedMotion()) return () => {};
-  let travel = 0, last = -1, id = 0;
+  let travel = 0, last = -1, until = -1, id = 0, running = false;
   const tick = (now: number) => {
-    if (last >= 0) { travel = stepTravel(travel, (now - last) / 1000); paint(markFrame(travel)); }
+    if (until < 0) until = now + ms;
+    if (last >= 0) { travel = stepTravel(travel, (Math.min(now, until) - last) / 1000); paint(markFrame(travel)); }
     last = now;
+    if (now >= until) { running = false; return; }
     id = raf(tick);
   };
-  id = raf(tick);
-  return () => caf(id);
+  const play = () => {
+    if (prefersReducedMotion()) return;
+    until = -1; // counted from the next frame
+    if (running) return;
+    running = true; last = -1;
+    id = raf(tick);
+  };
+  play();
+  return { stop: () => { if (running) caf(id); running = false; }, play };
 }
 
 /** The mark, `size` px wide. Painted by attribute from a requestAnimationFrame
- *  loop, so a frame re-renders nothing. */
+ *  loop, so a frame re-renders nothing. It moves PLAY_MS after it shows and
+ *  PLAY_MS more when the pointer moves onto it. The drawing is never named:
+ *  beside the wordmark the wordmark is the name, and where the mark stands
+ *  alone its button carries `Deltagos` (Amendment 7, F26). */
 export function DeltagosMark({ size = 56, animated = true }: { size?: number; animated?: boolean }) {
   const id = "dm" + useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const dform = useRef<SVGPathElement>(null), big = useRef<SVGGElement>(null), small = useRef<SVGGElement>(null);
   const tips = useRef<(SVGPolygonElement | null)[]>([]), notches = useRef<(SVGPolygonElement | null)[]>([]);
+  const run = useRef<MarkRun | null>(null);
 
   useEffect(() => {
     if (!animated) return;
@@ -148,17 +168,17 @@ export function DeltagosMark({ size = 56, animated = true }: { size?: number; an
       big.current?.setAttribute("transform", f.big);
       small.current?.setAttribute("transform", f.small);
     };
-    let stop = runMark(paint);
-    // Reduce motion turned on or off while the mark shows.
+    run.current = runMark(paint);
+    // Reduce motion turned on: the still frame. Turned off: it waits for a hover.
     const mq = window.matchMedia?.(REDUCE);
-    const changed = () => { stop(); stop = runMark(paint); };
+    const changed = () => { if (mq?.matches) { run.current?.stop(); paint(markFrame(0)); } };
     mq?.addEventListener?.("change", changed);
-    return () => { stop(); mq?.removeEventListener?.("change", changed); };
+    return () => { run.current?.stop(); run.current = null; mq?.removeEventListener?.("change", changed); };
   }, [animated]);
 
   const f = markFrame(0); // the still frame, what the first paint shows
   return (
-    <svg className="dmark" viewBox="20 17 64 66" width={size} height={(size * 66) / 64} role="img" aria-label="Deltagos mark">
+    <svg className="dmark" viewBox="20 17 64 66" width={size} height={(size * 66) / 64} aria-hidden="true" focusable="false" onPointerEnter={() => run.current?.play()}>
       <defs>
         <mask id={`${id}n`} maskUnits="userSpaceOnUse" x="-10" y="-10" width="120" height="120">
           <rect x="-10" y="-10" width="120" height="120" fill="#fff" />

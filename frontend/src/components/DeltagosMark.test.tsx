@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import { DeltagosLockup, DeltagosMark, markFrame, markLength, runMark, stepTravel, type MarkFrame } from "./DeltagosMark";
+import { DeltagosLockup, DeltagosMark, markFrame, markLength, PLAY_MS, runMark, stepTravel, type MarkFrame } from "./DeltagosMark";
 
 // window.matchMedia as Reduce motion would answer it (no DOM in these tests).
 function reduceMotion(on: boolean) {
   vi.stubGlobal("window", { matchMedia: (q: string) => ({ matches: on && q === "(prefers-reduced-motion: reduce)" }) });
 }
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
 
 describe("the mark's geometry", () => {
   it("walks the D at the drawing's length", () => {
@@ -45,7 +45,7 @@ describe("the mark's motion", () => {
     reduceMotion(false);
     const painted: MarkFrame[] = [];
     const queue: ((now: number) => void)[] = [];
-    const stop = runMark((f) => painted.push(f), (cb) => queue.push(cb), () => {});
+    const { stop } = runMark((f) => painted.push(f), PLAY_MS, (cb) => queue.push(cb), () => {});
     for (let t = 0; t <= 500; t += 16) queue.shift()!(t);
     stop();
     expect(painted[0]).toEqual(markFrame(0));
@@ -58,16 +58,101 @@ describe("the mark's motion", () => {
     reduceMotion(true);
     const painted: MarkFrame[] = [];
     const raf = vi.fn(() => 1);
-    runMark((f) => painted.push(f), raf, () => {});
+    runMark((f) => painted.push(f), PLAY_MS, raf, () => {});
     expect(raf).not.toHaveBeenCalled();
     expect(painted).toEqual([markFrame(0)]);
   });
   it("stops its loop when unmounted", () => {
     reduceMotion(false);
     const caf = vi.fn();
-    const stop = runMark(() => {}, () => 7, caf);
+    const { stop } = runMark(() => {}, PLAY_MS, () => 7, caf);
     stop();
     expect(caf).toHaveBeenCalledWith(7);
+  });
+});
+
+// The browser's frame clock under fake timers: requestAnimationFrame fires
+// every 16 ms of fake time with the fake clock's now, so advancing the clock
+// is the mark playing. Node has no requestAnimationFrame for vitest to fake,
+// so it is the browser's contract over the faked setTimeout.
+function frameClock() {
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "performance"] });
+  vi.stubGlobal("requestAnimationFrame", (cb: (now: number) => void) => setTimeout(() => cb(performance.now()), 16));
+  vi.stubGlobal("cancelAnimationFrame", (id: ReturnType<typeof setTimeout>) => clearTimeout(id));
+}
+
+describe("the mark rests after 4.5 s (Amendment 7, F25; H1)", () => {
+  it("moves 4.5 s after it shows, then stops where it is", () => {
+    reduceMotion(false);
+    frameClock();
+    const painted: MarkFrame[] = [];
+    runMark((f) => painted.push(f));
+    vi.advanceTimersByTime(1000);
+    expect(painted.length).toBeGreaterThan(30);
+    vi.advanceTimersByTime(PLAY_MS - 1000 + 100);
+    const atRest = painted.length, rest = painted[atRest - 1];
+    expect(vi.getTimerCount()).toBe(0); // no frame scheduled
+    vi.advanceTimersByTime(10_000);
+    expect(painted.length).toBe(atRest); // nothing painted after 4.5 s
+    expect(rest.dashoffset).not.toBe(markFrame(0).dashoffset); // a stop, not a jump back
+    expect(PLAY_MS).toBeLessThanOrEqual(5000);
+  });
+  it("moves for 4.5 s of frames, at most 5 s", () => {
+    reduceMotion(false);
+    frameClock();
+    let travel = 0;
+    const offsets: number[] = [];
+    runMark((f) => offsets.push(-Number(f.dashoffset)));
+    vi.advanceTimersByTime(6000);
+    // travel is wrapped at the D's length; sum the steps instead
+    for (let i = 1; i < offsets.length; i++) travel += (offsets[i] - offsets[i - 1] + markLength) % markLength;
+    // 4.5 s at 35% to 165% of 24 units/s
+    expect(travel).toBeGreaterThan(4.4 * 24 * 0.35);
+    expect(travel).toBeLessThan(5 * 24 * 1.65);
+    const frames = offsets.length - 1;
+    expect(frames * 16).toBeGreaterThanOrEqual(PLAY_MS);
+    expect(frames * 16).toBeLessThan(5000);
+  });
+  it("plays 4.5 s more when hovered, from where it rested", () => {
+    reduceMotion(false);
+    frameClock();
+    const painted: MarkFrame[] = [];
+    const run = runMark((f) => painted.push(f));
+    vi.advanceTimersByTime(PLAY_MS + 500);
+    const atRest = painted.length, rest = painted[atRest - 1];
+    run.play();
+    vi.advanceTimersByTime(40);
+    expect(painted.length).toBeGreaterThan(atRest);
+    expect(Math.abs(Number(painted[atRest].dashoffset) - Number(rest.dashoffset)) % markLength).toBeLessThan(2);
+    vi.advanceTimersByTime(PLAY_MS - 40 - 100);
+    expect(vi.getTimerCount()).toBe(1); // still moving just before 4.5 s
+    vi.advanceTimersByTime(200);
+    expect(vi.getTimerCount()).toBe(0); // rests again
+    const again = painted.length;
+    vi.advanceTimersByTime(10_000);
+    expect(painted.length).toBe(again);
+  });
+  it("a hover while it moves counts 4.5 s from the hover", () => {
+    reduceMotion(false);
+    frameClock();
+    const run = runMark(() => {});
+    vi.advanceTimersByTime(4000);
+    run.play();
+    vi.advanceTimersByTime(PLAY_MS - 100);
+    expect(vi.getTimerCount()).toBe(1);
+    vi.advanceTimersByTime(200);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+  it("never moves under Reduce motion, hovered or not", () => {
+    reduceMotion(true);
+    frameClock();
+    const painted: MarkFrame[] = [];
+    const run = runMark((f) => painted.push(f));
+    vi.advanceTimersByTime(1000);
+    run.play();
+    vi.advanceTimersByTime(PLAY_MS * 2);
+    expect(vi.getTimerCount()).toBe(0);
+    expect(painted).toEqual([markFrame(0)]);
   });
 });
 
@@ -80,7 +165,20 @@ describe("the mark rendered", () => {
     expect(html).toMatch(/class="dmark-big"/);
     expect(html).toMatch(/class="dmark-small"/);
     expect(html).toMatch(/<g mask="url\(#dm[\w-]*s\)">/);
-    expect(html).toContain('aria-label="Deltagos mark"');
+    expect(html).toContain('aria-hidden="true"');
+  });
+  it("names the lockup once: the mark hidden with no role or label, the wordmark the name (F26; H1)", () => {
+    const html = renderToStaticMarkup(<DeltagosLockup />);
+    const svg = html.match(/<svg[^>]*>/)![0];
+    expect(svg).toContain('aria-hidden="true"');
+    expect(svg).toContain('focusable="false"');
+    expect(svg).not.toMatch(/\srole=/);
+    expect(svg).not.toMatch(/aria-label|aria-labelledby|<title/);
+    expect(html).not.toMatch(/<title|<desc/);
+    // The accessible text of the lockup, aria-hidden subtrees left out.
+    const exposed = html.replace(/<svg[\s\S]*<\/svg>/, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    expect(exposed).toBe("Deltagos From deltos, the writing tablet, and strategos, the general.");
+    expect(exposed.match(/Deltagos/g)).toHaveLength(1);
   });
   it("carries the wordmark and the subtitle in the lockup (H1)", () => {
     const html = renderToStaticMarkup(<DeltagosLockup />);
