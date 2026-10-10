@@ -6,7 +6,7 @@ branch: lf15-names-and-notices
 seat: ln-build
 stage: one-window
 updated: 2026-10-09
-next: "N2: the notification centre database half is unrun (TCC); sup52 to get N2 amended to the log plus TestNotifyRefusal, or run the db read where TCC allows, then this card goes to done"
+next: "sup53 re-judges N2 against 0db55d6 (spec Amendment 1), then merges; sup52 ended"
 depends_on: []
 boundary: ["the spec's Boundary for this card"]
 spec: "docs/specs/leftovers-15.md (FR-1 to FR-3)"
