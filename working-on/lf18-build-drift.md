@@ -6,7 +6,7 @@ branch: lf18-build-drift
 seat: bd-build
 stage: one-window
 updated: 2026-10-10
-next: "waits on 0114 (accept)"
+next: "sup55 builds it (0114 ruled, launched 2026-10-10)"
 depends_on: []
 boundary: ["docs/specs/leftovers-18.md Boundary, lf18-build-drift"]
 spec: "docs/specs/leftovers-18.md (FR-11, FR-12)"

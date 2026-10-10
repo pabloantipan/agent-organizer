@@ -6,7 +6,7 @@ branch: lf18-narrow
 seat: nw-build
 stage: one-window
 updated: 2026-10-10
-next: "waits on 0114 (accept)"
+next: "sup55 builds it (0114 ruled, launched 2026-10-10)"
 depends_on: []
 boundary: ["docs/specs/leftovers-18.md Boundary, lf18-narrow"]
 spec: "docs/specs/leftovers-18.md (FR-8, FR-9; initiatives-view Amendment 3, I27)"
