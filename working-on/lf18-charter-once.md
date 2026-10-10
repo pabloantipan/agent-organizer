@@ -1,12 +1,12 @@
 ---
 title: "A fact shows once: Charter omit, card hover on body, readOnly detail, header pills wrap"
-status: next
+status: now
 repos: [organizer]
 branch: lf18-charter-once
 seat: co-build
 stage: one-window
 updated: 2026-10-10
-next: "sup55 builds it (0114 ruled, launched 2026-10-10)"
+next: "co-build builds it: Charter omit, hover on body, readOnly detail, header pills wrap"
 depends_on: []
 boundary: ["docs/specs/leftovers-18.md Boundary, lf18-charter-once"]
 spec: "docs/specs/leftovers-18.md (FR-4 to FR-7; initiatives-view Amendment 3, I25-I27)"
