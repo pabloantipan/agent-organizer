@@ -11,7 +11,7 @@ restating it (the discuss skill).
 - **Trap (sup56):** the screen locked at 02:35, and AX and screencapture then returned nothing. Post-lock screen rows rested on vitest, WebKit styles and pre-lock AX dumps. `caffeinate -i` does not stop the lock. Candidate for [for hephaistos] if it recurs.
 - **leftovers-20 gathering:** sent to aglaea (thread 01M4NCJ8S1DEGZHXBN2S5VD7S4): places U1/U2, the hero-as-back-link gap, card-details A1-A3, and the 22 px Details move at 1024 (cd-ui U1 sev 2; I34 "without a jump").
 - **Hephaistos closed four (claudecode 6f52c9a):** AX on the review build's pid is supervise 7b's first choice; spec-craft step 5 lists stylesheets and selectors per card; runs.jsonl read ≥2 min after probe -k; frozen-after-sleep carded as agent-slack seat-wake-freeze (until then, probe -r with the prelude).
-- **0116 proposed** (773de1a): leftovers-20, three cards; on accept start sup57.
+- **0116 ruled "ok"** (782df39); sup57 runs leftovers-20 in a tab of window 5498 (zellij pid 88620), forecast 30-45 min. On its close: end it, make install. (Its first token printed to my output on `token add`; rotated at once. Run `token add` with output discarded.)
 - Open, mine: Pablo's cut-off "And…"; which macOS the other laptop runs.
 
 ## HAND-OFF — 2026-10-09 evening, leftovers-15 running

@@ -6,7 +6,7 @@ branch: lf20-card-details
 seat:
 stage: one-window
 updated: 2026-10-11
-next: "pablo: rule 0116 (accept leftovers-20); on accept the FSE starts sup57"
+next: "sup57 runs it (0116 ruled ok, 2026-10-11)"
 depends_on: []
 boundary: ["docs/specs/leftovers-20.md Boundary, lf20-card-details"]
 spec: "docs/specs/leftovers-20.md (FR-5, FR-6; initiatives-view Amendment 5, I37, I38)"
