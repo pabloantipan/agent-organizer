@@ -1,6 +1,6 @@
 ---
 title: "Focus raises the card; Details never moves"
-status: now
+status: done
 repos: [organizer]
 branch: lf20-card-details
 seat: dt-build
@@ -39,3 +39,15 @@ Pass: D1, D2 and X0 met at f1b6e6e (dt-review, 2026-10-11).
 - Not covered by the gate: WebKit frames (Chromium only); at 1024 the goal shares its second line with `target 1 Oct`.
 - ui_review: true and no `## UI review` yet: status and place left for it.
 - reviewer dt-review, 2026-10-11, commit f1b6e6ec31fe823f70b5c5b09bb6d3a6bb2c0b0f.
+
+## UI review
+Pass, commit f1b6e6ec31fe823f70b5c5b09bb6d3a6bb2c0b0f (branch did not move), dt-ui, 2026-10-11. Sev 4/3: none.
+How each state was checked (shots and json in .wt-notes/dt-ui/):
+- D1 (FR-5, I37), WebKit: headless Playwright WebKit 26.5 over the review build's dist, fixture board stubbed (`wk.mjs`, `webkit-d1-d2.json`), 1024x640 rail open and 1440x900. init-a rest `rgb(39, 32, 51)`; hovered `rgb(46, 39, 60)` `raised`; keyboard only (7 Option-Tab, pointer parked off the card), `Open init-a` `:focus-visible` true, card `rgb(46, 39, 60)` `raised`, link ring 2px solid `rgb(138, 63, 252)`; Tab on, card back to rest; a pointer press then leaving does not raise (`:focus-visible` false). Same raise as hover: met. `webkit-*-D1-focus.png`. vitest D1 passes (29 tests in the two files).
+- D2 (FR-6, I38), WKWebView: `Deltagos Review.app` (pid saved, `auth: off`), AX frames and AXPress on my own process, window shots with `screencapture -o -l`. Web area 1024x608 (window 1024x640), rail opened by AXPress: Details @928,53 76x24 closed, open, closed; goal line under the bar's first line beside `target 1 Oct`. 1440x900: @1344,53 76x24 all three, goal on the first line. `wkwebview-1024x608-D2-*.png`, `wkwebview-1440x900-D2-*.png`. Headless WebKit agrees (x 928.70 / 1344.70, y 53, 75.30x24) on init-a, init-many, init-b, init-blind and init-define, no horizontal scroll.
+Findings (none fails):
+- U1 (sev 1) Two cards raised at once. What: with keyboard focus on one card's `Open <id>` and the pointer resting on another card, both raise, so "this opens" points two ways. Where: Initiatives, `webkit-d1-d2.json` `focusPlusHoverOther: [init-a, init-b]`. Evidence: measured, WebKit, both sizes. Proposal: let the latest of pointer or focus win, or accept as is; for aglaea.
+- U2 (sev 2, not this card's FRs) In WebKit plain Tab never reaches `Open <id>`: 80 Tabs from the page start did not land on it; Option-Tab did in 7. WKWebView follows Safari (links in the Tab order only with Option-Tab or Keyboard navigation on), so the raise reaches only those keyboard users. Where: `webkit-d1-d2.json` first run, recorded in run notes. Proposal: decide whether the id link must be in plain Tab order (I12 says Tab reaches it); ties to open question Q1 in docs/ux/memory.md.
+Spec gaps (for the FSE): D2 names "1024×640" without saying window or viewport (the app's 1024x640 window gives a 1024x608 web area); D1 says "keyboard focus" without naming Tab or Option-Tab, which differ in WebKit.
+For aglaea: U1 (focus versus pointer when both raise), U2 (plain Tab and links in WKWebView).
+Not verified in WKWebView: D1 (keyboard focus needs input I may not give in the review app; rests on headless WebKit computed styles and vitest).
