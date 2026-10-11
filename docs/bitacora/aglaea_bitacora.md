@@ -139,3 +139,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-11 — leftovers-19 answers: initiatives-view Amendment 5 (current = line, open = surface; h1 no focus; back link its own button; focus raises card; Details pinned), rows I35-I38; two design-system rules.
 - 2026-10-11 — FSE cut A5 as docs/specs/leftovers-20.md, accept record 0116 waiting on Pablo.
 - 2026-10-11 — leftovers-20 answers: initiatives-view Amendment 6 (rail hero a summary everywhere, I39; two raised cards, Tab-to-links tied to Pablo's Q1, goal-with-target kept).
+- 2026-10-11 — FSE cut I39 as docs/specs/leftovers-21.md; my Tab question (Q1) is now an option of record 0117 for Pablo.
