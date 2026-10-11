@@ -7,6 +7,7 @@ restating it (the discuss skill).
 ## HAND-OFF — 2026-10-09 evening, leftovers-15 running
 
 - **Last SHA seen:** 71771dd. leftovers-17 merged and installed (v0.2.0-1658-gb4a60f5). 0114 ruled ("go"); sup55 (pid 89313, tab of 5498) runs leftovers-18, five cards, forecast 30 min-1 h.
+- **01:0x:** after the sleep the lf18 seats' input was frozen (Enter/Escape ignored, alive S+), 2nd sighting after sup52. `probe -r sup55` with its prelude fixed it; sup55 restarts its cm-* seats. Sent [for hephaistos].
 - **lf18 gap 14:42 to 00:29:** the lid closed at 14:42 (pmset: Clamshell Sleep) with only current-mark's reviews left; resumed on wake. Not an overrun; sup55's run record should count awake time apart.
 - **Rejected (df3ae53, sl-build S1):** "statusline samples stop after one" was wrong. Supervisors read runs.jsonl within a minute of probe -k, before Retire's 2-min grace wrote the final lines; the open lines carry the first sample by design. Hephaistos's redraw lead ruled out; correction sent [for hephaistos]. Real but small: the last sample lags the bill by one turn; S2 reads the transcript.
 - **Repetition, 3rd: Boundary misses css** (lf15, lf16, lf17; sup54 caught global/memory/header/initiatives.css, amended 015388f). Sent [for hephaistos] as a spec-craft line; I list stylesheets and selectors per card from now.
