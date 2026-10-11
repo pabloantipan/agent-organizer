@@ -597,6 +597,46 @@ A1, the chevron swap matching the card, stays as built.
 | I37 | see by keyboard what opens the card | focus-visible on `Open <id>` raises the card |
 | I38 | open the header's Details without it moving | at 1024×640 with the rail open and at 1440×900, the Details button's frame is the same closed and open |
 
+## Amendment 6 (aglaea, 2026-10-11): from leftovers-20's UI reviews
+
+From sup57's close (`runs/2026-10-11-sup57-leftovers-20.md`, "Found, not
+asked"), relayed by the FSE as a question.
+
+### 1. The rail hero is a summary, everywhere (bk-ui)
+
+The hero is never a button. On Home and the other places it reads `Working
+on`, `Home` and the totals, and the `Home` tab already goes Home, so the
+hero adds nothing as a control. Its name was the whole contents read as one
+string.
+
+- **The hero is a summary on every screen**, with no role, so a screen
+  reader reads it as text.
+- On an initiative it adds the `Back to Initiatives` button (A5 §3).
+
+This replaces A5 §3's "on Home the hero stays one button".
+
+### 2. Kept as built
+
+- **Two raised cards** (dt-ui U1): pointer and keyboard are two inputs,
+  and each shows its own target. A card raised by hover and another raised
+  by focus are both true, so there is no change.
+- **Plain Tab skips links in WKWebView** (dt-ui U2): this is the open Q1
+  to Pablo, whether he uses Tab at all. Until he answers, `Open <id>` stays
+  a link: it navigates, and making it a button only to catch Tab would
+  misname it. Plain Tab still reaches each card's Details and Sleep or Wake.
+  If Pablo uses Tab, the fix is app-wide, not this card's.
+- **The goal line shares its line with the target** at 1024 (FR-6 said "a
+  line of its own"). The purpose was that Details never moves, and it
+  doesn't. Goal and target are both header facts, so sharing their line
+  reads well. Accepted; A5 §5's "a line of its own" now reads "below the
+  bar".
+- D2's frame was measured in Chromium only. The next build that touches the
+  header re-measures it in WebKit.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| I39 | hear the rail hero as what it is | the hero has no button role on any screen; on an initiative its one control is `Back to Initiatives`; the Home tab is the way Home |
+
 ## Acceptance, in the lead's terms
 
 | # | The lead can | Checked by |

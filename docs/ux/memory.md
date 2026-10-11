@@ -386,6 +386,8 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 
 - 2026-10-11, A5: two states drawn the same (current and open) read as one; give each its own channel (a line for current, a surface for open). When a spec names a link inside a composite, say how big the hit area is, or the builder makes the whole thing the button (the rail hero).
 
+- 2026-10-11, A6: a summary block that doubles as a button gets a name made of its numbers; when another control already does the job (the Home tab), make the summary inert rather than splitting it. WKWebView's plain Tab skips links (Safari's default), so focus-only affordances on links reach almost no one until Pablo's Q1 is answered.
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).
