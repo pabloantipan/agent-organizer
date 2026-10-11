@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 20 - current against open in the bar, the rail's own back button, the card's focus, Details that never moves
-status: proposed
+status: ruled
 raised: 2026-10-11
 raised_by: fse
 owner: pablo
@@ -9,6 +9,9 @@ cards: [lf20-bar-marks, lf20-back-button, lf20-card-details]
 threads: []
 supersedes: []
 superseded_by:
+ruled: 2026-10-11
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -39,3 +42,7 @@ this initiative, ~20-25 working minutes each (leftovers-19: 24 min).
 ## Recommendation
 
 The FSE's: accept as written.
+
+## Ruling
+
+pablo, 2026-10-11, in the organizer on lodestar: ok
