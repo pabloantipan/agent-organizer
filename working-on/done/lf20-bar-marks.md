@@ -1,6 +1,6 @@
 ---
 title: "Current is a line, open is a surface, in the bar"
-status: now
+status: done
 repos: [organizer]
 branch: lf20-bar-marks
 seat: bm-build
@@ -35,4 +35,14 @@ Verdict: pass. B1 and X0 met at d9b7331; reviewer bm-review, 2026-10-11.
 - No AX or screencapture used and no review app launched: B1 rests on vitest plus WebKit computed styles, as the row allows.
 
 Unmet: none. `## UI review` is missing, so status and place stay until it passes.
+
+## UI review
+Verdict: pass. Checked at d9b7331 (review build from a detached worktree, fixture home, `Deltagos Review` pid 32009 started and quit by me); bm-ui, 2026-10-11.
+
+- B1 (FR-1, FR-2), in the review app's WKWebView at 1440×900. AXPress on Settings, then Help, then Close, Home, Help, on my own pid only; AX classes read by pid; `screencapture -o -l` of its window. Settings: gear `.ghost.gear.on`, a 2 px accent line under it, no fill, the same line as the current place tab. Help over Settings: `?` `.ghost.gear.open` on the `--surface-selected` fill with no line, gear still underlined, so the two read apart at a glance. Help over Home: `?` filled, gear plain. Home: neither marked. Shots in `.wt-notes/bm-ui/`: `wkwebview-1440x900-B1-{home,settings,help-over-settings,help-over-home}.png`, close-ups `crop-*.png`.
+- Contrast: the accent line on the bar about 3.6:1, above the 3:1 for UI parts. Current versus open is told by shape (line against fill) and by `aria-current` / `aria-expanded`, not by colour alone.
+- Findings: none at severity 4 or 3. Two notes, severity 1, not a fail: (n1) the gear is 28 px tall and a place tab 24 px, so the gear's line sits 2 px lower than a tab's (AX frames: bottoms at 193 and 191). The two are about 1,100 px apart, so nobody will compare them. (n2) The open fill against the bar is faint, about 1.2:1. The fill is the same `--surface-selected` as before this card, and `?` carries `aria-expanded`, so there is no change.
+- Spec gaps (FSE): none.
+- For aglaea: none.
+- Not verified in WKWebView: hover on the current gear (no pointer hovers allowed; the builder notes `--surface-hover` paints under the line, as on a current tab); the focus ring on the now-square `.gear.on` (no synthetic keys allowed); widths other than 1440 (the bar's icons do not change with width in this diff).
 
