@@ -92,8 +92,9 @@ describe("the rail's back link follows placeOf (L2, I29)", () => {
 
   it("says Initiatives in the markup, not Home", () => {
     const src = css("./Rail.tsx");
-    expect(src).toContain('{back && <div className="hero-back"><ArrowLeft size={12} /> Initiatives</div>}');
-    expect(src).not.toMatch(/hero-back"><ArrowLeft size=\{12\} \/> Home/);
+    // leftovers-20 FR-3 made it a button of its own (Rail.hero.test.tsx).
+    expect(src).toMatch(/className="hero-back"[^>]*aria-label="Back to Initiatives"[^>]*>\s*<ArrowLeft size=\{12\} aria-hidden="true" \/> Initiatives/);
+    expect(src).not.toMatch(/<ArrowLeft size=\{12\}[^>]*\/> Home/);
   });
 });
 
