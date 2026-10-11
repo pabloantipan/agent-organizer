@@ -73,7 +73,7 @@ describe("the top bar by kind (leftovers-17 FR-3)", () => {
     for (const screen of ["home", "initiatives", "usage", "initiative", "settings"]) {
       const html = where(screen) + renderToStaticMarkup(<AppControls floats help settings={screen === "settings"} onCompact={noop} onHelp={noop} onSettings={noop} />);
       // `?` is expanded and selected, never current.
-      expect(html, screen).toMatch(/<button class="ghost gear on"[^>]*aria-label="Help" aria-expanded="true" aria-haspopup="dialog">/);
+      expect(html, screen).toMatch(/<button class="ghost gear on"[^>]*aria-label="Help" aria-expanded="true">/);
       expect(html.match(/<button[^>]*aria-label="Help"[^>]*>/)![0]).not.toContain("aria-current");
       // The screen under it keeps its one mark.
       const under = { home: "Home", initiatives: "Initiatives", usage: "Usage", initiative: "organizer", settings: "Settings" }[screen];

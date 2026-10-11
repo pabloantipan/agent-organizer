@@ -157,7 +157,7 @@ export function AppControls({ floats, help, settings, onCompact, onHelp, onSetti
   return (
     <>
       {floats && <button className="ghost gear" onClick={onCompact} title="Compact to icon (the icon floats on every desktop)" aria-label="Compact to icon"><CompactIcon /></button>}
-      <button className={`ghost gear ${help ? "on" : ""}`} onClick={onHelp} title="Help: how we build, from help_doc" aria-label="Help" aria-expanded={help} aria-haspopup="dialog"><CircleHelp size={14} /></button>
+      <button className={`ghost gear ${help ? "on" : ""}`} onClick={onHelp} title="Help: how we build, from help_doc" aria-label="Help" aria-expanded={help}><CircleHelp size={14} /></button>
       <button className={`ghost gear ${settings ? "on" : ""}`} onClick={onSettings} title="Settings" aria-label="Settings" aria-current={settings ? "page" : undefined}><Settings size={14} /></button>
     </>
   );
