@@ -14,7 +14,10 @@ export function Settings() {
     api.getConfig().then(setCfg);
     api.configPath().then(setPath);
   }, []);
-  if (!cfg) return <div className="empty">Loading…</div>;
+  // A screen no place tab marks names itself (initiatives-view A4 §1, I28),
+  // loading or not.
+  const title = <h1 className="settings-title">Settings</h1>;
+  if (!cfg) return <div className="settings">{title}<div className="empty">Loading…</div></div>;
 
   const set = <K extends keyof Config>(k: K, v: Config[K]) => setCfg({ ...cfg, [k]: v } as Config);
   const lines = (v: string[] | undefined) => (v ?? []).join("\n");
@@ -33,6 +36,7 @@ export function Settings() {
 
   return (
     <div className="settings">
+      {title}
       {authMode !== "firebase" ? (
         <div className="settings-block">
           <div className="section-label">Identity</div>

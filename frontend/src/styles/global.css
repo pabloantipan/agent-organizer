@@ -310,6 +310,7 @@ button.tiny { padding: 0 5px; font-size: var(--font-size-xs); line-height: 14px;
 /* settings */
 .settings { max-width: 640px; display: grid; gap: 14px; }
 .settings label { display: grid; gap: 4px; font-size: var(--font-size-sm); color: var(--muted); }
+.settings .settings-title { margin: 0; font-size: var(--font-size-2xl); line-height: var(--line-2xl); font-weight: var(--weight-semibold); color: var(--fg); }
 .settings .row { display: flex; gap: 8px; align-items: center; }
 .settings .hint { color: var(--muted); font-size: var(--font-size-sm); }
 
