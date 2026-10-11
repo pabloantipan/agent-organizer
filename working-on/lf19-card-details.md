@@ -6,7 +6,7 @@ branch: lf19-card-details
 seat: cd-build
 stage: one-window
 updated: 2026-10-11
-next: "waits on 0115 (accept)"
+next: "sup56 builds it (0115 ruled, launched 2026-10-11)"
 depends_on: []
 boundary: ["docs/specs/leftovers-19.md Boundary, lf19-card-details"]
 spec: "docs/specs/leftovers-19.md (FR-7, FR-8; initiatives-view Amendment 4, I33-I34)"

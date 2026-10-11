@@ -6,7 +6,7 @@ branch: lf19-places
 seat: pl-build
 stage: one-window
 updated: 2026-10-11
-next: "waits on 0115 (accept)"
+next: "sup56 builds it (0115 ruled, launched 2026-10-11)"
 depends_on: []
 boundary: ["docs/specs/leftovers-19.md Boundary, lf19-places"]
 spec: "docs/specs/leftovers-19.md (FR-1 to FR-6; initiatives-view Amendment 4, I28-I32)"
