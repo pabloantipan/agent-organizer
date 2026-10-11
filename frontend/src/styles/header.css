@@ -40,3 +40,8 @@
 /* Folded, the goal keeps room for a few words: short of it, it takes the
    next line rather than shrinking to nothing beside the pills. */
 .ihead .ihead-goal-line { min-width: min(20ch, 100%); }
+
+/* Details reads one label open or closed and keeps one height, so the bar
+   does not jump when it opens (leftovers-19 FR-8, I34); the chevron turns
+   (shell.css). Doubled class to win over shell.css whatever the load order. */
+.ihead .ihead-details { height: var(--control-sm); white-space: nowrap; }
