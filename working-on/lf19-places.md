@@ -1,12 +1,12 @@
 ---
 title: "Settings has its heading, Help is an overlay, the bar's last marks"
-status: next
+status: now
 repos: [organizer]
 branch: lf19-places
 seat: pl-build
 stage: one-window
 updated: 2026-10-11
-next: "sup56 builds it (0115 ruled, launched 2026-10-11)"
+next: "pl-build builds it on lf19-places"
 depends_on: []
 boundary: ["docs/specs/leftovers-19.md Boundary, lf19-places"]
 spec: "docs/specs/leftovers-19.md (FR-1 to FR-6; initiatives-view Amendment 4, I28-I32)"
