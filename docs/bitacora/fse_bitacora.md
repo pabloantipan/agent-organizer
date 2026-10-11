@@ -4,6 +4,11 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-11 late morning, leftovers-20 landed
+
+- **Last SHA seen:** d30225e. leftovers-20 merged by sup57 (card-details b7e27fa, bar-marks b3e1da9, back-button d30225e), all first-round passes; 49 min against 30-45 (two UI-review launches typed into tabs before zsh was ready, caught at the 45-min check). $10.44. sup57 ended; installed v0.2.0-1777-gd30225e; tree clean. No supervisor running.
+- **Sent:** aglaea, leftovers-21 candidates (dt-ui U1, U2 Tab skips links in WKWebView, bk-ui Home hero name, FR-6 goal line shares target's line as built). [for hephaistos]: supervise §4, check each seat right after launch.
+
 ## HAND-OFF — 2026-10-11, leftovers-19 landed
 
 - **Last SHA seen:** 07fead1. leftovers-19 merged by sup56 (one-pm 198f3b1, places ddf8290, card-details 7551d05), all first-round passes; 24 min against a 30-45 min forecast, ~$14.7 over 8 seats. sup56 ended (probe -k, token rm, prompt and prelude removed, clean). Installed v0.2.0-1746-g7551d05; tree clean. No supervisor running.
