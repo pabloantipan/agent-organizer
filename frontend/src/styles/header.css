@@ -40,3 +40,12 @@
 /* Folded, the goal keeps room for a few words: short of it, it takes the
    next line rather than shrinking to nothing beside the pills. */
 .ihead .ihead-goal-line { min-width: min(20ch, 100%); }
+
+/* Details reads one label open or closed and keeps one height, so the bar
+   does not jump when it opens (leftovers-19 FR-8, I34). The chevron turns by
+   swapping down for up, as the card's Details does, so shell.css's rotation
+   is cancelled: WebKit's AX frame of the rotated svg made the open button
+   33 px tall to AX against 24 drawn. Doubled class to win over shell.css
+   whatever the load order. */
+.ihead .ihead-details { height: var(--control-sm); white-space: nowrap; }
+.ihead .ihead-details svg, .ihead .ihead-details[aria-expanded="true"] svg { transform: none; transition: none; }

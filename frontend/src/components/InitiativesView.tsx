@@ -38,9 +38,11 @@ export function pressOf(target: { closest(sel: string): unknown } | null, asking
 const CONTROLS = "a, button, input, select, textarea, [role=group], .ic-note";
 
 /** Whether a pointer over the card raises it (leftovers-18 FR-5, I26): only
- *  where a press opens the initiative, so its body, open or closed; never
- *  over Details, Sleep, Wake or any control that keeps its own press. */
-export const raisesOn = (target: { closest(sel: string): unknown } | null): boolean => pressOf(target, false) === "open";
+ *  where a press opens the initiative, so its body, open or closed, and the
+ *  id link, whose press opens the same (leftovers-19 FR-7, I33); never over
+ *  Details, Sleep, Wake or any control that keeps its own press. */
+export const raisesOn = (target: { closest(sel: string): unknown } | null): boolean =>
+  !!target?.closest(".ic-id") || pressOf(target, false) === "open";
 
 /** The one card whose Details are open after a press on a card's Details:
  *  the same card closes, another one replaces it (FR-2: one at a time). */
