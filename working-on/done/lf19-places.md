@@ -1,6 +1,6 @@
 ---
 title: "Settings has its heading, Help is an overlay, the bar's last marks"
-status: now
+status: done
 repos: [organizer]
 branch: lf19-places
 seat: pl-build
@@ -12,6 +12,7 @@ boundary: ["docs/specs/leftovers-19.md Boundary, lf19-places"]
 spec: "docs/specs/leftovers-19.md (FR-1 to FR-6; initiatives-view Amendment 4, I28-I32)"
 gate: "docs/specs/leftovers-19.md Acceptance, rows L1, L2, L3, L4, L5, L6 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -47,3 +48,15 @@ docs/specs/leftovers-19.md, rows L1, L2, L3, L4, L5, L6 and X0.
 - Spec gaps (for the FSE): FR-2 says "back link", but the built control is the whole rail hero as one button. Its accessible name is the hero's stats followed by "Initiatives", and its press lands on the initiative's own card (`openInitiatives(id)`). That matches I29's intent; the spec never said whether the back is a separate control.
 - For aglaea: U1, whether the opened `?` and the current gear should differ when both are lit.
 - Not verified in WKWebView: every on-screen row (L1 AX heading, L2 AXPress on the hero landing on Initiatives, L4 AXExpanded and `aria-current` count, L5 shot), because the screen was locked. They rest on vitest, on the computed styles above, and on the builder's AX dumps from 02:26 (`.wt-notes/pl-build/ax-L*.txt`, `L5-initiative-1280.png`), which agree. No shots were taken. Firebase states (L3) are vitest plus computed styles only, by rule.
+
+## Review
+- **Verdict: pass.** Unmet rows: none. Reviewer `pl-review`, 2026-10-11, commit 79d90499156cd96d664c07393ed4a6dee83af8dc (the branch did not move). Evidence in `.wt-notes/pl-review/`.
+- I ran these from a fresh clone at that SHA (removed after): `make test`, the three vitest files, the grep, a markup render, the review build. The diff stays inside the Boundary (TopBar, Settings, the Rail hero and its two helpers, the `.sync-stale`, Settings `h1`, `.crumbs b` and `.needs-me*` rules, tests) and touches neither No-go.
+- L1: `L1-L6-vitest.log` (Places, TopBar, place: 35 passed): `h1` `Settings` comes first, before Identity or Account, while loading and once loaded. AX: the builder's `ax-L1-settings.txt` has AXHeading level 1 `Settings` above Identity.
+- L2: vitest `heroBack` and `pressHero` (on an initiative, the hero reads `← Initiatives` and calls `openInitiatives(id)`). AX: the builder's `ax-L2-initiative.txt` and `ax-L2-after-back.txt` (after AXPress, the Initiatives tab is current=page, `h1` Initiatives).
+- L3: vitest over six Sync states. My own WKWebView render of my build's css (`styles-*.json`): Sync is `ghost` with a transparent background and border at compact, regular, fresh and stale; `stale` is rgb(217,70,239) = `--tone` and is the only magenta in the bar.
+- L4: vitest over five screens: `?` has `aria-expanded="true"` and no `aria-current`, and there is exactly one page mark, the screen's. AX: the builder's `ax-L4-help-over-{home,settings,initiative}.txt` agree (expanded=1; the one current=page is Home, Settings or `init-a`).
+- L5: my WKWebView render: the title is rgb(238,235,244) = `--fg`, 600, no decoration, no box-shadow, against the tabs' `--fg-muted` at 500. The builder's shot `L5-initiative-1280.png` agrees.
+- L6: `L6-grep.txt`: empty, rc 1.
+- X0: `X0-make-test.log` (16 go packages ok, 524 vitest), `X0-pnpm-build.log`, `X0-wails-build.log` all rc 0; `X0-git-status.txt` empty; no `package-lock.json`.
+- Not rerun by me: the review-process halves of L1, L2, L4 and L5. The Mac's screen was locked from 02:35, so AX gave back only the app element (a scratch window of my own read the same) and `screencapture -l` could not make an image. Those halves rest on the builder's 02:25 dumps, which match the code. L5 as written ("computed style in the review process") cannot run: the review page exposes AX only. For the FSE.
