@@ -351,7 +351,12 @@ keeps their place.
   navigates (Needs me) is never marked current, and an overlay's opener
   (Help) is `aria-expanded`, not current: the screen under it keeps its
   mark (initiatives-view A3, A4). A screen no tab marks has an `h1`
-  naming it.
+  naming it. **Current is a line, open is a surface**: the 2 px accent
+  underline marks the current place or icon, `--surface-selected` marks an
+  open disclosure (A5).
+- **A control does not move when it is pressed**: what it opens or hides
+  may move the content, never the control itself (initiatives-view A5,
+  the header's Details).
 - **A fact shows once per screen**: a shared component that repeats a field
   its host already shows takes an `omit`, never a second field set
   (initiatives-view A3, the header's Charter).

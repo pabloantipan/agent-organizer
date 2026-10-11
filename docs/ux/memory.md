@@ -384,6 +384,8 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 
 - 2026-10-11, A4: before leaning on "its heading names it", check the screen has one (Settings had none). An overlay is not a page: its opener is expanded, not current. Chrome buttons stay ghost; let a coloured word carry urgency instead of an accent fill.
 
+- 2026-10-11, A5: two states drawn the same (current and open) read as one; give each its own channel (a line for current, a surface for open). When a spec names a link inside a composite, say how big the hit area is, or the builder makes the whole thing the button (the rail hero).
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).

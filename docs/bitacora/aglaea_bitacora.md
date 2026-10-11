@@ -136,3 +136,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-10 — leftovers-17 review answers: initiatives-view Amendment 3 (one current mark, firebase bar folds at 1024, Charter omit, 1024 overflows), rows I22-I27; two design-system rules (237db96).
 - 2026-10-10 — accepted the FSE's fifth fold (Rescan to its glyph) into initiatives-view A3 §2.
 - 2026-10-11 — leftovers-18 UI review answers: initiatives-view Amendment 4 (Settings h1, rail back link to Initiatives, folds by class accepted, Sync ghost with magenta stale, Help aria-expanded, title by weight, id raises card, one Details label), rows I28-I34.
+- 2026-10-11 — leftovers-19 answers: initiatives-view Amendment 5 (current = line, open = surface; h1 no focus; back link its own button; focus raises card; Details pinned), rows I35-I38; two design-system rules.

@@ -536,6 +536,67 @@ cannot sign in safely) is accepted as is.
 | I33 | see the id as part of the card | hovering the id link raises the card |
 | I34 | open the header's Details without a jump | the button reads `Details` open or closed, at one height, with `aria-expanded` |
 
+## Amendment 5 (aglaea, 2026-10-11): from leftovers-19's UI reviews
+
+From sup56's close (`runs/2026-10-11-sup56-leftovers-19.md`), relayed by
+the FSE as a question.
+
+### 1. "Current" and "open" look different in the bar (places U1, card A3)
+
+- **Current is a line, open is a surface**, the same way for tabs and
+  icons. The current gear (and any current icon) takes the tabs' 2 px
+  accent underline under its icon and drops the filled `.on` surface.
+- An opened overlay's opener (`?` while Help is open) keeps
+  `--surface-selected` with no underline.
+- With Help open over Settings, the gear is underlined and `?` is filled,
+  so the two can be told apart.
+- The initiative's title stays current by weight (A4 §6). It is text, not a
+  control.
+
+### 2. The Settings heading takes no focus (places U2): as built
+
+Pressing the gear leaves focus on the gear. The bar stays mounted and the
+gear is now the current mark, so the keyboard keeps its place. The `h1` is
+for reading and for heading navigation, and gets no `tabindex`. No change.
+
+### 3. The rail's back link is its own button (places, spec gap)
+
+It was not intended as built. On an initiative the whole hero (client, id,
+the now, blocked and next counts) is one button whose press goes to
+Initiatives, so a press on a count goes somewhere unexpected, and the name
+reads as a list of numbers.
+
+- On an initiative, **`← Initiatives` is its own small button** at the top
+  of the hero, at least 24 px tall, named `Back to Initiatives`.
+- The rest of the hero is a summary and does not respond to presses.
+- On Home the hero stays one button (Home), as before.
+
+### 4. Focus raises the card as hover does (card A2)
+
+`:focus-visible` on `Open <id>` raises the card, so a keyboard user sees
+the same "this opens" as a pointer user.
+
+### 5. The header's Details never moves (cd-ui U1)
+
+At 1024 the goal line keeps a 20ch floor, so the bar wraps and pushes
+Details to a second line while closed. Open, the goal line goes and Details
+rises 22 px.
+
+- **Details is pinned to the first line's right end** and never wraps.
+- When the goal line cannot keep its floor beside the pills, the goal line
+  is what drops to a line of its own under the bar.
+- Opening removes that line and the content below moves. Details itself
+  stays at the same x and y.
+
+A1, the chevron swap matching the card, stays as built.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| I35 | tell "you are here" from "open" | the current icon has the 2 px accent underline and no fill; `?` with Help open has the selected surface and no underline; with Help over Settings both show, different |
+| I36 | go back without pressing the counts | on an initiative, `← Initiatives` is its own button (≥ 24 px, named `Back to Initiatives`); pressing the hero's counts does nothing; on Home the hero is still the Home button |
+| I37 | see by keyboard what opens the card | focus-visible on `Open <id>` raises the card |
+| I38 | open the header's Details without it moving | at 1024×640 with the rail open and at 1440×900, the Details button's frame is the same closed and open |
+
 ## Acceptance, in the lead's terms
 
 | # | The lead can | Checked by |
