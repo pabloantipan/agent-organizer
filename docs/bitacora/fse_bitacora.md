@@ -10,6 +10,8 @@ restating it (the discuss skill).
 - **C1 amended (07fead1, 0108):** a hover row in the review process needs the pointer. Gate-row lesson, 4th input kind: hover joins TCC (N2), window press (P1/P3) and floating panel (F2). Hover rows read computed style in Chromium or offscreen WebKit.
 - **Trap (sup56):** the screen locked at 02:35, and AX and screencapture then returned nothing. Post-lock screen rows rested on vitest, WebKit styles and pre-lock AX dumps. `caffeinate -i` does not stop the lock. Candidate for [for hephaistos] if it recurs.
 - **leftovers-20 gathering:** sent to aglaea (thread 01M4NCJ8S1DEGZHXBN2S5VD7S4): places U1/U2, the hero-as-back-link gap, card-details A1-A3, and the 22 px Details move at 1024 (cd-ui U1 sev 2; I34 "without a jump").
+- **Hephaistos closed four (claudecode 6f52c9a):** AX on the review build's pid is supervise 7b's first choice; spec-craft step 5 lists stylesheets and selectors per card; runs.jsonl read ≥2 min after probe -k; frozen-after-sleep carded as agent-slack seat-wake-freeze (until then, probe -r with the prelude).
+- **0116 proposed** (773de1a): leftovers-20, three cards; on accept start sup57.
 - Open, mine: Pablo's cut-off "And…"; which macOS the other laptop runs.
 
 ## HAND-OFF — 2026-10-09 evening, leftovers-15 running
