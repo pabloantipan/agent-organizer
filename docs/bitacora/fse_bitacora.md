@@ -6,7 +6,7 @@ restating it (the discuss skill).
 
 ## HAND-OFF — 2026-10-09 evening, leftovers-15 running
 
-- **Last SHA seen:** 71771dd. leftovers-17 merged and installed (v0.2.0-1658-gb4a60f5). 0114 ruled ("go"); sup55 (pid 89313, tab of 5498) runs leftovers-18, five cards, forecast 30 min-1 h.
+- **Last SHA seen:** adbe176. leftovers-18 merged (sup55; ~25 min working, 11 h wall, the Mac asleep 14:42-00:20; first-round passes); sup55 ended; installed v0.2.0-1714-gadbe176. No supervisor running. Leftovers-19 gathering: aglaea on cm-ui U1-U5, co-ui U1; .needs-me.on dead in shell.css; make test npm vs wails build pnpm; review build cannot run firebase (shared keychain service).
 - **01:0x:** after the sleep the lf18 seats' input was frozen (Enter/Escape ignored, alive S+), 2nd sighting after sup52. `probe -r sup55` with its prelude fixed it; sup55 restarts its cm-* seats. Sent [for hephaistos].
 - **lf18 gap 14:42 to 00:29:** the lid closed at 14:42 (pmset: Clamshell Sleep) with only current-mark's reviews left; resumed on wake. Not an overrun; sup55's run record should count awake time apart.
 - **Rejected (df3ae53, sl-build S1):** "statusline samples stop after one" was wrong. Supervisors read runs.jsonl within a minute of probe -k, before Retire's 2-min grace wrote the final lines; the open lines carry the first sample by design. Hephaistos's redraw lead ruled out; correction sent [for hephaistos]. Real but small: the last sample lags the bill by one turn; S2 reads the transcript.
