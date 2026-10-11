@@ -6,7 +6,7 @@ branch: lf20-bar-marks
 seat: bm-build
 stage: one-window
 updated: 2026-10-11
-next: "review: lf20-bar-marks, B1 and X0 met, 2586950"
+next: "review: lf20-bar-marks, B1 and X0 met, d9b7331"
 depends_on: []
 boundary: ["docs/specs/leftovers-20.md Boundary, lf20-bar-marks"]
 spec: "docs/specs/leftovers-20.md (FR-1, FR-2; initiatives-view Amendment 5, I35)"
@@ -24,4 +24,4 @@ docs/specs/leftovers-20.md, rows B1 and X0.
 - [x] X0: clean clone, `make test`, `pnpm run build`, `wails build` pass, `git status --porcelain` empty. `.wt-notes/bm-build/x0.txt`
 
 ## Done
-- 2586950: `.gear.on` is the tabs' 2 px accent underline with no fill; `?` open is `.gear.open`, `--surface-selected`, no line (bm-build, 2026-10-11).
+- d9b7331: `.gear.on` is the tabs' 2 px accent underline with no fill; `?` open is `.gear.open`, `--surface-selected`, no line (bm-build, 2026-10-11).
