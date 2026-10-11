@@ -86,10 +86,10 @@ describe("H1: a fact shows once; one Charter with omit (FR-4)", () => {
 });
 
 describe("H2: hover raises a card on its body only, open or closed (FR-5)", () => {
-  it("the body raises; Details, Sleep, Wake (buttons), the id link and the confirm do not", () => {
+  it("the body and the id link raise (leftovers-19 FR-7); Details, Sleep, Wake (buttons) and the confirm do not", () => {
     expect(raisesOn(el("div"))).toBe(true);
     expect(raisesOn(el("button"))).toBe(false);
-    expect(raisesOn(el("a"))).toBe(false);
+    expect(raisesOn(el("a", ".ic-id"))).toBe(true);
     expect(raisesOn(el("div", "[role=group]"))).toBe(false);
     expect(raisesOn(null)).toBe(false);
   });
