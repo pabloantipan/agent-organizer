@@ -1,6 +1,6 @@
 ---
 title: "The rail's back to Initiatives is its own button"
-status: now
+status: done
 repos: [organizer]
 branch: lf20-back-button
 seat: bk-build
@@ -39,3 +39,16 @@ Pass: R1, R2 and X0 are met at 4810e18.
 - X0: in a clean clone at 4810e18, `XDG_DATA_HOME=$(mktemp -d) make test` passes (532/532 vitest, go ok), and so do `pnpm run build` and `wails build`. `git status --porcelain` is empty (`x0-*.log`).
 - Unmet: none.
 - Reviewer bk-review, 2026-10-11, commit 4810e18cb858978d5041b36d2e281a4c9370d2fe. There is no `## UI review` yet, so status and place are unchanged.
+
+## UI review
+Pass. Every row checked at 4810e18cb858978d5041b36d2e281a4c9370d2fe, on my own Deltagos Review build (fixture, `auth: off`). Evidence is under `.wt-notes/bk-ui/`.
+
+- R1 (FR-3, I36): on init-a, the AX tree has exactly one AXButton `Back to Initiatives`. It is 85x24 at both 1440x900 and 1024x640, and it sits first inside the `init-a summary` group. AXPress on it opens Initiatives (`place-tab.on`). Shots `wkwebview-1440x900-R1-initiative.png`, `wkwebview-1024x640-R1-hero-crop.png`; `r1-init-a-tree.txt`, `r1-r2-ax.txt`. Vitest `Rail.hero.test.tsx` and `Places.test.tsx` pass, 13/13.
+- R2 (FR-4): the client, id and counts are an AXGroup with static text and no button. AXPress on the group leaves the app on init-a, Overview (`r1-r2-ax.txt`). On Home the hero is still one `rail-hero.active` button (`r2-home-ax.txt`, `wkwebview-1024x640-R2-home-crop.png`). The Home markup is the same as main's except the removed back line.
+- Design system: the back button uses tokens (`--accent-fg`, `--surface-hover`, `--radius-sm`). It keeps the global `:focus-visible` ring. The summary has no hover change and a default cursor, so it no longer looks pressable. Its target is ≥ 24 px (2.5.8).
+- Findings sev 4/3: none.
+- Sev 1, recorded: on Home the hero's accessible name reads "Working on Home 1 now1 blocked11 next". It is a list of numbers, the same complaint §3 made about the initiative hero. It is outside FR-4, which says "unchanged". Proposal: name it `Home` and keep the counts as its description.
+- Spec gaps (FSE): none for this card.
+- For aglaea: whether the Home hero should get the same split (the sev 1 above).
+- Not verified in WKWebView: keyboard focus ring on `Back to Initiatives`, and where focus lands after Back (no synthetic keys under 0108). Judged from CSS: the global `:focus-visible` outline is 2 px with a 2 px offset, nothing clips it inside the hero's 16 px padding. Hover fill not verified (no pointer hovers).
+- UI reviewer bk-ui, 2026-10-11.
