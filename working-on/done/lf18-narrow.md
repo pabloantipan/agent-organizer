@@ -5,7 +5,7 @@ repos: [organizer]
 branch: lf18-narrow
 seat: nw-build
 stage: one-window
-updated: 2026-10-10
+updated: 2026-10-11
 next: "review: lf18-narrow, gate met (W1, W2, X0), a793f26"
 depends_on: []
 boundary: ["docs/specs/leftovers-18.md Boundary, lf18-narrow"]
@@ -49,6 +49,7 @@ nw-ui, 2026-10-10, on a793f26 (Deltagos Review from `make review-build` in a det
 
 Findings
 - U1 (3, owned by lf18-charter-once H4, not this card). The lead cannot read Overview's right side at 1024 on an initiative with every header pill: init-a's gate lozenges (`ruled`, `waiting`) are cut at the window edge. Evidence `web-1024x640-W1-overview.png/.txt`: `.subtabs` 877 px from x 1250, `.ov` ends x 2093 > 2024; the header's pills set the pane's minimum, Overview only fills it. I27 ("nothing runs past the right edge") is met only once charter-once's pills wrap; re-shoot init-a at 1024 after both merge.
+  - 2026-10-11, on main at 1fd083d: resolved. At 1024×640 rail open, init-a's header 774 px folded and open, `.ov` 720 px ending at x 1990, stacked; no AX element past x 2024 and no horizontal scroll bar in the tree (scrollWidth cannot be read from WKWebView without the inspector; the AX frames stand in). Evidence `.wt-notes/nw-ui/web-1024x640-W1-overview-main1fd083d{,-details}.{png,txt}`.
 - U2 (1). The stack point is Overview's own box, not the pane: `.ov` is the pane less its padding, so it stacks under ~934 px of pane, not 880 (at window 1180 the pane is 930 and it still stacks; side by side at 1200). Evidence: widths probe 1120/1150/1180/1200. Harmless, arguably better; proposal: say "Overview's box" in the spec or measure the pane.
 
 Spec gaps (for the FSE)
