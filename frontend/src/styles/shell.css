@@ -66,14 +66,16 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
    firebase folded it clamps last, to 12 characters (A3 §2, step 4). */
 .crumbs b.crumb-id { max-width: 22ch; }
 .topbar.fold .crumbs b.crumb-id { max-width: 12ch; }
-.crumbs b { color: var(--fg); font-weight: var(--weight-medium); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* On an initiative the title is current by weight and ink, not a line
+   (A4 §6, I32): --fg at 600 against the tabs' --fg-muted at 500; an
+   underline here would read as a tab. */
+.crumbs b { color: var(--fg); font-weight: var(--weight-semibold); text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .crumbs b.mono { font-size: var(--font-size-md); }
 .crumb { background: transparent; border-color: transparent; color: var(--fg-muted); padding: 2px var(--space-2); min-height: var(--control-sm); }
 .crumb:hover { color: var(--fg); background: var(--surface-hover); border-color: transparent; }
 .crumb-sep { color: var(--fg-subtle); }
 .needs-me { background: transparent; color: var(--fg-muted); }
 .needs-me:hover { color: var(--fg); }
-.needs-me.on { color: var(--fg); background: var(--surface-selected); border-color: var(--border-strong); }
 .badge-count {
   font-family: var(--mono); font-size: var(--font-size-xs); line-height: var(--line-xs); font-weight: var(--weight-semibold);
   padding: 0 var(--space-1-5); border-radius: var(--radius-xs); min-width: 18px; text-align: center;

@@ -82,7 +82,7 @@ export function TopBar() {
           Mac · your work · the app, 16 px between groups and no rules. The
           version is in the brand's hover at every width (FR-5). */}
       <span className="brand" title={version ? `Deltagos ${version}` : "Deltagos"}>Deltagos</span>
-      <Where screen={screen} selectedInitiative={selectedInitiative} help={help} go={go} goHome={goHome} openInitiatives={openInitiatives} openUsage={openUsage} />
+      <Where screen={screen} selectedInitiative={selectedInitiative} go={go} goHome={goHome} openInitiatives={openInitiatives} openUsage={openUsage} />
       <span className="tb-group tb-mac">
         <MemoryButton />
         {status}
@@ -98,8 +98,10 @@ export function TopBar() {
         <button className={`ghost ${fold ? "gear" : ""}`} onClick={refresh} disabled={loading} title="Rescan local disk" aria-label={fold ? (loading ? "Rescan, scanning" : "Rescan") : undefined}>
           <RefreshCw size={14} className={loading ? "spin" : ""} />{fold ? null : <> {loading ? "scanning…" : "Rescan"}</>}
         </button>
+        {/* Quiet in every state (A4 §4, I30): the accent is for actions
+            that commit in the content; stale is the signal, in magenta. */}
         {identity && (
-          <button className={stale ? "ghost" : "primary"} onClick={sync} disabled={syncing} title={fold ? `${syncName}\nPush this machine, pull all` : "Push this machine, pull all"} aria-label={fold ? syncName : undefined}>
+          <button className="ghost" onClick={sync} disabled={syncing} title={fold ? `${syncName}\nPush this machine, pull all` : "Push this machine, pull all"} aria-label={fold ? syncName : undefined}>
             <RefreshCcwDot size={14} className={syncing ? "spin" : ""} /> {syncing ? "syncing…" : stale ? <>Sync · <span className="sync-stale">stale</span></> : "Sync"}
           </button>
         )}
@@ -119,22 +121,23 @@ export function TopBar() {
   );
 }
 
-type WhereProps = { screen: Screen; selectedInitiative: string | null; help: boolean; go: (to: () => void) => () => void; goHome: () => void; openInitiatives: () => void; openUsage: () => void };
+type WhereProps = { screen: Screen; selectedInitiative: string | null; go: (to: () => void) => () => void; goHome: () => void; openInitiatives: () => void; openUsage: () => void };
 
 /** Where you are (initiatives-view Amendment 3, I22, I23): Home,
  *  Initiatives and Usage as one nav named Places, then, inside an
  *  initiative, its id as the screen's title, after the places with the
  *  group gap and no slash. One mark per screen: the place, or on an
  *  initiative the title, with Initiatives as its parent (`placeOf`).
- *  Settings and Help mark their own icon and show no crumb. */
-export function Where({ screen, selectedInitiative, help, go, goHome, openInitiatives, openUsage }: WhereProps) {
-  const crumb = screen === "initiative" && !help ? selectedInitiative ?? "Agents" : null;
+ *  Settings marks its own icon and shows no crumb. Help is an overlay
+ *  (Amendment 4 §5, I31): the screen under it keeps its marks. */
+export function Where({ screen, selectedInitiative, go, goHome, openInitiatives, openUsage }: WhereProps) {
+  const crumb = screen === "initiative" ? selectedInitiative ?? "Agents" : null;
   return (
     <span className="tb-group tb-where">
       <nav className="places" aria-label="Places">
-        <PlaceTab label="Home" place="home" screen={screen} help={help} onClick={go(goHome)} title="Needs me and every initiative" />
-        <PlaceTab label="Initiatives" place="initiatives" screen={screen} help={help} onClick={go(openInitiatives)} title="Every initiative as a card: awake, asleep and archived" />
-        <PlaceTab label="Usage" place="usage" screen={screen} help={help} onClick={go(openUsage)} title="Tokens and money, week by week" />
+        <PlaceTab label="Home" place="home" screen={screen} onClick={go(goHome)} title="Needs me and every initiative" />
+        <PlaceTab label="Initiatives" place="initiatives" screen={screen} onClick={go(openInitiatives)} title="Every initiative as a card: awake, asleep and archived" />
+        <PlaceTab label="Usage" place="usage" screen={screen} onClick={go(openUsage)} title="Tokens and money, week by week" />
       </nav>
       {crumb && (
         <span className="crumbs">
@@ -146,15 +149,16 @@ export function Where({ screen, selectedInitiative, help, go, goHome, openInitia
 }
 
 /** The app's own controls, icons only: Compact to icon (only where the
- *  icon runs), Help, Settings. Help and Settings are screens of no place,
- *  so the open one is the screen's mark (I22). */
+ *  icon runs), Help, Settings. Settings is a screen of no place, so on it
+ *  the gear is the screen's mark (I22). Help is an overlay, opened and not
+ *  current (Amendment 4 §5, I31): `?` is expanded and selected while open,
+ *  never `aria-current`, and Settings under it stays current. */
 export function AppControls({ floats, help, settings, onCompact, onHelp, onSettings }: { floats: boolean; help: boolean; settings: boolean; onCompact: () => void; onHelp: () => void; onSettings: () => void }) {
-  const onSettingsPage = settings && !help;
   return (
     <>
       {floats && <button className="ghost gear" onClick={onCompact} title="Compact to icon (the icon floats on every desktop)" aria-label="Compact to icon"><CompactIcon /></button>}
-      <button className={`ghost gear ${help ? "on" : ""}`} onClick={onHelp} title="Help: how we build, from help_doc" aria-label="Help" aria-current={help ? "page" : undefined}><CircleHelp size={14} /></button>
-      <button className={`ghost gear ${onSettingsPage ? "on" : ""}`} onClick={onSettings} title="Settings" aria-label="Settings" aria-current={onSettingsPage ? "page" : undefined}><Settings size={14} /></button>
+      <button className={`ghost gear ${help ? "on" : ""}`} onClick={onHelp} title="Help: how we build, from help_doc" aria-label="Help" aria-expanded={help} aria-haspopup="dialog"><CircleHelp size={14} /></button>
+      <button className={`ghost gear ${settings ? "on" : ""}`} onClick={onSettings} title="Settings" aria-label="Settings" aria-current={settings ? "page" : undefined}><Settings size={14} /></button>
     </>
   );
 }
@@ -162,8 +166,8 @@ export function AppControls({ floats, help, settings, onCompact, onHelp, onSetti
 /** One place as a quiet text tab: the current one is `aria-current="page"`
  *  with the accent underline; the parent of the open initiative carries the
  *  underline in --fg-subtle and no `aria-current`, still a link (I22). */
-function PlaceTab({ label, place, screen, help, onClick, title }: { label: string; place: Place; screen: Screen; help: boolean; onClick: () => void; title: string }) {
-  const mark = markOf(place, screen, help);
+function PlaceTab({ label, place, screen, onClick, title }: { label: string; place: Place; screen: Screen; onClick: () => void; title: string }) {
+  const mark = markOf(place, screen);
   return (
     <button type="button" className={`place-tab ${mark === "current" ? "on" : mark === "parent" ? "parent" : ""}`} aria-current={mark === "current" ? "page" : undefined} onClick={onClick} title={title}>{label}</button>
   );
