@@ -299,20 +299,12 @@ export function Rail() {
     <>
     <nav id={RAIL_ID} className="rail" aria-label="initiatives">
       <button className="rail-icon strip-toggle" onClick={() => setRailCollapsed(true)} title="collapse the rail" aria-label="Initiatives rail" aria-expanded aria-controls={RAIL_ID}><PanelLeftClose size={14} /></button>
-      <button
-        className={`rail-hero ${selectedInitiative === null ? "active" : ""}`}
-        onClick={() => pressHero(back, selectedInitiative, { openInitiatives, setSelectedInitiative })}
-        title={back ? "Back to Initiatives" : "Home: what needs you, and every initiative"}
-      >
-        <div className="eyebrow">{hero.eyebrow}</div>
-        <div className="name">{hero.name}</div>
-        <div className="stats">
-          <div className="stat"><b>{hero.now}</b><span>now</span></div>
-          <div className="stat"><b>{hero.blocked}</b><span>blocked</span></div>
-          <div className="stat"><b>{hero.next}</b><span>next</span></div>
-        </div>
-        {back && <div className="hero-back"><ArrowLeft size={12} /> Initiatives</div>}
-      </button>
+      <RailHero
+        hero={hero}
+        back={back}
+        active={selectedInitiative === null}
+        onPress={() => pressHero(back, selectedInitiative, { openInitiatives, setSelectedInitiative })}
+      />
       <div className="rail-list">
         {roles.length > 0 && (
           <section className="rail-group roles" aria-label="Roles">
@@ -474,6 +466,41 @@ export function StripFoldButtons({ asleep, archived, onOpen }: { asleep: string[
         );
       })}
     </>
+  );
+}
+
+type Hero = { eyebrow: string; name: string; now: number; blocked: number; next: number };
+
+/** The rail's hero (leftovers-20 FR-3, FR-4; initiatives-view A5 §3, I36).
+ *  On Home it is one button, Home. On an initiative it is a summary that
+ *  does not respond to presses, with `← Initiatives` as its own button on
+ *  top, so a press on the counts never leaves the initiative. */
+export function RailHero({ hero, back, active, onPress }: { hero: Hero; back: boolean; active: boolean; onPress: () => void }) {
+  const body = (
+    <>
+      <div className="eyebrow">{hero.eyebrow}</div>
+      <div className="name">{hero.name}</div>
+      <div className="stats">
+        <div className="stat"><b>{hero.now}</b><span>now</span></div>
+        <div className="stat"><b>{hero.blocked}</b><span>blocked</span></div>
+        <div className="stat"><b>{hero.next}</b><span>next</span></div>
+      </div>
+    </>
+  );
+  if (!back) {
+    return (
+      <button className={`rail-hero ${active ? "active" : ""}`} onClick={onPress} title="Home: what needs you, and every initiative">
+        {body}
+      </button>
+    );
+  }
+  return (
+    <section className="rail-hero summary" aria-label={`${hero.name} summary`}>
+      <button className="hero-back" onClick={onPress} aria-label="Back to Initiatives" title="Back to Initiatives">
+        <ArrowLeft size={12} aria-hidden="true" /> Initiatives
+      </button>
+      {body}
+    </section>
   );
 }
 

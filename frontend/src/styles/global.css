@@ -109,7 +109,16 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
 .rail-hero .stat:nth-child(1) b { color: var(--now); }
 .rail-hero .stat:nth-child(2) b { color: var(--blocked); }
 .rail-hero .stat:nth-child(3) b { color: var(--next); }
-.rail-hero .hero-back { margin-top: 12px; font-size: var(--font-size-sm); color: var(--accent-fg); }
+/* On an initiative the hero is a summary, not a control (I36): only its
+   back button responds. */
+.rail-hero.summary { cursor: default; }
+.rail-hero.summary:hover { border-color: var(--border); background: var(--panel); }
+.rail-hero .hero-back {
+  min-height: 24px; padding: 0 8px 0 4px; margin: -6px 0 8px -6px;
+  font-size: var(--font-size-sm); color: var(--accent-fg);
+  background: transparent; border-color: transparent; border-radius: var(--radius-sm);
+}
+.rail-hero .hero-back:hover { background: var(--surface-hover); border-color: transparent; }
 .rail-label { font-size: var(--font-size-sm); color: var(--dim); margin: 12px 8px 6px 18px; display: flex; align-items: center; gap: 2px; }
 .rail-label .rail-icon { opacity: 0; }
 .rail-list:hover .rail-label .rail-icon { opacity: 1; }
