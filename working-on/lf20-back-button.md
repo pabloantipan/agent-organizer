@@ -1,12 +1,12 @@
 ---
 title: "The rail's back to Initiatives is its own button"
-status: next
+status: now
 repos: [organizer]
 branch: lf20-back-button
 seat: bk-build
 stage: one-window
 updated: 2026-10-11
-next: "bk-build: build on branch lf20-back-button (sup57, wave 1)"
+next: "bk-build: building FR-3, FR-4 on branch lf20-back-button (sup57, wave 1)"
 depends_on: []
 boundary: ["docs/specs/leftovers-20.md Boundary, lf20-back-button"]
 spec: "docs/specs/leftovers-20.md (FR-3, FR-4; initiatives-view Amendment 5, I36)"
