@@ -3,10 +3,10 @@ title: "Focus raises the card; Details never moves"
 status: next
 repos: [organizer]
 branch: lf20-card-details
-seat:
+seat: dt-build
 stage: one-window
 updated: 2026-10-11
-next: "sup57 runs it (0116 ruled ok, 2026-10-11)"
+next: "dt-build: build on branch lf20-card-details (sup57, wave 1)"
 depends_on: []
 boundary: ["docs/specs/leftovers-20.md Boundary, lf20-card-details"]
 spec: "docs/specs/leftovers-20.md (FR-5, FR-6; initiatives-view Amendment 5, I37, I38)"

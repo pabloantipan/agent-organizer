@@ -3,10 +3,10 @@ title: "Current is a line, open is a surface, in the bar"
 status: next
 repos: [organizer]
 branch: lf20-bar-marks
-seat:
+seat: bm-build
 stage: one-window
 updated: 2026-10-11
-next: "sup57 runs it (0116 ruled ok, 2026-10-11)"
+next: "bm-build: build on branch lf20-bar-marks (sup57, wave 1)"
 depends_on: []
 boundary: ["docs/specs/leftovers-20.md Boundary, lf20-bar-marks"]
 spec: "docs/specs/leftovers-20.md (FR-1, FR-2; initiatives-view Amendment 5, I35)"
