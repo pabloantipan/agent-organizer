@@ -52,10 +52,18 @@ vitest plus computed styles (I24 precedent, accepted by Aglaea).
 | L4 | 4 | vitest with Help open over Home and over an initiative; AX tree of the review process with Help open | `?` has `aria-expanded="true"`, no `aria-current`; exactly one `aria-current="page"`, the screen's |
 | L5 | 5 | computed style of the title on an initiative in the review process | color `--fg`, weight 600, no underline |
 | L6 | 6 | `grep -rn "needs-me.on" frontend/src` | nothing |
-| C1 | 7 | vitest of the hover class with the pointer on the id link; computed style in the review process | raised |
+| C1 | 7 | vitest of the hover class with the pointer on the id link; computed style of the hovered state in Chromium or offscreen WebKit (Amendment 5) | raised |
 | C2 | 8 | vitest of the header button open and closed; AX frame heights in the review process | label `Details` both ways, `aria-expanded` true/false, equal heights |
 | P1 | 9 | from a clean clone: `make test`, then `ls frontend/package-lock.json` and `git status --porcelain` | pass; no lockfile; tree clean |
 | X0 | all | `XDG_DATA_HOME=$(mktemp -d) make test`, `cd frontend && npm run build` (pnpm after lf19-one-pm), `wails build`, then `git status --porcelain` | pass, empty |
+
+Amendment 5, 2026-10-11, the FSE, per 0108, from sup56 (thread
+01M4MQEF8MNF7GE2G9DSYNDEB5): C1's hover in the review process needs the
+pointer, which 0108 forbids; it is met by vitest plus the hovered state's
+computed style in Chromium or offscreen WebKit, as cd-build and cd-review
+did (.wt-notes/cd-build/c1-c2-chromium-1024x640.json). C2 checks heights
+only; the 22 px horizontal move of Details at 1024 (cd-ui U1, sev 2) is a
+leftovers-20 item, not a fail of this row.
 
 ## Boundary
 
