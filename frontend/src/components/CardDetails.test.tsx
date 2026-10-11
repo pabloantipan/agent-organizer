@@ -74,8 +74,11 @@ describe("C2: the header's Details reads one label, one height, aria-expanded (F
     expect(src("./InitiativeHeader.tsx")).not.toContain("Hide details");
   });
 
-  it("one height and the chevron turns when open", () => {
-    expect(src("../styles/header.css")).toMatch(/\.ihead \.ihead-details \{[^}]*height: var\(--control-sm\)[^}]*white-space: nowrap/);
-    expect(src("../styles/shell.css")).toContain('.ihead-details[aria-expanded="true"] svg { transform: rotate(180deg); }');
+  it("one height, and the chevron turns by swapping down for up, never rotated", () => {
+    const css = src("../styles/header.css");
+    expect(css).toMatch(/\.ihead \.ihead-details \{[^}]*height: var\(--control-sm\)[^}]*white-space: nowrap/);
+    expect(css).toMatch(/\.ihead \.ihead-details\[aria-expanded="true"\] svg \{ transform: none;/);
+    expect(button(false).tag).toContain("lucide-chevron-down");
+    expect(button(true).tag).toContain("lucide-chevron-up");
   });
 });

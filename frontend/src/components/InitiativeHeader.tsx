@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { ChevronDown, ChevronRight, Code2, FileText, Lock, Route } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronUp, Code2, FileText, Lock, Route } from "lucide-react";
 import type { merge, model } from "../../wailsjs/go/models";
 import { dateWords, parseISO, today } from "../lib/dates";
 import { api } from "../hooks/useWails";
@@ -188,8 +188,9 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
         <span className="spacer" />
         <button className="ihead-details" aria-expanded={headerOpen} aria-controls={`ihead-open-${i.id}`} onClick={() => setHeaderOpen(!headerOpen)}>
           {/* One label and one height open or closed, the chevron turning, as
-              the card's Details (leftovers-19 FR-8, I34). */}
-          Details <ChevronDown size={14} aria-hidden />
+              the card's Details (leftovers-19 FR-8, I34): swapped, not rotated,
+              since WebKit's AX frame of a rotated svg grows the button's. */}
+          Details {headerOpen ? <ChevronUp size={14} aria-hidden /> : <ChevronDown size={14} aria-hidden />}
         </button>
       </div>
       {unreadOpen && unread.length > 0 && <UnreadFiles id={`ihead-unread-${i.id}`} files={unread} root={i.path} local={i.local} />}
