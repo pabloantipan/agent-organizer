@@ -51,7 +51,8 @@
    hand, and the surface rises one step while the pointer is on the body,
    open or closed; over Details, Sleep, Wake or the open details it does not
    (leftovers-18 FR-5, I26). .raised is set from the pointer, since Safari
-   15.0 has no :has(). */
+   15.0 has no :has(). Keyboard focus on the id link raises it the same
+   (leftovers-20 FR-5, I37): .raised is set from :focus-visible as well. */
 .ic-main { display: grid; gap: var(--space-1); align-content: start; min-width: 0; cursor: pointer; }
 .ic.raised { background: var(--surface-hover); }
 .ic-head { display: flex; align-items: center; gap: var(--space-2); min-width: 0; flex-wrap: wrap; }

@@ -157,35 +157,39 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
   return (
     <header className={`ihead ${headerOpen ? "open" : "folded"} ${widthClass}`}>
       <div className="ihead-bar">
-        {/* A landing on the initiative (a role drawer's initiative link)
-            puts focus on its title (leftovers-11 FR-2). */}
-        <h1 className="ihead-id" tabIndex={-1} data-initiative={i.id}>
-          {i.id}
-          {i.client && <span className="lz tone">{i.client}</span>}
-          {readOnly && <span className="lz read-only" title={`${readOnly}: nothing here can be ruled, moved, commented, posted or started`}><Lock size={12} aria-hidden /> {readOnly}: read-only</span>}
-          {/* Asleep: the header carries no Wake (0104 A over C); the link
-              lands on its card in Initiatives with focus on its Wake. */}
-          {readOnly === "asleep" && <button className="ihead-wake-link" onClick={() => openInitiatives(`wake:${i.id}`)}>Wake in Initiatives ›</button>}
-        </h1>
-        {barStage && (shown ? (
-          <button className="ihead-stage" onClick={() => openStage(i.id, shownAt)} title={`${shown.title || shown.id}: open it in Roadmap`}
-            aria-label={`Roadmap, ${pos.label}: ${shown.title || shown.id}. Open it in Roadmap`}>
-            <Route size={13} aria-hidden />
-            <span className="num">{pos.current >= 0 ? `Stage ${pos.current + 1} of ${stages.length} · now` : pos.label}</span>
-            <span className="ihead-stage-t">· {shown.title || shown.id}</span>
-            <ChevronRight className="stg-chev" size={12} aria-hidden />
-          </button>
-        ) : <span className="ihead-stage none"><Route size={13} aria-hidden /> no roadmap yet</span>)}
-        {chip && first ? (
-          <button className="lz waiting ihead-chip" onClick={() => openDecision(i.id, first)} title="open Decisions on the first record waiting on a ruling">{chip}</button>
-        ) : headerOpen ? <span className="ihead-nochip">no decision waiting</span> : null}
-        {unread.length > 0 && (
-          <button className="lz warning ihead-chip" aria-expanded={unreadOpen} aria-controls={`ihead-unread-${i.id}`} onClick={() => setUnreadOpen(!unreadOpen)}
-            title="the files the scan skipped, with why; fix them and they read again">{unreadLabel(unread.length)}</button>
-        )}
-        {i.target && <span className="ihead-target">target <b className="num">{dateWords(i.target)}</b></span>}
-        {!headerOpen && <span className={`ihead-goal-line ${i.goal ? "" : "missing"}`} title={i.goal || undefined}>{i.goal || "no goal yet"}</span>}
-        <span className="spacer" />
+        {/* The pills wrap among themselves; Details stays outside them, at
+            the first line's right end, so it never wraps and opening it
+            leaves its frame where it was (leftovers-20 FR-6, I38). */}
+        <div className="ihead-pills">
+          {/* A landing on the initiative (a role drawer's initiative link)
+              puts focus on its title (leftovers-11 FR-2). */}
+          <h1 className="ihead-id" tabIndex={-1} data-initiative={i.id}>
+            {i.id}
+            {i.client && <span className="lz tone">{i.client}</span>}
+            {readOnly && <span className="lz read-only" title={`${readOnly}: nothing here can be ruled, moved, commented, posted or started`}><Lock size={12} aria-hidden /> {readOnly}: read-only</span>}
+            {/* Asleep: the header carries no Wake (0104 A over C); the link
+                lands on its card in Initiatives with focus on its Wake. */}
+            {readOnly === "asleep" && <button className="ihead-wake-link" onClick={() => openInitiatives(`wake:${i.id}`)}>Wake in Initiatives ›</button>}
+          </h1>
+          {barStage && (shown ? (
+            <button className="ihead-stage" onClick={() => openStage(i.id, shownAt)} title={`${shown.title || shown.id}: open it in Roadmap`}
+              aria-label={`Roadmap, ${pos.label}: ${shown.title || shown.id}. Open it in Roadmap`}>
+              <Route size={13} aria-hidden />
+              <span className="num">{pos.current >= 0 ? `Stage ${pos.current + 1} of ${stages.length} · now` : pos.label}</span>
+              <span className="ihead-stage-t">· {shown.title || shown.id}</span>
+              <ChevronRight className="stg-chev" size={12} aria-hidden />
+            </button>
+          ) : <span className="ihead-stage none"><Route size={13} aria-hidden /> no roadmap yet</span>)}
+          {chip && first ? (
+            <button className="lz waiting ihead-chip" onClick={() => openDecision(i.id, first)} title="open Decisions on the first record waiting on a ruling">{chip}</button>
+          ) : headerOpen ? <span className="ihead-nochip">no decision waiting</span> : null}
+          {unread.length > 0 && (
+            <button className="lz warning ihead-chip" aria-expanded={unreadOpen} aria-controls={`ihead-unread-${i.id}`} onClick={() => setUnreadOpen(!unreadOpen)}
+              title="the files the scan skipped, with why; fix them and they read again">{unreadLabel(unread.length)}</button>
+          )}
+          {i.target && <span className="ihead-target">target <b className="num">{dateWords(i.target)}</b></span>}
+          {!headerOpen && <span className={`ihead-goal-line ${i.goal ? "" : "missing"}`} title={i.goal || undefined}>{i.goal || "no goal yet"}</span>}
+        </div>
         <button className="ihead-details" aria-expanded={headerOpen} aria-controls={`ihead-open-${i.id}`} onClick={() => setHeaderOpen(!headerOpen)}>
           {/* One label and one height open or closed, the chevron turning, as
               the card's Details (leftovers-19 FR-8, I34): swapped, not rotated,

@@ -6,7 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { merge } from "../../wailsjs/go/models";
 import { escapeCloses } from "../lib/focus";
-import { CardDetails, detailsAfter, InitiativesView, pressOf } from "./InitiativesView";
+import { CardDetails, detailsAfter, focusVisible, InitiativesView, pressOf } from "./InitiativesView";
 import { InitiativeHeader } from "./InitiativeHeader";
 
 // zustand answers a server render with the store's initial state, so the
@@ -174,5 +174,66 @@ describe("C2: Details, the Charter and the Workspace (FR-2)", () => {
     expect(css).toContain(".ic.open { grid-column: 1 / -1; }");
     expect(css).toMatch(/\.ic-details \{[^}]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
     expect(css).toContain("@media (max-width: 1279px) { .ic-details { grid-template-columns: minmax(0, 1fr); } }");
+  });
+});
+
+describe("D1: keyboard focus on Open <id> raises the card as hover does (leftovers-20 FR-5, I37)", () => {
+  const src = readFileSync(new URL("./InitiativesView.tsx", import.meta.url), "utf8") as string;
+  const css = readFileSync(new URL("../styles/initiatives.css", import.meta.url), "utf8") as string;
+
+  it("focus-visible counts, a pointer's focus does not; WebKit without :focus-visible counts any focus", () => {
+    expect(focusVisible({ matches: (s) => s === ":focus-visible" })).toBe(true);
+    expect(focusVisible({ matches: () => false })).toBe(false);
+    expect(focusVisible({ matches: () => { throw new SyntaxError("unknown pseudo-class"); } })).toBe(true);
+  });
+
+  it("the id link sets the card's focus from focus-visible and clears it on blur", () => {
+    expect(src).toContain("onFocus={(e) => setFocused(focusVisible(e.currentTarget) ? c.id : null)} onBlur={() => setFocused(null)}");
+  });
+
+  it("focus and hover put the same class on the card, so the raise is hover's own rule", () => {
+    expect(src).toContain('${raised === c.id || focused === c.id ? "raised" : ""}');
+    expect(css).toContain(".ic.raised { background: var(--surface-hover); }");
+    expect(css).not.toMatch(/\.ic(\.\w+)*:focus/); // no second look for focus
+  });
+});
+
+describe("D2: the header's Details keeps one frame open and closed (leftovers-20 FR-6, I38)", () => {
+  const css = readFileSync(new URL("../styles/header.css", import.meta.url), "utf8") as string;
+  const head = (open: boolean) => {
+    const i = init({});
+    useBoard.setState({ view: viewOf([i]), agents: null, headerOpen: open, sub: "overview", widthClass: "regular" });
+    return renderToStaticMarkup(<InitiativeHeader initiative={i} />);
+  };
+  const bar = (h: string) => {
+    const pills = h.indexOf('<div class="ihead-pills">');
+    const details = h.indexOf('<button class="ihead-details"');
+    return { pills, details, pillsEnd: h.lastIndexOf("</div>", details) };
+  };
+
+  it("Details is outside the pills, after them, open and closed, with aria-expanded", () => {
+    for (const open of [false, true]) {
+      const h = head(open);
+      const b = bar(h);
+      expect(b.pills).toBeGreaterThan(-1);
+      expect(b.details).toBeGreaterThan(b.pillsEnd);
+      expect(h).toMatch(new RegExp(`<button class="ihead-details" aria-expanded="${open}"`));
+    }
+  });
+
+  it("closed, the goal line is one of the pills, so it is what wraps under the bar; open it is gone", () => {
+    const closed = head(false);
+    const b = bar(closed);
+    const goal = closed.indexOf('class="ihead-goal-line');
+    expect(goal).toBeGreaterThan(b.pills);
+    expect(goal).toBeLessThan(b.pillsEnd);
+    expect(head(true)).not.toContain("ihead-goal-line");
+    expect(css).toContain(".ihead .ihead-goal-line { min-width: min(20ch, 100%); }");
+  });
+
+  it("the bar never wraps and Details is pinned to the top: only the pills wrap", () => {
+    expect(css).toMatch(/\.ihead \.ihead-bar \{[^}]*flex-wrap: nowrap[^}]*align-items: flex-start/);
+    expect(css).toMatch(/\.ihead \.ihead-pills \{[^}]*flex: 1 1 0; min-width: 0;[^}]*flex-wrap: wrap/);
+    expect(css).toMatch(/\.ihead \.ihead-details \{[^}]*white-space: nowrap; flex: none; align-self: flex-start;/);
   });
 });

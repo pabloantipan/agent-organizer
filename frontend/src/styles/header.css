@@ -33,8 +33,17 @@
    chips and target do not fit one line, and the bar (shell.css: one flex
    line) ran past the right edge. Here the bar and the id's own group wrap;
    each pill keeps its words on one line. Doubled class to win over
-   shell.css whatever the load order. */
-.ihead .ihead-bar { flex-wrap: wrap; row-gap: var(--space-1); padding: var(--space-1) 0; }
+   shell.css whatever the load order.
+   Only the pills wrap (leftovers-20 FR-6, I38): Details sits outside them
+   at the first line's right end and never wraps, aligned to the top
+   (the pills' first line is the control height, 24, so the two meet), so
+   what the pills do when it opens (the goal line goes, the stage leaves
+   the bar) cannot move it. */
+.ihead .ihead-bar { flex-wrap: nowrap; align-items: flex-start; padding: var(--space-2) 0 var(--space-1); }
+.ihead .ihead-pills {
+  flex: 1 1 0; min-width: 0;
+  display: flex; flex-wrap: wrap; align-items: center; align-content: flex-start; column-gap: var(--space-3); row-gap: var(--space-1);
+}
 .ihead .ihead-id { flex: 0 1 auto; flex-wrap: wrap; row-gap: var(--space-1); min-width: 0; max-width: 100%; }
 .ihead .ihead-stage { max-width: 100%; }
 /* Folded, the goal keeps room for a few words: short of it, it takes the
@@ -47,5 +56,5 @@
    is cancelled: WebKit's AX frame of the rotated svg made the open button
    33 px tall to AX against 24 drawn. Doubled class to win over shell.css
    whatever the load order. */
-.ihead .ihead-details { height: var(--control-sm); white-space: nowrap; }
+.ihead .ihead-details { height: var(--control-sm); white-space: nowrap; flex: none; align-self: flex-start; }
 .ihead .ihead-details svg, .ihead .ihead-details[aria-expanded="true"] svg { transform: none; transition: none; }
