@@ -4,6 +4,14 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-11, leftovers-19 landed
+
+- **Last SHA seen:** 07fead1. leftovers-19 merged by sup56 (one-pm 198f3b1, places ddf8290, card-details 7551d05), all first-round passes; 24 min against a 30-45 min forecast, ~$14.7 over 8 seats. sup56 ended (probe -k, token rm, prompt and prelude removed, clean). Installed v0.2.0-1746-g7551d05; tree clean. No supervisor running.
+- **C1 amended (07fead1, 0108):** a hover row in the review process needs the pointer. Gate-row lesson, 4th input kind: hover joins TCC (N2), window press (P1/P3) and floating panel (F2). Hover rows read computed style in Chromium or offscreen WebKit.
+- **Trap (sup56):** the screen locked at 02:35, and AX and screencapture then returned nothing. Post-lock screen rows rested on vitest, WebKit styles and pre-lock AX dumps. `caffeinate -i` does not stop the lock. Candidate for [for hephaistos] if it recurs.
+- **leftovers-20 gathering:** sent to aglaea (thread 01M4NCJ8S1DEGZHXBN2S5VD7S4): places U1/U2, the hero-as-back-link gap, card-details A1-A3, and the 22 px Details move at 1024 (cd-ui U1 sev 2; I34 "without a jump").
+- Open, mine: Pablo's cut-off "And…"; which macOS the other laptop runs.
+
 ## HAND-OFF — 2026-10-09 evening, leftovers-15 running
 
 - **Last SHA seen:** adbe176. leftovers-18 merged (sup55; ~25 min working, 11 h wall, the Mac asleep 14:42-00:20; first-round passes); sup55 ended; installed v0.2.0-1714-gadbe176. No supervisor running. Leftovers-19 gathering: aglaea on cm-ui U1-U5, co-ui U1; .needs-me.on dead in shell.css; make test npm vs wails build pnpm; review build cannot run firebase (shared keychain service).
