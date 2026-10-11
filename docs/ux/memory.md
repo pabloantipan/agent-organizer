@@ -382,6 +382,8 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 
 - 2026-10-10: my firebase folds were estimated, not measured, and fell 42 px short in WebKit; a fold list needs a measured bar, worst case (long id, long email, two-digit badge, stale), before it is handed over.
 
+- 2026-10-11, A4: before leaning on "its heading names it", check the screen has one (Settings had none). An overlay is not a page: its opener is expanded, not current. Chrome buttons stay ghost; let a coloured word carry urgency instead of an accent fill.
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).

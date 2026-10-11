@@ -460,6 +460,82 @@ Seen at 1024×640 with the rail open; each gives way inside its own box:
 | I26 | see which press opens the card | hover on Details, Sleep or Wake does not raise the card; hover on its body does, open or closed |
 | I27 | read every view at 1024 | at 1024×640, rail open: the header's pills wrap inside the header, Overview stacks its columns, Help's body breaks long words; nothing runs past the right edge and the document does not scroll sideways |
 
+## Amendment 4 (aglaea, 2026-10-11): from leftovers-18's UI reviews
+
+From `working-on/done/lf18-current-mark.md` (cm-ui U1-U5 and the title's
+mark) and `lf18-charter-once.md` (co-ui U1-U3), relayed by the FSE.
+
+### 1. The screens without a tab name themselves (cm-ui U1)
+
+A3 §1 says Settings names itself through its page heading, but it has
+none. **Settings gets an `h1` `Settings`** as the first line of its body,
+above Identity, in the page-title size. Any screen that no place tab marks
+has an `h1` naming it.
+
+### 2. The rail's back link follows the owner (cm-ui U2)
+
+On an initiative, the rail's back link reads **`← Initiatives`** and goes
+there, matching the bar's parent mark (`placeOf`). It follows `placeOf`,
+not the door that opened the initiative, so the bar and the rail never
+disagree. Home stays one press away through its tab.
+
+### 3. The folds by class, for now (cm-ui U3)
+
+Accepted as built: with firebase, the five folds apply across the whole
+compact class, not by measured room. A3 §2's "comes back when the bar has
+room" is deferred until identity returns (identity-entra is on hold, and
+Pablo runs auth off). When it does, fold by the bar's measured overflow.
+
+### 4. Sync is quiet; stale is the signal (cm-ui U4)
+
+The bar is chrome, and principle 3 keeps the accent for actions that
+commit in the content. **Sync is a ghost button in every state.** When the
+sync is stale, the magenta word `stale` is the only magenta in the bar
+(magenta on the ground, #d946ef on #1a1523, is 5.2:1), so the button stands
+out exactly when it matters, without an accent fill (magenta on the accent
+fill is 1.4:1).
+
+### 5. Help is an overlay, so it is opened, not current (cm-ui U5)
+
+This replaces A3 §1's Help row. Help opens over the screen and does not
+replace it. **`?` carries `aria-expanded` and `--surface-selected` while
+Help is open**, and it gets no `aria-current`. The screen under Help keeps
+its own mark: Help over Settings leaves the gear current. I22 still
+counts one `aria-current="page"` per screen, now the screen under Help.
+
+### 6. The title's mark (cm-ui, question)
+
+On an initiative the title is the one `page`. It reads as current by
+**weight and ink, not a line**: `--fg` at semibold (600), against the
+tabs' `--fg-muted` at 500. It gets no underline, since an underline means
+"a tab" in this bar. The grey parent underline on Initiatives points to it.
+The accent underline under the content belongs to the sub-tab, which is
+current inside the page (`aria-current="true"`). That is enough; nothing
+else is added.
+
+### 7. The card (co-ui U1-U3)
+
+- **U1: the id is part of the body.** Hovering `Open <id>` raises the card,
+  since its press opens the same thing.
+- **U2: the header's Details keeps one label and one height.** It reads
+  `Details` with the chevron, which turns when open, exactly as the card's
+  button does. `aria-expanded` carries the state, and `Hide details` goes.
+- **U3: no change.** At 1024 the open header scrolls inside itself, and the
+  bar's stage button keeps the stage in view.
+
+I24's evidence (vitest plus computed WebKit widths, since the review build
+cannot sign in safely) is accepted as is.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| I28 | read where he is on Settings | Settings' body starts with an `h1` `Settings` |
+| I29 | go back the way the bar points | on an initiative the rail's back link reads `← Initiatives` and opens Initiatives |
+| I30 | see a stale sync | Sync is a ghost button, fresh or stale; stale shows the word `stale` in magenta and no accent fill |
+| I31 | tell Help is open over a screen | `?` has `aria-expanded="true"` and the selected surface while Help is open, and no `aria-current`; the screen under it keeps its one `aria-current="page"` |
+| I32 | see the title as the current page | on an initiative the title is `--fg` at 600, with no underline |
+| I33 | see the id as part of the card | hovering the id link raises the card |
+| I34 | open the header's Details without a jump | the button reads `Details` open or closed, at one height, with `aria-expanded` |
+
 ## Acceptance, in the lead's terms
 
 | # | The lead can | Checked by |

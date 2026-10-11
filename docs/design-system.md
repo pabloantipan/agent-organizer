@@ -348,7 +348,10 @@ keeps their place.
 - **One "you are here" per screen**: exactly one control carries
   `aria-current="page"` and the current mark. A parent place may show a
   quiet underline (`--fg-subtle`) with no `aria-current`; a verb that
-  navigates (Needs me) is never marked current (initiatives-view A3).
+  navigates (Needs me) is never marked current, and an overlay's opener
+  (Help) is `aria-expanded`, not current: the screen under it keeps its
+  mark (initiatives-view A3, A4). A screen no tab marks has an `h1`
+  naming it.
 - **A fact shows once per screen**: a shared component that repeats a field
   its host already shows takes an `omit`, never a second field set
   (initiatives-view A3, the header's Charter).
