@@ -43,12 +43,12 @@ uninstall: ## remove the app under either name and the CLI link
 test: ## go vet, go test, then the frontend's vitest run
 	@# main.go embeds frontend/dist: from a clean checkout, build it first
 	@# (leftovers-8 FR-8), installing the frontend's packages if missing.
-	@# The lockfile is pnpm's: npm must not leave a package-lock.json behind
-	@# (leftovers-18 FR-11).
-	test -d frontend/node_modules || (cd frontend && npm install --no-package-lock)
-	test -f frontend/dist/index.html || (cd frontend && npm run build)
+	@# pnpm from its lockfile, as wails build does (wails.json), so no
+	@# package-lock.json is left behind (leftovers-19 FR-9).
+	test -d frontend/node_modules || (cd frontend && pnpm install --frozen-lockfile)
+	test -f frontend/dist/index.html || (cd frontend && pnpm run build)
 	go vet ./... && go test ./...
-	cd frontend && npm test
+	cd frontend && pnpm test
 
 version:
 	@echo $(VERSION)
