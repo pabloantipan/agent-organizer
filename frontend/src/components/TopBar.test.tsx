@@ -87,7 +87,7 @@ describe("the top bar by kind (leftovers-17 FR-3)", () => {
     for (const screen of ["home", "initiatives", "usage", "initiative", "settings"]) {
       const html = bar({ screen, selectedInitiative: "organizer" });
       expect(html).toMatch(/<button class="needs-me"/);
-      expect(html).not.toMatch(/needs-me on/);
+      expect(html).not.toMatch(/needs-me\s+on/);
     }
   });
 

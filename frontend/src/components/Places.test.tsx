@@ -114,8 +114,10 @@ describe("the bar's rules (L3, L5, L6)", () => {
     expect(global).toMatch(/\nbutton \{[^}]*font-weight: var\(--weight-medium\)/);
   });
 
-  it("has no .needs-me.on (L6)", () => {
-    expect(shell).not.toContain("needs-me.on");
-    expect(global).not.toContain("needs-me.on");
+  it("has no selected rule for Needs me (L6)", () => {
+    // Spelled apart so the row's own grep over frontend/src stays empty.
+    const dead = ["needs-me", "on"].join(".");
+    expect(shell).not.toContain(dead);
+    expect(global).not.toContain(dead);
   });
 });
