@@ -1,13 +1,13 @@
 ---
 title: Accept leftovers 19 - Settings heading, Help as an overlay, the bar's last marks, the card's hover and Details, one package manager
-status: proposed
+status: ruled
 raised: 2026-10-11
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-11
+ruled_by: pablo
 options: ["accept as written", "accept with amendments", "send back"]
-chosen:
+chosen: accept as written
 cards: [lf19-places, lf19-card-details, lf19-one-pm]
 threads: []
 supersedes: []
@@ -43,3 +43,7 @@ this initiative, ~20-25 working minutes each.
 ## Recommendation
 
 The FSE's: accept as written.
+
+## Ruling
+
+pablo, 2026-10-11, in the organizer on lodestar: accepted
