@@ -152,12 +152,13 @@ export function Where({ screen, selectedInitiative, go, goHome, openInitiatives,
  *  icon runs), Help, Settings. Settings is a screen of no place, so on it
  *  the gear is the screen's mark (I22). Help is an overlay, opened and not
  *  current (Amendment 4 §5, I31): `?` is expanded and selected while open,
- *  never `aria-current`, and Settings under it stays current. */
+ *  never `aria-current`, and Settings under it stays current. Current is a
+ *  line (`.on`), open is a surface (`.open`) (A5 §1, I35). */
 export function AppControls({ floats, help, settings, onCompact, onHelp, onSettings }: { floats: boolean; help: boolean; settings: boolean; onCompact: () => void; onHelp: () => void; onSettings: () => void }) {
   return (
     <>
       {floats && <button className="ghost gear" onClick={onCompact} title="Compact to icon (the icon floats on every desktop)" aria-label="Compact to icon"><CompactIcon /></button>}
-      <button className={`ghost gear ${help ? "on" : ""}`} onClick={onHelp} title="Help: how we build, from help_doc" aria-label="Help" aria-expanded={help}><CircleHelp size={14} /></button>
+      <button className={`ghost gear ${help ? "open" : ""}`} onClick={onHelp} title="Help: how we build, from help_doc" aria-label="Help" aria-expanded={help}><CircleHelp size={14} /></button>
       <button className={`ghost gear ${settings ? "on" : ""}`} onClick={onSettings} title="Settings" aria-label="Settings" aria-current={settings ? "page" : undefined}><Settings size={14} /></button>
     </>
   );
