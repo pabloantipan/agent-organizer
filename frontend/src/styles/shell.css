@@ -81,7 +81,12 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
   padding: 0 var(--space-1-5); border-radius: var(--radius-xs); min-width: 18px; text-align: center;
   background: var(--danger-bg); color: var(--danger);
 }
-.gear.on { color: var(--fg); background: var(--surface-selected); }
+/* Current is a line, open is a surface (A5 §1, I35): the current icon (the
+   gear on Settings) takes the tabs' 2 px accent underline and no fill; the
+   opener of an open overlay (`?` while Help is open) takes the selected
+   surface and no line, so over Settings the two read apart. */
+.gear.on { color: var(--fg); box-shadow: inset 0 -2px 0 var(--accent); border-radius: 0; }
+.gear.open { color: var(--fg); background: var(--surface-selected); }
 
 /* ---------- Home ---------- */
 /* leftovers-8 FR-4 (A3): capped at the design system's 1,480 (Widths,

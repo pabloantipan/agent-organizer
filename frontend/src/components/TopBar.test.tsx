@@ -1,4 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
+// @ts-expect-error node:fs has no type declarations in this tsconfig
+import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // T1 (leftovers-17 FR-3, FR-4): the top bar by kind, over each screen and
@@ -73,7 +75,7 @@ describe("the top bar by kind (leftovers-17 FR-3)", () => {
     for (const screen of ["home", "initiatives", "usage", "initiative", "settings"]) {
       const html = where(screen) + renderToStaticMarkup(<AppControls floats help settings={screen === "settings"} onCompact={noop} onHelp={noop} onSettings={noop} />);
       // `?` is expanded and selected, never current.
-      expect(html, screen).toMatch(/<button class="ghost gear on"[^>]*aria-label="Help" aria-expanded="true">/);
+      expect(html, screen).toMatch(/<button class="ghost gear open"[^>]*aria-label="Help" aria-expanded="true">/);
       expect(html.match(/<button[^>]*aria-label="Help"[^>]*>/)![0]).not.toContain("aria-current");
       // The screen under it keeps its one mark.
       const under = { home: "Home", initiatives: "Initiatives", usage: "Usage", initiative: "organizer", settings: "Settings" }[screen];
@@ -114,6 +116,51 @@ describe("the top bar by kind (leftovers-17 FR-3)", () => {
 
   it("draws no rule between groups", () => {
     expect(bar()).not.toMatch(/init-sep|<hr|role="separator"/);
+  });
+});
+
+// B1 (leftovers-20 FR-1, FR-2; A5 §1, I35): current is a line, open is a
+// surface. The current gear is `.on`, the open `?` is `.open`, and the two
+// rules in shell.css draw them apart.
+describe("current against open in the bar (B1)", () => {
+  const shell = readFileSync(new URL("../styles/shell.css", import.meta.url), "utf8") as string;
+  const rule = (sel: string) => {
+    const m = shell.match(new RegExp(`^${sel.replace(/\./g, "\\.")} \\{([^}]*)\\}`, "m"));
+    expect(m, sel).not.toBeNull();
+    return m![1];
+  };
+  const help = (html: string) => html.match(/<button class="([^"]*)"[^>]*aria-label="Help"/)![1].split(/\s+/);
+  const gear = (html: string) => html.match(/<button class="([^"]*)"[^>]*aria-label="Settings"/)![1].split(/\s+/);
+  const controls = (help: boolean, settings: boolean) =>
+    renderToStaticMarkup(<AppControls floats={false} help={help} settings={settings} onCompact={noop} onHelp={noop} onSettings={noop} />);
+
+  it("marks the gear on Settings as current and `?` open as open, never the other's class", () => {
+    expect(gear(controls(false, true))).toContain("on");
+    expect(gear(controls(false, true))).not.toContain("open");
+    expect(help(controls(true, false))).toContain("open");
+    expect(help(controls(true, false))).not.toContain("on");
+    // Help over Settings: both show, and differ.
+    const both = controls(true, true);
+    expect(gear(both)).toEqual(["ghost", "gear", "on"]);
+    expect(help(both)).toEqual(["ghost", "gear", "open"]);
+    // Neither: no mark at all.
+    const none = controls(false, false);
+    expect(gear(none)).not.toContain("on");
+    expect(help(none)).not.toContain("open");
+  });
+
+  it("draws the current gear as the tabs' 2 px accent underline with no fill", () => {
+    const on = rule(".gear.on");
+    expect(on).toContain("box-shadow: inset 0 -2px 0 var(--accent)");
+    expect(on).not.toMatch(/background/);
+    // The same line as the current place tab.
+    expect(rule(".places .place-tab.on")).toContain("box-shadow: inset 0 -2px 0 var(--accent)");
+  });
+
+  it("draws `?` open as the selected surface with no underline", () => {
+    const open = rule(".gear.open");
+    expect(open).toContain("background: var(--surface-selected)");
+    expect(open).not.toMatch(/box-shadow/);
   });
 });
 
