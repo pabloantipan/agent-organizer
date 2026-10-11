@@ -584,7 +584,7 @@ rises 22 px.
 
 - **Details is pinned to the first line's right end** and never wraps.
 - When the goal line cannot keep its floor beside the pills, the goal line
-  is what drops to a line of its own under the bar.
+  is what drops below the bar (it may share that line with the target, A6).
 - Opening removes that line and the content below moves. Details itself
   stays at the same x and y.
 
