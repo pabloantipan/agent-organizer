@@ -59,9 +59,13 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .places .place-tab { background: transparent; border-color: transparent; color: var(--fg-muted); padding: 2px var(--space-2); min-height: var(--control-sm); border-radius: var(--radius-xs); }
 .places .place-tab:hover { color: var(--fg); background: var(--surface-hover); border-color: transparent; }
 .places .place-tab.on { color: var(--fg); box-shadow: inset 0 -2px 0 var(--accent); border-radius: 0; }
-.crumbs { display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-md); color: var(--fg-muted); min-width: 0; }
-/* At 1024 the initiative's id clamps; its hover says it whole (FR-5). */
+/* The crumb is the screen's title (A3 §1, I23): no slash, after the places
+   with the 16 px group gap (8 px of the group plus its own 8). */
+.crumbs { display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-md); color: var(--fg-muted); min-width: 0; margin-left: var(--space-2); }
+/* At 1024 the initiative's id clamps; its hover says it whole (FR-5). With
+   firebase folded it clamps last, to 12 characters (A3 §2, step 4). */
 .crumbs b.crumb-id { max-width: 22ch; }
+.topbar.fold .crumbs b.crumb-id { max-width: 12ch; }
 .crumbs b { color: var(--fg); font-weight: var(--weight-medium); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .crumbs b.mono { font-size: var(--font-size-md); }
 .crumb { background: transparent; border-color: transparent; color: var(--fg-muted); padding: 2px var(--space-2); min-height: var(--control-sm); }
