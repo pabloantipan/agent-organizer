@@ -7,7 +7,8 @@ import { move, uniq } from "../lib";
 import { inactiveIds } from "../lib/queue";
 import { foldName, sleepyOf, sleepyWord } from "../lib/initiatives";
 import { stripFolds } from "../lib/folds";
-import { useBoard } from "../stores/board.store";
+import { placeOf } from "../lib/place";
+import { useBoard, type Screen } from "../stores/board.store";
 import { CellStateLz, definitionWaits } from "./Crew";
 import { missingPersonas } from "../lib/queue";
 import { roleInitials, roleMail, roleState } from "../lib/roles";
@@ -27,7 +28,7 @@ type Entry = { id: string; title: string; client: string; status: string; now: n
  *  link to Initiatives, where they wake) and "Archived (n)" (every other
  *  status; docs/ux/specs/initiatives-view.md, The rail). */
 export function Rail() {
-  const { view, agents, selectedInitiative, setSelectedInitiative, reorderInitiatives, setGroups, railCollapsed, setRailCollapsed, roleOpen, openInitiatives } = useBoard();
+  const { view, agents, selectedInitiative, setSelectedInitiative, reorderInitiatives, setGroups, railCollapsed, setRailCollapsed, roleOpen, openInitiatives, screen } = useBoard();
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() => {
     try { return JSON.parse(localStorage.getItem("rail.collapsed") || "{}"); } catch { return {}; }
   });
@@ -292,14 +293,16 @@ export function Rail() {
     );
   }
 
+  const back = heroBack(screen, selectedInitiative);
+
   return (
     <>
     <nav id={RAIL_ID} className="rail" aria-label="initiatives">
       <button className="rail-icon strip-toggle" onClick={() => setRailCollapsed(true)} title="collapse the rail" aria-label="Initiatives rail" aria-expanded aria-controls={RAIL_ID}><PanelLeftClose size={14} /></button>
       <button
         className={`rail-hero ${selectedInitiative === null ? "active" : ""}`}
-        onClick={() => setSelectedInitiative(null)}
-        title={selectedInitiative ? "Back to Home" : "Home: what needs you, and every initiative"}
+        onClick={() => pressHero(back, selectedInitiative, { openInitiatives, setSelectedInitiative })}
+        title={back ? "Back to Initiatives" : "Home: what needs you, and every initiative"}
       >
         <div className="eyebrow">{hero.eyebrow}</div>
         <div className="name">{hero.name}</div>
@@ -308,7 +311,7 @@ export function Rail() {
           <div className="stat"><b>{hero.blocked}</b><span>blocked</span></div>
           <div className="stat"><b>{hero.next}</b><span>next</span></div>
         </div>
-        {selectedInitiative && <div className="hero-back"><ArrowLeft size={12} /> Home</div>}
+        {back && <div className="hero-back"><ArrowLeft size={12} /> Initiatives</div>}
       </button>
       <div className="rail-list">
         {roles.length > 0 && (
@@ -472,4 +475,18 @@ export function StripFoldButtons({ asleep, archived, onOpen }: { asleep: string[
       })}
     </>
   );
+}
+
+/** The hero's back link follows the bar's parent mark (initiatives-view A4
+ *  §2, I29): an initiative belongs to Initiatives (`placeOf`), whichever
+ *  door opened it, so the rail and the bar never disagree. */
+export function heroBack(screen: Screen, selectedInitiative: string | null): boolean {
+  return !!selectedInitiative && screen === "initiative" && placeOf(screen) === "initiatives";
+}
+
+/** Back lands on the initiative's own card in Initiatives; elsewhere the
+ *  hero is Home. */
+export function pressHero(back: boolean, selectedInitiative: string | null, to: { openInitiatives: (focus?: string | null) => void; setSelectedInitiative: (id: string | null) => void }) {
+  if (back) to.openInitiatives(selectedInitiative);
+  else to.setSelectedInitiative(null);
 }

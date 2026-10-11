@@ -41,8 +41,8 @@ const ascending = (xs: number[]) => xs.every((x, i) => i === 0 || xs[i - 1] < x)
 const current = (html: string) => [...html.matchAll(/<button[^>]*aria-current="page"[^>]*>([^<]*)<\/button>/g)].map((m) => m[1]);
 /** Every element marked current, by its text or its aria-label. */
 const marks = (html: string) => [...html.matchAll(/<(\w+)([^>]*)aria-current="page"([^>]*)>([^<]*)/g)].map((m) => (m[2] + m[3]).match(/aria-label="([^"]*)"/)?.[1] ?? m[4]);
-const where = (screen: string, help = false, selectedInitiative: string | null = "organizer") =>
-  renderToStaticMarkup(<Where screen={screen as never} selectedInitiative={selectedInitiative} help={help} go={() => noop} goHome={noop} openInitiatives={noop} openUsage={noop} />);
+const where = (screen: string, selectedInitiative: string | null = "organizer") =>
+  renderToStaticMarkup(<Where screen={screen as never} selectedInitiative={selectedInitiative} go={() => noop} goHome={noop} openInitiatives={noop} openUsage={noop} />);
 
 beforeEach(() => { for (const k of Object.keys(state)) delete state[k]; });
 
@@ -69,21 +69,25 @@ describe("the top bar by kind (leftovers-17 FR-3)", () => {
     expect(bar({ screen: "settings" })).toMatch(/class="ghost gear on"[^>]*aria-label="Settings" aria-current="page"/);
   });
 
-  it("marks Help alone while it is open, over any screen (K1)", () => {
+  it("opens Help over a screen without taking its mark (L4, I31)", () => {
     for (const screen of ["home", "initiatives", "usage", "initiative", "settings"]) {
-      const html = where(screen, true) + renderToStaticMarkup(<AppControls floats help settings={screen === "settings"} onCompact={noop} onHelp={noop} onSettings={noop} />);
-      expect(marks(html), screen).toEqual(["Help"]);
-      expect(html).not.toContain("place-tab on");
-      expect(html).not.toContain("place-tab parent");
-      expect(html).toMatch(/class="ghost gear on"[^>]*aria-label="Help" aria-current="page"/);
+      const html = where(screen) + renderToStaticMarkup(<AppControls floats help settings={screen === "settings"} onCompact={noop} onHelp={noop} onSettings={noop} />);
+      // `?` is expanded and selected, never current.
+      expect(html, screen).toMatch(/<button class="ghost gear on"[^>]*aria-label="Help" aria-expanded="true">/);
+      expect(html.match(/<button[^>]*aria-label="Help"[^>]*>/)![0]).not.toContain("aria-current");
+      // The screen under it keeps its one mark.
+      const under = { home: "Home", initiatives: "Initiatives", usage: "Usage", initiative: "organizer", settings: "Settings" }[screen];
+      expect(marks(html), screen).toEqual([under]);
     }
+    const closed = renderToStaticMarkup(<AppControls floats={false} help={false} settings={false} onCompact={noop} onHelp={noop} onSettings={noop} />);
+    expect(closed).toMatch(/<button class="ghost gear "[^>]*aria-label="Help" aria-expanded="false"/);
   });
 
   it("never marks Needs me, on any screen (K1, U3)", () => {
     for (const screen of ["home", "initiatives", "usage", "initiative", "settings"]) {
       const html = bar({ screen, selectedInitiative: "organizer" });
       expect(html).toMatch(/<button class="needs-me"/);
-      expect(html).not.toMatch(/needs-me on/);
+      expect(html).not.toMatch(/needs-me\s+on/);
     }
   });
 
@@ -94,7 +98,6 @@ describe("the top bar by kind (leftovers-17 FR-3)", () => {
     expect(init).not.toContain("crumb-sep");
     expect(init).not.toMatch(/>\/</);
     expect(bar({ screen: "initiative", selectedInitiative: null })).toMatch(/<b title="Agents" aria-current="page">Agents<\/b>/);
-    for (const screen of ["home", "initiative", "settings"]) expect(where(screen, true)).not.toContain('class="crumbs"');
   });
 
   it("keeps the tabs in the same place on every screen (K2)", () => {
@@ -195,6 +198,18 @@ describe("the signed-in bar at 1024 (K3, I24)", () => {
     const html = fb({ view: { board: { machines: [{}] }, pulled_at: new Date(Date.now() - 3 * 86400e3).toISOString() } });
     expect(html).toMatch(/<button class="ghost" title="Sync\. 1 machine, remote 3d ago\n[^"]*" aria-label="Sync\. 1 machine, remote 3d ago"><svg[^]*?<\/svg> Sync · <span class="sync-stale">stale<\/span><\/button>/);
     expect(fb()).not.toContain("sync-stale");
+  });
+
+  it("draws Sync as a ghost in every state, never the accent fill (L3, I30)", () => {
+    const old = { board: { machines: [{}] }, pulled_at: new Date(Date.now() - 3 * 86400e3).toISOString() };
+    const states = { fresh: fb(), stale: fb({ view: old }), syncing: fb({ syncing: true }), staleSyncing: fb({ view: old, syncing: true }), regular: fb({ widthClass: "regular" }), regularStale: fb({ widthClass: "regular", view: old }) };
+    for (const [name, html] of Object.entries(states)) {
+      const sync = html.match(/<button[^>]*>(?:(?!<\/button>)[^])*Sync(?:(?!<\/button>)[^])*<\/button>|<button[^>]*>(?:(?!<\/button>)[^])*syncing…<\/button>/)![0];
+      expect(sync, name).toMatch(/^<button class="ghost"/);
+      expect(html, name).not.toContain('class="primary"');
+    }
+    expect(states.stale).toContain('<span class="sync-stale">stale</span>');
+    expect(states.fresh).not.toContain("stale");
   });
 
   it("does not fold at regular: the line, the email and the account before Help", () => {
