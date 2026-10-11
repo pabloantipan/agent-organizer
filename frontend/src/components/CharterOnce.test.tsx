@@ -102,7 +102,7 @@ describe("H2: hover raises a card on its body only, open or closed (FR-5)", () =
     // Bound on .ic-main, which holds the body and the foot but not the open
     // details; leaving it clears the raise.
     expect(s).toContain('onMouseOver={(e) => setRaised(raisesOn(e.target as Element) ? c.id : null)} onMouseLeave={() => setRaised(null)}');
-    expect(s).toContain('${raised === c.id ? "raised" : ""}');
+    expect(s).toContain('${raised === c.id || focused === c.id ? "raised" : ""}');
     useBoard.setState({ view: viewOf([init({})]), agents: null });
     expect(renderToStaticMarkup(<InitiativesView />)).not.toMatch(/class="ic [^"]*raised/);
   });
@@ -122,9 +122,9 @@ describe("H3: InitiativeDetail's readOnly, not a css rule (FR-6)", () => {
 });
 
 describe("H4: the header's pills wrap inside the header (FR-7)", () => {
-  it("the bar and the id's group wrap", () => {
+  it("the pills and the id's group wrap (the bar itself not, leftovers-20 FR-6)", () => {
     const css = src("../styles/header.css");
-    expect(css).toMatch(/\.ihead \.ihead-bar \{[^}]*flex-wrap: wrap/);
+    expect(css).toMatch(/\.ihead \.ihead-pills \{[^}]*flex-wrap: wrap/);
     expect(css).toMatch(/\.ihead \.ihead-id \{[^}]*flex-wrap: wrap[^}]*min-width: 0/);
   });
 });
