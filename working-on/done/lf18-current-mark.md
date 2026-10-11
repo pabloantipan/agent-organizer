@@ -1,11 +1,12 @@
 ---
 title: "One current mark per screen; the bar keeps one line with firebase at 1024"
-status: now
+status: done
 repos: [organizer]
 branch: lf18-current-mark
 seat: cm-build
 stage: one-window
 updated: 2026-10-11
+review: pass
 next: "review: lf18-current-mark, gate met (K1-K3, X0), 5d358df"
 depends_on: []
 boundary: ["docs/specs/leftovers-18.md Boundary, lf18-current-mark"]
@@ -59,3 +60,11 @@ Spec gaps (for the FSE): A3 §1 assumes Settings has a page heading (U1); the ra
 For aglaea: U4; U5; on an initiative the only accent underline is the sub-tab's (`true`) and the bar's title, the one `page`, has no visual mark beside the parent's grey underline: is the title's weight enough?
 
 Not verified in WKWebView: the signed-in firebase bar (fold, account icon and its menu, `Sync · stale` in magenta, syncing) — the review app shares the keychain service `cl.antipan.organizer` with the real app, so it stays on auth off; judged from the vitest and cm-build's offscreen WebKit widths (stale 9.5 px spare). Help over Settings and over Home on the merge (checked on 5d358df only; the merge touches no top-bar file).
+
+## Review
+**Verdict: pass.** Unmet rows: none. Reviewer cm-review, 2026-10-11, commit 5d358df (K1's AX on an initiative also on a detached merge of 5d358df + 242dc0c, lf18-charter-once, not committed; on main as e4757ef). Evidence under `.wt-notes/cm-review/`.
+
+- K1: vitest (`TopBar.test.tsx`, `place.test.ts`) pass in X0's run. AX tree of my own `Deltagos Review` (merge build, fixture, auth off, 1024×640, rail open, AXPress on its pid only) on Home, Initiatives, Usage, Settings, an initiative opened from Initiatives, from a Home row and from the rail, and Help over Home, Initiatives, Usage, Settings and an initiative: exactly one `current=page` on each (`ax-*.txt`). On an initiative it is the crumb `init-a`; Initiatives is `.place-tab.parent` with no aria-current; the sub-tab reads `current=true`. Needs me is `.needs-me` and never `.on` in any dump.
+- K2: same vitest; AX on the three initiative doors: the crumb `init-a` follows the places (places right 1307, crumb left 1321), no `/` text in the bar; no crumb on Settings or any Help screen.
+- K3: vitest of the signed-in bar (30-char email, 22-char id, compact) pass. The fixture can't sign in, so per I24 I re-rendered the bar's markup myself at 5d358df (fresh, stale, stale+syncing) and measured it in an offscreen WKWebView with the clean clone's built css at 1024×640 (`k3-*-widths.json`): scrollWidth = clientWidth = 1024, one line, Settings right 972, account 28×28 named `Account someone@example.com`, Sync named `Sync. 2 machines, remote 3d ago` (also its hover), `Sync · stale` with `stale` rgb(217,70,239).
+- X0: fresh clone at 5d358df: `XDG_DATA_HOME=$(mktemp -d) make test` (497 vitest, Go ok), `npm run build`, `wails build` all pass; `git status --porcelain` empty (`X0b-*`). A first clone that also ran `npm install` was left with an untracked `frontend/package-lock.json` from that npm install (`X0-git-status.txt`). The row doesn't include `npm install`.
