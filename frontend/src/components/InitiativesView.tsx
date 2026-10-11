@@ -44,6 +44,12 @@ const CONTROLS = "a, button, input, select, textarea, [role=group], .ic-note";
 export const raisesOn = (target: { closest(sel: string): unknown } | null): boolean =>
   !!target?.closest(".ic-id") || pressOf(target, false) === "open";
 
+/** Whether focus on el shows a ring (keyboard, not the pointer). WebKit
+ *  before 15.4 has no :focus-visible and throws on it; there any focus counts. */
+export const focusVisible = (el: { matches(sel: string): boolean }): boolean => {
+  try { return el.matches(":focus-visible"); } catch { return true; }
+};
+
 /** The one card whose Details are open after a press on a card's Details:
  *  the same card closes, another one replaces it (FR-2: one at a time). */
 export const detailsAfter = (open: string | null, pressed: string): string | null => (open === pressed ? null : pressed);
@@ -68,6 +74,8 @@ export function InitiativesView() {
   const [details, setDetails] = useState<string | null>(null);
   // The card the pointer raises, by its body only (FR-5).
   const [raised, setRaised] = useState<string | null>(null);
+  // The card whose `Open <id>` has keyboard focus raises the same (leftovers-20 FR-5).
+  const [focused, setFocused] = useState<string | null>(null);
   const [announce, setAnnounce] = useState("");
   // Where focus goes once the view has drawn the new state: a card's id
   // (done), its note (a refused Wake), or its control.
@@ -225,7 +233,7 @@ export function InitiativesView() {
     const open = details === c.id;
     const detailsId = `ic-details-${c.id}`;
     return (
-      <article key={c.id} className={`ic ${c.state} ${open ? "open" : ""} ${raised === c.id ? "raised" : ""}`} data-card={c.id} aria-label={c.id}
+      <article key={c.id} className={`ic ${c.state} ${open ? "open" : ""} ${raised === c.id || focused === c.id ? "raised" : ""}`} data-card={c.id} aria-label={c.id}
         onKeyDown={open ? escapeCloses(() => closeDetails(c.id)) : undefined}>
         <div className="ic-main" onClick={pressCard(c, asking)}
           onMouseOver={(e) => setRaised(raisesOn(e.target as Element) ? c.id : null)} onMouseLeave={() => setRaised(null)}>
@@ -233,6 +241,7 @@ export function InitiativesView() {
             {/* The card's one link (FR-1): the body's press opens the same. */}
             <a id={`ic-id-${c.id}`} className="ic-id mono" href={`#${c.id}`} aria-label={`Open ${c.id}`}
               onClick={(e) => { e.preventDefault(); openInitiative(c.id, "overview"); }}
+              onFocus={(e) => setFocused(focusVisible(e.currentTarget) ? c.id : null)} onBlur={() => setFocused(null)}
               title={c.state === "awake" ? `open ${c.id}` : `open ${c.id}, read-only`}>{c.id}</a>
             {i.client && <span className="lz tone ic-client" title={i.client}>{i.client}</span>}
             <span className={`lz ic-word ${c.state}`}>{sleepyWord(i.status)}</span>
