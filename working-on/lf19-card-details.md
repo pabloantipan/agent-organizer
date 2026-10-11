@@ -6,7 +6,7 @@ branch: lf19-card-details
 seat: cd-build
 stage: one-window
 updated: 2026-10-11
-next: "review: lf19-card-details, gate met (C1, C2, X0), 023cb1e"
+next: "review: lf19-card-details, gate met (C1, C2, X0), 3f3aea6 (sup56 rebase of 023cb1e, same tree)"
 depends_on: []
 boundary: ["docs/specs/leftovers-19.md Boundary, lf19-card-details"]
 spec: "docs/specs/leftovers-19.md (FR-7, FR-8; initiatives-view Amendment 4, I33-I34)"
