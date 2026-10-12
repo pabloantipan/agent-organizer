@@ -1,6 +1,6 @@
 ---
 title: "The rail hero is a summary, never a button"
-status: now
+status: done
 repos: [organizer]
 branch: lf21-hero-summary
 seat: hs-build
@@ -49,3 +49,26 @@ Outside the gate: `global.css` also drops `cursor: pointer` from `button.link`. 
 No `## UI review` section yet, so status and place are unchanged.
 
 Reviewer hs-review, 2026-10-11, commit d6e12f7fac3f172205d1097de06b139318d71b03.
+
+## UI review
+Pass. Checked on d6e12f7 as pinned (version stamp `v0.2.0-1785-gd6e12f7`). I did not re-check ea21679; code review shows the rebase is the same patch. Fixture `auth: off`. My own `Deltagos Review` (pid 85100) ran from a detached worktree, and I read AX only on that pid. Shots are under `.wt-notes/hs-ui/`.
+
+States, and how each was checked:
+- Home, 1440×900 and 1024×672 (WKWebView): the hero is static text only ("Working on", "Home", counts), with no AXButton (`ax-home.txt`, `wkwebview-*-H2-home.png`).
+- An initiative (AXPress on rail item init-a), 1440 and 1024: the hero holds exactly one AXButton, `Back to Initiatives`, above acme / init-a / counts (`ax-initiative.txt`, `wkwebview-*-H2-initiative.png`). AXPress on it opens Initiatives (`ax-press-back.txt`, `ax-initiatives-place.txt`). FR-2 holds.
+- Home tab from an initiative: AXPress makes it `.place-tab.on`, and the hero reads Home again (`ax-after-home-tab.txt`). The only way Home is the tab, as I39 says.
+- Initiatives and Usage show no rail, so they have no hero to check.
+- H3, my own headless WebKit 26.5 and Chromium 151 run over the worktree's dist (`h3-mine.mjs`, `h3-computed.json`). The hero is a `DIV` with no role, title, tabindex or buttons. Its cursor is `auto` plain, with a headless hover, and with all 91 `:hover` rules forced. Background and border are the same in all three.
+- H1 vitest: 4/4 pass (`h1-vitest.log`).
+
+Findings:
+- U1, sev 1. **What:** none for the person. **Where:** `global.css`, where `button.link` lost its `cursor: pointer`. **Evidence:** the base `button` rule still sets `cursor: pointer`, and `button.link` now declares no cursor, so every link button keeps its pointer. Nothing visible changes, but the edit is outside the Boundary (code review raised it too). **Proposal:** restore the line when the branch is next touched.
+
+Spec gaps (FSE): none.
+
+For aglaea:
+- Q1: on Home the hero's counts reach AX as separate texts ("1", "now", "1", "blocked"…). A screen reader therefore reads each number apart from its noun. Should a summary group each count with its noun (for example one text "1 now")? This is not this card's scope.
+
+Not verified in WKWebView: real pointer hover and the pointer cursor over the hero (rule 0108: no pointer on the desktop). Both rest on computed styles in headless WebKit and Chromium. I did not check VoiceOver speech.
+
+UI reviewer hs-ui, 2026-10-11, commit d6e12f7fac3f172205d1097de06b139318d71b03.
