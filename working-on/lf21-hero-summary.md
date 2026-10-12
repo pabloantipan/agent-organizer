@@ -6,7 +6,7 @@ branch: lf21-hero-summary
 seat:
 stage: one-window
 updated: 2026-10-11
-next: "pablo: rule 0117 (accept leftovers-21); on accept the FSE starts sup58"
+next: "sup58 runs it (0117 ruled, 2026-10-11)"
 depends_on: []
 boundary: ["docs/specs/leftovers-21.md Boundary, lf21-hero-summary"]
 spec: "docs/specs/leftovers-21.md (FR-1, FR-2; initiatives-view Amendment 6, I39)"

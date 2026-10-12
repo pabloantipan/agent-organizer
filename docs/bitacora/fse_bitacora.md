@@ -8,6 +8,7 @@ restating it (the discuss skill).
 
 - **Last SHA seen:** d30225e. leftovers-20 merged by sup57 (card-details b7e27fa, bar-marks b3e1da9, back-button d30225e), all first-round passes; 49 min against 30-45 (two UI-review launches typed into tabs before zsh was ready, caught at the 45-min check). $10.44. sup57 ended; installed v0.2.0-1777-gd30225e; tree clean. No supervisor running.
 - **Sent:** aglaea, leftovers-21 candidates (dt-ui U1, U2 Tab skips links in WKWebView, bk-ui Home hero name, FR-6 goal line shares target's line as built). [for hephaistos]: supervise §4, check each seat right after launch.
+- **0117 ruled** (e54cad0, "accept; I use Tab, make links reachable app-wide next", words "go"): sup58 runs lf21-hero-summary in a tab of 5498; asked aglaea for the app-wide Tab design (leftovers-22).
 - **0117 proposed** (d807a74): leftovers-21, one card (hero never a button, I39) plus Pablo's Tab question (Aglaea Q1). On accept start sup58. Carry: the next card touching the header re-measures lf20 D2 in WebKit (Aglaea A6).
 
 ## HAND-OFF — 2026-10-11, leftovers-19 landed
