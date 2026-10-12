@@ -6,7 +6,7 @@ branch: lf21-hero-summary
 seat: hs-build
 stage: one-window
 updated: 2026-10-11
-next: "review: lf21-hero-summary, gate met (H1, H2, H3, X0), ea21679"
+next: "review: lf21-hero-summary, gate met on d6e12f7; X0 porcelain dirty on ea21679 only from main cbada68 (wailsjs modes 755, question to sup58), ea21679"
 depends_on: []
 boundary: ["docs/specs/leftovers-21.md Boundary, lf21-hero-summary"]
 spec: "docs/specs/leftovers-21.md (FR-1, FR-2; initiatives-view Amendment 6, I39)"
@@ -30,4 +30,5 @@ docs/specs/leftovers-21.md, rows H1, H2, H3 and X0.
 
 ## Notes
 - lf20's initiative wrapper `<section aria-label>` was a region landmark; it is now a plain div on both screens, since A6 says no role.
+- X0 passed on d6e12f7 (based on e54cad0). After the rebase on main, `wails build` leaves `frontend/wailsjs/runtime/{package.json,runtime.d.ts,runtime.js}` as mode changes 755 → 644 (`.wt-notes/hs-build/x0-ea21679-modes.txt`): main's cbada68 committed them 644 → 755, picked up from a stray review build of mine that ran in the root checkout at 23:25 (progress.md, Found). Fix is `git update-index --chmod=-x` on those three on main, outside this card's boundary; asked sup58.
 - `pressHero`'s Home branch is now unreachable from the rail; left in place (outside the boundary), covered by Places.test.
