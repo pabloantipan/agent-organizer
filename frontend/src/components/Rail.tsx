@@ -302,8 +302,7 @@ export function Rail() {
       <RailHero
         hero={hero}
         back={back}
-        active={selectedInitiative === null}
-        onPress={() => pressHero(back, selectedInitiative, { openInitiatives, setSelectedInitiative })}
+        onBack={() => pressHero(back, selectedInitiative, { openInitiatives, setSelectedInitiative })}
       />
       <div className="rail-list">
         {roles.length > 0 && (
@@ -471,13 +470,18 @@ export function StripFoldButtons({ asleep, archived, onOpen }: { asleep: string[
 
 type Hero = { eyebrow: string; name: string; now: number; blocked: number; next: number };
 
-/** The rail's hero (leftovers-20 FR-3, FR-4; initiatives-view A5 §3, I36).
- *  On Home it is one button, Home. On an initiative it is a summary that
- *  does not respond to presses, with `← Initiatives` as its own button on
- *  top, so a press on the counts never leaves the initiative. */
-export function RailHero({ hero, back, active, onPress }: { hero: Hero; back: boolean; active: boolean; onPress: () => void }) {
-  const body = (
-    <>
+/** The rail's hero (leftovers-21 FR-1, FR-2; initiatives-view A6 §1, I39).
+ *  A summary on every screen, with no role and no press: the Home tab is
+ *  the way Home. On an initiative its one control is `← Initiatives`, so a
+ *  press on the counts never leaves the initiative. */
+export function RailHero({ hero, back, onBack }: { hero: Hero; back: boolean; onBack: () => void }) {
+  return (
+    <div className="rail-hero">
+      {back && (
+        <button className="hero-back" onClick={onBack} aria-label="Back to Initiatives" title="Back to Initiatives">
+          <ArrowLeft size={12} aria-hidden="true" /> Initiatives
+        </button>
+      )}
       <div className="eyebrow">{hero.eyebrow}</div>
       <div className="name">{hero.name}</div>
       <div className="stats">
@@ -485,22 +489,7 @@ export function RailHero({ hero, back, active, onPress }: { hero: Hero; back: bo
         <div className="stat"><b>{hero.blocked}</b><span>blocked</span></div>
         <div className="stat"><b>{hero.next}</b><span>next</span></div>
       </div>
-    </>
-  );
-  if (!back) {
-    return (
-      <button className={`rail-hero ${active ? "active" : ""}`} onClick={onPress} title="Home: what needs you, and every initiative">
-        {body}
-      </button>
-    );
-  }
-  return (
-    <section className="rail-hero summary" aria-label={`${hero.name} summary`}>
-      <button className="hero-back" onClick={onPress} aria-label="Back to Initiatives" title="Back to Initiatives">
-        <ArrowLeft size={12} aria-hidden="true" /> Initiatives
-      </button>
-      {body}
-    </section>
+    </div>
   );
 }
 
