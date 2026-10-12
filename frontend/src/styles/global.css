@@ -441,7 +441,7 @@ button.tiny { padding: 0 5px; font-size: var(--font-size-xs); line-height: 14px;
 .agenda li.milestone { border-left-color: var(--pink); } .agenda li.target { border-left-color: var(--accent); }
 .agenda .ag-title { grid-column: 1 / -1; }
 .agenda .ag-init { font-size: var(--font-size-sm); }
-button.link { background: none; border: 0; padding: 0; color: var(--text); text-align: left; font: inherit; }
+button.link { background: none; border: 0; padding: 0; color: var(--text); text-align: left; font: inherit; cursor: pointer; }
 button.link:hover { color: var(--accent-fg); }
 
 /* agents */
