@@ -24,7 +24,9 @@ Your 0117 answer ("I use Tab"), designed by Aglaea (3ce6af1). Two cards
    navigates without being one.
 2. **The rail is one Tab stop**: Tab enters the rail on the current
    initiative, Up and Down move, Enter opens, the next Tab leaves it. It
-   waits for leftovers-21's rail card.
+   waits for leftovers-21's rail card. It also makes the rail's top block
+   read its counts as one line ("3 now, 0 blocked, 5 next") to a screen
+   reader, and removes code leftovers-21 left unused.
 
 Checks press Tab inside an offscreen copy of the app that never takes
 focus; nothing touches your keyboard or screen.

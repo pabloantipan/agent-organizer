@@ -55,6 +55,10 @@ else.
   group headers) stay ordinary Tab stops before the rows; drag's Space to
   lift stays (T3).
 - **FR-6** `pressHero`'s Home branch, dead since lf21 (sup58), goes.
+- **FR-7** The hero's visual stats are `aria-hidden`; one visually hidden
+  line inside the hero's positioned box reads `<n> now, <n> blocked, <n>
+  next` with the live numbers. No `aria-label` on a plain `div` (WebKit
+  does not announce it reliably) (initiatives-view A6 §3, I40).
 
 ## Acceptance → gate
 
@@ -65,6 +69,7 @@ else.
 | K3 | 3, 4 | harness: Tab to each kind of link; computed `outline` and, for `Open <id>`, the card's raise | the ring on every link; the card raised as hovered (lf20 D1's values) |
 | K4 | 4 | the inventory and the four Tab-order lists, before (flag off) and after (flag on), on the card | written; every navigating element is a link or a button, else listed as a finding |
 | V1 | 5, 6 | harness, flag on, on an initiative: Tab into the rail, Down twice, Up once, Return, then Tab; vitest of the roving tabindex | enters on the current row; one row `tabindex="0"`, the rest `-1`; Return opens the row under focus; the next Tab lands in `main` |
+| V2 | 7 | vitest of the hero on Home and on an initiative; AX tree of the review process (own pid) | the stats `aria-hidden`; one AXStaticText `<n> now, <n> blocked, <n> next` with the fixture's numbers, no separate number items |
 | X0 | all | `XDG_DATA_HOME=$(mktemp -d) make test`, `cd frontend && pnpm run build`, `wails build`, then `git status --porcelain` | pass, empty |
 
 ## Boundary
@@ -76,8 +81,9 @@ else.
   existing `:focus-visible` (line 39) does not reach links; the harness.
   Not: `Rail.tsx`, `InitiativesView.tsx`, `RoleDrawer.tsx` beyond reading
   them for the inventory.
-- `lf22-rail-roving`: `Rail.tsx` (the rows' tabindex and key handling) and
-  its tests; `styles/global.css` rail row focus rules only; it reuses
+- `lf22-rail-roving`: `Rail.tsx` (the rows' tabindex and key handling, the
+  hero's stats and spoken line) and its tests; `styles/global.css` rail
+  row focus rules and `.rail-hero*` only; it reuses
   `lf22-tab-links`' harness if merged, else carries its own copy. Not:
   `App.tsx`, `main.go`, `shell.css`.
 
@@ -92,4 +98,4 @@ else.
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf22-tab-links` | K1, K2, K3, K4, X0 | — | true |
-| `lf22-rail-roving` | V1, X0 | lf21-hero-summary | true |
+| `lf22-rail-roving` | V1, V2, X0 | lf21-hero-summary | true |
