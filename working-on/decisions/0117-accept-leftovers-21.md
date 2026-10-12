@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 21 - the rail hero is a summary, and do you use Tab
-status: proposed
+status: ruled
 raised: 2026-10-11
 raised_by: fse
 owner: pablo
@@ -9,6 +9,9 @@ cards: [lf21-hero-summary]
 threads: []
 supersedes: []
 superseded_by:
+ruled: 2026-10-11
+ruled_by: pablo
+chosen: accept; I use Tab, make links reachable app-wide next
 ---
 
 ## Question
@@ -40,3 +43,7 @@ this initiative (leftovers-20: three cards built and code-reviewed in 12 min,
 ## Recommendation
 
 The FSE's: accept; the Tab answer is yours.
+
+## Ruling
+
+pablo, 2026-10-11, in the organizer on lodestar: go
