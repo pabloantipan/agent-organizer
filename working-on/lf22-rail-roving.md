@@ -9,7 +9,7 @@ updated: 2026-10-11
 next: "pablo: rule 0118 (accept leftovers-22); on accept the FSE starts its supervisor"
 depends_on: [lf21-hero-summary]
 boundary: ["docs/specs/leftovers-22.md Boundary, lf22-rail-roving"]
-spec: "docs/specs/leftovers-22.md (FR-5; tab-reaches-links, T3)"
+spec: "docs/specs/leftovers-22.md (FR-5, FR-6; tab-reaches-links, T3)"
 gate: "docs/specs/leftovers-22.md Acceptance, rows V1 and X0"
 ui_review: true
 ---

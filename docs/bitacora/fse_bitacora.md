@@ -4,6 +4,12 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-12 00:5x, leftovers-21 landed
+
+- **Last SHA seen:** cb6c075. lf21-hero-summary merged by sup58 (8e97a0d), code and UI pass; 76 min against 20-35 (17 min of work, 58 min a re-review starved by test-lease under memory pressure; sent [for hephaistos]). sup58 ended; installed v0.2.0-1806-gcb6c075; tree clean. No supervisor running.
+- **0118 still proposed** (leftovers-22, Tab). Added FR-6 to lf22-rail-roving before the ruling: `pressHero`'s Home branch is dead since lf21. Asked aglaea about hs-ui Q1 (hero counts read apart from their nouns); may ride lf22-rail-roving.
+- **Repetition, 2nd: wailsjs/runtime modes flip to 755** (B1 in lf15; sup58: a stray review build in the root, swept in by aglaea's cbada68, restored 0f09de0). Sent with the test-lease note.
+
 ## HAND-OFF — 2026-10-11 late morning, leftovers-20 landed
 
 - **Last SHA seen:** d30225e. leftovers-20 merged by sup57 (card-details b7e27fa, bar-marks b3e1da9, back-button d30225e), all first-round passes; 49 min against 30-45 (two UI-review launches typed into tabs before zsh was ready, caught at the 45-min check). $10.44. sup57 ended; installed v0.2.0-1777-gd30225e; tree clean. No supervisor running.

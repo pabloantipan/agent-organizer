@@ -54,6 +54,7 @@ else.
   region. The rail's own buttons (collapse toggle, `Back to Initiatives`,
   group headers) stay ordinary Tab stops before the rows; drag's Space to
   lift stays (T3).
+- **FR-6** `pressHero`'s Home branch, dead since lf21 (sup58), goes.
 
 ## Acceptance → gate
 
@@ -63,7 +64,7 @@ else.
 | K2 | 2 | harness, flag on: the first Tab on Home, Initiatives, an initiative and Settings, then Return; vitest of the skip link | first stop `Skip to content`, `:focus-visible`, on screen with the ring; after Return the active element is inside `main` |
 | K3 | 3, 4 | harness: Tab to each kind of link; computed `outline` and, for `Open <id>`, the card's raise | the ring on every link; the card raised as hovered (lf20 D1's values) |
 | K4 | 4 | the inventory and the four Tab-order lists, before (flag off) and after (flag on), on the card | written; every navigating element is a link or a button, else listed as a finding |
-| V1 | 5 | harness, flag on, on an initiative: Tab into the rail, Down twice, Up once, Return, then Tab; vitest of the roving tabindex | enters on the current row; one row `tabindex="0"`, the rest `-1`; Return opens the row under focus; the next Tab lands in `main` |
+| V1 | 5, 6 | harness, flag on, on an initiative: Tab into the rail, Down twice, Up once, Return, then Tab; vitest of the roving tabindex | enters on the current row; one row `tabindex="0"`, the rest `-1`; Return opens the row under focus; the next Tab lands in `main` |
 | X0 | all | `XDG_DATA_HOME=$(mktemp -d) make test`, `cd frontend && pnpm run build`, `wails build`, then `git status --porcelain` | pass, empty |
 
 ## Boundary
