@@ -5,7 +5,7 @@ repos: [organizer]
 branch: lf21-hero-summary
 seat: hs-build
 stage: one-window
-updated: 2026-10-11
+updated: 2026-10-12
 next: "review: lf21-hero-summary, gate met (H1, H2, H3 on d6e12f7; X0 on 5130c03), 5130c03"
 depends_on: []
 boundary: ["docs/specs/leftovers-21.md Boundary, lf21-hero-summary"]
@@ -50,6 +50,8 @@ Outside the gate: `global.css` also drops `cursor: pointer` from `button.link`. 
 No `## UI review` section yet, so status and place are unchanged.
 
 Reviewer hs-review, 2026-10-11, commit d6e12f7fac3f172205d1097de06b139318d71b03.
+
+Re-pin 5130c0310bbf3f71f0849b722bd5e063c28fb682, hs-review, 2026-10-12. 2421594 is the same patch as d6e12f7 (`git range-diff` shows `=`). 5130c03 changes one line: it puts `cursor: pointer` back on `button.link`, so the flag above is resolved. H1 passes 4/4 in a clean clone at 5130c03 (`.wt-notes/hs-review/h1b-vitest.log`). X0 was not run at 5130c03: `test-lease run -- make test` gave up twice after 1800 s each on high memory pressure (`kern.memorystatus_vm_pressure_level` 2) and exited 75 without running (`x0b-make-test.log`). X0 stands only from d6e12f7. H2 and H3 stand from d6e12f7.
 
 ## UI review
 Pass. Checked on d6e12f7 as pinned (version stamp `v0.2.0-1785-gd6e12f7`). I did not re-check ea21679; code review shows the rebase is the same patch. Fixture `auth: off`. My own `Deltagos Review` (pid 85100) ran from a detached worktree, and I read AX only on that pid. Shots are under `.wt-notes/hs-ui/`.
