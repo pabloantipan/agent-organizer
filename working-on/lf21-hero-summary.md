@@ -6,7 +6,7 @@ branch: lf21-hero-summary
 seat: hs-build
 stage: one-window
 updated: 2026-10-11
-next: "hs-build: revert the button.link cursor change (outside boundary), rebase on 0f09de0, X0; then hs-review re-pins"
+next: "review: lf21-hero-summary, gate met (H1, H2, H3 on d6e12f7; X0 on 5130c03), 5130c03"
 depends_on: []
 boundary: ["docs/specs/leftovers-21.md Boundary, lf21-hero-summary"]
 spec: "docs/specs/leftovers-21.md (FR-1, FR-2; initiatives-view Amendment 6, I39)"
@@ -28,10 +28,11 @@ docs/specs/leftovers-21.md, rows H1, H2, H3 and X0.
 
 ## Done
 - hs-build, 2026-10-11: the hero is a role-less summary on every screen (no title, press, pointer or hover); on an initiative its one control stays Back to Initiatives; ea21679 (rebased on main from d6e12f7, where the gate ran; same code), gate met. Progress: `.wt-notes/hs-build/progress.md`.
+- hs-build, 2026-10-11: review finding fixed: restored `cursor: pointer` on `button.link` (my CSS replace had hit it too, outside the boundary) in a new commit; rebased on main 0f09de0; X0 from a clean clone of 5130c03 passes with `git status --porcelain` empty (`.wt-notes/hs-build/x0-*`, `x0-head.txt`); head 5130c03.
 
 ## Notes
 - lf20's initiative wrapper `<section aria-label>` was a region landmark; it is now a plain div on both screens, since A6 says no role.
-- X0 passed on d6e12f7 (based on e54cad0). After the rebase on main, `wails build` leaves `frontend/wailsjs/runtime/{package.json,runtime.d.ts,runtime.js}` as mode changes 755 → 644 (`.wt-notes/hs-build/x0-ea21679-modes.txt`): main's cbada68 committed them 644 → 755, picked up from a stray review build of mine that ran in the root checkout at 23:25 (progress.md, Found). Fix is `git update-index --chmod=-x` on those three on main, outside this card's boundary; asked sup58.
+- X0 passed on d6e12f7 (based on e54cad0). After the rebase on main, `wails build` leaves `frontend/wailsjs/runtime/{package.json,runtime.d.ts,runtime.js}` as mode changes 755 → 644: main's cbada68 committed them 644 → 755, picked up from a stray review build of mine that ran in the root checkout at 23:25 (progress.md, Found). Fix is `git update-index --chmod=-x` on those three on main, outside this card's boundary; asked sup58, who restored the modes in 0f09de0.
 - `pressHero`'s Home branch is now unreachable from the rail; left in place (outside the boundary), covered by Places.test.
 
 ## Review
