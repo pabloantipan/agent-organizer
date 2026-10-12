@@ -6,7 +6,7 @@ branch: lf21-hero-summary
 seat: hs-build
 stage: one-window
 updated: 2026-10-11
-next: "review: lf21-hero-summary, gate met on d6e12f7; X0 porcelain dirty on ea21679 only from main cbada68 (wailsjs modes 755, question to sup58), ea21679"
+next: "hs-build: revert the button.link cursor change (outside boundary), rebase on 0f09de0, X0; then hs-review re-pins"
 depends_on: []
 boundary: ["docs/specs/leftovers-21.md Boundary, lf21-hero-summary"]
 spec: "docs/specs/leftovers-21.md (FR-1, FR-2; initiatives-view Amendment 6, I39)"
