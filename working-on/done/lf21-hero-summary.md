@@ -1,12 +1,12 @@
 ---
 title: "The rail hero is a summary, never a button"
-status: now
+status: done
 repos: [organizer]
 branch: lf21-hero-summary
 seat: hs-build
 stage: one-window
 updated: 2026-10-12
-next: "review: lf21-hero-summary, gate met (H1, H2, H3 on d6e12f7; X0 on 5130c03), 5130c03"
+next: "done: merged 8e97a0d (sup58)"
 depends_on: []
 boundary: ["docs/specs/leftovers-21.md Boundary, lf21-hero-summary"]
 spec: "docs/specs/leftovers-21.md (FR-1, FR-2; initiatives-view Amendment 6, I39)"
@@ -29,6 +29,7 @@ docs/specs/leftovers-21.md, rows H1, H2, H3 and X0.
 ## Done
 - hs-build, 2026-10-11: the hero is a role-less summary on every screen (no title, press, pointer or hover); on an initiative its one control stays Back to Initiatives; ea21679 (rebased on main from d6e12f7, where the gate ran; same code), gate met. Progress: `.wt-notes/hs-build/progress.md`.
 - hs-build, 2026-10-11: review finding fixed: restored `cursor: pointer` on `button.link` (my CSS replace had hit it too, outside the boundary) in a new commit; rebased on main 0f09de0; X0 from a clean clone of 5130c03 passes with `git status --porcelain` empty (`.wt-notes/hs-build/x0-*`, `x0-head.txt`); head 5130c03.
+- sup58, 2026-10-12: merged as 8e97a0d (2421594, 5130c03). Merged main's tree equals 5130c03 but for this card, so hs-build's clean-clone X0 at 5130c03 stands for main; sup58's own make test on main never got a test-lease slot (memory pressure, 30 min). Run record `runs/2026-10-11-sup58-leftovers-21.md`.
 
 ## Notes
 - lf20's initiative wrapper `<section aria-label>` was a region landmark; it is now a plain div on both screens, since A6 says no role.
