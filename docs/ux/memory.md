@@ -388,6 +388,8 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 
 - 2026-10-11, A6: a summary block that doubles as a button gets a name made of its numbers; when another control already does the job (the Home tab), make the summary inert rather than splitting it. WKWebView's plain Tab skips links (Safari's default), so focus-only affordances on links reach almost no one until Pablo's Q1 is answered.
 
+- 2026-10-11, tab-reaches-links: before designing markup workarounds for a WebKit default, check whether the shell exposes the preference (Wails v2.15 has `Mac.Preferences.TabFocusesLinks`). Pablo uses Tab (0117), so keyboard paths are real, not hypothetical.
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).

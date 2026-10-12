@@ -620,7 +620,8 @@ This replaces A5 §3's "on Home the hero stays one button".
 - **Two raised cards** (dt-ui U1): pointer and keyboard are two inputs,
   and each shows its own target. A card raised by hover and another raised
   by focus are both true, so there is no change.
-- **Plain Tab skips links in WKWebView** (dt-ui U2): this is the open Q1
+- **Plain Tab skips links in WKWebView** (dt-ui U2; answered: Pablo uses
+  Tab, 0117; the fix is `docs/ux/specs/tab-reaches-links.md`): this was the open Q1
   to Pablo, whether he uses Tab at all. Until he answers, `Open <id>` stays
   a link: it navigates, and making it a button only to catch Tab would
   misname it. Plain Tab still reaches each card's Details and Sleep or Wake.
