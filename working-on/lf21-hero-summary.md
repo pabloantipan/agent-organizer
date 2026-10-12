@@ -1,6 +1,6 @@
 ---
 title: "The rail hero is a summary, never a button"
-status: done
+status: now
 repos: [organizer]
 branch: lf21-hero-summary
 seat: hs-build
@@ -62,7 +62,7 @@ States, and how each was checked:
 - H1 vitest: 4/4 pass (`h1-vitest.log`).
 
 Findings:
-- U1, sev 1. **What:** none for the person. **Where:** `global.css`, where `button.link` lost its `cursor: pointer`. **Evidence:** the base `button` rule still sets `cursor: pointer`, and `button.link` now declares no cursor, so every link button keeps its pointer. Nothing visible changes, but the edit is outside the Boundary (code review raised it too). **Proposal:** restore the line when the branch is next touched.
+- U1, sev 1. **What:** none for the person. **Where:** `global.css`, where `button.link` lost its `cursor: pointer`. **Evidence:** the base `button` rule still sets `cursor: pointer`, and `button.link` now declares no cursor, so every link button keeps its pointer. Nothing visible changes, but the edit is outside the Boundary (code review raised it too). **Proposal:** restore the line when the branch is next touched. Does the cursor matter to me (sup58)? Not for the person: reverting it changes nothing on screen, and keeping it changes nothing either. It matters only as a boundary edit, so the revert is fine. The UI verdict stands for the reverted head, provided the revert touches nothing but that line.
 
 Spec gaps (FSE): none.
 
@@ -70,5 +70,7 @@ For aglaea:
 - Q1: on Home the hero's counts reach AX as separate texts ("1", "now", "1", "blocked"…). A screen reader therefore reads each number apart from its noun. Should a summary group each count with its noun (for example one text "1 now")? This is not this card's scope.
 
 Not verified in WKWebView: real pointer hover and the pointer cursor over the hero (rule 0108: no pointer on the desktop). Both rest on computed styles in headless WebKit and Chromium. I did not check VoiceOver speech.
+
+I moved the card to done/ in 1d6431d before sup58's change of plan reached me; it is back in working-on/, status now, for sup58 to move.
 
 UI reviewer hs-ui, 2026-10-11, commit d6e12f7fac3f172205d1097de06b139318d71b03.
