@@ -634,9 +634,23 @@ This replaces A5 §3's "on Home the hero stays one button".
 - D2's frame was measured in Chromium only. The next build that touches the
   header re-measures it in WebKit.
 
+### 3. The hero's counts read as one phrase (hs-ui Q1, 2026-10-12)
+
+The counts reach a screen reader as `3`, `now`, `0`, `blocked` and so on,
+item by item. Fix it the robust way:
+
+- The visual stats are `aria-hidden`.
+- One visually hidden line, inside the hero's positioned box (the
+  "document never scrolls" rule), reads `3 now, 0 blocked, 5 next`.
+- An `aria-label` on a plain `div` is not relied on: WebKit does not
+  announce it reliably.
+
+This rides lf22-rail-roving (Rail.tsx).
+
 | # | The lead can | Checked by |
 |---|---|---|
 | I39 | hear the rail hero as what it is | the hero has no button role on any screen; on an initiative its one control is `Back to Initiatives`; the Home tab is the way Home |
+| I40 | hear the hero's counts as one phrase | in WKWebView's AX tree the hero's counts are one static text, `3 now, 0 blocked, 5 next` with the screen's numbers; the visual stats are hidden from AX |
 
 ## Acceptance, in the lead's terms
 
