@@ -6,7 +6,7 @@ branch: lf21-hero-summary
 seat: hs-build
 stage: one-window
 updated: 2026-10-11
-next: "review: lf21-hero-summary, gate met (H1, H2, H3, X0), d6e12f7"
+next: "review: lf21-hero-summary, gate met (H1, H2, H3, X0), ea21679"
 depends_on: []
 boundary: ["docs/specs/leftovers-21.md Boundary, lf21-hero-summary"]
 spec: "docs/specs/leftovers-21.md (FR-1, FR-2; initiatives-view Amendment 6, I39)"
@@ -26,7 +26,7 @@ docs/specs/leftovers-21.md, rows H1, H2, H3 and X0.
 - [x] X0 make test, pnpm run build, wails build, git status --porcelain from a clean clone: `.wt-notes/hs-build/x0-*.log`, `x0-porcelain.txt` (empty)
 
 ## Done
-- hs-build, 2026-10-11: the hero is a role-less summary on every screen (no title, press, pointer or hover); on an initiative its one control stays Back to Initiatives; d6e12f7, gate met. Progress: `.wt-notes/hs-build/progress.md`.
+- hs-build, 2026-10-11: the hero is a role-less summary on every screen (no title, press, pointer or hover); on an initiative its one control stays Back to Initiatives; ea21679 (rebased on main from d6e12f7, where the gate ran; same code), gate met. Progress: `.wt-notes/hs-build/progress.md`.
 
 ## Notes
 - lf20's initiative wrapper `<section aria-label>` was a region landmark; it is now a plain div on both screens, since A6 says no role.
