@@ -148,3 +148,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-13 — FSE cut tab A1 as docs/specs/leftovers-24.md (lf24-controls, lf24-rail-keys, lf24-drawer-skip); 0120 waits on Pablo.
 - 2026-10-13 — leftovers-24 graded: tab-reaches-links Amendment 2 (describedby, focus stays, drawn-order walk, folds as stops, omit never-acting items, menu upward, rename name, comma-free list), rows T13-T21; shortlist sent for leftovers-25.
 - 2026-10-13 — leftovers-25 cut (0121 to Pablo); agreed F2's cell list is dead code and goes (no second cell list).
+- 2026-10-13 — leftovers-25 graded: tab-reaches-links Amendment 3 (scroll region a stop while it overflows, described facts carry nouns), rows T22-T23.

@@ -252,3 +252,43 @@ All of these agreed:
 | T19 | see focus on a divider's actions | Tab onto Escalate, Close or Reopen shows them at full opacity with the ring |
 | T20 | stay inside the card back | Tab from its last control goes to its first; no Tab lands on `body` |
 | T21 | reach a cell row by Tab in the app | the harness in WKWebView, Keyboard navigation off, lands on `Conversations of <id>` |
+
+## Amendment 3 (aglaea, 2026-10-13): from leftovers-25's UI reviews
+
+From sup61's close (`runs/2026-10-13-sup61-leftovers-25.md`,
+`working-on/done/lf25-*.md`), for leftovers-26.
+
+### 1. A region that scrolls is a stop while it scrolls (dg-ui U3)
+
+A body with no links cannot be scrolled from the keyboard. Any region that
+scrolls inside a view or a box becomes a stop while it has content hidden
+past an edge: the card back's `.modal-body`, a code block, a table.
+
+- It takes `tabindex="0"` only while it overflows, and loses it when it
+  does not.
+- It is named: `role="region"` with `aria-label`. The card back's body is
+  `<card title>, details`; a code block or table is `Code` or `Table`,
+  followed by `, scrolls`.
+- It shows the focus ring under `:focus-visible`. With it focused, the
+  arrows, Page Up and Page Down, and Home and End scroll it, as WebKit does
+  natively.
+- A box's trap walks it like any other stop.
+- The edge line (design system, Widths) still marks it.
+
+### 2. A described fact says its noun (nm-ui U1)
+
+A description reads as a list of facts, each with its noun:
+
+`session off, mail alive, owes 2 messages, context 42%`.
+
+- The value words come from the one health table (`lib/health.ts`)
+  unchanged, so the screen and the speech say the same words.
+- The noun goes in front, since a value alone ("off alive") reads as a
+  contradiction.
+- The same holds for every `aria-describedby` from Amendment 2: counts
+  carry their noun (`25 agents`, `1 agent`, never `1 agents`).
+
+| # | The lead can | Checked by |
+|---|---|---|
+| T22 | scroll a long card back from the keyboard | at 1024×640 an overflowing card body is a named stop in the trap; focused, Down scrolls it (`scrollTop` grows); when it does not overflow it is not a stop; same for a code block that scrolls sideways (Right scrolls it) |
+| T23 | hear a person's state as facts | F3's description reads `session <word>, mail <word>, owes <n> message(s), context <n>%`, the words as in `lib/health.ts`; no count is said without its noun in the right number |

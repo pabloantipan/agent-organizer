@@ -451,7 +451,9 @@ content hidden past it carries a 1 px `--fg-subtle` line (4.5:1, not
 is hidden past that edge. A code block or table that scrolls
 inside a body carries the same edge (leftovers-6). A drawer or modal (card back, Help) is
 capped at the window and scrolls its own body, with the edge; it never
-scrolls on its backdrop (lf7-ui A2). Overlay scrollbars on macOS do not count, since they
+scrolls on its backdrop (lf7-ui A2). **A region that scrolls is a keyboard stop while it
+scrolls**: `tabindex="0"`, `role="region"` and a name, only while content
+is hidden past an edge (tab-reaches-links A3). Overlay scrollbars on macOS do not count, since they
 hide until scrolled (leftovers-3, U1).
 
 **The document never scrolls**; only a view's own scroller does. Anything
