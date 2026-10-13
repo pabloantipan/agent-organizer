@@ -115,8 +115,24 @@ export function useMarkdownEdges(ref: RefObject<HTMLElement | null>, content?: u
  *  cleanup. */
 export function watchMarkdown(root: HTMLElement): () => void {
   const watched = new Map<HTMLElement, () => void>();
+  // A refresh may set the body's HTML again, same text, new nodes: a block
+  // that held focus is replaced and focus falls to the document, out of the
+  // box's trap. The block that took its place takes focus back.
+  let held: { block: HTMLElement; at: number } | null = null;
+  const blocksOf = () => Array.from(root.querySelectorAll<HTMLElement>("pre, table"));
+  const onFocus = (e: Event) => {
+    const at = e.target instanceof HTMLElement ? blocksOf().indexOf(e.target) : -1;
+    held = at >= 0 ? { block: e.target as HTMLElement, at } : null;
+  };
+  // Focus that moves to an element is no longer held; focus that falls to
+  // nothing (a removed node) is.
+  const onBlur = (e: FocusEvent) => { if (e.relatedTarget) held = null; };
+  root.addEventListener("focusin", onFocus);
+  root.addEventListener("focusout", onBlur);
   const sync = () => {
-    const blocks = new Set(Array.from(root.querySelectorAll<HTMLElement>("pre, table")));
+    const list = blocksOf();
+    const blocks = new Set(list);
+    const lost = held && !blocks.has(held.block) ? held.at : -1;
     for (const [b, stop] of watched) if (!blocks.has(b)) { stop(); watched.delete(b); }
     for (const b of blocks) {
       if (watched.has(b)) continue;
@@ -127,9 +143,15 @@ export function watchMarkdown(root: HTMLElement): () => void {
         scrollStop(b, overflowsX(b), regionName.block(b.tagName));
       }));
     }
+    if (lost >= 0) {
+      held = null;
+      const active = document.activeElement;
+      const back = list[lost];
+      if (back && (!active || active === document.body) && back.getAttribute("tabindex") === "0") back.focus({ preventScroll: true });
+    }
   };
   sync();
   const mo = new MutationObserver(sync);
   mo.observe(root, { childList: true, subtree: true });
-  return () => { mo.disconnect(); for (const stop of watched.values()) stop(); };
+  return () => { mo.disconnect(); root.removeEventListener("focusin", onFocus); root.removeEventListener("focusout", onBlur); for (const stop of watched.values()) stop(); };
 }

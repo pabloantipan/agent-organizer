@@ -31,8 +31,11 @@ class Region {
   getAttribute(k: string) { return this.attrs.get(k) ?? null; }
   setAttribute(k: string, v: string) { this.attrs.set(k, v); }
   removeAttribute(k: string) { this.attrs.delete(k); }
-  addEventListener() {}
-  removeEventListener() {}
+  handlers = new Map<string, (e: unknown) => void>();
+  focused = 0;
+  addEventListener(k: string, h: (e: unknown) => void) { this.handlers.set(k, h); }
+  removeEventListener(k: string) { this.handlers.delete(k); }
+  focus() { this.focused++; (globalThis as { document?: { activeElement: unknown } }).document!.activeElement = this; }
   querySelectorAll() { return this.children; }
 }
 
@@ -108,6 +111,41 @@ describe("watchMarkdown: code blocks and tables are stops while they scroll (S2)
     fired.forEach((f) => f());
     expect(stop(table)).toEqual(none);
     expect(stop(pre).tabindex).toBe("0");
+    done();
+  });
+});
+
+describe("watchMarkdown: a focused block replaced by a refresh keeps focus in the box (S3)", () => {
+  const fired: Array<() => void> = [];
+  beforeEach(() => {
+    fired.length = 0;
+    const Observer = class { constructor(cb: (records: unknown[]) => void) { fired.push(() => cb([])); } observe() {} disconnect() {} };
+    Object.assign(globalThis, { ResizeObserver: Observer, MutationObserver: Observer, HTMLElement: Region });
+  });
+  afterEach(() => { Object.assign(globalThis, { ResizeObserver: undefined, MutationObserver: undefined, HTMLElement: undefined, document: undefined }); });
+
+  it("focuses the table that took the focused table's place, only when focus fell to the document", () => {
+    const body = { tagName: "BODY" };
+    Object.assign(globalThis, { document: { body, activeElement: body } });
+    const wide = () => { const t = new Region("TABLE"); t.scrollWidth = 900; return t; };
+    const root = new Region();
+    const [pre, table] = [new Region("PRE"), wide()];
+    pre.scrollWidth = 900;
+    root.children = [pre, table];
+    const done = watchMarkdown(root as unknown as HTMLElement);
+    root.handlers.get("focusin")!({ target: table });
+    // The same HTML set again: new nodes, focus on the document.
+    const again = wide();
+    root.children = [new Region("PRE"), again];
+    fired.forEach((f) => f());
+    expect(again.focused).toBe(1);
+    expect(stop(again).tabindex).toBe("0");
+    // Focus moved on to a button: a later refresh leaves it there.
+    root.handlers.get("focusout")!({ relatedTarget: {} });
+    const third = wide();
+    root.children = [new Region("PRE"), third];
+    fired.forEach((f) => f());
+    expect(third.focused).toBe(0);
     done();
   });
 });
