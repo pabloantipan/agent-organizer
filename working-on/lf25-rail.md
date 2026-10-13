@@ -3,10 +3,10 @@ title: "The rail reads whole and walks as drawn"
 status: next
 repos: [organizer]
 branch: lf25-rail
-seat:
+seat: rl-build
 stage: one-window
 updated: 2026-10-13
-next: "sup61 runs it (0121 ruled ok, 2026-10-13)"
+next: "rl-build builds it (sup61, wave 1, launched 2026-10-13)"
 depends_on: []
 boundary: ["docs/specs/leftovers-25.md Boundary, lf25-rail"]
 spec: "docs/specs/leftovers-25.md (FR-6 to FR-9; tab-reaches-links Amendment 2, T13, T15-T17)"
