@@ -76,6 +76,8 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   const newKept = !!useDraft(newThreadKey(initiativeId, chat));
   const kept = useDrafts();
   const [scrollTo, setScrollTo] = useState<string | null>(null);
+  // The chat whose new-thread form was asked for, until another is shown.
+  const askedNew = useRef<string | null>(null);
   // The thread a landing from elsewhere (Answer, a card's Discuss) named:
   // it gets focus once its messages are in (initiative-header FR-6).
   const landing = useRef<string | null>(null);
@@ -164,6 +166,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   // in it counts as seen.
   useEffect(() => {
     setReplyTo(null); setBranchFrom(null);
+    if (askedNew.current !== chat) askedNew.current = null;
     const last = threads[threads.length - 1];
     setTarget(last?.id ?? null);
     if (threads.length) setSeen((prev) => { const next = { ...prev }; for (const t of threads) next[t.id] = Date.now(); saveSeen(next); return next; });
@@ -228,6 +231,10 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   const drafted = (c: string, ts: CellThread[]) => kept.has(newThreadKey(initiativeId, c)) || ts.some((t) => kept.has(threadKey(initiativeId, t.id)));
   const draftMark = (c: string, ts: CellThread[]) => (drafted(c, ts) ? <span className="meta">· draft</span> : null);
   const landed = prefill && prefill.chat === chat ? prefill : null;
+  // leftovers-25 FR-3: the new-thread form takes focus when it was asked for
+  // (+, new thread instead) or landed on, never because a chat was shown:
+  // the button that showed the chat keeps it (Chat with <seat>, the list).
+  const askNew = () => { askedNew.current = chat; setTarget(null); setPrefill(null); };
   const pick = (v: View) => { onFocus(null); setView(v); setQuery(""); };
   const pickPerson = (a: string) => { setView("channel"); onFocus(a); setQuery(""); };
   const targetThread = target ? threads.find((t) => t.id === target) : undefined;
@@ -254,7 +261,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
         <div className="chats-label">
           <span>Chats</span>
           <span className="spacer" />
-          {!readOnly && <button className="rail-icon" onClick={() => { setTarget(null); setPrefill(null); }} disabled={!canPost} aria-describedby={noToken} title={canPost ? (focus ? `new thread with ${focus}` : "new thread") : undefined} aria-label={draftVerb("new thread", newKept)}><Plus size={13} /></button>}
+          {!readOnly && <button className="rail-icon" onClick={askNew} disabled={!canPost} aria-describedby={noToken} title={canPost ? (focus ? `new thread with ${focus}` : "new thread") : undefined} aria-label={draftVerb("new thread", newKept)}><Plus size={13} /></button>}
         </div>
         {noToken && <div id={noToken} className="chats-reason">no token for {human || "the human seat"} to post with; the cell bootstrap issues one</div>}
         <div className="cell-search">
@@ -406,7 +413,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
               defaultTo={focus ?? lastAsker(targetDetail?.messages ?? [], human) ?? lastOther(targetDetail?.messages ?? [], human)}
               replyTo={replyTo}
               onClearReply={() => setReplyTo(null)}
-              onNewThread={group.can_post ? () => { setTarget(null); setPrefill(null); } : undefined}
+              onNewThread={group.can_post ? askNew : undefined}
               newKept={newKept}
               onSent={() => { setReplyTo(null); reload(); }}
             />
@@ -423,6 +430,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
               canPost={group.can_post}
               onDone={(tid) => { setPrefill(null); reload(); if (tid) goTo(tid); else if (threads.length) setTarget(threads[threads.length - 1].id); }}
               cancellable={threads.length > 0}
+              grab={askedNew.current === chat || !!landed}
             />
           )}
         </div>}
@@ -566,7 +574,7 @@ const shownSeats = (seats: string[], to: string) => (to && !seats.includes(to) ?
 /** Starting a thread, or branching one: subject, recipient, kind, body. A
  *  branch arrives with its subject set and the quoted message as the first
  *  lines, so the link back survives in the record itself. */
-function NewThread({ initiativeId, chat, draftKey, seats, to: initialTo, subject: initialSubject, body: initialBody, quote, canPost = true, cancellable = true, onDone }: { initiativeId: string; chat?: string; draftKey: string; seats: string[]; to: string; subject?: string; body?: string; quote?: CellMessage; canPost?: boolean; cancellable?: boolean; onDone: (threadId: string | null) => void }) {
+function NewThread({ initiativeId, chat, draftKey, seats, to: initialTo, subject: initialSubject, body: initialBody, quote, canPost = true, cancellable = true, grab = true, onDone }: { initiativeId: string; chat?: string; draftKey: string; seats: string[]; to: string; subject?: string; body?: string; quote?: CellMessage; canPost?: boolean; cancellable?: boolean; grab?: boolean; onDone: (threadId: string | null) => void }) {
   // leftovers-9 FR-1: subject and body are one draft, kept for the session
   // under draftKey; Escape closes the form and keeps it, a kept draft wins
   // over what the form was opened with, and only cancel or Start discards it.
@@ -606,9 +614,9 @@ function NewThread({ initiativeId, chat, draftKey, seats, to: initialTo, subject
         {(cancellable || kept) && <button className="linkish meta" onClick={() => { drafts.discard(draftKey); if (cancellable) onDone(null); }}>cancel</button>}
       </div>
       {!canPost && <div className="frozen">No token for the human seat: run the cell bootstrap to issue one.</div>}
-      <input autoFocus={!quote && !initialSubject} value={subject} aria-label="Subject" autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setSubject(e.target.value)} {...imeSubject.props} placeholder="subject  (start with a card slug to link it: readiness-endpoint: …)" disabled={!canPost} onKeyDown={(e) => { if (imeSubject.escape(e)) return; if (e.key === "Enter") { e.preventDefault(); (e.currentTarget.closest(".composer")?.querySelector("textarea") as HTMLTextAreaElement | null)?.focus(); } }} />
+      <input autoFocus={grab && !quote && !initialSubject} value={subject} aria-label="Subject" autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setSubject(e.target.value)} {...imeSubject.props} placeholder="subject  (start with a card slug to link it: readiness-endpoint: …)" disabled={!canPost} onKeyDown={(e) => { if (imeSubject.escape(e)) return; if (e.key === "Enter") { e.preventDefault(); (e.currentTarget.closest(".composer")?.querySelector("textarea") as HTMLTextAreaElement | null)?.focus(); } }} />
       <div className="composer-line">
-        <textarea autoFocus={!!quote || !!initialSubject} rows={3} value={body} aria-label={`Message to ${to || "the channel"}`} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setBody(e.target.value)} {...imeBody.props} placeholder="Type a message  (Enter to send, Shift+Enter for a new line)" disabled={!canPost} onKeyDown={(e) => { if (imeBody.escape(e)) return; if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } if (e.key === "Escape" && cancellable) onDone(null); }} />
+        <textarea autoFocus={grab && (!!quote || !!initialSubject)} rows={3} value={body} aria-label={`Message to ${to || "the channel"}`} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setBody(e.target.value)} {...imeBody.props} placeholder="Type a message  (Enter to send, Shift+Enter for a new line)" disabled={!canPost} onKeyDown={(e) => { if (imeBody.escape(e)) return; if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); } if (e.key === "Escape" && cancellable) onDone(null); }} />
       </div>
       <div className="composer-row">
         <select value={kind} onChange={(e) => setKind(e.target.value)} disabled={!canPost} aria-label="Kind of message">{KINDS.map((k) => <option key={k} value={k}>{k}</option>)}</select>
@@ -843,13 +851,15 @@ function Ruling({ initiativeId, threadId, onOpen }: { initiativeId: string; thre
 }
 
 /** A ruling opens its thread on the same view, so a button (leftovers-24
- *  FR-5, F5), named by the thread; it keeps the row's look. */
+ *  FR-5, F5), named by the thread; it keeps the row's look. Who ruled, when,
+ *  the words and next are its description (leftovers-25 FR-1). */
 export function RulingButton({ dec, subject, onOpen }: { dec: CellMessage; subject: string; onOpen: () => void }) {
   const { text, next } = splitRuling(dec.body);
+  const id = useId();
   return (
-    <button type="button" className="q-ruling" onClick={onOpen} title="open the thread" aria-label={`Open the thread ${subject}`}>
+    <button type="button" className="q-ruling" onClick={onOpen} title="open the thread" aria-label={`Open the thread ${subject}`} aria-describedby={id}>
       <Gavel size={11} />
-      <span><b>{dec.from}</b> ruled {when(dec.created_at)}: {text}{next && <span className="q-next"> · <b>next</b> {next}</span>}</span>
+      <span id={id}><b>{dec.from}</b> ruled {when(dec.created_at)}: {text}{next && <span className="q-next"> · <b>next</b> {next}</span>}</span>
     </button>
   );
 }

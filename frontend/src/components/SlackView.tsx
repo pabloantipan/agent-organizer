@@ -1,22 +1,22 @@
-import { useRef, useState } from "react";
-import { MessagesSquare, Users, X } from "lucide-react";
+import { useId, useRef, useState } from "react";
+import { Users, X } from "lucide-react";
 import type { Seat } from "../hooks/useWails";
 import { useBoard } from "../stores/board.store";
 import { queueOf, readOnlyOf } from "../lib/queue";
 import { ContextBar, WatcherBadge } from "./ContextBar";
 import { HEALTH, peopleLabel } from "../lib/health";
+import { stateWord } from "../lib/stateWords";
 import { Conversation } from "./Conversation";
 
 const PEOPLE_KEY = "slack.people";
 
 /** The Slack tab, laid out the way Teams lays out a channel: the rail is
  *  the team list, the stream is the channel, and the members live in a
- *  panel on the right that a button in the header opens and closes. Nothing
- *  selected lists every mailbox with what needs the human. The roster and
+ *  panel on the right that a button in the header opens and closes. The roster and
  *  threads ride the agents feed; only open conversations and the archive
  *  are fetched. Lifecycle stays in Agents. */
 export function SlackView() {
-  const { selectedInitiative, setSelectedInitiative, agents: view, slackFocus, setSlackFocus, view: board, widthClass } = useBoard();
+  const { selectedInitiative, agents: view, slackFocus, setSlackFocus, view: board, widthClass } = useBoard();
   // People starts closed at compact, so the timeline keeps the width
   // (initiative-header FR-6); the stored choice is untouched until toggled.
   const [people, setPeople] = useState<boolean>(() => { try { return localStorage.getItem(PEOPLE_KEY) !== "closed" && useBoard.getState().widthClass !== "compact"; } catch { return true; } });
@@ -28,50 +28,11 @@ export function SlackView() {
   const peopleToggle = useRef<HTMLButtonElement>(null);
   const hidePeople = () => { togglePeople(); peopleToggle.current?.focus(); };
   if (!view) return <div className="empty">Sampling…</div>;
+  // leftovers-25 FR-5: Conversations mounts only under an initiative (the
+  // rail and Home choose it), so there is no list of cells to pick from.
   const cells = (view.groups ?? []).filter((g) => g.cell);
 
-  if (!selectedInitiative) {
-    return (
-      <div>
-        <div className="board-head"><h1>Slack</h1><span className="meta">one channel per initiative with an agents/cell.json. Pick one in the rail, or here.</span></div>
-        {cells.length === 0 && <div className="empty">No initiative on this machine has a mailbox.</div>}
-        <ul className="cells">
-          {cells.map((g) => {
-            const seats = g.crew ?? [];
-            const reachable = seats.filter((s) => s.watcher === "alive").length;
-            const q = queueOf(g, board);
-            const deaf = q.deaf;
-            const open = (g.threads ?? []).filter((t) => t.kind !== "journal").length;
-            const hot = q.total + deaf > 0;
-            return (
-              <li key={g.id}>
-                {/* leftovers-24 FR-2: it changes where you are, so a link (F2). The
-                    list shows only while no cell is shown, so none is current. */}
-                <a className={`cell-row ${hot ? "hot" : ""}`} href={`#${g.id}`} aria-label={`Conversations of ${g.id}`} onClick={(e) => { e.preventDefault(); setSelectedInitiative(g.id); }}>
-                <span className="cell-ident">
-                  <MessagesSquare size={14} />
-                  <span className="ident">{g.id}</span>
-                  {g.client && <span className="badge client">{g.client}</span>}
-                  <span className="meta">{g.project}</span>
-                </span>
-                <span className="cell-stats">
-                  <b className={q.total > 0 ? "hot" : ""}>{q.total}</b><span>need me</span>
-                  <b>{g.needs_reconciler ?? 0}</b><span>need {g.cell?.reconciler || "the reconciler"}</span>
-                  <b>{open}</b><span>open</span>
-                  <b>{g.waiting?.length ?? 0}</b><span>cards waiting</span>
-                  <b className={deaf > 0 ? "hot" : ""}>{reachable}/{seats.length}</b><span>reachable{q.capped > 0 ? <span title={HEALTH.capped.why}>, {q.capped} {HEALTH.capped.label}</span> : ""}{deaf > 0 ? <span title={HEALTH.deaf.why}>, {deaf} {HEALTH.deaf.label}</span> : ""}</span>
-                </span>
-                {g.discuss && <span className="badge watcher stale">{g.discuss}</span>}
-                </a>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    );
-  }
-
-  const g = cells.find((c) => c.id === selectedInitiative);
+  const g = cells.find((c) => selectedInitiative === c.id);
   if (!g) {
     return (
       <div>
@@ -108,6 +69,7 @@ export function SlackView() {
  *  liveness facts that matter for a conversation. Click a seat for the
  *  direct view with it; that is the DM. */
 export function People({ seats, human, focus, onFocus, onClose }: { seats: Seat[]; human: string; focus: string | null; onFocus: (a: string | null) => void; onClose: () => void }) {
+  const idBase = useId();
   return (
     <aside className="people">
       <div className="people-head"><Users size={13} /> <span>People</span> <span className="meta">{seats.length + (human ? 1 : 0)}</span> <span className="spacer" /><button className="rail-icon" onClick={onClose} title="hide" aria-label="Hide people"><X size={12} /></button></div>
@@ -117,23 +79,33 @@ export function People({ seats, human, focus, onFocus, onClose }: { seats: Seat[
             <i className="dot running" /><span className="mono">{human}</span><span className="meta">you</span>
           </li>
         )}
-        {seats.map((s) => (
+        {seats.map((s) => {
+          // leftovers-25 FR-1: the short name is the verb; what the row draws
+          // (live or off, the watcher's word, what it owes, context) is its
+          // description. The dot's word is said, since a colour is not.
+          const d = `${idBase}-${s.name}`;
+          return (
           <li key={s.name}>
-            {/* leftovers-24 FR-3: shows the chat in place, so a button (F3). */}
-            <button type="button" className={`person ${s.agent?.state ?? "off"} ${s.deaf && !s.capped ? "deaf" : ""} ${s.capped ? "capped" : ""} ${focus === s.name ? "active" : ""}`} aria-label={`Chat with ${s.name}`} aria-current={focus === s.name ? "true" : undefined} onClick={() => onFocus(focus === s.name ? null : s.name)} title={`${s.agent ? s.agent.state : "no session"}. Click for the conversation with ${s.name}.`}>
+            {/* leftovers-24 FR-3: shows the chat in place, so a button (F3).
+                leftovers-25 FR-3: it stays mounted and keeps focus; the chat
+                it shows does not take it (Conversation's askedNew). */}
+            <button type="button" className={`person ${s.agent?.state ?? "off"} ${s.deaf && !s.capped ? "deaf" : ""} ${s.capped ? "capped" : ""} ${focus === s.name ? "active" : ""}`} aria-label={`Chat with ${s.name}`} aria-describedby={`${d}-state ${d}-watch${(s.owes?.length ?? 0) > 0 ? ` ${d}-owes` : ""} ${d}-ctx`} aria-current={focus === s.name ? "true" : undefined} onClick={() => onFocus(focus === s.name ? null : s.name)} title={`${s.agent ? s.agent.state : "no session"}. Click for the conversation with ${s.name}.`}>
             <i className={`dot ${s.agent?.state ?? "off"}`} />
+            <span className="sr-only" id={`${d}-state`}>{s.agent ? (s.agent.state === "working" || s.agent.state === "running" ? "live" : stateWord(s.agent.state)) : "off"}</span>
             <span className="person-main">
               <span className="mono">{s.name}</span>
               <span className="person-meta">
-                <WatcherBadge watcher={s.watcher} deaf={s.deaf} capped={s.capped} undelivered={s.undelivered} />
-                {(s.owes?.length ?? 0) > 0 && <span className="badge owes" title={s.owes.map((o) => o.subject || o.id).join("\n")}>owes {s.owes.length}</span>}
+                <span className="person-watch" id={`${d}-watch`}><WatcherBadge watcher={s.watcher} deaf={s.deaf} capped={s.capped} undelivered={s.undelivered} /></span>
+                {(s.owes?.length ?? 0) > 0 && <span className="badge owes" id={`${d}-owes`} title={s.owes.map((o) => o.subject || o.id).join("\n")}>owes {s.owes.length}</span>}
               </span>
             </span>
-            <ContextBar c={s.agent?.context} />
+            <span className="person-ctx" id={`${d}-ctx`}><ContextBar c={s.agent?.context} /></span>
             </button>
           </li>
-        ))}
+          );
+        })}
       </ul>
     </aside>
   );
 }
+

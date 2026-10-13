@@ -491,6 +491,7 @@ button.link:hover { color: var(--accent-fg); }
 .tiny-btn.danger { background: var(--blocked-soft); color: var(--blocked); border-color: transparent; }
 .tiny-btn.danger:hover { background: var(--blocked); color: #fff; }
 .agent-group-title { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.agent-group-title-facts { display: inline-flex; align-items: center; gap: 8px; }
 /* A button that keeps the title's look (leftovers-24 FR-1). */
 button.agent-group-title, button.agent-group-title:hover { background: none; border: 0; padding: 0; min-height: 0; font-weight: inherit; line-height: inherit; white-space: normal; flex-shrink: 1; text-align: left; }
 .agent-group-head.static .agent-group-title { cursor: default; }
@@ -581,17 +582,7 @@ button.counts.linkish { font-family: var(--mono); }
 /* Conversations (the Slack view) */
 .slack-wrap { display: flex; flex-direction: column; min-height: 0; }
 .slack { display: flex; flex-direction: column; height: 100%; min-height: 0; }
-.cells { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.cell-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 10px 12px; border-radius: var(--r); background: var(--card); border: 1px solid var(--border); cursor: pointer; }
-.cell-row:hover { background: var(--card-hover); }
-/* A link that keeps the row's look (leftovers-24 FR-2). */
-a.cell-row { color: inherit; text-decoration: none; }
-.cell-row.hot { border-color: rgba(255, 77, 99, .35); }
-.cell-ident { display: inline-flex; align-items: center; gap: 8px; min-width: 220px; }
-.cell-stats { display: inline-flex; align-items: baseline; gap: 4px 6px; font-size: var(--font-size-sm); color: var(--muted); flex-wrap: wrap; }
-.cell-stats b { font-family: var(--mono); font-size: var(--font-size-md); color: var(--text); margin-left: 12px; }
-.cell-stats b:first-child { margin-left: 0; }
-.cell-stats b.hot, .cell-filters .hot .mono, .counter.hot, .tiny-btn.hot { color: var(--blocked); }
+.cell-filters .hot .mono, .counter.hot, .tiny-btn.hot { color: var(--blocked); }
 .slack-body { display: grid; grid-template-columns: 1fr; gap: 14px; flex: 1; min-height: 0; }
 .slack-body.with-people { grid-template-columns: 1fr 250px; }
 .people { display: flex; flex-direction: column; min-height: 0; border-radius: var(--r); background: var(--panel); border: 1px solid var(--border); }
@@ -607,6 +598,9 @@ button.person:focus-visible { outline-offset: -2px; }
 .person .mono { color: var(--text); font-size: var(--font-size-sm); }
 .person-main { flex: 1; min-width: 0; display: grid; gap: 2px; }
 .person-meta { display: flex; gap: 4px; flex-wrap: wrap; }
+/* The watcher's word, wrapped to be its own description target (leftovers-25
+   FR-1): a flex box, so the wrapper adds no line box to the row. */
+.person-watch { display: inline-flex; }
 .person .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); flex-shrink: 0; opacity: .6; }
 .person .dot.running { background: var(--local); opacity: 1; }
 .person .dot.working { background: var(--local); opacity: 1; box-shadow: 0 0 8px var(--local); animation: pulse 1.4s ease-in-out infinite; }
@@ -673,6 +667,9 @@ button.tl-subj::after { content: ""; position: absolute; top: 0; right: 0; botto
 .tl-meta { display: inline-flex; align-items: center; gap: 4px 6px; flex-wrap: wrap; font-size: var(--font-size-xs); color: var(--muted); }
 .tl-divider .a-actions { opacity: 0; }
 .tl-divider:hover .a-actions { opacity: 1; }
+/* Focus on Escalate, Close, Reopen or the reply shows them whole, with the
+   ring (leftovers-25 FR-4). */
+.tl-divider:focus-within .a-actions { opacity: 1; }
 .decision-banner { display: flex; gap: 8px; align-items: flex-start; padding: 8px 12px; border-radius: var(--radius-md); background: var(--accent-soft); border: 1px solid var(--border-accent); font-size: var(--font-size-md); }
 .decision-banner svg { flex-shrink: 0; margin-top: 2px; color: var(--accent-fg); }
 .msg { max-width: 82%; min-width: 0; }
