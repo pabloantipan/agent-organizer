@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 22 - Tab reaches every link
-status: proposed
+status: ruled
 raised: 2026-10-11
 raised_by: fse
 owner: pablo
@@ -9,6 +9,9 @@ cards: [lf22-tab-links, lf22-rail-roving]
 threads: []
 supersedes: []
 superseded_by:
+ruled: 2026-10-13
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -45,3 +48,7 @@ you; basis: leftovers-15 to 21, this initiative.
 ## Recommendation
 
 The FSE's: accept as written.
+
+## Ruling
+
+pablo, 2026-10-13, in the organizer on lodestar: accept as wr
