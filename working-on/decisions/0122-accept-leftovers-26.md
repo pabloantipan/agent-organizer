@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 26 - scroll regions reachable by keyboard, descriptions with their nouns, last small fixes, fixture gaps
-status: proposed
+status: ruled
 raised: 2026-10-13
 raised_by: fse
 owner: pablo
@@ -9,6 +9,9 @@ cards: [lf26-scroll-stops, lf26-words, lf26-menu, lf26-fixture]
 threads: []
 supersedes: []
 superseded_by:
+ruled: 2026-10-13
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -44,3 +47,7 @@ basis: leftovers-15 to 25, this initiative (leftovers-25: 36 min, no wait).
 ## Recommendation
 
 The FSE's: accept as written.
+
+## Ruling
+
+pablo, 2026-10-13, in the organizer on lodestar: ok
