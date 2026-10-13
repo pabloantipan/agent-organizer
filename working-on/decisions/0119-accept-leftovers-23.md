@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 23 - seats start detached, the organizer stops typing into iTerm
-status: proposed
+status: ruled
 raised: 2026-10-13
 raised_by: fse
 owner: pablo
@@ -9,6 +9,9 @@ cards: [lf23-detached-launch]
 threads: []
 supersedes: []
 superseded_by:
+ruled: 2026-10-13
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -38,3 +41,7 @@ basis: leftovers-15 to 22, this initiative.
 ## Recommendation
 
 The FSE's: accept as written.
+
+## Ruling
+
+pablo, 2026-10-13, in the organizer on lodestar: ok
