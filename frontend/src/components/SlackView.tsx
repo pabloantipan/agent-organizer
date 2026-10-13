@@ -32,7 +32,7 @@ export function SlackView() {
   // rail and Home choose it), so there is no list of cells to pick from.
   const cells = (view.groups ?? []).filter((g) => g.cell);
 
-  const g = cells.find((c) => c.id === selectedInitiative);
+  const g = cells.find((c) => selectedInitiative === c.id);
   if (!g) {
     return (
       <div>
