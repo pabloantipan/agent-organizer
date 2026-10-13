@@ -146,9 +146,9 @@ ends the rail; F2 reads the menu with the rail scrolled to its end (a
 place the lead reaches by scrolling, not a placed ⋯): above the ⋯, inside
 the window.
 
-Amendment 3, 2026-10-13, the FSE, from sup62 (0108): the Tab harness's
-window is never shown, so WebKit suspends requestAnimationFrame and its
-animated scrolls (Down, Page Down) do not move. S1 is met by End on the
-focused body (a real NSEvent, `scrollTop` 257), which scrolls without
-animation. Harness rule from here: scroll rows press End/Home, or an
-unanimated key, not Down.
+Amendment 3, 2026-10-13, the FSE, from sup62 (0108), corrected the same
+day: S1 and S2 run as written. The hidden harness window suspends
+requestAnimationFrame, so Down did not scroll at first; with
+`WKPreferences.inactiveSchedulingPolicy = .none` in a copy of the harness
+(window still offscreen, never shown), Down ×3 and Right ×3 scroll in 3/3
+runs. Carry: fold that setting into `scripts/tab-harness/` on a later card.
