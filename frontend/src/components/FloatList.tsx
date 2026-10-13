@@ -124,8 +124,9 @@ export function FloatList() {
       if (query) setQuery("");
       else close();
     } else if (e.key === "Tab") {
-      // Tab stays inside the panel.
-      const els = Array.from(panel.current?.querySelectorAll<HTMLElement>("input, button") ?? []).filter((x) => x.tabIndex >= 0 && !x.hasAttribute("disabled"));
+      // Tab stays inside the panel; the list is a stop while it scrolls
+      // (leftovers-26 FR-3, its tabindex from useScrollEdges).
+      const els = Array.from(panel.current?.querySelectorAll<HTMLElement>("input, button, [tabindex]") ?? []).filter((x) => x.tabIndex >= 0 && !x.hasAttribute("disabled"));
       if (!els.length) return;
       const i = els.indexOf(document.activeElement as HTMLElement);
       const next = e.shiftKey ? (i <= 0 ? els.length - 1 : i - 1) : (i === els.length - 1 ? 0 : i + 1);

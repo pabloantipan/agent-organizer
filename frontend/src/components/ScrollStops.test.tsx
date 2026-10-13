@@ -29,6 +29,10 @@ describe("S4: every scroll region is named where it is watched", () => {
     expect(helpSrc).not.toContain('setAttribute("tabindex"');
   });
 
+  it("the floating list's own Tab loop walks the list while it is a stop", () => {
+    expect(floatSrc).toContain('querySelectorAll<HTMLElement>("input, button, [tabindex]")');
+  });
+
   it("the header's open area is the id its Details button controls", () => {
     expect(headerSrc).toContain("aria-controls={`ihead-open-${i.id}`}");
     expect(headerSrc).toContain("id={`ihead-open-${i.id}`}");
