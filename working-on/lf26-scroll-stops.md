@@ -6,7 +6,7 @@ branch: lf26-scroll-stops
 seat:
 stage: one-window
 updated: 2026-10-13
-next: "pablo: rule 0122 (accept leftovers-26); on accept the FSE starts its supervisor"
+next: "sup62 runs it (0122 ruled ok, 2026-10-13)"
 depends_on: []
 boundary: ["docs/specs/leftovers-26.md Boundary, lf26-scroll-stops"]
 spec: "docs/specs/leftovers-26.md (FR-1 to FR-3, FR-9, FR-10; tab-reaches-links Amendment 3, T22 and §1 names)"

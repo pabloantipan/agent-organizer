@@ -4,6 +4,10 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-13, leftovers-26 running
+
+- **0122 ruled ok** (9370925): leftovers-26 (0389261, region names folded 7fc51ab; lf26-menu-list became lf26-menu). sup62 runs it in its own window 20524. On close: end it, close 20524, make install.
+
 ## HAND-OFF — 2026-10-13, leftovers-25 landed
 
 - **Last SHA seen:** f7998aa. leftovers-25 merged by sup61 (dialogs 8276d19, rail 6facd48, names f7998aa), both reviews pass each, one wave. 36 min against 60-90, lease wait 0 (pressure 1 throughout); $23.02. Record runs/2026-10-13-sup61-leftovers-25.md. Amendment 1 (f72c7f3): R3 met with the rail scrolled, N1's F5 on vitest. sup61 ended, window 19967 closed; installed v0.2.0-1905-gf7998aa; tree clean. No supervisor running.

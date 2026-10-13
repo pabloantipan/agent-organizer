@@ -6,7 +6,7 @@ branch: lf26-words
 seat:
 stage: one-window
 updated: 2026-10-13
-next: "pablo: rule 0122 (accept leftovers-26); on accept the FSE starts its supervisor"
+next: "sup62 runs it (0122 ruled ok, 2026-10-13)"
 depends_on: []
 boundary: ["docs/specs/leftovers-26.md Boundary, lf26-words"]
 spec: "docs/specs/leftovers-26.md (FR-4 to FR-7; tab-reaches-links Amendment 3, T23)"
