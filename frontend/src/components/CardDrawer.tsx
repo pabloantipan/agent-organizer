@@ -9,6 +9,7 @@ import { readOnlyOf } from "../lib/queue";
 import { dateWords } from "../lib/dates";
 import { cardKey, drafts, draftVerb, useDraft, useImeEscape } from "../lib/drafts";
 import { openBox } from "../lib/boxStack";
+import { loopTab } from "../lib/tabTrap";
 import { useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
 import { focusBoxBelow } from "./RuleDecisionBox";
 
@@ -46,6 +47,8 @@ export function CardDrawer() {
   useEffect(() => (open ? openBox(() => select(null)) : undefined), [open, select]);
   const html = useMemo(() => (selected ? (marked.parse(selected.body || "") as string) : ""), [selected]);
   const title = useRef<HTMLHeadingElement>(null);
+  // leftovers-25 FR-10: the open card back keeps Tab, as the role drawer does.
+  const box = useRef<HTMLDivElement>(null);
   const body = useRef<HTMLDivElement>(null);
   useMarkdownEdges(body, html);
   // leftovers-8 FR-6: the card back scrolls its own body, with the edge.
@@ -61,7 +64,7 @@ export function CardDrawer() {
   const dir = c.path.replace(/\/working-on\/.*$/, "");
   return (
     <div className="modal-backdrop" onClick={() => select(null)}>
-      <div className={`modal card-back ${c.status}`} onClick={(e) => e.stopPropagation()} role="dialog" aria-labelledby={titleId}>
+      <div ref={box} className={`modal card-back ${c.status}`} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => loopTab(e, box.current)} role="dialog" aria-labelledby={titleId}>
         <header className="modal-head">
           <div>
             <h2 ref={title} id={titleId} tabIndex={-1}>{c.title || c.slug}</h2>

@@ -5,6 +5,7 @@ import type { model } from "../../wailsjs/go/models";
 import { useBoard } from "../stores/board.store";
 import { dateWords } from "../lib/dates";
 import { openBox } from "../lib/boxStack";
+import { loopTab } from "../lib/tabTrap";
 import { useScrollEdges } from "../lib/useScrollEdges";
 import { focusBoxBelow } from "./RuleDecisionBox";
 import { ageWords, noSessionLine, otherHandOffLine, roleState, sessionStarted, sessionWord } from "../lib/roles";
@@ -86,15 +87,7 @@ export function RoleDrawer() {
   const st = roleState(role);
   const go = (fn: () => void) => { landing.current = true; openRole(null); fn(); };
   // An open box keeps the keyboard: Tab and Shift+Tab loop inside it.
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key !== "Tab" || !box.current) return;
-    const items = Array.from(box.current.querySelectorAll<HTMLElement>("button, summary, [href], [tabindex]:not([tabindex='-1'])")).filter((el) => !el.hasAttribute("disabled"));
-    if (items.length === 0) return;
-    const first = items[0], last = items[items.length - 1];
-    const at = document.activeElement;
-    if (e.shiftKey && (at === first || at === title.current)) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && at === last) { e.preventDefault(); first.focus(); }
-  };
+  const onKeyDown = (e: React.KeyboardEvent) => loopTab(e, box.current);
   const sessions = role.sessions ?? [];
   const mail = role.mail ?? [];
   const inits = role.initiatives ?? [];
@@ -143,11 +136,11 @@ export function RoleDrawer() {
           <Section label="Initiatives">
             {inits.length === 0
               ? <p className="rd-empty">None yet.</p>
-              : <p className="rd-inits">
-                  {inits.map((id, i) => (
-                    <span key={id}>{i > 0 && ", "}<a href="#" className="rd-init mono" onClick={(e) => { e.preventDefault(); go(() => { openInitiative(id, "overview"); landOnInitiative(id); }); }} aria-label={`Open ${id}`}>{id}</a></span>
+              : <ul className="rd-inits">
+                  {inits.map((id) => (
+                    <li key={id}><a href="#" className="rd-init mono" onClick={(e) => { e.preventDefault(); go(() => { openInitiative(id, "overview"); landOnInitiative(id); }); }} aria-label={`Open ${id}`}>{id}</a></li>
                   ))}
-                </p>}
+                </ul>}
           </Section>
         </div>
       </div>
