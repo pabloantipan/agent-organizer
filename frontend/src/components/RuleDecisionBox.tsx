@@ -5,6 +5,7 @@ import { api } from "../hooks/useWails";
 import { recordSections } from "../lib/decisions";
 import { leadOf } from "../lib/queue";
 import { openBox } from "../lib/boxStack";
+import { loopTab } from "../lib/tabTrap";
 import { useImeEscape } from "../lib/drafts";
 import { useBoard } from "../stores/board.store";
 import type { WidthClass } from "../lib/width";
@@ -196,46 +197,6 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
       </div>
     </div>
   );
-}
-
-/** initiative-header FR-7 (UI2): while the box is open, Tab and Shift+Tab
- *  loop inside it, so focus never lands on a row the box covers and no
- *  second box opens under the first. Every Tab is moved here, not only the
- *  one at an edge, so WebKit, which skips buttons on Tab by default, walks
- *  the same stops as Chromium. A radio group is one stop: its checked radio,
- *  else its first, as the browser does. From the title (not a stop), Tab
- *  goes to the first stop and Shift+Tab to the last. */
-function loopTab(e: KeyboardEvent, root: HTMLElement | null) {
-  if (e.key !== "Tab" || e.altKey || e.ctrlKey || e.metaKey || !root) return;
-  const stops = tabStops(root);
-  if (stops.length === 0) return;
-  e.preventDefault();
-  e.stopPropagation();
-  const active = document.activeElement;
-  const radio = (el: Element | null): el is HTMLInputElement => el instanceof HTMLInputElement && el.type === "radio";
-  const at = radio(active) ? stops.findIndex((s) => radio(s) && s.name === active.name) : stops.indexOf(active as HTMLElement);
-  const next = at < 0
-    ? (e.shiftKey ? stops.length - 1 : 0)
-    : (at + (e.shiftKey ? -1 : 1) + stops.length) % stops.length;
-  stops[next].focus();
-}
-
-/** The box's tab stops in document order: enabled, shown, not taken out of
- *  the order, one per radio group. */
-function tabStops(root: HTMLElement): HTMLElement[] {
-  const all = Array.from(root.querySelectorAll<HTMLElement>("button, textarea, input, select, a[href], [tabindex]"))
-    .filter((el) => el.tabIndex >= 0 && !el.matches(":disabled") && el.getClientRects().length > 0);
-  const out: HTMLElement[] = [];
-  const groups = new Set<string>();
-  for (const el of all) {
-    if (el instanceof HTMLInputElement && el.type === "radio" && el.name) {
-      if (groups.has(el.name)) continue;
-      groups.add(el.name);
-      const group = all.filter((r): r is HTMLInputElement => r instanceof HTMLInputElement && r.type === "radio" && r.name === el.name);
-      out.push(group.find((r) => r.checked) ?? group[0]);
-    } else out.push(el);
-  }
-  return out;
 }
 
 /** The room between the top bar and the window's bottom edge, less a gap. */
