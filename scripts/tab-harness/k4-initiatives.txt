@@ -1,0 +1,7 @@
+# K4 order: initiatives
+until document.querySelectorAll('.rail-item:not(.role)').length > 0
+eval [...document.querySelectorAll('.topbar button')].find(b=>b.innerText.trim()==='Initiatives').click()
+wait 800
+until document.querySelector('.rail-item.role')
+reset
+tabs 90 order

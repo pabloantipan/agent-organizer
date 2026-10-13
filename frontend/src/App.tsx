@@ -16,6 +16,7 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Gate } from "./components/Gate";
 import { CardDrawer } from "./components/CardDrawer";
 import { FloatList } from "./components/FloatList";
+import { SkipLink, MAIN_ID } from "./components/SkipLink";
 import { useBoard } from "./stores/board.store";
 import { api, type AgentsView as AgentsPayload } from "./hooks/useWails";
 import { EventsOn } from "../wailsjs/runtime/runtime";
@@ -56,15 +57,16 @@ export default function App() {
   return (
     <Gate>
     <div className="shell">
+      <SkipLink />
       <TopBar />
       {screen === "settings" ? (
-        <main className="content"><ErrorBoundary name="Settings"><Settings /></ErrorBoundary></main>
+        <main id={MAIN_ID} tabIndex={-1} className="content"><ErrorBoundary name="Settings"><Settings /></ErrorBoundary></main>
       ) : screen === "initiatives" ? (
-        <main className="content"><ErrorBoundary name="Initiatives"><InitiativesView /></ErrorBoundary></main>
+        <main id={MAIN_ID} tabIndex={-1} className="content"><ErrorBoundary name="Initiatives"><InitiativesView /></ErrorBoundary></main>
       ) : screen === "usage" ? (
-        <main className="content"><ErrorBoundary name="Usage"><Usage /></ErrorBoundary></main>
+        <main id={MAIN_ID} tabIndex={-1} className="content"><ErrorBoundary name="Usage"><Usage /></ErrorBoundary></main>
       ) : (
-        <main className={`content with-rail ${railCollapsed ? "rail-strip" : ""}`}>
+        <main id={MAIN_ID} tabIndex={-1} className={`content with-rail ${railCollapsed ? "rail-strip" : ""}`}>
           <Rail />
           {screen === "home" ? <div className="board-wrap"><ErrorBoundary name="Home"><Home /></ErrorBoundary></div> : <InitiativeScreen />}
         </main>
