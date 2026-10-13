@@ -582,7 +582,7 @@ button.counts.linkish { font-family: var(--mono); }
 /* Conversations (the Slack view) */
 .slack-wrap { display: flex; flex-direction: column; min-height: 0; }
 .slack { display: flex; flex-direction: column; height: 100%; min-height: 0; }
-.cell-filters .hot .mono, .counter.hot, .tiny-btn.hot { color: var(--blocked); }
+.counter.hot, .tiny-btn.hot { color: var(--blocked); }
 .slack-body { display: grid; grid-template-columns: 1fr; gap: 14px; flex: 1; min-height: 0; }
 .slack-body.with-people { grid-template-columns: 1fr 250px; }
 .people { display: flex; flex-direction: column; min-height: 0; border-radius: var(--r); background: var(--panel); border: 1px solid var(--border); }
@@ -628,6 +628,8 @@ button.person:focus-visible { outline-offset: -2px; }
 .cell-search { display: flex; align-items: center; gap: 6px; padding: 3px 8px; border-radius: var(--radius-md); background: var(--bg-deep); border: 1px solid var(--border); color: var(--dim); width: 220px; }
 .cell-search input { flex: 1; min-width: 0; background: transparent; border: 0; color: var(--text); font-size: var(--font-size-sm); padding: 2px 0; }
 .cell-search input:focus { outline: none; }
+/* The ring is the wrapper's, so the icon sits inside it (leftovers-26 FR-6). */
+.cell-search:focus-within { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .chat-head { display: flex; align-items: center; gap: 8px; padding: 6px 4px 10px; border-bottom: 1px solid var(--border); margin-bottom: 8px; color: var(--muted); }
 .chat-title { font-family: var(--mono); font-size: var(--font-size-lg); font-weight: 600; color: var(--text); }
 .counter { font-family: var(--mono); margin-left: 4px; color: var(--dim); }
