@@ -6,7 +6,7 @@ branch: lf22-tab-links
 seat: tl-build
 stage: one-window
 updated: 2026-10-13
-next: "review: lf22-tab-links, gate met (K1-K4, X0), 347152e"
+next: "review: lf22-tab-links, gate met (K1-K4, X0), d9cd76f"
 depends_on: []
 boundary: ["docs/specs/leftovers-22.md Boundary, lf22-tab-links"]
 spec: "docs/specs/leftovers-22.md (FR-1 to FR-4; tab-reaches-links, T1, T2, T4, T5)"
@@ -26,7 +26,7 @@ docs/specs/leftovers-22.md, rows K1, K2, K3, K4 and X0.
 - [x] X0: clean clone of 347152e: make test (Go ok, vitest 556), pnpm run build, wails build pass; porcelain empty (/Users/pabloantipan/organizer/.wt-notes/tl-build/x0-*.log, x0-status.txt)
 
 ## Done
-- 2026-10-13 tl-build: TabFocusesLinks on (243e538), skip link first on every screen (2e32056), offscreen WKWebView Tab harness in scripts/tab-harness (347152e); link ring already reached links, global.css untouched; rebased on 5642453.
+- 2026-10-13 tl-build: TabFocusesLinks on (3c53f4e), skip link first on every screen (dbca94e), offscreen WKWebView Tab harness in scripts/tab-harness (d9cd76f); link ring already reached links, global.css untouched; rebased on main (X0 ran on 347152e, the same code tree before the last rebase over card-only commits).
 
 ## Notes
 - Harness: the offscreen window says isKeyWindow to its own WKWebView only (WebKitTestRunner's way); without it WebKit matches no :focus. Never ordered in, never activates, keys via sendEvent: only. How to run: /Users/pabloantipan/organizer/.wt-notes/tl-build/progress.md.
