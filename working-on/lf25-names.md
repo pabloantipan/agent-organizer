@@ -1,12 +1,12 @@
 ---
 title: "A row says what it shows; focus stays put"
-status: next
+status: now
 repos: [organizer]
 branch: lf25-names
 seat: nm-build
 stage: one-window
 updated: 2026-10-13
-next: "nm-build builds it (sup61, wave 1, launched 2026-10-13)"
+next: "nm-build: FR-1..FR-5 in progress on lf25-names"
 depends_on: []
 boundary: ["docs/specs/leftovers-25.md Boundary, lf25-names"]
 spec: "docs/specs/leftovers-25.md (FR-1 to FR-5; tab-reaches-links Amendment 2, T13, T14, T19, T21)"
