@@ -390,6 +390,8 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 
 - 2026-10-11, tab-reaches-links: before designing markup workarounds for a WebKit default, check whether the shell exposes the preference (Wails v2.15 has `Mac.Preferences.TabFocusesLinks`). Pablo uses Tab (0117), so keyboard paths are real, not hypothetical.
 
+- 2026-10-13, tab-reaches-links A1: with macOS Keyboard navigation off, WKWebView skips buttons too, not only links; verify a platform premise in the built app before writing it as the problem. A roving set is cheap to extend (strip, roles); a composite head with four controls wants a menu.
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).

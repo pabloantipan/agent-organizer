@@ -354,6 +354,9 @@ keeps their place.
   naming it. **Current is a line, open is a surface**: the 2 px accent
   underline marks the current place or icon, `--surface-selected` marks an
   open disclosure (A5).
+- **Link or button**: a link changes where you are (screen, initiative,
+  sub-view); a button changes what is shown in place. Nothing that responds
+  to a press is a `span`, `li` or `div` (tab-reaches-links A1).
 - **A control does not move when it is pressed**: what it opens or hides
   may move the content, never the control itself (initiatives-view A5,
   the header's Details).

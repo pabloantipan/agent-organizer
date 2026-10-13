@@ -144,3 +144,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-11 — FSE cut tab-reaches-links as docs/specs/leftovers-22.md (lf22-tab-links K1-K4, lf22-rail-roving V1 after lf21); Tab rows checked in WKWebView via an offscreen NSEvent harness; 0118 waits on Pablo.
 - 2026-10-12 — hs-ui Q1: hero counts as one sr-only phrase, visual stats aria-hidden (A6 §3, I40), rides lf22-rail-roving.
 - 2026-10-12 — I40 taken into lf22-rail-roving as FR-7 and gate row V2.
+- 2026-10-13 — leftovers-22 answers: tab-reaches-links Amendment 1 (link vs button rule for F1-F5, skip link not rendered under a modal, row counts as one phrase, group head two stops, strip and Roles in the roving set), rows T6-T12.
