@@ -1,0 +1,30 @@
+# K2: the first Tab on Home, Initiatives, an initiative and Settings, then Return
+until document.querySelectorAll('.rail-item:not(.role)').length > 0
+report load
+key tab
+report home-first
+key return
+report home-after-return
+eval [...document.querySelectorAll('.topbar button')].find(b=>b.innerText.trim()==='Initiatives').click()
+wait 800
+reset
+key tab
+report initiatives-first
+key return
+report initiatives-after-return
+eval [...document.querySelectorAll('.topbar button')].find(b=>b.innerText.trim()==='Home').click()
+wait 500
+eval (()=>{const b=[...document.querySelectorAll('.rail-item')].find(e=>!e.classList.contains('role')); b.click(); return b.innerText.replace(/\\s+/g,' ')})()
+wait 800
+reset
+key tab
+report initiative-first
+key return
+report initiative-after-return
+eval document.querySelector('.topbar button[aria-label=Settings]').click()
+wait 800
+reset
+key tab
+report settings-first
+key return
+report settings-after-return

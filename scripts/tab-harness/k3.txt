@@ -1,0 +1,15 @@
+# K3: the ring on each kind of link; Open <id> raises its card as hover does
+until document.querySelectorAll('.rail-item:not(.role)').length > 0
+eval JSON.stringify({surfaceHover: getComputedStyle(document.documentElement).getPropertyValue('--surface-hover').trim(), surfaceRaised: getComputedStyle(document.documentElement).getPropertyValue('--surface-raised').trim(), focusRing: getComputedStyle(document.documentElement).getPropertyValue('--focus-ring').trim()})
+key tab
+report skip-link
+eval [...document.querySelectorAll('.topbar button')].find(b=>b.innerText.trim()==='Initiatives').click()
+wait 800
+eval (()=>{const c=document.querySelector('.ic'); const before=getComputedStyle(c).backgroundColor; c.classList.add('raised'); const hov=getComputedStyle(c).backgroundColor; c.classList.remove('raised'); return JSON.stringify({card:c.getAttribute('data-card'), rest: before, hoveredRaise: hov})})()
+reset
+tabs 14 initiatives
+eval [...document.querySelectorAll('.topbar button')].find(b=>b.innerText.trim()==='Home').click()
+until document.querySelector('.rail-item.role')
+eval document.querySelector('.r-row[data-role=Hephaistos]').click()
+wait 800
+tabs 5 drawer

@@ -1,0 +1,12 @@
+# K1: Tab from the top of Initiatives, and of Home with a role drawer open
+until document.querySelectorAll('.rail-item:not(.role)').length > 0
+eval [...document.querySelectorAll('.topbar button')].find(b=>b.innerText.trim()==='Initiatives').click()
+wait 800
+reset
+tabs 30 initiatives
+eval [...document.querySelectorAll('.topbar button')].find(b=>b.innerText.trim()==='Home').click()
+until document.querySelector('.rail-item.role')
+eval document.querySelector('.r-row[data-role=Hephaistos]').click()
+wait 800
+report drawer-open
+tabs 12 drawer
