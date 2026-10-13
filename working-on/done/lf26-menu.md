@@ -1,12 +1,12 @@
 ---
 title: "The group menu opens the right way"
-status: now
+status: done
 repos: [organizer]
 branch: lf26-menu
 seat: mn-build
 stage: one-window
 updated: 2026-10-13
-next: "review: lf26-menu, gate met (M1, X0), 6889465"
+next: "done: merged to main (sup62)"
 depends_on: []
 boundary: ["docs/specs/leftovers-26.md Boundary, lf26-menu"]
 spec: "docs/specs/leftovers-26.md (FR-8)"
