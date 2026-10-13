@@ -6,7 +6,7 @@ branch: lf25-names
 seat:
 stage: one-window
 updated: 2026-10-13
-next: "pablo: rule 0121 (accept leftovers-25); on accept the FSE starts its supervisor"
+next: "sup61 runs it (0121 ruled ok, 2026-10-13)"
 depends_on: []
 boundary: ["docs/specs/leftovers-25.md Boundary, lf25-names"]
 spec: "docs/specs/leftovers-25.md (FR-1 to FR-5; tab-reaches-links Amendment 2, T13, T14, T19, T21)"

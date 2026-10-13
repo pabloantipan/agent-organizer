@@ -7,6 +7,7 @@ restating it (the discuss skill).
 ## HAND-OFF — 2026-10-13 14:5x, leftovers-24 landed
 
 - **Last SHA seen:** d00165d. leftovers-24 merged by sup60 (rail-keys 2b5273e, controls 38fc448, drawer-skip d00165d), code and UI pass, one wave. 190 min against 45-75: builds 70 min on forecast, reviews waited 80-95 min on test-lease at memory pressure 2 (agents only 4.4 GB of it; the rest outside the seats). $26.91. Record runs/2026-10-13-sup60-leftovers-24.md. sup60 ended, window 19085 closed; installed v0.2.0-1868-gd00165d; tree clean. No supervisor running.
+- **0121 ruled ok** (8a94d96): leftovers-25 (5728325; Aglaea agreed F2 branch removed). sup61 runs it in its own window 19967. On close: end it, close 19967, make install.
 - **Sent to aglaea** (leftovers-25 shortlist asked): rk-ui A1-A4, ct-ui A1-A2, ds-ui Q1; for cards: ct-ui U1 sev 3 (divider actions invisible on focus), rk E4 strip Tab passes Asleep/Archived folds, rename field unnamed, card back no Tab trap, F2 cell row unreachable (vitest only).
 - **Forecasts:** add the test-lease wait to the waits term until Hephaistos answers the starvation thread (2nd sighting).
 - **lf23-detached-launch** still waits on Pablo merging claudecode feat/seat-background.
