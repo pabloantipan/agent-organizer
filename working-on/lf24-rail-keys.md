@@ -3,10 +3,10 @@ title: "The rail costs a few Tab stops, however long"
 status: next
 repos: [organizer]
 branch: lf24-rail-keys
-seat:
+seat: rk-build
 stage: one-window
 updated: 2026-10-13
-next: "sup60 runs it (0120 ruled ok, 2026-10-13)"
+next: "rk-build: build (sup60, wave 1)"
 depends_on: []
 boundary: ["docs/specs/leftovers-24.md Boundary, lf24-rail-keys"]
 spec: "docs/specs/leftovers-24.md (FR-6 to FR-9; tab-reaches-links Amendment 1, T8-T11)"
