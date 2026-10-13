@@ -39,3 +39,17 @@ Pass: M1 and X0 met at 6889465 (lf26-menu).
 - The harness presses the ⋯ with `click()` as a stand-in for AXPress (no focus, no scroll), as rl-ui did; no real AXPress on a review build's pid was run.
 - `## UI review` is missing, so status and place stay as they are.
 - Reviewer mn-review, 2026-10-13, commit 68894652cc93ac82e9e49029fa167c18b9feb189.
+
+## UI review
+Pass: M1 gives the lead a group menu that opens downward when pressed out of view, in the real app. Checked on 68894652cc93ac82e9e49029fa167c18b9feb189 (the branch did not move). X0 is the code reviewer's row; I did not re-run it.
+- How each state was checked:
+  - Real AXPress, `Deltagos Review` built by `make review-build` in my worktree, fixture, auth off, read by my own pid. Rail grouped by an AXPress on Group by client. At 1440x900 the ccint ⋯ sat at y 1234, below the window (content 157-1057). AXPress moved it to 750; the menu opened below it (776-864), inside the window, and focus was on Rename. At 1024x640 (window resized by AX on that pid) the ⋯ went from 1164 to 490, with the menu at 516-604 below it. A ⋯ above the rail (acme at 73) came to 487 and opened down. A ⋯ already in view (personal at 231) did not move and opened down. Shots: `.wt-notes/mn-ui/wkwebview-1440x900-M1-{before-press,axpress-open}.png`, `wkwebview-1024x640-M1-{before-press,axpress-open,axpress-above-open}.png`.
+  - Tab harness, offscreen WKWebView, own `wails dev` on :34124, `--links on --size 1024x640`, the builder's `m1.txt` plus my lines (`.wt-notes/mn-ui/steps2.txt`, `m1-final.jsonl`). Case d: ⋯ 1077 to 437, `up: false`, menu 463-551. Only `nav.rail` scrolled (0 to 640) and the document stayed at 0. An Escape dispatched in the page put focus back on the ⋯ ("Actions for ccint", ring drawn). Cases b, c and e match rl-ui (opens up at the bottom edge, so the in-view behaviour is unchanged) and the arrows cycle.
+- Findings (none is sev 4 or 3):
+  - U1 (sev 1, from code, not seen): someone can lose the ⋯ under the pointer. A pointer press on a ⋯ that is only partly cut by the rail's edge counts as out of view (`placeInView`: any part outside the port), so the rail scrolls and the ⋯ jumps to the middle before the menu opens. Where: `Rail.tsx` `placeInView`. Evidence: the rule in code. I could not press by pointer (0108). Proposal: scroll only when less than half the ⋯ is visible, or use `block: "nearest"` when it is partly visible. Ranked with the leftovers.
+- Spec gaps (for the FSE):
+  - FR-8's words ("measured after the first item's focus has scrolled the rail") are not what was built: an out-of-view ⋯ is centred in the rail before the place is measured (progress.md says why). Amend FR-8 to say what the press does to the rail.
+  - M1's harness setup is fragile. `m1.txt` presses the rail toggle when `aria-expanded` is false, and in my runs that left the rail collapsed, so case a (keyboard focus on the lowest ⋯) never ran: groups were not in the DOM for 30 s. Cases b to e ran once the rail was open. A setup that waits for the rail's open state would fix it. Case a's result is the builder's and the code reviewer's.
+- For aglaea: none.
+- Not verified in WKWebView: case a in my harness run (setup, above). The focus ring in the review app's own window, which is never key because I do not activate it (the harness shows the ring). A pointer press (U1). Firebase is not relevant to this row. The Rail vitest was not re-run by me: the lease was held by memory pressure "warn" for over an hour. The code reviewer ran it, 4/4.
+- UI reviewer mn-ui, 2026-10-13.
