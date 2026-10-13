@@ -29,3 +29,21 @@ docs/specs/leftovers-22.md, rows V1, V2 and X0.
 ## Notes
 - V1's last step reads as Amendment 1 (sup59, thread 01M4TND4GWDZDHBZGRK0ZRPW3B): the fold controls stay ordinary stops after the rows.
 - The harness window is never key, so :focus-visible never matches in it; it proves where focus goes, not the ring.
+
+## UI review
+rr-ui, 2026-10-13, on c4f0cd7 (every row checked there; the branch did not move). Verdict: **pass**. No severity 4 or 3.
+
+How each state was checked (shots and logs in `.wt-notes/rr-ui/`):
+- V1, flag on, in the offscreen harness (`harness/tab.swift`, `NSEvent`s through `sendEvent:` to its own never-key window) against my own `wails dev` on 34120, fixture, auth off. On init-a: Tab enters on init-a (init-a=0, rest -1); Down, Down, Up lands on init-many; Return opens it; the next Tabs go Expand Asleep, Initiatives ›, Expand Archived, then main (`v1-flag-on.txt`). Also from Home: enters on the first row, Shift-Tab leaves to the button before the rows, Tab comes back on the current row, the ends hold (`v1-extra-home.txt`). Grouped by client: still one row stop, Down crosses groups, Tab from a row goes to the next group's head (`v1-extra-grouped*.txt`).
+- V2, AX of my own review build (pid saved): one AXStaticText `1 now, 1 blocked, 11 next` on Home and `1 now, 1 blocked, 7 next` on init-a, no number items; hero unchanged to the eye at 1440×900 and 1024×640 (`ax-*.txt`, `wkwebview-1440x900-V2-{home,initiative}.png`, `wkwebview-1024x640-V2-initiative.png`). vitest 550/550.
+
+Findings (none fails the card):
+- U1 (2) What: a keyboard and VoiceOver user on a row hears `1 init-a acme 1 1 7`: the row's counts are bare numbers, while the hero now says `now, blocked, next`. Where: every rail row, `Rail.tsx` `Counts`. Evidence: harness and AX row names. Proposal: the hero's treatment on the row (counts `aria-hidden`, one phrase). Not in FR-5–7; next task.
+- U2 (2, spec gap) What: grouped, each group's head costs up to four stops (drag handle, chevron, rename, remove) and sits between the row groups; FR-5's "group headers before the rows" holds only for the first group. Where: grouped rail. Evidence: `v1-extra-grouped.txt`. Proposal: say whether group heads stay ordinary stops in DOM order (as built, and right for 2.4.3) or join a roving group of their own.
+- U3 (1, spec gap) What: the collapsed strip still gives every initiative its own Tab stop (up to twenty). Where: `rail strip`. Proposal: decide if T3 covers the strip.
+- U4 (1, pre-existing) Rename and remove group icons are named by `title` only (AX description, no name); Group by client and New group likewise.
+- Seen, not this card: at 1024×640 the header's `target … goal` line touches the sub-view tabs (shot above).
+
+For aglaea: U1, U2, U3.
+
+Not verified in WKWebView: the row's focus ring (`outline-offset: -2px` over the global 2px `--focus-ring`): the harness window is never key and I may not focus the review app, so `:focus-visible` never matched; judged from CSS only. Space-to-lift drag by keyboard (read in code: the row returns on `defaultPrevented`). VoiceOver speech itself (AX tree only). `wails build` after `wails dev` skipped: the worktree was removed.
