@@ -1,12 +1,12 @@
 ---
 title: "The skip link never sits under a drawer"
-status: next
+status: now
 repos: [organizer]
 branch: lf24-drawer-skip
 seat: ds-build
 stage: one-window
 updated: 2026-10-13
-next: "ds-build: build (sup60, wave 1)"
+next: "ds-build: building FR-10, FR-11; harness rows E6, E7 next"
 depends_on: []
 boundary: ["docs/specs/leftovers-24.md Boundary, lf24-drawer-skip"]
 spec: "docs/specs/leftovers-24.md (FR-10, FR-11; tab-reaches-links Amendment 1, T7, T12)"
