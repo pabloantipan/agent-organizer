@@ -1,5 +1,5 @@
-import { useState, type KeyboardEvent } from "react";
-import { Archive, ArrowLeft, ChevronDown, ChevronRight, FolderPlus, Layers, Moon, PanelLeftClose, PanelLeftOpen, Pencil, PencilRuler, X } from "lucide-react";
+import { useEffect, useRef, useState, type FocusEvent, type KeyboardEvent } from "react";
+import { Archive, ArrowLeft, ChevronDown, ChevronRight, FolderPlus, Layers, Moon, MoreHorizontal, PanelLeftClose, PanelLeftOpen, PencilRuler, X } from "lucide-react";
 import { DragDropContext, Draggable, Droppable, type DraggableProvidedDragHandleProps, type DropResult } from "@hello-pangea/dnd";
 import type { merge, model } from "../../wailsjs/go/models";
 import type { Group } from "../hooks/useWails";
@@ -33,6 +33,15 @@ export function Rail() {
     try { return JSON.parse(localStorage.getItem("rail.collapsed") || "{}"); } catch { return {}; }
   });
   const [editing, setEditing] = useState<number | null>(null);
+  // A group's ⋯ to take focus once the head it sits in is drawn again
+  // (after Rename ends by Enter or Escape).
+  const [refocus, setRefocus] = useState<number | null>(null);
+  const navRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (refocus === null) return;
+    navRef.current?.querySelector<HTMLElement>(`[${ACTIONS}="${refocus}"]`)?.focus();
+    setRefocus(null);
+  }, [refocus]);
   // The row Up and Down last moved to; null once focus leaves the rows, so
   // the next Tab enters on the current row again (FR-5, T3).
   const [cursor, setCursor] = useState<string | null>(null);
@@ -148,26 +157,49 @@ export function Rail() {
     persist([...base, { name: "new group", initiatives: [] }] as Group[]);
     setEditing(base.length);
   };
-  const rename = (i: number, name: string) => {
+  const rename = (i: number, name: string, back = false) => {
+    if (back) setRefocus(i);
     setEditing(null);
     const n = name.trim();
     if (!n || n === stored[i].name) return;
     persist(stored.map((g, j) => (j === i ? { ...g, name: n } : g)) as Group[]);
   };
-  const removeGroup = (i: number) => persist(stored.filter((_, j) => j !== i) as Group[]);
+  const removeGroup = (i: number, from?: HTMLElement) => {
+    // Focus stays at the same place in the rail: the group before, else the
+    // one that takes this one's place, else New group (the rail goes flat).
+    const nav = from?.closest("nav");
+    const to = i > 0 ? i - 1 : stored.length > 1 ? 0 : null;
+    (to !== null ? nav?.querySelector<HTMLElement>(`[${ACTIONS}="${to}"]`) : nav?.querySelector<HTMLElement>("[data-new-group]"))?.focus();
+    persist(stored.filter((_, j) => j !== i) as Group[]);
+  };
+  // Move up and Move down (FR-7, T9): the keyboard's way to reorder groups.
+  // The heads are drawn by position, so the ⋯ at the new position is the
+  // moved group's once the order comes back.
+  const moveGroup = (i: number, to: number, from?: HTMLElement) => {
+    if (to < 0 || to >= stored.length) return;
+    from?.closest("nav")?.querySelector<HTMLElement>(`[${ACTIONS}="${to}"]`)?.focus();
+    persist(move(stored, i, to));
+  };
 
-  // The rows in the order they are drawn (collapsed groups hide theirs):
-  // one Tab stop among them, Up and Down move, Enter opens (FR-5, T3).
-  const rows = (grouped ? sections.filter((s) => !collapsed[s.key]) : sections).flatMap((s) => s.ids);
-  const stop = rovingStop(rows, selectedInitiative, cursor);
+  // The rows in the order they are drawn (collapsed groups hide theirs),
+  // then the roles (FR-9, T11): Up and Down walk all of them, across groups
+  // and on into Roles; Enter opens. Each shown group's rows are one Tab
+  // stop, so Tab passes a group in its head's two stops and one row (FR-5,
+  // FR-7); the roles hold no stop but the one an arrow put focus on.
+  const shown = (grouped ? sections.filter((s) => !collapsed[s.key]) : sections).map((s) => s.ids);
+  const roleKeys = roles.map((r) => roleKey(r.name));
+  const walk = railCollapsed
+    ? [...activeIds, ...roleKeys]
+    : [...shown.flat(), ...(isCollapsed(ROLES) ? [] : roleKeys)];
+  const stops = rovingStops(railCollapsed ? [activeIds] : shown, roleKeys, selectedInitiative, cursor);
   const onRowKey = (ev: KeyboardEvent<HTMLElement>, id: string) => {
     if (ev.defaultPrevented) return; // drag's keyboard sensor has it (Space lifts, arrows move)
-    if (ev.key === "Enter") {
+    if (ev.key === "Enter" && !id.startsWith(ROLE)) {
       ev.preventDefault();
       setSelectedInitiative(id);
       return;
     }
-    const to = rovingMove(rows, id, ev.key);
+    const to = rovingMove(walk, id, ev.key);
     if (to === null) return;
     ev.preventDefault();
     setCursor(to);
@@ -179,6 +211,15 @@ export function Rail() {
     ? { eyebrow: current.client || "initiative", name: current.id, now: current.now, blocked: current.blocked, next: current.next }
     : { eyebrow: "Working on", name: "Home", ...totals };
 
+  // One handler set for every member of the roving walk.
+  const roving = (key: string) => ({
+    tabIndex: stops.has(key) ? 0 : -1,
+    [ROW]: key,
+    onKeyDown: (ev: KeyboardEvent<HTMLElement>) => onRowKey(ev, key),
+    onFocus: () => setCursor(key),
+    onBlur: (ev: FocusEvent) => { if (!(ev.relatedTarget instanceof Element && ev.relatedTarget.hasAttribute(ROW))) setCursor(null); },
+  });
+
   const item = (id: string, idx: number) => {
     const e = byId.get(id)!;
     return (
@@ -188,13 +229,10 @@ export function Rail() {
             ref={drag.innerRef}
             {...drag.draggableProps}
             {...drag.dragHandleProps}
-            tabIndex={e.id === stop ? 0 : -1}
-            {...{ [ROW]: e.id }}
+            {...roving(e.id)}
+            aria-label={rowName(e, rank.get(e.id))}
             className={`rail-item ${selectedInitiative === e.id ? "active" : ""} ${snap.isDragging ? "dragging" : ""}`}
             onClick={() => setSelectedInitiative(e.id)}
-            onKeyDown={(ev) => onRowKey(ev, e.id)}
-            onFocus={() => setCursor(e.id)}
-            onBlur={(ev) => { if (!(ev.relatedTarget instanceof Element && ev.relatedTarget.hasAttribute(ROW))) setCursor(null); }}
             title={e.title}
           >
             <span className="rail-rank">{rank.get(e.id)}</span>
@@ -206,7 +244,7 @@ export function Rail() {
                 <CellStateLz cell={e.cell} missing={e.missing} />
               </span>
             </span>
-            <Counts now={e.now} blocked={e.blocked} next={e.next} />
+            <Counts now={e.now} blocked={e.blocked} next={e.next} hidden />
           </div>
         )}
       </Draggable>
@@ -229,7 +267,7 @@ export function Rail() {
     const c = s.ids.reduce((a, id) => { const e = byId.get(id)!; return { now: a.now + e.now, blocked: a.blocked + e.blocked, next: a.next + e.next }; }, { now: 0, blocked: 0, next: 0 });
     const isEditing = editing === i && !s.fixed;
     return (
-      <div className={`rail-group-head ${s.fixed ? "fixed" : ""}`} {...(handle ?? {})}>
+      <div className={`rail-group-head ${s.fixed ? "fixed" : ""}`} {...dragOnly(handle)}>
         <button className="rail-chevron" onClick={() => toggle(s.key)} aria-expanded={!collapsed[s.key]} aria-label={foldName(!!collapsed[s.key], s.name)} title={foldName(!!collapsed[s.key], s.name)}>
           {collapsed[s.key] ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
         </button>
@@ -239,7 +277,7 @@ export function Rail() {
             className="rail-group-name-input"
             defaultValue={s.name}
             onBlur={(e) => rename(i, e.currentTarget.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") rename(i, e.currentTarget.value); if (e.key === "Escape") setEditing(null); }}
+            onKeyDown={(e) => { if (e.key === "Enter") rename(i, e.currentTarget.value, true); if (e.key === "Escape") { setEditing(null); setRefocus(i); } }}
           />
         ) : (
           <span className="rail-group-name" onDoubleClick={() => !s.fixed && setEditing(i)} title={s.fixed ? "not in any group" : "double-click to rename, drag to reorder"}>{s.name}</span>
@@ -248,10 +286,14 @@ export function Rail() {
         <span className="spacer" />
         {collapsed[s.key] && <Counts now={c.now} blocked={c.blocked} next={c.next} />}
         {!s.fixed && !isEditing && (
-          <span className="rail-group-tools">
-            <button className="rail-icon" onClick={() => setEditing(i)} title="rename"><Pencil size={11} /></button>
-            <button className="rail-icon" onClick={() => removeGroup(i)} title="remove group (its initiatives become ungrouped)"><X size={11} /></button>
-          </span>
+          <GroupActions
+            name={s.name}
+            index={i}
+            count={stored.length}
+            onRename={() => setEditing(i)}
+            onMove={(to, from) => moveGroup(i, to, from)}
+            onRemove={(from) => removeGroup(i, from)}
+          />
         )}
       </div>
     );
@@ -281,14 +323,14 @@ export function Rail() {
   if (railCollapsed) {
     return (
       <>
-      <nav id={RAIL_ID} className="rail strip" aria-label="initiatives">
+      <nav ref={navRef} id={RAIL_ID} className="rail strip" aria-label="initiatives">
         <button className="rail-icon strip-toggle" onClick={() => setRailCollapsed(false)} title="expand the rail" aria-label="Initiatives rail" aria-expanded={false} aria-controls={RAIL_ID}><PanelLeftOpen size={14} /></button>
         <button className={`strip-all ${selectedInitiative === null ? "active" : ""}`} onClick={() => setSelectedInitiative(null)} title={`Home: ${totals.now} now, ${totals.blocked} blocked, ${totals.next} next`}>all</button>
         {roles.map((r) => {
           const st = roleState(r);
           const m = roleMail(r);
           return (
-            <button key={`role:${r.name}`} type="button" className={`strip-item role ${roleOpen === r.name ? "active" : ""}`} data-role={r.name}
+            <button key={`role:${r.name}`} type="button" className={`strip-item role ${roleOpen === r.name ? "active" : ""}`} data-role={r.name} {...roving(roleKey(r.name))}
               onClick={(ev) => openRoleFrom(ev.currentTarget, r.name)} aria-label={roleItemWords(r).join(", ")} aria-haspopup="dialog" aria-expanded={roleOpen === r.name}
               title={`${r.name}: ${st.text}${m.text ? `, ${m.text}` : m.unknown ? ", mailbox not reachable" : ""}`}>
               {initials.get(r.name)}
@@ -300,6 +342,9 @@ export function Rail() {
         {active.map((e) => (
           <button
             key={e.id}
+            type="button"
+            {...roving(e.id)}
+            aria-label={rowName(e, rank.get(e.id))}
             className={`strip-item ${selectedInitiative === e.id ? "active" : ""} ${e.blocked > 0 ? "blocked" : e.now > 0 ? "now" : ""}`}
             onClick={() => setSelectedInitiative(e.id)}
             title={`${e.id}${e.client ? ` (${e.client})` : ""}: ${e.now} now, ${e.blocked} blocked, ${e.next} next${e.live > 0 ? `, ${e.live} live agent${e.live === 1 ? "" : "s"}` : ""}${defining(e) ? `\ncell in definition: ${definitionWaits(e.cell!, e.missing)}` : ""}`}
@@ -323,7 +368,7 @@ export function Rail() {
 
   return (
     <>
-    <nav id={RAIL_ID} className="rail" aria-label="initiatives">
+    <nav ref={navRef} id={RAIL_ID} className="rail" aria-label="initiatives">
       <button className="rail-icon strip-toggle" onClick={() => setRailCollapsed(true)} title="collapse the rail" aria-label="Initiatives rail" aria-expanded aria-controls={RAIL_ID}><PanelLeftClose size={14} /></button>
       <RailHero
         hero={hero}
@@ -346,14 +391,14 @@ export function Rail() {
                   const st = roleState(r);
                   const m = roleMail(r);
                   return (
-                    <button key={r.name} type="button" className={`rail-item role ${roleOpen === r.name ? "active" : ""}`} data-role={r.name}
+                    <button key={r.name} type="button" className={`rail-item role ${roleOpen === r.name ? "active" : ""}`} data-role={r.name} {...roving(roleKey(r.name))}
                       onClick={(ev) => openRoleFrom(ev.currentTarget, r.name)} aria-haspopup="dialog" aria-expanded={roleOpen === r.name}
                       aria-label={roleItemName(r)} title={`${r.name}: ${st.text}`}>
                       <span className="rail-rank" aria-hidden="true" />
                       <span className="rail-main">
                         <span className="rail-title">{st.live && <span className={`live-dot ${st.working ? "working" : ""}`} />}{r.name}</span>
                       </span>
-                      {m.count > 0 && <span className="rail-counts mono"><span className="m" title={m.text}>{m.count}</span></span>}
+                      {m.count > 0 && <span className="rail-counts mono" aria-hidden="true"><span className="m" title={m.text}>{m.count}</span></span>}
                     </button>
                   );
                 })}
@@ -365,7 +410,7 @@ export function Rail() {
           <span>By priority{grouped ? ", grouped" : ""}</span>
           <span className="spacer" />
           {!grouped && activeIds.length > 0 && <button className="rail-icon" onClick={groupByClient} title="Group by client"><Layers size={12} /></button>}
-          {ids.length > 0 && <button className="rail-icon" onClick={addGroup} title="New group"><FolderPlus size={12} /></button>}
+          {ids.length > 0 && <button className="rail-icon" data-new-group onClick={addGroup} title="New group" aria-label="New group"><FolderPlus size={12} /></button>}
           {grouped && <button className="rail-icon" onClick={() => persist([])} title="Ungroup: back to one flat list"><X size={12} /></button>}
         </div>
         <DragDropContext onDragEnd={onDragEnd}>
@@ -447,6 +492,11 @@ const FOLD = "asleep";
 const ARCHIVED = "archived";
 /** Marks an initiative row, so Up and Down can find the next one. */
 const ROW = "data-rail-row";
+/** A role's key in the roving walk, apart from any initiative id. */
+const ROLE = "role:";
+const roleKey = (name: string) => `${ROLE}${name}`;
+/** Marks a group's ⋯ by the group's position, so focus can find it again. */
+const ACTIONS = "data-group-actions";
 /** The rail's toggle is a disclosure of the rail (responsive-home FR-11). */
 const RAIL_ID = "rail";
 
@@ -466,6 +516,15 @@ function keepHidden(stored: string[], visible: string[], hidden: Set<string>) {
 /** The one row of the rail's Tab order (FR-5, T3): the row Up and Down
  *  last reached while focus is in the rows, else the current initiative's,
  *  else the first. */
+/** The Tab stops of the walk: one per shown group of rows (its stop as
+ *  `rovingStop` picks it), and a role only while the arrows put focus on
+ *  it, so the rail's Tab count grows with neither initiatives nor roles. */
+export function rovingStops(sections: string[][], roles: string[], selected: string | null, cursor: string | null): Set<string> {
+  const out = new Set(sections.filter((s) => s.length > 0).map((s) => rovingStop(s, selected, cursor)!));
+  if (cursor && roles.includes(cursor)) out.add(cursor);
+  return out;
+}
+
 export function rovingStop(rows: string[], selected: string | null, cursor: string | null): string | null {
   if (cursor && rows.includes(cursor)) return cursor;
   if (selected && rows.includes(selected)) return selected;
@@ -482,9 +541,100 @@ export function rovingMove(rows: string[], id: string, key: string): string | nu
   return rows[Math.min(rows.length - 1, Math.max(0, i + step))];
 }
 
-function Counts({ now, blocked, next }: { now: number; blocked: number; next: number }) {
+/** A rail row's name (FR-6, T8): the counts said as one phrase, zeros too,
+ *  so every row reads the same way; the visual counts are hidden. */
+export function rowName(e: { id: string; client: string; now: number; blocked: number; next: number }, rank: number | undefined): string {
+  return [e.id, e.client, rank !== undefined ? `rank ${rank}` : "", `${e.now} now`, `${e.blocked} blocked`, `${e.next} next`].filter(Boolean).join(", ");
+}
+
+/** A group's drag handle for the mouse only (FR-7, T9): out of the Tab
+ *  order and not a button to AX, since Move up and Move down are the
+ *  keyboard's way; the mouse sensor needs only the data attributes. */
+function dragOnly(handle?: DraggableProvidedDragHandleProps | null) {
+  if (!handle) return {};
+  const { role: _role, "aria-describedby": _described, tabIndex: _tab, ...rest } = handle;
+  return { ...rest, tabIndex: -1 };
+}
+
+const MENU = ["Rename", "Move up", "Move down", "Remove"] as const;
+
+/** Which of a group's actions do nothing where it stands: the first group
+ *  cannot move up, the last cannot move down. */
+export function groupActionOff(action: (typeof MENU)[number], index: number, count: number): boolean {
+  return (action === "Move up" && index <= 0) || (action === "Move down" && index >= count - 1);
+}
+
+/** A group head's second stop (FR-7, T9): `Actions for <group>`, a menu of
+ *  Rename, Move up, Move down and Remove. Down or Return opens it on its
+ *  first item; Up and Down move in it, Escape closes it back to the ⋯. */
+export function GroupActions({ name, index, count, onRename, onMove, onRemove }: {
+  name: string; index: number; count: number;
+  onRename: () => void; onMove: (to: number, from: HTMLElement) => void; onRemove: (from: HTMLElement) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const wrap = useRef<HTMLSpanElement>(null);
+  const items = () => [...(wrap.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [])];
+  useEffect(() => { if (open) items()[0]?.focus(); }, [open]);
+  const close = (back: boolean) => {
+    setOpen(false);
+    if (back) wrap.current?.querySelector<HTMLElement>(`[${ACTIONS}]`)?.focus();
+  };
+  const act = (a: (typeof MENU)[number], el: HTMLElement) => {
+    if (groupActionOff(a, index, count)) return;
+    setOpen(false);
+    if (a === "Rename") onRename();
+    else if (a === "Move up") onMove(index - 1, el);
+    else if (a === "Move down") onMove(index + 1, el);
+    else onRemove(el);
+  };
+  const onMenuKey = (ev: KeyboardEvent<HTMLElement>) => {
+    const list = items();
+    const at = list.indexOf(document.activeElement as HTMLElement);
+    const to = ev.key === "ArrowDown" ? (at + 1) % list.length
+      : ev.key === "ArrowUp" ? (at - 1 + list.length) % list.length
+      : ev.key === "Home" ? 0 : ev.key === "End" ? list.length - 1 : -1;
+    if (to >= 0) { ev.preventDefault(); list[to]?.focus(); return; }
+    if (ev.key === "Escape") { ev.preventDefault(); close(true); return; }
+    if (ev.key === "Tab") setOpen(false);
+  };
   return (
-    <span className="rail-counts mono">
+    <span
+      ref={wrap}
+      className={`rail-group-tools ${open ? "open" : ""}`}
+      onBlur={(ev) => { if (open && !(ev.relatedTarget instanceof Node && wrap.current?.contains(ev.relatedTarget))) setOpen(false); }}
+    >
+      <button
+        type="button"
+        className="rail-icon"
+        {...{ [ACTIONS]: index }}
+        aria-label={`Actions for ${name}`}
+        title={`Actions for ${name}`}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+        onKeyDown={(ev) => { if (ev.key === "ArrowDown" && !open) { ev.preventDefault(); setOpen(true); } }}
+      >
+        <MoreHorizontal size={12} aria-hidden="true" />
+      </button>
+      {open && (
+        <span role="menu" aria-label={`Actions for ${name}`} className="rail-menu" onKeyDown={onMenuKey}>
+          {MENU.map((a) => (
+            <button key={a} type="button" role="menuitem" tabIndex={-1} className="rail-menu-item"
+              aria-disabled={groupActionOff(a, index, count) || undefined}
+              title={a === "Remove" ? "its initiatives become ungrouped" : undefined}
+              onClick={(ev) => act(a, ev.currentTarget)}>
+              {a}
+            </button>
+          ))}
+        </span>
+      )}
+    </span>
+  );
+}
+
+function Counts({ now, blocked, next, hidden }: { now: number; blocked: number; next: number; hidden?: boolean }) {
+  return (
+    <span className="rail-counts mono" aria-hidden={hidden || undefined}>
       <span className="n" title="now">{now}</span>
       <span className="b" title="blocked">{blocked}</span>
       <span className="x" title="next">{next}</span>
