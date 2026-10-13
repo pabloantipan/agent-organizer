@@ -1,12 +1,12 @@
 ---
 title: "Long bodies and code blocks scroll from the keyboard"
-status: next
+status: now
 repos: [organizer]
 branch: lf26-scroll-stops
 seat: ss-build
 stage: one-window
 updated: 2026-10-13
-next: "ss-build: build (sup62, leftovers-26 wave 1)"
+next: "ss-build: building (sup62, leftovers-26 wave 1)"
 depends_on: []
 boundary: ["docs/specs/leftovers-26.md Boundary, lf26-scroll-stops"]
 spec: "docs/specs/leftovers-26.md (FR-1 to FR-3, FR-9, FR-10; tab-reaches-links Amendment 3, T22 and §1 names)"
