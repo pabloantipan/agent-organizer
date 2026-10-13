@@ -1,4 +1,4 @@
-import type { MouseEvent } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 
 /** The main region every screen renders (App.tsx), and the skip link's href. */
 export const MAIN_ID = "main";
@@ -34,10 +34,58 @@ export function skipToContent(doc: Document = document): HTMLElement | null {
   return to;
 }
 
+/** A modal is open: a drawer or sheet over a backdrop (the role drawer, a
+ *  card back, Retire). Read from the document so no modal has to report
+ *  itself (leftovers-24 FR-10). */
+export const BACKDROP = ".modal-backdrop";
+/** What can take focus inside a modal, as the drawers' traps count it. */
+const TRAP_ITEMS = "button, summary, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])";
+
+export function openModal(doc: Pick<Document, "querySelector"> = document): HTMLElement | null {
+  return doc.querySelector<HTMLElement>(`${BACKDROP} .modal`);
+}
+
+/** Focus fallen to body while a modal is open goes into the modal on the
+ *  next Tab: its first control, or its last on Shift+Tab, which the
+ *  modal's own trap owns from there (tab-reaches-links T7). Returns the
+ *  element focused, or null when the key is left to the browser. */
+export function tabIntoModal(e: Pick<KeyboardEvent, "key" | "shiftKey" | "defaultPrevented" | "preventDefault">, doc: Document = document): HTMLElement | null {
+  if (e.key !== "Tab" || e.defaultPrevented) return null;
+  const at = doc.activeElement;
+  if (at && at !== doc.body && at !== doc.documentElement) return null;
+  const modal = openModal(doc);
+  if (!modal) return null;
+  const items = Array.from(modal.querySelectorAll<HTMLElement>(TRAP_ITEMS)).filter((el) => !el.hasAttribute("disabled"));
+  const to = (e.shiftKey ? items[items.length - 1] : items[0]) ?? modal;
+  if (to === modal && !modal.hasAttribute("tabindex")) modal.tabIndex = -1;
+  e.preventDefault();
+  to.focus();
+  return to;
+}
+
+/** Whether a modal is open, kept current by watching the document. */
+function useModalOpen(): boolean {
+  const [open, setOpen] = useState(() => typeof document !== "undefined" && openModal() !== null);
+  useEffect(() => {
+    const read = () => setOpen(openModal() !== null);
+    read();
+    const watch = new MutationObserver(read);
+    watch.observe(document.body, { childList: true, subtree: true });
+    const onKey = (e: KeyboardEvent) => { tabIntoModal(e); };
+    document.addEventListener("keydown", onKey);
+    return () => { watch.disconnect(); document.removeEventListener("keydown", onKey); };
+  }, []);
+  return open;
+}
+
 /** The first Tab stop on every screen: hidden until focused, then at the
  *  top left over the bar with the focus ring (styles/shell.css). Enter
- *  follows the link, which puts focus in main rather than only scrolling. */
+ *  follows the link, which puts focus in main rather than only scrolling.
+ *  While a modal is open it is not rendered, since it would lead under the
+ *  backdrop; `inert` is not used, the floor is Safari 15.0 (FR-10). */
 export function SkipLink() {
+  const modal = useModalOpen();
+  if (modal) return null;
   const onClick = (e: MouseEvent<HTMLAnchorElement>) => { e.preventDefault(); skipToContent(); };
   return <a className="skip-link" href={`#${MAIN_ID}`} onClick={onClick}>Skip to content</a>;
 }

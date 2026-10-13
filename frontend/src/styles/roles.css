@@ -101,10 +101,10 @@
 /* Initiatives: plain text links in a comma list, never bordered buttons
    (Amendment 1, A2: the rail is how an initiative is picked). */
 .rd-inits { margin: 0; font-size: var(--font-size-md); color: var(--fg-muted); }
-.rd-init { font-size: var(--font-size-sm); color: var(--accent-fg); text-decoration: none; }
+.rd-init { font-size: var(--font-size-sm); color: var(--accent-fg); text-decoration: none; padding-inline: 2px; margin-inline-end: 4px; }
 .rd-init:hover { text-decoration: underline; }
 .rd-init:focus { outline: none; }
-.rd-init:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
+.rd-init:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 0; border-radius: var(--radius-xs); }
 .rd-bitacora + .rd-bitacora { margin-top: var(--space-3); padding-top: var(--space-3); box-shadow: 0 -1px 0 var(--border-subtle); }
 .rd-handoff-head { display: flex; align-items: baseline; gap: var(--space-2); font-size: var(--font-size-sm); }
 .rd-host { font-weight: var(--weight-semibold); color: var(--fg); }
