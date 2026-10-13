@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 25 - names that say what a row shows, a rail walked as drawn, dialogs that hold Tab
-status: proposed
+status: ruled
 raised: 2026-10-13
 raised_by: fse
 owner: pablo
@@ -9,6 +9,9 @@ cards: [lf25-names, lf25-rail, lf25-dialogs]
 threads: []
 supersedes: []
 superseded_by:
+ruled: 2026-10-13
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -43,3 +46,7 @@ leftovers-15 to 24, this initiative (leftovers-24: builds 70 min).
 ## Recommendation
 
 The FSE's: accept as written.
+
+## Ruling
+
+pablo, 2026-10-13, in the organizer on lodestar: ok
