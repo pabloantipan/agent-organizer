@@ -41,7 +41,9 @@
 # stand-ins are in FIXTURE_AGENT_PIDS; `kill $FIXTURE_AGENT_PIDS` ends them.
 #
 # Needs me has 14 rows in the default home, with or without discuss
-# (leftovers-11 V1); see asking_thread's call below.
+# (leftovers-11 V1); see asking_thread's call below. With discuss, init-a's
+# Conversations also hold one solved thread whose ruling Solved draws (F5);
+# see decided_thread.
 #
 # The default home also holds init-many (testdata/fixture-many), 76 decision
 # records for the find and limit rows (leftovers-6 FR-7).
@@ -188,6 +190,55 @@ json.dump(doc, open(path, "w"), indent=1)
 PY
 }
 
+# decided_thread <state.json>: one open organizer-fixture thread holds a
+# decision of pablo's, and the fixture's state marks it solved, so the
+# worklist's Solved list draws its ruling (F5, leftovers-26 FR-11). The
+# thread is the oldest open one that holds a decision; when its latest
+# decision is not the fixture's words, pablo posts them into it; when no open
+# thread holds one, the fse asks and pablo rules. Run twice, nothing is
+# posted the second time and it is still one thread. Only organizer-fixture;
+# tokens are read inside python and never printed. Without discuss it says so
+# on stderr and writes no state.
+decided_thread() {
+  DISCUSS_STATE="${DISCUSS_STATE_DIR:-$HOME/.local/state/discuss}" \
+  DISCUSS_ADDR="${DISCUSS_BIND:-127.0.0.1:9494}" python3 - "$1" <<'PY' >&2
+import json, os, sys, time, urllib.request
+path, project = sys.argv[1], "organizer-fixture"
+state, addr = os.environ["DISCUSS_STATE"], os.environ["DISCUSS_ADDR"]
+subject = "w-queued: which repo does the queued card start in"
+ask = "pablo, the queued card names repo-one only. Does it start there, or in a repo the fixture does not have yet?"
+ruling = "It starts in repo-one; a second repo waits for a card of its own.\nNext action: fse sets w-queued's next to start in repo-one"
+try:
+    toks = json.load(open(os.path.join(state, "tokens.json")))["tokens"]
+    tok = {v["agent"]: t for t, v in toks.items() if v.get("project") == project}
+    def call(who, method, rest, data=None):
+        req = urllib.request.Request("http://%s/projects/%s%s" % (addr, project, rest), method=method,
+            data=None if data is None else json.dumps(data).encode(),
+            headers={"Authorization": "Bearer " + tok[who], "Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=3) as r:
+            return json.load(r)
+    def decisions(t):
+        return [m for m in call("pablo", "GET", "/threads/" + t["id"])["messages"] if m["kind"] == "decision"]
+    decided = [(t, d) for t in call("pablo", "GET", "/health")["threads"] if t["status"] == "open" for d in [decisions(t)] if d]
+    if decided:
+        t, d = decided[0]
+        tid = t["id"]
+        if d[-1]["from"] != "pablo" or d[-1]["body"] != ruling:
+            call("pablo", "POST", "/messages", {"to": "fse", "thread_id": tid, "kind": "decision", "body": ruling})
+        if len(decided) > 1:
+            print("fixture-home: %d open threads hold a decision; %s is the one marked solved" % (len(decided), tid))
+    else:
+        tid = call("fse", "POST", "/messages", {"to": "pablo", "kind": "question", "subject": subject, "body": ask})["thread_id"]
+        call("pablo", "POST", "/messages", {"to": "fse", "thread_id": tid, "kind": "decision", "body": ruling})
+except Exception as e:
+    print("fixture-home: no thread holds a decision (discuss %s: %s)" % (addr, e))
+    sys.exit(1)
+os.makedirs(os.path.dirname(path), exist_ok=True)
+json.dump({"order": {"initiatives": None, "cards": None,
+    "resolved": {"thread:" + tid: time.strftime("%Y-%m-%d")}}}, open(path, "w"))
+PY
+}
+
 repo="$(cd "$(dirname "$0")/.." && pwd)"
 tmp="$(mktemp -d "${TMPDIR:-/tmp}/organizer-fixture.XXXXXX")"
 home="$tmp/home"
@@ -323,6 +374,9 @@ GIT_COMMITTER_DATE=2026-09-30T16:40:00-03:00 gm commit -q --allow-empty --date=2
 gm checkout -q main
 
 cp "$repo/testdata/fixture-health.json" "$tmp/health.json"
+# A ruling in Solved (leftovers-26 FR-11): before asking_thread, so the
+# decided thread rides the canned threads it copies.
+decided_thread "$tmp/data/organizer/state.json" || true
 # Needs me holds 14 rows (leftovers-11 V1: five, then "Show the other 9"),
 # one of them the thread above. Without discuss that thread cannot exist, so
 # a card in init-a addressed to pablo takes its place and the count stays 14.

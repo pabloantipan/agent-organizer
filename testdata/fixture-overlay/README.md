@@ -116,3 +116,12 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
   under two stages, with a review and a UI review passing, then sup13's wave
   on w-later, which joins no stage and is open with its review in flight.
   `runs/` is in `.gitignore`, so these and `w-founded.md` are force-added
+- a ruling in Solved (leftovers-26 FR-11, F5): the script leaves one open
+  organizer-fixture thread holding a decision of pablo's (the fse's
+  `w-queued: which repo does the queued card start in`, ruled "It starts in
+  repo-one" with a `Next action:` line) and writes the fixture's
+  `state.json` with that thread marked solved, so init-a's Conversations →
+  needs me → Solved draws `Open the thread w-queued: …` with who ruled,
+  when, the words and next. It posts only when the open thread's latest
+  decision is not those words, so a second run posts nothing; without
+  discuss there is no ruling and no state is written
