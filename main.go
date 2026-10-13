@@ -11,6 +11,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/logger"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/mac"
 
 	"organizer/internal/cli"
 )
@@ -20,6 +21,13 @@ var assets embed.FS
 
 // version is set at build time: -ldflags "-X main.version=v0.1.0".
 var version = "dev"
+
+// macOptions lets plain Tab reach links (leftovers-22 FR-1, 0117): WKWebView
+// follows Safari and skips links unless macOS keyboard navigation is on or
+// the user holds Option. One switch, so no link needs a tabindex.
+var macOptions = &mac.Options{
+	Preferences: &mac.Preferences{TabFocusesLinks: mac.Enabled},
+}
 
 func main() {
 	cli.Version = version
@@ -44,6 +52,7 @@ func main() {
 		},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup:        app.startup,
+		Mac:              macOptions,
 		Bind: []interface{}{
 			app,
 		},
