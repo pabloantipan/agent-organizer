@@ -68,12 +68,17 @@ describe("F1-F5 are buttons or links (leftovers-24)", () => {
     expect(html).toMatch(/^<button type="button" class="q-ruling" title="open the thread" aria-label="Open the thread lf24: the rail">/);
   });
 
-  it("no span, li or div answers a click in the F1-F5 files, but the thread divider", () => {
+  it("no span, li or div answers a click in the three files (T6, Amendment 1)", () => {
     const sites = ["AgentsView.tsx", "SlackView.tsx", "Conversation.tsx"].flatMap((f) =>
       (readFileSync(new URL(`./${f}`, import.meta.url), "utf8") as string).split("\n")
         .filter((l: string) => /<(span|li|div)\b[^>]*\bonClick=/.test(l))
         .map((l: string) => `${f}: ${l.trim().slice(0, 60)}`));
-    // The divider is the F4/F5 focus target, not one of F1-F5; raised to sup60.
-    expect(sites.filter((s) => !/tl-divider|a-actions/.test(s))).toEqual([]);
+    expect(sites).toEqual([]);
+  });
+
+  it("the thread divider replies through a button named Reply into <subject>", () => {
+    const src = readFileSync(new URL("./Conversation.tsx", import.meta.url), "utf8") as string;
+    expect(src).toContain('<div className="tl-divider" tabIndex={-1} role="group"');
+    expect(src).toContain('<button type="button" className="tl-subj" aria-label={`Reply into ${subj}`}');
   });
 });
