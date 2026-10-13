@@ -79,15 +79,11 @@ describe("the rail's back link follows placeOf (L2, I29)", () => {
     expect(heroBack("initiative", null)).toBe(false);
   });
 
-  it("opens Initiatives on the initiative's card; elsewhere the hero is Home", () => {
-    const to = { openInitiatives: vi.fn(), setSelectedInitiative: vi.fn() };
-    pressHero(true, "init-a", to);
+  it("opens Initiatives on the initiative's card, and has no Home branch (leftovers-22 FR-6)", () => {
+    const to = { openInitiatives: vi.fn() };
+    pressHero("init-a", to);
     expect(to.openInitiatives).toHaveBeenCalledWith("init-a");
-    expect(to.setSelectedInitiative).not.toHaveBeenCalled();
-    const home = { openInitiatives: vi.fn(), setSelectedInitiative: vi.fn() };
-    pressHero(false, null, home);
-    expect(home.setSelectedInitiative).toHaveBeenCalledWith(null);
-    expect(home.openInitiatives).not.toHaveBeenCalled();
+    expect(pressHero.length).toBe(2);
   });
 
   it("says Initiatives in the markup, not Home", () => {

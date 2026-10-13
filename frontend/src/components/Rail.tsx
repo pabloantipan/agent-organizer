@@ -302,7 +302,7 @@ export function Rail() {
       <RailHero
         hero={hero}
         back={back}
-        onBack={() => pressHero(back, selectedInitiative, { openInitiatives, setSelectedInitiative })}
+        onBack={() => pressHero(selectedInitiative, { openInitiatives })}
       />
       <div className="rail-list">
         {roles.length > 0 && (
@@ -500,9 +500,8 @@ export function heroBack(screen: Screen, selectedInitiative: string | null): boo
   return !!selectedInitiative && screen === "initiative" && placeOf(screen) === "initiatives";
 }
 
-/** Back lands on the initiative's own card in Initiatives; elsewhere the
- *  hero is Home. */
-export function pressHero(back: boolean, selectedInitiative: string | null, to: { openInitiatives: (focus?: string | null) => void; setSelectedInitiative: (id: string | null) => void }) {
-  if (back) to.openInitiatives(selectedInitiative);
-  else to.setSelectedInitiative(null);
+/** Back lands on the initiative's own card in Initiatives. It is the hero's
+ *  only press (FR-6): the hero is no way Home, the Home tab is. */
+export function pressHero(selectedInitiative: string | null, to: { openInitiatives: (focus?: string | null) => void }) {
+  to.openInitiatives(selectedInitiative);
 }

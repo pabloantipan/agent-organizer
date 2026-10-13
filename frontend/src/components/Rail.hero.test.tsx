@@ -47,10 +47,10 @@ describe("the rail hero on an initiative (R1, R2)", () => {
     handlers[0].el.props.onClick!();
     expect(onPress).toHaveBeenCalledTimes(1);
 
-    const to = { openInitiatives: vi.fn(), setSelectedInitiative: vi.fn() };
-    pressHero(heroBack("initiative", "init-a"), "init-a", to);
+    expect(heroBack("initiative", "init-a")).toBe(true);
+    const to = { openInitiatives: vi.fn() };
+    pressHero("init-a", to);
     expect(to.openInitiatives).toHaveBeenCalledWith("init-a");
-    expect(to.setSelectedInitiative).not.toHaveBeenCalled();
   });
 
   it("keeps the client, id and counts outside any button and without a handler", () => {
