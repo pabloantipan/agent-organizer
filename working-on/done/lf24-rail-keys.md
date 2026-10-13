@@ -1,6 +1,6 @@
 ---
 title: "The rail costs a few Tab stops, however long"
-status: now
+status: done
 repos: [organizer]
 branch: lf24-rail-keys
 seat: rk-build
@@ -12,6 +12,7 @@ boundary: ["docs/specs/leftovers-24.md Boundary, lf24-rail-keys"]
 spec: "docs/specs/leftovers-24.md (FR-6 to FR-9; tab-reaches-links Amendment 1, T8-T11)"
 gate: "docs/specs/leftovers-24.md Acceptance, rows E2, E3, E4, E5 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -31,6 +32,17 @@ docs/specs/leftovers-24.md, rows E2, E3, E4, E5 and X0.
 ## Notes
 - E3 needs one Tab stop per shown group's rows (Tab from the last row of one group reaches the next group's first row past its two head stops), so lf22's single stop over all groups is now one per group; the arrows still walk every row across groups. The rail's Tab count grows with groups, not with initiatives or roles.
 - Roles come last in the arrow walk though drawn above the rows, as FR-9 says (Down past the last initiative). In the strip, the Tab after the rank stop lands on the Asleep and Archived folds, which are not ranks and stay ordinary stops.
+
+## Review
+rk-review, 2026-10-13, on f149239 (`git diff main...f149239`; the branch did not move). **Verdict: pass.** Unmet rows: none. Evidence under `.wt-notes/rk-review/`.
+
+- E2: vitest `Rail.keys.test.tsx` (E2) in make test; AX tree of my own `Deltagos Review` (pid saved, fixture, auth off), `ax-tree-full.txt` l.37-46: every active row is one leaf AXButton named `<id>, <client>, rank <n>, <a> now, <b> blocked, <c> next`, zeros said, no count text under it. Met.
+- E3: harness (`--links on`) against my own `wails dev` on 34121 from a clean clone, `e3-on.jsonl`: from init-many (last of acme) Tab, Tab, Tab = `Collapse personal`, `Actions for personal`, init-b; the menu's Move up gives PERSONAL, ACME, CCINT and Move down restores it; every head `tabindex=-1`, drag attributes kept, no role. The vitest for Move up/down covers `move` and `groupActionOff`, not the menu wiring; the harness covers that. Met.
+- E4: `e4-on.jsonl`: the strip's ranks are one stop (init-a, the rest -1, roles -1); Down, Down, Up = init-many, init-b, init-many; Return opens init-many; the next Tab = `Asleep, 1 initiative`. Met under the reading that "strip" in E4 means the strip's ranks, as it must in "one stop" (the toggle, ALL and the folds are stops too). The folds sit inside `nav.rail.strip`, so read literally the next Tab does not leave the strip; the card's Gate line says "leaves the ranks". The FSE should reword E4.
+- E5: `e5-on.jsonl`: Down x9 from init-a = init-c (last initiative), Down = Hephaistos (first role), Up Up/Down hold the walk, Return opens the `Hephaistos` dialog. Rail stops on Home: 8 with 10 initiatives and 4 roles; equality with three more initiatives and two more roles: vitest (E5 ... equal), which the row allows. Met.
+- X0: fresh clone at f149239: `XDG_DATA_HOME=$(mktemp -d) test-lease run -- make test` exit 0, 16 go packages ok, 571 vitest passed (`x0-make-test.log`); `test-lease run -- make review-build` ran `wails build` whose frontend:build is `pnpm run build` (Compiling frontend: Done, Built ..., `review-build.log`); `git status --porcelain` empty. Two separate lease runs of `pnpm run build` timed out on memory pressure (exit 75, nothing ran). Met.
+
+Not gated, seen: the Asleep and Archived rows read `init-asleep asleeppersonal` in AX (no FR-6 form, no rank; FR-6 does not say whether they count as rail rows). Boundary: the diff touches only `Rail.tsx`, its two tests and `.rail-*` rules in global.css.
 
 ## UI review
 rk-ui, 2026-10-13, on f149239 (the branch did not move during the review). **Verdict: pass.** No severity 4 or 3. Evidence under `.wt-notes/rk-ui/`.
