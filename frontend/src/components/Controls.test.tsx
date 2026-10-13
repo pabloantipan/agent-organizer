@@ -76,8 +76,8 @@ describe("F1-F5 are buttons or links (leftovers-24)", () => {
     expect(html).toMatch(/<button type="button" class="person [^"]*active" aria-label="Chat with ds-build" aria-describedby="[^"]+" aria-current="true"/);
     const said = (seat: string) => html.match(new RegExp(`aria-label="Chat with ${seat}" aria-describedby="([^"]+)"`))![1]
       .split(" ").map((id) => textOf(html, id)).filter(Boolean).join(" | ");
-    expect(said("rk-build")).toBe("live | alive | owes 1 | 42%");
-    expect(said("ds-build")).toBe("off | deaf");
+    expect(said("rk-build")).toBe("session live, mail alive, owes 1 message, context 42%");
+    expect(said("ds-build")).toBe("session off, mail deaf");
   });
 
   it("F4: a search hit is a button whose name starts with the subject", () => {
