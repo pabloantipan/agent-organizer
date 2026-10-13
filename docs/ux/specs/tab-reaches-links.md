@@ -275,6 +275,20 @@ past an edge: the card back's `.modal-body`, a code block, a table.
 - A box's trap walks it like any other stop.
 - The edge line (design system, Widths) still marks it.
 
+**Names of every scroll region** (added 2026-10-13 for the FSE's FR-3
+carry). Where the region sits under a visible heading, the name is that
+heading through `aria-labelledby`. The words below are the fallback text:
+
+| Region | Name |
+|---|---|
+| card back body | `<card title>, details` |
+| role drawer body | `<role>, details` |
+| rule box (the record's text) | `Record <NNNN>, <title>` |
+| floating icon's list | `Initiatives list` |
+| initiative header, open area | `Details of <id>`, which matches its button's `aria-controls` |
+| Help | `Help` |
+| a code block or table in any of them | `Code, scrolls` or `Table, scrolls` |
+
 ### 2. A described fact says its noun (nm-ui U1)
 
 A description reads as a list of facts, each with its noun:
