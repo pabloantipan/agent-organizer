@@ -1,6 +1,7 @@
 ---
 title: "A row says what it shows; focus stays put"
-status: now
+status: done
+review: pass
 repos: [organizer]
 branch: lf25-names
 seat: nm-build
@@ -31,6 +32,14 @@ docs/specs/leftovers-25.md, rows N1, N2, N3, N4 and X0.
 ## Notes
 - Opening Conversations no longer puts focus in the new thread's Subject by itself (FR-3's fix); + and "new thread instead" still do.
 - With macOS Keyboard navigation off (`--links off`) WebKit's Tab reaches only Conversations' 4 text fields (.wt-notes/nm-build/n4-off.jsonl): platform behaviour, not this card.
+
+## Review
+**Verdict: pass.** Unmet rows: none. Reviewer nm-review, 2026-10-13, commit 3f76114 (the branch did not move). Diff stays inside the Boundary (the three components, Controls.test.tsx, `.agent-group-title*`, `.person*`, `.cells`/`.cell-*`, `.tl-divider .a-actions` in global.css). Fixture rows and X0 ran from a fresh clone at 3f76114 (`.wt-notes/nm-review/clean`, removed after); evidence in `.wt-notes/nm-review/`.
+- N1: vitest `Controls.test.tsx` 7/7 (`n1-vitest.log`): F1, F3, F5 keep their short names, `aria-describedby` targets hold the drawn facts, F1 has no `aria-pressed`. AX of my review build (pid saved) returned nothing: the screen was locked (CGSSessionScreenIsLocked true). The AX half rests on offscreen WebKit on my `wails dev` (34118) (`n1-webkit.jsonl`): `Chat with fse` → "off alive owes 2", `po_ana` → "live alive", `dev_bruno` → "live deaf"; every `Show only <id>` has no `aria-pressed`, description = counts, memory, cell state (e.g. "0 agents · 0 live · 0 working · 3 seats in definition"). The builder's AX read (`nm-build/n1-ax.txt`, ab29aef) is of files byte-identical to 3f76114's in those components and global.css. F5 on vitest (Amendment 1).
+- N2: harness, `n2-on.jsonl`: Return on `Chat with fse` leaves focus on it (aria-current true, composer not focused); Return on `Show only init-a` lands on init-a's first agent row (every row of `ul.agents` has tabindex, so the first `li[tabindex]` is the first row).
+- N3: harness, `n3-on.jsonl`: Tab onto Escalate gives `.a-actions` opacity 1 (0 at rest and on the other dividers), focus-visible, 2 px solid #8a3ffc; `n3-divider-crop.png` shows the ring.
+- N4: `n4-grep.txt`: both greps (SlackView.tsx; styles/ for `cell-row`, `.cells`) exit 1; harness Tab walk of the fse chat reached 35/35 clickables, no cell list (`n4-on.jsonl`).
+- X0: in the clean clone, `XDG_DATA_HOME=$(mktemp -d) make test` exit 0 (Go ok, vitest 593/593), `pnpm run build` exit 0, `wails build` exit 0, `git status --porcelain` empty (`x0-*.log`, `x0-status.txt`).
 
 ## UI review
 nm-ui, 2026-10-13, on 3f76114 (the branch did not move). **Verdict: pass.** No severity 4 or 3.
