@@ -531,14 +531,21 @@ export function RailHero({ hero, back, onBack }: { hero: Hero; back: boolean; on
       )}
       <div className="eyebrow">{hero.eyebrow}</div>
       <div className="name">{hero.name}</div>
-      <div className="stats">
+      <div className="stats" aria-hidden="true">
         <div className="stat"><b>{hero.now}</b><span>now</span></div>
         <div className="stat"><b>{hero.blocked}</b><span>blocked</span></div>
         <div className="stat"><b>{hero.next}</b><span>next</span></div>
       </div>
+      <span className="sr-only">{heroSaid(hero)}</span>
     </div>
   );
 }
+
+/** The counts as one phrase (FR-7; initiatives-view A6 §3, I40): the visual
+ *  stats are hidden from AX and this line, visually hidden inside the hero,
+ *  is what a screen reader reads. Not an aria-label on the div: WebKit does
+ *  not announce that reliably. */
+export const heroSaid = (h: { now: number; blocked: number; next: number }) => `${h.now} now, ${h.blocked} blocked, ${h.next} next`;
 
 /** The hero's back link follows the bar's parent mark (initiatives-view A4
  *  §2, I29): an initiative belongs to Initiatives (`placeOf`), whichever
