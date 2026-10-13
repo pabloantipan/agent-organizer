@@ -1,12 +1,13 @@
 ---
 title: "The skip link never sits under a drawer"
-status: now
+status: done
 repos: [organizer]
 branch: lf24-drawer-skip
 seat: ds-build
 stage: one-window
 updated: 2026-10-13
 next: "review: lf24-drawer-skip, gate met (E6, E7, X0), 7fe680f"
+review: pass
 depends_on: []
 boundary: ["docs/specs/leftovers-24.md Boundary, lf24-drawer-skip"]
 spec: "docs/specs/leftovers-24.md (FR-10, FR-11; tab-reaches-links Amendment 1, T7, T12)"
@@ -31,6 +32,16 @@ docs/specs/leftovers-24.md, rows E6, E7 and X0.
 - FR-11: 2 px padding alone does not clear the comma. The ring (2 px at offset 2 px) reaches 4 px past the link, and the comma sits right at its edge (measured 4.7 px over it). Inside `.rd-init*`: the ring moves to offset 0, so the 2 px padding is the gap between text and ring, and `margin-inline-end: 4px` gives the ring room. The design system asks for the 2 px offset only on accent-drawn elements. Unfocused, the comma sits 6 px after the id.
 - A modal is a `.modal` inside a `.modal-backdrop` (role drawer, card back, Retire), read from the document by `SkipLink.tsx`. No store flag, and no change to App.tsx or the modals.
 - Found, not asked: with `tabFocusesLinks` off, the role drawer's own trap lets Tab escape past its last link to body (`e6-off.jsonl`, trap#3). FR-10's handler brings the next Tab back in. The trap is in RoleDrawer.tsx, outside this boundary.
+
+## Review
+**Verdict: pass.** ds-review, 2026-10-13, on 7fe680f (pinned; the branch did not move). Unmet rows: none. Every check ran from a fresh clone at that SHA (`.wt-notes/ds-review/clean`, now removed), with the fixture and auth off. Runs are in `.wt-notes/ds-review/`.
+
+- E6 (10): vitest `SkipLink.modal.test.tsx` passes, and the second test is "absent while a drawer is open" (2 files, 8 tests, plus the full suite in X0). Harness (`scripts/tab-harness` plus the builder's `shot` verb, my own `wails dev` on :34122), role drawer, links on and off. Skip links: 1 before, 0 while open, 1 after close. Focus forced to body, then Tab lands on `Close Hephaistos`, inside the drawer. Shift+Tab lands on `Open init-drafted`, also inside (`e6-on.jsonl`, `e6-off.jsonl`).
+- E7 (11): harness, focused `.rd-init` `init-define` before a comma. Computed `padding-inline` is 2px/2px, `outline-offset` 0, `margin-right` 4px (`e7-on.jsonl`). In the screenshot, ink gaps between the ring and the comma are 2 px right and 2 px left (`e7-ring.png`, `e7-ring-zoom.png`, `e7-gaps.txt`). The ring touches neither comma.
+- X0 (all): `XDG_DATA_HOME=$(mktemp -d) make test` passes (Go, then vitest: 46 files, 564 tests). `pnpm run build` passes; two earlier tries hit the test-lease 1800 s memory-pressure timeout (exit 75), which is not a build failure. `wails build` passes. `git status --porcelain` is empty (`x0-*.log`, `x0-status.txt`).
+- Diff stays inside the boundary: `SkipLink.tsx`, `roles.css` `.rd-init*` only, and two tests. App.tsx, the store and RoleDrawer are untouched.
+
+Not covered by the gate (record only): with links off, the role drawer's trap still leaks to body on the third Tab (`e6-off.jsonl` trap#3). The comma sits 6 px off its id when unfocused (UI review U1).
 
 ## UI review
 ds-ui, 2026-10-13, on 7fe680f (the pinned commit; the branch did not move). **Verdict: pass.** Severity 4 or 3: none. Shots and runs are in `.wt-notes/ds-ui/`.
