@@ -87,9 +87,9 @@ export function People({ seats, human, focus, onFocus, onClose }: { seats: Seat[
           return (
           <li key={s.name}>
             {/* leftovers-24 FR-3: shows the chat in place, so a button (F3).
-                leftovers-25 FR-3: it stays mounted, so focus stays on it even
-                when the chat it shows mounts a composer that takes focus. */}
-            <button type="button" className={`person ${s.agent?.state ?? "off"} ${s.deaf && !s.capped ? "deaf" : ""} ${s.capped ? "capped" : ""} ${focus === s.name ? "active" : ""}`} aria-label={`Chat with ${s.name}`} aria-describedby={`${d}-state ${d}-meta ${d}-ctx`} aria-current={focus === s.name ? "true" : undefined} onClick={(e) => { const b = e.currentTarget; onFocus(focus === s.name ? null : s.name); keepFocus(b); }} title={`${s.agent ? s.agent.state : "no session"}. Click for the conversation with ${s.name}.`}>
+                leftovers-25 FR-3: it stays mounted and keeps focus; the chat
+                it shows does not take it (Conversation's askedNew). */}
+            <button type="button" className={`person ${s.agent?.state ?? "off"} ${s.deaf && !s.capped ? "deaf" : ""} ${s.capped ? "capped" : ""} ${focus === s.name ? "active" : ""}`} aria-label={`Chat with ${s.name}`} aria-describedby={`${d}-state ${d}-meta ${d}-ctx`} aria-current={focus === s.name ? "true" : undefined} onClick={() => onFocus(focus === s.name ? null : s.name)} title={`${s.agent ? s.agent.state : "no session"}. Click for the conversation with ${s.name}.`}>
             <i className={`dot ${s.agent?.state ?? "off"}`} />
             <span className="sr-only" id={`${d}-state`}>{s.agent ? (s.agent.state === "working" || s.agent.state === "running" ? "live" : stateWord(s.agent.state)) : "off"}</span>
             <span className="person-main">
@@ -109,9 +109,3 @@ export function People({ seats, human, focus, onFocus, onClose }: { seats: Seat[
   );
 }
 
-/** A press that shows another chat in place mounts that chat's composer,
- *  whose field may take focus; the pressed button keeps it (leftovers-25
- *  FR-3, design system: Focus and names). After the commit, so it wins. */
-function keepFocus(b: HTMLElement) {
-  requestAnimationFrame(() => { if (b.isConnected && document.activeElement !== b) b.focus({ preventScroll: true }); });
-}
