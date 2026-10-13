@@ -12,6 +12,7 @@ boundary: ["docs/specs/leftovers-22.md Boundary, lf22-tab-links"]
 spec: "docs/specs/leftovers-22.md (FR-1 to FR-4; tab-reaches-links, T1, T2, T4, T5)"
 gate: "docs/specs/leftovers-22.md Acceptance, rows K1, K2, K3, K4 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -262,3 +263,12 @@ Backdrops (`modal-backdrop`, `rb-scrim`) close, they do not navigate.
 21. main: input "code"
 22. main: button "Save"
 23. (nothing: focus on body)
+
+## Review
+Verdict: pass. Checked 347152e (pinned; head d9cd76f differs only in this card), clean clone, fixture, auth off, own wails dev on :34117, harness built from the branch's tabharness.swift.
+- K1: `go test -run TestMacOptionsTabFocusesLinks` pass (flag + AST check that options.App carries `Mac: macOptions`). Harness on: Initiatives Tab #11 `Open init-a`, then every card's link; Hephaistos drawer Tab #4-#8 `Open init-a`..`Open init-drafted`. Off: Initiatives body on all 30 presses; drawer cycles SUMMARY/body/rail row, never a link. Met.
+- K2: harness on, first Tab on Home, Initiatives, init-a, Settings = `Skip to content`, focus-visible, solid 2px rgb(138,63,252), rect 8,8 118x28 on screen; Return lands on main's h2 (Needs me) / h1 Initiatives / h1 init-a / h1 Settings. Vitest in make test: 44 files, 556 pass, SkipLink.test.tsx included. Met.
+- K3: skip link, `Open <id>` (all cards) and `rd-init` each solid 2px #8a3ffc offset 2px under focus-visible (global.css:39 reaches links, as claimed); focused `Open <id>` card `.raised`, rgb(46,39,60) = `--surface-hover`, the hovered raise; rest rgb(39,32,51). Met.
+- K4: my four orders, both flags, match the card's lists line for line (only a live context % differs). Inventory checked by grep: the three `<a>` and the non-button onClick elements are exactly the card's; F1-F5 listed as findings. Met.
+- X0: clean clone: make test (Go ok, vitest 556) pass, pnpm run build pass, wails build pass, porcelain empty. Met.
+Unmet rows: none. Reviewer: tl-review, 2026-10-13, commit 347152e. Evidence: /Users/pabloantipan/organizer/.wt-notes/tl-review/ (ev/*.jsonl, my-orders.md, x0-*.log).
