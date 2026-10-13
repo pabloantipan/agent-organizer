@@ -609,12 +609,14 @@ export function GroupActions({ name, index, count, onRename, onMove, onRemove }:
   const items = () => [...(wrap.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [])];
   // The menu opens upward when the room below the ⋯ is shorter than it
   // (leftovers-25 FR-8), measured before paint so it never draws past the
-  // window's edge first.
+  // window's edge first, and after the ⋯ is in view (leftovers-26 FR-8).
   useLayoutEffect(() => {
     if (!open) { setPlace(null); return; }
-    const btn = wrap.current?.getBoundingClientRect();
-    const h = menu.current?.offsetHeight ?? 0;
-    if (btn) setPlace(menuPlace(btn.top, btn.bottom, h, window.innerHeight));
+    const el = wrap.current;
+    if (!el) return;
+    const nav = el.closest("nav")?.getBoundingClientRect();
+    const port = { top: Math.max(0, nav?.top ?? 0), bottom: Math.min(window.innerHeight, nav?.bottom ?? window.innerHeight) };
+    setPlace(placeInView(el, port, menu.current?.offsetHeight ?? 0, window.innerHeight));
   }, [open]);
   useEffect(() => { if (open) items()[0]?.focus(); }, [open]);
   const close = (back: boolean) => {
@@ -671,6 +673,23 @@ export function GroupActions({ name, index, count, onRename, onMove, onRemove }:
       )}
     </span>
   );
+}
+
+/** The menu's place for a ⋯ `el` in a scrollport `port` (the rail's box
+ *  inside the window). A ⋯ pressed out of view (AXPress, a VoiceOver press:
+ *  no focus scrolled it) is brought to the middle of the rail first, so the
+ *  place is not measured where the first item's focus would then move it;
+ *  a ⋯ in view (keyboard focus, pointer) is measured where it stands. */
+export function placeInView(
+  el: Pick<HTMLElement, "getBoundingClientRect"> & { scrollIntoView?: (o: ScrollIntoViewOptions) => void },
+  port: { top: number; bottom: number }, h: number, view: number,
+): { up: boolean; room: number } {
+  let r = el.getBoundingClientRect();
+  if (r.top < port.top || r.bottom > port.bottom) {
+    el.scrollIntoView?.({ block: "center" });
+    r = el.getBoundingClientRect();
+  }
+  return menuPlace(r.top, r.bottom, h, view);
 }
 
 /** Where a menu of height `h` opens from a button spanning `top`..`bottom`
