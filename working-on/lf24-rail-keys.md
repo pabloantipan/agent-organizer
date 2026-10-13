@@ -6,7 +6,7 @@ branch: lf24-rail-keys
 seat:
 stage: one-window
 updated: 2026-10-13
-next: "pablo: rule 0120 (accept leftovers-24); on accept the FSE starts its supervisor"
+next: "sup60 runs it (0120 ruled ok, 2026-10-13)"
 depends_on: []
 boundary: ["docs/specs/leftovers-24.md Boundary, lf24-rail-keys"]
 spec: "docs/specs/leftovers-24.md (FR-6 to FR-9; tab-reaches-links Amendment 1, T8-T11)"

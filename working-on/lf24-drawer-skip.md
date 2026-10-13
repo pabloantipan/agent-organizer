@@ -6,7 +6,7 @@ branch: lf24-drawer-skip
 seat:
 stage: one-window
 updated: 2026-10-13
-next: "pablo: rule 0120 (accept leftovers-24); on accept the FSE starts its supervisor"
+next: "sup60 runs it (0120 ruled ok, 2026-10-13)"
 depends_on: []
 boundary: ["docs/specs/leftovers-24.md Boundary, lf24-drawer-skip"]
 spec: "docs/specs/leftovers-24.md (FR-10, FR-11; tab-reaches-links Amendment 1, T7, T12)"
