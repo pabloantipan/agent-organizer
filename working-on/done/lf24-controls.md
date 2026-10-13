@@ -1,6 +1,6 @@
 ---
 title: "Every click target is a link or a button"
-status: now
+status: done
 repos: [organizer]
 branch: lf24-controls
 seat: ct-build
@@ -12,6 +12,7 @@ boundary: ["docs/specs/leftovers-24.md Boundary, lf24-controls"]
 spec: "docs/specs/leftovers-24.md (FR-1 to FR-5; tab-reaches-links Amendment 1, T6)"
 gate: "docs/specs/leftovers-24.md Acceptance, rows E1 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -63,3 +64,13 @@ Not verified in WKWebView:
 - F2 in the app (unreachable, G1); vitest only.
 - Hover looks of the new buttons (no pointer hovers allowed); from the CSS, `button:hover` is overridden by each row's own `:hover`.
 - Widths other than 1440×900.
+
+## Review
+
+**Verdict: pass.** ct-review, 2026-10-13, branch `lf24-controls` at 37b056f, fresh clone under `.wt-notes/ct-review/clean` (removed after). Evidence in `.wt-notes/ct-review/`.
+
+- E1, met. Grep: no `span`, `li` or `div` with its own `onClick` in `AgentsView.tsx`, `SlackView.tsx`, `Conversation.tsx` (line grep plus a multi-line JSX scan; the same checks on main find the old sites). Roles and names: `Controls.test.tsx` passed inside make test (45 files, 563 tests). Harness: the builder's `e1.txt` rerun on my own `wails dev` (34118, fixture, auth off, `--links on`), `e1-on.jsonl`. `Show only init-a` takes Tab, Return selects init-a. `Chat with fse` takes Tab, Return sets the chat and `aria-current`. The search hit and `Open the thread w-queued…` take Tab, and Return focuses `Thread w-queued…, open` (the divider). `Reply into …` takes Tab and retargets. F2, which the app never mounts: `f2.txt` mounts `SlackView` by hand in the same page (initiative null). Tab reaches `Conversations of init-a`, `init-define`, `init-drafted` (links, `href="#<id>"`), and Return selects init-drafted (`f2.jsonl`).
+- X0, met. In the clean clone: `XDG_DATA_HOME=$(mktemp -d) make test` rc 0, `pnpm run build` rc 0, `wails build` rc 0, then `git status --porcelain` empty (`x0-make-test.log`, `x0-pnpm-build.log`, `x0-wails-build.log`, `x0-status.txt`).
+
+Unmet rows: none.
+
