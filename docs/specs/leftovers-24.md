@@ -80,6 +80,13 @@ Stylesheets per card with the rules each owns.
   only if it must report open; `styles/roles.css` `.rd-init*` only; their
   tests. Not: `Rail.tsx`, `global.css`.
 
+Amendment 1, 2026-10-13, the FSE, from sup60 (thread
+01M4TV4E3SYETWJH3DXZBH9K3X): E1's grep also finds `Conversation.tsx`'s
+`div.tl-divider` (a click replies) and `span.a-actions` (stopPropagation
+only). The divider gets a real reply `button` (a button changes what is
+shown in place, the design system's rule); `lf24-controls` also owns the
+`.tl-*` rules of `styles/global.css`, which no other card touches.
+
 ## No-gos
 
 - No change to tl-ui U2 (as built).
