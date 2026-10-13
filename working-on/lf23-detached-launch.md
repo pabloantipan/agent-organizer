@@ -6,7 +6,7 @@ branch: lf23-detached-launch
 seat:
 stage: one-window
 updated: 2026-10-13
-next: "pablo: rule 0119 and merge claudecode feat/seat-background; then the FSE starts its supervisor"
+next: "pablo: merge claudecode feat/seat-background (0119 ruled ok); then the FSE starts its supervisor"
 depends_on: []
 boundary: ["docs/specs/leftovers-23.md Boundary, lf23-detached-launch"]
 spec: "docs/specs/leftovers-23.md (FR-1 to FR-4)"
