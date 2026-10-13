@@ -1,6 +1,6 @@
 ---
 title: "Plain Tab reaches links, with a skip link first"
-status: now
+status: done
 repos: [organizer]
 branch: lf22-tab-links
 seat: tl-build
