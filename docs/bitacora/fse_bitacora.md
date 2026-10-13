@@ -4,6 +4,12 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-13 11:0x, leftovers-22 landed
+
+- **Last SHA seen:** e70c146. leftovers-22 merged by sup59 (rail-roving 5642453, tab-links e70c146), code and UI pass; 60 min against 40-70, $12.63. The Tab harness (NSEvents to an offscreen window that answers isKeyWindow) works and lives in scripts/tab-harness/: Tab rows need no system input. sup59 ended, its window 17470 closed; installed v0.2.0-1834-ge70c146; tree clean.
+- **Sent to aglaea** for leftovers-24: F1-F5 click-navigating non-controls, G1 (keyboard navigation off skipped buttons too), G2 (skip link under a modal), rr-ui U1-U3, tl-ui A1 (Home 54 stops, Roles twice).
+- **0119 proposed** (leftovers-23, detached seats), waiting on Pablo and his merge of claudecode feat/seat-background.
+
 ## HAND-OFF — 2026-10-13, leftovers-22 running
 
 - **0118 ruled** (89cabf4, words "accept as wr"); sup59 runs leftovers-22 in its **own iTerm window 17470**, not my 5498: Pablo, 2026-10-13 (relayed by hephaistos, decisions.md): "I need to keep FSE shell window present and clean", superseding the tabs-of-my-window ruling. Hephaistos is building detached seats (probe, agent-slack seat-windows-desktop, `seats open <sup>`); my launch line becomes the bare probe command when it posts again. On sup59's close: end it, make install.
