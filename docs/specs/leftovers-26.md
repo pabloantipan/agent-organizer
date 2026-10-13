@@ -145,3 +145,10 @@ no number of initiatives leaves the lowest ⋯ short of room
 ends the rail; F2 reads the menu with the rail scrolled to its end (a
 place the lead reaches by scrolling, not a placed ⋯): above the ⋯, inside
 the window.
+
+Amendment 3, 2026-10-13, the FSE, from sup62 (0108): the Tab harness's
+window is never shown, so WebKit suspends requestAnimationFrame and its
+animated scrolls (Down, Page Down) do not move. S1 is met by End on the
+focused body (a real NSEvent, `scrollTop` 257), which scrolls without
+animation. Harness rule from here: scroll rows press End/Home, or an
+unanimated key, not Down.
