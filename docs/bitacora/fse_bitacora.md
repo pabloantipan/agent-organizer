@@ -6,6 +6,7 @@ restating it (the discuss skill).
 
 ## HAND-OFF — 2026-10-13, leftovers-26 running
 
+- **16:2x Repetition, 3rd: test-lease starvation** (sup58, sup60, sup62 from 16:08; pressure 2, agents 5.0 GB of ~21 used). Sent [for hephaistos] asking for a rule (wait ceiling or per-run estimate). Amendments 1-3 of leftovers-26 (71ec45e native roles kept, 42ea9a3 F2 grouped home without sleep, e6406d6 harness scrolls by End: hidden window suspends rAF).
 - **0122 ruled ok** (9370925): leftovers-26 (0389261, region names folded 7fc51ab; lf26-menu-list became lf26-menu). sup62 runs it in its own window 20524. On close: end it, close 20524, make install.
 
 ## HAND-OFF — 2026-10-13, leftovers-25 landed
