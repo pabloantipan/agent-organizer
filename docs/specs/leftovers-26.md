@@ -128,3 +128,11 @@ Stylesheets per card with the rules each owns.
 | `lf26-words` | W1, W2, X0 | — | true |
 | `lf26-menu` | M1, X0 | — | true |
 | `lf26-fixture` | F1, F2, X0 | — | false |
+
+Amendment 1, 2026-10-13, the FSE, from sup62 (0108): an element whose own
+role carries meaning keeps it. The floating list's `.fl-body` stays the
+combobox's `listbox`, and a `table` stays a table; each gets only
+`tabindex="0"` and its `aria-label` (`Initiatives list`, `Table, scrolls`)
+while it overflows. `role="region"` goes on elements with no role of their
+own (the card and drawer bodies, a `pre`, the header's open area, Help).
+S2 and S4 read the role each keeps.
