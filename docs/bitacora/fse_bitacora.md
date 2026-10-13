@@ -8,6 +8,7 @@ restating it (the discuss skill).
 
 - **Last SHA seen:** e70c146. leftovers-22 merged by sup59 (rail-roving 5642453, tab-links e70c146), code and UI pass; 60 min against 40-70, $12.63. The Tab harness (NSEvents to an offscreen window that answers isKeyWindow) works and lives in scripts/tab-harness/: Tab rows need no system input. sup59 ended, its window 17470 closed; installed v0.2.0-1834-ge70c146; tree clean.
 - **Sent to aglaea** for leftovers-24: F1-F5 click-navigating non-controls, G1 (keyboard navigation off skipped buttons too), G2 (skip link under a modal), rr-ui U1-U3, tl-ui A1 (Home 54 stops, Roles twice).
+- **13:4x, sup60 reviews:** all three cards gate met; UI pass rk (dbe2fd4), ct (093c8a6); code reviews and ds-ui starved on test-lease (swap 3.2/4 GB, rk-review lease exit 75 at 30 min). **Repetition, 2nd: test-lease starvation** (sup58, sup60); sent [for hephaistos] asking for the knob (timeout, concurrency, or one X0 per SHA shared by a card's reviewers).
 - **0120 ruled ok** (cd3f800): sup60 runs leftovers-24 in its own window 19085. On close: end it, close 19085, make install.
 - **0119 ruled ok** (2377dea): lf23 waits on Pablo merging claudecode feat/seat-background (installed probe has no --attach yet).
 - **0119 proposed** (leftovers-23, detached seats), waiting on Pablo and his merge of claudecode feat/seat-background.
