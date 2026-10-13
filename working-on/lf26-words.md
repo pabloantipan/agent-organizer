@@ -3,10 +3,10 @@ title: "A description says each fact with its noun"
 status: next
 repos: [organizer]
 branch: lf26-words
-seat:
+seat: wd-build
 stage: one-window
 updated: 2026-10-13
-next: "sup62 runs it (0122 ruled ok, 2026-10-13)"
+next: "wd-build: build (sup62, leftovers-26 wave 1)"
 depends_on: []
 boundary: ["docs/specs/leftovers-26.md Boundary, lf26-words"]
 spec: "docs/specs/leftovers-26.md (FR-4 to FR-7; tab-reaches-links Amendment 3, T23)"
