@@ -9,7 +9,7 @@ import "../styles/initiatives.css";
 import { unreadFiles, unreadLabel } from "../lib/unread";
 import { UnreadFiles } from "./UnreadFiles";
 import { Charter, type CharterField } from "./Charter";
-import { useScrollEdges } from "../lib/useScrollEdges";
+import { regionName, useScrollEdges } from "../lib/useScrollEdges";
 import { useBoard, type Sub } from "../stores/board.store";
 import "../styles/header.css";
 
@@ -149,7 +149,8 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
   const compact = widthClass === "compact";
   const barStage = !headerOpen || compact;
   const openRef = useRef<HTMLDivElement>(null);
-  const edges = useScrollEdges(openRef, headerOpen);
+  // leftovers-26 FR-3: the open area is a stop while it scrolls.
+  const edges = useScrollEdges(openRef, headerOpen, regionName.headerOpen(i.id));
   // Files the scan could not read, counted beside the decisions waiting:
   // what they hold is on no sub-view, so the header says so and lists them.
   const unread = unreadFiles(i.problems);

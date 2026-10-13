@@ -5,7 +5,7 @@ import { FloatDismiss, FloatListHeight, FloatPick } from "../../wailsjs/go/main/
 import { useBoard } from "../stores/board.store";
 import { filterList, floatList, focusOrder, foldSignals, HOME, homeCount, homeLabel, type FloatList as FloatListT, type FloatRow, type FoldsOpen, type Signal } from "../lib/floatList";
 import { foldLabel, type Fold } from "../lib/folds";
-import { useScrollEdges } from "../lib/useScrollEdges";
+import { regionName, useScrollEdges } from "../lib/useScrollEdges";
 import { MemoryFloatLine } from "./MemoryFloatLine";
 import "../styles/float.css";
 
@@ -98,7 +98,8 @@ export function FloatList() {
     return () => ro.disconnect();
   }, [open, list, foldsOpen, view]);
 
-  const edges = useScrollEdges(scroller, open);
+  // leftovers-26 FR-3: the list is a stop while it scrolls; it stays a listbox.
+  const edges = useScrollEdges(scroller, open, regionName.floatList);
 
   useEffect(() => {
     if (!open || !current) return;

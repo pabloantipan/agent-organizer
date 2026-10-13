@@ -42,6 +42,10 @@
 .rb .rb-record { border-top: 1px solid transparent; border-bottom: 1px solid transparent; }
 .rb .rb-record.edge-top { border-top-color: var(--fg-subtle); }
 .rb .rb-record.edge-bottom { border-bottom-color: var(--fg-subtle); }
+/* leftovers-26 FR-1: a region that scrolls is a Tab stop while it does
+   (useScrollEdges, scrollStop); its ring sits inside its box, so the
+   overflow around it never clips it. */
+.rb .rb-record:focus-visible { outline-offset: -2px; }
 /* FR-5 (row 10): a body never widens its box. Each grid in the record takes
    one column that may shrink under its content's width, so a wide pre or
    table scrolls inside itself (global.css, .markdown pre) with its side

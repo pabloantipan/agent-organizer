@@ -294,6 +294,10 @@ button.tiny { padding: 0 5px; font-size: var(--font-size-xs); line-height: 14px;
 }
 .modal.card-back > .modal-body.edge-top { border-top-color: var(--fg-subtle); }
 .modal.card-back > .modal-body.edge-bottom { border-bottom-color: var(--fg-subtle); }
+/* leftovers-26 FR-1: a region that scrolls is a Tab stop while it does
+   (useScrollEdges, scrollStop); its ring sits inside its box, so the
+   overflow around it never clips it. */
+.modal.card-back > .modal-body:focus-visible { outline-offset: -2px; }
 .labels { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
 .section-label { font-size: var(--font-size-sm); font-weight: 600; color: var(--muted); margin: 16px 0 6px; }
 .modal-main .section-label:first-child, .modal-side .section-label:first-child { margin-top: 0; }
@@ -307,6 +311,8 @@ button.tiny { padding: 0 5px; font-size: var(--font-size-xs); line-height: 14px;
    still wins. */
 .markdown :where(pre, table) { overflow-x: auto; max-width: 100%; }
 .markdown table { display: block; border-collapse: collapse; font-size: var(--font-size-md); }
+/* leftovers-26 FR-2: a stop while it scrolls, its ring inside its box. */
+.markdown pre:focus-visible, .markdown table:focus-visible { outline-offset: -2px; }
 /* A code block or table that scrolls sideways shows it does (design system,
    Widths; leftovers-5 FR-13): the side with content hidden past it carries
    1 px of --fg-subtle (edge-left, edge-right, set by useMarkdownEdges in

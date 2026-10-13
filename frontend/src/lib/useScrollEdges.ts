@@ -2,7 +2,9 @@
 // that scrolls inside a view carries a 1 px --fg-subtle line on each edge
 // with content hidden past it. One watcher measures it for the initiative
 // header's open area (top and bottom) and for a code block or table that
-// scrolls sideways in a markdown body (left and right).
+// scrolls sideways in a markdown body (left and right). The same measurement
+// makes the region a Tab stop while it overflows (scrollStop, leftovers-26
+// FR-1), so there is no second observer.
 import { useLayoutEffect, useState, type RefObject } from "react";
 import { scrollEdges, type Edges } from "./scrollEdges";
 
@@ -15,6 +17,46 @@ export function sideEdges(m: { scrollLeft: number; scrollWidth: number; clientWi
   if (hidden <= 1) return { left: false, right: false };
   return { left: m.scrollLeft > 1, right: m.scrollLeft < hidden - 1 };
 }
+
+/** What a scroll region is called (tab-reaches-links A3 §1): its own words,
+ *  or the id of the visible heading over it. */
+export type RegionName = { label: string } | { labelledBy: string };
+
+/** The names of A3 §1, one place for every region the edge hooks watch. */
+export const regionName = {
+  cardBody: (title: string): RegionName => ({ label: `${title}, details` }),
+  roleBody: (role: string): RegionName => ({ label: `${role}, details` }),
+  record: (number: string, title: string): RegionName => ({ label: `Record ${number}, ${title}` }),
+  floatList: { label: "Initiatives list" } as RegionName,
+  headerOpen: (id: string): RegionName => ({ label: `Details of ${id}` }),
+  block: (tag: string): RegionName => ({ label: tag.toUpperCase() === "TABLE" ? "Table, scrolls" : "Code, scrolls" }),
+};
+
+type StopTarget = Pick<Element, "getAttribute" | "setAttribute" | "removeAttribute">;
+
+/** FR-1 (T22, design system: a region that scrolls is a stop while it
+ *  scrolls): while `overflows`, the region takes `tabindex="0"`, a role and
+ *  its name, so the keyboard reaches it and WebKit scrolls it natively;
+ *  otherwise all three go. The role is `region`, unless the element has a
+ *  role of its own (the floating list's listbox), which it keeps. The focus
+ *  ring is the stylesheet's `:focus-visible`. Idempotent: it writes only
+ *  what differs, so a measurement on every scroll costs nothing. */
+export function scrollStop(el: StopTarget, overflows: boolean, name: RegionName) {
+  const set = (k: string, v: string | null) => {
+    if (el.getAttribute(k) === v) return;
+    if (v === null) el.removeAttribute(k); else el.setAttribute(k, v);
+  };
+  const n = overflows ? name : null;
+  const ownRole = el.getAttribute("role") !== null && el.getAttribute("role") !== "region";
+  set("tabindex", n ? "0" : null);
+  if (!ownRole) set("role", n ? "region" : null);
+  set("aria-label", n && "label" in n ? n.label : null);
+  set("aria-labelledby", n && "labelledBy" in n ? n.labelledBy : null);
+}
+
+/** Overflow past either end, with the same pixel of slack as the edges. */
+export const overflowsY = (m: { scrollHeight: number; clientHeight: number }) => m.scrollHeight - m.clientHeight > 1;
+export const overflowsX = (m: { scrollWidth: number; clientWidth: number }) => m.scrollWidth - m.clientWidth > 1;
 
 /** Calls `measure` on scroll and whenever the area or anything in it
  *  changes size, children added after the start included (S6: a clamp's
@@ -34,23 +76,29 @@ export function watchEdges(el: HTMLElement, measure: () => void): () => void {
 }
 
 /** Which edges of a scroll area have content hidden past them (FR-17, the
- *  design system's Widths), while `on`. */
-export function useScrollEdges(ref: RefObject<HTMLElement | null>, on: boolean): Edges {
+ *  design system's Widths), while `on`. With a `name`, the area is also a
+ *  Tab stop while it overflows (scrollStop). */
+export function useScrollEdges(ref: RefObject<HTMLElement | null>, on: boolean, name?: RegionName): Edges {
   const [edges, setEdges] = useState<Edges>({ top: false, bottom: false });
+  const label = name ? JSON.stringify(name) : "";
   useLayoutEffect(() => {
     const el = ref.current;
-    if (!el || !on) { setEdges({ top: false, bottom: false }); return; }
+    const named: RegionName | null = label ? JSON.parse(label) : null;
+    if (!el) return;
+    if (!on) { setEdges({ top: false, bottom: false }); if (named) scrollStop(el, false, named); return; }
     return watchEdges(el, () => {
       const e = scrollEdges(el);
       setEdges((p) => (p.top === e.top && p.bottom === e.bottom ? p : e));
+      if (named) scrollStop(el, overflowsY(el), named);
     });
-  }, [ref, on]);
+  }, [ref, on, label]);
   return edges;
 }
 
 /** FR-13: every `pre` and table in a markdown body that scrolls sideways
  *  carries the edge on the side with hidden content only, as the classes
- *  `edge-left` and `edge-right` (global.css). Blocks the body gains later
+ *  `edge-left` and `edge-right` (global.css), and is a stop named `Code,
+ *  scrolls` or `Table, scrolls` while it does (leftovers-26 FR-2). Blocks the body gains later
  *  (innerHTML, a "show all") are watched as they arrive. `content` is what
  *  the body shows (its html): a body that mounts later, or is replaced, is
  *  picked up when it changes. */
@@ -58,22 +106,30 @@ export function useMarkdownEdges(ref: RefObject<HTMLElement | null>, content?: u
   useLayoutEffect(() => {
     const root = ref.current;
     if (!root) return;
-    const watched = new Map<HTMLElement, () => void>();
-    const sync = () => {
-      const blocks = new Set(Array.from(root.querySelectorAll<HTMLElement>("pre, table")));
-      for (const [b, stop] of watched) if (!blocks.has(b)) { stop(); watched.delete(b); }
-      for (const b of blocks) {
-        if (watched.has(b)) continue;
-        watched.set(b, watchEdges(b, () => {
-          const e = sideEdges(b);
-          b.classList.toggle("edge-left", e.left);
-          b.classList.toggle("edge-right", e.right);
-        }));
-      }
-    };
-    sync();
-    const mo = new MutationObserver(sync);
-    mo.observe(root, { childList: true, subtree: true });
-    return () => { mo.disconnect(); for (const stop of watched.values()) stop(); };
+    return watchMarkdown(root);
   }, [ref, content]);
+}
+
+/** The watch useMarkdownEdges runs over one body: each `pre` and table in
+ *  it, now and later, measured for its side edges and its stop. Returns the
+ *  cleanup. */
+export function watchMarkdown(root: HTMLElement): () => void {
+  const watched = new Map<HTMLElement, () => void>();
+  const sync = () => {
+    const blocks = new Set(Array.from(root.querySelectorAll<HTMLElement>("pre, table")));
+    for (const [b, stop] of watched) if (!blocks.has(b)) { stop(); watched.delete(b); }
+    for (const b of blocks) {
+      if (watched.has(b)) continue;
+      watched.set(b, watchEdges(b, () => {
+        const e = sideEdges(b);
+        b.classList.toggle("edge-left", e.left);
+        b.classList.toggle("edge-right", e.right);
+        scrollStop(b, overflowsX(b), regionName.block(b.tagName));
+      }));
+    }
+  };
+  sync();
+  const mo = new MutationObserver(sync);
+  mo.observe(root, { childList: true, subtree: true });
+  return () => { mo.disconnect(); for (const stop of watched.values()) stop(); };
 }

@@ -256,6 +256,10 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 /* Open: the charter, then where it is written, then the strip. Wide puts
    goal and measure beside scope, each held to about 90 characters (H9). */
 .ihead-open { display: grid; gap: var(--space-3); padding-bottom: var(--space-3); }
+/* leftovers-26 FR-1: a region that scrolls is a Tab stop while it does
+   (useScrollEdges, scrollStop); its ring sits inside its box, so the
+   overflow around it never clips it. */
+.ihead-open:focus-visible { outline-offset: -2px; }
 .ihead-cols { display: grid; gap: var(--space-1-5); }
 .ihead-col { display: grid; gap: var(--space-1-5); align-content: start; min-width: 0; }
 /* 72ch of the header's text is about 90 of its characters: ch is the "0",

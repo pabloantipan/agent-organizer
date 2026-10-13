@@ -10,7 +10,7 @@ import { useImeEscape } from "../lib/drafts";
 import { useBoard } from "../stores/board.store";
 import type { WidthClass } from "../lib/width";
 import "../styles/rule-box.css";
-import { useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
+import { regionName, useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
 
 /** leftovers-7 FR-2 (Focus and names, closing the top of a stack): the open
  *  rule boxes, newest last, each able to put focus back on the field it last
@@ -87,7 +87,8 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
   // each edge with content hidden past it shows (rule-box.css, edge-*), so
   // overlay scrollbars do not hide that options or the words are below.
   const boxEdges = useScrollEdges(box, true);
-  const recordEdges = useScrollEdges(record, withRecord);
+  // leftovers-26 FR-3: the record's text is a stop while it scrolls.
+  const recordEdges = useScrollEdges(record, withRecord, regionName.record(d.number, d.title));
 
   // Focus and names: a box that shows a record opens on its title, and the
   // record is its description.
