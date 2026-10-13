@@ -1,12 +1,12 @@
 ---
 title: "The rail reads whole and walks as drawn"
-status: now
+status: done
 repos: [organizer]
 branch: lf25-rail
 seat: rl-build
 stage: one-window
 updated: 2026-10-13
-next: "review: lf25-rail, gate met (R1 R2 R3 R4 X0), 48914c1"
+next: "merged to main (sup61)"
 depends_on: []
 boundary: ["docs/specs/leftovers-25.md Boundary, lf25-rail"]
 spec: "docs/specs/leftovers-25.md (FR-6 to FR-9; tab-reaches-links Amendment 2, T13, T15-T17)"
