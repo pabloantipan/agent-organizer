@@ -12,6 +12,7 @@ boundary: ["docs/specs/leftovers-25.md Boundary, lf25-dialogs"]
 spec: "docs/specs/leftovers-25.md (FR-10, FR-11; tab-reaches-links Amendment 2, T18, T20)"
 gate: "docs/specs/leftovers-25.md Acceptance, rows D1, D2 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -45,3 +46,12 @@ Spec gaps for the FSE: D2 checks the DOM tag, not the role WebKit exposes (U1); 
 For aglaea: U3, should an overflowing card body or code block be a Tab stop, and with what name?
 
 Not verified in WKWebView: the rule box's walk after the move (vitest and code path only: same function, unchanged body); a card body with a link (no fixture card has one; the selector holds `a[href]`); the card back in the review app itself (opened only in the harness, same engine); firebase states (n/a to this card).
+
+## Review
+Pass: D1, D2 and X0 met at d5c8246 (fresh clone under `.wt-notes/dg-review/clean`, removed after; evidence in `.wt-notes/dg-review/`).
+
+- D1: own `wails dev` on 34122 (fixture, `auth: off`), main's harness plus a `snap` verb, steps `d1.txt`. Real Return opens init-a's first card back; 7 stops (Close … Write about this card). 16 Tabs wrap 0→6→0, Tab from the last lands on Close, Shift+Tab from Close lands on the last, 8 more Shift+Tabs walk back. A keyup log of all 26 presses: never `body`, always inside the box, the same with links on and off (`d1-on.jsonl`, `d1-off.jsonl`). `grep -rn "function loopTab" frontend/src` finds only `lib/tabTrap.ts:13`. The diff removes the rule box's copy and the role drawer's edge-only copy.
+- D2: vitest `RoleDrawer.inits.test.tsx` + `tabTrap.test.ts` 9/9 (`d2-vitest.log`). Harness on Hephaistos's drawer: `UL` of 5 `LI`, no comma, flex, gap 8px 8px, no bullets. Tabbing onto each link shows a 2px ring at offset 0 with `:focus-visible`, and the ring sits 6.0 px from the next item, links on and off (`d2-on.jsonl`, `d2-off.jsonl`). Snapshot `d2-link2-crop.png`.
+- X0: `pnpm install --frozen-lockfile`, `XDG_DATA_HOME=$(mktemp -d) make test` (Go ok; vitest 49 files, 593 tests), `pnpm run build`, `wails build` all 0, porcelain empty (`x0-summary.txt`). `wails build` was run again after the dev session: 0, still empty.
+
+Unmet: none. Reviewer dg-review, 2026-10-13, commit d5c8246a5ad5659ccbe6c950f8d78a859c51f42b. UI review not written yet: status and place left alone.
