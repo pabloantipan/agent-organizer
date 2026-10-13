@@ -11,6 +11,7 @@
 #   eval "$(scripts/fixture-home.sh --twenty)"   # twenty initiatives instead
 #   eval "$(scripts/fixture-home.sh --live-mailbox)"  # init-a's health from discuss
 #   eval "$(scripts/fixture-home.sh --empty)"    # a home with no initiatives
+#   eval "$(scripts/fixture-home.sh --groups)"   # the default home without Asleep and Archived
 #   eval "$(scripts/fixture-home.sh --memory critical)"  # memory forced, with any of the above
 #
 # Memory (docs/specs/ram-indicator.md, Acceptance (ram-view)): --memory
@@ -47,6 +48,13 @@
 #
 # The default home also holds init-many (testdata/fixture-many), 76 decision
 # records for the find and limit rows (leftovers-6 FR-7).
+#
+# --groups lays the default home without testdata/fixture-sleep but for
+# init-blind (leftovers-26 Amendment 2, F2): no init-asleep, init-archived or
+# frozen session, so no Asleep or Archived fold trails the rail. Grouped by
+# client, the last group is ccint with init-blind alone, and with the rail
+# scrolled to its end its ⋯ has less room below than its menu at 1024x640,
+# so the menu opens above it. Everything else is the default home's.
 #
 # --twenty lays out testdata/fixture-twenty (docs/specs/twenty-at-a-glance.md,
 # FR-7): twenty initiatives in the spec's mix and nothing from testdata/home.
@@ -309,6 +317,8 @@ EOF
 fi
 live_mailbox=""
 [ "${1:-}" = "--live-mailbox" ] && live_mailbox=1
+groups=""
+[ "${1:-}" = "--groups" ] && groups=1
 # lsof resolves symlinks in an agent's cwd, as in --twenty above.
 tmp="$(cd "$tmp" && pwd -P)"
 home="$tmp/home"
@@ -320,12 +330,20 @@ a="$home/init-a"
 sed -i '' "s#\"/h/init-a\"#\"$a\"#" "$a/agents/cell.json"
 # Initiatives (header): the asleep, archived and factory-blind initiatives,
 # the frozen session, and the fake factory over this copy.
+# --groups (leftovers-26 Amendment 2) lays init-blind alone: no Asleep or
+# Archived fold trails the groups, so Group by client ends the rail with
+# ccint, one row, and its ⋯ is short of room at the end of the scroll.
+if [ -n "$groups" ]; then
+  (cd "$repo/testdata/fixture-sleep" && tar -cf - ./init-blind) | (cd "$home" && tar -xf -)
+  mkdir -p "$tmp/probe"
+else
 (cd "$repo/testdata/fixture-sleep" && tar --exclude=./README.md --exclude=./factory -cf - .) | (cd "$home" && tar -xf -)
 since="$(date -v-7d +%Y-%m-%d)"
 sed -i '' "s/@SINCE@/$since/" "$home/init-asleep/working-on/initiative.yaml"
 mkdir -p "$tmp/probe/frozen/init-asleep-probe-otter"
 echo "$home/init-asleep" > "$tmp/probe/frozen/init-asleep-probe-otter/cwd"
 printf 'layout {\n  cwd "%s"\n}\n' "$home/init-asleep" > "$tmp/probe/init-asleep-probe-otter.kdl"
+fi
 fd="$tmp/factory"
 mkdir -p "$fd/bin"
 cp "$repo/testdata/factory/factory" "$fd/factory-real"

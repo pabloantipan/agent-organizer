@@ -125,3 +125,11 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
   when, the words and next. It posts only when the open thread's latest
   decision is not those words, so a second run posts nothing; without
   discuss there is no ruling and no state is written
+- a lowest group short of room (leftovers-26 FR-12, Amendment 2, F2): no
+  overlay file; `scripts/fixture-home.sh --groups` lays this overlay and
+  the default home without `testdata/fixture-sleep` but for `init-blind`,
+  so no Asleep or Archived fold trails the rail. Grouped by client the
+  groups are acme, personal, then ccint with init-blind alone; with the
+  rail scrolled to its end the ccint ⋯ has less room below than its menu
+  at 1024×640, so the menu opens above it. More initiatives or groups
+  could not do it: the folds alone keep the room (Amendment 2)
