@@ -130,12 +130,12 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
 .rail-group-head .rail-group-tools { position: relative; display: inline-flex; gap: 1px; opacity: 0; }
 /* The ⋯ shows on hover, on focus and while its menu is open (FR-7, T9). */
 .rail-group-head:hover .rail-group-tools, .rail-group-head .rail-group-tools:focus-within, .rail-group-tools.open { opacity: 1; }
-.rail-menu { position: absolute; top: 100%; right: 0; z-index: 20; display: grid; min-width: 168px; margin-top: 2px; padding: 4px; background: var(--panel-2); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-lift); }
+.rail-menu { position: absolute; top: 100%; right: 0; z-index: 20; display: grid; min-width: 168px; margin-top: 2px; padding: 4px; background: var(--panel-2); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-lift); overflow-y: auto; }
+/* Opens upward when the room below the ⋯ is short (leftovers-25 FR-8). */
+.rail-menu.up { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 2px; }
 .rail-menu-item { padding: 6px 8px; min-height: 24px; text-align: left; font-size: var(--font-size-sm); color: var(--fg); background: transparent; border: 0; border-radius: var(--radius-sm); cursor: pointer; white-space: nowrap; }
 .rail-menu-item:hover, .rail-menu-item:focus-visible { background: var(--surface); }
 .rail-menu-item:focus-visible { outline-offset: -2px; }
-.rail-menu-item[aria-disabled="true"] { color: var(--fg-subtle); cursor: default; }
-.rail-menu-item[aria-disabled="true"]:hover { background: transparent; }
 .rail-chevron { display: inline-flex; padding: 0; width: 16px; height: 16px; align-items: center; justify-content: center; background: transparent; border: 0; color: var(--dim); cursor: pointer; }
 .rail-chevron:hover { color: var(--text); }
 .rail-group-name { font-weight: 600; letter-spacing: .02em; text-transform: uppercase; font-size: var(--font-size-xs); color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
