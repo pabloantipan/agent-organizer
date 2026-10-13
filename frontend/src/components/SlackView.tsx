@@ -89,14 +89,14 @@ export function People({ seats, human, focus, onFocus, onClose }: { seats: Seat[
             {/* leftovers-24 FR-3: shows the chat in place, so a button (F3).
                 leftovers-25 FR-3: it stays mounted and keeps focus; the chat
                 it shows does not take it (Conversation's askedNew). */}
-            <button type="button" className={`person ${s.agent?.state ?? "off"} ${s.deaf && !s.capped ? "deaf" : ""} ${s.capped ? "capped" : ""} ${focus === s.name ? "active" : ""}`} aria-label={`Chat with ${s.name}`} aria-describedby={`${d}-state ${d}-meta ${d}-ctx`} aria-current={focus === s.name ? "true" : undefined} onClick={() => onFocus(focus === s.name ? null : s.name)} title={`${s.agent ? s.agent.state : "no session"}. Click for the conversation with ${s.name}.`}>
+            <button type="button" className={`person ${s.agent?.state ?? "off"} ${s.deaf && !s.capped ? "deaf" : ""} ${s.capped ? "capped" : ""} ${focus === s.name ? "active" : ""}`} aria-label={`Chat with ${s.name}`} aria-describedby={`${d}-state ${d}-watch${(s.owes?.length ?? 0) > 0 ? ` ${d}-owes` : ""} ${d}-ctx`} aria-current={focus === s.name ? "true" : undefined} onClick={() => onFocus(focus === s.name ? null : s.name)} title={`${s.agent ? s.agent.state : "no session"}. Click for the conversation with ${s.name}.`}>
             <i className={`dot ${s.agent?.state ?? "off"}`} />
             <span className="sr-only" id={`${d}-state`}>{s.agent ? (s.agent.state === "working" || s.agent.state === "running" ? "live" : stateWord(s.agent.state)) : "off"}</span>
             <span className="person-main">
               <span className="mono">{s.name}</span>
-              <span className="person-meta" id={`${d}-meta`}>
-                <WatcherBadge watcher={s.watcher} deaf={s.deaf} capped={s.capped} undelivered={s.undelivered} />{" "}
-                {(s.owes?.length ?? 0) > 0 && <span className="badge owes" title={s.owes.map((o) => o.subject || o.id).join("\n")}>owes {s.owes.length}</span>}
+              <span className="person-meta">
+                <span id={`${d}-watch`}><WatcherBadge watcher={s.watcher} deaf={s.deaf} capped={s.capped} undelivered={s.undelivered} /></span>
+                {(s.owes?.length ?? 0) > 0 && <span className="badge owes" id={`${d}-owes`} title={s.owes.map((o) => o.subject || o.id).join("\n")}>owes {s.owes.length}</span>}
               </span>
             </span>
             <span className="person-ctx" id={`${d}-ctx`}><ContextBar c={s.agent?.context} /></span>

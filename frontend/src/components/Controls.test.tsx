@@ -36,6 +36,20 @@ function views(Component: () => React.ReactNode) {
   return renderToStaticMarkup(<Component />);
 }
 
+/** The text of the element whose id is given, as a description reads it:
+ *  the tags are balanced by name, the markup dropped, the spaces collapsed. */
+function textOf(html: string, id: string): string {
+  const at = html.indexOf(`id="${id}"`);
+  if (at < 0) return "";
+  const open = html.lastIndexOf("<", at);
+  const tag = html.slice(open + 1).match(/^\w+/)![0];
+  const re = new RegExp(`<(/?)${tag}\\b[^>]*>`, "g");
+  re.lastIndex = open;
+  let depth = 0, m: RegExpExecArray | null;
+  while ((m = re.exec(html))) { depth += m[1] ? -1 : 1; if (depth === 0) break; }
+  return html.slice(open, m ? m.index : html.length).replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+}
+
 const msg = { id: "m1", thread_id: "t1", subject: "lf24: the rail", kind: "decision", from: "pablo", to: "rk", body: "Do it.\nNext action: rk builds", created_at: Date.UTC(2026, 9, 13, 10) } as never;
 
 describe("F1-F5 are buttons or links (leftovers-24)", () => {
@@ -60,11 +74,9 @@ describe("F1-F5 are buttons or links (leftovers-24)", () => {
     const html = renderToStaticMarkup(<People seats={seats} human="pablo" focus="ds-build" onFocus={() => undefined} onClose={() => undefined} />);
     expect(html).toMatch(/<button type="button" class="person [^"]*" aria-label="Chat with rk-build" aria-describedby="[^"]+"(?! aria-current)/);
     expect(html).toMatch(/<button type="button" class="person [^"]*active" aria-label="Chat with ds-build" aria-describedby="[^"]+" aria-current="true"/);
-    const said = (seat: string) => {
-      const ids = html.match(new RegExp(`aria-label="Chat with ${seat}" aria-describedby="([^"]+)"`))![1].split(" ");
-      return ids.map((id) => (html.match(new RegExp(`id="${id}">(.*?)</span>(?=<span class="person-main"|</span><span class="person-ctx"|</button>)`)) ?? ["", ""])[1].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim()).filter(Boolean).join(" | ");
-    };
-    expect(said("rk-build")).toBe("live | alive owes 1 | 42%");
+    const said = (seat: string) => html.match(new RegExp(`aria-label="Chat with ${seat}" aria-describedby="([^"]+)"`))![1]
+      .split(" ").map((id) => textOf(html, id)).filter(Boolean).join(" | ");
+    expect(said("rk-build")).toBe("live | alive | owes 1 | 42%");
     expect(said("ds-build")).toBe("off | deaf");
   });
 
