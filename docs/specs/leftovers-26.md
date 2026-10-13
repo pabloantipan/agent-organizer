@@ -136,3 +136,12 @@ combobox's `listbox`, and a `table` stays a table; each gets only
 while it overflows. `role="region"` goes on elements with no role of their
 own (the card and drawer bodies, a `pre`, the header's open area, Help).
 S2 and S4 read the role each keeps.
+
+Amendment 2, 2026-10-13, the FSE, from sup62 (0108): the Asleep and
+Archived folds (`testdata/fixture-sleep`) always trail the last group, so
+no number of initiatives leaves the lowest ⋯ short of room
+(`.wt-notes/fx-build/f2-main-geometry.jsonl`). FR-12 is met by a
+`fixture-home.sh --groups` home without `fixture-sleep`, so the last group
+ends the rail; F2 reads the menu with the rail scrolled to its end (a
+place the lead reaches by scrolling, not a placed ⋯): above the ⋯, inside
+the window.
