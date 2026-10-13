@@ -15,6 +15,10 @@ import { groupMemory } from "../lib/initiatives";
 
 const REFRESH_MS = 10_000;
 
+/** The initiative a Show only press filtered to, until its view lands focus
+ *  on its first agent row (leftovers-25 FR-3). */
+let landOn: string | null = null;
+
 /** Agents tab: processes and sessions grouped per initiative. The Go side
  *  samples every ten seconds and pushes the "agents" event; this view only
  *  renders the latest payload. Working = CPU time grew between samples. */
@@ -44,6 +48,20 @@ export function AgentsView() {
     // (a parent's effect), so the landing is not scrolled away again.
     requestAnimationFrame(() => el.scrollIntoView({ block: "nearest" }));
   }, [agentFocus, view, clearAgentFocus]);
+
+  // leftovers-25 FR-3: Show only <id> unmounts with its press (the filtered
+  // view mounts in the initiative screen, a new instance); focus lands on the
+  // first agent row of the initiative it filtered to, never the body.
+  const factsId = useId();
+  useEffect(() => {
+    const id = landOn;
+    if (!id || !view || selectedInitiative !== id) return;
+    landOn = null;
+    const section = box.current?.querySelector(`[data-group="${CSS.escape(id)}"]`);
+    const el = section?.querySelector<HTMLElement>("ul.agents > li[tabindex]")
+      ?? section?.querySelector<HTMLElement>("button:not([disabled]), a[href]");
+    el?.focus({ preventScroll: true });
+  }, [selectedInitiative, view]);
 
   if (!view) return <div className="empty">Sampling processes…</div>;
   // FR-13: an initiative that is not active is watched, not driven; the flag
@@ -85,15 +103,19 @@ export function AgentsView() {
         <section key={g.id} className="agent-group" data-group={g.id}>
           {!selectedInitiative && (
           <header className="agent-group-head">
-            {/* leftovers-24 FR-1: a filter in place, so a button (F1); the titles
-                show only while no filter is on, so it is never pressed here. */}
-            <button type="button" className="agent-group-title" aria-pressed="false" aria-label={`Show only ${g.id}`} onClick={() => setSelectedInitiative(g.id)} title="Show only this initiative">
+            {/* leftovers-24 FR-1: a filter in place, so a plain button (F1).
+                leftovers-25 FR-1: the short name is the verb; the counts, memory
+                and cell state it draws are its description. FR-3: it unmounts
+                with the filter, so focus goes to the group's first agent row. */}
+            <button type="button" className="agent-group-title" aria-label={`Show only ${g.id}`} aria-describedby={`${factsId}-${g.id}`} onClick={() => { landOn = g.id; setSelectedInitiative(g.id); }} title="Show only this initiative">
               <Bot size={14} />
               <span className="ident">{g.id}</span>
               {g.client && <span className="badge client">{g.client}</span>}
-              <span className="meta">{countsOf(g)}</span>
-              {groupMemory(view, g.id) && <span className="meta num a-group-mem">{groupMemory(view, g.id)}</span>}
-              <CellStateLz cell={g.cell} missing={missingPersonas(g.crew)} />
+              <span className="agent-group-title-facts" id={`${factsId}-${g.id}`}>
+                <span className="meta">{countsOf(g)}</span>{" "}
+                {groupMemory(view, g.id) && <span className="meta num a-group-mem">{groupMemory(view, g.id)}</span>}{" "}
+                <CellStateLz cell={g.cell} missing={missingPersonas(g.crew)} />
+              </span>
             </button>
             <span className="spacer" />
             {g.cell && q.total > 0 && <button className="tiny-btn ghost hot" onClick={() => openSlack(g.id, null)} title="escalated to you, or asked of you: threads and cards">{q.total} need you</button>}

@@ -843,13 +843,15 @@ function Ruling({ initiativeId, threadId, onOpen }: { initiativeId: string; thre
 }
 
 /** A ruling opens its thread on the same view, so a button (leftovers-24
- *  FR-5, F5), named by the thread; it keeps the row's look. */
+ *  FR-5, F5), named by the thread; it keeps the row's look. Who ruled, when,
+ *  the words and next are its description (leftovers-25 FR-1). */
 export function RulingButton({ dec, subject, onOpen }: { dec: CellMessage; subject: string; onOpen: () => void }) {
   const { text, next } = splitRuling(dec.body);
+  const id = useId();
   return (
-    <button type="button" className="q-ruling" onClick={onOpen} title="open the thread" aria-label={`Open the thread ${subject}`}>
+    <button type="button" className="q-ruling" onClick={onOpen} title="open the thread" aria-label={`Open the thread ${subject}`} aria-describedby={id}>
       <Gavel size={11} />
-      <span><b>{dec.from}</b> ruled {when(dec.created_at)}: {text}{next && <span className="q-next"> · <b>next</b> {next}</span>}</span>
+      <span id={id}><b>{dec.from}</b> ruled {when(dec.created_at)}: {text}{next && <span className="q-next"> · <b>next</b> {next}</span>}</span>
     </button>
   );
 }

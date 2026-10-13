@@ -491,6 +491,7 @@ button.link:hover { color: var(--accent-fg); }
 .tiny-btn.danger { background: var(--blocked-soft); color: var(--blocked); border-color: transparent; }
 .tiny-btn.danger:hover { background: var(--blocked); color: #fff; }
 .agent-group-title { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.agent-group-title-facts { display: inline-flex; align-items: center; gap: 8px; }
 /* A button that keeps the title's look (leftovers-24 FR-1). */
 button.agent-group-title, button.agent-group-title:hover { background: none; border: 0; padding: 0; min-height: 0; font-weight: inherit; line-height: inherit; white-space: normal; flex-shrink: 1; text-align: left; }
 .agent-group-head.static .agent-group-title { cursor: default; }

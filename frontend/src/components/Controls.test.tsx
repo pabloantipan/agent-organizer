@@ -23,7 +23,7 @@ const { SlackView, People } = await import("./SlackView");
 const { SearchHit, RulingButton } = await import("./Conversation");
 
 const group = (id: string, cell: boolean) =>
-  ({ id, client: "acme", project: id, agents: [], crew: [], threads: [], cell: cell ? { project: id, state: "running" } : null });
+  ({ id, client: "acme", project: id, agents: [], crew: [], threads: [], live: 0, working: 0, cell: cell ? { project: id, state: "in_definition" } : null });
 
 function views(Component: () => React.ReactNode) {
   store.useBoard.setState({
@@ -39,10 +39,14 @@ function views(Component: () => React.ReactNode) {
 const msg = { id: "m1", thread_id: "t1", subject: "lf24: the rail", kind: "decision", from: "pablo", to: "rk", body: "Do it.\nNext action: rk builds", created_at: Date.UTC(2026, 9, 13, 10) } as never;
 
 describe("F1-F5 are buttons or links (leftovers-24)", () => {
-  it("F1: an Agents group title is a button, aria-pressed, named Show only <id>", () => {
+  it("F1: an Agents group title is a plain button named Show only <id>, described by its facts", () => {
     const html = views(AgentsView);
-    expect(html).toMatch(/<button type="button" class="agent-group-title" aria-pressed="false" aria-label="Show only init-a"/);
+    expect(html).toMatch(/<button type="button" class="agent-group-title" aria-label="Show only init-a" aria-describedby="([^"]+)"/);
     expect(html).toContain('aria-label="Show only init-b"');
+    expect(html).not.toContain("aria-pressed");
+    const id = html.match(/aria-label="Show only init-a" aria-describedby="([^"]+)"/)![1];
+    const facts = html.match(new RegExp(`<span class="agent-group-title-facts" id="${id}">(.*?)</span></button>`))![1];
+    expect(facts.replace(/<[^>]+>/g, "")).toMatch(/^0 agents · 0 live · 0 working · 0 seats (\S.* )?in definition$/);
   });
 
   it("F2: a Conversations cell row is a link named Conversations of <id>", () => {
@@ -51,11 +55,17 @@ describe("F1-F5 are buttons or links (leftovers-24)", () => {
     expect(html).not.toMatch(/<li[^>]*class="cell-row/);
   });
 
-  it("F3: a person is a button named Chat with <seat>, current when shown", () => {
-    const seats = [{ name: "rk-build", watcher: "alive" }, { name: "ds-build", watcher: "alive" }] as never;
+  it("F3: a person is a button named Chat with <seat>, current when shown, described by what it draws", () => {
+    const seats = [{ name: "rk-build", watcher: "alive", agent: { state: "working", context: { window_size: 200000, used_percent: 42, input_tokens: 84000 } }, owes: [{ id: "t1" }] }, { name: "ds-build", watcher: "alive", deaf: true, undelivered: 3 }] as never;
     const html = renderToStaticMarkup(<People seats={seats} human="pablo" focus="ds-build" onFocus={() => undefined} onClose={() => undefined} />);
-    expect(html).toMatch(/<button type="button" class="person [^"]*" aria-label="Chat with rk-build"(?! aria-current)/);
-    expect(html).toMatch(/<button type="button" class="person [^"]*active" aria-label="Chat with ds-build" aria-current="true"/);
+    expect(html).toMatch(/<button type="button" class="person [^"]*" aria-label="Chat with rk-build" aria-describedby="[^"]+"(?! aria-current)/);
+    expect(html).toMatch(/<button type="button" class="person [^"]*active" aria-label="Chat with ds-build" aria-describedby="[^"]+" aria-current="true"/);
+    const said = (seat: string) => {
+      const ids = html.match(new RegExp(`aria-label="Chat with ${seat}" aria-describedby="([^"]+)"`))![1].split(" ");
+      return ids.map((id) => (html.match(new RegExp(`id="${id}">(.*?)</span>(?=<span class="person-main"|</span><span class="person-ctx"|</button>)`)) ?? ["", ""])[1].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim()).filter(Boolean).join(" | ");
+    };
+    expect(said("rk-build")).toBe("live | alive owes 1 | 42%");
+    expect(said("ds-build")).toBe("off | deaf");
   });
 
   it("F4: a search hit is a button whose name starts with the subject", () => {
@@ -63,9 +73,12 @@ describe("F1-F5 are buttons or links (leftovers-24)", () => {
     expect(html).toMatch(/^<button type="button" class="hit"><span class="convo-subj">lf24: the rail<\/span>/);
   });
 
-  it("F5: a ruling is a button named Open the thread <subject>", () => {
+  it("F5: a ruling is a button named Open the thread <subject>, described by who ruled, when, the words, next", () => {
     const html = renderToStaticMarkup(<RulingButton dec={msg} subject="lf24: the rail" onOpen={() => undefined} />);
-    expect(html).toMatch(/^<button type="button" class="q-ruling" title="open the thread" aria-label="Open the thread lf24: the rail">/);
+    expect(html).toMatch(/^<button type="button" class="q-ruling" title="open the thread" aria-label="Open the thread lf24: the rail" aria-describedby="([^"]+)">/);
+    const id = html.match(/aria-describedby="([^"]+)"/)![1];
+    const said = html.slice(html.indexOf(`<span id="${id}">`)).replace(/<[^>]+>/g, "");
+    expect(said).toMatch(/^pablo ruled .+: Do it\. · next rk builds$/);
   });
 
   it("no span, li or div answers a click in the three files (T6, Amendment 1)", () => {

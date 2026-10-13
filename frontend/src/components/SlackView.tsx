@@ -1,10 +1,11 @@
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { MessagesSquare, Users, X } from "lucide-react";
 import type { Seat } from "../hooks/useWails";
 import { useBoard } from "../stores/board.store";
 import { queueOf, readOnlyOf } from "../lib/queue";
 import { ContextBar, WatcherBadge } from "./ContextBar";
 import { HEALTH, peopleLabel } from "../lib/health";
+import { stateWord } from "../lib/stateWords";
 import { Conversation } from "./Conversation";
 
 const PEOPLE_KEY = "slack.people";
@@ -108,6 +109,7 @@ export function SlackView() {
  *  liveness facts that matter for a conversation. Click a seat for the
  *  direct view with it; that is the DM. */
 export function People({ seats, human, focus, onFocus, onClose }: { seats: Seat[]; human: string; focus: string | null; onFocus: (a: string | null) => void; onClose: () => void }) {
+  const idBase = useId();
   return (
     <aside className="people">
       <div className="people-head"><Users size={13} /> <span>People</span> <span className="meta">{seats.length + (human ? 1 : 0)}</span> <span className="spacer" /><button className="rail-icon" onClick={onClose} title="hide" aria-label="Hide people"><X size={12} /></button></div>
@@ -117,23 +119,39 @@ export function People({ seats, human, focus, onFocus, onClose }: { seats: Seat[
             <i className="dot running" /><span className="mono">{human}</span><span className="meta">you</span>
           </li>
         )}
-        {seats.map((s) => (
+        {seats.map((s) => {
+          // leftovers-25 FR-1: the short name is the verb; what the row draws
+          // (live or off, the watcher's word, what it owes, context) is its
+          // description. The dot's word is said, since a colour is not.
+          const d = `${idBase}-${s.name}`;
+          return (
           <li key={s.name}>
-            {/* leftovers-24 FR-3: shows the chat in place, so a button (F3). */}
-            <button type="button" className={`person ${s.agent?.state ?? "off"} ${s.deaf && !s.capped ? "deaf" : ""} ${s.capped ? "capped" : ""} ${focus === s.name ? "active" : ""}`} aria-label={`Chat with ${s.name}`} aria-current={focus === s.name ? "true" : undefined} onClick={() => onFocus(focus === s.name ? null : s.name)} title={`${s.agent ? s.agent.state : "no session"}. Click for the conversation with ${s.name}.`}>
+            {/* leftovers-24 FR-3: shows the chat in place, so a button (F3).
+                leftovers-25 FR-3: it stays mounted, so focus stays on it even
+                when the chat it shows mounts a composer that takes focus. */}
+            <button type="button" className={`person ${s.agent?.state ?? "off"} ${s.deaf && !s.capped ? "deaf" : ""} ${s.capped ? "capped" : ""} ${focus === s.name ? "active" : ""}`} aria-label={`Chat with ${s.name}`} aria-describedby={`${d}-state ${d}-meta ${d}-ctx`} aria-current={focus === s.name ? "true" : undefined} onClick={(e) => { const b = e.currentTarget; onFocus(focus === s.name ? null : s.name); keepFocus(b); }} title={`${s.agent ? s.agent.state : "no session"}. Click for the conversation with ${s.name}.`}>
             <i className={`dot ${s.agent?.state ?? "off"}`} />
+            <span className="sr-only" id={`${d}-state`}>{s.agent ? (s.agent.state === "working" || s.agent.state === "running" ? "live" : stateWord(s.agent.state)) : "off"}</span>
             <span className="person-main">
               <span className="mono">{s.name}</span>
-              <span className="person-meta">
-                <WatcherBadge watcher={s.watcher} deaf={s.deaf} capped={s.capped} undelivered={s.undelivered} />
+              <span className="person-meta" id={`${d}-meta`}>
+                <WatcherBadge watcher={s.watcher} deaf={s.deaf} capped={s.capped} undelivered={s.undelivered} />{" "}
                 {(s.owes?.length ?? 0) > 0 && <span className="badge owes" title={s.owes.map((o) => o.subject || o.id).join("\n")}>owes {s.owes.length}</span>}
               </span>
             </span>
-            <ContextBar c={s.agent?.context} />
+            <span className="person-ctx" id={`${d}-ctx`}><ContextBar c={s.agent?.context} /></span>
             </button>
           </li>
-        ))}
+          );
+        })}
       </ul>
     </aside>
   );
+}
+
+/** A press that shows another chat in place mounts that chat's composer,
+ *  whose field may take focus; the pressed button keeps it (leftovers-25
+ *  FR-3, design system: Focus and names). After the commit, so it wins. */
+function keepFocus(b: HTMLElement) {
+  requestAnimationFrame(() => { if (b.isConnected && document.activeElement !== b) b.focus({ preventScroll: true }); });
 }
