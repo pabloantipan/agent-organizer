@@ -673,6 +673,9 @@ button.tl-subj::after { content: ""; position: absolute; top: 0; right: 0; botto
 .tl-meta { display: inline-flex; align-items: center; gap: 4px 6px; flex-wrap: wrap; font-size: var(--font-size-xs); color: var(--muted); }
 .tl-divider .a-actions { opacity: 0; }
 .tl-divider:hover .a-actions { opacity: 1; }
+/* Focus on Escalate, Close, Reopen or the reply shows them whole, with the
+   ring (leftovers-25 FR-4). */
+.tl-divider:focus-within .a-actions { opacity: 1; }
 .decision-banner { display: flex; gap: 8px; align-items: flex-start; padding: 8px 12px; border-radius: var(--radius-md); background: var(--accent-soft); border: 1px solid var(--border-accent); font-size: var(--font-size-md); }
 .decision-banner svg { flex-shrink: 0; margin-top: 2px; color: var(--accent-fg); }
 .msg { max-width: 82%; min-width: 0; }
