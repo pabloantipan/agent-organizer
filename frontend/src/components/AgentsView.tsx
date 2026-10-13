@@ -11,7 +11,7 @@ import { CleanButton } from "./Retire";
 import { Usage as fetchUsage } from "../../wailsjs/go/main/App";
 import { agentsWeekLine } from "../lib/usage";
 import { agentTarget } from "../lib/agentFocus";
-import { groupMemory } from "../lib/initiatives";
+import { groupMemory, plural } from "../lib/initiatives";
 
 const REFRESH_MS = 10_000;
 
@@ -84,7 +84,7 @@ export function AgentsView() {
       <div className="board-head">
         {!selectedInitiative && <h1>Agents</h1>}
         <span className="meta">
-          {selectedInitiative ? (sel ? `${countsOf(sel)} · ` : "") : `${totals.n} agents, ${totals.live} live, ${totals.working} working · `}
+          {selectedInitiative ? (sel ? `${countsOf(sel)} · ` : "") : `${plural(totals.n, "agent")}, ${totals.live} live, ${totals.working} working · `}
           {sel && groupMemory(view, sel.id) && <span className="num">{groupMemory(view, sel.id)} · </span>}
           sampled {since(view.sampled_at)} · every {REFRESH_MS / 1000}s
         </span>
@@ -150,9 +150,10 @@ export function AgentsView() {
 /** Inline "new agent" control: opens a probe in the initiative directory, in
  *  the family named after the initiative. Empty name = animal name. */
 /** A group's counts: in its head in the all view, on the toolbar line with
- *  one initiative selected (initiative-header FR-13). */
-const countsOf = (g: AgentGroup) =>
-  `${g.agents?.length ?? 0} agents · ${g.live} live · ${g.working} working${g.cell ? ` · ${g.crew?.length ?? 0} seats` : ""}`;
+ *  one initiative selected (initiative-header FR-13). Each noun agrees with
+ *  its count (leftovers-26 FR-5): `1 agent`, `1 seat`. */
+export const countsOf = (g: Pick<AgentGroup, "agents" | "live" | "working" | "cell" | "crew">) =>
+  `${plural(g.agents?.length ?? 0, "agent")} · ${g.live} live · ${g.working} working${g.cell ? ` · ${plural(g.crew?.length ?? 0, "seat")}` : ""}`;
 
 function NewAgent({ initiativeId }: { initiativeId: string }) {
   const [open, setOpen] = useState(false);
