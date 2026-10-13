@@ -6,7 +6,7 @@ branch: lf22-rail-roving
 seat:
 stage: one-window
 updated: 2026-10-11
-next: "pablo: rule 0118 (accept leftovers-22); on accept the FSE starts its supervisor"
+next: "sup59 runs it (0118 ruled, 2026-10-13)"
 depends_on: [lf21-hero-summary]
 boundary: ["docs/specs/leftovers-22.md Boundary, lf22-rail-roving"]
 spec: "docs/specs/leftovers-22.md (FR-5 to FR-7; tab-reaches-links, T3; initiatives-view A6 §3, I40)"

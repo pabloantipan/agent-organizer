@@ -6,7 +6,7 @@ branch: lf22-tab-links
 seat:
 stage: one-window
 updated: 2026-10-11
-next: "pablo: rule 0118 (accept leftovers-22); on accept the FSE starts its supervisor"
+next: "sup59 runs it (0118 ruled, 2026-10-13)"
 depends_on: []
 boundary: ["docs/specs/leftovers-22.md Boundary, lf22-tab-links"]
 spec: "docs/specs/leftovers-22.md (FR-1 to FR-4; tab-reaches-links, T1, T2, T4, T5)"

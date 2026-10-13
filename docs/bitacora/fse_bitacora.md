@@ -4,6 +4,11 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-13, leftovers-22 running
+
+- **0118 ruled** (89cabf4, words "accept as wr"); sup59 runs leftovers-22 in its **own iTerm window 17470**, not my 5498: Pablo, 2026-10-13 (relayed by hephaistos, decisions.md): "I need to keep FSE shell window present and clean", superseding the tabs-of-my-window ruling. Hephaistos is building detached seats (probe, agent-slack seat-windows-desktop, `seats open <sup>`); my launch line becomes the bare probe command when it posts again. On sup59's close: end it, make install.
+- Added before the ruling: lf22-rail-roving FR-6 (dead pressHero branch) and FR-7/V2 (I40, hero counts as one spoken line).
+
 ## HAND-OFF — 2026-10-12 00:5x, leftovers-21 landed
 
 - **Last SHA seen:** cb6c075. lf21-hero-summary merged by sup58 (8e97a0d), code and UI pass; 76 min against 20-35 (17 min of work, 58 min a re-review starved by test-lease under memory pressure; sent [for hephaistos]). sup58 ended; installed v0.2.0-1806-gcb6c075; tree clean. No supervisor running.
