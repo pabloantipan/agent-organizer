@@ -32,13 +32,14 @@ export const regionName = {
   block: (tag: string): RegionName => ({ label: tag.toUpperCase() === "TABLE" ? "Table, scrolls" : "Code, scrolls" }),
 };
 
-type StopTarget = Pick<Element, "getAttribute" | "setAttribute" | "removeAttribute">;
+type StopTarget = Pick<Element, "tagName" | "getAttribute" | "setAttribute" | "removeAttribute">;
 
 /** FR-1 (T22, design system: a region that scrolls is a stop while it
  *  scrolls): while `overflows`, the region takes `tabindex="0"`, a role and
  *  its name, so the keyboard reaches it and WebKit scrolls it natively;
  *  otherwise all three go. The role is `region`, unless the element has a
- *  role of its own (the floating list's listbox), which it keeps. The focus
+ *  role of its own that carries meaning (the floating list's listbox, a
+ *  table), which it keeps (leftovers-26 Amendment 1). The focus
  *  ring is the stylesheet's `:focus-visible`. Idempotent: it writes only
  *  what differs, so a measurement on every scroll costs nothing. */
 export function scrollStop(el: StopTarget, overflows: boolean, name: RegionName) {
@@ -47,7 +48,7 @@ export function scrollStop(el: StopTarget, overflows: boolean, name: RegionName)
     if (v === null) el.removeAttribute(k); else el.setAttribute(k, v);
   };
   const n = overflows ? name : null;
-  const ownRole = el.getAttribute("role") !== null && el.getAttribute("role") !== "region";
+  const ownRole = (el.getAttribute("role") ?? "region") !== "region" || el.tagName.toUpperCase() === "TABLE";
   set("tabindex", n ? "0" : null);
   if (!ownRole) set("role", n ? "region" : null);
   set("aria-label", n && "label" in n ? n.label : null);

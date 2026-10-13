@@ -103,7 +103,8 @@ describe("watchMarkdown: code blocks and tables are stops while they scroll (S2)
     body.children = [pre, table, narrow];
     const done = watchMarkdown(body as unknown as HTMLElement);
     expect(stop(pre)).toEqual({ tabindex: "0", role: "region", label: "Code, scrolls", labelledby: null });
-    expect(stop(table)).toEqual({ tabindex: "0", role: "region", label: "Table, scrolls", labelledby: null });
+    // Amendment 1: a table keeps its table role; only the stop and its name.
+    expect(stop(table)).toEqual({ tabindex: "0", role: null, label: "Table, scrolls", labelledby: null });
     expect(pre.classes.has("edge-right")).toBe(true);
     expect(stop(narrow)).toEqual(none);
     // A wider window: the table fits now; its next measurement takes the stop off.
