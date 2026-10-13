@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type KeyboardEvent } from "react";
 import { Archive, ArrowLeft, ChevronDown, ChevronRight, FolderPlus, Layers, Moon, PanelLeftClose, PanelLeftOpen, Pencil, PencilRuler, X } from "lucide-react";
 import { DragDropContext, Draggable, Droppable, type DraggableProvidedDragHandleProps, type DropResult } from "@hello-pangea/dnd";
 import type { merge, model } from "../../wailsjs/go/models";
@@ -33,6 +33,9 @@ export function Rail() {
     try { return JSON.parse(localStorage.getItem("rail.collapsed") || "{}"); } catch { return {}; }
   });
   const [editing, setEditing] = useState<number | null>(null);
+  // The row Up and Down last moved to; null once focus leaves the rows, so
+  // the next Tab enters on the current row again (FR-5, T3).
+  const [cursor, setCursor] = useState<string | null>(null);
   const inits = view?.board.initiatives ?? [];
   const ids = uniq(inits.map((i) => i.id));
   const byId = new Map<string, Entry>();
@@ -153,6 +156,24 @@ export function Rail() {
   };
   const removeGroup = (i: number) => persist(stored.filter((_, j) => j !== i) as Group[]);
 
+  // The rows in the order they are drawn (collapsed groups hide theirs):
+  // one Tab stop among them, Up and Down move, Enter opens (FR-5, T3).
+  const rows = (grouped ? sections.filter((s) => !collapsed[s.key]) : sections).flatMap((s) => s.ids);
+  const stop = rovingStop(rows, selectedInitiative, cursor);
+  const onRowKey = (ev: KeyboardEvent<HTMLElement>, id: string) => {
+    if (ev.defaultPrevented) return; // drag's keyboard sensor has it (Space lifts, arrows move)
+    if (ev.key === "Enter") {
+      ev.preventDefault();
+      setSelectedInitiative(id);
+      return;
+    }
+    const to = rovingMove(rows, id, ev.key);
+    if (to === null) return;
+    ev.preventDefault();
+    setCursor(to);
+    ev.currentTarget.closest("nav")?.querySelector<HTMLElement>(`[${ROW}="${CSS.escape(to)}"]`)?.focus();
+  };
+
   const current = selectedInitiative ? byId.get(selectedInitiative) : null;
   const hero = current
     ? { eyebrow: current.client || "initiative", name: current.id, now: current.now, blocked: current.blocked, next: current.next }
@@ -167,8 +188,13 @@ export function Rail() {
             ref={drag.innerRef}
             {...drag.draggableProps}
             {...drag.dragHandleProps}
+            tabIndex={e.id === stop ? 0 : -1}
+            {...{ [ROW]: e.id }}
             className={`rail-item ${selectedInitiative === e.id ? "active" : ""} ${snap.isDragging ? "dragging" : ""}`}
             onClick={() => setSelectedInitiative(e.id)}
+            onKeyDown={(ev) => onRowKey(ev, e.id)}
+            onFocus={() => setCursor(e.id)}
+            onBlur={(ev) => { if (!(ev.relatedTarget instanceof Element && ev.relatedTarget.hasAttribute(ROW))) setCursor(null); }}
             title={e.title}
           >
             <span className="rail-rank">{rank.get(e.id)}</span>
@@ -419,6 +445,8 @@ const ROLES = "roles";
  *  had opened Not active starts with both closed. */
 const FOLD = "asleep";
 const ARCHIVED = "archived";
+/** Marks an initiative row, so Up and Down can find the next one. */
+const ROW = "data-rail-row";
 /** The rail's toggle is a disclosure of the rail (responsive-home FR-11). */
 const RAIL_ID = "rail";
 
@@ -433,6 +461,25 @@ function keepHidden(stored: string[], visible: string[], hidden: Set<string>) {
     else if (q.length) out.push(q.shift()!);
   }
   return [...out, ...q];
+}
+
+/** The one row of the rail's Tab order (FR-5, T3): the row Up and Down
+ *  last reached while focus is in the rows, else the current initiative's,
+ *  else the first. */
+export function rovingStop(rows: string[], selected: string | null, cursor: string | null): string | null {
+  if (cursor && rows.includes(cursor)) return cursor;
+  if (selected && rows.includes(selected)) return selected;
+  return rows[0] ?? null;
+}
+
+/** Where Up or Down moves from `id`, held at either end; null for any other
+ *  key, which the row leaves alone. */
+export function rovingMove(rows: string[], id: string, key: string): string | null {
+  const step = key === "ArrowDown" ? 1 : key === "ArrowUp" ? -1 : 0;
+  if (!step) return null;
+  const i = rows.indexOf(id);
+  if (i < 0) return null;
+  return rows[Math.min(rows.length - 1, Math.max(0, i + step))];
 }
 
 function Counts({ now, blocked, next }: { now: number; blocked: number; next: number }) {
