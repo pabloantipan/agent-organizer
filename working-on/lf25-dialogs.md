@@ -1,12 +1,12 @@
 ---
 title: "An open card holds Tab; the drawer's list has no commas"
-status: next
+status: now
 repos: [organizer]
 branch: lf25-dialogs
 seat: dg-build
 stage: one-window
 updated: 2026-10-13
-next: "dg-build builds it (sup61, wave 1, launched 2026-10-13)"
+next: "dg-build: move loopTab to lib, trap CardDrawer, ul in RoleDrawer; then D1, D2, X0"
 depends_on: []
 boundary: ["docs/specs/leftovers-25.md Boundary, lf25-dialogs"]
 spec: "docs/specs/leftovers-25.md (FR-10, FR-11; tab-reaches-links Amendment 2, T18, T20)"
