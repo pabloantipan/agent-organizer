@@ -136,11 +136,11 @@ export function RoleDrawer() {
           <Section label="Initiatives">
             {inits.length === 0
               ? <p className="rd-empty">None yet.</p>
-              : <p className="rd-inits">
-                  {inits.map((id, i) => (
-                    <span key={id}>{i > 0 && ", "}<a href="#" className="rd-init mono" onClick={(e) => { e.preventDefault(); go(() => { openInitiative(id, "overview"); landOnInitiative(id); }); }} aria-label={`Open ${id}`}>{id}</a></span>
+              : <ul className="rd-inits">
+                  {inits.map((id) => (
+                    <li key={id}><a href="#" className="rd-init mono" onClick={(e) => { e.preventDefault(); go(() => { openInitiative(id, "overview"); landOnInitiative(id); }); }} aria-label={`Open ${id}`}>{id}</a></li>
                   ))}
-                </p>}
+                </ul>}
           </Section>
         </div>
       </div>

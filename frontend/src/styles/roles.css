@@ -100,8 +100,8 @@
 .rd-line.mail { grid-template-columns: minmax(0, 1fr) max-content max-content; }
 /* Initiatives: plain text links in a comma list, never bordered buttons
    (Amendment 1, A2: the rail is how an initiative is picked). */
-.rd-inits { margin: 0; font-size: var(--font-size-md); color: var(--fg-muted); }
-.rd-init { font-size: var(--font-size-sm); color: var(--accent-fg); text-decoration: none; padding-inline: 2px; margin-inline-end: 4px; }
+.rd-inits { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0; padding: 0; list-style: none; font-size: var(--font-size-md); color: var(--fg-muted); }
+.rd-init { font-size: var(--font-size-sm); color: var(--accent-fg); text-decoration: none; padding-inline: 2px; }
 .rd-init:hover { text-decoration: underline; }
 .rd-init:focus { outline: none; }
 .rd-init:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 0; border-radius: var(--radius-xs); }
