@@ -107,3 +107,13 @@ Stylesheets per card with the rules each owns.
 | `lf25-names` | N1, N2, N3, N4, X0 | — | true |
 | `lf25-rail` | R1, R2, R3, R4, X0 | — | true |
 | `lf25-dialogs` | D1, D2, X0 | — | true |
+
+Amendment 1, 2026-10-13, the FSE, from sup61 (0108):
+- **R3**: on the fixture at 1024×640 the lowest group has 177 px below its
+  ⋯, so its menu rightly opens downward. The row is met with the rail
+  scrolled until the ⋯ sits at the window's bottom: the menu opens upward,
+  inside the window; plus vitest of the placement both ways.
+- **N1**: the fixture mailbox holds no decision, so no ruling (F5) is drawn
+  in the built app; F5's name and description rest on vitest, F1 and F3 by
+  AX as written. Carry: a fixture thread with a decision, so the next card
+  that touches rulings can read F5 in AX.
