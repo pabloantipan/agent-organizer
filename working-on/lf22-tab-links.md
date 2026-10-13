@@ -272,3 +272,28 @@ Verdict: pass. Checked 347152e (pinned; head d9cd76f differs only in this card),
 - K4: my four orders, both flags, match the card's lists line for line (only a live context % differs). Inventory checked by grep: the three `<a>` and the non-button onClick elements are exactly the card's; F1-F5 listed as findings. Met.
 - X0: clean clone: make test (Go ok, vitest 556) pass, pnpm run build pass, wails build pass, porcelain empty. Met.
 Unmet rows: none. Reviewer: tl-review, 2026-10-13, commit 347152e. Evidence: /Users/pabloantipan/organizer/.wt-notes/tl-review/ (ev/*.jsonl, my-orders.md, x0-*.log).
+
+## UI review
+Verdict: pass. Reviewer tl-ui, 2026-10-13, commit 347152e (pinned; head d9cd76f differs only in this card). Fixture, auth off, own `wails dev` on :34119 (pid saved, killed by pid), the branch's tabharness.swift built into my notes, plus a copy with a `shot` verb (WKWebView `takeSnapshot`, offscreen, no input); review build `Deltagos Review` launched by me (pid saved) for AX and window shots. Shots and jsonl: /Users/pabloantipan/organizer/.wt-notes/tl-ui/.
+
+How each state was checked
+- T1/K1 links reached: harness, flag on/off, 1440x900: on, Initiatives Tab #11 `Open init-a`, Hephaistos drawer #4-#8 its initiative links; off, never a link. `go test -run TestMacOptionsTabFocusesLinks` pass. Shots `wkwebview-1440x900-K1K3-*`, `wkwebview-1024x640-K1K3-*`.
+- T2/K2 skip link: first Tab on Home, Initiatives, init-a, Settings and Usage is `Skip to content`, focus-visible, ring 2px #8a3ffc, 118x28 at 8,8, the topmost element at its centre (elementFromPoint), z 31 over the bar; Return lands on Needs me h2 / Initiatives h1 / init-a h1 / Settings h1 / Usage h1, ring shown, and the next Tab continues in main (`Rule init-a 0002`). At rest it is a 1x1 AXLink and invisible (`review-app-1440x900-K2-home-skip-at-rest.png`, AX tree of my pid). Vitest SkipLink 6 pass. 1024x640 the same.
+- T4/K3 ring and raise: skip link, `Open <id>`, `rd-init` ring under focus-visible; `Open <id>` card background rgb(46,39,60) = `--surface-hover`, lf20 D1's raise (`.ic.raised`, background only).
+- T5/K4: inventory re-grepped (href and onClick on non-controls, multi-line tags included): the card's three links and F1-F5 are complete.
+
+Findings (none sev 4 or 3)
+- U1 (sev 1) the lead sees the drawer link's ring cross the comma after it. Where: Hephaistos drawer, Initiatives line (`wkwebview-1440x900-K1K3-drawer-open-init-a-focused.png`). Evidence: outline-offset 2px on inline links separated by ", " with no padding. Proposal: a little inline padding on `.rd-init`, or a gap instead of the comma.
+- U2 (sev 1) the landing ring on Home's `NEEDS ME` h2 sits on the text's first letter and spans 1150 px. Where: `wkwebview-1440x900-K2-home-after-return.png`. Evidence: the h2 has no padding, the ring takes the box. Proposal: fine as it is. If the ring should hug the words, put it on an inline heading.
+
+Spec gaps (for the FSE)
+- G1 the spec's premise ("Tab stops only on buttons and fields") holds only with macOS Keyboard navigation on. With it off (the default, this Mac), WKWebView skipped buttons as well, so this switch made every button reachable too. Say so in tab-reaches-links so the next reader doesn't think buttons always worked.
+- G2 skip link with a modal open: the drawer traps focus (Tab never left it), but if focus falls to body the first Tab goes to the skip link under the backdrop (elementFromPoint = modal-backdrop; WCAG 2.4.11). The spec does not say whether the skip link is inert while a modal is open.
+- G3 F1-F5 are the next task (No-gos), as the card says.
+
+For aglaea (design questions, not findings)
+- A1 Home is 54 Tab stops at 1440x900, and Roles are 5 stops in the rail and 5 again on Home. Should one of them leave the Tab order, or should the Roles section get its own skip target?
+
+Not verified in WKWebView
+- A real keypress in the review app: no input to its window by rule (0108). Tab states come from the offscreen harness WKWebView, the same engine with the same `tabFocusesLinks` flag.
+- macOS Keyboard navigation on: a system setting I may not change.
