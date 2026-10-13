@@ -26,7 +26,7 @@ docs/specs/leftovers-25.md, rows N1, N2, N3, N4 and X0.
 - [x] X0: .wt-notes/nm-build/x0-make-test.log, x0-pnpm-build.log, x0-wails-build.log, x0-status.txt (clean clone of 3f76114, all pass, porcelain empty)
 
 ## Done
-- 2026-10-13 nm-build: FR-1..FR-5 built on lf25-names (9514feb..3f76114); Chat with <seat> lost focus because a chat switch mounted the new-thread form with autoFocus, now it takes focus only when asked or landed on. Evidence and reproduction in .wt-notes/nm-build/progress.md.
+- 2026-10-13 nm-build: FR-1..FR-5 built on lf25-names (f69ea20..3f76114); Chat with <seat> lost focus because a chat switch mounted the new-thread form with autoFocus, now it takes focus only when asked or landed on. Evidence and reproduction in .wt-notes/nm-build/progress.md.
 
 ## Notes
 - Opening Conversations no longer puts focus in the new thread's Subject by itself (FR-3's fix); + and "new thread instead" still do.
