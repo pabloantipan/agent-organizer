@@ -484,6 +484,8 @@ button.link:hover { color: var(--accent-fg); }
 .tiny-btn.danger { background: var(--blocked-soft); color: var(--blocked); border-color: transparent; }
 .tiny-btn.danger:hover { background: var(--blocked); color: #fff; }
 .agent-group-title { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+/* A button that keeps the title's look (leftovers-24 FR-1). */
+button.agent-group-title, button.agent-group-title:hover { background: none; border: 0; padding: 0; min-height: 0; font-weight: inherit; line-height: inherit; white-space: normal; flex-shrink: 1; text-align: left; }
 .agent-group-head.static .agent-group-title { cursor: default; }
 .new-agent { display: inline-flex; gap: 6px; align-items: center; }
 .new-agent-name { width: 220px; padding: 3px 8px; font-size: var(--font-size-sm); border-radius: var(--radius-md); }
@@ -575,6 +577,8 @@ button.counts.linkish { font-family: var(--mono); }
 .cells { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .cell-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 10px 12px; border-radius: var(--r); background: var(--card); border: 1px solid var(--border); cursor: pointer; }
 .cell-row:hover { background: var(--card-hover); }
+/* A link that keeps the row's look (leftovers-24 FR-2). */
+a.cell-row { color: inherit; text-decoration: none; }
 .cell-row.hot { border-color: rgba(255, 77, 99, .35); }
 .cell-ident { display: inline-flex; align-items: center; gap: 8px; min-width: 220px; }
 .cell-stats { display: inline-flex; align-items: baseline; gap: 4px 6px; font-size: var(--font-size-sm); color: var(--muted); flex-wrap: wrap; }
@@ -588,6 +592,9 @@ button.counts.linkish { font-family: var(--mono); }
 .people ul { list-style: none; margin: 0; padding: 6px; overflow: auto; display: grid; gap: 2px; align-content: start; }
 .person { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: var(--radius-md); cursor: pointer; min-width: 0; font-size: var(--font-size-sm); color: var(--muted); }
 .person:hover { background: var(--panel-2); }
+/* A button that keeps the row's look, ring inside the scrolled list (leftovers-24 FR-3). */
+button.person { width: 100%; border: 0; background: transparent; text-align: left; font-weight: inherit; line-height: inherit; white-space: normal; min-height: 0; }
+button.person:focus-visible { outline-offset: -2px; }
 .person.active { background: var(--accent-soft); }
 .person.me { cursor: default; }
 .person .mono { color: var(--text); font-size: var(--font-size-sm); }
@@ -636,6 +643,10 @@ button.counts.linkish { font-family: var(--mono); }
 .timeline { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 14px; padding: 0 6px 8px 2px; }
 .hit { padding: 8px 12px; border-radius: var(--radius-md); background: var(--panel); border: 1px solid var(--border); cursor: pointer; }
 .hit:hover { background: var(--panel-2); }
+/* A button that keeps the hit's look (leftovers-24 FR-4). */
+button.hit { display: block; width: 100%; text-align: left; font-weight: inherit; line-height: inherit; white-space: normal; min-height: 0; }
+button.hit:hover { border-color: var(--border); }
+button.hit > span { display: block; }
 .hit .snip { font-size: var(--font-size-sm); color: var(--dim); margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .convo-subj { font-size: var(--font-size-md); font-weight: 600; overflow-wrap: anywhere; }
 .tl-thread { display: flex; flex-direction: column; gap: 10px; padding: 0 0 6px; }
@@ -736,6 +747,8 @@ button.counts.linkish { font-family: var(--mono); }
 .q-ruling { display: flex; gap: 6px; align-items: flex-start; font-size: var(--font-size-sm); color: var(--text); background: var(--accent-soft); border-radius: var(--radius-md); padding: 6px 10px; cursor: pointer; overflow-wrap: anywhere; }
 .q-ruling svg { flex-shrink: 0; margin-top: 3px; color: var(--accent-fg); }
 .q-ruling b { color: var(--accent-fg); }
+/* A button that keeps the ruling's look (leftovers-24 FR-5). */
+button.q-ruling, button.q-ruling:hover { width: 100%; border: 0; background: var(--accent-soft); text-align: left; font-weight: inherit; line-height: inherit; white-space: normal; min-height: 0; }
 .q-next { color: var(--now); }
 /* the inline Rule box on a queue row */
 .rule-box { display: grid; gap: 6px; padding: 8px 10px; border-radius: var(--radius-md); background: var(--bg-deep); border: 1px solid var(--border-accent); }
