@@ -137,7 +137,7 @@ export function RoleDrawer() {
           <Section label="Initiatives">
             {inits.length === 0
               ? <p className="rd-empty">None yet.</p>
-              : <ul className="rd-inits">
+              : <ul className="rd-inits" role="list">
                   {inits.map((id) => (
                     <li key={id}><a href="#" className="rd-init mono" onClick={(e) => { e.preventDefault(); go(() => { openInitiative(id, "overview"); landOnInitiative(id); }); }} aria-label={`Open ${id}`}>{id}</a></li>
                   ))}
