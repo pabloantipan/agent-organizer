@@ -339,9 +339,11 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
             const subj = t.subject || t.id.slice(0, 8);
             return (
               <section key={t.id} id={`thread-${t.id}`} className={`tl-thread ${target === t.id ? "target" : ""} ${needsMe(t) ? "hot" : ""}`}>
-                {/* leftovers-12 FR-2: a landing focuses the divider, so it is named by its thread. */}
-                <div className="tl-divider" tabIndex={-1} role="group" aria-label={`Thread ${t.subject || "(no subject)"}, ${status}${status === "open" && t.since_decision > 0 ? `, ${t.since_decision} of 12` : ""}`} onClick={() => { setTarget(t.id); setReplyTo(null); setBranchFrom(null); }} title="reply into this thread">
-                  <span className="tl-subj">{t.subject || "(no subject)"}</span>
+                {/* leftovers-12 FR-2: a landing focuses the divider, so it is named by its thread.
+                    leftovers-24 Amendment 1: replying is the subject's button, which
+                    still takes a click anywhere on the divider. */}
+                <div className="tl-divider" tabIndex={-1} role="group" aria-label={`Thread ${t.subject || "(no subject)"}, ${status}${status === "open" && t.since_decision > 0 ? `, ${t.since_decision} of 12` : ""}`}>
+                  <button type="button" className="tl-subj" aria-label={`Reply into ${subj}`} onClick={() => { setTarget(t.id); setReplyTo(null); setBranchFrom(null); }} title="reply into this thread">{t.subject || "(no subject)"}</button>
                   <span className="tl-meta">
                     {status !== "open" && <span className={`badge thread ${status}`}>{status}</span>}
                     {status === "open" && t.since_decision > 0 && <span className={`counter ${t.since_decision >= 9 ? "hot" : ""}`} title="messages since the last decision; the server freezes the thread at 12">{t.since_decision}/12</span>}
@@ -352,7 +354,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
                     {branches.map((b) => <button key={b.id} className="badge branch" onClick={(e) => { e.stopPropagation(); goTo(b.id); }} title={b.subject}><GitBranch size={10} /> {chatOf(b) ?? "side"}</button>)}
                   </span>
                   <span className="spacer" />
-                  {canPost && <span className="a-actions" onClick={(e) => e.stopPropagation()}>
+                  {canPost && <span className="a-actions">
                     {status !== "open" && <button className="rail-icon" onClick={() => setStatus(t.id, "open")} title="reopen: the thread accepts posts again" aria-label={`Reopen ${subj}`}><Unlock size={12} /></button>}
                     {status === "open" && <button className="rail-icon" onClick={() => setStatus(t.id, "escalated")} title="escalate: on your queue, no agent can post" aria-label={`Escalate ${subj}`}><ArrowUpRight size={12} /></button>}
                     {status !== "closed" && <button className="rail-icon" onClick={() => setStatus(t.id, "closed")} title="close" aria-label={`Close ${subj}`}><Lock size={12} /></button>}

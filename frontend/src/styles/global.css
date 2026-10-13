@@ -657,6 +657,12 @@ button.hit > span { display: block; }
 .tl-thread.target .tl-divider { border-color: var(--border-accent); background: #32264d; }
 .tl-thread.hot .tl-divider { border-left: 3px solid var(--blocked); }
 .tl-subj { font-size: var(--font-size-md); font-weight: 600; color: var(--text); overflow-wrap: anywhere; }
+/* The reply button keeps the subject's look and, through ::after, the whole
+   divider as its target; the badges and actions sit above it (leftovers-24
+   Amendment 1). */
+button.tl-subj, button.tl-subj:hover { background: none; border: 0; padding: 0; min-height: 0; line-height: inherit; white-space: normal; flex-shrink: 1; text-align: left; }
+button.tl-subj::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; border-radius: inherit; }
+.tl-divider .tl-meta, .tl-divider .a-actions { position: relative; z-index: 1; }
 .tl-meta { display: inline-flex; align-items: center; gap: 4px 6px; flex-wrap: wrap; font-size: var(--font-size-xs); color: var(--muted); }
 .tl-divider .a-actions { opacity: 0; }
 .tl-divider:hover .a-actions { opacity: 1; }
