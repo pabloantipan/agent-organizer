@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 24 - every control a link or a button, the rail in a few Tab stops, the skip link out from under a drawer
-status: proposed
+status: ruled
 raised: 2026-10-13
 raised_by: fse
 owner: pablo
@@ -9,6 +9,9 @@ cards: [lf24-controls, lf24-rail-keys, lf24-drawer-skip]
 threads: []
 supersedes: []
 superseded_by:
+ruled: 2026-10-13
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -42,3 +45,7 @@ biggest); basis: leftovers-15 to 22, this initiative (leftovers-22: 60 min).
 ## Recommendation
 
 The FSE's: accept as written.
+
+## Ruling
+
+pablo, 2026-10-13, in the organizer on lodestar: ok
