@@ -157,3 +157,98 @@ already owns.
 | T10 | cross the strip in one Tab | with the rail collapsed, one Tab stop for every rank; Up and Down move; Enter opens |
 | T11 | reach Roles from the rail with the arrows | Down past the last initiative lands on the first role; Enter opens its drawer; the Tab count of the rail is independent of how many roles and initiatives there are |
 | T12 | see the ring clear the comma | the drawer's initiative link ring does not touch the following comma (WKWebView screenshot) |
+
+## Amendment 2 (aglaea, 2026-10-13): from leftovers-24's UI reviews
+
+From sup60's close (`runs/2026-10-13-sup60-leftovers-24.md`;
+`working-on/done/lf24-controls.md`, `lf24-rail-keys.md`,
+`lf24-drawer-skip.md`), for leftovers-25.
+
+### 1. A name is the verb; what the row shows is its description (ct A1, rk U1)
+
+A short `aria-label` on a rich row hides everything the row draws. The rule
+from the design system ("a fact shown is a fact said") applies.
+
+- **F1, F3, F5 keep a short name** (`Show only init-a`, `Chat with
+  hermes`, `Open the thread <subject>`). The row's drawn content is tied
+  to it with `aria-describedby`: counts, memory and cell state; live or off,
+  deaf, context; who ruled, when, the words, next.
+- **A rail row's name** (A1 §4) grows the facts it draws, after the
+  counts and only when present: `…, 0 next, cell in definition`, `, 1 live
+  agent`, `, 2 machines`.
+
+### 2. F1 is a plain button (ct A2)
+
+The titles show only while no filter is on, so `aria-pressed` could never
+be true. Drop it.
+
+### 3. A button that changes the view in place keeps focus (ct U2)
+
+Choosing `Chat with <seat>` leaves focus on that button. Generally, a
+button whose press changes what is shown in place, and does not unmount,
+keeps focus (design system, Focus and names). F1's button unmounts, so
+focus goes to the first agent row of the initiative it filtered to.
+
+### 4. The rail walks in drawn order (rk A1)
+
+This corrects A1 §4. The arrows follow the rail top to bottom, as drawn:
+Roles (drawn above), then the initiatives. Up from rank 1 reaches the last
+role, and Down from the last initiative stops there and does not wrap.
+
+### 5. Grouped rails cost stops per group (rk A2): accepted
+
+A1 §4's "3 to 5 stops whatever the number" holds for initiatives and
+roles. Each shown group adds its head's two stops and its own row stop.
+Groups are few and the lead's own choice, so this is accepted. The claim
+now reads: "3 to 5 stops, plus 3 per group".
+
+### 6. The strip's folds are stops (rk A3, U2)
+
+`Asleep` and `Archived` are other targets, not ranks. They stay Tab stops
+after the ranks. E4 reads "the next Tab leaves the ranks".
+
+### 7. An item that can never act where it stands is left out (rk A4)
+
+The first group's menu has no Move up, and the last has no Move down. This
+differs from a disabled action: nothing the lead can do there makes it
+act. The disabled-with-reason rule stays for actions that wait on a
+condition.
+
+### 8. The group menu fits its view (rk U3)
+
+When the room below the ⋯ is shorter than the menu, it opens upward. It
+never opens past the window's edge (a box fits its view).
+
+### 9. The rename field is named (rk U4)
+
+`aria-label="Rename <group>"`.
+
+### 10. The drawer's initiative list has no commas (ds Q1)
+
+A 6 px detached comma is a bad price for a ring only the keyboard sees.
+
+- The initiatives are a list (`ul`, inline) of links with an 8 px gap and
+  no separators. A screen reader counts the items.
+- FR-11 is restated as its outcome: **a link's focus ring clears its
+  neighbour by at least 2 px**, however that is built.
+
+### 11. The FSE's own, read the same
+
+All of these agreed:
+
+- ct U1: `.tl-divider:focus-within .a-actions { opacity: 1 }`.
+- The card back gets the role drawer's Tab trap.
+- F2's cell-row link must be reachable in the built app, not only in
+  vitest.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| T13 | hear what a row shows | F1, F3 and F5 have a short name and `aria-describedby` pointing to the row's content; a rail row's name ends with `cell in definition`, `n live agent(s)` and `n machines` where drawn (WKWebView AX tree) |
+| T14 | keep his place after a choice | Return on `Chat with <seat>` leaves focus on it; after F1, focus is on the first agent row of the filtered initiative |
+| T15 | walk the rail as drawn | Up from rank 1 lands on the last role; Down from the last initiative stays |
+| T16 | see only menu items that can act | the first group's menu has no Move up and the last's no Move down; at 1024×640 a low group's menu opens upward, whole inside the window |
+| T17 | hear the rename field | it is named `Rename <group>` |
+| T18 | read the drawer's initiatives cleanly | a list with no commas, an 8 px gap, and the focus ring at least 2 px from the next item |
+| T19 | see focus on a divider's actions | Tab onto Escalate, Close or Reopen shows them at full opacity with the ring |
+| T20 | stay inside the card back | Tab from its last control goes to its first; no Tab lands on `body` |
+| T21 | reach a cell row by Tab in the app | the harness in WKWebView, Keyboard navigation off, lands on `Conversations of <id>` |

@@ -392,6 +392,8 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 
 - 2026-10-13, tab-reaches-links A1: with macOS Keyboard navigation off, WKWebView skips buttons too, not only links; verify a platform premise in the built app before writing it as the problem. A roving set is cheap to extend (strip, roles); a composite head with four controls wants a menu.
 
+- 2026-10-13, tab A2: writing an `aria-label` form for a rich row silently dropped facts the row draws; give names as verb + subject and route the rest through describedby. Specify outcomes (ring clears the neighbour by 2 px), not means (2 px padding). Walk order = drawn order, always.
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).

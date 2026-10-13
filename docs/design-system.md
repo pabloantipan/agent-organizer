@@ -357,6 +357,11 @@ keeps their place.
 - **Link or button**: a link changes where you are (screen, initiative,
   sub-view); a button changes what is shown in place. Nothing that responds
   to a press is a `span`, `li` or `div` (tab-reaches-links A1).
+- **A short name, a full description**: a rich row's `aria-label` is the
+  verb and subject only; what the row draws is tied by `aria-describedby`,
+  so no drawn fact goes unsaid. A button that changes the view in place
+  keeps focus. A menu item that can never act where it stands is left out,
+  not dimmed (tab-reaches-links A2).
 - **A control does not move when it is pressed**: what it opens or hides
   may move the content, never the control itself (initiatives-view A5,
   the header's Details).
