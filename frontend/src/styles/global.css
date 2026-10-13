@@ -598,6 +598,9 @@ button.person:focus-visible { outline-offset: -2px; }
 .person .mono { color: var(--text); font-size: var(--font-size-sm); }
 .person-main { flex: 1; min-width: 0; display: grid; gap: 2px; }
 .person-meta { display: flex; gap: 4px; flex-wrap: wrap; }
+/* The watcher's word, wrapped to be its own description target (leftovers-25
+   FR-1): a flex box, so the wrapper adds no line box to the row. */
+.person-watch { display: inline-flex; }
 .person .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); flex-shrink: 0; opacity: .6; }
 .person .dot.running { background: var(--local); opacity: 1; }
 .person .dot.working { background: var(--local); opacity: 1; box-shadow: 0 0 8px var(--local); animation: pulse 1.4s ease-in-out infinite; }

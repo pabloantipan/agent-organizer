@@ -95,7 +95,7 @@ export function People({ seats, human, focus, onFocus, onClose }: { seats: Seat[
             <span className="person-main">
               <span className="mono">{s.name}</span>
               <span className="person-meta">
-                <span id={`${d}-watch`}><WatcherBadge watcher={s.watcher} deaf={s.deaf} capped={s.capped} undelivered={s.undelivered} /></span>
+                <span className="person-watch" id={`${d}-watch`}><WatcherBadge watcher={s.watcher} deaf={s.deaf} capped={s.capped} undelivered={s.undelivered} /></span>
                 {(s.owes?.length ?? 0) > 0 && <span className="badge owes" id={`${d}-owes`} title={s.owes.map((o) => o.subject || o.id).join("\n")}>owes {s.owes.length}</span>}
               </span>
             </span>
