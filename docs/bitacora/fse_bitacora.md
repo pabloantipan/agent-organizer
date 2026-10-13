@@ -4,6 +4,13 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-13, leftovers-25 landed
+
+- **Last SHA seen:** f7998aa. leftovers-25 merged by sup61 (dialogs 8276d19, rail 6facd48, names f7998aa), both reviews pass each, one wave. 36 min against 60-90, lease wait 0 (pressure 1 throughout); $23.02. Record runs/2026-10-13-sup61-leftovers-25.md. Amendment 1 (f72c7f3): R3 met with the rail scrolled, N1's F5 on vitest. sup61 ended, window 19967 closed; installed v0.2.0-1905-gf7998aa; tree clean. No supervisor running.
+- **Sent to aglaea**: dg-ui U3, nm-ui U1 hers; dg U1/U2, rl U1, nm U2-U4 small ones mine; fixture gaps (a decision thread, a low group at 1024x640). Waiting on her shortlist for leftovers-26.
+- **Forecast lesson:** with no lease wait a three-card Tab wave runs ~35 min; leftovers-24's 190 was the lease. Keep the lease term separate.
+- 16 organizer-fixture-agent stand-ins from sup60's era self-expire at 6 h; left alone.
+
 ## HAND-OFF — 2026-10-13 14:5x, leftovers-24 landed
 
 - **Last SHA seen:** d00165d. leftovers-24 merged by sup60 (rail-keys 2b5273e, controls 38fc448, drawer-skip d00165d), code and UI pass, one wave. 190 min against 45-75: builds 70 min on forecast, reviews waited 80-95 min on test-lease at memory pressure 2 (agents only 4.4 GB of it; the rest outside the seats). $26.91. Record runs/2026-10-13-sup60-leftovers-24.md. sup60 ended, window 19085 closed; installed v0.2.0-1868-gd00165d; tree clean. No supervisor running.
