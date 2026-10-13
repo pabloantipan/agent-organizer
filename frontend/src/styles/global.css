@@ -94,8 +94,9 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
 .strip-item.blocked .strip-rank { color: var(--blocked); }
 .strip-item .live-dot { position: absolute; right: 3px; top: 3px; width: 6px; height: 6px; margin: 0; }
 .strip-item .strip-defining { position: absolute; right: 2px; bottom: 2px; color: var(--tone); }
+/* Positioned, so the counts' spoken line (.sr-only, I40) stays inside it. */
 .rail-hero {
-  display: block; width: calc(100% - 20px); text-align: left; font: inherit;
+  position: relative; display: block; width: calc(100% - 20px); text-align: left; font: inherit;
   background: var(--panel); color: var(--text); border: 1px solid var(--border);
   padding: 16px 16px 14px; margin: 12px 10px 4px; border-radius: var(--r-lg);
 }
@@ -145,6 +146,9 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
 }
 .rail-item:hover { background: var(--surface); }
 .rail-item.active { background: var(--surface-selected); box-shadow: inset 2px 0 0 var(--accent); }
+/* The rows are one Tab stop (FR-5, T3): the ring sits inside the row, so
+   it never meets the next row's. */
+.rail-item:focus-visible { outline-offset: -2px; }
 .rail-item.dragging { background: var(--panel-2); box-shadow: var(--shadow-lift); }
 .rail-rank { font-family: var(--mono); font-size: var(--font-size-xs); color: var(--dim); width: 14px; text-align: right; }
 .rail-main { flex: 1; min-width: 0; display: grid; gap: 3px; }
