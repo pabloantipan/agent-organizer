@@ -396,6 +396,8 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 
 - 2026-10-13, tab A3: once Tab is the lead's path, a scroll region without links is a dead end; make it a stop while it overflows. Spoken descriptions need nouns per value; words come from the one table the screen uses.
 
+- 2026-10-13: a blanket ARIA role in a rule can overwrite native ones (listbox, table); write "a role only where there is none".
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).

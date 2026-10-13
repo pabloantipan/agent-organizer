@@ -269,6 +269,9 @@ past an edge: the card back's `.modal-body`, a code block, a table.
 - It is named: `role="region"` with `aria-label`. The card back's body is
   `<card title>, details`; a code block or table is `Code` or `Table`,
   followed by `, scrolls`.
+- **An element with its own role keeps it** (a listbox, a table): it gets
+  only the `tabindex` and the name while it overflows. `role="region"` is
+  for elements without a role (leftovers-26 A1, ss-build).
 - It shows the focus ring under `:focus-visible`. With it focused, the
   arrows, Page Up and Page Down, and Home and End scroll it, as WebKit does
   natively.
