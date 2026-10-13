@@ -49,7 +49,8 @@ describe("V1: the rail's rows are one Tab stop (FR-5, T3)", () => {
     expect(html.indexOf("rail-chevron")).toBeLessThan(firstRow);
     expect(html.slice(0, firstRow).match(/<button[^>]*tabindex="-1"/)).toBeNull();
     expect(html).toMatch(/<div[^>]*data-rfd-drag-handle-draggable-id="b"[^>]*data-rail-row="b"/);
-    expect(rowTabs(html).filter(([, t]) => t === "0")).toEqual([["b", "0"]]);
+    // one stop per shown group (leftovers-24 FR-7, T9): b in "one", c the rest
+    expect(rowTabs(html).filter(([, t]) => t === "0")).toEqual([["b", "0"], ["c", "0"]]);
   });
 
   it("the stop follows Up and Down while focus is in the rows, else the current row", () => {
