@@ -41,3 +41,27 @@ Verdict: pass. R1, R2, R3, R4 and X0 met on 48914c1, all run from a fresh clone 
 - X0: `XDG_DATA_HOME=$(mktemp -d) make test` rc 0 (Go ok, vitest 592/592), `pnpm run build` rc 0, `wails build` rc 0, `git status --porcelain` empty (/Users/pabloantipan/organizer/.wt-notes/rl-review/x0-*.log).
 Unmet: none. UI review: missing, so status and place stay as they are.
 Reviewer rl-review, 2026-10-13, commit 48914c1a978b296767fb99a44f9cb9de04109ccf.
+
+## UI review
+Verdict: pass. Commit 48914c1a978b296767fb99a44f9cb9de04109ccf (branch did not move), my own detached worktree, fixture, auth off. Sev 4/3: none. Evidence in /Users/pabloantipan/organizer/.wt-notes/rl-ui/.
+
+How each state was checked:
+- R1 (FR-6, T13): AX of my own `Deltagos Review` (own pid): `init-define … 0 next, cell in definition`, `init-a … 25 live agents` (ungrouped, ax-tree.txt:37-46) and grouped at 1440 (ax-tree-grouped-1024.txt); rows with nothing extra drawn read as before; strip names from the harness (`s-rank1`). `2 machines`: vitest only (no fixture initiative on two machines). Shot wk-1440x900-R1-rail.png.
+- R2 (FR-7, T15): harness, my wails dev on 34121, 1440x900 (r2.jsonl): rank 1 Up → Daedalus (last role), Up again → Ariadna, Down → Daedalus → rank 1; last initiative Down stays; first role Up stays; Roles closed: rank 1 Up stays; strip: rank 1 Up → Daedalus, last rank Down stays. Ring visible at every step.
+- R3 (FR-8, T16): harness 1024x640, grouped (r3.jsonl): lowest group as drawn opens down, whole; at the rail's bottom edge, and half below the window then focused, opens up, menu 526-614 above the ⋯ 616-640, inside; first group `Rename, Move down, Remove`, last `Rename, Move up, Remove`, arrows walk only those. AX on the review app agrees (ax-ccint-menu.txt).
+- R4 (FR-9, T17): AXPress `Actions for ccint` then `Rename` on my own pid: `AXTextField t="Rename ccint"`, focused (ax-rename.txt:62; shot wk-1440x900-R4-rename.png).
+- vitest `src/components/Rail*` 36/36 (vitest-rail.log). X0: not rerun; the review build compiled, rl-review's X0 stands.
+
+Findings:
+- U1 (sev 1) The group menu can open upward with room below. Where: rail group ⋯ pressed while out of view (AXPress, a VoiceOver press); shot wk-1440x900-R3-ccint-menu-axpress.png. Evidence: `menuPlace` measures in the layout effect before the first item's focus scrolls the rail; harness case d: ⋯ at y 1077 when pressed, 437 after, 179 px below, menu `up` at 347-435; AX on the app: ccint menu up with ~280 px below. Keyboard (focus scrolls first) and pointer (a visible ⋯) never hit it. The menu is whole and works; it only covers the row above. Proposal: measure after the focus scroll (or scroll the ⋯ into view before measuring).
+
+Spec gaps (for the FSE):
+- G1 R3's "the lowest group's menu … above the ⋯" does not hold on the fixture at 1024x640: Asleep and Archived sit below the lowest group, so FR-8 rightly opens it down; the row needs "scrolled to the window's bottom" or a fixture whose last group ends the rail.
+- G2 FR-6 says "only when drawn" and "both the full row and the strip": the strip draws no machines badge, yet says `n machines` (builder's reading, vitest pins it). True facts, said once more than drawn; decide which clause wins.
+- G3 The task prompt's "X0 (FR-1 to FR-5)" names lf25-names' FRs; this card's are FR-6 to FR-9, which is what I checked.
+
+For aglaea: none.
+
+Not verified in WKWebView: `2 machines` on a real row (no fixture state; vitest only); auth firebase (not run, by rule).
+Seen, outside this card: init-a's `25`–`31 live agents` counts stand-ins leaked from other seats' fixture homes (`organizer-fixture-probe-*` pids under other /private/tmp/organizer-fixture.* dirs, joined by family); the name says what the dot draws.
+UI reviewer rl-ui, 2026-10-13.
