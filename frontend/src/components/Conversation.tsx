@@ -243,6 +243,9 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
     if (chat) pickPerson(chat); else pick(t ? (t.kind === "journal" ? "journal" : "channel") : "archive");
     setTimeout(() => { setTarget(id); setScrollTo(id); }, 0);
   };
+  // A search hit and a ruling land like Answer does, focus on the divider
+  // (leftovers-24 FR-4, FR-5).
+  const landOn = (id: string) => { landing.current = id; goTo(id); };
   const setStatus = (id: string, s: string) => api.setCellThreadStatus(initiativeId, id, s).then(() => reload(), (e) => setErr(String(e)));
 
   return (
@@ -304,6 +307,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
               blockedBy={noToken}
               onRuled={reload}
               onDiscussThread={(id) => goTo(id)}
+              onOpenThread={landOn}
               onDiscussCard={(c) => {
                 const guess = seats.find((a) => (c.next || "").toLowerCase().includes(a.split("_").pop() ?? "\u0000"));
                 if (guess) pickPerson(guess);
@@ -317,11 +321,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
             <>
               {hits.length === 0 && <div className="empty">nothing matches</div>}
               {hits.map((m) => (
-                <div key={m.id} className="hit" onClick={() => { setQuery(""); goTo(m.thread_id); }}>
-                  <div className="convo-subj">{m.subject || "(no subject)"}</div>
-                  <div className="meta"><Kind k={m.kind} /> {m.from} → {m.to || "everyone"}</div>
-                  <div className="snip">{m.body.slice(0, 160)}</div>
-                </div>
+                <SearchHit key={m.id} m={m} onOpen={() => { setQuery(""); landOn(m.thread_id); }} />
               ))}
             </>
           ) : threads.length === 0 ? (
@@ -339,9 +339,11 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
             const subj = t.subject || t.id.slice(0, 8);
             return (
               <section key={t.id} id={`thread-${t.id}`} className={`tl-thread ${target === t.id ? "target" : ""} ${needsMe(t) ? "hot" : ""}`}>
-                {/* leftovers-12 FR-2: a landing focuses the divider, so it is named by its thread. */}
-                <div className="tl-divider" tabIndex={-1} role="group" aria-label={`Thread ${t.subject || "(no subject)"}, ${status}${status === "open" && t.since_decision > 0 ? `, ${t.since_decision} of 12` : ""}`} onClick={() => { setTarget(t.id); setReplyTo(null); setBranchFrom(null); }} title="reply into this thread">
-                  <span className="tl-subj">{t.subject || "(no subject)"}</span>
+                {/* leftovers-12 FR-2: a landing focuses the divider, so it is named by its thread.
+                    leftovers-24 Amendment 1: replying is the subject's button, which
+                    still takes a click anywhere on the divider. */}
+                <div className="tl-divider" tabIndex={-1} role="group" aria-label={`Thread ${t.subject || "(no subject)"}, ${status}${status === "open" && t.since_decision > 0 ? `, ${t.since_decision} of 12` : ""}`}>
+                  <button type="button" className="tl-subj" aria-label={`Reply into ${subj}`} onClick={() => { setTarget(t.id); setReplyTo(null); setBranchFrom(null); }} title="reply into this thread">{t.subject || "(no subject)"}</button>
                   <span className="tl-meta">
                     {status !== "open" && <span className={`badge thread ${status}`}>{status}</span>}
                     {status === "open" && t.since_decision > 0 && <span className={`counter ${t.since_decision >= 9 ? "hot" : ""}`} title="messages since the last decision; the server freezes the thread at 12">{t.since_decision}/12</span>}
@@ -352,7 +354,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
                     {branches.map((b) => <button key={b.id} className="badge branch" onClick={(e) => { e.stopPropagation(); goTo(b.id); }} title={b.subject}><GitBranch size={10} /> {chatOf(b) ?? "side"}</button>)}
                   </span>
                   <span className="spacer" />
-                  {canPost && <span className="a-actions" onClick={(e) => e.stopPropagation()}>
+                  {canPost && <span className="a-actions">
                     {status !== "open" && <button className="rail-icon" onClick={() => setStatus(t.id, "open")} title="reopen: the thread accepts posts again" aria-label={`Reopen ${subj}`}><Unlock size={12} /></button>}
                     {status === "open" && <button className="rail-icon" onClick={() => setStatus(t.id, "escalated")} title="escalate: on your queue, no agent can post" aria-label={`Escalate ${subj}`}><ArrowUpRight size={12} /></button>}
                     {status !== "closed" && <button className="rail-icon" onClick={() => setStatus(t.id, "closed")} title="close" aria-label={`Close ${subj}`}><Lock size={12} /></button>}
@@ -651,7 +653,7 @@ const seatGuess = (seats: string[], text: string) => seats.find((a) => text.toLo
  *  them as the decision, and they write it into the card. */
 function NeedsMe(p: {
   threads: CellThread[]; cards: QueueCard[]; human: string; seats: string[]; notes: Record<string, { by: string; at: unknown; text: string }[]>; resolved: Record<string, string>;
-  initiativeId: string; allThreads: CellThread[]; canPost: boolean; blockedBy?: string; onRuled: () => void; onDiscussThread: (id: string) => void; onDiscussCard: (c: QueueCard) => void; onOpenCard: (c: never) => void; onResolve: (key: string, v: boolean) => void;
+  initiativeId: string; allThreads: CellThread[]; canPost: boolean; blockedBy?: string; onRuled: () => void; onDiscussThread: (id: string) => void; onOpenThread: (id: string) => void; onDiscussCard: (c: QueueCard) => void; onOpenCard: (c: never) => void; onResolve: (key: string, v: boolean) => void;
 }) {
   const [showSolved, setShowSolved] = useState(false);
   const [ruling, setRuling] = useState<string | null>(null); // the row whose Rule box is open: thread:<id> or card:<slug>
@@ -780,7 +782,7 @@ function NeedsMe(p: {
                 <span className="meta">{date}</span>
                 <button className="rail-icon" onClick={() => p.onResolve(key, false)} title="reopen: back to the queue"><RotateCcw size={11} /></button>
               </div>
-              {threadId && <Ruling initiativeId={p.initiativeId} threadId={threadId} onOpen={() => p.onDiscussThread(threadId)} />}
+              {threadId && <Ruling initiativeId={p.initiativeId} threadId={threadId} onOpen={() => p.onOpenThread(threadId)} />}
             </div>
           );
         })}
@@ -837,11 +839,29 @@ function Ruling({ initiativeId, threadId, onOpen }: { initiativeId: string; thre
   }, [initiativeId, threadId]);
   const dec = d ? [...(d.messages ?? [])].reverse().find((m) => m.kind === "decision") : undefined;
   if (!dec) return null;
+  return <RulingButton dec={dec} subject={d?.subject || threadId.slice(0, 8)} onOpen={onOpen} />;
+}
+
+/** A ruling opens its thread on the same view, so a button (leftovers-24
+ *  FR-5, F5), named by the thread; it keeps the row's look. */
+export function RulingButton({ dec, subject, onOpen }: { dec: CellMessage; subject: string; onOpen: () => void }) {
   const { text, next } = splitRuling(dec.body);
   return (
-    <div className="q-ruling" onClick={onOpen} title="open the thread">
+    <button type="button" className="q-ruling" onClick={onOpen} title="open the thread" aria-label={`Open the thread ${subject}`}>
       <Gavel size={11} />
       <span><b>{dec.from}</b> ruled {when(dec.created_at)}: {text}{next && <span className="q-next"> · <b>next</b> {next}</span>}</span>
-    </div>
+    </button>
+  );
+}
+
+/** A search hit scrolls to its thread on the same view, so a button
+ *  (leftovers-24 FR-4, F4); its name starts with the hit's subject. */
+export function SearchHit({ m, onOpen }: { m: CellMessage; onOpen: () => void }) {
+  return (
+    <button type="button" className="hit" onClick={onOpen}>
+      <span className="convo-subj">{m.subject || "(no subject)"}</span>
+      <span className="meta"><Kind k={m.kind} /> {m.from} → {m.to || "everyone"}</span>
+      <span className="snip">{m.body.slice(0, 160)}</span>
+    </button>
   );
 }

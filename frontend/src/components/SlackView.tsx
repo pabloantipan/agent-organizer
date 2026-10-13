@@ -44,7 +44,10 @@ export function SlackView() {
             const open = (g.threads ?? []).filter((t) => t.kind !== "journal").length;
             const hot = q.total + deaf > 0;
             return (
-              <li key={g.id} className={`cell-row ${hot ? "hot" : ""}`} onClick={() => setSelectedInitiative(g.id)}>
+              <li key={g.id}>
+                {/* leftovers-24 FR-2: it changes where you are, so a link (F2). The
+                    list shows only while no cell is shown, so none is current. */}
+                <a className={`cell-row ${hot ? "hot" : ""}`} href={`#${g.id}`} aria-label={`Conversations of ${g.id}`} onClick={(e) => { e.preventDefault(); setSelectedInitiative(g.id); }}>
                 <span className="cell-ident">
                   <MessagesSquare size={14} />
                   <span className="ident">{g.id}</span>
@@ -59,6 +62,7 @@ export function SlackView() {
                   <b className={deaf > 0 ? "hot" : ""}>{reachable}/{seats.length}</b><span>reachable{q.capped > 0 ? <span title={HEALTH.capped.why}>, {q.capped} {HEALTH.capped.label}</span> : ""}{deaf > 0 ? <span title={HEALTH.deaf.why}>, {deaf} {HEALTH.deaf.label}</span> : ""}</span>
                 </span>
                 {g.discuss && <span className="badge watcher stale">{g.discuss}</span>}
+                </a>
               </li>
             );
           })}
@@ -103,7 +107,7 @@ export function SlackView() {
 /** The members panel: one row per seat, the human included, with the
  *  liveness facts that matter for a conversation. Click a seat for the
  *  direct view with it; that is the DM. */
-function People({ seats, human, focus, onFocus, onClose }: { seats: Seat[]; human: string; focus: string | null; onFocus: (a: string | null) => void; onClose: () => void }) {
+export function People({ seats, human, focus, onFocus, onClose }: { seats: Seat[]; human: string; focus: string | null; onFocus: (a: string | null) => void; onClose: () => void }) {
   return (
     <aside className="people">
       <div className="people-head"><Users size={13} /> <span>People</span> <span className="meta">{seats.length + (human ? 1 : 0)}</span> <span className="spacer" /><button className="rail-icon" onClick={onClose} title="hide" aria-label="Hide people"><X size={12} /></button></div>
@@ -114,7 +118,9 @@ function People({ seats, human, focus, onFocus, onClose }: { seats: Seat[]; huma
           </li>
         )}
         {seats.map((s) => (
-          <li key={s.name} className={`person ${s.agent?.state ?? "off"} ${s.deaf && !s.capped ? "deaf" : ""} ${s.capped ? "capped" : ""} ${focus === s.name ? "active" : ""}`} onClick={() => onFocus(focus === s.name ? null : s.name)} title={`${s.agent ? s.agent.state : "no session"}. Click for the conversation with ${s.name}.`}>
+          <li key={s.name}>
+            {/* leftovers-24 FR-3: shows the chat in place, so a button (F3). */}
+            <button type="button" className={`person ${s.agent?.state ?? "off"} ${s.deaf && !s.capped ? "deaf" : ""} ${s.capped ? "capped" : ""} ${focus === s.name ? "active" : ""}`} aria-label={`Chat with ${s.name}`} aria-current={focus === s.name ? "true" : undefined} onClick={() => onFocus(focus === s.name ? null : s.name)} title={`${s.agent ? s.agent.state : "no session"}. Click for the conversation with ${s.name}.`}>
             <i className={`dot ${s.agent?.state ?? "off"}`} />
             <span className="person-main">
               <span className="mono">{s.name}</span>
@@ -124,6 +130,7 @@ function People({ seats, human, focus, onFocus, onClose }: { seats: Seat[]; huma
               </span>
             </span>
             <ContextBar c={s.agent?.context} />
+            </button>
           </li>
         ))}
       </ul>

@@ -85,14 +85,16 @@ export function AgentsView() {
         <section key={g.id} className="agent-group" data-group={g.id}>
           {!selectedInitiative && (
           <header className="agent-group-head">
-            <span className="agent-group-title" onClick={() => setSelectedInitiative(g.id)} title="Show only this initiative">
+            {/* leftovers-24 FR-1: a filter in place, so a button (F1); the titles
+                show only while no filter is on, so it is never pressed here. */}
+            <button type="button" className="agent-group-title" aria-pressed="false" aria-label={`Show only ${g.id}`} onClick={() => setSelectedInitiative(g.id)} title="Show only this initiative">
               <Bot size={14} />
               <span className="ident">{g.id}</span>
               {g.client && <span className="badge client">{g.client}</span>}
               <span className="meta">{countsOf(g)}</span>
               {groupMemory(view, g.id) && <span className="meta num a-group-mem">{groupMemory(view, g.id)}</span>}
               <CellStateLz cell={g.cell} missing={missingPersonas(g.crew)} />
-            </span>
+            </button>
             <span className="spacer" />
             {g.cell && q.total > 0 && <button className="tiny-btn ghost hot" onClick={() => openSlack(g.id, null)} title="escalated to you, or asked of you: threads and cards">{q.total} need you</button>}
             {!ro && <NewAgent initiativeId={g.id} />}
