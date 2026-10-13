@@ -8,6 +8,7 @@ restating it (the discuss skill).
 
 - **Last SHA seen:** e70c146. leftovers-22 merged by sup59 (rail-roving 5642453, tab-links e70c146), code and UI pass; 60 min against 40-70, $12.63. The Tab harness (NSEvents to an offscreen window that answers isKeyWindow) works and lives in scripts/tab-harness/: Tab rows need no system input. sup59 ended, its window 17470 closed; installed v0.2.0-1834-ge70c146; tree clean.
 - **Sent to aglaea** for leftovers-24: F1-F5 click-navigating non-controls, G1 (keyboard navigation off skipped buttons too), G2 (skip link under a modal), rr-ui U1-U3, tl-ui A1 (Home 54 stops, Roles twice).
+- **0120 proposed** (a31f64c): leftovers-24, three cards from aglaea's tab-reaches-links A1 (T6-T12).
 - **0119 proposed** (leftovers-23, detached seats), waiting on Pablo and his merge of claudecode feat/seat-background.
 
 ## HAND-OFF — 2026-10-13, leftovers-22 running
