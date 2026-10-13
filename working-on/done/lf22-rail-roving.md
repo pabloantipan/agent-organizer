@@ -1,6 +1,6 @@
 ---
 title: "The rail is one Tab stop"
-status: now
+status: done
 repos: [organizer]
 branch: lf22-rail-roving
 seat: rr-build
@@ -12,6 +12,7 @@ boundary: ["docs/specs/leftovers-22.md Boundary, lf22-rail-roving"]
 spec: "docs/specs/leftovers-22.md (FR-5 to FR-7; tab-reaches-links, T3; initiatives-view A6 §3, I40)"
 gate: "docs/specs/leftovers-22.md Acceptance, rows V1, V2 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -47,3 +48,13 @@ Findings (none fails the card):
 For aglaea: U1, U2, U3.
 
 Not verified in WKWebView: the row's focus ring (`outline-offset: -2px` over the global 2px `--focus-ring`): the harness window is never key and I may not focus the review app, so `:focus-visible` never matched; judged from CSS only. Space-to-lift drag by keyboard (read in code: the row returns on `defaultPrevented`). VoiceOver speech itself (AX tree only). `wails build` after `wails dev` skipped: the worktree was removed.
+
+## Review
+Verdict: **pass**. rr-review, 2026-10-13, commit c4f0cd762d60fa4153161b3553836705ff6632db (the branch did not move). Every run from a fresh clone at that SHA under `.wt-notes/rr-review/clean` (removed after); logs in `.wt-notes/rr-review/`.
+
+- V1 (FR-5, 6): met. My copy of the builder's harness (activation prohibited, offscreen never-key window, `NSEvent`s via `sendEvent:`), against my own `wails dev` on 34118, fixture, auth off, flag on. On init-a: Tab enters on init-a (init-a=0, the other nine -1); Down, Down, Up lands on init-many with the 0 following; Return opens init-many; the next Tabs go Expand Asleep, Initiatives ›, Expand Archived, then main (`Roadmap, stage 2 of 3`), as Amendment 1 reads (`v1-flag-on.txt`). Since init-a is also the first row, a second run opened init-b first: Tab enters on init-b, not the first row (`v1-current-row.txt`). Diff: `pressHero(selectedInitiative, to)` has no Home branch (FR-6); vitest `Rail.roving.test.tsx` (tabindex 0/-1, entry, moves, ends) and `Places.test.tsx` pass in make test. `wails build` rerun after dev.
+- V2 (FR-7): met. Diff: `.stats` `aria-hidden="true"`, one `.sr-only` span inside the hero, no `aria-label` on a div; `.rail-hero` positioned. vitest `Rail.said.test.tsx` (Home and initiative) passes. AX of my own review build (`make review-build`, pid saved, AXPress on that pid only): Home one AXStaticText `1 now, 1 blocked, 11 next` (the active rows' sums: 1, 1, 7+3+1), init-a `1 now, 1 blocked, 7 next`, no stat number items in the hero (`ax-home.txt`, `ax-initiative.txt`).
+- X0: met. `XDG_DATA_HOME=$(mktemp -d) make test` (Go ok, vitest 43 files 550 tests), `pnpm run build`, `wails build` all exit 0 through test-lease; `git status --porcelain` empty (`x0-*.log`, `x0-status.txt`).
+
+Unmet: none.
+
