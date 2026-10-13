@@ -49,10 +49,10 @@ describe("F1-F5 are buttons or links (leftovers-24)", () => {
     expect(facts.replace(/<[^>]+>/g, "")).toMatch(/^0 agents · 0 live · 0 working · 0 seats (\S.* )?in definition$/);
   });
 
-  it("F2: a Conversations cell row is a link named Conversations of <id>", () => {
-    const html = views(SlackView);
-    expect(html).toMatch(/<li><a class="cell-row ?" href="#init-a" aria-label="Conversations of init-a"/);
-    expect(html).not.toMatch(/<li[^>]*class="cell-row/);
+  it("FR-5: Conversations has no cell list (leftovers-25)", () => {
+    expect(views(SlackView)).not.toMatch(/cell-row|class="cells"|Conversations of/);
+    const src = readFileSync(new URL("./SlackView.tsx", import.meta.url), "utf8") as string;
+    expect(src).not.toMatch(/cell-row|!selectedInitiative\)/);
   });
 
   it("F3: a person is a button named Chat with <seat>, current when shown, described by what it draws", () => {

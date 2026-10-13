@@ -582,17 +582,7 @@ button.counts.linkish { font-family: var(--mono); }
 /* Conversations (the Slack view) */
 .slack-wrap { display: flex; flex-direction: column; min-height: 0; }
 .slack { display: flex; flex-direction: column; height: 100%; min-height: 0; }
-.cells { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.cell-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 10px 12px; border-radius: var(--r); background: var(--card); border: 1px solid var(--border); cursor: pointer; }
-.cell-row:hover { background: var(--card-hover); }
-/* A link that keeps the row's look (leftovers-24 FR-2). */
-a.cell-row { color: inherit; text-decoration: none; }
-.cell-row.hot { border-color: rgba(255, 77, 99, .35); }
-.cell-ident { display: inline-flex; align-items: center; gap: 8px; min-width: 220px; }
-.cell-stats { display: inline-flex; align-items: baseline; gap: 4px 6px; font-size: var(--font-size-sm); color: var(--muted); flex-wrap: wrap; }
-.cell-stats b { font-family: var(--mono); font-size: var(--font-size-md); color: var(--text); margin-left: 12px; }
-.cell-stats b:first-child { margin-left: 0; }
-.cell-stats b.hot, .cell-filters .hot .mono, .counter.hot, .tiny-btn.hot { color: var(--blocked); }
+.cell-filters .hot .mono, .counter.hot, .tiny-btn.hot { color: var(--blocked); }
 .slack-body { display: grid; grid-template-columns: 1fr; gap: 14px; flex: 1; min-height: 0; }
 .slack-body.with-people { grid-template-columns: 1fr 250px; }
 .people { display: flex; flex-direction: column; min-height: 0; border-radius: var(--r); background: var(--panel); border: 1px solid var(--border); }
