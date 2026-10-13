@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FocusEvent, type KeyboardEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type FocusEvent, type KeyboardEvent } from "react";
 import { Archive, ArrowLeft, ChevronDown, ChevronRight, FolderPlus, Layers, Moon, MoreHorizontal, PanelLeftClose, PanelLeftOpen, PencilRuler, X } from "lucide-react";
 import { DragDropContext, Draggable, Droppable, type DraggableProvidedDragHandleProps, type DropResult } from "@hello-pangea/dnd";
 import type { merge, model } from "../../wailsjs/go/models";
@@ -181,16 +181,16 @@ export function Rail() {
     persist(move(stored, i, to));
   };
 
-  // The rows in the order they are drawn (collapsed groups hide theirs),
-  // then the roles (FR-9, T11): Up and Down walk all of them, across groups
-  // and on into Roles; Enter opens. Each shown group's rows are one Tab
+  // The rows in the order they are drawn: the roles above (leftovers-25
+  // FR-7), then the initiatives, collapsed groups hiding theirs. Up and
+  // Down walk all of them, across groups; Enter opens. Each shown group's rows are one Tab
   // stop, so Tab passes a group in its head's two stops and one row (FR-5,
   // FR-7); the roles hold no stop but the one an arrow put focus on.
   const shown = (grouped ? sections.filter((s) => !collapsed[s.key]) : sections).map((s) => s.ids);
   const roleKeys = roles.map((r) => roleKey(r.name));
   const walk = railCollapsed
-    ? [...activeIds, ...roleKeys]
-    : [...shown.flat(), ...(isCollapsed(ROLES) ? [] : roleKeys)];
+    ? railWalk(roleKeys, activeIds)
+    : railWalk(isCollapsed(ROLES) ? [] : roleKeys, shown.flat());
   const stops = rovingStops(railCollapsed ? [activeIds] : shown, roleKeys, selectedInitiative, cursor);
   const onRowKey = (ev: KeyboardEvent<HTMLElement>, id: string) => {
     if (ev.defaultPrevented) return; // drag's keyboard sensor has it (Space lifts, arrows move)
@@ -272,13 +272,7 @@ export function Rail() {
           {collapsed[s.key] ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
         </button>
         {isEditing ? (
-          <input
-            autoFocus
-            className="rail-group-name-input"
-            defaultValue={s.name}
-            onBlur={(e) => rename(i, e.currentTarget.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") rename(i, e.currentTarget.value, true); if (e.key === "Escape") { setEditing(null); setRefocus(i); } }}
-          />
+          <RenameField name={s.name} onDone={(v, back) => rename(i, v, back)} onCancel={() => { setEditing(null); setRefocus(i); }} />
         ) : (
           <span className="rail-group-name" onDoubleClick={() => !s.fixed && setEditing(i)} title={s.fixed ? "not in any group" : "double-click to rename, drag to reorder"}>{s.name}</span>
         )}
@@ -541,10 +535,26 @@ export function rovingMove(rows: string[], id: string, key: string): string | nu
   return rows[Math.min(rows.length - 1, Math.max(0, i + step))];
 }
 
+/** The roving walk in drawn order (leftovers-25 FR-7): the roles, drawn
+ *  above, then the initiatives; `rovingMove` holds at both ends. */
+export const railWalk = (roles: string[], rows: string[]) => [...roles, ...rows];
+
 /** A rail row's name (FR-6, T8): the counts said as one phrase, zeros too,
- *  so every row reads the same way; the visual counts are hidden. */
-export function rowName(e: { id: string; client: string; now: number; blocked: number; next: number }, rank: number | undefined): string {
-  return [e.id, e.client, rank !== undefined ? `rank ${rank}` : "", `${e.now} now`, `${e.blocked} blocked`, `${e.next} next`].filter(Boolean).join(", ");
+ *  so every row reads the same way; the visual counts are hidden. After
+ *  them, only when the row draws them (leftovers-25 FR-6): the cell in
+ *  definition, the live agents, the machines. */
+export function rowName(
+  e: { id: string; client: string; now: number; blocked: number; next: number; cell?: { state?: string } | null; live?: number; machines?: string[] },
+  rank: number | undefined,
+): string {
+  const live = e.live ?? 0;
+  const machines = e.machines?.length ?? 0;
+  return [
+    e.id, e.client, rank !== undefined ? `rank ${rank}` : "", `${e.now} now`, `${e.blocked} blocked`, `${e.next} next`,
+    e.cell?.state === "in_definition" ? "cell in definition" : "",
+    live > 0 ? `${live} live agent${live === 1 ? "" : "s"}` : "",
+    machines > 1 ? `${machines} machines` : "",
+  ].filter(Boolean).join(", ");
 }
 
 /** A group's drag handle for the mouse only (FR-7, T9): out of the Tab
@@ -559,10 +569,31 @@ function dragOnly(handle?: DraggableProvidedDragHandleProps | null) {
 const MENU = ["Rename", "Move up", "Move down", "Remove"] as const;
 
 /** Which of a group's actions do nothing where it stands: the first group
- *  cannot move up, the last cannot move down. */
+ *  cannot move up, the last cannot move down. The menu leaves them out
+ *  (leftovers-25 FR-8): nothing makes them act there, so they are not
+ *  disabled items. */
 export function groupActionOff(action: (typeof MENU)[number], index: number, count: number): boolean {
   return (action === "Move up" && index <= 0) || (action === "Move down" && index >= count - 1);
 }
+
+/** A group's name field while it is renamed, named `Rename <group>`
+ *  (leftovers-25 FR-9). Enter keeps the name and returns to the ⋯, Escape
+ *  drops it and returns there too, leaving the field keeps it. */
+export function RenameField({ name, onDone, onCancel }: { name: string; onDone: (value: string, back: boolean) => void; onCancel: () => void }) {
+  return (
+    <input
+      autoFocus
+      className="rail-group-name-input"
+      aria-label={`Rename ${name}`}
+      defaultValue={name}
+      onBlur={(e) => onDone(e.currentTarget.value, false)}
+      onKeyDown={(e) => { if (e.key === "Enter") onDone(e.currentTarget.value, true); if (e.key === "Escape") onCancel(); }}
+    />
+  );
+}
+
+/** The group menu's items where the group stands. */
+export const groupMenu = (index: number, count: number) => MENU.filter((a) => !groupActionOff(a, index, count));
 
 /** A group head's second stop (FR-7, T9): `Actions for <group>`, a menu of
  *  Rename, Move up, Move down and Remove. Down or Return opens it on its
@@ -572,8 +603,19 @@ export function GroupActions({ name, index, count, onRename, onMove, onRemove }:
   onRename: () => void; onMove: (to: number, from: HTMLElement) => void; onRemove: (from: HTMLElement) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [place, setPlace] = useState<{ up: boolean; room: number } | null>(null);
   const wrap = useRef<HTMLSpanElement>(null);
+  const menu = useRef<HTMLSpanElement>(null);
   const items = () => [...(wrap.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [])];
+  // The menu opens upward when the room below the ⋯ is shorter than it
+  // (leftovers-25 FR-8), measured before paint so it never draws past the
+  // window's edge first.
+  useLayoutEffect(() => {
+    if (!open) { setPlace(null); return; }
+    const btn = wrap.current?.getBoundingClientRect();
+    const h = menu.current?.offsetHeight ?? 0;
+    if (btn) setPlace(menuPlace(btn.top, btn.bottom, h, window.innerHeight));
+  }, [open]);
   useEffect(() => { if (open) items()[0]?.focus(); }, [open]);
   const close = (back: boolean) => {
     setOpen(false);
@@ -617,10 +659,9 @@ export function GroupActions({ name, index, count, onRename, onMove, onRemove }:
         <MoreHorizontal size={12} aria-hidden="true" />
       </button>
       {open && (
-        <span role="menu" aria-label={`Actions for ${name}`} className="rail-menu" onKeyDown={onMenuKey}>
-          {MENU.map((a) => (
+        <span ref={menu} role="menu" aria-label={`Actions for ${name}`} className={`rail-menu ${place?.up ? "up" : ""}`} style={place ? { maxHeight: place.room } : undefined} onKeyDown={onMenuKey}>
+          {groupMenu(index, count).map((a) => (
             <button key={a} type="button" role="menuitem" tabIndex={-1} className="rail-menu-item"
-              aria-disabled={groupActionOff(a, index, count) || undefined}
               title={a === "Remove" ? "its initiatives become ungrouped" : undefined}
               onClick={(ev) => act(a, ev.currentTarget)}>
               {a}
@@ -630,6 +671,17 @@ export function GroupActions({ name, index, count, onRename, onMove, onRemove }:
       )}
     </span>
   );
+}
+
+/** Where a menu of height `h` opens from a button spanning `top`..`bottom`
+ *  in a window `view` tall: upward when the room below is shorter than the
+ *  menu and the room above is larger; `room` is the side's height (the 2 px
+ *  gap counted), the menu's ceiling, so it never passes the window's edge. */
+export function menuPlace(top: number, bottom: number, h: number, view: number): { up: boolean; room: number } {
+  const below = Math.max(0, view - bottom - 2);
+  const above = Math.max(0, top - 2);
+  const up = h > below && above > below;
+  return { up, room: up ? above : below };
 }
 
 function Counts({ now, blocked, next, hidden }: { now: number; blocked: number; next: number; hidden?: boolean }) {

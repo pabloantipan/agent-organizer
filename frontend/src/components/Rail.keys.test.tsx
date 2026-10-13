@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { merge } from "../../wailsjs/go/models";
-import { groupActionOff, GroupActions, rovingMove, rovingStops, rowName } from "./Rail";
+import { groupActionOff, GroupActions, railWalk, rovingMove, rovingStops, rowName } from "./Rail";
 
 // leftovers-24 FR-6 to FR-9 (tab-reaches-links Amendment 1 §4, T8-T11).
 // zustand answers a server render with the store's initial state, so the
@@ -137,11 +137,13 @@ describe("E4: the strip is one stop for every rank (FR-8, T10)", () => {
 });
 
 describe("E5: Roles join the rail's roving set (FR-9, T11)", () => {
-  it("Down past the last initiative lands on the first role, and holds at the last role", () => {
-    const walk = ["a", "b", "c", "role:Aglaea", "role:Hermes"];
-    expect(rovingMove(walk, "c", "ArrowDown")).toBe("role:Aglaea");
-    expect(rovingMove(walk, "role:Aglaea", "ArrowUp")).toBe("c");
-    expect(rovingMove(walk, "role:Hermes", "ArrowDown")).toBe("role:Hermes");
+  it("the walk is drawn order (leftovers-25 FR-7): Up from rank 1 lands on the last role, Down holds at the last initiative", () => {
+    const walk = railWalk(["role:Aglaea", "role:Hermes"], ["a", "b", "c"]);
+    expect(walk).toEqual(["role:Aglaea", "role:Hermes", "a", "b", "c"]);
+    expect(rovingMove(walk, "a", "ArrowUp")).toBe("role:Hermes");
+    expect(rovingMove(walk, "role:Hermes", "ArrowDown")).toBe("a");
+    expect(rovingMove(walk, "c", "ArrowDown")).toBe("c");
+    expect(rovingMove(walk, "role:Aglaea", "ArrowUp")).toBe("role:Aglaea");
   });
 
   it("a role is no stop of its own, and is one while the arrows hold it", () => {
