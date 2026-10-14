@@ -6,7 +6,7 @@ branch: lf30-launch-view
 seat: lvw-build
 stage: one-window
 updated: 2026-10-14
-next: "lvw-build builds FR-3 to FR-6 in .wt/lf30-launch-view, then the gate rows"
+next: "review: lf30-launch-view, gate met (V1, V2, V3, V4, X0), 7c35c18"
 depends_on: [lf30-launch-go]
 boundary: ["docs/specs/leftovers-30.md Boundary, lf30-launch-view"]
 spec: "docs/specs/leftovers-30.md (FR-3 to FR-6; launch-progress L13, L14)"
@@ -19,3 +19,18 @@ The landed row stays in view; Seat up closes; badges show the deaf count (launch
 
 ## Gate
 docs/specs/leftovers-30.md, rows V1, V2, V3, V4 and X0.
+
+- [x] V1: harness 1024×640, landed below the fold, three feed updates above, then a scroll and one more: centred, back in view, not moved after the scroll. .wt-notes/lvw-build/out/v1.txt
+- [x] V2: harness with the stub, `Bring 1 up`, the list 1 s and 6 s after `Seat up`: present, then gone. .wt-notes/lvw-build/out/v2.txt
+- [x] V3: vitest of `needsMeRows`, `failed_at` 12:05 and `started_at` 12:04: dated 12:05. frontend/src/lib/queue.test.ts ("V3")
+- [x] V4: vitest and AX of a deaf and a capped seat with 3 waiting, on Agents and in the crew block: `· 3 waiting` on both. frontend/src/components/ContextBar.test.tsx; .wt-notes/lvw-build/out/v4-ax-agents.txt, out/v4-agents.png
+- [x] X0: make test, frontend build, wails build, git status --porcelain empty. .wt-notes/lvw-build/out/x0.txt
+
+## Done
+- FR-3 to FR-6 on branch lf30-launch-view (8bfa7cf, 2421418, 2df8c47, 7c35c18), gate met. How each row ran is in .wt-notes/lvw-build/progress.md.
+
+## Notes
+- V1's feed updates are the page's own feed applied with fake data: the harness imports the store from the vite dev server and applies the latest real feed with filler seats prepended to init-a's crew. A real tick is re-covered with the same fillers.
+- V4's AX ran on the review build, with the screen unlocked. The state comes from the fixture's canned health. Its temp copy was edited: dev_bruno and build-help deaf with 3 waiting, po_ana capped with 3 (sup10 is capped with 3 already). A fake discuss does not reach it, because canned_health wins.
+- The harness's hidden window never runs requestAnimationFrame, so the landing now starts from a zero timeout (7c35c18).
+- X0 ran from a clean clone at dfb74be. Its tree differs from 7c35c18 only by this card's start commit, which the rebase brought in from main.
