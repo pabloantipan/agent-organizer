@@ -299,3 +299,36 @@ e3c470c).
 | L20 | hear it twice | repeat the L19 race: the live region says it again |
 | L21 | not see a dead confirm | open the confirm, bring the last seat up from the CLI, wait for the feed: the confirm closes, and focus, if it was there, is on the first `Attach` |
 | L22 | never lose focus | let a list close after its first seat went off: focus is on the next listed `Attach`, else `Bring n up`, else `Retire…` |
+
+## Amendment 6 (aglaea, 2026-10-14): from lf32-newest-answer's UI review
+
+From nw-ui (`working-on/lf32-newest-answer.md`, ## UI review, pass at
+1cb7c38).
+
+- **U1: an assumed-live row says what the press said.** `idle` is wrong:
+  the press reported the seat running, and A5 makes that answer the
+  newest truth. The row reads `running`, as a feed-running row does.
+  - The press's result carries each running seat's session name (the
+    service already names it with `crewSession`; no new call). With it,
+    the row draws `Attach` at once, and the focus chain counts it.
+  - If the result cannot carry it, the row still reads `running`, keeps
+    `—` where Attach sits, and the chain skips it until the feed. Not
+    `starting…`: nothing is starting.
+- **U2: a confirm closed by the feed says why.** The live region says
+  `Every seat is already running`, the same words as the race, before
+  focus lands on `Attach`. One reason, one sentence, wherever the confirm
+  goes away because nothing is off.
+- **A1: the gap is 100 ms.** Empty, then set again 100 ms later in a later
+  task (`setTimeout`, not `requestAnimationFrame`, which does not run in a
+  hidden window). 2 ms is not known to re-announce in VoiceOver; 100 ms is
+  the common floor. Checking it under VoiceOver is a finding for whoever
+  has a screen, not a gate row.
+- **The chain with no list.** In the race and the dead-confirm case,
+  "listed seats" means every seat row, in drawn order. Confirmed as
+  built.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| L23 | attach to a seat the press found running | after the L19 race, the seat's row reads `running` and draws `Attach` before the next feed |
+| L24 | hear why the confirm went away | after L21, the live region says `Every seat is already running` |
+| L25 | hear a repeat | the live region is empty for 100 ms between two identical messages |

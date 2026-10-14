@@ -365,7 +365,9 @@ keeps their place.
 - **The newest answer wins, and focus never drops**: when a press returns
   something fresher than the feed, the view shows the press's answer at
   once and the feed catches up. A screen-reader-only live region says a
-  repeated message again: it is emptied, then set on the next frame. Visible
+  repeated message again: it is emptied, then set again in a
+  later task 100 ms on (`setTimeout`; never `requestAnimationFrame`, which
+  does not run in a hidden window). Visible
   live text is never emptied (it would blink); it states a level or a
   count, and an unchanged one has nothing new to say. When the focused thing
   leaves, focus goes to a named next target, with a fallback chain that
