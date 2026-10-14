@@ -1,12 +1,12 @@
 ---
 title: "Failures dated, task rows read late not stuck, deaf and capped show their count"
-status: next
+status: now
 repos: [organizer]
 branch: lf29-rows-badges
 seat: rb-build
 stage: one-window
 updated: 2026-10-14
-next: "sup66 runs it (0125 ruled ok, 2026-10-14)"
+next: "rb-build building B1-B4 on lf29-rows-badges"
 depends_on: [lf28-task-rows]
 boundary: ["docs/specs/leftovers-29.md Boundary, lf29-rows-badges"]
 spec: "docs/specs/leftovers-29.md (FR-5 to FR-8; launch-progress L11, L12; task-rows N1-N5)"
