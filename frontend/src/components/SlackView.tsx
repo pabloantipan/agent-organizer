@@ -4,7 +4,7 @@ import type { Seat } from "../hooks/useWails";
 import { useBoard } from "../stores/board.store";
 import { queueOf, readOnlyOf } from "../lib/queue";
 import { ContextBar, WatcherBadge } from "./ContextBar";
-import { HEALTH, healthState, peopleLabel } from "../lib/health";
+import { HEALTH, healthState, messages, peopleLabel } from "../lib/health";
 import { plural } from "../lib/initiatives";
 import { stateWord } from "../lib/stateWords";
 import { Conversation } from "./Conversation";
@@ -111,15 +111,19 @@ export function People({ seats, human, focus, onFocus, onClose }: { seats: Seat[
 }
 
 /** A person row's description (leftovers-26 FR-4, T23): `session <word>,
- *  mail <word>, owes <n> message(s), context <n>%`, each fact with its noun
- *  first and the mail word from HEALTH. A fact the row does not draw is not
- *  said: no mail word without a watcher, owes only when it owes, no context
- *  before the statusline reported one. */
-export function personFacts(s: Pick<Seat, "agent" | "watcher" | "deaf" | "capped" | "owes">): string {
+ *  mail <word>, <n> message(s) waiting, owes <n> message(s), context <n>%`,
+ *  each fact with its noun first and the mail word from HEALTH. A fact the
+ *  row does not draw is not said: no mail word without a watcher, the
+ *  waiting count right after the mail word whatever the word and only when
+ *  mail waits (leftovers-27 FR-9), owes only when it owes, no context before
+ *  the statusline reported one. */
+export function personFacts(s: Pick<Seat, "agent" | "watcher" | "deaf" | "capped" | "owes" | "undelivered">): string {
   const session = s.agent ? (s.agent.state === "working" || s.agent.state === "running" ? "live" : stateWord(s.agent.state)) : "off";
   const facts = [`session ${session}`];
   const mail = s.watcher ? healthState({ watcher: s.watcher, deaf: s.deaf, capped: s.capped }) : undefined;
   if (mail) facts.push(`mail ${HEALTH[mail].label}`);
+  const waiting = s.undelivered ?? 0;
+  if (mail && waiting > 0) facts.push(`${messages(waiting)} waiting`);
   const owes = s.owes?.length ?? 0;
   if (owes > 0) facts.push(`owes ${plural(owes, "message")}`);
   const c = s.agent?.context;
