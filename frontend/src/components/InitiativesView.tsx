@@ -14,6 +14,7 @@ import {
   sleepyOf, sleepyWord, storeArchivedOpen, storedArchivedOpen, waitingOf, waitLine, type Sleepy,
 } from "../lib/initiatives";
 import { escapeCloses } from "../lib/focus";
+import { useLiveRegion } from "../lib/liveRegion";
 import { nextDate } from "./InitiativeHeader";
 import { Charter } from "./Charter";
 import { InitiativeDetail } from "./Initiatives";
@@ -76,7 +77,7 @@ export function InitiativesView() {
   const [raised, setRaised] = useState<string | null>(null);
   // The card whose `Open <id>` has keyboard focus raises the same (leftovers-20 FR-5).
   const [focused, setFocused] = useState<string | null>(null);
-  const [announce, setAnnounce] = useState("");
+  const [announce, setAnnounce] = useLiveRegion();
   // Where focus goes once the view has drawn the new state: a card's id
   // (done), its note (a refused Wake), or its control.
   const [land, setLand] = useState<{ id: string; to: "id" | "note" | "action"; seq: number } | null>(null);
