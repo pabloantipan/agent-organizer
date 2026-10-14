@@ -1,0 +1,47 @@
+/* Launch progress (docs/ux/specs/launch-progress.md, leftovers-27 FR-6):
+   Bring crew up's seat list in place of the crew rows, and New agent's
+   button while its seat starts. Tier-2 tokens only. Each state is a word
+   with a shape, never a colour alone; nothing animates (the seconds are
+   text), so there is no motion to pause. */
+
+.launch-head {
+  margin: 0;
+  font-size: var(--font-size-md);
+  line-height: var(--line-md);
+  font-weight: 600;
+  color: var(--fg);
+}
+.launch-head:focus { outline: none; }
+.launch-head:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
+
+.launch-seats { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-1); }
+
+.ls {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-sm);
+  color: var(--fg);
+}
+.ls-shape { width: 1.2em; flex: none; text-align: center; font-family: var(--mono); }
+.ls-name { min-width: 10ch; }
+.ls-word { font-variant-numeric: tabular-nums; }
+.ls.waiting { color: var(--fg-muted); }
+.ls.retrying .ls-shape, .ls.retrying .ls-word { color: var(--warning); }
+.ls.running .ls-shape, .ls.running .ls-word { color: var(--live); }
+.ls.failed .ls-shape, .ls.failed .ls-word, .ls.failed .ls-why { color: var(--danger); }
+.ls-why { min-width: 0; overflow-wrap: anywhere; }
+.ls-acts { display: inline-flex; gap: var(--space-1-5); margin-left: auto; }
+.ls-err { color: var(--danger); }
+
+/* New agent while its seat starts: the button is the state, same place;
+   aria-disabled keeps focus on it, so it is drawn as disabled here. */
+.new-agent .na-busy[aria-disabled="true"] { color: var(--fg-muted); cursor: default; font-variant-numeric: tabular-nums; }
+
+/* A seat that did not start: one danger line under the button. */
+.new-agent.na-failed { display: inline-flex; flex-direction: column; align-items: flex-end; gap: var(--space-1); }
+.na-danger { display: flex; align-items: baseline; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--danger); max-width: 60ch; }
+.na-why { overflow-wrap: anywhere; }
