@@ -1,6 +1,6 @@
 ---
 title: "No button that does nothing; the landed row keeps its ring; focus after a list closes"
-status: now
+status: done
 repos: [organizer]
 branch: lf31-crew-button
 seat: cb-build
@@ -12,6 +12,7 @@ boundary: ["docs/specs/leftovers-31.md Boundary, lf31-crew-button"]
 spec: "docs/specs/leftovers-31.md (FR-1 to FR-4; launch-progress L15-L18)"
 gate: "docs/specs/leftovers-31.md Acceptance, rows B1, B2, B3, B4 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -32,6 +33,14 @@ docs/specs/leftovers-31.md, rows B1, B2, B3, B4 and X0.
 ## Notes
 - B1's feed updates are the page's own `applyAgents` with fake data (filler seats prepended to init-a's crew), lvw-build's method; steps in /Users/pabloantipan/organizer/.wt-notes/cb-build/steps/b1.txt.
 - Vitest has no DOM here: B2-B4's vitest read markup and focus fakes; the harness rows show the real focus. In a stale-feed race focus goes to the first row that has an Attach.
+
+## Review
+**Verdict: pass.** Unmet rows: none. Reviewer cb-review, 2026-10-14, commit e3c470c5a341447b49583dd7fa21cc373d67edf9 (branch did not move), clean clone at that SHA under `.wt-notes/cb-review/clean` (removed after). Tab harness offscreen at 1024x640, `--links on`, against my own `wails dev -devserver localhost:34188`, fixture exported, auth off, `ORGANIZER_PROBE_BIN` the probe stub through a stand-in wrapper; outputs and steps in `.wt-notes/cb-review/out/` and `steps/`.
+- B1: reran the builder's `b1.txt`: row `landed-held`, computed scroll-margin-block 8px/8px, outline 2px + 2px offset; ring gap to `.board-wrap` 205/206 landed, 313/98 and 407/4 px after two `applyAgents` updates adding 3 rows above each; ≥ 2 px each time (`b1.jsonl`). Fake data through the page's own `applyAgents` is what the row asks.
+- B2: vitest `Crew.button.test.tsx` B2 (11/11 with `Crew.hold.test.ts`, `b-vitest.txt`): no launch button all live, meta `3 seats · 3 live · 0 off`, Retire… stays; `Bring 1 up`, `Bring crew up`. `grep -rn Reattach frontend/src`: no match (`b2-grep.txt`, empty). Also live: after `Seat up` closes, meta `3 live · 0 off`, no launch button (`b4a.jsonl`).
+- B3: the vitest calls `startCrew` with an empty `createCrew` and does the focus itself on a fake, so it does not show the component's own focus; I ran the row as written live instead (`steps/b3-row.txt`, `b3-row.jsonl`): confirm open with fse off, the real feed marks fse live (confirm stays), Start: no probe call (stub log unchanged), confirm gone, live region `Every seat is already running`, no `.launch-head`, focus `Attach fse` (the first seat). Builder's stale-feed variant reproduced too (`b3-live.jsonl`, focus `Attach po_ana`, first row with an Attach).
+- B4: live: `Bring 1 up`, focus on the heading at `Seat up`, list gone 5.0 s later, focus `Attach fse` (`b4a.jsonl`); again with focus moved to Settings, list gone, focus stays on Settings (`b4b.jsonl`); vitest Close the list after a failure → `Bring 1 up` (fake), plus live with `PROBE_STUB_FAIL=fse`: `Seat not up · 0 of 1 running, 1 didn't start`, Close the list → focus `Bring 1 up` (`b4c.jsonl`).
+- X0: `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test` exit 0 (Go ok, 692 vitest), **reused** run 65b48219-54927 of e3c470c5a341 (cb-ui's) (`x0-make-test.txt`); `pnpm run build` exit 0; `wails build` exit 0; `git status --porcelain` empty (`x0-status.txt`); `wails build` again after `wails dev`.
 
 ## UI review
 cb-ui, 2026-10-14, at e3c470c (branch did not move). **Verdict: pass.** No severity 4 or 3.
