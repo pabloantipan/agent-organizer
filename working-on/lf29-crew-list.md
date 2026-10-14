@@ -51,3 +51,31 @@ Evidence is in .wt-notes/cl-review/out/. The fixture is a clean clone at 8fd6dce
 Not covered by the gate: `CreateCrew` still runs probe on the hidden running seats (stub log: ana and bruno after Bring 1 up). That keeps C2's `Seat up` on screen about 15 s instead of 5 s.
 
 Reviewer cl-review, 2026-10-14, commit 8fd6dce7118f118755c0b6295fb165be966adf78.
+
+## UI review
+
+Reviewer cl-ui, 2026-10-14. Every row was checked on commit 8fd6dce7118f118755c0b6295fb165be966adf78 (detached worktree `.wt/cl-ui`). **Verdict: pass.** No severity 4 or 3. Evidence is under `.wt-notes/cl-ui/` (`out/*.txt`, `*.jsonl`, `wkwebview-*.png`).
+
+How each row was checked: I ran the Tab harness on my own `wails dev` on port 34177 (fixture exported, auth off). `ORGANIZER_PROBE_BIN` was the builder's stand-in wrapper around `scripts/probe-stub.sh`, copied into my notes dir. Keys went through `[window sendEvent:]` only.
+- C1, pass. Reattach all gives `Crew up · 3 of 3 running`, and the list closes 6 s later. With `PROBE_STUB_FAIL=bruno` the heading reads `Crew up · 2 of 3 running, 1 didn't start` and Close the list appears. Pressing Stop starting by key while po_ana starts gives `Stopped · 2 of 3 running, 1 not started`. The live region says each result once, joined to the last seat's line (`out/c1a.txt`, `c1b.txt`, `c1c.txt`).
+- C2, pass. With fse off and two seats running, the button reads `Bring 1 up`. The list then holds fse alone: `Starting 1 seat · 0 of 1 running`, then `Seat up · 1 of 1 running`, said once (`out/c2.txt`).
+- C3, pass. I killed my own fse stand-ins by saved pid, so fse failed alone and the heading read `Seat not up · 0 of 1 running, 1 didn't start`. One Tab from the heading reaches `Close the list`, with a visible 2 px accent ring. Return hides the list and moves focus to `Bring 1 up`. The rows read `fse, off`. Needs me shows 15 rows, which is the fixture's own count, with no `start:` row. The stub log has no `-k` (`out/c3.txt`, `out/c3-stub-calls.txt`). Close the list is `tiny-btn ghost`, which is quiet, 92×28 px, `#b5afc3` text on the panel (`out/c3-styles.jsonl`). WKWebView snapshots at 1440×900 and 1024×640 show the starting, failed, close-focused and closed states. **AX was not taken because the screen was locked** (`CGSSessionScreenIsLocked=Yes`). The review build I built and launched (`make review-build`, pid saved) returned only `AXApplication @0,0 0x0` (`out/c3-ax-locked.txt`). C3's AX therefore rests on offscreen WebKit names and computed styles, the same as the builder's.
+- C4, pass. "fails alone" (Crew paragraph) and "forecast:" (Navigation paragraph) match. "stops the rest" has no match (`out/c4.txt`).
+- X0: the shared test run was **reused**: run a65b9ae9-39291 of 8fd6dce, started by cl-review, exit 0, Go ok ×16, vitest 664/664 (`x0-maketest.txt`). `make review-build` passed through test-lease in my worktree. The worktree status was empty before the build.
+
+Findings (none fails the card):
+- **U1 (sev 2).** After a one-seat press, the lead sees a finished `Seat up · 1 of 1 running` list for about 15 s instead of the 5 s that `Crew up` gets. This happens in the Agents crew block (`out/c2.txt`, t=8 to 23 s). The stub log shows `CreateCrew` still probing the hidden running seats (ana, bruno) after fse settles, and the list closes only when the service's whole start is done. Proposal: start only the off seats in `crew.go`. That is Go, outside this boundary, so it is an FSE card.
+- **U2 (sev 1).** After Close the list, a fresh page shows the list again with every seat: `Crew up · 2 of 3 running, 1 didn't start`, which lists seats nobody pressed. This happens on the Agents crew block after a webview reload (seen at the start of `out/c3-styles.jsonl`). The cause is that close and the press are module state while the service keeps the failed start. In the installed app nothing reloads the webview, so this matters only in `wails dev`. Proposal: none now. If it ever matters, let the service remember `SeenLaunch` for the list too.
+- **U3 (sev 1).** The heading line's `role=status` still holds `fse didn't start. Seat not up …` after the list closes. It is not said again, so nothing is lost. Recorded only.
+
+Spec gaps for the FSE:
+- G1: Amendment 1 gives no words for a result with nothing running. As built, it reads `Seat not up · 0 of 1 running, 1 didn't start` (or `Crew not up · …`).
+- G2: Amendment 1 does not say whether `Seat up` closes 5 s on as `Crew up` does (see U1).
+- G3: the stub stand-in starts a new stand-in for each seat that is already running, every time a press re-probes it. After a few presses the Agents list fills with duplicate `ana` rows (`wkwebview-1024x640-C3-close-focused.png`). This is a fixture artifact, but it hides the real Agents layout from screen rows.
+- G4: the builder's harness setup (`steps/common.txt`) selects init-a by `.rail-item` text, which does not exist at 1024 with the rail collapsed to the strip. I used `.strip-item[aria-label^="init-a,"]`. Width rows need a setup that works on both rails.
+
+For aglaea:
+- A1: as built, a hidden seat that fails is listed, so `m` can exceed "the number this press starts", because a failure is never hidden. Should Amendment 1 §2 say so?
+- A2: confirm the words `Seat not up` and `Crew not up` (G1).
+
+Not verified in WKWebView: the AX of the crew block and of Needs me (screen locked; see C3). VoiceOver speech was not checked; live-region text was read from the DOM.
