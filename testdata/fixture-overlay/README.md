@@ -133,3 +133,12 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
   rail scrolled to its end the ccint ⋯ has less room below than its menu
   at 1024×640, so the menu opens above it. More initiatives or groups
   could not do it: the folds alone keep the room (Amendment 2)
+- a task (leftovers-28 FR-1, FR-2, R2): `0011-accept-the-task-watch`, ruled,
+  with `forecast: 1-2m` and one card, `w-task`, in now with seat
+  `tw-fixture`. The scan dates the task by the commit that ruled the record;
+  the script commits the overlay in init-a's first commit, so the task
+  starts when the fixture is laid and reads stalled (past twice its 2 min
+  top) four minutes later. A ruling exactly "10 min back" needs the script
+  to commit this record in its own commit with `GIT_COMMITTER_DATE` ten
+  minutes earlier (lf28-task-rows owns `scripts/fixture-home.sh`); it adds
+  one open card to init-a
