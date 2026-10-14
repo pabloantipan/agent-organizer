@@ -311,8 +311,12 @@ button.tiny { padding: 0 5px; font-size: var(--font-size-xs); line-height: 14px;
    still wins. */
 .markdown :where(pre, table) { overflow-x: auto; max-width: 100%; }
 .markdown table { display: block; border-collapse: collapse; font-size: var(--font-size-md); }
-/* leftovers-26 FR-2: a stop while it scrolls, its ring inside its box. */
+/* leftovers-26 FR-2: a stop while it scrolls, its ring inside its box.
+   leftovers-27 FR-10 (T22): 4 px of padding on each side, so the ring clears
+   the text; :where keeps it at one class, so a view's own larger padding
+   (Help's 16 px) still wins. */
 .markdown pre:focus-visible, .markdown table:focus-visible { outline-offset: -2px; }
+.markdown :where(pre, table) { padding: var(--space-1); }
 /* A code block or table that scrolls sideways shows it does (design system,
    Widths; leftovers-5 FR-13): the side with content hidden past it carries
    1 px of --fg-subtle (edge-left, edge-right, set by useMarkdownEdges in

@@ -9,7 +9,8 @@
 // only through [window sendEvent:]. Nothing is posted to the system.
 //
 // steps.txt, one per line ('#' comments):
-//   key tab|shift-tab|return|up|down   post keyDown+keyUp to the window
+//   key tab|shift-tab|return|up|down|left|right
+//                                       post keyDown+keyUp to the window
 //   eval <js>                           run JS, print its result
 //   wait <ms>
 //   until <js>                          poll until the JS is true (30 s)
@@ -17,6 +18,14 @@
 //   reset                               focus moves to body, so the next Tab
 //                                       starts at the top, as on a fresh screen
 //   tabs <n> <label>                    n times: key tab, report <label>#i
+//   snapshot <path.png>                 write the WKWebView's own rendering at
+//                                       2x (takeSnapshot), never the screen
+//
+// The window is hidden, and WebKit throttles a hidden view's
+// requestAnimationFrame, so an animated scroll (Down in a focused region)
+// never moved. The preferences set inactiveSchedulingPolicy = .none
+// (leftovers-26 Amendment 3, leftovers-27 FR-11): the page keeps running
+// at full rate while the window stays offscreen and never shown.
 import AppKit
 import WebKit
 
@@ -70,6 +79,7 @@ final class Runner: NSObject, WKNavigationDelegate {
     self.steps = steps
     let cfg = WKWebViewConfiguration()
     cfg.preferences.tabFocusesLinks = links
+    if #available(macOS 14.0, *) { cfg.preferences.inactiveSchedulingPolicy = .none }
     // A fresh store per run: the app keeps the screen and the rail's state
     // in localStorage, and one run must not start where the last one ended.
     cfg.websiteDataStore = .nonPersistent()
@@ -81,7 +91,9 @@ final class Runner: NSObject, WKNavigationDelegate {
     window.makeFirstResponder(web)
     web.navigationDelegate = self
     NotificationCenter.default.post(name: NSWindow.didBecomeKeyNotification, object: window)
-    print("{\"harness\":\"start\",\"tabFocusesLinks\":\(links),\"url\":\"\(url)\",\"size\":\"\(Int(size[0]))x\(Int(size[1]))\",\"isKey\":\(window.isKeyWindow),\"visible\":\(window.isVisible)}")
+    var policy = "default"
+    if #available(macOS 14.0, *) { policy = cfg.preferences.inactiveSchedulingPolicy == .none ? "none" : "other" }
+    print("{\"harness\":\"start\",\"tabFocusesLinks\":\(links),\"inactiveSchedulingPolicy\":\"\(policy)\",\"url\":\"\(url)\",\"size\":\"\(Int(size[0]))x\(Int(size[1]))\",\"isKey\":\(window.isKeyWindow),\"visible\":\(window.isVisible)}")
     web.load(URLRequest(url: url))
   }
 
@@ -107,6 +119,8 @@ final class Runner: NSObject, WKNavigationDelegate {
     case "return": chars = "\r"; code = 36
     case "up": chars = String(UnicodeScalar(NSUpArrowFunctionKey)!); code = 126; flags = [.numericPad, .function]
     case "down": chars = String(UnicodeScalar(NSDownArrowFunctionKey)!); code = 125; flags = [.numericPad, .function]
+    case "left": chars = String(UnicodeScalar(NSLeftArrowFunctionKey)!); code = 123; flags = [.numericPad, .function]
+    case "right": chars = String(UnicodeScalar(NSRightArrowFunctionKey)!); code = 124; flags = [.numericPad, .function]
     default: fatalError("unknown key \(name)")
     }
     let ign = name == "shift-tab" ? "\t" : chars
@@ -161,6 +175,19 @@ final class Runner: NSObject, WKNavigationDelegate {
         let esc = out.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"").replacingOccurrences(of: "\n", with: " ")
         print("{\"eval\":\"\(esc)\"}")
         later(0.4)
+      }
+    case "snapshot":
+      // twice the view's width, so a 2 px ring and the gap beside it are legible
+      let snap = WKSnapshotConfiguration()
+      snap.snapshotWidth = NSNumber(value: Double(size[0] * 2))
+      web.takeSnapshot(with: snap) { img, err in
+        guard let img = img, let tiff = img.tiffRepresentation, let rep = NSBitmapImageRep(data: tiff),
+              let png = rep.representation(using: .png, properties: [:]) else {
+          print("{\"snapshot\":\"failed\",\"error\":\"\(err?.localizedDescription ?? "nil")\"}"); later(0); return
+        }
+        do { try png.write(to: URL(fileURLWithPath: rest)); print("{\"snapshot\":\"\(rest)\"}") }
+        catch { print("{\"snapshot\":\"failed\",\"error\":\"\(error.localizedDescription)\"}") }
+        later(0.05)
       }
     case "tabs":
       let p = rest.split(separator: " ", maxSplits: 1).map(String.init)

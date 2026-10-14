@@ -36,6 +36,29 @@ describe("W1: F3's description says each fact with its noun (leftovers-26 FR-4, 
   });
 });
 
+describe("W1: the waiting count follows the mail word (leftovers-27 FR-9, T23)", () => {
+  const states: [string, Partial<Record<string, unknown>>][] = [
+    ["alive", { watcher: "alive" }],
+    ["stale", { watcher: "stale" }],
+    ["deaf", { watcher: "stale", deaf: true }],
+    ["capped", { watcher: "alive", capped: true }],
+  ];
+  for (const [label, over] of states) {
+    it(`${label}: nothing at 0, \`1 message waiting\`, \`2 messages waiting\``, () => {
+      const word = HEALTH[label as keyof typeof HEALTH].label;
+      expect(personFacts(seat({ ...over, undelivered: 0 }))).toBe(`session live, mail ${word}, context 42%`);
+      expect(personFacts(seat({ ...over, undelivered: 1 }))).toBe(`session live, mail ${word}, 1 message waiting, context 42%`);
+      expect(personFacts(seat({ ...over, undelivered: 2, owes: owing(2) }))).toBe(`session live, mail ${word}, 2 messages waiting, owes 2 messages, context 42%`);
+    });
+  }
+  it("the spec's line: `session off, mail stale, 1 message waiting, owes 2 messages`", () => {
+    expect(personFacts(seat({ agent: undefined, watcher: "stale", undelivered: 1, owes: owing(2) }))).toBe("session off, mail stale, 1 message waiting, owes 2 messages");
+  });
+  it("no badge, no count: without a watcher the waiting count is not said", () => {
+    expect(personFacts(seat({ watcher: "", undelivered: 3 }))).toBe("session live, context 42%");
+  });
+});
+
 describe("W1: a person row names its one description (AX shape, server render)", () => {
   it("aria-describedby points at one sr-only line holding the FR-4 form", () => {
     const html = renderToStaticMarkup(<People seats={[seat({ owes: owing(2) })]} human="pablo" focus={null} onFocus={() => undefined} onClose={() => undefined} />);
@@ -43,5 +66,10 @@ describe("W1: a person row names its one description (AX shape, server render)",
     expect(ref).toBeTruthy();
     expect(ref).not.toContain(" ");
     expect(html).toContain(`<span class="sr-only" id="${ref}">session live, mail alive, owes 2 messages, context 42%</span>`);
+  });
+  it("with mail waiting the same line says it after the mail word (FR-9)", () => {
+    const html = renderToStaticMarkup(<People seats={[seat({ watcher: "stale", undelivered: 1, owes: owing(2) })]} human="pablo" focus={null} onFocus={() => undefined} onClose={() => undefined} />);
+    expect(html).toContain(">session live, mail stale, 1 message waiting, owes 2 messages, context 42%</span>");
+    expect(html).toContain("stale · 1 waiting");
   });
 });
