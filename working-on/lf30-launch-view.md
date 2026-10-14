@@ -6,7 +6,7 @@ branch: lf30-launch-view
 seat:
 stage: one-window
 updated: 2026-10-14
-next: "pablo: rule 0126 (accept leftovers-30); on accept the FSE starts its supervisor"
+next: "sup67 runs it (0126 ruled ok, 2026-10-14)"
 depends_on: [lf30-launch-go]
 boundary: ["docs/specs/leftovers-30.md Boundary, lf30-launch-view"]
 spec: "docs/specs/leftovers-30.md (FR-3 to FR-6; launch-progress L13, L14)"
