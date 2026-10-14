@@ -107,8 +107,8 @@ drives Pablo's desktops, focus or input, and no row starts a real seat.
   the padding rules of the scroll stops in `styles/global.css`
   (`.modal-body*`, `.markdown pre*`, `.markdown table*`),
   `styles/rule-box.css`, `styles/shell.css` (the header's open area),
-  `styles/roles.css` (`.rd-*`), `styles/help.css`, and the floating list's
-  stylesheet for `.fl-body`; `scripts/tab-harness/`. Not: the files of
+  `styles/roles.css` (`.rd-*`), `styles/help.css`, and `styles/float.css`
+  (`.fl-body` only); `scripts/tab-harness/`. Not: the files of
   the other two cards.
 
 ## No-gos
