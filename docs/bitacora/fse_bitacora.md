@@ -25,7 +25,15 @@ restating it (the discuss skill).
 - **Sent [for hephaistos]:** pause by seat-freeze, not probe -k (wd-review lost its conversation); test-lease starvation still open.
 - Next: leftovers-27 from the carry below when Aglaea has no more to fold; or wait for Pablo.
 
-## Carry for leftovers-27
+## Carry for leftovers-29
+
+- From sup64 (lf27): aglaea's polish U2, launch-view U3/U4; deaf badge no count; 'Close the list' unnamed; unseen-failure row undated (sorts behind Show the other N); fixture Roles group shows this Mac's real role sessions in a review build; CLAUDE.md Crew paragraph says a failing seat stops the rest (no longer); Copy the command writes the real clipboard (gate hygiene).
+
+## HAND-OFF — 2026-10-14 ~12:40, leftovers-27 landed
+
+- **Last SHA seen:** 7a55537. leftovers-27 merged by sup64 (state c5b0b1f, polish 70af74a, view 7a55537), all pass; 62 min against 70-110; no memory wait; shared runs reused (polish, launch-view). $25.77. sup64 ended; installed v0.2.0-2010-g7a55537; tree clean; aglaea thawed.
+
+## Carry for leftovers-27 (done)
 
 - **Supervisor prompt, from leftovers-27 on** (Hephaistos, claudecode 3ebcfd0, Pablo "as you recommend"): drop any lease-level rule; tell the supervisor to give both reviewers of a card the same `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- <X0 test line>` from a clean clone of the card's SHA (deps installed, nothing written in the clone, notes in .wt-notes/<seat>/); never --share make review-build or wails build; builders never --share; at warn the lease waits only under 4 GB free and says to seat-freeze idle seats after 10 min. Report to Hephaistos if a second reviewer's run is not "reused".
 - lf23 follow-ups (sup63): openInTerminal has no caller (dead code); app.go:386-387 comment still says iTerm2 window; launch progress for Bring crew up / Run card / New agent (asked aglaea).
