@@ -3,10 +3,10 @@ title: "The service keeps each seat's start and returns at once"
 status: next
 repos: [organizer]
 branch: lf27-launch-state
-seat:
+seat: st-build
 stage: one-window
 updated: 2026-10-14
-next: "sup64 runs it (0123 ruled ok, 2026-10-14)"
+next: "st-build builds it (sup64, wave 1)"
 depends_on: []
 boundary: ["docs/specs/leftovers-27.md Boundary, lf27-launch-state"]
 spec: "docs/specs/leftovers-27.md (FR-1 to FR-5)"
