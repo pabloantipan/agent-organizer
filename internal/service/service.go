@@ -49,6 +49,15 @@ type Service struct {
 	mem       memTracker
 	memory    *model.Memory
 	memReason string
+	// launches are the seat starts running or just run, per initiative
+	// (launch.go), under their own lock: the feed reads them under mu and
+	// the goroutines that start seats never take mu. after schedules the 5 s
+	// drop's notice; nil is time.AfterFunc. OnLaunch, when set, is told
+	// every change, outside both locks.
+	launchMu sync.Mutex
+	launches map[string]*InitiativeLaunch
+	after    func(time.Duration, func())
+	OnLaunch func(LaunchChange)
 	// OnMemoryWarn, when set, gets the reading of every sample that warns
 	// (FR-4), whichever caller took it, after the service lock is released.
 	OnMemoryWarn func(model.Memory)
@@ -299,42 +308,9 @@ func (s *Service) rememberCPU(snap model.Snapshot) {
 
 var nameRe = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,40}$`)
 
-// probeBin is where probe lives. A variable so tests run a fake probe (and
-// its family wrappers, which sit next to it); nothing else swaps it.
-var probeBin = func() string {
-	home, _ := os.UserHomeDir()
-	return filepath.Join(home, "bin", "probe")
-}
-
 // command builds every process a launch runs. A variable so tests record
 // what a launch executes: a line through /bin/sh, never osascript.
 var command = exec.Command
-
-// launchProbe runs one launch line itself, through /bin/sh. probe starts the
-// seat as a detached zellij session and checks it: no window, no tab, no
-// typed text. Exit 3 means the seat did not come up within probe's 30 s; it
-// is tried once more. Any other failure, or a second 3, is an error carrying
-// probe's output (the pane's last lines).
-func launchProbe(line string) error {
-	var out []byte
-	var err error
-	for try := 0; try < 2; try++ {
-		out, err = command("/bin/sh", "-c", line).CombinedOutput()
-		if err == nil {
-			return nil
-		}
-		var ee *exec.ExitError
-		if !errors.As(err, &ee) || ee.ExitCode() != 3 {
-			break
-		}
-	}
-	msg := strings.TrimSpace(string(out))
-	var ee *exec.ExitError
-	if errors.As(err, &ee) {
-		return fmt.Errorf("probe exited %d: %s", ee.ExitCode(), msg)
-	}
-	return fmt.Errorf("probe: %v: %s", err, msg)
-}
 
 // animals name a new agent when the caller gives none. probe's own -t does
 // the same but attaches, which a detached start cannot.
@@ -366,6 +342,8 @@ func sanitize(s string) string {
 // CreateAgent starts a new probe in the initiative directory, in the
 // initiative's probe family (probeFamily). An empty name gets an animal name.
 // The seat starts detached (launchProbe): no window opens; Attach shows it.
+// It returns once the seat is queued; the start runs in the background and
+// its states ride the agents feed (launch.go). WaitLaunch waits for it.
 func (s *Service) CreateAgent(initiativeID, name string) error {
 	var dir, family string
 	s.mu.Lock()
@@ -385,15 +363,19 @@ func (s *Service) CreateAgent(initiativeID, name string) error {
 	if name != "" && !nameRe.MatchString(name) {
 		return errors.New("name must be lowercase letters, digits and dashes")
 	}
-	// Idempotent: creates ~/bin/<family>-probe if missing.
-	if out, err := exec.Command(probeBin(), "--wrap", family).CombinedOutput(); err != nil {
-		return fmt.Errorf("probe --wrap: %s", strings.TrimSpace(string(out)))
-	}
-	wrapper := filepath.Join(filepath.Dir(probeBin()), family+"-probe")
 	if name == "" {
 		name = animalName()
 	}
-	return launchProbe(fmt.Sprintf("%s %s %s", shellQuote(wrapper), shellQuote(name), shellQuote(dir)))
+	line := fmt.Sprintf("%s %s %s", shellQuote(probeWrapper(family)), shellQuote(name), shellQuote(dir))
+	// Idempotent: creates ~/bin/<family>-probe if missing. In the
+	// background, before the start, so the call returns once queued.
+	wrap := func() error {
+		if out, err := command(probeBin(), "--wrap", family).CombinedOutput(); err != nil {
+			return fmt.Errorf("probe --wrap: %s", strings.TrimSpace(string(out)))
+		}
+		return nil
+	}
+	return s.queueLaunch(initiativeID, "agent", []SeatLaunch{{Seat: name, Session: family + "-probe-" + name, Line: line, pre: wrap}})
 }
 
 // KillAgent removes a probe session: zellij session, layout, marker, iTerm
@@ -428,26 +410,6 @@ func (s *Service) StopAgent(pid int) error {
 		return fmt.Errorf("pid %d is not a %s process anymore", pid, bin)
 	}
 	return syscall.Kill(pid, syscall.SIGTERM)
-}
-
-// openInTerminal runs a shell command in a new iTerm2 window, or Terminal.
-func openInTerminal(cmd string) error {
-	if runtime.GOOS != "darwin" {
-		return exec.Command("x-terminal-emulator", "-e", "bash", "-lc", cmd+"; exec bash").Start()
-	}
-	script := fmt.Sprintf(`tell application "iTerm2"
-	activate
-	set w to (create window with default profile)
-	tell current session of w to write text %s
-end tell`, appleScriptString(cmd))
-	if err := exec.Command("osascript", "-e", script).Run(); err == nil {
-		return nil
-	}
-	script = fmt.Sprintf(`tell application "Terminal"
-	activate
-	do script %s
-end tell`, appleScriptString(cmd))
-	return exec.Command("osascript", "-e", script).Start()
 }
 
 // AgentGroup is the agents of one initiative, for the Agents view.
@@ -501,6 +463,9 @@ type AgentsView struct {
 	// MemoryReason says why.
 	Memory       *model.Memory `json:"memory"`
 	MemoryReason string        `json:"memory_reason,omitempty"`
+	// Launches are the seat starts running or just run, one per initiative
+	// (launch.go, leftovers-27 FR-1); empty when none.
+	Launches []InitiativeLaunch `json:"launches"`
 }
 
 // RefreshAgents re-samples processes and sessions only (no git, no card
@@ -535,7 +500,7 @@ func (s *Service) RefreshAgents() AgentsView {
 }
 
 func (s *Service) agentsViewLocked() AgentsView {
-	v := AgentsView{SampledAt: s.now(), Unassigned: s.state.Local.Unassigned, MemoryReason: s.memReason}
+	v := AgentsView{SampledAt: s.now(), Unassigned: s.state.Local.Unassigned, MemoryReason: s.memReason, Launches: s.Launches()}
 	if s.memory != nil {
 		m := *s.memory
 		v.Memory = &m

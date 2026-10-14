@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -131,8 +132,7 @@ func (s *Service) PrepareLaunch(initiativeID, slug string) (Launch, error) {
 		Prelude:    cardPreludePath(),
 		Prompt:     cardPromptPath(initiativeID, slug),
 	}
-	wrapper := filepath.Join(filepath.Dir(probeBin()), family+"-probe")
-	l.Command = launchLine(l.Prelude, l.Prompt, wrapper, l.Session, l.Dir)
+	l.Command = launchLine(l.Prelude, l.Prompt, probeWrapper(family), l.Session, l.Dir)
 
 	// probe refuses a name over zellij's socket budget; say so rather than
 	// launching something that will not come up.
@@ -150,7 +150,9 @@ func (s *Service) PrepareLaunch(initiativeID, slug string) (Launch, error) {
 
 // RunCard prepares the launch and runs it: the builder starts detached
 // (launchProbe), no window opens. The prompt file must exist: starting a
-// builder without one is the failure the gate is for.
+// builder without one is the failure the gate is for. Only the CLI runs a
+// card, so it waits: the start goes through the same queue as New agent, its
+// states reach OnLaunch, and the error is the failed seat's.
 func (s *Service) RunCard(initiativeID, slug string) (Launch, error) {
 	l, err := s.PrepareLaunch(initiativeID, slug)
 	if err != nil {
@@ -175,7 +177,28 @@ func (s *Service) RunCard(initiativeID, slug string) (Launch, error) {
 	if out, err := command(probeBin(), "--wrap", family).CombinedOutput(); err != nil {
 		return l, fmt.Errorf("probe --wrap: %s", strings.TrimSpace(string(out)))
 	}
-	return l, launchProbe(l.Command)
+	if err := s.queueLaunch(initiativeID, "card", []SeatLaunch{{Seat: l.Session, Session: family + "-probe-" + l.Session, Line: l.Command}}); err != nil {
+		return l, err
+	}
+	return l, s.launchErr(initiativeID, l.Session)
+}
+
+// launchErr waits for the initiative's start and returns the named seat's
+// failure as probe reported it, or nil when it runs.
+func (s *Service) launchErr(initiativeID, seat string) error {
+	got, ok := s.WaitLaunch(initiativeID)
+	if !ok {
+		return nil
+	}
+	for _, sl := range got.Seats {
+		if sl.Seat == seat && sl.State == LaunchFailed {
+			if sl.Exit > 0 {
+				return &ProbeError{Exit: sl.Exit, Output: sl.Output}
+			}
+			return errors.New(sl.Reason)
+		}
+	}
+	return nil
 }
 
 // ---- the productivity baseline: what each card's sessions cost ----

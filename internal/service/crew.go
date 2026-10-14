@@ -435,9 +435,12 @@ func crewDir(initiativeID string) string {
 // sources at launch, and an opening prompt on the first run only. The token
 // itself is fetched at launch through `discuss-api token env`, so it lives in
 // the discuss registry and the process environment, nowhere else. Returns the
-// launch line of each seat; with open, runs them one after another, each
-// seat started detached by probe (no window, no tab, no typed text). A seat
-// that already has a live session is left alone ("running; nothing started").
+// launch line of each seat; with open, queues them and returns at once: the
+// seats start one after another in the background, each detached by probe
+// (no window, no tab, no typed text), their states on the agents feed
+// (launch.go), and WaitLaunch waits for them. A seat that fails does not
+// stop the rest; Stop starting does. A seat that already has a live session
+// is left alone ("running; nothing started").
 func (s *Service) CreateCrew(initiativeID string, open bool) ([]string, error) {
 	var si *model.ScannedInitiative
 	s.mu.Lock()
@@ -484,10 +487,7 @@ func (s *Service) CreateCrew(initiativeID string, open bool) ([]string, error) {
 		sessions[i] = sess
 	}
 	family := sanitize(si.Cell.Project)
-	if out, err := exec.Command(probeBin(), "--wrap", family).CombinedOutput(); err != nil {
-		return nil, fmt.Errorf("probe --wrap: %s", strings.TrimSpace(string(out)))
-	}
-	wrapper := filepath.Join(filepath.Dir(probeBin()), family+"-probe")
+	wrapper := probeWrapper(family)
 	dir := crewDir(initiativeID)
 	if err := os.MkdirAll(dir, 0o700); err != nil {
 		return nil, err
@@ -495,12 +495,6 @@ func (s *Service) CreateCrew(initiativeID string, open bool) ([]string, error) {
 
 	var cmds []string
 	for i, seat := range si.Cell.Agents {
-		// Preflight: the identity must already hold a token, or the pane would
-		// open on an error. The bootstrap issues tokens; this never does.
-		if out, err := exec.Command(api, "token", "env", si.Cell.Project, seat).CombinedOutput(); err != nil {
-			return nil, fmt.Errorf("%s/%s has no discuss token (%s); run ~/agent-slack/ops/bootstrap.sh %s first",
-				si.Cell.Project, seat, strings.TrimSpace(string(out)), si.Cell.Project)
-		}
 		prelude := preludeFor(api, *si.Cell, seat, sessions[i], s.Config().CrewModel)
 		preludePath := filepath.Join(dir, seat+".sh")
 		promptPath := filepath.Join(dir, seat+".md")
@@ -514,25 +508,74 @@ func (s *Service) CreateCrew(initiativeID string, open bool) ([]string, error) {
 		// session it opens is exactly sessions[i].
 		cmds = append(cmds, launchLine(preludePath, promptPath, wrapper, sanitize(seatShort(seat)), si.Path))
 	}
+
+	// What runs a process or reaches the network: probe's wrapper, the
+	// seat's token, the record side. With --print all of it runs here and a
+	// failure refuses; from the app it runs in the background, before each
+	// seat's start, so the call returns once the seats are queued.
+	wrap := func() error {
+		if out, err := command(probeBin(), "--wrap", family).CombinedOutput(); err != nil {
+			return fmt.Errorf("probe --wrap: %s", strings.TrimSpace(string(out)))
+		}
+		return nil
+	}
+	// Preflight: the identity must already hold a token, or the pane would
+	// open on an error. The bootstrap issues tokens; this never does.
+	token := func(seat string) error {
+		if out, err := exec.Command(api, "token", "env", si.Cell.Project, seat).CombinedOutput(); err != nil {
+			return fmt.Errorf("%s/%s has no discuss token (%s); run ~/agent-slack/ops/bootstrap.sh %s first",
+				si.Cell.Project, seat, strings.TrimSpace(string(out)), si.Cell.Project)
+		}
+		return nil
+	}
 	// The record side: push flag into projects.json, cell registered when
 	// this laptop is a factory. See registerCrew for what is a skip and what
 	// is a stop.
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-	defer cancel()
-	if err := registerCell(ctx, s.Config(), si.Path, record.Cell{
-		Cell: si.Cell.Project, Initiative: si.ID, Title: si.Title, Client: si.Client,
-	}); err != nil {
-		return nil, err
+	register := func() error {
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		defer cancel()
+		return registerCell(ctx, s.Config(), si.Path, record.Cell{
+			Cell: si.Cell.Project, Initiative: si.ID, Title: si.Title, Client: si.Client,
+		})
 	}
 	if !open {
+		if err := wrap(); err != nil {
+			return nil, err
+		}
+		for _, seat := range si.Cell.Agents {
+			if err := token(seat); err != nil {
+				return nil, err
+			}
+		}
+		if err := register(); err != nil {
+			return nil, err
+		}
 		return cmds, nil
 	}
-	// One seat after another, each detached (launchProbe): no window opens.
-	// A seat that fails stops the rest; the seats already started stay up.
+	// The seats start one after another on one goroutine, so registered
+	// needs no lock; a failed registration is tried again by the next seat.
+	registered := false
+	seats := make([]SeatLaunch, len(cmds))
 	for i, c := range cmds {
-		if err := launchProbe(c); err != nil {
-			return cmds[:i], fmt.Errorf("seat %s: %w", si.Cell.Agents[i], err)
-		}
+		seat := si.Cell.Agents[i]
+		seats[i] = SeatLaunch{Seat: seat, Session: sessions[i], Line: c, pre: func() error {
+			if err := wrap(); err != nil {
+				return err
+			}
+			if err := token(seat); err != nil {
+				return err
+			}
+			if !registered {
+				if err := register(); err != nil {
+					return err
+				}
+				registered = true
+			}
+			return nil
+		}}
+	}
+	if err := s.queueLaunch(initiativeID, "crew", seats); err != nil {
+		return nil, err
 	}
 	return cmds, nil
 }
