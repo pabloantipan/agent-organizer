@@ -6,7 +6,7 @@ branch: lf26-fixture
 seat: fx-build
 stage: one-window
 updated: 2026-10-14
-next: "review: lf26-fixture, gate met (F1, F2, X0), 5b87b66"
+next: "done: merged to main (sup62)"
 depends_on: []
 boundary: ["docs/specs/leftovers-26.md Boundary, lf26-fixture"]
 spec: "docs/specs/leftovers-26.md (FR-11, FR-12; leftovers-25 Amendment 1)"
