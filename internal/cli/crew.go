@@ -52,7 +52,7 @@ func crewCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now fun
 		}
 		return 0
 	}
-	fmt.Fprintf(stdout, "opened %d seats in iTerm2\n", len(cmds))
+	fmt.Fprintf(stdout, "started %d seats detached (watch: seats open, or probe --attach <session>)\n", len(cmds))
 	return 0
 }
 

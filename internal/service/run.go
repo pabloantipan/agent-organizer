@@ -148,8 +148,9 @@ func (s *Service) PrepareLaunch(initiativeID, slug string) (Launch, error) {
 	return l, nil
 }
 
-// RunCard prepares the launch and opens it in a terminal tab. The prompt file
-// must exist: starting a builder without one is the failure the gate is for.
+// RunCard prepares the launch and runs it: the builder starts detached
+// (launchProbe), no window opens. The prompt file must exist: starting a
+// builder without one is the failure the gate is for.
 func (s *Service) RunCard(initiativeID, slug string) (Launch, error) {
 	l, err := s.PrepareLaunch(initiativeID, slug)
 	if err != nil {
@@ -161,7 +162,20 @@ func (s *Service) RunCard(initiativeID, slug string) (Launch, error) {
 	if _, err := os.Stat(probeBin()); err != nil {
 		return l, fmt.Errorf("probe not found at %s", probeBin())
 	}
-	return l, openInTerminalTabs([]string{l.Command})
+	// Idempotent: creates ~/bin/<family>-probe if missing, as New agent and
+	// Bring crew up do; the launch line names that wrapper.
+	var family string
+	s.mu.Lock()
+	for i := range s.state.Local.Initiatives {
+		if si := &s.state.Local.Initiatives[i]; si.ID == initiativeID {
+			family = probeFamily(si)
+		}
+	}
+	s.mu.Unlock()
+	if out, err := command(probeBin(), "--wrap", family).CombinedOutput(); err != nil {
+		return l, fmt.Errorf("probe --wrap: %s", strings.TrimSpace(string(out)))
+	}
+	return l, launchProbe(l.Command)
 }
 
 // ---- the productivity baseline: what each card's sessions cost ----
