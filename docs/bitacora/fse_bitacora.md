@@ -4,6 +4,12 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-14, leftovers-23 running
+
+- **Hephaistos, 2026-10-14:** claudecode feat/seat-background merged (941e48d); my supervisor launch is now the bare probe line from my shell, detached, parent recorded; Pablo opens a team with `seats open organizer-probe-sup<n>`. No more iTerm windows to close at the end. test-lease rule (Pablo "as you recommend"): runs shared per commit, gate on ~4 GB free at warn; until it merges, freeze idle seats before a wave (seat-freeze, never probe -k). supervise now pauses by seat-freeze (claudecode bfd460c).
+- **sup63** runs leftovers-23 (lf23-detached-launch), launched detached. On close: probe -k, token rm, files, clean, make install.
+- aglaea left unfrozen: pressure normal, 4.3 GB free, a one-card Go task.
+
 ## HAND-OFF — 2026-10-14 morning, leftovers-26 landed
 
 - **Last SHA seen:** df3fb21. leftovers-26 merged by sup62 (menu 1ebb4b5, words 637960d, scroll-stops 244271d, fixture 70f14dc), all pass. ~48 min seat work; lease starved 102+14 min; paused 18:04 to 09:46 (Pablo: "I'll free memory, resume", then "Lower the threshold", the override refused by sup62's classifier as a relay against its brief and withdrawn when pressure fell). $36.42. sup62 ended, window 20524 closed; installed v0.2.0-1959-gdf3fb21; tree clean. No supervisor running.
