@@ -3,7 +3,7 @@ title: "Deltagos knows each task's forecast, start and silence"
 status: next
 repos: [organizer]
 branch: lf28-task-watch
-seat:
+seat: tw-build
 stage: one-window
 updated: 2026-10-14
 next: "sup65 runs it (0124 ruled ok, 2026-10-14)"
