@@ -299,9 +299,50 @@ func (s *Service) rememberCPU(snap model.Snapshot) {
 
 var nameRe = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,40}$`)
 
-func probeBin() string {
+// probeBin is where probe lives. A variable so tests run a fake probe (and
+// its family wrappers, which sit next to it); nothing else swaps it.
+var probeBin = func() string {
 	home, _ := os.UserHomeDir()
 	return filepath.Join(home, "bin", "probe")
+}
+
+// command builds every process a launch runs. A variable so tests record
+// what a launch executes: a line through /bin/sh, never osascript.
+var command = exec.Command
+
+// launchProbe runs one launch line itself, through /bin/sh. probe starts the
+// seat as a detached zellij session and checks it: no window, no tab, no
+// typed text. Exit 3 means the seat did not come up within probe's 30 s; it
+// is tried once more. Any other failure, or a second 3, is an error carrying
+// probe's output (the pane's last lines).
+func launchProbe(line string) error {
+	var out []byte
+	var err error
+	for try := 0; try < 2; try++ {
+		out, err = command("/bin/sh", "-c", line).CombinedOutput()
+		if err == nil {
+			return nil
+		}
+		var ee *exec.ExitError
+		if !errors.As(err, &ee) || ee.ExitCode() != 3 {
+			break
+		}
+	}
+	msg := strings.TrimSpace(string(out))
+	var ee *exec.ExitError
+	if errors.As(err, &ee) {
+		return fmt.Errorf("probe exited %d: %s", ee.ExitCode(), msg)
+	}
+	return fmt.Errorf("probe: %v: %s", err, msg)
+}
+
+// animals name a new agent when the caller gives none. probe's own -t does
+// the same but attaches, which a detached start cannot.
+var animals = []string{"otter", "heron", "lynx", "marten", "ibis", "puma", "wren", "gecko", "tapir", "koala"}
+
+func animalName() string {
+	n := time.Now().UnixNano()
+	return fmt.Sprintf("%s-%04d", animals[n%int64(len(animals))], (n/7)%10000)
 }
 
 // probeFamily is the probe wrapper an initiative's sessions run under: the
@@ -323,9 +364,8 @@ func sanitize(s string) string {
 }
 
 // CreateAgent starts a new probe in the initiative directory, in the
-// initiative's probe family (probeFamily). An empty name lets probe pick an
-// animal name. Opens iTerm2 (Terminal as fallback) so the session is visible
-// immediately.
+// initiative's probe family (probeFamily). An empty name gets an animal name.
+// The seat starts detached (launchProbe): no window opens; Attach shows it.
 func (s *Service) CreateAgent(initiativeID, name string) error {
 	var dir, family string
 	s.mu.Lock()
@@ -350,13 +390,10 @@ func (s *Service) CreateAgent(initiativeID, name string) error {
 		return fmt.Errorf("probe --wrap: %s", strings.TrimSpace(string(out)))
 	}
 	wrapper := filepath.Join(filepath.Dir(probeBin()), family+"-probe")
-	var cmd string
 	if name == "" {
-		cmd = fmt.Sprintf("cd %s && %s -t", shellQuote(dir), shellQuote(wrapper))
-	} else {
-		cmd = fmt.Sprintf("%s %s %s", shellQuote(wrapper), shellQuote(name), shellQuote(dir))
+		name = animalName()
 	}
-	return openInTerminal(cmd)
+	return launchProbe(fmt.Sprintf("%s %s %s", shellQuote(wrapper), shellQuote(name), shellQuote(dir)))
 }
 
 // KillAgent removes a probe session: zellij session, layout, marker, iTerm
@@ -548,7 +585,8 @@ func (s *Service) agentsViewLocked() AgentsView {
 
 // AttachSession opens the session in iTerm2 through the dynamic profile that
 // probe generates (profile name == session name). Falls back to Terminal
-// running `probe <name>`.
+// running `probe --attach <name>` (attachFallback): plain `probe <name>` on a
+// live seat prints "running; nothing started" and attaches nothing.
 func (s *Service) AttachSession(name string) error {
 	if strings.ContainsAny(name, "\"'\\\n") {
 		return errors.New("invalid session name")
@@ -561,15 +599,19 @@ end tell`, name)
 		if err := exec.Command("osascript", "-e", script).Run(); err == nil {
 			return nil
 		}
-		home, _ := os.UserHomeDir()
-		cmd := fmt.Sprintf("%s %s", shellQuote(filepath.Join(home, "bin", "probe")), shellQuote(name))
 		script = fmt.Sprintf(`tell application "Terminal"
 	activate
 	do script %s
-end tell`, appleScriptString(cmd))
+end tell`, appleScriptString(attachFallback(name)))
 		return exec.Command("osascript", "-e", script).Start()
 	}
-	return exec.Command("x-terminal-emulator", "-e", "bash", "-lc", "probe "+shellQuote(name)).Start()
+	return exec.Command("x-terminal-emulator", "-e", "bash", "-lc", attachFallback(name)).Start()
+}
+
+// attachFallback is the line a terminal runs to attach to a session when the
+// iTerm profile is not there.
+func attachFallback(name string) string {
+	return fmt.Sprintf("%s --attach %s", shellQuote(probeBin()), shellQuote(name))
 }
 
 // Scan reads the local disk and refreshes the cached local snapshot.

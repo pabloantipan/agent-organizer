@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"slices"
 	"strings"
 	"time"
@@ -436,8 +435,9 @@ func crewDir(initiativeID string) string {
 // sources at launch, and an opening prompt on the first run only. The token
 // itself is fetched at launch through `discuss-api token env`, so it lives in
 // the discuss registry and the process environment, nowhere else. Returns the
-// launch line of each seat; with open, runs them in one iTerm2 window, one
-// tab per seat. Seats that already have a session simply reattach.
+// launch line of each seat; with open, runs them one after another, each
+// seat started detached by probe (no window, no tab, no typed text). A seat
+// that already has a live session is left alone ("running; nothing started").
 func (s *Service) CreateCrew(initiativeID string, open bool) ([]string, error) {
 	var si *model.ScannedInitiative
 	s.mu.Lock()
@@ -527,40 +527,14 @@ func (s *Service) CreateCrew(initiativeID string, open bool) ([]string, error) {
 	if !open {
 		return cmds, nil
 	}
-	return cmds, openInTerminalTabs(cmds)
-}
-
-// openInTerminalTabs runs each command in its own tab of one new iTerm2
-// window; Terminal (one window per command) is the fallback.
-func openInTerminalTabs(cmds []string) error {
-	if len(cmds) == 0 {
-		return nil
-	}
-	if runtime.GOOS != "darwin" {
-		for _, c := range cmds {
-			if err := exec.Command("x-terminal-emulator", "-e", "bash", "-lc", c+"; exec bash").Start(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-	var b strings.Builder
-	b.WriteString("tell application \"iTerm2\"\n\tactivate\n\tset w to (create window with default profile)\n")
-	fmt.Fprintf(&b, "\ttell current session of w to write text %s\n", appleScriptString(cmds[0]))
-	for _, c := range cmds[1:] {
-		fmt.Fprintf(&b, "\ttell w\n\t\tset t to (create tab with default profile)\n\t\ttell current session of t to write text %s\n\tend tell\n", appleScriptString(c))
-	}
-	b.WriteString("end tell")
-	if err := exec.Command("osascript", "-e", b.String()).Run(); err == nil {
-		return nil
-	}
-	for _, c := range cmds {
-		script := fmt.Sprintf("tell application \"Terminal\"\n\tactivate\n\tdo script %s\nend tell", appleScriptString(c))
-		if err := exec.Command("osascript", "-e", script).Run(); err != nil {
-			return err
+	// One seat after another, each detached (launchProbe): no window opens.
+	// A seat that fails stops the rest; the seats already started stay up.
+	for i, c := range cmds {
+		if err := launchProbe(c); err != nil {
+			return cmds[:i], fmt.Errorf("seat %s: %w", si.Cell.Agents[i], err)
 		}
 	}
-	return nil
+	return cmds, nil
 }
 
 // preludeFor is the shell snippet a seat's pane sources before the agent
