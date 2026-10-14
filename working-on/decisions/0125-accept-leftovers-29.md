@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 29 - the crew list reads its result and closes, failures dated, deaf and capped show their count
-status: proposed
+status: ruled
 raised: 2026-10-14
 raised_by: fse
 owner: pablo
@@ -10,6 +10,9 @@ forecast: 30-60m
 threads: []
 supersedes: []
 superseded_by:
+ruled: 2026-10-14
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -45,3 +48,7 @@ start together); basis: leftovers-25 to 28, this initiative (leftovers-28:
 ## Recommendation
 
 The FSE's: accept as written.
+
+## Ruling
+
+pablo, 2026-10-14, in the organizer on lodestar: ok
