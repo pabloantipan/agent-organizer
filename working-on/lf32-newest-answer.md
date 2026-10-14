@@ -3,10 +3,10 @@ title: "The press's answer shows at once; repeats are said again; a dead confirm
 status: next
 repos: [organizer]
 branch: lf32-newest-answer
-seat:
+seat: nw-build
 stage: one-window
 updated: 2026-10-14
-next: "sup69 runs it (0128 ruled ok, 2026-10-14)"
+next: "nw-build builds it on branch lf32-newest-answer (sup69, 2026-10-14)"
 depends_on: []
 boundary: ["docs/specs/leftovers-32.md Boundary, lf32-newest-answer"]
 spec: "docs/specs/leftovers-32.md (FR-1 to FR-4; launch-progress L19-L22)"
