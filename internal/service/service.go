@@ -41,6 +41,8 @@ type Service struct {
 	prevAt    time.Time
 	openersMu sync.Mutex
 	openers   map[string]facts
+	// fetchThread replaces the human's Client.Thread in tests; nil is real.
+	fetchThread func(context.Context, string) (discuss.ThreadDetail, error)
 	// roleFiles caches the bitácoras and runs.jsonl the roles read (roles.go).
 	roleFiles roleFiles
 	// memReader reads this Mac's memory; mem tracks its levels over the
@@ -449,6 +451,9 @@ type AgentGroup struct {
 	// the gate rows, tokens and supervisor of each wave (FR-9, waves.go).
 	// Empty when no card names a wave.
 	Waves []Wave `json:"waves"`
+	// Tasks are the ruled accept records with a forecast and open cards,
+	// with their start, silence and state (tasks.go, leftovers-28 FR-3).
+	Tasks []Task `json:"tasks"`
 }
 
 type AgentsView struct {
@@ -510,8 +515,10 @@ func (s *Service) agentsViewLocked() AgentsView {
 	for i := range s.state.Local.Initiatives {
 		si := &s.state.Local.Initiatives[i]
 		g := AgentGroup{ID: si.ID, Title: si.Title, Client: si.Client, Path: si.Path}
+		var snap discuss.Snapshot
 		if si.Cell != nil {
-			snap, why := s.cellHealth(si.Cell)
+			var why string
+			snap, why = s.cellHealth(si.Cell)
 			g.Crew, g.Discuss = buildCrew(si, snap), why
 			g.Cell = crewCell(si.Cell, si.Decisions, g.Crew)
 			g.Waiting = cardsWaiting(si, snap)
@@ -542,6 +549,7 @@ func (s *Service) agentsViewLocked() AgentsView {
 		// After the agents: a wave reads the card-agent join stamped on them
 		// by the same feed, so the strip and the Agents rows never disagree.
 		g.Waves = waves(si)
+		g.Tasks = s.tasks(s.cfg, si, snap)
 		v.Groups = append(v.Groups, g)
 	}
 	v.Roles = s.rolesLocked(cells)

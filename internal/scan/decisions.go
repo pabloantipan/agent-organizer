@@ -1,6 +1,7 @@
 package scan
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -8,6 +9,7 @@ import (
 	"slices"
 	"sort"
 	"strings"
+	"time"
 
 	"organizer/internal/model"
 )
@@ -47,6 +49,13 @@ func readDecisions(dir string, problems []model.Problem) ([]model.Decision, []mo
 			continue
 		}
 		d.Body = body
+		if d.Forecast != "" {
+			top, err := model.ForecastTopMinutes(d.Forecast)
+			if err != nil {
+				problems = append(problems, model.Problem{Path: p, Msg: err.Error()})
+			}
+			d.ForecastTop = top
+		}
 		problems = append(problems, checkDecision(d)...)
 		out = append(out, d)
 	}
@@ -114,4 +123,30 @@ func checkDecisionLinks(ds []model.Decision) []model.Problem {
 		}
 	}
 	return ps
+}
+
+// rulingTimes stamps RuledAt on ruled records that carry a forecast: the
+// committer time of the oldest commit that adds `status: ruled` to the file.
+// Not a repo, or no such commit, leaves it empty and is no problem.
+func rulingTimes(ds []model.Decision, timeout time.Duration) {
+	if timeout <= 0 {
+		timeout = 5 * time.Second
+	}
+	for i := range ds {
+		d := &ds[i]
+		if d.Forecast == "" || d.Status != model.DecisionRuled {
+			continue
+		}
+		d.RuledAt = rulingCommitTime(d.Path, timeout)
+	}
+}
+
+func rulingCommitTime(path string, timeout time.Duration) string {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	out, err := git(ctx, filepath.Dir(path), "log", "--reverse", "--format=%cI", "-S", "status: ruled", "--", filepath.Base(path))
+	if err != nil || out == "" {
+		return ""
+	}
+	return strings.SplitN(out, "\n", 2)[0]
 }

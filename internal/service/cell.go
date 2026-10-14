@@ -171,11 +171,17 @@ func (s *Service) threadFacts(cfg config.Config, cell *model.Cell, threads []dis
 	}
 	s.openersMu.Unlock()
 	if len(missing) > 0 && cell.Human != "" {
-		if c, err := discuss.Connect(discussStateDir(cfg), cell.Project, cell.Human); err == nil {
+		fetch := s.fetchThread
+		if fetch == nil {
+			if c, err := discuss.Connect(discussStateDir(cfg), cell.Project, cell.Human); err == nil {
+				fetch = c.Thread
+			}
+		}
+		if fetch != nil {
 			ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
 			defer cancel()
 			for _, id := range missing {
-				d, err := c.Thread(ctx, id)
+				d, err := fetch(ctx, id)
 				if err != nil {
 					continue
 				}
