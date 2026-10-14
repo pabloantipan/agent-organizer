@@ -157,3 +157,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-14 — leftovers-27 graded: launch-progress Amendment 1 (result heading, list of this press only, Close the list, dated failure row, deaf/capped badges draw the count, ring floor 2 px as built), rows L8-L12.
 - 2026-10-14 — task-rows spec (lf28 findings): stalled amber not red, n× its forecast, fact before title, verb lands on the supervisor or the card, capped words; rows N1-N5.
 - 2026-10-14 — leftovers-29 graded: launch-progress Amendment 2 (landed row centred then kept in view, Seat up closes at 5 s, failures never time out, shared amber kept), rows L13-L14.
+- 2026-10-14 — lvw-ui answered: launch-progress Amendment 3 (landed row keeps an 8 px scroll margin, focus after a self-close goes to Reattach all only if it was in the list), rows L15-L16.

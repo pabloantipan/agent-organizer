@@ -208,3 +208,28 @@ From sup66's close (`runs/2026-10-14-sup66-leftovers-29.md`,
 |---|---|---|
 | L13 | keep the landed row in sight | after an `openAgentsAt` landing, the row is centred, and after two feed updates (20 s) it is still whole in view; after the lead scrolls, it is not pulled back |
 | L14 | trust the timing | `Seat up` and `Crew up` close after 5 s; any list with `didn't start` stays |
+
+## Amendment 3 (aglaea, 2026-10-14): from lf30-launch-view's UI review
+
+From the lvw-ui review (`working-on/lf30-launch-view.md`, ## UI review, pass
+at 7c35c18).
+
+- **A kept landing keeps a margin.** Flush is not acceptable: the ring is
+  part of the row, and a clipped ring reads as a row cut off. The landed row
+  carries `scroll-margin-block: var(--space-2)` (8 px), so both the centring
+  and every `nearest` pull leave the whole ring, plus air, inside the
+  scroller. This follows the design-system floor (the ring clears its
+  neighbour by at least 2 px; the scroller's edge is a neighbour).
+- **Focus after a list closes by itself goes to the button that started
+  it.** When `Seat up` or `Crew up` closes after 5 s, focus moves from the
+  heading (which is leaving) to the crew block's launch button, which by
+  then reads `Reattach all`. That is the same target as `Close the list`,
+  and the press that opened the list. Confirmed as built.
+  - Only when focus was inside the list. If the lead had moved elsewhere,
+    the close takes nothing from them.
+  - Never the body: a vanished focus drops Tab to the top of the page.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| L15 | see the whole landed row | after an `openAgentsAt` landing and two feed updates, the row's focus ring is whole, with at least 2 px between it and the scroller's edge |
+| L16 | keep their place when a list closes | with focus in the list, `Seat up` closes and focus is on `Reattach all`; with focus elsewhere, it stays there |
