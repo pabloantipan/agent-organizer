@@ -32,14 +32,18 @@
 .fl-search:focus { outline: 2px solid var(--focus-ring); outline-offset: 0; border-color: transparent; }
 
 /* The list ends 8 px under its last row (Amendment 3): the bottom padding
-   and the scroll edge's 1 px line make the 8. */
+   and the scroll edge's 1 px line make the 8. leftovers-27 FR-10 (T22): 4 px
+   above the first row, so the inset ring clears it. */
 .fl-body {
-  flex: 1; min-height: 0; overflow-y: auto; padding: 0 var(--space-2) calc(var(--space-2) - 1px);
+  flex: 1; min-height: 0; overflow-y: auto; padding: var(--space-1) var(--space-2) calc(var(--space-2) - 1px);
   border-top: 1px solid transparent; border-bottom: 1px solid transparent;
 }
 /* The scroll edge (design system, Widths). */
 .fl-body.edge-top { border-top-color: var(--fg-subtle); }
 .fl-body.edge-bottom { border-bottom-color: var(--fg-subtle); }
+/* A stop while it scrolls (leftovers-26 FR-3): its ring inside its box, as
+   every scroll stop's, so the window's edge never clips it. */
+.fl-body:focus-visible { outline-offset: -2px; }
 
 .fl-row {
   display: flex; align-items: center; gap: var(--space-2); width: 100%; height: 36px;

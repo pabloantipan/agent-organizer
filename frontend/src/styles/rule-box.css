@@ -46,6 +46,10 @@
    (useScrollEdges, scrollStop); its ring sits inside its box, so the
    overflow around it never clips it. */
 .rb .rb-record:focus-visible { outline-offset: -2px; }
+/* leftovers-27 FR-10 (T22): 4 px inside the record on each side, so the
+   ring clears its first line; the inline margin gives the 4 px back, so the
+   text lines up with the rest of the box. */
+.rb .rb-record { padding: var(--space-1); margin: 0 calc(-1 * var(--space-1)); }
 /* FR-5 (row 10): a body never widens its box. Each grid in the record takes
    one column that may shrink under its content's width, so a wide pre or
    table scrolls inside itself (global.css, .markdown pre) with its side
