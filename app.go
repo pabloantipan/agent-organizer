@@ -51,6 +51,9 @@ func (a *App) startup(ctx context.Context) {
 		wruntime.LogInfof(ctx, "memory reading forced by %s=%s", memoryFakeEnv, os.Getenv(memoryFakeEnv))
 	}
 	svc.OnMemoryWarn = a.memoryWarn
+	// Every change of a seat start moves the view at once, on the agents
+	// event the 10 s tick also sends (leftovers-27 FR-1).
+	svc.OnLaunch = func(service.LaunchChange) { a.emitAgents() }
 	notifyStart(a, faked)
 	go a.agentTicker(ctx)
 	floatIconStart(ctx)
@@ -133,6 +136,15 @@ func (a *App) memoryNotificationClicked() {
 // MemoryNotifications says whether the warning can reach him: "on", "off"
 // (for Deltagos, in System Settings; the popover says so), "not asked",
 // "no bundle" or "not installed" (a review build or a fixture run).
+// emitAgents samples agents and sends the view as the "agents" event. Without
+// a Wails context (a test) it sends nothing.
+func (a *App) emitAgents() {
+	if a.ctx == nil {
+		return
+	}
+	wruntime.EventsEmit(a.ctx, "agents", a.refreshAgents())
+}
+
 func (a *App) MemoryNotifications() string { return notifyState() }
 
 // agentTicker re-samples agents and pushes the view to the frontend as the
@@ -376,6 +388,7 @@ func (a *App) GetAgents() service.AgentsView {
 }
 
 // CreateAgent starts a new probe for an initiative (empty name = animal name).
+// It returns once the seat is queued; its states ride the agents event.
 func (a *App) CreateAgent(initiativeID, name string) error {
 	if a.svc == nil {
 		return errString(a.err)
@@ -384,12 +397,38 @@ func (a *App) CreateAgent(initiativeID, name string) error {
 }
 
 // CreateCrew launches every seat of the initiative's cell: one probe per
-// persona in one iTerm2 window. Returns the launch lines it ran.
+// persona, each started detached by probe, no window opens. It returns the
+// launch lines once the seats are queued; they start one after another in
+// the background and their states ride the agents event.
 func (a *App) CreateCrew(initiativeID string) ([]string, error) {
 	if a.svc == nil {
 		return nil, errString(a.err)
 	}
 	return a.svc.CreateCrew(initiativeID, true)
+}
+
+// StopStarting skips the initiative's seats still waiting to start; the one
+// in flight finishes.
+func (a *App) StopStarting(initiativeID string) {
+	if a.svc != nil {
+		a.svc.StopStarting(initiativeID)
+	}
+}
+
+// RetrySeat starts one seat that did not start again.
+func (a *App) RetrySeat(initiativeID, seat string) error {
+	if a.svc == nil {
+		return errString(a.err)
+	}
+	return a.svc.RetrySeat(initiativeID, seat)
+}
+
+// SeenLaunch records that the lead has seen the initiative's seat start, so
+// a failure leaves Needs me.
+func (a *App) SeenLaunch(initiativeID string) {
+	if a.svc != nil {
+		a.svc.SeenLaunch(initiativeID)
+	}
 }
 
 // DraftCell opens a drafting session for an initiative without a cell; with

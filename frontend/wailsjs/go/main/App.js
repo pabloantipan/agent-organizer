@@ -150,6 +150,10 @@ export function Retire(arg1) {
   return window['go']['main']['App']['Retire'](arg1);
 }
 
+export function RetrySeat(arg1, arg2) {
+  return window['go']['main']['App']['RetrySeat'](arg1, arg2);
+}
+
 export function Reveal(arg1) {
   return window['go']['main']['App']['Reveal'](arg1);
 }
@@ -180,6 +184,10 @@ export function ScopeType() {
 
 export function SearchCell(arg1, arg2) {
   return window['go']['main']['App']['SearchCell'](arg1, arg2);
+}
+
+export function SeenLaunch(arg1) {
+  return window['go']['main']['App']['SeenLaunch'](arg1);
 }
 
 export function SetCardOrder(arg1, arg2) {
@@ -228,6 +236,10 @@ export function StageType() {
 
 export function StopAgent(arg1) {
   return window['go']['main']['App']['StopAgent'](arg1);
+}
+
+export function StopStarting(arg1) {
+  return window['go']['main']['App']['StopStarting'](arg1);
 }
 
 export function SyncNow() {

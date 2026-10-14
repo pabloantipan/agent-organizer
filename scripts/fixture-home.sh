@@ -109,6 +109,14 @@
 # `env $FIXTURE_NOFACTORY_ENV` (a HOME without bin/factory and a PATH
 # without the fake).
 #
+# Seat starts (docs/specs/leftovers-27.md FR-4): no fixture launch starts a
+# real seat. Export ORGANIZER_PROBE_BIN="$PWD/scripts/probe-stub.sh" before
+# launching the app or `organizer crew|run`, and the stub stands in for probe
+# and every family wrapper: each seat "starts" in PROBE_STUB_SLEEP seconds
+# (default 3), and a seat whose short name is in PROBE_STUB_FAIL (b,c) fails
+# twice with exit 3 and two pane lines. PROBE_STUB_LOG names a file that
+# gets one line per call. The crew's discuss-api token preflight still runs.
+#
 # The FSE thread of G19 lives in the discuss mailbox, project organizer-fixture,
 # not on disk; the supervisor posted it once. Ruling it or the records only
 # touches this temp copy.

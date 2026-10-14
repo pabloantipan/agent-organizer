@@ -61,6 +61,7 @@ func runCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now func
 		fmt.Fprintln(stdout, l.Command)
 		return 0
 	}
+	svc.OnLaunch = launchLines(stdout)
 	if _, err := svc.RunCard(args[0], args[1]); err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1

@@ -1731,6 +1731,93 @@ export namespace service {
 		    return a;
 		}
 	}
+	export class SeatLaunch {
+	    seat: string;
+	    session: string;
+	    state: string;
+	    // Go type: time
+	    started_at?: any;
+	    reason?: string;
+	    exit?: number;
+	    output?: string;
+	    launch_line: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new SeatLaunch(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.seat = source["seat"];
+	        this.session = source["session"];
+	        this.state = source["state"];
+	        this.started_at = this.convertValues(source["started_at"], null);
+	        this.reason = source["reason"];
+	        this.exit = source["exit"];
+	        this.output = source["output"];
+	        this.launch_line = source["launch_line"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class InitiativeLaunch {
+	    initiative: string;
+	    kind: string;
+	    seats: SeatLaunch[];
+	    seen: boolean;
+	    running: number;
+	    failed: number;
+	    done: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new InitiativeLaunch(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.initiative = source["initiative"];
+	        this.kind = source["kind"];
+	        this.seats = this.convertValues(source["seats"], SeatLaunch);
+	        this.seen = source["seen"];
+	        this.running = source["running"];
+	        this.failed = source["failed"];
+	        this.done = source["done"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class AgentsView {
 	    groups: AgentGroup[];
 	    unassigned: model.Agent[];
@@ -1739,6 +1826,7 @@ export namespace service {
 	    sampled_at: any;
 	    memory?: model.Memory;
 	    memory_reason?: string;
+	    launches: InitiativeLaunch[];
 	
 	    static createFrom(source: any = {}) {
 	        return new AgentsView(source);
@@ -1752,6 +1840,7 @@ export namespace service {
 	        this.sampled_at = this.convertValues(source["sampled_at"], null);
 	        this.memory = this.convertValues(source["memory"], model.Memory);
 	        this.memory_reason = source["memory_reason"];
+	        this.launches = this.convertValues(source["launches"], InitiativeLaunch);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -2072,6 +2161,7 @@ export namespace service {
 	        this.problem = source["problem"];
 	    }
 	}
+	
 	export class LockState {
 	    enabled: boolean;
 	    unlocked: boolean;
@@ -2201,6 +2291,7 @@ export namespace service {
 		    return a;
 		}
 	}
+	
 	
 	export class SleepResult {
 	    id: string;

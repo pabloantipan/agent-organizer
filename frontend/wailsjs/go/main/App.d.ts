@@ -82,6 +82,8 @@ export function ResetPassword(arg1:string):Promise<void>;
 
 export function Retire(arg1:service.RetireOptions):Promise<service.RetireReport>;
 
+export function RetrySeat(arg1:string,arg2:string):Promise<void>;
+
 export function Reveal(arg1:string):Promise<void>;
 
 export function ReviewPrompt(arg1:string):Promise<string>;
@@ -97,6 +99,8 @@ export function SaveConfig(arg1:config.Config):Promise<void>;
 export function ScopeType():Promise<model.Scope>;
 
 export function SearchCell(arg1:string,arg2:string):Promise<Array<discuss.Message>>;
+
+export function SeenLaunch(arg1:string):Promise<void>;
 
 export function SetCardOrder(arg1:string,arg2:Array<string>):Promise<void>;
 
@@ -121,6 +125,8 @@ export function Sleep(arg1:string):Promise<service.SleepResult>;
 export function StageType():Promise<model.Stage>;
 
 export function StopAgent(arg1:number):Promise<void>;
+
+export function StopStarting(arg1:string):Promise<void>;
 
 export function SyncNow():Promise<service.SyncResult>;
 
