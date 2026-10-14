@@ -234,7 +234,7 @@ function InboxRow({ row }: { row: NeedsMeRow }) {
         <Shell row={row} reason="didn't start" tone="danger"
           subject={failedStartLine(row.launch)}
           context={failed.map((s) => `${s.seat}: ${s.reason}`).join(" · ")}>
-          <button className="act" aria-label={`Agents ${row.initiative}`} onClick={() => openInitiative(row.initiative, "agents")} title="its Agents shows the seats, with Try again">Agents</button>
+          <button className="act" aria-label={`Agents ${row.initiative}`} onClick={() => openAgentsAt(row.initiative, "launch")} title="its Agents shows the seats, with Try again">Agents</button>
         </Shell>
       );
     }

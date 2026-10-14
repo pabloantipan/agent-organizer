@@ -134,9 +134,16 @@ function LaunchList({ initiative, launch, focusHead, say, onClose }: { initiativ
     focusHead.current = false;
     head.current?.focus();
   }, [focusHead]);
+  // A button that goes while it has focus (Stop starting once nothing
+  // waits, Try again once its seat starts again) hands focus back to the
+  // heading, never to the body.
+  const inside = useRef(false);
+  useEffect(() => {
+    if (inside.current && (document.activeElement === document.body || !document.activeElement)) head.current?.focus();
+  });
   const failed = launch.done && launch.failed > 0;
   return (
-    <div className="launch">
+    <div className="launch" onFocus={() => { inside.current = true; }} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) inside.current = false; }}>
       <div className="crew-head">
         <h3 ref={head} tabIndex={-1} className="launch-head">{launchHeading(launch)}</h3>
         <span className="spacer" />
@@ -248,9 +255,13 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
   const { opener: crewUp, commit: openBtn } = useConfirmFocus(asking);
   const box = useRef<HTMLDivElement>(null);
   const { agentsLanding, clearAgentsLanding } = useBoard();
-  const [said, say] = useAnnouncer(launch);
+  // Only a crew start speaks here; New agent says its own seat (§3).
+  const [said, say] = useAnnouncer(launch?.kind === "crew" ? launch : undefined);
   const focusHead = useRef(false);
   const [, setClosedAt] = useState(0);
+  // Focus was in the list when it closed (all running, 5 s on): it goes to
+  // the crew block's button, which is back, not to the body.
+  const listHadFocus = useRef(false);
   // A failure shown here is seen (FR-7): its Needs me row goes.
   const unseen = !!launch && launch.failed > 0 && !launch.seen;
   useEffect(() => { if (unseen) SeenLaunch(group.id).catch(() => undefined); }, [unseen, group.id]);
@@ -258,14 +269,17 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
   // Open on the seat whose persona file is missing.
   useEffect(() => {
     if (!agentsLanding) return;
-    const el = agentsLanding === "crew-up"
+    // A failed start's Agents (FR-7) lands on the list's heading.
+    const el = agentsLanding === "launch"
+      ? box.current?.querySelector<HTMLElement>(".launch-head")
+      : agentsLanding === "crew-up"
       ? crewUp.current
       : box.current?.querySelector<HTMLElement>(`[data-seat="${CSS.escape(agentsLanding.replace(/^seat:/, ""))}"]`);
     if (!el) return;
     el.focus();
     el.scrollIntoView({ block: "nearest" });
     clearAgentsLanding();
-  }, [agentsLanding, clearAgentsLanding, crewUp, group.crew]);
+  }, [agentsLanding, clearAgentsLanding, crewUp, group.crew, launch]);
   const cell = group.cell;
   if (!cell) return null;
   const seats = group.crew ?? [];
@@ -285,9 +299,17 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
   };
   const showList = !!launch && launch.kind === "crew" && closed.get(group.id) !== shapeOf(launch);
 
+  if (!showList && listHadFocus.current) {
+    listHadFocus.current = false;
+    window.setTimeout(() => {
+      if (document.activeElement && document.activeElement !== document.body) return;
+      (crewUp.current ?? box.current?.querySelector<HTMLElement>("button:not([disabled])"))?.focus();
+    }, 0);
+  }
+
   if (showList) {
     return (
-      <div className="crew" ref={box}>
+      <div className="crew" ref={box} onFocus={() => { listHadFocus.current = true; }} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) listHadFocus.current = false; }}>
         <span className="sr-only" role="status" aria-live="polite">{said}</span>
         <div className="crew-head">
           <Users size={14} />

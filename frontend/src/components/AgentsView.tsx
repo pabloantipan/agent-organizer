@@ -173,8 +173,9 @@ export function agentStart(launch: Launch | undefined, seat: string | undefined)
  *  the visible text, and its name with the reason and the seconds. */
 export function startingButton(s: Pick<SeatStart, "seat" | "state" | "started_at">, now: number): { text: string; name: string } {
   const n = elapsed(s, now);
-  if (s.state === "retrying") return { text: `Trying again · ${n} s`, name: `Trying again to start ${s.seat}, ${n} seconds` };
-  if (s.state === "starting") return { text: `Starting · ${n} s`, name: `Starting ${s.seat}, ${n} seconds` };
+  const secs = `${n} second${n === 1 ? "" : "s"}`;
+  if (s.state === "retrying") return { text: `Trying again · ${n} s`, name: `Trying again to start ${s.seat}, ${secs}` };
+  if (s.state === "starting") return { text: `Starting · ${n} s`, name: `Starting ${s.seat}, ${secs}` };
   return { text: "Waiting to start", name: `${s.seat} waits for the seats before it` };
 }
 
@@ -210,7 +211,7 @@ function NewAgent({ initiativeId }: { initiativeId: string }) {
   useEffect(() => {
     if (state !== "failed") return;
     retry.current?.focus();
-    setSaid(`${s!.seat} didn't start`);
+    if (launch?.kind !== "crew") setSaid(`${s!.seat} didn't start`);
     SeenLaunch(initiativeId).catch(() => undefined);
   }, [state]);
   // Running: focus to the new agent's row once the feed draws it.
@@ -221,7 +222,7 @@ function NewAgent({ initiativeId }: { initiativeId: string }) {
     if (s.state !== "running") return;
     const row = document.querySelector<HTMLElement>(`ul.agents > li[data-session="${CSS.escape(s.session)}"]`);
     if (!row) return;
-    setSaid(`${s.seat} running`);
+    if (launch?.kind !== "crew") setSaid(`${s.seat} running`);
     setTarget(undefined);
     row.focus();
     row.scrollIntoView({ block: "nearest" });

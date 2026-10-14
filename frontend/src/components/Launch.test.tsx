@@ -110,6 +110,7 @@ describe("New agent's button (V3)", () => {
   it("reads Starting · n s, then Trying again · n s, with the reason in its name", () => {
     const at = new Date(T0 - 23_000).toISOString();
     expect(startingButton(seat("otter", "starting", { started_at: at }), T0)).toEqual({ text: "Starting · 23 s", name: "Starting otter, 23 seconds" });
+    expect(startingButton(seat("otter", "starting", { started_at: new Date(T0 - 1000).toISOString() }), T0).name).toBe("Starting otter, 1 second");
     expect(startingButton(seat("otter", "retrying", { started_at: at }), T0 + 18_000)).toEqual({ text: "Trying again · 41 s", name: "Trying again to start otter, 41 seconds" });
   });
 
