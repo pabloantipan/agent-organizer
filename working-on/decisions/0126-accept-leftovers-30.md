@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 30 - crew start skips running seats, failures dated, the landed row stays in view, badges show the deaf count
-status: proposed
+status: ruled
 raised: 2026-10-14
 raised_by: fse
 owner: pablo
@@ -10,6 +10,9 @@ forecast: 30-55m
 threads: []
 supersedes: []
 superseded_by:
+ruled: 2026-10-14
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -40,3 +43,7 @@ basis: leftovers-27 to 29, this initiative (leftovers-29: 36 min).
 ## Recommendation
 
 The FSE's: accept as written.
+
+## Ruling
+
+pablo, 2026-10-14, in the organizer on lodestar: ok
