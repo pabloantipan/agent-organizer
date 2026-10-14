@@ -4,6 +4,12 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-14 ~15:40, leftovers-30 landed
+
+- **Last SHA seen:** 8bc3159 (+ Aglaea's f07eced). 0126 ruled ok 15:00 (4af1228); sup67 ran it 15:01-15:34, 33 min against 30-55m, $11.53, 5 seats (run record runs/2026-10-14-sup67-leftovers-30.md). lf30-launch-go 53db688, lf30-launch-view 8bc3159, both reviews pass. sup67 ended, token revoked, files removed, clean; installed v0.2.0-2079-gf07eced; tree clean. No supervisor running.
+- **Carry for leftovers-31:** launch-progress Amendment 3 (f07eced): L15 landed row `scroll-margin-block: var(--space-2)` (lvw-ui U1, ring clipped flush at the edge); L16 focus after Seat up self-closes goes to the launch button only when focus was in the list, never the body. Asked Aglaea: words for Bring crew up when every seat already runs (nothing queued, nothing shown). Older carry: the fixture Roles group shows this Mac's real role sessions in a review build.
+- Forecast check: second task in a row inside its band with shared runs (lf29 36 min, lf30 33 min); the 30-55m band held.
+
 ## HAND-OFF — 2026-10-14, leftovers-27 running
 
 - **0123 ruled ok** (bdf0430): leftovers-27 (d51bbc5, 72eb94e). sup64 runs it detached, two waves (state + polish, then view). aglaea frozen before the wave (seat-freeze; 2.2 GB free); seat-thaw organizer-probe-aglaea when findings route to her. Old seat prompts naming TEST_LEASE_PRESSURE_LEVEL removed (22, finished waves). On close: probe -k sup64, token rm, files, clean, make install, thaw aglaea.
