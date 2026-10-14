@@ -1,6 +1,6 @@
 ---
 title: "The press's answer shows at once; repeats are said again; a dead confirm closes; focus never drops"
-status: now
+status: done
 repos: [organizer]
 branch: lf32-newest-answer
 seat: nw-build
@@ -12,6 +12,7 @@ boundary: ["docs/specs/leftovers-32.md Boundary, lf32-newest-answer"]
 spec: "docs/specs/leftovers-32.md (FR-1 to FR-4; launch-progress L19-L22)"
 gate: "docs/specs/leftovers-32.md Acceptance, rows N1, N2, N3, N4 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -32,6 +33,19 @@ docs/specs/leftovers-32.md, rows N1, N2, N3, N4 and X0.
 ## Notes
 - The first N2 harness run showed a 0 ms timer queued at once batching with the empty text in WKWebView, so race 2 said nothing; the hook now queues the timer after the empty text commits.
 - Cancel and Escape on the confirm still return focus to the opener; FR-4's "the confirm's close" is read as FR-3's close.
+
+## Review
+nw-review, 2026-10-14, commit 1cb7c3822b5cd11c76839c5ddff8607fbd15001d (the branch did not move). Verdict: **pass**. Unmet rows: none.
+
+All runs from a fresh clone at 1cb7c38 under `.wt-notes/nw-review/clean` (removed after); evidence in `.wt-notes/nw-review/`. Harness rows: my own `wails dev -devserver localhost:34198`, fixture exported, `auth: off`, `ORGANIZER_PROBE_BIN` = the probe stub (via the builder's stand-in wrapper), a fake `discuss-api`; Tab harness offscreen at 1024x640 with the builder's steps files copied. Diff: no Go file, no new service call; the race reads `CreateCrew`'s existing result (`startCrew`'s `none`). Changes stay inside the Boundary.
+
+- N1 met: stale feed via the page's own `applyAgents` (fse off), Bring 1 up, Start: at once meta `3 seats · 3 live · 0 off`, no launch button, region `Every seat is already running`; after the next real feed the same, same meta node, 0 mutations; the stub log shows no probe call for the press (`out/n1n2.jsonl`). My first n1n2 run was a real launch, not the race, because fse was off in CreateCrew's scan (`out/n1n2-run1.jsonl`); the rerun with fse running is the one counted.
+- N2 met: `liveRegion.test.ts` with fake timers reads `""`, `a`, `""`, `a`, and never calls rAF (`n-vitest.txt`); harness region timeline `[[1263,""],[3843,"Every…"],[12272,""],[12274,"Every…"]]`, so the second race empties and announces again.
+- N3 met: confirm open with focus on Start, then `applyAgents` with fse live: confirm gone, words unchanged before it closed, focus `Attach fse`, the first seat's Attach (`out/n3.jsonl`).
+- N4 met: vitest of `focusAfter` gives first Attach, second Attach, `Bring 3 up`, `Retire…`, never the body (`Crew.newest.test.tsx`, `n-vitest.txt`); harness: fse's stand-in killed by saved pid, Bring 1 up, fse shown off at `Seat up`, list closes by itself, focus `Bring 1 up` (`out/n4.jsonl`).
+- X0 met: `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test` **reused** run `1da99a7e-41271` of 1cb7c3822b5c (nw-ui's), exit 0, Go ok, vitest 60 files / 703 tests (`x0-make-test.txt`); `pnpm run build` exit 0; `wails build` exit 0; `git status --porcelain` empty (`x0-status.txt`).
+
+Not covered by the gate: N2 checks the text over time, not VoiceOver's speech (the gap is ~2 ms); FR-1's "names no seats" is the only branch that runs, since `CreateCrew` never returns seat names.
 
 ## UI review
 nw-ui, 2026-10-14, all rows on 1cb7c38 (the branch did not move). Verdict: **pass**. No severity 4 or 3.
