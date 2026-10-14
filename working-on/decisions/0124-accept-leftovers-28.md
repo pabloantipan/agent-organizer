@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 28 - a task over its forecast, a stalled task and an unanswered ask reach Needs me
-status: proposed
+status: ruled
 raised: 2026-10-14
 raised_by: fse
 owner: pablo
@@ -10,6 +10,9 @@ forecast: 60-100m
 threads: ["organizer 01M4GTXEHBBVMB3W8945PNN6GV"]
 supersedes: []
 superseded_by:
+ruled: 2026-10-14
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -44,3 +47,7 @@ initiative.
 ## Recommendation
 
 The FSE's: accept as written.
+
+## Ruling
+
+pablo, 2026-10-14, in the organizer on lodestar: ok
