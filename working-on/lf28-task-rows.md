@@ -41,3 +41,20 @@ Pass: R1, R2, R3 and X0 met on 79658865fdf0b6fe2b073de005213dca88da86e8, from a 
 - Unmet: none.
 - Noted, not gated: Home.tsx gained a whole `task` case beyond "only the second line" (a new kind cannot render otherwise); Needs me counts 16 with live discuss against fixture-home's 15; "twice its forecast" is said at 5× the band too.
 - Reviewer tr-review, 2026-10-14, commit 7965886.
+
+## UI review
+tr-ui, 2026-10-14, on 79658865 (7965886) throughout. **Verdict: pass** (no sev 4 or 3).
+
+Checked: R2 in the review build (`make review-build`, fixture-home, auth off, 1440×900 window): AX read of Needs me after AXPress "Show the other 11": row `stalled` · `init-a 0011 · Accept the task watch: stalled, 10 m, twice its forecast`, second line `record 0011 · w-task now · no post from its supervisor`, dated `10m`, verb `Agents init-a 0011` (accessible name carries the row); AXPress on it lands on init-a, Agents tab `.on`. Shots: `.wt-notes/tr-ui/wk-1440x900-r2-needsme-stalled.png`, `wk-1440x900-r2-agents-landed.png`; AX in `ax-needsme.txt`, `ax-agents.txt`. R1, R3: the branch's vitest (in the X0 run) plus reading `queue.ts`/`Home.tsx`. X0: `make test` **fresh**, test-lease run 4199e382-13147, rc 0, 658 vitest, Go ok (tr-review reused it); worktree `git status --porcelain` empty after it and after `make review-build`.
+
+Findings (none fails):
+- U1 (2) A capped asker is called "not picking up". Where: `threadContext` in `lib/queue.ts` (from code, no capped asker in the fixture). Evidence: `healthState` returns `capped` even when the watcher is alive, so the row reads `<seat> is not picking up (capped): Alive and posting, …`; FR-6 says the line appears when the watcher is not alive, and `HEALTH.capped.blocker` is "capped, mail waits for its next prompt". The lead may restart a seat that will get the answer. Proposal: use `HEALTH[state].blocker` after the seat name (deaf already reads "not picking up"), or skip capped when the watcher is alive.
+- U2 (1) "twice its forecast" said at 5×. Where: the R2 row (10 m on 1-2m). Evidence: shot above. The spec's words, kept by the builder. Proposal: "past twice its forecast" or "N× its forecast"; spec gap below.
+- U3 (2) Agents lands with nothing about the task. Where: `wk-1440x900-r2-agents-landed.png`. Evidence: the Agents view names no record 0011, no w-task, no seat of the task; focus stays on the web area. The lead must find the task's seats unaided. Proposal: land on the task's seat or card (as `openAgentsAt` does for seats); spec gap.
+- U4 (1) The fact sits at the end of a single-line, ellipsized subject/context (`.ib-subject`, `.ib-context` nowrap). At 1024 a long title or the stale-asker line ("… · hestia is not picking up (stale): Its wake watcher …") can cut the words that matter; the lozenge still says stalled/over, the title attribute holds the full context. Not seen: no resize done.
+
+Spec gaps for the FSE: "twice its forecast" at any multiple ≥ 2 (U2); what Agents shows on a task landing (U3); FR-6 vs capped (U1); fixture-home's "15" vs the 16 a review build shows with live discuss (one row from the live mailbox, not this card); the boundary allowed Home.tsx only for a second line, but a new row kind needs its `task` case to render at all.
+
+For aglaea: stalled uses the danger (blocked red) lozenge, as escalated does; is red right for "late" rather than "stopped"? Over uses tone.
+
+Not verified in WKWebView: the over and on states (vitest only; reachable by editing 0011's forecast, not done), a stale/deaf/capped asker row (canned health has none asking pablo; vitest R3 and code), 1024×640 (no AX resize, rules allow reads and AXPress only), keyboard/focus order.
