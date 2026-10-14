@@ -7,7 +7,7 @@ restating it (the discuss skill).
 ## HAND-OFF — 2026-10-14 ~15:40, leftovers-30 landed
 
 - **Last SHA seen:** 8bc3159 (+ Aglaea's f07eced). 0126 ruled ok 15:00 (4af1228); sup67 ran it 15:01-15:34, 33 min against 30-55m, $11.53, 5 seats (run record runs/2026-10-14-sup67-leftovers-30.md). lf30-launch-go 53db688, lf30-launch-view 8bc3159, both reviews pass. sup67 ended, token revoked, files removed, clean; installed v0.2.0-2079-gf07eced; tree clean. No supervisor running.
-- **leftovers-31 proposed as 0127** (spec docs/specs/leftovers-31.md, card lf31-crew-button, forecast 20-40m): L15-L18 from launch-progress Amendments 3 (f07eced) and 4 (703d3b5). On accept: sup68, one wave. Older carry: the fixture Roles group shows this Mac's real role sessions in a review build.
+- **leftovers-31 (0127 ruled "go") run by sup68.** Carry for leftovers-32: launch-progress Amendment 5 (75bc7c6) L19-L22 from cb-ui (press result applied at once; live regions cleared before saying, app-wide; stale confirm closes; focus chain Attach → Bring n up → Retire…). On close: probe -k sup68, token rm, files, clean, make install. Older carry: the fixture Roles group shows this Mac's real role sessions in a review build.
 - Forecast check: second task in a row inside its band with shared runs (lf29 36 min, lf30 33 min); the 30-55m band held.
 
 ## HAND-OFF — 2026-10-14, leftovers-27 running
