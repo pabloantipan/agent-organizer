@@ -40,6 +40,9 @@ func crewCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now fun
 	st, _ := cache.Load()
 	svc := service.NewWith(cfg, st, now)
 	svc.Scan(false)
+	if !print {
+		svc.OnLaunch = launchLines(stdout)
+	}
 	cmds, err := svc.CreateCrew(id, !print)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
@@ -52,8 +55,32 @@ func crewCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now fun
 		}
 		return 0
 	}
-	fmt.Fprintf(stdout, "started %d seats detached (watch: seats open, or probe --attach <session>)\n", len(cmds))
+	got, _ := svc.WaitLaunch(id)
+	fmt.Fprintf(stdout, "%d of %d seats running detached (watch: seats open, or probe --attach <session>)\n", got.Running, len(got.Seats))
+	if got.Failed > 0 {
+		return 1
+	}
 	return 0
+}
+
+// launchLines prints each seat's state as it changes, one line each:
+// `<seat> <state>`, and for a failed seat the reason, probe's exit and its
+// output's last line. The CLI waits for the start; the app shows the same
+// states from the agents feed.
+func launchLines(w io.Writer) func(service.LaunchChange) {
+	return func(c service.LaunchChange) {
+		if c.Seat == nil {
+			return
+		}
+		if c.Seat.State != service.LaunchFailed {
+			fmt.Fprintf(w, "%s %s\n", c.Seat.Seat, c.Seat.State)
+			return
+		}
+		fmt.Fprintf(w, "%s failed: %s\n", c.Seat.Seat, c.Seat.Reason)
+		if c.Seat.Output != "" {
+			fmt.Fprintf(w, "  %s\n", strings.ReplaceAll(c.Seat.Output, "\n", "\n  "))
+		}
+	}
 }
 
 // statuslineCmd is the Claude Code statusLine command. It reads the JSON the
