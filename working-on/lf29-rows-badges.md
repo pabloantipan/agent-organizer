@@ -6,7 +6,7 @@ branch: lf29-rows-badges
 seat:
 stage: one-window
 updated: 2026-10-14
-next: "pablo: rule 0125 (accept leftovers-29); on accept the FSE starts its supervisor"
+next: "sup66 runs it (0125 ruled ok, 2026-10-14)"
 depends_on: [lf28-task-rows]
 boundary: ["docs/specs/leftovers-29.md Boundary, lf29-rows-badges"]
 spec: "docs/specs/leftovers-29.md (FR-5 to FR-8; launch-progress L11, L12; task-rows N1-N5)"

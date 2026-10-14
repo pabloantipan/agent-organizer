@@ -6,7 +6,7 @@ branch: lf29-crew-list
 seat:
 stage: one-window
 updated: 2026-10-14
-next: "pablo: rule 0125 (accept leftovers-29); on accept the FSE starts its supervisor"
+next: "sup66 runs it (0125 ruled ok, 2026-10-14)"
 depends_on: []
 boundary: ["docs/specs/leftovers-29.md Boundary, lf29-crew-list"]
 spec: "docs/specs/leftovers-29.md (FR-1 to FR-4; launch-progress L8-L10)"
