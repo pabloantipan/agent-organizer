@@ -460,7 +460,7 @@ func TestLaunchStatesThroughTheStub(t *testing.T) {
 func TestLaunchAllRunningIsDroppedAfterFiveSeconds(t *testing.T) {
 	c := newStubCrew(t, "")
 	var kept []time.Duration
-	c.s.after = func(d time.Duration, f func()) { kept = append(kept, d) }
+	c.s.after = func(d time.Duration, f func()) { c.mu.Lock(); kept = append(kept, d); c.mu.Unlock() }
 	if _, err := c.s.CreateCrew("init-crew", true); err != nil {
 		t.Fatal(err)
 	}
@@ -468,9 +468,20 @@ func TestLaunchAllRunningIsDroppedAfterFiveSeconds(t *testing.T) {
 	if got.Running != 3 || !got.Seen {
 		t.Fatalf("all three should run: %+v", got)
 	}
+	// The drop's notice is scheduled just after the start settles.
+	for end := time.Now().Add(5 * time.Second); time.Now().Before(end); time.Sleep(10 * time.Millisecond) {
+		c.mu.Lock()
+		n := len(kept)
+		c.mu.Unlock()
+		if n > 0 {
+			break
+		}
+	}
+	c.mu.Lock()
 	if !slices.Equal(kept, []time.Duration{launchKeep}) || launchKeep != 5*time.Second {
 		t.Errorf("drop scheduled %v, want once after 5s", kept)
 	}
+	c.mu.Unlock()
 	c.advance(4999 * time.Millisecond)
 	if seatsOf(c.s, "init-crew") == nil {
 		t.Fatal("dropped early")
