@@ -4,6 +4,14 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-14 ~17:30, leftovers-32 landed, leftovers-33 proposed
+
+- **Last SHA seen:** d989ac2 (+ Aglaea's 469a605). leftovers-31: sup68, 19 min vs 20-40m, $6.37, 320ce40. leftovers-32: sup69, 15 min vs 20-40m, $5.74, d989ac2; installed v0.2.0-2109-gd989ac2; sup68 and sup69 ended. No supervisor running.
+- **leftovers-33 proposed as 0129** (card lf33-press-running, Go + frontend, 20-40m): launch-progress Amendment 6 L23-L25. On accept: sup70, one wave.
+- Hephaistos 2026-10-14: `forecast:` is in the working-on skill (claudecode 1568717); asks show from the first minute (kept); the fse skill's manual relay of asks ends next.
+- Forecast check: one-card tasks land in 15-20 min, under 20-40m; consider 15-30m for the next one-card frontend task.
+- Older carry: the fixture Roles group shows this Mac's real role sessions in a review build.
+
 ## HAND-OFF — 2026-10-14 ~15:40, leftovers-30 landed
 
 - **Last SHA seen:** 8bc3159 (+ Aglaea's f07eced). 0126 ruled ok 15:00 (4af1228); sup67 ran it 15:01-15:34, 33 min against 30-55m, $11.53, 5 seats (run record runs/2026-10-14-sup67-leftovers-30.md). lf30-launch-go 53db688, lf30-launch-view 8bc3159, both reviews pass. sup67 ended, token revoked, files removed, clean; installed v0.2.0-2079-gf07eced; tree clean. No supervisor running.
