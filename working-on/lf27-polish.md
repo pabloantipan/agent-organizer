@@ -6,7 +6,7 @@ branch: lf27-polish
 seat:
 stage: one-window
 updated: 2026-10-14
-next: "pablo: rule 0123 (accept leftovers-27); on accept the FSE starts its supervisor"
+next: "sup64 runs it (0123 ruled ok, 2026-10-14)"
 depends_on: []
 boundary: ["docs/specs/leftovers-27.md Boundary, lf27-polish"]
 spec: "docs/specs/leftovers-27.md (FR-9 to FR-11; tab-reaches-links A3 T22, T23)"

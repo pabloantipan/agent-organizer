@@ -4,6 +4,10 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-14, leftovers-27 running
+
+- **0123 ruled ok** (bdf0430): leftovers-27 (d51bbc5, 72eb94e). sup64 runs it detached, two waves (state + polish, then view). aglaea frozen before the wave (seat-freeze; 2.2 GB free); seat-thaw organizer-probe-aglaea when findings route to her. Old seat prompts naming TEST_LEASE_PRESSURE_LEVEL removed (22, finished waves). On close: probe -k sup64, token rm, files, clean, make install, thaw aglaea.
+
 ## HAND-OFF — 2026-10-14 ~11:00, leftovers-23 landed
 
 - **Last SHA seen:** 089a90d. lf23-detached-launch merged by sup63, review pass; 12 min against 25-45, $3.15; seats started detached first try. sup63 ended; installed v0.2.0-1968-g089a90d; tree clean. No supervisor running. Next: leftovers-27 from the carry once aglaea answers on launch progress.

@@ -6,7 +6,7 @@ branch: lf27-launch-view
 seat:
 stage: one-window
 updated: 2026-10-14
-next: "pablo: rule 0123 (accept leftovers-27); on accept the FSE starts its supervisor"
+next: "sup64 runs it (0123 ruled ok, 2026-10-14)"
 depends_on: [lf27-launch-state]
 boundary: ["docs/specs/leftovers-27.md Boundary, lf27-launch-view"]
 spec: "docs/specs/leftovers-27.md (FR-6 to FR-8; launch-progress L1-L7)"
