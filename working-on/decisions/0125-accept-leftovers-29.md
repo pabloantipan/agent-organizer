@@ -23,7 +23,8 @@ leftovers-27's reviews, graded by Aglaea (8c1b167). Two cards
    without killing anything.
 2. **Rows and badges**: a seat that didn't start shows in Needs me at the
    time it failed, among the other dated rows; deaf and capped people show
-   how many messages wait.
+   how many messages wait; a capped seat that asks you is no longer called
+   "not picking up" (from leftovers-28's UI review).
 
 No check drives your screen or keyboard, starts a real agent, or writes
 your clipboard.
