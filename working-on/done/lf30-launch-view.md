@@ -1,6 +1,6 @@
 ---
 title: "The landed row stays in view; Seat up closes; badges show the deaf count"
-status: now
+status: done
 repos: [organizer]
 branch: lf30-launch-view
 seat: lvw-build
