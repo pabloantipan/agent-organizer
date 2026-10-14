@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 31 - no button that does nothing, the landed row keeps its ring, focus after a list closes
-status: proposed
+status: ruled
 raised: 2026-10-14
 raised_by: fse
 owner: pablo
@@ -10,6 +10,9 @@ forecast: 20-40m
 threads: []
 supersedes: []
 superseded_by:
+ruled: 2026-10-14
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -42,3 +45,7 @@ initiative (36 and 33 min for two cards each).
 
 The FSE: **"accept as written"**. Small, one file's behaviour, every row
 checkable by a seat.
+
+## Ruling
+
+pablo, 2026-10-14, in the organizer on lodestar: go (said in the organizer FSE session, recorded by the FSE)
