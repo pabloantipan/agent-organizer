@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { AgentGroup, AgentsView, BoardView, CellThread } from "../hooks/useWails";
-import type { merge, model } from "../../wailsjs/go/models";
-import { launchVerb, missingPersonas, needsMeRows, needsMeShown, needsMeThread, NEEDS_ME_FIRST, pastFirst, personaMissing, queueOf, readOnlyOf } from "./queue";
+import type { AgentGroup, AgentsView, BoardView, CellThread, Seat } from "../hooks/useWails";
+import type { merge, model, service } from "../../wailsjs/go/models";
+import { bandWords, launchVerb, missingPersonas, needsMeRows, needsMeShown, needsMeThread, NEEDS_ME_FIRST, pastFirst, personaMissing, queueOf, readOnlyOf, spanWords, taskContext, taskLine, threadContext } from "./queue";
+import { HEALTH } from "./health";
 
 // Fixtures are plain objects: the generated classes carry methods the
 // functions under test never call, so each builder casts once.
@@ -221,5 +222,81 @@ describe("readOnlyOf: the read-only word (initiatives-view I14)", () => {
   it("is null for an awake one", () => {
     expect(readOnlyOf(board([withStatus("active")]), "a")).toBeNull();
     expect(readOnlyOf(board([withStatus("")]), "a")).toBeNull();
+  });
+});
+
+// R1 (leftovers-28 FR-5): a task over its forecast or stalled is one row.
+describe("needsMeRows: tasks over their forecast or stalled", () => {
+  const task = (number: string, state: string, t: Record<string, unknown> = {}) =>
+    ({ number, title: `Task ${number}`, forecast: "70-110m", forecast_top: 110, started: "2026-10-14T10:00:00Z",
+      elapsed_minutes: 130, cards: [{ slug: "a", status: "now" }, { slug: "b", status: "next" }], seats: [], supervisor: "",
+      state, ...t }) as unknown as service.Task;
+  const post = { thread_id: "t1", from: "sup64", subject: "leftovers-28", line: "band top: the builder is at X0" };
+  const view = board([initiative("a")]);
+  const rows = needsMeRows(view, agents(group("a", { tasks: [
+    task("0120", "on"),
+    task("0121", "over", { last_post: post }),
+    task("0122", "stalled", { elapsed_minutes: 230, started: "2026-10-14T09:00:00Z" }),
+    task("0123", "stalled", { quiet_minutes: 52 }),
+  ] })));
+  const tasks = rows.filter((r) => r.kind === "task");
+
+  it("has rows only for over and stalled, one per task (not per card), oldest first", () => {
+    expect(tasks.map((r) => r.key)).toEqual(["task:a/0122", "task:a/0121", "task:a/0123"]);
+    expect(tasks[0].since?.toISOString()).toBe("2026-10-14T09:00:00.000Z");
+  });
+
+  it("says FR-5's words", () => {
+    const t = (n: string) => (tasks.find((r) => r.key === `task:a/${n}`) as Extract<typeof tasks[number], { kind: "task" }>).task;
+    expect(taskLine(t("0121"))).toBe("Task 0121: over its forecast, 2 h 10 m of 70-110 min");
+    expect(taskLine(t("0122"))).toBe("Task 0122: stalled, 3 h 50 m, twice its forecast");
+    expect(taskLine(t("0123"))).toBe("Task 0123: stalled, no post for 52 min");
+    expect(taskContext(t("0121"))).toBe("sup64: leftovers-28: band top: the builder is at X0");
+    expect(taskContext(t("0123"))).toBe("record 0123 · a now, b next · no post from its supervisor");
+  });
+
+  it("names the silence only while a card is in now", () => {
+    const quietNoneNow = task("0124", "stalled", { quiet_minutes: 52, elapsed_minutes: 240, cards: [{ slug: "a", status: "next" }] });
+    expect(taskLine(quietNoneNow)).toBe("Task 0124: stalled, 4 h, twice its forecast");
+  });
+
+  it("spells units and spans", () => {
+    expect(bandWords("1.5-3h")).toBe("1.5-3 h");
+    expect(bandWords("40-90m")).toBe("40-90 min");
+    expect(spanWords(52)).toBe("52 m");
+    expect(spanWords(180)).toBe("3 h");
+  });
+
+  it("has no rows for an initiative that is not active", () => {
+    const asleep = board([{ ...initiative("a"), status: "paused" } as unknown as merge.BoardInitiative]);
+    expect(needsMeRows(asleep, agents(group("a", { tasks: [task("0121", "over")] }))).filter((r) => r.kind === "task")).toEqual([]);
+  });
+});
+
+// R3 (leftovers-28 FR-6): an ask from a seat that is not picking up says so.
+describe("needsMeRows: asks name the seat and whether it picks up", () => {
+  const ask = (id: number, asked_by: string, age: number) =>
+    ({ id, status: "open", asked_of_me: 1, asked_by, messages: 2, age_seconds: age, subject: `s${id}` }) as unknown as CellThread;
+  const seat = (name: string, watcher: string) => ({ name, watcher, deaf: false, capped: false, undelivered: 0 }) as unknown as Seat;
+  const rows = needsMeRows(board([initiative("a")]), agents(group("a", {
+    threads: [ask(1, "po_ana", 60), ask(2, "hestia", 600)],
+    crew: [seat("po_ana", "alive"), seat("hestia", "stale")],
+  }))).filter((r) => r.kind === "thread") as Extract<ReturnType<typeof needsMeRows>[number], { kind: "thread" }>[];
+
+  it("keeps the rows oldest first and keyed to their thread", () => {
+    expect(rows.map((r) => r.key)).toEqual(["thread:2", "thread:1"]);
+  });
+
+  it("says the stale asker is not picking up in HEALTH's words; the alive one does not", () => {
+    expect(threadContext(rows[0])).toBe(`hestia asks you · 2 messages · hestia is not picking up (${HEALTH.stale.label}): ${HEALTH.stale.why}`);
+    expect(threadContext(rows[1])).toBe("po_ana asks you · 2 messages");
+    expect(threadContext(rows[1])).not.toContain("not picking up");
+  });
+
+  it("uses the deaf and capped words too, and says nothing for a seat off the roster", () => {
+    const deaf = { thread: ask(3, "dev_bruno", 1), asker: "deaf" as const };
+    expect(threadContext(deaf)).toContain(`dev_bruno is not picking up (deaf): ${HEALTH.deaf.why}`);
+    const off = needsMeRows(board([initiative("a")]), agents(group("a", { threads: [ask(4, "ghost", 1)] })))[0];
+    expect(off.kind === "thread" && threadContext(off)).toBe("ghost asks you · 2 messages");
   });
 });

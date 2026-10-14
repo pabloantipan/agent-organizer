@@ -4,7 +4,7 @@ import { Briefcase, ChevronDown, ChevronRight, CircleDashed, Compass, Hammer, Ha
 import type { merge, model, service } from "../../wailsjs/go/models";
 import { oneLine, underRoot, unreadLabel } from "../lib/unread";
 import { UnreadFiles } from "./UnreadFiles";
-import { failedStartLine, inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, needsMeShown, NEEDS_ME_FIRST, pastFirst, type NeedsMeRow } from "../lib/queue";
+import { failedStartLine, inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, needsMeShown, NEEDS_ME_FIRST, pastFirst, taskContext, taskLine, threadContext, type NeedsMeRow } from "../lib/queue";
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
 import { dateWords } from "../lib/dates";
@@ -202,8 +202,18 @@ function InboxRow({ row }: { row: NeedsMeRow }) {
       return (
         <Shell row={row} reason={escalated ? "escalated" : "question"} tone={escalated ? "danger" : "tone"}
           subject={<><span className="mono">{row.initiative}</span> · {t.subject}</>}
-          context={`${escalated ? "escalated to you" : `${t.asked_by || "a seat"} asks you`} · ${t.messages} message${t.messages === 1 ? "" : "s"}`}>
+          context={threadContext(row)}>
           <button className="act" aria-label={`Answer ${row.initiative} ${t.subject}`} onClick={() => openSlackThread(row.initiative, t.id)}>Answer</button>
+        </Shell>
+      );
+    }
+    case "task": {
+      const t = row.task;
+      return (
+        <Shell row={row} reason={t.state} tone={t.state === "stalled" ? "danger" : "tone"}
+          subject={<><span className="mono">{row.initiative} {t.number}</span> · {taskLine(t)}</>}
+          context={taskContext(t)}>
+          <button className="act" aria-label={`Agents ${row.initiative} ${t.number}`} onClick={() => openInitiative(row.initiative, "agents")}>Agents</button>
         </Shell>
       );
     }
