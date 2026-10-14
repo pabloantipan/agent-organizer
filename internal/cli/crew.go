@@ -43,20 +43,40 @@ func crewCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now fun
 	if !print {
 		svc.OnLaunch = launchLines(stdout)
 	}
-	cmds, err := svc.CreateCrew(id, !print)
+	c, err := svc.StartCrew(id, !print)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1
 	}
+	// The seats already running get no line and no probe call (leftovers-30
+	// FR-1); this line names them, after the starts, so it never interleaves
+	// with the states printed as they change.
+	skipped := ""
+	if len(c.Skipped) > 0 {
+		skipped = "already running, not started: " + strings.Join(c.Skipped, ", ")
+	}
 	if print {
-		fmt.Fprintln(stdout, "# one terminal each; an existing session reattaches, a new one gets its opening prompt")
-		for _, c := range cmds {
-			fmt.Fprintln(stdout, c)
+		if skipped != "" {
+			fmt.Fprintln(stdout, "# "+skipped)
 		}
+		if len(c.Lines) > 0 {
+			fmt.Fprintln(stdout, "# one terminal each; an existing session reattaches, a new one gets its opening prompt")
+		}
+		for _, l := range c.Lines {
+			fmt.Fprintln(stdout, l)
+		}
+		return 0
+	}
+	if len(c.Lines) == 0 {
+		fmt.Fprintln(stdout, skipped)
+		fmt.Fprintln(stdout, "nothing started")
 		return 0
 	}
 	got, _ := svc.WaitLaunch(id)
 	fmt.Fprintf(stdout, "%d of %d seats running detached (watch: seats open, or probe --attach <session>)\n", got.Running, len(got.Seats))
+	if skipped != "" {
+		fmt.Fprintln(stdout, skipped)
+	}
 	if got.Failed > 0 {
 		return 1
 	}

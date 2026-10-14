@@ -17,6 +17,7 @@ import (
 	"organizer/internal/model"
 	"organizer/internal/prompt"
 	"organizer/internal/record"
+	"organizer/internal/scan"
 	"organizer/internal/session"
 )
 
@@ -439,9 +440,48 @@ func crewDir(initiativeID string) string {
 // seats start one after another in the background, each detached by probe
 // (no window, no tab, no typed text), their states on the agents feed
 // (launch.go), and WaitLaunch waits for them. A seat that fails does not
-// stop the rest; Stop starting does. A seat that already has a live session
-// is left alone ("running; nothing started").
+// stop the rest; Stop starting does. A seat that already runs is skipped:
+// no files, no entry, no probe call (StartCrew, leftovers-30 FR-1).
 func (s *Service) CreateCrew(initiativeID string, open bool) ([]string, error) {
+	c, err := s.StartCrew(initiativeID, open)
+	return c.Lines, err
+}
+
+// CrewStart is what one crew start did: the launch line of each seat it
+// starts, in roster order, and the seats it skipped because they already run.
+type CrewStart struct {
+	Lines   []string
+	Skipped []string
+}
+
+// liveSeats is the seats of the cell that run now, by the check the Agents
+// feed makes: a fresh process and session sample, grouped onto the
+// initiatives as RefreshAgents groups it, joined to the roster by buildCrew;
+// a seat runs when its agent is working or running (model.Agent.Live). A
+// variable so tests hand it a fixed set.
+var liveSeats = func(s *Service, initiativeID string) map[string]bool {
+	s.mu.Lock()
+	opts := s.agentOptions()
+	inits := append([]model.ScannedInitiative(nil), s.state.Local.Initiatives...)
+	s.mu.Unlock()
+	scan.AssignAgents(inits, scan.Agents(*opts))
+	live := map[string]bool{}
+	for i := range inits {
+		if inits[i].ID != initiativeID {
+			continue
+		}
+		for _, seat := range buildCrew(&inits[i], discuss.Snapshot{}) {
+			if seat.Agent != nil && seat.Agent.Live() {
+				live[seat.Name] = true
+			}
+		}
+	}
+	return live
+}
+
+// StartCrew is CreateCrew telling which seats it skipped, for the CLI. With
+// every seat running it starts nothing and queues nothing.
+func (s *Service) StartCrew(initiativeID string, open bool) (CrewStart, error) {
 	var si *model.ScannedInitiative
 	s.mu.Lock()
 	for i := range s.state.Local.Initiatives {
@@ -452,27 +492,27 @@ func (s *Service) CreateCrew(initiativeID string, open bool) ([]string, error) {
 	}
 	s.mu.Unlock()
 	if si == nil {
-		return nil, fmt.Errorf("initiative %q not found on this machine", initiativeID)
+		return CrewStart{}, fmt.Errorf("initiative %q not found on this machine", initiativeID)
 	}
 	if si.Cell == nil {
-		return nil, fmt.Errorf("initiative %q has no agents/cell.json", initiativeID)
+		return CrewStart{}, fmt.Errorf("initiative %q has no agents/cell.json", initiativeID)
 	}
 	// Nothing launches from a draft: the roster waits on its accept record
 	// (discovery-in-a-cell FR-3f).
 	if si.Cell.Draft {
-		return nil, draftRefusal(si)
+		return CrewStart{}, draftRefusal(si)
 	}
 	// Every seat's persona file, before anything else is looked up or
 	// created: a seat without one would open on an empty role.
 	if err := missingPersonas(si.Path, si.Cell); err != nil {
-		return nil, err
+		return CrewStart{}, err
 	}
 	if _, err := os.Stat(probeBin()); err != nil {
-		return nil, fmt.Errorf("probe not found at %s", probeBin())
+		return CrewStart{}, fmt.Errorf("probe not found at %s", probeBin())
 	}
 	api, err := discussAPIBin()
 	if err != nil {
-		return nil, err
+		return CrewStart{}, err
 	}
 	// Every seat's session name is resolved before anything is created: a
 	// name zellij will refuse is a refusal here, not a pane that never comes
@@ -482,30 +522,47 @@ func (s *Service) CreateCrew(initiativeID string, open bool) ([]string, error) {
 	for i, seat := range si.Cell.Agents {
 		sess, err := crewSession(si.Cell, seat)
 		if err != nil {
-			return nil, err
+			return CrewStart{}, err
 		}
 		sessions[i] = sess
+	}
+	// The seats already running are skipped before anything is written or
+	// run for them: a re-probe of a live seat starts nothing, but it holds
+	// the list for probe's check and can fail a seat that runs.
+	var out CrewStart
+	live := liveSeats(s, initiativeID)
+	var seatsToStart, sessionsToStart []string
+	for i, seat := range si.Cell.Agents {
+		if live[seat] {
+			out.Skipped = append(out.Skipped, seat)
+			continue
+		}
+		seatsToStart = append(seatsToStart, seat)
+		sessionsToStart = append(sessionsToStart, sessions[i])
+	}
+	if len(seatsToStart) == 0 {
+		return out, nil
 	}
 	family := sanitize(si.Cell.Project)
 	wrapper := probeWrapper(family)
 	dir := crewDir(initiativeID)
 	if err := os.MkdirAll(dir, 0o700); err != nil {
-		return nil, err
+		return CrewStart{}, err
 	}
 
 	var cmds []string
-	for i, seat := range si.Cell.Agents {
-		prelude := preludeFor(api, *si.Cell, seat, sessions[i], s.Config().CrewModel)
+	for i, seat := range seatsToStart {
+		prelude := preludeFor(api, *si.Cell, seat, sessionsToStart[i], s.Config().CrewModel)
 		preludePath := filepath.Join(dir, seat+".sh")
 		promptPath := filepath.Join(dir, seat+".md")
 		if err := os.WriteFile(preludePath, []byte(prelude), 0o600); err != nil {
-			return nil, err
+			return CrewStart{}, err
 		}
 		if err := os.WriteFile(promptPath, []byte(prompt.Persona(*si.Cell, seat, si.Path)), 0o600); err != nil {
-			return nil, err
+			return CrewStart{}, err
 		}
 		// probe prepends the family, so it is handed the short name: the
-		// session it opens is exactly sessions[i].
+		// session it opens is exactly sessionsToStart[i].
 		cmds = append(cmds, launchLine(preludePath, promptPath, wrapper, sanitize(seatShort(seat)), si.Path))
 	}
 
@@ -540,25 +597,26 @@ func (s *Service) CreateCrew(initiativeID string, open bool) ([]string, error) {
 	}
 	if !open {
 		if err := wrap(); err != nil {
-			return nil, err
+			return CrewStart{}, err
 		}
-		for _, seat := range si.Cell.Agents {
+		for _, seat := range seatsToStart {
 			if err := token(seat); err != nil {
-				return nil, err
+				return CrewStart{}, err
 			}
 		}
 		if err := register(); err != nil {
-			return nil, err
+			return CrewStart{}, err
 		}
-		return cmds, nil
+		out.Lines = cmds
+		return out, nil
 	}
 	// The seats start one after another on one goroutine, so registered
 	// needs no lock; a failed registration is tried again by the next seat.
 	registered := false
 	seats := make([]SeatLaunch, len(cmds))
 	for i, c := range cmds {
-		seat := si.Cell.Agents[i]
-		seats[i] = SeatLaunch{Seat: seat, Session: sessions[i], Line: c, pre: func() error {
+		seat := seatsToStart[i]
+		seats[i] = SeatLaunch{Seat: seat, Session: sessionsToStart[i], Line: c, pre: func() error {
 			if err := wrap(); err != nil {
 				return err
 			}
@@ -575,9 +633,10 @@ func (s *Service) CreateCrew(initiativeID string, open bool) ([]string, error) {
 		}}
 	}
 	if err := s.queueLaunch(initiativeID, "crew", seats); err != nil {
-		return nil, err
+		return CrewStart{}, err
 	}
-	return cmds, nil
+	out.Lines = cmds
+	return out, nil
 }
 
 // preludeFor is the shell snippet a seat's pane sources before the agent
