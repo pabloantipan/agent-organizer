@@ -3,6 +3,7 @@ import { sleepyWord } from "./initiatives";
 import type { merge, model, service } from "../../wailsjs/go/models";
 import { parseISO } from "./dates";
 import { unreadFiles, type UnreadFile } from "./unread";
+import { HEALTH, healthState, type HealthState } from "./health";
 
 /** One definition of the human's queue, used by the tab badge, the mailbox
  *  list, the Agents pill and the Slack chat list, so every count agrees.
@@ -95,7 +96,8 @@ export function queueOf(group: AgentGroup, view: BoardView | null) {
  *  last); `key` is what openNeedsMe and the Solved marks name it by. */
 export type NeedsMeRow =
   | { kind: "decision"; key: string; initiative: string; since: Date | null; decision: model.Decision }
-  | { kind: "thread"; key: string; initiative: string; since: Date | null; thread: CellThread }
+  | { kind: "thread"; key: string; initiative: string; since: Date | null; thread: CellThread; asker?: HealthState }
+  | { kind: "task"; key: string; initiative: string; since: Date | null; task: service.Task }
   | { kind: "card"; key: string; initiative: string; since: Date | null; card: merge.BoardCard }
   | { kind: "seat"; key: string; initiative: string; since: Date | null; seat: Seat }
   | { kind: "launch"; key: string; initiative: string; since: null; cell: model.Cell; missing: string | null }
@@ -105,7 +107,8 @@ export type NeedsMeRow =
 const day = (s: string | undefined) => parseISO(s?.slice(0, 10));
 
 /** Needs me (FR-15): queueOf over every cell plus the decision records
- *  waiting on the lead's ruling (FR-8), one list, oldest first, of active
+ *  waiting on the lead's ruling (FR-8) and the tasks over their forecast or
+ *  stalled (leftovers-28 FR-5), one list, oldest first, of active
  *  initiatives only (FR-9). The top bar's one badge is
  *  its length, so the count always equals the rows. Last, one Launch row per
  *  local cell in definition that is not a draft (discovery-in-a-cell FR-7,
@@ -137,7 +140,12 @@ export function needsMeRows(view: BoardView | null, agents: AgentsView | null, n
   for (const g of agents?.groups ?? []) {
     if (!g.cell || folded.has(g.id)) continue;
     const q = queueOf(g, view);
-    for (const t of q.threads) rows.push({ kind: "thread", key: `thread:${t.id}`, initiative: g.id, since: new Date(now.getTime() - (t.age_seconds ?? 0) * 1000), thread: t });
+    for (const t of q.threads) rows.push({ kind: "thread", key: `thread:${t.id}`, initiative: g.id, since: new Date(now.getTime() - (t.age_seconds ?? 0) * 1000), thread: t, asker: askerHealth(t, g.crew) });
+    // A task over its forecast or stalled (FR-5): one row per task, never per
+    // card, dated by its ruling; a task that is on has none.
+    for (const t of g.tasks ?? []) {
+      if (t.state === "over" || t.state === "stalled") rows.push({ kind: "task", key: `task:${g.id}/${t.number}`, initiative: g.id, since: t.started ? new Date(t.started) : null, task: t });
+    }
     for (const c of q.cards) rows.push({ kind: "card", key: `card:${g.id}/${c.slug}`, initiative: g.id, since: day(c.updated), card: c });
     for (const s of g.crew ?? []) {
       if (s.deaf || s.capped) rows.push({ kind: "seat", key: `seat:${g.id}/${s.name}`, initiative: g.id, since: null, seat: s });
@@ -158,6 +166,70 @@ export function needsMeRows(view: BoardView | null, agents: AgentsView | null, n
     if (l.failed > 0 && !l.seen && !folded.has(l.initiative)) rows.push({ kind: "start", key: `start:${l.initiative}`, initiative: l.initiative, since: null, launch: l });
   }
   return rows.concat(unread);
+}
+
+/** The health of the seat a thread asks the human for, from the cell's
+ *  roster (FR-6): undefined when the thread asks nothing, names no seat, or
+ *  the seat is not on the roster. */
+function askerHealth(t: CellThread, crew: Seat[] | undefined): HealthState | undefined {
+  if (!t.asked_by || (t.asked_of_me ?? 0) === 0) return undefined;
+  const s = (crew ?? []).find((c) => c.name === t.asked_by);
+  return s ? healthState(s) : undefined;
+}
+
+/** A thread row's context line (FR-6): who asks, or that it was escalated,
+ *  and the messages; when the asking seat's watcher is not alive, that the
+ *  seat is not picking up, in the health table's words, since the answer
+ *  would not wake it. */
+export function threadContext(row: { thread: CellThread; asker?: HealthState }): string {
+  const t = row.thread;
+  const who = t.status === "escalated" ? "escalated to you" : `${t.asked_by || "a seat"} asks you`;
+  const head = `${who} · ${t.messages} message${t.messages === 1 ? "" : "s"}`;
+  if (!row.asker || row.asker === "alive" || !t.asked_by) return head;
+  const h = HEALTH[row.asker];
+  return `${head} · ${t.asked_by} is not picking up (${h.label}): ${h.why}`;
+}
+
+/** Minutes as the rows say them: "52 m", "2 h 10 m", "3 h". */
+export function spanWords(min: number): string {
+  const m = Math.max(0, Math.floor(min));
+  const h = Math.floor(m / 60);
+  if (h === 0) return `${m} m`;
+  return m % 60 === 0 ? `${h} h` : `${h} h ${m % 60} m`;
+}
+
+/** A forecast band as written, with its unit spelled: "70-110m" is
+ *  "70-110 min", "1.5-3h" is "1.5-3 h"; anything else as it is. */
+export function bandWords(f: string): string {
+  const m = /^\s*([\d.]+\s*-\s*[\d.]+)\s*(m|h)\s*$/i.exec(f ?? "");
+  if (!m) return f ?? "";
+  return `${m[1].replace(/\s+/g, "")} ${m[2].toLowerCase() === "h" ? "h" : "min"}`;
+}
+
+/** The silence that makes a task stalled (FR-4): 45 min with no post while
+ *  a card of it is in now. */
+const QUIET_STALL = 45;
+
+/** A task row's subject (FR-5): over, with the time since the ruling and the
+ *  band; stalled, by the silence when that is why (it names the fact to
+ *  chase), else by the time, twice its forecast. */
+export function taskLine(t: Pick<service.Task, "title" | "forecast" | "elapsed_minutes" | "quiet_minutes" | "cards" | "state">): string {
+  if (t.state === "stalled") {
+    const quiet = t.quiet_minutes != null && t.quiet_minutes >= QUIET_STALL && (t.cards ?? []).some((c) => c.status === "now");
+    return quiet
+      ? `${t.title}: stalled, no post for ${t.quiet_minutes} min`
+      : `${t.title}: stalled, ${spanWords(t.elapsed_minutes)}, twice its forecast`;
+  }
+  return `${t.title}: over its forecast, ${spanWords(t.elapsed_minutes)} of ${bandWords(t.forecast)}`;
+}
+
+/** A task row's second line (FR-5): the supervisor's last post when there is
+ *  one (`sup64: <subject>: <first line>`), else the record and its cards. */
+export function taskContext(t: Pick<service.Task, "number" | "cards" | "last_post">): string {
+  const p = t.last_post;
+  if (p) return `${p.from}: ${p.subject}: ${p.line}`;
+  const cards = (t.cards ?? []).map((c) => `${c.slug} ${c.status}`).join(", ");
+  return `record ${t.number}${cards ? ` · ${cards}` : ""} · no post from its supervisor`;
 }
 
 /** A failed start's Needs me subject (FR-7): `Crew of <id>: n seat(s) didn't
