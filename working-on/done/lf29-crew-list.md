@@ -1,12 +1,12 @@
 ---
 title: "The crew list reads its result, starts only what was asked, closes"
-status: now
+status: done
 repos: [organizer]
 branch: lf29-crew-list
 seat: cl-build
 stage: one-window
 updated: 2026-10-14
-next: "review: lf29-crew-list, gate met (C3 AX on the screen-locked review build rests on offscreen WebKit names and styles), 8fd6dce"
+next: "done: reviewed pass (cl-review, cl-ui) at 8fd6dce; merged by sup66"
 depends_on: []
 boundary: ["docs/specs/leftovers-29.md Boundary, lf29-crew-list"]
 spec: "docs/specs/leftovers-29.md (FR-1 to FR-4; launch-progress L8-L10)"
