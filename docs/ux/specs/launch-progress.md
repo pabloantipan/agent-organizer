@@ -233,3 +233,32 @@ at 7c35c18).
 |---|---|---|
 | L15 | see the whole landed row | after an `openAgentsAt` landing and two feed updates, the row's focus ring is whole, with at least 2 px between it and the scroller's edge |
 | L16 | keep their place when a list closes | with focus in the list, `Seat up` closes and focus is on `Reattach all`; with focus elsewhere, it stays there |
+
+## Amendment 4 (aglaea, 2026-10-14): every seat already runs
+
+From sup67's close. Since lf30-launch-go (53db688), Bring crew up skips the
+seats that already run, so with every seat up a press queues nothing and
+shows nothing. The fault is the button, not the silence: `Reattach all`
+promises a thing the app does not do (it opens no window; Attach is per
+seat), and a press that cannot act should not be offered (design system:
+never-acting items are left out).
+
+- **With no seat off, there is no launch button.** The crew block's meta
+  already says `3 seats · 3 live · 0 off`; that is the answer, said once.
+  `Reattach all` is retired as a label. Retire… stays.
+- **The race.** If the confirm is open when the last off seat comes up
+  (another press, the CLI), `Start` finds nothing to queue: the confirm
+  closes, the live region says `Every seat is already running`, and focus
+  goes to the first seat row's `Attach`. No list, no heading.
+- **This changes L16's target.** When `Seat up` or `Crew up` closes by
+  itself, every listed seat runs and the button is gone. Focus, if it was
+  in the list, goes to the `Attach` of the first seat the list showed, in
+  the rows that take the list's place. A list that closes with a seat
+  still off (Close the list after a failure) keeps its target: `Bring n
+  up`.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| L17 | not press a button that does nothing | with every seat live, the crew block has no Bring up / Reattach button and its meta reads `n live · 0 off` |
+| L18 | hear why nothing started | with the confirm open, bring the last seat up from the CLI, press Start: the live region says `Every seat is already running`, no list appears, focus is on the first `Attach` |
+| L16 (amended) | keep their place when a list closes | with focus in the list, `Seat up` closes and focus is on the first listed seat's `Attach`; with focus elsewhere, it stays |

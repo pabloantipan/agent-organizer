@@ -402,6 +402,7 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 
 - 2026-10-14, task-rows: late is not stuck; keep red for blocked and rank lateness with amber or tone. Put the fact before the title in any one-line row that ellipsizes. A verb must land on the thing named, or change verb.
 - A view-kept scroll (nearest) needs a scroll-margin, or the ring is clipped at the edge; an element that closes itself hands focus to the control that opened it, only if focus was inside (launch-progress A3).
+- A button whose press can no longer act is removed, not left as a silent press; when a backend change makes a label a no-op (Reattach all after lf30-launch-go), re-check every focus target that named it (launch-progress A4).
 
 ## Participants in use
 
