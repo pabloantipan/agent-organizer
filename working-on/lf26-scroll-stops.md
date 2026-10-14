@@ -32,3 +32,54 @@ docs/specs/leftovers-26.md, rows S1, S2, S3, S4, D1 and X0.
 
 ## Notes
 - Found: CardDrawer re-sets its markdown on a same-text refresh, so a focused link in the body loses focus (fixed for pre/table only, links outside this card). A region that stops overflowing while focused drops its tabindex and focus falls out. Carry: fold `inactiveSchedulingPolicy = .none` into `scripts/tab-harness/` (Amendment 3).
+
+## UI review
+ss-ui, 2026-10-14, every row on 052e17f (detached worktree, `Deltagos Review.app` built by `make review-build`; harness against my own `wails dev` on 34120; fixture, auth off). Verdict: **pass**. No sev 4 or 3. Shots and runs are in `.wt-notes/ss-ui/`.
+
+How each row was checked:
+- S1: harness at 1024×640 (`--inactive-none on`, Amendment 3), the long card `Cut the scan report…`. Tab 2 lands on the body, named `Cut the scan report to what is read, details`, `role=region`. Down ×3 gave scrollTop 80 and End gave 257, 3/3 (`s1-run1..3.jsonl`). The ring is drawn inside the body (`wkwebview-1024x640-S1-body-focused-run1.png`). At 1440×900 the short `Beta card` has no tabindex, role or label and is never reached in 10 Tabs (`s1-short.jsonl`).
+- S2: the pre is `Code, scrolls`, role region. Right ×3 gave scrollLeft 40/40/80, 3/3 (`s2-run1..3.jsonl`, `wkwebview-1024x640-S2-code-focused-run1.png`). The table keeps its own role (none set) and is labelled `Table, scrolls`; Right ×3 gave 80/0/80, a harness timing flake like the builder's. Vitest: `useScrollEdges.test.ts`, `ScrollStops.test.tsx` and `RoleDrawer.inits.test.tsx` pass 23/23.
+- S3: 14 Tabs then 6 Shift+Tabs (`s3-walk.jsonl`). The walk goes Close, body, comment, code, table, the side actions, then wraps to Close. It is never BODY.
+- S4: the harness reads name and stop for each region, and I shot each one focused:
+  - header: `Details of init-a`
+  - role drawer: `Hephaistos, details` (it overflows by 4 px and is still a stop)
+  - rule box: `Record 0008, The organizer's roadmap, as it was proposed`
+  - Help: labelled by its h1 `Help`; its code blocks don't overflow at 1024, so none is a stop
+  - floating list: at 360×420 it is `Initiatives list`, keeps `listbox`, and is in the panel's Tab loop. At 1024 it does not overflow and is not a stop.
+  - AX of the real float panel in the review build: `AXList "Initiatives list"`.
+- D1: AX by the review build's pid: `AXList .rd-inits` with 5 `Open init-*` links (`ax-role.txt`, `wkwebview-1024x640-D1-role-drawer.png`). roles.css:101 reads "an inline list".
+- X0: read from the builder's evidence (`.wt-notes/ss-build/x0-summary.txt`: all four zero, porcelain empty). My own `make review-build` at 052e17f passed. I did not rerun make test.
+
+Findings (none fails):
+- **U1 (sev 2) The floating list's focus ring falls outside the panel.**
+  - What the lead cannot do: tell that the list has focus. Only a line at its top can show, under the search field.
+  - Where: the floating panel, `.fl-body` (`wkwebview-360x480-S4-float-list-panel.png`, `ax-float.txt`).
+  - Evidence: in the review build the list spans the whole 360 px of the panel and ends at its bottom edge (AX `@3056,785 360x432` in a `360x480` window). Its computed `outline-offset` is 2px (the global rule), and two ancestors are `overflow: hidden`. So the ring falls outside the window on the left, right and bottom.
+  - Proposal: `.fl-body:focus-visible { outline-offset: -2px }`, like the other regions. `float.css` was outside this card's boundary.
+  - Not seen focused in the real panel (no keys there); the harness snapshot of float mode came out blank.
+- **U2 (sev 2) The inset ring covers the edge of the text in the rule box's record and the header's open area.**
+  - What the lead cannot do: read the first column of glyphs cleanly while the region has focus.
+  - Where: `wkwebview-1024x640-S4-rule-focused.png`, where the `0029` and `roadmap` line starts sit under the ring; `wkwebview-1024x640-S4-header-focused.png`, where `GOAL` touches it.
+  - Evidence: `outline-offset: -2px` on a box with no inline padding.
+  - Proposal: give the region the inline padding the ring needs, so the ring clears the text by 2 px (the design-system rule "ring clears the neighbour by 2 px").
+- **U3 (sev 2) A wide code block in a role's hand-off is not a stop.**
+  - What the lead cannot do: scroll it sideways from the keyboard.
+  - Where: `RoleDrawer.tsx`, `.rd-handoff` (markdown set by innerHTML, `roles.css:115` `overflow-x: auto`).
+  - Evidence: from code. `useMarkdownEdges` is not called on the hand-off, so it does not watch it. FR-3 says code inside the role drawer keeps `Code, scrolls`.
+  - Proposal: call `useMarkdownEdges` on the hand-off body.
+  - Not verified in WKWebView: the fixture's hand-off has no code block.
+- U4 (sev 1) The comment textarea shows no ring on Tab: computed `outline: none 0px` in every walk. It predates this card and is outside its boundary.
+
+Spec gaps (for the FSE):
+- U1: the boundary left out `float.css`, so FR-1's ring could not be met for the floating list.
+- U3: FR-2 lists "what `useMarkdownEdges` watches" while FR-3 promises names for code inside every region. The role drawer's hand-off falls between the two.
+- When a focused region stops overflowing, focus falls out (the builder's note). No FR says where focus goes.
+
+For aglaea: whether the inset ring is wanted over unpadded text (U2), or the region should take padding.
+
+Not verified in WKWebView:
+- Down and Right in the real app: no keys there; the harness only.
+- The floating list's ring when focused in the real panel.
+- A decision record's code or table in Decisions; the same `watchMarkdown` covers it.
+- Resize from overflowing to not while focused.
+- auth: firebase: not run, per rules.
