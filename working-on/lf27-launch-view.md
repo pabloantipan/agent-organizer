@@ -6,7 +6,7 @@ branch: lf27-launch-view
 seat: lv-build
 stage: one-window
 updated: 2026-10-14
-next: "sup64 launches it after lf27-launch-state merges (wave 2)"
+next: "lv-build builds it (sup64, wave 2)"
 depends_on: [lf27-launch-state]
 boundary: ["docs/specs/leftovers-27.md Boundary, lf27-launch-view"]
 spec: "docs/specs/leftovers-27.md (FR-6 to FR-8; launch-progress L1-L7)"
