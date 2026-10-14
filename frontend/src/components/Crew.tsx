@@ -391,8 +391,10 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
       : box.current?.querySelector<HTMLElement>(`[data-seat="${CSS.escape(agentsLanding.replace(/^seat:/, ""))}"]`);
     if (!el) return;
     el.focus({ preventScroll: true });
-    // Centred and kept in view (FR-3), after the screen's scroll to the top.
-    requestAnimationFrame(() => { if (document.activeElement === el) holdInView(el); });
+    // Centred and kept in view (FR-3), after the screen's scroll to the top
+    // (a parent's effect). A task, not a frame: a window that draws no frame
+    // (hidden, or the harness's offscreen one) never runs requestAnimationFrame.
+    window.setTimeout(() => { if (document.activeElement === el) holdInView(el); }, 0);
     clearAgentsLanding();
   }, [agentsLanding, clearAgentsLanding, crewUp, group.crew, launch]);
   const cell = group.cell;

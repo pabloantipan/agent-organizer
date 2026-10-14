@@ -51,7 +51,9 @@ export function AgentsView() {
     // the rows above it (a task row's Agents, leftovers-29 FR-8, found it
     // scrolled back to 0). Not cleared on cleanup: clearAgentFocus above
     // reruns this effect.
-    requestAnimationFrame(() => { if (document.activeElement === el) holdInView(el); });
+    // A task, not a frame: a window that draws no frame never runs
+    // requestAnimationFrame.
+    window.setTimeout(() => { if (document.activeElement === el) holdInView(el); }, 0);
     window.setTimeout(keepHeldInView, 400);
   }, [agentFocus, view, clearAgentFocus]);
 
