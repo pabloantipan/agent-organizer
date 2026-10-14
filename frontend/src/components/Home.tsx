@@ -4,7 +4,7 @@ import { Briefcase, ChevronDown, ChevronRight, CircleDashed, Compass, Hammer, Ha
 import type { merge, model, service } from "../../wailsjs/go/models";
 import { oneLine, underRoot, unreadLabel } from "../lib/unread";
 import { UnreadFiles } from "./UnreadFiles";
-import { inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, needsMeShown, NEEDS_ME_FIRST, pastFirst, type NeedsMeRow } from "../lib/queue";
+import { failedStartLine, inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, needsMeShown, NEEDS_ME_FIRST, pastFirst, type NeedsMeRow } from "../lib/queue";
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
 import { dateWords } from "../lib/dates";
@@ -225,6 +225,16 @@ function InboxRow({ row }: { row: NeedsMeRow }) {
           subject={<><span className="mono">{row.initiative}</span> · <span className="mono">{s.name}</span> {h.blocker}{s.undelivered > 0 ? ` · ${messages(s.undelivered)} waiting` : ""}</>}
           context={`${h.why} ${h.what}`}>
           <button className="act" aria-label={`Agents ${row.initiative} ${s.name}`} onClick={() => openInitiative(row.initiative, "agents")}>Agents</button>
+        </Shell>
+      );
+    }
+    case "start": {
+      const failed = (row.launch.seats ?? []).filter((s) => s.state === "failed");
+      return (
+        <Shell row={row} reason="didn't start" tone="danger"
+          subject={failedStartLine(row.launch)}
+          context={failed.map((s) => `${s.seat}: ${s.reason}`).join(" · ")}>
+          <button className="act" aria-label={`Agents ${row.initiative}`} onClick={() => openInitiative(row.initiative, "agents")} title="its Agents shows the seats, with Try again">Agents</button>
         </Shell>
       );
     }

@@ -1,6 +1,6 @@
 import type { AgentGroup, AgentsView, BoardView, CellThread, Seat } from "../hooks/useWails";
 import { sleepyWord } from "./initiatives";
-import type { merge, model } from "../../wailsjs/go/models";
+import type { merge, model, service } from "../../wailsjs/go/models";
 import { parseISO } from "./dates";
 import { unreadFiles, type UnreadFile } from "./unread";
 
@@ -99,6 +99,7 @@ export type NeedsMeRow =
   | { kind: "card"; key: string; initiative: string; since: Date | null; card: merge.BoardCard }
   | { kind: "seat"; key: string; initiative: string; since: Date | null; seat: Seat }
   | { kind: "launch"; key: string; initiative: string; since: null; cell: model.Cell; missing: string | null }
+  | { kind: "start"; key: string; initiative: string; since: null; launch: service.InitiativeLaunch }
   | { kind: "unread"; key: string; initiative: string; since: null; path: string; files: UnreadFile[] };
 
 const day = (s: string | undefined) => parseISO(s?.slice(0, 10));
@@ -150,7 +151,22 @@ export function needsMeRows(view: BoardView | null, agents: AgentsView | null, n
       rows.push({ kind: "launch", key: `launch:${g.id}`, initiative: g.id, since: null, cell: g.cell, missing });
     }
   }
+  // A start with a seat that did not start, not yet seen on Agents (FR-7):
+  // one row per initiative, gone once the list is shown (SeenLaunch) or the
+  // seat is retried (the service's `seen` and `failed`).
+  for (const l of agents?.launches ?? []) {
+    if (l.failed > 0 && !l.seen && !folded.has(l.initiative)) rows.push({ kind: "start", key: `start:${l.initiative}`, initiative: l.initiative, since: null, launch: l });
+  }
   return rows.concat(unread);
+}
+
+/** A failed start's Needs me subject (FR-7): `Crew of <id>: n seat(s) didn't
+ *  start`; a New agent start names its agents. */
+export function failedStartLine(l: Pick<service.InitiativeLaunch, "initiative" | "kind" | "failed">): string {
+  const n = l.failed;
+  return l.kind === "crew"
+    ? `Crew of ${l.initiative}: ${n} seat${n === 1 ? "" : "s"} didn't start`
+    : `${l.initiative}: ${n} agent${n === 1 ? "" : "s"} didn't start`;
 }
 
 /** The verb and blocker of a cell-in-definition row (FR-3): a cell that
