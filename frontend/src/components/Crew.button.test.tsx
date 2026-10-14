@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { afterList, ALL_RUNNING, attachIn, Crew, startCrew } from "./Crew";
+import { ALL_RUNNING, attachIn, Crew, focusAfter, startCrew } from "./Crew";
 import type { AgentGroup } from "../hooks/useWails";
 
 // leftovers-31 FR-2 to FR-4 (launch-progress L16 amended, L17, L18). Vitest
@@ -52,7 +52,7 @@ function fakeDom(seats: { name: string; attach: boolean }[], launch: string | nu
         const m = q.match(/data-seat="([^"]+)"/);
         return (m ? attaches.find((a) => a.seat === m[1]) : attaches[0])?.el ?? null;
       }
-      if (q === "button:not([disabled])") return btn;
+      if (q === 'button[data-crew="launch"]:not([disabled])') return btn;
       return null;
     },
   };
@@ -100,14 +100,15 @@ describe("B3: Start finds every seat running (FR-3, L18)", () => {
 describe("B4: focus after the list closes (FR-4, L16 amended)", () => {
   it("closed by itself: the first listed seat's Attach", () => {
     const d = fakeDom([{ name: "po_a", attach: true }, { name: "dev_b", attach: true }]);
-    afterList(d.box, null, "dev_b")?.focus();
+    focusAfter(d.box, ["dev_b"])?.focus();
     expect((d.doc.activeElement as FakeEl).label).toBe("Attach dev_b");
   });
   it("Close the list after a failure: Bring 1 up, which the block still draws", () => {
     const html = renderToStaticMarkup(<Crew group={groupOf([true, false, true])} />);
     expect(launchBtn(html)).toBe("Bring 1 up");
+    // The list showed dev_b alone, which failed: no Attach (leftovers-32 FR-4).
     const d = fakeDom([{ name: "po_a", attach: true }, { name: "qa_c", attach: true }], "Bring 1 up");
-    afterList(d.box, d.btn, null)?.focus();
+    focusAfter(d.box, ["dev_b"])?.focus();
     expect((d.doc.activeElement as FakeEl).label).toBe("Bring 1 up");
   });
 });

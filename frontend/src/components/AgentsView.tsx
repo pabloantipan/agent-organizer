@@ -13,6 +13,7 @@ import { Usage as fetchUsage } from "../../wailsjs/go/main/App";
 import { agentsWeekLine } from "../lib/usage";
 import { agentTarget } from "../lib/agentFocus";
 import { groupMemory, plural } from "../lib/initiatives";
+import { useLiveRegion } from "../lib/liveRegion";
 
 const REFRESH_MS = 10_000;
 
@@ -210,7 +211,7 @@ function NewAgent({ initiativeId }: { initiativeId: string }) {
   const applyAgents = useBoard((s) => s.applyAgents);
   const launch = launchOf(useBoard((s) => s.agents?.launches), initiativeId);
   const s = agentStart(launch, target);
-  const [said, setSaid] = useState("");
+  const [said, setSaid] = useLiveRegion();
   const now = useNow(inFlight(s));
   const busy = useRef<HTMLButtonElement>(null);
   const retry = useRef<HTMLButtonElement>(null);

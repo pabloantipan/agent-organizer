@@ -10,6 +10,7 @@ import { missingPersonas, personaMissing } from "../lib/queue";
 import { useBoard } from "../stores/board.store";
 import { escapeCloses, useConfirmFocus } from "../lib/focus";
 import { stateWord } from "../lib/stateWords";
+import { useLiveRegion } from "../lib/liveRegion";
 import { RetrySeat, SeenLaunch, StopStarting } from "../../wailsjs/go/main/App";
 import { ClipboardSetText } from "../../wailsjs/runtime/runtime";
 import type { service } from "../../wailsjs/go/models";
@@ -160,17 +161,18 @@ export function announce(said: ReadonlySet<string>, l: Pick<Launch, "seats" | "d
  *  L7) says nothing it said before. */
 export const saidOf = (l: Pick<Launch, "seats" | "done" | "running" | "failed"> | undefined) => (l ? announce(new Set(), l).said : new Set<string>());
 
-/** The live region's text for one launch: the newest results, once. */
+/** The live region's text for one launch: the newest results, once. Said
+ *  through the live-region helper, so a repeated line is said again (FR-2). */
 export function useAnnouncer(l: Launch | undefined): [string, (m: string) => void] {
   const said = useRef<Set<string>>(saidOf(l));
-  const [msg, setMsg] = useState("");
+  const [msg, say] = useLiveRegion();
   useEffect(() => {
     if (!l) { said.current = new Set(); return; }
     const r = announce(said.current, l);
     said.current = r.said;
-    if (r.lines.length > 0) setMsg(r.lines.join(". "));
-  }, [l]);
-  return [msg, setMsg];
+    if (r.lines.length > 0) say(r.lines.join(". "));
+  }, [l, say]);
+  return [msg, say];
 }
 
 /** Now, ticking once a second while `on`: the seconds are text, nothing
@@ -199,12 +201,24 @@ export const ALL_RUNNING = "Every seat is already running";
 export const attachIn = (box: ParentNode | null | undefined, seat?: string) =>
   box?.querySelector<HTMLElement>(`.crew-seats > li${seat ? `[data-seat="${CSS.escape(seat)}"]` : ""} button[aria-label^="Attach "]`) ?? null;
 
+/** Where focus goes when a list or the confirm leaves the crew block with
+ *  focus inside it (leftovers-32 FR-4, launch-progress L22): the Attach of
+ *  the first listed seat that has one (`listed`, the seats the list showed;
+ *  no list, every seat row), else `Bring n up`, else `Retire…`, which every
+ *  crew block has. Never the body. One function for the self-close, Close
+ *  the list, the race and the dead confirm. */
+export function focusAfter(box: ParentNode | null | undefined, listed?: readonly string[] | null): HTMLElement | null {
+  if (!box) return null;
+  const attach = listed ? listed.map((s) => attachIn(box, s)).find((el) => !!el) ?? null : attachIn(box);
+  return attach ?? box.querySelector<HTMLElement>('button[data-crew="launch"]:not([disabled])') ?? box.querySelector<HTMLElement>('button[data-crew="retire"]');
+}
+
 /** Start in the confirm (FR-3, L18): the race is read from what the press
  *  finds. CreateCrew returns a launch line per seat it queued; none means
  *  the last off seat came up elsewhere since the confirm opened. Then the
- *  confirm closes (`none`, whose caller moves focus to the first seat row's
- *  Attach once the confirm is gone), the live region says so, and no list
- *  comes. */
+ *  confirm closes (`none`, whose caller shows the press's answer at once,
+ *  leftovers-32 FR-1, and moves focus by `focusAfter` once the confirm is
+ *  gone), the live region says so, and no list comes. */
 export function startCrew(id: string, h: {
   create: (id: string) => Promise<string[]>;
   queued: () => void;
@@ -220,15 +234,6 @@ export function startCrew(id: string, h: {
     },
     h.failed,
   );
-}
-
-/** Where focus goes when the list closes with focus inside it (FR-4, L16
- *  amended): closed by itself, every listed seat runs and the launch button
- *  is gone, so the Attach of the first seat the list showed; closed with a
- *  seat still off (Close the list after a failure), the launch button. */
-export function afterList(box: ParentNode | null | undefined, launchBtn: HTMLElement | null, firstListed: string | null): HTMLElement | null {
-  if (firstListed) return attachIn(box, firstListed);
-  return launchBtn ?? box?.querySelector<HTMLElement>("button:not([disabled])") ?? null;
 }
 
 /** The initiative's start on the agents feed, if any. */
@@ -404,11 +409,15 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
   const [said, say] = useAnnouncer(listed);
   const focusHead = useRef(false);
   const [, setClosedAt] = useState(0);
-  // Focus was in the list when it closed: it goes to afterList's target,
-  // never to the body (FR-4). `selfClosed` is the first seat the list showed
-  // when it closed by itself, else null.
+  // Focus was in the list when it closed: it goes to focusAfter's target,
+  // never to the body (FR-4). `listedSeats` is the seats the list showed.
   const listHadFocus = useRef(false);
-  const selfClosed = useRef<string | null>(null);
+  const listedSeats = useRef<string[]>([]);
+  // The press's answer (leftovers-32 FR-1, L19): Start queued nothing, so
+  // the seats this view showed off read live until the next feed, which
+  // carries a new group, says otherwise.
+  const [assumed, setAssumed] = useState<{ group: AgentGroup; seats: Set<string> } | null>(null);
+  const liveNow = assumed?.group === group ? assumed.seats : null;
   // A failure shown here is seen (FR-7): its Needs me row goes.
   const unseen = !!launch && launch.failed > 0 && !launch.seen;
   useEffect(() => { if (unseen) SeenLaunch(group.id).catch(() => undefined); }, [unseen, group.id]);
@@ -420,10 +429,10 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
   const upShape = shown && listed && listed.done && listed.failed === 0 && (listed.seats?.length ?? 0) > 0 ? shapeOf(listed) : "";
   const launchNow = useRef(launch);
   launchNow.current = launch;
+  const groupNow = useRef(group);
   useEffect(() => {
     if (!upShape) return;
-    const first = listed?.seats?.[0]?.seat ?? null;
-    const t = window.setTimeout(() => { if (launchNow.current) { selfClosed.current = first; closeList(group.id, launchNow.current); setClosedAt(Date.now()); } }, LIST_KEEP_MS);
+    const t = window.setTimeout(() => { if (launchNow.current) { closeList(group.id, launchNow.current); setClosedAt(Date.now()); } }, LIST_KEEP_MS);
     return () => window.clearTimeout(t);
   }, [upShape, group.id]);
   // A Needs me verb lands here (ui-leftovers FR-5): Launch on Bring crew up,
@@ -444,22 +453,33 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
     window.setTimeout(() => { if (document.activeElement === el) holdInView(el); }, 0);
     clearAgentsLanding();
   }, [agentsLanding, clearAgentsLanding, crewUp, group.crew, launch]);
-  // Start found every seat running (FR-3): once the confirm is gone, focus
-  // goes to the first seat row's Attach. After useConfirmFocus's own effect,
-  // which would hand it back to a launch button a stale feed still draws.
-  const landAttach = useRef(false);
+  // The confirm left (the race, or a feed with no seat off) with focus in
+  // it: focus goes by focusAfter once it is gone. After useConfirmFocus's
+  // own effect, which would hand it back to a launch button no longer drawn.
+  const refocus = useRef(false);
   useEffect(() => {
-    if (!landAttach.current || asking) return;
-    landAttach.current = false;
-    attachIn(box.current)?.focus();
+    if (!refocus.current || asking) return;
+    refocus.current = false;
+    focusAfter(box.current)?.focus();
   });
+  const seats = group.crew ?? [];
+  const off = seats.filter((s) => isOff(s) && !liveNow?.has(s.name)).length;
+  // A confirm whose press can no longer act closes (FR-3, L21); its words
+  // stay as they were.
+  const confirmBox = useRef<HTMLSpanElement>(null);
+  const dead = asking && seats.length > 0 && off === 0;
+  useEffect(() => {
+    if (!dead) return;
+    const inside = !!confirmBox.current && confirmBox.current.contains(document.activeElement);
+    if (inside) refocus.current = true;
+    setAsking(false);
+  }, [dead]);
   const cell = group.cell;
   if (!cell) return null;
-  const seats = group.crew ?? [];
   const blocked = seats.length === 0 ? "no seats: the roster is empty between waves" : crewBlocked(seats, cell);
-  const live = seats.filter((s) => s.agent && (s.agent.state === "working" || s.agent.state === "running")).length;
-  const off = seats.filter(isOff).length;
+  const live = seats.filter((s) => liveNow?.has(s.name) || (s.agent && (s.agent.state === "working" || s.agent.state === "running"))).length;
   const flash = (m: string) => { setNote(m); window.setTimeout(() => setNote(null), 5000); };
+  groupNow.current = group;
 
   const bringUp = () => {
     setBusy(true);
@@ -472,7 +492,13 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
     startCrew(group.id, {
       create: api.createCrew,
       queued: () => setAsking(false),
-      none: () => { unpress(); landAttach.current = true; setAsking(false); },
+      none: () => {
+        unpress();
+        // The result names no seats: every seat shown off reads live (FR-1).
+        setAssumed({ group: groupNow.current, seats: new Set(seats.filter(isOff).map((s) => s.name)) });
+        refocus.current = true;
+        setAsking(false);
+      },
       say,
       failed: (e) => { unpress(); flash(String(e)); },
     }).finally(() => setBusy(false));
@@ -481,13 +507,13 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
 
   if (!showList && listHadFocus.current) {
     listHadFocus.current = false;
-    const first = selfClosed.current;
+    const was = listedSeats.current;
     window.setTimeout(() => {
       if (document.activeElement && document.activeElement !== document.body) return;
-      afterList(box.current, crewUp.current, first)?.focus();
+      focusAfter(box.current, was)?.focus();
     }, 0);
   }
-  if (showList) selfClosed.current = null;
+  if (showList) listedSeats.current = (listed?.seats ?? []).map((s) => s.seat);
 
   if (showList) {
     return (
@@ -497,7 +523,7 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
           <Users size={14} />
           <span className="ident">{cell.project}</span>
         </div>
-        <LaunchList initiative={group.id} launch={listed} focusHead={focusHead} say={say} onClose={() => { closeList(group.id, launch!); setClosedAt(Date.now()); window.setTimeout(() => afterList(box.current, crewUp.current, null)?.focus(), 0); }} />
+        <LaunchList initiative={group.id} launch={listed} focusHead={focusHead} say={say} onClose={() => { const was = listedSeats.current; listHadFocus.current = false; closeList(group.id, launch!); setClosedAt(Date.now()); window.setTimeout(() => focusAfter(box.current, was)?.focus(), 0); }} />
       </div>
     );
   }
@@ -514,7 +540,7 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
         {group.discuss && <span className="badge watcher stale" title="crew health comes from the discuss API">{group.discuss}</span>}
         <span className="spacer" />
         {note && <span className="meta">{note}</span>}
-        {!readOnly && !asking && <button className={`tiny-btn ${(group.retirable?.length ?? 0) > 0 ? "" : "ghost"}`} onClick={() => setRetiring(true)} title={(group.retirable?.length ?? 0) > 0 ? `wave done with ${group.retirable.join(", ")}: organizer retire ${group.id} --retirable` : `organizer retire ${group.id}: end a wave`}><UserRoundX size={13} /> {(group.retirable?.length ?? 0) > 0 ? `${group.retirable.length} retirable` : "Retire…"}</button>}
+        {!readOnly && !asking && <button data-crew="retire" className={`tiny-btn ${(group.retirable?.length ?? 0) > 0 ? "" : "ghost"}`} onClick={() => setRetiring(true)} title={(group.retirable?.length ?? 0) > 0 ? `wave done with ${group.retirable.join(", ")}: organizer retire ${group.id} --retirable` : `organizer retire ${group.id}: end a wave`}><UserRoundX size={13} /> {(group.retirable?.length ?? 0) > 0 ? `${group.retirable.length} retirable` : "Retire…"}</button>}
         {retiring && <Retire group={group} onClose={() => setRetiring(false)} />}
         {/* The reason is text beside the button, not only its hover: a
             disabled button takes no focus and no WebKit mouse events
@@ -525,13 +551,13 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
             disabled, with its reason. */}
         {!readOnly && !asking && (off > 0 || seats.length === 0) && (
           <span title={blocked ?? `organizer crew ${group.id}`}>
-            <button ref={crewUp} className="tiny-btn primary" onClick={() => setAsking(true)} disabled={busy || !!blocked} aria-describedby={blocked ? reasonId : undefined}>
+            <button ref={crewUp} data-crew="launch" className="tiny-btn primary" onClick={() => setAsking(true)} disabled={busy || !!blocked} aria-describedby={blocked ? reasonId : undefined}>
               <Users size={13} /> {off === seats.length ? "Bring crew up" : `Bring ${off} up`}
             </button>
           </span>
         )}
         {asking && (
-          <span className="confirm-inline" onKeyDown={escapeCloses(() => setAsking(false))}>
+          <span ref={confirmBox} className="confirm-inline" onKeyDown={escapeCloses(() => setAsking(false))}>
             <span className="meta">starts the off seats one after another, detached, each with its discuss identity; running seats stay as they are</span>
             <button ref={openBtn} className="tiny-btn primary" onClick={bringUp} disabled={busy}>Start</button>
             <button className="tiny-btn ghost" onClick={() => setAsking(false)}>Cancel</button>
@@ -539,7 +565,7 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
         )}
       </div>
       <ul className="agents crew-seats">
-        {seats.map((s) => <SeatRow key={s.name} seat={s} readOnly={readOnly} confirm={confirmKill} setConfirm={setConfirmKill} flash={flash} onMessage={onMessage} />)}
+        {seats.map((s) => <SeatRow key={s.name} seat={s} assumedLive={!!liveNow?.has(s.name) && isOff(s)} readOnly={readOnly} confirm={confirmKill} setConfirm={setConfirmKill} flash={flash} onMessage={onMessage} />)}
       </ul>
     </div>
   );
@@ -547,9 +573,10 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
 
 const isOff = (s: Seat) => !s.agent || s.agent.state === "exited";
 
-function SeatRow({ seat, readOnly, confirm, setConfirm, flash, onMessage }: { seat: Seat; readOnly: boolean; confirm: string | null; setConfirm: (s: string | null) => void; flash: (m: string) => void; onMessage?: (seat: string) => void }) {
+function SeatRow({ seat, assumedLive = false, readOnly, confirm, setConfirm, flash, onMessage }: { seat: Seat; assumedLive?: boolean; readOnly: boolean; confirm: string | null; setConfirm: (s: string | null) => void; flash: (m: string) => void; onMessage?: (seat: string) => void }) {
   const a = seat.agent;
-  const state = a?.state ?? "off";
+  // Start found it running (FR-1): live until the next feed says otherwise.
+  const state = assumedLive ? "running" : a?.state ?? "off";
   const session = a?.session || "";
   const asking = confirm === seat.name;
   const health = healthState({ watcher: seat.watcher, deaf: seat.deaf, capped: seat.capped });
