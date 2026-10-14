@@ -3,7 +3,7 @@ title: "Over, stalled and unheard asks are Needs me rows"
 status: next
 repos: [organizer]
 branch: lf28-task-rows
-seat:
+seat: tr-build
 stage: one-window
 updated: 2026-10-14
 next: "sup65 runs it (0124 ruled ok, 2026-10-14)"
