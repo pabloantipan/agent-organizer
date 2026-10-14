@@ -10,6 +10,163 @@ import { missingPersonas, personaMissing } from "../lib/queue";
 import { useBoard } from "../stores/board.store";
 import { escapeCloses, useConfirmFocus } from "../lib/focus";
 import { stateWord } from "../lib/stateWords";
+import { RetrySeat, SeenLaunch, StopStarting } from "../../wailsjs/go/main/App";
+import { ClipboardSetText } from "../../wailsjs/runtime/runtime";
+import type { service } from "../../wailsjs/go/models";
+import "../styles/launch.css";
+
+export type Launch = service.InitiativeLaunch;
+export type SeatStart = service.SeatLaunch;
+
+/** Whole seconds since a seat's try began (launch-progress §1): counted here
+ *  from `started_at`, never sent per second by the service. */
+export const elapsed = (s: Pick<SeatStart, "started_at">, now: number) =>
+  s.started_at ? Math.max(0, Math.floor((now - Date.parse(String(s.started_at))) / 1000)) : 0;
+
+/** A seat's start as launch-progress §1 draws it: a word with a shape, never
+ *  a colour alone. `count` is the seconds part, drawn aria-hidden. */
+export function seatWord(s: Pick<SeatStart, "state" | "started_at">, now: number): { tone: string; shape: string; word: string; count: string } {
+  switch (s.state) {
+    case "starting": return { tone: "starting", shape: "…", word: "starting", count: ` · ${elapsed(s, now)} s` };
+    case "retrying": return { tone: "retrying", shape: "↻", word: "trying again", count: ` · ${elapsed(s, now)} s` };
+    case "running": return { tone: "running", shape: "✓", word: "running", count: "" };
+    case "failed": return { tone: "failed", shape: "✕", word: "didn't start", count: "" };
+    case "skipped": return { tone: "waiting", shape: "", word: "off", count: "" };
+    default: return { tone: "waiting", shape: "", word: "waiting", count: "" };
+  }
+}
+
+export const launchHeading = (l: Pick<Launch, "running" | "seats">) => `Starting crew · ${l.running} of ${l.seats?.length ?? 0} running`;
+
+/** The start's total, said once when no seat is left to start. */
+export function launchTotal(l: Pick<Launch, "running" | "failed" | "seats">): string {
+  const skipped = (l.seats ?? []).filter((s) => s.state === "skipped").length;
+  return `${l.running} of ${l.seats?.length ?? 0} running${l.failed > 0 ? `, ${l.failed} didn't start` : ""}${skipped > 0 ? `, ${skipped} off` : ""}`;
+}
+
+const ended = (state: string) => state === "running" || state === "failed";
+
+/** What the live region says for a feed update (L2): each seat's result
+ *  once and the total once, nothing per second. `said` holds what was said
+ *  already (`seat:state`, `total`); a seat that starts again (Try again)
+ *  leaves it, so its next result is said. Returns the new lines and set. */
+export function announce(said: ReadonlySet<string>, l: Pick<Launch, "seats" | "done" | "running" | "failed">): { lines: string[]; said: Set<string> } {
+  const next = new Set(said);
+  const lines: string[] = [];
+  for (const s of l.seats ?? []) {
+    if (!ended(s.state)) { next.delete(`${s.seat}:running`); next.delete(`${s.seat}:failed`); continue; }
+    const key = `${s.seat}:${s.state}`;
+    if (next.has(key)) continue;
+    next.add(key);
+    lines.push(`${s.seat} ${s.state === "running" ? "running" : "didn't start"}`);
+  }
+  if (!l.done) next.delete("total");
+  else if (!next.has("total")) { next.add("total"); lines.push(launchTotal(l)); }
+  return { lines, said: next };
+}
+
+/** What has been said already, so a remount (leaving Agents and coming back,
+ *  L7) says nothing it said before. */
+export const saidOf = (l: Pick<Launch, "seats" | "done" | "running" | "failed"> | undefined) => (l ? announce(new Set(), l).said : new Set<string>());
+
+/** The live region's text for one launch: the newest results, once. */
+export function useAnnouncer(l: Launch | undefined): [string, (m: string) => void] {
+  const said = useRef<Set<string>>(saidOf(l));
+  const [msg, setMsg] = useState("");
+  useEffect(() => {
+    if (!l) { said.current = new Set(); return; }
+    const r = announce(said.current, l);
+    said.current = r.said;
+    if (r.lines.length > 0) setMsg(r.lines.join(". "));
+  }, [l]);
+  return [msg, setMsg];
+}
+
+/** Now, ticking once a second while `on`: the seconds are text, nothing
+ *  spins (WCAG 2.2.2). */
+export function useNow(on: boolean): number {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!on) return;
+    setNow(Date.now());
+    const t = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(t);
+  }, [on]);
+  return now;
+}
+
+const starting = (l: Launch | undefined) => !!l?.seats?.some((s) => s.state === "starting" || s.state === "retrying");
+
+/** The initiative's start on the agents feed, if any. */
+export const launchOf = (launches: Launch[] | undefined, id: string) => (launches ?? []).find((l) => l.initiative === id);
+
+/** A settled start with a failure stays until the lead acts (launch-progress
+ *  §1); Close is one way to act. Module state, so the list stays closed
+ *  across navigation until the start changes. */
+const closed = new Map<string, string>();
+const shapeOf = (l: Launch) => (l.seats ?? []).map((s) => `${s.seat}:${s.state}:${s.started_at ?? ""}`).join("|");
+
+/** Try again and Copy the command of a seat that did not start (§2). */
+export function FailedActions({ initiative, seat, retryRef, onCopied, onError }: { initiative: string; seat: SeatStart; retryRef?: React.Ref<HTMLButtonElement>; onCopied: () => void; onError: (m: string) => void }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => ClipboardSetText(seat.launch_line).then(
+    (ok) => { if (!ok) { onError("the clipboard refused the command"); return; } setCopied(true); onCopied(); window.setTimeout(() => setCopied(false), 2000); },
+    (e) => onError(String(e)),
+  );
+  return (
+    <span className="ls-acts">
+      <button ref={retryRef} className="tiny-btn" aria-label={`Try again, ${seat.seat}`} onClick={() => RetrySeat(initiative, seat.seat).catch((e) => onError(String(e)))}>Try again</button>
+      <button className="tiny-btn ghost" aria-label={`Copy the command, ${seat.seat}`} title={seat.launch_line} onClick={copy}>{copied ? "Copied" : "Copy the command"}</button>
+    </span>
+  );
+}
+
+/** Bring crew up's progress in place of the crew rows (launch-progress §1,
+ *  FR-6): the heading takes focus after the press, since the button is
+ *  gone; one line per seat in launch order; Stop starting while any seat
+ *  waits or starts. */
+function LaunchList({ initiative, launch, focusHead, say, onClose }: { initiative: string; launch: Launch; focusHead: React.MutableRefObject<boolean>; say: (m: string) => void; onClose: () => void }) {
+  const head = useRef<HTMLHeadingElement>(null);
+  const now = useNow(starting(launch));
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    if (!focusHead.current) return;
+    focusHead.current = false;
+    head.current?.focus();
+  }, [focusHead]);
+  const failed = launch.done && launch.failed > 0;
+  return (
+    <div className="launch">
+      <div className="crew-head">
+        <h3 ref={head} tabIndex={-1} className="launch-head">{launchHeading(launch)}</h3>
+        <span className="spacer" />
+        {error && <span className="meta ls-err">{error}</span>}
+        {!launch.done && <button className="tiny-btn ghost" onClick={() => StopStarting(initiative).catch((e) => setError(String(e)))} title="the seat in flight finishes; the waiting ones stay off">Stop starting</button>}
+        {failed && <button className="tiny-btn ghost" onClick={() => { closed.set(initiative, shapeOf(launch)); onClose(); }} title="back to the crew rows; Bring up starts the off seats again">Close the list</button>}
+      </div>
+      <ul className="launch-seats">
+        {(launch.seats ?? []).map((s, i) => {
+          const w = seatWord(s, now);
+          return (
+            <li key={`${s.seat}-${i}`} className={`ls ${w.tone}`} data-launch-seat={s.seat}>
+              <span className="ls-shape" aria-hidden="true">{w.shape}</span>
+              <span className="ident ls-name">{s.seat}</span>
+              <span className="ls-word">{w.word}{w.count && <span aria-hidden="true">{w.count}</span>}</span>
+              {s.state === "failed" && (
+                <>
+                  {/* One line in words; probe's whole output is the hover
+                      and organizer.log, never on screen (§2). */}
+                  <span className="ls-why" title={s.output || s.reason}>· {s.reason}</span>
+                  <FailedActions initiative={initiative} seat={s} onCopied={() => say(`command for ${s.seat} copied`)} onError={setError} />
+                </>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
 
 /** What a cell in definition waits on (decision 0030): no seat has had a
  *  session or a run, so the roster is still being written. */
@@ -79,9 +236,9 @@ export function crewBlocked(seats: Seat[], cell: model.Cell): string | null {
 
 /** The persona cell of an initiative: one row per seat of agents/cell.json,
  *  joined to whatever process runs for it, its discuss watcher and its
- *  context fill. "Bring crew up" opens one probe per seat in one iTerm2
- *  window; seats already running just reattach. */
-export function Crew({ group, readOnly = false, onMessage }: { group: AgentGroup; readOnly?: boolean; onMessage?: (seat: string) => void }) {
+ *  context fill. "Bring crew up" starts one probe per seat, detached, one
+ *  after another, and the block shows each seat starting (FR-6). */
+export function Crew({ group, launch, readOnly = false, onMessage }: { group: AgentGroup; launch?: Launch; readOnly?: boolean; onMessage?: (seat: string) => void }) {
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
@@ -91,6 +248,12 @@ export function Crew({ group, readOnly = false, onMessage }: { group: AgentGroup
   const { opener: crewUp, commit: openBtn } = useConfirmFocus(asking);
   const box = useRef<HTMLDivElement>(null);
   const { agentsLanding, clearAgentsLanding } = useBoard();
+  const [said, say] = useAnnouncer(launch);
+  const focusHead = useRef(false);
+  const [, setClosedAt] = useState(0);
+  // A failure shown here is seen (FR-7): its Needs me row goes.
+  const unseen = !!launch && launch.failed > 0 && !launch.seen;
+  useEffect(() => { if (unseen) SeenLaunch(group.id).catch(() => undefined); }, [unseen, group.id]);
   // A Needs me verb lands here (ui-leftovers FR-5): Launch on Bring crew up,
   // Open on the seat whose persona file is missing.
   useEffect(() => {
@@ -113,14 +276,31 @@ export function Crew({ group, readOnly = false, onMessage }: { group: AgentGroup
 
   const bringUp = () => {
     setBusy(true);
+    // The list replaces the button; focus goes to its heading (L3).
+    focusHead.current = true;
     api.createCrew(group.id).then(
-      (cmds) => { flash(`opened ${cmds.length} seats in iTerm2`); setAsking(false); },
-      (e) => flash(String(e)),
+      () => setAsking(false),
+      (e) => { focusHead.current = false; flash(String(e)); },
     ).finally(() => setBusy(false));
   };
+  const showList = !!launch && launch.kind === "crew" && closed.get(group.id) !== shapeOf(launch);
+
+  if (showList) {
+    return (
+      <div className="crew" ref={box}>
+        <span className="sr-only" role="status" aria-live="polite">{said}</span>
+        <div className="crew-head">
+          <Users size={14} />
+          <span className="ident">{cell.project}</span>
+        </div>
+        <LaunchList initiative={group.id} launch={launch} focusHead={focusHead} say={say} onClose={() => { setClosedAt(Date.now()); window.setTimeout(() => crewUp.current?.focus(), 0); }} />
+      </div>
+    );
+  }
 
   return (
     <div className="crew" ref={box}>
+      <span className="sr-only" role="status" aria-live="polite">{said}</span>
       <div className="crew-head">
         <Users size={14} />
         <span className="ident">{cell.project}</span>
@@ -145,8 +325,8 @@ export function Crew({ group, readOnly = false, onMessage }: { group: AgentGroup
         )}
         {asking && (
           <span className="confirm-inline" onKeyDown={escapeCloses(() => setAsking(false))}>
-            <span className="meta">one iTerm2 window, {seats.length} tabs, each seat with its discuss identity; running seats reattach</span>
-            <button ref={openBtn} className="tiny-btn primary" onClick={bringUp} disabled={busy}>{busy ? "Opening…" : "Open"}</button>
+            <span className="meta">starts the off seats one after another, detached, each with its discuss identity; running seats stay as they are</span>
+            <button ref={openBtn} className="tiny-btn primary" onClick={bringUp} disabled={busy}>Start</button>
             <button className="tiny-btn ghost" onClick={() => setAsking(false)}>Cancel</button>
           </span>
         )}

@@ -4,7 +4,8 @@ import { api, type AgentGroup } from "../hooks/useWails";
 import { since } from "../lib";
 import { useBoard } from "../stores/board.store";
 import { AgentList } from "./AgentList";
-import { CellStateLz, Crew } from "./Crew";
+import { CellStateLz, Crew, elapsed, FailedActions, launchOf, useNow, type Launch, type SeatStart } from "./Crew";
+import { SeenLaunch } from "../../wailsjs/go/main/App";
 import { missingPersonas, queueOf, readOnlyOf } from "../lib/queue";
 import { escapeCloses, useConfirmFocus } from "../lib/focus";
 import { CleanButton } from "./Retire";
@@ -125,7 +126,7 @@ export function AgentsView() {
           {/* A roster seat's agent shows in the crew block above; an agent
               with a persona outside the roster (a supervisor, a builder, a
               guest) has no seat there, so it is listed here (FR-6). */}
-          {g.cell && <Crew group={g} readOnly={!!ro} onMessage={g.can_post && !ro ? (seat) => openSlack(g.id, seat) : undefined} />}
+          {g.cell && <Crew group={g} launch={launchOf(view.launches, g.id)} readOnly={!!ro} onMessage={g.can_post && !ro ? (seat) => openSlack(g.id, seat) : undefined} />}
           {!g.cell && selectedInitiative && !ro && <DraftCell initiativeId={g.id} />}
           <AgentList agents={(g.agents ?? []).filter((a) => !a.persona || !g.cell?.agents?.includes(a.persona))} root={g.path} readOnly={!!ro} onMessage={g.cell && g.can_post && !ro ? (p) => openSlack(g.id, p) : undefined} />
         </section>
@@ -155,26 +156,125 @@ export function AgentsView() {
 export const countsOf = (g: Pick<AgentGroup, "agents" | "live" | "working" | "cell" | "crew">) =>
   `${plural(g.agents?.length ?? 0, "agent")} · ${g.live} live · ${g.working} working${g.cell ? ` · ${plural(g.crew?.length ?? 0, "seat")}` : ""}`;
 
+/** The seat New agent started, per initiative, until it runs or fails and
+ *  the lead has acted. Module state, so leaving and coming back keeps the
+ *  button's state (launch-progress L7). */
+const pendingAgent = new Map<string, string>();
+
+/** The pending seat's start: the last entry of that name on the feed. */
+export function agentStart(launch: Launch | undefined, seat: string | undefined): SeatStart | undefined {
+  if (!launch || !seat) return undefined;
+  const seats = launch.seats ?? [];
+  for (let i = seats.length - 1; i >= 0; i--) if (seats[i].seat === seat) return seats[i];
+  return undefined;
+}
+
+/** What the pressed button reads while its seat starts (launch-progress §3):
+ *  the visible text, and its name with the reason and the seconds. */
+export function startingButton(s: Pick<SeatStart, "seat" | "state" | "started_at">, now: number): { text: string; name: string } {
+  const n = elapsed(s, now);
+  if (s.state === "retrying") return { text: `Trying again · ${n} s`, name: `Trying again to start ${s.seat}, ${n} seconds` };
+  if (s.state === "starting") return { text: `Starting · ${n} s`, name: `Starting ${s.seat}, ${n} seconds` };
+  return { text: "Waiting to start", name: `${s.seat} waits for the seats before it` };
+}
+
+const inFlight = (s: SeatStart | undefined) => !!s && (s.state === "queued" || s.state === "starting" || s.state === "retrying");
+
+/** Inline "new agent" control: starts a probe in the initiative directory,
+ *  in the family named after the initiative, detached. Empty name = animal
+ *  name. The pressed button becomes the seat's state (FR-6, §3): Starting ·
+ *  n s, Trying again · n s; then focus to the new row, or to Try again on one
+ *  danger line under the button. */
 function NewAgent({ initiativeId }: { initiativeId: string }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [note, setNote] = useState<string | null>(null);
-  const create = () => {
-    api.createAgent(initiativeId, name.trim()).then(
-      () => { setNote(`opening ${initiativeId}-probe-${name.trim() || "<animal>"}`); setOpen(false); setName(""); window.setTimeout(() => setNote(null), 4000); },
-      (e) => setNote(String(e)),
-    );
+  const [target, setTargetState] = useState<string | undefined>(() => pendingAgent.get(initiativeId));
+  const setTarget = (seat: string | undefined) => {
+    if (seat) pendingAgent.set(initiativeId, seat); else pendingAgent.delete(initiativeId);
+    setTargetState(seat);
   };
+  const applyAgents = useBoard((s) => s.applyAgents);
+  const launch = launchOf(useBoard((s) => s.agents?.launches), initiativeId);
+  const s = agentStart(launch, target);
+  const [said, setSaid] = useState("");
+  const now = useNow(inFlight(s));
+  const busy = useRef<HTMLButtonElement>(null);
+  const retry = useRef<HTMLButtonElement>(null);
+  const newBtn = useRef<HTMLButtonElement>(null);
+  const state = s?.state;
+
+  // The pressed button is now the state: focus stays on it (L3).
+  useEffect(() => { if (inFlight(s)) busy.current?.focus(); }, [state]);
+  // Failed: the danger line's Try again takes focus, and the failure is seen.
+  useEffect(() => {
+    if (state !== "failed") return;
+    retry.current?.focus();
+    setSaid(`${s!.seat} didn't start`);
+    SeenLaunch(initiativeId).catch(() => undefined);
+  }, [state]);
+  // Running: focus to the new agent's row once the feed draws it.
+  const agents = useBoard((st) => st.agents);
+  useEffect(() => {
+    if (!target) return;
+    if (!s) { setTarget(undefined); return; } // dropped from the feed, or replaced
+    if (s.state !== "running") return;
+    const row = document.querySelector<HTMLElement>(`ul.agents > li[data-session="${CSS.escape(s.session)}"]`);
+    if (!row) return;
+    setSaid(`${s.seat} running`);
+    setTarget(undefined);
+    row.focus();
+    row.scrollIntoView({ block: "nearest" });
+  }, [target, s, agents]);
+
+  const create = () => {
+    api.createAgent(initiativeId, name.trim())
+      .then(() => api.getAgents())
+      .then((v) => {
+        applyAgents(v);
+        const l = launchOf(v.launches, initiativeId);
+        const last = l?.seats?.[l.seats.length - 1];
+        setOpen(false); setName(""); setNote(null);
+        if (last) setTarget(last.seat);
+      }, (e) => setNote(String(e)));
+  };
+  const live = <span className="sr-only" role="status" aria-live="polite">{said}</span>;
+
+  if (s && inFlight(s)) {
+    const b = startingButton(s, now);
+    return (
+      <span className="new-agent">
+        {live}
+        {/* aria-disabled, not disabled: a disabled button drops focus to
+            the body, and focus stays here while the seat starts (L3). */}
+        <button ref={busy} className="tiny-btn na-busy" aria-disabled="true" aria-label={b.name} title={`${s.session}: probe checks the pane runs claude`}>{b.text}</button>
+      </span>
+    );
+  }
+  if (s?.state === "failed") {
+    return (
+      <span className="new-agent na-failed">
+        {live}
+        <button ref={newBtn} className="tiny-btn" onClick={() => { setTarget(undefined); setOpen(true); }} title={`${initiativeId}-probe <name> in the initiative directory`}><Plus size={13} /> New agent</button>
+        <span className="na-danger">
+          <span className="na-why" title={s.output || s.reason}><span className="ident">{s.seat}</span> didn't start · {s.reason}</span>
+          <FailedActions initiative={initiativeId} seat={s} retryRef={retry} onCopied={() => setSaid(`command for ${s.seat} copied`)} onError={setSaid} />
+        </span>
+      </span>
+    );
+  }
   if (!open) {
     return (
       <span className="new-agent">
+        {live}
         {note && <span className="meta">{note}</span>}
-        <button className="tiny-btn" onClick={() => setOpen(true)} title={`${initiativeId}-probe <name> in the initiative directory`}><Plus size={13} /> New agent</button>
+        <button ref={newBtn} className="tiny-btn" onClick={() => setOpen(true)} title={`${initiativeId}-probe <name> in the initiative directory`}><Plus size={13} /> New agent</button>
       </span>
     );
   }
   return (
     <span className="new-agent">
+      {live}
       <span className="meta mono">{initiativeId}-probe-</span>
       <input
         autoFocus
