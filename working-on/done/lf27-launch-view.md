@@ -1,6 +1,6 @@
 ---
 title: "Bring crew up and New agent show each seat starting"
-status: now
+status: done
 repos: [organizer]
 branch: lf27-launch-view
 seat: lv-build
