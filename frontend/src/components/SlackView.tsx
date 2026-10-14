@@ -4,7 +4,8 @@ import type { Seat } from "../hooks/useWails";
 import { useBoard } from "../stores/board.store";
 import { queueOf, readOnlyOf } from "../lib/queue";
 import { ContextBar, WatcherBadge } from "./ContextBar";
-import { HEALTH, peopleLabel } from "../lib/health";
+import { HEALTH, healthState, peopleLabel } from "../lib/health";
+import { plural } from "../lib/initiatives";
 import { stateWord } from "../lib/stateWords";
 import { Conversation } from "./Conversation";
 
@@ -81,25 +82,25 @@ export function People({ seats, human, focus, onFocus, onClose }: { seats: Seat[
         )}
         {seats.map((s) => {
           // leftovers-25 FR-1: the short name is the verb; what the row draws
-          // (live or off, the watcher's word, what it owes, context) is its
-          // description. The dot's word is said, since a colour is not.
+          // is its description, one line of facts each with its noun
+          // (leftovers-26 FR-4). The dot's word is said, since a colour is not.
           const d = `${idBase}-${s.name}`;
           return (
           <li key={s.name}>
             {/* leftovers-24 FR-3: shows the chat in place, so a button (F3).
                 leftovers-25 FR-3: it stays mounted and keeps focus; the chat
                 it shows does not take it (Conversation's askedNew). */}
-            <button type="button" className={`person ${s.agent?.state ?? "off"} ${s.deaf && !s.capped ? "deaf" : ""} ${s.capped ? "capped" : ""} ${focus === s.name ? "active" : ""}`} aria-label={`Chat with ${s.name}`} aria-describedby={`${d}-state ${d}-watch${(s.owes?.length ?? 0) > 0 ? ` ${d}-owes` : ""} ${d}-ctx`} aria-current={focus === s.name ? "true" : undefined} onClick={() => onFocus(focus === s.name ? null : s.name)} title={`${s.agent ? s.agent.state : "no session"}. Click for the conversation with ${s.name}.`}>
+            <button type="button" className={`person ${s.agent?.state ?? "off"} ${s.deaf && !s.capped ? "deaf" : ""} ${s.capped ? "capped" : ""} ${focus === s.name ? "active" : ""}`} aria-label={`Chat with ${s.name}`} aria-describedby={`${d}-facts`} aria-current={focus === s.name ? "true" : undefined} onClick={() => onFocus(focus === s.name ? null : s.name)} title={`${s.agent ? s.agent.state : "no session"}. Click for the conversation with ${s.name}.`}>
             <i className={`dot ${s.agent?.state ?? "off"}`} />
-            <span className="sr-only" id={`${d}-state`}>{s.agent ? (s.agent.state === "working" || s.agent.state === "running" ? "live" : stateWord(s.agent.state)) : "off"}</span>
+            <span className="sr-only" id={`${d}-facts`}>{personFacts(s)}</span>
             <span className="person-main">
               <span className="mono">{s.name}</span>
               <span className="person-meta">
-                <span className="person-watch" id={`${d}-watch`}><WatcherBadge watcher={s.watcher} deaf={s.deaf} capped={s.capped} undelivered={s.undelivered} /></span>
-                {(s.owes?.length ?? 0) > 0 && <span className="badge owes" id={`${d}-owes`} title={s.owes.map((o) => o.subject || o.id).join("\n")}>owes {s.owes.length}</span>}
+                <span className="person-watch"><WatcherBadge watcher={s.watcher} deaf={s.deaf} capped={s.capped} undelivered={s.undelivered} /></span>
+                {(s.owes?.length ?? 0) > 0 && <span className="badge owes" title={s.owes.map((o) => o.subject || o.id).join("\n")}>owes {s.owes.length}</span>}
               </span>
             </span>
-            <span className="person-ctx" id={`${d}-ctx`}><ContextBar c={s.agent?.context} /></span>
+            <span className="person-ctx"><ContextBar c={s.agent?.context} /></span>
             </button>
           </li>
           );
@@ -109,3 +110,19 @@ export function People({ seats, human, focus, onFocus, onClose }: { seats: Seat[
   );
 }
 
+/** A person row's description (leftovers-26 FR-4, T23): `session <word>,
+ *  mail <word>, owes <n> message(s), context <n>%`, each fact with its noun
+ *  first and the mail word from HEALTH. A fact the row does not draw is not
+ *  said: no mail word without a watcher, owes only when it owes, no context
+ *  before the statusline reported one. */
+export function personFacts(s: Pick<Seat, "agent" | "watcher" | "deaf" | "capped" | "owes">): string {
+  const session = s.agent ? (s.agent.state === "working" || s.agent.state === "running" ? "live" : stateWord(s.agent.state)) : "off";
+  const facts = [`session ${session}`];
+  const mail = s.watcher ? healthState({ watcher: s.watcher, deaf: s.deaf, capped: s.capped }) : undefined;
+  if (mail) facts.push(`mail ${HEALTH[mail].label}`);
+  const owes = s.owes?.length ?? 0;
+  if (owes > 0) facts.push(`owes ${plural(owes, "message")}`);
+  const c = s.agent?.context;
+  if (c) facts.push(c.window_size ? `context ${Math.max(0, Math.min(100, Math.round(c.used_percent)))}%` : "context unknown");
+  return facts.join(", ");
+}
