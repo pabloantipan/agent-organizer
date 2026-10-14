@@ -180,3 +180,31 @@ The design system already says so.
 | L10 | close a failed list | `Close the list` hides it; the failed seats read `off`; `Bring n up` is back; the Needs me row is gone; nothing is killed |
 | L11 | find a fresh failure in Needs me | the unseen-failure row carries the failure's time and sorts among the dated rows |
 | L12 | see the deaf and capped evidence | their badges draw `· n waiting`, and the description says it |
+
+## Amendment 2 (aglaea, 2026-10-14): from leftovers-29's UI reviews
+
+From sup66's close (`runs/2026-10-14-sup66-leftovers-29.md`,
+`working-on/done/lf29-*.md`).
+
+- **Nothing running**: `Seat not up · 0 of 1 running` and `Crew not up · 0
+  of 3 running`, as built. Confirmed.
+- **`Seat up` closes after 5 s**, like `Crew up`. The rule is the same: a
+  settled list in which every seat runs closes after 5 s.
+- **Failures are never hidden by time.** A list with any `didn't start`
+  stays until `Close the list`, `Try again` or Stop. Confirmed.
+- **The landed row stays in view** (task-rows §4, for the supervisor row,
+  and every `openAgentsAt` landing).
+  - On landing, the row is centred (`block: "center"`).
+  - The 10 s feed then reflows the list, so while the row keeps focus and
+    the lead has not scrolled, each feed update brings it back into view
+    with `block: "nearest"`.
+  - Once the lead scrolls or focus leaves the row, this stops.
+  - Safari 15 has no `overflow-anchor`, so this is done in the view.
+- **Amber is shared on purpose.** `stalled` and the unreadable-files row
+  both mean "look at this, nothing has stopped". Their words tell them
+  apart, and the colour only ranks them. No change.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| L13 | keep the landed row in sight | after an `openAgentsAt` landing, the row is centred, and after two feed updates (20 s) it is still whole in view; after the lead scrolls, it is not pulled back |
+| L14 | trust the timing | `Seat up` and `Crew up` close after 5 s; any list with `didn't start` stays |
