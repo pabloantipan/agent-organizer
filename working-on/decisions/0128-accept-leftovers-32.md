@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 32 - the press's answer shows at once, a repeated message is said again, a dead confirm closes, focus never drops
-status: proposed
+status: ruled
 raised: 2026-10-14
 raised_by: fse
 owner: pablo
@@ -10,6 +10,9 @@ forecast: 20-40m
 threads: []
 supersedes: []
 superseded_by:
+ruled: 2026-10-14
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -40,3 +43,7 @@ initiative (leftovers-31: one card, 19 min).
 ## Recommendation
 
 The FSE: **"accept as written"**.
+
+## Ruling
+
+pablo, 2026-10-14, in the organizer on lodestar: ok
