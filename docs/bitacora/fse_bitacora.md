@@ -23,6 +23,7 @@ restating it (the discuss skill).
 
 ## Carry for leftovers-27
 
+- **Supervisor prompt, from leftovers-27 on** (Hephaistos, claudecode 3ebcfd0, Pablo "as you recommend"): drop any lease-level rule; tell the supervisor to give both reviewers of a card the same `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- <X0 test line>` from a clean clone of the card's SHA (deps installed, nothing written in the clone, notes in .wt-notes/<seat>/); never --share make review-build or wails build; builders never --share; at warn the lease waits only under 4 GB free and says to seat-freeze idle seats after 10 min. Report to Hephaistos if a second reviewer's run is not "reused".
 - lf23 follow-ups (sup63): openInTerminal has no caller (dead code); app.go:386-387 comment still says iTerm2 window; launch progress for Bring crew up / Run card / New agent (asked aglaea).
 - Person description adds the waiting count after the mail word ('mail stale, 1 message waiting'), deaf and capped too (Aglaea A3 §2, T23, from wd-ui U1, lf26-words 637960d).
 - Scroll stops pad their content >= 4 px each side under the inset ring (outline-offset -2px); rule box record and header open area named (Aglaea A3 §1, T22 extended, from ss-ui U2, 244271d).
