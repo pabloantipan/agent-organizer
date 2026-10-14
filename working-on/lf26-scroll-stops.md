@@ -12,6 +12,7 @@ boundary: ["docs/specs/leftovers-26.md Boundary, lf26-scroll-stops"]
 spec: "docs/specs/leftovers-26.md (FR-1 to FR-3, FR-9, FR-10; tab-reaches-links Amendment 3, T22 and §1 names)"
 gate: "docs/specs/leftovers-26.md Acceptance, rows S1, S2, S3, S4, D1 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -83,3 +84,14 @@ Not verified in WKWebView:
 - A decision record's code or table in Decisions; the same `watchMarkdown` covers it.
 - Resize from overflowing to not while focused.
 - auth: firebase: not run, per rules.
+
+## Review
+Pass: S1, S2, S3, S4, D1 and X0 met at 052e17f (fresh clone, fixture, auth off; harness `--inactive-none on` per Amendment 3, own `wails dev` on 34119; evidence `.wt-notes/ss-review/`).
+- S1: harness 1024×640, Tab ×2 lands on the body `Cut the scan report to what is read, details` (role region, tabindex 0, ring 2px −2px); Down ×3 scrollTop 80 in 3/3 (`s1-run1..3.jsonl`); Beta card at 1440×900 sh=ch, no tabindex, never reached in 10 Tabs (`s1-short.jsonl`). AX in the review build: `AXLandmarkRegion "Cut the scan report to what is read, details"` (`s1-ax-cardback.txt`).
+- S2: Tab ×4 to the pre `Code, scrolls` (region), Right ×3 scrollLeft 120/120/120/0/80, 4 of 5 runs > 0 (`s2-tab4-run1..5.jsonl`; the zero is the harness's frame timing, Amendment 3); vitest `watchMarkdown` puts the stop on an overflowing pre/table and takes it off when it fits (passes in X0). AX: `Code, scrolls` region, `AXTable "Table, scrolls"`.
+- S3: 30 Tabs + 12 Shift+Tabs in the card back, body, pre and table each a stop, never BODY, never outside the panel, 5/5 (`s3-run1..5.jsonl`).
+- S4: harness 1024×640: role drawer `Hephaistos, details`, rule box `Record 0008, The organizer's roadmap, as it was proposed`, header `Details of init-a`, Help region labelled by its h1 (`s4-*.jsonl`); floating list a stop `Initiatives list` keeping listbox at 360×480, its own window's size (at 1024×640 it does not overflow and is correctly no stop, `s4-float.jsonl`). AX on the review build's pid: each `AXLandmarkRegion` with that name, the list `AXList "Initiatives list"` (`s4-ax-{role,rule,header,help,float}.txt`). vitest of the names passes.
+- D1: AX `AXList .rd-inits` with 5 items (`d1-ax-tree.txt`); `sed -n 101p` "an inline list" (`d1-roles-101.txt`).
+- X0: clean clone at 052e17f: make test (621 vitest, every go package ok), pnpm run build, wails build pass; porcelain empty (`x0-summary.txt`).
+Unmet: none. Not in the gate: the floating list drops its own name "Initiatives" while it does not overflow (scrollStop removes aria-label; seen in `s4-float.jsonl`, label null).
+Reviewer ss-review, 2026-10-14, commit 052e17ff7e66e70e61c7ed1577a469f47b7754ca. UI review missing: status and place left.
