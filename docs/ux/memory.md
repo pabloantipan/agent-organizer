@@ -398,6 +398,8 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 
 - 2026-10-13: a blanket ARIA role in a rule can overwrite native ones (listbox, table); write "a role only where there is none".
 
+- 2026-10-14, launch-progress: a long blocking action needs a visible state per item in place of the button, a live region per result (not per tick), a counter instead of a spinner (2.2.2), a stop, and a Needs me row for a failure the lead walked away from.
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).
