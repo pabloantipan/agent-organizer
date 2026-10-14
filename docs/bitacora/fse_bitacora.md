@@ -25,6 +25,12 @@ restating it (the discuss skill).
 - **Sent [for hephaistos]:** pause by seat-freeze, not probe -k (wd-review lost its conversation); test-lease starvation still open.
 - Next: leftovers-27 from the carry below when Aglaea has no more to fold; or wait for Pablo.
 
+## HAND-OFF — 2026-10-14 ~13:05, leftovers-28 landed
+
+- **Last SHA seen:** 5610227. leftovers-28 merged by sup65 (task-watch cbc790d, task-rows 5610227), all pass; 21 min against 60-100 (first record with forecast: field); no lease wait; shared run reused; $7.85. sup65 ended; installed v0.2.0-2031-g5610227; tree clean. No supervisor running. Told hephaistos 0014's Deltagos half is live.
+- **0125** (leftovers-29) proposed; folded tr-ui U1 (capped asker) and CLAUDE.md task rows in before the ruling (fa3036e). Asked aglaea: stalled red?, U2-U4 wording.
+- **Forecast lesson:** with shared runs and no lease wait, a 2-card, 2-wave Go+UI task ran 21 min; my bands (60-100) are now ~3x high. Next bands: one wave ~20-40, two waves ~30-60.
+
 ## Carry for leftovers-29
 
 - From sup64 (lf27): aglaea's polish U2, launch-view U3/U4; deaf badge no count; 'Close the list' unnamed; unseen-failure row undated (sorts behind Show the other N); fixture Roles group shows this Mac's real role sessions in a review build; CLAUDE.md Crew paragraph says a failing seat stops the rest (no longer); Copy the command writes the real clipboard (gate hygiene).
