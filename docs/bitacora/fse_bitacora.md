@@ -4,6 +4,13 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-14 morning, leftovers-26 landed
+
+- **Last SHA seen:** df3fb21. leftovers-26 merged by sup62 (menu 1ebb4b5, words 637960d, scroll-stops 244271d, fixture 70f14dc), all pass. ~48 min seat work; lease starved 102+14 min; paused 18:04 to 09:46 (Pablo: "I'll free memory, resume", then "Lower the threshold", the override refused by sup62's classifier as a relay against its brief and withdrawn when pressure fell). $36.42. sup62 ended, window 20524 closed; installed v0.2.0-1959-gdf3fb21; tree clean. No supervisor running.
+- **Lesson:** a supervisor brief that says "never lower X" needs the override in its own prompt, not a relay; next time a ruling changes a brief rule, end and relaunch the supervisor with the new brief, or have Pablo say it in its session.
+- **Sent [for hephaistos]:** pause by seat-freeze, not probe -k (wd-review lost its conversation); test-lease starvation still open.
+- Next: leftovers-27 from the carry below when Aglaea has no more to fold; or wait for Pablo.
+
 ## Carry for leftovers-27
 
 - Person description adds the waiting count after the mail word ('mail stale, 1 message waiting'), deaf and capped too (Aglaea A3 §2, T23, from wd-ui U1, lf26-words 637960d).
