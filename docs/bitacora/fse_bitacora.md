@@ -7,6 +7,7 @@ restating it (the discuss skill).
 ## Carry for leftovers-27
 
 - Person description adds the waiting count after the mail word ('mail stale, 1 message waiting'), deaf and capped too (Aglaea A3 §2, T23, from wd-ui U1, lf26-words 637960d).
+- Scroll stops pad their content >= 4 px each side under the inset ring (outline-offset -2px); rule box record and header open area named (Aglaea A3 §1, T22 extended, from ss-ui U2, 244271d).
 - Tab harness: WKPreferences.inactiveSchedulingPolicy = .none (sup62, leftovers-26 Amendment 3).
 
 ## HAND-OFF — 2026-10-13, leftovers-26 running
