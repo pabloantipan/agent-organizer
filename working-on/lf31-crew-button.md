@@ -3,10 +3,10 @@ title: "No button that does nothing; the landed row keeps its ring; focus after 
 status: next
 repos: [organizer]
 branch: lf31-crew-button
-seat:
+seat: cb-build
 stage: one-window
 updated: 2026-10-14
-next: "sup68 runs it (0127 ruled go, 2026-10-14)"
+next: "cb-build builds it in .wt/lf31-crew-button (sup68)"
 depends_on: []
 boundary: ["docs/specs/leftovers-31.md Boundary, lf31-crew-button"]
 spec: "docs/specs/leftovers-31.md (FR-1 to FR-4; launch-progress L15-L18)"
