@@ -162,15 +162,16 @@ func (s *Service) queueLaunch(initiative, kind string, seats []SeatLaunch) error
 		s.notifyLaunch(LaunchChange{Initiative: initiative, Seat: &queued[i]})
 	}
 	if start {
-		go s.runLaunches(initiative)
+		go s.runLaunches(l)
 	}
 	return nil
 }
 
-// setSeat changes seat i of the initiative's start and tells OnLaunch.
-func (s *Service) setSeat(initiative string, i int, change func(*SeatLaunch)) {
+// setSeat changes seat i of a start and tells OnLaunch. It works on the
+// start it was handed, not the map's: the map may have dropped or replaced it.
+func (s *Service) setSeat(l *InitiativeLaunch, i int, change func(*SeatLaunch)) {
+	initiative := l.Initiative
 	s.launchMu.Lock()
-	l := s.launches[initiative]
 	seat := &l.Seats[i]
 	change(seat)
 	if seat.State == LaunchFailed {
@@ -197,12 +198,13 @@ func (s *Service) afterKeep(initiative string) {
 	after(launchKeep, func() { s.notifyLaunch(LaunchChange{Initiative: initiative}) })
 }
 
-// runLaunches starts the initiative's queued seats one after another until
-// none is queued. One goroutine per initiative at a time (l.active).
-func (s *Service) runLaunches(initiative string) {
+// runLaunches starts a start's queued seats one after another until none is
+// queued. One goroutine per start at a time (l.active). It holds the start
+// itself: a new start that replaces it in the map gets its own goroutine,
+// and the drop never pulls it from under this one.
+func (s *Service) runLaunches(l *InitiativeLaunch) {
 	for {
 		s.launchMu.Lock()
-		l := s.launches[initiative]
 		next := -1
 		for i := range l.Seats {
 			if l.Seats[i].State == LaunchQueued {
@@ -219,7 +221,7 @@ func (s *Service) runLaunches(initiative string) {
 		s.launchMu.Unlock()
 
 		started := s.clock()
-		s.setSeat(initiative, next, func(seat *SeatLaunch) {
+		s.setSeat(l, next, func(seat *SeatLaunch) {
 			seat.State, seat.StartedAt = LaunchStarting, &started
 			seat.Reason, seat.Exit, seat.Output = "", 0, ""
 		})
@@ -230,10 +232,10 @@ func (s *Service) runLaunches(initiative string) {
 		if err == nil {
 			err = launchProbeTries(line, func() {
 				again := s.clock()
-				s.setSeat(initiative, next, func(seat *SeatLaunch) { seat.State, seat.StartedAt = LaunchRetrying, &again })
+				s.setSeat(l, next, func(seat *SeatLaunch) { seat.State, seat.StartedAt = LaunchRetrying, &again })
 			})
 		}
-		s.setSeat(initiative, next, func(seat *SeatLaunch) {
+		s.setSeat(l, next, func(seat *SeatLaunch) {
 			if err == nil {
 				seat.State = LaunchRunning
 				return
@@ -322,7 +324,7 @@ func (s *Service) RetrySeat(initiative, seat string) error {
 	s.launchMu.Unlock()
 	s.notifyLaunch(LaunchChange{Initiative: initiative, Seat: &cp})
 	if start {
-		go s.runLaunches(initiative)
+		go s.runLaunches(l)
 	}
 	return nil
 }
