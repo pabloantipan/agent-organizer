@@ -3,8 +3,8 @@ import { Users, X } from "lucide-react";
 import type { Seat } from "../hooks/useWails";
 import { useBoard } from "../stores/board.store";
 import { queueOf, readOnlyOf } from "../lib/queue";
-import { ContextBar, WatcherBadge } from "./ContextBar";
-import { HEALTH, healthState, messages, peopleLabel } from "../lib/health";
+import { ContextBar } from "./ContextBar";
+import { HEALTH, healthState, healthTitle, messages, peopleLabel, type HealthState } from "../lib/health";
 import { plural } from "../lib/initiatives";
 import { stateWord } from "../lib/stateWords";
 import { Conversation } from "./Conversation";
@@ -96,7 +96,7 @@ export function People({ seats, human, focus, onFocus, onClose }: { seats: Seat[
             <span className="person-main">
               <span className="mono">{s.name}</span>
               <span className="person-meta">
-                <span className="person-watch"><WatcherBadge watcher={s.watcher} deaf={s.deaf} capped={s.capped} undelivered={s.undelivered} /></span>
+                <span className="person-watch"><PersonBadge s={s} /></span>
                 {(s.owes?.length ?? 0) > 0 && <span className="badge owes" title={s.owes.map((o) => o.subject || o.id).join("\n")}>owes {s.owes.length}</span>}
               </span>
             </span>
@@ -108,6 +108,24 @@ export function People({ seats, human, focus, onFocus, onClose }: { seats: Seat[
       </ul>
     </aside>
   );
+}
+
+/** A person's mail word as its badge draws it (leftovers-29 FR-6,
+ *  launch-progress Amendment 1 to A3 §2): the word, then `· n waiting`
+ *  whenever mail waits, deaf included, since for deaf and capped the count is
+ *  the evidence for the word, and personFacts says the same count. Null
+ *  without a watcher. */
+export function personBadge(s: Pick<Seat, "watcher" | "deaf" | "capped" | "undelivered">): { state: HealthState; words: string } | null {
+  const state = s.watcher ? healthState({ watcher: s.watcher, deaf: s.deaf, capped: s.capped }) : undefined;
+  if (!state) return null;
+  const waiting = s.undelivered ?? 0;
+  return { state, words: `${HEALTH[state].label}${waiting > 0 ? ` · ${waiting} waiting` : ""}` };
+}
+
+function PersonBadge({ s }: { s: Pick<Seat, "watcher" | "deaf" | "capped" | "undelivered"> }) {
+  const b = personBadge(s);
+  if (!b) return null;
+  return <span className={`badge watcher ${b.state.replace(" ", "-")}`} title={healthTitle(b.state, s.undelivered ?? 0)}>{b.words}</span>;
 }
 
 /** A person row's description (leftovers-26 FR-4, T23): `session <word>,
