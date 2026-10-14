@@ -1,12 +1,12 @@
 ---
 title: "Deltagos knows each task's forecast, start and silence"
-status: next
+status: now
 repos: [organizer]
 branch: lf28-task-watch
 seat: tw-build
 stage: one-window
 updated: 2026-10-14
-next: "sup65 runs it (0124 ruled ok, 2026-10-14)"
+next: "tw-build: build FR-1 to FR-4 on branch lf28-task-watch"
 depends_on: [lf27-launch-state]
 boundary: ["docs/specs/leftovers-28.md Boundary, lf28-task-watch"]
 spec: "docs/specs/leftovers-28.md (FR-1 to FR-4)"
