@@ -29,7 +29,7 @@ function drawer(initiatives: string[]) {
 describe("D2: the drawer's initiatives are a list with no commas", () => {
   it("renders a ul with one link per initiative and no comma text", () => {
     const html = drawer(["organizer", "agent-slack", "camp"]);
-    const list = html.match(/<ul class="rd-inits">(.*?)<\/ul>/)?.[1] ?? "";
+    const list = html.match(/<ul class="rd-inits" role="list">(.*?)<\/ul>/)?.[1] ?? "";
     expect(list.match(/<li><a href="#" class="rd-init mono"[^>]*>[^<]+<\/a><\/li>/g)).toHaveLength(3);
     expect(list.replace(/<[^>]*>/g, "")).toBe("organizeragent-slackcamp");
     expect(list).not.toContain(",");
@@ -47,5 +47,15 @@ describe("D2: the drawer's initiatives are a list with no commas", () => {
     expect(rolesCss).toMatch(/\.rd-init:focus-visible \{ outline: 2px solid var\(--focus-ring\); outline-offset: 0;/);
     const tokens = readFileSync(new URL("../styles/tokens.css", import.meta.url), "utf8") as string;
     expect(tokens).toMatch(/--space-2: 8px;/);
+  });
+});
+
+// D1 (leftovers-26 FR-9, FR-10): WebKit drops list semantics under
+// list-style: none, so the ul says it is a list; the comment says inline.
+describe("D1: the drawer's initiatives stay a list", () => {
+  it("carries role=list and the comment names an inline list", () => {
+    expect(drawer(["organizer", "camp"])).toContain('<ul class="rd-inits" role="list">');
+    expect(rolesCss).toContain("plain text links in an inline list");
+    expect(rolesCss).not.toContain("comma list");
   });
 });

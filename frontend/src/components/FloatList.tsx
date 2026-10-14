@@ -5,7 +5,7 @@ import { FloatDismiss, FloatListHeight, FloatPick } from "../../wailsjs/go/main/
 import { useBoard } from "../stores/board.store";
 import { filterList, floatList, focusOrder, foldSignals, HOME, homeCount, homeLabel, type FloatList as FloatListT, type FloatRow, type FoldsOpen, type Signal } from "../lib/floatList";
 import { foldLabel, type Fold } from "../lib/folds";
-import { useScrollEdges } from "../lib/useScrollEdges";
+import { regionName, useScrollEdges } from "../lib/useScrollEdges";
 import { MemoryFloatLine } from "./MemoryFloatLine";
 import "../styles/float.css";
 
@@ -98,7 +98,8 @@ export function FloatList() {
     return () => ro.disconnect();
   }, [open, list, foldsOpen, view]);
 
-  const edges = useScrollEdges(scroller, open);
+  // leftovers-26 FR-3: the list is a stop while it scrolls; it stays a listbox.
+  const edges = useScrollEdges(scroller, open, regionName.floatList);
 
   useEffect(() => {
     if (!open || !current) return;
@@ -123,8 +124,9 @@ export function FloatList() {
       if (query) setQuery("");
       else close();
     } else if (e.key === "Tab") {
-      // Tab stays inside the panel.
-      const els = Array.from(panel.current?.querySelectorAll<HTMLElement>("input, button") ?? []).filter((x) => x.tabIndex >= 0 && !x.hasAttribute("disabled"));
+      // Tab stays inside the panel; the list is a stop while it scrolls
+      // (leftovers-26 FR-3, its tabindex from useScrollEdges).
+      const els = Array.from(panel.current?.querySelectorAll<HTMLElement>("input, button, [tabindex]") ?? []).filter((x) => x.tabIndex >= 0 && !x.hasAttribute("disabled"));
       if (!els.length) return;
       const i = els.indexOf(document.activeElement as HTMLElement);
       const next = e.shiftKey ? (i <= 0 ? els.length - 1 : i - 1) : (i === els.length - 1 ? 0 : i + 1);

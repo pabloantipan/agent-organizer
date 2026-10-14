@@ -6,7 +6,7 @@ import { useBoard } from "../stores/board.store";
 import { dateWords } from "../lib/dates";
 import { openBox } from "../lib/boxStack";
 import { loopTab } from "../lib/tabTrap";
-import { useScrollEdges } from "../lib/useScrollEdges";
+import { regionName, useScrollEdges } from "../lib/useScrollEdges";
 import { focusBoxBelow } from "./RuleDecisionBox";
 import { ageWords, noSessionLine, otherHandOffLine, roleState, sessionStarted, sessionWord } from "../lib/roles";
 import { stateWord } from "../lib/stateWords";
@@ -73,7 +73,8 @@ export function RoleDrawer() {
   const title = useRef<HTMLHeadingElement>(null);
   const box = useRef<HTMLDivElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
-  const edges = useScrollEdges(scroller, open);
+  // leftovers-26 FR-3: the body is a stop while it scrolls.
+  const edges = useScrollEdges(scroller, open, regionName.roleBody(role?.name ?? ""));
   const titleId = useId();
   const descId = useId();
   // A landing closes the drawer without handing focus back: focus goes to
@@ -136,7 +137,7 @@ export function RoleDrawer() {
           <Section label="Initiatives">
             {inits.length === 0
               ? <p className="rd-empty">None yet.</p>
-              : <ul className="rd-inits">
+              : <ul className="rd-inits" role="list">
                   {inits.map((id) => (
                     <li key={id}><a href="#" className="rd-init mono" onClick={(e) => { e.preventDefault(); go(() => { openInitiative(id, "overview"); landOnInitiative(id); }); }} aria-label={`Open ${id}`}>{id}</a></li>
                   ))}

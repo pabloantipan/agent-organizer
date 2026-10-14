@@ -1,6 +1,6 @@
 import { X } from "lucide-react";
 import { marked } from "marked";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
 import { Help } from "../../wailsjs/go/main/App";
 import type { service } from "../../wailsjs/go/models";
@@ -38,8 +38,7 @@ export function HelpView({ top, onClose }: { top: number; onClose: () => void })
   closeNow.current = onClose;
   useEffect(() => openBox(() => closeNow.current()), []);
 
-  // Name the headings and let a diagram take focus (so the keyboard can
-  // scroll it sideways) in the HTML string itself, not on the rendered DOM:
+  // Name the headings in the HTML string itself, not on the rendered DOM:
   // React owns the article's innerHTML and may set it again after an effect,
   // which dropped ids added afterwards, so the section list found nothing to
   // scroll to (FR-9).
@@ -52,16 +51,15 @@ export function HelpView({ top, onClose }: { top: number; onClose: () => void })
       h.id = `help-section-${i}`;
       found.push({ id: h.id, depth: Number(h.tagName[1]), title: h.textContent ?? "" });
     });
-    tpl.content.querySelectorAll("pre").forEach((pre) => {
-      pre.setAttribute("tabindex", "0");
-      pre.setAttribute("aria-label", "diagram, scrolls sideways");
-    });
     return { html: tpl.innerHTML, sections: found };
   }, [doc]);
   useMarkdownEdges(body, html);
   // leftovers-7 FR-5, P4: the document scrolls inside Help; each edge with
   // content hidden past it shows (help.css, edge-top and edge-bottom).
-  const docEdges = useScrollEdges(body, !!html);
+  // leftovers-26 FR-3: a stop while it scrolls, named by the Help heading;
+  // its code blocks are stops only while they scroll (useMarkdownEdges).
+  const titleId = useId();
+  const docEdges = useScrollEdges(body, !!html, { labelledBy: titleId });
 
   // The article (.help-doc, overflow-y: auto) is the element that scrolls;
   // the fixed overlay around it does not, so the heading moves into its view.
@@ -73,7 +71,7 @@ export function HelpView({ top, onClose }: { top: number; onClose: () => void })
         {/* Where the app names itself: the mark, its wordmark and subtitle
             (docs/specs/deltagos-mark.md FR-4). */}
         <DeltagosLockup />
-        <h1 className="help-title">Help</h1>
+        <h1 id={titleId} className="help-title">Help</h1>
         {doc && <span className="help-source mono" title={`read from ${doc.key}`}>{doc.path}</span>}
         <span className="spacer" />
         <button ref={close} className="ghost" onClick={onClose} title="Close the Help (Esc)"><X size={14} /> Close</button>

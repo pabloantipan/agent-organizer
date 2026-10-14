@@ -10,7 +10,7 @@ import { dateWords } from "../lib/dates";
 import { cardKey, drafts, draftVerb, useDraft, useImeEscape } from "../lib/drafts";
 import { openBox } from "../lib/boxStack";
 import { loopTab } from "../lib/tabTrap";
-import { useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
+import { regionName, useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
 import { focusBoxBelow } from "./RuleDecisionBox";
 
 /** Focus and names, opening inline (widths-and-focus FR-19): the card back
@@ -51,9 +51,10 @@ export function CardDrawer() {
   const box = useRef<HTMLDivElement>(null);
   const body = useRef<HTMLDivElement>(null);
   useMarkdownEdges(body, html);
-  // leftovers-8 FR-6: the card back scrolls its own body, with the edge.
+  // leftovers-8 FR-6: the card back scrolls its own body, with the edge;
+  // leftovers-26 FR-2: a stop named after the card while it scrolls.
   const scroller = useRef<HTMLDivElement>(null);
-  const edges = useScrollEdges(scroller, open);
+  const edges = useScrollEdges(scroller, open, regionName.cardBody(selected ? selected.title || selected.slug : ""));
   const titleId = useId();
   useFocusOpener(selected ? `${selected.initiative_id}/${selected.slug}` : null, title);
   if (!selected) return null;
