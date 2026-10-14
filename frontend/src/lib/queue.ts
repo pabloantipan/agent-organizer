@@ -216,7 +216,9 @@ function taskAsker(t: service.Task, crew: Seat[] | undefined): TaskAsker | undef
 function supervisorAgent(t: service.Task, g: AgentGroup, view: AgentsView | null): { group: string; id: string } | null {
   const sup = t.supervisor;
   if (!sup) return null;
-  const names = new Set([`${g.cell?.project || g.id}-probe-${sup}`, `${g.id}-probe-${sup}`, sup]);
+  // probe's family, as service.probeFamily sanitizes it.
+  const family = (g.cell?.project || g.id).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  const names = new Set([`${family}-probe-${sup}`, sup]);
   const live = (a: { session: string; pid: number; state: string }) => names.has(a.session) && (a.state === "running" || a.state === "working") && a.pid > 0;
   const where: [string, { session: string; pid: number; state: string }[]][] = [
     ...(view?.groups ?? []).map((x): [string, { session: string; pid: number; state: string }[]] => [x.id, [...(x.agents ?? []), ...(x.crew ?? []).flatMap((s) => (s.agent ? [s.agent] : []))]]),
