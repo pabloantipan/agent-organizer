@@ -45,3 +45,7 @@
 .new-agent.na-failed { display: inline-flex; flex-direction: column; align-items: flex-end; gap: var(--space-1); }
 .na-danger { display: flex; align-items: baseline; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--danger); max-width: 60ch; }
 .na-why { overflow-wrap: anywhere; }
+
+/* A row an Agents landing holds (leftovers-31 FR-1, L15): centring and each
+   `nearest` pull leave its whole focus ring, plus air, inside the scroller. */
+.landed-held { scroll-margin-block: var(--space-2); }

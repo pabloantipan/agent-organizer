@@ -52,12 +52,16 @@ export function holdInView(el: HTMLElement) {
     el,
     tops: new Map<EventTarget, number>(),
     release: () => {
+      el.classList.remove("landed-held");
       document.removeEventListener("scroll", onScroll, true);
       el.removeEventListener("blur", h.release);
       if (held === h) held = null;
     },
   };
   held = h;
+  // The scroll margin (leftovers-31 FR-1, L15): centring and each nearest
+  // pull leave the whole focus ring, plus air, inside the scroller.
+  el.classList.add("landed-held");
   document.addEventListener("scroll", onScroll, true);
   el.addEventListener("blur", h.release);
   scrollHeld("center");
