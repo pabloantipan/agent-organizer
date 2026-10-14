@@ -1,6 +1,12 @@
 package model
 
-import "time"
+import (
+	"fmt"
+	"math"
+	"regexp"
+	"strconv"
+	"time"
+)
 
 // Decision statuses, a closed set like card statuses; the working-on skill
 // owns it.
@@ -43,7 +49,35 @@ type Decision struct {
 	Threads      []string `yaml:"threads" json:"threads"`
 	Supersedes   []string `yaml:"supersedes" json:"supersedes"`
 	SupersededBy string   `yaml:"superseded_by" json:"superseded_by"`
-	Body         string   `yaml:"-" json:"body"`
+	// Forecast is an accept record's band as written (`40-90m`, `1.5-3h`);
+	// ForecastTop is its top in minutes, 0 when absent or unparsed.
+	Forecast    string `yaml:"forecast" json:"forecast"`
+	ForecastTop int    `yaml:"-" json:"forecast_top"`
+	// RuledAt is the time of the commit where `status: ruled` first appears
+	// on the record (RFC 3339), read from git for records with a forecast
+	// only; empty without git or such a commit.
+	RuledAt string `yaml:"-" json:"ruled_at"`
+	Body    string `yaml:"-" json:"body"`
+}
+
+var forecastBand = regexp.MustCompile(`^(\d+(?:\.\d+)?)\s*[-–]\s*(\d+(?:\.\d+)?)\s*(m|min|h)$`)
+
+// ForecastTopMinutes parses a band with its unit, `40-90m`, `1.5-3h` or
+// `70-110min`, and returns its top in minutes.
+func ForecastTopMinutes(s string) (int, error) {
+	m := forecastBand.FindStringSubmatch(s)
+	if m == nil {
+		return 0, fmt.Errorf("forecast %q is not a band like 40-90m or 1.5-3h", s)
+	}
+	lo, _ := strconv.ParseFloat(m[1], 64)
+	hi, _ := strconv.ParseFloat(m[2], 64)
+	if hi <= 0 || lo > hi {
+		return 0, fmt.Errorf("forecast %q: the band's top must be above zero and not below its bottom", s)
+	}
+	if m[3] == "h" {
+		hi *= 60
+	}
+	return int(math.Round(hi)), nil
 }
 
 // Open reports whether the decision still waits on a ruling.
