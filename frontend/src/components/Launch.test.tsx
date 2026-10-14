@@ -4,7 +4,7 @@
 import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { announce, Crew, launchHeading, launchTotal, saidOf, seatWord, type Launch } from "./Crew";
+import { announce, Crew, launchHeading, launchTotal, listedOf, saidOf, seatWord, type Launch } from "./Crew";
 import { agentStart, startingButton } from "./AgentsView";
 import { failedStartLine, needsMeRows } from "../lib/queue";
 import type { AgentGroup, AgentsView, BoardView } from "../hooks/useWails";
@@ -54,7 +54,7 @@ describe("the live region (L2)", () => {
     let said = saidOf(undefined);
     const out: string[][] = [];
     for (const l of steps) { const r = announce(said, l); said = r.said; out.push(r.lines); }
-    expect(out).toEqual([[], [], ["a running"], [], ["b didn't start"], ["c running", "2 of 3 running, 1 didn't start"], []]);
+    expect(out).toEqual([[], [], ["a running"], [], ["b didn't start"], ["c running", "Crew up · 2 of 3 running, 1 didn't start"], []]);
   });
 
   it("says a retried seat's new result, and nothing already said after a remount", () => {
@@ -63,11 +63,70 @@ describe("the live region (L2)", () => {
     expect(announce(said, failed).lines).toEqual([]);
     const again = announce(said, launch([seat("a", "running"), seat("b", "starting")]));
     expect(again.lines).toEqual([]);
-    expect(announce(again.said, launch([seat("a", "running"), seat("b", "running")])).lines).toEqual(["b running", "2 of 2 running"]);
+    expect(announce(again.said, launch([seat("a", "running"), seat("b", "running")])).lines).toEqual(["b running", "Crew up · 2 of 2 running"]);
   });
 
-  it("counts the seats Stop starting skipped as off in the total (L4)", () => {
-    expect(launchTotal(launch([seat("a", "running"), seat("b", "skipped"), seat("c", "skipped")]))).toBe("1 of 3 running, 2 off");
+  it("counts the seats Stop starting skipped as not started in the total (L4)", () => {
+    expect(launchTotal(launch([seat("a", "running"), seat("b", "skipped"), seat("c", "skipped")]))).toBe("Stopped · 1 of 3 running, 2 not started");
+  });
+});
+
+// leftovers-29 FR-1, FR-2 (launch-progress Amendment 1 §1-§2, L8-L9).
+describe("the heading reads the result once nothing starts (L8)", () => {
+  it("reads Starting while any listed seat waits, starts or tries again", () => {
+    expect(launchHeading(launch([seat("a", "running"), seat("b", "running"), seat("c", "retrying")]))).toBe("Starting crew · 2 of 3 running");
+    expect(launchHeading(launch([seat("a", "running"), seat("b", "failed"), seat("c", "queued")]))).toBe("Starting crew · 1 of 3 running");
+  });
+
+  it("reads Crew up, with what did not start, or Stopped", () => {
+    expect(launchHeading(launch([seat("a", "running"), seat("b", "running"), seat("c", "running")]))).toBe("Crew up · 3 of 3 running");
+    expect(launchHeading(launch([seat("a", "running"), seat("b", "failed"), seat("c", "running")]))).toBe("Crew up · 2 of 3 running, 1 didn't start");
+    expect(launchHeading(launch([seat("a", "running"), seat("b", "running"), seat("c", "skipped")]))).toBe("Stopped · 2 of 3 running, 1 not started");
+    expect(launchHeading(launch([seat("a", "running"), seat("b", "failed"), seat("c", "skipped")]))).toBe("Stopped · 1 of 3 running, 1 didn't start, 1 not started");
+    expect(launchHeading(launch([seat("a", "failed"), seat("b", "failed")]))).toBe("Crew not up · 0 of 2 running, 2 didn't start");
+  });
+
+  it("says the result once, in the heading's words", () => {
+    let said = saidOf(undefined);
+    const out: string[][] = [];
+    for (const l of [
+      launch([seat("a", "running"), seat("b", "running"), seat("c", "starting")]),
+      launch([seat("a", "running"), seat("b", "running"), seat("c", "running")]),
+      launch([seat("a", "running"), seat("b", "running"), seat("c", "running")]),
+    ]) { const r = announce(said, l); said = r.said; out.push(r.lines); }
+    expect(out).toEqual([["a running", "b running"], ["c running", "Crew up · 3 of 3 running"], []]);
+  });
+});
+
+describe("the list holds the seats this press starts (L9)", () => {
+  const all = (c: string) => launch([seat("fse", c), seat("po_ana", "queued"), seat("dev_bruno", "queued")]);
+
+  it("lists one seat and counts of 1: Starting 1 seat, then Seat up", () => {
+    const one = new Set(["fse"]);
+    const starting = listedOf(all("starting"), one);
+    expect(starting.seats.map((s) => s.seat)).toEqual(["fse"]);
+    expect(launchHeading(starting)).toBe("Starting 1 seat · 0 of 1 running");
+    const up = listedOf(all("running"), one);
+    expect(up.done).toBe(true);
+    expect(launchHeading(up)).toBe("Seat up · 1 of 1 running");
+    expect(launchHeading(listedOf(all("failed"), one))).toBe("Seat not up · 0 of 1 running, 1 didn't start");
+  });
+
+  it("lists a seat that was running only when it fails; all without a record of the press", () => {
+    const l = launch([seat("fse", "running"), seat("po_ana", "running"), seat("dev_bruno", "failed")]);
+    expect(listedOf(l, new Set(["fse"])).seats.map((s) => s.seat)).toEqual(["fse", "dev_bruno"]);
+    expect(listedOf(l).seats).toHaveLength(3);
+    expect(listedOf(l, new Set(["gone"])).seats).toHaveLength(3);
+  });
+
+});
+
+describe("Close the list (L10)", () => {
+  it("is a quiet button on the heading line of a settled list with a failure only", () => {
+    const failedList = renderToStaticMarkup(<Crew group={group} launch={launch([seat("a", "running"), seat("b", "failed", { reason: "r" })])} />);
+    expect(failedList).toMatch(/<div class="crew-head"><h3[^>]*>Crew up · 1 of 2 running, 1 didn&#x27;t start<\/h3><span class="spacer"><\/span><button class="tiny-btn ghost"[^>]*>Close the list<\/button><\/div>/);
+    expect(renderToStaticMarkup(<Crew group={group} launch={launch([seat("a", "running"), seat("b", "running")])} />)).not.toContain("Close the list");
+    expect(renderToStaticMarkup(<Crew group={group} launch={launch([seat("a", "failed"), seat("b", "starting")])} />)).not.toContain("Close the list");
   });
 });
 

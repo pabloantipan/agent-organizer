@@ -36,13 +36,54 @@ export function seatWord(s: Pick<SeatStart, "state" | "started_at">, now: number
   }
 }
 
-export const launchHeading = (l: Pick<Launch, "running" | "seats">) => `Starting crew · ${l.running} of ${l.seats?.length ?? 0} running`;
+type Listed = Pick<Launch, "running" | "failed" | "seats"> & Partial<Pick<Launch, "done">>;
 
-/** The start's total, said once when no seat is left to start. */
-export function launchTotal(l: Pick<Launch, "running" | "failed" | "seats">): string {
-  const skipped = (l.seats ?? []).filter((s) => s.state === "skipped").length;
-  return `${l.running} of ${l.seats?.length ?? 0} running${l.failed > 0 ? `, ${l.failed} didn't start` : ""}${skipped > 0 ? `, ${skipped} off` : ""}`;
+const unsettled = (state: string) => state === "queued" || state === "starting" || state === "retrying";
+
+/** The list's heading (launch-progress §1, Amendment 1 §1-§2): `Starting
+ *  crew · n of m running` while a listed seat waits, starts or tries again,
+ *  then the result. One seat is `Starting 1 seat`, then `Seat up`. Nothing
+ *  running and a failure is `not up` (the amendment names no words for it). */
+export function launchHeading(l: Listed): string {
+  const seats = l.seats ?? [];
+  const m = seats.length;
+  const one = m === 1;
+  if (seats.some((s) => unsettled(s.state))) return `${one ? "Starting 1 seat" : "Starting crew"} · ${l.running} of ${m} running`;
+  const skipped = seats.filter((s) => s.state === "skipped").length;
+  const failed = l.failed > 0 ? `, ${l.failed} didn't start` : "";
+  const counts = `${l.running} of ${m} running${failed}`;
+  if (skipped > 0) return `Stopped · ${counts}, ${skipped} not started`;
+  const what = one ? "Seat" : "Crew";
+  return `${l.running === 0 && l.failed > 0 ? `${what} not up` : `${what} up`} · ${counts}`;
 }
+
+/** The start's total, said once when no listed seat is left to start: the
+ *  heading's words (Amendment 1 §1). */
+export const launchTotal = (l: Listed) => launchHeading(l);
+
+/** The seats this press starts (Amendment 1 §2), in launch order, with the
+ *  counts over them alone. The service queues every roster seat (a live one
+ *  starts nothing), so the view keeps the ones that were off at the press;
+ *  a hidden seat that fails is listed anyway, since a failure is never
+ *  hidden. No record of the press, or one naming none of the start's seats
+ *  (a CLI start, an app restart), lists all. */
+export function listedOf(l: Launch, pressed?: ReadonlySet<string>): Launch {
+  const all = l.seats ?? [];
+  const ours = !!pressed && all.some((s) => pressed.has(s.seat));
+  const seats = ours ? all.filter((s) => pressed.has(s.seat) || s.state === "failed") : all;
+  return {
+    ...l,
+    seats,
+    running: seats.filter((s) => s.state === "running").length,
+    failed: seats.filter((s) => s.state === "failed").length,
+    done: !seats.some((s) => unsettled(s.state)),
+  } as Launch;
+}
+
+/** The seats the last Bring up press of an initiative starts: the off ones,
+ *  or every seat for Reattach all. Module state, so leaving Agents and
+ *  coming back (L7) lists the same seats. */
+const pressed = new Map<string, Set<string>>();
 
 const ended = (state: string) => state === "running" || state === "failed";
 
@@ -149,7 +190,7 @@ function LaunchList({ initiative, launch, focusHead, say, onClose }: { initiativ
         <span className="spacer" />
         {error && <span className="meta ls-err">{error}</span>}
         {!launch.done && <button className="tiny-btn ghost" onClick={() => StopStarting(initiative).catch((e) => setError(String(e)))} title="the seat in flight finishes; the waiting ones stay off">Stop starting</button>}
-        {failed && <button className="tiny-btn ghost" onClick={() => { closed.set(initiative, shapeOf(launch)); onClose(); }} title="back to the crew rows; Bring up starts the off seats again">Close the list</button>}
+        {failed && <button className="tiny-btn ghost" onClick={() => { SeenLaunch(initiative).catch(() => undefined); closed.set(initiative, shapeOf(launch)); onClose(); }} title="back to the crew rows; nothing is killed or retried, Bring up starts the off seats again">Close the list</button>}
       </div>
       <ul className="launch-seats">
         {(launch.seats ?? []).map((s, i) => {
@@ -256,7 +297,8 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
   const box = useRef<HTMLDivElement>(null);
   const { agentsLanding, clearAgentsLanding } = useBoard();
   // Only a crew start speaks here; New agent says its own seat (§3).
-  const [said, say] = useAnnouncer(launch?.kind === "crew" ? launch : undefined);
+  const listed = launch?.kind === "crew" ? listedOf(launch, pressed.get(group.id)) : undefined;
+  const [said, say] = useAnnouncer(listed);
   const focusHead = useRef(false);
   const [, setClosedAt] = useState(0);
   // Focus was in the list when it closed (all running, 5 s on): it goes to
@@ -285,19 +327,22 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
   const seats = group.crew ?? [];
   const blocked = seats.length === 0 ? "no seats: the roster is empty between waves" : crewBlocked(seats, cell);
   const live = seats.filter((s) => s.agent && (s.agent.state === "working" || s.agent.state === "running")).length;
-  const off = seats.filter((s) => !s.agent || s.agent.state === "exited").length;
+  const off = seats.filter(isOff).length;
   const flash = (m: string) => { setNote(m); window.setTimeout(() => setNote(null), 5000); };
 
   const bringUp = () => {
     setBusy(true);
     // The list replaces the button; focus goes to its heading (L3).
     focusHead.current = true;
+    // The list holds the seats this press starts (Amendment 1 §2).
+    const starts = seats.filter(isOff).map((s) => s.name);
+    pressed.set(group.id, new Set(starts.length > 0 ? starts : seats.map((s) => s.name)));
     api.createCrew(group.id).then(
       () => setAsking(false),
-      (e) => { focusHead.current = false; flash(String(e)); },
+      (e) => { focusHead.current = false; pressed.delete(group.id); flash(String(e)); },
     ).finally(() => setBusy(false));
   };
-  const showList = !!launch && launch.kind === "crew" && closed.get(group.id) !== shapeOf(launch);
+  const showList = !!listed && closed.get(group.id) !== shapeOf(listed);
 
   if (!showList && listHadFocus.current) {
     listHadFocus.current = false;
@@ -315,7 +360,7 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
           <Users size={14} />
           <span className="ident">{cell.project}</span>
         </div>
-        <LaunchList initiative={group.id} launch={launch} focusHead={focusHead} say={say} onClose={() => { setClosedAt(Date.now()); window.setTimeout(() => crewUp.current?.focus(), 0); }} />
+        <LaunchList initiative={group.id} launch={listed} focusHead={focusHead} say={say} onClose={() => { setClosedAt(Date.now()); window.setTimeout(() => crewUp.current?.focus(), 0); }} />
       </div>
     );
   }
@@ -359,6 +404,8 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
     </div>
   );
 }
+
+const isOff = (s: Seat) => !s.agent || s.agent.state === "exited";
 
 function SeatRow({ seat, readOnly, confirm, setConfirm, flash, onMessage }: { seat: Seat; readOnly: boolean; confirm: string | null; setConfirm: (s: string | null) => void; flash: (m: string) => void; onMessage?: (seat: string) => void }) {
   const a = seat.agent;
