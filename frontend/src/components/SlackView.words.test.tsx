@@ -6,7 +6,7 @@ import { HEALTH } from "../lib/health";
 // The store is a plain object here (as Rail.said.test): People reads none of
 // it, but SlackView's module imports it.
 vi.mock("../stores/board.store", () => ({ useBoard: Object.assign(() => ({}), { getState: () => ({}), setState: () => undefined }) }));
-const { People, personFacts } = await import("./SlackView");
+const { People, personBadge, personFacts } = await import("./SlackView");
 
 const ctx = (used_percent: number) => ({ session_id: "s", model: "opus", used_percent, input_tokens: 1000, window_size: 200000, cost_usd: 0, transcript: "", updated_at: null });
 const seat = (over: Partial<Record<string, unknown>> = {}) =>
@@ -71,5 +71,28 @@ describe("W1: a person row names its one description (AX shape, server render)",
     const html = renderToStaticMarkup(<People seats={[seat({ watcher: "stale", undelivered: 1, owes: owing(2) })]} human="pablo" focus={null} onFocus={() => undefined} onClose={() => undefined} />);
     expect(html).toContain(">session live, mail stale, 1 message waiting, owes 2 messages, context 42%</span>");
     expect(html).toContain("stale · 1 waiting");
+  });
+});
+
+// B2 (leftovers-29 FR-6, launch-progress L12): deaf and capped draw their
+// waiting count, and the description says the same count.
+describe("B2: deaf and capped badges draw `· n waiting`", () => {
+  const render = (over: Partial<Record<string, unknown>>) =>
+    renderToStaticMarkup(<People seats={[seat({ ...over, undelivered: 3 })]} human="pablo" focus={null} onFocus={() => undefined} onClose={() => undefined} />);
+  it("deaf · 3 waiting, described as 3 messages waiting", () => {
+    expect(personBadge(seat({ watcher: "stale", deaf: true, undelivered: 3 }))?.words).toBe("deaf · 3 waiting");
+    const html = render({ watcher: "stale", deaf: true });
+    expect(html).toContain(">deaf · 3 waiting</span>");
+    expect(html).toContain(`mail ${HEALTH.deaf.label}, 3 messages waiting`);
+  });
+  it("capped · 3 waiting, described as 3 messages waiting", () => {
+    expect(personBadge(seat({ watcher: "alive", capped: true, undelivered: 3 }))?.words).toBe("capped · 3 waiting");
+    const html = render({ watcher: "alive", capped: true });
+    expect(html).toContain(">capped · 3 waiting</span>");
+    expect(html).toContain(`mail ${HEALTH.capped.label}, 3 messages waiting`);
+  });
+  it("draws no count at 0, and no badge without a watcher", () => {
+    expect(personBadge(seat({ watcher: "stale", deaf: true, undelivered: 0 }))?.words).toBe("deaf");
+    expect(personBadge(seat({ watcher: "", undelivered: 3 }))).toBeNull();
   });
 });

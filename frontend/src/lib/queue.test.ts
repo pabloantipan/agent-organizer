@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AgentGroup, AgentsView, BoardView, CellThread, Seat } from "../hooks/useWails";
 import type { merge, model, service } from "../../wailsjs/go/models";
-import { bandWords, launchVerb, missingPersonas, needsMeRows, needsMeShown, needsMeThread, NEEDS_ME_FIRST, pastFirst, personaMissing, queueOf, readOnlyOf, spanWords, taskContext, taskLine, threadContext } from "./queue";
+import { forecastMultiple, forecastWords, launchVerb, missingPersonas, needsMeRows, needsMeShown, needsMeThread, NEEDS_ME_FIRST, pastFirst, personaMissing, queueOf, readOnlyOf, spanWords, taskCard, taskContext, taskFact, taskLine, taskTone, threadContext } from "./queue";
 import { HEALTH } from "./health";
 
 // Fixtures are plain objects: the generated classes carry methods the
@@ -246,23 +246,23 @@ describe("needsMeRows: tasks over their forecast or stalled", () => {
     expect(tasks[0].since?.toISOString()).toBe("2026-10-14T09:00:00.000Z");
   });
 
-  it("says FR-5's words", () => {
+  it("says FR-5's words, the fact first (leftovers-29 FR-8, task-rows §2-3)", () => {
     const t = (n: string) => (tasks.find((r) => r.key === `task:a/${n}`) as Extract<typeof tasks[number], { kind: "task" }>).task;
-    expect(taskLine(t("0121"))).toBe("Task 0121: over its forecast, 2 h 10 m of 70-110 min");
-    expect(taskLine(t("0122"))).toBe("Task 0122: stalled, 3 h 50 m, twice its forecast");
-    expect(taskLine(t("0123"))).toBe("Task 0123: stalled, no post for 52 min");
+    expect(taskLine("a", t("0121"))).toBe("over · 2 h 10 m, past its forecast · a 0121 · Task 0121");
+    expect(taskLine("a", t("0122"))).toBe("stalled · 3 h 50 m, 2× its forecast · a 0122 · Task 0122");
+    expect(taskLine("a", t("0123"))).toBe("stalled · no post for 52 m · a 0123 · Task 0123");
     expect(taskContext(t("0121"))).toBe("sup64: leftovers-28: band top: the builder is at X0");
     expect(taskContext(t("0123"))).toBe("record 0123 · a now, b next · no post from its supervisor");
   });
 
   it("names the silence only while a card is in now", () => {
     const quietNoneNow = task("0124", "stalled", { quiet_minutes: 52, elapsed_minutes: 240, cards: [{ slug: "a", status: "next" }] });
-    expect(taskLine(quietNoneNow)).toBe("Task 0124: stalled, 4 h, twice its forecast");
+    expect(taskFact(quietNoneNow)).toBe("4 h, 2× its forecast");
   });
 
   it("spells units and spans", () => {
-    expect(bandWords("1.5-3h")).toBe("1.5-3 h");
-    expect(bandWords("40-90m")).toBe("40-90 min");
+    expect(forecastWords("1.5-3h")).toBe("1.5-3 h");
+    expect(forecastWords("1-2m")).toBe("1-2 m");
     expect(spanWords(52)).toBe("52 m");
     expect(spanWords(180)).toBe("3 h");
   });
@@ -293,10 +293,101 @@ describe("needsMeRows: asks name the seat and whether it picks up", () => {
     expect(threadContext(rows[1])).not.toContain("not picking up");
   });
 
-  it("uses the deaf and capped words too, and says nothing for a seat off the roster", () => {
+  it("uses the deaf words too, and says nothing for a seat off the roster", () => {
     const deaf = { thread: ask(3, "dev_bruno", 1), asker: "deaf" as const };
     expect(threadContext(deaf)).toContain(`dev_bruno is not picking up (deaf): ${HEALTH.deaf.why}`);
     const off = needsMeRows(board([initiative("a")]), agents(group("a", { threads: [ask(4, "ghost", 1)] })))[0];
     expect(off.kind === "thread" && threadContext(off)).toBe("ghost asks you · 2 messages");
+  });
+});
+
+// B1 (leftovers-29 FR-5, launch-progress L11): the unseen-failure row is
+// dated with the last failure and sorts among the dated rows.
+describe("B1: the unseen-failure row is dated", () => {
+  const at = (hm: string) => `2026-10-14T${hm}:00Z`;
+  const view = board([initiative("a", [{ number: "0001", status: "proposed", raised: "2026-10-14" }])]);
+  const launches = [{ initiative: "a", kind: "crew", seen: false, failed: 2, running: 1, done: true, seats: [
+    { seat: "x", state: "running", started_at: at("11:30") },
+    { seat: "y", state: "failed", started_at: at("11:50"), reason: "r" },
+    { seat: "z", state: "failed", started_at: at("12:05"), reason: "r" },
+  ] }];
+  // Threads dated 11:00 and 13:00 by their age against now = 14:00.
+  const now = new Date(at("14:00"));
+  const a = { ...agents(group("a", { threads: [{ ...thread(1, "escalated"), age_seconds: 3 * 3600 }, { ...thread(2, "escalated"), age_seconds: 3600 }] as CellThread[] })), launches } as unknown as AgentsView;
+  const rows = needsMeRows(view, a, now).filter((r) => r.kind !== "decision");
+
+  it("dates it 12:05 and sorts it between 11:00 and 13:00", () => {
+    expect(rows.map((r) => r.key)).toEqual(["thread:1", "start:a", "thread:2"]);
+    expect(rows[1].since?.toISOString()).toBe("2026-10-14T12:05:00.000Z");
+  });
+
+  it("is never undated: a failure with no time is dated now", () => {
+    const bare = { groups: [], launches: [{ ...launches[0], seats: [{ seat: "y", state: "failed" }] }] } as unknown as AgentsView;
+    expect(needsMeRows(view, bare, now).find((r) => r.kind === "start")?.since?.getTime()).toBe(now.getTime());
+  });
+});
+
+// B3 (leftovers-29 FR-7, task-rows N5): a capped asker with a live watcher
+// reads the capped words; "not picking up" only for a watcher not alive.
+describe("B3: a capped asker is never not picking up", () => {
+  const ask = (id: number, asked_by: string) =>
+    ({ id, status: "open", asked_of_me: 1, asked_by, messages: 2, age_seconds: 60 * id, subject: `s${id}` }) as unknown as CellThread;
+  const seat = (name: string, watcher: string, capped: boolean) => ({ name, watcher, deaf: capped, capped, undelivered: 3 }) as unknown as Seat;
+  const rows = needsMeRows(board([initiative("a")]), agents(group("a", {
+    threads: [ask(1, "hestia"), ask(2, "dev_bruno")],
+    crew: [seat("hestia", "alive", true), seat("dev_bruno", "stale", true)],
+  }))).filter((r) => r.kind === "thread") as Extract<ReturnType<typeof needsMeRows>[number], { kind: "thread" }>[];
+  const of = (who: string) => threadContext(rows.find((r) => r.thread.asked_by === who)!);
+
+  it("says the capped words for the alive watcher", () => {
+    expect(of("hestia")).toBe(`hestia asks you · 2 messages · hestia ${HEALTH.capped.blocker}`);
+    expect(of("hestia")).toBe("hestia asks you · 2 messages · hestia capped, mail waits for its next prompt");
+    expect(of("hestia")).not.toContain("not picking up");
+  });
+
+  it("says not picking up only for the watcher that is not alive", () => {
+    expect(of("dev_bruno")).toContain("dev_bruno is not picking up");
+  });
+});
+
+// B4 (leftovers-29 FR-8, task-rows N1-N4): late, not stuck; how late; the
+// fact first; the verb lands on the task.
+describe("B4: the task rows", () => {
+  const task = (t: Record<string, unknown>) =>
+    ({ number: "0011", title: "Accept the task watch", forecast: "1-2m", forecast_top: 2, started: "2026-10-14T10:00:00Z", elapsed_minutes: 10,
+      cards: [{ slug: "w-done", status: "done" }, { slug: "w-task", status: "now" }], seats: ["w-build"], supervisor: "", state: "stalled", ...t }) as unknown as service.Task;
+
+  it("N2: 10 m on a 1-2 m forecast is 5× its forecast; 3 m on 2-4 m shows no multiple; the forecast is the hover's", () => {
+    expect(taskFact(task({}))).toBe("10 m, 5× its forecast");
+    expect(forecastMultiple(task({ elapsed_minutes: 3, forecast: "2-4m", forecast_top: 4 }))).toBeNull();
+    expect(taskFact(task({ state: "over", elapsed_minutes: 3, forecast: "2-4m", forecast_top: 4 }))).toBe("3 m, past its forecast");
+    expect(taskFact(task({ elapsed_minutes: 11, forecast_top: 4 }))).toBe("11 m, 2× its forecast");
+    expect(forecastWords("1-2m")).toBe("1-2 m");
+  });
+
+  it("N1: stalled is the warning lozenge, over the tone", () => {
+    expect(taskTone("stalled")).toBe("warning");
+    expect(taskTone("over")).toBe("tone");
+  });
+
+  it("N3: the fact comes before the id and the title", () => {
+    expect(taskLine("init-a", task({}))).toBe("stalled · 10 m, 5× its forecast · init-a 0011 · Accept the task watch");
+  });
+
+  it("the asker's health comes first on the second line", () => {
+    const [row] = needsMeRows(board([initiative("a")]), agents(group("a", {
+      tasks: [task({})], crew: [{ name: "w-build", watcher: "stale", deaf: true, capped: false, undelivered: 1 }] as unknown as Seat[],
+    }))).filter((r) => r.kind === "task") as Extract<ReturnType<typeof needsMeRows>[number], { kind: "task" }>[];
+    expect(taskContext(row.task, row.asker)).toBe(`w-build ${HEALTH.deaf.blocker} · record 0011 · w-done done, w-task now · no post from its supervisor`);
+  });
+
+  it("N4: a live supervisor session is the landing; none, the task's card in now", () => {
+    const sup = { session: "organizer-probe-sup66", pid: 4242, state: "running" };
+    const g = (agentsList: unknown[]) => group("a", { cell: { human: "pablo", state: "running", project: "organizer" } as unknown as AgentGroup["cell"], tasks: [task({ supervisor: "sup66" })], agents: agentsList as AgentGroup["agents"] });
+    const rowOf = (x: AgentGroup) => needsMeRows(board([initiative("a")]), agents(x)).find((r) => r.kind === "task") as Extract<ReturnType<typeof needsMeRows>[number], { kind: "task" }>;
+    expect(rowOf(g([sup])).supervisor).toEqual({ group: "a", id: "organizer-probe-sup66#4242" });
+    expect(rowOf(g([{ ...sup, state: "exited" }])).supervisor).toBeNull();
+    expect(rowOf(g([])).supervisor).toBeNull();
+    expect(taskCard(task({}))).toBe("w-task");
   });
 });

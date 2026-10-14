@@ -97,11 +97,11 @@ export function queueOf(group: AgentGroup, view: BoardView | null) {
 export type NeedsMeRow =
   | { kind: "decision"; key: string; initiative: string; since: Date | null; decision: model.Decision }
   | { kind: "thread"; key: string; initiative: string; since: Date | null; thread: CellThread; asker?: HealthState }
-  | { kind: "task"; key: string; initiative: string; since: Date | null; task: service.Task }
+  | { kind: "task"; key: string; initiative: string; since: Date | null; task: service.Task; supervisor: { group: string; id: string } | null; asker?: TaskAsker }
   | { kind: "card"; key: string; initiative: string; since: Date | null; card: merge.BoardCard }
   | { kind: "seat"; key: string; initiative: string; since: Date | null; seat: Seat }
   | { kind: "launch"; key: string; initiative: string; since: null; cell: model.Cell; missing: string | null }
-  | { kind: "start"; key: string; initiative: string; since: null; launch: service.InitiativeLaunch }
+  | { kind: "start"; key: string; initiative: string; since: Date | null; launch: service.InitiativeLaunch }
   | { kind: "unread"; key: string; initiative: string; since: null; path: string; files: UnreadFile[] };
 
 const day = (s: string | undefined) => parseISO(s?.slice(0, 10));
@@ -144,12 +144,19 @@ export function needsMeRows(view: BoardView | null, agents: AgentsView | null, n
     // A task over its forecast or stalled (FR-5): one row per task, never per
     // card, dated by its ruling; a task that is on has none.
     for (const t of g.tasks ?? []) {
-      if (t.state === "over" || t.state === "stalled") rows.push({ kind: "task", key: `task:${g.id}/${t.number}`, initiative: g.id, since: t.started ? new Date(t.started) : null, task: t });
+      if (t.state === "over" || t.state === "stalled") rows.push({ kind: "task", key: `task:${g.id}/${t.number}`, initiative: g.id, since: t.started ? new Date(t.started) : null, task: t, supervisor: supervisorAgent(t, g, agents), asker: taskAsker(t, g.crew) });
     }
     for (const c of q.cards) rows.push({ kind: "card", key: `card:${g.id}/${c.slug}`, initiative: g.id, since: day(c.updated), card: c });
     for (const s of g.crew ?? []) {
       if (s.deaf || s.capped) rows.push({ kind: "seat", key: `seat:${g.id}/${s.name}`, initiative: g.id, since: null, seat: s });
     }
+  }
+  // A start with a seat that did not start, not yet seen on Agents (FR-7):
+  // one row per initiative, gone once the list is shown (SeenLaunch) or the
+  // seat is retried (the service's `seen` and `failed`). Dated with the last
+  // failure (leftovers-29 FR-5), so it sorts among the dated rows.
+  for (const l of agents?.launches ?? []) {
+    if (l.failed > 0 && !l.seen && !folded.has(l.initiative)) rows.push({ kind: "start", key: `start:${l.initiative}`, initiative: l.initiative, since: lastFailure(l, now), launch: l });
   }
   const at = (r: NeedsMeRow) => r.since?.getTime() ?? Number.MAX_SAFE_INTEGER;
   rows.sort((a, b) => at(a) - at(b));
@@ -159,13 +166,25 @@ export function needsMeRows(view: BoardView | null, agents: AgentsView | null, n
       rows.push({ kind: "launch", key: `launch:${g.id}`, initiative: g.id, since: null, cell: g.cell, missing });
     }
   }
-  // A start with a seat that did not start, not yet seen on Agents (FR-7):
-  // one row per initiative, gone once the list is shown (SeenLaunch) or the
-  // seat is retried (the service's `seen` and `failed`).
-  for (const l of agents?.launches ?? []) {
-    if (l.failed > 0 && !l.seen && !folded.has(l.initiative)) rows.push({ kind: "start", key: `start:${l.initiative}`, initiative: l.initiative, since: null, launch: l });
-  }
   return rows.concat(unread);
+}
+
+/** When a failed start's last seat failed (leftovers-29 FR-5): the feed
+ *  carries no failure time, so the start of the last failed seat's last try,
+ *  which the failure ends; `now` when no failed seat carries one, so the row
+ *  is never undated. */
+function lastFailure(l: service.InitiativeLaunch, now: Date): Date {
+  const times = (l.seats ?? []).filter((s) => s.state === "failed" && s.started_at).map((s) => new Date(s.started_at).getTime()).filter((n) => !Number.isNaN(n));
+  return times.length > 0 ? new Date(Math.max(...times)) : now;
+}
+
+/** A seat's health as an asker (FR-6; leftovers-29 FR-7): a capped seat
+ *  whose watcher is alive is capped, its mail waiting for its next prompt;
+ *  a capped one whose watcher is not alive reads by its watcher, since that
+ *  is why the answer would not wake it. */
+function askerState(s: Seat): HealthState | undefined {
+  if (s.capped && s.watcher !== "alive") return healthState({ watcher: s.watcher, deaf: s.deaf }) ?? "capped";
+  return healthState(s);
 }
 
 /** The health of the seat a thread asks the human for, from the cell's
@@ -174,7 +193,42 @@ export function needsMeRows(view: BoardView | null, agents: AgentsView | null, n
 function askerHealth(t: CellThread, crew: Seat[] | undefined): HealthState | undefined {
   if (!t.asked_by || (t.asked_of_me ?? 0) === 0) return undefined;
   const s = (crew ?? []).find((c) => c.name === t.asked_by);
-  return s ? healthState(s) : undefined;
+  return s ? askerState(s) : undefined;
+}
+
+/** The first of a task's seats, in its order (the cards' seats, then the
+ *  supervisors), that is on the roster and not alive (task-rows §3). */
+export type TaskAsker = { seat: string; state: HealthState };
+function taskAsker(t: service.Task, crew: Seat[] | undefined): TaskAsker | undefined {
+  for (const name of t.seats ?? []) {
+    const s = (crew ?? []).find((c) => c.name === name);
+    const state = s && askerState(s);
+    if (state && state !== "alive") return { seat: name, state };
+  }
+  return undefined;
+}
+
+/** The live session of a task's supervisor (task-rows §4), as the id
+ *  AgentsView lands on (`<session>#<pid>`): the session probe names
+ *  `<family>-probe-<supervisor>`, the family being the cell's project or
+ *  the initiative's id, running or working, in any group. Null when the task
+ *  has no supervisor or its session is not live. */
+function supervisorAgent(t: service.Task, g: AgentGroup, view: AgentsView | null): { group: string; id: string } | null {
+  const sup = t.supervisor;
+  if (!sup) return null;
+  // probe's family, as service.probeFamily sanitizes it.
+  const family = (g.cell?.project || g.id).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  const names = new Set([`${family}-probe-${sup}`, sup]);
+  const live = (a: { session: string; pid: number; state: string }) => names.has(a.session) && (a.state === "running" || a.state === "working") && a.pid > 0;
+  const where: [string, { session: string; pid: number; state: string }[]][] = [
+    ...(view?.groups ?? []).map((x): [string, { session: string; pid: number; state: string }[]] => [x.id, [...(x.agents ?? []), ...(x.crew ?? []).flatMap((s) => (s.agent ? [s.agent] : []))]]),
+    ["", view?.unassigned ?? []],
+  ];
+  for (const [group, list] of where) {
+    const a = list.find(live);
+    if (a) return { group, id: `${a.session}#${a.pid}` };
+  }
+  return null;
 }
 
 /** A thread row's context line (FR-6): who asks, or that it was escalated,
@@ -186,6 +240,9 @@ export function threadContext(row: { thread: CellThread; asker?: HealthState }):
   const who = t.status === "escalated" ? "escalated to you" : `${t.asked_by || "a seat"} asks you`;
   const head = `${who} · ${t.messages} message${t.messages === 1 ? "" : "s"}`;
   if (!row.asker || row.asker === "alive" || !t.asked_by) return head;
+  // A capped asker with a live watcher (leftovers-29 FR-7, task-rows §5):
+  // alive, its mail waits for its next prompt; never "not picking up".
+  if (row.asker === "capped") return `${head} · ${t.asked_by} ${HEALTH.capped.blocker}`;
   const h = HEALTH[row.asker];
   return `${head} · ${t.asked_by} is not picking up (${h.label}): ${h.why}`;
 }
@@ -198,38 +255,69 @@ export function spanWords(min: number): string {
   return m % 60 === 0 ? `${h} h` : `${h} h ${m % 60} m`;
 }
 
-/** A forecast band as written, with its unit spelled: "70-110m" is
- *  "70-110 min", "1.5-3h" is "1.5-3 h"; anything else as it is. */
-export function bandWords(f: string): string {
-  const m = /^\s*([\d.]+\s*-\s*[\d.]+)\s*(m|h)\s*$/i.exec(f ?? "");
-  if (!m) return f ?? "";
-  return `${m[1].replace(/\s+/g, "")} ${m[2].toLowerCase() === "h" ? "h" : "min"}`;
-}
-
 /** The silence that makes a task stalled (FR-4): 45 min with no post while
  *  a card of it is in now. */
 const QUIET_STALL = 45;
 
-/** A task row's subject (FR-5): over, with the time since the ruling and the
- *  band; stalled, by the silence when that is why (it names the fact to
- *  chase), else by the time, twice its forecast. */
-export function taskLine(t: Pick<service.Task, "title" | "forecast" | "elapsed_minutes" | "quiet_minutes" | "cards" | "state">): string {
-  if (t.state === "stalled") {
-    const quiet = t.quiet_minutes != null && t.quiet_minutes >= QUIET_STALL && (t.cards ?? []).some((c) => c.status === "now");
-    return quiet
-      ? `${t.title}: stalled, no post for ${t.quiet_minutes} min`
-      : `${t.title}: stalled, ${spanWords(t.elapsed_minutes)}, twice its forecast`;
-  }
-  return `${t.title}: over its forecast, ${spanWords(t.elapsed_minutes)} of ${bandWords(t.forecast)}`;
+/** A forecast band in the rows' units: "1-2m" is "1-2 m", "1.5-3h" is
+ *  "1.5-3 h" (task-rows §2, the hover). */
+export function forecastWords(f: string): string {
+  const m = /^\s*([\d.]+\s*-\s*[\d.]+)\s*(m|h)\s*$/i.exec(f ?? "");
+  return m ? `${m[1].replace(/\s+/g, "")} ${m[2].toLowerCase()}` : f ?? "";
 }
 
-/** A task row's second line (FR-5): the supervisor's last post when there is
- *  one (`sup64: <subject>: <first line>`), else the record and its cards. */
-export function taskContext(t: Pick<service.Task, "number" | "cards" | "last_post">): string {
+/** How many times its forecast's top a task has run, rounded down; null
+ *  under 2×, where the row shows no multiple (task-rows §2). */
+export function forecastMultiple(t: Pick<service.Task, "elapsed_minutes" | "forecast_top">): number | null {
+  if (!(t.forecast_top > 0)) return null;
+  const n = Math.floor(t.elapsed_minutes / t.forecast_top);
+  return n >= 2 ? n : null;
+}
+
+/** A task row's fact, what the lozenge's word rests on, said first so the
+ *  ellipsis cuts the title (task-rows §3): stalled by the silence when that
+ *  is why (it names the fact to chase), else the time and, from 2×, the
+ *  multiple: `10 m, 5× its forecast`; under 2×, `past its forecast`. */
+export function taskFact(t: Pick<service.Task, "forecast_top" | "elapsed_minutes" | "quiet_minutes" | "cards" | "state">): string {
+  if (t.state === "stalled" && t.quiet_minutes != null && t.quiet_minutes >= QUIET_STALL && (t.cards ?? []).some((c) => c.status === "now")) {
+    return `no post for ${spanWords(t.quiet_minutes)}`;
+  }
+  const n = forecastMultiple(t);
+  return `${spanWords(t.elapsed_minutes)}, ${n ? `${n}× its forecast` : "past its forecast"}`;
+}
+
+/** A task row's lozenge (task-rows §1): stalled is late, not stuck, so
+ *  amber; over is the tone. Red stays blocked's and escalated's. */
+export const taskTone = (state: string) => (state === "stalled" ? "warning" : "tone");
+
+/** A task row's whole line, as its hover and accessible name say it:
+ *  `stalled · 10 m, 5× its forecast · init-a 0011 · <title>`. */
+export function taskLine(initiative: string, t: Pick<service.Task, "number" | "title" | "forecast_top" | "elapsed_minutes" | "quiet_minutes" | "cards" | "state">): string {
+  return `${t.state} · ${taskFact(t)} · ${initiative} ${t.number} · ${t.title}`;
+}
+
+/** A task row's second line (FR-5): the asker's health first when a seat of
+ *  the task is not alive (task-rows §3, `hestia not picking up`), then the
+ *  supervisor's last post when there is one (`sup64: <subject>: <first
+ *  line>`), else the record and its cards. */
+export function taskContext(t: Pick<service.Task, "number" | "cards" | "last_post">, asker?: TaskAsker): string {
   const p = t.last_post;
-  if (p) return `${p.from}: ${p.subject}: ${p.line}`;
   const cards = (t.cards ?? []).map((c) => `${c.slug} ${c.status}`).join(", ");
-  return `record ${t.number}${cards ? ` · ${cards}` : ""} · no post from its supervisor`;
+  const rest = p ? `${p.from}: ${p.subject}: ${p.line}` : `record ${t.number}${cards ? ` · ${cards}` : ""} · no post from its supervisor`;
+  return asker ? `${asker.seat} ${HEALTH[asker.state].blocker} · ${rest}` : rest;
+}
+
+/** The card a task's Open lands on (task-rows §4): its first card in now,
+ *  else its first open one. */
+export function taskCard(t: Pick<service.Task, "cards">): string | null {
+  const open = (t.cards ?? []).filter((c) => c.status !== "done");
+  return (open.find((c) => c.status === "now") ?? open[0])?.slug ?? null;
+}
+
+/** The board card of an initiative by slug, the local one first. */
+export function boardCard(view: BoardView | null, initiative: string, slug: string): merge.BoardCard | null {
+  const all = (["now", "blocked", "next"] as const).flatMap((st) => view?.board.columns?.[st] ?? []).filter((c) => c.initiative_id === initiative && c.slug === slug);
+  return all.find((c) => c.local) ?? all[0] ?? null;
 }
 
 /** A failed start's Needs me subject (FR-7): `Crew of <id>: n seat(s) didn't

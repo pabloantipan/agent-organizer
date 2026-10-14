@@ -46,8 +46,12 @@ export function AgentsView() {
     el.addEventListener("blur", () => el.classList.remove("memory-landed"), { once: true });
     el.focus({ preventScroll: true });
     // After the screen's own scroll to the top, which runs after this
-    // (a parent's effect), so the landing is not scrolled away again.
+    // (a parent's effect), so the landing is not scrolled away again; and
+    // once more when the feed's first draw has settled the rows above it
+    // (a task row's Agents, leftovers-29 FR-8, found it scrolled back to 0).
     requestAnimationFrame(() => el.scrollIntoView({ block: "nearest" }));
+    // Not cleared on cleanup: clearAgentFocus above reruns this effect.
+    window.setTimeout(() => { if (document.activeElement === el) el.scrollIntoView({ block: "nearest" }); }, 400);
   }, [agentFocus, view, clearAgentFocus]);
 
   // leftovers-25 FR-3: Show only <id> unmounts with its press (the filtered

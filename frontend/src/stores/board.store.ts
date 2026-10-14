@@ -78,6 +78,9 @@ type State = {
   // Open on a card row of a Needs me list is a landing: the card back opens
   // and the header folds (FR-1), storing "folded" (FR-11).
   openCardLanding: (c: merge.BoardCard) => void;
+  // A task row's Open (task-rows §4): the card's back over its initiative's
+  // Work, focused on its title (CardDrawer's own focus), header folded.
+  openCardInWork: (c: merge.BoardCard) => void;
   openStage: (initiativeId: string, index: number) => void;
   clearStageFocus: () => void;
   slackFocus: string | null;
@@ -239,6 +242,7 @@ export const useBoard = create<State>((set, get) => ({
   }),
   stageFocus: null,
   openCardLanding: (selected) => set({ selected, headerOpen: folded() }),
+  openCardInWork: (selected) => set({ ruleDraft: null, headerOpen: folded(), screen: "initiative", selectedInitiative: selected.initiative_id, sub: "work", selected, needsMeFocus: null, decisionFocus: null, stageFocus: null }),
   openStage: (selectedInitiative, index) => set({ ruleDraft: null, headerOpen: folded(), screen: "initiative", selectedInitiative, sub: "roadmap", selected: null, needsMeFocus: null, decisionFocus: null, stageFocus: stageFocusOf(selectedInitiative, index) }),
   clearStageFocus: () => set({ stageFocus: null }),
   slackFocus: null,
