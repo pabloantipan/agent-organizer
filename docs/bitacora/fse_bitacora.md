@@ -25,6 +25,11 @@ restating it (the discuss skill).
 - **Sent [for hephaistos]:** pause by seat-freeze, not probe -k (wd-review lost its conversation); test-lease starvation still open.
 - Next: leftovers-27 from the carry below when Aglaea has no more to fold; or wait for Pablo.
 
+## HAND-OFF — 2026-10-14 ~14:00, leftovers-29 landed
+
+- **Last SHA seen:** 3af463b. leftovers-29 merged by sup66 (rows-badges a5c30b4, crew-list 3af463b), all pass; 36 min against 30-60; shared runs reused; $17.91. Screen locked: C3, B2 by offscreen WebKit. sup66 ended; installed v0.2.0-2054-g3af463b; tree clean. Stopped orphan Deltagos Review pid 79989 (cwd .wt/cm-ui, gone; started 2026-10-10) by pid. No supervisor running.
+- **Carry for leftovers-30:** CreateCrew probes running seats the view hides (crew.go); launch feed lacks failed_at; WatcherBadge hides the deaf count (rb-ui R1); plus aglaea's answers (amber shared with unreadable, landing position, Seat/Crew not up, Seat up close). Older carry: fixture Roles shows real sessions in a review build.
+
 ## HAND-OFF — 2026-10-14 ~13:05, leftovers-28 landed
 
 - **Last SHA seen:** 5610227. leftovers-28 merged by sup65 (task-watch cbc790d, task-rows 5610227), all pass; 21 min against 60-100 (first record with forecast: field); no lease wait; shared run reused; $7.85. sup65 ended; installed v0.2.0-2031-g5610227; tree clean. No supervisor running. Told hephaistos 0014's Deltagos half is live.
