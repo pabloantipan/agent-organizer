@@ -15,6 +15,8 @@ function fakePage() {
   const row = {
     isConnected: true,
     parentElement: scroller,
+    classes: new Set<string>(),
+    classList: { add: (c: string) => row.classes.add(c), remove: (c: string) => row.classes.delete(c) },
     scrollIntoView: ({ block }: { block: string }) => { calls.push(block); scroller.scrollTop = block === "center" ? 500 : scroller.scrollTop + 40; },
     addEventListener: (t: string, f: () => void) => rowListeners.set(t, f),
     removeEventListener: (t: string) => rowListeners.delete(t),
@@ -50,6 +52,15 @@ describe("FR-3: the landed row stays in view", () => {
     p.scroll();
     keepHeldInView();
     expect(p.calls).toEqual(["center"]);
+  });
+
+  it("carries the scroll margin class while held (leftovers-31 FR-1), and drops it on release", () => {
+    const p = fakePage();
+    const cls = (p.row as unknown as { classes: Set<string> }).classes;
+    holdInView(p.row);
+    expect(cls.has("landed-held")).toBe(true);
+    p.blur();
+    expect(cls.has("landed-held")).toBe(false);
   });
 
   it("lets go on blur, and when focus is elsewhere at the update", () => {
