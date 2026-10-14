@@ -364,8 +364,10 @@ keeps their place.
   not dimmed (tab-reaches-links A2).
 - **The newest answer wins, and focus never drops**: when a press returns
   something fresher than the feed, the view shows the press's answer at
-  once and the feed catches up. A live region says a repeated message
-  again: it is emptied, then set on the next frame. When the focused thing
+  once and the feed catches up. A screen-reader-only live region says a
+  repeated message again: it is emptied, then set on the next frame. Visible
+  live text is never emptied (it would blink); it states a level or a
+  count, and an unchanged one has nothing new to say. When the focused thing
   leaves, focus goes to a named next target, with a fallback chain that
   ends on a control that always exists, never the body (launch-progress A5).
 - **A control does not move when it is pressed**: what it opens or hides
