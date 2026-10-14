@@ -1,12 +1,12 @@
 ---
 title: "A description says each fact with its noun"
-status: now
+status: done
 repos: [organizer]
 branch: lf26-words
 seat: wd-build
 stage: one-window
 updated: 2026-10-14
-next: "review: lf26-words, gate met (W1, W2, X0), 2df2892"
+next: "done: merged to main (sup62)"
 depends_on: []
 boundary: ["docs/specs/leftovers-26.md Boundary, lf26-words"]
 spec: "docs/specs/leftovers-26.md (FR-4 to FR-7; tab-reaches-links Amendment 3, T23)"
