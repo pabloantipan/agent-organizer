@@ -154,7 +154,7 @@ export function needsMeRows(view: BoardView | null, agents: AgentsView | null, n
   // A start with a seat that did not start, not yet seen on Agents (FR-7):
   // one row per initiative, gone once the list is shown (SeenLaunch) or the
   // seat is retried (the service's `seen` and `failed`). Dated with the last
-  // failure (leftovers-29 FR-5), so it sorts among the dated rows.
+  // failure (`failed_at`, leftovers-30 FR-5), so it sorts among the dated rows.
   for (const l of agents?.launches ?? []) {
     if (l.failed > 0 && !l.seen && !folded.has(l.initiative)) rows.push({ kind: "start", key: `start:${l.initiative}`, initiative: l.initiative, since: lastFailure(l, now), launch: l });
   }
@@ -169,12 +169,12 @@ export function needsMeRows(view: BoardView | null, agents: AgentsView | null, n
   return rows.concat(unread);
 }
 
-/** When a failed start's last seat failed (leftovers-29 FR-5): the feed
- *  carries no failure time, so the start of the last failed seat's last try,
- *  which the failure ends; `now` when no failed seat carries one, so the row
- *  is never undated. */
+/** When a failed start's last seat failed: the latest `failed_at` of its
+ *  failed seats (leftovers-30 FR-5), else that seat's last try's start for an
+ *  entry without one (leftovers-29 FR-5); `now` when no failed seat carries
+ *  either, so the row is never undated. */
 function lastFailure(l: service.InitiativeLaunch, now: Date): Date {
-  const times = (l.seats ?? []).filter((s) => s.state === "failed" && s.started_at).map((s) => new Date(s.started_at).getTime()).filter((n) => !Number.isNaN(n));
+  const times = (l.seats ?? []).filter((s) => s.state === "failed").map((s) => new Date(s.failed_at || s.started_at || "").getTime()).filter((n) => !Number.isNaN(n));
   return times.length > 0 ? new Date(Math.max(...times)) : now;
 }
 

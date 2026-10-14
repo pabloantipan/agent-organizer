@@ -21,7 +21,9 @@ export function ContextBar({ c }: { c?: ContextStatus | null }) {
 }
 
 /** The discuss health of a seat as a word, never colour alone: alive, stale,
- *  never, deaf, capped. The word, the why and what to do come from lib/health. */
+ *  never, deaf, capped. The word, the why and what to do come from lib/health;
+ *  mail waiting is counted for every state, as the person badge counts it
+ *  (leftovers-30 FR-6). */
 export function WatcherBadge({ watcher, deaf, capped, undelivered }: { watcher?: string; deaf?: boolean; capped?: boolean; undelivered?: number }) {
   if (!watcher) return null;
   const state = healthState({ watcher, deaf, capped });
@@ -29,7 +31,7 @@ export function WatcherBadge({ watcher, deaf, capped, undelivered }: { watcher?:
   const waiting = undelivered ?? 0;
   return (
     <span className={`badge watcher ${state.replace(" ", "-")}`} title={healthTitle(state, waiting)}>
-      {HEALTH[state].label}{state !== "deaf" && waiting > 0 ? ` · ${waiting} waiting` : ""}
+      {HEALTH[state].label}{waiting > 0 ? ` · ${waiting} waiting` : ""}
     </span>
   );
 }

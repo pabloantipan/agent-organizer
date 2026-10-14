@@ -23,6 +23,52 @@ export type SeatStart = service.SeatLaunch;
 export const elapsed = (s: Pick<SeatStart, "started_at">, now: number) =>
   s.started_at ? Math.max(0, Math.floor((now - Date.parse(String(s.started_at))) / 1000)) : 0;
 
+/** The row an Agents landing put focus on (leftovers-30 FR-3, launch-progress
+ *  L13): centred on landing; while it keeps focus and the lead has not
+ *  scrolled, each feed update brings it back with `block: "nearest"`, since
+ *  the feed reflows the list and Safari 15 has no `overflow-anchor`. A blur,
+ *  a scroll the view did not make (a scroller's offset other than the one
+ *  its own scrollIntoView left), or the row leaving the page lets it go. */
+let held: { el: HTMLElement; tops: Map<EventTarget, number>; release: () => void } | null = null;
+
+const topOf = (t: EventTarget) => (t === document ? document.scrollingElement?.scrollTop ?? 0 : (t as Element).scrollTop);
+
+function scrollHeld(block: ScrollLogicalPosition) {
+  const h = held;
+  if (!h) return;
+  if (!h.el.isConnected || document.activeElement !== h.el) { h.release(); return; }
+  h.el.scrollIntoView({ block });
+  const tops = new Map<EventTarget, number>([[document, topOf(document)]]);
+  for (let p = h.el.parentElement; p; p = p.parentElement) tops.set(p, p.scrollTop);
+  h.tops = tops;
+}
+
+/** Holds `el`, which has focus already, and centres it. Called after the
+ *  screen's own scroll to the top, so that scroll is not read as the lead's. */
+export function holdInView(el: HTMLElement) {
+  held?.release();
+  const onScroll = (e: Event) => { if (e.target && held?.tops.get(e.target) !== topOf(e.target)) held?.release(); };
+  const h = {
+    el,
+    tops: new Map<EventTarget, number>(),
+    release: () => {
+      document.removeEventListener("scroll", onScroll, true);
+      el.removeEventListener("blur", h.release);
+      if (held === h) held = null;
+    },
+  };
+  held = h;
+  document.addEventListener("scroll", onScroll, true);
+  el.addEventListener("blur", h.release);
+  scrollHeld("center");
+}
+
+/** A feed update: the held row back into view, if it is still held. */
+export const keepHeldInView = () => scrollHeld("nearest");
+
+/** Leaving Agents lets the row go. */
+export const releaseHeld = () => held?.release();
+
 /** A seat's start as launch-progress §1 draws it: a word with a shape, never
  *  a colour alone. `count` is the seconds part, drawn aria-hidden. */
 export function seatWord(s: Pick<SeatStart, "state" | "started_at">, now: number): { tone: string; shape: string; word: string; count: string } {
@@ -137,6 +183,9 @@ export function useNow(on: boolean): number {
 }
 
 const starting = (l: Launch | undefined) => !!l?.seats?.some((s) => s.state === "starting" || s.state === "retrying");
+
+/** How long a list with every listed seat up stays (launch-progress §1, L14). */
+export const LIST_KEEP_MS = 5000;
 
 /** The initiative's start on the agents feed, if any. */
 export const launchOf = (launches: Launch[] | undefined, id: string) => (launches ?? []).find((l) => l.initiative === id);
@@ -317,6 +366,19 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
   // A failure shown here is seen (FR-7): its Needs me row goes.
   const unseen = !!launch && launch.failed > 0 && !launch.seen;
   useEffect(() => { if (unseen) SeenLaunch(group.id).catch(() => undefined); }, [unseen, group.id]);
+  // A settled list in which no listed seat failed closes after 5 s, one seat
+  // (`Seat up`) or a crew (`Crew up`) alike (leftovers-30 FR-4, L14), counted
+  // from when this view saw it settle, whatever else the service's start
+  // still runs. A failure is never closed by time.
+  const shown = !!launch && !!listed && !listClosed(group.id, launch);
+  const upShape = shown && listed && listed.done && listed.failed === 0 && (listed.seats?.length ?? 0) > 0 ? shapeOf(listed) : "";
+  const launchNow = useRef(launch);
+  launchNow.current = launch;
+  useEffect(() => {
+    if (!upShape) return;
+    const t = window.setTimeout(() => { if (launchNow.current) { closeList(group.id, launchNow.current); setClosedAt(Date.now()); } }, LIST_KEEP_MS);
+    return () => window.clearTimeout(t);
+  }, [upShape, group.id]);
   // A Needs me verb lands here (ui-leftovers FR-5): Launch on Bring crew up,
   // Open on the seat whose persona file is missing.
   useEffect(() => {
@@ -328,8 +390,11 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
       ? crewUp.current
       : box.current?.querySelector<HTMLElement>(`[data-seat="${CSS.escape(agentsLanding.replace(/^seat:/, ""))}"]`);
     if (!el) return;
-    el.focus();
-    el.scrollIntoView({ block: "nearest" });
+    el.focus({ preventScroll: true });
+    // Centred and kept in view (FR-3), after the screen's scroll to the top
+    // (a parent's effect). A task, not a frame: a window that draws no frame
+    // (hidden, or the harness's offscreen one) never runs requestAnimationFrame.
+    window.setTimeout(() => { if (document.activeElement === el) holdInView(el); }, 0);
     clearAgentsLanding();
   }, [agentsLanding, clearAgentsLanding, crewUp, group.crew, launch]);
   const cell = group.cell;
@@ -352,7 +417,7 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
       (e) => { focusHead.current = false; pressed.delete(group.id); flash(String(e)); },
     ).finally(() => setBusy(false));
   };
-  const showList = !!launch && !!listed && !listClosed(group.id, launch);
+  const showList = shown;
 
   if (!showList && listHadFocus.current) {
     listHadFocus.current = false;

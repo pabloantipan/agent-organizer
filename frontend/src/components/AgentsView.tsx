@@ -4,7 +4,7 @@ import { api, type AgentGroup } from "../hooks/useWails";
 import { since } from "../lib";
 import { useBoard } from "../stores/board.store";
 import { AgentList } from "./AgentList";
-import { CellStateLz, Crew, elapsed, FailedActions, launchOf, useNow, type Launch, type SeatStart } from "./Crew";
+import { CellStateLz, Crew, elapsed, FailedActions, holdInView, keepHeldInView, launchOf, releaseHeld, useNow, type Launch, type SeatStart } from "./Crew";
 import { SeenLaunch } from "../../wailsjs/go/main/App";
 import { missingPersonas, queueOf, readOnlyOf } from "../lib/queue";
 import { escapeCloses, useConfirmFocus } from "../lib/focus";
@@ -45,14 +45,22 @@ export function AgentsView() {
     el.classList.add("memory-landed");
     el.addEventListener("blur", () => el.classList.remove("memory-landed"), { once: true });
     el.focus({ preventScroll: true });
-    // After the screen's own scroll to the top, which runs after this
-    // (a parent's effect), so the landing is not scrolled away again; and
-    // once more when the feed's first draw has settled the rows above it
-    // (a task row's Agents, leftovers-29 FR-8, found it scrolled back to 0).
-    requestAnimationFrame(() => el.scrollIntoView({ block: "nearest" }));
-    // Not cleared on cleanup: clearAgentFocus above reruns this effect.
-    window.setTimeout(() => { if (document.activeElement === el) el.scrollIntoView({ block: "nearest" }); }, 400);
+    // Centred (leftovers-30 FR-3) after the screen's own scroll to the top,
+    // which runs after this (a parent's effect), so the landing is not
+    // scrolled away again; once more when the feed's first draw has settled
+    // the rows above it (a task row's Agents, leftovers-29 FR-8, found it
+    // scrolled back to 0). Not cleared on cleanup: clearAgentFocus above
+    // reruns this effect.
+    // A task, not a frame: a window that draws no frame never runs
+    // requestAnimationFrame.
+    window.setTimeout(() => { if (document.activeElement === el) holdInView(el); }, 0);
+    window.setTimeout(keepHeldInView, 400);
   }, [agentFocus, view, clearAgentFocus]);
+
+  // Each feed update brings a held landed row back into view (FR-3); leaving
+  // Agents lets it go.
+  useEffect(() => { keepHeldInView(); }, [view]);
+  useEffect(() => releaseHeld, []);
 
   // leftovers-25 FR-3: Show only <id> unmounts with its press (the filtered
   // view mounts in the initiative screen, a new instance); focus lands on the
