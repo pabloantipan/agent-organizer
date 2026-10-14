@@ -305,7 +305,15 @@ A description reads as a list of facts, each with its noun:
 - The same holds for every `aria-describedby` from Amendment 2: counts
   carry their noun (`25 agents`, `1 agent`, never `1 agents`).
 
+**The waiting count** (wd-ui U1, 2026-10-14). When the badge draws a
+waiting count, the description says it right after the mail word:
+`session off, mail stale, 1 message waiting, owes 2 messages, context 42%`.
+
+- Any mail word that draws the count says it too: `deaf`, `capped`,
+  `stale`. For deaf and capped the count is the evidence, so it is said.
+- With nothing waiting, the badge draws no count and nothing is said.
+
 | # | The lead can | Checked by |
 |---|---|---|
 | T22 | scroll a long card back from the keyboard | at 1024×640 an overflowing card body is a named stop in the trap; focused, Down scrolls it (`scrollTop` grows); when it does not overflow it is not a stop; same for a code block that scrolls sideways (Right scrolls it) |
-| T23 | hear a person's state as facts | F3's description reads `session <word>, mail <word>, owes <n> message(s), context <n>%`, the words as in `lib/health.ts`; no count is said without its noun in the right number |
+| T23 | hear a person's state as facts | F3's description reads `session <word>, mail <word>, owes <n> message(s), context <n>%`, the words as in `lib/health.ts`; no count is said without its noun in the right number; a waiting count the badge draws is said after the mail word (`<n> message(s) waiting`), whatever the word |

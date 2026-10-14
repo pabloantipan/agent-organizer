@@ -151,3 +151,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-13 — leftovers-25 graded: tab-reaches-links Amendment 3 (scroll region a stop while it overflows, described facts carry nouns), rows T22-T23.
 - 2026-10-13 — names for every scroll region added to tab A3 §1 (FR-3 carry, next batch after leftovers-26).
 - 2026-10-13 — tab A3 §1 and the design system: scroll stops keep their native role (FSE's leftovers-26 A1).
+- 2026-10-14 — wd-ui U1: the person description says the waiting count after the mail word whenever the badge draws it (tab A3, T23).
