@@ -4,7 +4,7 @@ import { Briefcase, ChevronDown, ChevronRight, CircleDashed, Compass, Hammer, Ha
 import type { merge, model, service } from "../../wailsjs/go/models";
 import { oneLine, underRoot, unreadLabel } from "../lib/unread";
 import { UnreadFiles } from "./UnreadFiles";
-import { failedStartLine, inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, needsMeShown, NEEDS_ME_FIRST, pastFirst, taskContext, taskLine, threadContext, type NeedsMeRow } from "../lib/queue";
+import { failedStartLine, inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, needsMeShown, NEEDS_ME_FIRST, boardCard, forecastWords, pastFirst, taskCard, taskContext, taskFact, taskLine, taskTone, threadContext, type NeedsMeRow } from "../lib/queue";
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
 import { dateWords } from "../lib/dates";
@@ -166,7 +166,7 @@ const age = (since: Date | null) => {
  *  openNeedsMe names it. The row's hover carries its whole context line in
  *  every class (FR-11): wide cuts it, compact takes it out of the view and
  *  keeps it in the accessible text. */
-function Shell({ row, reason, tone, subject, context, children }: { row: NeedsMeRow; reason: string; tone: string; subject: React.ReactNode; context: string; children: React.ReactNode }) {
+function Shell({ row, reason, tone, subject, context, hover, children }: { row: NeedsMeRow; reason: string; tone: string; subject: React.ReactNode; context: string; hover?: string; children: React.ReactNode }) {
   const { needsMeFocus, ruleDraft } = useBoard();
   const ref = useRef<HTMLDivElement>(null);
   const focused = needsMeFocus === row.key;
@@ -177,7 +177,7 @@ function Shell({ row, reason, tone, subject, context, children }: { row: NeedsMe
     ref.current?.scrollIntoView({ block: "center", behavior: "smooth" });
   }, [focused]);
   return (
-    <div ref={ref} className={`ib-row ${focused ? "focused" : ""} ${ruleDraft?.key === row.key ? "ruling" : ""}`} data-key={row.key} title={context}>
+    <div ref={ref} className={`ib-row ${focused ? "focused" : ""} ${ruleDraft?.key === row.key ? "ruling" : ""}`} data-key={row.key} title={hover ? `${hover}\n${context}` : context}>
       <span className={`lz ${tone}`}>{reason}</span>
       <span className="ib-what">
         <span className="ib-subject">{subject}</span>
@@ -189,8 +189,20 @@ function Shell({ row, reason, tone, subject, context, children }: { row: NeedsMe
   );
 }
 
+/** A task with no live supervisor: Open lands on its card's back in Work,
+ *  focused on its title (task-rows §4). Disabled, saying why, when none of
+ *  its cards is on the board. */
+function TaskOpen({ row }: { row: Extract<NeedsMeRow, { kind: "task" }> }) {
+  const openCardInWork = useBoard((s) => s.openCardInWork);
+  const slug = taskCard(row.task);
+  const card = useBoard((s) => (slug ? boardCard(s.view, row.initiative, slug) : null));
+  return card
+    ? <button className="act" aria-label={`Open ${row.initiative} ${row.task.number}, card ${card.title || card.slug}`} onClick={() => openCardInWork(card)} title={`its card ${card.slug} in Work: no live supervisor session`}>Open</button>
+    : <button className="act" aria-label={`Open ${row.initiative} ${row.task.number}`} aria-disabled="true" title="none of its cards is open on the board">Open</button>;
+}
+
 function InboxRow({ row }: { row: NeedsMeRow }) {
-  const { openSlackThread, openInitiative, openAgentsAt, select } = useBoard();
+  const { openSlackThread, openInitiative, openAgentsAt, openAgentRow, select } = useBoard();
   switch (row.kind) {
     case "decision":
       return <DecisionRow row={row} decision={row.decision} />;
@@ -209,11 +221,15 @@ function InboxRow({ row }: { row: NeedsMeRow }) {
     }
     case "task": {
       const t = row.task;
+      const line = taskLine(row.initiative, t);
+      const forecast = `forecast ${forecastWords(t.forecast)}`;
       return (
-        <Shell row={row} reason={t.state} tone={t.state === "stalled" ? "danger" : "tone"}
-          subject={<><span className="mono">{row.initiative} {t.number}</span> · {taskLine(t)}</>}
-          context={taskContext(t)}>
-          <button className="act" aria-label={`Agents ${row.initiative} ${t.number}`} onClick={() => openInitiative(row.initiative, "agents")}>Agents</button>
+        <Shell row={row} reason={t.state} tone={taskTone(t.state)}
+          subject={<><span className="ib-fact" title={forecast}>{taskFact(t)}</span> · <span className="mono">{row.initiative} {t.number}</span> · {t.title}</>}
+          context={taskContext(t, row.asker)} hover={`${line} (${forecast})`}>
+          {row.supervisor
+            ? <button className="act" aria-label={`Agents, supervisor of ${t.number}`} onClick={() => openAgentRow(row.supervisor!.group, row.supervisor!.id)} title={`its supervisor's session on Agents (${forecast})`}>Agents</button>
+            : <TaskOpen row={row} />}
         </Shell>
       );
     }
