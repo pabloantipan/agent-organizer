@@ -391,3 +391,23 @@ describe("B4: the task rows", () => {
     expect(taskCard(task({}))).toBe("w-task");
   });
 });
+
+// V3 (leftovers-30 FR-5): the unseen-failure row is dated by `failed_at`,
+// not by the start of the try that failed.
+describe("V3: the unseen-failure row is dated by failed_at", () => {
+  const at = (hm: string) => `2026-10-14T${hm}:00Z`;
+  const now = new Date(at("14:00"));
+  const row = (seats: object[]) => needsMeRows(board([initiative("a")]), { groups: [], launches: [{ initiative: "a", kind: "crew", seen: false, failed: 1, running: 0, done: true, seats }] } as unknown as AgentsView, now).find((r) => r.kind === "start");
+
+  it("dates it 12:05 when failed_at is 12:05 and started_at 12:04", () => {
+    expect(row([{ seat: "y", state: "failed", started_at: at("12:04"), failed_at: at("12:05"), reason: "r" }])?.since?.toISOString()).toBe("2026-10-14T12:05:00.000Z");
+  });
+
+  it("takes the latest failure across failed seats; a running seat's times do not count", () => {
+    expect(row([
+      { seat: "x", state: "running", started_at: at("12:30") },
+      { seat: "y", state: "failed", started_at: at("12:04"), failed_at: at("12:05"), reason: "r" },
+      { seat: "z", state: "failed", started_at: at("12:06"), failed_at: at("12:09"), reason: "r" },
+    ])?.since?.toISOString()).toBe("2026-10-14T12:09:00.000Z");
+  });
+});
