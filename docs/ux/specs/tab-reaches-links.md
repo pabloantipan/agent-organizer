@@ -276,6 +276,12 @@ past an edge: the card back's `.modal-body`, a code block, a table.
   arrows, Page Up and Page Down, and Home and End scroll it, as WebKit does
   natively.
 - A box's trap walks it like any other stop.
+- **The ring is inset, and the region makes room for it** (ss-ui U2,
+  2026-10-14). An outset ring is clipped by the box or scroller around the
+  region, so the ring stays inset (`outline-offset: -2px`). The region's
+  content is padded at least 4 px on every side (the 2 px ring plus 2 px
+  of air), so the ring never covers text. Where the region already has
+  more padding, nothing changes.
 - The edge line (design system, Widths) still marks it.
 
 **Names of every scroll region** (added 2026-10-13 for the FSE's FR-3
@@ -315,5 +321,5 @@ waiting count, the description says it right after the mail word:
 
 | # | The lead can | Checked by |
 |---|---|---|
-| T22 | scroll a long card back from the keyboard | at 1024×640 an overflowing card body is a named stop in the trap; focused, Down scrolls it (`scrollTop` grows); when it does not overflow it is not a stop; same for a code block that scrolls sideways (Right scrolls it) |
+| T22 | scroll a long card back from the keyboard (and see the ring clear the text) | at 1024×640 an overflowing card body is a named stop in the trap; focused, Down scrolls it (`scrollTop` grows); when it does not overflow it is not a stop; same for a code block that scrolls sideways (Right scrolls it); focused, the inset ring sits at least 2 px from the text in every region, the rule box's record and the header's open area included |
 | T23 | hear a person's state as facts | F3's description reads `session <word>, mail <word>, owes <n> message(s), context <n>%`, the words as in `lib/health.ts`; no count is said without its noun in the right number; a waiting count the badge draws is said after the mail word (`<n> message(s) waiting`), whatever the word |

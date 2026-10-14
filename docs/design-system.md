@@ -454,7 +454,8 @@ capped at the window and scrolls its own body, with the edge; it never
 scrolls on its backdrop (lf7-ui A2). **A region that scrolls is a keyboard stop while it
 scrolls**: `tabindex="0"` and a name, plus `role="region"` when it has no
 role of its own, only while content is hidden past an edge
-(tab-reaches-links A3). Overlay scrollbars on macOS do not count, since they
+(tab-reaches-links A3). Its ring is inset (`-2px`), and the region pads
+its content at least 4 px so the ring never covers text. Overlay scrollbars on macOS do not count, since they
 hide until scrolled (leftovers-3, U1).
 
 **The document never scrolls**; only a view's own scroller does. Anything
