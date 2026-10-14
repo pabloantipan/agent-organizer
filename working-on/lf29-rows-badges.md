@@ -3,7 +3,7 @@ title: "Failures dated, task rows read late not stuck, deaf and capped show thei
 status: next
 repos: [organizer]
 branch: lf29-rows-badges
-seat:
+seat: rb-build
 stage: one-window
 updated: 2026-10-14
 next: "sup66 runs it (0125 ruled ok, 2026-10-14)"

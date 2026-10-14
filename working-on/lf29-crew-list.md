@@ -3,7 +3,7 @@ title: "The crew list reads its result, starts only what was asked, closes"
 status: next
 repos: [organizer]
 branch: lf29-crew-list
-seat:
+seat: cl-build
 stage: one-window
 updated: 2026-10-14
 next: "sup66 runs it (0125 ruled ok, 2026-10-14)"
