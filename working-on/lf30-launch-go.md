@@ -3,7 +3,7 @@ title: "A crew start skips running seats and dates its failures"
 status: next
 repos: [organizer]
 branch: lf30-launch-go
-seat:
+seat: lgo-build
 stage: one-window
 updated: 2026-10-14
 next: "sup67 runs it (0126 ruled ok, 2026-10-14)"

@@ -3,7 +3,7 @@ title: "The landed row stays in view; Seat up closes; badges show the deaf count
 status: next
 repos: [organizer]
 branch: lf30-launch-view
-seat:
+seat: lvw-build
 stage: one-window
 updated: 2026-10-14
 next: "sup67 runs it (0126 ruled ok, 2026-10-14)"
