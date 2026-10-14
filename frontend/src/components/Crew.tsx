@@ -144,8 +144,18 @@ export const launchOf = (launches: Launch[] | undefined, id: string) => (launche
 /** A settled start with a failure stays until the lead acts (launch-progress
  *  §1); Close is one way to act. Module state, so the list stays closed
  *  across navigation until the start changes. */
-const closed = new Map<string, string>();
+const closed = new Map<string, { pressed?: Set<string>; shape: string }>();
 const shapeOf = (l: Launch) => (l.seats ?? []).map((s) => `${s.seat}:${s.state}:${s.started_at ?? ""}`).join("|");
+/** Close keeps the press it closed with, so a new press does not list the
+ *  closed start's seats again until the new start reaches the feed. */
+const closeList = (id: string, l: Launch) => {
+  const p = pressed.get(id);
+  closed.set(id, { pressed: p, shape: shapeOf(listedOf(l, p)) });
+};
+const listClosed = (id: string, l: Launch) => {
+  const c = closed.get(id);
+  return !!c && shapeOf(listedOf(l, c.pressed)) === c.shape;
+};
 
 /** Try again and Copy the command of a seat that did not start (§2). */
 export function FailedActions({ initiative, seat, retryRef, onCopied, onError }: { initiative: string; seat: SeatStart; retryRef?: React.Ref<HTMLButtonElement>; onCopied: () => void; onError: (m: string) => void }) {
@@ -190,7 +200,7 @@ function LaunchList({ initiative, launch, focusHead, say, onClose }: { initiativ
         <span className="spacer" />
         {error && <span className="meta ls-err">{error}</span>}
         {!launch.done && <button className="tiny-btn ghost" onClick={() => StopStarting(initiative).catch((e) => setError(String(e)))} title="the seat in flight finishes; the waiting ones stay off">Stop starting</button>}
-        {failed && <button className="tiny-btn ghost" onClick={() => { SeenLaunch(initiative).catch(() => undefined); closed.set(initiative, shapeOf(launch)); onClose(); }} title="back to the crew rows; nothing is killed or retried, Bring up starts the off seats again">Close the list</button>}
+        {failed && <button className="tiny-btn ghost" onClick={() => { SeenLaunch(initiative).catch(() => undefined); onClose(); }} title="back to the crew rows; nothing is killed or retried, Bring up starts the off seats again">Close the list</button>}
       </div>
       <ul className="launch-seats">
         {(launch.seats ?? []).map((s, i) => {
@@ -342,7 +352,7 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
       (e) => { focusHead.current = false; pressed.delete(group.id); flash(String(e)); },
     ).finally(() => setBusy(false));
   };
-  const showList = !!listed && closed.get(group.id) !== shapeOf(listed);
+  const showList = !!launch && !!listed && !listClosed(group.id, launch);
 
   if (!showList && listHadFocus.current) {
     listHadFocus.current = false;
@@ -360,7 +370,7 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
           <Users size={14} />
           <span className="ident">{cell.project}</span>
         </div>
-        <LaunchList initiative={group.id} launch={listed} focusHead={focusHead} say={say} onClose={() => { setClosedAt(Date.now()); window.setTimeout(() => crewUp.current?.focus(), 0); }} />
+        <LaunchList initiative={group.id} launch={listed} focusHead={focusHead} say={say} onClose={() => { closeList(group.id, launch!); setClosedAt(Date.now()); window.setTimeout(() => crewUp.current?.focus(), 0); }} />
       </div>
     );
   }
