@@ -6,7 +6,7 @@ branch: lf32-newest-answer
 seat: nw-build
 stage: one-window
 updated: 2026-10-14
-next: "review: lf32-newest-answer, gate met (N1, N2, N3, N4, X0), 1cb7c38"
+next: "review: nw-review and nw-ui on 1cb7c38 (sup69, 2026-10-14)"
 depends_on: []
 boundary: ["docs/specs/leftovers-32.md Boundary, lf32-newest-answer"]
 spec: "docs/specs/leftovers-32.md (FR-1 to FR-4; launch-progress L19-L22)"
