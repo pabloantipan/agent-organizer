@@ -6,7 +6,7 @@ branch: lf31-crew-button
 seat:
 stage: one-window
 updated: 2026-10-14
-next: "pablo: rule 0127 (accept leftovers-31); on accept the FSE starts its supervisor"
+next: "sup68 runs it (0127 ruled go, 2026-10-14)"
 depends_on: []
 boundary: ["docs/specs/leftovers-31.md Boundary, lf31-crew-button"]
 spec: "docs/specs/leftovers-31.md (FR-1 to FR-4; launch-progress L15-L18)"
