@@ -4,6 +4,10 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-14 ~11:00, leftovers-23 landed
+
+- **Last SHA seen:** 089a90d. lf23-detached-launch merged by sup63, review pass; 12 min against 25-45, $3.15; seats started detached first try. sup63 ended; installed v0.2.0-1968-g089a90d; tree clean. No supervisor running. Next: leftovers-27 from the carry once aglaea answers on launch progress.
+
 ## HAND-OFF — 2026-10-14, leftovers-23 running
 
 - **Hephaistos, 2026-10-14:** claudecode feat/seat-background merged (941e48d); my supervisor launch is now the bare probe line from my shell, detached, parent recorded; Pablo opens a team with `seats open organizer-probe-sup<n>`. No more iTerm windows to close at the end. test-lease rule (Pablo "as you recommend"): runs shared per commit, gate on ~4 GB free at warn; until it merges, freeze idle seats before a wave (seat-freeze, never probe -k). supervise now pauses by seat-freeze (claudecode bfd460c).
@@ -19,6 +23,7 @@ restating it (the discuss skill).
 
 ## Carry for leftovers-27
 
+- lf23 follow-ups (sup63): openInTerminal has no caller (dead code); app.go:386-387 comment still says iTerm2 window; launch progress for Bring crew up / Run card / New agent (asked aglaea).
 - Person description adds the waiting count after the mail word ('mail stale, 1 message waiting'), deaf and capped too (Aglaea A3 §2, T23, from wd-ui U1, lf26-words 637960d).
 - Scroll stops pad their content >= 4 px each side under the inset ring (outline-offset -2px); rule box record and header open area named (Aglaea A3 §1, T22 extended, from ss-ui U2, 244271d).
 - Tab harness: WKPreferences.inactiveSchedulingPolicy = .none (sup62, leftovers-26 Amendment 3).
