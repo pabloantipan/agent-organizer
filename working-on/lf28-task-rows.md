@@ -1,12 +1,12 @@
 ---
 title: "Over, stalled and unheard asks are Needs me rows"
-status: next
+status: now
 repos: [organizer]
 branch: lf28-task-rows
 seat: tr-build
 stage: one-window
 updated: 2026-10-14
-next: "sup65 runs it (0124 ruled ok, 2026-10-14)"
+next: "tr-build: R1 and R3 in queue.ts, then fixture R2, review build"
 depends_on: [lf28-task-watch, lf27-launch-view]
 boundary: ["docs/specs/leftovers-28.md Boundary, lf28-task-rows"]
 spec: "docs/specs/leftovers-28.md (FR-5, FR-6)"
