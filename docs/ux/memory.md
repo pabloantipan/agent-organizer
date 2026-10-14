@@ -400,6 +400,8 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 
 - 2026-10-14, launch-progress: a long blocking action needs a visible state per item in place of the button, a live region per result (not per tick), a counter instead of a spinner (2.2.2), a stop, and a Needs me row for a failure the lead walked away from.
 
+- 2026-10-14, task-rows: late is not stuck; keep red for blocked and rank lateness with amber or tone. Put the fact before the title in any one-line row that ellipsizes. A verb must land on the thing named, or change verb.
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).

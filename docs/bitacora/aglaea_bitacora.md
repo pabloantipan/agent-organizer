@@ -155,3 +155,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-14 — ss-ui U2: scroll stops keep an inset ring and pad their content ≥4 px (tab A3 §1, T22; design system).
 - 2026-10-14 — launch-progress spec (Bring crew up, Run card, New agent while seats start; failed twice), rows L1-L7.
 - 2026-10-14 — leftovers-27 graded: launch-progress Amendment 1 (result heading, list of this press only, Close the list, dated failure row, deaf/capped badges draw the count, ring floor 2 px as built), rows L8-L12.
+- 2026-10-14 — task-rows spec (lf28 findings): stalled amber not red, n× its forecast, fact before title, verb lands on the supervisor or the card, capped words; rows N1-N5.
