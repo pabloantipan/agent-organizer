@@ -39,6 +39,18 @@ leftovers-27 FR-4), and none writes the real clipboard.
 - **FR-6** (L12) The deaf and capped badges of a person draw `· n
   waiting`, so the description (lf27 FR-9) and the screen say the same.
 
+- **FR-8** (N1-N4, Aglaea's `docs/ux/specs/task-rows.md`, from
+  leftovers-28's UI review) The task rows of leftovers-28, as she wrote
+  them: `stalled` takes the warning lozenge (amber; red stays blocked's and
+  escalated's), `over` the tone; the multiple is `<n>× its forecast`, n
+  rounded down, shown only from 2×, the forecast in the hover; the fact
+  comes before the title (`stalled · 10 m, 5× its forecast · init-a 0011 ·
+  <title>`) so the ellipsis cuts the title, and on the second line the
+  asker's health comes first; the verb lands on the task: with a live
+  supervisor session, Agents scrolled to, highlighted and focused on its
+  row, named `Agents, supervisor of <NNNN>`; with none, the verb is Open and
+  lands on the task card's back in Work. FR-7 is her N5.
+
 ## Acceptance → gate
 
 | # | FR | Check | Expected (fails on main) |
@@ -49,16 +61,18 @@ leftovers-27 FR-4), and none writes the real clipboard.
 | C4 | 4 | `grep -n "fails alone\|stops the rest\|forecast:" CLAUDE.md` | "fails alone" and "forecast:" match, "stops the rest" does not |
 | B1 | 5 | vitest of `needsMeRows` with an unseen failure at 12:05 among rows dated 11:00 and 13:00 | dated 12:05, sorted between them |
 | B3 | 7 | vitest of an ask row whose asker is capped with an alive watcher, and one whose watcher is stale | the capped words; "not picking up" only for the stale one |
+| B4 | 8 | vitest of the task rows: 10 m on a 1-2 m forecast, 3 m on 2-4 m; the lozenge class per state; harness at 1024×640 with a 60-character title (screenshot); harness: Return on the row with a supervisor session in the fixture's agents and without one | N1-N4: `5× its forecast`, no multiple under 2×, forecast in `title`; amber for stalled; lozenge and fact whole, title cut; focus on the supervisor's row named as FR-8, or on the card back's title via Open |
 | B2 | 6 | vitest and AX of a deaf and a capped person with 3 waiting | `· 3 waiting` drawn; the description says `3 messages waiting` |
 | X0 | all | `XDG_DATA_HOME=$(mktemp -d) make test`, `cd frontend && pnpm run build`, `wails build`, then `git status --porcelain` | pass, empty |
 
 ## Boundary
 
 - `lf29-crew-list`: `Crew.tsx`, `styles/launch.css`, their tests; the
-  Crew and Navigation paragraphs of `CLAUDE.md`. Not: `lib/queue.ts`, `SlackView.tsx`, Go.
-- `lf29-rows-badges`: `lib/queue.ts` (the unseen-failure row and the ask row's words),
+  Crew and Navigation paragraphs of `CLAUDE.md`. Not: `lib/queue.ts`, `SlackView.tsx`, `Home.tsx`, `AgentsView.tsx`, Go.
+- `lf29-rows-badges`: `lib/queue.ts` (the unseen-failure row, the ask row's words, the task rows), `Home.tsx` (the task row's render and verb), `AgentsView.tsx` (land on a session row by id), the store only for that landing and for opening a card back in Work,
   `SlackView.tsx` (the person badge), their tests; in `styles/global.css`
-  only `.person*`. Not: `Crew.tsx`, `launch.css`, Go.
+  only `.person*`; `styles/shell.css` only the Needs me row's lozenge and
+  fact rules. Not: `Crew.tsx`, `launch.css`, Go.
 
 ## No-gos
 
@@ -70,4 +84,4 @@ leftovers-27 FR-4), and none writes the real clipboard.
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf29-crew-list` | C1, C2, C3, C4, X0 | — | true |
-| `lf29-rows-badges` | B1, B2, B3, X0 | `lf28-task-rows` (both edit `lib/queue.ts`) | true |
+| `lf29-rows-badges` | B1, B2, B3, B4, X0 | `lf28-task-rows` (both edit `lib/queue.ts`) | true |
