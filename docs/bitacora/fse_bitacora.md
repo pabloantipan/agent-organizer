@@ -4,6 +4,11 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## Carry for leftovers-27
+
+- Person description adds the waiting count after the mail word ('mail stale, 1 message waiting'), deaf and capped too (Aglaea A3 §2, T23, from wd-ui U1, lf26-words 637960d).
+- Tab harness: WKPreferences.inactiveSchedulingPolicy = .none (sup62, leftovers-26 Amendment 3).
+
 ## HAND-OFF — 2026-10-13, leftovers-26 running
 
 - **16:2x Repetition, 3rd: test-lease starvation** (sup58, sup60, sup62 from 16:08; pressure 2, agents 5.0 GB of ~21 used). Sent [for hephaistos] asking for a rule (wait ceiling or per-run estimate). Amendments 1-3 of leftovers-26 (71ec45e native roles kept, 42ea9a3 F2 grouped home without sleep, e6406d6 then corrected: inactiveSchedulingPolicy=.none lets the hidden harness scroll; carry it into scripts/tab-harness).
