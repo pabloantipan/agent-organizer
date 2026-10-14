@@ -41,3 +41,15 @@ Pass: W1, W2, W3 and X0 met at be6efec (branch unmoved). Checked from a clean cl
 - W3: tabharness.swift:82 sets inactiveSchedulingPolicy = .none; start line reports "none"; Down x3 in the overflowing card body, scrollTop 0 -> 40, 80, 40 (3/3) — w3-run1..3.jsonl.
 - X0: make test reused (run 169eafa4-66796 of be6efec, exit 0: 638 vitest, 16 go ok); pnpm run build 0, wails build 0, git status --porcelain empty — x0-*.
 Unmet: none. Test run: reused 169eafa4-66796. Reviewer po-review, 2026-10-14, commit be6efec98f5dad6405698a59e2efcc78e0225f4a. ## UI review not yet written: status and place left alone.
+
+## UI review
+Pass (po-ui, 2026-10-14), commit be6efec98f5dad6405698a59e2efcc78e0225f4a, branch unmoved; every row checked on it. Sev 4/3: none. Test run: fresh, 169eafa4-66796 (exit 0: 638 vitest, go ok; po-review reused it). Evidence in .wt-notes/po-ui/.
+- W1: my review build (pid saved, fixture, auth off), init-a > Conversations > People by AXPress. AXCustomContent decodes: dev_bruno `session live, mail deaf, 2 messages waiting`; po_ana `session live, mail alive` (none waiting, nothing said); fse `session off, mail alive, owes 2 messages`. Vitest by make test. w1-ax-decoded.txt, wkwebview-1440x900-W1-people.png.
+- W2: branch harness, 1024x640, my wails dev on :34142; each stop focused and :focus-visible, 2px ring at -2px. Padding T/R/B/L, ring-to-text clear top/left: card body 6/22/22/22, 6/27; card pre 4/4/4/4, 4/8; card table 4/4/4/4, 9/13; header open 4/4/12/4, 6/2; role body 6/22/22/22, 6/20; rule record 4/4/4/4, 3/2; float list (--twenty) 4/8/7/8, 11/40; Help doc 24/32/48/32, 25/30. Snapshots rule-record and header-open: the ring clears the first line. w2-*.jsonl, shots/.
+- W3: tabharness.swift:82 sets the policy, start line says `none`; Down x3 in the card body, scrollTop 0 -> 80, 3/3, focus stays on the region. w3-run1..3.jsonl.
+- Findings:
+  - U1 (sev 1) A sighted person cannot see the count the description says under deaf. Where: dev_bruno's row, badge `deaf`, no count (W1 shot). Evidence: `WatcherBadge` drops the count when deaf (ContextBar.tsx:32), FR-9 says it anyway. Proposal: draw `deaf · n waiting`, or amend FR-9; ContextBar is outside this boundary.
+  - U2 (sev 1) The ring sits 2px from text on the left in the header's open area and the rule record. Where: shots/header-open.png, rule-record.png. Evidence: clear left 2; T22's floor is 2, FR-10's 4px padding met. Proposal: none now; see design questions.
+- Spec gaps (for the FSE): FR-9 says "whenever the badge draws one" and "deaf too", and the deaf badge draws none (U1). The Roles rail group in the fixture lists this Mac's real Hephaistos and Aglaea sessions, so a review build shows live roles the fixture did not make.
+- For aglaea: is 2px from ring to text the floor we want, or should the text sit 4px off the ring (padding 6)? (U2.)
+- Not verified in WKWebView: the float list's ring in a shot (my snapshot came out blank, computed styles only); the firebase states (not touched by this card).
