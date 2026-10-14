@@ -262,3 +262,40 @@ never-acting items are left out).
 | L17 | not press a button that does nothing | with every seat live, the crew block has no Bring up / Reattach button and its meta reads `n live · 0 off` |
 | L18 | hear why nothing started | with the confirm open, bring the last seat up from the CLI, press Start: the live region says `Every seat is already running`, no list appears, focus is on the first `Attach` |
 | L16 (amended) | keep their place when a list closes | with focus in the list, `Seat up` closes and focus is on the first listed seat's `Attach`; with focus elsewhere, it stays |
+
+## Amendment 5 (aglaea, 2026-10-14): from lf31-crew-button's UI review
+
+From cb-ui (`working-on/lf31-crew-button.md`, ## UI review, pass at
+e3c470c).
+
+- **U1: the press's answer is the newest truth; show it at once.** When
+  Start finds every seat running, the block must not keep saying `1 off`
+  and `Bring 1 up` beside `Every seat is already running`: that is one
+  fact said two ways on one screen. The press's result is applied to the
+  block at once, with no new service call: the seats it reports running
+  read live, the meta reads `0 off`, and the launch button goes (A4). The
+  next feed then agrees. If the result names no seats (it only says
+  nothing was queued), treat every seat the view shows as off as live
+  until the feed says otherwise.
+- **U2: a repeated message is said again.** The live region is emptied,
+  then set on the next frame, so a second identical race is announced.
+  This holds for every live region in the app (design system).
+- **U3: a confirm whose press can no longer act closes.** When the feed
+  turns `0 off` with the confirm open, the confirm closes; its words are
+  not rewritten. Same rule as the button (A4): an action that cannot act is
+  not offered. If focus was in the confirm, it goes where A4's race sends
+  it.
+- **Gap: the focus chain when a list or a confirm leaves.** Only if focus
+  was inside it, in order:
+  1. the `Attach` of the first listed seat that has one;
+  2. else `Bring n up` (a listed seat with no Attach is off, so it exists
+     unless it is blocked);
+  3. else `Retire…`, which every crew block has.
+  Never the body.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| L19 | trust one answer | with a stale feed showing `1 off`, press Start on a seat already running: at once the meta reads `0 off`, there is no launch button, and the live region says `Every seat is already running`; the next feed changes nothing |
+| L20 | hear it twice | repeat the L19 race: the live region says it again |
+| L21 | not see a dead confirm | open the confirm, bring the last seat up from the CLI, wait for the feed: the confirm closes, and focus, if it was there, is on the first `Attach` |
+| L22 | never lose focus | let a list close after its first seat went off: focus is on the next listed `Attach`, else `Bring n up`, else `Retire…` |

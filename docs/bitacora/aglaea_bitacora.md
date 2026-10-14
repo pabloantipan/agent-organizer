@@ -159,3 +159,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-14 — leftovers-29 graded: launch-progress Amendment 2 (landed row centred then kept in view, Seat up closes at 5 s, failures never time out, shared amber kept), rows L13-L14.
 - 2026-10-14 — lvw-ui answered: launch-progress Amendment 3 (landed row keeps an 8 px scroll margin, focus after a self-close goes to Reattach all only if it was in the list), rows L15-L16.
 - 2026-10-14 — sup67 close: launch-progress Amendment 4 (no launch button with every seat live, Reattach all retired, race says 'Every seat is already running', L16 target moves to the first Attach), rows L17-L18.
+- 2026-10-14 — cb-ui answered: launch-progress Amendment 5 (press answer applied at once, live region clears before repeating, dead confirm closes, focus fallback chain Attach → Bring n up → Retire…), rows L19-L22; design-system rule 'the newest answer wins, and focus never drops'.

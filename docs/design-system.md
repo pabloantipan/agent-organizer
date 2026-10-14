@@ -362,6 +362,12 @@ keeps their place.
   so no drawn fact goes unsaid. A button that changes the view in place
   keeps focus. A menu item that can never act where it stands is left out,
   not dimmed (tab-reaches-links A2).
+- **The newest answer wins, and focus never drops**: when a press returns
+  something fresher than the feed, the view shows the press's answer at
+  once and the feed catches up. A live region says a repeated message
+  again: it is emptied, then set on the next frame. When the focused thing
+  leaves, focus goes to a named next target, with a fallback chain that
+  ends on a control that always exists, never the body (launch-progress A5).
 - **A control does not move when it is pressed**: what it opens or hides
   may move the content, never the control itself (initiatives-view A5,
   the header's Details).
