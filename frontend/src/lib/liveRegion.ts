@@ -20,10 +20,19 @@ export function speaker(set: (m: string) => void, later: (f: () => void) => unkn
   };
 }
 
-/** The text of a screen-reader-only live region and the `say` that sets it. */
+/** The text of a screen-reader-only live region and the `say` that sets it.
+ *  The task that sets the text is queued only once the empty text is
+ *  committed: a 0 ms timer queued at once can run before React renders,
+ *  and the two updates then batch into one, so nothing is said again (N2,
+ *  seen in WKWebView). */
 export function useLiveRegion(): [string, (m: string) => void] {
   const [text, setText] = useState("");
-  const s = useMemo(() => speaker(setText), []);
-  useEffect(() => s.stop, [s]);
+  const [due, setDue] = useState<{ f: () => void } | null>(null);
+  const s = useMemo(() => speaker(setText, (f) => { const d = { f }; setDue(d); return d; }, () => setDue(null)), []);
+  useEffect(() => {
+    if (!due) return;
+    const t = setTimeout(due.f, 0);
+    return () => clearTimeout(t);
+  }, [due]);
   return [text, s.say];
 }
