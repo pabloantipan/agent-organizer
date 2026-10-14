@@ -42,6 +42,10 @@ type SeatLaunch struct {
 	// StartedAt is when the current try began, set while starting or
 	// retrying; the view counts the seconds up from it.
 	StartedAt *time.Time `json:"started_at,omitempty"`
+	// FailedAt is when the last try failed, set with State failed: after a
+	// retry on exit 3, the retry's failure. The view dates the failure by it
+	// (leftovers-30 FR-2).
+	FailedAt *time.Time `json:"failed_at,omitempty"`
 	// Reason, Exit and Output say why a failed seat did not start: the
 	// reason in words, probe's exit code (0 when probe never ran) and its
 	// output, the pane's last lines.
@@ -222,7 +226,7 @@ func (s *Service) runLaunches(l *InitiativeLaunch) {
 
 		started := s.clock()
 		s.setSeat(l, next, func(seat *SeatLaunch) {
-			seat.State, seat.StartedAt = LaunchStarting, &started
+			seat.State, seat.StartedAt, seat.FailedAt = LaunchStarting, &started, nil
 			seat.Reason, seat.Exit, seat.Output = "", 0, ""
 		})
 		var err error
@@ -235,12 +239,13 @@ func (s *Service) runLaunches(l *InitiativeLaunch) {
 				s.setSeat(l, next, func(seat *SeatLaunch) { seat.State, seat.StartedAt = LaunchRetrying, &again })
 			})
 		}
+		ended := s.clock()
 		s.setSeat(l, next, func(seat *SeatLaunch) {
 			if err == nil {
 				seat.State = LaunchRunning
 				return
 			}
-			seat.State = LaunchFailed
+			seat.State, seat.FailedAt = LaunchFailed, &ended
 			seat.Reason, seat.Exit, seat.Output = launchFailure(err)
 		})
 	}
@@ -313,7 +318,7 @@ func (s *Service) RetrySeat(initiative, seat string) error {
 		return fmt.Errorf("seat %s is %s, not failed", seat, st)
 	}
 	l.Seats[i].State = LaunchQueued
-	l.Seats[i].Reason, l.Seats[i].Exit, l.Seats[i].Output, l.Seats[i].StartedAt = "", 0, "", nil
+	l.Seats[i].Reason, l.Seats[i].Exit, l.Seats[i].Output, l.Seats[i].StartedAt, l.Seats[i].FailedAt = "", 0, "", nil, nil
 	if l.Done {
 		l.doneAt, l.settled = time.Time{}, make(chan struct{})
 	}

@@ -1834,6 +1834,8 @@ export namespace service {
 	    state: string;
 	    // Go type: time
 	    started_at?: any;
+	    // Go type: time
+	    failed_at?: any;
 	    reason?: string;
 	    exit?: number;
 	    output?: string;
@@ -1849,6 +1851,7 @@ export namespace service {
 	        this.session = source["session"];
 	        this.state = source["state"];
 	        this.started_at = this.convertValues(source["started_at"], null);
+	        this.failed_at = this.convertValues(source["failed_at"], null);
 	        this.reason = source["reason"];
 	        this.exit = source["exit"];
 	        this.output = source["output"];
