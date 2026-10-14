@@ -47,3 +47,31 @@ Pass: V1, V2, V3, V4 and X0 met at 7c35c18 (lf30-launch-view), each run from a f
 - Shared test run: fresh, run 0f898035-59948 (lvw-ui reused it).
 - Unmet rows: none. Diff stays inside the boundary (no Go, no SlackView).
 - Reviewer lvw-review, 2026-10-14, commit 7c35c18b01693a1a75c54ef768d043e70e658f3f.
+
+## UI review
+Pass, at 7c35c18b01693a1a75c54ef768d043e70e658f3f (every row checked on that commit). Sev 4/3: none. Shots and logs `.wt-notes/lvw-ui/`.
+
+How each state was checked:
+- V1 / L13: Tab harness 1024×640, my own `wails dev` on 34179 from a clean detached worktree (fixture, auth off, probe stub), the builder's steps. Landed: centreOff 0. After +3, +3, +3 rows above: whole in view each time (scrollTop 406, 412, 520). Lead scrolls to 370, one more update: stays at 370, focus kept. `out/v1.jsonl`, `wkwebview-1024x640-V1-{landed,update2,after-scroll-update4}.png`. Fake updates go through the store's own `applyAgents`, the path the `agents` event takes, and one real tick (9.6 s) fell inside the run, so they meet the row as written. The zero-timeout start is the same code the app runs, not a harness branch.
+- V2 / L14: same harness: `Bring 1 up`, Return twice. `Seat up · 1 of 1 running` at 7.3 s, present 1 s after, gone at 12.3 s (5.0 s), absent at the 6 s read. Focus then on `Reattach all`, never the body. `out/v2.jsonl`, `wkwebview-1024x640-V2-{seat-up-1s,closed-6s}.png`
+- V3: vitest `lib/queue.test.ts` "V3", in the shared run.
+- V4: vitest `ContextBar.test.tsx` in the shared run. AX of my own review build (pid saved, killed by it; screen unlocked; auth off). In my temp copy of canned health, dev_bruno and build-help were deaf with 3 waiting, and po_ana capped with 3. Crew block: `capped · 3 waiting` (po_ana), `deaf · 3 waiting` (dev_bruno). Agents rows: `deaf · 3 waiting` (build-help), `capped · 3 waiting` (sup10). `out/v4-ax-agents.txt`, `wkwebview-1440x900-V4-agents-deaf-capped.png`. The word comes first and the count is text, so it is not colour alone (1.4.1).
+- Shared test run: reused, run 0f898035-59948 of 7c35c18b0169 (lvw-review's), exit 0: Go all ok, vitest 684/684.
+
+Findings:
+- U1 (sev 1). The lead cannot see the landed row's whole focus ring once a feed update has moved it. Where: Agents, 1024×640, after update 2 (`wkwebview-1024x640-V1-update2.png`). Evidence: `nearest` leaves the row flush with the scroller's bottom edge (row bottom 640, view bottom 640). The 2 px outline at a 2 px offset falls outside the scroller, so the ring's bottom edge is clipped. The row stays whole and focused, so V1 holds. Proposal: give the landed row `scroll-margin-block: var(--space-2)` (Safari 15 has it), so `nearest` leaves the ring inside.
+
+Spec gaps (for the FSE):
+- L13 and FR-3 say "back in view" without saying whether the focus ring counts as part of the row (U1).
+- Nothing says where focus goes when `Seat up` closes by time. As built it lands on `Reattach all`, which is reasonable. Write it down so it is not changed by accident.
+
+For aglaea:
+- A1: should a landing that a feed update scrolls back with `nearest` keep a margin from the edge (U1), or is flush acceptable for a row that has just landed?
+
+Not verified in WKWebView:
+- The hold over real 10 s ticks alone: only fake updates, plus one real tick that the fake re-applied.
+- Release on blur: vitest `Crew.hold.test.ts` only.
+- The `openAgentRow` / `agentFocus` landing in AgentsView: V1 used `openAgentsAt` through Crew.
+- `Crew up` closing after 5 s: V2 covers `Seat up` only.
+- The V3 row's date as drawn on Home: vitest only.
+- Firebase: not run (forbidden), and no row depends on it.
