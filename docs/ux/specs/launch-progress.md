@@ -116,3 +116,67 @@ A failure can be forced on the fixture with a probe stub that exits 3.
 - Showing each seat's pane output live.
 - Launching seats in parallel, which is the FSE's and Hephaistos' call; the
   list works either way.
+
+## Amendment 1 (aglaea, 2026-10-14): from leftovers-27's UI reviews
+
+From sup64's close (`runs/2026-10-14-sup64-leftovers-27.md`,
+`working-on/done/lf27-*.md`), for leftovers-29 or later.
+
+### 1. The heading says the result once nothing is starting (U3)
+
+While any seat is `waiting`, `starting` or `trying again`, the heading reads
+`Starting crew · n of m running`. Once none is, it reads the result:
+
+- `Crew up · 3 of 3 running`, which closes after 5 s as before;
+- `Crew up · 2 of 3 running, 1 didn't start`;
+- `Stopped · 2 of 3 running, 1 not started` after Stop starting.
+
+The live region says the same words once.
+
+### 2. The list holds only the seats this press starts (U4)
+
+`Bring 1 up` starts one seat, so the list shows that seat alone. The
+heading counts it alone: `Starting 1 seat · 0 of 1 running`, then `Seat up
+· 1 of 1 running`. Seats already running are not listed, since their rows
+are on the crew block as usual. `m` is always the number this press
+starts.
+
+### 3. Close the list (spec gap)
+
+A settled list with a failure stays until the lead acts. **Close the list**
+is a quiet button on that heading line. It changes the view only:
+
+- the list goes;
+- the crew block shows its rows, with the failed seats `off`, and `Bring n
+  up` comes back;
+- the unseen-failure Needs me row goes (it counts as seen).
+
+Nothing is killed or retried.
+
+### 4. The unseen-failure row is dated (spec gap)
+
+The Needs me row `Crew of <id>: n seat(s) didn't start` is dated with the
+time the last seat failed. It sorts with the dated rows, oldest first, and
+never as an undated row behind `Show the other N`. The badge counts it
+either way.
+
+## Amendment 1 to tab-reaches-links A3 §2, recorded here for the same batch
+
+**The deaf and capped badges draw their waiting count** (`deaf · 3
+waiting`, `capped · 1 waiting`). For these two the count is the evidence
+for the word. The description then says it, as FR-9 asks: a fact said is
+a fact drawn. `stale` draws its count as it already does.
+
+### 5. The ring floor (polish U2): 2 px, as built
+
+The floor is **2 px of air** between the ring's inner edge and the text.
+The region pads 4 px, of which the ring takes 2. What was built is right.
+The design system already says so.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| L8 | read the outcome, not "starting", once it is over | with no seat waiting, starting or trying again, the heading reads `Crew up · …` or `Stopped · …` as in §1 |
+| L9 | see only what this press starts | `Bring 1 up` lists one seat and counts `of 1` |
+| L10 | close a failed list | `Close the list` hides it; the failed seats read `off`; `Bring n up` is back; the Needs me row is gone; nothing is killed |
+| L11 | find a fresh failure in Needs me | the unseen-failure row carries the failure's time and sorts among the dated rows |
+| L12 | see the deaf and capped evidence | their badges draw `· n waiting`, and the description says it |

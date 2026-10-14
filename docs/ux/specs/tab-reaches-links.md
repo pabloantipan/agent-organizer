@@ -317,6 +317,7 @@ waiting count, the description says it right after the mail word:
 
 - Any mail word that draws the count says it too: `deaf`, `capped`,
   `stale`. For deaf and capped the count is the evidence, so it is said.
+  The deaf and capped badges draw the count too (launch-progress A1).
 - With nothing waiting, the badge draws no count and nothing is said.
 
 | # | The lead can | Checked by |
