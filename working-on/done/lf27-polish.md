@@ -1,6 +1,6 @@
 ---
 title: "Waiting mail said, scroll stops padded, the harness scrolls"
-status: now
+status: done
 repos: [organizer]
 branch: lf27-polish
 seat: po-build
