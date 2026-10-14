@@ -3,10 +3,10 @@ title: "Seats start detached; the organizer stops typing into iTerm"
 status: next
 repos: [organizer]
 branch: lf23-detached-launch
-seat:
+seat: dl-build
 stage: one-window
-updated: 2026-10-13
-next: "sup63 runs it (0119 ruled ok; claudecode feat/seat-background merged 941e48d, 2026-10-14)"
+updated: 2026-10-14
+next: "dl-build builds it in .wt/lf23-detached-launch (sup63)"
 depends_on: []
 boundary: ["docs/specs/leftovers-23.md Boundary, lf23-detached-launch"]
 spec: "docs/specs/leftovers-23.md (FR-1 to FR-4)"
