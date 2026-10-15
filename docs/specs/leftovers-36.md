@@ -70,3 +70,13 @@ desktops, focus or input, starts a real seat, or writes the real clipboard.
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf36-needs-me-waits` | N1, N2, N3, N4, N5, N6, X0 | — | true |
+
+Amendment 1, 2026-10-15, the FSE, from nw-build via sup73 (thread
+01M50YEP): the fixture already holds two records FR-3 lists (overlay
+init-a 0005, owner alejandro; fixture-many 0075, owner ana), so no overlay
+record is needed and the heading reads `· 2`. The fixture's dates are fixed,
+so the count is whatever FR-3 gives on the day. So:
+- **N4** expects `Waiting on others · <n>`, n the number of fixture records
+  FR-3 selects on the day of the check (2 on 2026-10-15), each row reading
+  `waiting on <owner> · <days> days · …`, and the badge equal to the Needs
+  me row count without them. The Boundary's overlay record is optional.
