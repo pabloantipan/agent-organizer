@@ -83,3 +83,18 @@ roadmap's diamond corners go from 2px to 4px") stand, so:
   `styles/roadmap.css`.
 - FR-5 is already met on main (Usage, memory, Rescan); "today Rescan comes
   before Usage" was stale. R6 proves the order; nothing changes for it.
+
+Amendment 2, 2026-10-15, the FSE, from rt-ui's fail at e0779e4 (U1, sev 3):
+R2's grep named three literal spellings of the accent, so a focus rule in an
+accent-derived token passed it: `.comment-box textarea:focus` draws focus
+as `border-color: var(--border-accent)` with `outline: none` (2.03:1 on the
+drawer), which FR-1 already forbids. So:
+- **R2** now also fails on a `:focus`/`:focus-visible`/`:focus-within`
+  rule that names `--border-accent` or any `--accent-*` token, or that sets
+  `outline: none` without drawing `--focus-ring` itself. Today that is the
+  comment field alone among the rules this card touches; the pre-existing
+  `outline: none` rules rt-ui listed (`.r-row`, `.crew-seats li`,
+  `.cell-search input` and kin) are measured in R1-style only if they draw
+  no ring at all, and are otherwise a later batch's, not this fix round's.
+- **R1** adds a fifth surface: the card back's Comments field, focused by
+  Tab, outline colour `rgb(192,171,254)` at 3:1 or more on the drawer.
