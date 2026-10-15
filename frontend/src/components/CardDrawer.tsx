@@ -12,6 +12,7 @@ import { openBox } from "../lib/boxStack";
 import { loopTab } from "../lib/tabTrap";
 import { regionName, useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
 import { focusBoxBelow } from "./RuleDecisionBox";
+import { busyButton, busyLabel } from "../lib/busy";
 
 /** Focus and names, opening inline (widths-and-focus FR-19): the card back
  *  takes focus on its title when it opens, and hands it back to what opened
@@ -171,7 +172,7 @@ function Discuss({ card: c, readOnly }: { card: merge.BoardCard; readOnly: strin
  *  dated entries and a box to add one. They are the human's, kept in the
  *  app's synced state and never in the card file, so agents keep the file.
  *  "Write about this card" and the queue carry them into the conversation. */
-function MyNotes({ card: c, readOnly }: { card: merge.BoardCard; readOnly: string | null }) {
+export function MyNotes({ card: c, readOnly }: { card: merge.BoardCard; readOnly: string | null }) {
   const { view, addNote, editNote, account, agents } = useBoard();
   const key = `${c.initiative_id}/${c.slug}`;
   // The hint promises "Write about this card" only where Discuss draws it:
@@ -192,11 +193,20 @@ function MyNotes({ card: c, readOnly }: { card: merge.BoardCard; readOnly: strin
   const imeNew = useImeEscape(setText);
   const imeEdit = useImeEscape(setDraft);
   const [busy, setBusy] = useState(false);
+  const field = useRef<HTMLTextAreaElement>(null);
+  const save = useRef<HTMLButtonElement>(null);
   const me = account?.email || "";
   const submit = () => {
     if (!text.trim() || busy) return;
     setBusy(true);
-    addNote(c.initiative_id, c.slug, text).then(() => drafts.discard(dk)).finally(() => setBusy(false));
+    addNote(c.initiative_id, c.slug, text).then(() => {
+      // The saved comment empties the box and Save goes with it: a busy
+      // Save that kept focus hands it to the field, never the body
+      // (leftovers-34 FR-2).
+      const held = !!save.current && document.activeElement === save.current;
+      if (held) field.current?.focus();
+      drafts.discard(dk);
+    }).finally(() => setBusy(false));
   };
   const initial = (by: string) => (by || "?").replace(/@.*$/, "").slice(0, 1).toUpperCase();
   return (
@@ -207,8 +217,8 @@ function MyNotes({ card: c, readOnly }: { card: merge.BoardCard; readOnly: strin
       ) : <div className="comment-new">
         <span className="avatar" title={me || "you"}>{initial(me)}</span>
         <div className="comment-box">
-          <textarea value={text} aria-label={`Comment on ${c.title || c.slug}`} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setText(e.target.value)} {...imeNew.props} placeholder="Write a comment…  (Enter to save, Shift+Enter for a new line)" rows={text ? 3 : 1} onKeyDown={(e) => { if (imeNew.escape(e)) return; if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); submit(); } }} />
-          {text && <div className="comment-actions"><button className="tiny-btn primary" onClick={submit} disabled={busy}><Send size={12} /> {draftVerb("Save", true)}</button><button className="tiny-btn ghost" onClick={() => drafts.discard(dk)}>Cancel</button></div>}
+          <textarea ref={field} value={text} aria-label={`Comment on ${c.title || c.slug}`} autoCorrect="off" autoCapitalize="off" spellCheck={false} onChange={(e) => setText(e.target.value)} {...imeNew.props} placeholder="Write a comment…  (Enter to save, Shift+Enter for a new line)" rows={text ? 3 : 1} onKeyDown={(e) => { if (imeNew.escape(e)) return; if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); submit(); } }} />
+          {text && <div className="comment-actions"><button ref={save} className="tiny-btn primary" {...busyButton({ busy, onPress: submit })}><Send size={12} /> {busyLabel(busy, draftVerb("Save", true), "Saving…")}</button><button className="tiny-btn ghost" onClick={() => drafts.discard(dk)}>Cancel</button></div>}
         </div>
       </div>}
       <ul className="comment-list">

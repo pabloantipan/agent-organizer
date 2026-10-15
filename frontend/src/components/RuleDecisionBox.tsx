@@ -11,6 +11,7 @@ import { useBoard } from "../stores/board.store";
 import type { WidthClass } from "../lib/width";
 import "../styles/rule-box.css";
 import { regionName, useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
+import { busyButton, busyLabel } from "../lib/busy";
 
 /** leftovers-7 FR-2 (Focus and names, closing the top of a stack): the open
  *  rule boxes, newest last, each able to put focus back on the field it last
@@ -194,7 +195,7 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
       <div className="rb-foot">
         <span className="rb-sign">signed {ruler}{forOwner} · commits one file</span>
         <button className="ghost" onClick={() => close(true)} disabled={busy}>Cancel</button>
-        <button className="primary" onClick={() => void rule()} disabled={!ready}>{busy ? "Ruling…" : "Rule"}</button>
+        <button className="primary" {...busyButton({ busy, disabled: !ready, onPress: () => void rule() })}>{busyLabel(busy, "Rule", "Ruling…")}</button>
       </div>
     </div>
   );

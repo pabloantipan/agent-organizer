@@ -4,6 +4,7 @@ import { api, type AgentGroup, type CellMessage, type CellThread, type CellThrea
 import { useBoard } from "../stores/board.store";
 import { notesAsContext } from "../lib";
 import { branchKey, chatKey, drafts, draftVerb, newThreadKey, newThreadPost, threadKey, useDraft, useDrafts, useImeEscape } from "../lib/drafts";
+import { busyButton, busyLabel } from "../lib/busy";
 import { askedCards, needsMeThread } from "../lib/queue";
 import { timeWords } from "../lib/dates";
 
@@ -487,7 +488,7 @@ function Msg({ m, parent, human, onReply, onBranch }: { m: CellMessage; parent?:
 
 /** The message box: posts into one thread. Kind first, then the recipient,
  *  then the cost. Stalled threads accept only a decision. */
-function ReplyBox(p: {
+export function ReplyBox(p: {
   initiativeId: string; threadId: string; subject: string; status: string; human: string; seats: string[]; canPost: boolean; wakesAll: number;
   defaultTo: string; replyTo: CellMessage | null; onClearReply: () => void; onNewThread?: () => void; newKept?: boolean; onSent: () => void;
 }) {
@@ -505,6 +506,7 @@ function ReplyBox(p: {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const ref = useRef<HTMLTextAreaElement>(null);
+  const sendBtn = useRef<HTMLButtonElement>(null);
   useEffect(() => { setTo(p.defaultTo); }, [p.defaultTo]);
   useEffect(() => { if (p.status === "stalled") setKind("decision"); }, [p.status]);
   useEffect(() => {
@@ -520,7 +522,13 @@ function ReplyBox(p: {
     if (!body.trim() || busy) return;
     setBusy(true);
     api.postToCell(p.initiativeId, { thread_id: p.threadId, parent_id: p.replyTo?.id ?? "", to, kind, body } as never).then(
-      () => { drafts.discard(dk); setErr(null); p.onSent(); },
+      () => {
+        // Sent, the box empties and Send is disabled for it: a busy Send
+        // that kept focus hands it to the box, never the body
+        // (leftovers-34 FR-2).
+        if (sendBtn.current && document.activeElement === sendBtn.current) ref.current?.focus();
+        drafts.discard(dk); setErr(null); p.onSent();
+      },
       (e) => setErr(String(e)),
     ).finally(() => setBusy(false));
   };
@@ -551,7 +559,7 @@ function ReplyBox(p: {
         <span className="spacer" />
         {err && <span className="meta err">{err}</span>}
         <WakeCount wakes={wakes} all={!to && wakes > 1} />
-        <button className="tiny-btn primary" onClick={send} disabled={!writable || !body.trim() || busy} title="send"><Send size={12} /> {draftVerb("Send", !!body)}</button>
+        <button ref={sendBtn} className="tiny-btn primary" {...busyButton({ busy, disabled: !writable || !body.trim(), onPress: send })} title="send"><Send size={12} /> {busyLabel(busy, draftVerb("Send", !!body), "Sending…")}</button>
       </div>
     </div>
   );
@@ -574,7 +582,7 @@ const shownSeats = (seats: string[], to: string) => (to && !seats.includes(to) ?
 /** Starting a thread, or branching one: subject, recipient, kind, body. A
  *  branch arrives with its subject set and the quoted message as the first
  *  lines, so the link back survives in the record itself. */
-function NewThread({ initiativeId, chat, draftKey, seats, to: initialTo, subject: initialSubject, body: initialBody, quote, canPost = true, cancellable = true, grab = true, onDone }: { initiativeId: string; chat?: string; draftKey: string; seats: string[]; to: string; subject?: string; body?: string; quote?: CellMessage; canPost?: boolean; cancellable?: boolean; grab?: boolean; onDone: (threadId: string | null) => void }) {
+export function NewThread({ initiativeId, chat, draftKey, seats, to: initialTo, subject: initialSubject, body: initialBody, quote, canPost = true, cancellable = true, grab = true, onDone }: { initiativeId: string; chat?: string; draftKey: string; seats: string[]; to: string; subject?: string; body?: string; quote?: CellMessage; canPost?: boolean; cancellable?: boolean; grab?: boolean; onDone: (threadId: string | null) => void }) {
   // leftovers-9 FR-1: subject and body are one draft, kept for the session
   // under draftKey; Escape closes the form and keeps it, a kept draft wins
   // over what the form was opened with, and only cancel or Start discards it.
@@ -629,7 +637,7 @@ function NewThread({ initiativeId, chat, draftKey, seats, to: initialTo, subject
         {/* The wake count sits beside Start, read before anything is sent
             (design system, a composer's default addressee; leftovers-11 FR-6). */}
         <WakeCount wakes={wakes} all={!to && wakes > 1} />
-        <button className="tiny-btn primary" onClick={send} disabled={busy || !canPost || !subject.trim() || !body.trim()}><Send size={12} /> {draftVerb(quote ? "Branch" : "Start", !!kept)}</button>
+        <button className="tiny-btn primary" {...busyButton({ busy, disabled: !canPost || !subject.trim() || !body.trim(), onPress: send })}><Send size={12} /> {busyLabel(busy, draftVerb(quote ? "Branch" : "Start", !!kept), "Sending…")}</button>
       </div>
     </div>
   );

@@ -14,6 +14,7 @@ import { agentsWeekLine } from "../lib/usage";
 import { agentTarget } from "../lib/agentFocus";
 import { groupMemory, plural } from "../lib/initiatives";
 import { useLiveRegion } from "../lib/liveRegion";
+import { busyButton, busyLabel } from "../lib/busy";
 
 const REFRESH_MS = 10_000;
 
@@ -322,7 +323,7 @@ const drafting = new Set<string>();
  *  preflight answers), ready, confirm and opening, opened ("Drafting…",
  *  disabled), error on Open (in the danger role, the confirm kept for a
  *  retry), refused (the preflight's reason). */
-function DraftCell({ initiativeId }: { initiativeId: string }) {
+export function DraftCell({ initiativeId }: { initiativeId: string }) {
   const board = useBoard((s) => s.view);
   // The preflight's answer and the initiative it is for: checking until the
   // first answer for this initiative; later rechecks keep the last answer.
@@ -393,7 +394,7 @@ function DraftCell({ initiativeId }: { initiativeId: string }) {
             {error
               ? <span className="meta" role="alert" style={{ color: "var(--danger)" }}>The Terminal did not open: {error}. Run <code>organizer draft-cell {initiativeId}</code> in a terminal at the root.</span>
               : <span className="meta">one Terminal at the root running the agent; it writes only under agents/ and working-on/decisions/</span>}
-            <button ref={openBtn} className="tiny-btn primary" onClick={open} disabled={busy}>{busy ? "Opening…" : "Open"}</button>
+            <button ref={openBtn} className="tiny-btn primary" {...busyButton({ busy, onPress: open })}>{busyLabel(busy, "Open", "Opening…")}</button>
             <button className="tiny-btn ghost" onClick={cancel}>Cancel</button>
           </span>
         )}
