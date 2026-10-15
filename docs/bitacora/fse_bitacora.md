@@ -4,9 +4,9 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
-## HAND-OFF — 2026-10-15 ~11:15, rotation at the 250k cap (0015), leftovers-34 in its fix round
+## HAND-OFF — 2026-10-15 ~11:30, leftovers-34 landed; rotation at the 250k cap (0015)
 
-- **Last SHA seen:** ca2a038. **sup71 runs leftovers-34** (0130 ruled ok, launched 10:44, forecast 20-45m, card lf34-busy-focus). Code review passed at 87abf10; UI review (bf-ui) failed on U1 sev 3 (new thread/branch drops focus to body). I amended the spec under 0108: Amendment 1 (1426681: F5 focus after the result, names Draft the cell's Open and New agent's Start, rule-box words readOnly) and Amendment 2 (184e2e8: busy never dims the focus ring, F6, from Aglaea's launch-progress A8 eddb106). bf-build is back on it; both reviewers re-review F1-F6 and X0 at the new SHA. On close: probe -k sup71, token rm, rm its prompt and prelude, go run . clean, make install, git status, close its done thread; then cut leftovers-35 from what the reviews leave.
+- **Last SHA seen:** 6185c2a. leftovers-34 merged by sup71, 37 min vs 20-45m (round 2 after my Amendments 1-2), $15.73-24.54 (cost of a thawed pid unsettled). Installed; sup71 ended. No supervisor running. Carry for leftovers-35: U5 sev 2 (a new thread the feed never lists leaves Send busy, no timeout; needs a design answer or a timeout rule); asked Aglaea for U6 (busy tokens copy roles as rgba) and the ring margin.
 - **Supervisor prompt template:** copy the last one from the session transcript or rebuild from the fse skill; Rules now add: context cap 400k or wave end for the supervisor, 250k for its seats (0015); "if a seat shows 'Login expired', post fse at once".
 - **Open with Pablo:** did Needs me show a stalled row for leftovers-33 overnight (from ~02:17)? If not, card a Deltagos bug (tasks.go 2x top should have fired).
 - **With Hephaistos:** login-alert (agent-slack card, ruled "do"); lean-skills (measuring the ~100-skill listing per seat). Nothing owed from the organizer side.
