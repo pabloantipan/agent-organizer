@@ -6,7 +6,7 @@ branch: lf33-press-running
 seat:
 stage: one-window
 updated: 2026-10-14
-next: "pablo: rule 0129 (accept leftovers-33); on accept the FSE starts its supervisor"
+next: "sup70 runs it (0129 ruled ok, 2026-10-15)"
 depends_on: []
 boundary: ["docs/specs/leftovers-33.md Boundary, lf33-press-running"]
 spec: "docs/specs/leftovers-33.md (FR-1 to FR-4; launch-progress L23-L25)"
