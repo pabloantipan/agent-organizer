@@ -425,3 +425,25 @@ func TestU7PostDoesNotDelayUsage(t *testing.T) {
 		t.Errorf("posts %d, want 1 (the second pass skips while one runs)", n)
 	}
 }
+
+// Amendment 1: the CLI's wait for the post is bounded; a record that holds
+// the request longer than the bound does not hold the waiter.
+func TestWaitUsagePostIsBounded(t *testing.T) {
+	usageHome(t)
+	f := newUsageRecord(t)
+	f.hold = 2 * time.Second
+	s := usageService(t, config.Config{RecordURL: f.srv.URL, DiscussStateDir: usageStateDir(t, true)})
+	if _, err := s.Usage(""); err != nil {
+		t.Fatal(err)
+	}
+	start := time.Now()
+	if waitUsagePost(300 * time.Millisecond) {
+		t.Error("wait reported done while the record still held the post")
+	}
+	if took := time.Since(start); took > time.Second {
+		t.Errorf("bounded wait took %s", took)
+	}
+	if !waitUsagePost(5 * time.Second) {
+		t.Error("post did not finish after the record answered")
+	}
+}

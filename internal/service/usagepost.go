@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -31,6 +32,10 @@ const usagePostFile = "usage-post.json"
 // usagePostTimeout bounds one pass of posts so a record that never answers
 // cannot keep the next pass skipping forever.
 const usagePostTimeout = 2 * time.Minute
+
+// usagePostRequest bounds one request, and WaitUsagePost waits no longer
+// than it, so an unreachable record holds the CLI at most 10 s (Amendment 1).
+const usagePostRequest = 10 * time.Second
 
 var (
 	// usagePosting is set while a post runs; a pass that finds it set skips
@@ -125,6 +130,7 @@ func postUsage(ctx context.Context, t usagePostTarget, dataDir string, lines []u
 	}
 
 	rc := record.New(t.url)
+	rc.HTTP = &http.Client{Timeout: usagePostRequest}
 	sent := 0
 	for len(todo) > 0 {
 		n := min(len(todo), record.MaxUsageRows)
@@ -270,6 +276,20 @@ func UsagePostStatus(cfg config.Config) string {
 }
 
 // WaitUsagePost blocks until the post a ledger pass started has finished,
-// for a caller that exits right after the pass (the CLI's `organizer usage`
-// prints first, then waits).
-func WaitUsagePost() { usagePosts.Wait() }
+// or usagePostRequest has passed, for a caller that exits right after the
+// pass (the CLI's `organizer usage` prints first, then waits; Amendment 1).
+func WaitUsagePost() { waitUsagePost(usagePostRequest) }
+
+func waitUsagePost(max time.Duration) bool {
+	done := make(chan struct{})
+	go func() {
+		usagePosts.Wait()
+		close(done)
+	}()
+	select {
+	case <-done:
+		return true
+	case <-time.After(max):
+		return false
+	}
+}
