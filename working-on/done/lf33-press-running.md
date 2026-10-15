@@ -1,6 +1,6 @@
 ---
 title: "A seat the press found running can be attached at once; a closed confirm says why; a repeat waits 100 ms"
-status: now
+status: done
 repos: [organizer]
 branch: lf33-press-running
 seat: pr-build
