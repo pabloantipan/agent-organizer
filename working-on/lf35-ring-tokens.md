@@ -1,12 +1,12 @@
 ---
 title: "Focus ring violet-11 on every surface; busy twins tested; a sent thread that never shows lets go"
-status: next
+status: now
 repos: [organizer]
 branch: lf35-ring-tokens
 seat: rt-build
 stage: one-window
 updated: 2026-10-15
-next: "sup72 runs it (0133 accepted); builder rt-build"
+next: "rt-build building FR-1 to FR-6 on lf35-ring-tokens"
 depends_on: []
 boundary: ["docs/specs/leftovers-35.md Boundary, lf35-ring-tokens"]
 spec: "docs/specs/leftovers-35.md (FR-1 to FR-6; launch-progress L29, L30)"
