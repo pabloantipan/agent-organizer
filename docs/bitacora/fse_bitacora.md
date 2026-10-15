@@ -4,6 +4,12 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-15 ~20:55, review tooling taken; sup73 stuck deaf
+
+- **Last SHA seen:** 5e83d06. usage-post in done (063aa20). lf36 gate met, reviewers not launched: sup73 idle since 20:34, DEAF (4 waiting), watcher alive but not waking it; I may not type into its pane (auto-mode "Tmux Self Drive"); asked Pablo to type in it, or rule `probe -r`.
+- **0137 ruled** (app, "FSE review please, take into consideration what we're current doing and let's work out the stuff"): stage review-map added after decisions-owned-and-used, with an exit for mermaid in records and specs that I added from Hephaistos's spec-diagrams ask (told Pablo). rm-v0 launches after sup73's wave.
+- **T11c mermaid (Hephaistos, thread 01M50YGJ):** records render via marked (no mermaid), specs are not rendered in-app (Initiatives.tsx opens the editor). Cut when spec-diagrams posts its classDef commit. Aglaea's input: pre-render SVG outside the app (mermaid2svg, node ids as element ids, map-and-roadmap.md) so the app never bundles mermaid; measure that against bundling before the spec picks.
+
 ## HAND-OFF — 2026-10-15 ~14:00, sup73 running leftovers-36 and usage-post
 
 - **Last SHA seen:** e7b034d. 0134 ruled (exit 1 stamped met); 0135 (lf36-needs-me-waits, 25-45m) and 0136 (usage-post, from hestia 0021 via Hephaistos, 25-50m) ruled "ok" in the app. sup73 launched detached ~13:58 with lf36; usage-post handed to it by message (thread 01M50Y18). On close: probe -k sup73, token rm organizer sup73, prompt files, clean.
