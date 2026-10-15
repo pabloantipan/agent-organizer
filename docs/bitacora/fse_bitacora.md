@@ -8,6 +8,7 @@ restating it (the discuss skill).
 
 - **Last SHA seen:** 5a3ed0b (+ Aglaea's 81d5e4d). leftovers-33: sup70, 9 h 26 min launch to merge (~26 min of work): an expired Claude login stopped sup70 and both reviewers 01:16-10:19; its band-top post never went out; caught when Pablo asked "how's going" and I read organizer agents (all running, 0 working). $9.25. Installed v0.2.0-2124-g5a3ed0b; sup70 ended.
 - **Login alert:** Pablo ruled "do" (agent-slack decisions.md 2026-10-15); Hephaistos builds agent-slack card login-alert (pane read every 3 min, one notification + one thread). My claim that Deltagos's stall rule misses review cards was wrong (tasks.go: 2x top fires regardless, and a review card stays status now); asked Pablo whether the stalled row showed from ~02:17. If not, card a Deltagos bug.
+- **0015 (agent-slack, Pablo "ok" 2026-10-15): context caps in tokens.** FSE, builders, reviewers: 250k; supervisors 400k or wave end; one extension of +100k near a boundary, posted first. Supervisor prompts from sup72 on carry a Rules line for it.
 - **leftovers-34 proposed as 0130** (card lf34-busy-focus, 20-45m): Amendment 7 L24, L26, L27 and the busy rule over seven controls; Gate.tsx out (firebase). On accept: sup71.
 - **Lesson:** when asked "how's going" with a task open, compare elapsed against the forecast first; 9 h past the top went unnoticed until then.
 
