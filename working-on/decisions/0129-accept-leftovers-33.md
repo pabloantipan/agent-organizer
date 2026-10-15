@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 33 - a seat the press found running can be attached at once, a closed confirm says why, a repeat waits 100 ms
-status: proposed
+status: ruled
 raised: 2026-10-14
 raised_by: fse
 owner: pablo
@@ -10,6 +10,9 @@ forecast: 20-40m
 threads: []
 supersedes: []
 superseded_by:
+ruled: 2026-10-15
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -38,3 +41,7 @@ initiative (19 and 15 min, one card each; this one also touches Go).
 ## Recommendation
 
 The FSE: **"accept as written"**.
+
+## Ruling
+
+pablo, 2026-10-15, in the organizer on lodestar: ok
