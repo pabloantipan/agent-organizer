@@ -6,7 +6,7 @@ branch: lf34-busy-focus
 seat: bf-build
 stage: one-window
 updated: 2026-10-15
-next: "review: lf34-busy-focus, gate met (F1-F4, X0), 87abf10"
+next: "bf-build: fix UI review U1 (new thread and branch send drop focus to body), then re-review"
 depends_on: []
 boundary: ["docs/specs/leftovers-34.md Boundary, lf34-busy-focus"]
 spec: "docs/specs/leftovers-34.md (FR-1 to FR-3; launch-progress L24, L26, L27)"
