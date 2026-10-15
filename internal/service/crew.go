@@ -448,10 +448,20 @@ func (s *Service) CreateCrew(initiativeID string, open bool) ([]string, error) {
 }
 
 // CrewStart is what one crew start did: the launch line of each seat it
-// starts, in roster order, and the seats it skipped because they already run.
+// starts, in roster order, and the seats it skipped because they already run,
+// by name and with their sessions.
 type CrewStart struct {
 	Lines   []string
 	Skipped []string
+	Running []CrewRunning
+}
+
+// CrewRunning is a seat a crew start skipped because it already runs, with
+// the session crewSession names for it, so the view can attach to it before
+// the next feed (leftovers-33 FR-1).
+type CrewRunning struct {
+	Seat    string `json:"seat"`
+	Session string `json:"session"`
 }
 
 // liveSeats is the seats of the cell that run now, by the check the Agents
@@ -535,6 +545,7 @@ func (s *Service) StartCrew(initiativeID string, open bool) (CrewStart, error) {
 	for i, seat := range si.Cell.Agents {
 		if live[seat] {
 			out.Skipped = append(out.Skipped, seat)
+			out.Running = append(out.Running, CrewRunning{Seat: seat, Session: sessions[i]})
 			continue
 		}
 		seatsToStart = append(seatsToStart, seat)

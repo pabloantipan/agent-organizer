@@ -67,7 +67,7 @@ describe("B3: Start finds every seat running (FR-3, L18)", () => {
     const before = renderToStaticMarkup(<Crew group={groupOf([true, false, true])} />);
     expect(launchBtn(before)).toBe("Bring 1 up");
     const after = groupOf([true, true, true]);
-    const create = vi.fn(async () => [] as string[]); // queues nothing
+    const create = vi.fn(async () => ({ lines: [] as string[], running: [] })); // queues nothing
     const calls: string[] = [];
     let said = "";
     const d = fakeDom([{ name: "po_a", attach: true }, { name: "dev_b", attach: true }, { name: "qa_c", attach: true }]);
@@ -92,7 +92,7 @@ describe("B3: Start finds every seat running (FR-3, L18)", () => {
   });
   it("lets a press that queued seats go on to the list", async () => {
     const calls: string[] = [];
-    await startCrew("init-a", { create: async () => ["line"], queued: () => calls.push("queued"), none: () => calls.push("none"), say: () => calls.push("say"), failed: () => calls.push("failed") });
+    await startCrew("init-a", { create: async () => ({ lines: ["line"], running: [] }), queued: () => calls.push("queued"), none: () => calls.push("none"), say: () => calls.push("say"), failed: () => calls.push("failed") });
     expect(calls).toEqual(["queued"]);
   });
 });
