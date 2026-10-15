@@ -83,3 +83,13 @@ stages:
         met: 2026-09-27    # camp 0003, 0004 owned and ruled by alejandro (0134)
       - one change traced to decision data
     gates: []             # identity: a new record reopening 0004, raised when this stage comes up
+  - id: review-map
+    title: Pablo reviews an agent branch from Deltagos
+    phase: building
+    outcome: on odyssey the lead walks an agent branch of any initiative, marks what he looked at, and asks the builder's supervisor from where he saw it
+    exit:
+      - on odyssey, a real agent branch of another initiative opened in Deltagos, every changed symbol reached, the undeclared change flagged
+      - a question marked on a node reaches the card's supervisor as a thread
+      - records and specs show their mermaid diagrams in the four change classes (agent-slack spec-diagrams, T11c)
+    gates: ["0137"]
+    appetite: four small tasks, v0 to v3 (docs/specs/review-map.md)
