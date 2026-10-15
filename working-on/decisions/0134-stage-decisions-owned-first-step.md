@@ -1,13 +1,13 @@
 ---
 title: "Stage decisions-owned-and-used: exit 1 is already met; the first change from decision data"
-status: proposed
+status: ruled
 raised: 2026-10-15
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-15
+ruled_by: pablo
 options: ["record exit 1, act on the waits", "record exit 1, wait for more data", "not yet"]
-chosen:
+chosen: record exit 1, act on the waits
 cards: []
 threads: []
 supersedes: []
@@ -55,6 +55,8 @@ Separately, the four long waits are rulings only you (and alejandro, for
 camp 0005) can give; the cheapest change is to rule or withdraw them.
 
 ## Ruling
+
+pablo, 2026-10-15, in the organizer on lodestar: as recommended
 
 ## Consequences
 
