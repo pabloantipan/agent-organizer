@@ -76,7 +76,7 @@ button.ol-label:hover, .ol-label.act:hover { background: var(--surface-hover); b
 /* Decisions on the stage row: a 24 px button around an 11 px diamond. */
 .ol-gem { top: 0; width: 24px; height: 24px; min-height: 0; margin-left: -12px; padding: 0; border: 0; border-radius: var(--radius-sm); background: transparent; display: flex; align-items: center; justify-content: center; z-index: var(--z-raised); }
 .ol-gem:hover { background: transparent; border: 0; }
-.ol-gem > i { display: block; width: 11px; height: 11px; box-sizing: border-box; transform: rotate(45deg); border-radius: 2px; box-shadow: 0 0 0 2px var(--surface); }
+.ol-gem > i { display: block; width: 11px; height: 11px; box-sizing: border-box; transform: rotate(45deg); border-radius: var(--radius-xs); box-shadow: 0 0 0 2px var(--surface); }
 .ol-row.ol-k-stage.ol-k-current .ol-gem > i { box-shadow: 0 0 0 2px var(--surface-selected); }
 .ol-gem.raised > i, .ol-gem.waiting > i { background: var(--surface); border: 2px solid var(--decision-waiting); }
 .ol-gem.ruled > i { background: var(--decision-ruled); }
@@ -137,7 +137,7 @@ button.ol-label:hover, .ol-label.act:hover { background: var(--surface-hover); b
 .ol-key.planned { border: 1.5px dashed var(--status-next); }
 .ol-key.wave { background: var(--accent); }
 .ol-key.fail { width: 14px; background: var(--surface); border: 1.5px solid var(--tone); }
-.ol-gem-key { display: inline-block; width: 9px; height: 9px; box-sizing: border-box; transform: rotate(45deg); border-radius: 2px; }
+.ol-gem-key { display: inline-block; width: 9px; height: 9px; box-sizing: border-box; transform: rotate(45deg); border-radius: var(--radius-xs); }
 .ol-gem-key.waiting { border: 2px solid var(--decision-waiting); }
 .ol-gem-key.ruled { background: var(--decision-ruled); }
 .ol-foot > span { color: var(--fg-muted); }
