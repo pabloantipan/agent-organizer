@@ -4,6 +4,15 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-15 ~12:30, tidy 0131 applied; 0132 and 0133 proposed
+
+- **Last SHA seen:** a678528 (Aglaea; it swept my staged crew-and-context rename into her commit, content fixed in mine). 0131 ruled by Pablo in my session ("apply with discerssion, and go on"): five threads closed, eight merged branches deleted, crew-and-context filed superseded, six done findings to Aglaea (kept 1 and 2, dropped 3-6, thread 01M500DD closed). factory-integration kept.
+- **Left to Pablo:** `floating-icon-spike` tagged `archive/floating-icon-spike`; removing its dirty worktree and branch was refused by the permission guard. Push of main (790 ahead) and origin/run-gate: not taken as a word to Talos; ask.
+- **0132** proposes stage one-window exit met; next stage decisions-owned-and-used, first step without identity.
+- **0133** proposes leftovers-35 (card lf35-ring-tokens, 25-50m): focus ring violet-11 (a visible change, said plainly), busy twins test, U5 two-feed let-go, agentTarget by key, top bar Usage/memory/Rescan, gem radius 4. On accept: sup72.
+- Still open with Pablo: did Needs me show a stalled row for leftovers-33 overnight?
+- Repetition: a seat's commit sweeping another's staged files (git add by path, but `git mv` stages); commit right after `git mv`.
+
 ## HAND-OFF — 2026-10-15 ~11:30, leftovers-34 landed; rotation at the 250k cap (0015)
 
 - **Last SHA seen:** 6185c2a. leftovers-34 merged by sup71, 37 min vs 20-45m (round 2 after my Amendments 1-2), $15.73-24.54 (cost of a thawed pid unsettled). Installed; sup71 ended. No supervisor running. Carry for leftovers-35: U5 sev 2 (a new thread the feed never lists leaves Send busy, no timeout; needs a design answer or a timeout rule); Aglaea answered in launch-progress Amendment 9 (bb59da8): L29 derived tokens guarded by a vitest over tokens.css; L30 --focus-ring becomes --violet-11 #c0abfe app-wide (today #8a3ffc fails 1.4.11 on overlays and selected rows; the accent stays #8a3ffc). Name the ring colour change plainly in the leftovers-35 accept record, since Pablo picked the visual direction.
