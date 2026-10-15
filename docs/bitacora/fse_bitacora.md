@@ -4,6 +4,12 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-15 ~14:00, sup73 running leftovers-36 and usage-post
+
+- **Last SHA seen:** e7b034d. 0134 ruled (exit 1 stamped met); 0135 (lf36-needs-me-waits, 25-45m) and 0136 (usage-post, from hestia 0021 via Hephaistos, 25-50m) ruled "ok" in the app. sup73 launched detached ~13:58 with lf36; usage-post handed to it by message (thread 01M50Y18). On close: probe -k sup73, token rm organizer sup73, prompt files, clean.
+- **Open for Pablo:** origin remote missing (removed 11:42 by someone; asked); leftovers-33 overnight stalled row. 0136 flags that the ledger pass runs only when Usage is opened; a timer pass would be a second card if hestia needs it.
+- **Exit 2 of decisions-owned-and-used:** met when lf36 lands and the four long waits move (camp 0005, 0007, 0008; agent-slack 0013).
+
 ## HAND-OFF — 2026-10-15 ~13:30, leftovers-35 landed; 0134 proposed
 
 - **Last SHA seen:** cb35385 (+ merge 025a39a). leftovers-35: sup72, 34 min launch to merge vs 25-50m, ~$12-16, one fail round (U1 Comments focus) under my Amendment 2; installed v0.2.0-2182-g025a39a; sup72 ended, token revoked, prompt files removed. No supervisor running. Run record runs/2026-10-15-sup72-leftovers-35.md.
