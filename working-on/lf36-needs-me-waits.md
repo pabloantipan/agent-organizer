@@ -6,7 +6,7 @@ branch: lf36-needs-me-waits
 seat: nw-build
 stage: decisions-owned-and-used
 updated: 2026-10-15
-next: "waits on 0135; on accept the FSE spawns sup73"
+next: "sup73 runs it; builder per seat:"
 depends_on: []
 boundary: ["docs/specs/leftovers-36.md Boundary, lf36-needs-me-waits"]
 spec: "docs/specs/leftovers-36.md (FR-1 to FR-5; needs-me-waits W1-W6)"
@@ -19,3 +19,6 @@ A record waiting a week or more says so first on its Needs me row, and someone e
 
 ## Gate
 docs/specs/leftovers-36.md, rows N1, N2, N3, N4, N5, N6 and X0.
+
+## Notes
+- 2026-10-15: run by sup73 (organizer-probe-sup73), spawned by the FSE.
