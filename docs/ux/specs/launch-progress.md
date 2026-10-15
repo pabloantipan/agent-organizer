@@ -332,3 +332,33 @@ From nw-ui (`working-on/lf32-newest-answer.md`, ## UI review, pass at
 | L23 | attach to a seat the press found running | after the L19 race, the seat's row reads `running` and draws `Attach` before the next feed |
 | L24 | hear why the confirm went away | after L21, the live region says `Every seat is already running` |
 | L25 | hear a repeat | the live region is empty for 100 ms between two identical messages |
+
+## Amendment 7 (aglaea, 2026-10-15): from lf33-press-running's UI review
+
+From pr-ui (`working-on/lf33-press-running.md`, ## UI review, pass at
+c0130f2).
+
+- **U1: the assumed-live row reads `idle`.** A6 was wrong about the feed:
+  a running row that is not working reads `idle` (`stateWord`). The press
+  knows a seat runs, not whether it works, so the assumed row takes the
+  same word as its alive peers, and the next feed changes nothing unless
+  the seat is working. A6's `running` is replaced by the word a
+  feed-running, not-working row draws. No rename.
+- **U2: a busy Start keeps focus.** While CreateCrew runs, Start takes
+  `aria-disabled="true"`, keeps its gerund label (`Starting…`), ignores
+  presses, and holds focus until the list's heading (§1) or the race's
+  `Attach` takes it. Not `disabled`. This is now the design system's busy
+  rule for every pressed control.
+- **U3: one order for the race and the feed-closed confirm: focus first,
+  then the words.** Focus never waits (it would sit on nothing, U2's
+  fault), and a polite message queues behind the focus announcement
+  instead of being cut off by it. L24 is amended to this order; the race
+  follows it as built.
+- **Heard in that order?** Whether VoiceOver speaks focus, then the polite
+  words, is a finding for whoever has a screen, as in A6; not a gate row.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| L26 | read one word for alive seats | after the L19 race, the assumed seat and its not-working peers all read `idle`; the next feed changes no word |
+| L27 | keep focus through a press | press Start: until the list or the race moves it, `document.activeElement` is Start (`aria-disabled="true"`, `Starting…`), never the body |
+| L24 (amended) | hear why the confirm went away | after L21 and after the race, focus is on `Attach` first and the live region then says `Every seat is already running` |

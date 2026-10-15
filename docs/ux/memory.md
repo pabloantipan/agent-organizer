@@ -405,6 +405,7 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - A button whose press can no longer act is removed, not left as a silent press; when a backend change makes a label a no-op (Reattach all after lf30-launch-go), re-check every focus target that named it (launch-progress A4).
 - Every focus target needs a fallback chain ending on a control that always exists; a polled view must let a press's fresher answer override the stale feed; live regions clear before repeating (launch-progress A5).
 - Live-region re-say: 100 ms setTimeout, never rAF (hidden windows skip it). An optimistic row reads the state the press reported, and the press should return what the row needs (session name) so it is usable at once (launch-progress A6).
+- Before saying 'as X does', read the code's word for X (stateWord: alive-not-working is idle). A pressed control stays focusable while busy (aria-disabled). Focus first, then polite words (launch-progress A7).
 
 ## Participants in use
 
