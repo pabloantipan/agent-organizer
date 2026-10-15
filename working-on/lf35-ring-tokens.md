@@ -6,7 +6,7 @@ branch: lf35-ring-tokens
 seat: rt-build
 stage: one-window
 updated: 2026-10-15
-next: "waits on 0133; on accept the FSE spawns sup72"
+next: "sup72 runs it (0133 accepted); builder rt-build"
 depends_on: []
 boundary: ["docs/specs/leftovers-35.md Boundary, lf35-ring-tokens"]
 spec: "docs/specs/leftovers-35.md (FR-1 to FR-6; launch-progress L29, L30)"
@@ -19,3 +19,6 @@ Focus is visible on every surface, a busy colour follows its role, and a sent th
 
 ## Gate
 docs/specs/leftovers-35.md, rows R1, R2, R3, R4, R5, R6 and X0.
+
+## Notes
+- 2026-10-15: run by sup72 (organizer-probe-sup72), spawned by the FSE after 0133.
