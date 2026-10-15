@@ -81,7 +81,7 @@
   --border: rgba(255, 255, 255, 0.09);
   --border-strong: rgba(255, 255, 255, 0.16);
   --border-accent: rgba(160, 110, 255, 0.45); /* selected, hover on interactive objects */
-  --focus-ring: var(--violet-9);
+  --focus-ring: var(--violet-11);  /* 5.1–9.5:1 on every surface; the accent fill (#8a3ffc) is 2.85 on overlay (launch-progress L30) */
 
   /* accent: one solid action per view */
   --accent: var(--violet-9);
