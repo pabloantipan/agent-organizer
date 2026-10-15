@@ -1,13 +1,13 @@
 ---
 title: "Stage one-window: exit met"
-status: proposed
+status: ruled
 raised: 2026-10-15
 raised_by: fse
 owner: pablo
-ruled:
-ruled_by:
+ruled: 2026-10-15
+ruled_by: pablo
 options: [exit met, not yet]
-chosen:
+chosen: exit met
 cards: []
 threads: []
 supersedes: []
@@ -53,6 +53,10 @@ The FSE's: exit met. leftovers-35 runs either way; it is ordinary upkeep,
 not this stage's work.
 
 ## Ruling
+
+pablo, 2026-10-15, in the organizer on lodestar: do
+
+pablo, 2026-10-15, in the FSE session (organizer-probe-fse): "do", answering the FSE's message that put 0132 and 0133 to him with the FSE's recommendation on each. Recorded by the FSE.
 
 ## Consequences
 
