@@ -1,6 +1,6 @@
 ---
 title: "Post changed usage rows to the local record after each ledger pass"
-status: next
+status: now
 repos: [organizer]
 branch: usage-post
 seat: up-build
