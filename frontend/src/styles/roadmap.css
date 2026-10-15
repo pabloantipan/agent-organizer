@@ -35,7 +35,7 @@
 
 /* Gates: hollow fuchsia waiting at raised; solid indigo ruled at ruled, with a
    hollow indigo mark at raised and a line between the two. */
-.srm-gem { position: absolute; top: 22px; width: 12px; height: 12px; box-sizing: border-box; transform: translateX(-50%) rotate(45deg); border-radius: 2px; box-shadow: 0 0 0 3px var(--bg); z-index: 2; }
+.srm-gem { position: absolute; top: 22px; width: 12px; height: 12px; box-sizing: border-box; transform: translateX(-50%) rotate(45deg); border-radius: var(--radius-xs); box-shadow: 0 0 0 3px var(--bg); z-index: 2; }
 .srm-row.current .srm-gem { box-shadow: 0 0 0 3px var(--surface-selected); }
 .srm-gem.waiting { background: var(--bg); border: 2px solid var(--decision-waiting); }
 .srm-gem.ruled { background: var(--decision-ruled); }
