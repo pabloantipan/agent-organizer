@@ -1,6 +1,6 @@
 ---
 title: "Focus ring violet-11 on every surface; busy twins tested; a sent thread that never shows lets go"
-status: now
+status: done
 repos: [organizer]
 branch: lf35-ring-tokens
 seat: rt-build
@@ -41,18 +41,17 @@ docs/specs/leftovers-35.md, rows R1, R2, R3, R4, R5, R6 and X0.
 - 2026-10-15: run by sup72 (organizer-probe-sup72), spawned by the FSE after 0133.
 
 ## Review
-- Verdict: **pass**. Every row met on e0779e4ef48923c364436d4ebed8cda9313918ab (the branch had not moved), from a fresh clone at that SHA; notes in `.wt-notes/rt-review/`.
-- R1: Tab harness (my own `wails dev` on :34212, fixture, auth off, 1024x640), `out/r1.jsonl`: outline-color rgb(192, 171, 254), 2px solid, :focus-visible true, on crew panel Bring 1 up 8.38:1 (`.crew` rgb(32,27,43)), card back Close 8.38:1, selected rail row strip 9.52:1 and expanded (inset) 7.45:1, busy Start (aria-disabled, Starting…) 8.38:1. Met.
-- R2: my own scan of 66 `:focus`/`:focus-visible` rules in `frontend/src` (comments stripped, multi-line): 0 name `--accent`, `#8a3ffc` or `rgb(138`; the only `#8a3ffc` left is `--violet-9`. In WebKit `.gear.on` (A5) computes `rgb(138, 63, 252) 0 -2px 0 inset`, `--accent` #8a3ffc, the accent fill on Bring 1 up rgb(138, 63, 252), `--focus-ring` #c0abfe. Met.
-- R3: `src/lib/tokens.test.ts` passes on the file and asserts exactly one drift on the `--fg`-changed copy; all eight `--busy-*` carry a source comment (read in tokens.css lines 197-204). Met.
-- R4: `src/components/Conversation.sent.test.tsx` passes: real NewThread with a fake postToCell returning an id, timers faked to LIST_WAIT_MS: Send not busy on the remounted form, fields empty, region text exact, focus on the docked field, unchanged after the late listing, no "failed". `LIST_WAIT_MS = 20000` is defined once (`lib/listWait.ts`), Crew imports it. Met. (The test drives `sentWatch`/`letGoUnlisted`, not a mounted Conversation; the wiring is in the diff.)
-- R5: `src/lib/agentFocus.dom.test.tsx` passes (list order owl, fox vs feed fox, owl; lands on owl's row, not index 1). Also in a real WebKit DOM: on init-a's Agents I moved the last row first and every one of 9 `li[data-agent]` was found by `agentTarget`+`agentRow` at its new index (`out/r2r5.jsonl`). Met.
-- R6: harness `out/r6.jsonl`: Usage x 249 < memory 539 < Rescan 781; all 11 drawn `.ol-gem > i` and both `.ol-gem-key` compute `border-radius: 4px` (Amendment 1). TopBar.tsx unchanged. Met.
-- X0: shared `make test` was **reused**: run 36a77df8-53433 of e0779e4ef489 by organizer-probe-rt-ui, exit 0 (all Go ok, vitest 66 files 741 tests); `pnpm run build` exit 0 and `make review-build` (wails build) exit 0 in my clone; `git status --porcelain` empty after. Met.
-- Boundary and No-gos: diff touches only boundary files (AgentList is the agent row's component; TopBar.test is FR-5's test); no Go, Gate.tsx or lib/queue.ts; no color-mix, oklch or nesting; no new service call.
+- Verdict: **pass**, round 2. Every row met on cae9f2b6255e6cd5db7e9e985ff457098f4b8ac8 (branch moved from e0779e4: rebased on main, plus the U1 fix in global.css), from a fresh clone at that SHA; spec read with Amendments 1 and 2 (bb77b0c); notes in `.wt-notes/rt-review/`.
+- R1 (five surfaces): Tab harness, my own `wails dev` on :34212 (vite :5174, mine), fixture, auth off, 1024x640, `out/r1.jsonl`, `out/r1c.jsonl`. Outline rgb(192, 171, 254) 2px solid, :focus-visible true: crew panel Bring 1 up 8.38:1 on `.crew` rgb(32,27,43); card back Close 8.38:1; selected rail row strip 9.52:1, expanded (inset) 7.45:1; busy Start (aria-disabled, Starting…) 8.38:1. Fifth, the card back's Comments field reached by Tab from the control before it: `.comment-box textarea`, :focus-visible true, border-color rgb(192, 171, 254) (measured on border, as every field is), 8.38:1 on the drawer, 9.52:1 on its own fill. Met.
+- R2 (Amendment 2): my own scan of the 61 `:focus`/`:focus-visible`/`:focus-within` rules in `frontend/src` (comments stripped, multi-line): 0 name `--accent`, `--border-accent`, any `--accent-*`, `#8a3ffc` or `rgb(138`. 17 set `outline: none` without `--focus-ring` in the same block; each draws `--focus-ring` by another rule (checked per selector, e.g. `.cell-search:focus-within`, `.tz-wrap.ring::after`) and none is in this diff, so none is this round's (the FSE's reading, 01M503K7). The comment rule this card touches now reads `--focus-ring`. In WebKit `.gear.on` (A5) `rgb(138, 63, 252) 0 -2px 0 inset`, the accent fill rgb(138, 63, 252), `--accent` #8a3ffc, `--focus-ring` #c0abfe. Met.
+- R3: `src/lib/tokens.test.ts` passes, asserts exactly one drift on the `--fg`-changed copy; all eight `--busy-*` carry a source comment. Met.
+- R4: `src/components/Conversation.sent.test.tsx` passes (Send not busy, form cleared, exact region text, focus on the docked field, unchanged after the late listing, no "failed"); `LIST_WAIT_MS` is defined once in `lib/listWait.ts`. Met. The test drives the exported pieces, not a mounted Conversation; the wiring is in the diff.
+- R5: `src/lib/agentFocus.dom.test.tsx` passes; in a real WebKit DOM, with init-a's last Agents row moved first, all 9 `li[data-agent]` were found by key at their new index (`out/r2r5.jsonl`). Met.
+- R6: Usage x 249 < memory 551 < Rescan 781; all 11 drawn `.ol-gem > i` and both `.ol-gem-key` `border-radius: 4px` (`out/r6.jsonl`). TopBar.tsx unchanged. Met.
+- X0: shared `make test` **reused**: run 807d64a2-3894 of cae9f2b6255e by organizer-probe-rt-ui, exit 0 (16 Go packages ok, vitest 66 files 741 tests). In my clone `pnpm run build` exit 0, `make review-build` (wails build) exit 0, `git status --porcelain` empty. Met.
+- Boundary and No-gos: 14 frontend files, all inside the Boundary (global.css as a stylesheet with a focus rule not reading `--focus-ring`); no Go, `Gate.tsx` or `lib/queue.ts`; no color-mix, oklch or nesting; no new service call.
 - Unmet rows: none.
-- Gate note, not a failure: R2 and R6's order do not fail on main as the table's header claims (no focus rule named the accent on main; FR-5 was already met).
-- Reviewer rt-review, 2026-10-15, commit e0779e4ef48923c364436d4ebed8cda9313918ab.
+- Reviewer rt-review, 2026-10-15, commit cae9f2b6255e6cd5db7e9e985ff457098f4b8ac8.
 
 ## UI review
 - 2026-10-15 rt-ui, round 2, on cae9f2b (fresh detached worktree `.wt/rt-ui`; spec read with Amendment 2, bb77b0c). **Verdict: pass**, no severity 4 or 3.
