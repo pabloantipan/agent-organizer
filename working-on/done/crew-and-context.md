@@ -1,10 +1,10 @@
 ---
 title: Spawn a persona crew and show each agent's context fill
-status: now
+status: done
 repos: []
 branch: main
-updated: 2026-09-27
-next: "When a camp seat asks Pablo something, Rule that row from Needs me (decision + next action) and confirm the seat wakes and the ruling shows under Solved; then this card goes to review"
+updated: 2026-10-15
+next: "closed superseded by 0131, not delivered"
 ---
 
 ## Goal
@@ -46,3 +46,6 @@ none
 - Health comes from the human's discuss token in `~/.local/state/discuss/tokens.json`; when the API is down the crew block says so instead of guessing
 - 2026-09-07 branch `run-gate` (in done/run-gate.md) vendored model.go, config.go, prompt.go and session/ byte-identical from this card's uncommitted tree; commit this card first, then merge run-gate and route the scan-side `session.Prune` through `session.Retire` so pruned records are archived to runs.jsonl
 - 2026-09-15 committed and pushed: main 14c16d5..d5654c8 (four commits by layer: chore, Go, frontend, CLAUDE.md), build, vet, tests and tsc green; run-gate branch pushed too, still unmerged
+
+## Closed
+2026-10-15: closed superseded by 0131, not delivered. The Needs me ruling check is covered by done/redesign-rule-box and 0045; phase 3's calls by 0010 and the build-seat skill. Phase 2 (thread members in discuss, for a subgroup chat) is carded nowhere; an agent-slack card if wanted.
