@@ -210,7 +210,7 @@ describe("one line at 1024 (FR-5)", () => {
 });
 
 describe("the signed-in bar at 1024 (K3, I24)", () => {
-  const email = "someone@example.com"; // 30 characters
+  const email = "someone.longername@example.com"; // 30 characters
   const id = "ccint-camp-monorepo-xy"; // 22 characters
   const fb = (over: Record<string, unknown> = {}) => bar({
     authMode: "firebase", widthClass: "compact", screen: "initiative", selectedInitiative: id,
