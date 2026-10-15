@@ -5,7 +5,7 @@ repos: [organizer]
 branch: usage-post
 seat: up-build
 updated: 2026-10-15
-next: "sup73 runs it; builder per seat:"
+next: "up-build building on branch usage-post (sup73, launched 20:33)"
 depends_on: []
 boundary: ["docs/specs/usage-post.md Boundary, usage-post"]
 spec: "docs/specs/usage-post.md (FR-1 to FR-6; hestia usage-rows FR-5 and Contract, 0021)"
