@@ -6,7 +6,7 @@ branch: lf36-needs-me-waits
 seat: nw-build
 stage: decisions-owned-and-used
 updated: 2026-10-15
-next: "nw-build building on branch lf36-needs-me-waits (sup73, launched 20:33)"
+next: "review: lf36-needs-me-waits, gate met (N1-N6, X0; N4 per Amendment 1), 4a19ad3"
 depends_on: []
 boundary: ["docs/specs/leftovers-36.md Boundary, lf36-needs-me-waits"]
 spec: "docs/specs/leftovers-36.md (FR-1 to FR-5; needs-me-waits W1-W6)"
