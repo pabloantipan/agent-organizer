@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 35 - the focus ring turns light violet, busy colours follow their roles, a sent thread lets go
-status: proposed
+status: ruled
 raised: 2026-10-15
 raised_by: fse
 owner: pablo
@@ -10,9 +10,9 @@ forecast: 25-50m
 threads: [01M500DD8973107SZ7YQRGEHBN]
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-15
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -55,6 +55,8 @@ small requirements across tokens, Conversations and Agents).
 The FSE: **"accept as written"**.
 
 ## Ruling
+
+pablo, 2026-10-15, in the FSE session (organizer-probe-fse): "do", answering the FSE's message that put 0132 and 0133 to him with the FSE's recommendation on each. Recorded by the FSE.
 
 ## Consequences
 

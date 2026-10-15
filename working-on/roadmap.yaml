@@ -61,10 +61,13 @@ stages:
         met: 2026-10-06    # floating-icon-2 merged, 74e9b0a
       - text: a decision is read and ruled in the app with the record in view (decisions-view, rule-box-and-stages)
         met: 2026-10-04    # rule-box-and-stages, the last of them, in done/
-      - "the Roadmap reads as a plan: stages, waves, iterations, cards and decisions at four levels (0093)"
-      - no UI leftover older than one batch (leftovers-13 landed)
+      - text: "the Roadmap reads as a plan: stages, waves, iterations, cards and decisions at four levels (0093)"
+        met: 2026-10-06    # roadmap-outline and roadmap-waves-scan in done/ (0100)
+      - text: no UI leftover older than one batch (leftovers-13 landed)
+        met: 2026-10-06    # 0096; older done findings ranked by Aglaea in 0131
     gates: ["0093"]
     appetite: three waves    # the roadmap view, leftovers-13, one spare (0094)
+    done: 2026-10-15      # exit met, ruled in 0132
     forecast:              # recomputed by the FSE (docs/estimating.md), never hand-set
       range: "1-2 h over 1 wave: leftovers-15, five cards (0111); exit (c), the Roadmap at four levels, not yet carded"
       waves: 1
