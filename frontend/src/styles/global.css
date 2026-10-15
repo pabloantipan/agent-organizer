@@ -30,8 +30,14 @@ button svg { flex-shrink: 0; opacity: .9; }
 .init-grip svg, .init-caret svg { display: block; }
 button:hover { border-color: var(--border-strong); background: var(--button-bg-hover); }
 button:disabled { opacity: .45; cursor: default; }
+/* Busy (the design system's busy rule, launch-progress L27): a pressed
+   control keeps focus with aria-disabled, drawn as disabled, hover included.
+   New agent's in-flight state (.na-busy) draws its own. */
+button[aria-disabled="true"]:not(.na-busy) { opacity: .45; cursor: default; }
+button[aria-disabled="true"]:not(.na-busy):hover { border-color: var(--button-border); background: var(--button-bg); }
 button.primary { background: var(--accent); color: var(--fg-on-accent); border-color: transparent; }
 button.primary:hover { background: var(--accent-hover); }
+button.primary[aria-disabled="true"]:hover { background: var(--accent); border-color: transparent; }
 button.ghost { background: transparent; border-color: transparent; color: var(--muted); }
 button.ghost:hover { color: var(--fg); background: var(--surface-hover); }
 /* A toggle that is on is selected, never the accent (principle 3). */
@@ -500,6 +506,7 @@ button.link:hover { color: var(--accent-fg); }
 .a-actions { display: inline-flex; gap: 6px; align-items: center; justify-content: flex-end; white-space: nowrap; margin-left: auto; flex-wrap: wrap; }
 .tiny-btn.danger { background: var(--blocked-soft); color: var(--blocked); border-color: transparent; }
 .tiny-btn.danger:hover { background: var(--blocked); color: #fff; }
+.tiny-btn.danger[aria-disabled="true"]:hover { background: var(--blocked-soft); color: var(--blocked); border-color: transparent; }
 .agent-group-title { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
 .agent-group-title-facts { display: inline-flex; align-items: center; gap: 8px; }
 /* A button that keeps the title's look (leftovers-24 FR-1). */
