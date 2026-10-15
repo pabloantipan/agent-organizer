@@ -64,4 +64,4 @@ pass: P1, P2, P3, P4 and X0 met at c0130f2998bb9c40df9517ab27fbd2bb2fa87514, fro
 - Unmet: none.
 - Not in the gate: in the race, Start goes disabled and focus sits on the body ~120 ms (4183 to 4301 ms in `p2.jsonl`) before `Attach fse` takes it, and the words land ~100 ms after focus; pre-existing (leftovers-32), as the builder noted.
 
-Reviewer pr-review, 2026-10-15, commit c0130f2. UI review missing at writing: status and place left as they are.
+Reviewer pr-review, 2026-10-15, commit c0130f2. The UI review (pr-ui) also passes: status done, card moved to done/
