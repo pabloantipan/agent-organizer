@@ -191,6 +191,17 @@
   --button-bg: var(--surface-raised);
   --button-bg-hover: var(--surface-hover);
   --button-border: var(--border);
+  /* busy (launch-progress A8, L28): what is inside a pressed control at
+     45%, as rgba of each role, so the element keeps opacity 1 and its focus
+     ring full strength (no color-mix on the Safari 15 floor). */
+  --busy-fg: rgba(238, 235, 244, 0.45);          /* --fg */
+  --busy-muted: rgba(181, 175, 195, 0.45);       /* --fg-muted */
+  --busy-fg-on-accent: rgba(255, 255, 255, 0.45);
+  --busy-button-bg: rgba(39, 32, 51, 0.45);      /* --surface-raised */
+  --busy-border: rgba(255, 255, 255, 0.04);      /* --border */
+  --busy-accent: rgba(138, 63, 252, 0.45);       /* --accent */
+  --busy-blocked: rgba(255, 77, 99, 0.45);       /* --blocked */
+  --busy-blocked-soft: rgba(255, 77, 99, 0.063); /* --blocked-soft */
   --input-bg: var(--bg-sunken);
 
   /* ---------- legacy aliases: old names mapped onto the roles above. New code
