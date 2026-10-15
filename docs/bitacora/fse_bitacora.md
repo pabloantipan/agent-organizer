@@ -7,7 +7,8 @@ restating it (the discuss skill).
 ## HAND-OFF — 2026-10-15 ~14:00, sup73 running leftovers-36 and usage-post
 
 - **Last SHA seen:** e7b034d. 0134 ruled (exit 1 stamped met); 0135 (lf36-needs-me-waits, 25-45m) and 0136 (usage-post, from hestia 0021 via Hephaistos, 25-50m) ruled "ok" in the app. sup73 launched detached ~13:58 with lf36; usage-post handed to it by message (thread 01M50Y18). On close: probe -k sup73, token rm organizer sup73, prompt files, clean.
-- **Open for Pablo:** origin remote missing (removed 11:42 by someone; asked); leftovers-33 overnight stalled row. 0136 flags that the ledger pass runs only when Usage is opened; a timer pass would be a second card if hestia needs it.
+- **History rewritten by Hephaistos 2026-10-15** (Pablo: keep that client's address and word out): 465 unpushed commits from 428f498 rewritten; SHAs quoted in older hand-offs and records may not resolve, map in .git/filter-repo/commit-map. filter-repo also removed `origin` (that was the 11:42 change); GitHub pabloantipan/agent-organizer main = 5c9e3f0, pushed by URL. Never write the client's name or that address in commits or fixtures.
+- **Open for Pablo:** leftovers-33 overnight stalled row. 0136 flags that the ledger pass runs only when Usage is opened; a timer pass would be a second card if hestia needs it.
 - **Exit 2 of decisions-owned-and-used:** met when lf36 lands and the four long waits move (camp 0005, 0007, 0008; agent-slack 0013).
 
 ## HAND-OFF — 2026-10-15 ~13:30, leftovers-35 landed; 0134 proposed
