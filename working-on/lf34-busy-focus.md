@@ -1,12 +1,12 @@
 ---
 title: "One word for alive seats; a busy button keeps focus; focus then words"
-status: next
+status: now
 repos: [organizer]
 branch: lf34-busy-focus
 seat: bf-build
 stage: one-window
 updated: 2026-10-15
-next: "bf-build builds it (sup71, wave 1)"
+next: "bf-build: building FR-1 to FR-3, then gate F1-F4, X0"
 depends_on: []
 boundary: ["docs/specs/leftovers-34.md Boundary, lf34-busy-focus"]
 spec: "docs/specs/leftovers-34.md (FR-1 to FR-3; launch-progress L24, L26, L27)"
