@@ -28,7 +28,7 @@ docs/specs/leftovers-35.md, rows R1, R2, R3, R4, R5, R6 and X0.
 - [x] R6: Usage 249 < memory 539 < Rescan 781 (FR-5 met on main, unchanged); every `.ol-gem > i` and `.ol-gem-key` 4px (Amendment 1); `.wt-notes/rt-build/out/r6.jsonl`
 - [x] X0: clean clone, make test, pnpm run build, wails build pass, porcelain empty; `.wt-notes/rt-build/out/x0.log`
 - [x] R1 (Amendment 2, fifth surface): card back Comments field reached by Tab, `:focus-visible`, border-color rgb(192, 171, 254) 1px (fields draw focus as a border, outline none) 8.38 on the drawer, 9.52 on its fill; the four others re-run on cae9f2b unchanged; `.wt-notes/rt-build/out/r1x.jsonl`, `out/r1.jsonl`
-- [x] R2 (Amendment 2): 0 focus rules naming `--border-accent`, `--accent*`, #8a3ffc or rgb(a)(138,63; 17 pre-existing `outline: none` focus rules, each drawing `--focus-ring` another way (15 by a same-selector `:focus-visible`, `.cell-search input` by `.cell-search:focus-within`, `.tz-frame` by `.tz-wrap.ring::after`), none drawing nothing, so none changed; asked sup72 whether that reads as met; `.wt-notes/rt-build/r2-amended.txt`, `focus-grep2.mjs`
+- [x] R2 (Amendment 2): 0 focus rules naming `--border-accent`, `--accent*`, #8a3ffc or rgb(a)(138,63; 17 pre-existing `outline: none` focus rules, each drawing `--focus-ring` another way (15 by a same-selector `:focus-visible`, `.cell-search input` by `.cell-search:focus-within`, `.tz-frame` by `.tz-wrap.ring::after`), none drawing nothing, so none changed; read as met (sup72 and the FSE, 2026-10-15). Each rule and what draws its ring: `.crew-seats li`, `.inbox > button.ib-more`, `.ivw-head h1`, `.ic-note`, `.launch-head`, `.memory-pop`, `.agents li.memory-landed`, `.fl-memory-row`, `.ol-label`, `.roles-sec .sec-toggle`, `.r-row`, `.rd-init`, `.agents li.role-landed`, `.rb-title`, `.home .sec-title` → own `:focus-visible { outline: 2px solid var(--focus-ring) }`; `.cell-search input` → `.cell-search:focus-within` outline `--focus-ring`; `.tz-frame` → `.tz-wrap.ring::after` border `--focus-ring`; `.wt-notes/rt-build/r2-amended.txt`, `focus-grep2.mjs`
 - [x] X0 on cae9f2b: clean clone, make test (vitest 66 files, 741 tests), pnpm run build, wails build rc 0, porcelain empty; `.wt-notes/rt-build/out/x0.log`
 
 ## Done
@@ -37,7 +37,7 @@ docs/specs/leftovers-35.md, rows R1, R2, R3, R4, R5, R6 and X0.
 
 ## Notes
 - 2026-10-15 rt-build: FR-5 was already met on main; `.srm-gem` is dead CSS, so Amendment 1 (dbb77a7) moved FR-6 to outline.css. TopBar.test's fixture email was red on main; fixed (3004db3).
-- 2026-10-15 rt-build: R1's fifth surface is a field, and fields draw focus as a 1px `--focus-ring` border with outline none (`input, textarea:focus`), so it is measured by border-color, not outline-color. R2 as amended, read literally, flags the 17 `outline: none` rules that draw the ring in a sibling rule; question posted to sup72.
+- 2026-10-15 rt-build: R1's fifth surface is a field, and fields draw focus as a 1px `--focus-ring` border with outline none (`input, textarea:focus`), so it is measured by border-color (the property that draws it), not outline-color; sup72 and the FSE agreed. R2 as amended, read literally, flags the 17 `outline: none` rules that draw the ring in a sibling rule; read as met (sup72).
 - 2026-10-15: run by sup72 (organizer-probe-sup72), spawned by the FSE after 0133.
 
 ## Review
