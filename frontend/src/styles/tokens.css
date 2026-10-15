@@ -196,7 +196,7 @@
      ring full strength (no color-mix on the Safari 15 floor). */
   --busy-fg: rgba(238, 235, 244, 0.45);          /* --fg */
   --busy-muted: rgba(181, 175, 195, 0.45);       /* --fg-muted */
-  --busy-fg-on-accent: rgba(255, 255, 255, 0.45);
+  --busy-fg-on-accent: rgba(255, 255, 255, 0.45); /* --fg-on-accent */
   --busy-button-bg: rgba(39, 32, 51, 0.45);      /* --surface-raised */
   --busy-border: rgba(255, 255, 255, 0.04);      /* --border */
   --busy-accent: rgba(138, 63, 252, 0.45);       /* --accent */
