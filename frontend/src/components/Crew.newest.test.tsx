@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it } from "vitest";
-import { Crew, focusAfter } from "./Crew";
+import { Crew, focusAfter, runningOf, SeatRow, startCrew } from "./Crew";
 import type { AgentGroup } from "../hooks/useWails";
 
 // leftovers-32 FR-1, FR-3, FR-4 (launch-progress L19, L21, L22). Vitest runs
@@ -96,5 +96,39 @@ describe("N1, N3: what the block draws once no seat is off (FR-1, FR-3)", () => 
     expect(html).toContain("3 seats · 3 live · 0 off");
     expect(launchBtn(html)).toBeNull();
     expect(html).not.toContain("confirm-inline");
+  });
+});
+
+describe("P2 in markup: a seat the press found running (leftovers-33 FR-2, L23)", () => {
+  const off = seatOf("dev_b", false) as unknown as Parameters<typeof SeatRow>[0]["seat"];
+  const row = (assumedSession?: string) => renderToStaticMarkup(
+    <ul><SeatRow seat={off} assumedLive assumedSession={assumedSession} readOnly={false} confirm={null} setConfirm={() => undefined} flash={() => undefined} /></ul>,
+  );
+  it("named by the result: reads running, never idle, and draws Attach on its session", () => {
+    const html = row("p-probe-b");
+    expect(html).toContain('<span class="a-state running"><i></i>running</span>');
+    expect(html).not.toContain("idle");
+    expect(html).toContain('aria-label="Attach dev_b"');
+    expect(html).toContain('title="probe p-probe-b"');
+    expect(html).toContain('aria-label="p-probe-b (dev_b, running)"');
+  });
+  it("not named: reads running with no Attach until the feed, never starting…", () => {
+    const html = row(undefined);
+    expect(html).toContain("<i></i>running</span>");
+    expect(html).not.toContain("idle");
+    expect(html).not.toContain("Attach");
+    expect(html).not.toContain("starting");
+  });
+  it("the press hands its running seats and sessions to none", async () => {
+    let got: Map<string, string> | null = null;
+    await startCrew("init-a", {
+      create: async () => ({ lines: [], running: [{ seat: "dev_b", session: "p-probe-b" }] }),
+      queued: () => undefined,
+      none: (r) => { got = r; },
+      say: () => undefined,
+      failed: () => undefined,
+    });
+    expect(got).toEqual(new Map([["dev_b", "p-probe-b"]]));
+    expect(runningOf(null).size).toBe(0);
   });
 });

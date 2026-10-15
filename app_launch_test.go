@@ -47,10 +47,10 @@ func TestAppCreateCrewReturnsAtOnce(t *testing.T) {
 	a := &App{svc: svc}
 
 	start := time.Now()
-	cmds, err := a.CreateCrew("init-crew")
+	res, err := a.CreateCrew("init-crew")
 	took := time.Since(start)
-	if err != nil || len(cmds) != 3 {
-		t.Fatalf("CreateCrew: %v, %v", cmds, err)
+	if err != nil || len(res.Lines) != 3 || res.Running == nil || len(res.Running) != 0 {
+		t.Fatalf("CreateCrew: %+v, %v", res, err)
 	}
 	if took >= time.Second {
 		t.Errorf("CreateCrew took %v, want < 1 s (the stub sleeps 3 s per seat)", took)

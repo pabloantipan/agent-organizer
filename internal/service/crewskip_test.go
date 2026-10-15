@@ -112,3 +112,26 @@ func TestCreateCrewAllRunningStartsNothing(t *testing.T) {
 		t.Errorf("ran %v with every seat running", *f.execs)
 	}
 }
+
+// P1 (leftovers-33 FR-1): a crew of three with two running names the two as
+// running with crewSession's names, and launches only the third.
+func TestStartCrewNamesRunningSessions(t *testing.T) {
+	f := newFakeProbe(t, "crewfix", "0")
+	s, root := crewService(t, f, "po_ana", "dev_bruno", "qa_cleo")
+	fakeLive(t, "po_ana", "qa_cleo")
+
+	c, err := s.StartCrew("init-crew", true)
+	if err != nil {
+		t.Fatalf("StartCrew: %v", err)
+	}
+	want := []CrewRunning{{Seat: "po_ana", Session: "crewfix-probe-ana"}, {Seat: "qa_cleo", Session: "crewfix-probe-cleo"}}
+	if !slices.Equal(c.Running, want) {
+		t.Errorf("running %+v, want %+v", c.Running, want)
+	}
+	if len(c.Lines) != 1 || !strings.Contains(c.Lines[0], "dev_bruno.sh") || !strings.HasSuffix(c.Lines[0], "'bruno' '"+root+"'") {
+		t.Errorf("lines %v, want the one line for bruno", c.Lines)
+	}
+	if _, ok := s.WaitLaunch("init-crew"); !ok {
+		t.Error("nothing was queued for the seat that does not run")
+	}
+}

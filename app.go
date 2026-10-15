@@ -399,12 +399,25 @@ func (a *App) CreateAgent(initiativeID, name string) error {
 // CreateCrew launches every seat of the initiative's cell: one probe per
 // persona, each started detached by probe, no window opens. It returns the
 // launch lines once the seats are queued; they start one after another in
-// the background and their states ride the agents event.
-func (a *App) CreateCrew(initiativeID string) ([]string, error) {
+// the background and their states ride the agents event. Running names the
+// seats it skipped because they already run, with their sessions, so the
+// view can attach to them before the next feed.
+func (a *App) CreateCrew(initiativeID string) (CrewResult, error) {
 	if a.svc == nil {
-		return nil, errString(a.err)
+		return CrewResult{}, errString(a.err)
 	}
-	return a.svc.CreateCrew(initiativeID, true)
+	c, err := a.svc.StartCrew(initiativeID, true)
+	if c.Running == nil {
+		c.Running = []service.CrewRunning{}
+	}
+	return CrewResult{Lines: c.Lines, Running: c.Running}, err
+}
+
+// CrewResult is what one press of Bring crew up did: the launch line of each
+// seat it starts and the seats it found already running.
+type CrewResult struct {
+	Lines   []string              `json:"lines"`
+	Running []service.CrewRunning `json:"running"`
 }
 
 // StopStarting skips the initiative's seats still waiting to start; the one

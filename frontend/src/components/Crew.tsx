@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { FileXCorner, MessageSquare, PencilRuler, SquareTerminal, Trash2, UserRoundX, Users } from "lucide-react";
 import { Retire } from "./Retire";
 import { api, type AgentGroup, type Seat } from "../hooks/useWails";
@@ -10,14 +10,16 @@ import { missingPersonas, personaMissing } from "../lib/queue";
 import { useBoard } from "../stores/board.store";
 import { escapeCloses, useConfirmFocus } from "../lib/focus";
 import { stateWord } from "../lib/stateWords";
-import { useLiveRegion } from "../lib/liveRegion";
+import { useLiveRegion, type Say } from "../lib/liveRegion";
 import { RetrySeat, SeenLaunch, StopStarting } from "../../wailsjs/go/main/App";
 import { ClipboardSetText } from "../../wailsjs/runtime/runtime";
-import type { service } from "../../wailsjs/go/models";
+import type { main, service } from "../../wailsjs/go/models";
 import "../styles/launch.css";
 
 export type Launch = service.InitiativeLaunch;
 export type SeatStart = service.SeatLaunch;
+/** What one press of Bring crew up did (leftovers-33 FR-1). */
+export type CrewResult = Pick<main.CrewResult, "lines" | "running">;
 
 /** Whole seconds since a seat's try began (launch-progress §1): counted here
  *  from `started_at`, never sent per second by the service. */
@@ -163,7 +165,7 @@ export const saidOf = (l: Pick<Launch, "seats" | "done" | "running" | "failed"> 
 
 /** The live region's text for one launch: the newest results, once. Said
  *  through the live-region helper, so a repeated line is said again (FR-2). */
-export function useAnnouncer(l: Launch | undefined): [string, (m: string) => void] {
+export function useAnnouncer(l: Launch | undefined): [string, Say] {
   const said = useRef<Set<string>>(saidOf(l));
   const [msg, say] = useLiveRegion();
   useEffect(() => {
@@ -213,23 +215,29 @@ export function focusAfter(box: ParentNode | null | undefined, listed?: readonly
   return attach ?? box.querySelector<HTMLElement>('button[data-crew="launch"]:not([disabled])') ?? box.querySelector<HTMLElement>('button[data-crew="retire"]');
 }
 
+/** The sessions of the seats a press found running (leftovers-33 FR-1), by
+ *  seat. */
+export const runningOf = (r: Pick<CrewResult, "running"> | null | undefined) =>
+  new Map((r?.running ?? []).map((s) => [s.seat, s.session] as const));
+
 /** Start in the confirm (FR-3, L18): the race is read from what the press
  *  finds. CreateCrew returns a launch line per seat it queued; none means
  *  the last off seat came up elsewhere since the confirm opened. Then the
- *  confirm closes (`none`, whose caller shows the press's answer at once,
- *  leftovers-32 FR-1, and moves focus by `focusAfter` once the confirm is
- *  gone), the live region says so, and no list comes. */
+ *  confirm closes (`none`, handed the sessions of the seats the press found
+ *  running, whose caller shows the press's answer at once, leftovers-32
+ *  FR-1 and leftovers-33 FR-2, and moves focus by `focusAfter` once the
+ *  confirm is gone), the live region says so, and no list comes. */
 export function startCrew(id: string, h: {
-  create: (id: string) => Promise<string[]>;
+  create: (id: string) => Promise<CrewResult>;
   queued: () => void;
-  none: () => void;
+  none: (running: Map<string, string>) => void;
   say: (m: string) => void;
   failed: (e: unknown) => void;
 }): Promise<void> {
   return h.create(id).then(
-    (lines) => {
-      if ((lines?.length ?? 0) > 0) { h.queued(); return; }
-      h.none();
+    (r) => {
+      if ((r?.lines?.length ?? 0) > 0) { h.queued(); return; }
+      h.none(runningOf(r));
       h.say(ALL_RUNNING);
     },
     h.failed,
@@ -414,10 +422,12 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
   const listHadFocus = useRef(false);
   const listedSeats = useRef<string[]>([]);
   // The press's answer (leftovers-32 FR-1, L19): Start queued nothing, so
-  // the seats this view showed off read live until the next feed, which
-  // carries a new group, says otherwise.
-  const [assumed, setAssumed] = useState<{ group: AgentGroup; seats: Set<string> } | null>(null);
+  // the seats this view showed off read running until the next feed, which
+  // carries a new group, says otherwise. The ones the press named carry
+  // their session, so they draw Attach at once (leftovers-33 FR-2, L23).
+  const [assumed, setAssumed] = useState<{ group: AgentGroup; seats: Set<string>; sessions: Map<string, string> } | null>(null);
   const liveNow = assumed?.group === group ? assumed.seats : null;
+  const sessionsNow = assumed?.group === group ? assumed.sessions : null;
   // A failure shown here is seen (FR-7): its Needs me row goes.
   const unseen = !!launch && launch.failed > 0 && !launch.seen;
   useEffect(() => { if (unseen) SeenLaunch(group.id).catch(() => undefined); }, [unseen, group.id]);
@@ -454,10 +464,13 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
     clearAgentsLanding();
   }, [agentsLanding, clearAgentsLanding, crewUp, group.crew, launch]);
   // The confirm left (the race, or a feed with no seat off) with focus in
-  // it: focus goes by focusAfter once it is gone. After useConfirmFocus's
-  // own effect, which would hand it back to a launch button no longer drawn.
+  // it: focus goes by focusAfter once it is gone, in the same commit (a
+  // layout effect), so focus is never on the body between the confirm
+  // leaving and its target taking it. useConfirmFocus's effect, which runs
+  // later, finds no launch button to hand it back to: none is drawn with
+  // no seat off.
   const refocus = useRef(false);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!refocus.current || asking) return;
     refocus.current = false;
     focusAfter(box.current)?.focus();
@@ -467,13 +480,18 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
   // A confirm whose press can no longer act closes (FR-3, L21); its words
   // stay as they were.
   const confirmBox = useRef<HTMLSpanElement>(null);
+  // It says why first (leftovers-33 FR-3, L24): the confirm, and focus in
+  // it, stay until the live region carries the words, then it closes and
+  // focus goes by focusAfter. Focus never drops to the body meanwhile.
   const dead = asking && seats.length > 0 && off === 0;
   useEffect(() => {
     if (!dead) return;
-    const inside = !!confirmBox.current && confirmBox.current.contains(document.activeElement);
-    if (inside) refocus.current = true;
-    setAsking(false);
-  }, [dead]);
+    say(ALL_RUNNING, () => {
+      const inside = !!confirmBox.current && confirmBox.current.contains(document.activeElement);
+      if (inside) refocus.current = true;
+      setAsking(false);
+    });
+  }, [dead, say]);
   const cell = group.cell;
   if (!cell) return null;
   const blocked = seats.length === 0 ? "no seats: the roster is empty between waves" : crewBlocked(seats, cell);
@@ -492,10 +510,11 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
     startCrew(group.id, {
       create: api.createCrew,
       queued: () => setAsking(false),
-      none: () => {
+      none: (running) => {
         unpress();
-        // The result names no seats: every seat shown off reads live (FR-1).
-        setAssumed({ group: groupNow.current, seats: new Set(seats.filter(isOff).map((s) => s.name)) });
+        // Every seat shown off reads running (FR-1); the ones the result
+        // names carry their session (leftovers-33 FR-2).
+        setAssumed({ group: groupNow.current, seats: new Set(seats.filter(isOff).map((s) => s.name)), sessions: running });
         refocus.current = true;
         setAsking(false);
       },
@@ -565,7 +584,7 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
         )}
       </div>
       <ul className="agents crew-seats">
-        {seats.map((s) => <SeatRow key={s.name} seat={s} assumedLive={!!liveNow?.has(s.name) && isOff(s)} readOnly={readOnly} confirm={confirmKill} setConfirm={setConfirmKill} flash={flash} onMessage={onMessage} />)}
+        {seats.map((s) => <SeatRow key={s.name} seat={s} assumedLive={!!liveNow?.has(s.name) && isOff(s)} assumedSession={sessionsNow?.get(s.name)} readOnly={readOnly} confirm={confirmKill} setConfirm={setConfirmKill} flash={flash} onMessage={onMessage} />)}
       </ul>
     </div>
   );
@@ -573,17 +592,22 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
 
 const isOff = (s: Seat) => !s.agent || s.agent.state === "exited";
 
-function SeatRow({ seat, assumedLive = false, readOnly, confirm, setConfirm, flash, onMessage }: { seat: Seat; assumedLive?: boolean; readOnly: boolean; confirm: string | null; setConfirm: (s: string | null) => void; flash: (m: string) => void; onMessage?: (seat: string) => void }) {
-  const a = seat.agent;
-  // Start found it running (FR-1): live until the next feed says otherwise.
+/** One seat of the crew block. `assumedLive` is a seat the press found
+ *  running while the feed still shows it off (leftovers-32 FR-1): it reads
+ *  `running`, the press's word, never `idle`, until the next feed; with
+ *  `assumedSession`, the session the press named, it draws Attach at once,
+ *  else `—` and no Attach until the feed (leftovers-33 FR-2, L23). */
+export function SeatRow({ seat, assumedLive = false, assumedSession, readOnly, confirm, setConfirm, flash, onMessage }: { seat: Seat; assumedLive?: boolean; assumedSession?: string; readOnly: boolean; confirm: string | null; setConfirm: (s: string | null) => void; flash: (m: string) => void; onMessage?: (seat: string) => void }) {
+  const a = assumedLive ? undefined : seat.agent;
   const state = assumedLive ? "running" : a?.state ?? "off";
-  const session = a?.session || "";
+  const word = assumedLive ? "running" : stateWord(state);
+  const session = assumedLive ? assumedSession ?? "" : a?.session || "";
   const asking = confirm === seat.name;
   const health = healthState({ watcher: seat.watcher, deaf: seat.deaf, capped: seat.capped });
   const { opener: killBtn, commit: killCommit } = useConfirmFocus(asking);
   return (
-    <li className={state} data-seat={seat.name} tabIndex={-1} aria-label={`${session || seat.session} (${seat.name}, ${stateWord(state)})`}>
-      <span className={`a-state ${state}`}><i />{stateWord(state)}</span>
+    <li className={state} data-seat={seat.name} tabIndex={-1} aria-label={`${session || seat.session} (${seat.name}, ${word})`}>
+      <span className={`a-state ${state}`}><i />{word}</span>
       <span className="a-name"><span className="ident">{seat.name}</span></span>
       {seat.no_persona && (
         <span className="lz warning" title={`agents/${seat.name}.md is missing; the drafting session writes it, or write it by the persona-agents skill`}>

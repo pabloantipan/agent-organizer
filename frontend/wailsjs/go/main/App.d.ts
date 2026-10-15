@@ -3,8 +3,8 @@
 import {model} from '../models';
 import {discuss} from '../models';
 import {service} from '../models';
-import {auth} from '../models';
 import {main} from '../models';
+import {auth} from '../models';
 import {config} from '../models';
 import {usage} from '../models';
 
@@ -24,7 +24,7 @@ export function CopyReviewPrompt(arg1:string):Promise<void>;
 
 export function CreateAgent(arg1:string,arg2:string):Promise<void>;
 
-export function CreateCrew(arg1:string):Promise<Array<string>>;
+export function CreateCrew(arg1:string):Promise<main.CrewResult>;
 
 export function DraftCell(arg1:string,arg2:boolean):Promise<string>;
 
