@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { ArrowUpRight, AtSign, BookOpen, Archive, Check, ChevronDown, ChevronRight, CornerDownRight, Gavel, GitBranch, Hash, Inbox, Lock, MessagesSquare, Plus, RotateCcw, Search, Send, StickyNote, Unlock, X } from "lucide-react";
 import { api, type AgentGroup, type CellMessage, type CellThread, type CellThreadView } from "../hooks/useWails";
 import { useBoard } from "../stores/board.store";
@@ -254,6 +254,30 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   // A search hit and a ruling land like Answer does, focus on the divider
   // (leftovers-24 FR-4, FR-5).
   const landOn = (id: string) => { landing.current = id; goTo(id); };
+  // A new thread or a branch sent (leftovers-34 FR-2, F5): the form stays,
+  // its Send busy and focused, until the feed carries the thread; then it
+  // lands like landOn, and focus goes from Send to the thread's divider in
+  // the commit that draws it, never through the body.
+  const [posted, setPosted] = useState<string | null>(null);
+  const postedLanding = useRef<string | null>(null);
+  const onPosted = (tid: string) => {
+    postedLanding.current = tid;
+    setPosted(tid);
+    reload();
+    api.getAgents().then(applyAgents, () => undefined);
+  };
+  useEffect(() => {
+    if (!posted || !all.some((t) => t.id === posted)) return;
+    setPosted(null);
+    setPrefill(null);
+    setBranchFrom(null);
+    landOn(posted);
+  }, [posted, all]); // eslint-disable-line react-hooks/exhaustive-deps
+  useLayoutEffect(() => {
+    const id = postedLanding.current;
+    if (!id || posted === id) return;
+    if (landPosted(document, id)) postedLanding.current = null;
+  });
   const setStatus = (id: string, s: string) => api.setCellThreadStatus(initiativeId, id, s).then(() => reload(), (e) => setErr(String(e)));
 
   return (
@@ -398,7 +422,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
               to={branchFrom.from}
               subject={`${BRANCH_PREFIX}${targetThread.subject}`}
               quote={branchFrom}
-              onDone={(tid) => { setBranchFrom(null); reload(); if (tid) goTo(tid); }}
+              onDone={(tid) => { if (tid) { onPosted(tid); return; } setBranchFrom(null); reload(); }}
             />
           ) : target && targetThread ? (
             <ReplyBox
@@ -429,7 +453,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
               subject={landed?.subject || undefined}
               body={landed?.body || undefined}
               canPost={group.can_post}
-              onDone={(tid) => { setPrefill(null); reload(); if (tid) goTo(tid); else if (threads.length) setTarget(threads[threads.length - 1].id); }}
+              onDone={(tid) => { if (tid) { onPosted(tid); return; } setPrefill(null); reload(); if (threads.length) setTarget(threads[threads.length - 1].id); }}
               cancellable={threads.length > 0}
               grab={askedNew.current === chat || !!landed}
             />
@@ -563,6 +587,16 @@ export function ReplyBox(p: {
       </div>
     </div>
   );
+}
+
+/** Focus on a thread's divider, the target of a landing (leftovers-12
+ *  FR-2) and of a sent new thread or branch (leftovers-34 F5). False while
+ *  the thread is not drawn. */
+export function landPosted(doc: Pick<Document, "getElementById">, id: string): boolean {
+  const divider = doc.getElementById(`thread-${id}`)?.querySelector<HTMLElement>(".tl-divider");
+  if (!divider) return false;
+  divider.focus({ preventScroll: true });
+  return true;
 }
 
 /** The wake count, read before anything is sent (leftovers-12 FR-3, the

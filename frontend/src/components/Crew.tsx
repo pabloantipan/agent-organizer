@@ -587,7 +587,9 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
         <span className="spacer" />
         {note && <span className="meta">{note}</span>}
         {!readOnly && !asking && <button data-crew="retire" className={`tiny-btn ${(group.retirable?.length ?? 0) > 0 ? "" : "ghost"}`} onClick={() => setRetiring(true)} title={(group.retirable?.length ?? 0) > 0 ? `wave done with ${group.retirable.join(", ")}: organizer retire ${group.id} --retirable` : `organizer retire ${group.id}: end a wave`}><UserRoundX size={13} /> {(group.retirable?.length ?? 0) > 0 ? `${group.retirable.length} retirable` : "Retire…"}</button>}
-        {retiring && <Retire group={group} onClose={() => setRetiring(false)} />}
+        {/* Closing the report lands on the crew block's Retire…, else
+            focusAfter's target, never the body (leftovers-34 F5). */}
+        {retiring && <Retire group={group} onClose={() => { setRetiring(false); window.setTimeout(() => (box.current?.querySelector<HTMLElement>('button[data-crew="retire"]') ?? focusAfter(box.current))?.focus(), 0); }} />}
         {/* The reason is text beside the button, not only its hover: a
             disabled button takes no focus and no WebKit mouse events
             (lead-side-fixes FR-4). */}
