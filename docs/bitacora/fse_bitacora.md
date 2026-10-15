@@ -6,6 +6,8 @@ restating it (the discuss skill).
 
 ## HAND-OFF — 2026-10-15 ~12:30, tidy 0131 applied; 0132 and 0133 proposed
 
+- **Update ~12:45, last SHA 23eeb0d:** Pablo "do" on both; 0132 also ruled in the app (3d7ef5e), stage one-window done. sup72 launched detached for lf35-ring-tokens at ~12:45 (forecast 25-50m; check elapsed against it if asked). On close: probe -k sup72, token rm organizer sup72, prompt files, clean. Next: draft decisions-owned-and-used's first step without identity.
+
 - **Last SHA seen:** a678528 (Aglaea; it swept my staged crew-and-context rename into her commit, content fixed in mine). 0131 ruled by Pablo in my session ("apply with discerssion, and go on"): five threads closed, eight merged branches deleted, crew-and-context filed superseded, six done findings to Aglaea (kept 1 and 2, dropped 3-6, thread 01M500DD closed). factory-integration kept.
 - **Left to Pablo:** `floating-icon-spike` tagged `archive/floating-icon-spike`; removing its dirty worktree and branch was refused by the permission guard. Push of main (790 ahead) and origin/run-gate: not taken as a word to Talos; ask.
 - **0132** proposes stage one-window exit met; next stage decisions-owned-and-used, first step without identity.
