@@ -6,7 +6,7 @@ branch: lf34-busy-focus
 seat: bf-build
 stage: one-window
 updated: 2026-10-15
-next: "bf-build: fix UI review U1 (new thread and branch send drop focus to body), then re-review"
+next: "review: lf34-busy-focus, gate met (F1-F6, X0; U1-U4 fixed), 1dad95e"
 depends_on: []
 boundary: ["docs/specs/leftovers-34.md Boundary, lf34-busy-focus"]
 spec: "docs/specs/leftovers-34.md (FR-1 to FR-3; launch-progress L24, L26, L27)"
@@ -25,14 +25,21 @@ docs/specs/leftovers-34.md, rows F1, F2, F3, F4 and X0.
 - [x] F2: helper and seven controls, aria-disabled, gerund, one call, focus kept (`.wt-notes/bf-build/out/f2-vitest.txt`)
 - [x] F3: Start `Starting…` aria-disabled with focus, then the heading; 0 body samples (`.wt-notes/bf-build/out/f3.jsonl`)
 - [x] F4: N3 and the race, focusin on `Attach fse` before the region's text (`.wt-notes/bf-build/out/f4.jsonl`, `out/f1.jsonl`)
-- [x] X0: clean clone at 87abf10, make test, pnpm run build, wails build pass, status empty (`.wt-notes/bf-build/out/x0-*.txt`)
+- [x] F5: a resolved fake per control: Attach or the heading (Start), the new seat's row (New agent), the record's opener (Rule), the crew block's Retire… after the report (Retire), the comment field (Save), the reply field (docked Send), the new thread's divider (new thread, branch); never body (`.wt-notes/bf-build/out/f5-vitest.txt`)
+- [x] F6: Start, New agent's Start and Retire busy with focus: element opacity 1, ring opacity 1, label and fill at 45%, ring 3.35:1 (3.57:1) on its panel (`.wt-notes/bf-build/out/f6.jsonl`, `out/wkwebview-1024x640-F6-*.png`)
+- [x] X0: clean clone at 1dad95e, make test (16 Go packages, vitest 63 files / 732 tests), pnpm run build, wails build pass, status empty (`.wt-notes/bf-build/out/x0-*.txt`)
+- F1, F3, F4 rerun on the round 2 code: same results (`out/f1.jsonl`, `out/f3.jsonl`, `out/f4.jsonl`)
 
 ## Done
 - 2026-10-15 bf-build: busy rule helper `lib/busy.ts` on Start, Draft the cell's Open, Rule, Retire, comment Save and both Sends; assumed seats read idle; feed-closed confirm moves focus before the words; branch lf34-busy-focus at 87abf10 (progress: `.wt-notes/bf-build/progress.md`).
 
+- 2026-10-15 bf-build, round 2 (UI review U1, Amendments 1 and 2): a sent new thread or branch lands on its divider, New agent's Start is busy, the rule words are readonly while ruling, busy keeps the focus ring at full strength; 1dad95e.
+
 ## Notes
 - "New agent's Open" read as Draft the cell's Open, the only Open/Opening… in AgentsView; New agent's own Start has no busy state (progress.md, Found, not asked).
 - F2 runs without a DOM (no DOM library in package.json): server render with seeded state and a stand-in focus; F3 is the live check.
+- F6 reaches three of the eight busy controls in the fixture (Start, New agent's Start, Retire); Send needs a mailbox, Save and Rule were not driven; the same CSS rules draw them.
+- Retire's result is its report (focus on Close); closing it lands on the crew block's Retire….
 - F3's 20 ms interval stalls around the harness's key step; samples on every mutation and focusin cover it.
 
 ## Review
