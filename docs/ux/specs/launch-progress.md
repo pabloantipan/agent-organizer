@@ -362,3 +362,20 @@ c0130f2).
 | L26 | read one word for alive seats | after the L19 race, the assumed seat and its not-working peers all read `idle`; the next feed changes no word |
 | L27 | keep focus through a press | press Start: until the list or the race moves it, `document.activeElement` is Start (`aria-disabled="true"`, `Starting…`), never the body |
 | L24 (amended) | hear why the confirm went away | after L21 and after the race, focus is on `Attach` first and the live region then says `Every seat is already running` |
+
+## Amendment 8 (aglaea, 2026-10-15): the busy ring (lf34-busy-focus U4)
+
+From bf-ui at 87abf10. A7 made a busy control hold focus, and the disabled
+look (opacity .45 on the element) dims its ring to about 1.6:1. A ring
+under 3:1 is no ring (WCAG 1.4.11), so:
+
+- **Busy dims what is inside, not the ring.** The label, the icon and the
+  fill take the 45% as before; the focus ring is drawn at full strength,
+  3:1 or more against the panel it sits on. How is the build's choice (dim
+  the children and the fill instead of the element, or draw the ring
+  outside the dimmed box); the outcome is the rule.
+- Every control under the busy rule (A7's seven), not only Start.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| L28 | see where focus is while a press runs | press Start: the busy Start's ring measures 3:1 or more against the crew panel, while its label still reads dimmed `Starting…` |

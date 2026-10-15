@@ -406,6 +406,7 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - Every focus target needs a fallback chain ending on a control that always exists; a polled view must let a press's fresher answer override the stale feed; live regions clear before repeating (launch-progress A5).
 - Live-region re-say: 100 ms setTimeout, never rAF (hidden windows skip it). An optimistic row reads the state the press reported, and the press should return what the row needs (session name) so it is usable at once (launch-progress A6).
 - Before saying 'as X does', read the code's word for X (stateWord: alive-not-working is idle). A pressed control stays focusable while busy (aria-disabled). Focus first, then polite words (launch-progress A7).
+- Opacity on an element dims its outline too: any rule that lets a dimmed control hold focus must say the ring stays full strength (launch-progress A8).
 
 ## Participants in use
 

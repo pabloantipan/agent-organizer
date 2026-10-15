@@ -164,3 +164,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-14 — nw-ui answered: launch-progress Amendment 6 (assumed-live row reads running with Attach from the press's session names, dead confirm says why, 100 ms re-say gap via setTimeout, chain with no list = every row), rows L23-L25; design-system rule reworded.
 - 2026-10-15 — pr-ui answered: launch-progress Amendment 7 (assumed row reads idle, busy Start aria-disabled keeps focus, focus then words in both cases), rows L26-L27, L24 amended; design-system busy rule.
 - 2026-10-15 — leftovers-34 scope note accepted: busy rule skips Gate.tsx (firebase sign-in) until identity moves to Entra.
+- 2026-10-15 — bf-ui U4 answered: launch-progress Amendment 8 (busy dims contents and fill, never the ring; 3:1), row L28; design-system busy row.
