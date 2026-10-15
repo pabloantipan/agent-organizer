@@ -40,6 +40,7 @@ the real clipboard.
 | F3 | 2 | Tab harness with the stub: focus Start, press, read `document.activeElement` every 20 ms until the list heading has focus | Start (aria-disabled, `Starting…`) then the heading; never `body` |
 | F4 | 3 | Tab harness: leftovers-32's N3 (confirm open, focus on Start, `applyAgents` with the seat live) and N1's race; the order of focus change and live-region text | in both, focus on `Attach` before the region's text is set |
 | F5 | 2 | vitest per control of FR-2 with a fake call that resolves: where focus is after the result; for a new thread and a branch in Conversations, the new thread's divider (as a `landOn` landing does) | a named target for each, never `body`: the list heading or `Attach` (Start), the new seat's row (New agent), the record (Rule), the crew block (Retire), the comment field (Save), the reply field (docked Send), the new thread's divider (new thread, branch) |
+| F6 | 2 | Tab harness: focus each busy control reachable in the fixture (Start at least) while a fake call is pending; computed `opacity` of the element and of its ring, ring colour against the panel behind it | the label, icon and fill dimmed, the ring at full strength, contrast ≥ 3:1 |
 | X0 | all | `XDG_DATA_HOME=$(mktemp -d) make test`, `cd frontend && pnpm run build`, `wails build`, then `git status --porcelain` | pass, empty |
 
 ## Boundary
@@ -78,3 +79,10 @@ once sent. So:
 - The rule box's words field stays focusable while ruling (`readOnly`,
   not `disabled`), so Cmd+Enter from it keeps focus (U3).
 U4 (a busy control's focus ring is dimmed under 3:1) waits on Aglaea.
+
+Amendment 2, 2026-10-15, the FSE, from Aglaea's launch-progress Amendment 8
+(eddb106, L28), folded into the fix round while the builder is on it: busy
+dims what is inside a control (label, icon, fill) at 45%, never its focus
+ring, which stays at 3:1 or more against its panel (bf-ui U4). How is the
+builder's (dim the children and fill, or draw the ring outside the dimmed
+box). All seven busy controls. Row **F6** added.
