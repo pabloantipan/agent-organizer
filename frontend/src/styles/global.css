@@ -34,8 +34,10 @@ button:disabled { opacity: .45; cursor: default; }
    pressed control keeps focus with aria-disabled. Its label, icon (current
    colour) and fill are drawn at 45%, hover included; the element keeps
    opacity 1, so its focus ring stays at full strength (3:1 on the panel).
+   The dim lands at once, no transition: a window that draws no frame (the
+   harness's offscreen one) would otherwise hold the fill at full strength.
    New agent's in-flight state (.na-busy) draws its own. */
-button[aria-disabled="true"]:not(.na-busy), button[aria-disabled="true"]:not(.na-busy):hover { cursor: default; color: var(--busy-fg); background: var(--busy-button-bg); border-color: var(--busy-border); }
+button[aria-disabled="true"]:not(.na-busy), button[aria-disabled="true"]:not(.na-busy):hover { transition: none; cursor: default; color: var(--busy-fg); background: var(--busy-button-bg); border-color: var(--busy-border); }
 button.primary { background: var(--accent); color: var(--fg-on-accent); border-color: transparent; }
 button.primary:hover { background: var(--accent-hover); }
 button.primary[aria-disabled="true"], button.primary[aria-disabled="true"]:hover { color: var(--busy-fg-on-accent); background: var(--busy-accent); border-color: transparent; }
