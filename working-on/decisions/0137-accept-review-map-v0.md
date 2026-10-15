@@ -1,6 +1,6 @@
 ---
 title: Review tooling - a new stage, and its first card (organizer review, v0)
-status: proposed
+status: ruled
 raised: 2026-10-15
 raised_by: fse
 owner: pablo
@@ -10,9 +10,9 @@ forecast: 45-90m
 threads: [01M50YGJWFTYPRFJ59WSKRBWSP]
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-15
+ruled_by: pablo
+chosen: stage and v0 as written
 ---
 
 ## Question
@@ -62,6 +62,8 @@ ledger), plus the index comparison inside the card.
 The FSE: **"stage and v0 as written"**.
 
 ## Ruling
+
+pablo, 2026-10-15, in the organizer on lodestar: FSE review please, take into consideration what we're current doing and let's work out the stuff
 
 ## Consequences
 
