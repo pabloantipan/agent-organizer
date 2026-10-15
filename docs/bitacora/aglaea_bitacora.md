@@ -165,3 +165,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-15 — pr-ui answered: launch-progress Amendment 7 (assumed row reads idle, busy Start aria-disabled keeps focus, focus then words in both cases), rows L26-L27, L24 amended; design-system busy rule.
 - 2026-10-15 — leftovers-34 scope note accepted: busy rule skips Gate.tsx (firebase sign-in) until identity moves to Entra.
 - 2026-10-15 — bf-ui U4 answered: launch-progress Amendment 8 (busy dims contents and fill, never the ring; 3:1), row L28; design-system busy row.
+- 2026-10-15 — sup71 close answered: launch-progress Amendment 9 (derived tokens named and tested; focus ring moves to violet-11 app-wide, the accent failed 3:1 on overlay, pressed, selected), rows L29-L30; design system: Derived tokens, ring row.

@@ -407,6 +407,7 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - Live-region re-say: 100 ms setTimeout, never rAF (hidden windows skip it). An optimistic row reads the state the press reported, and the press should return what the row needs (session name) so it is usable at once (launch-progress A6).
 - Before saying 'as X does', read the code's word for X (stateWord: alive-not-working is idle). A pressed control stays focusable while busy (aria-disabled). Focus first, then polite words (launch-progress A7).
 - Opacity on an element dims its outline too: any rule that lets a dimmed control hold focus must say the ring stays full strength (launch-progress A8).
+- A contrast fault found on one control: measure the same pair on every surface before answering. The accent ring failed on overlay/pressed/selected app-wide; the ring is violet-11 now (launch-progress A9).
 
 ## Participants in use
 

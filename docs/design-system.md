@@ -89,7 +89,8 @@ Violet 10 is darker than 9 so white stays readable on a hovered button.
 | `--fg-muted` on raised | 7.4 | secondary text, next actions |
 | `--fg-subtle` on overlay | 4.5 | timestamps, meta, placeholders |
 | `--fg-disabled` on ground | 2.6 | **never readable text**: disabled and decoration only |
-| `--accent` (#8a3ffc) on ground | 3.6 | **fills, focus rings, icons only — never text** |
+| `--accent` (#8a3ffc) on ground | 3.6 | **fills and icons only — never text, never the focus ring** (on `--surface-overlay` it is 2.85, on `--surface-selected` 2.98: under 3:1) |
+| `--focus-ring` (`--violet-11`, #c0abfe) on any surface | 5.1–9.5 | focus rings: 9.5 on sunken, 8.4 on surface, 7.1 on overlay, 6.3 on pressed, 5.1 on plum-7, 7.5 on selected (launch-progress A9) |
 | `--accent-fg` on ground | 8.9 | accent-coloured text and links |
 | white on `--accent` | 5.0 | primary button label |
 | white on `--accent-hover` | 5.9 | hovered primary button |
@@ -157,7 +158,10 @@ no `zero` or stylistic sets).
 - The legacy names at the bottom of `tokens.css` (`--panel`, `--muted`, `--dim`,
   `--r` …) are aliases for migration. New code uses the role names; a component
   touched by the redesign drops its aliases.
-- `:focus-visible` is a 2px `--focus-ring` outline, never removed. On an
+- `:focus-visible` is a 2px `--focus-ring` outline, never removed. The ring is
+  `--violet-11`, not the accent fill: it must clear 3:1 on every surface it
+  can sit on, and the accent fails on overlays and selected rows. It also
+  keeps the ring apart from the accent "you are here" line. On an
   element already drawn in the accent (a selected tile or row), the ring sits
   at a 2px offset so it reads as a second edge, not as the same border.
 
@@ -286,6 +290,16 @@ muted, at most four in a row, no sparkline without data. *dataviz skill.*
 One line of what is missing, one line of how to get it, one action. Errors say
 what went wrong and how to fix it; never "there was a problem", never playful.
 *Primer Blankslate.*
+
+### Derived tokens
+Safari 15 has no `color-mix`, so a token that is another role at an alpha
+is written out as rgba. Each one names its source in a comment beside it
+(`--busy-fg: rgba(…, 0.45); /* --fg */`), and **a commit that changes a
+role changes its twins in the same commit**. Today the twins are the busy
+set (`--busy-*`, 45% of `--fg`, `--fg-muted`, `--fg-on-accent`,
+`--surface-raised`, `--border`, `--accent`, `--blocked`, `--blocked-soft`).
+A test reads `tokens.css` and checks each twin against its named source
+(launch-progress A9).
 
 ### Disabled actions
 An action is unavailable for one of four reasons, and each has one treatment.

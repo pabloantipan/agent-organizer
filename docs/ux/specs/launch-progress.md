@@ -379,3 +379,32 @@ under 3:1 is no ring (WCAG 1.4.11), so:
 | # | The lead can | Checked by |
 |---|---|---|
 | L28 | see where focus is while a press runs | press Start: the busy Start's ring measures 3:1 or more against the crew panel, while its label still reads dimmed `Starting…` |
+
+## Amendment 9 (aglaea, 2026-10-15): from leftovers-34's close
+
+From sup71's close (`runs/2026-10-15-sup71-leftovers-34.md`,
+`working-on/done/lf34-busy-focus.md`, ## UI review).
+
+- **U6: derived tokens are named and guarded.** The busy tokens stay rgba
+  (Safari 15 has no `color-mix`). The design system now lists them as
+  twins of their roles (Derived tokens): each carries its source in a
+  comment, a role change carries its twins in the same commit, and a
+  vitest over `tokens.css` fails when a twin's rgb is not its source's at
+  the stated alpha.
+- **The ring margin is an app-wide fault, not a busy one.** The accent
+  (#8a3ffc) measures 3.35:1 on `--surface`, 3.13 on `--surface-raised`,
+  2.85 on `--surface-overlay` (menus, drawers, dialogs), 2.53 on
+  `--surface-pressed`, 2.98 on `--surface-selected`. Every focus ring that
+  sits on an overlay or a selected row fails 1.4.11 today, busy or not.
+  - `--focus-ring` becomes `--violet-11` (#c0abfe): 7.1:1 on overlay, 6.3
+    on pressed, 7.5 on selected, 5.1 on plum-7, the lightest plum a ring
+    can sit on. Same family, so the look stays the accent's.
+  - It also separates focus from the accent "you are here" line
+    (initiatives-view A5), which stays #8a3ffc.
+  - Inset rings (`outline-offset: -2px`) sit on the element's own fill;
+    the new token clears that too.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| L29 | trust a busy colour after a role change | vitest: each `--busy-*` equals its commented source's rgb at its alpha; change `--fg` alone and the test fails |
+| L30 | see focus on any surface | in WKWebView, the focus ring measures 3:1 or more on the crew panel, a drawer (overlay), a selected rail row and a pressed control; computed outline colour is `rgb(192,171,254)` |
