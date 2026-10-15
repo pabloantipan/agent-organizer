@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { FileXCorner, MessageSquare, PencilRuler, SquareTerminal, Trash2, UserRoundX, Users } from "lucide-react";
 import { Retire } from "./Retire";
 import { api, type AgentGroup, type Seat } from "../hooks/useWails";
@@ -464,10 +464,13 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
     clearAgentsLanding();
   }, [agentsLanding, clearAgentsLanding, crewUp, group.crew, launch]);
   // The confirm left (the race, or a feed with no seat off) with focus in
-  // it: focus goes by focusAfter once it is gone. After useConfirmFocus's
-  // own effect, which would hand it back to a launch button no longer drawn.
+  // it: focus goes by focusAfter once it is gone, in the same commit (a
+  // layout effect), so focus is never on the body between the confirm
+  // leaving and its target taking it. useConfirmFocus's effect, which runs
+  // later, finds no launch button to hand it back to: none is drawn with
+  // no seat off.
   const refocus = useRef(false);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!refocus.current || asking) return;
     refocus.current = false;
     focusAfter(box.current)?.focus();
