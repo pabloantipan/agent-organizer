@@ -11,7 +11,7 @@ import { escapeCloses, useConfirmFocus } from "../lib/focus";
 import { CleanButton } from "./Retire";
 import { Usage as fetchUsage } from "../../wailsjs/go/main/App";
 import { agentsWeekLine } from "../lib/usage";
-import { agentTarget } from "../lib/agentFocus";
+import { agentRow, agentTarget } from "../lib/agentFocus";
 import { groupMemory, plural } from "../lib/initiatives";
 import { useLiveRegion } from "../lib/liveRegion";
 import { busyButton, busyLabel } from "../lib/busy";
@@ -39,9 +39,7 @@ export function AgentsView() {
     if (!agentFocus || !view) return;
     const t = agentTarget(view.groups, agentFocus, view.unassigned);
     const section = t && box.current?.querySelector(`[data-group="${CSS.escape(t.group)}"]`);
-    const el = !t || !section ? null
-      : "seat" in t ? section.querySelector<HTMLElement>(`.crew-seats > li[data-seat="${CSS.escape(t.seat)}"]`)
-      : section.querySelectorAll<HTMLElement>("ul.agents:not(.crew-seats) > li")[t.index];
+    const el = t && section ? agentRow(section, t) : null;
     clearAgentFocus();
     if (!el) return;
     el.classList.add("memory-landed");

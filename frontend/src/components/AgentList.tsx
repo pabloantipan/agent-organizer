@@ -7,6 +7,7 @@ import { HEALTH, healthState, healthTitle, type HealthState } from "../lib/healt
 import { stateWord } from "../lib/stateWords";
 import { agentMemory, rowMemoryWords, type MemoryFeed } from "../lib/initiatives";
 import { agentLabel } from "../lib/memory";
+import { agentKey } from "../lib/agentFocus";
 import { useBoard } from "../stores/board.store";
 import "../styles/initiatives.css";
 
@@ -34,11 +35,11 @@ export function AgentList({ agents, root, local = true, readOnly = false, onMess
           const sub = root && a.dir && a.dir !== root ? `./${a.dir.slice(root.length + 1)}` : root ? "" : shortHome(a.dir || "");
           // Processes can share a session name (children inherit it), so the
           // pid disambiguates; a layout-only row has pid 0 and a unique session.
-          const key = `${a.session}#${a.pid}`;
+          const key = agentKey(a);
           const asking = confirm === key;
           const health = healthState({ watcher: a.watcher, deaf: a.deaf, capped: a.capped, noIdentity: a.no_identity });
           return (
-            <li key={key} className={a.state} data-session={a.session || undefined} tabIndex={-1} aria-label={rowName(a, feed)}>
+            <li key={key} className={a.state} data-session={a.session || undefined} data-agent={key} tabIndex={-1} aria-label={rowName(a, feed)}>
               <span className={`a-state ${a.state}`}><i />{stateLabel(a)}</span>
               <span className="a-name">
                 {a.family && <span className="a-family">{a.family}</span>}
