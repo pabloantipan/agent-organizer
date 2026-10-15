@@ -80,3 +80,13 @@ at `127.0.0.1:8090`), not this gate.
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `usage-post` | U1, U2, U3, U4, U5, U6, U7, X0 | — | false |
+
+Amendment 1, 2026-10-15, the FSE, from up-build via sup73 (thread
+01M50YCH): `organizer usage` exits right after printing
+(`internal/cli/usage.go:42`), so a post started off the caller's path dies
+with the process and the CLI never posts, though FR-5 names it. So:
+- The Boundary also allows one call in `internal/cli/usage.go` after the
+  output is printed that waits for the post (`service.WaitUsagePost`). The
+  output and its timing are unchanged; the wait is bounded (the post's
+  request timeout, at most 10 s), so an unreachable record never holds the
+  CLI longer than that.
