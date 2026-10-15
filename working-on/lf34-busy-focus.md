@@ -56,35 +56,43 @@ Verdict: pass. Every row met at 87abf10c9e4048e65aff190f26a528ae1b09283a; unmet:
 - Reviewer bf-review, 2026-10-15, commit 87abf10.
 
 ## UI review
-Verdict: fail, on U1 (severity 3). Every row checked at 87abf10c9e4048e65aff190f26a528ae1b09283a; F1, F3, F4 and X0 met as written, F2 met as written. Reviewer bf-ui, 2026-10-15. Evidence in `.wt-notes/bf-ui/`.
+Verdict: pass. Round 2: every row checked at 1dad95e975eb88de51b9b27463857d9081415bf8 in a fresh clean clone. Nothing from round 1 (87abf10) counts. F1 to F6 and X0 are met as written, and nothing of severity 4 or 3 remains. Reviewer bf-ui, 2026-10-15. Evidence in `.wt-notes/bf-ui/r2/`.
 
 How each state was checked:
-- F1 (FR-1, L26): Tab harness in WKWebView, 1024×640, my clean clone, my `wails dev` on 34203, fixture, auth off, probe stub through `ORGANIZER_PROBE_BIN`. N1 race: the stale feed shows fse off, Start pressed, the real bound `CreateCrew` answers fse running (`Starting…` 4562 ms, Attach on `organizer-fixture-probe-fse` 4674). At once, 0 feeds since the press: `fse:idle po_ana:idle dev_bruno:idle`; after the next real feed: the same. No `body` (`out/f1.jsonl`). Met.
-- F2 (FR-2, L27): vitest read, not rerun apart (it passed inside X0): `lib/busy.test.ts` and `Busy.controls.test.tsx`, one test per control of the seven (Start, Draft the cell's Open, Rule, Retire, comment Save, docked Send, new thread Start/Branch). Diff: the other reasons (`!ready`, no plan, empty body or subject, `!canPost`) still reach `disabled`; one test covers it (Send, no body). Focus is a stand-in (no DOM in vitest), so F3 is the only live focus evidence. Met as written.
-- F3 (FR-2): harness, fse off, Return on Start: Start, then `Starting…` with `aria-disabled="true"` and focus (3827), then the heading (4069); 10 samples, 0 `body` (`out/f3.jsonl`). A second run, 9 samples, 0 `body` (`out/f3shot.jsonl`). The 20 ms interval stalls ~300 ms around the key step, as the builder noted; mutation and focusin samples cover it. Met.
-- F4 (FR-3, L24 amended): N3 (`out/f4.jsonl`): feed 3726, focusin `Attach fse` 3736, region text 3839. Race (`out/f1.jsonl`): focusin 4674, region text 4778. No `body`. Met.
-- Busy look: computed styles in WKWebView (`steps/out/css.txt`): `[aria-disabled="true"]` and `:disabled` draw the same (opacity .45, cursor default, same background, border and text) for primary, danger, ghost and plain buttons. Matches the Boundary.
-- Boundary and No-gos: the diff touches `lib/busy.ts` and its test, Crew, AgentsView, RuleDecisionBox, Retire, CardDrawer, Conversation, their tests and `global.css`. No Go, `Gate.tsx` or `lib/queue.ts`, and no new service call.
-- Shared test run: fresh, run 89bc8959-43994 of 87abf10c9e40 (`make test` exit 0: 16 Go packages ok, vitest 62 files / 721 tests). bf-review reused it.
+- F1 (FR-1, L26): Tab harness in WKWebView, 1024×640, my `wails dev` on 34203, fixture, auth off, probe stub through `ORGANIZER_PROBE_BIN`. N1 race with the real bound `CreateCrew`: the stale feed shows `fse:off`, Start is pressed. At once, 0 feeds since the press: `fse:idle po_ana:idle dev_bruno:idle`. After the next real feed: the same. No `body` (`r2/f1.jsonl`). Met.
+- F2 (FR-2): vitest (in X0): `lib/busy.test.ts`, plus `Busy.controls.test.tsx` with one test per control of FR-2's eight (Start, Draft the cell's Open, New agent's Start, Rule, Retire, comment Save, docked Send, new thread Start/Branch). Each gets `aria-disabled`, no `disabled`, the gerund and one call. The rule words are readonly, never disabled. Other reasons still reach `disabled` (diff; test for Send with no body). Focus is a stand-in, since vitest has no DOM. Met as written.
+- F3 (FR-2): harness, fse off, Return on Start: Start, then `Starting…` with aria-disabled and focus (3822 ms), then the heading (4078). 9 samples, 0 `body` (the one `BODY` in the file is before the press) (`r2/f3.jsonl`). Met.
+- F4 (FR-3): N3: feed 3725, focusin `Attach fse` 3735, region text 3837 (`r2/f4.jsonl`). Race: focusin 4668, region text 4772 (`r2/f1.jsonl`). No `body`. Met.
+- F5 (FR-2, Amendment 1): vitest `Busy.after.test.tsx` has a target for each control: Attach or the heading (Start), the seat row (New agent), the opener (Rule), the crew block's Retire… (Retire), the comment field, the reply field, and the divider for a new thread and a branch (Send stays busy and focused until the thread is drawn). It is a stand-in DOM. The new-thread case tests `NewThread` plus `landPosted`; the parent's `onPosted` effect is checked by code read only. Read in the commit that clears `posted`: the chat switch and the thread's section draw together, and the layout effect focuses the divider before paint. Met as written.
+- F6 (Amendment 2, L28): harness, the page's binding replaced by a never-resolving call, focus on each busy control, computed styles in WKWebView (`r2/f6.jsonl`):
+  - Start (`Starting…`): element opacity 1, ring `solid 2px rgb(138,63,252)` at opacity 1, ring contrast **3.35:1** on the crew panel `rgb(32,27,43)`. Label `rgba(255,255,255,.45)`, fill `rgba(138,63,252,.45)`.
+  - New agent's Start: **3.57:1** on the page `rgb(26,21,35)`, same dim.
+  - Retire (`Retiring…`): **3.35:1** on the modal `rgb(32,27,43)`. Label `rgba(255,77,99,.45)`, fill `rgba(255,77,99,.063)`.
+  - Shots: `r2/wkwebview-1024x640-F6-{start,newagent,retire}-busy.png`. The ring reads at full strength around a dimmed `Starting…`.
+  - Draft the cell's Open, Rule, Save and the Sends use the same `button.primary` / `tiny-btn` busy rules. Not focused live, since the fixture has no mailbox or draftable cell.
+  - Met.
+- X0: shared test run fresh, run 7693e457-85575 of 1dad95e (`make test` exit 0: 16 Go packages ok, vitest 732 tests). bf-review reused it. After my `wails dev`, `wails build` passed and `git status --porcelain` was empty.
+- Boundary and No-gos: the diff touches only `frontend/src`: `lib/busy.ts` and its test, Crew, AgentsView, RuleDecisionBox, Retire, CardDrawer, Conversation, their tests, `global.css` and `tokens.css` (the busy tokens). No Go, `Gate.tsx` or `lib/queue.ts`, and no new service call (the `getAgents` after a post is an existing call).
 
-Findings:
-- **U1 (severity 3): a new thread or a branch drops focus to the body once it is sent.** What the person cannot do: a keyboard or VoiceOver user who starts a thread (or a branch) in Conversations loses their place when the post succeeds. The next Tab starts at the top of the window, and the new thread is announced nowhere. Where: `Conversation.tsx` `NewThread` `send`: on success `onDone` unmounts the form, and with it the focused `Sending…` button. The parent's `goTo` sets the target and scrolls without landing focus (the landing branch runs only for `landOn`), and `ReplyBox` takes focus on mount only for `replyTo`. The builder fixed this end for the docked Send and the comment Save, not here (progress.md, Found: "focus can reach the body"). Evidence: code read at 87abf10, not seen in WKWebView (see Not verified). It goes against the design system's "focus never drops" ("when the focused thing leaves, focus goes to a named next target … never the body") and FR-2's "keeps focus until the result moves it". F2 tests only the pending state, so the gate is met and the rule is not. Proposal: on success, land on the new thread as `landOn` does (focus its divider), or focus the `ReplyBox` field that replaces the form. Same for a branch.
-- **U2 (severity 2): New agent's Start has no busy state.** A second Return while `createAgent` is pending starts a second seat (builder's Found; code read `AgentsView.tsx` `NewAgent.create`). FR-2 names "New agent's Open", which is no control: the builder wired Draft the cell's Open. Not a fail: the spec does not name this control. Proposal: give the FSE the naming fix; New agent's Start goes on `busyButton`.
-- **U3 (severity 2): the rule box's words field is `disabled` while ruling.** Cmd+Enter from the words drops focus to the body during the call (builder's Found; code read). Only the Rule button is in FR-2.
-- **U4 (severity 2, for aglaea): a focused busy control's focus ring is dimmed with it.** Opacity .45 applies to the outline too: #8a3ffc over the crew panel `rgb(32,27,43)` comes out near (80,43,137), about 1.6:1 against the panel, under 1.4.11's 3:1 for a focus indicator. Before this card a disabled button never held focus, so this is new. Computed: outline `solid 2px rgb(138,63,252)` with opacity .45 on the element.
+Round 1 findings, rechecked at 1dad95e:
+- U1 (sev 3, new thread or branch drops focus to the body): fixed. Send stays busy and focused until the feed carries the thread, then focus lands on its divider (`onPosted`, `landPosted`; F5). Checked by code read and vitest, not in WKWebView (no mailbox).
+- U2 (sev 2, New agent's Start had no busy state): fixed. `busyButton`, `Starting…`, a second press starts nothing, Escape is held while starting. Busy look and ring measured live in F6.
+- U3 (sev 2, rule words disabled while ruling): fixed. `readOnly`, and a second Cmd+Enter starts nothing (vitest).
+- U4 (sev 2, the busy ring was dimmed to about 1.6:1): fixed. 3.35:1 or more measured (F6).
+
+New findings (none of severity 4 or 3):
+- **U5 (severity 2): a sent new thread that never reaches the feed leaves Send busy for good.** What the person cannot do: if `PostToCell` answers with a thread id but the reload never lists that thread, `Sending…` stays and nothing says why. Where: `Conversation.tsx` `onPosted`; there is no timeout, unlike Crew's `LIST_WAIT_MS`. Evidence: code read. Severity 2: it needs a feed that drops a thread it just created. Cancel still works. Proposal: the same two-feed fallback Crew uses, landing on the reply field.
+- **U6 (severity 1): the busy tokens copy other tokens' values as rgba** (`--busy-fg` is `--fg` at 45%, and so on, `tokens.css`). Changing a role leaves its busy twin behind. The build had to, since the Safari 15 floor has no color-mix. Proposal: note it beside each role in `docs/design-system.md`.
 
 Spec gaps (for the FSE):
-- FR-2's "New agent's Open (`Opening…`)" names no control (U2).
-- FR-2 says "until the result moves it" but no row checks where the result lands for the seven controls. F2 checks only the pending state (U1).
-- F2 asks for `document.activeElement` in vitest, but vitest here has no DOM. The stand-in proves the attribute, not focus.
+- F2 and F5 ask for `document.activeElement` in vitest, which has no DOM here. Both rest on a stand-in. Only the crew Start's focus (F3) and the busy ring (F6, three controls) are seen live.
 
 Design questions, for aglaea:
-- U4: should busy dim the label only (or use another treatment) so the focus ring keeps 3:1?
-- The design system's busy row still opens with "disabled," and then asks for `aria-disabled`. The first word reads as the attribute.
-- Cancel and Escape stay live on a busy Start: they close the confirm while CreateCrew runs, and the list arrives later anyway. Intended?
+- U6: should busy colours be derived tokens named in the design system, so a role change carries its busy twin?
+- The busy ring sits at 3.35:1 on the crew panel, just over the line. Any panel lighter than `rgb(32,27,43)` would take it under 3:1.
 
 Not verified in WKWebView:
-- U1, U3 and the five controls besides Start live: the fixture has no discuss mailbox to post into or rule against. Judged from code and vitest.
-- Whether VoiceOver speaks focus before the polite words (Amendment 7: for whoever has a screen).
-- The review build (`make review-build`) was not launched for AX or screencapture: every live row ran in the harness's WKWebView instead. The busy Start lasts ~200 ms, too short for a window shot. There is one WKWebView snapshot, of the list heading after the press (`wkwebview-1024x640-F3-list-heading.png`).
+- F5's landings, U1's divider, Rule, the comment Save and both Sends live: the fixture has no discuss mailbox to post into, and no ruling was run.
+- Whether VoiceOver speaks focus before the polite words (launch-progress A7).
+- The review build (`make review-build`) was not launched for AX or screencapture. Every live row ran in the harness's WKWebView.
 - `auth: firebase` states: not run, as the rules require. The diff touches no firebase path.
