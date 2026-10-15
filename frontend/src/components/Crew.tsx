@@ -11,6 +11,7 @@ import { useBoard } from "../stores/board.store";
 import { escapeCloses, useConfirmFocus } from "../lib/focus";
 import { stateWord } from "../lib/stateWords";
 import { useLiveRegion, type Say } from "../lib/liveRegion";
+import { LIST_WAIT_MS } from "../lib/listWait";
 import { busyButton, busyLabel } from "../lib/busy";
 import { RetrySeat, SeenLaunch, StopStarting } from "../../wailsjs/go/main/App";
 import { ClipboardSetText } from "../../wailsjs/runtime/runtime";
@@ -195,10 +196,6 @@ const starting = (l: Launch | undefined) => !!l?.seats?.some((s) => s.state === 
 
 /** How long a list with every listed seat up stays (launch-progress §1, L14). */
 export const LIST_KEEP_MS = 5000;
-
-/** How long a Start that queued seats stays busy waiting for the feed to
- *  draw the list: two agents feed periods (10 s each). */
-export const LIST_WAIT_MS = 20000;
 
 /** What the live region says when Start finds every seat running
  *  (leftovers-31 FR-3, L18). */

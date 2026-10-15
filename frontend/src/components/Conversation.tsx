@@ -7,6 +7,8 @@ import { branchKey, chatKey, drafts, draftVerb, newThreadKey, newThreadPost, thr
 import { busyButton, busyLabel } from "../lib/busy";
 import { askedCards, needsMeThread } from "../lib/queue";
 import { timeWords } from "../lib/dates";
+import { useLiveRegion, type Say } from "../lib/liveRegion";
+import { LIST_WAIT_MS } from "../lib/listWait";
 
 const KINDS = ["msg", "question", "answer", "status", "decision", "done", "claim", "yield"];
 const POLL_MS = 5_000; // the open chat only; the list rides the agents feed
@@ -257,25 +259,31 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   // A new thread or a branch sent (leftovers-34 FR-2, F5): the form stays,
   // its Send busy and focused, until the feed carries the thread; then it
   // lands like landOn, and focus goes from Send to the thread's divider in
-  // the commit that draws it, never through the body.
-  const [posted, setPosted] = useState<string | null>(null);
+  // the commit that draws it, never through the body. A thread the feed has
+  // not listed after LIST_WAIT_MS lets Send go (leftovers-35 FR-3): the form
+  // clears, the live region says so, focus goes to the docked box's field,
+  // and a later listing moves nothing.
   const postedLanding = useRef<string | null>(null);
+  const [said, say] = useLiveRegion();
+  const dock = useRef<HTMLDivElement>(null);
+  const [cleared, setCleared] = useState(0);
+  const sentTo = useRef({ land: (_id: string) => undefined as void, letGo: () => undefined as void });
+  sentTo.current = {
+    land: (id) => { setPrefill(null); setBranchFrom(null); postedLanding.current = id; landOn(id); },
+    letGo: () => letGoUnlisted(document, dock.current, () => { setPrefill(null); setBranchFrom(null); setCleared((n) => n + 1); }, say),
+  };
+  const [sent] = useState(() => sentWatch({ land: (id) => sentTo.current.land(id), letGo: () => sentTo.current.letGo() }));
+  useEffect(() => () => sent.stop(), [sent]);
+  useEffect(() => { sent.feed(all.map((t) => t.id)); }, [sent, all]);
   const onPosted = (tid: string) => {
-    postedLanding.current = tid;
-    setPosted(tid);
+    sent.sent(tid);
+    sent.feed(all.map((t) => t.id));
     reload();
     api.getAgents().then(applyAgents, () => undefined);
   };
-  useEffect(() => {
-    if (!posted || !all.some((t) => t.id === posted)) return;
-    setPosted(null);
-    setPrefill(null);
-    setBranchFrom(null);
-    landOn(posted);
-  }, [posted, all]); // eslint-disable-line react-hooks/exhaustive-deps
   useLayoutEffect(() => {
     const id = postedLanding.current;
-    if (!id || posted === id) return;
+    if (!id) return;
     if (landPosted(document, id)) postedLanding.current = null;
   });
   const setStatus = (id: string, s: string) => api.setCellThreadStatus(initiativeId, id, s).then(() => reload(), (e) => setErr(String(e)));
@@ -411,11 +419,13 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
 
         {/* No token: the composer is not drawn (ui-leftovers FR-8, "never
             here"); the chat-list line says why, once. */}
-        {(readOnly || canPost) && <div className="dock">
+        <span className="sr-only" role="status" aria-live="polite">{said}</span>
+        {(readOnly || canPost) && <div className="dock" ref={dock}>
           {readOnly ? (
             <div className="empty"><Lock size={13} aria-hidden /> {readOnly}: read-only. Nothing can be posted here.</div>
           ) : branchFrom && targetThread ? (
             <NewThread
+              key={`branch|${cleared}`}
               initiativeId={initiativeId}
               seats={seats}
               draftKey={branchKey(initiativeId, branchFrom.id)}
@@ -444,7 +454,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
             />
           ) : (
             <NewThread
-              key={`${chat}|${landed?.subject ?? ""}`}
+              key={`${chat}|${landed?.subject ?? ""}|${cleared}`}
               initiativeId={initiativeId}
               chat={chat}
               draftKey={newThreadKey(initiativeId, chat)}
@@ -597,6 +607,50 @@ export function landPosted(doc: Pick<Document, "getElementById">, id: string): b
   if (!divider) return false;
   divider.focus({ preventScroll: true });
   return true;
+}
+
+/** What the live region says when a sent thread is not listed in time
+ *  (leftovers-35 FR-3): it was sent, so never "failed". */
+export const SENT_UNLISTED = "Sent. The thread shows when the feed lists it.";
+
+/** A sent new thread or branch waiting for the feed (leftovers-34 F5,
+ *  leftovers-35 FR-3): `feed` with the listed ids lands it once it shows;
+ *  LIST_WAIT_MS without it lets it go, and a later listing does nothing. */
+export function sentWatch(on: { land: (id: string) => void; letGo: () => void }, wait = LIST_WAIT_MS) {
+  let posted: string | null = null;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const stop = () => { if (timer !== undefined) clearTimeout(timer); timer = undefined; };
+  return {
+    sent: (id: string) => {
+      stop();
+      posted = id;
+      timer = setTimeout(() => { timer = undefined; posted = null; on.letGo(); }, wait);
+    },
+    feed: (ids: string[]) => {
+      if (!posted || !ids.includes(posted)) return;
+      const id = posted;
+      posted = null;
+      stop();
+      on.land(id);
+    },
+    stop,
+  };
+}
+
+/** The docked box's field: the reply box's message, else the new-thread
+ *  form's subject. */
+export const dockField = (dock: Pick<ParentNode, "querySelector"> | null) =>
+  dock?.querySelector<HTMLElement>("textarea:not(:disabled), input:not(:disabled)") ?? null;
+
+/** Lets a sent thread the feed never listed go: Send leaves busy and the
+ *  form clears (`clear` remounts it), the live region says SENT_UNLISTED,
+ *  and focus, if it was in the dock or had dropped to the body, goes to the
+ *  docked box's field once that is said. */
+export function letGoUnlisted(doc: Pick<Document, "activeElement" | "body">, dock: (Pick<ParentNode, "querySelector"> & { contains: (n: Node | null) => boolean }) | null, clear: () => void, say: Say) {
+  const was = doc.activeElement;
+  const here = !was || was === doc.body || !!dock?.contains(was);
+  clear();
+  say(SENT_UNLISTED, () => { if (here) dockField(dock)?.focus({ preventScroll: true }); });
 }
 
 /** The wake count, read before anything is sent (leftovers-12 FR-3, the
