@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 36 - Needs me says how long a record has waited, others' long waits shown apart
-status: proposed
+status: ruled
 raised: 2026-10-15
 raised_by: fse
 owner: pablo
@@ -11,9 +11,9 @@ stage: decisions-owned-and-used
 threads: [01M50R6JGJEAJ81C3XB4Q25Q9B]
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-15
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -53,6 +53,8 @@ initiative (19, 15, ~26, 37 and 34 min of work, one card each).
 The FSE: **"accept as written"**.
 
 ## Ruling
+
+pablo, 2026-10-15, in the organizer on lodestar: ok
 
 ## Consequences
 
