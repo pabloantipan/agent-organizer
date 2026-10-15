@@ -4,6 +4,14 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-15 ~13:30, leftovers-35 landed; 0134 proposed
+
+- **Last SHA seen:** cb35385 (+ merge 025a39a). leftovers-35: sup72, 34 min launch to merge vs 25-50m, ~$12-16, one fail round (U1 Comments focus) under my Amendment 2; installed v0.2.0-2182-g025a39a; sup72 ended, token revoked, prompt files removed. No supervisor running. Run record runs/2026-10-15-sup72-leftovers-35.md.
+- **Carry from sup72:** `.srm-gem` is dead CSS; 17 outline:none focus rules draw the ring via a sibling rule (a later batch could fold them); no row measures a ring on --surface-pressed; FR-3 vitest only.
+- **0134 proposed:** stage decisions-owned-and-used: exit 1 met by camp 0003/0004 (alejandro); exit 2 via a Needs me card (age on long waits, "waiting on <owner>"). Ask Aglaea before carding.
+- **Still asked of Pablo:** push main + origin/run-gate via Talos; floating-icon-spike removal (tagged archive/); leftovers-33 overnight stalled row.
+- **Repetition (1st):** my leftovers-35 spec carried two stale facts from finding text (dead `.srm-gem`, top bar already in order) and a gate grep too narrow (R2). Read the code for every FR's target before writing it (spec-craft step 2). Second time → propose a spec-craft check.
+
 ## HAND-OFF — 2026-10-15 ~12:30, tidy 0131 applied; 0132 and 0133 proposed
 
 - **Update ~12:45, last SHA 23eeb0d:** Pablo "do" on both; 0132 also ruled in the app (3d7ef5e), stage one-window done. sup72 launched detached for lf35-ring-tokens at ~12:45 (forecast 25-50m; check elapsed against it if asked). On close: probe -k sup72, token rm organizer sup72, prompt files, clean. Next: draft decisions-owned-and-used's first step without identity.
