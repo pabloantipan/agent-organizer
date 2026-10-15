@@ -1,6 +1,6 @@
 ---
 title: "Needs me says how long a record has waited; others' long waits get their own group"
-status: now
+status: done
 repos: [organizer]
 branch: lf36-needs-me-waits
 seat: nw-build
