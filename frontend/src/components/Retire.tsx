@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Broom, UserRoundX, X } from "lucide-react";
 import { api, type AgentGroup, type RetirePlan, type RetireReport } from "../hooks/useWails";
+import { busyButton, busyLabel } from "../lib/busy";
 
 /** Retire seats of a cell: the end of a wave as one action. The plan is
  *  shown first; nothing happens until Retire. Seats default to every one
@@ -56,7 +57,9 @@ export function Retire({ group, onClose }: { group: AgentGroup; onClose: () => v
               {report.steps?.map((s, i) => <li key={i} className="ok">{s}</li>)}
               {report.errors?.map((s, i) => <li key={`e${i}`} className="err">{s}</li>)}
             </ul>
-            <div className="actions-row"><span className="spacer" /><button className="tiny-btn primary" onClick={onClose}>Close</button></div>
+            {/* The result moves focus off the busy Retire, which is gone (the
+                busy rule, leftovers-34 FR-2): never to the body. */}
+            <div className="actions-row"><span className="spacer" /><button className="tiny-btn primary" onClick={onClose} autoFocus>Close</button></div>
           </div>
         ) : (
           <div className="retire-body">
@@ -104,7 +107,7 @@ export function Retire({ group, onClose }: { group: AgentGroup; onClose: () => v
               <span className="meta">{chosen.length} seat{chosen.length === 1 ? "" : "s"} leave; the roster keeps what is unchecked</span>
               <span className="spacer" />
               <button className="tiny-btn ghost" onClick={onClose}>Cancel</button>
-              <button className="tiny-btn danger" onClick={run} disabled={busy || !plan || (chosen.length === 0 && !(plan.sessions?.length) && !(plan.threads?.length))}>{busy ? "Retiring…" : "Retire"}</button>
+              <button className="tiny-btn danger" {...busyButton({ busy, disabled: !plan || (chosen.length === 0 && !(plan.sessions?.length) && !(plan.threads?.length)), onPress: run })}>{busyLabel(busy, "Retire", "Retiring…")}</button>
             </div>
           </div>
         )}

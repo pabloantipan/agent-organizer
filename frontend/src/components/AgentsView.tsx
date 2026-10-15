@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { Bot, PencilRuler, Plus } from "lucide-react";
 import { api, type AgentGroup } from "../hooks/useWails";
 import { since } from "../lib";
@@ -14,6 +14,7 @@ import { agentsWeekLine } from "../lib/usage";
 import { agentTarget } from "../lib/agentFocus";
 import { groupMemory, plural } from "../lib/initiatives";
 import { useLiveRegion } from "../lib/liveRegion";
+import { busyButton, busyLabel } from "../lib/busy";
 
 const REFRESH_MS = 10_000;
 
@@ -192,6 +193,16 @@ export function startingButton(s: Pick<SeatStart, "seat" | "state" | "started_at
   return { text: "Waiting to start", name: `${s.seat} waits for the seats before it` };
 }
 
+/** Focus on the new agent's row, once the feed draws it: where New agent's
+ *  Start lands after the result (leftovers-34 F5). False while not drawn. */
+export function landNewAgent(page: Pick<ParentNode, "querySelector">, session: string): boolean {
+  const row = page.querySelector<HTMLElement>(`ul.agents > li[data-session="${CSS.escape(session)}"]`);
+  if (!row) return false;
+  row.focus();
+  row.scrollIntoView?.({ block: "nearest" });
+  return true;
+}
+
 const inFlight = (s: SeatStart | undefined) => !!s && (s.state === "queued" || s.state === "starting" || s.state === "retrying");
 
 /** Inline "new agent" control: starts a probe in the initiative directory,
@@ -199,7 +210,7 @@ const inFlight = (s: SeatStart | undefined) => !!s && (s.state === "queued" || s
  *  name. The pressed button becomes the seat's state (FR-6, §3): Starting ·
  *  n s, Trying again · n s; then focus to the new row, or to Try again on one
  *  danger line under the button. */
-function NewAgent({ initiativeId }: { initiativeId: string }) {
+export function NewAgent({ initiativeId }: { initiativeId: string }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [note, setNote] = useState<string | null>(null);
@@ -218,8 +229,13 @@ function NewAgent({ initiativeId }: { initiativeId: string }) {
   const newBtn = useRef<HTMLButtonElement>(null);
   const state = s?.state;
 
-  // The pressed button is now the state: focus stays on it (L3).
-  useEffect(() => { if (inFlight(s)) busy.current?.focus(); }, [state]);
+  // The pressed button is now the state: focus stays on it (L3), taken in
+  // the commit that draws it, so the busy Start hands it over with no body
+  // between (leftovers-34 FR-2).
+  useLayoutEffect(() => { if (inFlight(s)) busy.current?.focus(); }, [state]);
+  // Started with no seat on the feed yet: back to New agent, never the body.
+  const backToNew = useRef(false);
+  useLayoutEffect(() => { if (backToNew.current && !open) { backToNew.current = false; newBtn.current?.focus(); } });
   // Failed: the danger line's Try again takes focus, and the failure is seen.
   useEffect(() => {
     if (state !== "failed") return;
@@ -233,15 +249,18 @@ function NewAgent({ initiativeId }: { initiativeId: string }) {
     if (!target) return;
     if (!s) { setTarget(undefined); return; } // dropped from the feed, or replaced
     if (s.state !== "running") return;
-    const row = document.querySelector<HTMLElement>(`ul.agents > li[data-session="${CSS.escape(s.session)}"]`);
-    if (!row) return;
+    if (!document.querySelector(`ul.agents > li[data-session="${CSS.escape(s.session)}"]`)) return;
     if (launch?.kind !== "crew") setSaid(`${s.seat} running`);
     setTarget(undefined);
-    row.focus();
-    row.scrollIntoView({ block: "nearest" });
+    landNewAgent(document, s.session);
   }, [target, s, agents]);
 
+  // Start is busy while createAgent runs: a second press starts nothing
+  // (leftovers-34 FR-2, Amendment 1).
+  const [starting, setStarting] = useState(false);
   const create = () => {
+    if (starting) return;
+    setStarting(true);
     api.createAgent(initiativeId, name.trim())
       .then(() => api.getAgents())
       .then((v) => {
@@ -249,8 +268,9 @@ function NewAgent({ initiativeId }: { initiativeId: string }) {
         const l = launchOf(v.launches, initiativeId);
         const last = l?.seats?.[l.seats.length - 1];
         setOpen(false); setName(""); setNote(null);
-        if (last) setTarget(last.seat);
-      }, (e) => setNote(String(e)));
+        if (last) setTarget(last.seat); else backToNew.current = true;
+      }, (e) => setNote(String(e)))
+      .finally(() => setStarting(false));
   };
   const live = <span className="sr-only" role="status" aria-live="polite">{said}</span>;
 
@@ -296,9 +316,9 @@ function NewAgent({ initiativeId }: { initiativeId: string }) {
         placeholder="name, or empty for an animal"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        onKeyDown={(e) => { if (e.key === "Enter") create(); if (e.key === "Escape") setOpen(false); }}
+        onKeyDown={(e) => { if (e.key === "Enter") create(); if (e.key === "Escape" && !starting) setOpen(false); }}
       />
-      <button className="tiny-btn primary" onClick={create}>Start</button>
+      <button className="tiny-btn primary" {...busyButton({ busy: starting, onPress: create })}>{busyLabel(starting, "Start", "Starting…")}</button>
       <button className="tiny-btn ghost" onClick={() => setOpen(false)}>Cancel</button>
       {note && <span className="meta err">{note}</span>}
     </span>
@@ -322,7 +342,7 @@ const drafting = new Set<string>();
  *  preflight answers), ready, confirm and opening, opened ("Drafting…",
  *  disabled), error on Open (in the danger role, the confirm kept for a
  *  retry), refused (the preflight's reason). */
-function DraftCell({ initiativeId }: { initiativeId: string }) {
+export function DraftCell({ initiativeId }: { initiativeId: string }) {
   const board = useBoard((s) => s.view);
   // The preflight's answer and the initiative it is for: checking until the
   // first answer for this initiative; later rechecks keep the last answer.
@@ -393,7 +413,7 @@ function DraftCell({ initiativeId }: { initiativeId: string }) {
             {error
               ? <span className="meta" role="alert" style={{ color: "var(--danger)" }}>The Terminal did not open: {error}. Run <code>organizer draft-cell {initiativeId}</code> in a terminal at the root.</span>
               : <span className="meta">one Terminal at the root running the agent; it writes only under agents/ and working-on/decisions/</span>}
-            <button ref={openBtn} className="tiny-btn primary" onClick={open} disabled={busy}>{busy ? "Opening…" : "Open"}</button>
+            <button ref={openBtn} className="tiny-btn primary" {...busyButton({ busy, onPress: open })}>{busyLabel(busy, "Open", "Opening…")}</button>
             <button className="tiny-btn ghost" onClick={cancel}>Cancel</button>
           </span>
         )}
