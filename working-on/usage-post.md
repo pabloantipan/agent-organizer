@@ -5,7 +5,7 @@ repos: [organizer]
 branch: usage-post
 seat: up-build
 updated: 2026-10-15
-next: "up-build building on branch usage-post (sup73, launched 20:33)"
+next: "review: usage-post, gate met (U1-U7, X0; Amendment 1 built), 2db9558"
 depends_on: []
 boundary: ["docs/specs/usage-post.md Boundary, usage-post"]
 spec: "docs/specs/usage-post.md (FR-1 to FR-6; hestia usage-rows FR-5 and Contract, 0021)"
@@ -28,8 +28,8 @@ docs/specs/usage-post.md, rows U1, U2, U3, U4, U5, U6, U7 and X0.
 - [x] X0: .wt-notes/up-build/x0-make-test.log, x0-pnpm-build.log, x0-wails-build.log, x0-status.txt (empty)
 
 ## Done
-- 2026-10-15: up-build built usage-post on branch usage-post (ca36eaf 02cc5c1 cf699e5 2db9558 , , , ); gate met, X0 rerun after Amendment 1, rebased on main.
+- 2026-10-15: up-build built usage-post on branch usage-post (ca36eaf, 02cc5c1, cf699e5, 2db9558); gate met, X0 rerun after Amendment 1, rebased on main.
 
 ## Notes
 - 2026-10-15: run by sup73 (organizer-probe-sup73), spawned by the FSE.
-- 2026-10-15: `organizer usage` exits right after printing, so its background post dies with the process; fixed under spec Amendment 1 (26a403f): the CLI waits for its post after printing, at most 10 s (, TestWaitUsagePostIsBounded). "Configured, nothing posted yet" is a fourth doctor wording the spec has no case for.
+- 2026-10-15: `organizer usage` exits right after printing, so its background post dies with the process; fixed under spec Amendment 1 (26a403f): the CLI waits for its post after printing, at most 10 s (2db9558, TestWaitUsagePostIsBounded). "Configured, nothing posted yet" is a fourth doctor wording the spec has no case for.
