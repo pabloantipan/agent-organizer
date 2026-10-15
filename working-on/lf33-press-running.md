@@ -12,6 +12,7 @@ boundary: ["docs/specs/leftovers-33.md Boundary, lf33-press-running"]
 spec: "docs/specs/leftovers-33.md (FR-1 to FR-4; launch-progress L23-L25)"
 gate: "docs/specs/leftovers-33.md Acceptance, rows P1, P2, P3, P4 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -51,3 +52,16 @@ Findings (none fails):
 For aglaea: U1, U3; also whether "said, then focus" in one commit is heard in that order by VoiceOver (no row checks it).
 Spec gaps for the FSE: U1 (Amendment 6's premise), U3 (race vs feed-closed scope).
 Not verified in WKWebView: VoiceOver order and the 100 ms re-announce (Amendment 6: no VO row); no AX or window shots (no row needs them; WKWebView snapshots only); review build not built (supervisor: no row needs AX). First n0 attempt found fse already live from another seat's `organizer-fixture` stand-in that then ended; n0 rerun brought fse up with my stub.
+
+## Review
+pass: P1, P2, P3, P4 and X0 met at c0130f2998bb9c40df9517ab27fbd2bb2fa87514, from a fresh clone of it (removed after). Evidence under `.wt-notes/pr-review/out/`.
+
+- P1: `TestStartCrewNamesRunningSessions` passes (running = po_ana `crewfix-probe-ana`, qa_cleo `crewfix-probe-cleo`, from `sessions[i]` that `crewSession` fills; one line, bruno's); `TestAppCreateCrewReturnsAtOnce` checks `App.CreateCrew` returns `running` non-null (`p1-go-test.txt`). `organizer crew init-a --print` on the fixture with the stub, binaries built from main 47bf151 and from c0130f2: identical, exit 0, and the fixture already had two seats running (`# already running, not started: po_ana, dev_bruno`) (`p1-cli-main.txt`, `p1-cli-branch.txt`, `p1-cli-diff.txt` empty).
+- P2: Tab harness 1024×640 on my own `wails dev -devserver localhost:34202` (vite on 5174, the clone's), fixture, `auth: off`, `ORGANIZER_PROBE_BIN` the stub; `n0` then `p2` (builder's steps, copied). The real bound `CreateCrew` (no page fake; stub log did not grow, nothing to start) closed the confirm; with no feed since the press (`feeds` 1 throughout, `feedsSincePress: 0`) the fse row read `running` with `Attach fse` titled `probe organizer-fixture-probe-fse` while the feed still had fse's agent null; focus `Attach fse`, fse the first seat drawn (`p2.jsonl`).
+- P3: `p3`: confirm open with focus on Start, `applyAgents` with fse live: at the focusin onto `Attach fse` (108 ms after the feed) the region already read `Every seat is already running`; confirm gone; focus never on the body (`p3.jsonl`).
+- P4: `liveRegion.test.ts` P4 passes: second `say("a")` reads empty at 0, 50 and 99 ms, `a` at 100 ms; a spied `requestAnimationFrame` never called; `requestAnimationFrame` appears in `liveRegion.ts` only in a comment (`p4-vitest.txt`).
+- X0: `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test` exit 0, reused run 847dec03-12359 of c0130f2998bb by organizer-probe-pr-ui (16 Go packages ok, vitest 60 files / 708 tests); `pnpm run build` 0; `wails build` 0; `git status --porcelain` empty. `wails generate module` changes nothing under `frontend/wailsjs/go` (only the runtime files' modes, which the branch does not touch). No new service call or feed field in the diff.
+- Unmet: none.
+- Not in the gate: in the race, Start goes disabled and focus sits on the body ~120 ms (4183 to 4301 ms in `p2.jsonl`) before `Attach fse` takes it, and the words land ~100 ms after focus; pre-existing (leftovers-32), as the builder noted.
+
+Reviewer pr-review, 2026-10-15, commit c0130f2. UI review missing at writing: status and place left as they are.
