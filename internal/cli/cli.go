@@ -291,6 +291,7 @@ func doctor(cfg config.Config, args []string, stdout, stderr io.Writer, now func
 	}
 	fmt.Fprintf(stdout, "statusline: %s\n", statuslineStatus())
 	fmt.Fprintf(stdout, "discuss: %s\n", discussStatus(cfg))
+	fmt.Fprintf(stdout, "usage post: %s\n", service.UsagePostStatus(cfg))
 
 	started := now()
 	snap := scan.Run(scanOptions(cfg, now, true))
