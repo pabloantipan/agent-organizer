@@ -6,7 +6,7 @@ branch: lf34-busy-focus
 seat:
 stage: one-window
 updated: 2026-10-15
-next: "pablo: rule 0130 (accept leftovers-34); on accept the FSE starts its supervisor"
+next: "sup71 runs it (0130 ruled ok, 2026-10-15)"
 depends_on: []
 boundary: ["docs/specs/leftovers-34.md Boundary, lf34-busy-focus"]
 spec: "docs/specs/leftovers-34.md (FR-1 to FR-3; launch-progress L24, L26, L27)"
