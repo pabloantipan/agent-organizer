@@ -56,7 +56,7 @@ desktops, focus or input, starts a real seat, or writes the real clipboard.
   beside `tokens.css`); `Conversation.tsx` (FR-3) and `Crew.tsx` only to
   export or share `LIST_WAIT_MS`; `lib/agentFocus.ts`, `AgentsView.tsx` and
   the agent row's component (FR-4); the top bar's component (FR-5);
-  `styles/roadmap.css` (FR-6); their tests; `docs/design-system.md` only to
+  `styles/outline.css` (FR-6, radius only); their tests; `docs/design-system.md` only to
   say the ring is violet-11. Not: Go, `Gate.tsx`, `lib/queue.ts`.
 
 ## No-gos
@@ -69,3 +69,17 @@ desktops, focus or input, starts a real seat, or writes the real clipboard.
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf35-ring-tokens` | R1, R2, R3, R4, R5, R6, X0 | — | true |
+
+Amendment 1, 2026-10-15, the FSE, from rt-build via sup72 (thread
+01M502MN): FR-6 named `.srm-gem`, which no component renders any more; the
+roadmap diamond on screen is `.ol-gem > i` and the legend's `.ol-gem-key`
+(`styles/outline.css`, both `border-radius: 2px`). 0133's words ("the
+roadmap's diamond corners go from 2px to 4px") stand, so:
+- **FR-6** is now: `.ol-gem > i` and `.ol-gem-key` take a 4px radius (the
+  dead `.srm-gem` rule may stay or go; nothing draws it).
+- **R6**'s radius check reads a drawn `.ol-gem > i` and a `.ol-gem-key`:
+  `4px`.
+- The Boundary names `styles/outline.css` (radius only) instead of
+  `styles/roadmap.css`.
+- FR-5 is already met on main (Usage, memory, Rescan); "today Rescan comes
+  before Usage" was stale. R6 proves the order; nothing changes for it.
