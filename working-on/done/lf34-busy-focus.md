@@ -1,6 +1,6 @@
 ---
 title: "One word for alive seats; a busy button keeps focus; focus then words"
-status: now
+status: done
 repos: [organizer]
 branch: lf34-busy-focus
 seat: bf-build
@@ -43,17 +43,18 @@ docs/specs/leftovers-34.md, rows F1, F2, F3, F4 and X0.
 - F3's 20 ms interval stalls around the harness's key step; samples on every mutation and focusin cover it.
 
 ## Review
-Verdict: pass. Every row met at 87abf10c9e4048e65aff190f26a528ae1b09283a; unmet: none. Evidence in `.wt-notes/bf-review/out/`.
+Verdict: pass. Round 2: every row checked at 1dad95e975eb88de51b9b27463857d9081415bf8 in a fresh clean clone (removed after). Nothing from round 1 (87abf10) counts. Unmet: none. Evidence in `.wt-notes/bf-review/r2/out/`.
 
-- F1: Tab harness (builder's steps, my clean clone, my `wails dev` on 34202, fixture, auth off, probe stub via `ORGANIZER_PROBE_BIN`), N1 race: stale feed shows fse off, Start pressed, the real `CreateCrew` names fse running (Attach on `organizer-fixture-probe-fse`). At once, 0 feeds since the press: `fse:idle po_ana:idle dev_bruno:idle`; after the next real feed: the same (`out/f1.jsonl`). Met.
-- F2: vitest, `lib/busy.test.ts` (props, a press while busy ignored, disabled kept when not busy) and `Busy.controls.test.tsx`, one test per control with a never-resolving fake call: Start, Open (Draft the cell), Rule, Retire, comment Save, the docked Send and the new-thread Start/Branch, each `aria-disabled="true"`, no `disabled`, the gerund, the call once. 24 passing (`out/f2-vitest.txt`). The diff passes the other reasons (`!ready`, no plan, empty body or subject) to `disabled`, tested for Send. Focus is a stand-in, since vitest here has no DOM; F3 is the live check. Met.
-- F3: harness, fse off: keydown 3830 ms, Start `Starting…` aria-disabled with focus 3832, heading `Starting 1 seat…` 4061; 9 samples, 0 `body` (`out/f3.jsonl`). The 20 ms interval stalled from 3535 to 4061 around the key step, so samples between come from every mutation and focusin, which any focus loss would trigger. Met.
-- F4: N3 (`out/f4.jsonl`): applyAgents with fse live 3730, focusin `Attach fse` 3740, region text 3842. Race (`out/f1.jsonl`): focusin `Attach fse` 4680, region text 4783. No `body` in either. Met.
-- X0: fresh clone at 87abf10: `make test` exit 0 (16 Go packages ok, vitest 62 files / 721 tests), `pnpm run build` 0, `wails build` 0, `git status --porcelain` empty (`out/x0-*.txt`). Met.
-- Boundary and No-gos: the diff touches only `lib/busy.ts` and its test, Crew, AgentsView, RuleDecisionBox, Retire, CardDrawer, Conversation, their tests and `global.css` (aria-disabled drawn as disabled). No Go, `Gate.tsx` or `lib/queue.ts`. No new service call.
-- Spec naming: FR-2's "New agent's Open (`Opening…`)" names no control. New agent's own submit is `Start`, which still has no busy state (a second press can start a second seat). I judged it as Draft the cell's Open, the only `Opening…` in AgentsView.tsx. Raised to sup71.
-- Shared test run: reused, run 89bc8959-43994 of 87abf10c9e40 (by organizer-probe-bf-ui).
-- Reviewer bf-review, 2026-10-15, commit 87abf10.
+- F1: Tab harness, 1024×640, my `wails dev` on 34202 (its own vite on 5174, serving my clone), fixture, auth off, probe stub through `ORGANIZER_PROBE_BIN`. N1 race: the stale feed shows fse off, then Start, and the real `CreateCrew` names fse running (Attach on `organizer-fixture-probe-fse`). At once, 0 feeds since the press: `fse:idle po_ana:idle dev_bruno:idle`. After the next real feed: the same (`f1.jsonl`). Met.
+- F2: vitest (`f2-f5-vitest.txt`, 35 passing). The helper: props, a press while busy ignored, `disabled` kept when not busy. One test per FR-2 control with a pending fake call: crew Start, Draft the cell's Open, New agent's Start, Rule, Retire, comment Save, the docked Send, and the new thread's Start/Branch. Each shows `aria-disabled="true"`, no `disabled`, the gerund, and the call made once. The rule words are `readOnly`, not `disabled`. The other reasons still reach `disabled` (diff; tested for Send). Focus is a stand-in, since vitest here has no DOM. Met as written.
+- F3: harness, fse off. Keydown 3826 ms, then Start `Starting…` aria-disabled with focus 3827, then the heading 4027; 9 samples, 0 `body` (`f3.jsonl`). The first try (`f3-interfered.jsonl`) is void: bf-ui's concurrent fixture ran a stand-in under the same session name `organizer-fixture-probe-fse`, so my fse read running. Rerun with only my stand-ins alive. The 20 ms interval stalls around the key step; mutation and focusin samples cover the gap. Met.
+- F4: N3 (`f4.jsonl`): feed 3729, focusin `Attach fse` 3738, region text 3840. Race (`f1.jsonl`): focusin 4653, region text 4756. No `body`. Met.
+- F5: vitest (`Busy.after.test.tsx`), with fake calls that resolve. Rule lands on the record's opener; the race on Attach; Retire, once its report closes, on the crew block's Retire…; Save on the comment field; the docked Send on the reply field. New agent lands on the new seat's row and a new thread or branch on its divider, with Send busy and focused until the thread is drawn. Never `body`. New agent, the new thread and the branch, and the race's `none`, drive the exported landing functions (`landNewAgent`, `landPosted`, `focusAfter`), not the effects that call them. The diff shows those effects call them. The queued Start's heading is F3. Met as written.
+- F6: harness, a never-resolving fake per binding (`f6.jsonl`, `wkwebview-1024x640-F6-*.png`). Start, New agent's Start and Retire, each busy and focus-visible: element opacity 1, ring opacity 1, ring `rgb(138,63,252)`, label and fill at 45%. Ring contrast 3.35:1 on `rgb(32,27,43)` (Start, Retire) and 3.57:1 on `rgb(26,21,35)` (New agent). Met.
+- X0: `make test` exit 0 (16 Go packages ok, vitest 63 files / 732 tests), `pnpm run build` 0, `wails build` 0, `git status --porcelain` empty (`x0-*.txt`). Met.
+- Boundary and No-gos: the diff touches `lib/busy.ts` and its test, Crew, AgentsView, RuleDecisionBox, Retire, CardDrawer, Conversation, their tests, `global.css` and `tokens.css` (busy colours). No Go, `Gate.tsx` or `lib/queue.ts`. No new Go binding. Conversation now also calls the existing `GetAgents` after a post.
+- Shared test run: reused, run 7693e457-85575 of 1dad95e975eb (by organizer-probe-bf-ui).
+- Reviewer bf-review, 2026-10-15, commit 1dad95e.
 
 ## UI review
 Verdict: pass. Round 2: every row checked at 1dad95e975eb88de51b9b27463857d9081415bf8 in a fresh clean clone. Nothing from round 1 (87abf10) counts. F1 to F6 and X0 are met as written, and nothing of severity 4 or 3 remains. Reviewer bf-ui, 2026-10-15. Evidence in `.wt-notes/bf-ui/r2/`.
