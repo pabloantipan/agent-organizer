@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AgentGroup, AgentsView, BoardView, CellThread, Seat } from "../hooks/useWails";
 import type { merge, model, service } from "../../wailsjs/go/models";
-import { forecastMultiple, forecastWords, launchVerb, missingPersonas, needsMeRows, needsMeShown, needsMeThread, NEEDS_ME_FIRST, pastFirst, personaMissing, queueOf, readOnlyOf, spanWords, taskCard, taskContext, taskFact, taskLine, taskTone, threadContext } from "./queue";
+import { forecastMultiple, forecastWords, launchVerb, missingPersonas, needsMeRows, needsMeShown, needsMeThread, NEEDS_ME_FIRST, pastFirst, personaMissing, queueOf, readOnlyOf, spanWords, taskCard, taskContext, taskFact, taskLine, taskTone, threadContext, waitDays, waitingOnOthers } from "./queue";
 import { HEALTH } from "./health";
 
 // Fixtures are plain objects: the generated classes carry methods the
@@ -409,5 +409,85 @@ describe("V3: the unseen-failure row is dated by failed_at", () => {
       { seat: "y", state: "failed", started_at: at("12:04"), failed_at: at("12:05"), reason: "r" },
       { seat: "z", state: "failed", started_at: at("12:06"), failed_at: at("12:09"), reason: "r" },
     ])?.since?.toISOString()).toBe("2026-10-14T12:09:00.000Z");
+  });
+});
+
+// leftovers-36 (needs-me-waits): a fixed now, records raised whole days before.
+const NOW = new Date(2026, 9, 15, 14, 30);
+const ago = (n: number) => { const d = new Date(2026, 9, 15 - n); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+
+describe("waitDays (FR-1, FR-4)", () => {
+  it("counts whole days from raised to now's day, and is null with no raised", () => {
+    expect(waitDays(ago(7), NOW)).toBe(7);
+    expect(waitDays(ago(0), NOW)).toBe(0);
+    expect(waitDays("2026-10-15T09:00:00Z", NOW)).toBe(0);
+    expect(waitDays(undefined, NOW)).toBeNull();
+    expect(waitDays("", NOW)).toBeNull();
+    expect(waitDays("someday", NOW)).toBeNull();
+  });
+});
+
+describe("N1: the lead's long waits lead Needs me, oldest first (FR-1, FR-2)", () => {
+  const view = board([initiative("a", [
+    { number: "0001", status: "proposed", owner: "pablo", raised: ago(8) },
+    { number: "0002", status: "proposed", owner: "", raised: ago(6) },
+    { number: "0003", status: "proposed", owner: "Pablo", raised: ago(9) },
+    { number: "0004", status: "proposed", raised: ago(18) },
+  ])]);
+  const g = group("a", { threads: [{ id: 7, status: "escalated", asked_of_me: 0, age_seconds: 2 * 86400 } as unknown as CellThread] });
+  const rows = needsMeRows(view, agents(g), NOW);
+
+  it("orders 18, 9, 8, then the 6-day record and the thread in today's order", () => {
+    expect(rows.map((r) => r.key)).toEqual(["decision:a/0004", "decision:a/0003", "decision:a/0001", "decision:a/0002", "thread:7"]);
+  });
+
+  it("gives the long ones their age and the 6-day one none", () => {
+    expect(rows.map((r) => (r.kind === "decision" ? r.waited : "thread"))).toEqual([18, 9, 8, null, "thread"]);
+  });
+
+  it("keeps the count: the same rows as by date alone", () => {
+    expect(rows).toHaveLength(5);
+    const byDate = [...rows].sort((x, y) => (x.since?.getTime() ?? 0) - (y.since?.getTime() ?? 0));
+    expect(new Set(rows.map((r) => r.key))).toEqual(new Set(byDate.map((r) => r.key)));
+  });
+
+  it("a long wait leads even an older thread and the undated rows", () => {
+    const old = group("a", { threads: [{ id: 8, status: "escalated", asked_of_me: 0, age_seconds: 30 * 86400 } as unknown as CellThread] });
+    const v = board([initiative("a", [{ number: "0005", status: "proposed", owner: "pablo", raised: ago(7) }, { number: "0006", status: "proposed", owner: "pablo" }])]);
+    expect(needsMeRows(v, agents(old), NOW).map((r) => r.key)).toEqual(["decision:a/0005", "thread:8", "decision:a/0006"]);
+  });
+});
+
+describe("N3: Waiting on others (FR-3, FR-4)", () => {
+  const paused = { ...initiative("p", [{ number: "0001", status: "proposed", owner: "alejandro", raised: ago(30) }]), status: "paused" } as unknown as merge.BoardInitiative;
+  const records = [
+    { number: "0001", status: "proposed", owner: "alejandro", raised: ago(18), title: "one" },
+    { number: "0002", status: "proposed", owner: "fse", raised: ago(9), title: "two" },
+    { number: "0003", status: "proposed", owner: "alejandro", raised: ago(3) },
+    { number: "0004", status: "proposed", owner: "alejandro" },
+    { number: "0005", status: "proposed", owner: "pablo", raised: ago(18) },
+    { number: "0006", status: "ruled", owner: "alejandro", raised: ago(20) },
+  ];
+  const view = board([initiative("a", records), paused]);
+
+  it("lists 18 then 9; the 3-day, the undated, the paused and the lead's are not in it", () => {
+    const got = waitingOnOthers(view, agents(group("a")), NOW);
+    expect(got.map((r) => [r.key, r.owner, r.waited])).toEqual([["others:a/0001", "alejandro", 18], ["others:a/0002", "fse", 9]]);
+  });
+
+  it("is not in needsMeRows or its count", () => {
+    const keys = needsMeRows(view, agents(group("a")), NOW).map((r) => r.key);
+    expect(keys).toEqual(["decision:a/0005"]);
+  });
+
+  it("is empty when only those remain", () => {
+    const rest = board([initiative("a", records.filter((r) => r.number !== "0001" && r.number !== "0002")), paused]);
+    expect(waitingOnOthers(rest, agents(group("a")), NOW)).toEqual([]);
+  });
+
+  it("reads the lead as the cell's human, in any case", () => {
+    const v = board([initiative("a", [{ number: "0007", status: "proposed", owner: "Ana", raised: ago(10) }, { number: "0008", status: "proposed", owner: "pablo", raised: ago(10) }])]);
+    const a = agents(group("a", { cell: { human: "ana" } as model.Cell }));
+    expect(waitingOnOthers(v, a, NOW).map((r) => r.key)).toEqual(["others:a/0008"]);
   });
 });

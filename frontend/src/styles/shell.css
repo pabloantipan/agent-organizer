@@ -29,6 +29,8 @@ button.lz:hover { background: var(--surface-hover); border: 0; }
 .lz.warning { background: var(--warning-bg); color: var(--warning); }
 .lz.tone { background: var(--tone-bg); color: var(--tone); }
 .lz.remote { background: var(--tone-bg); color: var(--remote); }
+/* waiting on someone else: dashed, as waiting records are drawn (leftovers-36 FR-3) */
+.lz.waiting.dashed { border: 1px dashed var(--decision-waiting); padding: 0 6px; }
 button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--fg); }
 
 .sec-title {

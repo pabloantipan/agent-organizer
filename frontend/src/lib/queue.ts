@@ -95,7 +95,7 @@ export function queueOf(group: AgentGroup, view: BoardView | null) {
  *  when it started waiting (null when the source has no date, and those sort
  *  last); `key` is what openNeedsMe and the Solved marks name it by. */
 export type NeedsMeRow =
-  | { kind: "decision"; key: string; initiative: string; since: Date | null; decision: model.Decision }
+  | { kind: "decision"; key: string; initiative: string; since: Date | null; decision: model.Decision; waited: number | null }
   | { kind: "thread"; key: string; initiative: string; since: Date | null; thread: CellThread; asker?: HealthState }
   | { kind: "task"; key: string; initiative: string; since: Date | null; task: service.Task; supervisor: { group: string; id: string } | null; asker?: TaskAsker }
   | { kind: "card"; key: string; initiative: string; since: Date | null; card: merge.BoardCard }
@@ -105,6 +105,28 @@ export type NeedsMeRow =
   | { kind: "unread"; key: string; initiative: string; since: null; path: string; files: UnreadFile[] };
 
 const day = (s: string | undefined) => parseISO(s?.slice(0, 10));
+
+/** A wait this long is long (needs-me-waits §1): a week, far off the lead's
+ *  rhythm of a median 0-day turnaround. */
+export const LONG_WAIT_DAYS = 7;
+
+/** Whole days from a record's `raised` to `now`'s day (needs-me-waits §1,
+ *  leftovers-36 FR-1): null when `raised` is missing or not a date, never a
+ *  computed one (FR-4). Counted between local midnights, so a DST night does
+ *  not cost a day. */
+export function waitDays(raised: string | undefined, now: Date): number | null {
+  const from = day(raised);
+  if (!from) return null;
+  const to = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.max(0, Math.round((to.getTime() - from.getTime()) / 86400000));
+}
+
+/** The age a row says, `waiting 18 days` (FR-1): only from LONG_WAIT_DAYS,
+ *  so `1 day` never occurs; null under it or undated. */
+export function longWait(raised: string | undefined, now: Date): number | null {
+  const n = waitDays(raised, now);
+  return n !== null && n >= LONG_WAIT_DAYS ? n : null;
+}
 
 /** Needs me (FR-15): queueOf over every cell plus the decision records
  *  waiting on the lead's ruling (FR-8) and the tasks over their forecast or
@@ -130,7 +152,7 @@ export function needsMeRows(view: BoardView | null, agents: AgentsView | null, n
     if (folded.has(i.id)) continue;
     const lead = leadOf(groups.get(i.id));
     for (const d of i.decisions ?? []) {
-      if (d.status === "proposed" && ownedByLead(d, lead)) rows.push({ kind: "decision", key: `decision:${i.id}/${d.number}`, initiative: i.id, since: day(d.raised), decision: d });
+      if (d.status === "proposed" && ownedByLead(d, lead)) rows.push({ kind: "decision", key: `decision:${i.id}/${d.number}`, initiative: i.id, since: day(d.raised), decision: d, waited: longWait(d.raised, now) });
     }
     // Files the scan could not read: whatever ask they hold is missing from
     // every other row, so the initiative gets one row that says so.
@@ -166,7 +188,38 @@ export function needsMeRows(view: BoardView | null, agents: AgentsView | null, n
       rows.push({ kind: "launch", key: `launch:${g.id}`, initiative: g.id, since: null, cell: g.cell, missing });
     }
   }
-  return rows.concat(unread);
+  // The lead's long waits lead, oldest first (FR-2): the rows are sorted by
+  // their date already, so a stable partition keeps that order on both sides.
+  const all = rows.concat(unread);
+  const long = (r: NeedsMeRow) => r.kind === "decision" && r.waited !== null;
+  return [...all.filter(long), ...all.filter((r) => !long(r))];
+}
+
+/** A record someone else owns that has waited a week or more (FR-3): not the
+ *  lead's queue, so never a row of needsMeRows nor in the badge. */
+export type OthersWait = { key: string; initiative: string; owner: string; waited: number; since: Date | null; decision: model.Decision };
+
+/** Waiting on others (FR-3, FR-4; needs-me-waits §2): proposed records on
+ *  active initiatives whose owner is set and is not the lead (a seat such as
+ *  `fse` included), raised LONG_WAIT_DAYS or more before `now`, oldest
+ *  first. An undated record has no age, so it joins no group by age. */
+export function waitingOnOthers(view: BoardView | null, agents: AgentsView | null, now = new Date()): OthersWait[] {
+  const out: OthersWait[] = [];
+  const seen = new Set<string>();
+  const groups = new Map((agents?.groups ?? []).map((g) => [g.id, g]));
+  const folded = inactiveIds(view);
+  for (const i of [...(view?.board.initiatives ?? [])].sort((a, b) => Number(b.local) - Number(a.local))) {
+    if (seen.has(i.id)) continue;
+    seen.add(i.id);
+    if (folded.has(i.id)) continue;
+    const lead = leadOf(groups.get(i.id));
+    for (const d of i.decisions ?? []) {
+      if (d.status !== "proposed" || ownedByLead(d, lead)) continue;
+      const waited = longWait(d.raised, now);
+      if (waited !== null) out.push({ key: `others:${i.id}/${d.number}`, initiative: i.id, owner: (d.owner ?? "").trim(), waited, since: day(d.raised), decision: d });
+    }
+  }
+  return out.sort((a, b) => b.waited - a.waited);
 }
 
 /** When a failed start's last seat failed: the latest `failed_at` of its

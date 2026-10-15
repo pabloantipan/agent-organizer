@@ -1,10 +1,10 @@
-import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Briefcase, ChevronDown, ChevronRight, CircleDashed, Compass, Hammer, Hand, Play } from "lucide-react";
 import type { merge, model, service } from "../../wailsjs/go/models";
 import { oneLine, underRoot, unreadLabel } from "../lib/unread";
 import { UnreadFiles } from "./UnreadFiles";
-import { failedStartLine, inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, needsMeShown, NEEDS_ME_FIRST, boardCard, forecastWords, pastFirst, taskCard, taskContext, taskFact, taskLine, taskTone, threadContext, type NeedsMeRow } from "../lib/queue";
+import { failedStartLine, inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, needsMeShown, NEEDS_ME_FIRST, waitingOnOthers, type OthersWait, boardCard, forecastWords, pastFirst, taskCard, taskContext, taskFact, taskLine, taskTone, threadContext, type NeedsMeRow } from "../lib/queue";
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
 import { dateWords } from "../lib/dates";
@@ -41,6 +41,7 @@ export function Home() {
   // regular at its top, so the cap lifts as regular's does from 1720.
   const roomy = windowRoomy || (windowClass === "wide" && widthClass === "regular");
   const rows = view ? needsMeRows(view, agents) : [];
+  const others = view ? waitingOnOthers(view, agents) : [];
   // A ruled record leaves the queue, and its box and its draft with it.
   const gone = !!ruleDraft && !!view && !rows.some((r) => r.key === ruleDraft.key) ? ruleDraft.key : null;
   useEffect(() => { if (gone) dropRule(gone); }, [gone, dropRule]);
@@ -88,6 +89,7 @@ export function Home() {
             )}
           </div>
         )}
+        <WaitingOnOthers rows={others} />
       </section>
       <Roles roles={agents?.roles ?? []} />
       <section className="home-sec home-list">
@@ -166,7 +168,7 @@ const age = (since: Date | null) => {
  *  openNeedsMe names it. The row's hover carries its whole context line in
  *  every class (FR-11): wide cuts it, compact takes it out of the view and
  *  keeps it in the accessible text. */
-function Shell({ row, reason, tone, subject, context, hover, children }: { row: NeedsMeRow; reason: string; tone: string; subject: React.ReactNode; context: string; hover?: string; children: React.ReactNode }) {
+function Shell({ row, reason, tone, subject, context, hover, children }: { row: Pick<NeedsMeRow, "key" | "since">; reason: string; tone: string; subject: React.ReactNode; context: string; hover?: string; children: React.ReactNode }) {
   const { needsMeFocus, ruleDraft } = useBoard();
   const ref = useRef<HTMLDivElement>(null);
   const focused = needsMeFocus === row.key;
@@ -302,15 +304,68 @@ function UnreadRow({ row }: { row: Extract<NeedsMeRow, { kind: "unread" }> }) {
   );
 }
 
-/** A decision waiting on a ruling. Its action is a slot: RuleAction opens
- *  the box that writes the ruling (FR-22). */
-function DecisionRow({ row, decision: d }: { row: NeedsMeRow; decision: model.Decision }) {
+/** A decision record's context line: its owner, when and by whom raised, its
+ *  options. */
+const decisionContext = (d: model.Decision) => {
   const opts = d.options ?? [];
+  return `${ownerPhrase(d.owner)} · raised ${d.raised ? dateWords(d.raised) : "—"}${d.raised_by ? ` by ${d.raised_by}` : ""}${opts.length > 0 ? ` · options: ${opts.join(", ")}` : ""}`;
+};
+
+/** `n days`, in full: a screen reader reads `d` as a letter (needs-me-waits
+ *  §1). Never 1, the threshold being 7. */
+const daysWords = (n: number) => `${n} days`;
+
+/** A decision waiting on a ruling. Its action is a slot: RuleAction opens
+ *  the box that writes the ruling (FR-22). A wait of a week or more says its
+ *  age first, in amber, in place of the kind (leftovers-36 FR-1), and the
+ *  verb is described by the drawn line (FR-5). */
+export function DecisionRow({ row, decision: d }: { row: Extract<NeedsMeRow, { kind: "decision" }>; decision: model.Decision }) {
+  const descId = useId();
+  const aged = row.waited !== null;
+  const desc = aged ? `waiting ${daysWords(row.waited!)}, ${row.initiative} ${d.number}, ${d.title}` : null;
   return (
-    <Shell row={row} reason="decision" tone="waiting"
+    <Shell row={row} reason={aged ? `waiting ${daysWords(row.waited!)}` : "decision"} tone={aged ? "warning" : "waiting"}
       subject={<><span className="mono">{row.initiative} {d.number}</span> · {d.title}</>}
-      context={`${ownerPhrase(d.owner)} · raised ${d.raised ? dateWords(d.raised) : "—"}${d.raised_by ? ` by ${d.raised_by}` : ""}${opts.length > 0 ? ` · options: ${opts.join(", ")}` : ""}`}>
-      <RuleAction rowKey={row.key} initiative={row.initiative} decision={d} />
+      hover={desc ? desc.split(", ").join(" · ") : undefined}
+      context={decisionContext(d)}>
+      <RuleAction rowKey={row.key} initiative={row.initiative} decision={d} describedBy={desc ? descId : undefined} />
+      {desc && <span id={descId} hidden>{desc}</span>}
+    </Shell>
+  );
+}
+
+/** Waiting on others (leftovers-36 FR-3; needs-me-waits §2): records someone
+ *  else owns that have waited a week or more, below Needs me's rows and
+ *  outside its count. Absent when empty. */
+export function WaitingOnOthers({ rows }: { rows: OthersWait[] }) {
+  if (rows.length === 0) return null;
+  return (
+    <>
+      <h3 className="sec-title ib-group">Waiting on others · <span className="num sec-count">{rows.length}</span></h3>
+      <div className="panel inbox">
+        {rows.map((r) => <OthersRow key={r.key} row={r} />)}
+      </div>
+    </>
+  );
+}
+
+/** One record waiting on someone else: whose it is, in the waiting record's
+ *  dashed fuchsia, its age in amber, id and title. The verb is Open, to look
+ *  before ruling over them: it lands on the record in the initiative's
+ *  Decisions, focused as Rule's landing is, where Rule is still offered
+ *  (0045). */
+export function OthersRow({ row }: { row: OthersWait }) {
+  const openDecision = useBoard((s) => s.openDecision);
+  const descId = useId();
+  const d = row.decision;
+  const desc = `waiting on ${row.owner}, ${daysWords(row.waited)}, ${row.initiative} ${d.number}, ${d.title}`;
+  return (
+    <Shell row={row} reason={`waiting on ${row.owner}`} tone="waiting dashed"
+      subject={<><span className="lz warning">{daysWords(row.waited)}</span> <span className="mono">{row.initiative} {d.number}</span> · {d.title}</>}
+      hover={desc.split(", ").join(" · ")}
+      context={decisionContext(d)}>
+      <button className="act" aria-label={`Open ${row.initiative} ${d.number}`} aria-describedby={descId} onClick={() => openDecision(row.initiative, d.number)} title="the record on its Decisions, where Rule is">Open</button>
+      <span id={descId} hidden>{desc}</span>
     </Shell>
   );
 }
@@ -325,7 +380,7 @@ function DecisionRow({ row, decision: d }: { row: NeedsMeRow; decision: model.De
  *  Cancel (FR-9): opening another row's Rule, Escape or this Rule again
  *  closes the box and keeps them, and the verb reads `Rule · draft`
  *  (leftovers-9 FR-1). */
-function RuleAction({ rowKey, initiative, decision }: { rowKey: string; initiative: string; decision: model.Decision }) {
+function RuleAction({ rowKey, initiative, decision, describedBy }: { rowKey: string; initiative: string; decision: model.Decision; describedBy?: string }) {
   const { ruleDraft, openRule, setRuleDraft, dropRule } = useBoard();
   const widthClass = useContext(HomeClass);
   const open = ruleDraft?.key === rowKey;
@@ -342,7 +397,7 @@ function RuleAction({ rowKey, initiative, decision }: { rowKey: string; initiati
       {/* The scrim sits outside the row, on the page's ground, so the
           opener's row can stand above it (FR-23). */}
       {open && widthClass !== "wide" && createPortal(<div className="rb-scrim" aria-hidden="true" onClick={closeKeep} />, document.body)}
-      <button ref={btn} className="act" aria-expanded={open} aria-label={draftVerb(`Rule ${initiative} ${decision.number}`, kept)} onClick={() => openRule(open ? null : rowKey)}>{draftVerb("Rule", kept)}</button>
+      <button ref={btn} className="act" aria-expanded={open} aria-describedby={describedBy} aria-label={draftVerb(`Rule ${initiative} ${decision.number}`, kept)} onClick={() => openRule(open ? null : rowKey)}>{draftVerb("Rule", kept)}</button>
       {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord widthClass={widthClass} opener={btn} afterRule={focusNeedsMe} onClose={() => openRule(null)} onCancel={() => dropRule(rowKey)}
         draft={{ chosen: ruleDraft.chosen, words: ruleDraft.words, set: setRuleDraft }} />}
     </span>
