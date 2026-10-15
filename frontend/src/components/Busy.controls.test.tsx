@@ -70,7 +70,7 @@ vi.mock("../lib/drafts", async (orig) => {
 });
 
 const { Crew } = await import("./Crew");
-const { DraftCell } = await import("./AgentsView");
+const { DraftCell, NewAgent } = await import("./AgentsView");
 const { RuleDecisionBox } = await import("./RuleDecisionBox");
 const { Retire } = await import("./Retire");
 const { MyNotes } = await import("./CardDrawer");
@@ -215,6 +215,16 @@ describe("F2: every control that waits on the service keeps focus (leftovers-34 
     });
   });
 
+  it("New agent's Start: Starting…, focus kept while CreateAgent is pending, a second press starts nothing (Amendment 1)", () => {
+    Object.assign(h.state, { applyAgents: () => undefined, agents: { groups: [], launches: [] } });
+    // open 0, name 1, note 2, target 3, useLiveRegion 4-5, useNow 6, starting 7
+    check({
+      idle: () => seeded(<NewAgent initiativeId="init-a" />, { 0: true }),
+      busy: () => seeded(<NewAgent initiativeId="init-a" />, { 0: true, 7: true }),
+      label: "Start", gerund: "Starting…", call: "createAgent",
+    });
+  });
+
   it("the rule box's Rule: Ruling…, focus kept while RuleDecision is pending", () => {
     Object.assign(h.state, { widthClass: "wide", refresh: async () => undefined, agents: { groups: [groupOf()] } });
     const dec = { number: "0007", title: "t", status: "proposed", options: ["a", "b"], owner: "pablo" } as never;
@@ -224,6 +234,15 @@ describe("F2: every control that waits on the service keeps focus (leftovers-34 
       busy: () => seeded(box(), SEEDS.ruleBusy),
       label: "Rule", gerund: "Ruling…", call: "ruleDecision",
     });
+  });
+
+  it("the rule box's words stay focusable while ruling: readonly, never disabled (Amendment 1, U3)", () => {
+    Object.assign(h.state, { widthClass: "wide", refresh: async () => undefined, agents: { groups: [groupOf()] } });
+    const dec = { number: "0007", title: "t", status: "proposed", options: ["a", "b"], owner: "pablo" } as never;
+    const html = seeded(<RuleDecisionBox initiative="init-a" decision={dec} onClose={() => undefined} />, SEEDS.ruleBusy);
+    const ta = html.match(/<textarea\b[^>]*>/)![0];
+    expect(ta).toMatch(/\breadOnly=""|\breadonly=""/);
+    expect(ta).not.toMatch(/\bdisabled/);
   });
 
   it("Retire's run: Retiring…, focus kept while Retire is pending", () => {
