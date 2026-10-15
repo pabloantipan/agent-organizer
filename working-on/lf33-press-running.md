@@ -3,10 +3,10 @@ title: "A seat the press found running can be attached at once; a closed confirm
 status: next
 repos: [organizer]
 branch: lf33-press-running
-seat:
+seat: pr-build
 stage: one-window
-updated: 2026-10-14
-next: "sup70 runs it (0129 ruled ok, 2026-10-15)"
+updated: 2026-10-15
+next: "pr-build builds it on branch lf33-press-running (sup70)"
 depends_on: []
 boundary: ["docs/specs/leftovers-33.md Boundary, lf33-press-running"]
 spec: "docs/specs/leftovers-33.md (FR-1 to FR-4; launch-progress L23-L25)"
