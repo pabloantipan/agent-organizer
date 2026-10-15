@@ -23,14 +23,14 @@ docs/specs/leftovers-36.md, rows N1, N2, N3, N4, N5, N6 and X0.
 - [x] N1: .wt-notes/nw-build/out/vitest-n1-n6.txt
 - [x] N2: .wt-notes/nw-build/out/vitest-n1-n6.txt
 - [x] N3: .wt-notes/nw-build/out/vitest-n1-n6.txt
-- [x] N4: .wt-notes/nw-build/out/n4n5.jsonl, out/n4-home.png (heading reads · 2, see Notes)
+- [x] N4: .wt-notes/nw-build/out/n4n5.jsonl, out/n4-home.png (heading `· 2`, as Amendment 1 reads N4)
 - [x] N5: .wt-notes/nw-build/out/n4n5.jsonl, out/n5-decisions.png
 - [x] N6: .wt-notes/nw-build/out/vitest-n1-n6.txt
 - [x] X0: .wt-notes/nw-build/out/x0-make-test.log, x0-pnpm-build.log, x0-wails-build.log, x0-status.txt (empty)
 
 ## Done
-- 2026-10-15: nw-build built it on lf36-needs-me-waits (5bc6a1e queue, 8249815 Home); gate met, unmerged, rebased on main.
+- 2026-10-15: nw-build built it on lf36-needs-me-waits (bdea474 queue, 4a19ad3 Home); gate met, unmerged, rebased on main after be39970.
 
 ## Notes
 - 2026-10-15: run by sup73 (organizer-probe-sup73), spawned by the FSE.
-- 2026-10-15: N4 reads `Waiting on others · 2`, not · 1: the overlay's init-a 0005 (alejandro, 18 d) is the record N4 asks for, so none was added, and the default fixture's init-many 0075 (ana, 14 d, testdata/fixture-many) also qualifies by FR-3. Asked sup73.
+- 2026-10-15: N4 reads `Waiting on others · 2`, not · 1: the overlay's init-a 0005 (alejandro, 18 d) is the record N4 asks for, so none was added, and the default fixture's init-many 0075 (ana, 14 d, testdata/fixture-many) also qualifies by FR-3. Asked sup73; the FSE amended N4 (leftovers-36 Amendment 1, be39970): n is what FR-3 selects from the fixture on the day. 0005 is the overlay record N4 and N5 use.
