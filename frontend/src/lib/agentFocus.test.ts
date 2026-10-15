@@ -11,13 +11,13 @@ describe("agentTarget", () => {
   it("finds a crew seat's agent by its seat", () => {
     expect(agentTarget(groups, "camp-probe-andrea#10")).toEqual({ group: "camp", seat: "po_andrea" });
   });
-  it("finds any other agent by its place in the list, roster seats left out", () => {
-    expect(agentTarget(groups, "camp-probe-sup#11")).toEqual({ group: "camp", index: 0 });
-    expect(agentTarget(groups, "#12")).toEqual({ group: "camp", index: 1 });
-    expect(agentTarget(groups, "organizer-probe-a#20")).toEqual({ group: "organizer", index: 0 });
+  it("finds any other agent by its key, roster seats left out (leftovers-35 FR-4)", () => {
+    expect(agentTarget(groups, "camp-probe-sup#11")).toEqual({ group: "camp", key: "camp-probe-sup#11" });
+    expect(agentTarget(groups, "#12")).toEqual({ group: "camp", key: "#12" });
+    expect(agentTarget(groups, "organizer-probe-a#20")).toEqual({ group: "organizer", key: "organizer-probe-a#20" });
   });
   it("finds an agent outside every initiative in the unassigned group", () => {
-    expect(agentTarget(groups, "probe-x#30", [{ session: "probe-y", pid: 31 }, { session: "probe-x", pid: 30 }])).toEqual({ group: "", index: 1 });
+    expect(agentTarget(groups, "probe-x#30", [{ session: "probe-y", pid: 31 }, { session: "probe-x", pid: 30 }])).toEqual({ group: "", key: "probe-x#30" });
   });
   it("is null for an agent that is gone", () => {
     expect(agentTarget(groups, "x#1")).toBeNull();

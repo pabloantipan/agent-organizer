@@ -81,7 +81,7 @@
   --border: rgba(255, 255, 255, 0.09);
   --border-strong: rgba(255, 255, 255, 0.16);
   --border-accent: rgba(160, 110, 255, 0.45); /* selected, hover on interactive objects */
-  --focus-ring: var(--violet-9);
+  --focus-ring: var(--violet-11);  /* 5.1–9.5:1 on every surface; the accent fill (#8a3ffc) is 2.85 on overlay (launch-progress L30) */
 
   /* accent: one solid action per view */
   --accent: var(--violet-9);
@@ -196,7 +196,7 @@
      ring full strength (no color-mix on the Safari 15 floor). */
   --busy-fg: rgba(238, 235, 244, 0.45);          /* --fg */
   --busy-muted: rgba(181, 175, 195, 0.45);       /* --fg-muted */
-  --busy-fg-on-accent: rgba(255, 255, 255, 0.45);
+  --busy-fg-on-accent: rgba(255, 255, 255, 0.45); /* --fg-on-accent */
   --busy-button-bg: rgba(39, 32, 51, 0.45);      /* --surface-raised */
   --busy-border: rgba(255, 255, 255, 0.04);      /* --border */
   --busy-accent: rgba(138, 63, 252, 0.45);       /* --accent */
