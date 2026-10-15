@@ -9,7 +9,8 @@ restating it (the discuss skill).
 - **Last SHA seen:** cb35385 (+ merge 025a39a). leftovers-35: sup72, 34 min launch to merge vs 25-50m, ~$12-16, one fail round (U1 Comments focus) under my Amendment 2; installed v0.2.0-2182-g025a39a; sup72 ended, token revoked, prompt files removed. No supervisor running. Run record runs/2026-10-15-sup72-leftovers-35.md.
 - **Carry from sup72:** `.srm-gem` is dead CSS; 17 outline:none focus rules draw the ring via a sibling rule (a later batch could fold them); no row measures a ring on --surface-pressed; FR-3 vitest only.
 - **0134 proposed:** stage decisions-owned-and-used: exit 1 met by camp 0003/0004 (alejandro); exit 2 via a Needs me card (age on long waits, "waiting on <owner>"). Ask Aglaea before carding.
-- **Still asked of Pablo:** push main + origin/run-gate via Talos; floating-icon-spike removal (tagged archive/); leftovers-33 overnight stalled row.
+- **Pablo "do it yourself" (~13:40):** floating-icon-spike worktree and branch removed (commits kept under tag `archive/floating-icon-spike`, 4a708f0). Push not done: the repo has **no remote at all** (`.git/config` has only [core]; `.git/logs/refs/remotes` emptied 2026-10-15 11:42, packed-refs rewritten 11:44, before the tidy ran). 0131's "790 ahead of origin/main" was not verified by me. Asked Pablo whether origin was removed on purpose.
+- **Still asked of Pablo:** leftovers-33 overnight stalled row.
 - **Repetition (1st):** my leftovers-35 spec carried two stale facts from finding text (dead `.srm-gem`, top bar already in order) and a gate grep too narrow (R2). Read the code for every FR's target before writing it (spec-craft step 2). Second time → propose a spec-craft check.
 
 ## HAND-OFF — 2026-10-15 ~12:30, tidy 0131 applied; 0132 and 0133 proposed
