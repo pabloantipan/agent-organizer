@@ -104,18 +104,25 @@ describe("P2 in markup: a seat the press found running (leftovers-33 FR-2, L23)"
   const row = (assumedSession?: string) => renderToStaticMarkup(
     <ul><SeatRow seat={off} assumedLive assumedSession={assumedSession} readOnly={false} confirm={null} setConfirm={() => undefined} flash={() => undefined} /></ul>,
   );
-  it("named by the result: reads running, never idle, and draws Attach on its session", () => {
+  // leftovers-34 FR-1 (L26): the word is a feed-running, not-working row's,
+  // `idle`, so the next feed changes none.
+  const feedRow = renderToStaticMarkup(
+    <ul><SeatRow seat={seatOf("dev_b", true) as unknown as Parameters<typeof SeatRow>[0]["seat"]} readOnly={false} confirm={null} setConfirm={() => undefined} flash={() => undefined} /></ul>,
+  );
+  const wordOf = (html: string) => html.match(/<span class="a-state [^"]*"><i><\/i>([^<]*)<\/span>/)?.[1];
+  it("named by the result: reads idle, as its feed row will, and draws Attach on its session", () => {
     const html = row("p-probe-b");
-    expect(html).toContain('<span class="a-state running"><i></i>running</span>');
-    expect(html).not.toContain("idle");
+    expect(html).toContain('<span class="a-state running"><i></i>idle</span>');
+    expect(wordOf(html)).toBe(wordOf(feedRow));
+    expect(html).not.toMatch(/<i><\/i>running</);
     expect(html).toContain('aria-label="Attach dev_b"');
     expect(html).toContain('title="probe p-probe-b"');
-    expect(html).toContain('aria-label="p-probe-b (dev_b, running)"');
+    expect(html).toContain('aria-label="p-probe-b (dev_b, idle)"');
   });
-  it("not named: reads running with no Attach until the feed, never starting…", () => {
+  it("not named: reads idle with no Attach until the feed, never starting…", () => {
     const html = row(undefined);
-    expect(html).toContain("<i></i>running</span>");
-    expect(html).not.toContain("idle");
+    expect(html).toContain("<i></i>idle</span>");
+    expect(wordOf(html)).toBe(wordOf(feedRow));
     expect(html).not.toContain("Attach");
     expect(html).not.toContain("starting");
   });

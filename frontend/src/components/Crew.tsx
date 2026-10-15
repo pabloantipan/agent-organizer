@@ -11,6 +11,7 @@ import { useBoard } from "../stores/board.store";
 import { escapeCloses, useConfirmFocus } from "../lib/focus";
 import { stateWord } from "../lib/stateWords";
 import { useLiveRegion, type Say } from "../lib/liveRegion";
+import { busyButton, busyLabel } from "../lib/busy";
 import { RetrySeat, SeenLaunch, StopStarting } from "../../wailsjs/go/main/App";
 import { ClipboardSetText } from "../../wailsjs/runtime/runtime";
 import type { main, service } from "../../wailsjs/go/models";
@@ -195,6 +196,10 @@ const starting = (l: Launch | undefined) => !!l?.seats?.some((s) => s.state === 
 /** How long a list with every listed seat up stays (launch-progress §1, L14). */
 export const LIST_KEEP_MS = 5000;
 
+/** How long a Start that queued seats stays busy waiting for the feed to
+ *  draw the list: two agents feed periods (10 s each). */
+export const LIST_WAIT_MS = 20000;
+
 /** What the live region says when Start finds every seat running
  *  (leftovers-31 FR-3, L18). */
 export const ALL_RUNNING = "Every seat is already running";
@@ -286,7 +291,10 @@ function LaunchList({ initiative, launch, focusHead, say, onClose }: { initiativ
   const head = useRef<HTMLHeadingElement>(null);
   const now = useNow(starting(launch));
   const [error, setError] = useState<string | null>(null);
-  useEffect(() => {
+  // In the commit that draws the list, which is the one that takes the busy
+  // Start away: focus goes from Start to the heading with no body between
+  // (leftovers-34 FR-2, L27).
+  useLayoutEffect(() => {
     if (!focusHead.current) return;
     focusHead.current = false;
     head.current?.focus();
@@ -405,6 +413,9 @@ export function crewBlocked(seats: Seat[], cell: model.Cell): string | null {
 export function Crew({ group, launch, readOnly = false, onMessage }: { group: AgentGroup; launch?: Launch; readOnly?: boolean; onMessage?: (seat: string) => void }) {
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
+  // Start queued seats and the list is not drawn yet: Start stays, busy and
+  // with focus, until the list's heading takes it (leftovers-34 FR-2, L27).
+  const [awaitList, setAwaitList] = useState(false);
   const [note, setNote] = useState<string | null>(null);
   const [confirmKill, setConfirmKill] = useState<string | null>(null);
   const [retiring, setRetiring] = useState(false);
@@ -475,22 +486,36 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
     refocus.current = false;
     focusAfter(box.current)?.focus();
   });
+  const confirmBox = useRef<HTMLSpanElement>(null);
+  // A list that never comes (no feed carries the start) does not hold Start
+  // busy for good: after two feed periods the confirm closes as a race does.
+  useEffect(() => {
+    if (!awaitList) return;
+    const t = window.setTimeout(() => {
+      if (confirmBox.current?.contains(document.activeElement)) refocus.current = true;
+      setAwaitList(false);
+      setAsking(false);
+    }, LIST_WAIT_MS);
+    return () => window.clearTimeout(t);
+  }, [awaitList]);
   const seats = group.crew ?? [];
   const off = seats.filter((s) => isOff(s) && !liveNow?.has(s.name)).length;
   // A confirm whose press can no longer act closes (FR-3, L21); its words
   // stay as they were.
-  const confirmBox = useRef<HTMLSpanElement>(null);
   // It says why first (leftovers-33 FR-3, L24): the confirm, and focus in
   // it, stay until the live region carries the words, then it closes and
   // focus goes by focusAfter. Focus never drops to the body meanwhile.
-  const dead = asking && seats.length > 0 && off === 0;
+  // Focus first, then the words (leftovers-34 FR-3, L24 amended), as the
+  // race does: the confirm closes, focus goes by focusAfter in that commit,
+  // and the live region is set after it. A pressed Start is the press's to
+  // answer, not the feed's.
+  const dead = asking && !busy && !awaitList && seats.length > 0 && off === 0;
   useEffect(() => {
     if (!dead) return;
-    say(ALL_RUNNING, () => {
-      const inside = !!confirmBox.current && confirmBox.current.contains(document.activeElement);
-      if (inside) refocus.current = true;
-      setAsking(false);
-    });
+    const inside = !!confirmBox.current && confirmBox.current.contains(document.activeElement);
+    if (inside) refocus.current = true;
+    setAsking(false);
+    say(ALL_RUNNING);
   }, [dead, say]);
   const cell = group.cell;
   if (!cell) return null;
@@ -509,7 +534,7 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
     const unpress = () => { focusHead.current = false; if (before) pressed.set(group.id, before); else pressed.delete(group.id); };
     startCrew(group.id, {
       create: api.createCrew,
-      queued: () => setAsking(false),
+      queued: () => setAwaitList(true),
       none: (running) => {
         unpress();
         // Every seat shown off reads running (FR-1); the ones the result
@@ -523,6 +548,8 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
     }).finally(() => setBusy(false));
   };
   const showList = shown;
+  // The list is drawn: the confirm it replaced is done.
+  if (showList && (asking || awaitList)) { setAsking(false); setAwaitList(false); }
 
   if (!showList && listHadFocus.current) {
     listHadFocus.current = false;
@@ -578,7 +605,7 @@ export function Crew({ group, launch, readOnly = false, onMessage }: { group: Ag
         {asking && (
           <span ref={confirmBox} className="confirm-inline" onKeyDown={escapeCloses(() => setAsking(false))}>
             <span className="meta">starts the off seats one after another, detached, each with its discuss identity; running seats stay as they are</span>
-            <button ref={openBtn} className="tiny-btn primary" onClick={bringUp} disabled={busy}>Start</button>
+            <button ref={openBtn} className="tiny-btn primary" {...busyButton({ busy: busy || awaitList, onPress: bringUp })}>{busyLabel(busy || awaitList, "Start", "Starting…")}</button>
             <button className="tiny-btn ghost" onClick={() => setAsking(false)}>Cancel</button>
           </span>
         )}
@@ -594,13 +621,15 @@ const isOff = (s: Seat) => !s.agent || s.agent.state === "exited";
 
 /** One seat of the crew block. `assumedLive` is a seat the press found
  *  running while the feed still shows it off (leftovers-32 FR-1): it reads
- *  `running`, the press's word, never `idle`, until the next feed; with
+ *  the word a feed-running, not-working row draws (`stateWord`, `idle`), so
+ *  the next feed changes no word unless the seat works (leftovers-34 FR-1,
+ *  L26); with
  *  `assumedSession`, the session the press named, it draws Attach at once,
  *  else `—` and no Attach until the feed (leftovers-33 FR-2, L23). */
 export function SeatRow({ seat, assumedLive = false, assumedSession, readOnly, confirm, setConfirm, flash, onMessage }: { seat: Seat; assumedLive?: boolean; assumedSession?: string; readOnly: boolean; confirm: string | null; setConfirm: (s: string | null) => void; flash: (m: string) => void; onMessage?: (seat: string) => void }) {
   const a = assumedLive ? undefined : seat.agent;
   const state = assumedLive ? "running" : a?.state ?? "off";
-  const word = assumedLive ? "running" : stateWord(state);
+  const word = stateWord(state);
   const session = assumedLive ? assumedSession ?? "" : a?.session || "";
   const asking = confirm === seat.name;
   const health = healthState({ watcher: seat.watcher, deaf: seat.deaf, capped: seat.capped });
