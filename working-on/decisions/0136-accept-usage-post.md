@@ -1,6 +1,6 @@
 ---
 title: Accept usage-post - the organizer sends its usage rows to the local record
-status: proposed
+status: ruled
 raised: 2026-10-15
 raised_by: fse
 owner: pablo
@@ -10,9 +10,9 @@ forecast: 25-50m
 threads: [01M50RN69B0SCKW9A68DW6VJFR]
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-15
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -55,6 +55,8 @@ forecast: 25-50 min over 1 wave; basis: one-card tasks on this initiative
 The FSE: **"accept as written"**.
 
 ## Ruling
+
+pablo, 2026-10-15, in the organizer on lodestar: ok
 
 ## Consequences
 
