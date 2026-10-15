@@ -54,7 +54,8 @@ func (s *Service) Usage(week string) (usage.View, error) {
 		}
 	}
 
-	ledger, offs := usage.DataPaths(filepath.Dir(session.Dir()))
+	dataDir := filepath.Dir(session.Dir())
+	ledger, offs := usage.DataPaths(dataDir)
 	st, err := usage.Ingest(usage.Options{
 		ProjectsDir: usage.ProjectsDir(),
 		LedgerPath:  ledger,
@@ -71,6 +72,9 @@ func (s *Service) Usage(week string) (usage.View, error) {
 	}
 	v.Machine = cfg.Machine
 	v.Stats = st
+	// The changed rows go to the record after the view is built, in the
+	// background, so the post never delays it (usage-post FR-6).
+	startUsagePost(cfg, dataDir, ledger, s.now)
 	return v, nil
 }
 

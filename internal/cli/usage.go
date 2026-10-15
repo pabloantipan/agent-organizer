@@ -45,6 +45,9 @@ func usageCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now fu
 		fmt.Fprintln(stderr, usageUsage)
 		return 2
 	}
+	// The pass posts its changed rows in the background; wait for it, at
+	// most 10 s, once the output is printed (usage-post Amendment 1).
+	defer service.WaitUsagePost()
 	if asJSON {
 		enc := json.NewEncoder(stdout)
 		enc.SetIndent("", "  ")
