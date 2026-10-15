@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 34 - one word for alive seats, a busy button keeps focus, focus then words
-status: proposed
+status: ruled
 raised: 2026-10-15
 raised_by: fse
 owner: pablo
@@ -10,6 +10,9 @@ forecast: 20-45m
 threads: []
 supersedes: []
 superseded_by:
+ruled: 2026-10-15
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -42,3 +45,7 @@ seven controls).
 ## Recommendation
 
 The FSE: **"accept as written"**.
+
+## Ruling
+
+pablo, 2026-10-15, in the organizer on lodestar: ok
