@@ -8,6 +8,8 @@ import { openBox } from "../lib/boxStack";
 import { loopTab } from "../lib/tabTrap";
 import { regionName, useScrollEdges } from "../lib/useScrollEdges";
 import { focusBoxBelow } from "./RuleDecisionBox";
+import { slotDiagrams } from "../lib/diagram";
+import { useDiagrams } from "./DiagramFigure";
 import { ageWords, noSessionLine, otherHandOffLine, roleState, sessionStarted, sessionWord } from "../lib/roles";
 import { stateWord } from "../lib/stateWords";
 import "../styles/roles.css";
@@ -253,6 +255,8 @@ function Bitacora({ b }: { b: model.RoleBitacora }) {
 }
 
 function HandOffBody({ body }: { body: string }) {
-  const html = useMemo(() => marked.parse(body || "") as string, [body]);
-  return <div className="markdown rd-handoff" dangerouslySetInnerHTML={{ __html: html }} />;
+  const html = useMemo(() => slotDiagrams(marked.parse(body || "") as string), [body]);
+  const el = useRef<HTMLDivElement>(null);
+  const figures = useDiagrams(el, html, "Hand-off");
+  return <><div ref={el} className="markdown rd-handoff" dangerouslySetInnerHTML={{ __html: html }} />{figures}</>;
 }

@@ -8,6 +8,8 @@ import { openBox } from "../lib/boxStack";
 import { focusBoxBelow } from "./RuleDecisionBox";
 import { DeltagosLockup } from "./DeltagosMark";
 import "../styles/help.css";
+import { slotDiagrams } from "../lib/diagram";
+import { useDiagrams } from "./DiagramFigure";
 
 type Section = { id: string; depth: number; title: string };
 
@@ -45,7 +47,7 @@ export function HelpView({ top, onClose }: { top: number; onClose: () => void })
   const { html, sections } = useMemo(() => {
     if (!doc?.text) return { html: "", sections: [] as Section[] };
     const tpl = document.createElement("template");
-    tpl.innerHTML = marked.parse(doc.text) as string;
+    tpl.innerHTML = slotDiagrams(marked.parse(doc.text) as string);
     const found: Section[] = [];
     tpl.content.querySelectorAll<HTMLHeadingElement>("h1, h2, h3").forEach((h, i) => {
       h.id = `help-section-${i}`;
@@ -54,6 +56,8 @@ export function HelpView({ top, onClose }: { top: number; onClose: () => void })
     return { html: tpl.innerHTML, sections: found };
   }, [doc]);
   useMarkdownEdges(body, html);
+  // diagrams FR-2: a ```mermaid block draws as a figure in its slot.
+  const figures = useDiagrams(body, html, "Help");
   // leftovers-7 FR-5, P4: the document scrolls inside Help; each edge with
   // content hidden past it shows (help.css, edge-top and edge-bottom).
   // leftovers-26 FR-3: a stop while it scrolls, named by the Help heading;
@@ -92,6 +96,7 @@ export function HelpView({ top, onClose }: { top: number; onClose: () => void })
             ))}
           </nav>
           <article ref={body} className={`markdown help-doc ${docEdges.top ? "edge-top" : ""} ${docEdges.bottom ? "edge-bottom" : ""}`} dangerouslySetInnerHTML={{ __html: html }} />
+          {figures}
         </div>
       )}
     </section>
