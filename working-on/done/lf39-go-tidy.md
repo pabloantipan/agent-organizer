@@ -1,11 +1,11 @@
 ---
 title: "A steady crew test, honest CLI money, a missing card spec named, Escape in the Tab harness"
-status: now
+status: done
 repos: [organizer]
 branch: lf39-go-tidy
 seat: gt-build
 updated: 2026-10-16
-next: "file finding: organizer run (internal/cli/run.go, launchLines without a wait) has the same OnLaunch-after-settle gap; root fix is notify before close in internal/service/launch.go setSeat"
+next: "done; launch.go gap and specRel duplicate filed to the FSE (thread 01M52H5K566N1ZWCR9VDSTQ5CD)"
 review: pass
 risk: low
 footprint: [internal/cli/crew_test.go, internal/cli/usage.go, internal/usage/report.go (Totals), internal/scan (card spec check), testdata/home, frontend/src/lib/usage.ts (totalsNotes), frontend/wailsjs/, scripts/tab-harness/tabharness.swift]
@@ -70,8 +70,8 @@ Rows (logs in .wt-notes/gt-review/):
 - L5: own page on 127.0.0.1:60499, pid saved and killed by pid; window visible:false; page saw `["Escape"]`. Main's harness: `Fatal error: unknown key escape`.
 - X0: make test, pnpm install --frozen-lockfile, pnpm run build, wails build pass; git status --porcelain empty.
 
-Note: `organizer run` keeps the same gap (Found, not asked); not proved by a test here, and no card, record or backlog line holds it, hence next.
-Note: cardSpecRel duplicates service.specRel; the two can drift.
+Note: `organizer run` keeps the same gap (Found, not asked); not proved by a test here, and no card, record or backlog line holds it, hence next. Filed by sup78 to the FSE, thread 01M52H5K566N1ZWCR9VDSTQ5CD.
+Note: cardSpecRel duplicates service.specRel; the two can drift. Filed to the FSE in the same thread.
 Gate gap: X0 and L1 say `make test` without a temp XDG_DATA_HOME; I ran L1's with one.
 
 gt-review, 2026-10-16
