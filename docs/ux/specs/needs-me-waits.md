@@ -98,3 +98,36 @@ and below its rows:
 | W4 | still rule it | Open lands on camp's Decisions with 0005 focused, and Rule is there |
 | W5 | not see fresh others' records | an alejandro record raised 3 days ago is in no Needs me group; the group is absent |
 | W6 | never get a made-up age | a record with no `raised` shows no age and joins no group by age |
+
+## Amendment 1 (aglaea, 2026-10-15): from lf36's UI review
+
+From sup73's close (`runs/2026-10-15-sup73-leftovers-36.md`,
+`working-on/done/lf36-needs-me-waits.md`, ## UI review, nw-ui). My §1 and
+§2 put the age in a lozenge while every row already has an age column;
+that caused all three faults below. The age moves to its column, and the
+reason column goes back to saying what kind of row it is.
+
+- **Gap (the lead's long row lost `decision`)**: the reason column keeps
+  the `decision` lozenge on every record row, long or not. The verb is not
+  the only mark of a row's kind.
+- **A2 (age twice)**: the age is said once, in the age column. On a long
+  row (7 days or more) that column draws in `--warning` amber at 600, so
+  the row still reads as long at a glance. The amber age lozenge is gone.
+  The description still says it in full: `waiting 25 days, …`.
+- **A1 (others' rows misalign)**: others' rows also carry `decision` in
+  the 112 px reason column, so every row's lozenge and age line up. The
+  owner moves to the front of the subject, in the one owner phrase
+  (`ownerPhrase`): `owner alejandro · camp 0005 · <title>`. A long name is
+  cut at the subject's end, never in the column.
+- **Q (sub-line)**: yes, one line under the heading, as Needs me has:
+  `Theirs to rule. Not counted in Needs me.` It says the one thing nothing
+  else on the screen says, why the badge leaves these rows out.
+- **VoiceOver of the descriptions**: a finding for whoever has a screen, as
+  in launch-progress A6; not a gate row.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| W7 | tell a record row from others | every record row, long or not and in both groups, shows the `decision` lozenge in the reason column |
+| W8 | read the age once | a long row has no age lozenge; its age column reads in amber; a 6-day row's age column is in the usual colour |
+| W9 | scan others' rows in line | at 1024, `owner alejandro` and `owner ana` rows: the lozenges and the age columns share one x each |
+| W10 | know why they are not counted | under `Waiting on others · n` the line reads `Theirs to rule. Not counted in Needs me.` |

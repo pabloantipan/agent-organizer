@@ -411,6 +411,7 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - Re-sweep Gantt tick labels when the font or its size changes: tickLabelExtent estimates width by character count (time-zoom-2, dropped from leftovers-35 on 0 cuts). A sent message whose thread lags the feed reads 'Sent', never failed, after two feeds (U5).
 - Check a record's 'today it shows X' against the code before designing: 0134 said others' records read like the lead's on Needs me; ownedByLead keeps them off. Others' long waits get a 'Waiting on others' group outside the badge, verb Open (needs-me-waits).
 - Map and roadmap (note, 2026-10-15): the base map is drawn once and every lens (stage, spec, record option, node) only recolours it; layout never changes, or place is lost. Map is a Roadmap mode; specs and records open in a drawer over it. Amber is not 'current' (map-and-roadmap.md).
+- Before placing a fact in a row, list the row's existing columns: needs-me-waits put the age in a lozenge beside an age column (said twice) and displaced the kind lozenge. Kind stays in the reason column; emphasis goes on the existing column (A1).
 
 ## Participants in use
 
