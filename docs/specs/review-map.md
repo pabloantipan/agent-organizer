@@ -132,3 +132,13 @@ build step (v0-v3), each a wave of one or two cards; only v0 is carded now.
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `rm-v0` | M1, M2, M3, M4, M5, M6, X0 | — | false |
+
+Amendment 1, 2026-10-15, the FSE, from rm-build's report via the card
+(0d14c8f): M4 asked for a tested and an untested changed function on
+*both* merges, but 35671ed has no untested changed definition; a real merge
+need not hold both. So:
+- **M4** is met when, across the two gate merges, a changed function with a
+  test lists `file::TestName` and a changed function without one carries
+  `untested`; if neither merge holds an untested one, a small Go repo in
+  testdata shows it. A merge with no untested definition says so in the
+  evidence, which is itself a check that no false `untested` appears.
