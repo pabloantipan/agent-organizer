@@ -1,0 +1,50 @@
+# M2: changed nodes of c8e1773 (compare hand-lists.md, M2)
+modified	test	go:organizer/internal/cli.TestCrewCmdPrintsEachState
+added	test	go:organizer/internal/cli.TestCrewCmdSkipsRunningSeat
+added	test	go:organizer/internal/cli.TestCrewStandIn
+modified	function	go:organizer/internal/cli.crewCmd
+added	test	go:organizer/internal/cli.crewHome
+added	type	go:organizer/internal/service.CrewStart
+modified	type	go:organizer/internal/service.SeatLaunch
+modified	method	go:organizer/internal/service.Service.CreateCrew
+modified	method	go:organizer/internal/service.Service.RetrySeat
+added	method	go:organizer/internal/service.Service.StartCrew
+modified	method	go:organizer/internal/service.Service.runLaunches
+added	test	go:organizer/internal/service.TestCreateCrewAllRunningStartsNothing
+added	test	go:organizer/internal/service.TestCreateCrewSkipsRunningSeats
+added	test	go:organizer/internal/service.TestFailedSeatCarriesFailedAt
+added	test	go:organizer/internal/service.crewService
+added	test	go:organizer/internal/service.fakeLive
+added	var	go:organizer/internal/service.liveSeats
+
+# M1: nodes from a non-Go file (want 0)
+c8e1773: 0, base 736fce3d3d7e4639a6664bea442e38f36f195da4, head c8e17736192831399b6fd70a74747dffe3232034
+35671ed: 0, base 2401e90945da195a305fd191cd0723773441160a, head 35671edd9c5f00936c7c5ac55ed494c5fbdac641
+
+# M3: uses edges into the three picked functions (compare hand-lists.md, M3)
+go:organizer.App.CreateCrew -> go:organizer/internal/service.Service.CreateCrew  [go/types]
+go:organizer/internal/cli.crewCmd -> go:organizer/internal/service.Service.StartCrew  [go/types]
+go:organizer/internal/service.Service.CreateCrew -> go:organizer/internal/service.Service.StartCrew  [go/types]
+go:organizer/internal/service.Service.RetrySeat -> go:organizer/internal/service.Service.runLaunches  [go/types]
+go:organizer/internal/service.Service.queueLaunch -> go:organizer/internal/service.Service.runLaunches  [go/types]
+callers marked affected or changed:
+go:organizer.App.CreateCrew affected
+go:organizer/internal/service.Service.queueLaunch affected
+go:organizer/internal/cli.crewCmd modified
+
+# M4: a changed function with a test, and one without
+## c8e1773
+go:organizer/internal/cli.crewCmd tests=[] flags=["untested"]
+go:organizer/internal/service.CrewStart tests=["internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing","internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats"] flags=[]
+go:organizer/internal/service.SeatLaunch tests=["internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats","internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt","internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached","internal/service/launch_test.go::TestCrewStartRefusesWhileOneIsStarting","internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds","internal/service/launch_test.go::TestLaunchStatesThroughTheStub"] flags=[]
+go:organizer/internal/service.Service.CreateCrew tests=["internal/service/crew_test.go::TestCreateCrewRefusesASeatWithoutItsPersonaFile","internal/service/draft_test.go::TestDraftCellIsInDefinitionAndRefusedNamingItsAcceptRecord","internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached","internal/service/launch_test.go::TestCrewStartRefusesWhileOneIsStarting","internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds","internal/service/launch_test.go::TestLaunchStatesThroughTheStub"] flags=[]
+go:organizer/internal/service.Service.RetrySeat tests=["internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt","internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds","internal/service/launch_test.go::TestLaunchStatesThroughTheStub"] flags=[]
+go:organizer/internal/service.Service.StartCrew tests=["internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing","internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats","internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt"] flags=[]
+go:organizer/internal/service.Service.runLaunches tests=[] flags=["untested"]
+go:organizer/internal/service.liveSeats tests=["internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing","internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats","internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt"] flags=[]
+## 35671ed
+go:organizer.App.CreateCrew tests=["app_launch_test.go::TestAppCreateCrewReturnsAtOnce"] flags=[]
+go:organizer.CrewResult tests=["app_launch_test.go::TestAppCreateCrewReturnsAtOnce"] flags=[]
+go:organizer/internal/service.CrewRunning tests=["internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions"] flags=[]
+go:organizer/internal/service.CrewStart tests=["internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing","internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats","internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions"] flags=[]
+go:organizer/internal/service.Service.StartCrew tests=["internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing","internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats","internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions","internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt"] flags=[]

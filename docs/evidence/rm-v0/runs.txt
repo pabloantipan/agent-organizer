@@ -1,0 +1,56 @@
+$ organizer review organizer c8e1773 --json --out c8e1773.revmap.json
+exit 0
+organizer c8e1773: 736fce3..c8e1773 (go/types)
+changed 8 (and 9 tests), affected 58, untested 2, edges 91
+top changed by callers:
+  modified  15 callers  6 tests  organizer/internal/service.SeatLaunch
+  added      3 callers  2 tests  organizer/internal/service.CrewStart
+  added      2 callers  3 tests  organizer/internal/service.Service.StartCrew
+  modified   2 callers  0 tests  organizer/internal/service.Service.runLaunches  untested
+  modified   1 callers  0 tests  organizer/internal/cli.crewCmd  untested
+  modified   1 callers  6 tests  organizer/internal/service.Service.CreateCrew
+  modified   1 callers  3 tests  organizer/internal/service.Service.RetrySeat
+  added      1 callers  3 tests  organizer/internal/service.liveSeats
+  ! head: organizer: pattern all:frontend/dist: no matching files found
+  ! base: organizer: pattern all:frontend/dist: no matching files found
+$ organizer review organizer 35671ed --json --out 35671ed.revmap.json
+exit 0
+organizer 35671ed: 2401e90..35671ed (go/types)
+changed 5 (and 2 tests), affected 30, untested 0, edges 40
+top changed by callers:
+  added      4 callers  1 tests  organizer/internal/service.CrewRunning
+  modified   4 callers  3 tests  organizer/internal/service.CrewStart
+  modified   3 callers  4 tests  organizer/internal/service.Service.StartCrew
+  added      1 callers  1 tests  organizer.CrewResult
+  modified   0 callers  1 tests  organizer.App.CreateCrew
+  ! head: organizer: pattern all:frontend/dist: no matching files found
+  ! base: organizer: pattern all:frontend/dist: no matching files found
+# wall time, c8e1773, three runs
+real 2.25
+real 2.29
+real 2.29
+# M6
+$ organizer review organizer rm-v0
+organizer rm-v0: 294e125..005ebe4 (go/types)
+changed 62 (and 8 tests), affected 53, untested 46, edges 183
+top changed by callers:
+  added      7 callers  2 tests  organizer/internal/review.Range
+  added      6 callers  1 tests  organizer/internal/review.Missing
+  added      5 callers  0 tests  organizer/internal/review.Def  untested
+  added      5 callers  0 tests  organizer/internal/review.commitOf  untested
+  added      4 callers  1 tests  organizer/internal/review.Edge
+  added      4 callers  0 tests  organizer/internal/review.Graph  untested
+  added      4 callers  1 tests  organizer/internal/review.Node
+  added      4 callers  4 tests  organizer/internal/review.Repo
+  added      3 callers  1 tests  organizer/internal/review.Evidence
+  added      3 callers  2 tests  organizer/internal/review.GoTypes
+  ! head: organizer: pattern all:frontend/dist: no matching files found
+  ! base: organizer: pattern all:frontend/dist: no matching files found
+wrote $XDG_DATA_HOME/organizer/review/organizer/005ebe49ac016e5c5bacc94a565e1966d47c936d/revmap.json
+exit 0
+$ organizer review organizer app-icon-composer   (card whose branch no longer exists)
+branch app-icon-composer of card app-icon-composer does not exist in /Users/pabloantipan/organizer
+exit 2
+card with no branch: field: no such card on the real board; TestReviewCardWithoutBranchExits2 (internal/cli/review_test.go) and TestCardRanges (internal/review) prove exit 2 and the message 'card <slug> has no branch: field'
+$ organizer doctor | grep review
+review: go at /opt/homebrew/bin/go
