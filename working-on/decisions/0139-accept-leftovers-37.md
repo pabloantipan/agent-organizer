@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 37 - Needs me's long-wait rows read cleanly
-status: proposed
+status: ruled
 raised: 2026-10-15
 raised_by: fse
 owner: pablo
@@ -11,9 +11,9 @@ stage: decisions-owned-and-used
 threads: [01M5106WRJ6234SR9MVDZ818AY]
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-15
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -47,6 +47,8 @@ smaller).
 The FSE: **"accept as written"**.
 
 ## Ruling
+
+pablo, 2026-10-15, in the organizer on lodestar: ok
 
 ## Consequences
 
