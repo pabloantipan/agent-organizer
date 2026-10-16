@@ -18,7 +18,10 @@ type Totals struct {
 	End   string `json:"end"`   // the Sunday
 	// Money is the sum of the costs known; WithoutCost counts the sessions
 	// whose cost no record carries, so the view can say what it excludes.
+	// Priced is the share of Money the organizer's price table gave
+	// (cost_from priced) rather than a record or a transcript.
 	Money       float64 `json:"money"`
+	Priced      float64 `json:"priced"`
 	Input       int64   `json:"input"`
 	Output      int64   `json:"output"`
 	CacheRead   int64   `json:"cache_read"`
@@ -233,6 +236,9 @@ func totals(week string, ls []Line, running map[string]bool, loc *time.Location)
 		t.CacheWrite += l.CacheWrite
 		if l.Cost != nil {
 			t.Money += *l.Cost
+			if l.CostFrom == "priced" {
+				t.Priced += *l.Cost
+			}
 		} else {
 			noCost[l.SessionID] = true
 		}

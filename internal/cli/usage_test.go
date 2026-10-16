@@ -80,3 +80,32 @@ func TestUsageCmdOverATranscript(t *testing.T) {
 		t.Errorf("role cut should give the reason:\n%s", out.String())
 	}
 }
+
+// L2 (leftovers-39 FR-2): a week whose sessions carry no cost prints `—`
+// and the count, never $0.00; a priced share is named.
+func TestWriteUsageMoney(t *testing.T) {
+	tests := []struct {
+		name    string
+		t       ledger.Totals
+		want    string
+		wantNot string
+	}{
+		{"no cost at all", ledger.Totals{Sessions: 7, WithoutCost: 7}, "money     — (no cost recorded for 7 sessions)\n", "$0.00"},
+		{"one session, no cost", ledger.Totals{Sessions: 1, WithoutCost: 1}, "money     — (no cost recorded for 1 session)\n", "$0.00"},
+		{"a priced session", ledger.Totals{Sessions: 3, WithoutCost: 1, Money: 42.5, Priced: 12.5}, "money     $42.50; excludes 1 session with no cost; $12.50 priced\n", "—"},
+		{"nothing priced", ledger.Totals{Sessions: 2, Money: 5}, "money     $5.00\n", "priced"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.t.Week, tt.t.Start, tt.t.End = "2026-W34", "2026-08-17", "2026-08-23"
+			var out bytes.Buffer
+			WriteUsage(&out, ledger.View{Week: "2026-W34", FirstDay: "2026-08-17", ThisWeek: tt.t}, "initiative")
+			if !strings.Contains(out.String(), tt.want) {
+				t.Errorf("printed\n%s\nwant a line %q", out.String(), tt.want)
+			}
+			if strings.Contains(out.String(), tt.wantNot) {
+				t.Errorf("printed\n%s\nwant no %q", out.String(), tt.wantNot)
+			}
+		})
+	}
+}

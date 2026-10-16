@@ -104,6 +104,8 @@ describe("words", () => {
     expect(reasonsWords([{ reason: "no initiative root", sessions: 2 }, { reason: "no card", sessions: 1 }])).toBe("no initiative root (2 sessions); no card (1 session)");
     expect(totalsNotes({ running: 2, without_cost: 3 })).toEqual(["includes 2 running", "excludes 3 sessions with no cost"]);
     expect(totalsNotes({ running: 0, without_cost: 1 })).toEqual(["excludes 1 session with no cost"]);
+    expect(totalsNotes({ running: 0, without_cost: 0, priced: 12.5 })).toContain("$12.50 priced");
+    expect(totalsNotes({ running: 1, without_cost: 0, priced: 0 })).toEqual(["includes 1 running"]);
     expect(roleWords("fse")).toBe("FSE");
     expect(roleWords("builder")).toBe("builder");
   });

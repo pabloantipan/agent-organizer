@@ -239,11 +239,13 @@ export function reasonsWords(reasons: { reason: string; sessions: number }[] | u
   return reasons.map((r) => `${r.reason} (${r.sessions} session${r.sessions === 1 ? "" : "s"})`).join("; ");
 }
 
-/** The notes under the money total (her States: running and cost unknown). */
-export function totalsNotes(t: { running: number; without_cost: number }): string[] {
+/** The notes under the money total (her States: running and cost unknown),
+ *  and the share the price table gave (leftovers-39 FR-2). */
+export function totalsNotes(t: { running: number; without_cost: number; priced?: number }): string[] {
   const out: string[] = [];
   if (t.running > 0) out.push(`includes ${t.running} running`);
   if (t.without_cost > 0) out.push(`excludes ${t.without_cost} session${t.without_cost === 1 ? "" : "s"} with no cost`);
+  if (t.priced != null && t.priced > 0) out.push(`${money(t.priced)} priced`);
   return out;
 }
 

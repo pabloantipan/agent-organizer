@@ -2741,6 +2741,7 @@ export namespace usage {
 	    start: string;
 	    end: string;
 	    money: number;
+	    priced: number;
 	    input: number;
 	    output: number;
 	    cache_read: number;
@@ -2761,6 +2762,7 @@ export namespace usage {
 	        this.start = source["start"];
 	        this.end = source["end"];
 	        this.money = source["money"];
+	        this.priced = source["priced"];
 	        this.input = source["input"];
 	        this.output = source["output"];
 	        this.cache_read = source["cache_read"];

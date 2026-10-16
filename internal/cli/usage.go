@@ -77,14 +77,7 @@ func WriteUsage(w io.Writer, v ledger.View, by string) {
 		fmt.Fprintln(w, "No sessions this week.")
 		return
 	}
-	money := fmt.Sprintf("money     %s", dollars(t.Money))
-	if l := v.LastWeek; l.Money > 0 {
-		money += fmt.Sprintf(", %+.0f%% on last week (%s)", 100*(t.Money-l.Money)/l.Money, dollars(l.Money))
-	}
-	if t.WithoutCost > 0 {
-		money += fmt.Sprintf("; excludes %d %s with no cost", t.WithoutCost, plural(t.WithoutCost, "session"))
-	}
-	fmt.Fprintln(w, money)
+	fmt.Fprintln(w, moneyLine(t, v.LastWeek))
 	fmt.Fprintf(w, "tokens    %s: %s\n", compact(t.Tokens), kindsLine(t.Input, t.Output, t.CacheRead, t.CacheWrite))
 	sess := fmt.Sprintf("sessions  %d, %.1f h of work", t.Sessions, t.Hours)
 	if t.Running > 0 {
@@ -138,6 +131,26 @@ func kindsLine(in, out, read, write int64) string {
 		parts[i] = k.name + " " + compact(k.n)
 	}
 	return strings.Join(parts, " · ")
+}
+
+// moneyLine is the money tile as a line. A week whose sessions all lack a
+// cost is unknown, `—`, never $0.00 (leftovers-39 FR-2); the priced share
+// is named when there is one.
+func moneyLine(t, last ledger.Totals) string {
+	if t.WithoutCost >= t.Sessions && !(t.Money > 0) {
+		return fmt.Sprintf("money     — (no cost recorded for %d %s)", t.Sessions, plural(t.Sessions, "session"))
+	}
+	money := fmt.Sprintf("money     %s", dollars(t.Money))
+	if last.Money > 0 {
+		money += fmt.Sprintf(", %+.0f%% on last week (%s)", 100*(t.Money-last.Money)/last.Money, dollars(last.Money))
+	}
+	if t.WithoutCost > 0 {
+		money += fmt.Sprintf("; excludes %d %s with no cost", t.WithoutCost, plural(t.WithoutCost, "session"))
+	}
+	if t.Priced > 0 {
+		money += fmt.Sprintf("; %s priced", dollars(t.Priced))
+	}
+	return money
 }
 
 func dollars(x float64) string { return fmt.Sprintf("$%.2f", x) }
