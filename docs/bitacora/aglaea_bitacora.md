@@ -175,3 +175,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-15 — diagrams-in-app A1: added glyph ✚ U+271A (Dingbats, no emoji presentation), not ➕.
 - 2026-10-16 — lf37 graded: needs-me-waits Amendment 2 (owner once on others' rows, one verb column so ages share an x), rows W11-W12.
 - 2026-10-16 — dg-reader graded: diagrams-in-app Amendment 2 (✎ entry named 'Change on the map, start here', D9); U1 (Specs below the header region's fold at 1024) dropped with reasons.
+- 2026-10-16 — dg-render graded: diagrams-in-app Amendment 3 (blocked-reason style confirmed; outlines need 3:1 only where they carry meaning; SVG contents aria-hidden, text line uses labels and 'Around it'), D5 amended, D10.

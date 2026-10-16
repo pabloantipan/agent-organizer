@@ -148,3 +148,34 @@ From `working-on/dg-reader.md`, ## UI review (pass at 6ef262a).
 | # | The lead can | Checked by |
 |---|---|---|
 | D9 | hear which entry to read first | the Contents entry for `Change on the map` has the accessible name `Change on the map, start here`; ✎ stays hidden from the reader |
+
+## Amendment 3 (aglaea, 2026-10-16): from dg-render's UI review
+
+From `working-on/done/dg-render.md`, ## UI review (A1-A3), merged b82ddf0.
+
+- **A1: yes, that is the style.** The blocked-reason style is `sm`
+  `--fg-muted` (design system, Disabled actions), the same look as the
+  busy line. The two differ in their first words (`Drawing…` against
+  `Diagram not drawn:`) and in what follows the second (a reason and a
+  fix). No change.
+- **A2: no 3:1 on context and unclassed outlines.** 1.4.11 asks 3:1 of the
+  parts of a graphic needed to understand it. On this map a node is read
+  by its label (context labels `--fg-subtle`, 5.3:1) and its links by
+  their edges (`--fg-subtle`); the box outline only frames it. Context is
+  recessive on purpose, so the change stands out. The outline must reach
+  3:1 only where it carries meaning: the three touched classes (D2), and
+  `removed`'s dash.
+- **A3: hide the contents; the text line is the one text.** The figure is
+  one `role="img"` with its alt, and its inner SVG text is `aria-hidden`.
+  Otherwise a reader hears every label twice, the glyphs read as
+  "pencil" and "heavy Greek cross", and the order follows the SVG's
+  drawing order, not the map's. What the node labels gave is moved into
+  the text line, which now uses labels (without glyphs) instead of ids
+  and names the neighbourhood too:
+  `Added: Payments. Changed: BFF. Removed: none. Around it: PWA.`
+  A node with no label is named by its id.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| D5 (amended) | read the change without the picture | under the figure, `Added: … Changed: … Removed: … Around it: …` lists the labels of each class's nodes, none of them with a glyph |
+| D10 | hear the figure once | the AX tree shows the figure as one image with its alt and no child text; the text line is read after it |
