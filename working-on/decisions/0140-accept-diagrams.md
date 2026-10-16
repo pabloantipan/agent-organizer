@@ -1,6 +1,6 @@
 ---
 title: Accept diagrams - records and specs show their change-on-the-map figure in Deltagos
-status: proposed
+status: ruled
 raised: 2026-10-15
 raised_by: fse
 owner: pablo
@@ -11,9 +11,9 @@ stage: review-map
 threads: [01M510GR3VQKCZJVBHNMBSR200, 01M510M9NW8CZ1T3RPNVH2EP2H]
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-15
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -56,6 +56,8 @@ initiative's two-card frontend tasks (leftovers-30, 33 min; leftovers-29,
 The FSE: **"accept as written"**.
 
 ## Ruling
+
+pablo, 2026-10-15, in the organizer on lodestar: ok
 
 ## Consequences
 
