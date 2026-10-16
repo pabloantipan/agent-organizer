@@ -15,6 +15,8 @@ import { useDiagrams } from "./DiagramFigure";
 import { regionName, useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
 import { focusBoxBelow } from "./RuleDecisionBox";
 import { busyButton, busyLabel } from "../lib/busy";
+import { specRef } from "../lib/specReader";
+import { SpecOpener, SpecReader, useSpecProbe } from "./SpecReader";
 
 /** Focus and names, opening inline (widths-and-focus FR-19): the card back
  *  takes focus on its title when it opens, and hands it back to what opened
@@ -40,9 +42,15 @@ function useFocusOpener(key: string | null, title: React.RefObject<HTMLHeadingEl
   }, [key, title]);
 }
 
+/** The card back and, over it, the spec reader its spec: link opens
+ *  (diagrams FR-7): one mount for both, so the reader paints over the card. */
+export function CardDrawer() {
+  return <><CardBack /><SpecReader /></>;
+}
+
 // Trello-style card back: centered, description in the main column, labels
 // and actions in the side column.
-export function CardDrawer() {
+function CardBack() {
   const { selected, select, view } = useBoard();
   // Escape closes the card back when it is the topmost open box
   // (leftovers-5 FR-1): opened over a rule box, it closes and the box stays.
@@ -61,6 +69,9 @@ export function CardDrawer() {
   const scroller = useRef<HTMLDivElement>(null);
   const edges = useScrollEdges(scroller, open, regionName.cardBody(selected ? selected.title || selected.slug : ""));
   const titleId = useId();
+  // diagrams FR-8: a spec: naming a file that is not there reads missing
+  // before any press.
+  useSpecProbe(selected?.initiative_id ?? "", selected?.spec ?? "", !!selected?.local && !!selected?.spec);
   useFocusOpener(selected ? `${selected.initiative_id}/${selected.slug}` : null, title);
   if (!selected) return null;
   const c = selected;
@@ -105,6 +116,7 @@ export function CardDrawer() {
               {(c.repos ?? []).length === 0 && <li className="meta">none listed</li>}
               {(c.repos ?? []).map((r) => <li key={r} className="mono">{r}</li>)}
             </ul>
+            {c.spec && <CardSpec card={c} />}
             <div className="section-label">Actions</div>
             {c.local ? (
               <div className="actions">
@@ -125,6 +137,23 @@ export function CardDrawer() {
   );
 }
 
+
+/** The card's spec: as a link that opens the spec reader on its section
+ *  (diagrams FR-7, D6); the prose after the path stays as written. */
+function CardSpec({ card: c }: { card: merge.BoardCard }) {
+  const r = specRef(c.spec);
+  const word = c.spec.trim().split(/\s+/)[0] ?? "";
+  const rest = c.spec.trim().slice(word.length).trim();
+  return (
+    <>
+      <div className="section-label">Spec</div>
+      <div className="card-spec">
+        {r ? <SpecOpener initiative={c.initiative_id} refText={c.spec} label={word} local={c.local} className="mono" /> : <span className="mono">{word}</span>}
+        {rest && <div className="meta">{rest}</div>}
+      </div>
+    </>
+  );
+}
 
 /** Answering from the card: open the thread it waits on in Slack, or write
  *  to a seat with the card slug as the subject, which is what links the new
