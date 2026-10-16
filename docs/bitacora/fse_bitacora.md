@@ -11,6 +11,7 @@ restating it (the discuss skill).
 - Running: sup75 = uc-resume then uc-price (Go, internal/usage). sup76 = lf37-waits-polish then dg-render then dg-reader (frontend, Tab harness one at a time). They share no files. Two supervisors only, for memory (24 GB) and the harness.
 - Pablo pushes main when he wants: `! git -C ~/organizer push origin main`.
 - Open: Q1 for review-map v1 (where the revmap lives for another Mac's branch) with Hephaistos; whether odyssey has mmdc; stalled-row question on leftovers-33.
+- **Repetition, 2nd+: unverified premises in my specs** (lf35, lf36 N4, review-map M4, usage-audit FR-1 from the relayed audit; uc-build 05f57f0). Amended (eb83092, usage-audit Amendment 1) and raised 0141 to generalize.
 - Next: on each task's done/ cards, read the closing report, end the supervisor, then cut review-map v1 (TS, change-check reconciliation) as a proposed record.
 
 ## HAND-OFF — 2026-10-15 ~21:10, leftovers-36 and usage-post landed; sup74 on rm-v0
