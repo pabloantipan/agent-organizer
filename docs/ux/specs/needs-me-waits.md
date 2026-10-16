@@ -131,3 +131,22 @@ reason column goes back to saying what kind of row it is.
 | W8 | read the age once | a long row has no age lozenge; its age column reads in amber; a 6-day row's age column is in the usual colour |
 | W9 | scan others' rows in line | at 1024, `owner alejandro` and `owner ana` rows: the lozenges and the age columns share one x each |
 | W10 | know why they are not counted | under `Waiting on others · n` the line reads `Theirs to rule. Not counted in Needs me.` |
+
+## Amendment 2 (aglaea, 2026-10-16): from lf37's UI review
+
+From `working-on/done/lf37-waits-polish.md`, ## UI review (merged af31b6c).
+
+- **U1: the owner is said once.** On others' rows the subject already
+  leads with `owner alejandro`, so the context line drops its
+  `ownerPhrase` there and starts at `raised …` (a fact shows once per
+  screen). The lead's rows keep the context line as it is.
+- **U2: one verb column.** The verb sits in a column as wide as the widest
+  verb a row can carry (Rule, Open, Answer, Agents, Launch), with the
+  button right-aligned in it, so the age column stands at one x across
+  every row of Needs me and of Waiting on others. The outcome is the rule;
+  a fixed `min-width` on the verb cell is enough.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| W11 | read the owner once | at 1280 and wider, an others' row shows `owner alejandro` in the subject only; its context line starts `raised` |
+| W12 | scan ages in one line | at 1024 and 1440, with Rule, Open and Answer rows in view, every age column's left edge has the same x (±0.5 px) |

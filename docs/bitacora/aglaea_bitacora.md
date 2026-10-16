@@ -173,3 +173,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-15 — lf36 graded: needs-me-waits Amendment 1 (decision lozenge kept, age once in an amber age column, owner first in the subject, sub-line 'Theirs to rule. Not counted in Needs me.'), rows W7-W10.
 - 2026-10-15 — diagrams-in-app spec (T11c): dark class mapping and a 'dark' mermaid2svg style for Hephaistos, hash-keyed SVG cache, never an empty box, class text line, spec reader drawer with Contents and Back; rows D1-D8.
 - 2026-10-15 — diagrams-in-app A1: added glyph ✚ U+271A (Dingbats, no emoji presentation), not ➕.
+- 2026-10-16 — lf37 graded: needs-me-waits Amendment 2 (owner once on others' rows, one verb column so ages share an x), rows W11-W12.
