@@ -45,16 +45,22 @@ docs/specs/diagrams.md, rows G1, G2, D1, D2, D5, D8 and X0.
 - modified `internal/cli/cli.go:doctor`: the `diagrams:` line
 - added `internal/cli/diagram_test.go`: doctor's diagrams line
 - modified `app.go`: `App.diagrams` field, `NewApp`, added `App.RenderDiagram`
-- modified `frontend/wailsjs/go/main/App.d.ts`, `frontend/wailsjs/go/main/App.js`: generated RenderDiagram
+- modified `frontend/wailsjs/go/main/App.d.ts`: generated RenderDiagram
+- modified `frontend/wailsjs/go/main/App.js`: generated RenderDiagram
 - added `frontend/src/lib/diagram.ts`: slotDiagrams, mermaidBlocks, changeClasses, classLine, diagramName, svgSource
 - added `frontend/src/lib/diagram.test.ts`: D5, slots
 - added `frontend/src/components/DiagramFigure.tsx`: DiagramFigure, DiagramView, useDiagrams, nearestHeading
 - added `frontend/src/components/DiagramFigure.test.tsx`: G2 view half, FR-3, the five sites' wiring
 - added `frontend/src/styles/diagram.css`: figure, frame, state and class line
-- modified `frontend/src/components/CardDrawer.tsx`, `frontend/src/components/RoleDrawer.tsx:HandOffBody`, `frontend/src/components/RuleDecisionBox.tsx:Clamped`, `frontend/src/components/DecisionsView.tsx:RecordBody`, `frontend/src/components/HelpView.tsx`: slot mermaid blocks, mount figures
+- modified `frontend/src/components/CardDrawer.tsx`: slot mermaid blocks, mount figures
+- modified `frontend/src/components/RoleDrawer.tsx`: HandOffBody slots mermaid blocks, mounts figures
+- modified `frontend/src/components/RuleDecisionBox.tsx`: Clamped slots mermaid blocks, mounts figures
+- modified `frontend/src/components/DecisionsView.tsx`: RecordBody takes the title, slots mermaid blocks, mounts figures
+- modified `frontend/src/components/HelpView.tsx`: slot mermaid blocks, mount figures
 - added `testdata/fixture-overlay/init-a/working-on/decisions/0012-draw-the-change-on-the-map.md`: D1, D2, D8 fixture
 - modified `testdata/fixture-overlay/README.md`: one bullet for 0012
 Risky:
+- `MERMAID_HOME`: a new env var read, as mermaid2svg reads it, else ~/.mermaid
 - `useDiagrams`: portals into nodes inside dangerouslySetInnerHTML; a body set again replaces the slots and the figures remount
 - `Renderer.Render`: a hung mmdc holds the mutex until the 90 s timeout kills its process group
 Not changed, on purpose:
