@@ -1,11 +1,11 @@
 ---
 title: "Usage hours are active time, and a session with no cost record is priced from a table"
-status: now
+status: done
 repos: [organizer]
 branch: uc-price
 seat: up-build
 updated: 2026-10-16
-next: "file finding: TestCrewCmdSkipsRunningSeat is flaky (one make test run lost the qa_cleo running line), and organizer usage text prints $0.00 for a week wholly without cost where FR-5 says never $0.00 (both in ## Review, outside the gate)"
+next: "done: merged; review findings filed to the FSE (bitacora 21ae10c, next Go leftovers)"
 review: pass
 risk: high
 footprint: [internal/usage/ledger.go (Line.active, Ingest, costOf, splitCost), internal/usage/report.go (totals, the model cut), internal/usage/prices.go (new), frontend/src/lib/usage.ts, frontend/src/components/Usage.tsx]
@@ -84,6 +84,6 @@ Gate:
 - X0: `pnpm install`, then `XDG_DATA_HOME=$(mktemp -d) test-lease run -- make test`. The first run failed in `TestCrewCmdSkipsRunningSeat` (crew_test.go:146, output missing `qa_cleo running`). The rerun passed: go all ok, vitest 759 of 759. Then `pnpm run build`, `wails build` (Built …/Deltagos.app), and `git status --porcelain` is empty (`.wt-notes/up-review/x0.log`, `x0b.log`).
 
 Outside the gate (Note, not blocking; neither touches this diff):
-- Note: `TestCrewCmdSkipsRunningSeat` is flaky. It failed once in make test and passed 3 of 3 alone. It is crew code this card does not touch. Not filed: the card stays open for it.
-- Note: `organizer usage --week 2026-W34` (CLI text, internal/cli/usage.go:85) prints `$0.00; excludes 7 sessions with no cost` for a week with no cost at all. FR-5 says "never $0.00" of the view, and the view says `—`; the CLI behaves as it does on main. Not filed: the card stays open for it.
+- Note: `TestCrewCmdSkipsRunningSeat` is flaky. It failed once in make test and passed 3 of 3 alone. It is crew code this card does not touch. Filed: the FSE, thread 01M5190P, held for the next Go leftovers (bitacora 21ae10c).
+- Note: `organizer usage --week 2026-W34` (CLI text, internal/cli/usage.go:85) prints `$0.00; excludes 7 sessions with no cost` for a week with no cost at all. FR-5 says "never $0.00" of the view, and the view says `—`; the CLI behaves as it does on main. Filed: the FSE, thread 01M5190P, held for the next Go leftovers (bitacora 21ae10c).
 - Note: a week's money total does not say "(priced)" for its priced share. FR-5 names only where the source is shown.
