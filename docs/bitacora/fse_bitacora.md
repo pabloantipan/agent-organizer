@@ -13,6 +13,7 @@ restating it (the discuss skill).
 - Open: Q1 for review-map v1 (where the revmap lives for another Mac's branch) with Hephaistos; whether odyssey has mmdc; stalled-row question on leftovers-33.
 - **Repetition, 2nd+: unverified premises in my specs** (lf35, lf36 N4, review-map M4, usage-audit FR-1 from the relayed audit; uc-build 05f57f0). Amended (eb83092, usage-audit Amendment 1) and raised 0141 to generalize.
 - 23:xx: uc-resume done (Amendment 1, runs split at a reset). Amended leftovers-37 (P4 the house sub-line) and usage-audit Amendment 2 (P4: FR-3's rule gives ~28-31 h W42, not the audit's 65 h, which was a 10-min cap). 0141 ruled ok; sent [for hephaistos]. My watcher did not wake me for sup75's question; Pablo typed it.
+- Findings to card later (uc-price review, 586208a): `TestCrewCmdSkipsRunningSeat` flaky (a make test run lost the qa_cleo running line); `organizer usage` text prints $0.00 for a week wholly without cost (FR-5 says never). Go, internal/cli + test: next Go leftovers.
 - Next: on each task's done/ cards, read the closing report, end the supervisor, then cut review-map v1 (TS, change-check reconciliation) as a proposed record.
 
 ## HAND-OFF — 2026-10-15 ~21:10, leftovers-36 and usage-post landed; sup74 on rm-v0
