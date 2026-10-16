@@ -78,6 +78,10 @@ type Line struct {
 	// statusline, runs.jsonl or a live record) or "transcript" (its
 	// cost-state); empty with a null cost.
 	CostFrom string `json:"cost_from,omitempty"`
+	// Reset says the session's recorded cost fell back at least once
+	// (a /login inside a process): it is the sum of its runs, and what a
+	// run spent before its reset is in no record (usage-audit FR-1).
+	Reset bool `json:"reset,omitempty"`
 }
 
 // Model is the day's main model: the one with the most tokens.
@@ -159,13 +163,17 @@ const offsetsVersion = 3
 // CostSource is one record of a session's cumulative cost: a runs.jsonl run
 // or a live statusline record. Claude Code's total is cumulative across a
 // resume (a resumed session reports at least what it had), so the largest
-// one is the session's cost.
+// one is the session's cost, unless the total fell back inside a process
+// (a /login resets it): foldCosts then sums the runs.
 type CostSource struct {
 	SessionID string
-	Session   string // AGENT_SESSION, a name when the transcript has none
-	Persona   string // AGENT_NAME
+	PID       int
+	At        time.Time // when the record held CostUSD: its last seen
+	Session   string    // AGENT_SESSION, a name when the transcript has none
+	Persona   string    // AGENT_NAME
 	CostUSD   float64
 	HasCost   bool
+	Reset     bool // set by foldCosts: more than one run
 }
 
 // Options is one ingest pass.
@@ -520,35 +528,58 @@ func pairSkillIn(b []byte) string {
 	return ""
 }
 
+// foldCosts gives each session its recorded cost (usage-audit FR-1,
+// Amendment 1): the records with a cost, in time order, split into runs
+// wherever one is lower than the one before it, and the cost is the sum of
+// each run's largest. With no drop that is the largest record.
 func foldCosts(srcs []CostSource) map[string]CostSource {
 	out := map[string]CostSource{}
+	recs := map[string][]CostSource{}
 	for _, c := range srcs {
 		if c.SessionID == "" {
 			continue
 		}
-		prev, ok := out[c.SessionID]
-		if !ok {
-			out[c.SessionID] = c
-			continue
+		s := out[c.SessionID]
+		s.SessionID = c.SessionID
+		if s.Session == "" {
+			s.Session = c.Session
 		}
-		if c.HasCost && (!prev.HasCost || c.CostUSD > prev.CostUSD) {
-			prev.CostUSD, prev.HasCost = c.CostUSD, true
+		if s.Persona == "" {
+			s.Persona = c.Persona
 		}
-		if prev.Session == "" {
-			prev.Session = c.Session
+		out[c.SessionID] = s
+		if c.HasCost {
+			recs[c.SessionID] = append(recs[c.SessionID], c)
 		}
-		if prev.Persona == "" {
-			prev.Persona = c.Persona
+	}
+	for sid, rs := range recs {
+		sort.SliceStable(rs, func(i, j int) bool {
+			if !rs[i].At.Equal(rs[j].At) {
+				return rs[i].At.Before(rs[j].At)
+			}
+			return rs[i].PID < rs[j].PID
+		})
+		s := out[sid]
+		runs, runMax := 1, rs[0].CostUSD
+		for i, c := range rs[1:] {
+			if c.CostUSD < rs[i].CostUSD {
+				s.CostUSD += runMax
+				runs, runMax = runs+1, 0
+			}
+			runMax = max(runMax, c.CostUSD)
 		}
-		out[c.SessionID] = prev
+		s.CostUSD += runMax
+		s.HasCost, s.Reset = true, runs > 1
+		out[sid] = s
 	}
 	return out
 }
 
 // sessionCost is a session's cost and where it came from.
 type sessionCost struct {
-	USD  float64
-	From string // "record", "transcript", or empty: no cost
+	USD   float64
+	From  string // "record", "transcript", or empty: no cost
+	Reset bool   // the record's runs: see CostSource
 }
 
 // costOf picks a session's cost (FR-2, Amendment 1): the statusline's from
@@ -558,7 +589,7 @@ type sessionCost struct {
 func costOf(c CostSource, meta *sessionMeta) sessionCost {
 	switch {
 	case c.HasCost && c.CostUSD > 0:
-		return sessionCost{USD: c.CostUSD, From: "record"}
+		return sessionCost{USD: c.CostUSD, From: "record", Reset: c.Reset}
 	case meta != nil && meta.TranscriptCost > 0:
 		return sessionCost{USD: meta.TranscriptCost, From: "transcript"}
 	}
@@ -581,8 +612,9 @@ func splitCost(ls []*Line, c sessionCost) bool {
 			v := c.USD * float64(l.Total()) / float64(total)
 			next, from = &v, c.From
 		}
-		if !sameCost(l.Cost, next) || l.CostFrom != from {
-			l.Cost, l.CostFrom = next, from
+		reset := c.Reset && next != nil
+		if !sameCost(l.Cost, next) || l.CostFrom != from || l.Reset != reset {
+			l.Cost, l.CostFrom, l.Reset = next, from, reset
 			changed = true
 		}
 	}
