@@ -1,11 +1,11 @@
 ---
 title: "A mermaid block in a record or card draws as a dark figure, with its source and a text line"
-status: now
+status: done
 repos: [organizer]
 branch: dg-render
 seat: dr-build
 stage: review-map
-updated: 2026-10-15
+updated: 2026-10-16
 next: "review: dg-render, gate met (G1, G2, D1, D2, D5, D8, X0), 47a6e58"
 risk: medium
 footprint: [internal/diagram/ (new), app.go, frontend/wailsjs/, internal/cli (doctor), frontend/src/lib/ (mermaid blocks, class line), a figure component, the five marked sites, frontend/src/styles/, a fixture record]
@@ -14,6 +14,7 @@ boundary: ["docs/specs/diagrams.md Boundary, dg-render"]
 spec: "docs/specs/diagrams.md (FR-1 to FR-5; diagrams-in-app D1-D8)"
 gate: "docs/specs/diagrams.md Acceptance, rows G1, G2, D1, D2, D5, D8 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -104,3 +105,19 @@ Not verified in WKWebView:
 - The figure's source `pre` as a Tab stop when it overflows: no overflowing source in the fixture at 1024.
 - Firebase states: not applicable.
 - 400 px: below the 1024 minimum.
+
+## Review
+dr-review, 2026-10-16, on 47a6e5820570eafddd414f759635060f1c118eef (the branch did not move). Verdict: **pass**. Unmet rows: none. D2 judged against diagrams.md Amendment 1 (3e6b136). Clean clone at /Users/pabloantipan/organizer/.wt-notes/dr-review/clean (removed after); notes, logs and shots under /Users/pabloantipan/organizer/.wt-notes/dr-review/.
+
+change-check (organizer dg-render --base main --head 47a6e58), 19 files: undeclared 0, declared not changed 0, new env var 0, new dependency 0, new host 0; outside boundary 11, outside footprint 17, untested? 12 (full output: change-check.txt). Explained: the card's boundary is the spec's prose ("the five markdown places", "one figure component", "`wails generate module` output", "the fixture record, their tests"), which change-check cannot map to paths. The 11 outside-boundary files are exactly those: CardDrawer, DecisionsView, HelpView, RoleDrawer, RuleDecisionBox, DiagramFigure.tsx and its test, App.d.ts, App.js, the 0012 record and the overlay README's bullet for it. Outside footprint is the same set against the card's looser footprint list. The untested? lines are helpers that the G1/G2 tests reach through Render and Mmdc (executable, nodeVersion, shortDir, FirstError), and through bindings and wiring (RenderDiagram, NewApp, RecordBody, Clamped, reasonOf, nearestHeading). None is a gate row's own claim.
+
+- G1: read TestG1RenderCachesAndAppendsDarkClassdefs and TestG1MmdcFromNewestNvm against the row. A fake mmdc logs each run. Two renders of one block make 1 run, a changed node makes 2, and a changed classdefs-dark.mmd makes 3. The input starts with the block unchanged and ends with the four classDef lines. With an empty PATH it picks nvm v24.0.1 over v9.11.2 and v18.20.4. Every test uses a TempDir home, PATH and cache; TestNewFollowsTheDataDir reads New() only and renders nothing. So no test touches the real ~/.nvm, ~/.mermaid or data dir. I ran `go test -v` for both: PASS.
+- G2: TestG2Reasons returns `mmdc not found …`, `dark style missing: ~/.mermaid/mermaid-styles-dark.css` (mmdc not run), and on exit 1 `Error: Parse error on line 2:` (nothing cached, not cached as a failure): PASS. vitest DiagramFigure.test.tsx "G2: …": for each reason, `Diagram not drawn: <reason>` directly over the source `<pre><code>`, with no img and the class line; while drawing it shows the source under `Drawing the diagram…`: PASS.
+- D1: Tab harness at 1024×640 against my own `wails dev -devserver localhost:34242` from the clean clone. The fixture and overlay were exported, auth off, probe stub. No mmdc on the PATH, so nvm v24.0.1 was used, with the dark style from ~/.mermaid. Both figures of init-a 0012 drew. Shot out/d1-figure.png: no light panel (SVG background transparent, frame rgb(32,27,43) = --surface). ✚ Payments is lilac, ✎ BFF amber, ✕ Legacy pay grey dashed 5 3 and struck, PWA and Datastore grey. No red: the fixture's light classDef stroke #c00000 is overridden by the appended dark lines.
+- D2: computed in the drawn SVG (out/d1d2d8.jsonl) and recomputed in Python (out/d2-ratios.txt) against --surface #201b2b. Strokes: added #b06cff 5.14:1, changed #ffb020 9.16:1, removed #958ea2 5.32:1, all ≥ 3:1. Context #44404d measures 1.66:1, not held to 3:1 by Amendment 1. Labels: added #eeebf4 14.23:1, changed 14.23:1, removed #b5afc3 7.89:1, context #958ea2 5.32:1, all ≥ 4.5:1.
+- D5: vitest lib/diagram.test.ts "D5: added, changed and no removed" gives `Added: a, b. Changed: c. Removed: none.`: PASS.
+- D8: same harness. The second figure's frame is 890 px holding 2418, and scrollLeft 0→200 sets. Page scrollWidth 1024 = innerWidth 1024, with no wide ancestors. Tab from the first figure's Source lands on `DIV role=region "The nightly scan, end to end, diagram"`, focus-visible. Right ×3 scrolls the frame 40 px while scrollX stays 0 (out/d8-frame.png).
+- X0: shared `make test` was **reused**: test-lease reused run a4ca3634-59570 of 47a6e5820570 by organizer-probe-dr-ui, exit 0 (internal/diagram and internal/cli ok, vitest 69 files / 781 tests). Then, in the clean clone, `pnpm run build` exited 0, `wails build` exited 0, and `git status --porcelain` was empty (x0-exit.txt, x0-status.txt). `wails build` was run again after the dev session and exited 0.
+- No-gos and Boundary from the diff: package.json and lockfile untouched, and the dist has no mermaid; no network call in internal/diagram or the frontend; no light panel; removed is grey; Render writes only temp files inside CacheDir and removes them. After the run the fixture's diagrams dir holds just 2 .svg files, the real ~/.local/share/organizer/diagrams does not exist, and the ~/.mermaid style files' mtimes (2026-10-15 21:14) predate the run.
+- Not covered by the gate: puppeteer's temporary Chromium profile under $TMPDIR (dr-ui's spec gap); four of the five markdown sites have no fixture block (vitest wiring only); no cache prune.
+
