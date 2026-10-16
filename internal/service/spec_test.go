@@ -31,6 +31,7 @@ func specFixture(t *testing.T) (*Service, string) {
 	write("working-on/initiative.yaml", "id: fix\ntitle: Fixture\nstatus: active\nmachine: testbox\nrepos: []\nspecs: [docs/specs]\n")
 	write("working-on/reader.md", "---\ntitle: Reader\nstatus: next\nupdated: 2026-10-16\nnext: build it\nspec: \"docs/other/card.md#change-on-the-map (FR-6)\"\n---\n")
 	write("docs/specs/a.md", "# A\n")
+	write("docs/specs/with space.md", "# Spaced\n")
 	write("docs/other/card.md", "# Card spec\n")
 	write("docs/secret.md", "not a spec\n")
 	cfg := config.Config{Machine: "lodestar", Roots: []string{root}, MaxDepth: 2}
@@ -59,6 +60,7 @@ func TestReadSpecResolved(t *testing.T) {
 		"docs/other/card.md":                   "# Card spec\n",
 		"docs/other/card.md#change-on-the-map": "# Card spec\n",
 		"./docs/specs/a.md":                    "# A\n",
+		"docs/specs/with space.md":             "# Spaced\n",
 	} {
 		doc, err := s.ReadSpec("fix", path)
 		if err != nil || doc.Text != want || doc.Missing {
