@@ -1,6 +1,6 @@
 ---
 title: Specs check their premises against real data before carding
-status: proposed
+status: ruled
 raised: 2026-10-15
 raised_by: fse
 owner: pablo
@@ -8,6 +8,9 @@ options: ["add a premise row to spec-craft", "my own checklist only", "no change
 cards: []
 supersedes: []
 superseded_by:
+ruled: 2026-10-15
+ruled_by: pablo
+chosen: add a premise row to spec-craft
 ---
 
 ## Question
@@ -44,6 +47,8 @@ four different sources (finding text, a fixture, a merge, an audit), so a
 personal habit will not cover it; the skill reaches every FSE.
 
 ## Ruling
+
+pablo, 2026-10-15, in the organizer on lodestar: ok
 
 ## Consequences
 
