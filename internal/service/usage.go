@@ -44,11 +44,11 @@ func (s *Service) Usage(week string) (usage.View, error) {
 	// tokens never costs nothing, so it is "no cost recorded", not $0.
 	var costs []usage.CostSource
 	for _, r := range session.LoadRuns(session.RunsPath()) {
-		costs = append(costs, usage.CostSource{SessionID: r.SessionID, Session: r.Session, Persona: r.Persona, CostUSD: r.CostUSD, HasCost: r.CostUSD > 0})
+		costs = append(costs, usage.CostSource{SessionID: r.SessionID, PID: r.PID, At: r.LastSeen, Session: r.Session, Persona: r.Persona, CostUSD: r.CostUSD, HasCost: r.CostUSD > 0})
 	}
 	running := map[string]bool{}
 	for pid, r := range session.Load(session.Dir()) {
-		costs = append(costs, usage.CostSource{SessionID: r.SessionID, Session: r.Session, Persona: r.Persona, CostUSD: r.CostUSD, HasCost: r.CostUSD > 0})
+		costs = append(costs, usage.CostSource{SessionID: r.SessionID, PID: r.PID, At: r.UpdatedAt, Session: r.Session, Persona: r.Persona, CostUSD: r.CostUSD, HasCost: r.CostUSD > 0})
 		if alive(pid) {
 			running[r.SessionID] = true
 		}

@@ -2648,6 +2648,7 @@ export namespace usage {
 	    tokens: number;
 	    money?: number;
 	    cost_from: string;
+	    reset: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new SessionRow(source);
@@ -2674,6 +2675,7 @@ export namespace usage {
 	        this.tokens = source["tokens"];
 	        this.money = source["money"];
 	        this.cost_from = source["cost_from"];
+	        this.reset = source["reset"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

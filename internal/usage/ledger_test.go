@@ -307,3 +307,68 @@ func TestAttributionKeptWhenFirstSeen(t *testing.T) {
 		}
 	}
 }
+
+// A1, A2 (usage-audit FR-1, Amendment 1): a session's recorded cost is the
+// sum over its runs of each run's largest record, a run ending where a
+// record, in time order, is lower than the one before it.
+func TestFoldCostsRuns(t *testing.T) {
+	t0 := time.Date(2026, 10, 9, 10, 0, 0, 0, time.UTC)
+	type rec struct {
+		pid int
+		usd float64
+	}
+	for _, tc := range []struct {
+		name  string
+		recs  []rec // in time order
+		want  float64
+		reset bool
+	}{
+		{"A1 a drop inside pid 2 starts a second run", []rec{{1, 5}, {1, 10}, {2, 12}, {2, 3}, {3, 7}}, 19, true},
+		{"A1 three resumed pids, cumulative", []rec{{1, 5}, {1, 10}, {2, 10}, {2, 12}, {3, 12}, {3, 14}}, 14, false},
+		{"A2 one pid, growing", []rec{{1, 3}, {1, 8}, {1, 11}}, 11, false},
+		{"$0 open lines are no record", []rec{{1, 0}, {1, 4}, {2, 0}, {2, 6}}, 6, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var in []CostSource
+			for i, r := range tc.recs {
+				in = append(in, CostSource{SessionID: "s", PID: r.pid, At: t0.Add(time.Duration(i) * time.Minute), CostUSD: r.usd, HasCost: r.usd > 0})
+			}
+			// The order they arrive in is not the order they happened in.
+			for i, j := 0, len(in)-1; i < j; i, j = i+1, j-1 {
+				in[i], in[j] = in[j], in[i]
+			}
+			got := foldCosts(in)["s"]
+			if !got.HasCost || got.CostUSD-tc.want > 1e-9 || tc.want-got.CostUSD > 1e-9 || got.Reset != tc.reset {
+				t.Errorf("cost = %v reset %v, want %v reset %v", got.CostUSD, got.Reset, tc.want, tc.reset)
+			}
+		})
+	}
+	if got := foldCosts([]CostSource{{SessionID: "s", PID: 1}})["s"]; got.HasCost || got.Reset {
+		t.Errorf("no record with a cost = %+v, want no cost", got)
+	}
+}
+
+// A reset session's lines and its session row say so; its cost is the
+// sum of its runs.
+func TestIngestMarksReset(t *testing.T) {
+	t0 := time.Date(2026, 10, 9, 10, 0, 0, 0, time.UTC)
+	costs := []CostSource{
+		{SessionID: "s-main", PID: 7, At: t0, CostUSD: 5, HasCost: true},
+		{SessionID: "s-main", PID: 7, At: t0.Add(time.Hour), CostUSD: 2, HasCost: true},
+		{SessionID: "s-trans", PID: 8, At: t0, CostUSD: 4, HasCost: true},
+	}
+	o := opts(t, copyFixture(t), costs)
+	if _, err := Ingest(o); err != nil {
+		t.Fatal(err)
+	}
+	rows := map[string]SessionRow{}
+	for _, r := range sessions(LoadLedger(o.LedgerPath), nil) {
+		rows[r.ID] = r
+	}
+	if r := rows["s-main"]; !r.Reset || r.Money == nil || *r.Money-7 > 1e-9 || 7-*r.Money > 1e-9 {
+		t.Errorf("s-main = %v reset %v, want $7 reset", r.Money, r.Reset)
+	}
+	if rows["s-trans"].Reset {
+		t.Errorf("s-trans has one run and is not reset")
+	}
+}

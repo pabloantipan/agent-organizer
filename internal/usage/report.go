@@ -98,6 +98,7 @@ type SessionRow struct {
 	Tokens     int64     `json:"tokens"`
 	Money      *float64  `json:"money"`
 	CostFrom   string    `json:"cost_from"` // record, transcript, or empty with no money
+	Reset      bool      `json:"reset"`     // the recorded cost fell back once at least (Line.Reset)
 }
 
 // View is the week as the CLI prints it and App.Usage returns it.
@@ -417,6 +418,7 @@ func sessions(ls []Line, running map[string]bool) []SessionRow {
 		if l.CostFrom != "" {
 			s.CostFrom = l.CostFrom
 		}
+		s.Reset = s.Reset || l.Reset
 		if l.Cost != nil {
 			x := *l.Cost
 			if s.Money != nil {
