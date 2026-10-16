@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 38 - the owner once, one age column
-status: proposed
+status: ruled
 raised: 2026-10-15
 raised_by: fse
 owner: pablo
@@ -10,6 +10,9 @@ forecast: 15-35m
 stage: decisions-owned-and-used
 supersedes: []
 superseded_by:
+ruled: 2026-10-16
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -46,6 +49,8 @@ The FSE: **"accept as written"**. It can join sup76's queue after
 dg-reader, or run alone.
 
 ## Ruling
+
+pablo, 2026-10-16, in the organizer on lodestar: ok
 
 ## Consequences
 
