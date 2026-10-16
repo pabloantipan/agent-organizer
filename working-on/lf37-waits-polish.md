@@ -1,12 +1,12 @@
 ---
 title: "Needs me's record rows keep 'decision', say their age once, and others' rows line up"
-status: next
+status: now
 repos: [organizer]
 branch: lf37-waits-polish
 seat: wp-build
 stage: decisions-owned-and-used
 updated: 2026-10-15
-next: "building: wp-build on branch lf37-waits-polish (sup76, launched 22:42)"
+next: "building: wp-build on branch lf37-waits-polish (sup76, launched 22:42); started 2026-10-15"
 risk: low
 footprint: [frontend/src/components/Home.tsx (DecisionRow, WaitingOnOthers), frontend/src/styles/shell.css, their tests]
 depends_on: []
