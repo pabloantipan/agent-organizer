@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"organizer/internal/cache"
@@ -40,8 +41,9 @@ func crewCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now fun
 	st, _ := cache.Load()
 	svc := service.NewWith(cfg, st, now)
 	svc.Scan(false)
+	lines := newLaunchPrinter(stdout)
 	if !print {
-		svc.OnLaunch = launchLines(stdout)
+		svc.OnLaunch = lines.print
 	}
 	c, err := svc.StartCrew(id, !print)
 	if err != nil {
@@ -73,6 +75,7 @@ func crewCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now fun
 		return 0
 	}
 	got, _ := svc.WaitLaunch(id)
+	lines.waitFor(got.Seats)
 	fmt.Fprintf(stdout, "%d of %d seats running detached (watch: seats open, or probe --attach <session>)\n", got.Running, len(got.Seats))
 	if skipped != "" {
 		fmt.Fprintln(stdout, skipped)
@@ -83,22 +86,55 @@ func crewCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now fun
 	return 0
 }
 
-// launchLines prints each seat's state as it changes, one line each:
+// launchPrinter prints each seat's state as it changes, one line each:
 // `<seat> <state>`, and for a failed seat the reason, probe's exit and its
 // output's last line. The CLI waits for the start; the app shows the same
 // states from the agents feed.
-func launchLines(w io.Writer) func(service.LaunchChange) {
-	return func(c service.LaunchChange) {
-		if c.Seat == nil {
-			return
-		}
-		if c.Seat.State != service.LaunchFailed {
-			fmt.Fprintf(w, "%s %s\n", c.Seat.Seat, c.Seat.State)
-			return
-		}
-		fmt.Fprintf(w, "%s failed: %s\n", c.Seat.Seat, c.Seat.Reason)
+//
+// The service settles a start before it tells OnLaunch of the last seat's
+// state, so WaitLaunch can return while that line is still on its way;
+// waitFor holds the total until every seat's final state is printed.
+type launchPrinter struct {
+	w       io.Writer
+	mu      sync.Mutex
+	done    *sync.Cond
+	printed map[string]string
+}
+
+func newLaunchPrinter(w io.Writer) *launchPrinter {
+	p := &launchPrinter{w: w, printed: map[string]string{}}
+	p.done = sync.NewCond(&p.mu)
+	return p
+}
+
+// launchLines is a printer's print, for a caller that does not wait.
+func launchLines(w io.Writer) func(service.LaunchChange) { return newLaunchPrinter(w).print }
+
+func (p *launchPrinter) print(c service.LaunchChange) {
+	if c.Seat == nil {
+		return
+	}
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if c.Seat.State != service.LaunchFailed {
+		fmt.Fprintf(p.w, "%s %s\n", c.Seat.Seat, c.Seat.State)
+	} else {
+		fmt.Fprintf(p.w, "%s failed: %s\n", c.Seat.Seat, c.Seat.Reason)
 		if c.Seat.Output != "" {
-			fmt.Fprintf(w, "  %s\n", strings.ReplaceAll(c.Seat.Output, "\n", "\n  "))
+			fmt.Fprintf(p.w, "  %s\n", strings.ReplaceAll(c.Seat.Output, "\n", "\n  "))
+		}
+	}
+	p.printed[c.Seat.Seat] = c.Seat.State
+	p.done.Broadcast()
+}
+
+// waitFor blocks until each seat's printed state is the one it settled in.
+func (p *launchPrinter) waitFor(seats []service.SeatLaunch) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	for _, s := range seats {
+		for p.printed[s.Seat] != s.State {
+			p.done.Wait()
 		}
 	}
 }
