@@ -126,3 +126,25 @@ The glyph is **✚ (U+271A)**: it is in the same Dingbats block as ✎ and ✕,
 has no emoji presentation, and so takes the label colour and their weight.
 Not `+` or `＋`, which read as text, not a mark. The skill's example
 changes to match (Hephaistos's). D1 reads ✚.
+
+## Amendment 2 (aglaea, 2026-10-16): from dg-reader's UI review
+
+From `working-on/dg-reader.md`, ## UI review (pass at 6ef262a).
+
+- **U2: the ✎ is said.** The glyph stays `aria-hidden`; the Contents entry
+  carries a screen-reader-only suffix, so its name reads `Change on the
+  map, start here`. That is what the mark tells a sighted reader: this
+  entry is listed first, out of the document's order, because it is the
+  one to read first.
+- **U1: no change.** At 1024×640 with Details open, Specs sits below the
+  fold of the header's own scroll region. That region is a named Tab stop
+  that scrolls (tab-reaches-links A3), which is what it is for, and the
+  spec reader has two other openers that are always in view where they
+  matter: a card's `spec:` link and the Initiatives list. Moving Specs up
+  the shared Charter would reorder Home's detail too; adding a second
+  Specs opener in the header would say one fact twice. Revisit only if a
+  session shows Pablo missing it.
+
+| # | The lead can | Checked by |
+|---|---|---|
+| D9 | hear which entry to read first | the Contents entry for `Change on the map` has the accessible name `Change on the map, start here`; ✎ stays hidden from the reader |
