@@ -5,7 +5,7 @@ repos: [organizer]
 branch: lf39-go-tidy
 seat: gt-build
 updated: 2026-10-16
-next: "waits on 0143; on accept the FSE gives it to a supervisor"
+next: "sup78 runs it; 0143 ruled"
 risk: low
 footprint: [internal/cli/crew_test.go, internal/cli/usage.go, internal/usage/report.go (Totals), internal/scan (card spec check), testdata/home, frontend/src/lib/usage.ts (totalsNotes), frontend/wailsjs/, scripts/tab-harness/tabharness.swift]
 depends_on: []
