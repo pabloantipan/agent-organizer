@@ -1,12 +1,12 @@
 ---
 title: "A mermaid block in a record or card draws as a dark figure, with its source and a text line"
-status: next
+status: now
 repos: [organizer]
 branch: dg-render
 seat: dr-build
 stage: review-map
 updated: 2026-10-15
-next: "building: dr-build on branch dg-render (sup76, launched 23:30)"
+next: "building: dr-build on branch dg-render, phase 1 internal/diagram (sup76)"
 risk: medium
 footprint: [internal/diagram/ (new), app.go, frontend/wailsjs/, internal/cli (doctor), frontend/src/lib/ (mermaid blocks, class line), a figure component, the five marked sites, frontend/src/styles/, a fixture record]
 depends_on: []
