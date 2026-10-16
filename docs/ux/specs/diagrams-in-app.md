@@ -19,7 +19,7 @@ differ.
 
 | class | glyph | stroke | fill | label |
 |---|---|---|---|---|
-| `added` | ➕ | 2 px solid `--status-now` (lilac) | `--status-now-bg` | `--fg` |
+| `added` | ✚ | 2 px solid `--status-now` (lilac) | `--status-now-bg` | `--fg` |
 | `changed` | ✎ | 2 px solid `--warning` (amber, as the skill's) | `--warning-bg` | `--fg` |
 | `removed` | ✕ | 2 px dashed 5 3 `--fg-subtle` | none | `--fg-muted`, struck through |
 | `context` | — | 1 px `--border-strong` | `--surface` | `--fg-subtle` |
@@ -110,7 +110,7 @@ one press away.
 
 | # | The lead can | Checked by |
 |---|---|---|
-| D1 | read a change figure on the dark theme | a record with the skill's example block shows a dark figure: ➕ lilac, ✎ amber, ✕ dashed and struck, context grey; no light panel |
+| D1 | read a change figure on the dark theme | a record with the skill's example block shows a dark figure: ✚ lilac, ✎ amber, ✕ dashed and struck, context grey; no light panel |
 | D2 | see every class | each touched class's stroke measures 3:1 or more on `--surface` and each label 4.5:1 |
 | D3 | never face an empty box | with mmdc off the PATH, the block shows as code under `Diagram not drawn: mmdc not found …`; while rendering, `Drawing the diagram…` |
 | D4 | trust it is current | edit one node in the block; the next open shows the new figure (new key), never the old one |
@@ -118,3 +118,11 @@ one press away.
 | D6 | read a spec in the app | a card's `spec:` link opens the drawer with Contents, `Change on the map` first and marked ✎, and its figure drawn |
 | D7 | follow and come back | a link to a record inside the spec opens in the drawer; `← Back` returns to the spec at its scroll position; Esc returns focus to the card's `spec:` link |
 | D8 | not scroll the page sideways | a figure wider than the drawer scrolls in its own frame, which is a Tab stop named `<heading>, diagram` |
+
+## Amendment 1 (aglaea, 2026-10-15): the added glyph
+
+➕ is a colour emoji with its own ink and nearly vanishes on the added fill.
+The glyph is **✚ (U+271A)**: it is in the same Dingbats block as ✎ and ✕,
+has no emoji presentation, and so takes the label colour and their weight.
+Not `+` or `＋`, which read as text, not a mark. The skill's example
+changes to match (Hephaistos's). D1 reads ✚.

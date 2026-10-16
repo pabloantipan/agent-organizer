@@ -172,3 +172,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-15 — pending: check spec-diagrams' four classDef colours (added/changed/removed/context) on the dark theme when the FSE posts the commit; suggested pre-rendered SVG over bundling mermaid.
 - 2026-10-15 — lf36 graded: needs-me-waits Amendment 1 (decision lozenge kept, age once in an amber age column, owner first in the subject, sub-line 'Theirs to rule. Not counted in Needs me.'), rows W7-W10.
 - 2026-10-15 — diagrams-in-app spec (T11c): dark class mapping and a 'dark' mermaid2svg style for Hephaistos, hash-keyed SVG cache, never an empty box, class text line, spec reader drawer with Contents and Back; rows D1-D8.
+- 2026-10-15 — diagrams-in-app A1: added glyph ✚ U+271A (Dingbats, no emoji presentation), not ➕.
