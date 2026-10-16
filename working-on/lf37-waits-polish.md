@@ -6,7 +6,7 @@ branch: lf37-waits-polish
 seat: wp-build
 stage: decisions-owned-and-used
 updated: 2026-10-15
-next: "sup76 runs it first (then dg-render, dg-reader; the Tab harness one at a time); 0139 ruled"
+next: "building: wp-build on branch lf37-waits-polish (sup76, launched 22:42)"
 risk: low
 footprint: [frontend/src/components/Home.tsx (DecisionRow, WaitingOnOthers), frontend/src/styles/shell.css, their tests]
 depends_on: []
