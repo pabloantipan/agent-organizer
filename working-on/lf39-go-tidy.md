@@ -1,11 +1,11 @@
 ---
 title: "A steady crew test, honest CLI money, a missing card spec named, Escape in the Tab harness"
-status: next
+status: now
 repos: [organizer]
 branch: lf39-go-tidy
 seat: gt-build
 updated: 2026-10-16
-next: "sup78 runs it; 0143 ruled"
+next: "gt-build builds it on lf39-go-tidy"
 risk: low
 footprint: [internal/cli/crew_test.go, internal/cli/usage.go, internal/usage/report.go (Totals), internal/scan (card spec check), testdata/home, frontend/src/lib/usage.ts (totalsNotes), frontend/wailsjs/, scripts/tab-harness/tabharness.swift]
 depends_on: []
