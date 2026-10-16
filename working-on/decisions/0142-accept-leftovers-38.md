@@ -24,6 +24,9 @@ card (`docs/specs/leftovers-38.md`):
 - A dead style goes.
 - In the spec reader, a screen reader hears the first Contents entry as
   `Change on the map, start here` (Aglaea's D9).
+- A diagram is read once, as one picture with its alt; the line under it
+  names the boxes by their labels, plus what is around the change
+  (`… Around it: PWA.`) (Aglaea's D5, D10).
 
 No check drives your screen or keyboard, starts a real agent, or writes
 your clipboard.
