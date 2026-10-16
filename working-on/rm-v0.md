@@ -5,7 +5,7 @@ repos: [organizer]
 branch: rm-v0
 seat: rm-build
 updated: 2026-10-15
-next: "review: rm-v0, gate met (M4 on 35671ed: no untested changed definition exists, asked sup74), 42ca123"
+next: "review: rm-v0, gate met (M4 read per review-map Amendment 1), 42ca123"
 depends_on: []
 boundary: ["docs/specs/review-map.md Boundary, rm-v0"]
 spec: "docs/specs/review-map.md (FR-1 to FR-6; agent-slack review/pipeline-starter.md §6.6)"
@@ -23,7 +23,7 @@ Evidence on branch rm-v0 under `docs/evidence/rm-v0/` (hand lists committed firs
 - [x] M1: both merges in a clean clone's build, valid JSON, base = first parent, 0 non-Go nodes: `c8e1773.revmap.json`, `35671ed.revmap.json`, `runs.txt`, `checks.txt` (M1); fixture `TestBuildOnMerge` (internal/review).
 - [x] M2: c8e1773's 8 changed definitions and 9 changed test definitions match `hand-lists.md` (M2) with their change; no other changed node: `checks.txt` (M2).
 - [x] M3: StartCrew, Service.CreateCrew, runLaunches: all 5 hand callers present with `uses` edges (`source: go/types`), callers `affected` (crewCmd and RetrySeat are themselves `modified`), no other edge into them: `checks.txt` (M3) against `hand-lists.md` (M3).
-- [x] M4: c8e1773: Service.StartCrew lists `internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats` (and 2 more); Service.runLaunches and cli.crewCmd carry `untested`. 35671ed: every changed definition is reached by a test (App.CreateCrew → `app_launch_test.go::TestAppCreateCrewReturnsAtOnce`), so no `untested` exists to show there; asked sup74. `checks.txt` (M4); fixture `TestBuildOnMerge`.
+- [x] M4: c8e1773: Service.StartCrew lists `internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats` (and 2 more); Service.runLaunches and cli.crewCmd carry `untested`. 35671ed: every changed definition is reached by a test (App.CreateCrew → `app_launch_test.go::TestAppCreateCrewReturnsAtOnce`), so no `untested` exists to show there; per review-map.md Amendment 1 (d38d32a) M4 holds across the two merges and 35671ed having none is evidence of no false `untested`. `checks.txt` (M4); fixture `TestBuildOnMerge`.
 - [x] M5: the table under Notes.
 - [x] M6: `organizer review organizer rm-v0` resolves 294e125..head from the branch; `app-icon-composer` (branch gone) exits 2 naming it: `runs.txt` (M6). A card with no `branch:` exists on no real board; `TestReviewCardWithoutBranchExits2` (internal/cli) exits 2 with "card no-branch has no branch: field".
 - [x] X0: in a clean clone of 005ebe4: `XDG_DATA_HOME=$(mktemp -d) make test` pass (Go ok, vitest 757 passed), `pnpm run build` pass, `wails build` pass, `git status --porcelain` empty. The rebase onto main after it added card/docs commits only.
