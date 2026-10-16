@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   agentsWeekLine, barLabel, changeWords, groupWaves, moneyOf, unknownMoney, compact, duration, forInitiative, hoursWords, isoWeekOf, kindsLine,
-  money, moneyGrid, reasonsWords, roleWords, rowDetail, shareWords, shiftWeek, sortRows, startWords, totalsNotes,
+  costFromWords, money, moneyGrid, reasonsWords, sessionMoney, roleWords, rowDetail, shareWords, shiftWeek, sortRows, startWords, totalsNotes,
   usageColumns, weekLabel, weekRange, type UsageRow, type UsageSession,
 } from "./usage";
 
@@ -17,6 +17,20 @@ describe("money", () => {
   it("reads no cost as a dash", () => {
     expect(money(null)).toBe("—");
     expect(money(undefined)).toBe("—");
+  });
+});
+
+describe("priced money (usage-audit P9)", () => {
+  it("says a priced cost is priced", () => {
+    expect(sessionMoney({ money: 12.5, cost_from: "priced" })).toBe("$12.50 (priced)");
+    expect(costFromWords({ money: 12.5, cost_from: "priced" })).toMatch(/price table/);
+  });
+  it("keeps recorded money plain and unknown money a dash", () => {
+    expect(sessionMoney({ money: 12.5, cost_from: "record" })).toBe("$12.50");
+    expect(sessionMoney({ money: null, cost_from: "" })).toBe("—");
+    expect(sessionMoney({ cost_from: "" })).toBe("—");
+    expect(costFromWords({ money: null, cost_from: "" })).toBe("no cost recorded");
+    expect(costFromWords({ money: 3, cost_from: "transcript" })).toBe("cost from the transcript");
   });
 });
 
@@ -129,7 +143,7 @@ describe("usageColumns", () => {
 });
 
 const sess = (id: string, o: Partial<UsageSession>): UsageSession => ({
-  id, name: id, initiative: "organizer", task: "", task_title: "", role: "builder", model: "claude-opus", start: "", end: "", minutes: 60,
+  id, name: id, initiative: "organizer", task: "", task_title: "", role: "builder", model: "claude-opus", start: "", end: "", minutes: 60, active: 1200,
   running: false, input: 10, output: 10, cache_read: 70, cache_write: 10, tokens: 100, money: 1, cost_from: "record", ...o,
 });
 
@@ -141,8 +155,8 @@ describe("forInitiative", () => {
     sess("x", { initiative: "camp", money: 9 }),
   ];
   const v = forInitiative(all, "organizer");
-  it("sums the initiative's own sessions", () => {
-    expect(v.totals).toMatchObject({ money: 5, tokens: 300, sessions: 3, running: 1, without_cost: 1, hours: 3 });
+  it("sums the initiative's own sessions, hours as active time, not first to last", () => {
+    expect(v.totals).toMatchObject({ money: 5, tokens: 300, sessions: 3, running: 1, without_cost: 1, hours: 1 });
     expect(v.sessions.map((s) => s.id)).toEqual(["b", "r", "f"]);
   });
   it("cuts by task with members and Not attributed last with its reason", () => {

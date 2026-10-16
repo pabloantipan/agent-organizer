@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { SESSIONS_MODEL_FROM, compact, duration, kindsLine, money, roleWords, startWords, type UsageSession } from "../lib/usage";
+import { SESSIONS_MODEL_FROM, compact, costFromWords, duration, kindsLine, roleWords, sessionMoney, startWords, type UsageSession } from "../lib/usage";
 
 /** `▸ Sessions · N` (her §5): closed by default, newest first. A running
  *  session reads `running` for its length and its numbers `so far`; a
@@ -49,7 +49,7 @@ export function UsageSessions({ sessions }: { sessions: UsageSession[] }) {
                     {model && <td className="mono cut">{s.model || "—"}</td>}
                     <td className="c-num nowrap">{s.running ? <span className="running-word">running</span> : duration(s.minutes)}</td>
                     <td className="c-num nowrap">{compact(s.tokens)}{soFar}</td>
-                    <td className="c-num nowrap" title={s.money == null ? "no cost recorded" : s.cost_from ? `cost from the ${s.cost_from}` : undefined}>{money(s.money)}{s.money != null && soFar}</td>
+                    <td className="c-num nowrap" title={costFromWords(s)}>{sessionMoney(s)}{s.money != null && soFar}</td>
                   </tr>
                 );
               })}

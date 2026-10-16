@@ -33,6 +33,10 @@ type Kinds struct {
 	Output     int64 `json:"output"`
 	CacheRead  int64 `json:"cache_read"`
 	CacheWrite int64 `json:"cache_write"`
+	// CacheWrite1h is the part of CacheWrite cached for an hour (the
+	// transcript's cache_creation.ephemeral_1h_input_tokens), priced apart
+	// from the 5-minute rest; not a fifth kind, so not in Total.
+	CacheWrite1h int64 `json:"cache_write_1h,omitempty"`
 }
 
 // Total is every kind added up: the "tokens" the view shows.
@@ -44,6 +48,7 @@ func (k *Kinds) Add(o Kinds) {
 	k.Output += o.Output
 	k.CacheRead += o.CacheRead
 	k.CacheWrite += o.CacheWrite
+	k.CacheWrite1h += o.CacheWrite1h
 }
 
 // Attribution is who a session was, fixed when it is first seen and kept on
@@ -71,12 +76,17 @@ type Line struct {
 	Messages int              `json:"messages"`
 	First    time.Time        `json:"first"`
 	Last     time.Time        `json:"last"`
+	// Active is the day's working time in seconds (usage-audit FR-3): the
+	// gaps between consecutive messages that are activeGap or less. A
+	// longer gap starts a new stretch and adds nothing.
+	Active int64 `json:"active"`
 	// Cost is this day's share of the session's cost, by its share of the
 	// session's tokens; null when no record of the session carries a cost.
 	Cost *float64 `json:"cost"`
 	// CostFrom says where the session's cost came from: "record" (the
-	// statusline, runs.jsonl or a live record) or "transcript" (its
-	// cost-state); empty with a null cost.
+	// statusline, runs.jsonl or a live record), "transcript" (its
+	// cost-state) or "priced" (its tokens at the price table, FR-5, FR-7);
+	// empty with a null cost.
 	CostFrom string `json:"cost_from,omitempty"`
 	// Reset says the session's recorded cost fell back at least once
 	// (a /login inside a process): it is the sum of its runs, and what a
@@ -127,7 +137,7 @@ func (c *counted) grow(k Kinds) Kinds {
 		return d
 	}
 	return Kinds{up(&c.Kinds.Input, k.Input), up(&c.Kinds.Output, k.Output),
-		up(&c.Kinds.CacheRead, k.CacheRead), up(&c.Kinds.CacheWrite, k.CacheWrite)}
+		up(&c.Kinds.CacheRead, k.CacheRead), up(&c.Kinds.CacheWrite, k.CacheWrite), up(&c.Kinds.CacheWrite1h, k.CacheWrite1h)}
 }
 
 // sessionMeta is what a transcript says about its session once, near its
@@ -140,6 +150,52 @@ type sessionMeta struct {
 	// TranscriptCost is the largest totalCostUSD of the transcript's
 	// cost-state entries, Claude Code's own running total for the session.
 	TranscriptCost float64 `json:"transcript_cost,omitempty"`
+	// Stretches are the session's messages by local day, as stretches of
+	// time with no gap over activeGap: what Line.Active is summed from,
+	// kept because a message read in a later pass can join or bridge them.
+	Stretches map[string][]stretch `json:"stretches,omitempty"`
+}
+
+// activeGap is the longest gap between two messages that still counts as
+// work (0138: a 5-minute gap rule).
+const activeGap = 5 * time.Minute
+
+// stretch is a run of messages each activeGap or less after the one before.
+type stretch struct {
+	From time.Time `json:"from"`
+	To   time.Time `json:"to"`
+}
+
+// addStretch puts a message's time into the day's stretches, merging every
+// stretch it lands within activeGap of. Order does not matter, and a time
+// seen twice changes nothing, so passes and sub-agent files can interleave.
+func addStretch(ss []stretch, t time.Time) []stretch {
+	n := stretch{t, t}
+	out := ss[:0:0]
+	for _, s := range ss {
+		if !t.Before(s.From.Add(-activeGap)) && !t.After(s.To.Add(activeGap)) {
+			if s.From.Before(n.From) {
+				n.From = s.From
+			}
+			if s.To.After(n.To) {
+				n.To = s.To
+			}
+			continue
+		}
+		out = append(out, s)
+	}
+	out = append(out, n)
+	sort.Slice(out, func(i, j int) bool { return out[i].From.Before(out[j].From) })
+	return out
+}
+
+// activeOf is the stretches' length in seconds.
+func activeOf(ss []stretch) int64 {
+	var d time.Duration
+	for _, s := range ss {
+		d += s.To.Sub(s.From)
+	}
+	return int64(d / time.Second)
 }
 
 // offsets is the file beside the ledger that makes reading incremental.
@@ -157,8 +213,10 @@ type offsets struct {
 }
 
 // offsetsVersion 2 records the transcripts' cost-state (FR-2 Amendment 1);
-// 3 counts a streamed message's final usage, not its first snapshot.
-const offsetsVersion = 3
+// 3 counts a streamed message's final usage, not its first snapshot; 4
+// records each message's time as stretches (active hours) and the 1-hour
+// cache writes (usage-audit FR-3, FR-4).
+const offsetsVersion = 4
 
 // CostSource is one record of a session's cumulative cost: a runs.jsonl run
 // or a live statusline record. Claude Code's total is cumulative across a
@@ -238,10 +296,13 @@ func Ingest(o Options) (Stats, error) {
 		byKey[l.SessionID+"|"+l.Day] = &l
 	}
 	offs := loadOffsets(o.OffsetsPath)
+	var before *rebuild
 	if offs.Version != offsetsVersion || offs.Generation != gen {
 		// Offsets from before this version skipped what this one reads, or
 		// they and the ledger were not written together: read every
-		// transcript again, rebuilding the ledger from them.
+		// transcript again, rebuilding the ledger from them. What no
+		// transcript can give back is kept (rebuild.restore).
+		before = &rebuild{lines: byKey, files: offs.Files}
 		offs = &offsets{Version: offsetsVersion, Files: map[string]*fileState{}, Sessions: map[string]*sessionMeta{}}
 		byKey = map[string]*Line{}
 		st.Changed = true
@@ -296,6 +357,10 @@ func Ingest(o Options) (Stats, error) {
 			l.Models[model] = mk
 			if first {
 				l.Messages++
+				if meta.Stretches == nil {
+					meta.Stretches = map[string][]stretch{}
+				}
+				meta.Stretches[day] = addStretch(meta.Stretches[day], ts)
 			}
 			if ts.Before(l.First) {
 				l.First = ts
@@ -313,6 +378,15 @@ func Ingest(o Options) (Stats, error) {
 	})
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return st, err
+	}
+	if before != nil {
+		before.restore(byKey, offs)
+	}
+	for _, l := range byKey {
+		if a := activeFor(l, offs.Sessions[l.SessionID]); a != l.Active {
+			l.Active = a
+			st.Changed = true
+		}
 	}
 
 	bySession := map[string][]*Line{}
@@ -352,7 +426,7 @@ func Ingest(o Options) (Stats, error) {
 				}
 			}
 		}
-		if splitCost(ls, costOf(costs[sid], meta)) {
+		if splitCost(ls, costOf(costs[sid], meta, ls)) {
 			changed = true
 		}
 	}
@@ -411,6 +485,9 @@ type entry struct {
 			Output     int64 `json:"output_tokens"`
 			CacheRead  int64 `json:"cache_read_input_tokens"`
 			CacheWrite int64 `json:"cache_creation_input_tokens"`
+			Creation   *struct {
+				OneHour int64 `json:"ephemeral_1h_input_tokens"`
+			} `json:"cache_creation"`
 		} `json:"usage"`
 	} `json:"message"`
 }
@@ -465,7 +542,10 @@ func readFrom(p string, fsx *fileState, meta *sessionMeta, loc *time.Location, a
 				break
 			}
 			u := e.Message.Usage
-			k := Kinds{u.Input, u.Output, u.CacheRead, u.CacheWrite}
+			k := Kinds{Input: u.Input, Output: u.Output, CacheRead: u.CacheRead, CacheWrite: u.CacheWrite}
+			if u.Creation != nil {
+				k.CacheWrite1h = min(u.Creation.OneHour, u.CacheWrite)
+			}
 			if c := seen[id]; c != nil {
 				if d := c.grow(k); d.Total() > 0 {
 					add(c.Day, c.TS, c.Model, d, false)
@@ -578,38 +658,61 @@ func foldCosts(srcs []CostSource) map[string]CostSource {
 // sessionCost is a session's cost and where it came from.
 type sessionCost struct {
 	USD   float64
-	From  string // "record", "transcript", or empty: no cost
+	From  string // "record", "transcript", "priced", or empty: no cost
 	Reset bool   // the record's runs: see CostSource
 }
 
 // costOf picks a session's cost (FR-2, Amendment 1): the statusline's from
-// runs.jsonl or a live record, else the transcript's own cost-state. A
+// runs.jsonl or a live record, else the transcript's own cost-state, else
+// its tokens at the price table when every one of them is priced (FR-5). A
 // record of $0 is no record, so a session the record left at $0 and the
-// transcript prices takes the transcript's. Neither is no cost.
-func costOf(c CostSource, meta *sessionMeta) sessionCost {
+// transcript prices takes the transcript's. None of them is no cost. A
+// reset session's record misses what a run spent before its reset, so one
+// whose tokens are all priced takes the larger of the two (FR-7).
+func costOf(c CostSource, meta *sessionMeta, ls []*Line) sessionCost {
+	priced, ok := priceLines(ls)
 	switch {
 	case c.HasCost && c.CostUSD > 0:
+		if c.Reset && ok && priced > c.CostUSD {
+			return sessionCost{USD: priced, From: "priced", Reset: true}
+		}
 		return sessionCost{USD: c.CostUSD, From: "record", Reset: c.Reset}
 	case meta != nil && meta.TranscriptCost > 0:
 		return sessionCost{USD: meta.TranscriptCost, From: "transcript"}
+	case ok && priced > 0:
+		return sessionCost{USD: priced, From: "priced"}
 	}
 	return sessionCost{}
 }
 
 // splitCost puts the session's cost on its days by each day's share of its
-// tokens. A session with no cost keeps null on every day; one with a cost
-// but no tokens has nowhere to put it. Reports whether it moved.
+// priced tokens when every day is priced, else of its tokens (FR-6); the
+// shares add up to the cost either way. A session with no cost keeps null
+// on every day; one with a cost but no tokens has nowhere to put it.
+// Reports whether it moved.
 func splitCost(ls []*Line, c sessionCost) bool {
-	var total int64
-	for _, l := range ls {
-		total += l.Total()
+	ws := make([]float64, len(ls))
+	priced := true
+	for i, l := range ls {
+		p, ok := priceLine(l)
+		priced = priced && ok
+		ws[i] = p
+	}
+	if !priced {
+		for i, l := range ls {
+			ws[i] = float64(l.Total())
+		}
+	}
+	var total float64
+	for _, w := range ws {
+		total += w
 	}
 	changed := false
-	for _, l := range ls {
+	for i, l := range ls {
 		var next *float64
 		from := ""
 		if c.From != "" && total > 0 {
-			v := c.USD * float64(l.Total()) / float64(total)
+			v := c.USD * ws[i] / total
 			next, from = &v, c.From
 		}
 		reset := c.Reset && next != nil
@@ -619,6 +722,72 @@ func splitCost(ls []*Line, c sessionCost) bool {
 		}
 	}
 	return changed
+}
+
+// rebuild is the ledger and the offsets a rebuild started from.
+type rebuild struct {
+	lines map[string]*Line
+	files map[string]*fileState
+}
+
+// restore keeps what a rebuild cannot read again. Claude Code deletes old
+// transcripts, so a session with a transcript gone, or none read at all,
+// keeps its old lines whole: rereading what is left would lose the rest.
+// Their days' active time is what the old line had, else first to last
+// (activeFor). A session read again keeps the attribution its old lines
+// carry, fixed when it was first seen, not what today's cards would give.
+func (r *rebuild) restore(byKey map[string]*Line, offs *offsets) {
+	gone := map[string]bool{}
+	for p, f := range r.files {
+		if _, err := os.Stat(p); err != nil {
+			gone[f.Session] = true
+		}
+	}
+	read := map[string][]string{}
+	for k, l := range byKey {
+		read[l.SessionID] = append(read[l.SessionID], k)
+	}
+	old := map[string][]*Line{}
+	for _, l := range r.lines {
+		old[l.SessionID] = append(old[l.SessionID], l)
+	}
+	for sid, ls := range old {
+		meta := offs.Sessions[sid]
+		if meta == nil {
+			meta = &sessionMeta{}
+			offs.Sessions[sid] = meta
+		}
+		if gone[sid] || len(read[sid]) == 0 {
+			for _, k := range read[sid] {
+				delete(byKey, k)
+			}
+			for _, l := range ls {
+				byKey[sid+"|"+l.Day] = l
+				delete(meta.Stretches, l.Day)
+			}
+			continue
+		}
+		sort.Slice(ls, func(i, j int) bool { return ls[i].Day < ls[j].Day })
+		a := ls[0].Attribution
+		for _, k := range read[sid] {
+			byKey[k].Attribution = a
+		}
+		meta.Fixed = a.Reason == ""
+	}
+}
+
+// activeFor is a line's active seconds: its day's stretches, else (a day
+// no transcript can give back) what the line had, else first to last.
+func activeFor(l *Line, meta *sessionMeta) int64 {
+	if meta != nil {
+		if ss, ok := meta.Stretches[l.Day]; ok {
+			return activeOf(ss)
+		}
+	}
+	if l.Active > 0 {
+		return l.Active
+	}
+	return int64(l.Last.Sub(l.First) / time.Second)
 }
 
 func sameCost(a, b *float64) bool {

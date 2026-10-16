@@ -37,9 +37,12 @@ export type UsageSession = Kinds & {
   start: string;
   end: string;
   minutes: number;
+  /** Seconds of active time in the week: messages 5 minutes apart or less (usage-audit FR-3). */
+  active: number;
   running: boolean;
   tokens: number;
   money?: number | null;
+  /** record, transcript, priced (the organizer's price table), or empty with no money. */
   cost_from: string;
 };
 
@@ -80,6 +83,13 @@ export function unknownMoney(x: { money: number; sessions: number; without_cost?
 }
 /** Money as a cell, a bar or a tile says it: `—` when wholly unknown. */
 export const moneyOf = (x: { money: number; sessions: number; without_cost?: number }) => (unknownMoney(x) ? "—" : money(x.money));
+/** A session's money as the list says it (usage-audit FR-5): `$12.50
+ *  (priced)` when the organizer's price table gave it, `—` when nothing did. */
+export const sessionMoney = (s: { money?: number | null; cost_from?: string }) =>
+  s.money != null && s.cost_from === "priced" ? `${money(s.money)} (priced)` : money(s.money);
+/** Where a session's money came from, for its hover. */
+export const costFromWords = (s: { money?: number | null; cost_from?: string }) =>
+  s.money == null ? "no cost recorded" : s.cost_from === "priced" ? "no cost recorded: its tokens at the organizer's price table" : s.cost_from ? `cost from the ${s.cost_from}` : undefined;
 export const unknownWords = (n: number) => `no cost recorded for ${n} session${n === 1 ? "" : "s"}`;
 
 /** A token count as data reads it: `25.0M`, `830k`, `8.3k`, `412`, `1.2B`. */
@@ -358,7 +368,7 @@ export function forInitiative(sessions: UsageSession[], initiative: string, task
     for (const k of KIND_KEYS) totals[k] += s[k] ?? 0;
     totals.tokens += s.tokens;
     if (s.money != null) totals.money += s.money; else totals.without_cost++;
-    totals.hours += (s.minutes || 0) / 60;
+    totals.hours += (s.active || 0) / 3600;
     if (s.running) totals.running++;
   }
   const cuts = {} as Record<Cut, UsageRow[]>;
