@@ -31,7 +31,7 @@ import (
 var Version = "dev"
 
 // Subcommands the binary recognises. Anything else launches the GUI.
-var Subcommands = []string{"status", "board", "sync", "prompt", "run", "runs", "usage", "decisions", "rule", "agents", "memory", "roles", "crew", "draft-cell", "retire", "clean", "statusline", "factory-key", "login", "logout", "whoami", "doctor", "config", "version", "--version", "help"}
+var Subcommands = []string{"status", "board", "sync", "prompt", "run", "runs", "usage", "decisions", "rule", "agents", "memory", "roles", "crew", "draft-cell", "retire", "review", "clean", "statusline", "factory-key", "login", "logout", "whoami", "doctor", "config", "version", "--version", "help"}
 
 // IsSubcommand reports whether arg names a CLI subcommand.
 func IsSubcommand(arg string) bool {
@@ -89,6 +89,8 @@ func runWith(args []string, stdout, stderr io.Writer, now func() time.Time) int 
 		return draftCellCmd(cfg, args[1:], stdout, stderr, now)
 	case "retire":
 		return retireCmd(cfg, args[1:], stdout, stderr, now)
+	case "review":
+		return reviewCmd(cfg, args[1:], stdout, stderr, now)
 	case "clean":
 		return cleanCmd(cfg, stdout, stderr, now)
 	case "statusline":
@@ -169,6 +171,7 @@ func usage(w io.Writer) {
   organizer crew <initiative> [--print] bring the initiative's persona cell up, one probe per seat; --print shows the lines
   organizer draft-cell <initiative> [--print] open a session that drafts the persona cell (persona-agents, references/drafting.md); --print shows its prompt
   organizer retire <initiative> [--retirable | --keep a,b] [--kill session] [--run]  end a wave: retire seats, kill sessions, close the mailbox, revoke tokens, rewrite cell.json (dry unless --run)
+  organizer review <initiative> <card | sha> [--json] [--out path] the Go change of a card's branch or a merge as revmap.json: changed definitions, 1-hop callers and callees, tests
   organizer clean                     delete exited probe sessions and stale statusline records
   organizer statusline                Claude Code statusLine command: records context fill per agent and prints it
   organizer factory-key [--rotate]    issue this laptop's factory key from discuss-record into ~/.local/state/discuss/push.key; --rotate issues a new one, then revokes the old
@@ -292,6 +295,7 @@ func doctor(cfg config.Config, args []string, stdout, stderr io.Writer, now func
 	fmt.Fprintf(stdout, "statusline: %s\n", statuslineStatus())
 	fmt.Fprintf(stdout, "discuss: %s\n", discussStatus(cfg))
 	fmt.Fprintf(stdout, "usage post: %s\n", service.UsagePostStatus(cfg))
+	fmt.Fprintf(stdout, "review: %s\n", reviewStatus())
 
 	started := now()
 	snap := scan.Run(scanOptions(cfg, now, true))
