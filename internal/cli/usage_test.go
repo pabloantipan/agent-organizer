@@ -65,7 +65,8 @@ func TestUsageCmdOverATranscript(t *testing.T) {
 	if err := json.Unmarshal(out.Bytes(), &v); err != nil {
 		t.Fatal(err)
 	}
-	if v.ThisWeek.Tokens != 10 || v.ThisWeek.Sessions != 1 || v.ThisWeek.WithoutCost != 1 {
+	// No cost source, every token opus-5-5: priced from the table (usage-audit FR-5).
+	if v.ThisWeek.Tokens != 10 || v.ThisWeek.Sessions != 1 || v.ThisWeek.WithoutCost != 0 || v.ThisWeek.Money <= 0 {
 		t.Errorf("this week = %+v", v.ThisWeek)
 	}
 	for _, c := range ledger.Cuts {
