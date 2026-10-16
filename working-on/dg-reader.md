@@ -79,3 +79,40 @@ Not changed, on purpose:
 - Not covered by the gate: the shared `scripts/tab-harness` has no Escape, so D7 depends on a copy in a notes dir. A card's `spec:` naming a missing file raises no scan Problem.
 
 Reviewer dd-review, 2026-10-16, commit 74cf351e20b141e55d19a694bc9024856e297272. No `## UI review` yet: status and place left as they are.
+
+## UI review
+**Pass**, at 74cf351e20b141e55d19a694bc9024856e297272 (branch unmoved). Checked against diagrams.md FR-6 to FR-8 (D6, D7, G3, X0), diagrams-in-app §3 and D6/D7, and the design system. The task prompt names "§0-§4 and W1-W6": that spec has §1-§3 and D1-D8 only, so I checked §2 (figure reuse) and §3. No severity 4 or 3 finding. Evidence: `/Users/pabloantipan/organizer/.wt-notes/dd-ui/` (shots `wk-1024x640-<row>-<state>.png`, out/ui-d6d7.jsonl, out/ui-extra.jsonl).
+
+**Shared test run: fresh**, run e116364f-58078 of 74cf351, exit 0, 801 vitest plus the go packages (x0-make-test.log). dd-review reused it.
+
+How each state was checked:
+- D6, met (Tab harness, my `wails dev :34253` from a clean detached clone, fixture + overlay, `auth: off`, 1024×640): Return on w-wide's `spec:` link opens docs/reader.md. Focus is on h2 "The scan report", focus-visible, 43 px under the top. Contents lists `✎ Change on the map` first (amber ✎), then the rest in document order. The figure is drawn (alt "Change on the map, diagram"). Body measure is 615 px, page scrollWidth 1024 (D6-section, D6-contents).
+- D7, met, run on the builder's harness copy with the `escape` verb (`.wt-notes/dd-build/tabharness.swift`, copied into my notes dir). Return on the 0012 link shows the record in the same drawer with `← Back` ("Back to docs/reader.md"), both figures drawn. Return on ← Back puts the spec back at scrollTop 1527, the same as before. Esc closes the drawer, the card back stays, and focus is on `Read docs/reader.md#the-scan-report`, focus-visible (D7-record, D7-back, D7-escape). The 0099 link reads `missing` and has no href.
+- FR-7, the other openers, with no card back open: the header's Details Specs and Home's init-a chevron Specs each open the reader on Return. Focus goes to the path, and Esc gives focus back to that opener (FR7-header-details, FR7-header-drawer, FR7-home-specs, FR7-home-drawer). Tab stays inside the drawer. The reader is mounted in CardDrawer, and App.tsx always renders CardDrawer, so the reader opens from any view.
+- FR-8 missing: card alpha's `docs/alpha.md#shape` reads `missing` and has no button (FR8-missing-opener).
+- G3: the code reviewer's run, plus my reading of the test. A counting `readSpecFile` stays at 0 for eight refused paths, so the test proves nothing was read, not only that an error came back.
+- Review app (`make review-build`, my pid, AX only): I pressed init-a, Work, w-wide and its spec link by AX at 1024×672. The drawer opened on "The scan report" with AXFocused on that heading (D6-reviewapp-drawer).
+- Computed contrast on `--surface-overlay` #2e273c: text 12.1:1, Contents items and missing words (`--fg-muted`) 6.7:1, ✎ amber 7.8:1, links `--accent-fg` 7.1:1. Contents rows are 28 px tall and ✕ is 38-51×28, both over 24 px. The body is a named scroll region and a Tab stop ("docs/reader.md, spec"). Tokens only in spec-reader.css. No light panel.
+- Boundary and No-gos: the diff only reads files, reuses DiagramFigure/useDiagrams unforked, and makes no network call except BrowserOpenURL on a press.
+
+Findings (none 4 or 3):
+- U1 (2). **What the lead cannot do:** at 1024×640 with Details open, find the header's Specs without scrolling. **Where:** InitiativeHeader, FR7-header-details. **Evidence:** `.ihead-specs` sits at y 406-434, inside the header's own scroll region (y 89-269, scrollHeight 496 over 178). It is reachable by scroll and Tab, and the edge rule shows there is more. **Proposal:** put Specs above Scope in the open Details, or count them on the bar ("3 specs").
+- U2 (1). **What the lead cannot do:** a screen reader does not hear the ✎ mark, because `.sr-map-mark` is aria-hidden. Being first in the list still carries the meaning. **Where:** SpecReader Contents. **Evidence:** DOM. **Proposal:** give the item an accessible name that includes the mark (e.g. "Change on the map, the change"), or leave it as is.
+- U3 (1). **What the lead cannot do:** see the drawer at its real place in the shots. **Where:** harness and review-app shots. **Evidence:** the drawer sits 24 px right and ✕ is at the window edge, both offscreen and in my on-screen but probably occluded review window: the slide-in animation is paused while hidden. **Proposal:** none for the build. A reviewer reads it as an artifact, not a layout bug (see Not verified).
+
+Spec gaps (for the FSE):
+- §3 "keeps its scroll position per path … reopening a spec lands where it was left" conflicts with a `#section` opener. Reopening w-wide's link lands on the section again, not on where the reader left off (600 → 1527). The build lets the section win, which I think is right, but the spec does not say so.
+- A card's `spec:` naming a missing file raises no scan Problem. §3 says "the scan's existing problem says why", but nothing tells the lead why it is missing.
+- The shared `scripts/tab-harness` has no Escape key, so D7 depends on a copy in a notes dir.
+
+For aglaea: A1. Should the header's Specs be on the folded bar (U1)? A2. Should the ✎ mark be announced (U2)?
+
+Not verified in WKWebView:
+- The drawer at its final place after the slide-in in a visible, front window: I may not bring a window front. Code: the transform runs from 24 px to none over 200 ms.
+- Reopen of a spec without a `#section` at its kept scroll: the fixture's header specs are shorter than the drawer. Code: `leftAt` per path.
+- Esc in my review app (no synthetic keys there). Esc was checked in the harness only.
+- `auth: firebase`: not relevant to this card.
+
+Process note: my first harness run overlapped for part of its run with dd-review's harness on :34252. I had not checked before starting. Each harness drives only its own offscreen window and both runs passed, but the one-at-a-time rule was broken once. My second run started only after confirming none was running.
+
+UI reviewer dd-ui, 2026-10-16, commit 74cf351e20b141e55d19a694bc9024856e297272. Status, `review:` and place left as they are.
