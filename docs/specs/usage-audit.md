@@ -157,3 +157,18 @@ double-counts every ordinary resume (W41 $1215 vs the audit's $801.82). So:
 - **uc-price P10** go test: a `reset` session whose priced tokens exceed
   its runs takes the priced cost; on the data-dir copy, 368c36b6 is within
   10% of the audit's $74.71.
+
+Amendment 2, 2026-10-15, the FSE, from up-build's numbers (sup75, thread
+01M51771): the audit's 65 h used a different rule, every gap counted up to
+10 min (`sum(min(gap, 600))`, Hephaistos's sess.py), not the one 0138 named.
+0138's words are "a 5-minute gap rule", and its question described active
+time as "messages less than about 5 minutes apart": FR-3 as written. The
+rule stays; the expected number was wrong. On the audit's own data, W42:
+FR-3 28.1 h; a 5-min cap 47.8 h; a 10-min cap 64.9 h.
+- **P4** (replaced) on the data-dir copy, W42 `totals.hours` is within 15%
+  of FR-3 applied to the same messages by an independent script (the
+  card's Notes give both), and between 20 h and 45 h; the Notes keep the
+  table of the four rules above.
+- **FR-3** also covers `forInitiative` in `frontend/src/lib/usage.ts`,
+  which sums hours for one initiative and must use `active` too (sup75,
+  thread 01M516VS).

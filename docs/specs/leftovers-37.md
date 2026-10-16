@@ -59,3 +59,14 @@ follow 0095 and 0108.
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf37-waits-polish` | P1, P2, P3, P4, X0 | — | true |
+
+Amendment 1, 2026-10-15, the FSE, from wp-review's fail on P4 (sup76,
+thread 01M516MP): Aglaea's W10 reads "one line under the heading, as Needs
+me has" (needs-me-waits.md:122), and Needs me's sub-line is a `sec-sub`
+inside its h2, on the heading's line (Home.tsx:76). The intent is the house
+sub-line, so:
+- **FR-4** The sub-line is Waiting on others' `sec-sub`, placed as Needs
+  me's is.
+- **P4** exactly `Theirs to rule. Not counted in Needs me.`, in a
+  `sec-sub` of the group's heading, at the same position relative to its
+  heading as Needs me's sub-line.
