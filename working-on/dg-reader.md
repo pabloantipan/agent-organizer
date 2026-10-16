@@ -6,7 +6,7 @@ branch: dg-reader
 seat: dd-build
 stage: review-map
 updated: 2026-10-15
-next: "sup76 runs it after dg-render; 0140 ruled"
+next: "building: dd-build on branch dg-reader (sup76, launched 00:05)"
 risk: medium
 footprint: [app.go, internal/service (spec read), a drawer component, frontend/src/components/Initiatives.tsx, InitiativeHeader.tsx, CardDrawer.tsx, frontend/wailsjs/]
 depends_on: [dg-render]
