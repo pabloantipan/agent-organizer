@@ -9,7 +9,7 @@
 // only through [window sendEvent:]. Nothing is posted to the system.
 //
 // steps.txt, one per line ('#' comments):
-//   key tab|shift-tab|return|up|down|left|right
+//   key tab|shift-tab|return|escape|up|down|left|right
 //                                       post keyDown+keyUp to the window
 //   eval <js>                           run JS, print its result
 //   wait <ms>
@@ -117,6 +117,7 @@ final class Runner: NSObject, WKNavigationDelegate {
     case "tab": chars = "\t"; code = 48
     case "shift-tab": chars = "\u{19}"; code = 48; flags = [.shift]
     case "return": chars = "\r"; code = 36
+    case "escape": chars = "\u{1b}"; code = 53
     case "up": chars = String(UnicodeScalar(NSUpArrowFunctionKey)!); code = 126; flags = [.numericPad, .function]
     case "down": chars = String(UnicodeScalar(NSDownArrowFunctionKey)!); code = 125; flags = [.numericPad, .function]
     case "left": chars = String(UnicodeScalar(NSLeftArrowFunctionKey)!); code = 123; flags = [.numericPad, .function]
