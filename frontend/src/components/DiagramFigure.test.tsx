@@ -21,7 +21,7 @@ describe("G2: a figure that cannot draw shows the source under the reason", () =
       const html = view({ state: "failed", reason });
       expect(html).toContain(`Diagram not drawn: ${reason}</p>${code}`);
       expect(html).not.toContain("<img");
-      expect(html).toContain("Added: a, b. Changed: c. Removed: none.");
+      expect(html).toContain("Added: a, b. Changed: c. Removed: none. Around it: none.");
     });
   }
   it("while drawing, the source under Drawing the diagram…", () => {
@@ -36,7 +36,7 @@ describe("FR-3, FR-4: a drawn figure", () => {
   it("is an image named after its heading, described by the class line", () => {
     expect(html).toMatch(/<img src="data:image\/svg\+xml;charset=utf-8,%3Csvg%2F%3E" alt="Change on the map, diagram" aria-describedby="([^"]+)-classes"\/>/);
     const id = html.match(/aria-describedby="([^"]+)"/)![1];
-    expect(html).toContain(`<p id="${id}" class="diagram-classes">Added: a, b. Changed: c. Removed: none.</p>`);
+    expect(html).toContain(`<p id="${id}" class="diagram-classes">Added: a, b. Changed: c. Removed: none. Around it: none.</p>`);
   });
   it("has a Source disclosure, closed, then the text line under it", () => {
     expect(html).toMatch(/<button type="button" class="link diagram-source" aria-expanded="false" aria-controls="[^"]+">Source<\/button><p id="[^"]+" class="diagram-classes">/);
