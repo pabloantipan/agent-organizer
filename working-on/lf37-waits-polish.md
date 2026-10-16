@@ -6,7 +6,7 @@ branch: lf37-waits-polish
 seat: wp-build
 stage: decisions-owned-and-used
 updated: 2026-10-15
-next: "review: lf37-waits-polish, gate met (P1, P2, P3, P4, X0), 3ceff0f"
+next: "P4: the sub-line renders beside the count inside the h3 (same y), not under the heading; move it under, or the FSE amends FR-4/P4 to the inline house sub-line (wp-review)"
 risk: low
 footprint: [frontend/src/components/Home.tsx (DecisionRow, WaitingOnOthers), frontend/src/styles/shell.css, their tests]
 depends_on: []
@@ -14,6 +14,7 @@ boundary: ["docs/specs/leftovers-37.md Boundary, lf37-waits-polish"]
 spec: "docs/specs/leftovers-37.md (FR-1 to FR-4; needs-me-waits Amendment 1, W7-W10)"
 gate: "docs/specs/leftovers-37.md Acceptance, rows P1, P2, P3, P4 and X0"
 ui_review: true
+review: fail
 ---
 
 ## Goal
@@ -46,3 +47,14 @@ Not changed, on purpose:
 ## Notes
 - The fixture has no record under 7 days; P2's short row was made by re-dating init-a 0010 in the page's store only (progress.md).
 - `.lz.waiting.dashed` is now dead CSS; age x differs ~5 px between the two groups (Rule wider than Open in the `auto` verb column); within each group it is one x.
+
+## Review
+Verdict: **fail**, unmet: P4. Reviewer wp-review, 2026-10-15, commit 3ceff0fd3aab25d807f3b414f5231439ca7af113, fresh clone (removed after). Evidence: /Users/pabloantipan/organizer/.wt-notes/wp-review/out/.
+- P1: met. Read `Home.waits.test.tsx` against the row: fixed now 2026-10-15 (fake Date), lead 25 d and 6 d, alejandro 25 d; each row's first span is `lz waiting` `decision`, one lozenge, no `lz warning`, no dashed; 25 d ages `ib-age … long`, 6 d not; long descriptions `waiting 25 days, …` / `waiting on alejandro, 25 days, …`. Ran it: 10/10.
+- P2: met. Tab harness 1024x640, own wails dev :34232, fixture + overlay, auth off (builder's steps, 0010 re-dated to 6 d in the page store only): `--warning` rgb(255, 176, 32); every long record row rgb(255, 176, 32) 600; 6 d init-a 0010 rgb(149, 142, 162) 400 = thread row 01M490219ZMV… rgb(149, 142, 162) 400. out/p2.jsonl, p2-needs-me.png.
+- P3: met. Others' rows: lozenge left x 82 both, `ib-age` x 857.84 both; subjects `owner alejandro · init-a 0005 · …`, `owner ana · init-many 0075 · …`. out/p2p3.jsonl, p3-others.png.
+- P4: **unmet**. Text is exact (`Theirs to rule. Not counted in Needs me.`, vitest and harness), but it is a `.sec-sub` span inside the flex-row h3, drawn beside the count: h3 y 45, count x 200 y 45, sub x 215 y 45 (out/p2p3.jsonl, p3-others.png). FR-4 and P4 say under the heading. It follows the inline house sub-line (Needs me's h2, Roles, Initiatives), so if W10 meant that, the row needs amending; flagged to sup76.
+- X0: met. `make test` 0 (Go ok, vitest 760/760), `pnpm run build` 0, `wails build` 0, `git status --porcelain` empty.
+- Shared test run: **reused** run ec7012f7-88717 of 3ceff0fd3aab (wp-ui, 2026-10-15T22:50:47).
+- change-check (base main fe0874e, head 3ceff0f): changed Home.tsx (Shell, DecisionRow, WaitingOnOthers, OthersRow), Home.waits.test.tsx, shell.css; undeclared 0, declared-not-changed 0. Flags explained: `outside boundary`/`outside footprint` Home.waits.test.tsx: the Boundary's "their tests" (prose change-check cannot parse), footprint says "their tests" too; `untested? Shell`: exercised through DecisionRow/OthersRow in P1. No Go, no Gate.tsx, store, testdata or `lib/queue.ts` change; no new service call; badge 16 unchanged.
+
