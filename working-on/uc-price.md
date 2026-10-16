@@ -4,8 +4,9 @@ status: now
 repos: [organizer]
 branch: uc-price
 seat: up-build
-updated: 2026-10-15
-next: "review: uc-price, gate met (P1-P10, X0; P4 as amended by Amendment 2)"
+updated: 2026-10-16
+next: "file finding: TestCrewCmdSkipsRunningSeat is flaky (one make test run lost the qa_cleo running line), and organizer usage text prints $0.00 for a week wholly without cost where FR-5 says never $0.00 (both in ## Review, outside the gate)"
+review: pass
 risk: high
 footprint: [internal/usage/ledger.go (Line.active, Ingest, costOf, splitCost), internal/usage/report.go (totals, the model cut), internal/usage/prices.go (new), frontend/src/lib/usage.ts, frontend/src/components/Usage.tsx]
 depends_on: [uc-resume]
@@ -29,7 +30,7 @@ Forecast 25-50 min over 1 wave (the FSE; basis: one-card Go tasks here, uc-resum
 - P4 (Amendment 2), met. Rule table, W42, the audit's msgs.pkl: FR-3 per session-day (<=5 min, longer adds nothing) 28.1 h; 5-min cap 47.8 h; <=10 min else 0 40.8 h; 10-min cap per session (the audit's sess.py) 64.9 h. Fresh data-dir copy at 2026-10-16T02:28:44Z, branch `usage --week 2026-W42 --json` totals.hours **31.47 h** (main on an earlier copy 185.9 h); independent script, FR-3 over the same transcripts cut at that instant (every assistant message by id, sub-agents under the parent, local day, gaps <= 300 s; `.wt-notes/up-build/p4_independent.py`) **31.49 h**, 130 session-days: 0.06% apart, inside 20-45 h.
 - P7: W34 holds claude-opus-5 and claude-fable-5 only, neither in the table: money `—`, without_cost 7 on main and branch.
 - P10 real half: 368c36b6 whole session main $24.00 record, reset; branch $74.71 priced, reset (audit $74.71). W42 total main $465.40, branch $492.50; W41 main $785.10, branch $823.92 (audit $801.82, +2.8%): 368c36b6 and the price split across days and weeks; no session newly without cost.
-- Not anticipated: `forInitiative` in frontend/src/lib/usage.ts sums the filtered view's hours from session minutes (first to last); found, not asked: `SessionRow.active` is added in Go and `forInitiative` now sums it (sup75: FR-3 makes the view's hours active time; "one frontend change" names FR-5's words). The source is named in `UsageSessions.tsx` (the Usage view's session list), not `Usage.tsx`, so the priced words are called there. `internal/cli/usage_test.go` expected a lone opus-5-5 session without a cost source to be without cost; FR-5 prices it (f79465c).
+- Not anticipated: `forInitiative` in frontend/src/lib/usage.ts sums the filtered view's hours from session minutes (first to last); found, not asked (went to: docs/specs/usage-audit.md Amendment 2, FR-3 covers `forInitiative`): `SessionRow.active` is added in Go and `forInitiative` now sums it (sup75: FR-3 makes the view's hours active time; "one frontend change" names FR-5's words). The source is named in `UsageSessions.tsx` (the Usage view's session list), not `Usage.tsx`, so the priced words are called there. `internal/cli/usage_test.go` expected a lone opus-5-5 session without a cost source to be without cost; FR-5 prices it (f79465c).
 
 ## Declared changes
 - added `internal/usage/prices.go`: the price table (`Prices`, `Price`), `priceOf`, `priceOfModels`, `priceLine`, `priceLines` (FR-4)
@@ -64,3 +65,25 @@ Not changed, on purpose:
 ## Done
 - 2026-10-16, up-build: hours are active time, missing and reset costs priced from the table, split by priced tokens, `$<n> (priced)`; gate P1-P10 and X0 met on f56743a (rebased on main b983ed5); P4 as amended, 31.47 h vs the independent 31.49 h.
 
+## Review
+**pass** at ebc95f7 (branch uc-price, detached clean checkout). Unmet gate items: none. Reviewer up-review, 2026-10-16.
+
+`change-check organizer uc-price`, run from the checkout, reads the card from the root's main (no `## Declared changes` there): 10 files, 63 flags (outside boundary 10, outside footprint 6, undeclared 36, untested? 11); every undeclared line is that missing section. Rerun against the branch's card (symlink `organizer` to the checkout, `.wt-notes/up-review/cc-branch.txt`): 40 flags: outside boundary 10, outside footprint 6, undeclared 12, declared, not changed 1, untested? 11. Explained:
+- outside boundary (all 10): the tool does not resolve `Boundary (uc-price)`. By hand: `internal/usage/{ledger,report,prices,price_test}.go`, `frontend/src/lib/usage.ts` and `usage.test.ts` are in it. `UsageSessions.tsx` is the session list inside the Usage view, where the cost source is named; the change only imports and calls `sessionMoney`/`costFromWords` (2 lines), what the boundary allows `Usage.tsx`. `internal/cli/usage_test.go`: one assertion that expected FR-5's old behaviour (no cost) now expects a priced one. `frontend/wailsjs/go/models.ts`: generated for `SessionRow.active`, which X0 needs committed. `working-on/uc-price.md`: the card.
+- outside footprint (6): the same tests, the generated file, the card and `UsageSessions.tsx`, above.
+- undeclared (12): symbols of declared changes the tool reads by first name only. `Kinds.Add`, `counted.grow`, `entry`, `readFrom`: threading `CacheWrite1h` from `cache_creation` (the `Kinds` bullet). `sessionMeta`: declared as `sessionMeta.Stretches`. `stretch`, `activeOf`, `activeFor`: listed in the `addStretch` bullet. `rebuild.restore`: the `rebuild` bullet. `sessionCost`: the comment gains "priced". `report.go:Totals`: the `Hours` comment. `report.go:sessions`: `s.Active +=`, declared in the `SessionRow` bullet ("summed in `sessions`").
+- declared, not changed, `ledger.go:offsetsVersion`: a tool miss; the diff changes `const offsetsVersion = 3` to `4`.
+
+Gate:
+- P1, P2, P3, P5, P6, P8, P10 (go test half): `go test -count=1 -run 'TestP|TestActiveGap|TestModelCut' -v ./internal/usage/`: all PASS. I read each test against its row. P1 checks 360 s and 0.1 h. P2 splits the passes between 10:03 and 10:04. P3 checks version-3 offsets with `active` stripped, which reads 360 after one ingest. P5 is $30.50 by hand, `priced`. P6 has a haiku token, so null and no `priced`. P8 checks 9.901 and 0.099, summing to 10. P10 checks over → 25 priced reset; under and mixed → 19 record reset. On main they do not compile (`Active`, `Prices`).
+- P4 (Amendment 2): I copied the data dir and removed `record_url` from a copied config. Branch `usage --week 2026-W42 --json` gives totals.hours **31.69**. My own script (`.wt-notes/up-review/p4_fr3.py`: assistant messages with id and usage, first timestamp per id, sub-agent files under the parent, local day, gaps ≤ 300 s, cut at the run's instant 2026-10-16T02:3xZ) gives **31.81 h**, 132 session-days. They are 0.4% apart and inside 20-45 h. The Notes keep the four-rule table.
+- P7: W34 `this_week` is money 0, without_cost 7 of 7 sessions. Its models are claude-opus-5 (6) and claude-fable-5 (1), neither in the table. The view's `unknownMoney` (usage.ts:80) makes this `—`, with `unknownWords` "no cost recorded for 7 sessions".
+- P9: vitest "priced money (usage-audit P9)" passes (`$12.50 (priced)`, `—`).
+- P10 (real half): 368c36b6's lines on the copy add up to **$74.71**, `priced`, `reset`, matching the audit's $74.71.
+- FR-7: `costOf` takes the larger only when the session is reset and all of its tokens are priced. FR-3 `forInitiative` sums `active/3600`, and vitest expects 1 h, not 3.
+- X0: `pnpm install`, then `XDG_DATA_HOME=$(mktemp -d) test-lease run -- make test`. The first run failed in `TestCrewCmdSkipsRunningSeat` (crew_test.go:146, output missing `qa_cleo running`). The rerun passed: go all ok, vitest 759 of 759. Then `pnpm run build`, `wails build` (Built …/Deltagos.app), and `git status --porcelain` is empty (`.wt-notes/up-review/x0.log`, `x0b.log`).
+
+Outside the gate (Note, not blocking; neither touches this diff):
+- Note: `TestCrewCmdSkipsRunningSeat` is flaky. It failed once in make test and passed 3 of 3 alone. It is crew code this card does not touch. Not filed: the card stays open for it.
+- Note: `organizer usage --week 2026-W34` (CLI text, internal/cli/usage.go:85) prints `$0.00; excludes 7 sessions with no cost` for a week with no cost at all. FR-5 says "never $0.00" of the view, and the view says `—`; the CLI behaves as it does on main. Not filed: the card stays open for it.
+- Note: a week's money total does not say "(priced)" for its priced share. FR-5 names only where the source is shown.
