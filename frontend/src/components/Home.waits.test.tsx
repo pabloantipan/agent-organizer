@@ -94,6 +94,16 @@ describe("P1: records 25 and 6 days old, the lead's and alejandro's, at a fixed 
     expect(subject.replace(/<[^>]+>/g, "")).toBe("owner alejandro · camp 0005 · Who owns QA");
   });
 
+  // leftovers-38 O1 (needs-me-waits W11): the owner is said once, in the
+  // others' subject; the lead's context line is as it was.
+  const contextOf = (html: string) => /<span class="ib-context">([^<]*)<\/span>/.exec(html)?.[1];
+  it("O1: the others' context starts at raised and holds no owner; the lead's is unchanged", () => {
+    expect(contextOf(rows.theirs25)).toBe("raised 20 Sep");
+    expect(contextOf(rows.theirs25)).not.toContain("owner ");
+    expect(contextOf(rows.lead25)).toBe("owner pablo · raised 20 Sep");
+    expect(contextOf(rows.lead6)).toBe("owner pablo · raised 9 Oct");
+  });
+
   it("keeps Rule as the lead's verb and Open as the others'", () => {
     expect(rows.lead25).toMatch(/<button[^>]*>Rule<\/button>/);
     expect(rows.theirs25).toMatch(/<button[^>]*aria-label="Open camp 0005"[^>]*>Open<\/button>/);

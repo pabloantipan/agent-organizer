@@ -305,10 +305,11 @@ function UnreadRow({ row }: { row: Extract<NeedsMeRow, { kind: "unread" }> }) {
 }
 
 /** A decision record's context line: its owner, when and by whom raised, its
- *  options. */
-const decisionContext = (d: model.Decision) => {
+ *  options. An others' row already leads its subject with the owner, so its
+ *  line starts at `raised` (needs-me-waits W11, leftovers-38 FR-1). */
+const decisionContext = (d: model.Decision, withOwner = true) => {
   const opts = d.options ?? [];
-  return `${ownerPhrase(d.owner)} · raised ${d.raised ? dateWords(d.raised) : "—"}${d.raised_by ? ` by ${d.raised_by}` : ""}${opts.length > 0 ? ` · options: ${opts.join(", ")}` : ""}`;
+  return `${withOwner ? `${ownerPhrase(d.owner)} · ` : ""}raised ${d.raised ? dateWords(d.raised) : "—"}${d.raised_by ? ` by ${d.raised_by}` : ""}${opts.length > 0 ? ` · options: ${opts.join(", ")}` : ""}`;
 };
 
 /** `n days`, in full: a screen reader reads `d` as a letter (needs-me-waits
@@ -366,7 +367,7 @@ export function OthersRow({ row }: { row: OthersWait }) {
     <Shell row={row} reason="decision" tone="waiting" long
       subject={<>{ownerPhrase(row.owner)} · <span className="mono">{row.initiative} {d.number}</span> · {d.title}</>}
       hover={desc.split(", ").join(" · ")}
-      context={decisionContext(d)}>
+      context={decisionContext(d, false)}>
       <button className="act" aria-label={`Open ${row.initiative} ${d.number}`} aria-describedby={descId} onClick={() => openDecision(row.initiative, d.number)} title="the record on its Decisions, where Rule is">Open</button>
       <span id={descId} hidden>{desc}</span>
     </Shell>
