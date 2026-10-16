@@ -22,6 +22,8 @@ card (`docs/specs/leftovers-38.md`):
 - The action buttons get one column width, so the age column lines up
   across both groups.
 - A dead style goes.
+- In the spec reader, a screen reader hears the first Contents entry as
+  `Change on the map, start here` (Aglaea's D9).
 
 No check drives your screen or keyboard, starts a real agent, or writes
 your clipboard.

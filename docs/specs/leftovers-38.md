@@ -4,7 +4,8 @@ status: proposed (0142)
 by: the FSE, 2026-10-15, on main at 4285b0d
 sources: lf37-waits-polish's UI review (`working-on/done/lf37-waits-polish.md`,
 `## UI review`, U1, U2, U3), answered by Aglaea in `docs/ux/specs/needs-me-waits.md`
-Amendment 2 (4285b0d, W11, W12).
+Amendment 2 (4285b0d, W11, W12); dg-reader's UI review U2 (6ef262a), answered
+in `docs/ux/specs/diagrams-in-app.md` Amendment 2 (D9).
 
 ## Premises (each read today)
 
@@ -17,6 +18,9 @@ Amendment 2 (4285b0d, W11, W12).
 - `.lz.waiting.dashed` (`styles/shell.css:33`) has no user in
   `frontend/src` since lf37 (grep of `dashed` in components and lib).
 
+- The Contents' ✎ is `<span className="sr-map-mark" aria-hidden="true">`
+  in `components/SpecReader.tsx:341`; the entry has no other name.
+
 ## Requirements, card `lf38-owner-once` (frontend)
 
 - **FR-1** (W11) An others' row's context line drops the owner and starts
@@ -26,6 +30,9 @@ Amendment 2 (4285b0d, W11, W12).
   age column in both groups has one left x. A min-width on the verb cell
   is enough; no row changes its other columns.
 - **FR-3** (U3) `.lz.waiting.dashed` goes.
+- **FR-4** (D9) The spec reader's Contents entry for `Change on the map`
+  has the accessible name `Change on the map, start here` (a
+  screen-reader-only suffix); ✎ stays aria-hidden.
 
 ## Acceptance → gate
 
@@ -34,17 +41,18 @@ Amendment 2 (4285b0d, W11, W12).
 | O1 | 1 | vitest of the others' row and `DecisionRow` | others' context starts `raised`, holds no `owner `; the lead's row context unchanged |
 | O2 | 2 | Tab harness at 1024×640 and at 1440 wide, fixture with Rule, Open and Answer rows in view (both groups) | every `ib-age` left x equal within 0.5 px, at each width |
 | O3 | 3 | `grep -rn 'waiting.dashed' frontend/src` | nothing |
+| O4 | 4 | vitest of `SpecReader`'s Contents | the entry's accessible name is exactly `Change on the map, start here`; ✎ has aria-hidden |
 | X0 | all | `XDG_DATA_HOME=$(mktemp -d) make test`, `cd frontend && pnpm run build`, `wails build`, then `git status --porcelain` | pass, empty |
 
 ## Boundary
 
 - `lf38-owner-once`: `components/Home.tsx` (`decisionContext` or the
   others' row's use of it), `styles/shell.css` (the verb cell, the dead
-  rule), their tests. Not: `lib/queue.ts`, `lib/decisions.ts`'s
+  rule), `components/SpecReader.tsx` (the Contents entry), their tests. Not: `lib/queue.ts`, `lib/decisions.ts`'s
   `ownerPhrase`, Go.
 
 ## Cards
 
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
-| `lf38-owner-once` | O1, O2, O3, X0 | — | true |
+| `lf38-owner-once` | O1, O2, O3, O4, X0 | — | true |
