@@ -1,0 +1,1778 @@
+{
+  "version": "0",
+  "initiative": "organizer",
+  "target": "35671ed",
+  "base": "2401e90945da195a305fd191cd0723773441160a",
+  "head": "35671edd9c5f00936c7c5ac55ed494c5fbdac641",
+  "source": "go/types",
+  "nodes": [
+    {
+      "id": "go:organizer.App.CreateCrew",
+      "level": "symbol",
+      "parent": "go:organizer",
+      "kind": "method",
+      "lang": "go",
+      "file": "app.go",
+      "range_head": [
+        399,
+        414
+      ],
+      "range_base": [
+        399,
+        408
+      ],
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "app_launch_test.go::TestAppCreateCrewReturnsAtOnce"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer.CrewResult",
+      "level": "symbol",
+      "parent": "go:organizer",
+      "kind": "type",
+      "lang": "go",
+      "file": "app.go",
+      "range_head": [
+        416,
+        421
+      ],
+      "range_base": null,
+      "change": "added",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "app_launch_test.go::TestAppCreateCrewReturnsAtOnce"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer.TestAppCreateCrewReturnsAtOnce",
+      "level": "symbol",
+      "parent": "go:organizer",
+      "kind": "test",
+      "lang": "go",
+      "file": "app_launch_test.go",
+      "range_head": [
+        14,
+        66
+      ],
+      "range_base": [
+        14,
+        66
+      ],
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.CrewRunning",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        459,
+        465
+      ],
+      "range_base": null,
+      "change": "added",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.CrewStart",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        450,
+        457
+      ],
+      "range_base": [
+        450,
+        455
+      ],
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.Service.StartCrew",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "method",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        492,
+        651
+      ],
+      "range_base": [
+        482,
+        640
+      ],
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.TestStartCrewNamesRunningSessions",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "test",
+      "lang": "go",
+      "file": "internal/service/crewskip_test.go",
+      "range_head": [
+        116,
+        137
+      ],
+      "range_base": null,
+      "change": "added",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer.App",
+      "level": "symbol",
+      "parent": "go:organizer",
+      "kind": "type",
+      "lang": "go",
+      "file": "app.go",
+      "range_head": [
+        23,
+        28
+      ],
+      "range_base": [
+        23,
+        28
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "app_launch_test.go::TestAppCreateCrewReturnsAtOnce"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer.errString",
+      "level": "symbol",
+      "parent": "go:organizer",
+      "kind": "type",
+      "lang": "go",
+      "file": "app.go",
+      "range_head": [
+        642,
+        642
+      ],
+      "range_base": [
+        629,
+        629
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/cache.State",
+      "level": "symbol",
+      "parent": "go:organizer/internal/cache",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/cache/cache.go",
+      "range_head": [
+        15,
+        21
+      ],
+      "range_base": [
+        15,
+        21
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "app_launch_test.go::TestAppCreateCrewReturnsAtOnce",
+          "internal/service/auth_test.go::TestAccountViewFollowsTheMode",
+          "internal/service/auth_test.go::TestSyncSkipsWhenAuthOff",
+          "internal/service/auth_test.go::TestSyncWithFirebaseReachesTheOldChecks",
+          "internal/service/crew_test.go::TestCellStateRidesACopyNotTheCache",
+          "internal/service/crew_test.go::TestCreateCrewRefusesASeatWithoutItsPersonaFile",
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/draft_test.go::TestDraftCellIsInDefinitionAndRefusedNamingItsAcceptRecord",
+          "internal/service/draft_test.go::TestDraftCellRefusesWithoutGoalOrPeopleOrWithACell",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt",
+          "internal/service/help_test.go::TestHelpMissingFileNamesPathAndKey",
+          "internal/service/help_test.go::TestHelpReadsTheFileAtCallTime",
+          "internal/service/help_test.go::TestHelpUnreadableFileNamesPathAndKey",
+          "internal/service/launch_test.go::TestCreateAgentStartsDetached",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestCrewStartRefusesWhileOneIsStarting",
+          "internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds",
+          "internal/service/launch_test.go::TestLaunchStatesThroughTheStub",
+          "internal/service/launch_test.go::TestRunCardStartsDetachedAndRetriesOnce",
+          "internal/service/memory_test.go::TestOnMemoryWarn",
+          "internal/service/memory_test.go::TestSampleMemory",
+          "internal/service/memory_test.go::TestSetMemoryReader",
+          "internal/service/notes_test.go::TestNotesAreACommentFeed",
+          "internal/service/retire_test.go::TestPlanRetireFindsEverySeatsSessionOnTheCampCell",
+          "internal/service/retire_test.go::TestPlanRetireReportsASeatItCannotName",
+          "internal/service/retire_test.go::TestPlanRetireRetirableSaysTheCellIsInDefinition",
+          "internal/service/retire_test.go::TestRetireOfTheLastSeatKeepsTheCell",
+          "internal/service/roles_test.go::TestAgentsViewRoles",
+          "internal/service/rule_test.go::TestRuleDecisionAnyOwner",
+          "internal/service/rule_test.go::TestRuleDecisionRefusals",
+          "internal/service/rule_test.go::TestRuleDecisionWritesAndCommits",
+          "internal/service/run_test.go::TestInitiativeRunsSumsTokensPerCard",
+          "internal/service/run_test.go::TestPrepareLaunchUsesTheCellFamily",
+          "internal/service/run_test.go::TestPrepareLaunchWarnsOnlyOverTheSessionCeiling",
+          "internal/service/sleep_test.go::TestFactoryAwakeNeverOnTheTick",
+          "internal/service/sleep_test.go::TestFactoryBlindMissingFailingArchived",
+          "internal/service/sleep_test.go::TestFactoryCallTimesOut",
+          "internal/service/sleep_test.go::TestFactoryFoundInHomeBin",
+          "internal/service/sleep_test.go::TestSleepWakeThroughTheFactory",
+          "internal/service/sleep_test.go::TestSleepWhileOneRunsIsBusy",
+          "internal/service/tasks_test.go::TestTasksOnTheFeed"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/cli.crewCmd",
+      "level": "symbol",
+      "parent": "go:organizer/internal/cli",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/cli/crew.go",
+      "range_head": [
+        19,
+        84
+      ],
+      "range_base": [
+        19,
+        84
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/config.Config",
+      "level": "symbol",
+      "parent": "go:organizer/internal/config",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/config/config.go",
+      "range_head": [
+        21,
+        70
+      ],
+      "range_base": [
+        21,
+        70
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "app_launch_test.go::TestAppCreateCrewReturnsAtOnce",
+          "internal/cli/auth_test.go::TestDoctorReportsTheAuthMode",
+          "internal/cli/cli_test.go::TestWriteStatusGolden",
+          "internal/config/config_test.go::TestAuthMode",
+          "internal/config/config_test.go::TestLoadRoles",
+          "internal/config/config_test.go::TestSaveKeepsNoRoles",
+          "internal/service/auth_test.go::TestAccountViewFollowsTheMode",
+          "internal/service/auth_test.go::TestSyncSkipsWhenAuthOff",
+          "internal/service/auth_test.go::TestSyncWithFirebaseReachesTheOldChecks",
+          "internal/service/crew_test.go::TestCannedHealthReadsOneProject",
+          "internal/service/crew_test.go::TestCellStateRidesACopyNotTheCache",
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/factory_test.go::TestFactoryKeyIssuesThenRotates",
+          "internal/service/factory_test.go::TestRegisterCellWritesPushAndRegistersWhenAFactory",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt",
+          "internal/service/help_test.go::TestHelpDocDefaultsAndExpands",
+          "internal/service/help_test.go::TestHelpMissingFileNamesPathAndKey",
+          "internal/service/help_test.go::TestHelpReadsTheFileAtCallTime",
+          "internal/service/help_test.go::TestHelpUnreadableFileNamesPathAndKey",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestCrewStartRefusesWhileOneIsStarting",
+          "internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds",
+          "internal/service/launch_test.go::TestLaunchStatesThroughTheStub",
+          "internal/service/memory_test.go::TestOnMemoryWarn",
+          "internal/service/memory_test.go::TestSampleMemory",
+          "internal/service/memory_test.go::TestSetMemoryReader",
+          "internal/service/notes_test.go::TestNotesAreACommentFeed",
+          "internal/service/roles_test.go::TestAgentsViewRoles",
+          "internal/service/rule_test.go::TestRuleDecisionAnyOwner",
+          "internal/service/rule_test.go::TestRuleDecisionRefusals",
+          "internal/service/rule_test.go::TestRuleDecisionWritesAndCommits",
+          "internal/service/sleep_test.go::TestFactoryAwakeNeverOnTheTick",
+          "internal/service/sleep_test.go::TestFactoryBlindMissingFailingArchived",
+          "internal/service/sleep_test.go::TestFactoryCallTimesOut",
+          "internal/service/sleep_test.go::TestFactoryFoundInHomeBin",
+          "internal/service/sleep_test.go::TestSleepWakeThroughTheFactory",
+          "internal/service/sleep_test.go::TestSleepWhileOneRunsIsBusy",
+          "internal/service/tasks_test.go::TestTasksOnTheFeed"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/model.Cell",
+      "level": "symbol",
+      "parent": "go:organizer/internal/model",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/model/model.go",
+      "range_head": [
+        442,
+        466
+      ],
+      "range_base": [
+        442,
+        466
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/prompt/prompt_test.go::TestPersonaNamesSeatAndRoster",
+          "internal/scan/agents_test.go::TestAssignAgents",
+          "internal/scan/scan_test.go::TestReadCellAcceptsAnEmptyRoster",
+          "internal/service/crew_test.go::TestBuildCrewJoinsRosterProcessesAndHealth",
+          "internal/service/crew_test.go::TestCannedHealthReadsOneProject",
+          "internal/service/crew_test.go::TestCardsWaitingFindsWorkHeldUpByAnUnansweredThread",
+          "internal/service/crew_test.go::TestCellInDefinitionUntilASeatHasRun",
+          "internal/service/crew_test.go::TestCellStateRidesACopyNotTheCache",
+          "internal/service/crew_test.go::TestCreateCrewRefusesASeatWithoutItsPersonaFile",
+          "internal/service/crew_test.go::TestCrewLaunchOpensTheSessionCrewSessionNames",
+          "internal/service/crew_test.go::TestCrewSessionNamesTheCellAndTheSeat",
+          "internal/service/crew_test.go::TestHealthIsStampedOnEveryAgentWithAName",
+          "internal/service/crew_test.go::TestNoIdentityIsASessionUnderASeatsNameWithoutItsIdentity",
+          "internal/service/crew_test.go::TestPreludeSetsIdentityAndModel",
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/draft_test.go::TestDraftCellIsInDefinitionAndRefusedNamingItsAcceptRecord",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestCrewStartRefusesWhileOneIsStarting",
+          "internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds",
+          "internal/service/launch_test.go::TestLaunchStatesThroughTheStub",
+          "internal/service/retire_test.go::TestPlanRetireFindsEverySeatsSessionOnTheCampCell",
+          "internal/service/retire_test.go::TestPlanRetireReportsASeatItCannotName",
+          "internal/service/retire_test.go::TestPlanRetireRetirableSaysTheCellIsInDefinition",
+          "internal/service/retire_test.go::TestRetirableIsEmptyWhileTheCellIsInDefinition",
+          "internal/service/retire_test.go::TestRetirableReadsCardsAndSessions",
+          "internal/service/retire_test.go::TestRetireOfTheLastSeatKeepsTheCell",
+          "internal/service/roles_test.go::TestAgentsViewRoles",
+          "internal/service/run_test.go::TestPrepareLaunchUsesTheCellFamily",
+          "internal/service/tasks_test.go::TestTasksOnTheFeed",
+          "internal/service/tasks_test.go::TestTasksOpenCards",
+          "internal/service/waves_test.go::TestSupervisorOf"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/model.Initiative",
+      "level": "symbol",
+      "parent": "go:organizer/internal/model",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/model/model.go",
+      "range_head": [
+        36,
+        100
+      ],
+      "range_base": [
+        36,
+        100
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/merge/merge_test.go::TestBuildCarriesFSEActivity",
+          "internal/merge/merge_test.go::TestBuildCarriesGoalMeasureSpecsScopeAndStages",
+          "internal/merge/merge_test.go::TestBuildCarriesWaves",
+          "internal/merge/merge_test.go::TestBuildHonoursOrder",
+          "internal/merge/merge_test.go::TestBuildLocalWinsAndAlsoOn",
+          "internal/prompt/prompt_test.go::TestReviewMentionsEverythingThatMatters",
+          "internal/scan/agents_test.go::TestAssignAgents",
+          "internal/scan/rejects_test.go::TestInitiativeScopeAsStringKeepsTheInitiative",
+          "internal/scan/roadmap_test.go::TestReadInitiativeGoalMeasureSpecs",
+          "internal/scan/roadmap_test.go::TestReadInitiativeScope",
+          "internal/scan/roadmap_test.go::TestReadInitiativeWithoutRoadmap",
+          "internal/scan/roadmap_test.go::TestReadRoadmapStagesAndCurrentStage",
+          "internal/scan/roadmap_test.go::TestRoadmapProblemsDoNotFailTheScan",
+          "internal/scan/scan_test.go::TestInitiativeDescriptionAndSpecs",
+          "internal/scan/scan_test.go::TestInitiativeWithoutDescriptionOrSpecs",
+          "internal/scan/scan_test.go::TestReadInitiativeCardsOrderAndProblems",
+          "internal/scan/scan_test.go::TestSpecsEntriesCannotEscapeTheRoot",
+          "internal/scan/scan_test.go::TestSpecsEntriesThatResolveToNothing",
+          "internal/scan/sleep_test.go::TestAsleepSinceIsReadWithNoProblem",
+          "internal/scan/sleep_test.go::TestFrozenDirsGoToTheDeepestRoot",
+          "internal/service/cardjoin_test.go::TestJoinAgent",
+          "internal/service/cardjoin_test.go::TestJoinAgentByBranch",
+          "internal/service/cardjoin_test.go::TestJoinAgentCardsCarriesStateContextAndStart",
+          "internal/service/cardjoin_test.go::TestJoinAgentTwoCardsAnswer",
+          "internal/service/cardjoin_test.go::TestJoinAgentWithoutStatusline",
+          "internal/service/cardjoin_test.go::TestOpenCardsSkipsFinished",
+          "internal/service/crew_test.go::TestBuildCrewJoinsRosterProcessesAndHealth",
+          "internal/service/crew_test.go::TestCellStateRidesACopyNotTheCache",
+          "internal/service/crew_test.go::TestCreateCrewRefusesASeatWithoutItsPersonaFile",
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/draft_test.go::TestDraftCellRefusesWithoutGoalOrPeopleOrWithACell",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt",
+          "internal/service/launch_test.go::TestCreateAgentStartsDetached",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestCrewStartRefusesWhileOneIsStarting",
+          "internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds",
+          "internal/service/launch_test.go::TestLaunchStatesThroughTheStub",
+          "internal/service/launch_test.go::TestRunCardStartsDetachedAndRetriesOnce",
+          "internal/service/memory_test.go::TestMemorySessionNames",
+          "internal/service/memory_test.go::TestMemorySummary",
+          "internal/service/retire_test.go::TestPlanRetireFindsEverySeatsSessionOnTheCampCell",
+          "internal/service/retire_test.go::TestPlanRetireReportsASeatItCannotName",
+          "internal/service/retire_test.go::TestPlanRetireRetirableSaysTheCellIsInDefinition",
+          "internal/service/retire_test.go::TestRetirableIsEmptyWhileTheCellIsInDefinition",
+          "internal/service/retire_test.go::TestRetirableReadsCardsAndSessions",
+          "internal/service/retire_test.go::TestRetireOfTheLastSeatKeepsTheCell",
+          "internal/service/roles_test.go::TestAgentsViewRoles",
+          "internal/service/run_test.go::TestInitiativeRunsSumsTokensPerCard",
+          "internal/service/run_test.go::TestPrepareLaunchUsesTheCellFamily",
+          "internal/service/run_test.go::TestPrepareLaunchWarnsOnlyOverTheSessionCeiling",
+          "internal/service/sleep_test.go::TestFactoryBlindMissingFailingArchived",
+          "internal/service/sleep_test.go::TestSleepWakeThroughTheFactory",
+          "internal/service/tasks_test.go::TestTasksOnTheFeed",
+          "internal/service/tasks_test.go::TestTasksOpenCards",
+          "internal/service/waves_test.go::TestSupervisorOf",
+          "internal/service/waves_test.go::TestWaveJoinsPrefersWorking",
+          "internal/service/waves_test.go::TestWavesG5",
+          "internal/service/waves_test.go::TestWavesNone",
+          "internal/service/waves_test.go::TestWavesSorted",
+          "internal/sync/firestore_test.go::TestPushRetirePull"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/model.ScannedInitiative",
+      "level": "symbol",
+      "parent": "go:organizer/internal/model",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/model/model.go",
+      "range_head": [
+        531,
+        549
+      ],
+      "range_base": [
+        531,
+        549
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/merge/merge_test.go::TestBuildCarriesFSEActivity",
+          "internal/merge/merge_test.go::TestBuildCarriesGoalMeasureSpecsScopeAndStages",
+          "internal/merge/merge_test.go::TestBuildCarriesWaves",
+          "internal/merge/merge_test.go::TestBuildHonoursOrder",
+          "internal/merge/merge_test.go::TestBuildLocalWinsAndAlsoOn",
+          "internal/prompt/prompt_test.go::TestReviewMentionsEverythingThatMatters",
+          "internal/scan/agents_test.go::TestAssignAgents",
+          "internal/scan/forecast_test.go::TestRulingCommitTime",
+          "internal/scan/fse_test.go::TestFSECommitsIgnoreTheEnclosingRepo",
+          "internal/scan/fse_test.go::TestReadFSECommits",
+          "internal/scan/fse_test.go::TestReadFSEHandOff",
+          "internal/scan/fse_test.go::TestReadFSENoBitacora",
+          "internal/scan/rejects_test.go::TestBrokenInitiativeYAMLIsUnread",
+          "internal/scan/rejects_test.go::TestInitiativeScopeAsStringKeepsTheInitiative",
+          "internal/scan/rejects_test.go::TestLedgerFilesAreSkippedNotRejected",
+          "internal/scan/roadmap_test.go::TestCardAndDecisionCarryStage",
+          "internal/scan/roadmap_test.go::TestReadInitiativeGoalMeasureSpecs",
+          "internal/scan/roadmap_test.go::TestReadInitiativeScope",
+          "internal/scan/roadmap_test.go::TestReadInitiativeWithoutRoadmap",
+          "internal/scan/roadmap_test.go::TestReadRoadmapStagesAndCurrentStage",
+          "internal/scan/roadmap_test.go::TestRoadmapProblemsDoNotFailTheScan",
+          "internal/scan/runs_test.go::TestReadInitiativeJoinsWavesToStages",
+          "internal/scan/scan_test.go::TestCardThreadsAreReadAndValidated",
+          "internal/scan/scan_test.go::TestInitiativeDescriptionAndSpecs",
+          "internal/scan/scan_test.go::TestInitiativeWithoutDescriptionOrSpecs",
+          "internal/scan/scan_test.go::TestReadCardBuildFields",
+          "internal/scan/scan_test.go::TestReadInitiativeCardsOrderAndProblems",
+          "internal/scan/scan_test.go::TestSpecsEntriesCannotEscapeTheRoot",
+          "internal/scan/scan_test.go::TestSpecsEntriesThatResolveToNothing",
+          "internal/scan/sleep_test.go::TestAsleepSinceIsReadWithNoProblem",
+          "internal/service/cardjoin_test.go::TestJoinAgent",
+          "internal/service/cardjoin_test.go::TestJoinAgentByBranch",
+          "internal/service/cardjoin_test.go::TestJoinAgentCardsCarriesStateContextAndStart",
+          "internal/service/cardjoin_test.go::TestJoinAgentTwoCardsAnswer",
+          "internal/service/cardjoin_test.go::TestJoinAgentWithoutStatusline",
+          "internal/service/cardjoin_test.go::TestOpenCardsSkipsFinished",
+          "internal/service/cell_test.go::TestCardsOnThreadsByIdAndSubject",
+          "internal/service/crew_test.go::TestBuildCrewJoinsRosterProcessesAndHealth",
+          "internal/service/crew_test.go::TestCardsWaitingFindsWorkHeldUpByAnUnansweredThread",
+          "internal/service/crew_test.go::TestCellInDefinitionUntilASeatHasRun",
+          "internal/service/crew_test.go::TestCellStateRidesACopyNotTheCache",
+          "internal/service/crew_test.go::TestCreateCrewRefusesASeatWithoutItsPersonaFile",
+          "internal/service/crew_test.go::TestHealthIsStampedOnEveryAgentWithAName",
+          "internal/service/crew_test.go::TestNoIdentityIsASessionUnderASeatsNameWithoutItsIdentity",
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/draft_test.go::TestDraftCellIsInDefinitionAndRefusedNamingItsAcceptRecord",
+          "internal/service/draft_test.go::TestDraftCellRefusesWithoutGoalOrPeopleOrWithACell",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt",
+          "internal/service/launch_test.go::TestCreateAgentStartsDetached",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestCrewStartRefusesWhileOneIsStarting",
+          "internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds",
+          "internal/service/launch_test.go::TestLaunchStatesThroughTheStub",
+          "internal/service/launch_test.go::TestRunCardStartsDetachedAndRetriesOnce",
+          "internal/service/memory_test.go::TestMemorySessionNames",
+          "internal/service/memory_test.go::TestMemorySummary",
+          "internal/service/retire_test.go::TestPlanRetireFindsEverySeatsSessionOnTheCampCell",
+          "internal/service/retire_test.go::TestPlanRetireReportsASeatItCannotName",
+          "internal/service/retire_test.go::TestPlanRetireRetirableSaysTheCellIsInDefinition",
+          "internal/service/retire_test.go::TestRetirableIsEmptyWhileTheCellIsInDefinition",
+          "internal/service/retire_test.go::TestRetirableReadsCardsAndSessions",
+          "internal/service/retire_test.go::TestRetireOfTheLastSeatKeepsTheCell",
+          "internal/service/roles_test.go::TestAgentsViewRoles",
+          "internal/service/run_test.go::TestInitiativeRunsSumsTokensPerCard",
+          "internal/service/run_test.go::TestPrepareLaunchUsesTheCellFamily",
+          "internal/service/run_test.go::TestPrepareLaunchWarnsOnlyOverTheSessionCeiling",
+          "internal/service/tasks_test.go::TestTasksOnTheFeed",
+          "internal/service/tasks_test.go::TestTasksOpenCards",
+          "internal/service/waves_test.go::TestSupervisorOf",
+          "internal/service/waves_test.go::TestWaveJoinsPrefersWorking",
+          "internal/service/waves_test.go::TestWavesG5",
+          "internal/service/waves_test.go::TestWavesNone",
+          "internal/service/waves_test.go::TestWavesSorted",
+          "internal/sync/firestore_test.go::TestPushRetirePull"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/model.Snapshot",
+      "level": "symbol",
+      "parent": "go:organizer/internal/model",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/model/model.go",
+      "range_head": [
+        593,
+        600
+      ],
+      "range_base": [
+        593,
+        600
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/merge/merge_test.go::TestBuildCarriesFSEActivity",
+          "internal/merge/merge_test.go::TestBuildCarriesGoalMeasureSpecsScopeAndStages",
+          "internal/merge/merge_test.go::TestBuildCarriesWaves",
+          "internal/merge/merge_test.go::TestBuildHonoursOrder",
+          "internal/merge/merge_test.go::TestBuildLocalWinsAndAlsoOn",
+          "internal/scan/scan_test.go::TestRunCollectsAll",
+          "internal/scan/sleep_test.go::TestFrozenDirsGoToTheDeepestRoot",
+          "internal/service/crew_test.go::TestCellStateRidesACopyNotTheCache",
+          "internal/service/crew_test.go::TestCreateCrewRefusesASeatWithoutItsPersonaFile",
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/draft_test.go::TestDraftCellIsInDefinitionAndRefusedNamingItsAcceptRecord",
+          "internal/service/draft_test.go::TestDraftCellRefusesWithoutGoalOrPeopleOrWithACell",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt",
+          "internal/service/launch_test.go::TestCreateAgentStartsDetached",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestCrewStartRefusesWhileOneIsStarting",
+          "internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds",
+          "internal/service/launch_test.go::TestLaunchStatesThroughTheStub",
+          "internal/service/launch_test.go::TestRunCardStartsDetachedAndRetriesOnce",
+          "internal/service/retire_test.go::TestPlanRetireFindsEverySeatsSessionOnTheCampCell",
+          "internal/service/retire_test.go::TestPlanRetireReportsASeatItCannotName",
+          "internal/service/retire_test.go::TestPlanRetireRetirableSaysTheCellIsInDefinition",
+          "internal/service/retire_test.go::TestRetireOfTheLastSeatKeepsTheCell",
+          "internal/service/roles_test.go::TestAgentsViewRoles",
+          "internal/service/run_test.go::TestInitiativeRunsSumsTokensPerCard",
+          "internal/service/run_test.go::TestPrepareLaunchUsesTheCellFamily",
+          "internal/service/run_test.go::TestPrepareLaunchWarnsOnlyOverTheSessionCeiling",
+          "internal/service/tasks_test.go::TestTasksOnTheFeed",
+          "internal/sync/firestore_test.go::TestPushRetirePull"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/prompt.Persona",
+      "level": "symbol",
+      "parent": "go:organizer/internal/prompt",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/prompt/prompt.go",
+      "range_head": [
+        128,
+        146
+      ],
+      "range_base": [
+        128,
+        146
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/prompt/prompt_test.go::TestPersonaNamesSeatAndRoster"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/record.Cell",
+      "level": "symbol",
+      "parent": "go:organizer/internal/record",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/record/record.go",
+      "range_head": [
+        50,
+        57
+      ],
+      "range_base": [
+        50,
+        57
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/record/record_test.go::TestIssueRevokeAndRegister",
+          "internal/service/factory_test.go::TestRegisterCellWritesPushAndRegistersWhenAFactory"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.SeatLaunch",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/service/launch.go",
+      "range_head": [
+        37,
+        61
+      ],
+      "range_base": [
+        37,
+        61
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestCrewStartRefusesWhileOneIsStarting",
+          "internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds",
+          "internal/service/launch_test.go::TestLaunchStatesThroughTheStub"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.Service",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/service/service.go",
+      "range_head": [
+        35,
+        77
+      ],
+      "range_base": [
+        35,
+        77
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/auth_test.go::TestAccountViewFollowsTheMode",
+          "internal/service/crew_test.go::TestCannedHealthReadsOneProject",
+          "internal/service/crew_test.go::TestCellStateRidesACopyNotTheCache",
+          "internal/service/crew_test.go::TestCreateCrewRefusesASeatWithoutItsPersonaFile",
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/draft_test.go::TestDraftCellIsInDefinitionAndRefusedNamingItsAcceptRecord",
+          "internal/service/draft_test.go::TestDraftCellRefusesWithoutGoalOrPeopleOrWithACell",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt",
+          "internal/service/help_test.go::TestHelpMissingFileNamesPathAndKey",
+          "internal/service/help_test.go::TestHelpReadsTheFileAtCallTime",
+          "internal/service/help_test.go::TestHelpUnreadableFileNamesPathAndKey",
+          "internal/service/launch_test.go::TestCreateAgentStartsDetached",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestCrewStartRefusesWhileOneIsStarting",
+          "internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds",
+          "internal/service/launch_test.go::TestLaunchStatesThroughTheStub",
+          "internal/service/launch_test.go::TestRunCardStartsDetachedAndRetriesOnce",
+          "internal/service/memory_test.go::TestOnMemoryWarn",
+          "internal/service/memory_test.go::TestSampleMemory",
+          "internal/service/retire_test.go::TestPlanRetireFindsEverySeatsSessionOnTheCampCell",
+          "internal/service/retire_test.go::TestPlanRetireReportsASeatItCannotName",
+          "internal/service/retire_test.go::TestPlanRetireRetirableSaysTheCellIsInDefinition",
+          "internal/service/retire_test.go::TestRetireOfTheLastSeatKeepsTheCell",
+          "internal/service/roles_test.go::TestAgentsViewRoles",
+          "internal/service/rule_test.go::TestRuleDecisionAnyOwner",
+          "internal/service/rule_test.go::TestRuleDecisionRefusals",
+          "internal/service/rule_test.go::TestRuleDecisionWritesAndCommits",
+          "internal/service/run_test.go::TestInitiativeRunsSumsTokensPerCard",
+          "internal/service/run_test.go::TestPrepareLaunchUsesTheCellFamily",
+          "internal/service/run_test.go::TestPrepareLaunchWarnsOnlyOverTheSessionCeiling",
+          "internal/service/sleep_test.go::TestFactoryAwakeNeverOnTheTick",
+          "internal/service/sleep_test.go::TestFactoryBlindMissingFailingArchived",
+          "internal/service/sleep_test.go::TestFactoryCallTimesOut",
+          "internal/service/sleep_test.go::TestFactoryFoundInHomeBin",
+          "internal/service/sleep_test.go::TestSleepWakeThroughTheFactory",
+          "internal/service/sleep_test.go::TestSleepWhileOneRunsIsBusy",
+          "internal/service/tasks_test.go::TestTasksOnTheFeed"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.Service.Config",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "method",
+      "lang": "go",
+      "file": "internal/service/service.go",
+      "range_head": [
+        109,
+        113
+      ],
+      "range_base": [
+        109,
+        113
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.Service.CreateCrew",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "method",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        434,
+        448
+      ],
+      "range_base": [
+        434,
+        448
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crew_test.go::TestCreateCrewRefusesASeatWithoutItsPersonaFile",
+          "internal/service/draft_test.go::TestDraftCellIsInDefinitionAndRefusedNamingItsAcceptRecord",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestCrewStartRefusesWhileOneIsStarting",
+          "internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds",
+          "internal/service/launch_test.go::TestLaunchStatesThroughTheStub"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.Service.queueLaunch",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "method",
+      "lang": "go",
+      "file": "internal/service/launch.go",
+      "range_head": [
+        137,
+        172
+      ],
+      "range_base": [
+        137,
+        172
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.command",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "var",
+      "lang": "go",
+      "file": "internal/service/service.go",
+      "range_head": [
+        313,
+        315
+      ],
+      "range_base": [
+        313,
+        315
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt",
+          "internal/service/launch_test.go::TestCreateAgentStartsDetached",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestRunCardStartsDetachedAndRetriesOnce"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.crewDir",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        424,
+        432
+      ],
+      "range_base": [
+        424,
+        432
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crew_test.go::TestCreateCrewRefusesASeatWithoutItsPersonaFile",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/draft_test.go::TestDraftCellIsInDefinitionAndRefusedNamingItsAcceptRecord"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.crewSession",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        74,
+        96
+      ],
+      "range_base": [
+        74,
+        96
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crew_test.go::TestCrewLaunchOpensTheSessionCrewSessionNames",
+          "internal/service/crew_test.go::TestCrewSessionNamesTheCellAndTheSeat"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.discussAPIBin",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        410,
+        422
+      ],
+      "range_base": [
+        410,
+        422
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.draftRefusal",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/draft.go",
+      "range_head": [
+        34,
+        41
+      ],
+      "range_base": [
+        34,
+        41
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.launchLine",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/run.go",
+      "range_head": [
+        17,
+        25
+      ],
+      "range_base": [
+        17,
+        25
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crew_test.go::TestCrewLaunchOpensTheSessionCrewSessionNames"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.liveSeats",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "var",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        467,
+        490
+      ],
+      "range_base": [
+        457,
+        480
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.missingPersonas",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        393,
+        408
+      ],
+      "range_base": [
+        393,
+        408
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crew_test.go::TestCreateCrewRefusesASeatWithoutItsPersonaFile"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.preludeFor",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        653,
+        675
+      ],
+      "range_base": [
+        642,
+        664
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crew_test.go::TestCrewLaunchOpensTheSessionCrewSessionNames",
+          "internal/service/crew_test.go::TestPreludeSetsIdentityAndModel"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.probeBin",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "var",
+      "lang": "go",
+      "file": "internal/service/launch.go",
+      "range_head": [
+        402,
+        414
+      ],
+      "range_base": [
+        402,
+        414
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt",
+          "internal/service/launch_test.go::TestAttachFallbackAttaches",
+          "internal/service/launch_test.go::TestCreateAgentStartsDetached",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestRunCardStartsDetachedAndRetriesOnce"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.probeWrapper",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/launch.go",
+      "range_head": [
+        416,
+        425
+      ],
+      "range_base": [
+        416,
+        425
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.registerCell",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/factory.go",
+      "range_head": [
+        75,
+        115
+      ],
+      "range_base": [
+        75,
+        115
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/factory_test.go::TestRegisterCellWritesPushAndRegistersWhenAFactory"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.sanitize",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/service.go",
+      "range_head": [
+        338,
+        342
+      ],
+      "range_base": [
+        338,
+        342
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crew_test.go::TestCrewLaunchOpensTheSessionCrewSessionNames"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.seatShort",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        62,
+        72
+      ],
+      "range_base": [
+        62,
+        72
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crew_test.go::TestCrewLaunchOpensTheSessionCrewSessionNames"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "go:organizer.App.CreateCrew",
+      "to": "go:organizer.App",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer.App.CreateCrew",
+      "to": "go:organizer.CrewResult",
+      "kind": "uses",
+      "change": "added",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer.App.CreateCrew",
+      "to": "go:organizer.errString",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer.App.CreateCrew",
+      "to": "go:organizer/internal/service.CrewRunning",
+      "kind": "uses",
+      "change": "added",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer.App.CreateCrew",
+      "to": "go:organizer/internal/service.CrewStart",
+      "kind": "uses",
+      "change": "added",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer.App.CreateCrew",
+      "to": "go:organizer/internal/service.Service.StartCrew",
+      "kind": "uses",
+      "change": "added",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer.CrewResult",
+      "to": "go:organizer/internal/service.CrewRunning",
+      "kind": "uses",
+      "change": "added",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/cli.crewCmd",
+      "to": "go:organizer/internal/service.CrewStart",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/cli.crewCmd",
+      "to": "go:organizer/internal/service.Service.StartCrew",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.CrewStart",
+      "to": "go:organizer/internal/service.CrewRunning",
+      "kind": "uses",
+      "change": "added",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.CreateCrew",
+      "to": "go:organizer/internal/service.CrewStart",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.CreateCrew",
+      "to": "go:organizer/internal/service.Service.StartCrew",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/cache.State",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/config.Config",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/model.Cell",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/model.Initiative",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/model.ScannedInitiative",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/model.Snapshot",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/prompt.Persona",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/record.Cell",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.CrewRunning",
+      "kind": "uses",
+      "change": "added",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.CrewStart",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.SeatLaunch",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.Service",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.Service.Config",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.Service.queueLaunch",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.command",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.crewDir",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.crewSession",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.discussAPIBin",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.draftRefusal",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.launchLine",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.liveSeats",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.missingPersonas",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.preludeFor",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.probeBin",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.probeWrapper",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.registerCell",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.sanitize",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.seatShort",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    }
+  ],
+  "mismatches": [],
+  "stats": {
+    "changed": 5,
+    "changed_tests": 2,
+    "affected": 30,
+    "untested": 0,
+    "edges": 40
+  },
+  "problems": [
+    "head: organizer: pattern all:frontend/dist: no matching files found",
+    "base: organizer: pattern all:frontend/dist: no matching files found"
+  ]
+}
