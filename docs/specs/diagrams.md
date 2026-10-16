@@ -73,7 +73,7 @@ two cards in order.
 |---|---|---|---|
 | G1 | 1 | go test with a fake `mmdc` on the PATH (and one only under a fake `~/.nvm/versions/node/v*/bin`): render a block twice; change one node; change `classdefs-dark.mmd` | `mmdc` runs once for the first two, again for each change; the input it received ends with the four dark classDef lines; nvm's newest is found when the PATH has none |
 | G2 | 1, 2 | go test and vitest: no `mmdc`; dark style missing; `mmdc` exits 1 with an error | the method returns the reason; the view shows the source under `Diagram not drawn: <reason>`, never an empty figure |
-| D1 | 1, 2 | Tab harness at 1024×640 on lodestar (real `mmdc`, the dark style installed): a fixture record holding the skill's change-classes example | a figure, no light panel: ➕ lilac, ✎ amber, ✕ dashed and struck, context grey (shot) |
+| D1 | 1, 2 | Tab harness at 1024×640 on lodestar (real `mmdc`, the dark style installed): a fixture record holding the skill's change-classes example | a figure, no light panel: ✚ lilac, ✎ amber, ✕ dashed and struck, context grey (shot) |
 | D2 | 1 | the same: computed stroke and label colours per class against `--surface` | strokes ≥ 3:1, labels ≥ 4.5:1 |
 | D5 | 3 | vitest: the text line for a block with added, changed and no removed | `Added: a, b. Changed: c. Removed: none.` |
 | D8 | 4 | Tab harness: a figure wider than the drawer | its frame scrolls, page `scrollWidth` equals its width, the frame is a Tab stop with that name |
