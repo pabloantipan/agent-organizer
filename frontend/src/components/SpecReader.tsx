@@ -181,6 +181,18 @@ export function SpecReader() {
     return withAnchors(slotDiagrams(marked.parse(md || "") as string));
   }, [top]);
   const html = rendered.html;
+  // The body's HTML is set here, not by dangerouslySetInnerHTML: React set
+  // it again after the first commit (StrictMode, wails dev), replacing the
+  // figure slots and the heading that held focus after they were taken.
+  // This runs before the figures' and the landing's effects.
+  const shown = useRef<{ el: HTMLElement | null; html: string }>({ el: null, html: "" });
+  useLayoutEffect(() => {
+    const el = body.current;
+    if (!el) { shown.current = { el: null, html: "" }; return; }
+    if (shown.current.el === el && shown.current.html === html) return;
+    el.innerHTML = html;
+    shown.current = { el, html };
+  });
   useMarkdownEdges(body, html);
   const figures = useDiagrams(body, html, top?.path ?? "");
   const edges = useScrollEdges(scroller, open, { label: `${top?.path ?? ""}, ${top?.kind === "record" ? "record" : "spec"}` });
@@ -333,7 +345,7 @@ export function SpecReader() {
                   </ol>
                 </nav>
               )}
-              <div ref={body} className="markdown sr-doc" onClick={onBodyClick} dangerouslySetInnerHTML={{ __html: html }} />
+              <div ref={body} className="markdown sr-doc" onClick={onBodyClick} />
               {figures}
             </>
           )}

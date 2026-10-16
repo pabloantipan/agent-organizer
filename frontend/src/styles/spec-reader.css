@@ -13,7 +13,8 @@
 @media (prefers-reduced-motion: no-preference) {
   .sr-drawer { animation: sr-in 200ms var(--ease-out); }
 }
-@keyframes sr-in { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+/* Transform only: a paused animation (a hidden view) never hides the body. */
+@keyframes sr-in { from { transform: translateX(24px); } to { transform: none; } }
 
 .sr-head {
   flex: none; display: flex; align-items: center; gap: var(--space-2);
