@@ -15,7 +15,7 @@ follow 0095 and 0108.
 - **FR-1** (W7) Every record row, long or not and in both groups (Needs me
   and Waiting on others), shows the `decision` lozenge in `Shell`'s reason
   column.
-- **FR-2** (W8) The amber age lozenge leleftovers-36 added goes. A record
+- **FR-2** (W8) The amber age lozenge leftovers-36 added goes. A record
   row waiting 7 days or more draws its `ib-age` column in `--warning` at
   weight 600; under 7 days the column is as other rows. The row's
   accessible description still says `waiting <n> days, …` in full.
