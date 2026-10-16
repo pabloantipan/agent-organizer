@@ -25,7 +25,7 @@ type Totals struct {
 	CacheWrite  int64   `json:"cache_write"`
 	Tokens      int64   `json:"tokens"`
 	Sessions    int     `json:"sessions"`
-	Hours       float64 `json:"hours"` // summed session time, first to last message per day
+	Hours       float64 `json:"hours"` // summed active time (Line.Active), messages 5 minutes apart or less
 	Running     int     `json:"running"`
 	WithoutCost int     `json:"without_cost"`
 }
@@ -90,6 +90,7 @@ type SessionRow struct {
 	Start      time.Time `json:"start"`
 	End        time.Time `json:"end"`
 	Minutes    float64   `json:"minutes"` // first to last message in the week
+	Active     int64     `json:"active"`  // seconds of active time in the week (Line.Active)
 	Running    bool      `json:"running"`
 	Input      int64     `json:"input"`
 	Output     int64     `json:"output"`
@@ -97,7 +98,7 @@ type SessionRow struct {
 	CacheWrite int64     `json:"cache_write"`
 	Tokens     int64     `json:"tokens"`
 	Money      *float64  `json:"money"`
-	CostFrom   string    `json:"cost_from"` // record, transcript, or empty with no money
+	CostFrom   string    `json:"cost_from"` // record, transcript, priced, or empty with no money
 	Reset      bool      `json:"reset"`     // the recorded cost fell back once at least (Line.Reset)
 }
 
@@ -235,7 +236,7 @@ func totals(week string, ls []Line, running map[string]bool, loc *time.Location)
 		} else {
 			noCost[l.SessionID] = true
 		}
-		t.Hours += l.Last.Sub(l.First).Hours()
+		t.Hours += float64(l.Active) / 3600
 	}
 	t.Tokens = t.Input + t.Output + t.CacheRead + t.CacheWrite
 	t.Sessions = len(sess)
@@ -311,14 +312,23 @@ func cut(c string, ls []Line, weekMoney float64) []Row {
 	}
 	for _, l := range ls {
 		if c == "model" {
-			var total int64
-			for _, k := range l.Models {
-				total += k.Total()
+			// The day's cost on its models by each one's priced tokens when
+			// every one is priced, else by its tokens (FR-6).
+			ws := map[string]float64{}
+			var total float64
+			_, priced := priceOfModels(l.Models)
+			for m, k := range l.Models {
+				w := float64(k.Total())
+				if priced {
+					w, _ = priceOf(m, k)
+				}
+				ws[m] = w
+				total += w
 			}
 			for m, k := range l.Models {
 				var cost *float64
 				if l.Cost != nil && total > 0 {
-					x := *l.Cost * float64(k.Total()) / float64(total)
+					x := *l.Cost * ws[m] / total
 					cost = &x
 				}
 				add(m, m, l, k, cost)
@@ -415,6 +425,7 @@ func sessions(ls []Line, running map[string]bool) []SessionRow {
 		s.Output += l.Output
 		s.CacheRead += l.CacheRead
 		s.CacheWrite += l.CacheWrite
+		s.Active += l.Active
 		if l.CostFrom != "" {
 			s.CostFrom = l.CostFrom
 		}
