@@ -149,6 +149,7 @@ func ReadInitiative(root string, opts Options) model.ScannedInitiative {
 	si.Cards, si.Problems = readCards(wo, false, si.Cards, si.Problems)
 	si.Cards, si.Problems = readCards(filepath.Join(wo, doneDir), true, si.Cards, si.Problems)
 	sortCards(si.Cards)
+	si.Problems = append(si.Problems, checkCardSpecs(root, si.Cards)...)
 	si.Decisions, si.Problems = readDecisions(filepath.Join(wo, decisionsDir), si.Problems)
 	si.Stages, si.Problems = readRoadmap(wo, si.Problems)
 	si.Problems = append(si.Problems, checkStageLinks(wo, si.Stages, si.Cards, si.Decisions)...)
@@ -229,6 +230,47 @@ func readCard(path string, archived bool) (model.Card, []model.Problem) {
 		}
 	}
 	return c, problems
+}
+
+// checkCardSpecs reports an open card whose spec: names a relative .md file
+// that is not under the initiative root (leftovers-39 FR-3): a builder
+// launched from it reads nothing. The file is the field's first word, read
+// as service.specRel reads it; prose, an absolute path or a path out of the
+// root (another repo) is no problem. Done cards are history and not checked.
+func checkCardSpecs(root string, cards []model.Card) []model.Problem {
+	var problems []model.Problem
+	for _, c := range cards {
+		if c.Archived || c.Status == model.StatusDone {
+			continue
+		}
+		rel, ok := cardSpecRel(c.Spec)
+		if !ok || !strings.EqualFold(filepath.Ext(rel), ".md") {
+			continue
+		}
+		if _, err := os.Stat(filepath.Join(root, filepath.FromSlash(rel))); errors.Is(err, fs.ErrNotExist) {
+			problems = append(problems, model.Problem{Path: c.Path, Msg: fmt.Sprintf("spec %q names no file", rel)})
+		}
+	}
+	return problems
+}
+
+// cardSpecRel is service.specRel (internal/service/spec.go), which the scan
+// cannot import: the first word of a card's spec:, without trailing
+// punctuation or its #section, relative to the root and not climbing out.
+func cardSpecRel(ref string) (string, bool) {
+	f := strings.Fields(ref)
+	if len(f) == 0 {
+		return "", false
+	}
+	p, _, _ := strings.Cut(strings.TrimRight(f[0], ",;:"), "#")
+	if strings.TrimSpace(p) == "" || filepath.IsAbs(p) || strings.HasPrefix(p, "/") {
+		return "", false
+	}
+	rel := filepath.Clean(filepath.FromSlash(p))
+	if rel == "." || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return "", false
+	}
+	return filepath.ToSlash(rel), true
 }
 
 // validULID reports whether s is a 26-character Crockford base32 ULID, the id
