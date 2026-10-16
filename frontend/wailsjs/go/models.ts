@@ -2487,6 +2487,22 @@ export namespace service {
 		    return a;
 		}
 	}
+	export class SpecDoc {
+	    path: string;
+	    text: string;
+	    missing: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SpecDoc(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.text = source["text"];
+	        this.missing = source["missing"];
+	    }
+	}
 	export class SyncResult {
 	    pushed: number;
 	    retired: number;

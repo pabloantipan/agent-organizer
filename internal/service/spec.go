@@ -1,0 +1,82 @@
+package service
+
+import (
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+)
+
+// SpecDoc is a spec file as the reader shows it (docs/specs/diagrams.md
+// FR-6): its path relative to the initiative root, its text, and Missing
+// when the scan resolved the path but the file is gone now.
+type SpecDoc struct {
+	Path    string `json:"path"`
+	Text    string `json:"text"`
+	Missing bool   `json:"missing"`
+}
+
+// ErrSpecRefused is a path the scan did not resolve as a spec of the
+// initiative: nothing is read for it.
+var ErrSpecRefused = errors.New("not a spec of this initiative")
+
+// readSpecFile reads a spec; tests count its calls.
+var readSpecFile = os.ReadFile
+
+// ReadSpec returns a spec file's text by initiative and path (FR-6; G3).
+// Only the files the scan resolved under the initiative's specs: and the
+// paths its cards' spec: fields name are read; any other path is refused
+// before the disk is touched. A `#section` on the path is ignored.
+func (s *Service) ReadSpec(initiativeID, path string) (SpecDoc, error) {
+	si, err := s.initiative(initiativeID)
+	if err != nil {
+		return SpecDoc{}, err
+	}
+	rel, ok := specRel(path)
+	allowed := map[string]bool{}
+	for _, files := range si.SpecFiles {
+		for _, f := range files {
+			allowed[f] = true
+		}
+	}
+	for _, c := range si.Cards {
+		if p, ok := specRel(c.Spec); ok {
+			allowed[p] = true
+		}
+	}
+	if !ok || !allowed[rel] {
+		return SpecDoc{}, fmt.Errorf("%q: %w %s; only the files under specs: or a card's spec: are read", path, ErrSpecRefused, initiativeID)
+	}
+	doc := SpecDoc{Path: rel}
+	b, err := readSpecFile(filepath.Join(si.Path, filepath.FromSlash(rel)))
+	if errors.Is(err, os.ErrNotExist) {
+		doc.Missing = true
+		return doc, nil
+	}
+	if err != nil {
+		return SpecDoc{}, err
+	}
+	doc.Text = string(b)
+	return doc, nil
+}
+
+// specRel is the file a spec reference names, relative to the initiative
+// root with forward slashes: the first word of a card's spec: field (the
+// rest is prose, "docs/specs/x.md (FR-1 to FR-3)"), without its #section.
+// A path that is absolute or climbs out of the root names nothing.
+func specRel(ref string) (string, bool) {
+	f := strings.Fields(ref)
+	if len(f) == 0 {
+		return "", false
+	}
+	p, _, _ := strings.Cut(strings.TrimRight(f[0], ",;:"), "#")
+	if p == "" || filepath.IsAbs(p) || strings.HasPrefix(p, "/") {
+		return "", false
+	}
+	rel := filepath.Clean(filepath.FromSlash(p))
+	if rel == "." || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return "", false
+	}
+	return filepath.ToSlash(rel), true
+}
