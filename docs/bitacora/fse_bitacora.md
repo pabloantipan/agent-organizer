@@ -4,6 +4,15 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF 2026-10-15 ~22:00 (last SHA seen 115f98d)
+
+- rm-v0 merged (bf916c8, sup74, 18 min vs 45-90 forecast, $7.22); index go/types. sup74 ended (killed, token revoked, prompts removed). Its two findings plus change-check reuse filed under review-map "Later steps"; threads closed.
+- 0138, 0139, 0140 ruled. uc-price cut from 0138 (usage-audit FR-3 to FR-6, gate P1-P9). Cards now carry risk and footprint (Hephaistos: change-check in claudecode 975131b; builders declare changes).
+- Running: sup75 = uc-resume then uc-price (Go, internal/usage). sup76 = lf37-waits-polish then dg-render then dg-reader (frontend, Tab harness one at a time). They share no files. Two supervisors only, for memory (24 GB) and the harness.
+- Pablo pushes main when he wants: `! git -C ~/organizer push origin main`.
+- Open: Q1 for review-map v1 (where the revmap lives for another Mac's branch) with Hephaistos; whether odyssey has mmdc; stalled-row question on leftovers-33.
+- Next: on each task's done/ cards, read the closing report, end the supervisor, then cut review-map v1 (TS, change-check reconciliation) as a proposed record.
+
 ## HAND-OFF — 2026-10-15 ~21:10, leftovers-36 and usage-post landed; sup74 on rm-v0
 
 - **Last SHA seen:** 5a04a97. sup73: lf36 32 min (25-45m), usage-post 12 min (25-50m), installed v0.2.0-2227-g5a04a97; ended, token revoked. sup73 sat deaf 20:34-~20:55 until Pablo typed in its pane (I may not: auto mode "Tmux Self Drive").
