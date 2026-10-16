@@ -412,6 +412,7 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - Check a record's 'today it shows X' against the code before designing: 0134 said others' records read like the lead's on Needs me; ownedByLead keeps them off. Others' long waits get a 'Waiting on others' group outside the badge, verb Open (needs-me-waits).
 - Map and roadmap (note, 2026-10-15): the base map is drawn once and every lens (stage, spec, record option, node) only recolours it; layout never changes, or place is lost. Map is a Roadmap mode; specs and records open in a drawer over it. Amber is not 'current' (map-and-roadmap.md).
 - Before placing a fact in a row, list the row's existing columns: needs-me-waits put the age in a lozenge beside an age column (said twice) and displaced the kind lozenge. Kind stays in the reason column; emphasis goes on the existing column (A1).
+- Diagrams in the app (2026-10-15): dark-mapped change classes (glyph and shape constant across themes, hue may differ; removed is not red), SVG cached by block hash in the organizer's data dir, never committed; source shown with a reason when not drawn; a text line of the classes under every figure; specs read in a drawer (diagrams-in-app.md). Measured on --surface: lilac 5.1, amber 9.2, plum-10 5.3.
 
 ## Participants in use
 
