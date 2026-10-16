@@ -5,6 +5,7 @@ init-a  (acme)  ~/init-a  1 now, 1 blocked, 2 next
   next     nonext              1mo  
   ! ~/init-a/working-on/broken.md: no frontmatter: file must start with ---
   ! ~/init-a/working-on/nonext.md: open card without next action
+  ! ~/init-a/working-on/alpha.md: spec "docs/alpha.md" names no file
   ! ~/init-a/working-on/roadmap.yaml: stage joins exit "a wave is grouped" met "soon" is not YYYY-MM-DD
   ! ~/init-a/working-on/roadmap.yaml: stage id "joins" is used twice
   ! ~/init-a/working-on/roadmap.yaml: stage joins gates on decision 0099, which does not exist

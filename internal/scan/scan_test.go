@@ -423,3 +423,39 @@ func TestReadCellAcceptsAnEmptyRoster(t *testing.T) {
 		})
 	}
 }
+
+// L4 (leftovers-39 FR-3): a card's spec naming a relative .md that is not
+// there is one problem on that card; prose and a file that exists are none.
+func TestCardSpecNamesNoFile(t *testing.T) {
+	root, err := filepath.Abs(filepath.Join("..", "..", "testdata", "card-specs", "init-specs"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	si := ReadInitiative(root, Options{Now: func() time.Time { return time.Date(2026, 10, 16, 12, 0, 0, 0, time.UTC) }})
+	var got []model.Problem
+	for _, p := range si.Problems {
+		if strings.Contains(p.Msg, "spec") {
+			got = append(got, p)
+		}
+	}
+	want := model.Problem{Path: filepath.Join(root, "working-on", "missing.md"), Msg: `spec "docs/nope.md" names no file`}
+	if len(got) != 1 || got[0] != want {
+		t.Errorf("spec problems = %+v, want only %+v (all: %+v)", got, want, si.Problems)
+	}
+}
+
+func TestCardSpecRel(t *testing.T) {
+	for ref, want := range map[string]string{
+		"docs/specs/x.md (FR-1 to FR-3)": "docs/specs/x.md",
+		"docs/x.md#shape":                "docs/x.md",
+		"docs/x.md, FR-2":                "docs/x.md",
+		"/abs/x.md":                      "",
+		"../agent-slack/specs/x.md":      "",
+		"":                               "",
+	} {
+		got, ok := cardSpecRel(ref)
+		if ok != (want != "") || got != want {
+			t.Errorf("cardSpecRel(%q) = %q, %v; want %q", ref, got, ok, want)
+		}
+	}
+}
