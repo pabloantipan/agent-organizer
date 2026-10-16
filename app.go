@@ -13,6 +13,7 @@ import (
 	wruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
 	"organizer/internal/config"
+	"organizer/internal/diagram"
 	"organizer/internal/discuss"
 	"organizer/internal/merge"
 	"organizer/internal/model"
@@ -22,12 +23,13 @@ import (
 
 // App is the Wails-bound surface. It stays thin; logic lives in service.
 type App struct {
-	ctx context.Context
-	svc *service.Service
-	err string
+	ctx      context.Context
+	svc      *service.Service
+	err      string
+	diagrams *diagram.Renderer
 }
 
-func NewApp() *App { return &App{} }
+func NewApp() *App { return &App{diagrams: diagram.New()} }
 
 // agentsEvery is the sampling period for agent processes. One ps and one
 // lsof per tick; nothing runs when the window is closed.
@@ -649,4 +651,15 @@ func (a *App) Help() (service.HelpDoc, error) {
 		return service.HelpDoc{}, errString(a.err)
 	}
 	return a.svc.Help(), nil
+}
+
+// RenderDiagram draws one mermaid block as a dark SVG (docs/specs/diagrams.md
+// FR-1), from the cache when it is there, when a body holding it is shown.
+// The error is the reason the figure reads: mmdc not found, the dark style
+// missing, or mmdc's first error line (FR-2).
+func (a *App) RenderDiagram(source string) (string, error) {
+	if a.diagrams == nil {
+		a.diagrams = diagram.New()
+	}
+	return a.diagrams.Render(source)
 }
