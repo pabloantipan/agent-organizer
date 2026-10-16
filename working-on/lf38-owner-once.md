@@ -1,12 +1,12 @@
 ---
 title: "Needs me says an others' owner once, and the age column keeps one x"
-status: next
+status: now
 repos: [organizer]
 branch: lf38-owner-once
 seat: oo-build
 stage: decisions-owned-and-used
-updated: 2026-10-15
-next: "sup77 runs it; 0142 ruled"
+updated: 2026-10-16
+next: "oo-build builds it on lf38-owner-once"
 risk: low
 footprint: [frontend/src/components/Home.tsx (decisionContext, the others' row), frontend/src/styles/shell.css (.ib-row verb column, .lz.waiting.dashed), frontend/src/components/SpecReader.tsx (Contents entry name), frontend/src/lib/diagram.ts (classLine), frontend/src/components/DiagramFigure.tsx, their tests]
 depends_on: []
