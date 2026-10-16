@@ -4,6 +4,14 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF — 2026-10-15 ~21:10, leftovers-36 and usage-post landed; sup74 on rm-v0
+
+- **Last SHA seen:** 5a04a97. sup73: lf36 32 min (25-45m), usage-post 12 min (25-50m), installed v0.2.0-2227-g5a04a97; ended, token revoked. sup73 sat deaf 20:34-~20:55 until Pablo typed in its pane (I may not: auto mode "Tmux Self Drive").
+- **sup74** launched ~21:10 for rm-v0 (45-90m). On close: probe -k sup74, token rm, prompt files, clean.
+- **Push:** my `git push origin main` refused by auto mode ("Out-of-Place Publication"); Pablo pushes (29 commits ahead at 21:05).
+- **Open:** 0138 (usage audit: uc-resume ready; hours and price table choices) waits on Pablo. Aglaea asked for leftovers-37 intake (thread 01M5106W). T11c mermaid waits on Hephaistos's classDef commit.
+- **From sup73, not carded:** doctor's 4th wording 'nothing posted yet' (fine, unnamed by FR-5); usage-post state file written by app and CLI without a lock (worst case a resend); lf36 N1 count assertion is tautological (diff proves it).
+
 ## HAND-OFF — 2026-10-15 ~20:55, review tooling taken; sup73 stuck deaf
 
 - **Last SHA seen:** 5e83d06. usage-post in done (063aa20). lf36 gate met, reviewers not launched: sup73 idle since 20:34, DEAF (4 waiting), watcher alive but not waking it; I may not type into its pane (auto-mode "Tmux Self Drive"); asked Pablo to type in it, or rule `probe -r`.

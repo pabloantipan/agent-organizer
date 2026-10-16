@@ -5,7 +5,7 @@ repos: [organizer]
 branch: rm-v0
 seat: rm-build
 updated: 2026-10-15
-next: "waits on 0137; on accept the FSE spawns a supervisor"
+next: "sup74 runs it (0137); builder rm-build"
 depends_on: []
 boundary: ["docs/specs/review-map.md Boundary, rm-v0"]
 spec: "docs/specs/review-map.md (FR-1 to FR-6; agent-slack review/pipeline-starter.md §6.6)"
@@ -18,3 +18,6 @@ From a card or a merge, `organizer review` emits the Go change as revmap.json: c
 
 ## Gate
 docs/specs/review-map.md, rows M1, M2, M3, M4, M5, M6 and X0.
+
+## Notes
+- 2026-10-15: run by sup74 (organizer-probe-sup74), spawned by the FSE.
