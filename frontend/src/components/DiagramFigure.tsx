@@ -45,6 +45,16 @@ export function DiagramFigure({ source, heading }: { source: string; heading: st
   return <DiagramView source={source} heading={heading} st={st} />;
 }
 
+/** The drawn SVG with its root hidden from assistive tech: the figure is
+ *  one image named by its alt, and the text line says what the labels say
+ *  (leftovers-38 FR-6, diagrams-in-app D10). WebKit otherwise exposes the
+ *  SVG's labels inside the <img>, in drawing order and with their glyphs.
+ *  The root's own role and names go, so nothing in it asks to be read. */
+export function silentSvg(svg: string): string {
+  return svg.replace(/<svg\b([^>]*?)(\/?)>/, (_, attrs: string, close: string) =>
+    `<svg${attrs.replace(/\s(?:aria-[\w-]+|role)="[^"]*"/g, "")} aria-hidden="true"${close}>`);
+}
+
 /** What a figure shows in each state; pure, so vitest renders it. */
 export function DiagramView({ source, heading, st }: { source: string; heading: string; st: DiagramState }) {
   const [open, setOpen] = useState(false);
@@ -81,7 +91,7 @@ export function DiagramView({ source, heading, st }: { source: string; heading: 
   return (
     <figure className="diagram">
       <div ref={frame} className="diagram-frame">
-        <img src={svgSource(st.svg)} alt={name} aria-describedby={`${id}-classes`} />
+        <img src={svgSource(silentSvg(st.svg))} alt={name} aria-describedby={`${id}-classes`} />
       </div>
       <button type="button" className="link diagram-source" aria-expanded={open} aria-controls={`${id}-source`} onClick={() => setOpen(!open)}>Source</button>
       {open && <pre id={`${id}-source`}><code className="language-mermaid">{source}</code></pre>}

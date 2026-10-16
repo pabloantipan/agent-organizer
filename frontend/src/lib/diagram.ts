@@ -31,27 +31,59 @@ export function mermaidBlocks(md: string): string[] {
 
 export type ChangeClasses = { added: string[]; changed: string[]; removed: string[] };
 
-/** The node ids of a block's `class a,b name` lines per change class, in
- *  order of first mention; `context` and any other class are not listed. */
-export function changeClasses(source: string): ChangeClasses {
-  const out: ChangeClasses = { added: [], changed: [], removed: [] };
+/** A `class a,b name` line: its ids and its class. */
+const CLASS_LINE = /^\s*class\s+([^\s;]+)\s+([A-Za-z_][\w-]*)\s*;?\s*$/;
+
+/** The node ids of a block's `class a,b name` lines for each named class, in
+ *  order of first mention; any other class is not listed. */
+function classIds<K extends string>(source: string, names: readonly K[]): Record<K, string[]> {
+  const out = Object.fromEntries(names.map((n) => [n, [] as string[]])) as Record<K, string[]>;
   for (const line of source.split("\n")) {
-    const m = line.match(/^\s*class\s+([^\s;]+)\s+([A-Za-z_][\w-]*)\s*;?\s*$/);
-    if (!m) continue;
-    const name = m[2] as keyof ChangeClasses;
-    if (!(name in out)) continue;
+    const m = line.match(CLASS_LINE);
+    if (!m || !(names as readonly string[]).includes(m[2])) continue;
+    const ids = out[m[2] as K];
     for (const id of m[1].split(",").map((s) => s.trim()).filter(Boolean)) {
-      if (!out[name].includes(id)) out[name].push(id);
+      if (!ids.includes(id)) ids.push(id);
     }
   }
   return out;
 }
 
-/** FR-3, D5: `Added: a, b. Changed: c. Removed: none.` */
+/** The node ids of a block's `class a,b name` lines per change class, in
+ *  order of first mention; `context` and any other class are not listed. */
+export const changeClasses = (source: string): ChangeClasses => classIds(source, ["added", "changed", "removed"] as const);
+
+/** A node's shape opening its label: `id["…"]`, `id(…)`, `id[("…")]`,
+ *  `id{…}`, `id>…]` and the rest of mermaid's shapes. An id never ends in
+ *  `-`, so `a-->b` is an edge, not a shape. */
+const NODE = /([A-Za-z_](?:[\w-]*\w)?)\s*(?:\[\[|\[\(|\(\[|\(\(\(|\(\(|\{\{|\[\/|\[\\|\[|\(|\{|>)\s*(?:"([^"]*)"|([^\]\)\}"]*))/g;
+
+/** The drawn marks of the change classes (diagrams-in-app D2, Amendment 1). */
+const GLYPHS = /[\u271A\u270E\u2715\uFE0F]/g;
+
+/** Each node's label as a reader hears it, by id, from its first shape:
+ *  no glyph, no markup, spaces folded. Class and style lines are skipped. */
+export function nodeLabels(source: string): Map<string, string> {
+  const out = new Map<string, string>();
+  for (const line of source.split("\n")) {
+    if (/^\s*(class|classDef|style|linkStyle|click|%%)\b/.test(line)) continue;
+    for (const m of line.matchAll(NODE)) {
+      if (out.has(m[1])) continue;
+      const label = (m[2] ?? m[3] ?? "").replace(/<[^>]*>/g, " ").replace(GLYPHS, "").replace(/^[/\\]+|[/\\]+$/g, "").replace(/\s+/g, " ").trim();
+      if (label) out.set(m[1], label);
+    }
+  }
+  return out;
+}
+
+/** FR-3, D5 amended: `Added: Payments. Changed: BFF. Removed: none. Around
+ *  it: PWA.`, each class's nodes by label (the id when a node has none),
+ *  `context` under Around it, `none` for an empty class. */
 export function classLine(source: string): string {
-  const c = changeClasses(source);
-  const ids = (xs: string[]) => (xs.length ? xs.join(", ") : "none");
-  return `Added: ${ids(c.added)}. Changed: ${ids(c.changed)}. Removed: ${ids(c.removed)}.`;
+  const c = classIds(source, ["added", "changed", "removed", "context"] as const);
+  const labels = nodeLabels(source);
+  const say = (ids: string[]) => (ids.length ? ids.map((id) => labels.get(id) ?? id).join(", ") : "none");
+  return `Added: ${say(c.added)}. Changed: ${say(c.changed)}. Removed: ${say(c.removed)}. Around it: ${say(c.context)}.`;
 }
 
 /** FR-4: the frame's name, `<nearest heading>, diagram`. */

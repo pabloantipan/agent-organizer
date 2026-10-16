@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { marked } from "marked";
-import { changeClasses, classLine, diagramName, DRAWING, hasDiagram, mermaidBlocks, slotDiagrams, svgSource } from "./diagram";
+import { changeClasses, classLine, diagramName, DRAWING, hasDiagram, mermaidBlocks, nodeLabels, slotDiagrams, svgSource } from "./diagram";
 
 // The skill's change-classes example (mermaid-flowcharts, "Change classes";
 // ✚ as diagrams-in-app Amendment 1).
@@ -17,19 +17,49 @@ const example = `flowchart LR
 `;
 
 describe("D5: the text line under a figure (FR-3)", () => {
-  it("added, changed and no removed", () => {
+  it("added, changed and no removed; unlabelled nodes by id", () => {
     const src = "flowchart LR\n  a --> b --> c\n  class a,b added\n  class c changed\n";
-    expect(classLine(src)).toBe("Added: a, b. Changed: c. Removed: none.");
+    expect(classLine(src)).toBe("Added: a, b. Changed: c. Removed: none. Around it: none.");
   });
-  it("the skill's example, context not listed", () => {
-    expect(classLine(example)).toBe("Added: payments_svc. Changed: bff. Removed: legacy_pay.");
+  it("the skill's example, by label, context under Around it", () => {
+    expect(classLine(example)).toBe("Added: Payments. Changed: BFF. Removed: Legacy pay. Around it: PWA, Datastore.");
   });
-  it("a block with no classes reads none three times", () => {
-    expect(classLine("flowchart LR\n  a --> b\n")).toBe("Added: none. Changed: none. Removed: none.");
+  it("a block with no classes reads none four times", () => {
+    expect(classLine("flowchart LR\n  a --> b\n")).toBe("Added: none. Changed: none. Removed: none. Around it: none.");
   });
   it("ids keep their first order and appear once; other classes and classDef lines are not read", () => {
     const c = changeClasses("class x added\nclass y,x added;\nclass z hot\nclassDef added fill:#000\n  class w removed\n");
     expect(c).toEqual({ added: ["x", "y"], changed: [], removed: ["w"] });
+  });
+});
+
+describe("leftovers-38 O5 (D5 amended): the text line says labels, never glyphs", () => {
+  // The skill's change-classes example with labelled nodes and one without.
+  const src = `flowchart LR
+    pwa["PWA"] --> bff["✎ BFF"]
+    bff --> payments_svc["✚ Payments"]
+    bff --> cache
+    class pwa,cache context
+    class bff changed
+    class payments_svc added
+`;
+  it("Added: Payments. Changed: BFF. Removed: none. Around it: PWA, cache.", () => {
+    expect(classLine(src)).toBe("Added: Payments. Changed: BFF. Removed: none. Around it: PWA, cache.");
+  });
+  it("no ✚ ✎ ✕ anywhere in the line", () => {
+    expect(classLine(src)).not.toMatch(/[✚✎✕]/);
+    expect(classLine(example)).not.toMatch(/[✚✎✕]/);
+  });
+  it("reads every shape's label, the first one an id gets, and no edge as a shape", () => {
+    const labels = nodeLabels(`flowchart TD
+  a-->b
+  s(["✕ Stadium"]) --> db[("Store")]
+  r{Choice} --> h{{"Hex <br/> two"}}
+  t>Flag] --> p[/Para/]
+  s["Later label"]
+  class a,s removed
+`);
+    expect(Object.fromEntries(labels)).toEqual({ s: "Stadium", db: "Store", r: "Choice", h: "Hex two", t: "Flag", p: "Para" });
   });
 });
 

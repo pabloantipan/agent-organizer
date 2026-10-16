@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { DiagramView } from "./DiagramFigure";
+import { DiagramView, silentSvg } from "./DiagramFigure";
 import cardSrc from "./CardDrawer.tsx?raw";
 import roleSrc from "./RoleDrawer.tsx?raw";
 import ruleSrc from "./RuleDecisionBox.tsx?raw";
@@ -21,7 +21,7 @@ describe("G2: a figure that cannot draw shows the source under the reason", () =
       const html = view({ state: "failed", reason });
       expect(html).toContain(`Diagram not drawn: ${reason}</p>${code}`);
       expect(html).not.toContain("<img");
-      expect(html).toContain("Added: a, b. Changed: c. Removed: none.");
+      expect(html).toContain("Added: a, b. Changed: c. Removed: none. Around it: none.");
     });
   }
   it("while drawing, the source under Drawing the diagram…", () => {
@@ -34,9 +34,9 @@ describe("G2: a figure that cannot draw shows the source under the reason", () =
 describe("FR-3, FR-4: a drawn figure", () => {
   const html = view({ state: "drawn", svg: "<svg/>" });
   it("is an image named after its heading, described by the class line", () => {
-    expect(html).toMatch(/<img src="data:image\/svg\+xml;charset=utf-8,%3Csvg%2F%3E" alt="Change on the map, diagram" aria-describedby="([^"]+)-classes"\/>/);
+    expect(html).toMatch(/<img src="data:image\/svg\+xml;charset=utf-8,%3Csvg%20aria-hidden%3D%22true%22%2F%3E" alt="Change on the map, diagram" aria-describedby="([^"]+)-classes"\/>/);
     const id = html.match(/aria-describedby="([^"]+)"/)![1];
-    expect(html).toContain(`<p id="${id}" class="diagram-classes">Added: a, b. Changed: c. Removed: none.</p>`);
+    expect(html).toContain(`<p id="${id}" class="diagram-classes">Added: a, b. Changed: c. Removed: none. Around it: none.</p>`);
   });
   it("has a Source disclosure, closed, then the text line under it", () => {
     expect(html).toMatch(/<button type="button" class="link diagram-source" aria-expanded="false" aria-controls="[^"]+">Source<\/button><p id="[^"]+" class="diagram-classes">/);
@@ -44,6 +44,23 @@ describe("FR-3, FR-4: a drawn figure", () => {
   });
   it("sits in a frame of its own, which scrolls (diagram.css)", () => {
     expect(html).toContain('<div class="diagram-frame"><img');
+  });
+});
+
+describe("leftovers-38 O6 (D10): the figure is one image, its SVG hidden inside it", () => {
+  // mmdc's root, as it draws a flowchart: a role, a roledescription, names.
+  const svg = '<svg aria-roledescription="flowchart-v2" role="graphics-document document" viewBox="0 0 10 10" aria-labelledby="t" id="m"><title id="t">x</title><g><text>✎ BFF</text></g></svg>';
+  it("the root is aria-hidden, keeps its other attributes, loses its role and names", () => {
+    expect(silentSvg(svg)).toBe('<svg viewBox="0 0 10 10" id="m" aria-hidden="true"><title id="t">x</title><g><text>✎ BFF</text></g></svg>');
+  });
+  it("only the root is touched, and a self-closed root stays well formed", () => {
+    expect(silentSvg('<svg/>')).toBe('<svg aria-hidden="true"/>');
+    expect(silentSvg(svg).match(/aria-hidden/g)).toHaveLength(1);
+  });
+  it("the drawn figure is one img with its alt and no other content, the text line after it", () => {
+    const html = renderToStaticMarkup(<DiagramView source={src} heading="Change on the map" st={{ state: "drawn", svg }} />);
+    expect(html).toMatch(/<div class="diagram-frame"><img src="data:image\/svg\+xml;charset=utf-8,%3Csvg%20viewBox[^"]*aria-hidden%3D%22true%22%3E[^"]*" alt="Change on the map, diagram" aria-describedby="[^"]+"\/><\/div>/);
+    expect(html.indexOf("<img")).toBeLessThan(html.indexOf('class="diagram-classes"'));
   });
 });
 
