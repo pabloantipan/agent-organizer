@@ -1,6 +1,6 @@
 ---
 title: Usage numbers - fix the money of resumed sessions, and choose what hours and missing costs mean
-status: proposed
+status: ruled
 raised: 2026-10-15
 raised_by: fse
 owner: pablo
@@ -14,9 +14,9 @@ forecast: 25-50m
 threads: [01M50ZTJGYCSX4VTJB1SRR7EB3]
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-15
+ruled_by: pablo
+chosen: fix money now; hours = active, a 5-minute gap rule; keep a price table for missing costs and the split
 ---
 
 ## Question
@@ -60,6 +60,8 @@ table is a small file to keep current, and it is the only way the 17 Aug
 week stops reading $0.
 
 ## Ruling
+
+pablo, 2026-10-15, in the organizer on lodestar: Do as you recommend
 
 ## Consequences
 
