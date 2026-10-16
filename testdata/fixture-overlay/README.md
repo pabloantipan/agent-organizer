@@ -142,3 +142,9 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
   to commit this record in its own commit with `GIT_COMMITTER_DATE` ten
   minutes earlier (lf28-task-rows owns `scripts/fixture-home.sh`); it adds
   one open card to init-a
+- a record whose body draws figures (diagrams FR-2 to FR-4, D1, D2, D8):
+  `0012-draw-the-change-on-the-map`, ruled, so Needs me is unchanged, holds
+  the `mermaid-flowcharts` skill's change-classes example under `## Change
+  on the map` (✚ for added, diagrams-in-app Amendment 1), one node per
+  class, and a ten-node chain under `## The nightly scan, end to end`
+  wider than the record's body at 1024×640, so its frame scrolls
