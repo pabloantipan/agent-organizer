@@ -11,6 +11,7 @@ restating it (the discuss skill).
 - Waiting on Pablo: 0142 (lf38-owner-once, now with D9). Pablo pushes main.
 - Waiting on Aglaea: dg-render A1-A3 (thread posted 00:4x).
 - Held for a Go leftovers card: TestCrewCmdSkipsRunningSeat flaky; `organizer usage` text $0.00 for an all-unknown week (+ priced share in the total); a card `spec:` naming a missing file raises no scan Problem; tab-harness Escape (tool, maybe Hephaistos's).
+- 2026-10-16: lf38 landed (sup77 ended, 26 min). lf39 review pass with a finding for the next Go leftovers: `organizer run` (internal/cli/run.go, launchLines without a wait) has the same OnLaunch-after-settle race as the crew test; root fix: notify before close in internal/service/launch.go setSeat.
 - Next: cut that Go leftovers spec; raise review-map v1 as a proposed record (Q1 open with Hephaistos).
 
 ## HAND-OFF 2026-10-15 ~22:00 (last SHA seen 115f98d)
