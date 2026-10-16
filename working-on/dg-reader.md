@@ -1,12 +1,12 @@
 ---
 title: "The spec reader: a spec opens in a right drawer with its contents and figures"
-status: next
+status: now
 repos: [organizer]
 branch: dg-reader
 seat: dd-build
 stage: review-map
-updated: 2026-10-15
-next: "building: dd-build on branch dg-reader (sup76, launched 00:05)"
+updated: 2026-10-16
+next: "building: dd-build on branch dg-reader, phase 1 (bound read)"
 risk: medium
 footprint: [app.go, internal/service (spec read), a drawer component, frontend/src/components/Initiatives.tsx, InitiativeHeader.tsx, CardDrawer.tsx, frontend/wailsjs/]
 depends_on: [dg-render]
