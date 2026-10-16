@@ -31,10 +31,11 @@ func fakeMmdc(t *testing.T, dir string, fail bool) (bin, log string) {
 	body := `#!/bin/sh
 src=""; dst=""
 while [ $# -gt 0 ]; do
-  case "$1" in -i) src="$2"; shift;; -o) dst="$2"; shift;; esac
+  case "$1" in -i) src="$2"; shift;; -o) dst="$2"; shift;; -b) bg="$2"; shift;; esac
   shift
 done
 echo run >> "` + log + `"
+echo "$bg" > "` + dir + `/last-background"
 /bin/cp "$src" "` + dir + `/last-input"
 `
 	if fail {
@@ -110,6 +111,9 @@ func TestG1RenderCachesAndAppendsDarkClassdefs(t *testing.T) {
 	}
 	if !strings.HasSuffix(string(in), classdefs) {
 		t.Fatalf("input does not end with the four dark classDef lines:\n%s", in)
+	}
+	if bg, _ := os.ReadFile(filepath.Join(bin, "last-background")); string(bg) != "transparent\n" {
+		t.Fatalf("mmdc ran with -b %q, want transparent: no light panel", bg)
 	}
 	lines := strings.Split(strings.TrimRight(string(in), "\n"), "\n")
 	for _, l := range lines[len(lines)-4:] {

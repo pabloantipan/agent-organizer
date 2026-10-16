@@ -142,10 +142,17 @@ func (r *Renderer) shortDir() string {
 	return r.MermaidDir
 }
 
-// Key is the cache key of a block under the given style files' contents.
+// Background is mmdc's -b. mmdc paints the SVG's root white unless told
+// otherwise, whatever the config's theme says, and mermaid2svg passes no -b:
+// a figure drawn that way is a light panel on the dark ground (No-gos;
+// diagrams-in-app §1, "the figure's background is transparent").
+const Background = "transparent"
+
+// Key is the cache key of a block under the given style files' contents
+// and the flags it is drawn with.
 func Key(source string, style [][]byte) string {
 	h := sha256.New()
-	fmt.Fprintf(h, "%d\n%s", len(source), source)
+	fmt.Fprintf(h, "-b %s\n%d\n%s", Background, len(source), source)
 	for _, b := range style {
 		fmt.Fprintf(h, "\n%d\n", len(b))
 		h.Write(b)
@@ -198,7 +205,7 @@ func (r *Renderer) Render(source string) (string, error) {
 	out := strings.TrimSuffix(in.Name(), ".mmd") + ".svg"
 	defer os.Remove(out)
 
-	said, err := r.run(mmdc, "-i", in.Name(), "-o", out,
+	said, err := r.run(mmdc, "-i", in.Name(), "-o", out, "-b", Background,
 		"-c", filepath.Join(r.MermaidDir, StyleFiles[1]),
 		"-C", filepath.Join(r.MermaidDir, StyleFiles[2]))
 	if err != nil {
