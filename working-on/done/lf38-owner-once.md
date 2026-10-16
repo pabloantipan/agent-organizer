@@ -1,6 +1,6 @@
 ---
 title: "Needs me says an others' owner once, and the age column keeps one x"
-status: now
+status: done
 repos: [organizer]
 branch: lf38-owner-once
 seat: oo-build
@@ -14,6 +14,7 @@ boundary: ["docs/specs/leftovers-38.md Boundary, lf38-owner-once"]
 spec: "docs/specs/leftovers-38.md (FR-1 to FR-3; needs-me-waits Amendment 2, W11, W12)"
 gate: "docs/specs/leftovers-38.md Acceptance, rows O1 to O6 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -57,6 +58,27 @@ Risky:
 Not changed, on purpose:
 - `frontend/src/styles/diagram.css`: outside the boundary; no wrapper around the img, so `.diagram-frame > img` still applies
 - `frontend/src/lib/decisions.ts:ownerPhrase`: boundary
+
+## Review
+oo-review, 2026-10-16, on 1b13701a553f64016cdddb90edd52c6864a111cf (fresh clone under .wt-notes/oo-review/clean, removed after). Verdict: **pass**. Unmet rows: none.
+
+change-check (`change-check organizer lf38-owner-once --base main --head 1b13701…`): 9 files, undeclared 0, declared-not-changed 0; 4 flags, each explained:
+- outside boundary / outside footprint: `Home.waits.test.tsx`. The Boundary allows "their tests", and it is Home.tsx's test file (O1).
+- untested?: `decisionContext`: rendered and asserted through `OthersRow` and `DecisionRow` in `Home.waits.test.tsx` (O1).
+- untested?: `classIds`: private, exercised through `classLine` and `changeClasses` in `diagram.test.ts` (O5 and the D5 rows).
+The diff touches no `lib/queue.ts`, no `ownerPhrase`, no Go, store or testdata.
+
+Rows:
+- O1 met. `Home.waits.test.tsx` "O1": the others' context is exactly `raised 20 Sep`, it contains no `owner `, and the lead's rows read `owner pablo · raised …`. `decisionContext`'s default path is the same code as before, so the lead's line is unchanged. Passes (vitest, 45/45 in the four files).
+- O2 met. My own steps (`.wt-notes/oo-review/steps/o2.txt`; rows grouped by their document position against the Waiting on others heading) ran in the Tab harness against my own `wails dev` on :34232, with the fixture plus overlay, auth off and the probe stub. "Show the other 11" was pressed with Return, so all rows were in the DOM: 18 rows; Needs me had Rule 10, Answer 1, Open 2, Agents 1, Launch 1, Show 1; Waiting on others had Open 2. Every `ib-age` left x was 842 at 1024×640 and 1258 at 1440×900, spread 0 at both. (Others' rows only ever carry Open.)
+- O3 met: `grep -rn 'waiting.dashed' frontend/src` printed nothing, rc 1.
+- O4 met. `SpecReader.test.tsx` "leftovers-38 O4": it renders the exported `Contents`, and the name taken from the content (aria-hidden spans dropped) is exactly `Change on the map, start here`. The ✎ span keeps `aria-hidden="true"`, and the suffix is `.sr-only` (shell.css:10).
+- O5 met. `diagram.test.ts` "leftovers-38 O5" uses the skill's example with labels `PWA`, `✎ BFF`, `✚ Payments` and an unlabelled `cache`. It reads `Added: Payments. Changed: BFF. Removed: none. Around it: PWA, cache.`, with no ✚ ✎ ✕ and the id for the unlabelled node.
+- O6 met. In my own review build (`make review-build`, fixture plus overlay, auth off), the AX tree by its saved pid on init-a → Decisions → 0012 shows `AXImage d="Change on the map, diagram"` with no children, then Source, then `AXStaticText "Added: Payments. Changed: BFF. Removed: Legacy pay. Around it: PWA, Datastore."`. The screen was unlocked and AX answered.
+- X0 met. The shared run `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test` was **reused**: run `64ef681a-69867` of 1b13701a553f by organizer-probe-oo-ui, rc 0, 71 files and 810 tests. `pnpm run build` rc 0. `wails build` rc 0 (inside `make review-build`). `git status --porcelain` afterwards was empty.
+
+Evidence: /Users/pabloantipan/organizer/.wt-notes/oo-review/ (change-check.txt, vitest-o1-o4-o5-o6.log, o2-1024x640.txt, o2-1440x900.txt, o3-grep.txt, ax-o6.txt, x0-*.txt|log, review-build.log).
+Reviewer oo-review, 2026-10-16, commit 1b13701.
 
 ## UI review
 oo-ui, 2026-10-16, every row checked on 1b13701 (detached clone, fixture plus overlay, auth off). Verdict: **pass**. No sev 4 or 3.
