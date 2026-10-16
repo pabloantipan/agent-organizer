@@ -6,7 +6,7 @@ branch: lf38-owner-once
 seat: oo-build
 stage: decisions-owned-and-used
 updated: 2026-10-15
-next: "waits on 0142; on accept the FSE gives it to a supervisor"
+next: "sup77 runs it; 0142 ruled"
 risk: low
 footprint: [frontend/src/components/Home.tsx (decisionContext, the others' row), frontend/src/styles/shell.css (.ib-row verb column, .lz.waiting.dashed), frontend/src/components/SpecReader.tsx (Contents entry name), frontend/src/lib/diagram.ts (classLine), frontend/src/components/DiagramFigure.tsx, their tests]
 depends_on: []
