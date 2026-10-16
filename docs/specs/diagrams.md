@@ -119,3 +119,14 @@ Hephaistos (`npm install -g @mermaid-js/mermaid-cli`), not by this card.
 |---|---|---|---|
 | `dg-render` | G1, G2, D1, D2, D5, D8, X0 | — | true |
 | `dg-reader` | D6, D7, G3, X0 | `dg-render` | true |
+
+Amendment 1, 2026-10-15, the FSE, from sup76 (thread 01M519T7): D2 asked
+3:1 of every class's stroke, but the design asks it of a *touched* class
+only (`docs/ux/specs/diagrams-in-app.md:32-33`, row D2 at :114) and gives
+`context` a 1 px `--border-strong` stroke on purpose (1.66:1, quiet by
+design). So:
+- **D2** strokes of `added`, `changed` and `removed` ≥ 3:1 on `--surface`;
+  every class's label, `context` included, ≥ 4.5:1.
+- The build passes `-b transparent` to `mmdc` (it paints white
+  otherwise); FR-1's "the way `mermaid2svg --style dark` does" includes
+  it.
