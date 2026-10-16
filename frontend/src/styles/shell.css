@@ -131,6 +131,8 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .ib-subject .mono { font-size: var(--font-size-sm); color: var(--fg-muted); }
 .ib-context { font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ib-age { font-family: var(--mono); font-size: var(--font-size-sm); color: var(--fg-subtle); text-align: right; }
+/* a record waiting a week or more: its age, said once, in amber (leftovers-37 FR-2) */
+.ib-age.long { color: var(--warning); font-weight: var(--weight-semibold); }
 .ib-act .act { min-height: var(--control-sm); padding: 0 var(--space-3); font-size: var(--font-size-sm); }
 /* Focus and names, disclosure state (ui-leftovers FR-4): an open Rule is
    marked the way Conversations marks its Rule toggle */
