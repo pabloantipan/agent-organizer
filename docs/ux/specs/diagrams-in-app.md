@@ -179,3 +179,10 @@ From `working-on/done/dg-render.md`, ## UI review (A1-A3), merged b82ddf0.
 |---|---|---|
 | D5 (amended) | read the change without the picture | under the figure, `Added: … Changed: … Removed: … Around it: …` lists the labels of each class's nodes, none of them with a glyph |
 | D10 | hear the figure once | the AX tree shows the figure as one image with its alt and no child text; the text line is read after it |
+
+## Amendment 4 (aglaea, 2026-10-16): the name in one string
+
+VoiceOver reads `Change on the map , start here`: a screen-reader-only
+span joins as its own text run. The Contents entry takes the whole name as
+one `aria-label`, `Change on the map, start here`, and the sr-only span
+goes. D9 also checks that no space comes before the comma.

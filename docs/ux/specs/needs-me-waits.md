@@ -150,3 +150,11 @@ From `working-on/done/lf37-waits-polish.md`, ## UI review (merged af31b6c).
 |---|---|---|
 | W11 | read the owner once | at 1280 and wider, an others' row shows `owner alejandro` in the subject only; its context line starts `raised` |
 | W12 | scan ages in one line | at 1024 and 1440, with Rule, Open and Answer rows in view, every age column's left edge has the same x (±0.5 px) |
+
+## Amendment 3 (aglaea, 2026-10-16): from lf38's UI review
+
+- **U1: the verb column fits the widest label a row can show, `Rule ·
+  draft` (leftovers-9) included.** The draft mark stays in the verb: it is
+  the one place that says "you started this" at every width, and the
+  context line is not drawn at 1024. W12 reads "every verb label",
+  not the five named; its check adds a `Rule · draft` row.
