@@ -10,7 +10,7 @@
 /* FR-4: a figure wider than its column scrolls in its own frame; the page
    never scrolls sideways. The image keeps its drawn size. */
 .diagram-frame {
-  overflow-x: auto; max-width: 100%; background: var(--surface); border-radius: var(--radius-md);
+  overflow-x: auto; max-width: 100%; background: var(--surface);
   padding: var(--space-2); border-left: 1px solid transparent; border-right: 1px solid transparent;
 }
 .diagram-frame.edge-left { border-left-color: var(--fg-subtle); }

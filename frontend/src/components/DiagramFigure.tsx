@@ -102,6 +102,11 @@ export function nearestHeading(root: HTMLElement, el: HTMLElement): string {
 
 type Slot = { el: HTMLElement; source: string; heading: string };
 
+/** Each slot's source, read once before the slot is emptied for its figure:
+ *  an effect that runs again (StrictMode, a refresh with the same HTML)
+ *  finds the slot empty. */
+const sources = new WeakMap<HTMLElement, string>();
+
 /** Mounts a DiagramFigure into each slot of a markdown body. `content` is
  *  what the body shows (its HTML), so a body set again is picked up;
  *  `fallback` names the figure when no heading stands over it. Call it
@@ -115,7 +120,11 @@ export function useDiagrams(root: RefObject<HTMLElement | null>, content: unknow
     r?.querySelectorAll<HTMLElement>(".diagram-slot").forEach((el) => {
       const prev = slots.find((s) => s.el === el);
       if (prev) { found.push(prev); return; }
-      const source = el.querySelector("code")?.textContent ?? "";
+      let source = sources.get(el);
+      if (source === undefined) {
+        source = el.querySelector("code")?.textContent ?? "";
+        sources.set(el, source);
+      }
       el.replaceChildren();
       found.push({ el, source, heading: nearestHeading(r, el) || fallback });
     });
