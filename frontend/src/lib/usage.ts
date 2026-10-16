@@ -37,6 +37,8 @@ export type UsageSession = Kinds & {
   start: string;
   end: string;
   minutes: number;
+  /** Seconds of active time in the week: messages 5 minutes apart or less (usage-audit FR-3). */
+  active: number;
   running: boolean;
   tokens: number;
   money?: number | null;
@@ -366,7 +368,7 @@ export function forInitiative(sessions: UsageSession[], initiative: string, task
     for (const k of KIND_KEYS) totals[k] += s[k] ?? 0;
     totals.tokens += s.tokens;
     if (s.money != null) totals.money += s.money; else totals.without_cost++;
-    totals.hours += (s.minutes || 0) / 60;
+    totals.hours += (s.active || 0) / 3600;
     if (s.running) totals.running++;
   }
   const cuts = {} as Record<Cut, UsageRow[]>;
