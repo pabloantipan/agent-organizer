@@ -148,3 +148,11 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
   on the map` (✚ for added, diagrams-in-app Amendment 1), one node per
   class, and a ten-node chain under `## The nightly scan, end to end`
   wider than the record's body at 1024×640, so its frame scrolls
+- a spec the reader opens (diagrams FR-6 to FR-8, D6, D7):
+  `init-a/docs/reader.md`, taller than the drawer at 1024×640, with
+  `## Change on the map` (a figure) after three other `##` sections, a
+  link to record 0012, one to `specs/01-shape.md` and one to a record that
+  does not exist (reads missing) under `## The scan report`; the card
+  `w-wide` names it with `spec: "docs/reader.md#the-scan-report"`, so its
+  card back's Spec link lands on that section. It is under no `specs:`
+  entry, so only the card's spec: makes it readable (G3's other side)

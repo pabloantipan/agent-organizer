@@ -653,6 +653,16 @@ func (a *App) Help() (service.HelpDoc, error) {
 	return a.svc.Help(), nil
 }
 
+// ReadSpec returns a spec file's text for the reader (docs/specs/diagrams.md
+// FR-6): only a path the scan resolved under the initiative's specs: or a
+// card's spec:; anything else is refused and nothing is read.
+func (a *App) ReadSpec(initiativeID, path string) (service.SpecDoc, error) {
+	if a.svc == nil {
+		return service.SpecDoc{}, errString(a.err)
+	}
+	return a.svc.ReadSpec(initiativeID, path)
+}
+
 // RenderDiagram draws one mermaid block as a dark SVG (docs/specs/diagrams.md
 // FR-1), from the cache when it is there, when a body holding it is shown.
 // The error is the reason the figure reads: mmdc not found, the dark style

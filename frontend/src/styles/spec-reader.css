@@ -1,0 +1,75 @@
+/* The spec reader (docs/specs/diagrams.md FR-7; diagrams-in-app §3): a
+   drawer from the right over the current view and its backdrop, capped at
+   the window, scrolling its own body with the edges. Tier-2 tokens only.
+   It mounts after the card back, so at the same layer it paints over it. */
+.modal-backdrop.sr-backdrop { display: block; padding: 0; overflow: hidden; }
+.sr-drawer {
+  position: absolute; top: 0; right: 0; bottom: 0; width: min(880px, calc(100% - var(--space-12)));
+  display: flex; flex-direction: column; min-width: 0;
+  background: var(--surface-overlay); color: var(--fg);
+  border-left: 1px solid var(--border-strong); box-shadow: var(--shadow-lift);
+  user-select: text;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .sr-drawer { animation: sr-in 200ms var(--ease-out); }
+}
+/* Transform only: a paused animation (a hidden view) never hides the body. */
+@keyframes sr-in { from { transform: translateX(24px); } to { transform: none; } }
+
+.sr-head {
+  flex: none; display: flex; align-items: center; gap: var(--space-2);
+  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-6);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.sr-path {
+  flex: 1 1 auto; min-width: 0; margin: 0;
+  font-size: var(--font-size-md); font-weight: var(--weight-semibold); color: var(--fg);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sr-back, .sr-editor { flex: none; }
+.sr-close { flex: none; }
+
+.sr-body {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
+  padding: var(--space-5) var(--space-6) var(--space-12);
+  border-top: 1px solid transparent; border-bottom: 1px solid transparent;
+}
+.sr-body.edge-top { border-top-color: var(--fg-subtle); }
+.sr-body.edge-bottom { border-bottom-color: var(--fg-subtle); }
+.sr-body:focus-visible { outline-offset: -2px; }
+
+/* Contents: the ## headings as a jump list at the top, not sticky; the
+   change on the map first and marked ✎. */
+.sr-contents { max-width: min(72ch, 100%); margin-bottom: var(--space-6); padding-bottom: var(--space-4); border-bottom: 1px solid var(--border-subtle); }
+.sr-contents .section-label { margin-top: 0; }
+.sr-contents ol { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-0-5); }
+.sr-contents button.linkish { color: var(--fg-muted); font-size: var(--font-size-md); text-align: left; padding: var(--space-0-5) 0; }
+.sr-contents button.linkish:hover { color: var(--accent-fg); }
+.sr-contents li.map button.linkish { color: var(--fg); font-weight: var(--weight-semibold); }
+.sr-map-mark { display: inline-block; width: 1.4em; color: var(--warning); }
+
+/* The body at a reading measure; figures to the drawer's full width. */
+.sr-doc { font-size: var(--font-size-lg); line-height: 1.6; overflow-wrap: anywhere; min-width: 0; }
+.sr-doc > * { max-width: min(72ch, 100%); }
+.sr-doc > .diagram-slot { max-width: none; }
+.sr-doc :where(pre, table) { overflow-wrap: normal; }
+.sr-doc.markdown h1 { font-size: var(--font-size-2xl); margin: 0 0 var(--space-4); }
+.sr-doc.markdown h2 { font-size: var(--font-size-xl); color: var(--fg); margin: var(--space-8) 0 var(--space-3); }
+.sr-doc.markdown h3 { font-size: var(--font-size-lg); margin: var(--space-6) 0 var(--space-2); }
+.sr-doc :where(h1, h2, h3, h4, h5, h6):focus { outline: none; }
+.sr-doc :where(h1, h2, h3, h4, h5, h6):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.sr-doc pre code { background: none; padding: 0; }
+.sr-doc a { color: var(--accent-fg); }
+.sr-doc a[aria-disabled="true"] { color: var(--fg-muted); text-decoration: none; cursor: default; }
+
+/* A path that is not there: no press, the word says so. */
+.sr-missing { font-size: var(--font-size-sm); color: var(--fg-muted); font-style: italic; }
+.sr-opener-missing { color: var(--fg-muted); }
+.sr-error { color: var(--fg-muted); }
+
+/* The openers: the card back's Spec, the header's Specs. */
+.card-spec { font-size: var(--font-size-sm); overflow-wrap: anywhere; min-width: 0; }
+.card-spec button.linkish { color: var(--accent-fg); text-align: left; overflow-wrap: anywhere; }
+.ihead-specs { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1-5); margin-top: var(--space-1-5); font-size: var(--font-size-sm); color: var(--fg-subtle); }
+.ihead-specs ul { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); list-style: none; margin: 0; padding: 0; min-width: 0; }
+.ihead-specs button.linkish { color: var(--accent-fg); overflow-wrap: anywhere; text-align: left; }

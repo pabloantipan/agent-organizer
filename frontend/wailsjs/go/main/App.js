@@ -142,6 +142,10 @@ export function PostToCell(arg1, arg2) {
   return window['go']['main']['App']['PostToCell'](arg1, arg2);
 }
 
+export function ReadSpec(arg1, arg2) {
+  return window['go']['main']['App']['ReadSpec'](arg1, arg2);
+}
+
 export function RenderDiagram(arg1) {
   return window['go']['main']['App']['RenderDiagram'](arg1);
 }

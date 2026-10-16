@@ -4,6 +4,7 @@ import { Bot, ChartGantt, Code2, Copy, Kanban, Terminal } from "lucide-react";
 import { api } from "../hooks/useWails";
 import { shortHome } from "../lib";
 import { useBoard } from "../stores/board.store";
+import { SpecOpener } from "./SpecReader";
 
 /** What the Initiatives tab showed when a row was open, now folded into
  *  Home: the repos with branch, dirt and last commit, the scanner's
@@ -54,7 +55,9 @@ export function InitiativeDetail({ i, readOnly = false }: { i: merge.BoardInitia
 
 // Specs is where the initiative is specified, one group per specs: entry with
 // the files the scanner resolved under it. An entry that resolved to nothing
-// says so and the reason is in Problems. Nothing renders without specs.
+// says so and the reason is in Problems. Nothing renders without specs. A
+// file opens in the spec reader (diagrams FR-7), whose Open in editor is the
+// editor one press away.
 function Specs({ i }: { i: merge.BoardInitiative }) {
   const entries = i.specs ?? [];
   if (entries.length === 0) return null;
@@ -72,11 +75,7 @@ function Specs({ i }: { i: merge.BoardInitiative }) {
               <ul className="spec-files">
                 {files.map((f) => (
                   <li key={f} title={f}>
-                    {i.local ? (
-                      <button className="linkish" onClick={() => api.openInEditor(`${i.path}/${f}`)}>{specLabel(entry, f)}</button>
-                    ) : (
-                      <span>{specLabel(entry, f)}</span>
-                    )}
+                    <SpecOpener initiative={i.id} refText={f} label={specLabel(entry, f)} local={i.local} exact />
                   </li>
                 ))}
               </ul>

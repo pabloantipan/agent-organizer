@@ -6,6 +6,7 @@ branch: w-wide
 updated: 2026-10-04
 next: "Wait for 0010"
 stage: joins
+spec: "docs/reader.md#the-scan-report"
 ---
 
 ## Goal

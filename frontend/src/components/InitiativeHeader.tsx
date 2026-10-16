@@ -11,6 +11,7 @@ import { UnreadFiles } from "./UnreadFiles";
 import { Charter, type CharterField } from "./Charter";
 import { regionName, useScrollEdges } from "../lib/useScrollEdges";
 import { useBoard, type Sub } from "../stores/board.store";
+import { SpecOpener } from "./SpecReader";
 import "../styles/header.css";
 
 /** A stage's state for the stepper: done when ruled so, current as the scan
@@ -107,6 +108,22 @@ function StageStrip({ i, compact }: { i: merge.BoardInitiative; compact: boolean
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+/** The files the scan resolved under specs:, each opening the spec reader
+ *  (diagrams FR-7; diagrams-in-app §3, header Details). Nothing without
+ *  specs; an entry that resolved to nothing is the scan's problem. */
+function HeaderSpecs({ i }: { i: merge.BoardInitiative }) {
+  const files = Array.from(new Set(Object.values(i.spec_files ?? {}).flat())).sort();
+  if (files.length === 0) return null;
+  return (
+    <div className="ihead-specs">
+      <FileText size={12} aria-hidden /> <span className="ihead-specs-label">Specs</span>
+      <ul>
+        {files.map((f) => <li key={f}><SpecOpener initiative={i.id} refText={f} label={f} local={i.local} className="mono" exact /></li>)}
+      </ul>
     </div>
   );
 }
@@ -212,6 +229,7 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
             {i.local && i.charter_modified && <span className="ihead-edited">edited, not committed</span>}
             {i.local && <button className="linkish" onClick={() => api.openInEditor(charter)}><Code2 size={12} aria-hidden /> Open initiative.yaml in editor</button>}
           </div>
+          <HeaderSpecs i={i} />
           <StageStrip i={i} compact={compact} />
         </div>
       )}

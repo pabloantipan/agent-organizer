@@ -78,6 +78,8 @@ export function PlanRetire(arg1:service.RetireOptions):Promise<service.RetirePla
 
 export function PostToCell(arg1:string,arg2:service.CellPost):Promise<discuss.PostResult>;
 
+export function ReadSpec(arg1:string,arg2:string):Promise<service.SpecDoc>;
+
 export function RenderDiagram(arg1:string):Promise<string>;
 
 export function ResetPassword(arg1:string):Promise<void>;
