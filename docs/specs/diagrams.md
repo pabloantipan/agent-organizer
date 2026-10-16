@@ -24,12 +24,18 @@ two cards in order.
 
 ### Card `dg-render` (Go and frontend): a mermaid block becomes a dark figure
 
-- **FR-1** A bound method renders one mermaid block to SVG: it runs `mmdc`
-  (found on the PATH, else the nvm path the toolchain uses) with
-  `~/.mermaid/mermaid-config-dark.json` and `mermaid-styles-dark.css`, and
-  caches the result at `~/.local/share/organizer/diagrams/<sha256 of the
-  block>.svg`. Rendered on open, never on scan. A cached file is returned
-  without running `mmdc`.
+- **FR-1** A bound method renders one mermaid block to SVG the way
+  `mermaid2svg --style dark` does (Hephaistos, mermaid-diagram-tool
+  20dfbcc): it appends the four lines of `~/.mermaid/classdefs-dark.mmd` to
+  the block (a later classDef of the same class wins; CSS cannot outrank
+  mermaid's scoped classDef rules), then runs `mmdc -c
+  ~/.mermaid/mermaid-config-dark.json -C ~/.mermaid/mermaid-styles-dark.css`.
+  `mmdc` is looked up on the PATH, then `~/.nvm/versions/node/*/bin/mmdc`
+  newest first. The SVG is cached at
+  `~/.local/share/organizer/diagrams/<sha256>.svg`, the hash over the
+  original block plus the three style files, so a style change re-renders.
+  Rendered on open, never on scan. A cached file is returned without
+  running `mmdc`. The source text is never changed.
 - **FR-2** Wherever the app renders markdown with `marked` (the five places
   above), a fenced `mermaid` block draws as a figure from FR-1: while
   rendering, the source as code under `Drawing the diagram…`; when it
@@ -65,7 +71,7 @@ two cards in order.
 
 | # | FR | Check | Expected (fails on main) |
 |---|---|---|---|
-| G1 | 1 | go test with a fake `mmdc` on the PATH: render a block twice; then change one node | `mmdc` runs once for the first two, again for the changed one; files named by the block's sha256 |
+| G1 | 1 | go test with a fake `mmdc` on the PATH (and one only under a fake `~/.nvm/versions/node/v*/bin`): render a block twice; change one node; change `classdefs-dark.mmd` | `mmdc` runs once for the first two, again for each change; the input it received ends with the four dark classDef lines; nvm's newest is found when the PATH has none |
 | G2 | 1, 2 | go test and vitest: no `mmdc`; dark style missing; `mmdc` exits 1 with an error | the method returns the reason; the view shows the source under `Diagram not drawn: <reason>`, never an empty figure |
 | D1 | 1, 2 | Tab harness at 1024×640 on lodestar (real `mmdc`, the dark style installed): a fixture record holding the skill's change-classes example | a figure, no light panel: ➕ lilac, ✎ amber, ✕ dashed and struck, context grey (shot) |
 | D2 | 1 | the same: computed stroke and label colours per class against `--surface` | strokes ≥ 3:1, labels ≥ 4.5:1 |
@@ -76,10 +82,9 @@ two cards in order.
 | G3 | 6 | go test: a path outside the resolved specs | refused, nothing read |
 | X0 | all | `XDG_DATA_HOME=$(mktemp -d) make test`, `cd frontend && pnpm run build`, `wails build`, then `git status --porcelain` | pass, empty |
 
-D1 and D2 need the `dark` style in `~/.mermaid`, Hephaistos's (thread
-01M510M9); if it has not landed when the card starts, the builder renders
-with a test copy of it in testdata and the reviewer reruns D1 and D2 once
-it has.
+D1 and D2 use the `dark` style in `~/.mermaid` (landed, mermaid-diagram-tool
+20dfbcc). On odyssey `mmdc` and `~/.mermaid` are installed by Pablo or its
+Hephaistos (`npm install -g @mermaid-js/mermaid-cli`), not by this card.
 
 ## Boundary
 
