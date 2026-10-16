@@ -14,6 +14,7 @@ boundary: ["docs/specs/diagrams.md Boundary, dg-reader"]
 spec: "docs/specs/diagrams.md (FR-6 to FR-8; diagrams-in-app D1-D8)"
 gate: "docs/specs/diagrams.md Acceptance, rows D6, D7, G3 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -63,3 +64,18 @@ Not changed, on purpose:
 - `DiagramFigure.tsx`, `lib/diagram.ts`: imported as they are
 - `App.tsx`, `board.store.ts`: the reader mounts in CardDrawer and keeps its own store
 - `internal/scan`: card spec: paths are resolved in the service, at read time
+
+## Review
+**Pass**: D6, D7, G3 and X0 met at 74cf351 (branch unmoved), fresh clone at `.wt-notes/dd-review/clean`, removed after. Evidence under `/Users/pabloantipan/organizer/.wt-notes/dd-review/`.
+
+- **D6** met. My own `wails dev :34252` from the clone, fixture + overlay, `auth: off` (out/auth.txt), the builder's harness copy (with `escape`) at 1024×640, my steps (steps.txt; out/run.jsonl). Return on w-wide's `spec:` link: drawer on docs/reader.md, focus on h2 "The scan report" (focus-visible, in view, 43 px under the top at scrollTop 1527 = max, the section is last-but-one); Contents `✎ Change on the map` first (`li.map`), then the other seven in document order although the heading sits sixth in the file (out/d6-section.png, d6-contents.png).
+- **D7** met, on the builder's harness copy with the `escape` verb. Unlike the builder's run I scrolled to 700 before the record link, so `← Back` cannot pass by re-landing on the section: Return on the 0012 link shows the record in the same drawer (one drawer, h1 "0012 Draw the change on the map", `← Back`); Return on `← Back`: docs/reader.md at 700 (700 before); Esc: drawer gone, card back stays, focus on `Read docs/reader.md#the-scan-report`, focus-visible (out/d7-*.png). The 0099 link reads missing, no href.
+- **FR-7, other openers** (supervisor's ask): with no card back open, the header's Details Specs (docs/one-spec.md) and Home's init-a chevron Specs (specs/01-shape.md) open the reader by Return; Esc returns focus to each list (out/fr7-header.png, fr7-home.png).
+- **G3** met. `TestG3ReadSpecRefusesUnresolved` passes (g3.log): eight unresolved paths (unlisted file, initiative.yaml, a card file, `../`, `specs/../`, absolute, /etc/passwd, empty) are `ErrSpecRefused` with no text, and a counting `readSpecFile` stays at 0, so it proves nothing was read, not only the error. `ReadSpec` has no other disk access.
+- **X0** met. make test: **reused** run e116364f-58078 of 74cf351e20b1 (organizer-probe-dd-ui), exit 0, 801 vitest + all go packages ok; `pnpm run build` 0, `wails build` 0, `git status --porcelain` empty; again empty after my `wails dev` and a second `wails build`.
+- **Boundary and No-gos**: the diff reads, never writes (WriteFile/MkdirAll only in the test's TempDir); no network (http links go to BrowserOpenURL on a press); `DiagramFigure.tsx`, `lib/diagram.ts` untouched, imported (`useDiagrams`, `slotDiagrams`).
+- **change-check** (`organizer dg-reader --base main --head 74cf351`): 0 undeclared, 0 declared-not-changed, 0 new env/dep/host. 13 `outside boundary` and 39 `outside footprint` are explained: the card's `boundary:` points at the spec's prose, which the tool cannot match. CardDrawer.tsx is the card back's `spec:` link, InitiativeHeader.tsx the header's Specs, SpecReader.tsx plus lib/specReader.ts plus spec-reader.css the drawer component, wailsjs/ the generated output of the one bound read, and the fixture overlay the D6/D7 data. 14 `untested?` are internal helpers covered through the tested exports or the harness.
+- Unmet rows: none.
+- Not covered by the gate: the shared `scripts/tab-harness` has no Escape, so D7 depends on a copy in a notes dir. A card's `spec:` naming a missing file raises no scan Problem.
+
+Reviewer dd-review, 2026-10-16, commit 74cf351e20b141e55d19a694bc9024856e297272. No `## UI review` yet: status and place left as they are.
