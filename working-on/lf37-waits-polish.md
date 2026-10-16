@@ -58,3 +58,19 @@ Verdict: **fail**, unmet: P4. Reviewer wp-review, 2026-10-15, commit 3ceff0fd3aa
 - Shared test run: **reused** run ec7012f7-88717 of 3ceff0fd3aab (wp-ui, 2026-10-15T22:50:47).
 - change-check (base main fe0874e, head 3ceff0f): changed Home.tsx (Shell, DecisionRow, WaitingOnOthers, OthersRow), Home.waits.test.tsx, shell.css; undeclared 0, declared-not-changed 0. Flags explained: `outside boundary`/`outside footprint` Home.waits.test.tsx: the Boundary's "their tests" (prose change-check cannot parse), footprint says "their tests" too; `untested? Shell`: exercised through DecisionRow/OthersRow in P1. No Go, no Gate.tsx, store, testdata or `lib/queue.ts` change; no new service call; badge 16 unchanged.
 
+
+## UI review
+Verdict: **pass**. Reviewer wp-ui, 2026-10-15, every row on commit 3ceff0fd3aab25d807f3b414f5231439ca7af113 (branch did not move). Shots and logs: /Users/pabloantipan/organizer/.wt-notes/wp-ui/ (worktree removed after).
+- How checked: P1, P4 vitest read against the rows (fixed now, 25/6 d, lead's and alejandro's; exact sub-line) and run in the shared run. P2, P3 Tab harness 1024x640, own wails dev :34233, fixture + overlay, auth off, builder's steps copied (0010 re-dated to 6 d in the page store only): long rows rgb(255, 176, 32) 600 = `--warning`, 6 d row and thread row rgb(149, 142, 162) 400; others' lozenges x 82 both, ages x 857.84 both, subjects `owner alejandro · init-a 0005 · …`, `owner ana · init-many 0075 · …`; every record row `decision`, one lozenge; badge 16. Review build (fixture, auth off) AX tree by pid: heading name `WAITING ON OTHERS · 2 Theirs to rule. Not counted in Needs me.`, rows `Open init-a 0005`, `Open init-many 0075`. Shots: wkwebview-1024x640-P2-long-short.png, wkwebview-1024x640-P3-others.png.
+- Shared test run: **fresh**, run ec7012f7-88717 of 3ceff0f, `make test` exit 0 (vitest 760/760); wp-review reused it.
+- Diff: Home.tsx, shell.css, Home.waits.test.tsx only; no Go, Gate.tsx, store, testdata, `lib/queue.ts`; no new service call.
+- P4 placement (differs from wp-review's fail): W10's source, Amendment 1 Q, says "one line under the heading, **as Needs me has**", and Needs me's sub-line is the same inline `.sec-sub` beside the count (h2 y = sub y). The build matches the named pattern, so I do not count it against the design; wording for the FSE below.
+
+Findings (none 4 or 3):
+- U1 (2) The owner is said twice on an others' row at 1280 and up. Where: Waiting on others, context line. Evidence: AX at 1440 draws subject `owner alejandro · …` and context `owner alejandro · raised 27 Sep by fse · …` (`decisionContext` leads with `ownerPhrase`); at 1024 compact hides the context, so the harness shot does not show it. The lead reads the same fact twice, the A2 fault in a new column. Proposal: drop the owner phrase from the context on others' rows (keep raised, by, options).
+- U2 (1) Age x differs by verb width: 862.98 in Needs me (Rule), 857.84 in Waiting on others (Open), 9d beside Answer further left. Within a group it is one x, as P3 asks. Proposal: a fixed verb column width.
+- U3 (1) `.lz.waiting.dashed` (shell.css:33) is dead CSS now; the boundary only allowed removing the age lozenge's rule.
+
+Spec gaps (for the FSE): FR-4/P4 say "under the heading" while W10 says "as Needs me has" (inline beside the count): amend P4 to the inline house sub-line or say "on its own line". FR-3 never said what the context line keeps (U1).
+For aglaea: U1 (owner in subject and context), U2 (one age x across groups or per group).
+Not verified in WKWebView: VoiceOver reading the descriptions (no screen, spec's Not in the gate); `screencapture -l` of the review window came back blank, so review-build visuals rest on the harness snapshots and AX frames; firebase states not applicable.
