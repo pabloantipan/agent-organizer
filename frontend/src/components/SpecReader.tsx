@@ -19,7 +19,7 @@ import { openBox } from "../lib/boxStack";
 import { loopTab } from "../lib/tabTrap";
 import { slotDiagrams } from "../lib/diagram";
 import { useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
-import { linkTarget, pathRef, sectionId, specRef, withAnchors, type ReaderIndex } from "../lib/specReader";
+import { linkTarget, pathRef, sectionId, specRef, withAnchors, type ContentsItem, type ReaderIndex } from "../lib/specReader";
 import { useDiagrams } from "./DiagramFigure";
 import "../styles/spec-reader.css";
 
@@ -331,20 +331,7 @@ export function SpecReader() {
             <p className="sr-error" role="status">Not read: {top.error}</p>
           ) : (
             <>
-              {rendered.contents.length > 0 && (
-                <nav className="sr-contents" aria-label="Contents">
-                  <div className="section-label">Contents</div>
-                  <ol>
-                    {rendered.contents.map((c) => (
-                      <li key={c.id} className={c.map ? "map" : undefined}>
-                        <button type="button" className="linkish" onClick={() => goSection(c.id)}>
-                          {c.map && <span className="sr-map-mark" aria-hidden="true">✎</span>}{c.text}
-                        </button>
-                      </li>
-                    ))}
-                  </ol>
-                </nav>
-              )}
+              <Contents items={rendered.contents} go={goSection} />
               <div ref={body} className="markdown sr-doc" onClick={onBodyClick} />
               {figures}
             </>
@@ -352,6 +339,27 @@ export function SpecReader() {
         </div>
       </div>
     </div>
+  );
+}
+
+/** The document's Contents, the change map first. The ✎ is drawn only; the
+ *  map's entry says what the mark tells a sighted reader, so its name is
+ *  `<heading>, start here` (diagrams-in-app D9, leftovers-38 FR-4). */
+export function Contents({ items, go }: { items: ContentsItem[]; go: (id: string) => void }) {
+  if (items.length === 0) return null;
+  return (
+    <nav className="sr-contents" aria-label="Contents">
+      <div className="section-label">Contents</div>
+      <ol>
+        {items.map((c) => (
+          <li key={c.id} className={c.map ? "map" : undefined}>
+            <button type="button" className="linkish" onClick={() => go(c.id)}>
+              {c.map && <span className="sr-map-mark" aria-hidden="true">✎</span>}{c.text}{c.map && <span className="sr-only">, start here</span>}
+            </button>
+          </li>
+        ))}
+      </ol>
+    </nav>
   );
 }
 

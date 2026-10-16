@@ -1,6 +1,8 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it } from "vitest";
-import { SpecOpenerView, useSpecReader } from "./SpecReader";
+import { Contents, SpecOpenerView, useSpecReader } from "./SpecReader";
+import { withAnchors } from "../lib/specReader";
+import { marked } from "marked";
 import initSrc from "./Initiatives.tsx?raw";
 import headSrc from "./InitiativeHeader.tsx?raw";
 import cardSrc from "./CardDrawer.tsx?raw";
@@ -49,5 +51,20 @@ describe("FR-7: the three openers open the reader, not the editor", () => {
     expect(cardSrc).toContain("<><CardBack /><SpecReader /></>");
     expect(cardSrc).toContain("<SpecOpener initiative={c.initiative_id} refText={c.spec}");
     expect(cardSrc).toContain("useSpecProbe(");
+  });
+});
+
+describe("leftovers-38 O4 (D9): the map's Contents entry is heard as the one to read first", () => {
+  const { contents } = withAnchors(marked.parse("# Spec\n\n## Problem\n\nx\n\n## Change on the map\n\ny\n", { async: false }) as string);
+  const html = renderToStaticMarkup(<Contents items={contents} go={() => undefined} />);
+  const buttons = [...html.matchAll(/<button[^>]*>(.*?)<\/button>/g)].map((m) => m[1]);
+  /** A button's accessible name from its content: aria-hidden spans say nothing, sr-only ones are read. */
+  const nameOf = (inner: string) => inner.replace(/<span[^>]*aria-hidden="true"[^>]*>.*?<\/span>/g, "").replace(/<[^>]+>/g, "");
+  it("the entry's accessible name is exactly Change on the map, start here", () => {
+    expect(buttons.map(nameOf)).toEqual(["Change on the map, start here", "Problem"]);
+  });
+  it("the ✎ stays drawn and aria-hidden, the suffix only screen-reader", () => {
+    expect(buttons[0]).toBe('<span class="sr-map-mark" aria-hidden="true">✎</span>Change on the map<span class="sr-only">, start here</span>');
+    expect(buttons[1]).toBe("Problem");
   });
 });
