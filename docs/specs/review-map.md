@@ -118,6 +118,21 @@ build step (v0-v3), each a wave of one or two cards; only v0 is carded now.
   supervisor (or the FSE when none runs), so Pablo reviews, not only reads;
   coverage as merge evidence on the card.
 
+- Findings from rm-v0 (sup74, thread 01M5119X, 2026-10-15), for the cut of
+  v1/v2: (1) the main package's `//go:embed all:frontend/dist` fails in every
+  `git archive` export of this repo (dist is ignored), so each review of the
+  organizer reports it as a problem though type info resolves: v1 builds a
+  stub dist in the export or treats an embed error as known. (2) FR-3's
+  `untested` means no direct test reference: `runLaunches` (run via
+  `queueLaunch` in launch_test.go) and `crewCmd` (via `runWith` in
+  crew_test.go) read untested though tests run them: v2's viewer says `no
+  direct test`, or v1 adds reach. (3) v1's reconciliation reuses
+  `change-check <initiative> <card> --json` (claudecode 975131b, installed
+  as `~/bin/change-check`; Hephaistos, thread 01M50YGJ).
+- rm-v0 chose `go/types` (0 M2/M3 misses, 2.3 s on c8e1773, needs only go
+  and the module cache); codebase-memory was file level and dropped
+  receivers, scip-go missed types and vars (`working-on/done/rm-v0.md`).
+
 ## Open questions
 
 - Q1 (v1): where `revmap.json` lives for another Mac's branch (odyssey

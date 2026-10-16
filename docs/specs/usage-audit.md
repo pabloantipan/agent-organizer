@@ -1,6 +1,6 @@
 # Usage audit fixes: money a resumed session spent, hours that mean something: the spec
 
-status: proposed (0138)
+status: ruled (0138, 2026-10-15: "Do as you recommend", the first option)
 by: the FSE, 2026-10-15, on main at 523b0a7
 sources: Hephaistos's audit of the week 2026-W42 (organizer thread 01M50ZTJ;
 scripts in Hephaistos's scratchpad `usage-audit/`), after Pablo asked "dude,
@@ -54,20 +54,72 @@ rewriting the live `usage.jsonl`.
   (`usage-post`, which resends the changed rows by itself), the ledger's
   file format beyond what a cost change rewrites.
 
-## Waiting on 0138 (not carded until ruled)
+## Requirements, card `uc-price` (Go, one frontend line), ruled by 0138
 
-- **Hours (audit 2).** "179 h of work" is first-to-last message per session
-  and day, so idle and parallel sessions count: the audit finds 65 h active
-  and 18.7 h of wall clock with any session working. The words and the
-  number are the owner's choice (0138, Q1).
-- **No cost record (audit 3).** A session with none counts as $0 (the week
-  of 17 Aug: 341.9M tokens, 7 sessions, $0.00). A fallback needs a price
-  table the organizer keeps (0138, Q2). Prices checked by Hephaistos today
-  for Opus 5.5: input $4/M, cache write $5/M (5 min) or $8/M (1 h), cache
-  read $0.20/M, output $20/M, no long-context surcharge.
-- **The split (audit 4).** Cost split across days and models by token share,
-  not price; with a price table it splits by priced tokens (0138, Q2). A
-  past week also drifts while a session spanning it grows; that stays, and
-  the view says so (0138, Q2).
-- **Live cost above priced tokens (audit 5).** 9 of 441 sessions since 23
-  Sep, 9-34% above. Not verified; a note, no card.
+0138 chose: hours are active time with a 5-minute gap rule; the organizer
+keeps a price table for missing costs and for the split. Code read:
+`Ingest`'s add callback (ledger.go:274-296, where each message's `ts` is
+seen), `splitCost` (:571), `costOf` (:558), `totals` (report.go:219, `Hours`
+:237), the model cut's split (report.go:310-321), `hoursWords` and
+`moneyOf` in `frontend/src/lib/usage.ts`.
+
+- **FR-3** (hours) A ledger line carries `active`, seconds: the sum of the
+  gaps between that session's consecutive messages on that day that are 5
+  minutes or less (a message more than 5 minutes after the one before
+  starts a new stretch and adds nothing for the gap). `Totals.Hours` is
+  the sum of `active`, not of `Last - First`. Lines written before the
+  field exist are recomputed from the transcripts once (the builder picks
+  how: a ledger version that resets the offsets, or a one-time rebuild),
+  never left reading 0 h. The view's words stay `<n> h of work`.
+- **FR-4** (price table) `internal/usage` holds one table of prices per
+  model, dollars per million tokens per kind, each row with the date it
+  was checked and its source. It starts with the one row checked
+  (Hephaistos, 2026-10-15): `claude-opus-5-5` input 4, output 20, cache
+  read 0.20, cache write 5 (5-minute) and 8 (1-hour). The builder reads a
+  real transcript's `usage` for a 1-hour/5-minute cache-write split
+  (`cache_creation.ephemeral_1h_input_tokens` or its like): if it is
+  there, cache writes are priced per TTL; if not, at the 5-minute price,
+  and the card's Notes say which. No price for a model is guessed; a model
+  not in the table has no price.
+- **FR-5** (missing cost) A session with no cost record and no transcript
+  cost gets a priced cost when every one of its tokens is of a priced
+  model: `cost_from: "priced"`. Otherwise its cost stays null and the view
+  keeps `—` and `no cost recorded for <n> sessions`, never $0.00. A
+  priced cost reads `$<n> (priced)` where the view names the source
+  (`moneyOf` or a sibling helper; the one frontend change).
+- **FR-6** (split) A session's cost is put on its days, and a day's cost on
+  its models, by each part's priced tokens when every part is priced, and
+  by token count (today's rule) when any part is not. The total never
+  changes by the split.
+- A past week still drifts while a session that spans it grows; that
+  stays (audit 4) and is not this card's.
+- Live cost above priced tokens (audit 5, 9 of 441 sessions since 23 Sep):
+  a note, no card.
+
+## Acceptance → gate (uc-price)
+
+| # | FR | Check | Expected (fails on main) |
+|---|---|---|---|
+| P1 | 3 | go test: one session, messages at 10:00, 10:03, 10:04, 10:30, 10:32 | `active` 360 s (3 + 1 + 2 min); hours 0.1 |
+| P2 | 3 | go test: a session ingested in two passes, the split between 10:03 and 10:04 | the same 360 s as one pass |
+| P3 | 3 | go test: a ledger line without `active` (written by today's code) | recomputed from its transcript after one ingest, not 0 |
+| P4 | 3 | on this Mac, read-only, a copy of the data dir: `organizer usage --week 2026-W42 --json` totals.hours, read after uc-resume landed | within 10% of the audit's 65 h (today 179 h) |
+| P5 | 4, 5 | go test: a session of opus-5-5 tokens with no cost source | cost from the table, `cost_from: "priced"`, exact to the cent for a hand-computed case |
+| P6 | 5 | go test: a session with one unpriced model's tokens and no cost source | cost null, no `priced` |
+| P7 | 5 | on the copy: `--week 2026-W34` (the 17 Aug week, 7 sessions, $0.00 today) | money not 0 if its models are priced, else `—` with `no cost recorded for 7 sessions`; the card's Notes say which models it held |
+| P8 | 6 | go test: a session with cost $10 over two days, day one 1M opus output tokens, day two 1M opus cache-read tokens | day one ≈ $9.90, day two ≈ $0.10 (20 : 0.20), sum $10 |
+| P9 | 5 | vitest: the priced words | `$12.50 (priced)` for a priced cost; `—` stays for unknown |
+| X0 | all | `XDG_DATA_HOME=$(mktemp -d) make test`, `cd frontend && pnpm run build`, `wails build`, then `git status --porcelain` | pass, empty |
+
+P4 and P7 read the real ledger and change nothing: a copy of the data dir
+(`XDG_DATA_HOME` pointed at it), never the live `usage.jsonl`.
+
+## Boundary (uc-price)
+
+- `internal/usage` (the `active` field, the price table, `costOf`,
+  `splitCost`, `totals`, the model cut's split), `internal/service/usage.go`
+  only if the rebuild needs it, `frontend/src/lib/usage.ts` and its test
+  for the priced words, `frontend/src/components/Usage.tsx` only to call
+  them, their tests. Not: the post to the record, `foldCosts` (uc-resume's),
+  any other view.
+- Runs after `uc-resume` (same package, same files): `depends_on: [uc-resume]`.

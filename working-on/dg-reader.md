@@ -6,7 +6,9 @@ branch: dg-reader
 seat: dd-build
 stage: review-map
 updated: 2026-10-15
-next: "waits on 0140; on accept the FSE gives it to a supervisor"
+next: "sup76 runs it after dg-render; 0140 ruled"
+risk: medium
+footprint: [app.go, internal/service (spec read), a drawer component, frontend/src/components/Initiatives.tsx, InitiativeHeader.tsx, CardDrawer.tsx, frontend/wailsjs/]
 depends_on: [dg-render]
 boundary: ["docs/specs/diagrams.md Boundary, dg-reader"]
 spec: "docs/specs/diagrams.md (FR-6 to FR-8; diagrams-in-app D1-D8)"

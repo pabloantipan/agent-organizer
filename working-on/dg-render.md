@@ -6,7 +6,9 @@ branch: dg-render
 seat: dr-build
 stage: review-map
 updated: 2026-10-15
-next: "waits on 0140; on accept the FSE gives it to a supervisor"
+next: "sup76 runs it after lf37-waits-polish; 0140 ruled"
+risk: medium
+footprint: [internal/diagram/ (new), app.go, frontend/wailsjs/, internal/cli (doctor), frontend/src/lib/ (mermaid blocks, class line), a figure component, the five marked sites, frontend/src/styles/, a fixture record]
 depends_on: []
 boundary: ["docs/specs/diagrams.md Boundary, dg-render"]
 spec: "docs/specs/diagrams.md (FR-1 to FR-5; diagrams-in-app D1-D8)"

@@ -5,7 +5,9 @@ repos: [organizer]
 branch: uc-resume
 seat: uc-build
 updated: 2026-10-15
-next: "waits on 0138; on accept the FSE gives it to a supervisor"
+next: "sup75 runs it (uc-resume then uc-price); 0138 ruled"
+risk: high
+footprint: [internal/usage/ledger.go (CostSource, foldCosts), internal/usage/ledger_test.go, internal/service/usage.go]
 depends_on: []
 boundary: ["docs/specs/usage-audit.md Boundary (uc-resume)"]
 spec: "docs/specs/usage-audit.md (FR-1, FR-2)"

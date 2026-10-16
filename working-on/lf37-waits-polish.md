@@ -6,7 +6,9 @@ branch: lf37-waits-polish
 seat: wp-build
 stage: decisions-owned-and-used
 updated: 2026-10-15
-next: "waits on 0139; on accept the FSE gives it to a supervisor"
+next: "sup76 runs it first (then dg-render, dg-reader; the Tab harness one at a time); 0139 ruled"
+risk: low
+footprint: [frontend/src/components/Home.tsx (DecisionRow, WaitingOnOthers), frontend/src/styles/shell.css, their tests]
 depends_on: []
 boundary: ["docs/specs/leftovers-37.md Boundary, lf37-waits-polish"]
 spec: "docs/specs/leftovers-37.md (FR-1 to FR-4; needs-me-waits Amendment 1, W7-W10)"
