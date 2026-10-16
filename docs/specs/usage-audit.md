@@ -123,3 +123,37 @@ P4 and P7 read the real ledger and change nothing: a copy of the data dir
   them, their tests. Not: the post to the record, `foldCosts` (uc-resume's),
   any other view.
 - Runs after `uc-resume` (same package, same files): `depends_on: [uc-resume]`.
+
+Amendment 1, 2026-10-15, the FSE, from uc-build's evidence on the card
+(05f57f0, `working-on/uc-resume.md` Notes): FR-1's premise is false. Claude
+Code restores a session's cost on resume, so both the statusline record and
+the transcript's `cost-state` are cumulative across processes (34 of 35
+multi-pid sessions in runs.jsonl rise monotonically). The one drop is
+368c36b6: the cost restarted inside pid 28295 at `/login`, and that
+process's peak before `/login` is in no record. Summing per pid, as written,
+double-counts every ordinary resume (W41 $1215 vs the audit's $801.82). So:
+
+- **FR-1** (replaced) A session's recorded cost is the sum over its *runs*
+  of each run's largest record, where a run ends when a record, in time
+  order, is lower than the one before it (a reset, `/login` is the one
+  seen). With no drop this is today's max. `CostSource` carries what
+  orders the records (first/last seen, pid); the session is marked
+  `reset` when it has more than one run. The comment that the total is
+  cumulative across a resume stays: it is true.
+- **FR-2** stands answered: neither source restarts per process (A5, the
+  card's Notes).
+- **A1** (replaced) go test: one session, records in time order 5, 10,
+  12, 3, 7 (across three pids) → 19 (12 + 7), `reset`; and a second
+  session of three pids 5→10, 10→12, 12→14 → 14, not `reset`.
+- **A3** (replaced) 368c36b6 reads $24.00 (18.08 + 5.92) and `reset`; the
+  window lost before `/login` is priced by uc-price (FR-7, P10), not here.
+- **A4** (replaced) W41 total within 3% of $801.82 and no session above
+  its value on main except one marked `reset` (main is already within
+  3%; this row guards against double counting).
+- **uc-price FR-7** A session marked `reset` whose tokens are all of
+  priced models takes the larger of its recorded cost and its priced
+  tokens, `cost_from: "priced"`; one with an unpriced model keeps its
+  recorded cost and `reset`.
+- **uc-price P10** go test: a `reset` session whose priced tokens exceed
+  its runs takes the priced cost; on the data-dir copy, 368c36b6 is within
+  10% of the audit's $74.71.

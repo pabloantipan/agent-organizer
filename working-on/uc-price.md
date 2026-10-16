@@ -11,7 +11,7 @@ footprint: [internal/usage/ledger.go (Line.active, Ingest, costOf, splitCost), i
 depends_on: [uc-resume]
 boundary: ["docs/specs/usage-audit.md Boundary (uc-price)"]
 spec: "docs/specs/usage-audit.md (FR-3 to FR-6; 0138)"
-gate: "docs/specs/usage-audit.md Acceptance (uc-price), rows P1 to P9 and X0"
+gate: "docs/specs/usage-audit.md Acceptance (uc-price), rows P1 to P9 and X0, and P10 (Amendment 1)"
 ui_review: false
 ---
 
