@@ -6,7 +6,7 @@ branch: dg-render
 seat: dr-build
 stage: review-map
 updated: 2026-10-15
-next: "sup76 runs it after lf37-waits-polish; 0140 ruled"
+next: "building: dr-build on branch dg-render (sup76, launched 23:30)"
 risk: medium
 footprint: [internal/diagram/ (new), app.go, frontend/wailsjs/, internal/cli (doctor), frontend/src/lib/ (mermaid blocks, class line), a figure component, the five marked sites, frontend/src/styles/, a fixture record]
 depends_on: []
