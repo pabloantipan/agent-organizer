@@ -2640,6 +2640,7 @@ export namespace usage {
 	    // Go type: time
 	    end: any;
 	    minutes: number;
+	    active: number;
 	    running: boolean;
 	    input: number;
 	    output: number;
@@ -2667,6 +2668,7 @@ export namespace usage {
 	        this.start = this.convertValues(source["start"], null);
 	        this.end = this.convertValues(source["end"], null);
 	        this.minutes = source["minutes"];
+	        this.active = source["active"];
 	        this.running = source["running"];
 	        this.input = source["input"];
 	        this.output = source["output"];
