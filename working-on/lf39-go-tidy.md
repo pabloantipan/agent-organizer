@@ -5,7 +5,8 @@ repos: [organizer]
 branch: lf39-go-tidy
 seat: gt-build
 updated: 2026-10-16
-next: "review: lf39-go-tidy, gate met (L1-L5, X0), 75631c0"
+next: "file finding: organizer run (internal/cli/run.go, launchLines without a wait) has the same OnLaunch-after-settle gap; root fix is notify before close in internal/service/launch.go setSeat"
+review: pass
 risk: low
 footprint: [internal/cli/crew_test.go, internal/cli/usage.go, internal/usage/report.go (Totals), internal/scan (card spec check), testdata/home, frontend/src/lib/usage.ts (totalsNotes), frontend/wailsjs/, scripts/tab-harness/tabharness.swift]
 depends_on: []
@@ -54,3 +55,23 @@ Not changed, on purpose:
 
 ## Done
 - 2026-10-16 gt-build: crew flake fixed at its cause, usage money honest with the priced share, missing card spec named, Escape in the harness; gate met at 75631c0.
+
+## Review
+**pass**, 75631c0 (branch not moved); unmet gate items: none. Card stays open: one finding has no home (next).
+
+change-check (from a clean clone at 75631c0): 26 flags, outside boundary 0, declared not changed 0.
+- undeclared `crew.go` launchLines, launchPrinter, newLaunchPrinter, launchPrinter.print, launchPrinter.waitFor: named inside the `crewCmd` bullet; `report.go:totals`: inside the `Totals` bullet ("summed in totals"). Explained.
+- outside footprint (15): tests, fixtures, golden and `crew.go`, all inside the spec Boundary ("the crew code if the cause is there", "their tests", fixture under testdata/); the footprint was narrower than the Boundary. Explained.
+- untested? (5): crewCmd by TestCrewCmdSkipsRunningSeat, moneyLine by TestWriteUsageMoney, checkCardSpecs by TestCardSpecNamesNoFile, through their callers. Explained.
+
+Rows (logs in .wt-notes/gt-review/):
+- L1: -count=200 ok (95 s); main at 86ec85a failed 1/200, last seat line `qa_cleo running` missing before the total (L1-before.txt); make test x3 pass, 801 vitest each. FR-1 met: the cause (setSeat closes `settled` inside settle, unlocks, then notifies OnLaunch, so WaitLaunch returns before the last line) is named in Notes and the diff removes it for crew: the printer waits until each seat's printed state equals its settled one. The assertion is unchanged (crew_test.go not in the diff). Every seat state change notifies (queueLaunch, setSeat, StopStarting, RetrySeat), so waitFor cannot hang on the CLI path. Fixing the consumer, not launch.go, is within the Boundary and fixes what the test observes.
+- L2, L3, L4: pass; cardSpecRel is specRel+cleanRel byte for byte.
+- L5: own page on 127.0.0.1:60499, pid saved and killed by pid; window visible:false; page saw `["Escape"]`. Main's harness: `Fatal error: unknown key escape`.
+- X0: make test, pnpm install --frozen-lockfile, pnpm run build, wails build pass; git status --porcelain empty.
+
+Note: `organizer run` keeps the same gap (Found, not asked); not proved by a test here, and no card, record or backlog line holds it, hence next.
+Note: cardSpecRel duplicates service.specRel; the two can drift.
+Gate gap: X0 and L1 say `make test` without a temp XDG_DATA_HOME; I ran L1's with one.
+
+gt-review, 2026-10-16
