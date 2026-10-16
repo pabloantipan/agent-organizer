@@ -5,7 +5,7 @@ repos: [organizer]
 branch: uc-price
 seat: up-build
 updated: 2026-10-15
-next: "up-build: waiting on sup75 for P4 (FR-3 gap rule vs the audit's 10-minute cap) and forInitiative hours; rest built (ab37c3d, a377b9d, f79465c)"
+next: "up-build: waiting on sup75 for P4 (FR-3 gap rule vs the audit's 10-minute cap) ; rest built and X0 passed"
 risk: high
 footprint: [internal/usage/ledger.go (Line.active, Ingest, costOf, splitCost), internal/usage/report.go (totals, the model cut), internal/usage/prices.go (new), frontend/src/lib/usage.ts, frontend/src/components/Usage.tsx]
 depends_on: [uc-resume]
@@ -29,5 +29,5 @@ Forecast 25-50 min over 1 wave (the FSE; basis: one-card Go tasks here, uc-resum
 - P4, not met as written (question to sup75): the audit's 65 h is every gap capped at 10 min (`sum(min(gap,600))`, sess.py in Hephaistos's usage-audit scratchpad), not FR-3's rule. On the audit's msgs.pkl, W42: cap 10m 64.9 h; FR-3 per session-day 28.1 h; cap 5m 47.8 h; <=10m-else-0 40.8 h. Data-dir copy, `usage --week 2026-W42 --json` totals.hours: main 185.9, branch 31.3 (FR-3 as written).
 - P7: W34 holds claude-opus-5 and claude-fable-5 only, neither in the table: money `—`, without_cost 7 on main and branch.
 - P10 real half: 368c36b6 whole session main $24.00 record, reset; branch $74.71 priced, reset (audit $74.71). W42 total main $465.40, branch $492.50; W41 main $785.10, branch $823.92 (audit $801.82, +2.8%): 368c36b6 and the price split across days and weeks; no session newly without cost.
-- Not anticipated: `forInitiative` in frontend/src/lib/usage.ts sums the filtered view's hours from session minutes (first to last); `SessionRow.active` is added in Go, the frontend line waits on sup75 (asked). The source is named in `UsageSessions.tsx` (the Usage view's session list), not `Usage.tsx`, so the priced words are called there. `internal/cli/usage_test.go` expected a lone opus-5-5 session without a cost source to be without cost; FR-5 prices it (f79465c).
+- Not anticipated: `forInitiative` in frontend/src/lib/usage.ts sums the filtered view's hours from session minutes (first to last); found, not asked: `SessionRow.active` is added in Go and `forInitiative` now sums it (sup75: FR-3 makes the view's hours active time; "one frontend change" names FR-5's words). The source is named in `UsageSessions.tsx` (the Usage view's session list), not `Usage.tsx`, so the priced words are called there. `internal/cli/usage_test.go` expected a lone opus-5-5 session without a cost source to be without cost; FR-5 prices it (f79465c).
 
