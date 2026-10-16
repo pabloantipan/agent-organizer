@@ -130,3 +130,8 @@ design). So:
 - The build passes `-b transparent` to `mmdc` (it paints white
   otherwise); FR-1's "the way `mermaid2svg --style dark` does" includes
   it.
+
+Amendment 2, 2026-10-16, the FSE, from dg-reader's UI review (6ef262a):
+- **FR-8** A link with `#section` lands on that section even when the file
+  was read before; only a link without a section returns to where the
+  reader left off. (The build already does this.)
