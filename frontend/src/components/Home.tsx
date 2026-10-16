@@ -168,7 +168,7 @@ const age = (since: Date | null) => {
  *  openNeedsMe names it. The row's hover carries its whole context line in
  *  every class (FR-11): wide cuts it, compact takes it out of the view and
  *  keeps it in the accessible text. */
-function Shell({ row, reason, tone, subject, context, hover, children }: { row: Pick<NeedsMeRow, "key" | "since">; reason: string; tone: string; subject: React.ReactNode; context: string; hover?: string; children: React.ReactNode }) {
+function Shell({ row, reason, tone, subject, context, hover, long, children }: { row: Pick<NeedsMeRow, "key" | "since">; reason: string; tone: string; subject: React.ReactNode; context: string; hover?: string; long?: boolean; children: React.ReactNode }) {
   const { needsMeFocus, ruleDraft } = useBoard();
   const ref = useRef<HTMLDivElement>(null);
   const focused = needsMeFocus === row.key;
@@ -185,7 +185,7 @@ function Shell({ row, reason, tone, subject, context, hover, children }: { row: 
         <span className="ib-subject">{subject}</span>
         <span className="ib-context">{context}</span>
       </span>
-      <span className="ib-age num" title={row.since ? row.since.toLocaleString() : "no date on this"}>{age(row.since)}</span>
+      <span className={`ib-age num${long ? " long" : ""}`} title={row.since ? row.since.toLocaleString() : "no date on this"}>{age(row.since)}</span>
       <span className="ib-act">{children}</span>
     </div>
   );
@@ -316,15 +316,16 @@ const decisionContext = (d: model.Decision) => {
 const daysWords = (n: number) => `${n} days`;
 
 /** A decision waiting on a ruling. Its action is a slot: RuleAction opens
- *  the box that writes the ruling (FR-22). A wait of a week or more says its
- *  age first, in amber, in place of the kind (leftovers-36 FR-1), and the
- *  verb is described by the drawn line (FR-5). */
+ *  the box that writes the ruling (FR-22). Every record row keeps the
+ *  `decision` lozenge (leftovers-37 FR-1); a wait of a week or more says its
+ *  age once, in its age column drawn amber (FR-2), and the verb is described
+ *  by the drawn line (leftovers-36 FR-5). */
 export function DecisionRow({ row, decision: d }: { row: Extract<NeedsMeRow, { kind: "decision" }>; decision: model.Decision }) {
   const descId = useId();
   const aged = row.waited !== null;
   const desc = aged ? `waiting ${daysWords(row.waited!)}, ${row.initiative} ${d.number}, ${d.title}` : null;
   return (
-    <Shell row={row} reason={aged ? `waiting ${daysWords(row.waited!)}` : "decision"} tone={aged ? "warning" : "waiting"}
+    <Shell row={row} reason="decision" tone="waiting" long={aged}
       subject={<><span className="mono">{row.initiative} {d.number}</span> · {d.title}</>}
       hover={desc ? desc.split(", ").join(" · ") : undefined}
       context={decisionContext(d)}>
@@ -341,7 +342,7 @@ export function WaitingOnOthers({ rows }: { rows: OthersWait[] }) {
   if (rows.length === 0) return null;
   return (
     <>
-      <h3 className="sec-title ib-group">Waiting on others · <span className="num sec-count">{rows.length}</span></h3>
+      <h3 className="sec-title ib-group">Waiting on others · <span className="num sec-count">{rows.length}</span><span className="sec-sub">Theirs to rule. Not counted in Needs me.</span></h3>
       <div className="panel inbox">
         {rows.map((r) => <OthersRow key={r.key} row={r} />)}
       </div>
@@ -349,8 +350,10 @@ export function WaitingOnOthers({ rows }: { rows: OthersWait[] }) {
   );
 }
 
-/** One record waiting on someone else: whose it is, in the waiting record's
- *  dashed fuchsia, its age in amber, id and title. The verb is Open, to look
+/** One record waiting on someone else: the `decision` lozenge as on the
+ *  lead's rows, so lozenges and ages line up, then whose it is at the front
+ *  of the subject, id and title, and its age once, in the long age column
+ *  (leftovers-37 FR-1 to FR-3). The verb is Open, to look
  *  before ruling over them: it lands on the record in the initiative's
  *  Decisions, focused as Rule's landing is, where Rule is still offered
  *  (0045). */
@@ -360,8 +363,8 @@ export function OthersRow({ row }: { row: OthersWait }) {
   const d = row.decision;
   const desc = `waiting on ${row.owner}, ${daysWords(row.waited)}, ${row.initiative} ${d.number}, ${d.title}`;
   return (
-    <Shell row={row} reason={`waiting on ${row.owner}`} tone="waiting dashed"
-      subject={<><span className="lz warning">{daysWords(row.waited)}</span> <span className="mono">{row.initiative} {d.number}</span> · {d.title}</>}
+    <Shell row={row} reason="decision" tone="waiting" long
+      subject={<>{ownerPhrase(row.owner)} · <span className="mono">{row.initiative} {d.number}</span> · {d.title}</>}
       hover={desc.split(", ").join(" · ")}
       context={decisionContext(d)}>
       <button className="act" aria-label={`Open ${row.initiative} ${d.number}`} aria-describedby={descId} onClick={() => openDecision(row.initiative, d.number)} title="the record on its Decisions, where Rule is">Open</button>
