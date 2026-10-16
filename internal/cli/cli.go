@@ -21,6 +21,7 @@ import (
 
 	"organizer/internal/cache"
 	"organizer/internal/config"
+	"organizer/internal/diagram"
 	"organizer/internal/merge"
 	"organizer/internal/model"
 	"organizer/internal/scan"
@@ -296,6 +297,7 @@ func doctor(cfg config.Config, args []string, stdout, stderr io.Writer, now func
 	fmt.Fprintf(stdout, "discuss: %s\n", discussStatus(cfg))
 	fmt.Fprintf(stdout, "usage post: %s\n", service.UsagePostStatus(cfg))
 	fmt.Fprintf(stdout, "review: %s\n", reviewStatus())
+	fmt.Fprintf(stdout, "diagrams: %s\n", diagram.New().Status())
 
 	started := now()
 	snap := scan.Run(scanOptions(cfg, now, true))
