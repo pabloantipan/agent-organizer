@@ -1,0 +1,22 @@
+/* A mermaid block drawn as a figure (docs/specs/diagrams.md FR-2 to FR-4;
+   diagrams-in-app §1, §2). The SVG carries its own dark colours (the dark
+   style in ~/.mermaid, background transparent); the panel behind it is
+   --surface. No light panel. */
+.diagram-slot, .diagram { display: block; min-width: 0; max-width: 100%; margin: var(--space-3) 0; }
+.diagram-slot > .diagram { margin: 0; }
+/* The drawing and not-drawn lines read as a blocked reason does: muted,
+   small, no spinner, no red (a figure that did not draw blocks nothing). */
+.diagram-state { font-size: var(--font-size-sm); color: var(--fg-muted); line-height: 1.35; margin: 0 0 var(--space-1); }
+/* FR-4: a figure wider than its column scrolls in its own frame; the page
+   never scrolls sideways. The image keeps its drawn size. */
+.diagram-frame {
+  overflow-x: auto; max-width: 100%; background: var(--surface); border-radius: var(--radius-md);
+  padding: var(--space-2); border-left: 1px solid transparent; border-right: 1px solid transparent;
+}
+.diagram-frame.edge-left { border-left-color: var(--fg-subtle); }
+.diagram-frame.edge-right { border-right-color: var(--fg-subtle); }
+.diagram-frame:focus-visible { outline-offset: -2px; }
+.diagram-frame > img { display: block; max-width: none; height: auto; }
+.diagram button.diagram-source { font-size: var(--font-size-sm); color: var(--fg-muted); margin-top: var(--space-1); }
+.diagram button.diagram-source:hover { color: var(--accent-fg); }
+.diagram-classes { font-size: var(--font-size-sm); color: var(--fg-muted); margin: var(--space-1) 0 0; }
