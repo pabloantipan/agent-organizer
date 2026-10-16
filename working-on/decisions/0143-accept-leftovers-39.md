@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 39 - four small fixes from last night's reviews
-status: proposed
+status: ruled
 raised: 2026-10-16
 raised_by: fse
 owner: pablo
@@ -9,6 +9,9 @@ cards: [lf39-go-tidy]
 forecast: 20-45m
 supersedes: []
 superseded_by:
+ruled: 2026-10-16
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -41,6 +44,8 @@ The FSE: **"accept as written"**. It shares no file with lf38 and can run
 beside it.
 
 ## Ruling
+
+pablo, 2026-10-16, in the organizer on lodestar: ok
 
 ## Consequences
 
