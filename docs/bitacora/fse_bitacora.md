@@ -16,6 +16,7 @@ restating it (the discuss skill).
 - Findings to card later (uc-price review, 586208a): `TestCrewCmdSkipsRunningSeat` flaky (a make test run lost the qa_cleo running line); `organizer usage` text prints $0.00 for a week wholly without cost (FR-5 says never). Go, internal/cli + test: next Go leftovers.
 - 23:4x sup75 ended (uc-resume 12 min, uc-price 40 min vs 25-50 each; task 57 min, ~25 of it waiting on my amendments; seats $9.58; installed v0.2.0-2287-g22ec945). Lesson: a boundary that says "not the frontend" must still allow `frontend/wailsjs/` when a bound Go type changes. Deaf watcher, 2nd time (sup73, me): sent [for hephaistos].
 - Running: sup76 on dg-render, then dg-reader; 0142 (lf38-owner-once) waits on Pablo.
+- dg-reader UI review gaps (6ef262a): #section wins (diagrams Amendment 2); a card `spec:` naming a missing file raises no scan Problem (Go leftovers); scripts/tab-harness has no Escape (D7 used a copy) — Go/tools leftovers. U1, U2 sent to aglaea.
 - Next: on each task's done/ cards, read the closing report, end the supervisor, then cut review-map v1 (TS, change-check reconciliation) as a proposed record.
 
 ## HAND-OFF — 2026-10-15 ~21:10, leftovers-36 and usage-post landed; sup74 on rm-v0
