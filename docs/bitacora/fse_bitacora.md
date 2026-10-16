@@ -4,6 +4,15 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF 2026-10-16 ~00:40 (last SHA seen 320f2f4)
+
+- No supervisor running. sup75 (usage-audit: uc-resume, uc-price) and sup76 (lf37, dg-render, dg-reader) ended; installed v0.2.0-2316-gb39b706, doctor says diagrams ok. sup76: lf37 47 min vs 15-35 (35 waiting on me), diagrams 62 min vs 60-110, seats $25.40.
+- review-map exit 3 met (2026-10-16, roadmap). Exits 1, 2 need v1-v3 (TS + change-check reconciliation; Review view, Aglaea first; questions as threads).
+- Waiting on Pablo: 0142 (lf38-owner-once, now with D9). Pablo pushes main.
+- Waiting on Aglaea: dg-render A1-A3 (thread posted 00:4x).
+- Held for a Go leftovers card: TestCrewCmdSkipsRunningSeat flaky; `organizer usage` text $0.00 for an all-unknown week (+ priced share in the total); a card `spec:` naming a missing file raises no scan Problem; tab-harness Escape (tool, maybe Hephaistos's).
+- Next: cut that Go leftovers spec; raise review-map v1 as a proposed record (Q1 open with Hephaistos).
+
 ## HAND-OFF 2026-10-15 ~22:00 (last SHA seen 115f98d)
 
 - rm-v0 merged (bf916c8, sup74, 18 min vs 45-90 forecast, $7.22); index go/types. sup74 ended (killed, token revoked, prompts removed). Its two findings plus change-check reuse filed under review-map "Later steps"; threads closed.

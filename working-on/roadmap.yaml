@@ -90,6 +90,7 @@ stages:
     exit:
       - on odyssey, a real agent branch of another initiative opened in Deltagos, every changed symbol reached, the undeclared change flagged
       - a question marked on a node reaches the card's supervisor as a thread
-      - records and specs show their mermaid diagrams in the four change classes (agent-slack spec-diagrams, T11c)
+      - text: records and specs show their mermaid diagrams in the four change classes (agent-slack spec-diagrams, T11c)
+        met: 2026-10-16
     gates: ["0137"]
     appetite: four small tasks, v0 to v3 (docs/specs/review-map.md)
