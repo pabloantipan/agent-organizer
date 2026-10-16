@@ -29,8 +29,6 @@ button.lz:hover { background: var(--surface-hover); border: 0; }
 .lz.warning { background: var(--warning-bg); color: var(--warning); }
 .lz.tone { background: var(--tone-bg); color: var(--tone); }
 .lz.remote { background: var(--tone-bg); color: var(--remote); }
-/* waiting on someone else: dashed, as waiting records are drawn (leftovers-36 FR-3) */
-.lz.waiting.dashed { border: 1px dashed var(--decision-waiting); padding: 0 6px; }
 button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--fg); }
 
 .sec-title {
@@ -118,7 +116,7 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 /* Inbox row: reason lozenge, subject with one line of context, age, one verb */
 .inbox { padding: var(--space-1) var(--space-2); display: grid; }
 .ib-row {
-  display: grid; grid-template-columns: 112px minmax(0, 1fr) 48px auto; gap: var(--space-3); align-items: center;
+  display: grid; grid-template-columns: 112px minmax(0, 1fr) 48px minmax(var(--ib-verb-w), auto); gap: var(--space-3); align-items: center;
   padding: var(--space-2); border-radius: var(--radius-md);
   transition: background var(--dur-fast) var(--ease-out);
 }
@@ -133,6 +131,12 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .ib-age { font-family: var(--mono); font-size: var(--font-size-sm); color: var(--fg-subtle); text-align: right; }
 /* a record waiting a week or more: its age, said once, in amber (leftovers-37 FR-2) */
 .ib-age.long { color: var(--warning); font-weight: var(--weight-semibold); }
+/* One verb column (leftovers-38 FR-2, needs-me-waits W12): at least as wide
+   as the widest verb a row carries (Rule, Open, Answer, Agents, Launch), the
+   button at its right edge, so every age column stands at one x. Wide's
+   Needs me lays the button out as the grid item itself (rule-box.css). */
+.ib-row { --ib-verb-w: 72px; }
+.ib-act, .ib-act .act { justify-self: end; }
 .ib-act .act { min-height: var(--control-sm); padding: 0 var(--space-3); font-size: var(--font-size-sm); }
 /* Focus and names, disclosure state (ui-leftovers FR-4): an open Rule is
    marked the way Conversations marks its Rule toggle */
