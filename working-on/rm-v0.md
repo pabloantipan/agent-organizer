@@ -1,11 +1,11 @@
 ---
 title: "organizer review: a Go change as revmap.json (review map v0)"
-status: next
+status: now
 repos: [organizer]
 branch: rm-v0
 seat: rm-build
 updated: 2026-10-15
-next: "sup74 runs it (0137); builder rm-build"
+next: "rm-build builds it on branch rm-v0 (sup74)"
 depends_on: []
 boundary: ["docs/specs/review-map.md Boundary, rm-v0"]
 spec: "docs/specs/review-map.md (FR-1 to FR-6; agent-slack review/pipeline-starter.md §6.6)"
