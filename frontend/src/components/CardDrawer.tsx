@@ -10,6 +10,8 @@ import { dateWords } from "../lib/dates";
 import { cardKey, drafts, draftVerb, useDraft, useImeEscape } from "../lib/drafts";
 import { openBox } from "../lib/boxStack";
 import { loopTab } from "../lib/tabTrap";
+import { slotDiagrams } from "../lib/diagram";
+import { useDiagrams } from "./DiagramFigure";
 import { regionName, useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
 import { focusBoxBelow } from "./RuleDecisionBox";
 import { busyButton, busyLabel } from "../lib/busy";
@@ -46,12 +48,14 @@ export function CardDrawer() {
   // (leftovers-5 FR-1): opened over a rule box, it closes and the box stays.
   const open = !!selected;
   useEffect(() => (open ? openBox(() => select(null)) : undefined), [open, select]);
-  const html = useMemo(() => (selected ? (marked.parse(selected.body || "") as string) : ""), [selected]);
+  const html = useMemo(() => (selected ? slotDiagrams(marked.parse(selected.body || "") as string) : ""), [selected]);
   const title = useRef<HTMLHeadingElement>(null);
   // leftovers-25 FR-10: the open card back keeps Tab, as the role drawer does.
   const box = useRef<HTMLDivElement>(null);
   const body = useRef<HTMLDivElement>(null);
   useMarkdownEdges(body, html);
+  // diagrams FR-2: each mermaid block draws as a figure in its slot.
+  const figures = useDiagrams(body, html, selected ? selected.title || selected.slug : "");
   // leftovers-8 FR-6: the card back scrolls its own body, with the edge;
   // leftovers-26 FR-2: a stop named after the card while it scrolls.
   const scroller = useRef<HTMLDivElement>(null);
@@ -93,6 +97,7 @@ export function CardDrawer() {
             )}
             <MyNotes card={c} readOnly={readOnly} />
             <div ref={body} className="markdown" dangerouslySetInnerHTML={{ __html: html }} />
+            {figures}
           </div>
           <aside className="modal-side">
             <div className="section-label">Repos</div>

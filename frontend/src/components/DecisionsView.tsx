@@ -11,6 +11,8 @@ import { useMarkdownEdges } from "../lib/useScrollEdges";
 import { holdTall, stickNow, type HeldTall } from "../lib/stuckHead";
 import { useBoard } from "../stores/board.store";
 import { RuleDecisionBox } from "./RuleDecisionBox";
+import { useDiagrams } from "./DiagramFigure";
+import { slotDiagrams } from "../lib/diagram";
 import { EdgePointer, TimeFrame, ZoomControl, useTimeZoom } from "./TimeZoom";
 import "../styles/decisions.css";
 
@@ -339,7 +341,7 @@ export function DecisionsView() {
         {isOpen && (
           <div className="dec-body">
             {!isRuling && facts}
-            <RecordBody body={d.body || ""} />
+            <RecordBody body={d.body || ""} title={d.title} />
             <div className="dec-path mono">{d.path}</div>
           </div>
         )}
@@ -593,11 +595,11 @@ function revealInWrap(el: HTMLElement) {
  *  a code block scrolled sideways went back to its start every few seconds.
  *  The body's DOM is written only when its HTML changes, and then each code
  *  block and table keeps the offset it was scrolled to. */
-function RecordBody({ body }: { body: string }) {
+function RecordBody({ body, title }: { body: string; title: string }) {
   const el = useRef<HTMLDivElement>(null);
   const last = useRef<string | null>(null);
   useMarkdownEdges(el);
-  const html = useMemo(() => marked.parse(body) as string, [body]);
+  const html = useMemo(() => slotDiagrams(marked.parse(body) as string), [body]);
   useLayoutEffect(() => {
     const e = el.current;
     if (!e || last.current === html) return;
@@ -607,5 +609,8 @@ function RecordBody({ body }: { body: string }) {
     last.current = html;
     wide().forEach((w, i) => { if (offsets[i]) w.scrollLeft = offsets[i]; });
   }, [html]);
-  return <div ref={el} className="markdown dec-text" />;
+  // diagrams FR-2: each mermaid block draws as a figure in its slot, after
+  // the body's HTML is written above.
+  const figures = useDiagrams(el, html, title);
+  return <><div ref={el} className="markdown dec-text" />{figures}</>;
 }

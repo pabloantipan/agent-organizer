@@ -10,6 +10,8 @@ import { useImeEscape } from "../lib/drafts";
 import { useBoard } from "../stores/board.store";
 import type { WidthClass } from "../lib/width";
 import "../styles/rule-box.css";
+import { slotDiagrams } from "../lib/diagram";
+import { useDiagrams } from "./DiagramFigure";
 import { regionName, useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
 import { busyButton, busyLabel } from "../lib/busy";
 
@@ -424,7 +426,7 @@ const SHORT_LINES = 3;
  *  only the blocks that fit are rendered. */
 function Clamped({ label, md, lines }: { label: string; md: string | null; lines: number }) {
   const [all, setAll] = useState(false);
-  const html = md ? (marked.parse(md) as string) : "";
+  const html = md ? slotDiagrams(marked.parse(md) as string) : "";
   // How many blocks fit, for this html at this clamp; either changing is
   // measured again. `over`: the short clamp (UI4) and a first block longer
   // than it, which is then cut at its third line instead of shown whole.
@@ -448,12 +450,16 @@ function Clamped({ label, md, lines }: { label: string; md: string | null; lines
   const over = !all && !!measured?.over;
   const cut = !all && !!measured && (measured.keep < measured.total || over);
   const shown = cut ? firstBlocks(html, measured!.keep) : html;
+  // diagrams FR-2: each mermaid block draws as a figure in its slot; the
+  // clamp measured the slot as it reads before the figure mounts.
+  const figures = useDiagrams(body, shown, label);
   return (
     <section className="rb-section" aria-label={label}>
       <div className="rb-label">{label}</div>
       {md
         ? <div id={id} ref={body} className={`markdown dec-text rb-body ${over ? "clamp-first" : ""}`} dangerouslySetInnerHTML={{ __html: shown }} />
         : <div className="rb-body empty">This record has no {label}.</div>}
+      {figures}
       {md && (cut || all) && <button className="link rb-more" aria-expanded={all} aria-controls={id} onClick={() => setAll(!all)}>{all ? "less" : "more"}</button>}
     </section>
   );
