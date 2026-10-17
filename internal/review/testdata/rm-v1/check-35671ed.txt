@@ -1,0 +1,22 @@
+{
+ "T1 missed": [],
+ "T1 extra": [],
+ "T2 missed": [],
+ "T2 extra": [],
+ "trap edges api->CrewResult": [],
+ "T3": {
+  "speaker tests": [
+   "frontend/src/lib/liveRegion.test.ts::N2: a repeated message is said again",
+   "frontend/src/lib/liveRegion.test.ts::P4: a repeat waits 100 ms (leftovers-33 FR-4, L25)"
+  ],
+  "untested missing": [],
+  "untested extra": []
+ },
+ "T4 symbols without package parent": [],
+ "T4 package edges without symbol edge": [],
+ "T4 packages emitted twice": 0,
+ "problems": null,
+ "notes": [
+  "embed all:frontend/dist: placeholder"
+ ]
+}

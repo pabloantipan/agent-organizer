@@ -1,0 +1,20 @@
+# T6: PATH = this shell's PATH with every .nvm entry removed (node lives only there):
+#   which node -> node not found
+# organizer review organizer 35671ed
+organizer 35671ed: 2401e90..35671ed (go/types, typescript)
+changed 5 (and 2 tests), affected 30, untested 0, edges 40, packages 8
+top changed by callers:
+  added      4 callers  1 tests  organizer/internal/service.CrewRunning
+  modified   4 callers  3 tests  organizer/internal/service.CrewStart
+  modified   3 callers  4 tests  organizer/internal/service.Service.StartCrew
+  added      1 callers  1 tests  organizer.CrewResult
+  modified   0 callers  1 tests  organizer.App.CreateCrew
+  embed all:frontend/dist: placeholder
+  ! ts: node is not on PATH, so no TypeScript symbols were read; install Node (https://nodejs.org) or put it on PATH (organizer doctor shows it)
+wrote /Users/pabloantipan/organizer/.wt-notes/rt-build/t6.json
+exit 0
+--- written: 37 go symbol nodes, 0 ts nodes; problems: ['ts: node is not on PATH, so no TypeScript symbols were read; install Node (https://nodejs.org) or put it on PATH (organizer doctor shows it)']
+# organizer doctor, review line, same PATH
+review: go at /opt/homebrew/bin/go; node not on PATH, so no TypeScript is read; install Node (https://nodejs.org)
+# organizer doctor, review line, full PATH
+review: go at /opt/homebrew/bin/go; node at /Users/pabloantipan/.nvm/versions/node/v22.15.0/bin/node (typescript from the reviewed repo's node_modules)

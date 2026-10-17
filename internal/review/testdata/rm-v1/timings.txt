@@ -1,0 +1,21 @@
+# timings, Apple Silicon, 2026-10-17T23:33:01Z; wall seconds
+## full organizer review (e8ab335 binary, go/types + typescript), 3 runs each
+35671ed run 1: real 5.79
+35671ed run 2: real 5.84
+35671ed run 3: real 5.92
+c8e1773 run 1: real 4.21
+c8e1773 run 2: real 4.20
+c8e1773 run 3: real 4.22
+## TS source alone on the 35671ed export, head + base (148 .ts/.tsx files each), 3 runs each
+compiler API run 1: real 1.62
+tree-sitter run 1: real 0.34
+light run 1: real 0.14
+compiler API run 2: real 1.59
+tree-sitter run 2: real 0.33
+light run 2: real 0.14
+compiler API run 3: real 1.57
+tree-sitter run 3: real 0.33
+light run 3: real 0.14
+## full review through each source on 35671ed (alternatives via a fake node on PATH), 1 run
+tree-sitter: real 4.60
+light: real 4.39
