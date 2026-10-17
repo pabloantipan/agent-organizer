@@ -231,8 +231,8 @@ Card `rm-v1-reconcile` (Go, depends on `rm-v1-ts`):
 ### Boundary
 
 - `rm-v1-ts`: `internal/review` (a TS source behind `Source`, the package
-  level, the embed placeholder), `internal/cli` (`review.go`, and `doctor`'s line in `cli.go`;
-  `doctor`'s line), a node helper script under `internal/review` if the
+  level, the embed placeholder), `internal/cli` (`review.go`, and `doctor`'s line in
+  `cli.go`), a node helper script under `internal/review` if the
   compiler API wins, `go.mod`/`go.sum`, their tests and testdata.
 - `rm-v1-reconcile`: `internal/review` (the change-check call and mapping),
   `internal/cli` (`--card`), their tests and testdata.

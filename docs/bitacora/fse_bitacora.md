@@ -10,7 +10,8 @@ restating it (the discuss skill).
 - Held for the next frontend leftovers (vf-ui, done/lf40-verb-fit.md ## UI review): UF1 sev 1, a test that renders every verb label Home.tsx can draw against `--ib-verb-w` (Rule · draft fits by 5.8 px; Answer · draft would not); spec gaps: the verb labels are listed nowhere, and wide Home (>=1920, rule-box.css) is unchecked for FR-1.
 - For Hephaistos when next writing: change-check false-flags CSS custom properties and footprint written as words (sup79).
 - Held for the next Go leftovers: setSeat notify-before-close (organizer run race); one shared spec-path helper (scan.cardSpecRel vs service.specRel). Gate habit: every make test row carries a temp XDG_DATA_HOME.
-- Next: raise review-map v1 as a proposed record (Q1 with Hephaistos: where the revmap lives for another Mac's branch).
+- Raised 0145 (review-map v1: rm-v1-ts then rm-v1-reconcile, forecast 40-90 min over 2 waves); Q1 answered (odyssey is a clone of lodestar; review runs in its clone). Waiting on Pablo.
+- My watcher (pid 51122) is the old binary from before discuss 80c3608 (Hephaistos, thread 01M518M3): the missed wake of 10-15 23:03 is fixed by restarting this seat, Pablo's call.
 
 ## HAND-OFF 2026-10-16 (last SHA seen 7f439a3)
 
