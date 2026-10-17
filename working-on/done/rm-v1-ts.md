@@ -1,12 +1,12 @@
 ---
 title: "organizer review reads TypeScript, adds the package level, and survives the dist embed"
-status: now
+status: done
 repos: [organizer]
 branch: rm-v1-ts
 seat: rt-build
 stage: review-map
 updated: 2026-10-17
-next: "file finding: three Found, not asked items have no home (cgo-less PATH problem lines; placeholder retry +1 s; organizer help's review line says the Go change), then done"
+next: "merged; findings to the FSE (thread 01M5644TMW0YVJ34QBHHXGT9GV)"
 review: pass
 risk: medium
 footprint: [internal/review/*, internal/cli/review.go, internal/cli/cli.go (doctor line), go.mod, go.sum, internal/review/testdata/*]
@@ -189,7 +189,7 @@ Rows:
 - T6: Notes table present, compiler API chosen with why. PATH = temp dir of symlinks: go + git alone exits 1 `exec: "tar": executable file not found` (v0's `git archive | tar`, unchanged here; see Note); go + git + tar: exit 0, problem `ts: node is not on PATH … install Node`, Go nodes written, the same 45 Go nodes and 47 Go edges as the full run; `organizer doctor` on that PATH: `node not on PATH, so no TypeScript is read`.
 - X0: `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test` exit 0, **fresh** run (test-lease log: start 20:41:45, end 20:42:40 rc 0 saved; run id `cfacb959ee3be4e7c8a6b8229392cd68`); `cd frontend && test-lease run -- pnpm run build` 0; `test-lease run -- wails build` 0; `git status --porcelain` empty; no package-lock.json.
 
-Findings: none blocking. "Found, not asked" above: the rm-v1-reconcile line → card rm-v1-reconcile; the other three have no home yet (no backlog in this initiative), hence `next`. On the cgo one: on my go+git+tar PATH it only adds problem lines; the Go nodes and edges were identical to the full run.
+Findings: none blocking. "Found, not asked" above: the rm-v1-reconcile line → card rm-v1-reconcile; the other three and both Notes below → the FSE, thread 01M5644TMW0YVJ34QBHHXGT9GV (sup80, 2026-10-17). On the cgo one: on my go+git+tar PATH it only adds problem lines; the Go nodes and edges were identical to the full run.
 
 - Note: `organizer doctor` and the review never name `tar`, which the export needs (v0, outside this card; FR-10 reads "a tool").
 - Note: the summary's source reads `go/types, typescript` on c8e1773 where node never ran (sources listed, not the ones used).
