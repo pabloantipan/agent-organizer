@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 40 - Rule · draft lines up, one name for the map entry
-status: proposed
+status: ruled
 raised: 2026-10-16
 raised_by: fse
 owner: pablo
@@ -10,6 +10,9 @@ forecast: 10-25m
 stage: decisions-owned-and-used
 supersedes: []
 superseded_by:
+ruled: 2026-10-17
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -37,6 +40,8 @@ initiative (smaller than both).
 The FSE: **"accept as written"**.
 
 ## Ruling
+
+pablo, 2026-10-17, in the organizer on lodestar: ok
 
 ## Consequences
 
