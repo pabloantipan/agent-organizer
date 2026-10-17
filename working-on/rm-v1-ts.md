@@ -6,7 +6,7 @@ branch: rm-v1-ts
 seat: rt-build
 stage: review-map
 updated: 2026-10-17
-next: "waits on 0145; on accept the FSE gives it to a supervisor"
+next: "sup80 runs it; 0145 ruled"
 risk: medium
 footprint: [internal/review/*, internal/cli/review.go, internal/cli/cli.go (doctor line), go.mod, go.sum, internal/review/testdata/*]
 depends_on: []

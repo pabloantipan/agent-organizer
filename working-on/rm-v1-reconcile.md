@@ -6,7 +6,7 @@ branch: rm-v1-reconcile
 seat: rr-build
 stage: review-map
 updated: 2026-10-17
-next: "waits on 0145 and rm-v1-ts; on accept the FSE gives it to a supervisor"
+next: "sup80 runs it after rm-v1-ts; 0145 ruled"
 risk: low
 footprint: [internal/review/*, internal/cli/review.go, internal/review/testdata/*]
 depends_on: [rm-v1-ts]

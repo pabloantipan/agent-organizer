@@ -158,7 +158,7 @@ need not hold both. So:
 
 ## v1: TS, package level, declared changes (cards `rm-v1-ts`, `rm-v1-reconcile`)
 
-status: proposed (0145), by the FSE, 2026-10-17, on main at d0d122a.
+status: ruled (0145), by the FSE, 2026-10-17, on main at d0d122a.
 
 ### Premises
 
