@@ -1,6 +1,6 @@
 ---
 title: "The verb column fits 'Rule · draft', and the map entry is one accessible name"
-status: next
+status: now
 repos: [organizer]
 branch: lf40-verb-fit
 seat: vf-build
