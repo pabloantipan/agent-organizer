@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"organizer/internal/config"
@@ -17,9 +18,9 @@ import (
 
 const reviewUsage = "usage: organizer review <initiative> <card-slug | sha> [--json] [--out path]   (ids: organizer status)"
 
-// reviewCmd is review-map v0 (FR-1 to FR-4): the Go change of a card's
-// branch or of a commit as revmap.json, written under the data dir (or
-// --out) and summarised, or printed whole with --json.
+// reviewCmd is review-map v0 and v1 (FR-1 to FR-10): the Go and TypeScript
+// change of a card's branch or of a commit as revmap.json, written under
+// the data dir (or --out) and summarised, or printed whole with --json.
 func reviewCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now func() time.Time) int {
 	args, asJSON := takeFlag(args, "--json")
 	args, out, _ := takeValue(args, "--out")
@@ -70,7 +71,7 @@ func reviewCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now f
 		return 1
 	}
 	defer os.RemoveAll(work)
-	rm, err := review.Build(id, target, ranges, review.GoTypes{}, work)
+	rm, err := review.Build(id, target, ranges, review.Sources(), work)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1
@@ -104,12 +105,20 @@ func findCard(si *model.ScannedInitiative, slug string) *model.Card {
 	return nil
 }
 
-// reviewStatus is doctor's line for organizer review's one outside tool:
-// the go toolchain, which the go/types source runs as go list.
+// reviewStatus is doctor's line for organizer review's outside tools: the
+// go toolchain, which the go/types source runs as go list, and node, which
+// runs the typescript of the reviewed repo's own node_modules (FR-10).
 func reviewStatus() string {
-	p, err := review.GoBinary()
-	if err != nil {
-		return "go not on PATH; organizer review needs it (https://go.dev/dl/) and the reviewed module's dependencies downloaded (go mod download in that repo)"
+	var parts []string
+	if p, err := review.GoBinary(); err != nil {
+		parts = append(parts, "go not on PATH; organizer review needs it (https://go.dev/dl/) and the reviewed module's dependencies downloaded (go mod download in that repo)")
+	} else {
+		parts = append(parts, "go at "+p)
 	}
-	return "go at " + p
+	if p, err := review.NodeBinary(); err != nil {
+		parts = append(parts, "node not on PATH, so no TypeScript is read; install Node (https://nodejs.org)")
+	} else {
+		parts = append(parts, "node at "+p+" (typescript from the reviewed repo's node_modules)")
+	}
+	return strings.Join(parts, "; ")
 }

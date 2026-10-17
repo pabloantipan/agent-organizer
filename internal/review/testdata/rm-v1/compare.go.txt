@@ -1,0 +1,333 @@
+// compare: the two alternative TS sources of rm-v1-ts's measurement
+// (tree-sitter, a light line parser), printing tsgraph.js's JSON so the
+// real organizer review can run them through a fake `node` on PATH.
+// Both resolve references by name, scoped to the file's own top-level
+// names and its relative imports: neither has types.
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
+
+	sitter "github.com/smacker/go-tree-sitter"
+	"github.com/smacker/go-tree-sitter/typescript/tsx"
+	"github.com/smacker/go-tree-sitter/typescript/typescript"
+)
+
+type def struct {
+	ID       string `json:"id"`
+	Pkg      string `json:"pkg"`
+	Kind     string `json:"kind"`
+	File     string `json:"file"`
+	Start    int    `json:"start"`
+	End      int    `json:"end"`
+	TestFile bool   `json:"test_file"`
+	TestFunc bool   `json:"test_func"`
+	TestName string `json:"test_name"`
+	name     string
+	refs     []string // names referenced in the body
+}
+
+type file struct {
+	rel     string
+	defs    []*def
+	imports map[string][2]string // local name -> (target rel, exported name)
+}
+
+func own(r string) bool {
+	if !(strings.HasSuffix(r, ".ts") || strings.HasSuffix(r, ".tsx")) || strings.HasSuffix(r, ".d.ts") {
+		return false
+	}
+	for _, s := range strings.Split(r, "/") {
+		if s == "wailsjs" || s == "node_modules" {
+			return false
+		}
+	}
+	return true
+}
+
+var importRe = regexp.MustCompile(`(?s)import\s+(type\s+)?(?:(\w+)\s*,?\s*)?(?:\{([^}]*)\})?\s*from\s*["'](\.[^"']*)["']`)
+
+func imports(root, rel, src string) map[string][2]string {
+	out := map[string][2]string{}
+	for _, m := range importRe.FindAllStringSubmatch(src, -1) {
+		target := resolve(root, filepath.ToSlash(filepath.Join(filepath.Dir(rel), m[4])))
+		if target == "" {
+			continue
+		}
+		if m[2] != "" {
+			out[m[2]] = [2]string{target, "default"}
+		}
+		for _, part := range strings.Split(m[3], ",") {
+			part = strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(part), "type "))
+			if part == "" {
+				continue
+			}
+			name, local := part, part
+			if i := strings.Index(part, " as "); i > 0 {
+				name, local = strings.TrimSpace(part[:i]), strings.TrimSpace(part[i+4:])
+			}
+			out[local] = [2]string{target, name}
+		}
+	}
+	return out
+}
+
+func resolve(root, p string) string {
+	for _, c := range []string{p, p + ".ts", p + ".tsx", p + "/index.ts", p + "/index.tsx"} {
+		if fi, err := os.Stat(filepath.Join(root, c)); err == nil && !fi.IsDir() {
+			return c
+		}
+	}
+	return ""
+}
+
+var testCall = regexp.MustCompile(`^(describe|it|test)$`)
+
+// ---- tree-sitter
+
+func tsOutline(rel string, src []byte) []*def {
+	lang := typescript.GetLanguage()
+	if strings.HasSuffix(rel, ".tsx") {
+		lang = tsx.GetLanguage()
+	}
+	p := sitter.NewParser()
+	p.SetLanguage(lang)
+	tree, err := p.ParseCtx(context.Background(), nil, src)
+	if err != nil {
+		return nil
+	}
+	root := tree.RootNode()
+	var out []*def
+	test := strings.HasSuffix(rel, ".test.ts") || strings.HasSuffix(rel, ".test.tsx")
+	prevEnd := -1
+	docStart := -1
+	for i := 0; i < int(root.NamedChildCount()); i++ {
+		st := root.NamedChild(i)
+		if st.Type() == "comment" {
+			if docStart < 0 || int(st.StartPoint().Row) > prevEnd+1 {
+				docStart = int(st.StartPoint().Row)
+			}
+			prevEnd = int(st.EndPoint().Row)
+			continue
+		}
+		start := int(st.StartPoint().Row)
+		if docStart >= 0 && prevEnd == start-1 {
+			start = docStart
+		}
+		docStart, prevEnd = -1, int(st.EndPoint().Row)
+		decl := st
+		if st.Type() == "export_statement" {
+			if d := st.ChildByFieldName("declaration"); d != nil {
+				decl = d
+			}
+		}
+		add := func(name, kind string, tf bool, tn string) {
+			k := kind
+			if test {
+				k = "test"
+			}
+			d := &def{ID: "ts:" + rel + "#" + name, Pkg: "ts:" + filepath.ToSlash(filepath.Dir(rel)), Kind: k, File: rel,
+				Start: start + 1, End: int(st.EndPoint().Row) + 1, TestFile: test, TestFunc: tf, TestName: tn, name: name}
+			collect(decl, src, d)
+			out = append(out, d)
+		}
+		switch decl.Type() {
+		case "function_declaration", "generator_function_declaration", "class_declaration", "abstract_class_declaration",
+			"type_alias_declaration", "interface_declaration", "enum_declaration":
+			if n := decl.ChildByFieldName("name"); n != nil {
+				add(n.Content(src), "function", false, "")
+			}
+		case "lexical_declaration", "variable_declaration":
+			for j := 0; j < int(decl.NamedChildCount()); j++ {
+				v := decl.NamedChild(j)
+				if v.Type() == "variable_declarator" {
+					if n := v.ChildByFieldName("name"); n != nil && n.Type() == "identifier" {
+						add(n.Content(src), "const", false, "")
+					}
+				}
+			}
+		case "expression_statement":
+			if !test {
+				continue
+			}
+			c := decl.NamedChild(0)
+			if c == nil || c.Type() != "call_expression" {
+				continue
+			}
+			fn := c.ChildByFieldName("function")
+			for fn != nil && fn.Type() == "member_expression" {
+				fn = fn.ChildByFieldName("object")
+			}
+			args := c.ChildByFieldName("arguments")
+			if fn == nil || fn.Type() != "identifier" || !testCall.MatchString(fn.Content(src)) || args == nil || args.NamedChildCount() == 0 {
+				continue
+			}
+			a := args.NamedChild(0)
+			if a.Type() != "string" && a.Type() != "template_string" {
+				continue
+			}
+			name := strings.Trim(a.Content(src), "\"'`")
+			add(name, "test", true, name)
+		}
+	}
+	return out
+}
+
+func collect(n *sitter.Node, src []byte, d *def) {
+	switch n.Type() {
+	case "identifier", "type_identifier", "shorthand_property_identifier":
+		d.refs = append(d.refs, n.Content(src))
+	}
+	for i := 0; i < int(n.NamedChildCount()); i++ {
+		collect(n.NamedChild(i), src, d)
+	}
+}
+
+// ---- light line parser
+
+var (
+	declRe  = regexp.MustCompile(`^(?:export\s+)?(?:default\s+)?(?:declare\s+)?(?:async\s+)?(function\*?|class|const|let|var|type|interface|enum)\s+([A-Za-z_$][\w$]*)`)
+	lTestRe = regexp.MustCompile("^(describe|it|test)(?:\\.\\w+)*\\(\\s*[\"'`]([^\"'`]*)[\"'`]")
+	identRe = regexp.MustCompile(`[A-Za-z_$][\w$]*`)
+	strRe   = regexp.MustCompile("\"(?:[^\"\\\\\n]|\\\\.)*\"|'(?:[^'\\\\\n]|\\\\.)*'|//[^\n]*")
+)
+
+func lightOutline(rel string, src []byte) []*def {
+	lines := strings.Split(string(src), "\n")
+	test := strings.HasSuffix(rel, ".test.ts") || strings.HasSuffix(rel, ".test.tsx")
+	type at struct {
+		line       int
+		name       string
+		tf         bool
+		isDef      bool
+		docStarted int
+	}
+	var starts []at
+	for i, l := range lines {
+		if l == "" || !regexp.MustCompile(`^[A-Za-z_$@/]`).MatchString(l) {
+			continue
+		}
+		if strings.HasPrefix(l, "/") {
+			continue
+		}
+		a := at{line: i}
+		if m := declRe.FindStringSubmatch(l); m != nil {
+			a.name, a.isDef = m[2], true
+		} else if m := lTestRe.FindStringSubmatch(l); m != nil && test {
+			a.name, a.tf, a.isDef = m[2], true, true
+		}
+		starts = append(starts, a)
+	}
+	var out []*def
+	for k, a := range starts {
+		if !a.isDef {
+			continue
+		}
+		end := len(lines) - 1
+		if k+1 < len(starts) {
+			end = starts[k+1].line - 1
+		}
+		for end > a.line && (strings.TrimSpace(lines[end]) == "" || strings.HasPrefix(lines[end], "/") || strings.HasPrefix(lines[end], " *")) {
+			end--
+		}
+		start := a.line
+		for start > 0 {
+			t := lines[start-1]
+			if strings.HasPrefix(t, "/") || strings.HasPrefix(t, " *") {
+				start--
+				continue
+			}
+			break
+		}
+		kind := "const"
+		if test {
+			kind = "test"
+		}
+		d := &def{ID: "ts:" + rel + "#" + a.name, Pkg: "ts:" + filepath.ToSlash(filepath.Dir(rel)), Kind: kind, File: rel,
+			Start: start + 1, End: end + 1, TestFile: test, TestFunc: a.tf, name: a.name}
+		if a.tf {
+			d.TestName = a.name
+		}
+		body := strRe.ReplaceAllString(strings.Join(lines[a.line:end+1], "\n"), `""`)
+		for _, loc := range identRe.FindAllStringIndex(body, -1) {
+			if loc[0] > 0 && body[loc[0]-1] == '.' {
+				continue
+			}
+			rest := strings.TrimLeft(body[loc[1]:], " ")
+			if strings.HasPrefix(rest, ":") && !strings.HasPrefix(rest, "::") {
+				continue
+			}
+			d.refs = append(d.refs, body[loc[0]:loc[1]])
+		}
+		out = append(out, d)
+	}
+	return out
+}
+
+func main() {
+	mode, root := os.Args[1], os.Args[2]
+	var files []*file
+	byRel := map[string]*file{}
+	_ = filepath.WalkDir(root, func(p string, e os.DirEntry, err error) error {
+		if err != nil {
+			return nil
+		}
+		if e.IsDir() && (e.Name() == "node_modules" || strings.HasPrefix(e.Name(), ".")) {
+			return filepath.SkipDir
+		}
+		rel, _ := filepath.Rel(root, p)
+		rel = filepath.ToSlash(rel)
+		if e.IsDir() || !own(rel) {
+			return nil
+		}
+		src, _ := os.ReadFile(p)
+		f := &file{rel: rel, imports: imports(root, rel, string(src))}
+		if mode == "tree-sitter" {
+			f.defs = tsOutline(rel, src)
+		} else {
+			f.defs = lightOutline(rel, src)
+		}
+		files = append(files, f)
+		byRel[rel] = f
+		return nil
+	})
+	var defs []*def
+	uses := map[string][]string{}
+	for _, f := range files {
+		top := map[string]*def{}
+		for _, d := range f.defs {
+			top[d.name] = d
+		}
+		for _, d := range f.defs {
+			seen := map[string]bool{}
+			for _, r := range d.refs {
+				var to *def
+				if t := top[r]; t != nil {
+					to = t
+				} else if imp, ok := f.imports[r]; ok {
+					if tf := byRel[imp[0]]; tf != nil {
+						for _, x := range tf.defs {
+							if x.name == imp[1] {
+								to = x
+							}
+						}
+					}
+				}
+				if to == nil || to == d || seen[to.ID] {
+					continue
+				}
+				seen[to.ID] = true
+				uses[d.ID] = append(uses[d.ID], to.ID)
+			}
+			defs = append(defs, d)
+		}
+	}
+	b, _ := json.Marshal(map[string]any{"defs": defs, "uses": uses, "problems": []string{}})
+	fmt.Print(string(b))
+}

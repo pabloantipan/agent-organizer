@@ -1,0 +1,130 @@
+# TS source comparison (rm-v1-ts FR-7/T6). Alternatives built from compare.go.txt (go-tree-sitter v0.0.0-20240827094217-dd81d9e9be82, module cache under .wt-notes only), run through organizer review (go build of the branch before e8ab335, same code) behind a fake node on PATH; compiler = tsgraph.js.
+## check.py, 35671ed, tree-sitter
+{
+ "T1 missed": [],
+ "T1 extra": [],
+ "T2 missed": [],
+ "T2 extra": [],
+ "trap edges api->CrewResult": [],
+ "T3": {
+  "speaker tests": [
+   "frontend/src/lib/liveRegion.test.ts::N2: a repeated message is said again",
+   "frontend/src/lib/liveRegion.test.ts::P4: a repeat waits 100 ms (leftovers-33 FR-4, L25)"
+  ],
+  "untested missing": [],
+  "untested extra": []
+ },
+ "T4 symbols without package parent": [],
+ "T4 package edges without symbol edge": [],
+ "T4 packages emitted twice": 0,
+ "problems": null,
+ "notes": [
+  "embed all:frontend/dist: placeholder"
+ ]
+}
+## check.py, 35671ed, light
+{
+ "T1 missed": [],
+ "T1 extra": [],
+ "T2 missed": [],
+ "T2 extra": [],
+ "trap edges api->CrewResult": [],
+ "T3": {
+  "speaker tests": [
+   "frontend/src/lib/liveRegion.test.ts::N2: a repeated message is said again",
+   "frontend/src/lib/liveRegion.test.ts::P4: a repeat waits 100 ms (leftovers-33 FR-4, L25)"
+  ],
+  "untested missing": [],
+  "untested extra": []
+ },
+ "T4 symbols without package parent": [],
+ "T4 package edges without symbol edge": [],
+ "T4 packages emitted twice": 0,
+ "problems": null,
+ "notes": [
+  "embed all:frontend/dist: placeholder"
+ ]
+}
+## full-map differences against the compiler (edges from TS symbols; changed TS nodes)
+### 35671ed: compiler: 15 changed TS nodes, 94 TS edges
+- tree-sitter: 15 changed, 95 edges; edges only compiler 0, only tree-sitter 1; changed nodes differing 0
+    only tree-sitter: ts:frontend/src/hooks/useWails.ts#api -> ts:frontend/src/hooks/useWails.ts#Note
+- light: 15 changed, 94 edges; edges only compiler 0, only light 0; changed nodes differing 0
+### 7c829fe: compiler: 77 changed TS nodes, 298 TS edges
+- tree-sitter: 77 changed, 295 edges; edges only compiler 3, only tree-sitter 0; changed nodes differing 0
+    only compiler: ts:frontend/src/components/AgentsView.tsx#AgentsView -> ts:frontend/src/lib/agentFocus.ts#AgentTarget
+    only compiler: ts:frontend/src/components/InitiativeHeader.tsx#InitiativeHeader -> ts:frontend/src/lib/scrollEdges.ts#Edges
+    only compiler: ts:frontend/src/stores/board.store.ts#useBoard -> ts:frontend/src/lib/drafts.ts#DraftStore
+- light: 77 changed, 294 edges; edges only compiler 4, only light 0; changed nodes differing 8
+    only compiler: ts:frontend/src/components/AgentsView.tsx#AgentsView -> ts:frontend/src/lib/agentFocus.ts#AgentTarget
+    only compiler: ts:frontend/src/components/InitiativeHeader.tsx#InitiativeHeader -> ts:frontend/src/lib/scrollEdges.ts#Edges
+    only compiler: ts:frontend/src/stores/board.store.ts#useBoard -> ts:frontend/src/lib/drafts.ts#DraftStore
+    only compiler: ts:frontend/src/stores/board.store.ts#useBoard -> ts:frontend/src/stores/board.store.ts#NO_RULING
+    changed differs: ('ts:frontend/src/lib/initiatives.test.ts#Agents', 'added')
+    changed differs: ("ts:frontend/src/lib/initiatives.test.ts#Agents' Memory column (I10)", 'added')
+    changed differs: ('ts:frontend/src/lib/initiatives.test.ts#Sleep', 'added')
+    changed differs: ("ts:frontend/src/lib/initiatives.test.ts#Sleep's confirm (§4, I4)", 'added')
+    changed differs: ('ts:frontend/src/lib/initiatives.test.ts#the factory', 'added')
+    changed differs: ("ts:frontend/src/lib/initiatives.test.ts#the factory's line (States)", 'added')
+    changed differs: ('ts:frontend/src/lib/initiatives.test.ts#the head', 'added')
+    changed differs: ("ts:frontend/src/lib/initiatives.test.ts#the head's count (§1, I2)", 'added')
+### 22ae6b5: compiler: 57 changed TS nodes, 164 TS edges
+- tree-sitter: 40 changed, 158 edges; edges only compiler 6, only tree-sitter 0; changed nodes differing 17
+    only compiler: ts:frontend/src/components/CardDrawer.tsx#MyNotes -> ts:frontend/src/lib/drafts.ts#DraftStore
+    only compiler: ts:frontend/src/components/Conversation.tsx#Conversation -> ts:frontend/src/components/Conversation.tsx#QueueCard
+    only compiler: ts:frontend/src/components/Conversation.tsx#Conversation -> ts:frontend/src/lib/drafts.ts#DraftStore
+    only compiler: ts:frontend/src/components/Conversation.tsx#NewThread -> ts:frontend/src/lib/drafts.ts#DraftStore
+    only compiler: ts:frontend/src/components/Conversation.tsx#ReplyBox -> ts:frontend/src/lib/drafts.ts#DraftStore
+    only compiler: ts:frontend/src/components/RuleDecisionBox.tsx#RuleDecisionBox -> ts:frontend/src/lib/scrollEdges.ts#Edges
+    changed differs: ('ts:frontend/src/components/Busy.after.test.tsx#Crew', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.after.test.tsx#MyNotes', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.after.test.tsx#NewThread', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.after.test.tsx#ReplyBox', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.after.test.tsx#RuleDecisionBox', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.after.test.tsx#focusAfter', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.after.test.tsx#landNewAgent', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.after.test.tsx#landPosted', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.after.test.tsx#startCrew', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.controls.test.tsx#Crew', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.controls.test.tsx#DraftCell', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.controls.test.tsx#MyNotes', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.controls.test.tsx#NewAgent', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.controls.test.tsx#NewThread', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.controls.test.tsx#ReplyBox', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.controls.test.tsx#Retire', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.controls.test.tsx#RuleDecisionBox', 'added')
+- light: 40 changed, 151 edges; edges only compiler 14, only light 1; changed nodes differing 19
+    only compiler: ts:frontend/src/components/AgentsView.tsx#DraftCell -> ts:frontend/src/lib/busy.ts#busyButton
+    only compiler: ts:frontend/src/components/AgentsView.tsx#NewAgent -> ts:frontend/src/lib/busy.ts#busyButton
+    only compiler: ts:frontend/src/components/CardDrawer.tsx#MyNotes -> ts:frontend/src/lib/busy.ts#busyButton
+    only compiler: ts:frontend/src/components/CardDrawer.tsx#MyNotes -> ts:frontend/src/lib/drafts.ts#DraftStore
+    only compiler: ts:frontend/src/components/Conversation.tsx#Conversation -> ts:frontend/src/components/Conversation.tsx#QueueCard
+    only compiler: ts:frontend/src/components/Conversation.tsx#Conversation -> ts:frontend/src/lib/drafts.ts#DraftStore
+    only compiler: ts:frontend/src/components/Conversation.tsx#NewThread -> ts:frontend/src/lib/busy.ts#busyButton
+    only compiler: ts:frontend/src/components/Conversation.tsx#NewThread -> ts:frontend/src/lib/drafts.ts#DraftStore
+    only compiler: ts:frontend/src/components/Conversation.tsx#ReplyBox -> ts:frontend/src/lib/busy.ts#busyButton
+    only compiler: ts:frontend/src/components/Conversation.tsx#ReplyBox -> ts:frontend/src/lib/drafts.ts#DraftStore
+    only compiler: ts:frontend/src/components/Crew.tsx#Crew -> ts:frontend/src/lib/busy.ts#busyButton
+    only compiler: ts:frontend/src/components/Retire.tsx#Retire -> ts:frontend/src/lib/busy.ts#busyButton
+    only compiler: ts:frontend/src/components/RuleDecisionBox.tsx#RuleDecisionBox -> ts:frontend/src/lib/busy.ts#busyButton
+    only compiler: ts:frontend/src/components/RuleDecisionBox.tsx#RuleDecisionBox -> ts:frontend/src/lib/scrollEdges.ts#Edges
+    only light: ts:frontend/src/components/SlackView.tsx#People -> ts:frontend/src/components/Conversation.tsx#Conversation
+    changed differs: ('ts:frontend/src/components/Busy.after.test.tsx#Crew', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.after.test.tsx#MyNotes', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.after.test.tsx#NewThread', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.after.test.tsx#ReplyBox', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.after.test.tsx#RuleDecisionBox', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.after.test.tsx#focusAfter', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.after.test.tsx#landNewAgent', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.after.test.tsx#landPosted', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.after.test.tsx#startCrew', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.controls.test.tsx#Crew', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.controls.test.tsx#DraftCell', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.controls.test.tsx#MyNotes', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.controls.test.tsx#NewAgent', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.controls.test.tsx#NewThread', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.controls.test.tsx#ReplyBox', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.controls.test.tsx#Retire', 'added')
+    changed differs: ('ts:frontend/src/components/Busy.controls.test.tsx#RuleDecisionBox', 'added')
+    changed differs: ('ts:frontend/src/lib/busy.test.ts#F2: busyButton, the busy rule', 'added')
+    changed differs: ("ts:frontend/src/lib/busy.test.ts#F2: busyButton, the busy rule's props and guarded handler", 'added')

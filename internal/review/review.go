@@ -1,8 +1,10 @@
-// Package review turns a Go change into revmap.json v0 (docs/specs/review-map.md,
-// agent-slack review/pipeline-starter.md §6.6.3): the definitions a diff
-// touches, their one-hop callers and callees, and the tests that reference
-// each. Every node and edge comes from the index source; nothing is guessed
-// (§6.6.5), so risk, claim and mismatches are present and empty in v0.
+// Package review turns a Go and TypeScript change into revmap.json v0
+// (docs/specs/review-map.md v0 and v1, agent-slack
+// review/pipeline-starter.md §6.6.3): the definitions a diff touches, their
+// one-hop callers and callees, and the tests that reference each, every
+// symbol under its package. Every node and edge comes from an index source;
+// nothing is guessed (§6.6.5), so risk, claim and mismatches are present and
+// empty.
 package review
 
 import (
@@ -28,6 +30,8 @@ type RevMap struct {
 	Mismatches []any      `json:"mismatches"`
 	Stats      Stats      `json:"stats"`
 	Problems   []string   `json:"problems,omitempty"`
+	// Notes are what the review did to an export to read it (FR-9), once.
+	Notes []string `json:"notes,omitempty"`
 }
 
 type RepoPair struct {
@@ -74,6 +78,7 @@ type Edge struct {
 }
 
 type Stats struct {
+	Packages     int `json:"packages"`
 	Changed      int `json:"changed"`
 	ChangedTests int `json:"changed_tests"`
 	Affected     int `json:"affected"`
@@ -82,9 +87,13 @@ type Stats struct {
 }
 
 // Build exports base and head of each range under work (removed by the
-// caller), reads both through src, and assembles the map.
-func Build(initiative, target string, ranges []Range, src Source, work string) (*RevMap, error) {
-	rm := &RevMap{Version: "0", Initiative: initiative, Target: target, Source: src.Name(),
+// caller), reads both through every source, and assembles the map.
+func Build(initiative, target string, ranges []Range, srcs []Source, work string) (*RevMap, error) {
+	var names []string
+	for _, s := range srcs {
+		names = append(names, s.Name())
+	}
+	rm := &RevMap{Version: "0", Initiative: initiative, Target: target, Source: strings.Join(names, ", "),
 		Nodes: []Node{}, Edges: []Edge{}, Mismatches: []any{}}
 	for i, r := range ranges {
 		if i == 0 {
@@ -93,16 +102,21 @@ func Build(initiative, target string, ranges []Range, src Source, work string) (
 		if len(ranges) > 1 {
 			rm.Repos = append(rm.Repos, RepoPair{Name: r.Name, Base: r.Base, Head: r.Head, From: r.From})
 		}
-		nodes, edges, problems, err := buildRepo(r, src, filepath.Join(work, fmt.Sprintf("%d", i)))
+		res, err := buildRepo(r, srcs, filepath.Join(work, fmt.Sprintf("%d", i)))
 		if err != nil {
 			return nil, err
 		}
-		rm.Nodes = append(rm.Nodes, nodes...)
-		rm.Edges = append(rm.Edges, edges...)
-		rm.Problems = append(rm.Problems, problems...)
+		rm.Nodes = append(rm.Nodes, res.nodes...)
+		rm.Edges = append(rm.Edges, res.edges...)
+		rm.Problems = append(rm.Problems, res.problems...)
+		rm.Notes = append(rm.Notes, res.notes...)
 	}
+	rm.Notes = uniqKeep(rm.Notes)
 	for _, n := range rm.Nodes {
 		switch {
+		case n.Level == "package":
+			rm.Stats.Packages++
+			continue
 		case n.Change == "affected":
 			rm.Stats.Affected++
 		case n.Kind == "test":
@@ -116,40 +130,110 @@ func Build(initiative, target string, ranges []Range, src Source, work string) (
 			}
 		}
 	}
-	rm.Stats.Edges = len(rm.Edges)
+	pkgs := map[string]bool{}
+	for _, n := range rm.Nodes {
+		pkgs[n.ID] = n.Level == "package"
+	}
+	for _, e := range rm.Edges {
+		if !pkgs[e.From] {
+			rm.Stats.Edges++ // symbol edges; package edges summarise them
+		}
+	}
 	return rm, nil
 }
 
-func buildRepo(r Range, src Source, work string) ([]Node, []Edge, []string, error) {
-	hunks, err := Hunks(r.Repo, r.Base, r.Head)
+type repoResult struct {
+	nodes           []Node
+	edges           []Edge
+	problems, notes []string
+}
+
+// merge adds another source's graph; ids never collide across languages.
+func (g *Graph) merge(o *Graph, src string, srcOf map[string]string) {
+	for id, d := range o.Defs {
+		g.Defs[id] = d
+		srcOf[id] = src
+	}
+	for f, ds := range o.ByFile {
+		g.ByFile[f] = append(g.ByFile[f], ds...)
+	}
+	for from, tos := range o.Uses {
+		g.Uses[from] = tos
+	}
+	g.Problems = append(g.Problems, o.Problems...)
+	g.Notes = append(g.Notes, o.Notes...)
+}
+
+func buildRepo(r Range, srcs []Source, work string) (repoResult, error) {
+	var res repoResult
+	handles := func(p string) bool {
+		for _, s := range srcs {
+			if s.Handles(p) {
+				return true
+			}
+		}
+		return false
+	}
+	hunks, err := Hunks(r.Repo, r.Base, r.Head, handles)
 	if err != nil {
-		return nil, nil, nil, err
+		return res, err
 	}
 	if len(hunks) == 0 {
-		return nil, nil, nil, nil
+		return res, nil
 	}
 	baseDir, headDir := filepath.Join(work, "base"), filepath.Join(work, "head")
 	if err := Export(r.Repo, r.Base, baseDir); err != nil {
-		return nil, nil, nil, err
+		return res, err
 	}
 	if err := Export(r.Repo, r.Head, headDir); err != nil {
-		return nil, nil, nil, err
+		return res, err
 	}
-	head, err := src.Graph(headDir)
-	if err != nil {
-		return nil, nil, nil, err
+	// A source runs only when a changed file is its own, so a Go-only
+	// change never needs node.
+	empty := func() *Graph {
+		return &Graph{Defs: map[string]Def{}, ByFile: map[string][]Def{}, Uses: map[string]map[string]bool{}}
 	}
-	base, err := src.Graph(baseDir)
-	if err != nil {
-		return nil, nil, nil, err
+	head, base := empty(), empty()
+	srcOf := map[string]string{}
+	for _, s := range srcs {
+		used := false
+		for _, f := range hunks {
+			used = used || s.Handles(f.Base) || s.Handles(f.Head)
+		}
+		if !used {
+			continue
+		}
+		h, err := s.Graph(headDir, r.Repo)
+		if err != nil {
+			return res, err
+		}
+		b, err := s.Graph(baseDir, r.Repo)
+		if err != nil {
+			return res, err
+		}
+		head.merge(h, s.Name(), srcOf)
+		base.merge(b, s.Name(), srcOf)
 	}
-	var problems []string
+	// A problem both sides share is said once, unprefixed.
+	inBase := map[string]bool{}
+	for _, p := range base.Problems {
+		inBase[p] = true
+	}
 	for _, p := range head.Problems {
-		problems = append(problems, "head: "+p)
+		if inBase[p] {
+			res.problems = append(res.problems, p)
+			delete(inBase, p)
+			continue
+		}
+		res.problems = append(res.problems, "head: "+p)
 	}
 	for _, p := range base.Problems {
-		problems = append(problems, "base: "+p)
+		if inBase[p] {
+			res.problems = append(res.problems, "base: "+p)
+		}
 	}
+	res.problems = uniqKeep(res.problems)
+	res.notes = append(append(res.notes, head.Notes...), base.Notes...)
 
 	// Changed: every definition a hunk overlaps, on its own side.
 	changed := map[string]string{}
@@ -201,7 +285,7 @@ func buildRepo(r Range, src Source, work string) ([]Node, []Edge, []string, erro
 		if !d.TestFunc {
 			continue
 		}
-		name := d.File + "::" + lastName(id)
+		name := d.testName()
 		seen := map[string]bool{id: true}
 		queue := []string{id}
 		for len(queue) > 0 {
@@ -271,7 +355,7 @@ func buildRepo(r Range, src Source, work string) ([]Node, []Edge, []string, erro
 		if !inHead {
 			d = bd
 		}
-		n := Node{ID: id, Level: "symbol", Parent: d.Pkg, Kind: d.Kind, Lang: "go", File: prefix + d.File,
+		n := Node{ID: id, Level: "symbol", Parent: d.Pkg, Kind: d.Kind, Lang: d.Lang, File: prefix + d.File,
 			Change: change, Evidence: Evidence{Tests: []string{}}, Flags: []string{}, Review: Review{State: "unreviewed"}}
 		if inHead {
 			n.RangeHead = &[2]int{d.Start, d.End}
@@ -305,18 +389,106 @@ func buildRepo(r Range, src Source, work string) ([]Node, []Edge, []string, erro
 	})
 	var es []Edge
 	for k, ch := range edges {
-		es = append(es, Edge{From: k[0], To: k[1], Kind: "uses", Change: ch, Source: src.Name()})
+		es = append(es, Edge{From: k[0], To: k[1], Kind: "uses", Change: ch, Source: srcOf[k[0]]})
 	}
+	pkgNodes, pkgEdges := packageLevel(nodes, es, prefix)
+	nodes = append(pkgNodes, nodes...)
+	es = append(es, pkgEdges...)
 	sort.Slice(es, func(i, j int) bool {
 		if es[i].From != es[j].From {
 			return es[i].From < es[j].From
 		}
 		return es[i].To < es[j].To
 	})
-	return nodes, es, problems, nil
+	res.nodes, res.edges = nodes, es
+	return res, nil
 }
 
-func lastName(id string) string { return id[strings.LastIndexByte(id, '.')+1:] }
+// packageLevel is FR-8: one package node per parent of a symbol node, modified
+// when any child changed, else affected; and one package uses edge for
+// each pair of packages a symbol edge crosses, with that edge's change
+// read across all of them (on a side when any symbol edge is).
+func packageLevel(nodes []Node, edges []Edge, prefix string) ([]Node, []Edge) {
+	pkg := map[string]*Node{}
+	var order []string
+	parentOf := map[string]string{}
+	for _, n := range nodes {
+		parentOf[n.ID] = n.Parent
+		p := pkg[n.Parent]
+		if p == nil {
+			p = &Node{ID: n.Parent, Level: "package", Kind: "package", Lang: n.Lang, File: prefix + pkgFile(n),
+				Change: "affected", Evidence: Evidence{Tests: []string{}}, Flags: []string{}, Review: Review{State: "unreviewed"}}
+			pkg[n.Parent] = p
+			order = append(order, n.Parent)
+		}
+		if n.Change != "affected" {
+			p.Change = "modified"
+		}
+	}
+	sort.Strings(order)
+	out := make([]Node, 0, len(order))
+	for _, id := range order {
+		out = append(out, *pkg[id])
+	}
+	type side struct{ head, base bool }
+	cross := map[[2]string]*side{}
+	src := map[[2]string]string{}
+	for _, e := range edges {
+		from, to := parentOf[e.From], parentOf[e.To]
+		if from == "" || to == "" || from == to {
+			continue
+		}
+		k := [2]string{from, to}
+		if cross[k] == nil {
+			cross[k] = &side{}
+			src[k] = e.Source
+		}
+		cross[k].head = cross[k].head || e.Change != "deleted"
+		cross[k].base = cross[k].base || e.Change != "added"
+	}
+	var es []Edge
+	for k, s := range cross {
+		ch := "unchanged"
+		switch {
+		case s.head && !s.base:
+			ch = "added"
+		case !s.head:
+			ch = "deleted"
+		}
+		es = append(es, Edge{From: k[0], To: k[1], Kind: "uses", Change: ch, Source: src[k]})
+	}
+	return out, es
+}
+
+// pkgFile is a package node's file: the directory of its symbols' files.
+func pkgFile(n Node) string {
+	if i := strings.LastIndexByte(n.File, '/'); i >= 0 {
+		return n.File[:i]
+	}
+	return "."
+}
+
+// lastName is a definition's name: after the # of a TS id, else after the
+// last dot of a Go one.
+func lastName(id string) string {
+	if i := strings.IndexByte(id, '#'); i >= 0 && strings.HasPrefix(id, "ts:") {
+		return id[i+1:]
+	}
+	return id[strings.LastIndexByte(id, '.')+1:]
+}
+
+// uniqKeep drops repeats, keeping the first order.
+func uniqKeep(xs []string) []string {
+	seen := map[string]bool{}
+	var out []string
+	for _, x := range xs {
+		if !seen[x] {
+			seen[x] = true
+			out = append(out, x)
+		}
+	}
+	return out
+}
 
 func uniq(xs []string) []string {
 	sort.Strings(xs)
@@ -349,15 +521,15 @@ func DataDir() string {
 // changed symbols with the most callers.
 func WriteSummary(w io.Writer, rm *RevMap, path string) {
 	fmt.Fprintf(w, "%s %s: %s..%s (%s)\n", rm.Initiative, rm.Target, short(rm.Base), short(rm.Head), rm.Source)
-	fmt.Fprintf(w, "changed %d (and %d tests), affected %d, untested %d, edges %d\n",
-		rm.Stats.Changed, rm.Stats.ChangedTests, rm.Stats.Affected, rm.Stats.Untested, rm.Stats.Edges)
+	fmt.Fprintf(w, "changed %d (and %d tests), affected %d, untested %d, edges %d, packages %d\n",
+		rm.Stats.Changed, rm.Stats.ChangedTests, rm.Stats.Affected, rm.Stats.Untested, rm.Stats.Edges, rm.Stats.Packages)
 	in := map[string]int{}
 	for _, e := range rm.Edges {
 		in[e.To]++
 	}
 	var top []Node
 	for _, n := range rm.Nodes {
-		if n.Change != "affected" && n.Kind != "test" {
+		if n.Level == "symbol" && n.Change != "affected" && n.Kind != "test" {
 			top = append(top, n)
 		}
 	}
@@ -378,7 +550,10 @@ func WriteSummary(w io.Writer, rm *RevMap, path string) {
 		if len(n.Flags) > 0 {
 			flag = "  " + strings.Join(n.Flags, ",")
 		}
-		fmt.Fprintf(w, "  %-9s %2d callers %2d tests  %s%s\n", n.Change, in[n.ID], len(n.Evidence.Tests), strings.TrimPrefix(n.ID, "go:"), flag)
+		fmt.Fprintf(w, "  %-9s %2d callers %2d tests  %s%s\n", n.Change, in[n.ID], len(n.Evidence.Tests), strings.TrimPrefix(strings.TrimPrefix(n.ID, "go:"), "ts:"), flag)
+	}
+	for _, n := range rm.Notes {
+		fmt.Fprintln(w, "  "+n)
 	}
 	hint := false
 	for _, p := range rm.Problems {

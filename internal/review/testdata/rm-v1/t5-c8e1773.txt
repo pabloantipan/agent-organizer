@@ -1,0 +1,17 @@
+# T5: organizer review organizer c8e1773 (summary), then git status --porcelain in the repo
+organizer c8e1773: 736fce3..c8e1773 (go/types, typescript)
+changed 8 (and 9 tests), affected 58, untested 2, edges 91, packages 10
+top changed by callers:
+  modified  15 callers  6 tests  organizer/internal/service.SeatLaunch
+  added      3 callers  2 tests  organizer/internal/service.CrewStart
+  added      2 callers  3 tests  organizer/internal/service.Service.StartCrew
+  modified   2 callers  0 tests  organizer/internal/service.Service.runLaunches  untested
+  modified   1 callers  0 tests  organizer/internal/cli.crewCmd  untested
+  modified   1 callers  6 tests  organizer/internal/service.Service.CreateCrew
+  modified   1 callers  3 tests  organizer/internal/service.Service.RetrySeat
+  added      1 callers  3 tests  organizer/internal/service.liveSeats
+  embed all:frontend/dist: placeholder
+wrote /var/folders/3v/x_m4c32d4y14_snjptn33_k40000gn/T/tmp.k9lqoh7net/organizer/review/organizer/c8e17736192831399b6fd70a74747dffe3232034/revmap.json
+exit 0
+--- git status --porcelain:
+--- (end; empty above means clean)

@@ -35,3 +35,14 @@ func TestReviewCardWithoutBranchExits2(t *testing.T) {
 		t.Errorf("exit %d, stderr %q", code, errb.String())
 	}
 }
+
+// FR-10: doctor names node, or says it is missing, beside go.
+func TestReviewStatusNamesNode(t *testing.T) {
+	if s := reviewStatus(); !strings.Contains(s, "go ") || !strings.Contains(s, "node ") {
+		t.Errorf("reviewStatus %q", s)
+	}
+	t.Setenv("PATH", t.TempDir())
+	if s := reviewStatus(); !strings.Contains(s, "go not on PATH") || !strings.Contains(s, "node not on PATH, so no TypeScript is read") {
+		t.Errorf("reviewStatus without tools %q", s)
+	}
+}

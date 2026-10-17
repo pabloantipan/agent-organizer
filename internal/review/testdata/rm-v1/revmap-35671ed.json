@@ -1,0 +1,5455 @@
+{
+  "version": "0",
+  "initiative": "organizer",
+  "target": "35671ed",
+  "base": "2401e90945da195a305fd191cd0723773441160a",
+  "head": "35671edd9c5f00936c7c5ac55ed494c5fbdac641",
+  "source": "go/types, typescript",
+  "nodes": [
+    {
+      "id": "go:organizer",
+      "level": "package",
+      "parent": "",
+      "kind": "package",
+      "lang": "go",
+      "file": ".",
+      "range_head": null,
+      "range_base": null,
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/cache",
+      "level": "package",
+      "parent": "",
+      "kind": "package",
+      "lang": "go",
+      "file": "internal/cache",
+      "range_head": null,
+      "range_base": null,
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/cli",
+      "level": "package",
+      "parent": "",
+      "kind": "package",
+      "lang": "go",
+      "file": "internal/cli",
+      "range_head": null,
+      "range_base": null,
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/config",
+      "level": "package",
+      "parent": "",
+      "kind": "package",
+      "lang": "go",
+      "file": "internal/config",
+      "range_head": null,
+      "range_base": null,
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/model",
+      "level": "package",
+      "parent": "",
+      "kind": "package",
+      "lang": "go",
+      "file": "internal/model",
+      "range_head": null,
+      "range_base": null,
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/prompt",
+      "level": "package",
+      "parent": "",
+      "kind": "package",
+      "lang": "go",
+      "file": "internal/prompt",
+      "range_head": null,
+      "range_base": null,
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/record",
+      "level": "package",
+      "parent": "",
+      "kind": "package",
+      "lang": "go",
+      "file": "internal/record",
+      "range_head": null,
+      "range_base": null,
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service",
+      "level": "package",
+      "parent": "",
+      "kind": "package",
+      "lang": "go",
+      "file": "internal/service",
+      "range_head": null,
+      "range_base": null,
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src",
+      "level": "package",
+      "parent": "",
+      "kind": "package",
+      "lang": "ts",
+      "file": "frontend/src",
+      "range_head": null,
+      "range_base": null,
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components",
+      "level": "package",
+      "parent": "",
+      "kind": "package",
+      "lang": "ts",
+      "file": "frontend/src/components",
+      "range_head": null,
+      "range_base": null,
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/hooks",
+      "level": "package",
+      "parent": "",
+      "kind": "package",
+      "lang": "ts",
+      "file": "frontend/src/hooks",
+      "range_head": null,
+      "range_base": null,
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/lib",
+      "level": "package",
+      "parent": "",
+      "kind": "package",
+      "lang": "ts",
+      "file": "frontend/src/lib",
+      "range_head": null,
+      "range_base": null,
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/stores",
+      "level": "package",
+      "parent": "",
+      "kind": "package",
+      "lang": "ts",
+      "file": "frontend/src/stores",
+      "range_head": null,
+      "range_base": null,
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer.App.CreateCrew",
+      "level": "symbol",
+      "parent": "go:organizer",
+      "kind": "method",
+      "lang": "go",
+      "file": "app.go",
+      "range_head": [
+        399,
+        414
+      ],
+      "range_base": [
+        399,
+        408
+      ],
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "app_launch_test.go::TestAppCreateCrewReturnsAtOnce"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer.CrewResult",
+      "level": "symbol",
+      "parent": "go:organizer",
+      "kind": "type",
+      "lang": "go",
+      "file": "app.go",
+      "range_head": [
+        416,
+        421
+      ],
+      "range_base": null,
+      "change": "added",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "app_launch_test.go::TestAppCreateCrewReturnsAtOnce"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer.TestAppCreateCrewReturnsAtOnce",
+      "level": "symbol",
+      "parent": "go:organizer",
+      "kind": "test",
+      "lang": "go",
+      "file": "app_launch_test.go",
+      "range_head": [
+        14,
+        66
+      ],
+      "range_base": [
+        14,
+        66
+      ],
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.CrewRunning",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        459,
+        465
+      ],
+      "range_base": null,
+      "change": "added",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.CrewStart",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        450,
+        457
+      ],
+      "range_base": [
+        450,
+        455
+      ],
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.Service.StartCrew",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "method",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        492,
+        651
+      ],
+      "range_base": [
+        482,
+        640
+      ],
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.TestStartCrewNamesRunningSessions",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "test",
+      "lang": "go",
+      "file": "internal/service/crewskip_test.go",
+      "range_head": [
+        116,
+        137
+      ],
+      "range_base": null,
+      "change": "added",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.button.test.tsx#B3: Start finds every seat running (FR-3, L18)",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "test",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.button.test.tsx",
+      "range_head": [
+        64,
+        98
+      ],
+      "range_base": [
+        64,
+        98
+      ],
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.newest.test.tsx#P2 in markup: a seat the press found running (leftovers-33 FR-2, L23)",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "test",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.newest.test.tsx",
+      "range_head": [
+        102,
+        134
+      ],
+      "range_base": null,
+      "change": "added",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#Crew",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        401,
+        591
+      ],
+      "range_base": [
+        393,
+        572
+      ],
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/ContextBar.test.tsx::V4: WatcherBadge draws · n waiting for deaf and capped",
+          "frontend/src/components/Crew.button.test.tsx::B2: no launch button with every seat running (FR-2, L17)",
+          "frontend/src/components/Crew.button.test.tsx::B3: Start finds every seat running (FR-3, L18)",
+          "frontend/src/components/Crew.button.test.tsx::B4: focus after the list closes (FR-4, L16 amended)",
+          "frontend/src/components/Crew.newest.test.tsx::N1, N3: what the block draws once no seat is off (FR-1, FR-3)",
+          "frontend/src/components/Crew.newest.test.tsx::N4: one focus function, never the body (FR-4, L22)",
+          "frontend/src/components/Launch.test.tsx::Close the list (L10)",
+          "frontend/src/components/Launch.test.tsx::the crew block in place (V1)",
+          "frontend/src/lib/memoryTrack.test.tsx::U1: the Memory cell's fixed track",
+          "frontend/src/lib/memoryWords.test.tsx::M1: the Memory cell's three words"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#CrewResult",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        21,
+        22
+      ],
+      "range_base": null,
+      "change": "added",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [
+        "untested"
+      ],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#SeatRow",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        595,
+        643
+      ],
+      "range_base": [
+        576,
+        619
+      ],
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/Crew.newest.test.tsx::P2 in markup: a seat the press found running (leftovers-33 FR-2, L23)"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#runningOf",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "const",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        218,
+        221
+      ],
+      "range_base": null,
+      "change": "added",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/Crew.newest.test.tsx::P2 in markup: a seat the press found running (leftovers-33 FR-2, L23)"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#startCrew",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "function",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        223,
+        245
+      ],
+      "range_base": [
+        216,
+        237
+      ],
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/Crew.button.test.tsx::B3: Start finds every seat running (FR-3, L18)",
+          "frontend/src/components/Crew.newest.test.tsx::P2 in markup: a seat the press found running (leftovers-33 FR-2, L23)"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#useAnnouncer",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "function",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        166,
+        178
+      ],
+      "range_base": [
+        164,
+        176
+      ],
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [
+        "untested"
+      ],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/hooks/useWails.ts#api",
+      "level": "symbol",
+      "parent": "ts:frontend/src/hooks",
+      "kind": "const",
+      "lang": "ts",
+      "file": "frontend/src/hooks/useWails.ts",
+      "range_head": [
+        33,
+        83
+      ],
+      "range_base": [
+        33,
+        83
+      ],
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [
+        "untested"
+      ],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/lib/liveRegion.test.ts#N2: a repeated message is said again",
+      "level": "symbol",
+      "parent": "ts:frontend/src/lib",
+      "kind": "test",
+      "lang": "ts",
+      "file": "frontend/src/lib/liveRegion.test.ts",
+      "range_head": [
+        10,
+        50
+      ],
+      "range_base": [
+        10,
+        50
+      ],
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/lib/liveRegion.test.ts#P4: a repeat waits 100 ms (leftovers-33 FR-4, L25)",
+      "level": "symbol",
+      "parent": "ts:frontend/src/lib",
+      "kind": "test",
+      "lang": "ts",
+      "file": "frontend/src/lib/liveRegion.test.ts",
+      "range_head": [
+        52,
+        91
+      ],
+      "range_base": null,
+      "change": "added",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/lib/liveRegion.ts#SAY_GAP_MS",
+      "level": "symbol",
+      "parent": "ts:frontend/src/lib",
+      "kind": "const",
+      "lang": "ts",
+      "file": "frontend/src/lib/liveRegion.ts",
+      "range_head": [
+        3,
+        6
+      ],
+      "range_base": null,
+      "change": "added",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/lib/liveRegion.test.ts::N2: a repeated message is said again",
+          "frontend/src/lib/liveRegion.test.ts::P4: a repeat waits 100 ms (leftovers-33 FR-4, L25)"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/lib/liveRegion.ts#Say",
+      "level": "symbol",
+      "parent": "ts:frontend/src/lib",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/lib/liveRegion.ts",
+      "range_head": [
+        39,
+        40
+      ],
+      "range_base": null,
+      "change": "added",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [
+        "untested"
+      ],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/lib/liveRegion.ts#speaker",
+      "level": "symbol",
+      "parent": "ts:frontend/src/lib",
+      "kind": "function",
+      "lang": "ts",
+      "file": "frontend/src/lib/liveRegion.ts",
+      "range_head": [
+        8,
+        37
+      ],
+      "range_base": [
+        3,
+        21
+      ],
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/lib/liveRegion.test.ts::N2: a repeated message is said again",
+          "frontend/src/lib/liveRegion.test.ts::P4: a repeat waits 100 ms (leftovers-33 FR-4, L25)"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/lib/liveRegion.ts#useLiveRegion",
+      "level": "symbol",
+      "parent": "ts:frontend/src/lib",
+      "kind": "function",
+      "lang": "ts",
+      "file": "frontend/src/lib/liveRegion.ts",
+      "range_head": [
+        42,
+        57
+      ],
+      "range_base": [
+        23,
+        38
+      ],
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [
+        "untested"
+      ],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer.App",
+      "level": "symbol",
+      "parent": "go:organizer",
+      "kind": "type",
+      "lang": "go",
+      "file": "app.go",
+      "range_head": [
+        23,
+        28
+      ],
+      "range_base": [
+        23,
+        28
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "app_launch_test.go::TestAppCreateCrewReturnsAtOnce"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer.errString",
+      "level": "symbol",
+      "parent": "go:organizer",
+      "kind": "type",
+      "lang": "go",
+      "file": "app.go",
+      "range_head": [
+        642,
+        642
+      ],
+      "range_base": [
+        629,
+        629
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/cache.State",
+      "level": "symbol",
+      "parent": "go:organizer/internal/cache",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/cache/cache.go",
+      "range_head": [
+        15,
+        21
+      ],
+      "range_base": [
+        15,
+        21
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "app_launch_test.go::TestAppCreateCrewReturnsAtOnce",
+          "internal/service/auth_test.go::TestAccountViewFollowsTheMode",
+          "internal/service/auth_test.go::TestSyncSkipsWhenAuthOff",
+          "internal/service/auth_test.go::TestSyncWithFirebaseReachesTheOldChecks",
+          "internal/service/crew_test.go::TestCellStateRidesACopyNotTheCache",
+          "internal/service/crew_test.go::TestCreateCrewRefusesASeatWithoutItsPersonaFile",
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/draft_test.go::TestDraftCellIsInDefinitionAndRefusedNamingItsAcceptRecord",
+          "internal/service/draft_test.go::TestDraftCellRefusesWithoutGoalOrPeopleOrWithACell",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt",
+          "internal/service/help_test.go::TestHelpMissingFileNamesPathAndKey",
+          "internal/service/help_test.go::TestHelpReadsTheFileAtCallTime",
+          "internal/service/help_test.go::TestHelpUnreadableFileNamesPathAndKey",
+          "internal/service/launch_test.go::TestCreateAgentStartsDetached",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestCrewStartRefusesWhileOneIsStarting",
+          "internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds",
+          "internal/service/launch_test.go::TestLaunchStatesThroughTheStub",
+          "internal/service/launch_test.go::TestRunCardStartsDetachedAndRetriesOnce",
+          "internal/service/memory_test.go::TestOnMemoryWarn",
+          "internal/service/memory_test.go::TestSampleMemory",
+          "internal/service/memory_test.go::TestSetMemoryReader",
+          "internal/service/notes_test.go::TestNotesAreACommentFeed",
+          "internal/service/retire_test.go::TestPlanRetireFindsEverySeatsSessionOnTheCampCell",
+          "internal/service/retire_test.go::TestPlanRetireReportsASeatItCannotName",
+          "internal/service/retire_test.go::TestPlanRetireRetirableSaysTheCellIsInDefinition",
+          "internal/service/retire_test.go::TestRetireOfTheLastSeatKeepsTheCell",
+          "internal/service/roles_test.go::TestAgentsViewRoles",
+          "internal/service/rule_test.go::TestRuleDecisionAnyOwner",
+          "internal/service/rule_test.go::TestRuleDecisionRefusals",
+          "internal/service/rule_test.go::TestRuleDecisionWritesAndCommits",
+          "internal/service/run_test.go::TestInitiativeRunsSumsTokensPerCard",
+          "internal/service/run_test.go::TestPrepareLaunchUsesTheCellFamily",
+          "internal/service/run_test.go::TestPrepareLaunchWarnsOnlyOverTheSessionCeiling",
+          "internal/service/sleep_test.go::TestFactoryAwakeNeverOnTheTick",
+          "internal/service/sleep_test.go::TestFactoryBlindMissingFailingArchived",
+          "internal/service/sleep_test.go::TestFactoryCallTimesOut",
+          "internal/service/sleep_test.go::TestFactoryFoundInHomeBin",
+          "internal/service/sleep_test.go::TestSleepWakeThroughTheFactory",
+          "internal/service/sleep_test.go::TestSleepWhileOneRunsIsBusy",
+          "internal/service/tasks_test.go::TestTasksOnTheFeed"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/cli.crewCmd",
+      "level": "symbol",
+      "parent": "go:organizer/internal/cli",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/cli/crew.go",
+      "range_head": [
+        19,
+        84
+      ],
+      "range_base": [
+        19,
+        84
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/config.Config",
+      "level": "symbol",
+      "parent": "go:organizer/internal/config",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/config/config.go",
+      "range_head": [
+        21,
+        70
+      ],
+      "range_base": [
+        21,
+        70
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "app_launch_test.go::TestAppCreateCrewReturnsAtOnce",
+          "internal/cli/auth_test.go::TestDoctorReportsTheAuthMode",
+          "internal/cli/cli_test.go::TestWriteStatusGolden",
+          "internal/config/config_test.go::TestAuthMode",
+          "internal/config/config_test.go::TestLoadRoles",
+          "internal/config/config_test.go::TestSaveKeepsNoRoles",
+          "internal/service/auth_test.go::TestAccountViewFollowsTheMode",
+          "internal/service/auth_test.go::TestSyncSkipsWhenAuthOff",
+          "internal/service/auth_test.go::TestSyncWithFirebaseReachesTheOldChecks",
+          "internal/service/crew_test.go::TestCannedHealthReadsOneProject",
+          "internal/service/crew_test.go::TestCellStateRidesACopyNotTheCache",
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/factory_test.go::TestFactoryKeyIssuesThenRotates",
+          "internal/service/factory_test.go::TestRegisterCellWritesPushAndRegistersWhenAFactory",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt",
+          "internal/service/help_test.go::TestHelpDocDefaultsAndExpands",
+          "internal/service/help_test.go::TestHelpMissingFileNamesPathAndKey",
+          "internal/service/help_test.go::TestHelpReadsTheFileAtCallTime",
+          "internal/service/help_test.go::TestHelpUnreadableFileNamesPathAndKey",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestCrewStartRefusesWhileOneIsStarting",
+          "internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds",
+          "internal/service/launch_test.go::TestLaunchStatesThroughTheStub",
+          "internal/service/memory_test.go::TestOnMemoryWarn",
+          "internal/service/memory_test.go::TestSampleMemory",
+          "internal/service/memory_test.go::TestSetMemoryReader",
+          "internal/service/notes_test.go::TestNotesAreACommentFeed",
+          "internal/service/roles_test.go::TestAgentsViewRoles",
+          "internal/service/rule_test.go::TestRuleDecisionAnyOwner",
+          "internal/service/rule_test.go::TestRuleDecisionRefusals",
+          "internal/service/rule_test.go::TestRuleDecisionWritesAndCommits",
+          "internal/service/sleep_test.go::TestFactoryAwakeNeverOnTheTick",
+          "internal/service/sleep_test.go::TestFactoryBlindMissingFailingArchived",
+          "internal/service/sleep_test.go::TestFactoryCallTimesOut",
+          "internal/service/sleep_test.go::TestFactoryFoundInHomeBin",
+          "internal/service/sleep_test.go::TestSleepWakeThroughTheFactory",
+          "internal/service/sleep_test.go::TestSleepWhileOneRunsIsBusy",
+          "internal/service/tasks_test.go::TestTasksOnTheFeed"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/model.Cell",
+      "level": "symbol",
+      "parent": "go:organizer/internal/model",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/model/model.go",
+      "range_head": [
+        442,
+        466
+      ],
+      "range_base": [
+        442,
+        466
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/prompt/prompt_test.go::TestPersonaNamesSeatAndRoster",
+          "internal/scan/agents_test.go::TestAssignAgents",
+          "internal/scan/scan_test.go::TestReadCellAcceptsAnEmptyRoster",
+          "internal/service/crew_test.go::TestBuildCrewJoinsRosterProcessesAndHealth",
+          "internal/service/crew_test.go::TestCannedHealthReadsOneProject",
+          "internal/service/crew_test.go::TestCardsWaitingFindsWorkHeldUpByAnUnansweredThread",
+          "internal/service/crew_test.go::TestCellInDefinitionUntilASeatHasRun",
+          "internal/service/crew_test.go::TestCellStateRidesACopyNotTheCache",
+          "internal/service/crew_test.go::TestCreateCrewRefusesASeatWithoutItsPersonaFile",
+          "internal/service/crew_test.go::TestCrewLaunchOpensTheSessionCrewSessionNames",
+          "internal/service/crew_test.go::TestCrewSessionNamesTheCellAndTheSeat",
+          "internal/service/crew_test.go::TestHealthIsStampedOnEveryAgentWithAName",
+          "internal/service/crew_test.go::TestNoIdentityIsASessionUnderASeatsNameWithoutItsIdentity",
+          "internal/service/crew_test.go::TestPreludeSetsIdentityAndModel",
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/draft_test.go::TestDraftCellIsInDefinitionAndRefusedNamingItsAcceptRecord",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestCrewStartRefusesWhileOneIsStarting",
+          "internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds",
+          "internal/service/launch_test.go::TestLaunchStatesThroughTheStub",
+          "internal/service/retire_test.go::TestPlanRetireFindsEverySeatsSessionOnTheCampCell",
+          "internal/service/retire_test.go::TestPlanRetireReportsASeatItCannotName",
+          "internal/service/retire_test.go::TestPlanRetireRetirableSaysTheCellIsInDefinition",
+          "internal/service/retire_test.go::TestRetirableIsEmptyWhileTheCellIsInDefinition",
+          "internal/service/retire_test.go::TestRetirableReadsCardsAndSessions",
+          "internal/service/retire_test.go::TestRetireOfTheLastSeatKeepsTheCell",
+          "internal/service/roles_test.go::TestAgentsViewRoles",
+          "internal/service/run_test.go::TestPrepareLaunchUsesTheCellFamily",
+          "internal/service/tasks_test.go::TestTasksOnTheFeed",
+          "internal/service/tasks_test.go::TestTasksOpenCards",
+          "internal/service/waves_test.go::TestSupervisorOf"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/model.Initiative",
+      "level": "symbol",
+      "parent": "go:organizer/internal/model",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/model/model.go",
+      "range_head": [
+        36,
+        100
+      ],
+      "range_base": [
+        36,
+        100
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/merge/merge_test.go::TestBuildCarriesFSEActivity",
+          "internal/merge/merge_test.go::TestBuildCarriesGoalMeasureSpecsScopeAndStages",
+          "internal/merge/merge_test.go::TestBuildCarriesWaves",
+          "internal/merge/merge_test.go::TestBuildHonoursOrder",
+          "internal/merge/merge_test.go::TestBuildLocalWinsAndAlsoOn",
+          "internal/prompt/prompt_test.go::TestReviewMentionsEverythingThatMatters",
+          "internal/scan/agents_test.go::TestAssignAgents",
+          "internal/scan/rejects_test.go::TestInitiativeScopeAsStringKeepsTheInitiative",
+          "internal/scan/roadmap_test.go::TestReadInitiativeGoalMeasureSpecs",
+          "internal/scan/roadmap_test.go::TestReadInitiativeScope",
+          "internal/scan/roadmap_test.go::TestReadInitiativeWithoutRoadmap",
+          "internal/scan/roadmap_test.go::TestReadRoadmapStagesAndCurrentStage",
+          "internal/scan/roadmap_test.go::TestRoadmapProblemsDoNotFailTheScan",
+          "internal/scan/scan_test.go::TestInitiativeDescriptionAndSpecs",
+          "internal/scan/scan_test.go::TestInitiativeWithoutDescriptionOrSpecs",
+          "internal/scan/scan_test.go::TestReadInitiativeCardsOrderAndProblems",
+          "internal/scan/scan_test.go::TestSpecsEntriesCannotEscapeTheRoot",
+          "internal/scan/scan_test.go::TestSpecsEntriesThatResolveToNothing",
+          "internal/scan/sleep_test.go::TestAsleepSinceIsReadWithNoProblem",
+          "internal/scan/sleep_test.go::TestFrozenDirsGoToTheDeepestRoot",
+          "internal/service/cardjoin_test.go::TestJoinAgent",
+          "internal/service/cardjoin_test.go::TestJoinAgentByBranch",
+          "internal/service/cardjoin_test.go::TestJoinAgentCardsCarriesStateContextAndStart",
+          "internal/service/cardjoin_test.go::TestJoinAgentTwoCardsAnswer",
+          "internal/service/cardjoin_test.go::TestJoinAgentWithoutStatusline",
+          "internal/service/cardjoin_test.go::TestOpenCardsSkipsFinished",
+          "internal/service/crew_test.go::TestBuildCrewJoinsRosterProcessesAndHealth",
+          "internal/service/crew_test.go::TestCellStateRidesACopyNotTheCache",
+          "internal/service/crew_test.go::TestCreateCrewRefusesASeatWithoutItsPersonaFile",
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/draft_test.go::TestDraftCellRefusesWithoutGoalOrPeopleOrWithACell",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt",
+          "internal/service/launch_test.go::TestCreateAgentStartsDetached",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestCrewStartRefusesWhileOneIsStarting",
+          "internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds",
+          "internal/service/launch_test.go::TestLaunchStatesThroughTheStub",
+          "internal/service/launch_test.go::TestRunCardStartsDetachedAndRetriesOnce",
+          "internal/service/memory_test.go::TestMemorySessionNames",
+          "internal/service/memory_test.go::TestMemorySummary",
+          "internal/service/retire_test.go::TestPlanRetireFindsEverySeatsSessionOnTheCampCell",
+          "internal/service/retire_test.go::TestPlanRetireReportsASeatItCannotName",
+          "internal/service/retire_test.go::TestPlanRetireRetirableSaysTheCellIsInDefinition",
+          "internal/service/retire_test.go::TestRetirableIsEmptyWhileTheCellIsInDefinition",
+          "internal/service/retire_test.go::TestRetirableReadsCardsAndSessions",
+          "internal/service/retire_test.go::TestRetireOfTheLastSeatKeepsTheCell",
+          "internal/service/roles_test.go::TestAgentsViewRoles",
+          "internal/service/run_test.go::TestInitiativeRunsSumsTokensPerCard",
+          "internal/service/run_test.go::TestPrepareLaunchUsesTheCellFamily",
+          "internal/service/run_test.go::TestPrepareLaunchWarnsOnlyOverTheSessionCeiling",
+          "internal/service/sleep_test.go::TestFactoryBlindMissingFailingArchived",
+          "internal/service/sleep_test.go::TestSleepWakeThroughTheFactory",
+          "internal/service/tasks_test.go::TestTasksOnTheFeed",
+          "internal/service/tasks_test.go::TestTasksOpenCards",
+          "internal/service/waves_test.go::TestSupervisorOf",
+          "internal/service/waves_test.go::TestWaveJoinsPrefersWorking",
+          "internal/service/waves_test.go::TestWavesG5",
+          "internal/service/waves_test.go::TestWavesNone",
+          "internal/service/waves_test.go::TestWavesSorted",
+          "internal/sync/firestore_test.go::TestPushRetirePull"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/model.ScannedInitiative",
+      "level": "symbol",
+      "parent": "go:organizer/internal/model",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/model/model.go",
+      "range_head": [
+        531,
+        549
+      ],
+      "range_base": [
+        531,
+        549
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/merge/merge_test.go::TestBuildCarriesFSEActivity",
+          "internal/merge/merge_test.go::TestBuildCarriesGoalMeasureSpecsScopeAndStages",
+          "internal/merge/merge_test.go::TestBuildCarriesWaves",
+          "internal/merge/merge_test.go::TestBuildHonoursOrder",
+          "internal/merge/merge_test.go::TestBuildLocalWinsAndAlsoOn",
+          "internal/prompt/prompt_test.go::TestReviewMentionsEverythingThatMatters",
+          "internal/scan/agents_test.go::TestAssignAgents",
+          "internal/scan/forecast_test.go::TestRulingCommitTime",
+          "internal/scan/fse_test.go::TestFSECommitsIgnoreTheEnclosingRepo",
+          "internal/scan/fse_test.go::TestReadFSECommits",
+          "internal/scan/fse_test.go::TestReadFSEHandOff",
+          "internal/scan/fse_test.go::TestReadFSENoBitacora",
+          "internal/scan/rejects_test.go::TestBrokenInitiativeYAMLIsUnread",
+          "internal/scan/rejects_test.go::TestInitiativeScopeAsStringKeepsTheInitiative",
+          "internal/scan/rejects_test.go::TestLedgerFilesAreSkippedNotRejected",
+          "internal/scan/roadmap_test.go::TestCardAndDecisionCarryStage",
+          "internal/scan/roadmap_test.go::TestReadInitiativeGoalMeasureSpecs",
+          "internal/scan/roadmap_test.go::TestReadInitiativeScope",
+          "internal/scan/roadmap_test.go::TestReadInitiativeWithoutRoadmap",
+          "internal/scan/roadmap_test.go::TestReadRoadmapStagesAndCurrentStage",
+          "internal/scan/roadmap_test.go::TestRoadmapProblemsDoNotFailTheScan",
+          "internal/scan/runs_test.go::TestReadInitiativeJoinsWavesToStages",
+          "internal/scan/scan_test.go::TestCardThreadsAreReadAndValidated",
+          "internal/scan/scan_test.go::TestInitiativeDescriptionAndSpecs",
+          "internal/scan/scan_test.go::TestInitiativeWithoutDescriptionOrSpecs",
+          "internal/scan/scan_test.go::TestReadCardBuildFields",
+          "internal/scan/scan_test.go::TestReadInitiativeCardsOrderAndProblems",
+          "internal/scan/scan_test.go::TestSpecsEntriesCannotEscapeTheRoot",
+          "internal/scan/scan_test.go::TestSpecsEntriesThatResolveToNothing",
+          "internal/scan/sleep_test.go::TestAsleepSinceIsReadWithNoProblem",
+          "internal/service/cardjoin_test.go::TestJoinAgent",
+          "internal/service/cardjoin_test.go::TestJoinAgentByBranch",
+          "internal/service/cardjoin_test.go::TestJoinAgentCardsCarriesStateContextAndStart",
+          "internal/service/cardjoin_test.go::TestJoinAgentTwoCardsAnswer",
+          "internal/service/cardjoin_test.go::TestJoinAgentWithoutStatusline",
+          "internal/service/cardjoin_test.go::TestOpenCardsSkipsFinished",
+          "internal/service/cell_test.go::TestCardsOnThreadsByIdAndSubject",
+          "internal/service/crew_test.go::TestBuildCrewJoinsRosterProcessesAndHealth",
+          "internal/service/crew_test.go::TestCardsWaitingFindsWorkHeldUpByAnUnansweredThread",
+          "internal/service/crew_test.go::TestCellInDefinitionUntilASeatHasRun",
+          "internal/service/crew_test.go::TestCellStateRidesACopyNotTheCache",
+          "internal/service/crew_test.go::TestCreateCrewRefusesASeatWithoutItsPersonaFile",
+          "internal/service/crew_test.go::TestHealthIsStampedOnEveryAgentWithAName",
+          "internal/service/crew_test.go::TestNoIdentityIsASessionUnderASeatsNameWithoutItsIdentity",
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/draft_test.go::TestDraftCellIsInDefinitionAndRefusedNamingItsAcceptRecord",
+          "internal/service/draft_test.go::TestDraftCellRefusesWithoutGoalOrPeopleOrWithACell",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt",
+          "internal/service/launch_test.go::TestCreateAgentStartsDetached",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestCrewStartRefusesWhileOneIsStarting",
+          "internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds",
+          "internal/service/launch_test.go::TestLaunchStatesThroughTheStub",
+          "internal/service/launch_test.go::TestRunCardStartsDetachedAndRetriesOnce",
+          "internal/service/memory_test.go::TestMemorySessionNames",
+          "internal/service/memory_test.go::TestMemorySummary",
+          "internal/service/retire_test.go::TestPlanRetireFindsEverySeatsSessionOnTheCampCell",
+          "internal/service/retire_test.go::TestPlanRetireReportsASeatItCannotName",
+          "internal/service/retire_test.go::TestPlanRetireRetirableSaysTheCellIsInDefinition",
+          "internal/service/retire_test.go::TestRetirableIsEmptyWhileTheCellIsInDefinition",
+          "internal/service/retire_test.go::TestRetirableReadsCardsAndSessions",
+          "internal/service/retire_test.go::TestRetireOfTheLastSeatKeepsTheCell",
+          "internal/service/roles_test.go::TestAgentsViewRoles",
+          "internal/service/run_test.go::TestInitiativeRunsSumsTokensPerCard",
+          "internal/service/run_test.go::TestPrepareLaunchUsesTheCellFamily",
+          "internal/service/run_test.go::TestPrepareLaunchWarnsOnlyOverTheSessionCeiling",
+          "internal/service/tasks_test.go::TestTasksOnTheFeed",
+          "internal/service/tasks_test.go::TestTasksOpenCards",
+          "internal/service/waves_test.go::TestSupervisorOf",
+          "internal/service/waves_test.go::TestWaveJoinsPrefersWorking",
+          "internal/service/waves_test.go::TestWavesG5",
+          "internal/service/waves_test.go::TestWavesNone",
+          "internal/service/waves_test.go::TestWavesSorted",
+          "internal/sync/firestore_test.go::TestPushRetirePull"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/model.Snapshot",
+      "level": "symbol",
+      "parent": "go:organizer/internal/model",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/model/model.go",
+      "range_head": [
+        593,
+        600
+      ],
+      "range_base": [
+        593,
+        600
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/merge/merge_test.go::TestBuildCarriesFSEActivity",
+          "internal/merge/merge_test.go::TestBuildCarriesGoalMeasureSpecsScopeAndStages",
+          "internal/merge/merge_test.go::TestBuildCarriesWaves",
+          "internal/merge/merge_test.go::TestBuildHonoursOrder",
+          "internal/merge/merge_test.go::TestBuildLocalWinsAndAlsoOn",
+          "internal/scan/scan_test.go::TestRunCollectsAll",
+          "internal/scan/sleep_test.go::TestFrozenDirsGoToTheDeepestRoot",
+          "internal/service/crew_test.go::TestCellStateRidesACopyNotTheCache",
+          "internal/service/crew_test.go::TestCreateCrewRefusesASeatWithoutItsPersonaFile",
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/draft_test.go::TestDraftCellIsInDefinitionAndRefusedNamingItsAcceptRecord",
+          "internal/service/draft_test.go::TestDraftCellRefusesWithoutGoalOrPeopleOrWithACell",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt",
+          "internal/service/launch_test.go::TestCreateAgentStartsDetached",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestCrewStartRefusesWhileOneIsStarting",
+          "internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds",
+          "internal/service/launch_test.go::TestLaunchStatesThroughTheStub",
+          "internal/service/launch_test.go::TestRunCardStartsDetachedAndRetriesOnce",
+          "internal/service/retire_test.go::TestPlanRetireFindsEverySeatsSessionOnTheCampCell",
+          "internal/service/retire_test.go::TestPlanRetireReportsASeatItCannotName",
+          "internal/service/retire_test.go::TestPlanRetireRetirableSaysTheCellIsInDefinition",
+          "internal/service/retire_test.go::TestRetireOfTheLastSeatKeepsTheCell",
+          "internal/service/roles_test.go::TestAgentsViewRoles",
+          "internal/service/run_test.go::TestInitiativeRunsSumsTokensPerCard",
+          "internal/service/run_test.go::TestPrepareLaunchUsesTheCellFamily",
+          "internal/service/run_test.go::TestPrepareLaunchWarnsOnlyOverTheSessionCeiling",
+          "internal/service/tasks_test.go::TestTasksOnTheFeed",
+          "internal/sync/firestore_test.go::TestPushRetirePull"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/prompt.Persona",
+      "level": "symbol",
+      "parent": "go:organizer/internal/prompt",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/prompt/prompt.go",
+      "range_head": [
+        128,
+        146
+      ],
+      "range_base": [
+        128,
+        146
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/prompt/prompt_test.go::TestPersonaNamesSeatAndRoster"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/record.Cell",
+      "level": "symbol",
+      "parent": "go:organizer/internal/record",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/record/record.go",
+      "range_head": [
+        50,
+        57
+      ],
+      "range_base": [
+        50,
+        57
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/record/record_test.go::TestIssueRevokeAndRegister",
+          "internal/service/factory_test.go::TestRegisterCellWritesPushAndRegistersWhenAFactory"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.SeatLaunch",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/service/launch.go",
+      "range_head": [
+        37,
+        61
+      ],
+      "range_base": [
+        37,
+        61
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestCrewStartRefusesWhileOneIsStarting",
+          "internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds",
+          "internal/service/launch_test.go::TestLaunchStatesThroughTheStub"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.Service",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "type",
+      "lang": "go",
+      "file": "internal/service/service.go",
+      "range_head": [
+        35,
+        77
+      ],
+      "range_base": [
+        35,
+        77
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/auth_test.go::TestAccountViewFollowsTheMode",
+          "internal/service/crew_test.go::TestCannedHealthReadsOneProject",
+          "internal/service/crew_test.go::TestCellStateRidesACopyNotTheCache",
+          "internal/service/crew_test.go::TestCreateCrewRefusesASeatWithoutItsPersonaFile",
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/draft_test.go::TestDraftCellIsInDefinitionAndRefusedNamingItsAcceptRecord",
+          "internal/service/draft_test.go::TestDraftCellRefusesWithoutGoalOrPeopleOrWithACell",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt",
+          "internal/service/help_test.go::TestHelpMissingFileNamesPathAndKey",
+          "internal/service/help_test.go::TestHelpReadsTheFileAtCallTime",
+          "internal/service/help_test.go::TestHelpUnreadableFileNamesPathAndKey",
+          "internal/service/launch_test.go::TestCreateAgentStartsDetached",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestCrewStartRefusesWhileOneIsStarting",
+          "internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds",
+          "internal/service/launch_test.go::TestLaunchStatesThroughTheStub",
+          "internal/service/launch_test.go::TestRunCardStartsDetachedAndRetriesOnce",
+          "internal/service/memory_test.go::TestOnMemoryWarn",
+          "internal/service/memory_test.go::TestSampleMemory",
+          "internal/service/retire_test.go::TestPlanRetireFindsEverySeatsSessionOnTheCampCell",
+          "internal/service/retire_test.go::TestPlanRetireReportsASeatItCannotName",
+          "internal/service/retire_test.go::TestPlanRetireRetirableSaysTheCellIsInDefinition",
+          "internal/service/retire_test.go::TestRetireOfTheLastSeatKeepsTheCell",
+          "internal/service/roles_test.go::TestAgentsViewRoles",
+          "internal/service/rule_test.go::TestRuleDecisionAnyOwner",
+          "internal/service/rule_test.go::TestRuleDecisionRefusals",
+          "internal/service/rule_test.go::TestRuleDecisionWritesAndCommits",
+          "internal/service/run_test.go::TestInitiativeRunsSumsTokensPerCard",
+          "internal/service/run_test.go::TestPrepareLaunchUsesTheCellFamily",
+          "internal/service/run_test.go::TestPrepareLaunchWarnsOnlyOverTheSessionCeiling",
+          "internal/service/sleep_test.go::TestFactoryAwakeNeverOnTheTick",
+          "internal/service/sleep_test.go::TestFactoryBlindMissingFailingArchived",
+          "internal/service/sleep_test.go::TestFactoryCallTimesOut",
+          "internal/service/sleep_test.go::TestFactoryFoundInHomeBin",
+          "internal/service/sleep_test.go::TestSleepWakeThroughTheFactory",
+          "internal/service/sleep_test.go::TestSleepWhileOneRunsIsBusy",
+          "internal/service/tasks_test.go::TestTasksOnTheFeed"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.Service.Config",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "method",
+      "lang": "go",
+      "file": "internal/service/service.go",
+      "range_head": [
+        109,
+        113
+      ],
+      "range_base": [
+        109,
+        113
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.Service.CreateCrew",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "method",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        434,
+        448
+      ],
+      "range_base": [
+        434,
+        448
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crew_test.go::TestCreateCrewRefusesASeatWithoutItsPersonaFile",
+          "internal/service/draft_test.go::TestDraftCellIsInDefinitionAndRefusedNamingItsAcceptRecord",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestCrewStartRefusesWhileOneIsStarting",
+          "internal/service/launch_test.go::TestLaunchAllRunningIsDroppedAfterFiveSeconds",
+          "internal/service/launch_test.go::TestLaunchStatesThroughTheStub"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.Service.queueLaunch",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "method",
+      "lang": "go",
+      "file": "internal/service/launch.go",
+      "range_head": [
+        137,
+        172
+      ],
+      "range_base": [
+        137,
+        172
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.command",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "var",
+      "lang": "go",
+      "file": "internal/service/service.go",
+      "range_head": [
+        313,
+        315
+      ],
+      "range_base": [
+        313,
+        315
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt",
+          "internal/service/launch_test.go::TestCreateAgentStartsDetached",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestRunCardStartsDetachedAndRetriesOnce"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.crewDir",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        424,
+        432
+      ],
+      "range_base": [
+        424,
+        432
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crew_test.go::TestCreateCrewRefusesASeatWithoutItsPersonaFile",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/draft_test.go::TestDraftCellIsInDefinitionAndRefusedNamingItsAcceptRecord"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.crewSession",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        74,
+        96
+      ],
+      "range_base": [
+        74,
+        96
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crew_test.go::TestCrewLaunchOpensTheSessionCrewSessionNames",
+          "internal/service/crew_test.go::TestCrewSessionNamesTheCellAndTheSeat"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.discussAPIBin",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        410,
+        422
+      ],
+      "range_base": [
+        410,
+        422
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.draftRefusal",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/draft.go",
+      "range_head": [
+        34,
+        41
+      ],
+      "range_base": [
+        34,
+        41
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.launchLine",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/run.go",
+      "range_head": [
+        17,
+        25
+      ],
+      "range_base": [
+        17,
+        25
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crew_test.go::TestCrewLaunchOpensTheSessionCrewSessionNames"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.liveSeats",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "var",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        467,
+        490
+      ],
+      "range_base": [
+        457,
+        480
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.missingPersonas",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        393,
+        408
+      ],
+      "range_base": [
+        393,
+        408
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crew_test.go::TestCreateCrewRefusesASeatWithoutItsPersonaFile"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.preludeFor",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        653,
+        675
+      ],
+      "range_base": [
+        642,
+        664
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crew_test.go::TestCrewLaunchOpensTheSessionCrewSessionNames",
+          "internal/service/crew_test.go::TestPreludeSetsIdentityAndModel"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.probeBin",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "var",
+      "lang": "go",
+      "file": "internal/service/launch.go",
+      "range_head": [
+        402,
+        414
+      ],
+      "range_base": [
+        402,
+        414
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crewskip_test.go::TestCreateCrewAllRunningStartsNothing",
+          "internal/service/crewskip_test.go::TestCreateCrewSkipsRunningSeats",
+          "internal/service/crewskip_test.go::TestStartCrewNamesRunningSessions",
+          "internal/service/failedat_test.go::TestFailedSeatCarriesFailedAt",
+          "internal/service/launch_test.go::TestAttachFallbackAttaches",
+          "internal/service/launch_test.go::TestCreateAgentStartsDetached",
+          "internal/service/launch_test.go::TestCreateCrewStartsSeatsDetached",
+          "internal/service/launch_test.go::TestRunCardStartsDetachedAndRetriesOnce"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.probeWrapper",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/launch.go",
+      "range_head": [
+        416,
+        425
+      ],
+      "range_base": [
+        416,
+        425
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.registerCell",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/factory.go",
+      "range_head": [
+        75,
+        115
+      ],
+      "range_base": [
+        75,
+        115
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/factory_test.go::TestRegisterCellWritesPushAndRegistersWhenAFactory"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.sanitize",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/service.go",
+      "range_head": [
+        338,
+        342
+      ],
+      "range_base": [
+        338,
+        342
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crew_test.go::TestCrewLaunchOpensTheSessionCrewSessionNames"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "go:organizer/internal/service.seatShort",
+      "level": "symbol",
+      "parent": "go:organizer/internal/service",
+      "kind": "function",
+      "lang": "go",
+      "file": "internal/service/crew.go",
+      "range_head": [
+        62,
+        72
+      ],
+      "range_base": [
+        62,
+        72
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "internal/service/crew_test.go::TestCrewLaunchOpensTheSessionCrewSessionNames"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/App.tsx#App",
+      "level": "symbol",
+      "parent": "ts:frontend/src",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/App.tsx",
+      "range_head": [
+        25,
+        79
+      ],
+      "range_base": [
+        25,
+        79
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/AgentList.tsx#AgentList",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/AgentList.tsx",
+      "range_head": [
+        17,
+        99
+      ],
+      "range_base": [
+        17,
+        99
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/ContextBar.test.tsx::V4: WatcherBadge draws · n waiting for deaf and capped",
+          "frontend/src/lib/memoryTrack.test.tsx::U1: the Memory cell's fixed track",
+          "frontend/src/lib/memoryWords.test.tsx::M1: the Memory cell's three words"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/AgentList.tsx#HealthWhy",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/AgentList.tsx",
+      "range_head": [
+        126,
+        133
+      ],
+      "range_base": [
+        126,
+        133
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/AgentList.tsx#MemoryCell",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/AgentList.tsx",
+      "range_head": [
+        101,
+        112
+      ],
+      "range_base": [
+        101,
+        112
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/AgentsView.tsx#AgentsView",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/AgentsView.tsx",
+      "range_head": [
+        24,
+        162
+      ],
+      "range_base": [
+        24,
+        162
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/AgentsView.tsx#DraftCell",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/AgentsView.tsx",
+      "range_head": [
+        314,
+        403
+      ],
+      "range_base": [
+        314,
+        403
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/AgentsView.tsx#NewAgent",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/AgentsView.tsx",
+      "range_head": [
+        197,
+        306
+      ],
+      "range_base": [
+        197,
+        306
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Board.tsx#Board",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/Board.tsx",
+      "range_head": [
+        25,
+        166
+      ],
+      "range_base": [
+        25,
+        166
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/CardDrawer.tsx#CardDrawer",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/CardDrawer.tsx",
+      "range_head": [
+        40,
+        120
+      ],
+      "range_base": [
+        40,
+        120
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/ContextBar.tsx#ContextBar",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/ContextBar.tsx",
+      "range_head": [
+        6,
+        21
+      ],
+      "range_base": [
+        6,
+        21
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/ContextBar.tsx#WatcherBadge",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/ContextBar.tsx",
+      "range_head": [
+        23,
+        37
+      ],
+      "range_base": [
+        23,
+        37
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/ContextBar.test.tsx::V4: WatcherBadge draws · n waiting for deaf and capped"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Conversation.tsx#Conversation",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/Conversation.tsx",
+      "range_head": [
+        54,
+        440
+      ],
+      "range_base": [
+        54,
+        440
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Conversation.tsx#NeedsMe",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/Conversation.tsx",
+      "range_head": [
+        652,
+        801
+      ],
+      "range_base": [
+        652,
+        801
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Conversation.tsx#NewThread",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/Conversation.tsx",
+      "range_head": [
+        574,
+        636
+      ],
+      "range_base": [
+        574,
+        636
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Conversation.tsx#ReplyBox",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/Conversation.tsx",
+      "range_head": [
+        488,
+        558
+      ],
+      "range_base": [
+        488,
+        558
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Conversation.tsx#Ruling",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/Conversation.tsx",
+      "range_head": [
+        838,
+        851
+      ],
+      "range_base": [
+        838,
+        851
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#ALL_RUNNING",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "const",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        198,
+        200
+      ],
+      "range_base": [
+        196,
+        198
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/Crew.button.test.tsx::B3: Start finds every seat running (FR-3, L18)"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#CellStateLz",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        373,
+        385
+      ],
+      "range_base": [
+        365,
+        377
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#DefinitionWaits",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        343,
+        366
+      ],
+      "range_base": [
+        335,
+        358
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#LIST_KEEP_MS",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "const",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        195,
+        196
+      ],
+      "range_base": [
+        193,
+        194
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#Launch",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        19,
+        19
+      ],
+      "range_base": [
+        19,
+        19
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/Launch.test.tsx::Close the list (L10)",
+          "frontend/src/components/Launch.test.tsx::Needs me: a start that failed unseen (V4, FR-7)",
+          "frontend/src/components/Launch.test.tsx::New agent's button (V3)",
+          "frontend/src/components/Launch.test.tsx::seat words (L1, L5)",
+          "frontend/src/components/Launch.test.tsx::the crew block in place (V1)",
+          "frontend/src/components/Launch.test.tsx::the heading reads the result once nothing starts (L8)",
+          "frontend/src/components/Launch.test.tsx::the list holds the seats this press starts (L9)",
+          "frontend/src/components/Launch.test.tsx::the live region (L2)"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#LaunchList",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        281,
+        333
+      ],
+      "range_base": [
+        273,
+        325
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#announce",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "function",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        143,
+        160
+      ],
+      "range_base": [
+        141,
+        158
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/Launch.test.tsx::the heading reads the result once nothing starts (L8)",
+          "frontend/src/components/Launch.test.tsx::the live region (L2)"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#closeList",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "const",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        255,
+        260
+      ],
+      "range_base": [
+        247,
+        252
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#crewBlocked",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "function",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        387,
+        399
+      ],
+      "range_base": [
+        379,
+        391
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#focusAfter",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "function",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        206,
+        216
+      ],
+      "range_base": [
+        204,
+        214
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/Crew.button.test.tsx::B4: focus after the list closes (FR-4, L16 amended)",
+          "frontend/src/components/Crew.newest.test.tsx::N4: one focus function, never the body (FR-4, L22)"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#holdInView",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "function",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        49,
+        71
+      ],
+      "range_base": [
+        47,
+        69
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/Crew.hold.test.ts::FR-3: the landed row stays in view"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#isOff",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "const",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        593,
+        593
+      ],
+      "range_base": [
+        574,
+        574
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#listClosed",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "const",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        261,
+        264
+      ],
+      "range_base": [
+        253,
+        256
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#listedOf",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "function",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        117,
+        134
+      ],
+      "range_base": [
+        115,
+        132
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/Launch.test.tsx::the list holds the seats this press starts (L9)"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#pressed",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "const",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        136,
+        139
+      ],
+      "range_base": [
+        134,
+        137
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#saidOf",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "const",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        162,
+        164
+      ],
+      "range_base": [
+        160,
+        162
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/Launch.test.tsx::the heading reads the result once nothing starts (L8)",
+          "frontend/src/components/Launch.test.tsx::the live region (L2)"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Crew.tsx#shapeOf",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "const",
+      "lang": "ts",
+      "file": "frontend/src/components/Crew.tsx",
+      "range_head": [
+        254,
+        254
+      ],
+      "range_base": [
+        246,
+        246
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Gate.tsx#LockScreen",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/Gate.tsx",
+      "range_head": [
+        51,
+        88
+      ],
+      "range_base": [
+        51,
+        88
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Gate.tsx#SignInScreen",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/Gate.tsx",
+      "range_head": [
+        112,
+        174
+      ],
+      "range_base": [
+        112,
+        174
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/InitiativeHeader.tsx#InitiativeHeader",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/InitiativeHeader.tsx",
+      "range_head": [
+        127,
+        229
+      ],
+      "range_base": [
+        127,
+        229
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/CardDetails.test.tsx::C2: the header's Details reads one label, one height, aria-expanded (FR-8, I34)",
+          "frontend/src/components/CharterOnce.test.tsx::H1: a fact shows once; one Charter with omit (FR-4)",
+          "frontend/src/components/CharterOnce.test.tsx::H5: the sub-tabs mark the current one aria-current true, never page (FR-7b)",
+          "frontend/src/components/InitiativesView.test.tsx::C2: Details, the Charter and the Workspace (FR-2)",
+          "frontend/src/components/InitiativesView.test.tsx::D2: the header's Details keeps one frame open and closed (leftovers-20 FR-6, I38)"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Initiatives.tsx#Actions",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/Initiatives.tsx",
+      "range_head": [
+        98,
+        115
+      ],
+      "range_base": [
+        98,
+        115
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Initiatives.tsx#Specs",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/Initiatives.tsx",
+      "range_head": [
+        55,
+        89
+      ],
+      "range_base": [
+        55,
+        89
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/InitiativesView.tsx#InitiativesView",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/InitiativesView.tsx",
+      "range_head": [
+        63,
+        337
+      ],
+      "range_base": [
+        63,
+        337
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/CharterOnce.test.tsx::H1: a fact shows once; one Charter with omit (FR-4)",
+          "frontend/src/components/CharterOnce.test.tsx::H2: hover raises a card on its body only, open or closed (FR-5)",
+          "frontend/src/components/InitiativesView.test.tsx::C1: a press on the card's body opens it; its buttons never do (FR-1)"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Overview.tsx#WorkSummary",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/Overview.tsx",
+      "range_head": [
+        161,
+        229
+      ],
+      "range_base": [
+        161,
+        229
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/PasscodeBlock.tsx#PasscodeBlock",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/PasscodeBlock.tsx",
+      "range_head": [
+        5,
+        30
+      ],
+      "range_base": [
+        5,
+        30
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Retire.tsx#CleanButton",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/Retire.tsx",
+      "range_head": [
+        116,
+        126
+      ],
+      "range_base": [
+        116,
+        126
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Retire.tsx#Retire",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/Retire.tsx",
+      "range_head": [
+        5,
+        114
+      ],
+      "range_base": [
+        5,
+        114
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/RuleDecisionBox.tsx#RuleDecisionBox",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/RuleDecisionBox.tsx",
+      "range_head": [
+        31,
+        201
+      ],
+      "range_base": [
+        31,
+        201
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/Settings.tsx#Settings",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/Settings.tsx",
+      "range_head": [
+        7,
+        117
+      ],
+      "range_base": [
+        7,
+        117
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/TopBar.tsx#TopBar",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/TopBar.tsx",
+      "range_head": [
+        12,
+        122
+      ],
+      "range_base": [
+        12,
+        122
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/UnreadFiles.tsx#UnreadFiles",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/UnreadFiles.tsx",
+      "range_head": [
+        5,
+        24
+      ],
+      "range_base": [
+        5,
+        24
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/hooks/useWails.ts#Account",
+      "level": "symbol",
+      "parent": "ts:frontend/src/hooks",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/hooks/useWails.ts",
+      "range_head": [
+        5,
+        5
+      ],
+      "range_base": [
+        5,
+        5
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/hooks/useWails.ts#AgentGroup",
+      "level": "symbol",
+      "parent": "ts:frontend/src/hooks",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/hooks/useWails.ts",
+      "range_head": [
+        8,
+        8
+      ],
+      "range_base": [
+        8,
+        8
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/ContextBar.test.tsx::V4: WatcherBadge draws · n waiting for deaf and capped",
+          "frontend/src/components/Crew.button.test.tsx::B2: no launch button with every seat running (FR-2, L17)",
+          "frontend/src/components/Crew.button.test.tsx::B3: Start finds every seat running (FR-3, L18)",
+          "frontend/src/components/Crew.button.test.tsx::B4: focus after the list closes (FR-4, L16 amended)",
+          "frontend/src/components/Crew.newest.test.tsx::N1, N3: what the block draws once no seat is off (FR-1, FR-3)",
+          "frontend/src/components/Crew.newest.test.tsx::N4: one focus function, never the body (FR-4, L22)",
+          "frontend/src/components/Launch.test.tsx::Close the list (L10)",
+          "frontend/src/components/Launch.test.tsx::the crew block in place (V1)",
+          "frontend/src/lib/floatList.test.ts::floatList: signals in the fold order",
+          "frontend/src/lib/floatList.test.ts::the Home row",
+          "frontend/src/lib/initiativeState.test.ts::initiativeStates",
+          "frontend/src/lib/memoryTrack.test.tsx::U1: the Memory cell's fixed track",
+          "frontend/src/lib/memoryWords.test.tsx::M1: the Memory cell's three words",
+          "frontend/src/lib/queue.test.ts::B1: the unseen-failure row is dated",
+          "frontend/src/lib/queue.test.ts::B3: a capped asker is never not picking up",
+          "frontend/src/lib/queue.test.ts::B4: the task rows",
+          "frontend/src/lib/queue.test.ts::FR-3 (lead-side-fixes): a cell that cannot launch says why",
+          "frontend/src/lib/queue.test.ts::FR-7 Launch row",
+          "frontend/src/lib/queue.test.ts::Solved marks",
+          "frontend/src/lib/queue.test.ts::needsMeRows and queueOf: cards",
+          "frontend/src/lib/queue.test.ts::needsMeRows and queueOf: threads",
+          "frontend/src/lib/queue.test.ts::needsMeRows: asks name the seat and whether it picks up",
+          "frontend/src/lib/queue.test.ts::needsMeRows: decision records",
+          "frontend/src/lib/queue.test.ts::needsMeRows: files the scan could not read",
+          "frontend/src/lib/queue.test.ts::needsMeRows: tasks over their forecast or stalled"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/hooks/useWails.ts#AgentsView",
+      "level": "symbol",
+      "parent": "ts:frontend/src/hooks",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/hooks/useWails.ts",
+      "range_head": [
+        7,
+        7
+      ],
+      "range_base": [
+        7,
+        7
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/Launch.test.tsx::Needs me: a start that failed unseen (V4, FR-7)",
+          "frontend/src/lib/floatList.test.ts::floatList: signals in the fold order",
+          "frontend/src/lib/floatList.test.ts::the Home row",
+          "frontend/src/lib/initiativeState.test.ts::initiativeStates",
+          "frontend/src/lib/memoryWords.test.tsx::M1: the Memory cell's three words",
+          "frontend/src/lib/queue.test.ts::B1: the unseen-failure row is dated",
+          "frontend/src/lib/queue.test.ts::B3: a capped asker is never not picking up",
+          "frontend/src/lib/queue.test.ts::B4: the task rows",
+          "frontend/src/lib/queue.test.ts::FR-3 (lead-side-fixes): a cell that cannot launch says why",
+          "frontend/src/lib/queue.test.ts::FR-7 Launch row",
+          "frontend/src/lib/queue.test.ts::Solved marks",
+          "frontend/src/lib/queue.test.ts::V3: the unseen-failure row is dated by failed_at",
+          "frontend/src/lib/queue.test.ts::needsMeRows and queueOf: cards",
+          "frontend/src/lib/queue.test.ts::needsMeRows and queueOf: threads",
+          "frontend/src/lib/queue.test.ts::needsMeRows: asks name the seat and whether it picks up",
+          "frontend/src/lib/queue.test.ts::needsMeRows: decision records",
+          "frontend/src/lib/queue.test.ts::needsMeRows: files the scan could not read",
+          "frontend/src/lib/queue.test.ts::needsMeRows: tasks over their forecast or stalled"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/hooks/useWails.ts#BoardView",
+      "level": "symbol",
+      "parent": "ts:frontend/src/hooks",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/hooks/useWails.ts",
+      "range_head": [
+        15,
+        15
+      ],
+      "range_base": [
+        15,
+        15
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/FloatList.test.tsx::the floating list's folds (leftovers-16 F2)",
+          "frontend/src/components/Launch.test.tsx::Needs me: a start that failed unseen (V4, FR-7)",
+          "frontend/src/lib/floatList.test.ts::floatList: signals in the fold order",
+          "frontend/src/lib/floatList.test.ts::floatList: the rail's order and groups",
+          "frontend/src/lib/floatList.test.ts::focusOrder",
+          "frontend/src/lib/floatList.test.ts::search",
+          "frontend/src/lib/floatList.test.ts::the Home row",
+          "frontend/src/lib/floatList.test.ts::the rail's two folds (leftovers-16 F2)",
+          "frontend/src/lib/initiativeState.test.ts::initiativeStates",
+          "frontend/src/lib/queue.test.ts::B1: the unseen-failure row is dated",
+          "frontend/src/lib/queue.test.ts::B3: a capped asker is never not picking up",
+          "frontend/src/lib/queue.test.ts::B4: the task rows",
+          "frontend/src/lib/queue.test.ts::FR-3 (lead-side-fixes): a cell that cannot launch says why",
+          "frontend/src/lib/queue.test.ts::FR-7 Launch row",
+          "frontend/src/lib/queue.test.ts::Solved marks",
+          "frontend/src/lib/queue.test.ts::V3: the unseen-failure row is dated by failed_at",
+          "frontend/src/lib/queue.test.ts::needsMeRows and queueOf: cards",
+          "frontend/src/lib/queue.test.ts::needsMeRows and queueOf: threads",
+          "frontend/src/lib/queue.test.ts::needsMeRows: asks name the seat and whether it picks up",
+          "frontend/src/lib/queue.test.ts::needsMeRows: decision records",
+          "frontend/src/lib/queue.test.ts::needsMeRows: files the scan could not read",
+          "frontend/src/lib/queue.test.ts::needsMeRows: tasks over their forecast or stalled",
+          "frontend/src/lib/queue.test.ts::readOnlyOf: the read-only word (initiatives-view I14)"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/hooks/useWails.ts#CellMessage",
+      "level": "symbol",
+      "parent": "ts:frontend/src/hooks",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/hooks/useWails.ts",
+      "range_head": [
+        27,
+        27
+      ],
+      "range_base": [
+        27,
+        27
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/hooks/useWails.ts#CellPost",
+      "level": "symbol",
+      "parent": "ts:frontend/src/hooks",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/hooks/useWails.ts",
+      "range_head": [
+        26,
+        26
+      ],
+      "range_base": [
+        26,
+        26
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/hooks/useWails.ts#CellThreadView",
+      "level": "symbol",
+      "parent": "ts:frontend/src/hooks",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/hooks/useWails.ts",
+      "range_head": [
+        25,
+        25
+      ],
+      "range_base": [
+        25,
+        25
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/hooks/useWails.ts#CellView",
+      "level": "symbol",
+      "parent": "ts:frontend/src/hooks",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/hooks/useWails.ts",
+      "range_head": [
+        23,
+        23
+      ],
+      "range_base": [
+        23,
+        23
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/hooks/useWails.ts#Config",
+      "level": "symbol",
+      "parent": "ts:frontend/src/hooks",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/hooks/useWails.ts",
+      "range_head": [
+        16,
+        16
+      ],
+      "range_base": [
+        16,
+        16
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/hooks/useWails.ts#Group",
+      "level": "symbol",
+      "parent": "ts:frontend/src/hooks",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/hooks/useWails.ts",
+      "range_head": [
+        28,
+        28
+      ],
+      "range_base": [
+        28,
+        28
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/hooks/useWails.ts#LockState",
+      "level": "symbol",
+      "parent": "ts:frontend/src/hooks",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/hooks/useWails.ts",
+      "range_head": [
+        6,
+        6
+      ],
+      "range_base": [
+        6,
+        6
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/hooks/useWails.ts#Order",
+      "level": "symbol",
+      "parent": "ts:frontend/src/hooks",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/hooks/useWails.ts",
+      "range_head": [
+        18,
+        18
+      ],
+      "range_base": [
+        18,
+        18
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/hooks/useWails.ts#RetireOptions",
+      "level": "symbol",
+      "parent": "ts:frontend/src/hooks",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/hooks/useWails.ts",
+      "range_head": [
+        20,
+        20
+      ],
+      "range_base": [
+        20,
+        20
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/hooks/useWails.ts#RetirePlan",
+      "level": "symbol",
+      "parent": "ts:frontend/src/hooks",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/hooks/useWails.ts",
+      "range_head": [
+        21,
+        21
+      ],
+      "range_base": [
+        21,
+        21
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/hooks/useWails.ts#RetireReport",
+      "level": "symbol",
+      "parent": "ts:frontend/src/hooks",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/hooks/useWails.ts",
+      "range_head": [
+        22,
+        22
+      ],
+      "range_base": [
+        22,
+        22
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/hooks/useWails.ts#RunsView",
+      "level": "symbol",
+      "parent": "ts:frontend/src/hooks",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/hooks/useWails.ts",
+      "range_head": [
+        29,
+        29
+      ],
+      "range_base": [
+        29,
+        29
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/hooks/useWails.ts#Seat",
+      "level": "symbol",
+      "parent": "ts:frontend/src/hooks",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/hooks/useWails.ts",
+      "range_head": [
+        9,
+        9
+      ],
+      "range_base": [
+        9,
+        9
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/SlackView.words.test.tsx::B2: deaf and capped badges draw `· n waiting`",
+          "frontend/src/components/SlackView.words.test.tsx::W1: F3's description says each fact with its noun (leftovers-26 FR-4, T23)",
+          "frontend/src/components/SlackView.words.test.tsx::W1: a person row names its one description (AX shape, server render)",
+          "frontend/src/components/SlackView.words.test.tsx::W1: the waiting count follows the mail word (leftovers-27 FR-9, T23)",
+          "frontend/src/lib/queue.test.ts::B3: a capped asker is never not picking up",
+          "frontend/src/lib/queue.test.ts::B4: the task rows",
+          "frontend/src/lib/queue.test.ts::needsMeRows: asks name the seat and whether it picks up"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/hooks/useWails.ts#SyncResult",
+      "level": "symbol",
+      "parent": "ts:frontend/src/hooks",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/hooks/useWails.ts",
+      "range_head": [
+        17,
+        17
+      ],
+      "range_base": [
+        17,
+        17
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/lib/focus.ts#escapeCloses",
+      "level": "symbol",
+      "parent": "ts:frontend/src/lib",
+      "kind": "const",
+      "lang": "ts",
+      "file": "frontend/src/lib/focus.ts",
+      "range_head": [
+        24,
+        28
+      ],
+      "range_base": [
+        24,
+        28
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/InitiativesView.test.tsx::C2: Details, the Charter and the Workspace (FR-2)"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/lib/focus.ts#useConfirmFocus",
+      "level": "symbol",
+      "parent": "ts:frontend/src/lib",
+      "kind": "function",
+      "lang": "ts",
+      "file": "frontend/src/lib/focus.ts",
+      "range_head": [
+        3,
+        22
+      ],
+      "range_base": [
+        3,
+        22
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/lib/health.ts#healthState",
+      "level": "symbol",
+      "parent": "ts:frontend/src/lib",
+      "kind": "function",
+      "lang": "ts",
+      "file": "frontend/src/lib/health.ts",
+      "range_head": [
+        59,
+        68
+      ],
+      "range_base": [
+        59,
+        68
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/lib/queue.ts#missingPersonas",
+      "level": "symbol",
+      "parent": "ts:frontend/src/lib",
+      "kind": "const",
+      "lang": "ts",
+      "file": "frontend/src/lib/queue.ts",
+      "range_head": [
+        339,
+        340
+      ],
+      "range_base": [
+        339,
+        340
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/lib/queue.test.ts::FR-9 (ui-leftovers): a missing persona file says who writes it"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/lib/stateWords.ts#stateWord",
+      "level": "symbol",
+      "parent": "ts:frontend/src/lib",
+      "kind": "const",
+      "lang": "ts",
+      "file": "frontend/src/lib/stateWords.ts",
+      "range_head": [
+        8,
+        8
+      ],
+      "range_base": [
+        8,
+        8
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/lib/stateWords.test.ts::stateWord"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/stores/board.store.ts#useBoard",
+      "level": "symbol",
+      "parent": "ts:frontend/src/stores",
+      "kind": "const",
+      "lang": "ts",
+      "file": "frontend/src/stores/board.store.ts",
+      "range_head": [
+        180,
+        402
+      ],
+      "range_base": [
+        180,
+        402
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/lib/landing.test.ts::U3: Initiatives › lands on the view's title",
+          "frontend/src/lib/memoryWords.test.tsx::M1: the Memory cell's three words"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "go:organizer",
+      "to": "go:organizer/internal/service",
+      "kind": "uses",
+      "change": "added",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer.App.CreateCrew",
+      "to": "go:organizer.App",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer.App.CreateCrew",
+      "to": "go:organizer.CrewResult",
+      "kind": "uses",
+      "change": "added",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer.App.CreateCrew",
+      "to": "go:organizer.errString",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer.App.CreateCrew",
+      "to": "go:organizer/internal/service.CrewRunning",
+      "kind": "uses",
+      "change": "added",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer.App.CreateCrew",
+      "to": "go:organizer/internal/service.CrewStart",
+      "kind": "uses",
+      "change": "added",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer.App.CreateCrew",
+      "to": "go:organizer/internal/service.Service.StartCrew",
+      "kind": "uses",
+      "change": "added",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer.CrewResult",
+      "to": "go:organizer/internal/service.CrewRunning",
+      "kind": "uses",
+      "change": "added",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/cli",
+      "to": "go:organizer/internal/service",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/cli.crewCmd",
+      "to": "go:organizer/internal/service.CrewStart",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/cli.crewCmd",
+      "to": "go:organizer/internal/service.Service.StartCrew",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service",
+      "to": "go:organizer/internal/cache",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service",
+      "to": "go:organizer/internal/config",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service",
+      "to": "go:organizer/internal/model",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service",
+      "to": "go:organizer/internal/prompt",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service",
+      "to": "go:organizer/internal/record",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.CrewStart",
+      "to": "go:organizer/internal/service.CrewRunning",
+      "kind": "uses",
+      "change": "added",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.CreateCrew",
+      "to": "go:organizer/internal/service.CrewStart",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.CreateCrew",
+      "to": "go:organizer/internal/service.Service.StartCrew",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/cache.State",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/config.Config",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/model.Cell",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/model.Initiative",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/model.ScannedInitiative",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/model.Snapshot",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/prompt.Persona",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/record.Cell",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.CrewRunning",
+      "kind": "uses",
+      "change": "added",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.CrewStart",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.SeatLaunch",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.Service",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.Service.Config",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.Service.queueLaunch",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.command",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.crewDir",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.crewSession",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.discussAPIBin",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.draftRefusal",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.launchLine",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.liveSeats",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.missingPersonas",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.preludeFor",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.probeBin",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.probeWrapper",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.registerCell",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.sanitize",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "go:organizer/internal/service.Service.StartCrew",
+      "to": "go:organizer/internal/service.seatShort",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "go/types"
+    },
+    {
+      "from": "ts:frontend/src",
+      "to": "ts:frontend/src/hooks",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/App.tsx#App",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components",
+      "to": "ts:frontend/src/hooks",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components",
+      "to": "ts:frontend/src/lib",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components",
+      "to": "ts:frontend/src/stores",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/AgentList.tsx#AgentList",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/AgentsView.tsx#AgentsView",
+      "to": "ts:frontend/src/components/Crew.tsx#Crew",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/AgentsView.tsx#AgentsView",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/AgentsView.tsx#DraftCell",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/AgentsView.tsx#NewAgent",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/AgentsView.tsx#NewAgent",
+      "to": "ts:frontend/src/lib/liveRegion.ts#useLiveRegion",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Board.tsx#Board",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/CardDrawer.tsx#CardDrawer",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Conversation.tsx#Conversation",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Conversation.tsx#NeedsMe",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Conversation.tsx#NewThread",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Conversation.tsx#ReplyBox",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Conversation.tsx#Ruling",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/components/Crew.tsx#ALL_RUNNING",
+      "kind": "uses",
+      "change": "added",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/components/Crew.tsx#CellStateLz",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/components/Crew.tsx#DefinitionWaits",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/components/Crew.tsx#LIST_KEEP_MS",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/components/Crew.tsx#Launch",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/components/Crew.tsx#LaunchList",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/components/Crew.tsx#SeatRow",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/components/Crew.tsx#closeList",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/components/Crew.tsx#crewBlocked",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/components/Crew.tsx#focusAfter",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/components/Crew.tsx#holdInView",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/components/Crew.tsx#isOff",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/components/Crew.tsx#listClosed",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/components/Crew.tsx#listedOf",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/components/Crew.tsx#pressed",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/components/Crew.tsx#shapeOf",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/components/Crew.tsx#startCrew",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/components/Crew.tsx#useAnnouncer",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/components/Retire.tsx#Retire",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/hooks/useWails.ts#AgentGroup",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/lib/focus.ts#escapeCloses",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/lib/focus.ts#useConfirmFocus",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/lib/queue.ts#missingPersonas",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#Crew",
+      "to": "ts:frontend/src/stores/board.store.ts#useBoard",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#SeatRow",
+      "to": "ts:frontend/src/components/AgentList.tsx#HealthWhy",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#SeatRow",
+      "to": "ts:frontend/src/components/AgentList.tsx#MemoryCell",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#SeatRow",
+      "to": "ts:frontend/src/components/ContextBar.tsx#ContextBar",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#SeatRow",
+      "to": "ts:frontend/src/components/ContextBar.tsx#WatcherBadge",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#SeatRow",
+      "to": "ts:frontend/src/hooks/useWails.ts#Seat",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#SeatRow",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#SeatRow",
+      "to": "ts:frontend/src/lib/focus.ts#escapeCloses",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#SeatRow",
+      "to": "ts:frontend/src/lib/focus.ts#useConfirmFocus",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#SeatRow",
+      "to": "ts:frontend/src/lib/health.ts#healthState",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#SeatRow",
+      "to": "ts:frontend/src/lib/stateWords.ts#stateWord",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#runningOf",
+      "to": "ts:frontend/src/components/Crew.tsx#CrewResult",
+      "kind": "uses",
+      "change": "added",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#startCrew",
+      "to": "ts:frontend/src/components/Crew.tsx#ALL_RUNNING",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#startCrew",
+      "to": "ts:frontend/src/components/Crew.tsx#CrewResult",
+      "kind": "uses",
+      "change": "added",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#startCrew",
+      "to": "ts:frontend/src/components/Crew.tsx#runningOf",
+      "kind": "uses",
+      "change": "added",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#useAnnouncer",
+      "to": "ts:frontend/src/components/Crew.tsx#Launch",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#useAnnouncer",
+      "to": "ts:frontend/src/components/Crew.tsx#announce",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#useAnnouncer",
+      "to": "ts:frontend/src/components/Crew.tsx#saidOf",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#useAnnouncer",
+      "to": "ts:frontend/src/lib/liveRegion.ts#Say",
+      "kind": "uses",
+      "change": "added",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Crew.tsx#useAnnouncer",
+      "to": "ts:frontend/src/lib/liveRegion.ts#useLiveRegion",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Gate.tsx#LockScreen",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Gate.tsx#SignInScreen",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/InitiativeHeader.tsx#InitiativeHeader",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Initiatives.tsx#Actions",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Initiatives.tsx#Specs",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/InitiativesView.tsx#InitiativesView",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/InitiativesView.tsx#InitiativesView",
+      "to": "ts:frontend/src/lib/liveRegion.ts#useLiveRegion",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Overview.tsx#WorkSummary",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/PasscodeBlock.tsx#PasscodeBlock",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Retire.tsx#CleanButton",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Retire.tsx#Retire",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/RuleDecisionBox.tsx#RuleDecisionBox",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/Settings.tsx#Settings",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/TopBar.tsx#TopBar",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/UnreadFiles.tsx#UnreadFiles",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/hooks/useWails.ts#api",
+      "to": "ts:frontend/src/hooks/useWails.ts#Account",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/hooks/useWails.ts#api",
+      "to": "ts:frontend/src/hooks/useWails.ts#AgentsView",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/hooks/useWails.ts#api",
+      "to": "ts:frontend/src/hooks/useWails.ts#BoardView",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/hooks/useWails.ts#api",
+      "to": "ts:frontend/src/hooks/useWails.ts#CellMessage",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/hooks/useWails.ts#api",
+      "to": "ts:frontend/src/hooks/useWails.ts#CellPost",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/hooks/useWails.ts#api",
+      "to": "ts:frontend/src/hooks/useWails.ts#CellThreadView",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/hooks/useWails.ts#api",
+      "to": "ts:frontend/src/hooks/useWails.ts#CellView",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/hooks/useWails.ts#api",
+      "to": "ts:frontend/src/hooks/useWails.ts#Config",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/hooks/useWails.ts#api",
+      "to": "ts:frontend/src/hooks/useWails.ts#Group",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/hooks/useWails.ts#api",
+      "to": "ts:frontend/src/hooks/useWails.ts#LockState",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/hooks/useWails.ts#api",
+      "to": "ts:frontend/src/hooks/useWails.ts#Order",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/hooks/useWails.ts#api",
+      "to": "ts:frontend/src/hooks/useWails.ts#RetireOptions",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/hooks/useWails.ts#api",
+      "to": "ts:frontend/src/hooks/useWails.ts#RetirePlan",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/hooks/useWails.ts#api",
+      "to": "ts:frontend/src/hooks/useWails.ts#RetireReport",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/hooks/useWails.ts#api",
+      "to": "ts:frontend/src/hooks/useWails.ts#RunsView",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/hooks/useWails.ts#api",
+      "to": "ts:frontend/src/hooks/useWails.ts#SyncResult",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/lib/liveRegion.ts#speaker",
+      "to": "ts:frontend/src/lib/liveRegion.ts#SAY_GAP_MS",
+      "kind": "uses",
+      "change": "added",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/lib/liveRegion.ts#useLiveRegion",
+      "to": "ts:frontend/src/lib/liveRegion.ts#SAY_GAP_MS",
+      "kind": "uses",
+      "change": "added",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/lib/liveRegion.ts#useLiveRegion",
+      "to": "ts:frontend/src/lib/liveRegion.ts#Say",
+      "kind": "uses",
+      "change": "added",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/lib/liveRegion.ts#useLiveRegion",
+      "to": "ts:frontend/src/lib/liveRegion.ts#speaker",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/stores",
+      "to": "ts:frontend/src/hooks",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/stores/board.store.ts#useBoard",
+      "to": "ts:frontend/src/hooks/useWails.ts#api",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    }
+  ],
+  "mismatches": [],
+  "stats": {
+    "packages": 13,
+    "changed": 16,
+    "changed_tests": 6,
+    "affected": 101,
+    "untested": 5,
+    "edges": 134
+  },
+  "notes": [
+    "embed all:frontend/dist: placeholder"
+  ]
+}

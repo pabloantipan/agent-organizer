@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -15,20 +16,35 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// Def is one top-level Go definition: a function, a method, a type, or a
-// package-level var or const (one per name). Its range includes its doc
-// comment, so a hunk that only rewords the doc touches the definition.
+// Def is one top-level definition. In Go: a function, a method, a type, or
+// a package-level var or const (one per name). In TS: a function or
+// component, a class, a type or interface, a const or var (one per name),
+// and in a test file a top-level describe, it or test. Its range includes
+// its doc comment, so a hunk that only rewords the doc touches the
+// definition.
 type Def struct {
-	ID    string // go:<package path>.<Receiver>.<Name>, receiver without *
-	Pkg   string // go:<package path>
-	Kind  string // function, method, type, var, const, test
+	ID    string // go:<package path>.<Receiver>.<Name>, receiver without *; ts:<file>#<name>
+	Pkg   string // go:<package path>; ts:<the file's directory>
+	Kind  string // function, method, type, var, const, test; TS adds component, class
+	Lang  string // go, ts
 	File  string // relative to the repo root, slash-separated
 	Start int    // first line, 1-based
 	End   int    // last line
-	// TestFile is true for a definition in a _test.go file; TestFunc for a
-	// Test, Benchmark, Fuzz or Example function in one.
+	// TestFile is true for a definition in a _test.go or *.test.ts(x)
+	// file; TestFunc for a Test, Benchmark, Fuzz or Example function in
+	// one, or a top-level describe, it or test, whose name is TestName
+	// when it is not the last element of the ID.
 	TestFile bool
 	TestFunc bool
+	TestName string
+}
+
+// testName is how evidence names a test: file::TestName.
+func (d Def) testName() string {
+	if d.TestName != "" {
+		return d.File + "::" + d.TestName
+	}
+	return d.File + "::" + lastName(d.ID)
 }
 
 // Graph is what an index source produced for one tree: every definition by
@@ -42,15 +58,24 @@ type Graph struct {
 	// did not type-check, a module whose dependencies are not downloaded);
 	// the graph holds what it could read.
 	Problems []string
+	// Notes are what the source did to the export to read it, said once in
+	// the summary (FR-9: an embed placeholder).
+	Notes []string
 }
 
-// Source builds a Graph for a checked-out tree. One source exists today
-// (go/types in process, chosen by measurement in rm-v0's Notes); v1 may add
-// another behind the same interface.
+// Source builds a Graph for an exported tree. repo is the reviewed repo's
+// checkout, read only for tools it holds (typescript in its
+// node_modules), never written. Handles says which changed files are its
+// own. Two sources exist, each chosen by measurement: go/types (rm-v0's
+// Notes) and typescript (rm-v1-ts's Notes).
 type Source interface {
 	Name() string
-	Graph(root string) (*Graph, error)
+	Handles(path string) bool
+	Graph(root, repo string) (*Graph, error)
 }
+
+// Sources is every source a review runs, in order.
+func Sources() []Source { return []Source{GoTypes{}, TSCompiler{}} }
 
 // GoTypes is the go/packages + go/types source. It needs the go toolchain
 // on PATH (go list) and the module's dependencies in the module cache; it
@@ -60,10 +85,12 @@ type GoTypes struct{}
 
 func (GoTypes) Name() string { return "go/types" }
 
+func (GoTypes) Handles(p string) bool { return strings.HasSuffix(p, ".go") }
+
 // GoBinary is how the source finds the go toolchain; doctor reports it.
 func GoBinary() (string, error) { return exec.LookPath("go") }
 
-func (GoTypes) Graph(root string) (*Graph, error) {
+func (GoTypes) Graph(root, _ string) (*Graph, error) {
 	if _, err := GoBinary(); err != nil {
 		return nil, fmt.Errorf("the go toolchain is not on PATH: organizer review reads Go through go list; install Go from https://go.dev/dl/ (organizer doctor shows it)")
 	}
@@ -125,6 +152,17 @@ func (g *Graph) loadModule(root string, m module) error {
 	pkgs, err := packages.Load(cfg, "./...")
 	if err != nil {
 		return fmt.Errorf("%s: %v", rel(root, m.dir), err)
+	}
+	// FR-9: a package that fails only on a //go:embed pattern matching
+	// nothing in the export (an ignored build output such as frontend/dist)
+	// gets an empty placeholder for it, inside the export, and one retry.
+	if notes := placeholders(root, pkgs); len(notes) > 0 {
+		g.Notes = append(g.Notes, notes...)
+		fset = token.NewFileSet()
+		cfg.Fset = fset
+		if pkgs, err = packages.Load(cfg, "./..."); err != nil {
+			return fmt.Errorf("%s: %v", rel(root, m.dir), err)
+		}
 	}
 	type fileDefs struct {
 		file *ast.File
@@ -209,6 +247,76 @@ func (g *Graph) loadModule(root string, m module) error {
 	return nil
 }
 
+var embedErr = regexp.MustCompile(`^pattern (\S+): (?:no matching files found|cannot embed directory \S+: contains no embeddable files)$`)
+
+// placeholders writes, for each package whose only errors are //go:embed
+// patterns that match nothing, an empty file at each such pattern's path
+// (an empty file satisfies a string, []byte or embed.FS variable alike)
+// and returns one note per pattern. A glob, or a path that would leave
+// root, is left as the error it is.
+func placeholders(root string, pkgs []*packages.Package) []string {
+	var notes []string
+	done := map[string]bool{}
+	for _, p := range pkgs {
+		var pats []string
+		other := false
+		for _, e := range p.Errors {
+			if e.Kind == packages.TypeError {
+				continue
+			}
+			if m := embedErr.FindStringSubmatch(e.Msg); m != nil {
+				pats = append(pats, m[1])
+			} else {
+				other = true
+			}
+		}
+		if other || len(pats) == 0 {
+			continue
+		}
+		dir := pkgDir(p)
+		if dir == "" {
+			continue
+		}
+		for _, pat := range pats {
+			pathPat := strings.TrimPrefix(pat, "all:")
+			if strings.ContainsAny(pathPat, "*?[\\") {
+				continue
+			}
+			dst := filepath.Join(dir, filepath.FromSlash(pathPat))
+			if r, err := filepath.Rel(root, dst); err != nil || r == ".." || strings.HasPrefix(r, ".."+string(filepath.Separator)) {
+				continue
+			}
+			if done[dst] {
+				continue
+			}
+			if fi, err := os.Stat(dst); err == nil && fi.IsDir() {
+				dst = filepath.Join(dst, "placeholder")
+			}
+			if os.MkdirAll(filepath.Dir(dst), 0o755) != nil || os.WriteFile(dst, nil, 0o644) != nil {
+				continue
+			}
+			done[dst] = true
+			notes = append(notes, fmt.Sprintf("embed %s: placeholder", pat))
+		}
+	}
+	return notes
+}
+
+// pkgDir is the directory of a package's files.
+func pkgDir(p *packages.Package) string {
+	for _, fs := range [][]string{p.GoFiles, p.CompiledGoFiles, p.OtherFiles, p.EmbedFiles, p.IgnoredFiles} {
+		if len(fs) > 0 {
+			return filepath.Dir(fs[0])
+		}
+	}
+	for _, e := range p.Errors {
+		if i := strings.Index(e.Pos, ":"); i > 0 && filepath.IsAbs(e.Pos[:i]) {
+			return filepath.Dir(e.Pos[:i])
+		}
+	}
+	return ""
+}
+
 // referable is an object a definition can reference across definitions:
 // anything at package scope, a method, or a struct field.
 func referable(obj types.Object) bool {
@@ -247,7 +355,7 @@ func Outline(fset *token.FileSet, f *ast.File, pkgPath, relFile string) []Def {
 	test := strings.HasSuffix(relFile, "_test.go")
 	pkg := "go:" + pkgPath
 	mk := func(name, kind string, from, to token.Pos) Def {
-		d := Def{ID: pkg + "." + name, Pkg: pkg, Kind: kind, File: relFile,
+		d := Def{ID: pkg + "." + name, Pkg: pkg, Kind: kind, Lang: "go", File: relFile,
 			Start: fset.Position(from).Line, End: fset.Position(to).Line, TestFile: test}
 		return d
 	}

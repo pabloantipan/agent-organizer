@@ -127,7 +127,7 @@ func TestBuildOnMerge(t *testing.T) {
 	if ranges[0].Base != before || ranges[0].Head != merge {
 		t.Fatalf("range %+v, want base %s head %s", ranges[0], before, merge)
 	}
-	rm, err := Build("init", merge, ranges, GoTypes{}, t.TempDir())
+	rm, err := Build("init", merge, ranges, []Source{GoTypes{}}, t.TempDir())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -142,7 +142,14 @@ func TestBuildOnMerge(t *testing.T) {
 			t.Errorf("%s change %q, want %q", id, nodes[id].Change, ch)
 		}
 	}
+	checkPackages(t, rm)
+	if pk := nodes["go:example.com/m/p"]; pk.Level != "package" || pk.Change != "modified" || pk.File != "p" {
+		t.Errorf("package node %+v", pk)
+	}
 	for _, n := range rm.Nodes {
+		if n.Level == "package" {
+			continue
+		}
 		if !strings.HasSuffix(n.File, ".go") {
 			t.Errorf("node %s from a non-Go file %s", n.ID, n.File)
 		}
@@ -203,7 +210,7 @@ func TestCardRanges(t *testing.T) {
 func TestBuildLeavesRepoAlone(t *testing.T) {
 	dir, merge, _ := fixtureRepo(t)
 	ranges, _ := CommitRanges(merge, []Repo{{Dir: dir}})
-	if _, err := Build("init", merge, ranges, GoTypes{}, t.TempDir()); err != nil {
+	if _, err := Build("init", merge, ranges, []Source{GoTypes{}}, t.TempDir()); err != nil {
 		t.Fatal(err)
 	}
 	out, _ := exec.Command("git", "-C", dir, "status", "--porcelain").Output()

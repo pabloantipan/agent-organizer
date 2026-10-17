@@ -1,0 +1,6 @@
+# X0, clean clone of branch rm-v1-ts at 3b0aeff under .wt-notes/rt-build/clean, 2026-10-17
+XDG_DATA_HOME=$(mktemp -d) CI=true test-lease run -- make test   -> exit 0 (all Go packages ok; organizer/internal/review ok; vitest 71 files, 810 tests passed)
+cd frontend && test-lease run -- pnpm run build                    -> exit 0
+test-lease run -- wails build                                      -> exit 0
+git status --porcelain                                             -> empty
+go test -count=1 -v -run 'TS|Embed' ./internal/review (same clone) -> TestTSOnMerge, TestTSMissingTools, TestEmbedPlaceholder PASS, none skipped

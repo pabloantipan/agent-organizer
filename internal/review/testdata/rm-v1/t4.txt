@@ -1,0 +1,26 @@
+# T4 on both merges: every symbol's parent is a package node in nodes, each package once; package uses edges only where a symbol edge crosses those packages
+35671ed: 13 package nodes (0 repeated), 123 symbols, 0 without a package parent; 12 package edges, 0 without a symbol edge; nodes from wailsjs or .d.ts: 0
+   modified  go:organizer
+   affected  go:organizer/internal/cache
+   affected  go:organizer/internal/cli
+   affected  go:organizer/internal/config
+   affected  go:organizer/internal/model
+   affected  go:organizer/internal/prompt
+   affected  go:organizer/internal/record
+   modified  go:organizer/internal/service
+   affected  ts:frontend/src
+   modified  ts:frontend/src/components
+   modified  ts:frontend/src/hooks
+   modified  ts:frontend/src/lib
+   affected  ts:frontend/src/stores
+c8e1773: 10 package nodes (0 repeated), 75 symbols, 0 without a package parent; 11 package edges, 0 without a symbol edge; nodes from wailsjs or .d.ts: 0
+   affected  go:organizer
+   affected  go:organizer/internal/cache
+   modified  go:organizer/internal/cli
+   affected  go:organizer/internal/config
+   affected  go:organizer/internal/discuss
+   affected  go:organizer/internal/model
+   affected  go:organizer/internal/prompt
+   affected  go:organizer/internal/record
+   affected  go:organizer/internal/scan
+   modified  go:organizer/internal/service
