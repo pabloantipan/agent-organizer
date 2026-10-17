@@ -54,17 +54,21 @@ describe("FR-7: the three openers open the reader, not the editor", () => {
   });
 });
 
-describe("leftovers-38 O4 (D9): the map's Contents entry is heard as the one to read first", () => {
+describe("leftovers-40 V2 (D9, A4): the map's Contents entry has one accessible name, from aria-label", () => {
   const { contents } = withAnchors(marked.parse("# Spec\n\n## Problem\n\nx\n\n## Change on the map\n\ny\n", { async: false }) as string);
   const html = renderToStaticMarkup(<Contents items={contents} go={() => undefined} />);
-  const buttons = [...html.matchAll(/<button[^>]*>(.*?)<\/button>/g)].map((m) => m[1]);
-  /** A button's accessible name from its content: aria-hidden spans say nothing, sr-only ones are read. */
-  const nameOf = (inner: string) => inner.replace(/<span[^>]*aria-hidden="true"[^>]*>.*?<\/span>/g, "").replace(/<[^>]+>/g, "");
+  const buttons = [...html.matchAll(/<button([^>]*)>(.*?)<\/button>/g)].map((m) => ({ attrs: m[1], inner: m[2] }));
+  /** A button's accessible name: its aria-label, else its content without aria-hidden spans. */
+  const nameOf = (b: { attrs: string; inner: string }) =>
+    / aria-label="([^"]*)"/.exec(b.attrs)?.[1] ?? b.inner.replace(/<span[^>]*aria-hidden="true"[^>]*>.*?<\/span>/g, "").replace(/<[^>]+>/g, "");
   it("the entry's accessible name is exactly Change on the map, start here", () => {
     expect(buttons.map(nameOf)).toEqual(["Change on the map, start here", "Problem"]);
+    expect(buttons[0].attrs).toContain(' aria-label="Change on the map, start here"');
+    expect(buttons[1].attrs).not.toContain("aria-label");
   });
-  it("the ✎ stays drawn and aria-hidden, the suffix only screen-reader", () => {
-    expect(buttons[0]).toBe('<span class="sr-map-mark" aria-hidden="true">✎</span>Change on the map<span class="sr-only">, start here</span>');
-    expect(buttons[1]).toBe("Problem");
+  it("no sr-only span inside it; the ✎ stays drawn and aria-hidden", () => {
+    expect(buttons[0].inner).not.toContain("sr-only");
+    expect(buttons[0].inner).toBe('<span class="sr-map-mark" aria-hidden="true">✎</span>Change on the map');
+    expect(buttons[1].inner).toBe("Problem");
   });
 });
