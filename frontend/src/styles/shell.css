@@ -131,11 +131,14 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .ib-age { font-family: var(--mono); font-size: var(--font-size-sm); color: var(--fg-subtle); text-align: right; }
 /* a record waiting a week or more: its age, said once, in amber (leftovers-37 FR-2) */
 .ib-age.long { color: var(--warning); font-weight: var(--weight-semibold); }
-/* One verb column (leftovers-38 FR-2, needs-me-waits W12): at least as wide
-   as the widest verb a row carries (Rule, Open, Answer, Agents, Launch), the
-   button at its right edge, so every age column stands at one x. Wide's
-   Needs me lays the button out as the grid item itself (rule-box.css). */
-.ib-row { --ib-verb-w: 72px; }
+/* One verb column (leftovers-38 FR-2, leftovers-40 FR-1, needs-me-waits W12,
+   A3): at least as wide as the widest label a row can show, `Rule · draft`
+   (lib/drafts draftVerb; about 5 em of --font-size-sm), the button at its
+   right edge, so every age column stands at one x. The floor is the label at
+   the button's type size with room to spare, plus its padding and border, so
+   it follows the type scale instead of a measured pixel count. Wide's Needs
+   me lays the button out as the grid item itself (rule-box.css). */
+.ib-row { --ib-verb-w: calc(5.5 * var(--font-size-sm) + 2 * var(--space-3) + 2px); }
 .ib-act, .ib-act .act { justify-self: end; }
 .ib-act .act { min-height: var(--control-sm); padding: 0 var(--space-3); font-size: var(--font-size-sm); }
 /* Focus and names, disclosure state (ui-leftovers FR-4): an open Rule is
