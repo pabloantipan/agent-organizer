@@ -1,12 +1,12 @@
 ---
 title: "organizer review carries change-check's declared-change flags onto the map"
-status: next
+status: now
 repos: [organizer]
 branch: rm-v1-reconcile
 seat: rr-build
 stage: review-map
 updated: 2026-10-17
-next: "sup80 runs it after rm-v1-ts; 0145 ruled"
+next: "rr-build: map change-check flags onto revmap (FR-11, FR-12)"
 risk: low
 footprint: [internal/review/*, internal/cli/review.go, internal/review/testdata/*]
 depends_on: [rm-v1-ts]
