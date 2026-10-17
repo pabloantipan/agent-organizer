@@ -135,10 +135,8 @@ build step (v0-v3), each a wave of one or two cards; only v0 is carded now.
 
 ## Open questions
 
-- Q1 (v1): where `revmap.json` lives for another Mac's branch (odyssey
-  reviewing a lodestar initiative): pushed branch and a local clone, or
-  computed where the branch is and synced. Raised as its own record when v1
-  is cut.
+- Q1 (v1): answered 2026-10-17, see "v1" below: the branch is pushed and
+  `organizer review` runs in the reviewing Mac's clone; no sync path.
 - Q2 (v2): Monaco and ELK add weight to the bundle; Aglaea and the size
   budget decide.
 
@@ -157,3 +155,99 @@ need not hold both. So:
   `untested`; if neither merge holds an untested one, a small Go repo in
   testdata shows it. A merge with no untested definition says so in the
   evidence, which is itself a check that no false `untested` appears.
+
+## v1: TS, package level, declared changes (cards `rm-v1-ts`, `rm-v1-reconcile`)
+
+status: proposed (0145), by the FSE, 2026-10-17, on main at d0d122a.
+
+### Premises
+
+| Premise | Shown by | Read |
+|---|---|---|
+| Q1: the branch is pushed and `organizer review` runs in the reviewing Mac's clone; odyssey has go, the initiative repos and mmdc | Pablo on lodestar, "Oddysey is escentially a 'clone' of this laptop", "yes, all installed" (Hephaistos relay, thread 01M55TQT) | 2026-10-17 |
+| odyssey's claudecode is at `~/claudecode/personal-cloude`, so no `~/claudecode` path goes into the command | Hephaistos, same thread (a relay: claim) | 2026-10-17 |
+| `internal/review` has one `Source`, `GoTypes`; every node is `Level: "symbol"`, `Lang: "go"`; no `~/claudecode` path in the package | `source.go:50`, `:59`; `review.go:274`; grep | 2026-10-17 |
+| `Export` is `git archive \| tar`, which leaves out the ignored `frontend/dist`, so the main package's `//go:embed all:frontend/dist` errors in exports | `git.go:96`; sup74's finding (claim, re-read by T5) | 2026-10-17 |
+| `change-check … --base --head --json` is on the PATH, finds a `done/` card, and gives `repos[].files[]` (`path`, `status`, `test`, `symbols`) and `flags[]` (`flag`, `repo`, `path`, `symbol`, `detail`) with the words `undeclared`, `outside footprint`, `declared, not changed` | run on lf40-verb-fit 29aa20f..608880e: three flags | 2026-10-17 |
+| two of those flag kinds can be false (CSS custom properties; footprint written with words) | sup79's close (claim) | 2026-10-17 |
+| `typescript` is in `frontend/node_modules`; node v22.15.0 on the PATH | `ls`, `node -v` | 2026-10-17 |
+| the schema's `level` is `symbol` or `package`; flags `undeclared`, `declared_not_changed`, `outside_footprint`; mismatches `{type, node}` with `changed_not_declared` | `pipeline-starter.md` §6.6.3, lines 383-431 | 2026-10-17 |
+
+### Requirements
+
+Card `rm-v1-ts` (Go):
+
+- **FR-7** TS and TSX files (not `.d.ts`, not `frontend/wailsjs`) get
+  symbol nodes as Go does (FR-2, FR-3): changed exported and top-level
+  functions, components, consts and types, their 1-hop callers and callees
+  inside the same repo, and the tests that reference them (`*.test.ts(x)`,
+  as `file::<describe or it name>`), `lang: "ts"`. The source is chosen by
+  measurement as FR-5 was (candidates: the TypeScript compiler API run by
+  node from the reviewed repo's own `node_modules`; tree-sitter; a light
+  parser), recorded in the card's Notes, behind `Source`.
+- **FR-8** Every symbol node's `parent` is a `package` node (Go: the import
+  path; TS: the file's directory under `src`), emitted once with `change`
+  `modified` when any child changed, else `affected`; package-to-package
+  `uses` edges summarise the symbol edges.
+- **FR-9** The export gets what an ignored embed needs: when a Go package
+  fails only on a `//go:embed` pattern that matches nothing in the export,
+  the build writes an empty placeholder for that pattern inside the export
+  (never in the repo) and retries; the summary says `embed <pattern>:
+  placeholder` once.
+- **FR-10** No path is written in: a tool is found on the PATH or in the
+  reviewed repo (`node_modules/.bin`), and a missing one is named by
+  `organizer review` and `organizer doctor`, as FR-5.
+
+Card `rm-v1-reconcile` (Go, depends on `rm-v1-ts`):
+
+- **FR-11** With a card (the target is a slug, or `--card <slug>` with a
+  sha) `organizer review` runs `change-check <initiative> <card> --base
+  <base> --head <head> --json` and maps its flags onto the map, word for
+  word: `undeclared` → node flag `undeclared` and mismatch
+  `changed_not_declared`; `declared, not changed` → `declared_not_changed`
+  and mismatch `declared_not_changed` on the node it names, or a node-less
+  mismatch when none matches; `outside footprint` → `outside_footprint`. A
+  flag on a file with no node lands on a file-level mismatch. The map adds
+  no flag change-check did not give (FR-6).
+- **FR-12** No card, or `change-check` missing or failing: the map is
+  written without reconciliation and the summary says why in one line; exit
+  0. The summary counts each mismatch type.
+
+### Acceptance → gate
+
+| # | FR | Check | Expected (fails on main) |
+|---|---|---|---|
+| T1 | 7 | `organizer review organizer 35671ed --json` in a clean clone (lf33, Go and frontend); the builder's hand list of every TS definition a hunk touches, committed first | every hand-listed TS definition present with the right `change` and `lang: "ts"`; none not on the list |
+| T2 | 7 | for 35671ed, three changed TS functions or components; callers by `grep` written by hand | each caller `affected` with a `uses` edge; no edge the hand check cannot confirm |
+| T3 | 7 | for 35671ed: a changed TS symbol a vitest names, and one none does | the first lists `file::<name>`; the second `untested` |
+| T4 | 8 | 35671ed and c8e1773 | every symbol node's `parent` is a `package` node present in `nodes`; package `uses` edges exist only where a symbol edge does |
+| T5 | 9 | `organizer review organizer c8e1773` | no embed problem; `embed all:frontend/dist: placeholder` once; `git status --porcelain` empty in the repo |
+| T6 | 5, 10 | the card's Notes; `PATH=` without node, `organizer review organizer 35671ed` | the comparison table with the source chosen and why; the run names what is missing and still writes the Go nodes |
+| R1 | 11 | `organizer review organizer 43c61fc --card lf40-verb-fit --json` | its three change-check flags appear: `outside_footprint` on the test file, `undeclared` on `shell.css` (file level), `declared_not_changed` for `.ib-row` as a node-less mismatch; nothing else flagged |
+| R2 | 11 | go test with a fake `change-check` on the PATH printing one flag of each kind on symbols that have nodes | each flag and mismatch on its node, word for word |
+| R3 | 12 | no card; `PATH` without change-check; a fake one exiting 1 | the map written, one line saying why, exit 0 |
+| X0 | all | `XDG_DATA_HOME=$(mktemp -d) make test`, `cd frontend && pnpm run build`, `wails build`, then `git status --porcelain` | pass, empty |
+
+### Boundary
+
+- `rm-v1-ts`: `internal/review` (a TS source behind `Source`, the package
+  level, the embed placeholder), `internal/cli` (`review.go`, and `doctor`'s line in `cli.go`;
+  `doctor`'s line), a node helper script under `internal/review` if the
+  compiler API wins, `go.mod`/`go.sum`, their tests and testdata.
+- `rm-v1-reconcile`: `internal/review` (the change-check call and mapping),
+  `internal/cli` (`--card`), their tests and testdata.
+- Not: the frontend's code (it is only read), `change-check` itself (its two
+  false flags go to Hephaistos, sent 2026-10-17), `internal/service` beyond
+  the scan, any other repo, CI, a viewer.
+
+### No-gos
+
+- No `~/claudecode` or other absolute tool path. No network. No writes to
+  the reviewed repo. No reach (`no direct test`) yet: v2's viewer words it.
+
+### Cards
+
+| Card | Gate rows | Depends on | ui_review |
+|---|---|---|---|
+| `rm-v1-ts` | T1, T2, T3, T4, T5, T6, X0 | — | false |
+| `rm-v1-reconcile` | R1, R2, R3, X0 | `rm-v1-ts` | false |
