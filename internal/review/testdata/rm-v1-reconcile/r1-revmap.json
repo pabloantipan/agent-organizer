@@ -1,0 +1,252 @@
+{
+  "version": "0",
+  "initiative": "organizer",
+  "target": "43c61fc",
+  "base": "f4fd863f9d829a5c728a8150571d98bbdf0bf24d",
+  "head": "43c61fc2e5189a6976d5275d9df93720f78f9664",
+  "source": "go/types, typescript",
+  "nodes": [
+    {
+      "id": "ts:frontend/src/components",
+      "level": "package",
+      "parent": "",
+      "kind": "package",
+      "lang": "ts",
+      "file": "frontend/src/components",
+      "range_head": null,
+      "range_base": null,
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/lib",
+      "level": "package",
+      "parent": "",
+      "kind": "package",
+      "lang": "ts",
+      "file": "frontend/src/lib",
+      "range_head": null,
+      "range_base": null,
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/SpecReader.test.tsx#leftovers-38 O4 (D9): the map's Contents entry is heard as the one to read first",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "test",
+      "lang": "ts",
+      "file": "frontend/src/components/SpecReader.test.tsx",
+      "range_head": null,
+      "range_base": [
+        57,
+        70
+      ],
+      "change": "deleted",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [
+        "outside_footprint"
+      ],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/SpecReader.test.tsx#leftovers-40 V2 (D9, A4): the map's Contents entry has one accessible name, from aria-label",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "test",
+      "lang": "ts",
+      "file": "frontend/src/components/SpecReader.test.tsx",
+      "range_head": [
+        57,
+        74
+      ],
+      "range_base": null,
+      "change": "added",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [
+        "outside_footprint"
+      ],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/SpecReader.tsx#Contents",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/SpecReader.tsx",
+      "range_head": [
+        345,
+        365
+      ],
+      "range_base": [
+        345,
+        364
+      ],
+      "change": "modified",
+      "risk": null,
+      "evidence": {
+        "tests": [
+          "frontend/src/components/SpecReader.test.tsx::leftovers-40 V2 (D9, A4): the map's Contents entry has one accessible name, from aria-label"
+        ]
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/components/SpecReader.tsx#SpecReader",
+      "level": "symbol",
+      "parent": "ts:frontend/src/components",
+      "kind": "component",
+      "lang": "ts",
+      "file": "frontend/src/components/SpecReader.tsx",
+      "range_head": [
+        161,
+        343
+      ],
+      "range_base": [
+        161,
+        343
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    },
+    {
+      "id": "ts:frontend/src/lib/specReader.ts#ContentsItem",
+      "level": "symbol",
+      "parent": "ts:frontend/src/lib",
+      "kind": "type",
+      "lang": "ts",
+      "file": "frontend/src/lib/specReader.ts",
+      "range_head": [
+        56,
+        56
+      ],
+      "range_base": [
+        56,
+        56
+      ],
+      "change": "affected",
+      "risk": null,
+      "evidence": {
+        "tests": []
+      },
+      "claim": null,
+      "flags": [],
+      "review": {
+        "state": "unreviewed",
+        "by": null,
+        "at": null,
+        "note": null
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "ts:frontend/src/components",
+      "to": "ts:frontend/src/lib",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/SpecReader.tsx#Contents",
+      "to": "ts:frontend/src/lib/specReader.ts#ContentsItem",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    },
+    {
+      "from": "ts:frontend/src/components/SpecReader.tsx#SpecReader",
+      "to": "ts:frontend/src/components/SpecReader.tsx#Contents",
+      "kind": "uses",
+      "change": "unchanged",
+      "source": "typescript"
+    }
+  ],
+  "mismatches": [
+    {
+      "type": "outside_footprint",
+      "node": null,
+      "file": "frontend/src/components/SpecReader.test.tsx"
+    },
+    {
+      "type": "changed_not_declared",
+      "node": null,
+      "file": "frontend/src/styles/shell.css"
+    },
+    {
+      "type": "declared_not_changed",
+      "node": null,
+      "file": "frontend/src/styles/shell.css",
+      "symbol": "frontend/src/styles/shell.css:.ib-row"
+    }
+  ],
+  "reconciled": true,
+  "reconciliation": "change-check lf40-verb-fit",
+  "stats": {
+    "packages": 2,
+    "changed": 1,
+    "changed_tests": 2,
+    "affected": 2,
+    "untested": 0,
+    "edges": 2
+  }
+}
