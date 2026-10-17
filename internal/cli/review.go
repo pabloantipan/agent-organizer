@@ -16,15 +16,19 @@ import (
 	"organizer/internal/scan"
 )
 
-const reviewUsage = "usage: organizer review <initiative> <card-slug | sha> [--json] [--out path]   (ids: organizer status)"
+const reviewUsage = "usage: organizer review <initiative> <card-slug | sha> [--card slug] [--json] [--out path]   (ids: organizer status)"
 
-// reviewCmd is review-map v0 and v1 (FR-1 to FR-10): the Go and TypeScript
+// reviewCmd is review-map v0 and v1 (FR-1 to FR-12): the Go and TypeScript
 // change of a card's branch or of a commit as revmap.json, written under
 // the data dir (or --out) and summarised, or printed whole with --json.
+// With a card (the target, or --card beside a sha) change-check's flags
+// land on the map; without one, or when change-check is missing or fails,
+// the map is written without them and says why.
 func reviewCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now func() time.Time) int {
 	args, asJSON := takeFlag(args, "--json")
 	args, out, _ := takeValue(args, "--out")
-	if len(args) != 2 {
+	args, cardSlug, cardGiven := takeValue(args, "--card")
+	if len(args) != 2 || (cardGiven && cardSlug == "") {
 		fmt.Fprintln(stderr, reviewUsage)
 		return 2
 	}
@@ -43,6 +47,9 @@ func reviewCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now f
 	var ranges []review.Range
 	var err error
 	if card := findCard(si, target); card != nil {
+		if cardSlug == "" {
+			cardSlug = card.Slug
+		}
 		ranges, err = review.CardRanges(card.Slug, card.Branch, review.ReposOf(si.Path, si.ID, card.Repos))
 	} else {
 		repos := review.ReposOf(si.Path, si.ID, si.Initiative.Repos)
@@ -75,6 +82,17 @@ func reviewCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now f
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1
+	}
+	switch {
+	case cardSlug == "":
+		rm.Reconciliation = "no card"
+	default:
+		if flags, err := review.ChangeCheck(si.Path, id, cardSlug, rm.Base, rm.Head); err != nil {
+			rm.Reconciliation = err.Error()
+		} else {
+			review.Reconcile(rm, flags)
+			rm.Reconciled, rm.Reconciliation = true, "change-check "+cardSlug
+		}
 	}
 	if out == "" {
 		out = review.DefaultPath(id, rm.Head)
