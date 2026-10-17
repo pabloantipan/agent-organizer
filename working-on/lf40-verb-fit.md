@@ -6,7 +6,7 @@ branch: lf40-verb-fit
 seat: vf-build
 stage: decisions-owned-and-used
 updated: 2026-10-16
-next: "waits on 0144; on accept the FSE gives it to a supervisor"
+next: "sup79 runs it; 0144 ruled"
 risk: low
 footprint: [frontend/src/styles/shell.css (verb cell), frontend/src/components/SpecReader.tsx (map entry), their tests]
 depends_on: [lf38-owner-once]
