@@ -5,8 +5,8 @@ repos: [organizer]
 branch: lf40-verb-fit
 seat: vf-build
 stage: decisions-owned-and-used
-updated: 2026-10-16
-next: "sup79 runs it; 0144 ruled"
+updated: 2026-10-17
+next: "vf-build building on lf40-verb-fit (sup79, launched 2026-10-17 15:20)"
 risk: low
 footprint: [frontend/src/styles/shell.css (verb cell), frontend/src/components/SpecReader.tsx (map entry), their tests]
 depends_on: [lf38-owner-once]
