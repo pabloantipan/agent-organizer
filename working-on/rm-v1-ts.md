@@ -1,12 +1,12 @@
 ---
 title: "organizer review reads TypeScript, adds the package level, and survives the dist embed"
-status: next
+status: now
 repos: [organizer]
 branch: rm-v1-ts
 seat: rt-build
 stage: review-map
 updated: 2026-10-17
-next: "sup80 runs it; 0145 ruled"
+next: "rt-build builds it: hand lists, TS source comparison, then FR-7 to FR-10"
 risk: medium
 footprint: [internal/review/*, internal/cli/review.go, internal/cli/cli.go (doctor line), go.mod, go.sum, internal/review/testdata/*]
 depends_on: []
