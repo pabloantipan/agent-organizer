@@ -118,7 +118,7 @@ func Export(dir, rev, dst string) error {
 	return nil
 }
 
-// FileHunks is the changed lines of one Go file: line ranges on each side.
+// FileHunks is the changed lines of one file: line ranges on each side.
 type FileHunks struct {
 	Base, Head string // path on each side; "" when the file is added or deleted
 	BaseLines  []span
@@ -129,10 +129,11 @@ type span struct{ from, to int } // inclusive; to < from means "between from-1 a
 
 var hunkRe = regexp.MustCompile(`^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@`)
 
-// Hunks is `git diff -U0 base...head` over Go files only, by file. Renames
-// are followed so a moved file is one file with both paths.
-func Hunks(dir, base, head string) ([]FileHunks, error) {
-	out, err := git(dir, "diff", "-U0", "--no-color", "--no-ext-diff", "-M", base+"..."+head, "--", "*.go")
+// Hunks is `git diff -U0 base...head` over the files keep accepts (a
+// source's own files), by file. Renames are followed so a moved file is one
+// file with both paths.
+func Hunks(dir, base, head string, keep func(path string) bool) ([]FileHunks, error) {
+	out, err := git(dir, "diff", "-U0", "--no-color", "--no-ext-diff", "-M", base+"..."+head)
 	if err != nil {
 		return nil, err
 	}
@@ -166,13 +167,13 @@ func Hunks(dir, base, head string) ([]FileHunks, error) {
 			}
 		}
 	}
-	var gofiles []FileHunks
+	var kept []FileHunks
 	for _, f := range files {
-		if strings.HasSuffix(f.Base, ".go") || strings.HasSuffix(f.Head, ".go") {
-			gofiles = append(gofiles, f)
+		if (f.Base != "" && keep(f.Base)) || (f.Head != "" && keep(f.Head)) {
+			kept = append(kept, f)
 		}
 	}
-	return gofiles, sc.Err()
+	return kept, sc.Err()
 }
 
 func diffPath(p string) string {
