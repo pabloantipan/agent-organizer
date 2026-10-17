@@ -4,6 +4,12 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF 2026-10-17 (last SHA seen 483f411)
+
+- sup79 runs lf40-verb-fit (0144 ruled "ok" 2026-10-17; forecast 10-25 min). On its closing report: end it (probe -k, token rm, clean, prompts, threads).
+- Held for the next Go leftovers: setSeat notify-before-close (organizer run race); one shared spec-path helper (scan.cardSpecRel vs service.specRel). Gate habit: every make test row carries a temp XDG_DATA_HOME.
+- Next: raise review-map v1 as a proposed record (Q1 with Hephaistos: where the revmap lives for another Mac's branch). Pablo pushes main.
+
 ## HAND-OFF 2026-10-16 (last SHA seen 7f439a3)
 
 - No supervisor running. Today: lf38 (sup77, 26 min, $7.75) and lf39 (sup78, 34 min, $3.80) landed; installed v0.2.0-2349-g63c90f8. Pablo pushes main.
