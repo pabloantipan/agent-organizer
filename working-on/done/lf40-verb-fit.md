@@ -1,12 +1,12 @@
 ---
 title: "The verb column fits 'Rule · draft', and the map entry is one accessible name"
-status: now
+status: done
 repos: [organizer]
 branch: lf40-verb-fit
 seat: vf-build
 stage: decisions-owned-and-used
 updated: 2026-10-17
-next: "review: lf40-verb-fit, gate met (V1, V2, X0), 608880e"
+next: "done: merged to main (sup79)"
 risk: low
 footprint: [frontend/src/styles/shell.css (verb cell), frontend/src/components/SpecReader.tsx (map entry), their tests]
 depends_on: [lf38-owner-once]
