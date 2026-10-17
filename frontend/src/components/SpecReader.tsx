@@ -344,7 +344,8 @@ export function SpecReader() {
 
 /** The document's Contents, the change map first. The ✎ is drawn only; the
  *  map's entry says what the mark tells a sighted reader, so its name is
- *  `<heading>, start here` (diagrams-in-app D9, leftovers-38 FR-4). */
+ *  `<heading>, start here` (diagrams-in-app D9, leftovers-38 FR-4), one
+ *  `aria-label` so WebKit reads it as one run (leftovers-40 FR-2, A4). */
 export function Contents({ items, go }: { items: ContentsItem[]; go: (id: string) => void }) {
   if (items.length === 0) return null;
   return (
@@ -353,8 +354,8 @@ export function Contents({ items, go }: { items: ContentsItem[]; go: (id: string
       <ol>
         {items.map((c) => (
           <li key={c.id} className={c.map ? "map" : undefined}>
-            <button type="button" className="linkish" onClick={() => go(c.id)}>
-              {c.map && <span className="sr-map-mark" aria-hidden="true">✎</span>}{c.text}{c.map && <span className="sr-only">, start here</span>}
+            <button type="button" className="linkish" aria-label={c.map ? `${c.text}, start here` : undefined} onClick={() => go(c.id)}>
+              {c.map && <span className="sr-map-mark" aria-hidden="true">✎</span>}{c.text}
             </button>
           </li>
         ))}
