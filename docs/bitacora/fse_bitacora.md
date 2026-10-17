@@ -4,11 +4,13 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
-## HAND-OFF 2026-10-17 (last SHA seen 483f411)
+## HAND-OFF 2026-10-17 (last SHA seen b194de3)
 
-- sup79 runs lf40-verb-fit (0144 ruled "ok" 2026-10-17; forecast 10-25 min). On its closing report: end it (probe -k, token rm, clean, prompts, threads).
+- No supervisor running. lf40-verb-fit landed (sup79, 13 min vs 10-25, $4.96); installed v0.2.0-2363-gb194de3. Pablo pushes main.
+- Held for the next frontend leftovers (vf-ui, done/lf40-verb-fit.md ## UI review): UF1 sev 1, a test that renders every verb label Home.tsx can draw against `--ib-verb-w` (Rule · draft fits by 5.8 px; Answer · draft would not); spec gaps: the verb labels are listed nowhere, and wide Home (>=1920, rule-box.css) is unchecked for FR-1.
+- For Hephaistos when next writing: change-check false-flags CSS custom properties and footprint written as words (sup79).
 - Held for the next Go leftovers: setSeat notify-before-close (organizer run race); one shared spec-path helper (scan.cardSpecRel vs service.specRel). Gate habit: every make test row carries a temp XDG_DATA_HOME.
-- Next: raise review-map v1 as a proposed record (Q1 with Hephaistos: where the revmap lives for another Mac's branch). Pablo pushes main.
+- Next: raise review-map v1 as a proposed record (Q1 with Hephaistos: where the revmap lives for another Mac's branch).
 
 ## HAND-OFF 2026-10-16 (last SHA seen 7f439a3)
 
