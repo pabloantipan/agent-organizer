@@ -85,3 +85,22 @@ repo organizer: base 29aa20f62 (--base main) ... head 608880e4ed909c90c137cb0c17
 - Not in the gate, noted: wide Home (rule-box.css, button as grid item) was not measured by V1; the floor (92 px) would not fit a future `Answer · draft` (~99 px, the builder's note).
 
 Reviewer vf-review, 2026-10-17, commit 608880e4ed909c90c137cb0c17cb30e1984090fd. `## UI review` not yet written: status and place left as they are.
+
+## UI review
+vf-ui, 2026-10-17, all rows on commit 608880e4ed909c90c137cb0c17cb30e1984090fd (detached clone; the branch did not move). **Verdict: pass.** No severity 4 or 3.
+
+- V1 (FR-1, W12 amended): met. Tab harness run by me against my own `wails dev` (port 34233), fixture, auth off, probe stub, measured 15 s after load so the agents feed's rows are in. 18 rows in view: Rule · draft, Rule, Answer, Open, Agents, Launch, Show. Every `ib-age` left x is 822 at 1024×640 (compact) and 1238 at 1440×900 (regular), spread 0, in all three states: before, with a draft kept on init-a 0002 through `lib/drafts` in the page, and after discarding it. Verb widths (px): Rule · draft 86.22, Answer 67.81, Launch 67.41, Agents 66.42, Show 57.14, Open 56.16, Rule 51.02. All buttons end at one right edge (974, 1390), so the floor is 92 px with 5.8 px to spare. Evidence: `.wt-notes/vf-ui/out/v1-1024x640.txt`, `out/v1-1440x900.txt`, shots `wkwebview-1024x640-V1-kept-draft.png`, `wkwebview-1024x640-V1-after-discard.png`, `wkwebview-1440x900-V1-after-discard.png`.
+- How the wider column reads at 1024: fine. The subject column goes from 624 to 604 px (3%). In the shot, the longest fixture subject ("Which machine runs the fixture's nightly scan, and who watches it") ends well short of the age column. Short verbs sit right-aligned with blank space to their left, which keeps the age column and the button edge straight. Nothing truncates that did not before.
+- V2 (FR-2, D9 + A4): met. The vitest file passes, 9 of 9, including "leftovers-40 V2" (2 tests). The test reads the name from `aria-label` and checks that the inner markup has no `sr-only`, which matches the row. In WebKit, I opened the review build (pid saved) and went init-a → Work → w-wide → `Read docs/reader.md#the-scan-report`. In its AX tree, the Contents entry is `AXButton t="Change on the map, start here"`, with no space before the comma, no ✎ and no child text. Other entries keep their content name. The ✎ is still drawn, and the visible label leads the name, so 2.5.3 (Label in Name) holds. Evidence: `out/ax-reader.txt`, shot `wkwebview-1440x900-V2-reader-contents.png`.
+- X0: shared test run **fresh**, run 29e31527-80277 of 608880e4ed90 (`XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test`, rc 0, Go ok, 71 files / 810 vitest). vf-review reused it. `make review-build` rc 0. `wails build` after my `wails dev` rc 0. `git status --porcelain` empty at the end.
+
+Findings
+- UF1 (sev 1). What the person cannot do: nothing today. Where: the verb column, `shell.css` `--ib-verb-w`. Evidence: the floor fits the longest label by 5.8 px. A longer compound label, such as an `Answer · draft` (~99 px), would push its row's age left again, and no test lists the labels against the floor. Proposal: a check that renders every label `Home.tsx` can draw and measures it against the floor, so the next compound verb fails a test rather than a UI review.
+
+Spec gaps (for the FSE)
+- W12 and V1 name 1024 and 1440 only. Wide Home (≥1920, `rule-box.css` lays the button out as the grid item with `display: contents`) has no ages row, so FR-1 is unchecked there.
+- No row says which labels a verb may carry. FR-1 says "every verb label a row can show", but nothing lists them, so UF1 has no row to fail.
+
+For aglaea: none.
+
+Not verified in WKWebView: wide Home (≥1920), whose ages I did not measure. VoiceOver's spoken output: I read the AX title, which is what VoiceOver speaks, but did not listen to it. Firebase states: not touched by this card.
