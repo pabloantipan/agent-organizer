@@ -1,6 +1,6 @@
 ---
 title: Accept review-map v1 - TS, package level and declared changes in organizer review
-status: proposed
+status: ruled
 raised: 2026-10-17
 raised_by: fse
 owner: pablo
@@ -10,6 +10,9 @@ forecast: 40-90m
 stage: review-map
 supersedes: []
 superseded_by:
+ruled: 2026-10-17
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -49,3 +52,7 @@ The FSE: **"accept as written"**.
 ## Consequences
 
 On accept: the FSE gives both cards to one supervisor, `rm-v1-ts` first.
+
+## Ruling
+
+pablo, 2026-10-17, in the organizer on lodestar: ok
