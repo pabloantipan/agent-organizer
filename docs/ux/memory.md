@@ -420,6 +420,9 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - A press that the service refuses re-reads the state before it words anything: if the refusal means the action can no longer work, the button goes and the screen shows the same state as one that never could (focus to the nearest heading); if it may work again, the button stays and the reason shows under it in the blocked-reason style. Never a raw `Error:` prefix, never red for a non-block (review-view A7).
 - "Open at the line" means the definition, not its doc comment: the label keeps the full range, the jump skips the leading comment block (review-view A7).
 
+- A form's Save is drawn only while something differs from what is saved; a lone disabled Save is noise (review-view A8).
+- `aria-current="page"` is the screen's place, one per screen; the current item of a list inside it is `aria-current="true"`, one per list (design system, review-view A8). The end of the Tab order reaching body is not a dropped focus.
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).

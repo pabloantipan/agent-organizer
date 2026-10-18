@@ -365,7 +365,10 @@ keeps their place.
   navigates (Needs me) is never marked current, and an overlay's opener
   (Help) is `aria-expanded`, not current: the screen under it keeps its
   mark (initiatives-view A3, A4). A screen no tab marks has an `h1`
-  naming it. **Current is a line, open is a surface**: the 2 px accent
+  naming it. Inside a screen, the current item of a list (the chat shown,
+  the symbol open in a review's worklist) carries `aria-current="true"`,
+  one per list; it is not the screen's place and does not count against
+  the one `page` (review-view A8). **Current is a line, open is a surface**: the 2 px accent
   underline marks the current place or icon, `--surface-selected` marks an
   open disclosure (A5).
 - **Link or button**: a link changes where you are (screen, initiative,

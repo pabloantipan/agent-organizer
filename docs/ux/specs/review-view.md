@@ -438,3 +438,30 @@ From `working-on/done/lf42-open-at-line.md`, ## UI review (pass at 4406ed5).
 | R31 | not press a button that cannot work | remove the worktree while `Open in editor` shows, press it: the button is gone, the line reads `Not checked out here at <sha>.` in `--fg-muted`, focus is on the symbol's h2, no `Error:` anywhere |
 | R32 | try again when only the editor failed | with an editor command that exits 1, press: the button stays focused and `Editor didn't open: …` shows under it, not red |
 | R33 | land on the definition | format.ts `1-4` with a doc comment on line 1 opens at `:2`; the label still reads `1-4` |
+
+## Amendment 8 (aglaea, 2026-10-18): from lw-ui on lf41-review-words
+
+From `working-on/done/lf41-review-words.md`, ## UI review.
+
+- **A1: Save shows only when there is something to save.** A disabled
+  Save with nothing changed says nothing Pablo can act on. In the mark
+  form, in every state (unmarked, marked, asked), Save is drawn only while
+  the mark or the note differs from what is saved; it goes again once
+  saved. In the asked, unedited state the panel ends at `Asked <seat> ·
+  Open the thread`. When Save leaves after a press, focus goes to the next
+  control in the panel (the asking primary if any, else the mark's radio
+  group), never the body.
+- **A2 (LW1): no wrap.** Tab past the last control reaching `body` is the
+  document's end, and the next Tab starts again at the top, as on every
+  screen of the app. The Review screen does not trap or wrap Tab. "Focus
+  never drops to the body" is about focus the app moves, not the end of
+  the Tab order.
+- **A3: confirmed.** The chat list's row and the worklist's row are the
+  current item of a list, `aria-current="true"`, one per list. The one
+  `aria-current="page"` stays on the screen's place (the sub-view tab).
+  The design system now says so.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R34 | not meet a button that does nothing | an asked, unedited symbol shows no Save; editing the note draws Save (and `Ask <seat> again`); after Save, Save is gone and focus is on a control in the panel |
+| R35 | tell the screen from the item | on Conversations after `Open the thread`, one `aria-current="page"` (the Conversations tab) and one `aria-current="true"` (the thread's chat) |
