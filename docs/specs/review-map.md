@@ -656,3 +656,16 @@ So:
   fails as the row expects. Expected unchanged. No fixture change.
 - The stray thread is in the fixture's project and asks no human; the
   builder leaves it (it moves no Needs me count), noted on the card.
+
+Amendment 4 (v3), 2026-10-18, the FSE, from rv-ask-ui's UI review (au-ui,
+1aa65a4, U1, severity 3): at 1024×640 a failed ask's line is below the
+panel's fold and nothing else says it failed. So:
+- **FR-29** also: when the failure line appears it scrolls into view
+  (`nearest`) with focus kept on the button, the button names it with
+  `aria-describedby`, and the review's live region says it once.
+- **A9** (29) harness at 1024×640, a failed ask (A5's setting), also on the
+  last symbol | the failure line inside the panel's visible box; the live
+  region says `Saved here; couldn't ask fse: …` once and not `Reviewed m of
+  m`; focus on the button.
+- `rv-ask-ui`'s gate adds A9. U2-U5 went to Aglaea (her words decide which
+  join this round).
