@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"organizer/internal/model"
 )
 
 // Repo is one repo of an initiative: its name as written and its directory.
@@ -38,17 +40,19 @@ func isRepo(dir string) bool {
 	return err == nil
 }
 
-// CardRanges is FR-1 for a card: its branch against main's merge base, in
-// each of its repos that has the branch. A card with no branch, or a branch
-// no repo has, is Missing.
+// CardRanges is FR-1 and FR-13 for a card: its branch against main's merge
+// base, in each of its repos that has the branch; else, in each repo, the
+// newest commit on main's first parent whose subject is the card's merge
+// (`merge: <slug> (…)`), against its first parent. A card with neither is
+// Missing, naming both.
 func CardRanges(slug, branch string, repos []Repo) ([]Range, error) {
-	if strings.TrimSpace(branch) == "" {
-		return nil, &Missing{What: fmt.Sprintf("card %s has no branch: field; organizer review needs a branch or a commit", slug)}
-	}
 	var out []Range
 	var where []string
 	for _, r := range repos {
 		where = append(where, r.Dir)
+		if branch == "" {
+			continue
+		}
 		if _, ok := commitOf(r.Dir, "refs/heads/"+branch); !ok {
 			continue
 		}
@@ -58,10 +62,51 @@ func CardRanges(slug, branch string, repos []Repo) ([]Range, error) {
 		}
 		out = append(out, rg)
 	}
-	if len(out) == 0 {
-		return nil, &Missing{What: fmt.Sprintf("branch %s of card %s does not exist in %s", branch, slug, strings.Join(where, ", "))}
+	if len(out) > 0 {
+		return out, nil
 	}
-	return out, nil
+	for _, r := range repos {
+		sha, ok := mergeOf(r.Dir, slug)
+		if !ok {
+			continue
+		}
+		rg, err := CommitRange(r.Dir, r.Name, sha)
+		if err != nil {
+			return nil, err
+		}
+		rg.From = "merge on " + rg.From
+		out = append(out, rg)
+	}
+	if len(out) > 0 {
+		return out, nil
+	}
+	in := strings.Join(where, ", ")
+	branchWhy := fmt.Sprintf("card %s has no branch: field", slug)
+	if branch != "" {
+		branchWhy = fmt.Sprintf("branch %s of card %s does not exist in %s", branch, slug, in)
+	}
+	return nil, &Missing{What: fmt.Sprintf("%s, and no commit on main's first parent in %s starts \"merge: %s \" or \"merge: %s(\"", branchWhy, in, slug, slug)}
+}
+
+// mergeOf is the newest commit on the main line's first parent whose
+// subject starts `merge: <slug> ` or `merge: <slug>(` (FR-13): the merge a
+// supervisor makes before deleting the card's branch.
+func mergeOf(dir, slug string) (string, bool) {
+	mb, ok := mainline(dir)
+	if !ok || strings.TrimSpace(slug) == "" {
+		return "", false
+	}
+	out, err := git(dir, "log", "--first-parent", "--format=%H %s", "refs/heads/"+mb)
+	if err != nil {
+		return "", false
+	}
+	for _, l := range strings.Split(out, "\n") {
+		sha, subject, _ := strings.Cut(l, " ")
+		if strings.HasPrefix(subject, "merge: "+slug+" ") || strings.HasPrefix(subject, "merge: "+slug+"(") {
+			return sha, true
+		}
+	}
+	return "", false
 }
 
 // CommitRanges is FR-1 for a commit: against its first parent, in the
@@ -79,4 +124,53 @@ func CommitRanges(rev string, repos []Repo) ([]Range, error) {
 		}
 	}
 	return nil, &Missing{What: fmt.Sprintf("no card or commit named %s in %s", rev, strings.Join(where, ", "))}
+}
+
+// Resolve is the target of `organizer review <initiative> <target>` for
+// both the CLI and the app (FR-1, FR-13): a card slug of the initiative
+// resolves through CardRanges, anything else is a commit in the
+// initiative's repos or its root. card is the slug the target names, or "".
+func Resolve(si *model.ScannedInitiative, target string) (ranges []Range, card string, err error) {
+	for i := range si.Cards {
+		if c := si.Cards[i]; c.Slug == target {
+			ranges, err = CardRanges(c.Slug, strings.TrimSpace(c.Branch), ReposOf(si.Path, si.ID, c.Repos))
+			return ranges, c.Slug, err
+		}
+	}
+	repos := ReposOf(si.Path, si.ID, si.Initiative.Repos)
+	if len(si.Initiative.Repos) > 0 {
+		repos = append(repos, Repo{Dir: si.Path})
+	}
+	ranges, err = CommitRanges(target, repos)
+	return ranges, "", err
+}
+
+// Make is the whole of `organizer review` past resolution: the map of
+// ranges built under a fresh work dir in parent (removed after), and
+// change-check's flags on it when card is set (FR-11, FR-12). The CLI and
+// the app's make (service/review.go, which runs the CLI) share it.
+func Make(si *model.ScannedInitiative, target, card string, ranges []Range, parent string) (*RevMap, error) {
+	if err := os.MkdirAll(parent, 0o755); err != nil {
+		return nil, err
+	}
+	work, err := os.MkdirTemp(parent, "review-work-")
+	if err != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(work)
+	rm, err := Build(si.ID, target, ranges, Sources(), work)
+	if err != nil {
+		return nil, err
+	}
+	if card == "" {
+		rm.Reconciliation = "no card"
+		return rm, nil
+	}
+	if flags, err := ChangeCheck(si.Path, si.ID, card, rm.Base, rm.Head); err != nil {
+		rm.Reconciliation = err.Error()
+	} else {
+		Reconcile(rm, flags)
+		rm.Reconciled, rm.Reconciliation = true, "change-check "+card
+	}
+	return rm, nil
 }
