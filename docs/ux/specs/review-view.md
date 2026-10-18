@@ -251,3 +251,28 @@ From rl-ui on rv-list (62d9133, `working-on/rv-list.md`, ## UI review).
 |---|---|---|
 | R13 | tell TS symbols apart | an `index.ts` symbol reads `<folder>.<name>`; two same-stem symbols in one group both carry their parent folder |
 | R14 | not see a flash | a make that ends under 1 s shows only `Making the map…` on the button, never the counter or Stop |
+
+## Amendment 2 (aglaea, 2026-10-18): from rv-symbol's UI review
+
+From rs-ui on rv-symbol (3155162, `working-on/rv-symbol.md`, ## UI review).
+
+- **A1: one pair of words, by direction.** An affected symbol opened from
+  `Called by` reads `unchanged · calls runLaunches`; one opened from
+  `Calls` reads `unchanged · called by runLaunches`. This replaces §3.3's
+  `shown because it calls …`: shorter, and the two read as a pair.
+- **A2: the primary saves what was chosen; it never overrides.** Its label
+  follows the radio: none or Reviewed → `Reviewed, next`; Question →
+  `Save question, next`; Blocked → `Save block, next`. Each saves the
+  chosen mark with its note (still required for Question and Blocked) and
+  moves on. No confirm dialog: the label already says what the press does.
+  `Save` (stay) is unchanged.
+- **A3: keep the row, say `none found`.** That nothing calls a changed
+  symbol, or that it calls nothing, is a fact worth reading (an entry
+  point, or dead code). `none found` rather than `none`, because the index
+  found none at one hop.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R15 | read which way a neighbour points | from Called by: `unchanged · calls <symbol>`; from Calls: `unchanged · called by <symbol>` |
+| R16 | not lose a Question by pressing on | with Question chosen and a note, the primary reads `Save question, next` and saves a Question |
+| R17 | read an empty neighbourhood | a symbol with no callers shows `Called by  none found` |
