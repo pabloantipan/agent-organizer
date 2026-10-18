@@ -8,6 +8,8 @@ restating it (the discuss skill).
 
 sup83 done 18:10: leftovers 41 in 53 min (40-80m; review-go 31, fixture-launch 42, review-words 51) and leftovers 42 in 37 min (25-50m), every review first-round pass; seats $32.10; installed v0.2.0-2560-ga8e2556; run record runs/2026-10-18-sup83-leftovers-41.md. sup83 ended. Held: wails generate module rewrites frontend/wailsjs/runtime/ on this Mac (CLI drift; pin wails or note in CLAUDE.md, Go leftovers); lw-ui A1-A3 sent to aglaea; lw-build ran ~265k with one extension.
 
+sup84 done 18:48: leftovers 43 in 29 min (25-50m), both reviews pass, seats $10.64, installed v0.2.0-2582-ga3b1855, run record runs/2026-10-18-sup84-leftovers-43.md. sup84 ended. Found for the next leftovers: RS1 (sev 2) Save on an asked mark drops Asked/AskedThread (review.SetMark, internal/review/marks.go:134); RS2 (sev 2) a note on an unmarked symbol draws a disabled Save with no reason; RS3 (sev 1) Conversations lands on archive when the named thread is not listed; failedId from a path with a space breaks aria-describedby; a status re-read with a different map_head drops the muted line. RS1-RS3 sent to aglaea.
+
 Ruled by default (list for Pablo's return):
 - 0149 accept leftovers 41, `accept as written`, 16:39 (asked 16:34 in pane and mailbox).
 - 0150 accept leftovers 42, `accept as written`, 16:45 (asked 16:40).
