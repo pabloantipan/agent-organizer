@@ -77,6 +77,8 @@ export function MilestoneType():Promise<model.Milestone>;
 
 export function OpenInEditor(arg1:string):Promise<void>;
 
+export function OpenReviewAt(arg1:string,arg2:string,arg3:string,arg4:number):Promise<void>;
+
 export function OpenTerminal(arg1:string):Promise<void>;
 
 export function PickUp(arg1:string):Promise<number>;

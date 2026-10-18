@@ -11,10 +11,11 @@ import { readFileSync } from "node:fs";
 // V-R8's mark, as the pure view renders them to markup (no DOM library is a
 // dependency). The harness rows press the keys.
 
-vi.mock("../../wailsjs/go/main/App", () => ({ MarkReview: vi.fn(), ReviewFile: vi.fn(), AskReview: vi.fn() }));
+const openReviewAt = vi.fn((..._: unknown[]) => Promise.resolve());
+vi.mock("../../wailsjs/go/main/App", () => ({ MarkReview: vi.fn(), ReviewFile: vi.fn(), AskReview: vi.fn(), ReviewStatus: vi.fn(), OpenReviewAt: (...a: unknown[]) => openReviewAt(...a) }));
 
-const { AskStatus, markPress, ReviewSymbolView } = await import("./ReviewSymbol");
-const { afterSave, canSave, markOf, worklist } = await import("../lib/review");
+const { AskStatus, EditorAction, markPress, openAt, ReviewSymbolView } = await import("./ReviewSymbol");
+const { afterSave, canSave, editorAt, markOf, threadOf, worklist } = await import("../lib/review");
 
 const node = (n: Partial<review.Node> & { id: string }) => ({
   level: "symbol", parent: "go:example.com/inita/svc", kind: "function", lang: "go", file: "svc/greet.go", change: "modified",
@@ -40,11 +41,11 @@ const texts = {
   head: { first: 1, lines: ["package svc", "", "// Greet is what acme's board says first.", "func Greet(name string) string {", '\treturn "hello, " + name + "!"', "}"] },
 };
 const noop = () => undefined;
-function panel(p: { id: string; marks?: review.Marks | null; from?: string; texts?: typeof texts | null; claim?: string; to?: { seat: string; why: string } | null; last?: boolean }) {
+function panel(p: { id: string; marks?: review.Marks | null; from?: string; texts?: typeof texts | null; claim?: string; to?: { seat: string; why: string } | null; last?: boolean; status?: service.ReviewStatus | null }) {
   const n = p.claim ? { ...at(p.id), claim: p.claim } as review.Node : at(p.id);
   return renderToStaticMarkup(
     <ReviewSymbolView map={map} node={n} row={rowOf(p.id)} marks={p.marks ?? null} from={p.from ? at(p.from) : null} to={p.to} last={p.last} texts={p.texts === undefined ? texts : p.texts} error={null}
-      title={createRef()} onOpen={noop} onBack={noop} onMark={() => Promise.resolve()} onNext={noop} />,
+      title={createRef()} editor={editorAt(p.status, map.head, n)} onOpenEditor={() => Promise.resolve()} onOpen={noop} onBack={noop} onMark={() => Promise.resolve()} onNext={noop} />,
   );
 }
 const text = (html: string) => html.replace(/<[^>]+>/g, " ").replace(/&#x27;/g, "'").replace(/&quot;/g, '"').replace(/\s+/g, " ");
@@ -406,5 +407,57 @@ describe("W4 (leftovers-41 FR-4, R29): the panel once asked", () => {
     const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
     expect(src).toContain("if (ask && !then) toLink.current = true;");
     expect(src).toContain("link.current.focus();");
+  });
+});
+
+describe("E3 (leftovers-42 FR-1, FR-3): Open in editor at the head start line", () => {
+  const status = (dir: string, head = map.head) =>
+    ({ initiative: "init-a", card: "rv-fixture", state: "map", head, map_head: head, checkouts: [{ repo: "", head: "391ae0f0000", dir }] }) as unknown as service.ReviewStatus;
+  it("checked out: the title line carries Open in editor, a secondary button, and no not-here line", () => {
+    const h = panel({ id: G, status: status("/home/rv/.wt/rv-fixture") });
+    expect(h).toContain('<div class="rs-where-line"><span class="meta mono rs-where">svc/greet.go 3-6</span><button type="button" class="rs-editor">Open in editor</button></div>');
+    expect(h).not.toContain("Not checked out here");
+    // the title stays the symbol and its change word: the button is not in the h2
+    expect(h).toMatch(/<h2 tabindex="-1" class="review-symbol-title"><span class="mono">svc.Greet<\/span> <span class="rv-change">modified<\/span><\/h2>/);
+  });
+  it("the press calls OpenReviewAt with the card, the file and the head start line", async () => {
+    const where = editorAt(status("/home/rv/.wt/rv-fixture"), map.head, at(G))!;
+    let pressed = 0;
+    const el = EditorAction({ at: where, onOpen: () => { pressed++; } }) as unknown as { props: { onClick: () => void } };
+    el.props.onClick();
+    expect(pressed).toBe(1);
+    openReviewAt.mockClear();
+    await openAt("init-a", "rv-fixture", where);
+    expect(openReviewAt).toHaveBeenCalledWith("init-a", "rv-fixture", "svc/greet.go", 3);
+  });
+  it("not checked out: no button, and the title line adds, muted, Not checked out here at 391ae0f.", () => {
+    const h = panel({ id: G, status: status("") });
+    expect(h).not.toContain("Open in editor");
+    expect(h).toContain('<span class="meta rs-not-here">Not checked out here at 391ae0f.</span>');
+  });
+  it("before the status is read, or read for another head, neither is drawn", () => {
+    for (const st of [null, status("/x", "0000000ffff")]) {
+      const h = panel({ id: G, status: st });
+      expect(h).not.toContain("Open in editor");
+      expect(h).not.toContain("Not checked out here");
+    }
+  });
+  it("the muted line is --fg-muted, never opacity", () => {
+    const css = readFileSync(new URL("../styles/review.css", import.meta.url), "utf8") as string;
+    expect(css).toContain(".rs-not-here { color: var(--fg-muted); }");
+  });
+});
+
+describe("E4 (leftovers-42 FR-4): Open the thread opens the mark's own thread", () => {
+  it("a mark asked in a replaced thread opens its asked_thread, not the head's thread", () => {
+    const marks = { thread: "01NEW", changed: [], marks: [
+      { symbol: G, state: "question", note: "n", asked: "01MSG", asked_thread: "01OLD" },
+      { symbol: F, state: "blocked", note: "b", asked: "01MSG2" },
+    ] } as unknown as review.Marks;
+    expect(threadOf(marks, G)).toBe("01OLD");
+    expect(threadOf(marks, F)).toBe("01NEW");
+    const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
+    expect(src).toContain("const thread = threadOf(marks, id);");
+    expect(src).toContain("onOpenThread={() => onOpenThread?.(thread)}");
   });
 });

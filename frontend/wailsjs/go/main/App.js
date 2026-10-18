@@ -138,6 +138,10 @@ export function OpenInEditor(arg1) {
   return window['go']['main']['App']['OpenInEditor'](arg1);
 }
 
+export function OpenReviewAt(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['OpenReviewAt'](arg1, arg2, arg3, arg4);
+}
+
 export function OpenTerminal(arg1) {
   return window['go']['main']['App']['OpenTerminal'](arg1);
 }
