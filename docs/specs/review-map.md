@@ -435,3 +435,16 @@ fixture's map has none (4 nodes, 0 edges). So `rv-symbol`'s boundary adds
 function on the fixture branch that calls `svc.Greet`, so the map holds an
 affected caller with a `uses` edge. No claim (v1 fills none; V-R7 stays
 vitest). D5's expectations still hold.
+
+Amendment 5 (v2), 2026-10-18, the FSE, from rs-build's `decide:` (00b8b25):
+FR-21's "at least 20 characters at 1024 with the memory badge" cannot hold
+inside the crumb: at 1024 with the critical badge (134 px) the bar is full
+and the crumbs get 152 px. Taking width from the rest of the top bar is a
+change of its own, not this card's. So:
+- **FR-21** the title shrink-wraps and is cut only when the bar is full; it
+  carries the full title in its accessible name and its hover title. No
+  character floor at 1024.
+- **V-F2** at 1440×900: no gap over 8 px between the title and `› Review`,
+  and the full title shown; at 1024×640: the accessible name is the full
+  title, and the crumb never overlaps the bar's other items. The top bar's
+  width budget at 1024 is held for a later card.
