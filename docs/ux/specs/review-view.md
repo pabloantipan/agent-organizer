@@ -458,10 +458,10 @@ From `working-on/done/lf41-review-words.md`, ## UI review.
   the Tab order.
 - **A3: confirmed.** The chat list's row and the worklist's row are the
   current item of a list, `aria-current="true"`, one per list. The one
-  `aria-current="page"` stays on the screen's place (the sub-view tab).
+  `aria-current="page"` stays on the screen's place (the top bar's crumb; the sub-tabs are `true` too, leftovers-17 FR-7b).
   The design system now says so.
 
 | # | Pablo can | Checked by |
 |---|---|---|
 | R34 | not meet a button that does nothing | an asked, unedited symbol shows no Save; editing the note draws Save (and `Ask <seat> again`); after Save, Save is gone and focus is on a control in the panel |
-| R35 | tell the screen from the item | on Conversations after `Open the thread`, one `aria-current="page"` (the Conversations tab) and one `aria-current="true"` (the thread's chat) |
+| R35 | tell the screen from the item | on Conversations after `Open the thread`, one `aria-current="page"` (the top bar's crumb) and one `aria-current="true"` (the thread's chat) |
