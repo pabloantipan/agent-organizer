@@ -409,3 +409,19 @@ rv-symbol already touches or is next to, so they join `rv-symbol`:
 - `rv-symbol`'s gate adds V-F1 and V-F2; its boundary adds
   `components/TopBar.tsx` (the crumb only) and `Review.tsx` for the focus on
   open. U3 (severity 1, the flags' wrap) and G2/G3 are held.
+
+Amendment 3 (v2), 2026-10-18, the FSE, from Aglaea's review-view Amendment 1
+(9d1c848, A1, A2, R13, R14), answering rv-list's UI review. Both join
+`rv-symbol` (its files `lib/review.ts` and `Review.tsx` hold them):
+- **FR-22** (A1) A TS row's qualifier is its file stem; a stem `index`
+  takes its folder's name; two rows in one group that would read the same
+  both carry their parent folder. The row's description carries the full
+  path.
+- **FR-23** (A2) A make's progress line (`Making the map · n s`, `Stop`)
+  shows only after 1 s; before it, only the button reads `Making the map…`
+  with focus kept. Focus does not move to Stop when it appears.
+- **V-R13** (22) vitest of the qualifier: `lib/index.ts` → `lib.<name>`;
+  two `format.ts` in one group → both `<folder>/format.<name>`.
+- **V-R14** (23) vitest with fake timers: a make ending at 900 ms never
+  renders the counter or Stop; one at 1500 ms does, focus unmoved.
+- `rv-symbol`'s gate adds V-R13 and V-R14.
