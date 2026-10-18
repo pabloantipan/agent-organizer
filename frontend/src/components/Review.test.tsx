@@ -2,6 +2,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { createRef } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { review, service } from "../../wailsjs/go/models";
+// @ts-expect-error node:fs has no type declarations in this tsconfig
+import { readFileSync } from "node:fs";
 
 // V-S (review-map v2 FR-18; docs/ux/specs/review-view.md §4): each state's
 // words, exactly, as the screen draws them. No DOM library is a dependency,
@@ -243,13 +245,19 @@ describe("A4 (FR-29): an asked row is seen, not only heard", () => {
   const G = "go:example.com/inita/svc.Greet", F = "ts:web/src/format.ts#formatName";
   const row = (h: string, id: string) => h.match(new RegExp(`<li[^>]*data-row="${id.replace(/[.#/]/g, "\\$&")}"[^>]*>.*?</li>`))?.[0] ?? "";
   const mk = (m: { symbol: string; state: string; asked?: string }[]) => ({ initiative: "init-a", card: "rv-fixture", head: "", marks: m.map((x) => ({ note: "n", ...x })), changed: [], thread: "01THREAD" }) as unknown as review.Marks;
-  it("? asked and ✕ asked beside the marks; a mark not asked draws no word", () => {
+  it("? asked and ✕ asked as one unit in the mark's place, before the name (leftovers-41 FR-3, R28); a mark not asked draws no word", () => {
     const h = view({ status: status("map"), map: fixture, marks: mk([{ symbol: G, state: "question", asked: "01A" }, { symbol: F, state: "blocked", asked: "01B" }]) });
-    expect(row(h, G)).toMatch(/<span class="rv-mark question" aria-hidden="true">\?<\/span>.*<span class="rv-asked question" aria-hidden="true">asked<\/span>/);
+    expect(row(h, G)).toMatch(/<span class="rv-mark rv-unit question" aria-hidden="true"><span class="rv-glyph">\?<\/span><span class="rv-asked question">asked<\/span><\/span><span class="rv-name mono">/);
     expect(row(h, G)).toContain('aria-label="Greet, modified, question, asked"');
-    expect(row(h, F)).toMatch(/<span class="rv-mark blocked" aria-hidden="true">✕<\/span>.*<span class="rv-asked blocked" aria-hidden="true">asked<\/span>/);
+    expect(row(h, F)).toMatch(/<span class="rv-mark rv-unit blocked" aria-hidden="true"><span class="rv-glyph">✕<\/span><span class="rv-asked blocked">asked<\/span><\/span><span class="rv-name mono">/);
     const plain = view({ status: status("map"), map: fixture, marks: mk([{ symbol: G, state: "question" }]) });
     expect(row(plain, G)).not.toContain("rv-asked");
+    expect(row(plain, G)).toMatch(/<span class="rv-mark question" aria-hidden="true">\?<\/span><span class="rv-name mono">/);
+  });
+  it("W3's CSS: the unit is pulled back by the padding's mark column, so the glyph sits where .rv-mark's does", () => {
+    const css = readFileSync(new URL("../styles/review.css", import.meta.url), "utf8") as string;
+    expect(css).toContain(".rv-mark.rv-unit { position: static; width: auto; margin-left: calc(-1 * (1.5ch + var(--space-1-5))); white-space: nowrap; font-weight: var(--weight-regular); }");
+    expect(css).toContain(".rv-unit > .rv-glyph { display: inline-block; width: 1.5ch; text-align: center; font-weight: var(--weight-bold); }");
   });
   it("the live region carries what the screen says (Asked sup81, once: saidAfter)", () => {
     expect(view({ status: status("map"), map: fixture, said: "Asked sup81" })).toContain('<div class="sr-only" aria-live="polite">Asked sup81</div>');

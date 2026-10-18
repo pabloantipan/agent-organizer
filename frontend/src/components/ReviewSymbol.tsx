@@ -3,7 +3,7 @@ import type { review as rv, service } from "../../wailsjs/go/models";
 import { AskReview, MarkReview, ReviewFile } from "../../wailsjs/go/main/App";
 import { busyButton, busyLabel } from "../lib/busy";
 import {
-  affectedLine, afterSave, askedLine, askFailedLine, askLine, backTo, calledBy, callsOf, canSave, flagLook, flagWords, isAffected, markOf, primaryOf, shasOf, shortName, symbolDiff, testsOf, WORDS,
+  affectedLine, afterSave, askedLine, askFailedLine, backTo, calledBy, callsOf, canSave, flagLook, flagWords, isAffected, markControls, markOf, shasOf, shortName, symbolDiff, testsOf, WORDS,
   type Addressee, type MarkState, type RangeText, type Row, type Via,
 } from "../lib/review";
 
@@ -154,7 +154,8 @@ function Diff({ name, texts, error }: { name: string; texts: { base: RangeText |
  *  and Blocked asks them, and the muted line says so; on the last
  *  unmarked symbol it stays (FR-38). After an ask the panel says who was
  *  asked and opens the thread; a failed post says why, with Try again
- *  (FR-29). */
+ *  (FR-29). Once asked, the line and an asking primary go until the note
+ *  is edited, which brings back `Ask <seat> again` (leftovers-41 FR-4). */
 function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNext }: {
   name: string; id: string; marks: rv.Marks | null; to: Addressee | null; last: boolean;
   onMark: (s: MarkState, note: string) => Promise<void>; onAsk?: (s: MarkState, note: string) => Promise<service.ReviewAsk>; onOpenThread?: (thread: string) => void; onNext: () => void;
@@ -167,7 +168,19 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
   // A post that failed (ReviewAsk.error): the mark is saved, the ask is not.
   const [failed, setFailed] = useState<Failed | null>(null);
   const seat = to?.seat ?? "";
-  const primary = primaryOf(state, note, { seat, last });
+  const mark = (marks?.marks ?? []).find((m) => m.symbol === id && m.state);
+  // Asked, note as asked: an ask would repeat a promise kept (FR-4).
+  const { primary, showPrimary, line } = markControls({ state, note, to, last, asked: !!mark?.asked, askedNote: saved.note });
+  // An ask that stays (the last symbol, Try again) unmounts the pressed
+  // button; focus goes to Open the thread, which took its place.
+  const thread = marks?.thread ?? "";
+  const toLink = useRef(false);
+  const link = useRef<HTMLAnchorElement>(null);
+  useEffect(() => {
+    if (!toLink.current || !link.current) return;
+    toLink.current = false;
+    link.current.focus();
+  });
   const run = (which: "next" | "save" | "retry", s: MarkState, ask: boolean, then?: () => void) => async () => {
     setBusy(which);
     setError(null);
@@ -176,6 +189,7 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
         const shown = afterSave(s, note);
         setState(shown.state);
         setNote(shown.note);
+        if (ask && !then) toLink.current = true;
         then?.();
       } });
       setFailed(r);
@@ -187,9 +201,6 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
   };
   const opts: [MarkState, string][] = [["reviewed", WORDS.reviewed], ["question", WORDS.question], ["blocked", WORDS.blocked]];
   const noteId = `rs-note-${id}`;
-  const line = askLine(to, state);
-  const mark = (marks?.marks ?? []).find((m) => m.symbol === id && m.state);
-  const thread = marks?.thread ?? "";
   // A failed ask names its line on the button that stays focused (FR-29, Amendment 4).
   const failedId = `rs-failed-${id}`;
   const describedBy = failed ? failedId : undefined;
@@ -208,11 +219,11 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
       <textarea id={noteId} className="rs-note" rows={2} value={note} onChange={(e) => setNote(e.target.value)}
         placeholder={state === "question" || state === "blocked" ? "required for Question and Blocked" : "optional"} />
       <div className="rs-buttons">
-        <button className="primary" aria-describedby={describedBy} {...busyButton({ busy: busy === "next", disabled: busy !== "" || !primary.ready, onPress: run("next", primary.mark, primary.ask, last ? undefined : onNext) })}>{busyLabel(busy === "next", primary.label, primary.ask ? WORDS.asking : WORDS.saving)}</button>
+        {showPrimary && <button className="primary" aria-describedby={describedBy} {...busyButton({ busy: busy === "next", disabled: busy !== "" || !primary.ready, onPress: run("next", primary.mark, primary.ask, last ? undefined : onNext) })}>{busyLabel(busy === "next", primary.label, primary.ask ? WORDS.asking : WORDS.saving)}</button>}
         <button {...busyButton({ busy: busy === "save", disabled: busy !== "" || !canSave(state, note, saved), onPress: run("save", state, false) })}>{busyLabel(busy === "save", WORDS.save, WORDS.saving)}</button>
       </div>
       {line && <p className="rs-ask-line meta">{line}</p>}
-      <AskStatus failed={failed} failedId={failedId} asked={!!mark?.asked} seat={seat} thread={thread} busy={busy} onRetry={failed ? run("retry", failed.state, true) : () => undefined} onOpenThread={() => onOpenThread?.(thread)} />
+      <AskStatus failed={failed} failedId={failedId} asked={!!mark?.asked} seat={seat} thread={thread} busy={busy} link={link} onRetry={failed ? run("retry", failed.state, true) : () => undefined} onOpenThread={() => onOpenThread?.(thread)} />
       {error && <p className="review-error">{error}</p>}
     </div>
   );
@@ -240,18 +251,20 @@ export async function markPress(o: {
   return null;
 }
 
-/** After an ask (FR-29): `Asked <seat> · Open the thread`, or, when the
+/** After an ask (FR-29): `Asked <seat> · Open the thread`, the thread a
+ *  link since it changes where you are (leftovers-41 FR-2), or, when the
  *  post failed, `Saved here; couldn't ask <seat>: <first error line>` with
  *  Try again, which reads `Asking…` while it posts. The failure line
  *  scrolls into view (`nearest`) each time a press fails, focus staying on
  *  the button, which names it (`failedId`, Amendment 4): at 1024×640 it
  *  sits below the panel's fold. */
-export function AskStatus({ failed, failedId, asked, seat, thread, busy, onRetry, onOpenThread }: {
-  failed: Failed | null; failedId?: string; asked: boolean; seat: string; thread: string; busy: string; onRetry: () => void; onOpenThread: () => void;
+export function AskStatus({ failed, failedId, asked, seat, thread, busy, link, onRetry, onOpenThread }: {
+  failed: Failed | null; failedId?: string; asked: boolean; seat: string; thread: string; busy: string;
+  link?: React.RefObject<HTMLAnchorElement | null>; onRetry: () => void; onOpenThread: () => void;
 }) {
   if (failed) return <FailedLine failed={failed} id={failedId} busy={busy} onRetry={onRetry} />;
   if (!asked || !seat || !thread) return null;
-  return <p className="rs-asked">{askedLine(seat)} · <button className="link" onClick={onOpenThread}>{WORDS.openThread}</button></p>;
+  return <p className="rs-asked">{askedLine(seat)} · <a ref={link} href="#" className="rs-thread" onClick={(e) => { e.preventDefault(); onOpenThread(); }}>{WORDS.openThread}</a></p>;
 }
 
 function FailedLine({ failed, id, busy, onRetry }: { failed: Failed; id?: string; busy: string; onRetry: () => void }) {

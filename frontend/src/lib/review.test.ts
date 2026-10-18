@@ -3,7 +3,7 @@ import type { review, service } from "../../wailsjs/go/models";
 import {
   allReviewed, countsLine, coverage, coverageLine, elapsedOf, factsBeside, filesOf, flagWords, groupName, inTextField, listWidth,
   makingLabel, movedLine, nextToReview, nothingToReview, partialLines, reviewable, rowName, screenState, shortName, walkOf, WORDS, worklist,
-  afterASecond, affectedLine, askedLine, askFailedLine, askLine, firstLine, lastToReview, primaryOf, saidAfter, makeOrigin, secondsSince, backTo, calledBy, callsOf, canSave, flagLook, markOf, progressDelay, shasOf, symbolDiff, testsOf,
+  afterASecond, affectedLine, askedLine, askFailedLine, askLine, askStage, firstLine, markControls, lastToReview, primaryOf, saidAfter, makeOrigin, secondsSince, backTo, calledBy, callsOf, canSave, flagLook, markOf, progressDelay, shasOf, symbolDiff, testsOf,
 } from "./review";
 
 // review-map v2 FR-18 (docs/ux/specs/review-view.md §3.1, §3.2, §4, §5):
@@ -459,7 +459,7 @@ describe("A4 (FR-28, FR-29): who the mark asks, and what is said after", () => {
     const cov = { reviewed: 2, of: 2, mustLeft: 0, risk: null };
     const part = { reviewed: 1, of: 2, mustLeft: 0, risk: null };
     const line = askFailedLine("fse", "open /x/tokens.json: no such file or directory");
-    expect(saidAfter({ asked: "", failed: line, wasDone: false, done: false, cov: part })).toBe("Saved here; couldn't ask fse: open /x/tokens.json: no such file or directory");
+    expect(saidAfter({ asked: "", failed: line, wasDone: false, done: false, cov: part })).toBe("Saved here; couldn't ask fse: Deltagos has no discuss identity for this cell. organizer doctor says why.");
     // the last symbol: not `Reviewed 2 of 2`, which would read as success
     expect(saidAfter({ asked: "", failed: line, wasDone: false, done: true, cov })).toBe(line);
     expect(saidAfter({ asked: "", failed: line, wasDone: false, done: true, cov })).not.toContain("Reviewed");
@@ -494,5 +494,71 @@ describe("A6 (FR-38): no next when there is none", () => {
     expect(primaryOf("blocked", "b", { last: true }).label).toBe("Save block");
     expect(primaryOf("question", "q", { seat: "sup81", last: true }).label).toBe("Ask sup81");
     expect(primaryOf("blocked", "b", { seat: "sup81", last: true }).label).toBe("Ask sup81");
+  });
+});
+
+describe("W1 (leftovers-41 FR-1, R26): a failed ask says its cause in words", () => {
+  // au-ui U3's two error texts, a 409, and anything else with a home path.
+  const tokens = "open /var/folders/xy/T/tmp.abc/tokens.json: no such file or directory";
+  const sock = "dial unix /Users/pabloantipan/.local/state/discuss/discuss.sock: connect: connection refused";
+  it("no discuss identity: tokens.json, or the words", () => {
+    expect(askFailedLine("fse", tokens)).toBe("Saved here; couldn't ask fse: Deltagos has no discuss identity for this cell. organizer doctor says why.");
+    expect(askFailedLine("fse", "Error: no discuss identity for organizer-fixture/pablo")).toBe("Saved here; couldn't ask fse: Deltagos has no discuss identity for this cell. organizer doctor says why.");
+  });
+  it("discuss.sock: discuss isn't running", () => {
+    expect(askFailedLine("fse", sock)).toBe("Saved here; couldn't ask fse: discuss isn't running. organizer doctor says why.");
+    expect(askFailedLine("sup81", "Error: dial unix discuss.sock: connect: no such file or directory\nmore")).toBe("Saved here; couldn't ask sup81: discuss isn't running. organizer doctor says why.");
+  });
+  it("409 or closed: the review's thread is closed", () => {
+    expect(askFailedLine("fse", "post: 409 Conflict (status closed)")).toBe("Saved here; the review's thread is closed. Try again opens a new one.");
+    expect(askFailedLine("fse", "thread 01ABC is closed")).toBe("Saved here; the review's thread is closed. Try again opens a new one.");
+  });
+  it("anything else: the first line, a home path shortened to ~", () => {
+    expect(askFailedLine("fse", "open /Users/x/y: denied")).toBe("Saved here; couldn't ask fse: open ~/y: denied");
+    expect(askFailedLine("fse", "Error: dial unix /tmp/x.sock: connect: no such file\nmore")).toBe("Saved here; couldn't ask fse: dial unix /tmp/x.sock: connect: no such file");
+    expect(askFailedLine("fse", "read /Users/pablo/a and /Users/ana/b: bad")).toBe("Saved here; couldn't ask fse: read ~/a and ~/b: bad");
+  });
+  it("no absolute home path shows in any cause", () => {
+    for (const e of [tokens, sock, "post: 409", "open /Users/x/y: denied"]) expect(askFailedLine("fse", e)).not.toMatch(/\/Users\//);
+  });
+});
+
+describe("W4 (leftovers-41 FR-4, R29): once asked, no promise already kept", () => {
+  const sup = { seat: "sup81", why: "runs this card" };
+  const ctl = (o: Partial<Parameters<typeof markControls>[0]>) => markControls({ state: "question", note: "why?", to: sup, last: false, asked: false, askedNote: "", ...o });
+  it("the stage: not asked, asked with the note as asked, asked and edited", () => {
+    expect(askStage(false, "a", "")).toBe("");
+    expect(askStage(true, " why? ", "why?")).toBe("asked");
+    expect(askStage(true, "why, then?", "why?")).toBe("again");
+  });
+  it("before an ask: the primary asks and the line promises it", () => {
+    const c = ctl({});
+    expect(c.showPrimary).toBe(true);
+    expect(c.primary.label).toBe("Ask sup81, next");
+    expect(c.line).toBe("Saves the mark and asks sup81 (runs this card) in this review's thread. Wakes sup81.");
+  });
+  it("after an ask: no line and no asking primary", () => {
+    const c = ctl({ asked: true, askedNote: "why?" });
+    expect(c.line).toBe("");
+    expect(c.showPrimary).toBe(false);
+    // Blocked chosen over an asked question with the same note asks nothing either
+    expect(ctl({ state: "blocked", asked: true, askedNote: "why?" }).showPrimary).toBe(false);
+    // Reviewed is still offered: it asks no one
+    const r = ctl({ state: "reviewed", asked: true, askedNote: "why?" });
+    expect(r.showPrimary).toBe(true);
+    expect(r.primary.label).toBe("Reviewed, next");
+  });
+  it("the note edited: the again line and Ask <seat> again, , next while one is left", () => {
+    const c = ctl({ note: "why the comma?", asked: true, askedNote: "why?" });
+    expect(c.showPrimary).toBe(true);
+    expect(c.primary).toEqual({ label: "Ask sup81 again, next", mark: "question", ready: true, ask: true });
+    expect(c.line).toBe("Saves the mark and asks sup81 again in this review's thread. Wakes sup81.");
+    expect(ctl({ note: "why the comma?", asked: true, askedNote: "why?", last: true }).primary.label).toBe("Ask sup81 again");
+    expect(askLine(sup, "question", true)).toBe("Saves the mark and asks sup81 again in this review's thread. Wakes sup81.");
+  });
+  it("nobody to ask: the again stage changes nothing", () => {
+    const c = ctl({ to: { seat: "", why: "no cell" }, note: "b", asked: true, askedNote: "a" });
+    expect(c.primary.label).toBe("Save question, next");
+    expect(c.line).toBe("No one to ask here: no cell. Kept in Deltagos.");
   });
 });

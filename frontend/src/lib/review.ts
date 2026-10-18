@@ -58,18 +58,51 @@ export type Addressee = { seat: string; why: string };
 /** The muted line under the mark (FR-28; review-view Amendment 3): with
  *  someone to ask, what the ask does and that it wakes them; with nobody,
  *  why and that the mark stays here; on Reviewed or none, no line. */
-export function askLine(to: Addressee | null, s: MarkState): string {
+export function askLine(to: Addressee | null, s: MarkState, again = false): string {
   if (!to || !needsNote(s)) return "";
+  if (to.seat && again) return `Saves the mark and asks ${to.seat} again in this review's thread. Wakes ${to.seat}.`;
   return to.seat
     ? `Saves the mark and asks ${to.seat} (${to.why}) in this review's thread. Wakes ${to.seat}.`
     : `No one to ask here: ${to.why}. Kept in Deltagos.`;
 }
 
+/** Where a mark stands with its ask (leftovers-41 FR-4, review-view
+ *  Amendment 6 A2): not asked, `""`; asked and its note as it was asked,
+ *  `asked` (the panel says only who was asked, no promise to ask); asked
+ *  and the note edited since, `again` (a new ask is possible). */
+export type AskStage = "" | "asked" | "again";
+export const askStage = (asked: boolean, note: string, askedNote: string): AskStage =>
+  !asked ? "" : note.trim() === askedNote.trim() ? "asked" : "again";
+
+/** What the mark's controls read for the chosen mark and note (FR-28,
+ *  FR-38; leftovers-41 FR-4): the primary, whether it shows (an ask
+ *  already made with this note is not offered again), and the muted line
+ *  (none once asked, the `again` line once the note is edited). */
+export function markControls(o: { state: MarkState; note: string; to: Addressee | null; last: boolean; asked: boolean; askedNote: string }) {
+  const stage = askStage(o.asked, o.note, o.askedNote);
+  const primary = primaryOf(o.state, o.note, { seat: o.to?.seat ?? "", last: o.last, again: stage === "again" });
+  return {
+    stage,
+    primary,
+    showPrimary: !(stage === "asked" && primary.ask),
+    line: stage === "asked" ? "" : askLine(o.to, o.state, stage === "again"),
+  };
+}
+
 /** After an ask (FR-29): the panel's line and the live region's words. */
 export const askedLine = (seat: string) => `Asked ${seat}`;
 
-/** A post that failed (FR-29): the mark is saved, the ask is not. */
-export const askFailedLine = (seat: string, error: string) => `Saved here; couldn't ask ${seat}: ${firstLine(error)}`;
+/** A post that failed (FR-29): the mark is saved, the ask is not. The
+ *  cause in words, matched on the error text (leftovers-41 FR-1, review-view
+ *  Amendment 5 U3): no identity, discuss not running, the thread closed;
+ *  anything else is its first line with the home path as `~`. */
+export function askFailedLine(seat: string, error: string): string {
+  const e = firstLine(error);
+  if (/tokens\.json|no discuss identity/.test(e)) return `Saved here; couldn't ask ${seat}: Deltagos has no discuss identity for this cell. organizer doctor says why.`;
+  if (e.includes("discuss.sock")) return `Saved here; couldn't ask ${seat}: discuss isn't running. organizer doctor says why.`;
+  if (/409|closed/.test(e)) return "Saved here; the review's thread is closed. Try again opens a new one.";
+  return `Saved here; couldn't ask ${seat}: ${e.replace(/\/Users\/[^/\s]+/g, "~")}`;
+}
 
 /** The first line of an error, without the binding's `Error: `. */
 export const firstLine = (e: string) => e.replace(/^Error:\s*/, "").split("\n")[0].trim();
@@ -523,11 +556,13 @@ export const canSave = (s: MarkState, note: string, saved: { state: MarkState; n
  *  With someone to ask (FR-28, Amendment 3) Question and Blocked read `Ask
  *  <seat>, next` and ask. On the last symbol without a mark (FR-38,
  *  Amendment 4) there is no next: `Reviewed`, `Save question`, `Save
- *  block`, `Ask <seat>`. Question and Blocked need a note first (`ready`). */
-export function primaryOf(s: MarkState, note: string, o: { seat?: string; last?: boolean } = {}): { label: string; mark: Exclude<MarkState, "">; ready: boolean; ask: boolean } {
+ *  block`, `Ask <seat>`. A mark already asked whose note was edited reads
+ *  `Ask <seat> again` (leftovers-41 FR-4). Question and Blocked need a
+ *  note first (`ready`). */
+export function primaryOf(s: MarkState, note: string, o: { seat?: string; last?: boolean; again?: boolean } = {}): { label: string; mark: Exclude<MarkState, "">; ready: boolean; ask: boolean } {
   const mark = s === "" ? "reviewed" : s;
   const ask = needsNote(mark) && !!o.seat;
-  const base = ask ? `Ask ${o.seat}` : mark === "question" ? WORDS.questionLast : mark === "blocked" ? WORDS.blockLast : WORDS.reviewedLast;
+  const base = ask ? `Ask ${o.seat}${o.again ? " again" : ""}` : mark === "question" ? WORDS.questionLast : mark === "blocked" ? WORDS.blockLast : WORDS.reviewedLast;
   return { label: o.last ? base : `${base}, next`, mark, ready: !needsNote(mark) || note.trim() !== "", ask };
 }
 

@@ -406,10 +406,11 @@ function Worklist({ groups, active, setActive, shown, onOpen }: { groups: Group[
                     className={`rv-row ${r.id === shown ? "on" : ""} ${r.node ? "" : "declared"}`}
                     onFocus={(e) => { e.stopPropagation(); setActive(r.id); }}
                     onClick={(e) => { e.stopPropagation(); setActive(r.id); if (r.node) onOpen(r.id); }}>
-                    <span className={`rv-mark ${r.mark}`} aria-hidden="true">{MARK_GLYPH[r.mark]}</span>
+                    {r.asked && r.mark && !r.changedSince
+                      ? <span className={`rv-mark rv-unit ${r.mark}`} aria-hidden="true"><span className="rv-glyph">{MARK_GLYPH[r.mark]}</span><span className={`rv-asked ${r.mark}`}>asked</span></span>
+                      : <span className={`rv-mark ${r.mark}`} aria-hidden="true">{MARK_GLYPH[r.mark]}</span>}
                     <span className="rv-name mono">{r.name}</span>
                     {r.change && <span className="rv-change">{r.change}</span>}
-                    {r.asked && r.mark && !r.changedSince && <span className={`rv-asked ${r.mark}`} aria-hidden="true">asked</span>}
                     {r.node ? r.node.flags?.map((f, k) => <span key={f} className={`rv-flag ${flagLook(f)}`}>{r.flags[k]}</span>) : <span className={`rv-flag ${flagLook("declared_not_changed")}`}>declared, not changed</span>}
                     {r.changedSince && <span className="rv-since">{WORDS.changedSince}</span>}
                     {r.path && <span id={`rv-path-${r.id}`} className="sr-only">{r.path}</span>}
