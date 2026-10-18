@@ -1,6 +1,6 @@
 ---
 title: "The review's failure words, the thread link, marks in one column, and one list of Needs me verbs"
-status: next
+status: done
 repos: [organizer]
 branch: lf41-review-words
 seat: lw-build
@@ -14,6 +14,7 @@ boundary: ["docs/specs/leftovers-41.md Boundary, lf41-review-words"]
 spec: "docs/specs/leftovers-41.md (FR-1 to FR-6)"
 gate: "docs/specs/leftovers-41.md Acceptance, rows W1-W6 and X0"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -99,6 +100,96 @@ For aglaea:
 - A3: the chat list's `aria-current="true"` (as FR-5 says) beside the design system's "exactly one `aria-current="page"` per screen". I read list-level `true` as outside that rule, the same as the Review worklist. Confirm.
 
 Not verified in WKWebView: the review build itself (screen locked: no AX window, no screencapture). The success path (`? asked`, `Asked fse · Open the thread`, `again`, the chat list after Open the thread) was seen with stubbed bindings only, by the no-mailbox rule; a real ask waits on lf41-fixture-launch's `canned_post`. Also not verified: the socket, closed-thread and other-error words (vitest); `✕ asked`; Answer, Agents, Launch, Show and `Rule · draft` rows (the fixture has none; vitest); a pointer press on anything (no pointer, by rule).
+
+## Review
+lw-review, 2026-10-18, on afbc2fb373651439b7328bfa31ee81e63badabc3 (the branch did not move), every row run from my own clean clone. **Verdict: pass.** Unmet gate items: none. No blocking finding.
+
+Shared test run: **fresh**, run `aadad5cb-19360` of afbc2fb373651439b7328bfa31ee81e63badabc3 (`XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test`, exit 0: go ok in every package, vitest 78 files / 970 tests; lw-ui reused it). Then `test-lease run -- pnpm run build` 0, `test-lease run -- wails build` 0 (again 0 after the harness), `git status --porcelain` empty both times. Logs: `.wt-notes/lw-review/x0-*.log`.
+
+change-check (from the clean clone):
+
+```
+change-check: working-on/lf41-review-words.md
+risk: low
+repo organizer: base 24785059d (default main) ... head lf41-review-words afbc2fb37; 13 files
+
+## Changed
+
+- organizer/frontend/src/components/Conversation.test.tsx (added, test)
+- organizer/frontend/src/components/Conversation.tsx (modified): Conversation
+- organizer/frontend/src/components/Home.tsx (modified): TaskOpen, InboxRow, UnreadRow, OthersRow, RuleAction
+- organizer/frontend/src/components/Home.waits.test.tsx (modified, test)
+- organizer/frontend/src/components/Review.test.tsx (modified, test)
+- organizer/frontend/src/components/Review.tsx (modified): Worklist
+- organizer/frontend/src/components/ReviewSymbol.test.tsx (modified, test)
+- organizer/frontend/src/components/ReviewSymbol.tsx (modified): AskStatus
+- organizer/frontend/src/lib/review.test.ts (modified, test)
+- organizer/frontend/src/lib/review.ts (modified): askLine, AskStage, askStage, markControls, askFailedLine, primaryOf
+- organizer/frontend/src/lib/verbs.test.ts (added, test)
+- organizer/frontend/src/lib/verbs.ts (added): Verb, ruleVerb
+- organizer/frontend/src/styles/review.css (modified)
+
+## Tests touched
+
+- organizer/frontend/src/components/Conversation.test.tsx
+- organizer/frontend/src/components/Home.waits.test.tsx
+- organizer/frontend/src/components/Review.test.tsx
+- organizer/frontend/src/components/ReviewSymbol.test.tsx
+- organizer/frontend/src/lib/review.test.ts
+- organizer/frontend/src/lib/verbs.test.ts
+
+## Risky (declared)
+
+- `MarkForm`: once asked with the note as asked, Question/Blocked has no primary; moving on is N or the list (Reviewed and Save stay)
+- `askFailedLine`: matching is on error text; a new Go error wording falls to "anything else"
+
+## Not changed, on purpose (declared)
+
+- `Conversation.tsx` landing logic: the class and the new attribute already follow the chat shown in WK; only the attribute was added (boundary)
+- any Go, `app.go`, `frontend/wailsjs/`, the store, `lib/queue.ts:launchVerb` (outside the boundary; Home compares it to `VERBS.open`)
+
+## Flags
+
+| flag | where | symbol | detail |
+|---|---|---|---|
+| outside footprint | organizer/frontend/src/components/Conversation.test.tsx |  | added |
+| undeclared | organizer/frontend/src/lib/review.ts | AskStage | added |
+| untested? | organizer/frontend/src/components/Home.tsx | TaskOpen | no test file names it |
+| untested? | organizer/frontend/src/components/Home.tsx | UnreadRow | no test file names it |
+| untested? | organizer/frontend/src/components/Home.tsx | RuleAction | no test file names it |
+| untested? | organizer/frontend/src/components/Review.tsx | Worklist | no test file names it |
+| declared, not changed |  | frontend/src/components/ReviewSymbol.tsx:MarkForm | no matching change |
+
+7 flags: outside boundary 0, outside footprint 1, undeclared 1, declared, not changed 1, new env var 0, new dependency 0, new host 0, risk 0, untested? 4, could not read 0, boundary unreadable 0
+```
+
+Every flag explained:
+- outside footprint, `Conversation.test.tsx`: the spec's Boundary names "`components/Conversation.tsx` (the chat row's `aria-current` only) and its test"; the card's footprint left the test out, and Declared changes lists it. Inside the boundary.
+- undeclared, `review.ts:AskStage`: the type of the declared `askStage` (same name, same hunk, review.ts:390-392). Covered by that bullet.
+- declared, not changed, `ReviewSymbol.tsx:MarkForm`: false flag. The diff changes MarkForm's body (ReviewSymbol.tsx:168-247 at afbc2fb: `markControls`, `showPrimary`, the `toLink`/`link` focus hand-off); change-check attributed the file's hunks to `AskStatus` only.
+- untested?, `Home.tsx` TaskOpen, UnreadRow, RuleAction: rendered through `InboxRow` by Home.waits.test.tsx W6 (task with no supervisor → TaskOpen `Open`, unread → UnreadRow `Show`, decision → DecisionRow → RuleAction `Rule` and `Rule · draft`). Untested? `Review.tsx` Worklist: rendered by Review.test.tsx (`view(...)`, the A4 rows and W3 markup).
+- outside boundary 0, new dependency 0: confirmed by hand. `git diff main...afbc2fb` touches 13 files, all under the lf41-review-words bullet; nothing in Go, `app.go`, `frontend/wailsjs/`, `frontend/src/stores/`, `scripts/`, `package.json` or the lockfile. Conversation.tsx: `aria-current` on the seven chat rows plus one comment, nothing else. Home.tsx: verb strings read from `VERBS` and `InboxRow` exported for the test.
+
+Rows:
+- **W1 met.** review.test.ts "W1": au-ui's two texts (`open /var/folders/…/tokens.json: …`, `dial unix …/discuss.sock: connect: connection refused`), `post: 409 Conflict (status closed)`, `open /Users/x/y: denied` → `Saved here; couldn't ask fse: open ~/y: denied`. Each of the four lines matches review-view Amendment 5 U3 and FR-1 character for character. Also in WK (my harness, both sizes): the real failed ask reads `Saved here; couldn't ask fse: Deltagos has no discuss identity for this cell. organizer doctor says why.`, with no `/Users/`.
+- **W2 met.** vitest: `<a href="#" class="rs-thread">Open the thread</a>`, no button, no tabindex. Harness, both sizes: one Tab from Save lands on `A href="#"` "Open the thread", `:focus-visible`, `solid 2px rgb(192,171,254)`; Return opens Conversations (`sub: conversations`, the thread's divider focused).
+- **W3 met.** Harness at 1024×640 and 1440×900: glyph left 41 on `? asked` (formatName) = 41 on `✓` (Greet). `asked` spans 56.84–88.84, before the name at 93.97. The wrapped flag starts at 93.97, the same as the name.
+- **W4 met.** review.test.ts W4 (`markControls`): after an ask, no line and no asking primary. With the note edited, `Ask sup81 again, next` / `Ask sup81 again` and `Saves the mark and asks sup81 again in this review's thread. Wakes sup81.` ReviewSymbol.test.tsx W4: the asked panel's markup. Harness, both sizes: after an ask, buttons `[Save]`, no ask line, `Asked fse · Open the thread`, focus on the link. After editing the note: `Ask fse again` and the `again` line, as Amendment 6 A2 words them.
+- **W5 met.** Conversation.test.tsx: with the chat the landing picks (fse), only fse's row carries `aria-current="true"`; channel has none, and with no seat channel alone does. Harness, both sizes, after pressing Open the thread: `current: ["fse"]`, `channelCurrent: null`, title `fse`.
+- **W6 met.** verbs.test.ts: the list is exactly `Rule, Rule · draft, Answer, Open, Agents, Launch, Show`. Home.waits.test.tsx W6 renders every `NeedsMeRow` kind in `lib/queue.ts` (decision, thread, task ×2, card, seat, start, launch ×2, unread), plus `Rule · draft` and OthersRow, each with one verb from `VERBS`. No verb literal is left in Home's buttons.
+- **X0 met**, above.
+
+No mailbox: each harness run appended `discuss_state_dir: <empty mktemp -d>` after `fixture-home.sh --review`, checked once in the config (`out/nodiscuss-check.txt`: 1), auth off, probe stubbed. The one real ask per run failed before connecting, and each dir was empty afterwards. The harness (my own `swiftc` build of lw-build's `tabharness.swift`, read: offscreen window, keys to its own window only) ran under `harness.lock` against my `wails dev -devserver localhost:34262`. It stopped by the saved dev pid and its children, plus my fixture's stand-ins (`h/out/killed.txt`), none left alive. Evidence: `.wt-notes/lw-review/h/out/`.
+
+Notes (not blocking):
+- N1: W5's vitest does not call `openSlack`. It reads the landing effect from the source and renders with the focus that effect sets, since vitest has no DOM here. The behaviour is proven by the harness press, not by the vitest alone. For the FSE: a gate row that says "vitest after openSlack" needs a DOM library or a harness row.
+- N2: W4's "then edit the note" is a unit test of `markControls` plus a source-text check of MarkForm; the edited panel itself is proven in WK only.
+- N3: FR-1's `/409|closed/` matches the substring anywhere (lw-ui LW3), and `/Users/<any>` becomes `~` (LW2). Both are built as FR-1 says.
+
+Where each finding on this card goes:
+- N1, N2, lw-ui S1, S2: to the FSE (gate wording, FR-4's move-on, FR-1's home path).
+- N3, lw-ui LW2, LW3: to the FSE, for a leftovers amendment to FR-1 (shorten only `$HOME`; match Go's own closed-thread error).
+- lw-ui LW1, A1, A2, A3: to aglaea via the FSE (Tab after the panel's last stop, the lone disabled Save, `aria-current="true"` in lists).
 
 ## Done
 - 2026-10-18 lw-build: FR-1 to FR-6 on branch lf41-review-words (9b36a71, f87b25b, 1425e0a, afbc2fb), rebased on main ad4a3c2. Gate met: W1, W4-W6 vitest; W2, W3 vitest and Tab harness at 1024x640 and 1440x900 (W1, W4 also in WK); X0 from a clean clone at afbc2fb (make test 0, pnpm run build 0, wails build 0, porcelain empty). Not merged. Evidence and how to reach each state: `.wt-notes/lw-build/progress.md`.
