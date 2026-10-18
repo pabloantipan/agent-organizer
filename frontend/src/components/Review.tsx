@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { review as rv, service } from "../../wailsjs/go/models";
-import { MakeReview, ReviewMap, ReviewMarks, ReviewStatus, StopReview } from "../../wailsjs/go/main/App";
+import { MakeReview, ReviewAddressee, ReviewMap, ReviewMarks, ReviewStatus, StopReview } from "../../wailsjs/go/main/App";
 import { ClipboardSetText, EventsOn } from "../../wailsjs/runtime/runtime";
 import { useBoard } from "../stores/board.store";
 import { openBox, openBoxes } from "../lib/boxStack";
 import { busyButton } from "../lib/busy";
 import { speaker } from "../lib/liveRegion";
 import {
-  afterASecond, allReviewed, countsLine, coverage, coverageLine, filesOf, flagLook, groupName, inTextField, isAffected, MARK_GLYPH, makeOrigin, makingLabel, movedLine,
-  nextToReview, nothingToReview, partialLines, rowName, screenState, secondsSince, worklist, WORDS, type Group, type Row,
+  afterASecond, allReviewed, countsLine, coverage, coverageLine, filesOf, firstLine, flagLook, groupName, inTextField, isAffected, lastToReview, MARK_GLYPH, makeOrigin, makingLabel, movedLine,
+  askFailedLine, nextToReview, nothingToReview, partialLines, rowName, saidAfter, screenState, secondsSince, worklist, WORDS, type Addressee, type Group, type Row, type Via,
 } from "../lib/review";
 import { ReviewSymbol } from "./ReviewSymbol";
 import "../styles/review.css";
@@ -19,7 +19,7 @@ import "../styles/review.css";
  *  the card back's Review the change; `← Card` and Escape go back to it.
  *  The symbol's panel is ReviewSymbol, mounted in SymbolPane. */
 export function Review() {
-  const { review, closeReview, setReviewPlace } = useBoard();
+  const { review, closeReview, setReviewPlace, openSlack } = useBoard();
   const initiative = review?.initiative ?? "";
   const card = review?.card ?? "";
   const symbol = review?.symbol ?? "";
@@ -28,6 +28,13 @@ export function Review() {
   const [map, setMap] = useState<rv.RevMap | null>(null);
   const [marks, setMarks] = useState<rv.Marks | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Who a Question or Blocked asks (FR-25), read once per card.
+  const [to, setTo] = useState<Addressee | null>(null);
+  useEffect(() => {
+    let live = true;
+    ReviewAddressee(initiative, card).then((a) => { if (live) setTo(a); }, (e) => { if (live) setTo({ seat: "", why: firstLine(String(e)) }); });
+    return () => { live = false; };
+  }, [initiative, card]);
 
   const load = useCallback(async () => {
     try {
@@ -67,16 +74,28 @@ export function Review() {
   const cov = useMemo(() => (map ? coverage(map, marks) : null), [map, marks]);
   const done = !!cov && allReviewed(cov);
 
-  // All reviewed: the live region says it once (§4).
+  // All reviewed, and an ask that posted: the live region says each once
+  // (§4; FR-29, FR-38), both in one message when one press does both.
   const [said, setSaid] = useState("");
   const sayer = useMemo(() => speaker(setSaid), []);
   useEffect(() => () => sayer.stop(), [sayer]);
   const wasDone = useRef<boolean | null>(null);
+  const asked = useRef("");
+  const failed = useRef("");
   useEffect(() => {
     if (!cov) return;
-    if (wasDone.current === false && done) sayer.say(coverageLine(cov));
+    const m = saidAfter({ asked: asked.current, failed: failed.current, wasDone: wasDone.current, done, cov });
+    asked.current = "";
+    failed.current = "";
+    if (m) sayer.say(m);
     wasDone.current = done;
   }, [cov, done, sayer]);
+  const seat = to?.seat ?? "";
+  const onAsked = useCallback((r: service.ReviewAsk) => {
+    if (r.error) failed.current = askFailedLine(r.to?.seat || seat, r.error);
+    else if (r.asked) asked.current = r.to?.seat ?? "";
+    setMarks(r.marks);
+  }, [seat]);
 
   // Opening a symbol moves focus to its title (§5).
   const title = useRef<HTMLHeadingElement>(null);
@@ -86,10 +105,13 @@ export function Review() {
   // An affected symbol opens read-only from a changed one (§3.3); `from`
   // is the changed one `← back` returns to, and where N walks from.
   const [from, setFrom] = useState("");
-  const open = useCallback((id: string) => {
+  // The list an affected symbol was opened from, which names its line (FR-40).
+  const [via, setVia] = useState<Via | undefined>(undefined);
+  const open = useCallback((id: string, list?: Via) => {
     const n = map?.nodes?.find((x) => x.id === id);
     const affected = !!n && isAffected(n);
     setFrom(affected ? (symbol && !map?.nodes?.find((x) => x.id === symbol && isAffected(x)) ? symbol : from) : "");
+    setVia(affected ? list : undefined);
     focusTitle.current = true;
     if (!affected) setActive(id);
     setOpened((k) => k + 1);
@@ -157,12 +179,15 @@ export function Review() {
 
   // Focus on open (FR-20): the screen's first target once it has drawn,
   // the worklist's stop with a map, Make the map with none, else ← Card;
-  // never the page body.
+  // never the page body. Back from Conversations (← Review, FR-29) the
+  // place still names a symbol: focus goes to its title, as on opening it.
   const focusedOpen = useRef(false);
   useEffect(() => {
     if (focusedOpen.current || state === "loading" || (shown && !map)) return;
     focusedOpen.current = true;
-    firstTarget(document)?.focus();
+    const returned = symbol && map?.nodes?.some((n) => n.id === symbol) ? title.current : null;
+    (returned ?? firstTarget(document))?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, shown, map]);
 
   // A make that ends with a map hands focus to the worklist (the result,
@@ -181,7 +206,7 @@ export function Review() {
   return (
     <ReviewView status={status} make={make} map={map} marks={marks} error={error} symbol={symbol} active={active} setActive={setActive}
       onBack={closeReview} onStep={step} onOpen={open} onMake={makeIt} onStop={stop} makeBtn={makeBtn} title={title} said={said} progress={progress} origin={origin}
-      panel={{ initiative, card, head: review?.head ?? "", from, onBack: () => open(from), onMarks: setMarks, onNext: () => step(1) }} />
+      panel={{ initiative, card, head: review?.head ?? "", from, via, to, onBack: () => open(from), onMarks: setMarks, onAsked, onOpenThread: (thread) => openSlack(initiative, null, thread), onNext: () => step(1) }} />
   );
 }
 
@@ -197,7 +222,7 @@ export const firstTarget = (root: ParentNode) =>
 export type ReviewViewProps = {
   status: service.ReviewStatus | null; make: service.ReviewMake | null; map: rv.RevMap | null; marks: rv.Marks | null; error: string | null;
   symbol: string; active: string; setActive: (k: string) => void;
-  onBack: () => void; onStep: (dir: 1 | -1) => void; onOpen: (id: string) => void; onMake: () => void; onStop: () => void;
+  onBack: () => void; onStep: (dir: 1 | -1) => void; onOpen: (id: string, via?: Via) => void; onMake: () => void; onStop: () => void;
   makeBtn: React.RefObject<HTMLButtonElement | null>; title: React.RefObject<HTMLHeadingElement | null>; said: string;
   /** FR-23: the make has run 1 s, so its counter and Stop show. */
   progress?: boolean;
@@ -207,7 +232,10 @@ export type ReviewViewProps = {
   panel?: PanelProps;
 };
 
-type PanelProps = { initiative: string; card: string; head: string; from: string; onBack: () => void; onMarks: (m: rv.Marks) => void; onNext: () => void };
+type PanelProps = {
+  initiative: string; card: string; head: string; from: string; via?: Via; to?: Addressee | null;
+  onBack: () => void; onMarks: (m: rv.Marks) => void; onAsked?: (r: service.ReviewAsk) => void; onOpenThread?: (thread: string) => void; onNext: () => void;
+};
 
 /** What the screen draws for a status, a make, a map and its marks: every
  *  §4 state, pure, so vitest renders each one. */
@@ -266,7 +294,7 @@ export function ReviewView({ status, make, map, marks, error, symbol, active, se
             <Worklist groups={groups} active={active || symbol} setActive={setActive} shown={currentRow(symbol, panel?.from)} onOpen={onOpen} />
           ))}
         </div>
-        <SymbolPane map={map} node={node} row={row} marks={marks} title={title} onOpen={onOpen} panel={panel} />
+        <SymbolPane map={map} node={node} row={row} marks={marks} last={lastToReview(groups, symbol)} title={title} onOpen={onOpen} panel={panel} />
       </div>
       <div className="sr-only" aria-live="polite">{said}</div>
     </div>
@@ -381,6 +409,7 @@ function Worklist({ groups, active, setActive, shown, onOpen }: { groups: Group[
                     <span className={`rv-mark ${r.mark}`} aria-hidden="true">{MARK_GLYPH[r.mark]}</span>
                     <span className="rv-name mono">{r.name}</span>
                     {r.change && <span className="rv-change">{r.change}</span>}
+                    {r.asked && r.mark && !r.changedSince && <span className={`rv-asked ${r.mark}`} aria-hidden="true">asked</span>}
                     {r.node ? r.node.flags?.map((f, k) => <span key={f} className={`rv-flag ${flagLook(f)}`}>{r.flags[k]}</span>) : <span className={`rv-flag ${flagLook("declared_not_changed")}`}>declared, not changed</span>}
                     {r.changedSince && <span className="rv-since">{WORDS.changedSince}</span>}
                     {r.path && <span id={`rv-path-${r.id}`} className="sr-only">{r.path}</span>}
@@ -400,14 +429,15 @@ function Worklist({ groups, active, setActive, shown, onOpen }: { groups: Group[
  *  each other from 1440, the facts under the diff below (§3.4). With no
  *  symbol chosen it is empty; with no panel props (vitest of the screen's
  *  states) it draws the title only. */
-function SymbolPane({ map, node, row, marks, title, onOpen, panel }: { map: rv.RevMap | null; node: rv.Node | null; row: Row | null; marks: rv.Marks | null; title: React.RefObject<HTMLHeadingElement | null>; onOpen: (id: string) => void; panel?: PanelProps }) {
+function SymbolPane({ map, node, row, marks, last, title, onOpen, panel }: { map: rv.RevMap | null; node: rv.Node | null; row: Row | null; marks: rv.Marks | null; last: boolean; title: React.RefObject<HTMLHeadingElement | null>; onOpen: (id: string, via?: Via) => void; panel?: PanelProps }) {
   if (!node || !map) return <section className="review-symbol empty" aria-label="Symbol" />;
   const from = panel?.from ? map.nodes?.find((n) => n.id === panel.from) ?? null : null;
   return (
     <section className="review-symbol" aria-label="Symbol">
       {panel ? (
-        <ReviewSymbol key={node.id} initiative={panel.initiative} card={panel.card} head={panel.head} map={map} node={node} row={row} marks={marks} from={from}
-          title={title} onOpen={onOpen} onBack={panel.onBack} onMarks={panel.onMarks} onNext={panel.onNext} />
+        <ReviewSymbol key={node.id} initiative={panel.initiative} card={panel.card} head={panel.head} map={map} node={node} row={row} marks={marks} from={from} via={panel.via}
+          to={panel.to ?? null} last={last} title={title} onOpen={onOpen} onBack={panel.onBack} onMarks={panel.onMarks} onAsked={panel.onAsked ?? ((r) => panel.onMarks(r.marks))}
+          onOpenThread={panel.onOpenThread ?? (() => undefined)} onNext={panel.onNext} />
       ) : (
         <h2 ref={title} tabIndex={-1} className="review-symbol-title"><span className="mono">{row?.name ?? node.id}</span> <span className="rv-change">{node.change}</span></h2>
       )}

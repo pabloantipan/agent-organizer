@@ -186,6 +186,14 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
       if (!chat) setView(t ? (t.kind === "journal" ? "journal" : "channel") : "archive");
       landing.current = slackDraft.threadId;
       setTimeout(() => { setTarget(slackDraft.threadId!); setScrollTo(slackDraft.threadId!); }, 0);
+      // A thread the feed does not list yet (the one an ask just opened,
+      // review-map v3 FR-41): ask the feed now and land once it lists it;
+      // meanwhile focus waits on `← Review`, never the body.
+      if (!t) {
+        unlisted.sent(slackDraft.threadId);
+        api.getAgents().then(applyAgents, () => undefined);
+        if (document.activeElement === document.body || !document.activeElement) reviewBackOf(document)?.focus({ preventScroll: true });
+      }
     }
     if (slackDraft.subject !== undefined) { setPrefill({ chat, subject: slackDraft.subject, body: slackDraft.body ?? "" }); setTarget(null); }
     clearSlackDraft();
@@ -202,7 +210,8 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
       const asked = [...el.querySelectorAll<HTMLElement>(".msg.for-me")].pop();
       el.scrollIntoView({ block: "start" });
       asked?.scrollIntoView({ block: "nearest" });
-      el.querySelector<HTMLElement>(".tl-divider")?.focus({ preventScroll: true });
+      const divider = el.querySelector<HTMLElement>(".tl-divider");
+      if (divider) landDivider(divider, reviewBackOf(document));
       landing.current = null;
     } else {
       el.scrollIntoView({ block: "start", behavior: "smooth" });
@@ -256,6 +265,13 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   // A search hit and a ruling land like Answer does, focus on the divider
   // (leftovers-24 FR-4, FR-5).
   const landOn = (id: string) => { landing.current = id; goTo(id); };
+  // A landing on a thread the feed has not listed yet (FR-41) lands when it
+  // does, within LIST_WAIT_MS; past it the archive fallback stands.
+  const landTo = useRef(landOn);
+  landTo.current = landOn;
+  const [unlisted] = useState(() => sentWatch({ land: (id) => landTo.current(id), letGo: () => undefined }));
+  useEffect(() => () => unlisted.stop(), [unlisted]);
+  useEffect(() => { unlisted.feed(all.map((t) => t.id)); }, [unlisted, all]);
   // A new thread or a branch sent (leftovers-34 FR-2, F5): the form stays,
   // its Send busy and focused, until the feed carries the thread; then it
   // lands like landOn, and focus goes from Send to the thread's divider in
@@ -607,6 +623,26 @@ export function landPosted(doc: Pick<Document, "getElementById">, id: string): b
   if (!divider) return false;
   divider.focus({ preventScroll: true });
   return true;
+}
+
+/** `← Review` in Conversations' toolbar (SlackView's ReviewBack), when
+ *  this Conversations was opened from the Review screen. */
+export const reviewBackOf = (doc: Pick<Document, "querySelector">) => doc.querySelector<HTMLElement>("[data-review-back]");
+
+/** A landing from the Review screen's Open the thread (review-map v3
+ *  FR-41): focus on the thread's divider, and the next Tab, once, goes to
+ *  `← Review` (above it in the page, so not its Tab order), the way back.
+ *  Any other key, or focus leaving, drops that. */
+export function landDivider(divider: HTMLElement, back: HTMLElement | null) {
+  divider.focus({ preventScroll: true });
+  if (!back) return;
+  const off = () => { divider.removeEventListener("keydown", key); divider.removeEventListener("blur", off); };
+  const key = (e: KeyboardEvent) => {
+    off();
+    if (e.key === "Tab" && !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); back.focus(); }
+  };
+  divider.addEventListener("keydown", key);
+  divider.addEventListener("blur", off);
 }
 
 /** What the live region says when a sent thread is not listed in time

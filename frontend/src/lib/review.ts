@@ -40,10 +40,51 @@ export const WORDS = {
   questionNext: "Save question, next",
   blockNext: "Save block, next",
   save: "Save",
-  v3: "Kept in Deltagos; asking the supervisor comes later.",
+  reviewedLast: "Reviewed",
+  questionLast: "Save question",
+  blockLast: "Save block",
+  saving: "Saving…",
+  asking: "Asking…",
+  openThread: "Open the thread",
+  backToReview: "← Review",
   unchanged: "unchanged",
   noneFound: "none found",
 } as const;
+
+/** Who a Question or Blocked asks (review-map v3 FR-25, the binding
+ *  ReviewAddressee): a seat and why, or seat "" and why nobody. */
+export type Addressee = { seat: string; why: string };
+
+/** The muted line under the mark (FR-28; review-view Amendment 3): with
+ *  someone to ask, what the ask does and that it wakes them; with nobody,
+ *  why and that the mark stays here; on Reviewed or none, no line. */
+export function askLine(to: Addressee | null, s: MarkState): string {
+  if (!to || !needsNote(s)) return "";
+  return to.seat
+    ? `Saves the mark and asks ${to.seat} (${to.why}) in this review's thread. Wakes ${to.seat}.`
+    : `No one to ask here: ${to.why}. Kept in Deltagos.`;
+}
+
+/** After an ask (FR-29): the panel's line and the live region's words. */
+export const askedLine = (seat: string) => `Asked ${seat}`;
+
+/** A post that failed (FR-29): the mark is saved, the ask is not. */
+export const askFailedLine = (seat: string, error: string) => `Saved here; couldn't ask ${seat}: ${firstLine(error)}`;
+
+/** The first line of an error, without the binding's `Error: `. */
+export const firstLine = (e: string) => e.replace(/^Error:\s*/, "").split("\n")[0].trim();
+
+/** What the review's live region says after the marks change (FR-29,
+ *  FR-38; §4 all reviewed): `Asked <seat>` once for an ask that posted,
+ *  the coverage once when the last symbol is marked, both when one press
+ *  does both. An ask that failed says its failure line alone, even on the
+ *  last symbol: the coverage would read as success (FR-29, Amendment 4).
+ *  "" says nothing. */
+export function saidAfter(o: { asked: string; failed?: string; wasDone: boolean | null; done: boolean; cov: Coverage }): string {
+  if (o.failed) return o.failed;
+  const parts = [o.asked ? askedLine(o.asked) : "", o.wasDone === false && o.done ? coverageLine(o.cov) : ""].filter(Boolean);
+  return parts.join(". ");
+}
 
 /** §4 making: `Making the map · 2 s`, a counter, no spinner. */
 export const makingLabel = (seconds: number) => `Making the map · ${Math.max(0, Math.floor(seconds))} s`;
@@ -179,6 +220,8 @@ export type Row = {
   change: string;
   flags: string[];
   mark: MarkState;
+  /** FR-29: the mark was asked of someone (its `asked`). */
+  asked: boolean;
   /** §4 new map, same symbol: the previous head's mark did not carry. */
   changedSince: boolean;
   /** Counted by coverage and walked by Next to review. */
@@ -190,11 +233,15 @@ export type Group = { key: string; kind: GroupKind; title: string; rows: Row[]; 
 
 /** The marks of a head, by symbol, and the symbols whose marks did not
  *  carry to it. */
-export function marksOf(marks: review.Marks | null | undefined): { by: Map<string, MarkState>; changed: Set<string> } {
+export function marksOf(marks: review.Marks | null | undefined): { by: Map<string, MarkState>; changed: Set<string>; asked: Set<string> } {
   const by = new Map<string, MarkState>();
-  for (const m of marks?.marks ?? []) if (m.state) by.set(m.symbol, m.state as MarkState);
+  const asked = new Set<string>();
+  for (const m of marks?.marks ?? []) {
+    if (m.state) by.set(m.symbol, m.state as MarkState);
+    if (m.state && m.asked) asked.add(m.symbol);
+  }
   const changedSet = new Set((marks?.changed ?? []).map((m) => m.symbol).filter((s) => !by.has(s)));
-  return { by, changed: changedSet };
+  return { by, changed: changedSet, asked };
 }
 
 function fileOrder(a: review.Node, b: review.Node) {
@@ -217,11 +264,11 @@ export function rowOrder(a: review.Node, b: review.Node) {
  *  changed (mismatches with no node), then Tests changed, collapsed. The
  *  affected nodes are not rows. Empty groups are not drawn. */
 export function worklist(m: review.RevMap, marks?: review.Marks | null): Group[] {
-  const { by, changed: since } = marksOf(marks);
+  const { by, changed: since, asked } = marksOf(marks);
   const pkgs = pkgOf(m);
   const row = (n: review.Node, name: string): Row => ({
     id: n.id, node: n, name, path: n.file, change: n.change,
-    flags: (n.flags ?? []).map(flagWords), mark: by.get(n.id) ?? "",
+    flags: (n.flags ?? []).map(flagWords), mark: by.get(n.id) ?? "", asked: asked.has(n.id),
     changedSince: !by.has(n.id) && since.has(n.id), counted: !isTest(n),
   });
   const defs = (m.nodes ?? []).filter(changed);
@@ -245,7 +292,7 @@ export function worklist(m: review.RevMap, marks?: review.Marks | null): Group[]
   if (declared.length) {
     groups.push({
       key: "declared", kind: "declared", title: "Declared, not changed", collapsed: false,
-      rows: declared.map((x, i) => ({ id: `declared:${i}:${x.file ?? ""}:${x.symbol ?? ""}`, node: null, name: [x.file, x.symbol].filter(Boolean).join(":"), path: x.file ?? "", change: "", flags: [], mark: "", changedSince: false, counted: false })),
+      rows: declared.map((x, i) => ({ id: `declared:${i}:${x.file ?? ""}:${x.symbol ?? ""}`, node: null, name: [x.file, x.symbol].filter(Boolean).join(":"), path: x.file ?? "", change: "", flags: [], mark: "", asked: false, changedSince: false, counted: false })),
     });
   }
   const tests = defs.filter(isTest).sort(rowOrder);
@@ -331,10 +378,12 @@ export const filesOf = (m: review.RevMap) => [...new Set((m.nodes ?? []).map((n)
 
 const MARK_WORD: Record<MarkState, string> = { "": "", reviewed: "reviewed", question: "question", blocked: "blocked" };
 
-/** A row's name (§5): `runLaunches, modified, no direct test, reviewed`. */
+/** A row's name (§5): `runLaunches, modified, no direct test, reviewed`;
+ *  an asked mark adds `asked` (FR-29: `question, asked`). */
 export function rowName(r: Row): string {
   if (!r.node) return [r.name, "declared, not changed"].join(", ");
-  return [r.name, r.change, ...r.flags, r.changedSince ? WORDS.changedSince : MARK_WORD[r.mark]].filter(Boolean).join(", ");
+  const mark = r.changedSince ? WORDS.changedSince : MARK_WORD[r.mark];
+  return [r.name, r.change, ...r.flags, mark, mark && r.asked && !r.changedSince ? "asked" : ""].filter(Boolean).join(", ");
 }
 
 /** A group head's name (§5): `internal/service, 3 symbols, 1 reviewed`. */
@@ -430,15 +479,19 @@ export const callsOf = (m: review.RevMap, id: string) => uniqNodes((m.edges ?? [
 /** An affected node is an unchanged neighbour, shown read-only (§3.3). */
 export const isAffected = (n: review.Node) => n.change === "affected";
 
+/** The list an affected symbol was opened from (FR-40). */
+export type Via = "calledBy" | "calls";
+
 /** Which way an affected symbol points (review-view Amendment 2, A1;
- *  FR-30): opened from `Called by` it calls the changed one, `unchanged ·
- *  calls runLaunches`; opened from `Calls` the changed one calls it,
- *  `unchanged · called by runLaunches`. Read from the edges, which is the
- *  list it sits in. */
-export function affectedLine(m: review.RevMap, affected: review.Node, changedNode: review.Node | null): string {
+ *  FR-30, FR-40): opened from `Called by` it calls the changed one,
+ *  `unchanged · calls runLaunches`; opened from `Calls` the changed one
+ *  calls it, `unchanged · called by runLaunches`. The list it was opened
+ *  from decides, never the edges: with mutual calls both are true. Only
+ *  with no list known (none in the place) do the edges say. */
+export function affectedLine(m: review.RevMap, affected: review.Node, changedNode: review.Node | null, via?: Via): string {
   if (!changedNode) return WORDS.unchanged;
   const name = shortName(changedNode, true);
-  const calls = (m.edges ?? []).some((e) => e.from === affected.id && e.to === changedNode.id);
+  const calls = via ? via === "calledBy" : (m.edges ?? []).some((e) => e.from === affected.id && e.to === changedNode.id);
   return calls ? `${WORDS.unchanged} · calls ${name}` : `${WORDS.unchanged} · called by ${name}`;
 }
 
@@ -467,12 +520,19 @@ export const canSave = (s: MarkState, note: string, saved: { state: MarkState; n
 /** The primary follows the chosen radio and saves it (Amendment 2, A2;
  *  FR-31): none or Reviewed `Reviewed, next`, Question `Save question,
  *  next`, Blocked `Save block, next`; it never overrides a chosen mark.
- *  Question and Blocked need a note first (`ready`). */
-export function primaryOf(s: MarkState, note: string): { label: string; mark: Exclude<MarkState, "">; ready: boolean } {
+ *  With someone to ask (FR-28, Amendment 3) Question and Blocked read `Ask
+ *  <seat>, next` and ask. On the last symbol without a mark (FR-38,
+ *  Amendment 4) there is no next: `Reviewed`, `Save question`, `Save
+ *  block`, `Ask <seat>`. Question and Blocked need a note first (`ready`). */
+export function primaryOf(s: MarkState, note: string, o: { seat?: string; last?: boolean } = {}): { label: string; mark: Exclude<MarkState, "">; ready: boolean; ask: boolean } {
   const mark = s === "" ? "reviewed" : s;
-  const label = mark === "question" ? WORDS.questionNext : mark === "blocked" ? WORDS.blockNext : WORDS.reviewedNext;
-  return { label, mark, ready: !needsNote(mark) || note.trim() !== "" };
+  const ask = needsNote(mark) && !!o.seat;
+  const base = ask ? `Ask ${o.seat}` : mark === "question" ? WORDS.questionLast : mark === "blocked" ? WORDS.blockLast : WORDS.reviewedLast;
+  return { label: o.last ? base : `${base}, next`, mark, ready: !needsNote(mark) || note.trim() !== "", ask };
 }
+
+/** No next to move to (FR-38): no symbol other than this one is unmarked. */
+export const lastToReview = (groups: Group[], id: string) => nextToReview(groups, id) === null;
 
 /** What the form shows once a mark is saved: the mark as saved (FR-24), so
  *  `Reviewed, next` with nothing left reads Reviewed, not the old radio. */

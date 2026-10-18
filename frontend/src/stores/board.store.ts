@@ -86,7 +86,13 @@ type State = {
   clearStageFocus: () => void;
   slackFocus: string | null;
   setSlackFocus: (agent: string | null) => void;
-  openSlack: (initiativeId: string, agent: string | null) => void;
+  // With a thread, openSlack lands on it (slackDraft); opened from the
+  // Review screen (Open the thread, review-map v3 FR-29) it keeps the
+  // review's place in reviewBack, which Conversations' `← Review` returns
+  // to (backToReview), on the same symbol.
+  openSlack: (initiativeId: string, agent: string | null, threadId?: string) => void;
+  reviewBack: ReviewOpen | null;
+  backToReview: () => void;
   // slackDraft is a one-shot instruction for Conversations from elsewhere
   // in the app: open this thread, or start a conversation with this subject.
   // The sub-view consumes it and clears it.
@@ -182,9 +188,14 @@ export type RuleDraft = { key: string; chosen: string; words: string };
 export type ReviewOpen = ReviewPlace & { back: { screen: Screen; selectedInitiative: string | null; sub: Sub; card: merge.BoardCard } };
 
 /** A navigation names `screen`; one that does not also name `review` leaves
- *  the Review screen. */
+ *  the Review screen, and one that does not name `reviewBack` drops the
+ *  way back to it. */
 type Patch = Partial<State> | State;
-const leaveReview = (p: Patch): Patch => ("screen" in p && !("review" in p) ? { ...p, review: null } : p);
+const leaveReview = (p: Patch): Patch => {
+  if (!("screen" in p)) return p;
+  const q = "review" in p ? p : { ...p, review: null };
+  return "reviewBack" in q ? q : { ...q, reviewBack: null };
+};
 
 const NO_RULING: Draft = { chosen: "", words: "" };
 
@@ -270,7 +281,12 @@ export const useBoard = create<State>((rawSet, get) => {
   clearStageFocus: () => set({ stageFocus: null }),
   slackFocus: null,
   setSlackFocus: (slackFocus) => set({ slackFocus }),
-  openSlack: (selectedInitiative, slackFocus) => set({ ruleDraft: null, headerOpen: folded(), screen: "initiative", sub: "conversations", selectedInitiative, slackFocus, slackDraft: null, needsMeFocus: null }),
+  openSlack: (selectedInitiative, slackFocus, threadId) => set((st) => ({
+    ruleDraft: null, headerOpen: folded(), screen: "initiative", sub: "conversations", selectedInitiative, slackFocus, slackDraft: threadId ? { threadId } : null, needsMeFocus: null,
+    reviewBack: threadId && st.review?.initiative === selectedInitiative ? st.review : null,
+  })),
+  reviewBack: null,
+  backToReview: () => set((st) => (st.reviewBack ? { review: st.reviewBack, reviewBack: null, screen: "initiative", selectedInitiative: st.reviewBack.initiative, selected: null } : {})),
   slackDraft: null,
   openSlackThread: (selectedInitiative, threadId) => set({ ruleDraft: null, headerOpen: folded(), screen: "initiative", sub: "conversations", selectedInitiative, selected: null, slackDraft: { threadId }, needsMeFocus: null }),
   openSlackDraft: (selectedInitiative, slackFocus, subject, body) => set({ ruleDraft: null, headerOpen: folded(), screen: "initiative", sub: "conversations", selectedInitiative, selected: null, slackFocus, slackDraft: { subject, body }, needsMeFocus: null }),

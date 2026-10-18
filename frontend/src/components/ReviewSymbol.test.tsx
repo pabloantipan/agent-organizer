@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
-import type { review } from "../../wailsjs/go/models";
+import type { review, service } from "../../wailsjs/go/models";
 import type { MarkState } from "../lib/review";
 // @ts-expect-error node:fs has no type declarations in this tsconfig
 import { readFileSync } from "node:fs";
@@ -11,9 +11,9 @@ import { readFileSync } from "node:fs";
 // V-R8's mark, as the pure view renders them to markup (no DOM library is a
 // dependency). The harness rows press the keys.
 
-vi.mock("../../wailsjs/go/main/App", () => ({ MarkReview: vi.fn(), ReviewFile: vi.fn() }));
+vi.mock("../../wailsjs/go/main/App", () => ({ MarkReview: vi.fn(), ReviewFile: vi.fn(), AskReview: vi.fn() }));
 
-const { ReviewSymbolView } = await import("./ReviewSymbol");
+const { AskStatus, markPress, ReviewSymbolView } = await import("./ReviewSymbol");
 const { afterSave, canSave, markOf, worklist } = await import("../lib/review");
 
 const node = (n: Partial<review.Node> & { id: string }) => ({
@@ -40,10 +40,10 @@ const texts = {
   head: { first: 1, lines: ["package svc", "", "// Greet is what acme's board says first.", "func Greet(name string) string {", '\treturn "hello, " + name + "!"', "}"] },
 };
 const noop = () => undefined;
-function panel(p: { id: string; marks?: review.Marks | null; from?: string; texts?: typeof texts | null; claim?: string }) {
+function panel(p: { id: string; marks?: review.Marks | null; from?: string; texts?: typeof texts | null; claim?: string; to?: { seat: string; why: string } | null; last?: boolean }) {
   const n = p.claim ? { ...at(p.id), claim: p.claim } as review.Node : at(p.id);
   return renderToStaticMarkup(
-    <ReviewSymbolView map={map} node={n} row={rowOf(p.id)} marks={p.marks ?? null} from={p.from ? at(p.from) : null} texts={p.texts === undefined ? texts : p.texts} error={null}
+    <ReviewSymbolView map={map} node={n} row={rowOf(p.id)} marks={p.marks ?? null} from={p.from ? at(p.from) : null} to={p.to} last={p.last} texts={p.texts === undefined ? texts : p.texts} error={null}
       title={createRef()} onOpen={noop} onBack={noop} onMark={() => Promise.resolve()} onNext={noop} />,
   );
 }
@@ -104,9 +104,11 @@ describe("V-R7: the builder's claim", () => {
 });
 
 describe("V-R8: the mark", () => {
-  it("the radio group, Note, Reviewed, next (primary) and Save, then the v3 line", () => {
+  it("the radio group, Note, Reviewed, next (primary) and Save; no line on none (FR-28)", () => {
     const h = text(panel({ id: G }));
-    expect(h).toContain("Reviewed Question Blocked Note Reviewed, next Save Kept in Deltagos; asking the supervisor comes later.");
+    expect(h).toContain("Reviewed Question Blocked Note Reviewed, next Save");
+    expect(h).not.toContain("Kept in Deltagos");
+    expect(panel({ id: G })).not.toContain("rs-ask-line");
     expect(panel({ id: G })).toMatch(/<button class="primary">Reviewed, next<\/button><button disabled="">Save<\/button>/);
   });
   it("Question with no note keeps Save disabled; with a note it is enabled", () => {
@@ -204,5 +206,158 @@ describe("P3, P4 (FR-33, FR-34, FR-36): the ring, the mono links, the flags' ind
   it("the mark sits in the row's padding, so a wrapped flag starts at the name", () => {
     expect(css("review.css")).toMatch(/\.rv-mark \{ position: absolute; left: var\(--space-5\);/);
     expect(css("review.css")).toContain("padding: var(--space-1) var(--space-2) var(--space-1) calc(var(--space-5) + 1.5ch + var(--space-1-5));");
+  });
+});
+
+describe("A4 (FR-28, FR-29): ask from the mark, mocked bindings", () => {
+  const sup = { seat: "sup81", why: "runs this card" };
+  const saved = (state: string, note: string, more: Record<string, string> = {}) => ({ marks: [{ symbol: G, state, note, ...more }], changed: [], ...(more.asked ? { thread: "01THREAD" } : {}) }) as unknown as review.Marks;
+  it("Question with a note and someone to ask: primary Ask sup81, next; secondary Save; the line ending Wakes sup81.", () => {
+    const h = panel({ id: G, marks: saved("question", "why the comma?"), to: sup });
+    expect(h).toMatch(/<button class="primary">Ask sup81, next<\/button><button disabled="">Save<\/button>/);
+    expect(text(h)).toContain("Saves the mark and asks sup81 (runs this card) in this review's thread. Wakes sup81.");
+    expect(h).not.toContain("Kept in Deltagos");
+  });
+  it("Blocked the same; with no note the ask waits for one", () => {
+    expect(panel({ id: G, marks: saved("blocked", "x"), to: sup })).toMatch(/<button class="primary">Ask sup81, next<\/button>/);
+    expect(panel({ id: G, marks: saved("question", ""), to: sup })).toMatch(/<button class="primary" disabled="">Ask sup81, next<\/button>/);
+  });
+  it("nobody to ask: Save question, next and No one to ask here: no cell. Kept in Deltagos.", () => {
+    const h = panel({ id: G, marks: saved("question", "why the comma?"), to: { seat: "", why: "no cell" } });
+    expect(h).toMatch(/<button class="primary">Save question, next<\/button>/);
+    expect(text(h)).toContain("No one to ask here: no cell. Kept in Deltagos.");
+  });
+  it("Reviewed with someone to ask: no line, no ask", () => {
+    const h = panel({ id: G, marks: saved("reviewed", ""), to: sup });
+    expect(h).toMatch(/<button class="primary">Reviewed, next<\/button>/);
+    expect(h).not.toContain("rs-ask-line");
+  });
+  it("after an ask: Asked sup81 · Open the thread, which opens the review's thread", () => {
+    const h = panel({ id: G, marks: saved("question", "why the comma?", { asked: "01MSG" }), to: sup });
+    expect(text(h)).toContain("Asked sup81 · Open the thread");
+    expect(h).toContain('<button class="link">Open the thread</button>');
+    const opened: string[] = [];
+    const el = AskStatus({ failed: null, asked: true, seat: "sup81", thread: "01THREAD", busy: "", onRetry: noop, onOpenThread: () => opened.push("01THREAD") }) as unknown as { props: { children: { props: { onClick: () => void } }[] } };
+    el.props.children[2].props.onClick();
+    expect(opened).toEqual(["01THREAD"]);
+    // not asked: no line
+    expect(text(panel({ id: G, marks: saved("question", "why the comma?"), to: sup }))).not.toContain("Asked sup81");
+  });
+  it("a failed ask: the failure words and Try again; while posting, Asking…", () => {
+    const f = { seat: "sup81", state: "question" as MarkState, error: "dial unix discuss.sock: connect: no such file or directory" };
+    const h = renderToStaticMarkup(<AskStatus failed={f} asked={false} seat="sup81" thread="" busy="" onRetry={noop} onOpenThread={noop} />);
+    expect(text(h)).toContain("Saved here; couldn't ask sup81: dial unix discuss.sock: connect: no such file or directory Try again");
+    expect(h).toContain(">Try again</button>");
+    const busy = renderToStaticMarkup(<AskStatus failed={f} asked={false} seat="sup81" thread="" busy="retry" onRetry={noop} onOpenThread={noop} />);
+    expect(busy).toContain('aria-disabled="true"');
+    expect(busy).toContain(">Asking…</button>");
+  });
+  it("the press: an ask posts and moves on; a failed post keeps the mark, says why and stays; Save never asks", async () => {
+    const asked = { marks: saved("question", "why?", { asked: "01MSG" }), to: sup, thread: "01THREAD", asked: "01MSG", error: "" } as unknown as service.ReviewAsk;
+    const failed = { marks: saved("question", "why?"), to: sup, thread: "", asked: "", error: "dial unix discuss.sock: connect: refused" } as unknown as service.ReviewAsk;
+    const onAsk = vi.fn((_s: MarkState, _n: string) => Promise.resolve(asked));
+    const onMark = vi.fn((_s: MarkState, _n: string) => Promise.resolve());
+    const next = vi.fn();
+    expect(await markPress({ ask: true, state: "question", note: " why? ", seat: "sup81", onAsk, onMark, then: next })).toBeNull();
+    expect(onAsk).toHaveBeenCalledWith("question", "why?");
+    expect(onMark).not.toHaveBeenCalled();
+    expect(next).toHaveBeenCalledTimes(1);
+    const stay = vi.fn();
+    const r = await markPress({ ask: true, state: "question", note: "why?", seat: "sup81", onAsk: () => Promise.resolve(failed), onMark, then: stay });
+    expect(r).toEqual({ seat: "sup81", state: "question", error: "dial unix discuss.sock: connect: refused" });
+    expect(stay).not.toHaveBeenCalled();
+    await markPress({ ask: false, state: "question", note: "why?", seat: "sup81", onAsk, onMark, then: noop });
+    expect(onMark).toHaveBeenCalledWith("question", "why?");
+    expect(onAsk).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("A6 (FR-38): the last unmarked symbol", () => {
+  const saved = (state: string, note: string) => ({ marks: [{ symbol: G, state, note }], changed: [] }) as unknown as review.Marks;
+  it("each mark's primary drops , next", () => {
+    expect(panel({ id: G, last: true })).toMatch(/<button class="primary">Reviewed<\/button>/);
+    expect(panel({ id: G, marks: saved("question", "q"), last: true })).toMatch(/<button class="primary">Save question<\/button>/);
+    expect(panel({ id: G, marks: saved("blocked", "b"), last: true })).toMatch(/<button class="primary">Save block<\/button>/);
+    expect(panel({ id: G, marks: saved("question", "q"), last: true, to: { seat: "sup81", why: "runs this card" } })).toMatch(/<button class="primary">Ask sup81<\/button>/);
+  });
+  it("the press on the last does not move on, so focus stays on the button (the busy rule keeps it while it saves)", async () => {
+    // MarkForm passes `then` without onNext when last: only the form's own update runs
+    const onNext = vi.fn();
+    const shown = vi.fn();
+    await markPress({ ask: false, state: "reviewed", note: "", seat: "", onMark: () => Promise.resolve(), then: shown });
+    expect(shown).toHaveBeenCalledTimes(1);
+    expect(onNext).not.toHaveBeenCalled();
+    const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
+    expect(src).toContain('run("next", primary.mark, primary.ask, last ? undefined : onNext)');
+  });
+});
+
+describe("A7 (FR-39): a muted flag is text", () => {
+  const css = readFileSync(new URL("../styles/review.css", import.meta.url), "utf8") as string;
+  it("no inline padding on .rv-flag.muted; amber and dashed keep the lozenge's", () => {
+    expect(css).toContain(".rv-flag.muted { padding-left: 0; padding-right: 0; }");
+    expect(css).toMatch(/\.rv-flag \{[^}]*padding: 1px 7px;/);
+    expect(css).not.toMatch(/\.rv-flag\.(amber|dashed) \{[^}]*padding/);
+  });
+});
+
+describe("A8 (FR-40): the line follows the list it was opened from", () => {
+  const mutual = { ...map, edges: [...map.edges, { from: G, to: W, kind: "uses", change: "unchanged", source: "go/types" }] } as unknown as review.RevMap;
+  const drawn = (via: "calledBy" | "calls") => text(renderToStaticMarkup(<ReviewSymbolView map={mutual} node={at(W)} row={null} marks={null} from={at(G)} via={via} texts={null} error={null}
+    title={createRef()} onOpen={noop} onBack={noop} onMark={() => Promise.resolve()} onNext={noop} />));
+  it("two symbols that call each other: calls from Called by, called by from Calls", () => {
+    expect(drawn("calledBy")).toContain("unchanged · calls svc.Greet");
+    expect(drawn("calls")).toContain("unchanged · called by svc.Greet");
+  });
+  it("Greet lists Welcome under both, and each link says its list", () => {
+    const opened: [string, string | undefined][] = [];
+    const props = { map: mutual, node: at(G), row: rowOf(G), marks: null, from: null, texts, error: null,
+      title: createRef<HTMLHeadingElement>(), onOpen: (id: string, via?: string) => { opened.push([id, via]); }, onBack: noop, onMark: () => Promise.resolve(), onNext: noop };
+    expect(text(renderToStaticMarkup(<ReviewSymbolView {...props} />))).toContain("Called by svc.Welcome Calls svc.Welcome");
+    // press each link as drawn, in document order (the panel's own tree)
+    type El = { type: unknown; props: { className?: string; onClick?: () => void; children?: unknown } };
+    const links: El[] = [];
+    const walk = (x: unknown) => {
+      if (Array.isArray(x)) return x.forEach(walk);
+      if (!x || typeof x !== "object" || !("props" in x)) return;
+      const el = x as El;
+      if (el.type === "button" && el.props.className === "link mono") links.push(el);
+      walk(el.props.children);
+    };
+    walk(ReviewSymbolView(props));
+    for (const l of links) l.props.onClick?.();
+    expect(opened).toEqual([[W, "calledBy"], [W, "calls"]]);
+  });
+});
+
+describe("A9 (FR-29, Amendment 4): a failed ask is seen and said", () => {
+  const f = { seat: "fse", state: "question" as MarkState, error: "open /x/tokens.json: no such file or directory" };
+  it("the failure line has an id that Try again names", () => {
+    const h = renderToStaticMarkup(<AskStatus failed={f} failedId="rs-failed-G" asked={false} seat="fse" thread="" busy="" onRetry={noop} onOpenThread={noop} />);
+    expect(h).toContain('<span id="rs-failed-G">Saved here; couldn&#x27;t ask fse: open /x/tokens.json: no such file or directory</span>');
+    expect(h).toMatch(/<button aria-describedby="rs-failed-G"[^>]*>Try again<\/button>/);
+  });
+  const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
+  it("the primary names the failure line while it shows; the line scrolls into view, nearest, focus untouched", () => {
+    expect(src).toContain("const describedBy = failed ? failedId : undefined;");
+    expect(src).toContain('<button className="primary" aria-describedby={describedBy}');
+    expect(src).toContain('useEffect(() => { line.current?.scrollIntoView?.({ block: "nearest" }); }, [failed]);');
+    expect(src).not.toMatch(/FailedLine[\s\S]*\.focus\(/);
+  });
+  it("the review's live region is told the failure (Review's onAsked)", () => {
+    const review = readFileSync(new URL("./Review.tsx", import.meta.url), "utf8") as string;
+    expect(review).toContain("if (r.error) failed.current = askFailedLine(r.to?.seat || seat, r.error);");
+    expect(review).toContain("saidAfter({ asked: asked.current, failed: failed.current,");
+  });
+});
+
+describe("A11 (FR-42): asked is muted on every row; the glyph keeps its colour", () => {
+  const css = readFileSync(new URL("../styles/review.css", import.meta.url), "utf8") as string;
+  it(".rv-asked is --fg-muted, with no per-mark or current-row colour", () => {
+    expect(css).toMatch(/\.rv-asked \{[^}]*color: var\(--fg-muted\);/);
+    expect(css).not.toMatch(/\.rv-asked\.(question|blocked)/);
+    expect(css).not.toMatch(/\.on[^{]*\.rv-asked/);
+    expect(css).toContain(".rv-mark.blocked { color: var(--danger); }");
+    expect(css).toMatch(/\.rv-mark\.question \{ color: var\(--tone\); \}/);
   });
 });
