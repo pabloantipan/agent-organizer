@@ -166,7 +166,10 @@ func Make(si *model.ScannedInitiative, target, card string, ranges []Range, pare
 		rm.Reconciliation = "no card"
 		return rm, nil
 	}
-	if flags, err := ChangeCheck(si.Path, si.ID, card, rm.Base, rm.Head); err != nil {
+	// change-check takes the root or the id; an id it looks up under ~,
+	// which finds no fixture or clone and may find another root with the
+	// same id, so it gets the root the scan read.
+	if flags, err := ChangeCheck(si.Path, si.Path, card, rm.Base, rm.Head); err != nil {
 		rm.Reconciliation = err.Error()
 	} else {
 		Reconcile(rm, flags)
