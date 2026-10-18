@@ -306,6 +306,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
 
   return (
     <div className="cell with-chats">
+      {/* The current row is the chat shown, whoever showed it (leftovers-41 FR-5). */}
       <nav className="chats">
         <div className="chats-label">
           <span>Chats</span>
@@ -318,22 +319,22 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="search" aria-label={`Search ${initiativeId}'s conversations`} />
           {query && <button className="rail-icon" onClick={() => setQuery("")} aria-label="Clear search" title="Clear search"><X size={12} /></button>}
         </div>
-        <button className={`chat ${!focus && view === "needs" ? "active" : ""} ${counts.needs > 0 ? "fresh hot" : ""}`} onClick={() => pick("needs")} title="escalated to you, or a message addressed to you with no reply from you after it"><Inbox size={12} /><span className="chat-name">needs me</span>{draftMark("needs", openThreads)}{counts.needs > 0 && <span className="chat-fresh hot">{counts.needs}</span>}</button>
-        {reconciler && reconciler !== human && <button className={`chat ${!focus && view === "reconciler" ? "active" : ""}`} onClick={() => pick("reconciler")} title={`the reconciler's backlog: stalled, or answered and left without a decision. ${reconciler}'s work, not yours`}><Gavel size={12} /><span className="chat-name">needs {reconciler}</span>{draftMark("reconciler", all.filter(needsReconciler))}{counts.reconciler > 0 && <span className="chat-n">{counts.reconciler}</span>}</button>}
-        <button className={`chat ${!focus && view === "channel" ? "active" : ""} ${counts.channelFresh > 0 ? "fresh" : ""}`} onClick={() => pick("channel")} title="every conversation not between you and one seat"><Hash size={12} /><span className="chat-name">channel</span>{draftMark("channel", all.filter((t) => chatOf(t) === null && t.kind !== "journal"))}{counts.channelFresh > 0 ? <span className="chat-fresh">{counts.channelFresh}</span> : counts.channel > 0 ? <span className="chat-n">{counts.channel}</span> : null}</button>
+        <button aria-current={chat === "needs" ? "true" : undefined} className={`chat ${!focus && view === "needs" ? "active" : ""} ${counts.needs > 0 ? "fresh hot" : ""}`} onClick={() => pick("needs")} title="escalated to you, or a message addressed to you with no reply from you after it"><Inbox size={12} /><span className="chat-name">needs me</span>{draftMark("needs", openThreads)}{counts.needs > 0 && <span className="chat-fresh hot">{counts.needs}</span>}</button>
+        {reconciler && reconciler !== human && <button aria-current={chat === "reconciler" ? "true" : undefined} className={`chat ${!focus && view === "reconciler" ? "active" : ""}`} onClick={() => pick("reconciler")} title={`the reconciler's backlog: stalled, or answered and left without a decision. ${reconciler}'s work, not yours`}><Gavel size={12} /><span className="chat-name">needs {reconciler}</span>{draftMark("reconciler", all.filter(needsReconciler))}{counts.reconciler > 0 && <span className="chat-n">{counts.reconciler}</span>}</button>}
+        <button aria-current={chat === "channel" ? "true" : undefined} className={`chat ${!focus && view === "channel" ? "active" : ""} ${counts.channelFresh > 0 ? "fresh" : ""}`} onClick={() => pick("channel")} title="every conversation not between you and one seat"><Hash size={12} /><span className="chat-name">channel</span>{draftMark("channel", all.filter((t) => chatOf(t) === null && t.kind !== "journal"))}{counts.channelFresh > 0 ? <span className="chat-fresh">{counts.channelFresh}</span> : counts.channel > 0 ? <span className="chat-n">{counts.channel}</span> : null}</button>
         <div className="chats-label sub"><span>People</span></div>
         {seats.map((a) => {
           const n = all.filter((t) => chatOf(t) === a).length;
           const fresh = all.filter((t) => chatOf(t) === a && isNew(t)).length;
           return (
-            <button key={a} className={`chat ${focus === a ? "active" : ""} ${fresh > 0 ? "fresh" : ""}`} onClick={() => pickPerson(a)} title={`direct with ${a}`}>
+            <button key={a} aria-current={chat === chatKey(a, "channel") ? "true" : undefined} className={`chat ${focus === a ? "active" : ""} ${fresh > 0 ? "fresh" : ""}`} onClick={() => pickPerson(a)} title={`direct with ${a}`}>
               <AtSign size={12} /><span className="chat-name">{a}</span>{draftMark(chatKey(a, "channel"), all.filter((t) => chatOf(t) === a))}{fresh > 0 ? <span className="chat-fresh">{fresh}</span> : n > 0 ? <span className="chat-n">{n}</span> : null}
             </button>
           );
         })}
         <div className="chats-label sub"><span>More</span></div>
-        <button className={`chat ${!focus && view === "journal" ? "active" : ""}`} onClick={() => pick("journal")} title="self-addressed notes: each seat's open questions"><BookOpen size={12} /><span className="chat-name">journal</span>{draftMark("journal", all.filter((t) => t.kind === "journal"))}{counts.journal > 0 && <span className="chat-n">{counts.journal}</span>}</button>
-        <button className={`chat ${!focus && view === "archive" ? "active" : ""}`} onClick={() => pick("archive")} title="closed threads"><Archive size={12} /><span className="chat-name">archive</span>{draftMark("archive", closed ?? [])}{closed && closed.length > 0 && <span className="chat-n">{closed.length}</span>}</button>
+        <button aria-current={chat === "journal" ? "true" : undefined} className={`chat ${!focus && view === "journal" ? "active" : ""}`} onClick={() => pick("journal")} title="self-addressed notes: each seat's open questions"><BookOpen size={12} /><span className="chat-name">journal</span>{draftMark("journal", all.filter((t) => t.kind === "journal"))}{counts.journal > 0 && <span className="chat-n">{counts.journal}</span>}</button>
+        <button aria-current={chat === "archive" ? "true" : undefined} className={`chat ${!focus && view === "archive" ? "active" : ""}`} onClick={() => pick("archive")} title="closed threads"><Archive size={12} /><span className="chat-name">archive</span>{draftMark("archive", closed ?? [])}{closed && closed.length > 0 && <span className="chat-n">{closed.length}</span>}</button>
       </nav>
 
       <div className="cell-main">
