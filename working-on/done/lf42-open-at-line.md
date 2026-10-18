@@ -1,12 +1,12 @@
 ---
 title: "Open in editor at the symbol's line, in the checkout that holds the head"
-status: next
+status: done
 repos: [organizer]
 branch: lf42-open-at-line
 seat: oe-build
 stage: review-map
 updated: 2026-10-18
-next: "review: lf42-open-at-line, gate met (E1 E2 E3 E4 X0), 4406ed5"
+next: "none: merged review pass (oe-review, oe-ui); findings routed in ## Review"
 risk: low
 footprint: [internal/service/review_open.go, internal/service/review_open_test.go, internal/service/review.go, app.go, frontend/wailsjs/*, frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css]
 depends_on: [lf41-review-words, lf41-review-go]
@@ -90,6 +90,7 @@ repo organizer: base 27702435c (default main) ... head lf42-open-at-line 4406ed5
 - Note (to the FSE): FR-1's multi-repo path (`checkoutOf` by repo prefix, the per-repo head from `rm.Repos`) has no Go test. E1 does not ask for one; the frontend covers the prefix in `editorAt`.
 - Note (to the FSE): the declared risk stands: `ReviewStatus` now runs `git rev-parse HEAD` in up to four directories per repo on every read, including CardDrawer's. No measurement was asked for.
 - Note (to the FSE): `Review.test.tsx`'s App mock has no `OpenReviewAt` (the builder found this). It is harmless under static rendering, but a future DOM test will need it.
+- Where the UI review's findings go (I did not edit `## UI review`): U1 (sev 2, refusal at the press shows a raw `Error:` and keeps the button) goes to the FSE, as the refused-at-press spec gap oe-ui names. U2 (sev 1, the doc comment is the head start line) goes to the FSE through aglaea's A2. A1 goes to aglaea, via the FSE.
 
 ## UI review
 oe-ui, 2026-10-18, on 4406ed5228f939170968ab318bd2714e407c8167 for every row (the branch did not move). **Verdict: pass.** No finding of severity 4 or 3. Evidence is in `.wt-notes/oe-ui/` (`out/rb-*.png`, `out/wk-*.png`, `out/h-*.txt`, `out/editor-calls.txt`, `steps/`).
