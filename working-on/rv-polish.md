@@ -3,7 +3,7 @@ title: "The review panel's words, ring and rows, as Aglaea's Amendment 2 and the
 status: next
 repos: [organizer]
 branch: rv-polish
-seat:
+seat: rp-build
 stage: review-map
 updated: 2026-10-18
 next: "sup82 runs it (0147 ruled by the standing rule, 2026-10-18)"

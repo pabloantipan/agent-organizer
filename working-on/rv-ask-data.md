@@ -3,7 +3,7 @@ title: "Who to ask about a review mark, and asking them in a thread"
 status: next
 repos: [organizer]
 branch: rv-ask-data
-seat:
+seat: ad-build
 stage: review-map
 updated: 2026-10-18
 next: "sup82 runs it (0147 ruled by the standing rule, 2026-10-18)"
