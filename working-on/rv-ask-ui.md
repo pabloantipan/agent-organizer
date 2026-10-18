@@ -6,7 +6,7 @@ branch: rv-ask-ui
 seat: au-build
 stage: review-map
 updated: 2026-10-18
-next: "review: rv-ask-ui, gate met (A4, A5, X0, A6, A7, A8), 60f74c3"
+next: "fix UI review U1 (sev 3): at 1024x640 a failed ask's line is below the panel's fold and nothing else says it failed; scroll it into view and announce it (code review passed, au-review)"
 risk: medium
 footprint: [frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css, frontend/src/components/Review.tsx, frontend/src/components/Review.test.tsx, frontend/src/stores/board.store.ts (openSlack thread, review place), frontend/src/components/SlackView.tsx (← Review)]
 depends_on: [rv-ask-data, rv-polish]
