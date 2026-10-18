@@ -6,7 +6,7 @@ branch: lf41-fixture-launch
 seat:
 stage: review-map
 updated: 2026-10-18
-next: "pablo: rule 0149 (leftovers 41)"
+next: "sup83 runs it (0149 ruled in away mode, 2026-10-18)"
 risk: medium
 footprint: [internal/service/launch.go, internal/service/launch_test.go, internal/cli/run.go, internal/cli/run_test.go, internal/scan/scan.go, internal/service/spec.go, internal/specpath/*, internal/config/config.go, internal/service/cell.go, scripts/fixture-home.sh, their tests]
 depends_on: []

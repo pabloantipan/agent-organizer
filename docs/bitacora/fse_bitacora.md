@@ -4,6 +4,11 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## Away mode 2026-10-18 15:29 - ~19:30 CLT (Pablo via Hephaistos, thread 01M584E1; decisions.md c788d64)
+
+Ruled by default (list for Pablo's return):
+- 0149 accept leftovers 41, `accept as written`, 16:39 (asked 16:34 in pane and mailbox).
+
 ## HAND-OFF 2026-10-18 ~13:30 (last SHA seen 890e02c + sup82's merges)
 
 - review-map v3 landed: rv-ask-data, rv-polish, rv-ask-ui (a87f6fe, e596d51, 2027e08). sup82: 96 min vs 70-140 over 2 waves (22, 30, 60 min per card; one UI fail U1 sev 3 and a fix round A9-A11); seats $37.76; run record runs/2026-10-18-sup82-review-map-v3.md. sup82 ended.

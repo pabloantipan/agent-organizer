@@ -1,6 +1,6 @@
 # Leftovers 41: the review's words and links, and the Go and fixture loose ends: the build spec
 
-status: proposed (0149)
+status: ruled (0149)
 by: the FSE, 2026-10-18, on main at 443d8c5, in away mode
 sources: Aglaea's `docs/ux/specs/review-view.md` Amendments 5 and 6
 (R26-R30, words given); lf40's UF1 (verb labels); sup82's run report

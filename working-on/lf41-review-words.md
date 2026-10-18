@@ -6,7 +6,7 @@ branch: lf41-review-words
 seat:
 stage: review-map
 updated: 2026-10-18
-next: "pablo: rule 0149 (leftovers 41)"
+next: "sup83 runs it (0149 ruled in away mode, 2026-10-18)"
 risk: low
 footprint: [frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/components/Review.tsx, frontend/src/components/Review.test.tsx, frontend/src/styles/review.css, frontend/src/components/Conversation.tsx (aria-current), frontend/src/components/Home.tsx (verbs), frontend/src/lib/verbs.ts, frontend/src/lib/verbs.test.ts, frontend/src/components/Home.waits.test.tsx]
 depends_on: []

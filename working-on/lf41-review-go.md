@@ -6,7 +6,7 @@ branch: lf41-review-go
 seat:
 stage: review-map
 updated: 2026-10-18
-next: "pablo: rule 0149 (leftovers 41)"
+next: "sup83 runs it (0149 ruled in away mode, 2026-10-18)"
 risk: low
 footprint: [internal/review/*.go, internal/cli/review.go, internal/cli/cli.go (help line), internal/cli/review_test.go, internal/service/review_ask.go, internal/service/review_ask_test.go, frontend/wailsjs/*]
 depends_on: []
