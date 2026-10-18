@@ -276,3 +276,48 @@ From rs-ui on rv-symbol (3155162, `working-on/rv-symbol.md`, ## UI review).
 | R15 | read which way a neighbour points | from Called by: `unchanged · calls <symbol>`; from Calls: `unchanged · called by <symbol>` |
 | R16 | not lose a Question by pressing on | with Question chosen and a note, the primary reads `Save question, next` and saves a Question |
 | R17 | read an empty neighbourhood | a symbol with no callers shows `Called by  none found` |
+
+## Amendment 3 (aglaea, 2026-10-18): asking from the mark (v3, for 0147)
+
+Read against `docs/specs/review-map.md` v3 (FR-25 to FR-29, proposed in
+0147). The FSE's v3 follows §3.3's room, and most of it stands. Four
+changes, from the side of the person doing the review:
+
+- **The ask is the primary on Question and Blocked.** With A2, the
+  primary on Question reads `Save question, next`, and FR-28 puts `Ask
+  <seat>` on the secondary. Then the fast path (press the primary, go on)
+  never asks, and questions pile up unasked, which is the failure v3 is
+  for. So, when someone can be asked: primary **`Ask <seat>, next`**
+  (saves, posts, moves on), secondary **`Save`** (keeps it here, asks no
+  one). With nobody to ask, A2 stands (`Save question, next`), and FR-28's
+  line says why.
+- **One thread per review, not one per symbol.** FR-26 opens a thread per
+  mark: five questions are five threads in the supervisor's mailbox, five
+  chats in Conversations, and five wakes. The first ask of a review
+  opens one thread, `<slug>: review at <head short sha>`; each later ask
+  is a message in it, its first line naming the symbol and `file:lines`.
+  The supervisor reads one conversation and answers in order; Pablo has
+  one chat to come back to. Asking again on the same symbol is a further
+  message there, as FR-26 says.
+- **The wake is said before the press.** The muted line reads `Saves the
+  mark and asks <seat> (<why>) in this review's thread. Wakes <seat>.`
+  Conversations keeps the wake count visible for the same reason: every
+  wake is a turn.
+- **Asked is seen, not only heard.** After an ask, the row's mark draws
+  `? asked` / `✕ asked` (not only an accessible-name word, FR-29), the
+  live region says `Asked <seat>` once, and the panel, when shown, reads
+  `Asked <seat> · Open the thread`. `Open the thread` lands on
+  Conversations with that thread; Conversations' header then offers
+  `← Review`, which returns to the same symbol (the place rides the
+  store).
+
+Unchanged from the FSE's v3: who to ask and the `why` words (FR-25), the
+busy `Asking…`, the failure line with `Try again` (FR-29), `--marks` on
+the CLI (FR-27).
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R18 | ask without slowing down | with someone to ask and Question chosen with a note, the primary reads `Ask <seat>, next`; pressing it saves, posts and moves to the next symbol |
+| R19 | keep one conversation per review | two asks on two symbols post one thread `<slug>: review at <sha>` and two messages; each message's first line names its symbol and `file:lines` |
+| R20 | know it wakes someone | the line under the mark ends `Wakes <seat>.` |
+| R21 | see what was asked | an asked row draws `asked` beside its mark; `Open the thread` then `← Review` returns to the same symbol |

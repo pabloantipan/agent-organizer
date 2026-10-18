@@ -165,3 +165,4 @@ resumes. The seat moves to the new discuss watcher (wake-rearm, api
 - 2026-10-18 — rv-symbol graded: review-view Amendment 2 (calls / called by, primary label follows the chosen mark, 'none found'), R15-R17.
 - 2026-10-18 — paused for the new watcher (Pablo via Hephaistos): HAND-OFF rewritten; nothing open.
 - 2026-10-18 — resumed on the new watcher (identity intact); nothing open, waiting for mail.
+- 2026-10-18 — v3 (0147) read: review-view Amendment 3 (Ask <seat>, next as the primary, one thread per review, the wake said, 'asked' drawn, ← Review), R18-R21.
