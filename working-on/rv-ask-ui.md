@@ -14,6 +14,7 @@ boundary: ["docs/specs/review-map.md v3 Boundary, rv-ask-ui"]
 spec: "docs/specs/review-map.md (v3, FR-28, FR-29; docs/ux/specs/review-view.md §3.3 and Amendment 2)"
 gate: "docs/specs/review-map.md v3 Acceptance, rows A4, A5 and X0; v3 Amendment 1 rows A6, A7; Amendment 2 row A8"
 ui_review: true
+review: pass
 ---
 
 ## Goal
@@ -48,6 +49,91 @@ Not changed, on purpose:
 - Harness runs set `discuss_state_dir: <an empty mktemp -d>` in the fixture's config from my own `run-dev.sh` (sup82, thread 01M57TR1): the `--review` fixture names none, so the app used the real token registry. With it every post fails before connecting (`open …/tokens.json: no such file or directory`), which is the spec's "no mailbox". Confirmed by the FSE as review-map v3 Amendment 3.
 - Before that, A5's premise ("fixture health, no mailbox") was false: the `--review` config names `canned_health` but no `discuss_state_dir`, so `discussStateDir` (internal/service/factory.go:119) uses the real `~/.local/state/discuss`, which has a token for `organizer-fixture/pablo`. My A5 run posted one ask: project `organizer-fixture`, to `fse`, thread `01M57TKJC6HSEGBS46PQQV10YY`, message `01M57TKJC6HSEGBS46PT5VTACG`. Nothing reached the `organizer` project. Detail: `.wt-notes/au-build/progress.md`.
 - Thread 01M57TKJC6HSEGBS46PQQV10YY (organizer-fixture, to fse, from the first A5 run) is left as it is, as sup82 asked; sup82 reports it and the fixture gap to the FSE.
+
+## Review
+Verdict: **pass** at 60f74c309524c62bfbf58333e5228258d9fb6eca (branch did not move during the review). Unmet gate items: none. Reviewer au-review, 2026-10-18.
+
+- A4: met. `lib/review.test.ts`, `ReviewSymbol.test.tsx`, `Review.test.tsx`, `SlackView.review.test.tsx` compared string by string with FR-28/29 and review-view §3.3, Amendments 3, 4: `Ask sup81, next`, `Save`, `… in this review's thread. Wakes sup81.`, `Save question, next`, `No one to ask here: no cell. Kept in Deltagos.`, `? asked`/`✕ asked`, `Asked sup81` (saidAfter once), `Asked sup81 · Open the thread` → `openSlack(…, thread)` → `slackDraft {threadId}`, `← Review` → same place, `Saved here; couldn't ask sup81: …` + `Try again`, `Asking…`. All match.
+- A5: met, my own harness run at 1024×640 on `fixture-home.sh --review` + `discuss_state_dir: <empty mktemp -d>` (checked: one such line in the config), auth off: before `Ask fse, next` / `Save` / `Saves the mark and asks fse (the initiative's FSE) in this review's thread. Wakes fse.`; after `Saved here; couldn't ask fse: open …/tokens.json: no such file or directory Try again`, focus on `Ask fse, next`, row `…, question` with no `asked`; on disk `state.json` has the mark `question`, no `asked`, no `thread` (`.wt-notes/au-review/out/h-run-1024x640.txt`, `out/a5-state.json`). No press reached discuss.
+- A6: met. vitest four labels without `, next`, `Reviewed 2 of 2`; also in WK: `Reviewed` pressed, focus on `BUTTON Reviewed`, live region `Reviewed 2 of 2` once.
+- A7: met in WK at 1024×640: `no direct test` text left 58 = name text left 58, padding 0, no border/fill; the amber flag keeps 7px.
+- A8: met (vitest both directions with mutual edges, and the links pass their list).
+- X0: met. `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test`: **reused** run `c8492051-21087` of 60f74c309524 (au-ui, 12:47:20), exit 0, go ok, 922 vitest passed. `test-lease run -- pnpm run build` 0, `test-lease run -- wails build` 0 (and again after the harness), `git status --porcelain` empty.
+- Busy rule: with AskReview slowed 1.5 s in the page, three presses of `Ask fse` → one call (`Asking…`, aria-disabled, focus held); two of `Try again` → one (`out/h-busy.txt`). No call before any press (counter on `window.go.main.App`); `Save` after a failed ask called MarkReview only. One AskReview call site (`ReviewSymbol.tsx:43`), reached only from a press.
+- No-gos: no post as a persona, no network beyond the binding, no new dependency, no absolute tool path; nothing outside the boundary (no Go, `app.go`, `wailsjs/`, `Conversation.tsx`, Needs me, Home, `scripts/`).
+
+change-check (clean clone):
+```
+change-check: working-on/rv-ask-ui.md
+risk: medium
+repo organizer: base 26aad169d (default main) ... head rv-ask-ui 60f74c309; 10 files
+
+## Changed
+
+- organizer/frontend/src/components/Review.test.tsx (modified, test)
+- organizer/frontend/src/components/Review.tsx (modified): Review, ReviewViewProps, PanelProps, ReviewView, Worklist, SymbolPane
+- organizer/frontend/src/components/ReviewSymbol.test.tsx (modified, test)
+- organizer/frontend/src/components/ReviewSymbol.tsx (modified): MarkState, Addressee, ReviewSymbol, ReviewSymbolViewProps, ReviewSymbolView, MarkForm, Failed, markPress, AskStatus
+- organizer/frontend/src/components/SlackView.review.test.tsx (added, test)
+- organizer/frontend/src/components/SlackView.tsx (modified): SlackView, ReviewBack
+- organizer/frontend/src/lib/review.test.ts (modified, test)
+- organizer/frontend/src/lib/review.ts (modified): Addressee, askLine, askedLine, askFailedLine, firstLine, saidAfter, Row, marksOf, worklist, rowName, Via, affectedLine, primaryOf, lastToReview
+- organizer/frontend/src/stores/board.store.ts (modified): State, leaveReview
+- organizer/frontend/src/styles/review.css (modified)
+
+## Tests touched
+
+- organizer/frontend/src/components/Review.test.tsx
+- organizer/frontend/src/components/ReviewSymbol.test.tsx
+- organizer/frontend/src/components/SlackView.review.test.tsx
+- organizer/frontend/src/lib/review.test.ts
+
+## Risky (declared)
+
+- `leaveReview`: every navigation naming a screen now also drops `reviewBack`
+- `openSlack`: a thread not yet in the 10 s feed lands Conversations on the archive (Conversation.tsx's draft handler, unchanged)
+
+## Not changed, on purpose (declared)
+
+- any Go, `app.go`, `frontend/wailsjs/`: the bindings sufficed
+- `Conversation.tsx`: the existing `slackDraft.threadId` landing is used as is
+
+## Flags
+
+| flag | where | symbol | detail |
+|---|---|---|---|
+| boundary unreadable | organizer | docs/specs/review-map.md: no section 'v3 Boundary' | boundary entry |
+| outside boundary | organizer/frontend/src/components/Review.test.tsx |  | modified |
+| outside boundary | organizer/frontend/src/components/Review.tsx |  | modified |
+| outside boundary | organizer/frontend/src/components/ReviewSymbol.test.tsx |  | modified |
+| outside boundary | organizer/frontend/src/components/ReviewSymbol.tsx |  | modified |
+| outside boundary | organizer/frontend/src/components/SlackView.review.test.tsx |  | added |
+| outside boundary | organizer/frontend/src/components/SlackView.tsx |  | modified |
+| outside boundary | organizer/frontend/src/lib/review.test.ts |  | modified |
+| outside boundary | organizer/frontend/src/lib/review.ts |  | modified |
+| outside boundary | organizer/frontend/src/stores/board.store.ts |  | modified |
+| outside boundary | organizer/frontend/src/styles/review.css |  | modified |
+| outside footprint | organizer/frontend/src/components/SlackView.review.test.tsx |  | added |
+| undeclared | organizer/frontend/src/components/Review.test.tsx |  | modified |
+| undeclared | organizer/frontend/src/components/ReviewSymbol.test.tsx |  | modified |
+| untested? | organizer/frontend/src/components/Review.tsx | Worklist | no test file names it |
+| untested? | organizer/frontend/src/components/Review.tsx | SymbolPane | no test file names it |
+| untested? | organizer/frontend/src/lib/review.ts | marksOf | no test file names it |
+| untested? | organizer/frontend/src/stores/board.store.ts | leaveReview | no test file names it |
+
+18 flags: outside boundary 10, outside footprint 1, undeclared 2, declared, not changed 0, new env var 0, new dependency 0, new host 0, risk 0, untested? 4, could not read 0, boundary unreadable 1
+```
+Explained:
+- `boundary unreadable`: the entry is prose (known false flag). Checked by hand against v3 Boundary, rv-ask-ui, plus Amendment 2.
+- `outside boundary` ×10: follows from the unreadable entry; every path is in the bullet (ReviewSymbol.tsx and test, Review.tsx, lib/review.ts and test, review.css, board.store.ts, SlackView.tsx and its test) or in Amendment 2 (Review.test.tsx). board.store.ts holds only `openSlack` with a thread, `reviewBack`/`backToReview` and `leaveReview` dropping `reviewBack` (the review place). SlackView.tsx holds only `ReviewBack` in the toolbar.
+- `outside footprint` SlackView.review.test.tsx: the footprint omits it; the boundary's "SlackView.tsx … and its test" allows it.
+- `undeclared` Review.test.tsx, ReviewSymbol.test.tsx: declared, in one bullet that names three files; change-check reads only the first.
+- `untested?` Worklist, SymbolPane: rendered by Review.test.tsx through ReviewView (asked row, panel); marksOf: through `worklist` in review.test.ts (asked row); leaveReview: SlackView.review.test.tsx (`openInitiative` drops `reviewBack`).
+
+Notes (not findings):
+- Note: Review.tsx's boundary says "(the row's `asked`)", but FR-29's live region and Open the thread, FR-38's last, FR-40's list and focus on return all live in the screen, so the diff there is wider than the parenthetical. Each hunk serves a gate FR. The FSE could widen the wording.
+- Note: gate gap: A4's "live region says `Asked sup81` once" is vitest of the pure `saidAfter` plus markup, not the Review effect, and no harness row can make a successful ask without a test mailbox. A6's "focus on the button" in vitest is a source-string check (WK confirms it).
+- Note: `Try again` resends the note as it is now, not the failed one; an emptied note is refused by the binding with its error line.
 
 ## Done
 - 2026-10-18 au-build: FR-28, FR-29, FR-38, FR-40 (e0dc71a) and FR-39 (60f74c3) on rv-ask-ui; gate A4, A5, X0, A6, A7, A8 met; notes `.wt-notes/au-build/progress.md`.
