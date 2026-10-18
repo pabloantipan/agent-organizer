@@ -1,6 +1,6 @@
 ---
 title: Accept review-map v2 - the Review view, a worklist opened from the card
-status: proposed
+status: ruled
 raised: 2026-10-17
 raised_by: fse
 owner: pablo
@@ -10,6 +10,9 @@ forecast: 90-180m
 stage: review-map
 supersedes: []
 superseded_by:
+ruled: 2026-10-17
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -52,3 +55,7 @@ The FSE: **"accept as written"**.
 ## Consequences
 
 On accept: the FSE gives the three cards to one supervisor, in order.
+
+## Ruling
+
+pablo, 2026-10-17, in the organizer on lodestar: go
