@@ -3,7 +3,7 @@ title: "Open in editor at the symbol's line, in the checkout that holds the head
 status: next
 repos: [organizer]
 branch: lf42-open-at-line
-seat:
+seat: oe-build
 stage: review-map
 updated: 2026-10-18
 next: "sup83 runs it as wave 2, after leftovers 41 (0150 ruled in away mode, 2026-10-18)"
