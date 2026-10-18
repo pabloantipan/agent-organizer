@@ -6,7 +6,8 @@ branch: rv-symbol
 seat: rs-build
 stage: review-map
 updated: 2026-10-18
-next: "review: rv-symbol, gate met, 3155162"
+next: "V-R14: the progress line shows 50 ms to 1 s after the press, not after 1 s: afterASecond counts from Go's started, cut to the second (review.go:363 RFC3339); count from the press, and test with a whole-second started"
+review: fail
 risk: medium
 footprint: [frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css, frontend/src/components/Review.tsx, frontend/src/components/TopBar.tsx (crumb), frontend/src/components/TopBar.test.tsx, scripts/fixture-home.sh (--review only)]
 depends_on: [rv-list]
@@ -59,3 +60,102 @@ Not changed, on purpose:
 - `frontend/src/components/TopBar.tsx`: the title's text is the full title already; the fix is CSS
 - `Open in editor` (§3.3): not in FR-19, and OpenInEditor takes no line
 - `frontend/wailsjs`, `app.go`, any Go: the bindings sufficed
+
+## Review
+
+**fail**, rs-review, 2026-10-18, on 3155162 (clean clone of 31551625286a1c550dd0149e55453aea773bd5c3).
+
+Unmet gate items: **V-R14**. Met: V-R4, V-R5, V-R6, V-R7, V-R8, V-R10, V-R12, X0, V-F1, V-F2 (as Amendment 5), V-R13.
+
+Found (blocking, V-R14 / FR-23): the progress line and Stop show between 0 and 1 s after the press, not after 1 s. `afterASecond` waits `1000 - elapsedOf(make)`, and `make.started` is Go's `s.now().UTC().Format(time.RFC3339)` (`internal/service/review.go:363`), whole seconds, so the press's fraction of a second is already counted. Proof, `.wt-notes/rs-review/fr23-proof.mjs` importing the clone's `lib/review.ts` unchanged:
+```
+$ node --experimental-strip-types fr23-proof.mjs
+progressDelay at the press: 50 ms (FR-23 wants 1000)
+afterASecond schedules show() after: 50 ms; a make ending at 900 ms would show the counter and Stop
+```
+(input: started `2026-10-18T10:00:00Z`, pressed `10:00:00.950Z`). The V-R14 vitest passes only because it builds `started` with `new Date().toISOString()` (milliseconds), which the binding never returns: the step checks less than the row. The same cause draws `Making the map · 0 s` once the line appears (my harness, `h/out/h-vf1-make.txt` and `h-vr10.txt`, labels seen: `Making the map…`, `Making the map · 0 s`, `Stop`, `Making the map · 1 s`): MakeButton's first render with progress uses `now` from its mount. Fix in the frontend (Go is outside the boundary): count the 1 s from the press, and test with a whole-second `started`.
+
+Evidence (all from my clean clone; notes in `.wt-notes/rs-review/`):
+- X0: `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test`: **fresh**, run **357ddb79-82098** (rs-ui reused it), exit 0, go ok for every package, vitest 74 files / 879 tests (`rv-x0-make-test.txt`); `test-lease run -- pnpm run build` exit 0; `test-lease run -- wails build` exit 0, again after `wails dev` exit 0; `git status --porcelain` empty both times.
+- V-R12: no `reactflow|@xyflow|elkjs|monaco` in `frontend/package.json` or `frontend/dist` (grep rc=1). No-gos: no change to package.json, lockfile, go.mod; no fetch, URL or absolute path in added frontend lines; no syntax-colour library; only the 9 boundary paths changed (no Go, `wailsjs/`, CardDrawer, board.store, App, shell.css, TopBar.tsx).
+- D5 rerun (Amendment 4): `go run . review init-a rv-fixture --json` exit 0: svc.Greet go modified with TestGreet; format.formatName ts modified `untested`,`undeclared`; svc.Welcome affected, edge Welcome uses Greet; reconciled; fixture repo `git status` clean.
+- Tab harness (builder's tabharness.swift and steps, read and copied to `h/`, pointed at my clone, my `wails dev -devserver localhost:34256`, fixture `--review --memory critical`, auth off, lock held): V-F1 no map: focus on Make the map; with a map: the worklist stop, never body. V-R5: `no direct test`, `not in the card's declared changes` color rgb(255, 176, 32) = `--warning` #ffb020. V-R8: Reviewed, next → `Reviewed 1 of 2`, focus on h2 svc.Greet; Question with no note: Save disabled, enabled after a typed note. V-R4: Tab from the h2 → region `svc.Greet, diff`, rows 1–6, one `−` (no number) and one `+` (5). V-R6: Called by svc.Welcome → h2 svc.Welcome, `unchanged · shown because it calls svc.Greet`, no diff, no radios, only `← back to svc.Greet` → h2 svc.Greet. V-R10: after `$FIXTURE_REVIEW_MOVE` and Make it again, Greet keeps `question`, formatName `changed since you reviewed`. V-F2 1440×900: full title, 8 px to `›`; 1024×640: text and title attribute the full title, no overlaps, crumbs end 473 before the Mac group at 489.
+- Vitest rows read string by string against review-view §3.3, §5, Amendment 1: every word matches (`no direct test`, `not in the card's declared changes`, `none name it directly`, `unchanged · shown because it calls …`, `← back to …`, `The builder says`, `Reviewed`/`Question`/`Blocked`/`Note`, `Reviewed, next`, `Save`, `Kept in Deltagos; asking the supervisor comes later.`, `changed since you reviewed`, `Making the map…`). V-R7 blockquote under the figcaption, after the facts. V-R13 `lib/index.ts` → `lib.formatName`, two `format.ts` → `lib/format.…`, `components/format.…`.
+
+change-check (from the clean clone):
+```
+change-check: working-on/rv-symbol.md
+risk: medium
+repo organizer: base 994987754 (default main) ... head rv-symbol 315516252; 9 files
+
+## Changed
+
+- organizer/frontend/src/components/Review.test.tsx (modified, test)
+- organizer/frontend/src/components/Review.tsx (modified): Review, firstTarget, ReviewViewProps, PanelProps, ReviewView, MakeButton, Worklist, SymbolPane
+- organizer/frontend/src/components/ReviewSymbol.test.tsx (added, test)
+- organizer/frontend/src/components/ReviewSymbol.tsx (added): MarkState, ReviewSymbol, ReviewSymbolViewProps, ReviewSymbolView, Diff, MarkForm
+- organizer/frontend/src/components/TopBar.test.tsx (modified, test)
+- organizer/frontend/src/lib/review.test.ts (modified, test)
+- organizer/frontend/src/lib/review.ts (modified): progressDelay, afterASecond, flagLook, FlagLook, tsParts, shortName, qualifiedNames, Row, worklist, DiffLine, RangeText, symbolDiff, shasOf, symbolNode, calledBy, callsOf, isAffected, affectedLine, backTo, testsOf, needsNote, canSave, markOf
+- organizer/frontend/src/styles/review.css (modified)
+- organizer/scripts/fixture-home.sh (modified)
+
+## Tests touched
+
+- organizer/frontend/src/components/Review.test.tsx
+- organizer/frontend/src/components/ReviewSymbol.test.tsx
+- organizer/frontend/src/components/TopBar.test.tsx
+- organizer/frontend/src/lib/review.test.ts
+
+## Risky (declared)
+
+- `Review.open`: tracks `from` for an affected symbol; N from an affected one walks from the changed one
+- `review.css .review-where .crumbs`: a zero width on the crumbs; anything else placed in them must shrink too
+
+## Not changed, on purpose (declared)
+
+- `frontend/src/components/TopBar.tsx`: the title's text is the full title already; the fix is CSS
+- `Open in editor` (§3.3): not in FR-19, and OpenInEditor takes no line
+- `frontend/wailsjs`, `app.go`, any Go: the bindings sufficed
+
+## Flags
+
+| flag | where | symbol | detail |
+|---|---|---|---|
+| boundary unreadable | organizer | docs/specs/review-map.md: no section 'v2 Boundary' | boundary entry |
+| outside boundary | organizer/frontend/src/components/Review.test.tsx |  | modified |
+| outside boundary | organizer/frontend/src/components/Review.tsx |  | modified |
+| outside boundary | organizer/frontend/src/components/ReviewSymbol.test.tsx |  | added |
+| outside boundary | organizer/frontend/src/components/ReviewSymbol.tsx |  | added |
+| outside boundary | organizer/frontend/src/components/TopBar.test.tsx |  | modified |
+| outside boundary | organizer/frontend/src/lib/review.test.ts |  | modified |
+| outside boundary | organizer/frontend/src/lib/review.ts |  | modified |
+| outside boundary | organizer/frontend/src/styles/review.css |  | modified |
+| outside boundary | organizer/scripts/fixture-home.sh |  | modified |
+| outside footprint | organizer/frontend/src/components/Review.test.tsx |  | modified |
+| untested? | organizer/frontend/src/components/Review.tsx | firstTarget | no test file names it |
+| untested? | organizer/frontend/src/components/Review.tsx | MakeButton | no test file names it |
+| untested? | organizer/frontend/src/components/Review.tsx | Worklist | no test file names it |
+| untested? | organizer/frontend/src/components/Review.tsx | SymbolPane | no test file names it |
+| untested? | organizer/frontend/src/components/ReviewSymbol.tsx | Diff | no test file names it |
+| untested? | organizer/frontend/src/components/ReviewSymbol.tsx | MarkForm | no test file names it |
+| untested? | organizer/frontend/src/lib/review.ts | tsParts | no test file names it |
+| untested? | organizer/frontend/src/lib/review.ts | qualifiedNames | no test file names it |
+| untested? | organizer/frontend/src/lib/review.ts | symbolNode | no test file names it |
+| untested? | organizer/frontend/src/lib/review.ts | isAffected | no test file names it |
+| untested? | organizer/frontend/src/lib/review.ts | needsNote | no test file names it |
+
+22 flags: outside boundary 9, outside footprint 1, undeclared 0, declared, not changed 0, new env var 0, new dependency 0, new host 0, risk 0, untested? 11, could not read 0, boundary unreadable 1
+```
+Explained:
+- `boundary unreadable` and the 9 `outside boundary`: the false flag on a boundary entry with words after the path. Read against v2 `### Boundary` rv-symbol plus Amendments 2–4: ReviewSymbol(.test).tsx, lib/review(.test).ts, review.css, Review.tsx (mount, focus on open by Am. 2, FR-22/23 by Am. 3), TopBar.test.tsx (the crumb's test, Am. 2), fixture-home.sh (Am. 4; the diff is inside the `--review` branch and its header comment only, adding an unchanged `Welcome` that calls `Greet`). `Review.test.tsx` is not named by the boundary or the footprint (`outside footprint`); it holds the tests of the FR-22/FR-23 changes Amendment 3 puts in Review.tsx. Explained; Note: the footprint should list it.
+- TopBar.tsx: in the footprint, not changed; the card declares it not changed on purpose (the fix is CSS in review.css). Consistent with V-F2.
+- `untested?`: firstTarget (V-F1 harness), MakeButton/Worklist/SymbolPane/Diff/MarkForm (rendered by Review.test and ReviewSymbol.test), tsParts and qualifiedNames (through shortName and worklist, V-R13), symbolNode (through calledBy/callsOf), isAffected (V-R6), needsNote (through canSave). All exercised; no finding.
+- undeclared 0, declared not changed 0.
+
+Notes (not blocking):
+- Note: Tests rows that name a test that did not change are plain text; §3.3 says they open the editor. Not in FR-19's list; same cause as `Open in editor`, held by the builder's note.
+- Note: an affected symbol restored without a changed one to come from reads only `unchanged` with no back button (`affectedLine` with null).
+- Note: the radio inputs are 1×1 with outline none when focused (harness vr-order#2); the focus look is rs-ui's call.
+- Note: Tab past `Reviewed, next` lands on body while Save is disabled (builder's "found, not asked").
+
