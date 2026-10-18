@@ -11,12 +11,15 @@
   height: 100%; min-width: 0; overflow: hidden;
 }
 
-/* The crumb: `<initiative> › <card title> › Review`. */
-/* The card title is what gives way: a zero basis that grows into the
-   bar's free space up to 32ch, so the bar never grows past the window (a
-   nowrap title would count at full width in the shell's column). */
-.tb-where.review-where, .review-where .crumbs { flex: 1 1 auto; }
-.crumbs .crumb-card { flex: 1 1 auto; width: 0; min-width: 0; max-width: 32ch; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--fg-muted); }
+/* The crumb: `<initiative> › <card title> › Review` (FR-21). The card
+   title shrink-wraps: its own width up to 32ch, cut only when the bar is
+   full, so `› Review` follows it and the free space falls after Review.
+   The zero width sits on the crumbs, not on the title: the bar's
+   min-content then does not count the nowrap title, which would widen the
+   shell's column and every screen at 1024. */
+.tb-where.review-where { flex: 1 1 auto; }
+.review-where .crumbs { flex: 1 1 auto; width: 0; }
+.crumbs .crumb-card { flex: 0 1 auto; min-width: 0; max-width: 32ch; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--fg-muted); }
 .crumbs .crumb-card ~ b, .crumbs .crumb-id { flex-shrink: 0; }
 
 .review-bar { display: flex; justify-content: flex-end; min-width: 0; }
@@ -80,20 +83,80 @@
 .rv-change { color: var(--fg-muted); font-size: var(--font-size-xs); font-weight: var(--weight-regular); }
 .rv-since { color: var(--tone); font-size: var(--font-size-xs); }
 
-/* Flags as words (§3.3's table): amber lozenges for look-at-this, muted
-   for the rest, dashed for declared, not changed. */
+/* Flags as words (§3.3's table, flagLook): amber lozenges for
+   look-at-this (the text in --warning, V-R5), muted for the rest, dashed
+   for declared, not changed. */
 .rv-flag {
   font-size: var(--font-size-xs); font-weight: var(--weight-semibold); padding: 1px 7px; border-radius: var(--radius-xs);
   color: var(--fg-muted); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.rv-flag.undeclared, .rv-flag.outside_footprint { color: var(--fg-on-warning); background: var(--warning); }
-.rv-flag.declared_not_changed { border: 1px dashed var(--border); }
+.rv-flag.amber { color: var(--warning); background: var(--warning-bg); }
+.rv-flag.dashed { border: 1px dashed var(--border); }
 
 /* Where the symbol's panel mounts. */
 .review-symbol { min-height: 0; min-width: 0; overflow-y: auto; overflow-x: hidden; display: grid; align-content: start; gap: var(--space-2); }
 .review-symbol-title { margin: 0; font-size: var(--font-size-lg); font-weight: var(--weight-semibold); color: var(--fg); overflow-wrap: anywhere; }
 .review-symbol-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); min-width: 0; }
 .review-diff, .review-facts { min-width: 0; }
+
+/* The symbol's panel (§3.3). */
+.rs-where { overflow-wrap: anywhere; }
+.rs-affected { margin: 0; font-size: var(--font-size-sm); color: var(--fg-muted); }
+
+/* The diff: sm mono, head line numbers, the sign in the gutter; added
+   lines on --status-now-bg, removed on --surface-pressed in --fg-muted.
+   Long lines scroll inside it, never the page. */
+.rs-diff {
+  font-size: var(--font-size-sm); line-height: var(--line-sm); overflow: auto; max-height: 60vh;
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--surface);
+}
+.rs-diff:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.rs-diff table { border-collapse: collapse; min-width: 100%; }
+.rs-diff td { padding: 0 var(--space-2); white-space: pre; vertical-align: top; }
+.rs-diff .rs-ln { color: var(--fg-subtle); text-align: right; user-select: none; -webkit-user-select: none; }
+.rs-diff .rs-sign { width: 1ch; padding: 0 var(--space-1); color: var(--fg); }
+.rs-diff .rs-code { color: var(--fg); width: 100%; }
+.rs-diff tr.add { background: var(--status-now-bg); }
+.rs-diff tr.del { background: var(--surface-pressed); }
+.rs-diff tr.del .rs-code { color: var(--fg-muted); }
+
+/* The facts: labels over values, then the claim apart, then the mark. */
+.review-facts { display: grid; gap: var(--space-4); align-content: start; }
+.rs-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--space-2) var(--space-3); margin: 0; font-size: var(--font-size-sm); }
+.rs-facts dt { color: var(--fg-muted); }
+.rs-facts dd { margin: 0; min-width: 0; color: var(--fg); overflow-wrap: anywhere; }
+.rs-flags { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.rs-links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); }
+.rs-links button.link:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
+
+/* The builder's claim, never in the facts' style (§6.6.5). */
+.rs-claim { margin: 0; display: grid; gap: var(--space-1); }
+.rs-claim figcaption { font-size: var(--font-size-xs); font-weight: var(--weight-semibold); color: var(--fg-muted); }
+.rs-claim blockquote { margin: 0; padding: var(--space-1) var(--space-3); border-left: 2px solid var(--border); font-style: italic; color: var(--fg); font-size: var(--font-size-sm); overflow-wrap: anywhere; }
+
+/* The mark. */
+.rs-mark { display: grid; gap: var(--space-2); }
+.rs-radios { display: flex; flex-wrap: wrap; gap: var(--space-3); margin: 0; padding: 0; border: 0; font-size: var(--font-size-sm); color: var(--fg); }
+/* As the rule box's options (rule-box.css): the native radio is kept for
+   the keyboard and screen readers, not painted. */
+.rs-radio { position: relative; display: inline-block; cursor: pointer; }
+.rs-radio input { position: absolute; opacity: 0; width: 1px; height: 1px; min-height: 0; margin: 0; padding: 0; border: 0; }
+.rs-radio span {
+  display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--control-sm); padding: 0 var(--space-3);
+  border-radius: var(--radius-sm); color: var(--fg-muted); background: var(--surface-raised); border: 1px solid var(--border-subtle);
+}
+.rs-radio span::before { content: ""; flex-shrink: 0; width: var(--icon-sm); height: var(--icon-sm); border-radius: var(--radius-full); box-shadow: inset 0 0 0 1.5px var(--fg-subtle); }
+.rs-radio:hover span { background: var(--surface-hover); color: var(--fg); }
+.rs-radio.on span { background: var(--surface-selected); border-color: var(--border-accent); color: var(--fg); }
+.rs-radio.on span::before { box-shadow: inset 0 0 0 4px var(--accent); }
+.rs-radio input:focus-visible + span { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.rs-note-label { font-size: var(--font-size-sm); color: var(--fg-muted); }
+.rs-note { resize: vertical; font-size: var(--font-size-sm); }
+.rs-note::placeholder { color: var(--fg-subtle); }
+/* global.css drops the outline on focused fields; the ring stays here */
+.rs-note:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.rs-buttons { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.rs-v3 { margin: 0; font-size: var(--font-size-sm); color: var(--fg-muted); }
 
 /* From 1440 (§3.4); last, so it wins over the rules above. */
 @media (min-width: 1440px) {

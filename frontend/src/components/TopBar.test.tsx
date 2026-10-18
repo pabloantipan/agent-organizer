@@ -276,3 +276,22 @@ describe("the signed-in bar at 1024 (K3, I24)", () => {
     expect(html).not.toContain("Sync");
   });
 });
+
+describe("the review crumb's card title (review-map v2 FR-21)", () => {
+  const css = readFileSync(new URL("../styles/review.css", import.meta.url), "utf8") as string;
+  const rule = (sel: string) => css.match(new RegExp(`(^|\\n)${sel.replace(/[.*]/g, (c) => `\\${c}`)} \\{([^}]*)\\}`))?.[2] ?? "";
+  it("shrink-wraps: no fixed basis or width, min-width 0, at most 32ch", () => {
+    const card = rule(".crumbs .crumb-card");
+    expect(card).toContain("flex: 0 1 auto");
+    expect(card).toContain("min-width: 0");
+    expect(card).toContain("max-width: 32ch");
+    expect(card).not.toMatch(/(^|[\s;])width:|flex-basis/);
+    // the zero width that keeps the bar inside the window is the crumbs', not the title's
+    expect(rule(".review-where .crumbs")).toContain("width: 0");
+  });
+  it("carries the full title in its name, however much the bar shows", () => {
+    const title = "Greet acme by name on the board, and a title much longer than thirty-two characters";
+    const html = renderToStaticMarkup(<Where screen="initiative" selectedInitiative="init-a" review={{ initiative: "init-a", title }} go={() => noop} goHome={noop} openInitiatives={noop} openUsage={noop} />);
+    expect(html).toContain(`<span class="crumb-card" title="${title}">${title}</span>`);
+  });
+});

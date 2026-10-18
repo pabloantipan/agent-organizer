@@ -19,7 +19,8 @@
 # options of the default home, adds to init-a in the temp copy only the card
 # rv-fixture on branch rv-fixture. Its one commit changes Greet in svc/
 # (a Go module; svc/greet_test.go tests it, and the card declares
-# svc/greet.go) and formatName in web/src/format.ts (no test names it and
+# svc/greet.go; svc/welcome.go's Welcome calls it and does not change, so
+# the map holds it as an affected caller) and formatName in web/src/format.ts (no test names it and
 # the card does not declare it, so change-check calls it undeclared). The
 # tag review-second is a second commit on that branch that changes
 # formatName again and leaves Greet's text alone; the branch moves to it
@@ -425,6 +426,16 @@ package svc
 // Greet is what acme's board says first.
 func Greet(name string) string {
 	return "hello " + name
+}
+GO
+  # Welcome calls Greet and is not changed on the branch, so the map holds
+  # an affected caller with a uses edge (review-map v2 Amendment 4, V-R6).
+  cat > "$a/svc/welcome.go" <<'GO'
+package svc
+
+// Welcome is the board's first line for a new person.
+func Welcome(name string) string {
+	return Greet(name) + ", welcome"
 }
 GO
   cat > "$a/svc/greet_test.go" <<'GO'
