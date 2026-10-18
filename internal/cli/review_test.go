@@ -189,3 +189,65 @@ func TestReviewMergedCard(t *testing.T) {
 		t.Errorf("neither: exit %d, stderr %q", code, errb.String())
 	}
 }
+
+// A3 (v3 FR-27): --marks prints the count line and one line per question
+// or block, the asked one with the review's thread and the other `not
+// asked`; a card with no map exits 2 naming organizer review.
+func TestReviewMarksCoverage(t *testing.T) {
+	_, dir := reviewRepo(t)
+	git := func(args ...string) string {
+		t.Helper()
+		cmd := exec.Command("git", append([]string{"-C", dir}, args...)...)
+		cmd.Env = append(os.Environ(), "GIT_AUTHOR_NAME=t", "GIT_AUTHOR_EMAIL=t@t", "GIT_COMMITTER_NAME=t", "GIT_COMMITTER_EMAIL=t@t", "GIT_CONFIG_GLOBAL=/dev/null")
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatalf("git %v: %v\n%s", args, err, out)
+		}
+		return strings.TrimSpace(string(out))
+	}
+	for _, c := range []string{"cm", "nomap"} {
+		if err := os.WriteFile(filepath.Join(dir, "working-on", c+".md"), []byte("---\ntitle: x\nstatus: now\nbranch: "+c+"\nupdated: 2026-10-18\nnext: \"x\"\n---\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	git("add", ".")
+	git("commit", "-q", "-m", "cards")
+	git("branch", "nomap")
+	git("checkout", "-q", "-b", "cm")
+	if err := os.WriteFile(filepath.Join(dir, "p/f.go"), []byte("package p\n\nfunc F() int { return 3 }\n\nfunc G() int { return 3 }\n\nfunc H() int { return 3 }\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	git("commit", "-q", "-am", "F, G and H")
+	git("checkout", "-q", "main")
+	head := git("rev-parse", "cm")
+
+	var out, errb bytes.Buffer
+	if code := runWith([]string{"review", "init-r", "cm"}, &out, &errb, time.Now); code != 0 {
+		t.Fatalf("make the map: exit %d, stderr %q", code, errb.String())
+	}
+	f, g, h := "go:example.com/r/p.F", "go:example.com/r/p.G", "go:example.com/r/p.H"
+	state := `{"initiative":"init-r","card":"cm","head":"` + head + `","thread":"T1","changed":[],"marks":[
+		{"symbol":"` + f + `","state":"question","note":"why 3?","by":"pablo","at":"2026-10-18T09:00:00Z","hash":"x","asked":"M1"},
+		{"symbol":"` + g + `","state":"blocked","note":"no","by":"pablo","at":"2026-10-18T09:00:00Z","hash":"x"},
+		{"symbol":"` + h + `","state":"reviewed","note":"","by":"pablo","at":"2026-10-18T09:00:00Z","hash":"x"}]}`
+	p := filepath.Join(os.Getenv("XDG_DATA_HOME"), "organizer", "review", "init-r", head, "state.json")
+	if err := os.WriteFile(p, []byte(state), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	out.Reset()
+	errb.Reset()
+	if code := runWith([]string{"review", "init-r", "cm", "--marks"}, &out, &errb, time.Now); code != 0 {
+		t.Fatalf("--marks: exit %d, stderr %q", code, errb.String())
+	}
+	want := "Reviewed 1 of 3 · 1 questions · 1 blocked\n" + f + "  question  T1\n" + g + "  blocked  not asked\n"
+	if out.String() != want {
+		t.Errorf("--marks:\n%s\nwant:\n%s", out.String(), want)
+	}
+
+	out.Reset()
+	errb.Reset()
+	code := runWith([]string{"review", "init-r", "nomap", "--marks"}, &out, &errb, time.Now)
+	if code != 2 || !strings.Contains(errb.String(), "organizer review init-r nomap\n") || out.Len() != 0 {
+		t.Errorf("no map: exit %d, stdout %q, stderr %q", code, out.String(), errb.String())
+	}
+}

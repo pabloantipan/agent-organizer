@@ -6,6 +6,10 @@ export function AddNote(arg1, arg2, arg3) {
   return window['go']['main']['App']['AddNote'](arg1, arg2, arg3);
 }
 
+export function AskReview(arg1, arg2, arg3, arg4, arg5, arg6) {
+  return window['go']['main']['App']['AskReview'](arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
 export function AttachSession(arg1) {
   return window['go']['main']['App']['AttachSession'](arg1);
 }
@@ -172,6 +176,10 @@ export function RetrySeat(arg1, arg2) {
 
 export function Reveal(arg1) {
   return window['go']['main']['App']['Reveal'](arg1);
+}
+
+export function ReviewAddressee(arg1, arg2) {
+  return window['go']['main']['App']['ReviewAddressee'](arg1, arg2);
 }
 
 export function ReviewFile(arg1, arg2, arg3, arg4, arg5, arg6) {
