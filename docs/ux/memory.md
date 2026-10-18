@@ -423,6 +423,10 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - A form's Save is drawn only while something differs from what is saved; a lone disabled Save is noise (review-view A8).
 - `aria-current="page"` is the screen's place, one per screen; the current item of a list inside it is `aria-current="true"`, one per list (design system, review-view A8). The end of the Tab order reaching body is not a dropped focus.
 
+- A sent message is a fact, not form state: a Save keeps the ask and its thread; only a new ask replaces them (review-view A9).
+- A button that cannot act is not drawn; when the reason is not obvious, a muted line says what would make it act (review-view A9).
+- A landing whose target is not loaded yet goes to its likeliest home (the seat's chat), never to an archive, and moves to the target when it arrives unless the person moved (review-view A9).
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).

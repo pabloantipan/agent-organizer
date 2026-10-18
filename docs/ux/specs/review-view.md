@@ -465,3 +465,37 @@ From `working-on/done/lf41-review-words.md`, ## UI review.
 |---|---|---|
 | R34 | not meet a button that does nothing | an asked, unedited symbol shows no Save; editing the note draws Save (and `Ask <seat> again`); after Save, Save is gone and focus is on a control in the panel |
 | R35 | tell the screen from the item | on Conversations after `Open the thread`, one `aria-current="page"` (the top bar's crumb) and one `aria-current="true"` (the thread's chat) |
+
+## Amendment 9 (aglaea, 2026-10-18): from rs-ui on lf43-review-states
+
+From `working-on/done/lf43-review-states.md`, ## UI review.
+
+- **RS1: a Save never forgets an ask.** The ask is a fact (a message was
+  sent, a seat was woken), not part of the editable mark. A Save keeps
+  the mark's asked state and its thread whatever it changes. After
+  editing and saving the note of an asked mark, the panel still reads
+  `Asked <seat> · Open the thread`, the row keeps `? asked` (or
+  `✕ asked`), and because the saved note now differs from the one that
+  was asked, the line and the primary are A6's `again` forms: `Saves the
+  mark and asks <seat> again in this review's thread. Wakes <seat>.` and
+  `Ask <seat> again` (`, next` while one is left). Changing the mark to ✓
+  or none keeps the link in the panel (the thread still exists), drops
+  `asked` from the row's mark (it marks a question or a block), and
+  offers no ask.
+- **RS2: no Save that cannot save.** Save is drawn only when it can save
+  (the form differs from what is saved and there is a mark). A note typed
+  with no mark draws, under the note, the muted line `Choose a mark to
+  save this note.`, which goes once a mark is chosen. The note is kept as
+  typed.
+- **RS3: never land on archive for a thread not listed yet.** Archive is
+  closed threads. When the named thread is not in the feed yet,
+  Conversations lands on the direct chat of the seat it was asked of (the
+  review's seat), else on channel, and selects the thread when the feed
+  lists it, unless Pablo has moved since. The one current row
+  (`aria-current="true"`) and the selected fill are always the same row.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R36 | keep an ask through a Save | asked symbol, edit the note, Save: the panel shows `Asked <seat> · Open the thread` and `Ask <seat> again`; the row reads `? asked` |
+| R37 | know why a note will not save | unmarked symbol, type a note: no Save, the line `Choose a mark to save this note.` under it; choose a mark: the line goes and Save is drawn |
+| R38 | land somewhere real | `Open the thread` with the thread not yet in the feed lands on the seat's direct chat, never archive; the current row and the fill agree |
