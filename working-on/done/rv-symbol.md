@@ -1,13 +1,13 @@
 ---
 title: "The Review screen's symbol panel: diff, facts, claim and the mark"
-status: now
+status: done
 repos: [organizer]
 branch: rv-symbol
 seat: rs-build
 stage: review-map
 updated: 2026-10-18
-next: "review: rv-symbol, gate met, edcd546"
-review: fail
+next: "none: done, merge rv-symbol at edcd546"
+review: pass
 risk: medium
 footprint: [frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css, frontend/src/components/Review.tsx, frontend/src/components/TopBar.tsx (crumb), frontend/src/components/TopBar.test.tsx, scripts/fixture-home.sh (--review only)]
 depends_on: [rv-list]
@@ -163,6 +163,32 @@ Notes (not blocking):
 - Note: the radio inputs are 1×1 with outline none when focused (harness vr-order#2); the focus look is rs-ui's call.
 - Note: Tab past `Reviewed, next` lands on body while Save is disabled (builder's "found, not asked").
 
+
+### Round 2
+
+**pass**, rs-review, 2026-10-18, on edcd546 (clean clone of edcd54620b4eca32897aa662196854b781fa534c, rebased on main c18b5f8).
+
+Unmet gate items: **none**. Met: V-R4, V-R5, V-R6, V-R7, V-R8, V-R10, V-R12, X0, V-F1, V-F2 (as Amendment 5), V-R13, V-R14, V-U1.
+
+- Rebase: `git range-diff 3155162~4..3155162 main..edcd546` prints `=` for all four earlier commits (c81d5c4 = f567a2d, f3e0795 = d867d53, bca500c = c4b7bfd, 3155162 = 2ff660e); the new ones are e0b7d5f (V-R14) and edcd546 (FR-24/V-U1). The harness rows I passed in round 1 (V-R4, V-R5, V-R6, V-R10, V-F1, V-F2) are not rerun. e0b7d5f touches only the make's timer and counter. edcd546 touches only Save's enabling and the form after a save. V-R8's harness path (an unmarked Greet, then Question, then a note) has saved state `""`, so `canSave` answers as before. Its vitest is updated and passes.
+- V-R14: e0b7d5f counts the 1 s and the counter from `makeOrigin`: the press taken in the page, or, for a make first seen here, `started` + 1 s or the time it was seen. My proof rerun against the new lib (`.wt-notes/rs-review/fr23-proof-r2.mjs`): started `10:00:00Z`, press `.950`, answer 5 ms later:
+  ```
+  origin - press: 0 ms; show() after 995 ms from the answer = 1000 ms from the press (FR-23 wants 1000)
+  counter when shown: Making the map · 1 s | with a stale now at the press: Making the map · 1 s
+  ```
+  The vitest now uses a whole-second `started` with the press at .950, in the lib (`review.test.ts` V-R14) and as drawn (`Review.test.tsx`, "V-R14 (FR-23) as drawn"): at 45, 500 and 895 ms there is no counter and no Stop; at 1000 ms it reads `Making the map · 1 s` with Stop and never `· 0 s`. `secondsSince` floors at 1, so the visible counter never first reads `0 s` (U4 fixed).
+- V-U1 (Amendment 6): `ReviewSymbol.test.tsx` "V-U1" walks Save Question, then `Reviewed, next`, then Save. Writes are `["question","reviewed"]`, the mark stays `reviewed`, and the panel drawn from those marks has Reviewed checked and Save disabled. MarkForm resets from `afterSave` after every save (ReviewSymbol.tsx:152-154), and `canSave` takes the saved mark.
+- X0: `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test`: **fresh** run, started 01:42:17 on edcd546 and saved (the log names no run id for a fresh run; no reuse event). Exit 0: 18 Go packages ok, vitest 74 files / 884 tests (`r2-x0-make-test.txt`). `pnpm run build` exit 0, `wails build` exit 0, `git status --porcelain` empty. V-R12: grep rc=1 in package.json and dist. No dependency, Go or wailsjs change.
+- change-check at edcd546 (`r2-change-check.txt`): the same 9 paths, flags and explanations as round 1. Undeclared 0, declared not changed 0. `untested?` is 10 (MarkForm is now named by a test). The new symbols `makeOrigin`, `secondsSince` and `afterSave` are tested.
+- UI review: pass (rs-ui, 3155162). Its U1 is folded into Amendment 6 and fixed here; no UI re-review (sup81).
+
+Where the findings went:
+- V-R14 (mine, round 1) and U4: fixed in e0b7d5f.
+- U1: review-map v2 Amendment 6 (cc28507), fixed in edcd546.
+- U2, U3 (= G1, and my Note on Tests not opening the editor, and the card's `Open in editor` note), U5, U6, G2, G3: held for a later card, FSE bitácora b38b92e and Amendment 6's last line. My Note on the 1×1 radio focus is U2.
+- A1 to A3: review-view Amendment 2 (c494570, R15 to R17), held for the follow-up (c18b5f8).
+- My Note on an affected symbol restored with nothing to go back to: withdrawn as a finding (I did not prove it reachable); nothing filed, nothing owed.
+- Tab past `Reviewed, next` landing on body, and the footprint missing `Review.test.tsx`: not findings. The first is the end of the tab order; the second is card hygiene, closed by this move.
 
 ## UI review
 rs-ui, 2026-10-18, on 31551625286a1c550dd0149e55453aea773bd5c3 (every row; the branch did not move). **Verdict: pass.** No severity 4 or 3 against the spec or the design. rs-review's V-R14 fail is not repeated here; the screen agrees with it (U4). Evidence: `.wt-notes/rs-ui/` (`out/` shots, harness logs, steps).
