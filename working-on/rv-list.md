@@ -7,7 +7,7 @@ seat: rl-build
 stage: review-map
 updated: 2026-10-18
 review: pass
-next: "review: rv-list, gate met (V-R1, V-R2, V-R3, V-R9, V-R11, V-S, V-R12, X0), 62d9133"
+next: "file finding: rl-ui U1 (focus on body when the screen opens), U2 (crumb title cut at 1024), U3 (flag wrap indent), G1-G3, A1-A2; rl-review fixture gap (remote card, second package), .topbar min-width, flagLook unused (rv-symbol); then move to done (both reviews pass)"
 risk: medium
 footprint: [frontend/src/components/Review.tsx, frontend/src/components/Review.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css, frontend/src/components/CardDrawer.tsx, frontend/src/stores/board.store.ts, frontend/src/App.tsx]
 depends_on: [rv-data]
@@ -161,6 +161,8 @@ Notes (not blocking):
 - Note (gate): V-R3's "packages by size" and V-R1's "another machine's card" cannot show on the fixture (one package outside Must visit, no remote card); both are proven only in vitest (`worklist(big)`, `reviewable(false, …)`). The fixture could carry a second package and a remote card. → nowhere yet: `next` files it.
 - Note (gate): the harness steps only print values (no assertions); the row is judged by reading the output. Fine for a reviewer, but a builder's "gate met" on them is a reading, not a test.
 - Builder's "Found, not asked": `.topbar` `min-width: 0` in shell.css (guard for every long crumb) → nowhere yet: `next` files it; change-check's boundary parse → the known change-check false flag, no new place; place.ts exhaustive switch and the docs-only file list → no action, as the builder chose.
+
+Where the findings went (rl-review, 2026-10-18, after rl-ui's pass): nowhere yet. No card, record or backlog line names rl-ui's U1, U2, U3, G1, G2, G3, A1, A2, nor this review's fixture gap, `.topbar` `min-width: 0` or unused `flagLook` (rv-symbol's card does not mention it). So the card stays open with `next: "file finding: …"`, per the review rule; the move to done waits for the FSE to file them.
 
 ## UI review
 rl-ui, 2026-10-18, on 62d913385069e4a08b00d84076d30ed8600fea41 (every row; the branch did not move). **Verdict: pass.** No severity 4 or 3. Evidence: `.wt-notes/rl-ui/` (`out/` shots and harness logs).
