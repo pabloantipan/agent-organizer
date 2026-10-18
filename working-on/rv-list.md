@@ -161,3 +161,58 @@ Notes (not blocking):
 - Note (gate): V-R3's "packages by size" and V-R1's "another machine's card" cannot show on the fixture (one package outside Must visit, no remote card); both are proven only in vitest (`worklist(big)`, `reviewable(false, …)`). The fixture could carry a second package and a remote card. → nowhere yet: `next` files it.
 - Note (gate): the harness steps only print values (no assertions); the row is judged by reading the output. Fine for a reviewer, but a builder's "gate met" on them is a reading, not a test.
 - Builder's "Found, not asked": `.topbar` `min-width: 0` in shell.css (guard for every long crumb) → nowhere yet: `next` files it; change-check's boundary parse → the known change-check false flag, no new place; place.ts exhaustive switch and the docs-only file list → no action, as the builder chose.
+
+## UI review
+rl-ui, 2026-10-18, on 62d913385069e4a08b00d84076d30ed8600fea41 (every row; the branch did not move). **Verdict: pass.** No severity 4 or 3. Evidence: `.wt-notes/rl-ui/` (`out/` shots and harness logs).
+
+How each state was checked:
+- Review build (`make review-build`, my worktree): I launched `Deltagos Review` myself on `fixture-home.sh --review` with auth off and the probe stub, read the AX tree by my own pid and shot `screencapture -o -l` of its window. I drove it only by AXPress on that pid. The screen was not locked.
+  - A, change-check on the PATH: the card back has a Review section (`wk-1024x640-R1-card-back.png`). No map (`wk-1024x640-S-no-map.png`). Make the map shows `Making the map · 0 s` with Stop, then the map: `81ba32a ← 37622fc · 2 symbols changed, 0 tests`, `Reviewed 0 of 2 · 1 must-visit left` (`wk-1024x640-R2-map.png`). The symbol at 1440×900 (`wk-1440x900-R11-symbol.png`). Moved (`$FIXTURE_REVIEW_MOVE`): `The branch moved since this map (81ba32a → 1b4f44d).` with Make it again. Making it again shows the counter and Stop in the header, and the map is remade at 1b4f44d.
+  - B, change-check off the PATH: `⚠ Not checked against the card's declared changes: change-check not on PATH.` (`wk-1024x640-R9-partial.png`). After the make, focus is on the worklist.
+- Tab harness (builder's copy with `n`/`shift-n`, steps read and copied to `.wt-notes/rl-ui/steps/`). It ran against my own `wails dev` on :34254 from a clean clone of 62d9133, fixture --review, auth off, under `harness.lock`. The window was key (`isKey: true`).
+  - V-R1: nonext has no Review section; rv-fixture shows `Review the change`. Esc and ← Card both return to the card back with focus on the button, focus-visible.
+  - V-R3: N from ← Card goes to formatName (Must visit), then Greet (svc); Shift+N goes back to formatName. Focus is on the h2 each time.
+  - Tab from ← Card: Next to review, then the worklist as one stop. ↑ ↓ ← → Enter behave per §5. The group head's ring is 2 px `--focus-ring` on `.rv-ghead`.
+  - V-R11: 1024×640 gives list 280 and facts under the diff. 1440×900 gives list 300 and facts beside the diff at 360. scrollWidth equals the width on page, body, main and top bar (`h-vr11-*.txt`).
+- vitest: in the shared run (Review.test.tsx states, lib/review.test.ts).
+- V-R12: no reactflow, @xyflow, elkjs or monaco in `frontend/package.json` or the built `dist`.
+- Shared test run: **reused**, run `e9312599-68276` of 62d913385069 by organizer-probe-rl-review. Exit 0: Go ok, vitest 73 files and 846 tests (`.wt-notes/rl-ui/x0-make-test.txt`).
+
+§4 words, design against screen:
+- `No review map for this change yet.` / `Make the map` (primary): same, on screen.
+- `Making the map · 2 s` and `Stop`: `Making the map · 0 s` and `Stop` on screen. The fixture's make takes under 1 s, so n ≥ 1 is shown only in vitest. Focus stays on the busy button (harness `making`).
+- Failed: the reason, `Try again`, `Copy the command`: same in vitest only.
+- Partial: `Not checked against the card's declared changes: …`: same, on screen, in `--warning` (#ffb020).
+- Moved: `The branch moved since this map (4d2a91b → 9e0f3c1).` / `Make it again`: same shape, on screen, with the fixture's shas.
+- New map, same symbol, `changed since you reviewed`: same in vitest only (row name).
+- Docs-only: `Nothing to review at symbol level: the change touches no Go or TS definition.`: same in vitest only.
+- All reviewed, `Reviewed 8 of 8` with Next to review gone: `Reviewed 2 of 2` with no Next to review, in vitest only.
+- Crumb `<initiative> › <card title> › Review`: `init-a›Greet acme by name on the board›Review` (separators aria-hidden), with Review `aria-current`.
+- No symbol chosen: an empty `section` named Symbol, with no words, as §4 gives none. rv-symbol's place (`.review-diff`, `.review-facts`) is there and laid out per §3.4.
+
+Findings:
+- **U1 (2) Opening the screen drops focus on the page body.**
+  - What the person cannot do: a screen-reader user is told nothing when the screen opens, and no ring shows where they are.
+  - Where: card back → `Review the change` → the Review screen (harness `open-focus`: `BODY`, `.wt-notes/rl-ui/out/h-ui-open.txt`).
+  - Evidence: `docs/design-system.md` Focus and names says of navigating: "Never on the page body". The first Tab does land on `← Card` and N works from body, so a keyboard user recovers in one press.
+  - Proposal: on open, focus the screen's first target. That is the worklist stop with a map and `Make the map` without one, as the after-make handoff already does. Otherwise `← Card`.
+- **U2 (2) The crumb's card title is cut to 8 characters at 1024.**
+  - What the person cannot do: read which card's change is open at the laptop width.
+  - Where: top bar at 1024×640, `init-a › Greet ac… › Review` (`wk-1024x640-R2-map.png`). At 1440 the title box grows to 32ch and leaves a ~50 px gap before `› Review` (`wk-1440x900-R11-symbol.png`).
+  - Evidence: computed `.crumb-card` 59 px wide against 201 px of text. The full title is only in a hover `title`.
+  - Proposal: shrink-wrap the title (basis auto, `min-width: 0`, max 32ch) so the gap falls after Review. Give the crumb its width budget at 1024 against the memory badge (see G1).
+- **U3 (1) A row's flags wrap under the name at a smaller indent than the name** (`no direct test` at x 48 under a name at x 59, `wk-1024x640-R2-map.png`).
+  - What the person cannot do: nothing is blocked; the second line reads as a separate row at a glance.
+  - Evidence: `.rv-row` is a wrapping flex row and the mark span takes the first line's indent.
+  - Proposal: put the flags on a second line indented to the name, or make the mark a fixed first column.
+
+Spec gaps (for the FSE):
+- G1: §5 orders Tab but does not say where focus goes when the screen opens (U1). The crumb's width at 1024 beside the memory badge is not specified (U2).
+- G2: the fixture has no remote card and only one package outside Must visit. V-R1's `!local` and V-R3's "by size" rest on vitest only (same as rl-review's note).
+- G3: the fixture's make is under 1 s, so the §4 making counter past `0 s` is never seen live.
+
+For aglaea:
+- A1: TS symbols in Must visit are qualified by file stem (`format.formatName`), and Go ones by package (`shared.Upload` in §3). Is the file stem the right qualifier for TS?
+- A2: a make under a second flashes `Making the map · 0 s` and Stop. Should the busy state wait about 1 s before it shows?
+
+Not verified in WKWebView (vitest or DOM only): failed state with `Try again` and `Copy the command`, since the fixture has no failure path and no row writes the clipboard. Also: docs-only, all reviewed and its live-region line (needs rv-symbol's marks), `changed since you reviewed` (no marks to carry on the remake), the counter at n ≥ 1, and another machine's card.
