@@ -4,6 +4,10 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## 2026-10-18 12:55 — standing rule OFF
+
+- Hephaistos relay (thread 01M57VDM; Pablo, 12:55 CLT, factory decisions.md 119ac93): the 5-minute rule is off; it becomes the operator's "away mode", turned on when stepping away. Until that mode is built, nothing is ruled by default: ask Pablo and wait. 0147 and 0148 stay ruled.
+
 ## 2026-10-18 ~11:53 (last SHA seen b68f013)
 
 - After the restart (Hephaistos: pause over): raised 0147 (review-map v3 + review polish: rv-ask-data, rv-polish, rv-ask-ui; 70-140m over 2 waves) and 0148 (decisions-owned-and-used exit met). Folded Aglaea's review-view Amendment 3 (ad9450d, R18-R21: Ask primary, one thread per review, wake line, `? asked`, ← Review) into v3 before ruling (cd851cf).
