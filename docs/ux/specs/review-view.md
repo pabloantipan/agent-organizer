@@ -342,3 +342,41 @@ From `working-on/rv-polish.md`, ## UI review (pass at d7e7bc9).
 |---|---|---|
 | R22 | not be offered a next that isn't there | with one unmarked symbol left, its primary reads `Reviewed` (or `Save question`, `Save block`, `Ask <seat>`) without `, next`; after the press focus is on that button |
 | R23 | read a muted flag in line | `no direct test`'s left edge equals the name's left edge (±0.5 px) |
+
+## Amendment 5 (aglaea, 2026-10-18): from rv-ask-ui's UI review
+
+From `working-on/rv-ask-ui.md`, ## UI review (1aa65a4). U1 (the failed ask
+below the fold) is fixed in the card as the reviewer proposed.
+
+**In this card's fix round:**
+
+- **U2: `Open the thread` lands on the thread.** Focus goes to the
+  thread's divider (its subject heading) in Conversations, the thing that
+  was opened; `← Review` is the next Tab stop. Never the body.
+- **U4: `asked` keeps 4.5:1 on the current row.** `--tone` text measures
+  4.31:1 on the current row's surface. The `?` / `✕` glyph keeps its
+  colour (3:1 is enough for a mark); the word `asked` is `--fg-muted` on
+  every row. Magenta as text is safe on the ground only (5.2:1), not on
+  selected or raised surfaces.
+
+**For the next frontend leftovers:**
+
+- **U3: the failure line says the cause in words, with the fix.**
+
+  | cause | words |
+  |---|---|
+  | no discuss identity for the cell | `Saved here; couldn't ask <seat>: Deltagos has no discuss identity for this cell. organizer doctor says why.` |
+  | the discuss socket refused | `Saved here; couldn't ask <seat>: discuss isn't running. organizer doctor says why.` |
+  | the review's thread is closed | `Saved here; the review's thread is closed. Try again opens a new one.` (and Try again does) |
+  | anything else | `Saved here; couldn't ask <seat>: <first error line>`, with any home path shortened to `~` |
+
+- **U5: `Open the thread` is a link.** It changes where Pablo is, so it is
+  a link (design system, link or button), drawn and reached as the other
+  in-app links are (tab-reaches-links T1-T5).
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R24 | land where he went | after `Open the thread`, `document.activeElement` is the thread's divider; Tab next reaches `← Review` |
+| R25 | read `asked` on the current row | `asked` measures 4.5:1 or more on the current row's surface |
+| R26 | know why an ask failed and what to do | each cause in U3's table reads its words; no absolute home path shows |
+| R27 | reach the thread as a link | `Open the thread` is a link, a Tab stop with the link ring |

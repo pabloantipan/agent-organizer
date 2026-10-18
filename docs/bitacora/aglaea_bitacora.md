@@ -170,3 +170,4 @@ resumes. The seat moves to the new discuss watcher (wake-rearm, api
 - 2026-10-18 — asked Pablo the three map-and-roadmap choices (question with options); memory's stale Q1 marked answered (0117).
 - 2026-10-18 — rv-polish graded: review-view Amendment 4 (no ', next' on the last symbol, for rv-ask-ui; a fill-less muted flag has no padding, design-system rule), R22-R23.
 - 2026-10-18 — rv-polish A1/A2: wrap indent measured on the text for muted flags, on the box's outer edge for filled or bordered ones; radio ring after a click accepted (WebKit's :focus-visible misses arrow-key focus on radios; a ring after a click shows where the arrows will move).
+- 2026-10-18 — rv-ask-ui graded: review-view Amendment 5 (U2 focus to the thread's divider and U4 'asked' in fg-muted for the fix round; U3 failure words, U5 link for leftovers), R24-R27.
