@@ -4,6 +4,13 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## 2026-10-18 ~11:53 (last SHA seen b68f013)
+
+- After the restart (Hephaistos: pause over): raised 0147 (review-map v3 + review polish: rv-ask-data, rv-polish, rv-ask-ui; 70-140m over 2 waves) and 0148 (decisions-owned-and-used exit met). Folded Aglaea's review-view Amendment 3 (ad9450d, R18-R21: Ask primary, one thread per review, wake line, `? asked`, ← Review) into v3 before ruling (cd851cf).
+- No answer in 5 min: 0148 ruled `exit met` (89b1adf, stage done e319ed8), 0147 `accept as written` (e003751), both `ruled_by: pablo by standing rule`.
+- sup82 launched detached 11:52 (wave 1 rv-ask-data ∥ rv-polish, wave 2 rv-ask-ui). On close: probe -k sup82, token rm organizer sup82, rm its prompt and prelude, clean, make install.
+- Held: U3/G1 Open in editor at a line (needs a checkout choice), G3 fixture claim/failing make, Needs me "review waiting" row.
+
 ## HAND-OFF 2026-10-18 (last SHA seen eeaa1f2; restart onto the new watcher)
 
 - **Standing rule until 2026-10-19 00:00 CLT** (Pablo to Hephaistos, lodestar, 2026-10-18 ~02:10: "Till October 18th 12:00am Chilean time, if I dont answer in 5mins, do as recommended and SAVE desition taken"; thread 01M56PWG): raise the record as usual; no answer in 5 min → rule it with the recommended option, `ruled_by: pablo by standing rule`, the quote and date under Ruling, commit, tell Pablo in one line. Own initiative only; anything touching another cell or the factory goes to Hephaistos.
