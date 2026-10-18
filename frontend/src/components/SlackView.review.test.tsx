@@ -28,7 +28,7 @@ describe("A4 (FR-29): Open the thread, then ← Review", () => {
     expect(st().reviewBack).toMatchObject({ initiative: "init-a", card: "rv-fixture", head: "2bd87db", symbol: "go:example.com/inita/svc.Greet" });
     // Conversations' header offers ← Review
     const h = renderToStaticMarkup(<ReviewBack initiative="init-a" reviewBack={st().reviewBack} onBack={() => undefined} />);
-    expect(h).toBe('<button class="ghost">← Review</button>');
+    expect(h).toBe('<button class="ghost" data-review-back="true">← Review</button>');
     st().backToReview();
     expect(st().review).toMatchObject({ initiative: "init-a", card: "rv-fixture", head: "2bd87db", symbol: "go:example.com/inita/svc.Greet" });
     expect(st().review?.back.sub).toBe("work");

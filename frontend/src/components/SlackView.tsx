@@ -73,7 +73,7 @@ export function SlackView() {
  *  the store (reviewBack). */
 export function ReviewBack({ initiative, reviewBack, onBack }: { initiative: string; reviewBack: { initiative: string } | null; onBack: () => void }) {
   if (reviewBack?.initiative !== initiative) return null;
-  return <button className="ghost" onClick={onBack}>{WORDS.backToReview}</button>;
+  return <button className="ghost" data-review-back onClick={onBack}>{WORDS.backToReview}</button>;
 }
 
 /** The members panel: one row per seat, the human included, with the
