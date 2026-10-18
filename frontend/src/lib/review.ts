@@ -453,7 +453,15 @@ export function testsOf(m: review.RevMap, n: review.Node): { label: string; node
 
 /** The mark of §3.3: Question and Blocked need a note; Save needs a mark. */
 export const needsNote = (s: MarkState) => s === "question" || s === "blocked";
-export const canSave = (s: MarkState, note: string) => s !== "" && (!needsNote(s) || note.trim() !== "");
+/** Save is live for a complete mark that differs from the saved one
+ *  (FR-24: after the last `Reviewed, next`, Save writes nothing unless the
+ *  reader changes the mark). */
+export const canSave = (s: MarkState, note: string, saved: { state: MarkState; note: string } = { state: "", note: "" }) =>
+  s !== "" && (!needsNote(s) || note.trim() !== "") && (s !== saved.state || note.trim() !== saved.note);
+
+/** What the form shows once a mark is saved: the mark as saved (FR-24), so
+ *  `Reviewed, next` with nothing left reads Reviewed, not the old radio. */
+export const afterSave = (s: MarkState, note: string) => ({ state: s, note: note.trim() });
 
 /** A mark's saved note on this head, for the panel to start from. */
 export function markOf(marks: review.Marks | null | undefined, id: string): { state: MarkState; note: string } {

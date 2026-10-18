@@ -3,7 +3,7 @@ import type { review as rv } from "../../wailsjs/go/models";
 import { MarkReview, ReviewFile } from "../../wailsjs/go/main/App";
 import { busyButton, busyLabel } from "../lib/busy";
 import {
-  affectedLine, backTo, calledBy, callsOf, canSave, flagLook, flagWords, isAffected, markOf, shasOf, shortName, symbolDiff, testsOf, WORDS,
+  affectedLine, afterSave, backTo, calledBy, callsOf, canSave, flagLook, flagWords, isAffected, markOf, shasOf, shortName, symbolDiff, testsOf, WORDS,
   type MarkState, type RangeText, type Row,
 } from "../lib/review";
 
@@ -149,6 +149,9 @@ function MarkForm({ name, id, marks, onMark, onNext }: { name: string; id: strin
     setError(null);
     try {
       await onMark(s, note.trim());
+      const shown = afterSave(s, note);
+      setState(shown.state);
+      setNote(shown.note);
       then?.();
     } catch (e) {
       setError(String(e));
@@ -174,7 +177,7 @@ function MarkForm({ name, id, marks, onMark, onNext }: { name: string; id: strin
         placeholder={state === "question" || state === "blocked" ? "required for Question and Blocked" : "optional"} />
       <div className="rs-buttons">
         <button className="primary" {...busyButton({ busy: busy === "next", disabled: busy !== "", onPress: run("next", "reviewed", onNext) })}>{busyLabel(busy === "next", WORDS.reviewedNext, "Saving…")}</button>
-        <button {...busyButton({ busy: busy === "save", disabled: busy !== "" || !canSave(state, note), onPress: run("save", state) })}>{busyLabel(busy === "save", WORDS.save, "Saving…")}</button>
+        <button {...busyButton({ busy: busy === "save", disabled: busy !== "" || !canSave(state, note, saved), onPress: run("save", state) })}>{busyLabel(busy === "save", WORDS.save, "Saving…")}</button>
       </div>
       <p className="rs-v3 meta">{WORDS.v3}</p>
       {error && <p className="review-error">{error}</p>}

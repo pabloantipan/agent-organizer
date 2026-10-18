@@ -322,6 +322,11 @@ describe("V-R8: the mark", () => {
     expect(canSave("question", "why?")).toBe(true);
     expect(canSave("blocked", "")).toBe(false);
     expect(canSave("blocked", "the gate is wrong")).toBe(true);
+    // FR-24: the mark as saved has nothing to save; a change does
+    expect(canSave("reviewed", "", { state: "reviewed", note: "" })).toBe(false);
+    expect(canSave("reviewed", " ok ", { state: "reviewed", note: "ok" })).toBe(false);
+    expect(canSave("reviewed", "ok, after all", { state: "reviewed", note: "ok" })).toBe(true);
+    expect(canSave("question", "why?", { state: "reviewed", note: "why?" })).toBe(true);
   });
   it("the panel starts from the saved mark and note", () => {
     const mk = { marks: [{ symbol: "a", state: "question", note: "why?" }], changed: [] } as unknown as review.Marks;

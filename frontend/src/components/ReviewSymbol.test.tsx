@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 import type { review } from "../../wailsjs/go/models";
+import type { MarkState } from "../lib/review";
 
 // The symbol's panel (review-map v2 FR-19; docs/ux/specs/review-view.md
 // §3.3): V-R4's diff, V-R5's flags, V-R6's affected view, V-R7's claim and
@@ -11,7 +12,7 @@ import type { review } from "../../wailsjs/go/models";
 vi.mock("../../wailsjs/go/main/App", () => ({ MarkReview: vi.fn(), ReviewFile: vi.fn() }));
 
 const { ReviewSymbolView } = await import("./ReviewSymbol");
-const { worklist } = await import("../lib/review");
+const { afterSave, canSave, markOf, worklist } = await import("../lib/review");
 
 const node = (n: Partial<review.Node> & { id: string }) => ({
   level: "symbol", parent: "go:example.com/inita/svc", kind: "function", lang: "go", file: "svc/greet.go", change: "modified",
@@ -109,8 +110,42 @@ describe("V-R8: the mark", () => {
   it("Question with no note keeps Save disabled; with a note it is enabled", () => {
     const q = (note: string) => ({ marks: [{ symbol: G, state: "question", note }], changed: [] }) as unknown as review.Marks;
     expect(panel({ id: G, marks: q("") })).toMatch(/<button disabled="">Save<\/button>/);
-    expect(panel({ id: G, marks: q("why the comma?") })).toMatch(/<button>Save<\/button>/);
     expect(panel({ id: G, marks: q("why the comma?") })).toMatch(/checked="" value="question"\/><span>Question<\/span>/);
+    // a typed note on an unsaved Question enables Save (the harness types it)
+    expect(canSave("question", "why the comma?", markOf(null, G))).toBe(true);
+    // a saved mark shown unchanged has nothing to save (FR-24)
+    expect(panel({ id: G, marks: q("why the comma?") })).toMatch(/<button disabled="">Save<\/button>/);
+  });
+});
+
+describe("V-U1 (FR-24): Save after the last Reviewed, next keeps it", () => {
+  it("mark the last unmarked symbol Question, then Reviewed, next, then Save: the mark stays Reviewed", () => {
+    // MarkReview as the binding answers it: the marks after the write
+    let marks = { marks: [] as { symbol: string; state: string; note: string }[], changed: [] } as unknown as review.Marks;
+    const writes: string[] = [];
+    const mark = (s: string, note: string) => {
+      writes.push(s);
+      marks = { ...marks, marks: [...marks.marks.filter((m) => m.symbol !== G), { symbol: G, state: s, note }] } as unknown as review.Marks;
+    };
+    // the form's sequence (MarkForm): the radios and note, each save resets them from what was saved
+    let form: { state: MarkState; note: string } = { state: "question", note: "why the comma?" };
+    expect(canSave(form.state, form.note, markOf(marks, G))).toBe(true);
+    mark(form.state, form.note);                       // Save
+    form = afterSave(form.state, form.note);
+    mark("reviewed", form.note);                        // Reviewed, next, nothing left to open
+    form = afterSave("reviewed", form.note);
+    expect(form).toEqual({ state: "reviewed", note: "why the comma?" });
+    // Save now writes nothing: it is disabled until the reader changes the mark
+    expect(canSave(form.state, form.note, markOf(marks, G))).toBe(false);
+    expect(writes).toEqual(["question", "reviewed"]);
+    expect(markOf(marks, G).state).toBe("reviewed");
+    // and the panel drawn from those marks reads Reviewed, Save disabled
+    const h = panel({ id: G, marks });
+    expect(h).toMatch(/checked="" value="reviewed"\/><span>Reviewed<\/span>/);
+    expect(h).not.toMatch(/checked="" value="question"/);
+    expect(h).toMatch(/<button disabled="">Save<\/button>/);
+    // changing the mark again makes Save live
+    expect(canSave("question", "still why?", markOf(marks, G))).toBe(true);
   });
 });
 
