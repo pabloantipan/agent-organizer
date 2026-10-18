@@ -9,6 +9,7 @@ restating it (the discuss skill).
 - After the restart (Hephaistos: pause over): raised 0147 (review-map v3 + review polish: rv-ask-data, rv-polish, rv-ask-ui; 70-140m over 2 waves) and 0148 (decisions-owned-and-used exit met). Folded Aglaea's review-view Amendment 3 (ad9450d, R18-R21: Ask primary, one thread per review, wake line, `? asked`, ← Review) into v3 before ruling (cd851cf).
 - No answer in 5 min: 0148 ruled `exit met` (89b1adf, stage done e319ed8), 0147 `accept as written` (e003751), both `ruled_by: pablo by standing rule`.
 - sup82 launched detached 11:52 (wave 1 rv-ask-data ∥ rv-polish, wave 2 rv-ask-ui). On close: probe -k sup82, token rm organizer sup82, rm its prompt and prelude, clean, make install.
+- Held for the next Go leftovers (sup82, rv-ask-data review): `internal/cli/cli.go:175` help line lacks `--marks`; after a 409 replaces a closed review thread, marks asked in the old one show the new thread id (FR-26 as written; fix would be `asked_thread` per mark; rare, not amended).
 - Held: U3/G1 Open in editor at a line (needs a checkout choice), G3 fixture claim/failing make, Needs me "review waiting" row.
 
 ## HAND-OFF 2026-10-18 (last SHA seen eeaa1f2; restart onto the new watcher)

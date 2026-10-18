@@ -512,7 +512,7 @@ Card `rv-ask-data` (Go):
   asked mark records `asked: <message id>`. It refuses a
   reviewed mark, an empty note, nobody to ask and another machine's card,
   and writes nothing then. A post that fails keeps the saved mark without
-  `thread` and returns the first error line.
+  `asked` and returns the first error line (wording aligned with A2, 2026-10-18, sup82).
 - **FR-27** `organizer review <initiative> <card> --marks` prints
   `Reviewed <n> of <m> · <q> questions · <b> blocked`, then one line per
   question or block: symbol, state, thread id or `not asked`. Exit 0; a
