@@ -16,19 +16,22 @@ import (
 	"organizer/internal/scan"
 )
 
-const reviewUsage = "usage: organizer review <initiative> <card-slug | sha> [--card slug] [--json] [--out path]   (ids: organizer status)"
+const reviewUsage = "usage: organizer review <initiative> <card-slug | sha> [--card slug] [--json] [--out path] [--work dir]   (ids: organizer status)"
 
 // reviewCmd is review-map v0 and v1 (FR-1 to FR-12): the Go and TypeScript
 // change of a card's branch or of a commit as revmap.json, written under
 // the data dir (or --out) and summarised, or printed whole with --json.
 // With a card (the target, or --card beside a sha) change-check's flags
 // land on the map; without one, or when change-check is missing or fails,
-// the map is written without them and says why.
+// the map is written without them and says why. A card resolves to its
+// branch, else to its merge on main (FR-13). --work names the directory the
+// build's temp dir goes under (the app's make removes it when stopped).
 func reviewCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now func() time.Time) int {
 	args, asJSON := takeFlag(args, "--json")
 	args, out, _ := takeValue(args, "--out")
 	args, cardSlug, cardGiven := takeValue(args, "--card")
-	if len(args) != 2 || (cardGiven && cardSlug == "") {
+	args, work, workGiven := takeValue(args, "--work")
+	if len(args) != 2 || (cardGiven && cardSlug == "") || (workGiven && work == "") {
 		fmt.Fprintln(stderr, reviewUsage)
 		return 2
 	}
@@ -44,20 +47,7 @@ func reviewCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now f
 		fmt.Fprintf(stderr, "initiative %q not found on this machine\n", id)
 		return 2
 	}
-	var ranges []review.Range
-	var err error
-	if card := findCard(si, target); card != nil {
-		if cardSlug == "" {
-			cardSlug = card.Slug
-		}
-		ranges, err = review.CardRanges(card.Slug, card.Branch, review.ReposOf(si.Path, si.ID, card.Repos))
-	} else {
-		repos := review.ReposOf(si.Path, si.ID, si.Initiative.Repos)
-		if len(si.Initiative.Repos) > 0 {
-			repos = append(repos, review.Repo{Dir: si.Path})
-		}
-		ranges, err = review.CommitRanges(target, repos)
-	}
+	ranges, card, err := review.Resolve(si, target)
 	if err != nil {
 		var m *review.Missing
 		if errors.As(err, &m) {
@@ -67,32 +57,16 @@ func reviewCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now f
 		fmt.Fprintln(stderr, err)
 		return 1
 	}
-	work, err := os.MkdirTemp(review.DataDir(), "review-work-")
-	if err != nil {
-		if err = os.MkdirAll(review.DataDir(), 0o755); err == nil {
-			work, err = os.MkdirTemp(review.DataDir(), "review-work-")
-		}
+	if cardSlug == "" {
+		cardSlug = card
 	}
-	if err != nil {
-		fmt.Fprintln(stderr, err)
-		return 1
+	if work == "" {
+		work = review.DataDir()
 	}
-	defer os.RemoveAll(work)
-	rm, err := review.Build(id, target, ranges, review.Sources(), work)
+	rm, err := review.Make(si, target, cardSlug, ranges, work)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1
-	}
-	switch {
-	case cardSlug == "":
-		rm.Reconciliation = "no card"
-	default:
-		if flags, err := review.ChangeCheck(si.Path, id, cardSlug, rm.Base, rm.Head); err != nil {
-			rm.Reconciliation = err.Error()
-		} else {
-			review.Reconcile(rm, flags)
-			rm.Reconciled, rm.Reconciliation = true, "change-check "+cardSlug
-		}
 	}
 	if out == "" {
 		out = review.DefaultPath(id, rm.Head)
@@ -112,15 +86,6 @@ func reviewCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now f
 	}
 	review.WriteSummary(stdout, rm, out)
 	return 0
-}
-
-func findCard(si *model.ScannedInitiative, slug string) *model.Card {
-	for i := range si.Cards {
-		if si.Cards[i].Slug == slug {
-			return &si.Cards[i]
-		}
-	}
-	return nil
 }
 
 // reviewStatus is doctor's line for organizer review's outside tools: the

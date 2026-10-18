@@ -6,6 +6,7 @@ import {service} from '../models';
 import {main} from '../models';
 import {auth} from '../models';
 import {config} from '../models';
+import {review} from '../models';
 import {usage} from '../models';
 
 export function AddNote(arg1:string,arg2:string,arg3:string):Promise<model.Note>;
@@ -64,6 +65,10 @@ export function KillAgent(arg1:string):Promise<void>;
 
 export function LockNow():Promise<service.LockState>;
 
+export function MakeReview(arg1:string,arg2:string):Promise<service.ReviewMake>;
+
+export function MarkReview(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string,arg6:string):Promise<review.Marks>;
+
 export function MemoryNotifications():Promise<string>;
 
 export function MilestoneType():Promise<model.Milestone>;
@@ -90,7 +95,17 @@ export function RetrySeat(arg1:string,arg2:string):Promise<void>;
 
 export function Reveal(arg1:string):Promise<void>;
 
+export function ReviewFile(arg1:string,arg2:string,arg3:string,arg4:string,arg5:number,arg6:number):Promise<review.Text>;
+
+export function ReviewMakeState(arg1:string,arg2:string):Promise<service.ReviewMake>;
+
+export function ReviewMap(arg1:string,arg2:string,arg3:string):Promise<review.RevMap>;
+
+export function ReviewMarks(arg1:string,arg2:string,arg3:string):Promise<review.Marks>;
+
 export function ReviewPrompt(arg1:string):Promise<string>;
+
+export function ReviewStatus(arg1:string,arg2:string):Promise<service.ReviewStatus>;
 
 export function RuleDecision(arg1:string,arg2:string,arg3:string,arg4:string):Promise<void>;
 
@@ -129,6 +144,8 @@ export function Sleep(arg1:string):Promise<service.SleepResult>;
 export function StageType():Promise<model.Stage>;
 
 export function StopAgent(arg1:number):Promise<void>;
+
+export function StopReview(arg1:string,arg2:string):Promise<service.ReviewMake>;
 
 export function StopStarting(arg1:string):Promise<void>;
 

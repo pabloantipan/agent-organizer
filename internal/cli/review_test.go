@@ -50,8 +50,8 @@ func TestReviewStatusNamesNode(t *testing.T) {
 
 // reviewRepo is an initiative whose root is its one Go repo, with a commit
 // changing F and a card c1; it sets the config and data dir and returns
-// the commit.
-func reviewRepo(t *testing.T) string {
+// the commit and the root.
+func reviewRepo(t *testing.T) (string, string) {
 	t.Helper()
 	home := t.TempDir()
 	root := filepath.Join(home, "init-r")
@@ -89,13 +89,13 @@ func reviewRepo(t *testing.T) string {
 	}
 	t.Setenv("ORGANIZER_CONFIG", cfg)
 	t.Setenv("XDG_DATA_HOME", t.TempDir())
-	return git("rev-parse", "HEAD")
+	return git("rev-parse", "HEAD"), root
 }
 
 // R3 (FR-12): no card, change-check not on the PATH, and a change-check
 // exiting 1 with no JSON each write the map, say why in one line, exit 0.
 func TestReviewWithoutReconciliation(t *testing.T) {
-	sha := reviewRepo(t)
+	sha, _ := reviewRepo(t)
 	run := func(args ...string) (string, string) { // stdout, stderr
 		t.Helper()
 		var out, errb bytes.Buffer
@@ -140,4 +140,52 @@ func TestReviewWithoutReconciliation(t *testing.T) {
 	t.Setenv("PATH", fake+string(os.PathListSeparator)+orig)
 	out, _ = run(sha, "--card", "c1")
 	check("fails", out, "change-check failed: output is not its --json")
+}
+
+// D1, the CLI half (FR-13): a card whose branch was merged and deleted is
+// reviewed as its merge against the first parent; a slug with neither a
+// branch nor a merge exits 2 naming both.
+func TestReviewMergedCard(t *testing.T) {
+	_, dir := reviewRepo(t)
+	git := func(args ...string) string {
+		t.Helper()
+		cmd := exec.Command("git", append([]string{"-C", dir}, args...)...)
+		cmd.Env = append(os.Environ(), "GIT_AUTHOR_NAME=t", "GIT_AUTHOR_EMAIL=t@t", "GIT_COMMITTER_NAME=t", "GIT_COMMITTER_EMAIL=t@t", "GIT_CONFIG_GLOBAL=/dev/null")
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatalf("git %v: %v\n%s", args, err, out)
+		}
+		return strings.TrimSpace(string(out))
+	}
+	if err := os.WriteFile(filepath.Join(dir, "working-on/c2.md"), []byte("---\ntitle: x\nstatus: now\nbranch: c2\nupdated: 2026-10-17\nnext: \"x\"\n---\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	git("add", ".")
+	git("commit", "-q", "-m", "card c2")
+	git("checkout", "-q", "-b", "c2")
+	if err := os.WriteFile(filepath.Join(dir, "p/f.go"), []byte("package p\n\nfunc F() int { return 3 }\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	git("commit", "-q", "-am", "F returns 3")
+	git("checkout", "-q", "main")
+	git("merge", "-q", "--no-ff", "-m", "merge: c2 (F returns 3)", "c2")
+	git("branch", "-q", "-D", "c2")
+	merge, parent := git("rev-parse", "HEAD"), git("rev-parse", "HEAD^1")
+
+	var out, errb bytes.Buffer
+	if code := runWith([]string{"review", "init-r", "c2", "--json"}, &out, &errb, time.Now); code != 0 {
+		t.Fatalf("exit %d, stderr %q", code, errb.String())
+	}
+	if !strings.Contains(out.String(), `"head": "`+merge+`"`) || !strings.Contains(out.String(), `"base": "`+parent+`"`) {
+		t.Errorf("map is not %s^1..%s:\n%.400s", merge, merge, out.String())
+	}
+	out.Reset()
+	errb.Reset()
+	if err := os.WriteFile(filepath.Join(dir, "working-on/c3.md"), []byte("---\ntitle: x\nstatus: next\nbranch: c3\nupdated: 2026-10-17\nnext: \"x\"\n---\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	code := runWith([]string{"review", "init-r", "c3"}, &out, &errb, time.Now)
+	if code != 2 || !strings.Contains(errb.String(), "branch c3 of card c3 does not exist") || !strings.Contains(errb.String(), `"merge: c3 "`) {
+		t.Errorf("neither: exit %d, stderr %q", code, errb.String())
+	}
 }
