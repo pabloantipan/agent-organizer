@@ -4,6 +4,7 @@ import {
   allReviewed, countsLine, coverage, coverageLine, elapsedOf, factsBeside, filesOf, flagWords, groupName, inTextField, listWidth,
   makingLabel, movedLine, nextToReview, nothingToReview, partialLines, reviewable, rowName, screenState, shortName, walkOf, WORDS, worklist,
   afterASecond, affectedLine, askedLine, askFailedLine, askLine, askStage, firstLine, markControls, lastToReview, primaryOf, saidAfter, makeOrigin, secondsSince, backTo, calledBy, callsOf, canSave, flagLook, markOf, progressDelay, shasOf, symbolDiff, testsOf,
+  editorAt, notCheckedOut, threadOf,
 } from "./review";
 
 // review-map v2 FR-18 (docs/ux/specs/review-view.md §3.1, §3.2, §4, §5):
@@ -560,5 +561,35 @@ describe("W4 (leftovers-41 FR-4, R29): once asked, no promise already kept", () 
     const c = ctl({ to: { seat: "", why: "no cell" }, note: "b", asked: true, askedNote: "a" });
     expect(c.primary.label).toBe("Save question, next");
     expect(c.line).toBe("No one to ask here: no cell. Kept in Deltagos.");
+  });
+});
+
+describe("leftovers-42: editorAt, notCheckedOut, threadOf", () => {
+  const node = (file: string, range_head?: number[]) => ({ id: "x", file, range_head }) as unknown as review.Node;
+  const st = (checkouts: { repo: string; head: string; dir: string }[], map_head = "h1") => ({ map_head, checkouts }) as unknown as service.ReviewStatus;
+  it("one repo: the head start line in its checkout; dir empty is not checked out", () => {
+    expect(editorAt(st([{ repo: "", head: "391ae0f9", dir: "/r" }]), "h1", node("svc/a.go", [12, 20]))).toEqual({ file: "svc/a.go", line: 12, sha: "391ae0f9", dir: "/r" });
+    expect(editorAt(st([{ repo: "", head: "391ae0f9", dir: "" }]), "h1", node("svc/a.go", [12, 20]))?.dir).toBe("");
+  });
+  it("several repos: the file's repo by its prefix", () => {
+    const s = st([{ repo: "api", head: "aaaaaaa1", dir: "/api" }, { repo: "web", head: "bbbbbbb2", dir: "" }]);
+    expect(editorAt(s, "h1", node("api/x.go", [3, 4]))).toEqual({ file: "api/x.go", line: 3, sha: "aaaaaaa1", dir: "/api" });
+    expect(editorAt(s, "h1", node("web/x.ts", [3, 4]))?.sha).toBe("bbbbbbb2");
+    expect(editorAt(s, "h1", node("other/x.go", [3, 4]))).toBeNull();
+  });
+  it("nothing to draw: no status, another head, no head line", () => {
+    const s = st([{ repo: "", head: "h", dir: "/r" }]);
+    expect(editorAt(null, "h1", node("a.go", [1, 2]))).toBeNull();
+    expect(editorAt(s, "h2", node("a.go", [1, 2]))).toBeNull();
+    expect(editorAt(s, "h1", node("a.go"))).toBeNull();
+  });
+  it("the words", () => {
+    expect(notCheckedOut("391ae0f0123abc")).toBe("Not checked out here at 391ae0f.");
+  });
+  it("threadOf: the mark's asked_thread, else the review's thread", () => {
+    const m = { thread: "T", marks: [{ symbol: "a", state: "question", asked_thread: "A" }, { symbol: "b", state: "question" }] } as unknown as review.Marks;
+    expect(threadOf(m, "a")).toBe("A");
+    expect(threadOf(m, "b")).toBe("T");
+    expect(threadOf(null, "a")).toBe("");
   });
 });

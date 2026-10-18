@@ -46,6 +46,7 @@ export const WORDS = {
   saving: "Saving…",
   asking: "Asking…",
   openThread: "Open the thread",
+  openInEditor: "Open in editor",
   backToReview: "← Review",
   unchanged: "unchanged",
   noneFound: "none found",
@@ -578,3 +579,28 @@ export function markOf(marks: review.Marks | null | undefined, id: string): { st
   const m = (marks?.marks ?? []).find((x) => x.symbol === id && x.state);
   return { state: (m?.state ?? "") as MarkState, note: m?.note ?? "" };
 }
+
+/** The thread `Open the thread` opens for a symbol (leftovers-42 FR-4):
+ *  the mark's own `asked_thread`, else the review's `thread`. */
+export function threadOf(marks: review.Marks | null | undefined, id: string): string {
+  const m = (marks?.marks ?? []).find((x) => x.symbol === id && x.state);
+  return m?.asked_thread || marks?.thread || "";
+}
+
+/** Where `Open in editor` opens a symbol (leftovers-42 FR-1, FR-3): the
+ *  head start line and the checkout of the file's repo that has the shown
+ *  map's head (`ReviewStatus.checkouts`). null when there is nothing to
+ *  draw: the status not read yet, or read for another head, or no head
+ *  line (a deleted symbol). dir "" is not checked out here. */
+export type EditorAt = { file: string; line: number; sha: string; dir: string };
+export function editorAt(status: service.ReviewStatus | null | undefined, head: string, n: review.Node): EditorAt | null {
+  const line = n.range_head?.[0];
+  if (!status || !line || status.map_head !== head) return null;
+  const cos = status.checkouts ?? [];
+  const co = cos.length === 1 && !cos[0].repo ? cos[0] : cos.find((c) => c.repo && n.file.startsWith(`${c.repo}/`));
+  if (!co) return null;
+  return { file: n.file, line, sha: co.head, dir: co.dir };
+}
+
+/** The muted words when the head is checked out nowhere here (FR-3). */
+export const notCheckedOut = (sha: string) => `Not checked out here at ${sha.slice(0, 7)}.`;

@@ -1,17 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import type { review as rv, service } from "../../wailsjs/go/models";
-import { AskReview, MarkReview, ReviewFile } from "../../wailsjs/go/main/App";
+import { AskReview, MarkReview, OpenReviewAt, ReviewFile, ReviewStatus } from "../../wailsjs/go/main/App";
 import { busyButton, busyLabel } from "../lib/busy";
 import {
-  affectedLine, afterSave, askedLine, askFailedLine, backTo, calledBy, callsOf, canSave, flagLook, flagWords, isAffected, markControls, markOf, shasOf, shortName, symbolDiff, testsOf, WORDS,
-  type Addressee, type MarkState, type RangeText, type Row, type Via,
+  affectedLine, afterSave, askedLine, askFailedLine, backTo, calledBy, callsOf, canSave, editorAt, flagLook, flagWords, isAffected, markControls, markOf, notCheckedOut, shasOf, shortName, symbolDiff, testsOf, threadOf, WORDS,
+  type Addressee, type EditorAt, type MarkState, type RangeText, type Row, type Via,
 } from "../lib/review";
 
 /** The symbol's panel (docs/ux/specs/review-view.md §3.3, §5; review-map
  *  v2 FR-19), mounted in Review's SymbolPane: the title, the diff scoped to
  *  the symbol's base and head ranges, the facts (flags, tests, Called by,
  *  Calls), the builder's claim apart from them, and the mark. An affected
- *  symbol opens read-only: its line, no diff, no mark, and back. */
+ *  symbol opens read-only: its line, no diff, no mark, and back. The
+ *  title's `Open in editor` waits on the review status, read on mount, for
+ *  the checkout that holds the map's head (leftovers-42 FR-3). */
 export function ReviewSymbol({ initiative, card, head, map, node, row, marks, from, via, to, last, title, onOpen, onBack, onMarks, onAsked, onOpenThread, onNext }: {
   initiative: string; card: string; head: string; map: rv.RevMap; node: rv.Node; row: Row | null; marks: rv.Marks | null;
   /** The changed symbol an affected one was opened from, and the list. */
@@ -38,6 +40,16 @@ export function ReviewSymbol({ initiative, card, head, map, node, row, marks, fr
     return () => { live = false; };
   }, [initiative, card, map, node]);
 
+  // Which checkout holds the head, read with the status (FR-3); null
+  // until read, so nothing is drawn before the panel knows.
+  const [status, setStatus] = useState<service.ReviewStatus | null>(null);
+  useEffect(() => {
+    let live = true;
+    ReviewStatus(initiative, card).then((st) => { if (live) setStatus(st); }, () => undefined);
+    return () => { live = false; };
+  }, [initiative, card, head]);
+  const editor = editorAt(status, head, node);
+
   const mark = async (state: MarkState, note: string) => onMarks(await MarkReview(initiative, card, head, node.id, state, note));
   const ask = async (state: MarkState, note: string) => {
     const r = await AskReview(initiative, card, head, node.id, state, note);
@@ -45,6 +57,7 @@ export function ReviewSymbol({ initiative, card, head, map, node, row, marks, fr
     return r;
   };
   return <ReviewSymbolView map={map} node={node} row={row} marks={marks} from={from} via={via} to={to} last={last} texts={texts} error={error} title={title}
+    editor={editor} onOpenEditor={editor ? () => openAt(initiative, card, editor) : undefined}
     onOpen={onOpen} onBack={onBack} onMark={mark} onAsk={ask} onOpenThread={onOpenThread} onNext={onNext} />;
 }
 
@@ -53,15 +66,17 @@ export type ReviewSymbolViewProps = {
   to?: Addressee | null; last?: boolean;
   texts: { base: RangeText | null; head: RangeText | null } | null; error: string | null;
   title: React.RefObject<HTMLHeadingElement | null>;
+  /** Where Open in editor opens (FR-3); null or absent draws neither it nor the line. */
+  editor?: EditorAt | null; onOpenEditor?: () => Promise<void>;
   onOpen: (id: string, via?: Via) => void; onBack: () => void; onMark: (state: MarkState, note: string) => Promise<void>;
   onAsk?: (state: MarkState, note: string) => Promise<service.ReviewAsk>; onOpenThread?: (thread: string) => void; onNext: () => void;
 };
 
 /** What the panel draws, pure, so vitest renders each case. */
-export function ReviewSymbolView({ map, node, row, marks, from, via, to = null, last = false, texts, error, title, onOpen, onBack, onMark, onAsk, onOpenThread, onNext }: ReviewSymbolViewProps) {
+export function ReviewSymbolView({ map, node, row, marks, from, via, to = null, last = false, texts, error, title, editor = null, onOpenEditor, onOpen, onBack, onMark, onAsk, onOpenThread, onNext }: ReviewSymbolViewProps) {
   const name = shortName(node, true);
   const range = node.range_head ?? node.range_base;
-  const where = <div className="meta mono rs-where">{node.file}{range ? ` ${range[0]}-${range[1]}` : ""}</div>;
+  const where = <TitleLine file={node.file} range={range} editor={editor} onOpenEditor={onOpenEditor} />;
 
   if (isAffected(node)) {
     return (
@@ -123,6 +138,36 @@ export function ReviewSymbolView({ map, node, row, marks, from, via, to = null, 
   );
 }
 
+/** The title's file line (§3.3; leftovers-42 FR-3): `file lines`, then
+ *  `Open in editor` (secondary) when a checkout here holds the head, else,
+ *  muted, `Not checked out here at <sha>.`; a refusal at the press (the
+ *  checkout moved since the read) says why under it. */
+function TitleLine({ file, range, editor, onOpenEditor }: { file: string; range: number[] | undefined; editor: EditorAt | null; onOpenEditor?: () => Promise<void> }) {
+  const [refused, setRefused] = useState<string | null>(null);
+  const open = () => {
+    setRefused(null);
+    onOpenEditor?.().catch((e) => setRefused(String(e)));
+  };
+  return (
+    <>
+      <div className="rs-where-line">
+        <span className="meta mono rs-where">{file}{range ? ` ${range[0]}-${range[1]}` : ""}</span>
+        {editor && <EditorAction at={editor} onOpen={open} />}
+      </div>
+      {refused && <p className="review-error">{refused}</p>}
+    </>
+  );
+}
+
+/** Open in editor, or the muted line saying the head is not here (FR-3). */
+export function EditorAction({ at, onOpen }: { at: EditorAt; onOpen: () => void }) {
+  if (!at.dir) return <span className="meta rs-not-here">{notCheckedOut(at.sha)}</span>;
+  return <button type="button" className="rs-editor" onClick={onOpen}>{WORDS.openInEditor}</button>;
+}
+
+/** The press (FR-1): the file at the head start line, in the checkout. */
+export const openAt = (initiative: string, card: string, at: EditorAt) => OpenReviewAt(initiative, card, at.file, at.line);
+
 /** The scoped diff (§3.3): head line numbers, `+` / `−` in the gutter, no
  *  colour but the two backgrounds; a scroll stop named `<symbol>, diff`. */
 function Diff({ name, texts, error }: { name: string; texts: { base: RangeText | null; head: RangeText | null } | null; error: string | null }) {
@@ -173,7 +218,8 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
   const { primary, showPrimary, line } = markControls({ state, note, to, last, asked: !!mark?.asked, askedNote: saved.note });
   // An ask that stays (the last symbol, Try again) unmounts the pressed
   // button; focus goes to Open the thread, which took its place.
-  const thread = marks?.thread ?? "";
+  // The mark's own thread, else the review's (leftovers-42 FR-4).
+  const thread = threadOf(marks, id);
   const toLink = useRef(false);
   const link = useRef<HTMLAnchorElement>(null);
   useEffect(() => {
