@@ -4,7 +4,7 @@ import { AskReview, MarkReview, OpenReviewAt, ReviewFile, ReviewStatus } from ".
 import { busyButton, busyLabel } from "../lib/busy";
 import { useLiveRegion } from "../lib/liveRegion";
 import {
-  affectedLine, afterSave, askedLine, askFailedLine, backTo, calledBy, callsOf, canSave, editorAt, editorFailed, editorRefusal, flagLook, flagWords, focusAfterSave, isAffected, markControls, markOf, notCheckedOut, saveShown, shasOf, shortName, symbolDiff, testsOf, threadOf, WORDS,
+  affectedLine, afterSave, askedLine, askOf, askFailedLine, backTo, calledBy, callsOf, canSave, domId, editorAt, editorFailed, editorRefusal, flagLook, flagWords, focusAfterSave, isAffected, markControls, markOf, notCheckedOut, noteHint, saveShown, shasOf, shortName, symbolDiff, testsOf, threadOf, WORDS,
   type Addressee, type EditorAt, type MarkState, type RangeText, type Row, type Via,
 } from "../lib/review";
 
@@ -91,7 +91,7 @@ export type ReviewSymbolViewProps = {
 export function ReviewSymbolView({ map, node, row, marks, from, via, to = null, last = false, texts, error, title, editor = null, onOpenEditor, onEditorLeft, onOpen, onBack, onMark, onAsk, onOpenThread, onNext }: ReviewSymbolViewProps) {
   const name = shortName(node, true);
   const range = node.range_head ?? node.range_base;
-  const where = <TitleLine file={node.file} range={range} editor={editor} title={title} onOpenEditor={onOpenEditor} onLeft={onEditorLeft} />;
+  const where = <TitleLine id={node.id} file={node.file} range={range} editor={editor} title={title} onOpenEditor={onOpenEditor} onLeft={onEditorLeft} />;
 
   if (isAffected(node)) {
     return (
@@ -161,15 +161,17 @@ export function ReviewSymbolView({ map, node, row, marks, from, via, to = null, 
  *  focus moves to the symbol's h2 and the polite region says the line
  *  once; or the editor did not open, so the button stays focused, named by
  *  `Editor didn't open: <first line>` under it in the blocked-reason
- *  style, which the region says too. */
-function TitleLine({ file, range, editor, title, onOpenEditor, onLeft }: {
-  file: string; range: number[] | undefined; editor: EditorAt | null; title: React.RefObject<HTMLHeadingElement | null>;
+ *  style, which the region says too. The line's id comes from the node
+ *  id, sanitised (leftovers-44 FR-4): a path with a space would make the
+ *  button's `aria-describedby` name two ids, neither of them the line. */
+function TitleLine({ id, file, range, editor, title, onOpenEditor, onLeft }: {
+  id: string; file: string; range: number[] | undefined; editor: EditorAt | null; title: React.RefObject<HTMLHeadingElement | null>;
   onOpenEditor?: () => Promise<void>; onLeft?: () => void;
 }) {
   const [failed, setFailed] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [said, say] = useLiveRegion();
-  const failedId = `rs-editor-failed-${file}`;
+  const failedId = editorFailedId(id);
   const open = () => {
     if (!onOpenEditor || !editor) return;
     setFailed(null);
@@ -190,6 +192,9 @@ function TitleLine({ file, range, editor, title, onOpenEditor, onLeft }: {
     </>
   );
 }
+
+/** The editor-failure line's id, from the node id (leftovers-44 FR-4). */
+export const editorFailedId = (nodeId: string) => domId("rs-editor-failed", nodeId);
 
 /** A refused press (leftovers-43 FR-1, FR-2): the head left, so the panel
  *  shows it not here, focus goes to the h2 and the line is said once; or
@@ -258,7 +263,11 @@ function Diff({ name, texts, error }: { name: string; texts: { base: RangeText |
  *  is edited, which brings back `Ask <seat> again` (leftovers-41 FR-4).
  *  Save is drawn only while the mark or the note differs from the saved
  *  one; when it leaves after its press, focus goes to the asking primary,
- *  else the radio group (leftovers-43 FR-4, Amendment 8 A1). */
+ *  else the radio group (leftovers-43 FR-4, Amendment 8 A1). An ask
+ *  survives every Save (leftovers-44 FR-1): the panel keeps `Asked <seat>
+ *  · Open the thread`, and a saved note that differs from the one asked
+ *  with offers `Ask <seat> again`. Save needs a mark (FR-2): a note with
+ *  none says, muted under it, to choose one. */
 function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNext }: {
   name: string; id: string; marks: rv.Marks | null; to: Addressee | null; last: boolean;
   onMark: (s: MarkState, note: string) => Promise<void>; onAsk?: (s: MarkState, note: string) => Promise<service.ReviewAsk>; onOpenThread?: (thread: string) => void; onNext: () => void;
@@ -271,9 +280,10 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
   // A post that failed (ReviewAsk.error): the mark is saved, the ask is not.
   const [failed, setFailed] = useState<Failed | null>(null);
   const seat = to?.seat ?? "";
-  const mark = (marks?.marks ?? []).find((m) => m.symbol === id && m.state);
-  // Asked, note as asked: an ask would repeat a promise kept (FR-4).
-  const { primary, showPrimary, line } = markControls({ state, note, to, last, asked: !!mark?.asked, askedNote: saved.note });
+  // Asked, note as asked: an ask would repeat a promise kept (FR-4). The
+  // ask and its note are kept through a Save (leftovers-44 FR-1).
+  const { asked, askedNote } = askOf(marks, id);
+  const { primary, showPrimary, line } = markControls({ state, note, to, last, asked, askedNote });
   // An ask that stays (the last symbol, Try again) unmounts the pressed
   // button; focus goes to Open the thread, which took its place.
   // The mark's own thread, else the review's (leftovers-42 FR-4).
@@ -318,9 +328,11 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
     }
   };
   const opts: [MarkState, string][] = [["reviewed", WORDS.reviewed], ["question", WORDS.question], ["blocked", WORDS.blocked]];
-  const noteId = `rs-note-${id}`;
+  const noteId = domId("rs-note", id);
+  const hint = noteHint(state, note);
+  const hintId = domId("rs-note-hint", id);
   // A failed ask names its line on the button that stays focused (FR-29, Amendment 4).
-  const failedId = `rs-failed-${id}`;
+  const failedId = domId("rs-failed", id);
   const describedBy = failed ? failedId : undefined;
   return (
     <div className="rs-mark">
@@ -334,8 +346,9 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
         ))}
       </fieldset>
       <label className="rs-note-label" htmlFor={noteId}>{WORDS.note}</label>
-      <textarea id={noteId} className="rs-note" rows={2} value={note} onChange={(e) => setNote(e.target.value)}
+      <textarea id={noteId} className="rs-note" rows={2} value={note} onChange={(e) => setNote(e.target.value)} aria-describedby={hint ? hintId : undefined}
         placeholder={state === "question" || state === "blocked" ? "required for Question and Blocked" : "optional"} />
+      {hint && <p id={hintId} className="rs-note-hint meta">{hint}</p>}
       {(showPrimary || dirty) && (
         <div className="rs-buttons">
           {showPrimary && <button ref={primaryButton} className="primary" aria-describedby={describedBy} {...busyButton({ busy: busy === "next", disabled: busy !== "" || !primary.ready, onPress: run("next", primary.mark, primary.ask, last ? undefined : onNext) })}>{busyLabel(busy === "next", primary.label, primary.ask ? WORDS.asking : WORDS.saving)}</button>}
@@ -343,7 +356,7 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
         </div>
       )}
       {line && <p className="rs-ask-line meta">{line}</p>}
-      <AskStatus failed={failed} failedId={failedId} asked={!!mark?.asked} seat={seat} thread={thread} busy={busy} link={link} onRetry={failed ? run("retry", failed.state, true) : () => undefined} onOpenThread={() => onOpenThread?.(thread)} />
+      <AskStatus failed={failed} failedId={failedId} asked={asked} seat={seat} thread={thread} busy={busy} link={link} onRetry={failed ? run("retry", failed.state, true) : () => undefined} onOpenThread={() => onOpenThread?.(thread)} />
       {error && <p className="review-error">{error}</p>}
     </div>
   );

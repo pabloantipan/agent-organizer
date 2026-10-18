@@ -51,6 +51,7 @@ export const WORDS = {
   backToReview: "← Review",
   unchanged: "unchanged",
   noneFound: "none found",
+  chooseMark: "Choose a mark to save this note.",
 } as const;
 
 /** Who a Question or Blocked asks (review-map v3 FR-25, the binding
@@ -273,7 +274,9 @@ export function marksOf(marks: review.Marks | null | undefined): { by: Map<strin
   const asked = new Set<string>();
   for (const m of marks?.marks ?? []) {
     if (m.state) by.set(m.symbol, m.state as MarkState);
-    if (m.state && m.asked) asked.add(m.symbol);
+    // `asked` marks a question or a block; a mark asked and since changed
+    // to Reviewed keeps its ask, not the word (leftovers-44 FR-1).
+    if (needsNote(m.state as MarkState) && m.asked) asked.add(m.symbol);
   }
   const changedSet = new Set((marks?.changed ?? []).map((m) => m.symbol).filter((s) => !by.has(s)));
   return { by, changed: changedSet, asked };
@@ -581,6 +584,14 @@ export function markOf(marks: review.Marks | null | undefined, id: string): { st
   return { state: (m?.state ?? "") as MarkState, note: m?.note ?? "" };
 }
 
+/** A symbol's ask (leftovers-44 FR-1): whether its mark was asked, kept
+ *  through every Save, and the note it was asked with; a mark asked before
+ *  `asked_note` was kept reads its saved note as that. */
+export function askOf(marks: review.Marks | null | undefined, id: string): { asked: boolean; askedNote: string } {
+  const m = (marks?.marks ?? []).find((x) => x.symbol === id && x.state);
+  return { asked: !!m?.asked, askedNote: m?.asked_note ?? m?.note ?? "" };
+}
+
 /** The thread `Open the thread` opens for a symbol (leftovers-42 FR-4):
  *  the mark's own `asked_thread`, else the review's `thread`. */
 export function threadOf(marks: review.Marks | null | undefined, id: string): string {
@@ -650,11 +661,22 @@ export function editorRefusal(e: unknown): { moved: true } | { moved: false; lin
 /** The line under `Open in editor` when the editor did not start (FR-2). */
 export const editorFailed = (line: string) => `Editor didn't open: ${line}`;
 
-/** Whether the mark form draws Save (leftovers-43 FR-4, Amendment 8 A1):
- *  only while the mark or the note differs from what is saved. Drawn, it
- *  stays disabled until it can save (`canSave`). */
+/** Whether the mark form draws Save (leftovers-43 FR-4, Amendment 8 A1;
+ *  leftovers-44 FR-2): only when it can save, a mark chosen and the mark
+ *  or the note differing from what is saved. Drawn, it stays disabled
+ *  while a Question or Blocked waits on its note (`canSave`). */
 export const saveShown = (s: MarkState, note: string, saved: { state: MarkState; note: string }) =>
-  s !== saved.state || note.trim() !== saved.note;
+  s !== "" && (s !== saved.state || note.trim() !== saved.note);
+
+/** The muted line under the note (leftovers-44 FR-2, Amendment 9 RS2): a
+ *  note typed with no mark says why it will not save; "" once a mark is
+ *  chosen or while the note is empty. */
+export const noteHint = (s: MarkState, note: string) => (s === "" && note.trim() !== "" ? WORDS.chooseMark : "");
+
+/** An element id built from a node id or a path (leftovers-44 FR-4): only
+ *  letters, digits, `-` and `_`, so an `aria-describedby` that names it
+ *  names one element even when the path holds a space. */
+export const domId = (prefix: string, raw: string) => `${prefix}-${raw.replace(/[^A-Za-z0-9_-]/g, "_")}`;
 
 /** Where focus goes when Save leaves after a press (FR-4): the asking
  *  primary when it is drawn, else the mark's radio group; never the body. */
