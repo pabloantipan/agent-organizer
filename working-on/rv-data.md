@@ -6,7 +6,7 @@ branch: rv-data
 seat: rd-build
 stage: review-map
 updated: 2026-10-17
-next: "waits on 0146; on accept the FSE gives it to a supervisor"
+next: "sup81 runs it; 0146 ruled"
 risk: medium
 footprint: [internal/review/resolve.go, internal/review/marks.go, internal/review/*_test.go, internal/service/review.go, internal/service/review_test.go, app.go, frontend/wailsjs/*, internal/cli/review.go, internal/cli/review_test.go, scripts/fixture-home.sh]
 depends_on: []

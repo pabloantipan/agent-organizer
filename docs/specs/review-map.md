@@ -254,7 +254,7 @@ Card `rm-v1-reconcile` (Go, depends on `rm-v1-ts`):
 
 ## v2: the Review view (cards `rv-data`, `rv-list`, `rv-symbol`)
 
-status: proposed (0146), by the FSE, 2026-10-17, on main at c88c071.
+status: ruled (0146), by the FSE, 2026-10-17, on main at c88c071.
 sources: Aglaea's design `docs/ux/specs/review-view.md` (3425cb3, §1-§6,
 acceptance R1-R12; thread 01M5657Q), answering Q2: no React Flow, ELK or
 Monaco in v2. Its rows are the gate rows below, each named `V-R<n>`.
