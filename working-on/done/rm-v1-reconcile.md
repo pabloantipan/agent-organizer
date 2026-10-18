@@ -6,7 +6,7 @@ branch: rm-v1-reconcile
 seat: rr-build
 stage: review-map
 updated: 2026-10-17
-next: "review: rm-v1-reconcile, R1 R2 R3 X0 met, c995111"
+next: "merged; findings to the FSE (thread 01M5644TMW0YVJ34QBHHXGT9GV)"
 review: pass
 risk: low
 footprint: [internal/review/*, internal/cli/review.go, internal/review/testdata/*]
@@ -46,7 +46,7 @@ Not changed, on purpose:
 - One mismatch per change-check flag, so the summary's counts are change-check's `counts` for the three words. The mismatch has `node` when the flag lands on exactly one node; a path-only flag (no symbol) flags every changed node of the file and is one file-level mismatch (`node: null`, `file`). `outside_footprint` therefore also has a mismatch type, which FR-11 names only for the file-with-no-node case.
 - revmap.json gains `reconciled` (bool) and `reconciliation` (the card, or why not); mismatches carry `file` and `symbol` only when `node` is null.
 - change-check's other words (`outside boundary`, `untested?`, `new env var`, ...) have no place in FR-11 and are left out.
-- Multi-repo: change-check runs once with the first repo's base and head (`rm.Base`, `rm.Head`); a card over several repos reconciles only that one. Not met here; a second card if needed. → sup80, to the FSE
+- Multi-repo: change-check runs once with the first repo's base and head (`rm.Base`, `rm.Head`); a card over several repos reconciles only that one. Not met here; a second card if needed. → the FSE, thread 01M5644TMW0YVJ34QBHHXGT9GV (sup80)
 
 ## Done
 - 2026-10-17 rr-build: change-check flags onto the map with --card (FR-11), map written with one why-line without it (FR-12); R1-R3, X0 met.
@@ -86,8 +86,8 @@ Unmet rows: none.
 Shared test run: **fresh**, run id `3b176e2c-59731` (saved for reuse).
 
 Notes (not blocking):
-- Footprint omits `internal/cli/review_test.go` (change-check's `outside footprint`). → sup80, to the FSE
-- `organizer help`'s review line in cli.go does not mention `--card` (rr-build's "Found, not asked", outside the boundary). → sup80, to the FSE
-- Multi-repo cards reconcile only the first repo (card Notes, rr-build). → sup80, to the FSE
+- Footprint omits `internal/cli/review_test.go` (change-check's `outside footprint`). → the FSE, thread 01M5644TMW0YVJ34QBHHXGT9GV (sup80)
+- `organizer help`'s review line in cli.go does not mention `--card` (rr-build's "Found, not asked", outside the boundary). → the FSE, thread 01M5644TMW0YVJ34QBHHXGT9GV (sup80)
+- Multi-repo cards reconcile only the first repo (card Notes, rr-build). → the FSE, thread 01M5644TMW0YVJ34QBHHXGT9GV (sup80)
 
 Reviewer: rr-review, 2026-10-17, commit c9951112b3aac4f54416989408695334c1cbeefa.
