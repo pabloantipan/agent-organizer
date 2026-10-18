@@ -3,10 +3,13 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -351,5 +354,229 @@ func TestReviewMarksAcrossRemap(t *testing.T) {
 	}
 	if old, err := s.ReviewMarks("rv", "c1", head); err != nil || len(old.Marks) != 2 {
 		t.Errorf("old head's marks %+v %v", old, err)
+	}
+}
+
+// fakeMailbox is a discuss API on httptest: health lists agents, posts
+// open a thread when none is named, and a thread in closed refuses with
+// the server's 409 sentence. Nothing reaches a real mailbox.
+type fakeMailbox struct {
+	sync.Mutex
+	srv    *httptest.Server
+	agents []string
+	closed map[string]bool
+	posts  []map[string]string
+	n      int
+}
+
+func newFakeMailbox(t *testing.T, s *Service, project string, agents ...string) *fakeMailbox {
+	t.Helper()
+	f := &fakeMailbox{agents: agents, closed: map[string]bool{}}
+	f.srv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		f.Lock()
+		defer f.Unlock()
+		switch {
+		case r.URL.Path == "/healthz":
+			w.WriteHeader(200)
+		case r.Method == "GET" && r.URL.Path == "/projects/"+project+"/health":
+			rows := []map[string]string{}
+			for _, a := range f.agents {
+				rows = append(rows, map[string]string{"agent": a, "watcher": "alive"})
+			}
+			_ = json.NewEncoder(w).Encode(map[string]any{"agents": rows, "threads": []any{}})
+		case r.Method == "POST" && r.URL.Path == "/projects/"+project+"/messages":
+			var p map[string]string
+			_ = json.NewDecoder(r.Body).Decode(&p)
+			if f.closed[p["thread_id"]] {
+				w.WriteHeader(http.StatusConflict)
+				_, _ = fmt.Fprintf(w, `{"error":"posting %s to thread %s (status closed): thread is not open"}`, p["kind"], p["thread_id"])
+				return
+			}
+			f.n++
+			if p["thread_id"] == "" {
+				p["thread_id"] = fmt.Sprintf("T%d", f.n)
+			}
+			p["id"] = fmt.Sprintf("M%d", f.n)
+			f.posts = append(f.posts, p)
+			_ = json.NewEncoder(w).Encode(map[string]string{"id": p["id"], "thread_id": p["thread_id"]})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	t.Cleanup(f.srv.Close)
+	state := t.TempDir()
+	if err := os.WriteFile(filepath.Join(state, "tokens.json"), []byte(`{"tokens":{"fake-token":{"project":"`+project+`","agent":"pablo"}}}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("DISCUSS_BIND", strings.TrimPrefix(f.srv.URL, "http://"))
+	s.mu.Lock()
+	s.cfg.DiscussStateDir = state
+	s.mu.Unlock()
+	return f
+}
+
+// withCell gives the fixture's initiative a cell and card c1 a next action,
+// then rescans.
+func withCell(t *testing.T, s *Service, root, cell, next string) {
+	t.Helper()
+	if cell != "" {
+		_ = os.MkdirAll(filepath.Join(root, "agents"), 0o755)
+		if err := os.WriteFile(filepath.Join(root, "agents", "cell.json"), []byte(cell), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	card := "---\ntitle: c1\nstatus: now\nbranch: c1\nupdated: 2026-10-18\nnext: \"" + next + "\"\n---\n"
+	if err := os.WriteFile(filepath.Join(root, "working-on", "c1.md"), []byte(card), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	s.Scan(false)
+}
+
+const cellWithFSE = `{"project":"rv","human":"pablo","agents":["fse"],"reconciler":""}`
+
+// A1 (v3 FR-25): the supervisor at the start of next when health lists
+// it; else the FSE; else the reconciler; else nobody, saying why; another
+// machine's card refused.
+func TestReviewAddressee(t *testing.T) {
+	s, root := reviewFixture(t, "build")
+	newFakeMailbox(t, s, "rv", "pablo", "fse", "sup81")
+	check := func(name, seat, why string) {
+		t.Helper()
+		got, err := s.ReviewAddressee("rv", "c1")
+		if err != nil || got.Seat != seat || got.Why != why {
+			t.Errorf("%s: %+v %v, want %q %q", name, got, err, seat, why)
+		}
+	}
+	withCell(t, s, root, "", "sup81 runs it (0147 ruled)")
+	check("no cell", "", WhyNoCell)
+	withCell(t, s, root, cellWithFSE, "sup81 runs it (0147 ruled)")
+	check("sup81 in health", "sup81", WhyRunsCard)
+	withCell(t, s, root, "", "sup82 runs it (0147 ruled)")
+	check("sup82 not in health", "fse", WhyFSE)
+	withCell(t, s, root, "", "supper is served")
+	check("not a supervisor", "fse", WhyFSE)
+	withCell(t, s, root, `{"project":"rv","human":"pablo","agents":["po","dev"],"reconciler":"po"}`, "x")
+	check("a reconciler, no fse", "po", WhyReconciler)
+	withCell(t, s, root, `{"project":"rv","human":"pablo","agents":["dev"],"reconciler":""}`, "x")
+	check("neither", "", WhyNoSeat)
+
+	s.mu.Lock()
+	s.state.Remote = []model.Snapshot{{Machine: "odyssey", Initiatives: []model.ScannedInitiative{
+		{Initiative: model.Initiative{ID: "rv"}, Cards: []model.Card{{Slug: "far", Next: "sup81 runs it"}}},
+	}}}
+	s.mu.Unlock()
+	if _, err := s.ReviewAddressee("rv", "far"); err == nil || !strings.Contains(err.Error(), "is on odyssey, not this machine") {
+		t.Errorf("another machine's card: %v", err)
+	}
+	if _, err := s.AskReview("rv", "far", "", "x", "question", "why"); err == nil || !strings.Contains(err.Error(), "is on odyssey") {
+		t.Errorf("ask on another machine's card: %v", err)
+	}
+}
+
+// A2 (v3 FR-26): asks on a, b and a again are three messages in one thread
+// `c1: review at <sha>` to the seat, kind question; after a remap the new
+// head's ask lands in the same thread; a closed thread is replaced once;
+// a reviewed mark, an empty note and nobody to ask are refused with no
+// write; with the server down the mark is saved without asked and the
+// error comes back.
+func TestAskReview(t *testing.T) {
+	s, root := reviewFixture(t, "build")
+	mb := newFakeMailbox(t, s, "rv", "pablo", "fse", "sup81")
+	withCell(t, s, root, cellWithFSE, "sup81 runs it (0147 ruled)")
+	makeAndWait(t, s, "c1")
+	head := gitIn(t, root, "rev-parse", "c1")
+	a, b := "go:example.com/rv/p.A", "go:example.com/rv/p.B"
+	state := review.StatePath("rv", head)
+
+	for _, c := range []struct{ state, note, want string }{
+		{"reviewed", "", "only a question or a block"},
+		{"question", "  ", "needs a note"},
+	} {
+		if _, err := s.AskReview("rv", "c1", "", a, c.state, c.note); err == nil || !strings.Contains(err.Error(), c.want) {
+			t.Errorf("%s %q: %v", c.state, c.note, err)
+		}
+	}
+	if fileExists(state) || len(mb.posts) != 0 {
+		t.Fatalf("a refusal wrote: state %v, posts %v", fileExists(state), mb.posts)
+	}
+
+	r1, err := s.AskReview("rv", "c1", "", a, "question", "why 2?")
+	if err != nil || r1.Error != "" || r1.To.Seat != "sup81" || r1.Thread != "T1" || r1.Asked != "M1" {
+		t.Fatalf("first ask %+v %v", r1, err)
+	}
+	r2, _ := s.AskReview("rv", "c1", "", b, "blocked", "B must stay 1")
+	r3, _ := s.AskReview("rv", "c1", "", a, "question", "and again?")
+	if r2.Thread != "T1" || r3.Thread != "T1" || r3.Asked != "M3" {
+		t.Errorf("later asks %+v %+v", r2, r3)
+	}
+	sha := head[:7]
+	if len(mb.posts) != 3 || mb.posts[0]["subject"] != "c1: review at "+sha || mb.posts[1]["subject"] != "" {
+		t.Fatalf("posts %v", mb.posts)
+	}
+	firsts := []string{a + " · p/a.go:3-3 · question", b + " · p/a.go:5-5 · blocked", a + " · p/a.go:3-3 · question"}
+	for i, p := range mb.posts {
+		lines := strings.Split(p["body"], "\n")
+		if p["to"] != "sup81" || p["kind"] != "question" || p["thread_id"] != "T1" || lines[0] != firsts[i] || lines[len(lines)-1] != "Next action: sup81 answers in this thread" {
+			t.Errorf("post %d: %v", i, p)
+		}
+	}
+	if got := mb.posts[1]["body"]; !strings.Contains(got, "\nB must stay 1\n") {
+		t.Errorf("the note: %q", got)
+	}
+	m, _ := s.ReviewMarks("rv", "c1", "")
+	if m.Thread != "T1" || len(m.Marks) != 2 || m.Marks[0].Asked != "M3" || m.Marks[1].Asked != "M2" {
+		t.Errorf("marks %+v", m)
+	}
+
+	// a remap: the new head's ask lands in the same thread
+	gitIn(t, root, "checkout", "-q", "c1")
+	if err := os.WriteFile(filepath.Join(root, "p/a.go"), []byte("package p\n\nfunc A() int { return 2 }\n\nfunc B() int { return 3 }\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	gitIn(t, root, "commit", "-q", "-am", "B returns 3")
+	gitIn(t, root, "checkout", "-q", "main")
+	makeAndWait(t, s, "c1")
+	r4, err := s.AskReview("rv", "c1", "", b, "question", "3 now?")
+	if err != nil || r4.Thread != "T1" || mb.posts[3]["thread_id"] != "T1" || mb.posts[3]["subject"] != "" {
+		t.Errorf("after the remap %+v %v %v", r4, err, mb.posts[3])
+	}
+
+	// the thread closed: one new thread, the new id kept
+	mb.Lock()
+	mb.closed["T1"] = true
+	mb.Unlock()
+	r5, err := s.AskReview("rv", "c1", "", a, "question", "closed?")
+	newHead := gitIn(t, root, "rev-parse", "c1")
+	if err != nil || r5.Error != "" || r5.Thread != "T5" || len(mb.posts) != 5 || mb.posts[4]["subject"] != "c1: review at "+newHead[:7] {
+		t.Errorf("after the 409 %+v %v %v", r5, err, mb.posts)
+	}
+	if m, _ := s.ReviewMarks("rv", "c1", ""); m.Thread != "T5" {
+		t.Errorf("thread after the 409 %q", m.Thread)
+	}
+
+	// the server down: saved, not asked, the error returned
+	mb.srv.Close()
+	r6, err := s.AskReview("rv", "c1", "", b, "blocked", "down")
+	if err != nil || r6.Error == "" || r6.Asked != "" || strings.Contains(r6.Error, "\n") {
+		t.Fatalf("down %+v %v", r6, err)
+	}
+	m, _ = s.ReviewMarks("rv", "c1", "")
+	for _, mk := range m.Marks {
+		if mk.Symbol == b && (mk.State != "blocked" || mk.Note != "down" || mk.Asked != "") {
+			t.Errorf("the mark after a failed post %+v", mk)
+		}
+	}
+	if m.Thread != "T5" {
+		t.Errorf("a failed post moved the thread: %q", m.Thread)
+	}
+
+	// nobody to ask: refused with no write
+	withCell(t, s, root, `{"project":"rv","human":"pablo","agents":["dev"],"reconciler":""}`, "x")
+	before, _ := os.ReadFile(review.StatePath("rv", newHead))
+	if _, err := s.AskReview("rv", "c1", "", a, "question", "anyone?"); err == nil || !strings.Contains(err.Error(), "no one to ask here: "+WhyNoSeat) {
+		t.Errorf("nobody: %v", err)
+	}
+	if after, _ := os.ReadFile(review.StatePath("rv", newHead)); string(after) != string(before) {
+		t.Error("a refused ask wrote the marks")
 	}
 }
