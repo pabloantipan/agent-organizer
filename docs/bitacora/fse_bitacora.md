@@ -6,6 +6,8 @@ restating it (the discuss skill).
 
 ## Away mode 2026-10-18 15:29 - ~19:30 CLT (Pablo via Hephaistos, thread 01M584E1; decisions.md c788d64)
 
+sup83 done 18:10: leftovers 41 in 53 min (40-80m; review-go 31, fixture-launch 42, review-words 51) and leftovers 42 in 37 min (25-50m), every review first-round pass; seats $32.10; installed v0.2.0-2560-ga8e2556; run record runs/2026-10-18-sup83-leftovers-41.md. sup83 ended. Held: wails generate module rewrites frontend/wailsjs/runtime/ on this Mac (CLI drift; pin wails or note in CLAUDE.md, Go leftovers); lw-ui A1-A3 sent to aglaea; lw-build ran ~265k with one extension.
+
 Ruled by default (list for Pablo's return):
 - 0149 accept leftovers 41, `accept as written`, 16:39 (asked 16:34 in pane and mailbox).
 - 0150 accept leftovers 42, `accept as written`, 16:45 (asked 16:40).
@@ -33,7 +35,7 @@ Multi-repo reconciliation: Hephaistos adds `change-check --repo <name>` (no --re
 - **Repetition (premise rows, again):** v3 A5 said 'no mailbox' from `canned_health`; posts still hit the real socket (58752b6, Amendment 3). A premise about isolation must name the write path, not the read path. A follow-up for the next leftovers: `fixture-home.sh` default config should set `discuss_state_dir` to a temp dir unless `--live-mailbox`.
 - Held for the next frontend leftovers: au-ui U3 error words (review-view Amendment 5 R26, words given), U5 Open the thread a real link (R27); rv-polish G2 fixture affected callee; au-ui G4 a canned AskReview to see success without discuss.
 - Also held (frontend leftovers), words in review-view Amendment 6 (R28-R30): `? asked` as one unit in the mark's column (R28); drop the pre-press line once asked, `Ask <seat> again` after a note edit (R29); the chat list's current row follows the chat shown (R30).
-- Held: U3/G1 Open in editor at a line (needs a checkout choice), G3 fixture claim/failing make, Needs me "review waiting" row.
+- Held for the next frontend leftovers, words in review-view Amendment 7 (104d92d, R31-R33): lf42 U1 (refusal re-reads status, muted line, focus to h2; editor failure keeps button with "Editor didn't open: …"), U2 (open at the definition after the leading comment block); G3 fixture claim/failing make, Needs me "review waiting" row.
 
 ## HAND-OFF 2026-10-18 (last SHA seen eeaa1f2; restart onto the new watcher)
 
