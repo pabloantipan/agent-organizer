@@ -4,7 +4,14 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
-## 2026-10-18 12:55 — standing rule OFF
+## HAND-OFF 2026-10-18 ~13:30 (last SHA seen 890e02c + sup82's merges)
+
+- review-map v3 landed: rv-ask-data, rv-polish, rv-ask-ui (a87f6fe, e596d51, 2027e08). sup82: 96 min vs 70-140 over 2 waves (22, 30, 60 min per card; one UI fail U1 sev 3 and a fix round A9-A11); seats $37.76; run record runs/2026-10-18-sup82-review-map-v3.md. sup82 ended.
+- review-map exits: 2 met in code (a question reaches the card's supervisor as a thread); exit 1 and the proof of 2 are Pablo's trial on odyssey (push, install, walk a real branch of another initiative). Stamp exit 2 only after a real ask reaches a real supervisor.
+- Standing rule OFF (below). Ask and wait.
+- Next: cut the next frontend leftovers (au-ui U3 R26, U5 R27; R28-R30; rl-ui/rs-ui held items; lf40 UF1; wide Home; top bar at 1024) and the next Go leftovers (list under 2026-10-18 hand-off plus: cli help --marks, replaced-thread id, fixture discuss_state_dir default, canned AskReview G4), each as a proposed record for Pablo.
+
+
 
 - Hephaistos relay (thread 01M57VDM; Pablo, 12:55 CLT, factory decisions.md 119ac93): the 5-minute rule is off; it becomes the operator's "away mode", turned on when stepping away. Until that mode is built, nothing is ruled by default: ask Pablo and wait. 0147 and 0148 stay ruled.
 
@@ -16,6 +23,7 @@ restating it (the discuss skill).
 - Held for the next Go leftovers (sup82, rv-ask-data review): `internal/cli/cli.go:175` help line lacks `--marks`; after a 409 replaces a closed review thread, marks asked in the old one show the new thread id (FR-26 as written; fix would be `asked_thread` per mark; rare, not amended).
 - **Repetition (premise rows, again):** v3 A5 said 'no mailbox' from `canned_health`; posts still hit the real socket (58752b6, Amendment 3). A premise about isolation must name the write path, not the read path. A follow-up for the next leftovers: `fixture-home.sh` default config should set `discuss_state_dir` to a temp dir unless `--live-mailbox`.
 - Held for the next frontend leftovers: au-ui U3 error words (review-view Amendment 5 R26, words given), U5 Open the thread a real link (R27); rv-polish G2 fixture affected callee; au-ui G4 a canned AskReview to see success without discuss.
+- Also held (frontend leftovers), words in review-view Amendment 6 (R28-R30): `? asked` as one unit in the mark's column (R28); drop the pre-press line once asked, `Ask <seat> again` after a note edit (R29); the chat list's current row follows the chat shown (R30).
 - Held: U3/G1 Open in editor at a line (needs a checkout choice), G3 fixture claim/failing make, Needs me "review waiting" row.
 
 ## HAND-OFF 2026-10-18 (last SHA seen eeaa1f2; restart onto the new watcher)
