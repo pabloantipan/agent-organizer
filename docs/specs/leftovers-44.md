@@ -59,3 +59,8 @@ No row posts to a real mailbox, launches an editor or drives Pablo's screen.
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf44-ask-survives` | K1-K5, X0 | — | true |
+
+Amendment 1, 2026-10-18, the FSE, from sup85 (thread 01M58GMD): FR-1 keeps
+an earlier ask, so `internal/service/review_test.go:566` (TestAskReview's
+`Asked == ""` after a failed re-ask) now expects the earlier ask kept. The
+boundary adds that one assertion of `internal/service/review_test.go`.
