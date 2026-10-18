@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { review as rv, service } from "../../wailsjs/go/models";
 import { AskReview, MarkReview, ReviewFile } from "../../wailsjs/go/main/App";
 import { busyButton, busyLabel } from "../lib/busy";
@@ -190,6 +190,9 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
   const line = askLine(to, state);
   const mark = (marks?.marks ?? []).find((m) => m.symbol === id && m.state);
   const thread = marks?.thread ?? "";
+  // A failed ask names its line on the button that stays focused (FR-29, Amendment 4).
+  const failedId = `rs-failed-${id}`;
+  const describedBy = failed ? failedId : undefined;
   return (
     <div className="rs-mark">
       <fieldset className="rs-radios">
@@ -205,11 +208,11 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
       <textarea id={noteId} className="rs-note" rows={2} value={note} onChange={(e) => setNote(e.target.value)}
         placeholder={state === "question" || state === "blocked" ? "required for Question and Blocked" : "optional"} />
       <div className="rs-buttons">
-        <button className="primary" {...busyButton({ busy: busy === "next", disabled: busy !== "" || !primary.ready, onPress: run("next", primary.mark, primary.ask, last ? undefined : onNext) })}>{busyLabel(busy === "next", primary.label, primary.ask ? WORDS.asking : WORDS.saving)}</button>
+        <button className="primary" aria-describedby={describedBy} {...busyButton({ busy: busy === "next", disabled: busy !== "" || !primary.ready, onPress: run("next", primary.mark, primary.ask, last ? undefined : onNext) })}>{busyLabel(busy === "next", primary.label, primary.ask ? WORDS.asking : WORDS.saving)}</button>
         <button {...busyButton({ busy: busy === "save", disabled: busy !== "" || !canSave(state, note, saved), onPress: run("save", state, false) })}>{busyLabel(busy === "save", WORDS.save, WORDS.saving)}</button>
       </div>
       {line && <p className="rs-ask-line meta">{line}</p>}
-      <AskStatus failed={failed} asked={!!mark?.asked} seat={seat} thread={thread} busy={busy} onRetry={failed ? run("retry", failed.state, true) : () => undefined} onOpenThread={() => onOpenThread?.(thread)} />
+      <AskStatus failed={failed} failedId={failedId} asked={!!mark?.asked} seat={seat} thread={thread} busy={busy} onRetry={failed ? run("retry", failed.state, true) : () => undefined} onOpenThread={() => onOpenThread?.(thread)} />
       {error && <p className="review-error">{error}</p>}
     </div>
   );
@@ -239,18 +242,25 @@ export async function markPress(o: {
 
 /** After an ask (FR-29): `Asked <seat> · Open the thread`, or, when the
  *  post failed, `Saved here; couldn't ask <seat>: <first error line>` with
- *  Try again, which reads `Asking…` while it posts. */
-export function AskStatus({ failed, asked, seat, thread, busy, onRetry, onOpenThread }: {
-  failed: Failed | null; asked: boolean; seat: string; thread: string; busy: string; onRetry: () => void; onOpenThread: () => void;
+ *  Try again, which reads `Asking…` while it posts. The failure line
+ *  scrolls into view (`nearest`) each time a press fails, focus staying on
+ *  the button, which names it (`failedId`, Amendment 4): at 1024×640 it
+ *  sits below the panel's fold. */
+export function AskStatus({ failed, failedId, asked, seat, thread, busy, onRetry, onOpenThread }: {
+  failed: Failed | null; failedId?: string; asked: boolean; seat: string; thread: string; busy: string; onRetry: () => void; onOpenThread: () => void;
 }) {
-  if (failed) {
-    return (
-      <p className="rs-asked review-error">
-        {askFailedLine(failed.seat, failed.error)}{" "}
-        <button {...busyButton({ busy: busy === "retry", disabled: busy !== "", onPress: onRetry })}>{busyLabel(busy === "retry", WORDS.tryAgain, WORDS.asking)}</button>
-      </p>
-    );
-  }
+  if (failed) return <FailedLine failed={failed} id={failedId} busy={busy} onRetry={onRetry} />;
   if (!asked || !seat || !thread) return null;
   return <p className="rs-asked">{askedLine(seat)} · <button className="link" onClick={onOpenThread}>{WORDS.openThread}</button></p>;
+}
+
+function FailedLine({ failed, id, busy, onRetry }: { failed: Failed; id?: string; busy: string; onRetry: () => void }) {
+  const line = useRef<HTMLParagraphElement>(null);
+  useEffect(() => { line.current?.scrollIntoView?.({ block: "nearest" }); }, [failed]);
+  return (
+    <p ref={line} className="rs-asked review-error">
+      <span id={id}>{askFailedLine(failed.seat, failed.error)}</span>{" "}
+      <button aria-describedby={id} {...busyButton({ busy: busy === "retry", disabled: busy !== "", onPress: onRetry })}>{busyLabel(busy === "retry", WORDS.tryAgain, WORDS.asking)}</button>
+    </p>
+  );
 }

@@ -329,3 +329,24 @@ describe("A8 (FR-40): the line follows the list it was opened from", () => {
     expect(opened).toEqual([[W, "calledBy"], [W, "calls"]]);
   });
 });
+
+describe("A9 (FR-29, Amendment 4): a failed ask is seen and said", () => {
+  const f = { seat: "fse", state: "question" as MarkState, error: "open /x/tokens.json: no such file or directory" };
+  it("the failure line has an id that Try again names", () => {
+    const h = renderToStaticMarkup(<AskStatus failed={f} failedId="rs-failed-G" asked={false} seat="fse" thread="" busy="" onRetry={noop} onOpenThread={noop} />);
+    expect(h).toContain('<span id="rs-failed-G">Saved here; couldn&#x27;t ask fse: open /x/tokens.json: no such file or directory</span>');
+    expect(h).toMatch(/<button aria-describedby="rs-failed-G"[^>]*>Try again<\/button>/);
+  });
+  const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
+  it("the primary names the failure line while it shows; the line scrolls into view, nearest, focus untouched", () => {
+    expect(src).toContain("const describedBy = failed ? failedId : undefined;");
+    expect(src).toContain('<button className="primary" aria-describedby={describedBy}');
+    expect(src).toContain('useEffect(() => { line.current?.scrollIntoView?.({ block: "nearest" }); }, [failed]);');
+    expect(src).not.toMatch(/FailedLine[\s\S]*\.focus\(/);
+  });
+  it("the review's live region is told the failure (Review's onAsked)", () => {
+    const review = readFileSync(new URL("./Review.tsx", import.meta.url), "utf8") as string;
+    expect(review).toContain("if (r.error) failed.current = askFailedLine(r.to?.seat || seat, r.error);");
+    expect(review).toContain("saidAfter({ asked: asked.current, failed: failed.current,");
+  });
+});

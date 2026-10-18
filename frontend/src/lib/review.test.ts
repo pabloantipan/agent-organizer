@@ -455,6 +455,17 @@ describe("A4 (FR-28, FR-29): who the mark asks, and what is said after", () => {
     // the first marks loaded say nothing
     expect(saidAfter({ asked: "", wasDone: null, done: true, cov })).toBe("");
   });
+  it("A9 (FR-29, Amendment 4): a failed ask says its failure line alone, also on the last symbol", () => {
+    const cov = { reviewed: 2, of: 2, mustLeft: 0, risk: null };
+    const part = { reviewed: 1, of: 2, mustLeft: 0, risk: null };
+    const line = askFailedLine("fse", "open /x/tokens.json: no such file or directory");
+    expect(saidAfter({ asked: "", failed: line, wasDone: false, done: false, cov: part })).toBe("Saved here; couldn't ask fse: open /x/tokens.json: no such file or directory");
+    // the last symbol: not `Reviewed 2 of 2`, which would read as success
+    expect(saidAfter({ asked: "", failed: line, wasDone: false, done: true, cov })).toBe(line);
+    expect(saidAfter({ asked: "", failed: line, wasDone: false, done: true, cov })).not.toContain("Reviewed");
+    // Try again that fails again says it again (the marks change each press)
+    expect(saidAfter({ asked: "", failed: line, wasDone: true, done: true, cov })).toBe(line);
+  });
   it("an asked row: its name says asked after the mark", () => {
     const G2 = "go:x/svc.Greet";
     const mm = revmap([pkg("go:x/svc", "svc"), node({ id: G2, parent: "go:x/svc", file: "svc/greet.go" })]);

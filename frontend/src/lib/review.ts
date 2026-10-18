@@ -77,8 +77,11 @@ export const firstLine = (e: string) => e.replace(/^Error:\s*/, "").split("\n")[
 /** What the review's live region says after the marks change (FR-29,
  *  FR-38; §4 all reviewed): `Asked <seat>` once for an ask that posted,
  *  the coverage once when the last symbol is marked, both when one press
- *  does both. "" says nothing. */
-export function saidAfter(o: { asked: string; wasDone: boolean | null; done: boolean; cov: Coverage }): string {
+ *  does both. An ask that failed says its failure line alone, even on the
+ *  last symbol: the coverage would read as success (FR-29, Amendment 4).
+ *  "" says nothing. */
+export function saidAfter(o: { asked: string; failed?: string; wasDone: boolean | null; done: boolean; cov: Coverage }): string {
+  if (o.failed) return o.failed;
   const parts = [o.asked ? askedLine(o.asked) : "", o.wasDone === false && o.done ? coverageLine(o.cov) : ""].filter(Boolean);
   return parts.join(". ");
 }

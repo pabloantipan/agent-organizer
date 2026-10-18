@@ -8,7 +8,7 @@ import { busyButton } from "../lib/busy";
 import { speaker } from "../lib/liveRegion";
 import {
   afterASecond, allReviewed, countsLine, coverage, coverageLine, filesOf, firstLine, flagLook, groupName, inTextField, isAffected, lastToReview, MARK_GLYPH, makeOrigin, makingLabel, movedLine,
-  nextToReview, nothingToReview, partialLines, rowName, saidAfter, screenState, secondsSince, worklist, WORDS, type Addressee, type Group, type Row, type Via,
+  askFailedLine, nextToReview, nothingToReview, partialLines, rowName, saidAfter, screenState, secondsSince, worklist, WORDS, type Addressee, type Group, type Row, type Via,
 } from "../lib/review";
 import { ReviewSymbol } from "./ReviewSymbol";
 import "../styles/review.css";
@@ -81,17 +81,21 @@ export function Review() {
   useEffect(() => () => sayer.stop(), [sayer]);
   const wasDone = useRef<boolean | null>(null);
   const asked = useRef("");
+  const failed = useRef("");
   useEffect(() => {
     if (!cov) return;
-    const m = saidAfter({ asked: asked.current, wasDone: wasDone.current, done, cov });
+    const m = saidAfter({ asked: asked.current, failed: failed.current, wasDone: wasDone.current, done, cov });
     asked.current = "";
+    failed.current = "";
     if (m) sayer.say(m);
     wasDone.current = done;
   }, [cov, done, sayer]);
+  const seat = to?.seat ?? "";
   const onAsked = useCallback((r: service.ReviewAsk) => {
-    if (!r.error && r.asked) asked.current = r.to?.seat ?? "";
+    if (r.error) failed.current = askFailedLine(r.to?.seat || seat, r.error);
+    else if (r.asked) asked.current = r.to?.seat ?? "";
     setMarks(r.marks);
-  }, []);
+  }, [seat]);
 
   // Opening a symbol moves focus to its title (§5).
   const title = useRef<HTMLHeadingElement>(null);
