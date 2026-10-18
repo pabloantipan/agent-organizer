@@ -1,12 +1,12 @@
 ---
 title: "Ask <seat> on a Question or Blocked mark, and the thread it opened"
-status: next
+status: now
 repos: [organizer]
 branch: rv-ask-ui
 seat: au-build
 stage: review-map
 updated: 2026-10-18
-next: "sup82 runs it (0147 ruled by the standing rule, 2026-10-18)"
+next: "sup82 runs it (0147); au-build: code and vitest A4, A6, A8 in (rv-ask-ui), harness A5, A7 next"
 risk: medium
 footprint: [frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css, frontend/src/components/Review.tsx, frontend/src/components/Review.test.tsx, frontend/src/stores/board.store.ts (openSlack thread, review place), frontend/src/components/SlackView.tsx (← Review)]
 depends_on: [rv-ask-data, rv-polish]
