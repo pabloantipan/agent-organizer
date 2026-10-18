@@ -6,7 +6,7 @@ branch: rv-ask-ui
 seat: au-build
 stage: review-map
 updated: 2026-10-18
-next: "review: rv-ask-ui round 2, gate met (A4-A11, X0), 8ba6d0d"
+next: "UI review round 2 (au-ui) at 8ba6d0d; code review round 2 passed (au-review)"
 risk: medium
 footprint: [frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css, frontend/src/components/Review.tsx, frontend/src/components/Review.test.tsx, frontend/src/stores/board.store.ts (openSlack thread, review place), frontend/src/components/SlackView.tsx (← Review), frontend/src/components/Conversation.tsx (threadId landing)]
 depends_on: [rv-ask-data, rv-polish]
@@ -146,6 +146,53 @@ Notes (not findings):
 - Note: Review.tsx's boundary says "(the row's `asked`)", but FR-29's live region and Open the thread, FR-38's last, FR-40's list and focus on return all live in the screen, so the diff there is wider than the parenthetical. Each hunk serves a gate FR. The FSE could widen the wording.
 - Note: gate gap: A4's "live region says `Asked sup81` once" is vitest of the pure `saidAfter` plus markup, not the Review effect, and no harness row can make a successful ask without a test mailbox. A6's "focus on the button" in vitest is a source-string check (WK confirms it).
 - Note: `Try again` resends the note as it is now, not the failed one; an emptied note is refused by the binding with its error line.
+
+### Round 2 (au-review, 2026-10-18)
+Verdict: **pass** at 8ba6d0dd764685f930d1d4659c28588ed7a50f68 (restarted in a fresh clean clone, as sup82 asked; the round 1 verdict above was at 60f74c3). Unmet gate items: none (A4, A5, A6, A7, A8, A9, A10, A11, X0).
+
+- X0: `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test`: **fresh**, run `ae6a7c37-38486` at 8ba6d0d (au-ui reused it), exit 0, go ok, 76 files and 933 vitest tests passed. `pnpm run build` 0, `wails build` 0 (and again after the harness), porcelain empty.
+- A9: met in my own harness at 1024×640, no mailbox (one `discuss_state_dir: <empty mktemp -d>` line checked), auth off. Builder's `b2.txt` read and run unchanged except the shot paths (`.wt-notes/au-review/out/r2-h-b2.txt`). formatName: failure line 576–624 inside the panel's 169–624, focus on `Ask fse, next`, `aria-describedby` → `Saved here; couldn't ask fse: open …/tokens.json: no such file or directory`, live region recorded once with those words. Try again: the same, focus on `Try again`. Last symbol (Greet, Blocked): line in view, focus on `Ask fse`, live region the failure once, never `Reviewed 2 of 2`.
+- A10: met (AskReview, GetAgents, GetCellThread stubbed in the harness page only; nothing posts). Open the thread → `document.activeElement` is `#thread-01STUBTHREAD .tl-divider`, not the body. One real Tab key → `← Review`, Return → Review with focus on `svc.Greet`'s h2.
+- A11: met. `asked` computed `rgb(181, 175, 195)` = `--fg-muted` on the current row (Greet, ✕ in `--danger`) and on the other row (formatName, ? in `--tone`).
+- A4, A6, A8: vitest green in the fresh run; words unchanged from round 1. A5, A7 rerun on 8ba6d0d with my round-1 steps (`out/r2-h-run.txt`, `out/r2-a5-state.json`): A5 as round 1 (on disk `question`, no `asked`, no `thread`; focus on the button), and the live region now also says the failure. A7: 58 = 58. A6 in WK: focus on `Reviewed`, `Reviewed 2 of 2` once.
+- Busy rule again with AskReview slowed 1.5 s (`out/r2-h-busy.txt`): three presses → one call, two Try again → one. No call before a press; Save → MarkReview only.
+- Boundary: the diff against main is the round 1 files plus `Conversation.tsx` and `Conversation.review.test.tsx` (Amendment 5). Conversation.tsx changes only the `slackDraft.threadId` landing: an unlisted thread asks the feed (`api.getAgents`, an existing binding) and waits through `sentWatch`, focus parks on `← Review`, and the landing focuses the divider through `landDivider`. No Go, `app.go`, `wailsjs/`, Needs me, Home, `scripts/`.
+
+change-check round 2 (flags; Changed lists the same 10 files plus the two Conversation ones):
+```
+## Flags
+
+| flag | where | symbol | detail |
+|---|---|---|---|
+| boundary unreadable | organizer | docs/specs/review-map.md: no section 'v3 Boundary' | boundary entry |
+| outside boundary | organizer/frontend/src/components/Conversation.review.test.tsx |  | added |
+| outside boundary | organizer/frontend/src/components/Conversation.tsx |  | modified |
+| outside boundary | organizer/frontend/src/components/Review.test.tsx |  | modified |
+| outside boundary | organizer/frontend/src/components/Review.tsx |  | modified |
+| outside boundary | organizer/frontend/src/components/ReviewSymbol.test.tsx |  | modified |
+| outside boundary | organizer/frontend/src/components/ReviewSymbol.tsx |  | modified |
+| outside boundary | organizer/frontend/src/components/SlackView.review.test.tsx |  | added |
+| outside boundary | organizer/frontend/src/components/SlackView.tsx |  | modified |
+| outside boundary | organizer/frontend/src/lib/review.test.ts |  | modified |
+| outside boundary | organizer/frontend/src/lib/review.ts |  | modified |
+| outside boundary | organizer/frontend/src/stores/board.store.ts |  | modified |
+| outside boundary | organizer/frontend/src/styles/review.css |  | modified |
+| outside footprint | organizer/frontend/src/components/Conversation.review.test.tsx |  | added |
+| outside footprint | organizer/frontend/src/components/SlackView.review.test.tsx |  | added |
+| undeclared | organizer/frontend/src/components/Review.test.tsx |  | modified |
+| undeclared | organizer/frontend/src/components/ReviewSymbol.test.tsx |  | modified |
+| untested? | organizer/frontend/src/components/Review.tsx | Worklist | no test file names it |
+| untested? | organizer/frontend/src/components/Review.tsx | SymbolPane | no test file names it |
+| untested? | organizer/frontend/src/lib/review.ts | marksOf | no test file names it |
+| untested? | organizer/frontend/src/stores/board.store.ts | leaveReview | no test file names it |
+
+21 flags: outside boundary 12, outside footprint 2, undeclared 2, declared, not changed 0, new env var 0, new dependency 0, new host 0, risk 0, untested? 4, could not read 0, boundary unreadable 1
+```
+Explained as in round 1, plus: `outside boundary` Conversation.tsx and Conversation.review.test.tsx are in Amendment 5's boundary. `outside footprint` Conversation.review.test.tsx and SlackView.review.test.tsx: the footprint omits the tests that the boundary allows.
+
+Notes (not findings):
+- Note: `landDivider` now runs for every landing in Conversations (a search hit, a ruling, Answer), not only Open the thread. It redirects Tab only while `← Review` is shown, which is when Conversations was opened from the review.
+- Note: A10 is only seen with a page-level stub, since no canned post exists (au-ui's G4 stands).
 
 ## UI review
 au-ui, 2026-10-18, on 60f74c309524c62bfbf58333e5228258d9fb6eca (every row; the branch did not move). **Verdict: fail**, one severity 3 (U1) against FR-29 at 1024×640. Evidence: `.wt-notes/au-ui/` (`out/` shots and harness logs, `steps/`).
