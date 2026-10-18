@@ -117,6 +117,82 @@ Explained: no `undeclared`, `outside boundary` or `declared, not changed` lines.
 
 Reviewer `rs-review`, 2026-10-18.
 
+## UI review
+
+rs-ui, 2026-10-18. I checked every row on 78f5fe6c171717037ef8731e8bb798ee38c61619 (the branch did not move). **Verdict: pass.** No finding of severity 4 or 3 against leftovers-43 or review-view Amendments 7 and 8. Evidence is in `.wt-notes/rs-ui/`: the `out/rb-*.png` and `out/wk-*.png` shots, the harness logs `out/h-*.txt`, the editor logs `out/editor-calls*.txt` and `out/rb-editor-calls.txt`, `steps/`, and `out/killed.txt`.
+
+Shared test run: **reused**, run `b5072609-8166` of 78f5fe6c1717 by organizer-probe-rs-review, exit 0, vitest 78 files / 997 tests (`.wt-notes/rs-ui/x0-make-test.log`).
+
+No mailbox, no editor. Both fixtures were `--review --canned-post`. Each launch checked that the config had exactly one `discuss_state_dir:` line, under the fixture's temp dir, and `auth: off` (`out/rb-config-check.txt`, `out/dev-config-check.txt`). The probe was stubbed. `editor:` was a stub named `code` (`bin/code`, `rb/bin/code`): it logs its argv, or with its mode file set to `fail` it prints `nope` to stderr and exits 1. No real editor ran. Nothing was posted: the asks went to the fixture's `posts.jsonl`.
+
+How each state was checked:
+- **Review build** (`make review-build` in my detached worktree): pid saved, AX and AXPress on that pid only, `screencapture -o -l` of its window, at window sizes 1440×900 and 1024×640. The screen was unlocked.
+  - Not checked out: `web/src/format.ts 1-4  Not checked out here at 49f252c.`, no button.
+  - Root moved to `rv-fixture`: `Open in editor` shows. The presses logged `-g …/svc/greet.go:4` (label `3-6`, `//` comment on 3) and `-g …/web/src/format.ts:2` (label `1-4`, `/** */` on 1). That is R33.
+  - Stub in fail mode: the button stays and keeps AX focus, and `Editor didn't open: nope` sits under it in `.blocked-reason.rs-editor-failed`. That is R32.
+  - Mode back to ok and root back on main, then a press: no editor call was logged, the button is gone, the line reads `Not checked out here at 49f252c.`, and AX focus is on the h2 `format.formatName modified` (also at 1024 on `svc.Greet`). That is R31.
+  - In both cases the panel's sr-only region held the line within 1.5 s.
+  - `Opening…` showed for one AX read, then `Open in editor` came back.
+  - R34 could not be driven here: AX cannot type a note in a way React sees.
+- **Tab harness** (rs-build's `tabharness.swift`, read; I added a `waitfile` step so the shell can move the checkout mid-run). It ran offscreen with `isKey: true` under `harness.lock`, against my own `wails dev -devserver localhost:34265` from a clean clone of 78f5fe6. Each run used a fresh fixture. There were five runs: 1024 ×3 and 1440 ×2. The dev server and stand-ins were killed by saved pid.
+  - **Not here**: from the h2, Tab goes to the diff, so the muted line is no stop.
+  - **R32**: `Editor didn't open: nope` appears at 400 ms. The button keeps focus and carries `aria-describedby="rs-editor-failed-svc/greet.go"`. Tab goes to the diff and Shift+Tab comes back to the button.
+  - **R31**: the button is gone and focus is on the h2. The next Tab goes to the diff.
+  - **R33**: logged `format.ts:2` and `greet.go:4`, the same as the review build.
+  - **R34**:
+    - An asked, unedited symbol has no `rs-buttons` and ends at `Asked fse · Open the thread`. From the note, Tab goes to `Open the thread`, then to body (the document's end, A2), then to `Skip to content`. Save is no stop.
+    - Editing the note shows `Ask fse again, next` and `Save`.
+    - After Save, Save is gone and focus is on the primary with `:focus-visible` (2px rgb(192,171,254)).
+    - On an unasked symbol, choosing Reviewed and saving sends focus to the checked radio. Its label shows the same 2px ring, offset 2px.
+  - **R35**, at both sizes, after `Open the thread`: one `aria-current="page"` (the crumb `init-a`); `"true"` on the Conversations sub-tab and on one chat row.
+- **Style** (computed): the muted line and the failed line are both 12px/400 rgb(181,175,195), which is `--fg-muted`. A scan of the review screen for red text found nothing, and `innerText` has no `Error:` in any state. There is no horizontal scroll: 992/992 and 1408/1408, document 1024 and 1440.
+- **Rest of the panel** (as oe-ui saw it on lf42): at both sizes these are unchanged:
+  - the header `<head> ← <base> · 2 symbols changed, 0 tests` and `Reviewed n of 2 · 1 must-visit left`;
+  - the h2 focused on N, and `Open in editor` on the file line's row (centres within 2px);
+  - `? asked` before the row name, `Asked fse · Open the thread` as a link, and the primary `Reviewed, next`.
+  - At 1024 the panel scrolls inside itself, as before.
+
+Words, design vs screen:
+- `Not checked out here at <short sha>.` reads `Not checked out here at 49f252c.` in the review build, and `… ad73b87.`, `… 285a5ac.`, `… 501c154.` in WKWebView. Same.
+- `Editor didn't open: <first error line>` reads `Editor didn't open: nope`. Same.
+- `Open in editor`: same.
+- `Asked <seat> · Open the thread` reads `Asked fse · Open the thread`. Same.
+- `Ask <seat> again` reads `Ask fse again, next`. The `, next` comes from lf41's primary naming.
+- `Save`: same.
+- `Opening…` is not in the spec. It is the design system's busy example.
+
+Findings:
+- **RS1 (2)**:
+  - What the person cannot do: after editing the note on an asked symbol and pressing Save, the panel no longer shows the thread. `Asked fse · Open the thread` goes, and the row drops `asked`. The primary reads `Ask fse, next`, not `Ask fse again, next`, so the next press asks as if for the first time.
+  - Where: `out/h-1024x640-run2.txt` and `out/h-1440x900-run2.txt` (G_edited → H_saved → J).
+  - Evidence: `review.SetMark` (`internal/review/marks.go:134`) rewrites the mark without `Asked`/`AskedThread`. This branch does not touch it, so the behaviour predates this card. FR-4 now draws Save exactly in this state. Focus lands on the asking primary as FR-4 says. This differs from rs-review's note, which expected the radio group.
+  - Severity: 2. It is not a fail: the spec covers Save's drawing and focus, not what a save keeps.
+  - Proposal: SetMark keeps `Asked`/`AskedThread` when the state is unchanged, or the spec words what Save after an ask means.
+- **RS2 (2)**:
+  - What the person cannot do: a note typed on an unmarked symbol draws `Save`, but it stays disabled (the `canSave` check refuses a note with no mark), and nothing on screen says a mark is needed. That is a button that does nothing beside a working `Reviewed`.
+  - Where: `out/h-1024x640-run1.txt` G_edited: `Reviewed`, `Save [disabled]`.
+  - Evidence: FR-4's letter is met (the note differs → drawn). R34's intent ("not meet a button that does nothing") is not met in this one state.
+  - Severity: 2.
+  - Proposal: draw Save only when `canSave`, or say "choose a mark to save the note".
+- **RS3 (1)**:
+  - What the person cannot do: with the canned post, the thread is not in the feed. Conversations then lands on `# archive`, `Nothing here.`, with `aria-current="true"` on archive while `# channel` shows the selected fill.
+  - Where: `out/wk-1024x640-R35-conversations.png`.
+  - Evidence: this happens only in the fixture with no mailbox, and `Conversation.tsx` is untouched.
+  - Severity: 1.
+  - Proposal: none for this card.
+
+Spec gaps (for the FSE): what a Save of an asked mark keeps (RS1); Save with a note and no mark (RS2).
+
+For aglaea: RS1 (should an edited-and-saved ask stay asked, with its thread link?) and RS3 (where Conversations lands when the named thread is not listed).
+
+Not verified in WKWebView:
+- The thread's own chat as the one `"true"` row. There is no mailbox, so the canned thread is never listed; S5 vitest covers it.
+- An editor still running at 2 s (go test only).
+- The other refusals, a path outside the checkout and another machine's card (code and vitest only).
+- `#` comments and decorators for FR-3 (vitest S3; the fixture has `//` and `/** */` only).
+- R34 in the review build (AX cannot type a note).
+- The timing of the region's line after a refused press. The offscreen harness read it empty at 2.5 s and set 0.7 s later; the review build had it within 1.5 s.
+
 ## Notes
 
 - FR-5/S5 against FR-7b: settled by fse as (b), leftovers-43 Amendment 1, 2026-10-18: no aria-current change; the crumb keeps `page`, the sub-tab and the chat row stay `"true"`; S5 checks that; `InitiativeHeader.tsx` is out of the boundary.
