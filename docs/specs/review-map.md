@@ -669,3 +669,20 @@ panel's fold and nothing else says it failed. So:
   m`; focus on the button.
 - `rv-ask-ui`'s gate adds A9. U2-U5 went to Aglaea (her words decide which
   join this round).
+
+Amendment 5 (v3), 2026-10-18, the FSE, from Aglaea's review-view
+Amendment 5 (R24, R25), answering au-ui's U2 and U4; they join this fix
+round. U3 (R26, error words) and U5 (R27, a real link) go to the next
+frontend leftovers.
+- **FR-41** (U2, R24) `Open the thread` lands focus on that thread's
+  divider in Conversations, with `← Review` the next Tab stop; never the
+  body.
+- **FR-42** (U4, R25) The word `asked` is `--fg-muted` on every row; the
+  `?` / `✕` glyph keeps its colour.
+- **A10** (41) harness: after an ask (vitest-mocked success or the
+  harness's canned post), `Open the thread` | `document.activeElement` is
+  the thread's divider; one Tab reaches `← Review`.
+- **A11** (42) harness: an asked row, current and not | the word's computed
+  colour is `--fg-muted` in both.
+- `rv-ask-ui`'s boundary adds `components/Conversation.tsx` (the
+  `slackDraft.threadId` landing only) and its test; its gate adds A10, A11.

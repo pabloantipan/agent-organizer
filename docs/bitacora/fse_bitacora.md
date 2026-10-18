@@ -15,6 +15,7 @@ restating it (the discuss skill).
 - sup82 launched detached 11:52 (wave 1 rv-ask-data ∥ rv-polish, wave 2 rv-ask-ui). On close: probe -k sup82, token rm organizer sup82, rm its prompt and prelude, clean, make install.
 - Held for the next Go leftovers (sup82, rv-ask-data review): `internal/cli/cli.go:175` help line lacks `--marks`; after a 409 replaces a closed review thread, marks asked in the old one show the new thread id (FR-26 as written; fix would be `asked_thread` per mark; rare, not amended).
 - **Repetition (premise rows, again):** v3 A5 said 'no mailbox' from `canned_health`; posts still hit the real socket (58752b6, Amendment 3). A premise about isolation must name the write path, not the read path. A follow-up for the next leftovers: `fixture-home.sh` default config should set `discuss_state_dir` to a temp dir unless `--live-mailbox`.
+- Held for the next frontend leftovers: au-ui U3 error words (review-view Amendment 5 R26, words given), U5 Open the thread a real link (R27); rv-polish G2 fixture affected callee; au-ui G4 a canned AskReview to see success without discuss.
 - Held: U3/G1 Open in editor at a line (needs a checkout choice), G3 fixture claim/failing make, Needs me "review waiting" row.
 
 ## HAND-OFF 2026-10-18 (last SHA seen eeaa1f2; restart onto the new watcher)
