@@ -7,16 +7,17 @@ import { openBox, openBoxes } from "../lib/boxStack";
 import { busyButton } from "../lib/busy";
 import { speaker } from "../lib/liveRegion";
 import {
-  allReviewed, countsLine, coverage, coverageLine, elapsedOf, filesOf, groupName, inTextField, MARK_GLYPH, makingLabel, movedLine,
+  afterASecond, allReviewed, countsLine, coverage, coverageLine, elapsedOf, filesOf, flagLook, groupName, inTextField, isAffected, MARK_GLYPH, makingLabel, movedLine,
   nextToReview, nothingToReview, partialLines, rowName, screenState, worklist, WORDS, type Group, type Row,
 } from "../lib/review";
+import { ReviewSymbol } from "./ReviewSymbol";
 import "../styles/review.css";
 
 /** The Review screen (docs/ux/specs/review-view.md §2-§5, review-map v2
  *  FR-18): one card's change, its header (counts, coverage, Next to
  *  review, the partial lines) over the worklist and the symbol. Opened from
  *  the card back's Review the change; `← Card` and Escape go back to it.
- *  The symbol's panel is rv-symbol's: it mounts in SymbolPane. */
+ *  The symbol's panel is ReviewSymbol, mounted in SymbolPane. */
 export function Review() {
   const { review, closeReview, setReviewPlace } = useBoard();
   const initiative = review?.initiative ?? "";
@@ -82,12 +83,18 @@ export function Review() {
   const focusTitle = useRef(false);
   const [active, setActive] = useState("");
   const [opened, setOpened] = useState(0);
+  // An affected symbol opens read-only from a changed one (§3.3); `from`
+  // is the changed one `← back` returns to, and where N walks from.
+  const [from, setFrom] = useState("");
   const open = useCallback((id: string) => {
+    const n = map?.nodes?.find((x) => x.id === id);
+    const affected = !!n && isAffected(n);
+    setFrom(affected ? (symbol && !map?.nodes?.find((x) => x.id === symbol && isAffected(x)) ? symbol : from) : "");
     focusTitle.current = true;
-    setActive(id);
-    setOpened((n) => n + 1);
+    if (!affected) setActive(id);
+    setOpened((k) => k + 1);
     setReviewPlace({ symbol: id });
-  }, [setReviewPlace]);
+  }, [setReviewPlace, map, symbol, from]);
   // The worklist's row for it scrolls into view, nearest (§5).
   useEffect(() => {
     if (!focusTitle.current || !symbol) return;
@@ -97,9 +104,9 @@ export function Review() {
   }, [symbol, opened]);
 
   const step = useCallback((dir: 1 | -1) => {
-    const to = nextToReview(groups, symbol, dir);
+    const to = nextToReview(groups, from || symbol, dir);
     if (to) open(to);
-  }, [groups, symbol, open]);
+  }, [groups, symbol, from, open]);
 
   // N and Shift+N whenever focus is not in a text field (§5), and no box is
   // open over the screen.
@@ -131,6 +138,27 @@ export function Review() {
   const making = make?.state === "making";
   const shown = state === "map" || state === "moved";
 
+  // No flash (FR-23): the counter and Stop show only once the make has run
+  // 1 s; a make that ends sooner never draws them. Focus stays put.
+  const [progress, setProgress] = useState(false);
+  const makeKey = making && make ? make.started : "";
+  useEffect(() => {
+    setProgress(false);
+    if (!makeKey || !make) return;
+    return afterASecond(make, () => setProgress(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [makeKey]);
+
+  // Focus on open (FR-20): the screen's first target once it has drawn,
+  // the worklist's stop with a map, Make the map with none, else ← Card;
+  // never the page body.
+  const focusedOpen = useRef(false);
+  useEffect(() => {
+    if (focusedOpen.current || state === "loading" || (shown && !map)) return;
+    focusedOpen.current = true;
+    firstTarget(document)?.focus();
+  }, [state, shown, map]);
+
   // A make that ends with a map hands focus to the worklist (the result,
   // not the wait, moves focus); a failure keeps it on Try again.
   // The map loads after the make's end, so the hand-off waits for it.
@@ -146,20 +174,32 @@ export function Review() {
 
   return (
     <ReviewView status={status} make={make} map={map} marks={marks} error={error} symbol={symbol} active={active} setActive={setActive}
-      onBack={closeReview} onStep={step} onOpen={open} onMake={makeIt} onStop={stop} makeBtn={makeBtn} title={title} said={said} />
+      onBack={closeReview} onStep={step} onOpen={open} onMake={makeIt} onStop={stop} makeBtn={makeBtn} title={title} said={said} progress={progress}
+      panel={{ initiative, card, head: review?.head ?? "", from, onBack: () => open(from), onMarks: setMarks, onNext: () => step(1) }} />
   );
 }
+
+/** FR-20's first target, in that order (a selector list would take
+ *  document order, and ← Card comes first in it). */
+export const firstTarget = (root: ParentNode) =>
+  root.querySelector<HTMLElement>(".rv-tree [tabindex='0']") ?? root.querySelector<HTMLElement>(".review-empty button") ?? root.querySelector<HTMLElement>(".review-back");
 
 export type ReviewViewProps = {
   status: service.ReviewStatus | null; make: service.ReviewMake | null; map: rv.RevMap | null; marks: rv.Marks | null; error: string | null;
   symbol: string; active: string; setActive: (k: string) => void;
   onBack: () => void; onStep: (dir: 1 | -1) => void; onOpen: (id: string) => void; onMake: () => void; onStop: () => void;
   makeBtn: React.RefObject<HTMLButtonElement | null>; title: React.RefObject<HTMLHeadingElement | null>; said: string;
+  /** FR-23: the make has run 1 s, so its counter and Stop show. */
+  progress?: boolean;
+  /** What the symbol's panel needs beyond the map; none draws the title only. */
+  panel?: PanelProps;
 };
+
+type PanelProps = { initiative: string; card: string; head: string; from: string; onBack: () => void; onMarks: (m: rv.Marks) => void; onNext: () => void };
 
 /** What the screen draws for a status, a make, a map and its marks: every
  *  §4 state, pure, so vitest renders each one. */
-export function ReviewView({ status, make, map, marks, error, symbol, active, setActive, onBack, onStep, onOpen, onMake, onStop, makeBtn, title, said }: ReviewViewProps) {
+export function ReviewView({ status, make, map, marks, error, symbol, active, setActive, onBack, onStep, onOpen, onMake, onStop, makeBtn, title, said, progress = false, panel }: ReviewViewProps) {
   const state = screenState(status, make);
   const groups = map ? worklist(map, marks) : [];
   const cov = map ? coverage(map, marks) : null;
@@ -186,7 +226,7 @@ export function ReviewView({ status, make, map, marks, error, symbol, active, se
         {state === "moved" && status && (
           <div className="review-moved">
             <span>{movedLine(status.map_head, status.head)}</span>
-            <MakeButton btn={makeBtn} label={WORDS.makeAgain} making={making} make={make} onMake={onMake} onStop={onStop} />
+            <MakeButton btn={makeBtn} label={WORDS.makeAgain} making={making} progress={progress} make={make} onMake={onMake} onStop={onStop} />
           </div>
         )}
         {shown && failed && make && <div className="review-failed"><p className="review-reason">{make.error}</p><CopyCommand command={make.command} /></div>}
@@ -200,7 +240,7 @@ export function ReviewView({ status, make, map, marks, error, symbol, active, se
           {(state === "none" || state === "making" || state === "failed") && (
             <div className="review-empty">
               {state === "failed" && make ? <p className="review-reason">{make.error}</p> : <p>{WORDS.noMap}</p>}
-              <MakeButton btn={makeBtn} label={state === "failed" ? WORDS.tryAgain : WORDS.makeMap} primary={state !== "failed"} making={making} make={make} onMake={onMake} onStop={onStop}>
+              <MakeButton btn={makeBtn} label={state === "failed" ? WORDS.tryAgain : WORDS.makeMap} primary={state !== "failed"} making={making} progress={progress} make={make} onMake={onMake} onStop={onStop}>
                 {state === "failed" && make && <CopyCommand command={make.command} />}
               </MakeButton>
             </div>
@@ -214,7 +254,7 @@ export function ReviewView({ status, make, map, marks, error, symbol, active, se
             <Worklist groups={groups} active={active || symbol} setActive={setActive} shown={symbol} onOpen={onOpen} />
           ))}
         </div>
-        <SymbolPane node={node} row={row} title={title} />
+        <SymbolPane map={map} node={node} row={row} marks={marks} title={title} onOpen={onOpen} panel={panel} />
       </div>
       <div className="sr-only" aria-live="polite">{said}</div>
     </div>
@@ -224,17 +264,18 @@ export function ReviewView({ status, make, map, marks, error, symbol, active, se
 /** Make the map, and while it runs the same button as `Making the map · 2 s`
  *  with Stop beside it: a counter, no spinner, and focus stays on the busy
  *  button (§4, the busy rule). */
-function MakeButton({ btn, label, primary, making, make, onMake, onStop, children }: { btn: React.RefObject<HTMLButtonElement | null>; label: string; primary?: boolean; making: boolean; make: service.ReviewMake | null; onMake: () => void; onStop: () => void; children?: React.ReactNode }) {
+function MakeButton({ btn, label, primary, making, progress, make, onMake, onStop, children }: { btn: React.RefObject<HTMLButtonElement | null>; label: string; primary?: boolean; making: boolean; progress: boolean; make: service.ReviewMake | null; onMake: () => void; onStop: () => void; children?: React.ReactNode }) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
-    if (!making) return;
+    if (!making || !progress) return;
+    setNow(Date.now());
     const t = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(t);
-  }, [making]);
+  }, [making, progress]);
   return (
     <span className="review-make">
-      <button ref={btn} className={primary ? "primary" : undefined} {...busyButton({ busy: making, onPress: onMake })}>{making ? makingLabel(elapsedOf(make, now)) : label}</button>
-      {making && <button onClick={onStop}>{WORDS.stop}</button>}
+      <button ref={btn} className={primary ? "primary" : undefined} {...busyButton({ busy: making, onPress: onMake })}>{making ? (progress ? makingLabel(elapsedOf(make, now)) : WORDS.makingShort) : label}</button>
+      {making && progress && <button onClick={onStop}>{WORDS.stop}</button>}
       {children}
     </span>
   );
@@ -320,7 +361,7 @@ function Worklist({ groups, active, setActive, shown, onOpen }: { groups: Group[
             {open && (
               <ul role="group">
                 {g.rows.map((r) => (
-                  <li key={r.id} role="treeitem" aria-level={2} aria-label={rowName(r)} aria-selected={r.id === shown} data-row={r.id}
+                  <li key={r.id} role="treeitem" aria-level={2} aria-label={rowName(r)} aria-describedby={r.path ? `rv-path-${r.id}` : undefined} aria-selected={r.id === shown} data-row={r.id}
                     tabIndex={current === r.id ? 0 : -1} ref={ref(r.id)}
                     className={`rv-row ${r.id === shown ? "on" : ""} ${r.node ? "" : "declared"}`}
                     onFocus={(e) => { e.stopPropagation(); setActive(r.id); }}
@@ -328,8 +369,9 @@ function Worklist({ groups, active, setActive, shown, onOpen }: { groups: Group[
                     <span className={`rv-mark ${r.mark}`} aria-hidden="true">{MARK_GLYPH[r.mark]}</span>
                     <span className="rv-name mono">{r.name}</span>
                     {r.change && <span className="rv-change">{r.change}</span>}
-                    {r.node ? r.node.flags?.map((f, k) => <span key={f} className={`rv-flag ${f}`}>{r.flags[k]}</span>) : <span className="rv-flag declared_not_changed">declared, not changed</span>}
+                    {r.node ? r.node.flags?.map((f, k) => <span key={f} className={`rv-flag ${flagLook(f)}`}>{r.flags[k]}</span>) : <span className={`rv-flag ${flagLook("declared_not_changed")}`}>declared, not changed</span>}
                     {r.changedSince && <span className="rv-since">{WORDS.changedSince}</span>}
+                    {r.path && <span id={`rv-path-${r.id}`} className="sr-only">{r.path}</span>}
                   </li>
                 ))}
               </ul>
@@ -341,23 +383,22 @@ function Worklist({ groups, active, setActive, shown, onOpen }: { groups: Group[
   );
 }
 
-/** Where the symbol's panel mounts (rv-symbol, design §3.3): the title, an
- *  h2 that takes focus when a symbol opens, then the diff and the facts,
- *  beside each other from 1440, the facts under the diff below (§3.4).
- *  With no symbol chosen it is empty. */
-function SymbolPane({ node, row, title }: { node: rv.Node | null; row: Row | null; title: React.RefObject<HTMLHeadingElement | null> }) {
-  if (!node) return <section className="review-symbol empty" aria-label="Symbol" />;
-  const range = node.range_head ?? node.range_base;
+/** Where the symbol's panel mounts (design §3.3): ReviewSymbol, whose h2
+ *  takes focus when a symbol opens, then the diff and the facts, beside
+ *  each other from 1440, the facts under the diff below (§3.4). With no
+ *  symbol chosen it is empty; with no panel props (vitest of the screen's
+ *  states) it draws the title only. */
+function SymbolPane({ map, node, row, marks, title, onOpen, panel }: { map: rv.RevMap | null; node: rv.Node | null; row: Row | null; marks: rv.Marks | null; title: React.RefObject<HTMLHeadingElement | null>; onOpen: (id: string) => void; panel?: PanelProps }) {
+  if (!node || !map) return <section className="review-symbol empty" aria-label="Symbol" />;
+  const from = panel?.from ? map.nodes?.find((n) => n.id === panel.from) ?? null : null;
   return (
     <section className="review-symbol" aria-label="Symbol">
-      <h2 ref={title} tabIndex={-1} className="review-symbol-title">
-        <span className="mono">{row?.name ?? node.id}</span> <span className="rv-change">{node.change}</span>
-      </h2>
-      <div className="meta mono">{node.file}{range ? ` ${range[0]}-${range[1]}` : ""}</div>
-      <div className="review-symbol-body">
-        <div className="review-diff" />
-        <div className="review-facts" />
-      </div>
+      {panel ? (
+        <ReviewSymbol key={node.id} initiative={panel.initiative} card={panel.card} head={panel.head} map={map} node={node} row={row} marks={marks} from={from}
+          title={title} onOpen={onOpen} onBack={panel.onBack} onMarks={panel.onMarks} onNext={panel.onNext} />
+      ) : (
+        <h2 ref={title} tabIndex={-1} className="review-symbol-title"><span className="mono">{row?.name ?? node.id}</span> <span className="rv-change">{node.change}</span></h2>
+      )}
     </section>
   );
 }

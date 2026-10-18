@@ -38,10 +38,10 @@ const status = (state: string, make: Partial<service.ReviewMake> | null = null) 
 const marks = (m: Record<string, string>) => ({ initiative: "init-a", card: "rv-fixture", head: "", marks: Object.entries(m).map(([symbol, state]) => ({ symbol, state })), changed: [] }) as unknown as review.Marks;
 
 const noop = () => undefined;
-function view(p: { status: service.ReviewStatus | null; make?: service.ReviewMake | null; map?: review.RevMap | null; marks?: review.Marks | null; symbol?: string }) {
+function view(p: { status: service.ReviewStatus | null; make?: service.ReviewMake | null; map?: review.RevMap | null; marks?: review.Marks | null; symbol?: string; progress?: boolean }) {
   return renderToStaticMarkup(
     <ReviewView status={p.status} make={p.make ?? null} map={p.map ?? null} marks={p.marks ?? null} error={null} symbol={p.symbol ?? ""} active="" setActive={noop}
-      onBack={noop} onStep={noop} onOpen={noop} onMake={noop} onStop={noop} makeBtn={createRef()} title={createRef()} said="" />,
+      onBack={noop} onStep={noop} onOpen={noop} onMake={noop} onStop={noop} makeBtn={createRef()} title={createRef()} said="" progress={p.progress} />,
   );
 }
 const text = (html: string) => html.replace(/<[^>]+>/g, " ").replace(/&#x27;/g, "'").replace(/&gt;/g, ">").replace(/\s+/g, " ");
@@ -55,10 +55,23 @@ describe("V-S: every §4 state in the design's words", () => {
 
   it("making: the counter on the busy button, no spinner, and Stop", () => {
     const started = new Date(Date.now() - 2_000).toISOString();
-    const h = view({ status: status("none"), make: { state: "making", started, elapsed: 2 } as service.ReviewMake });
+    const h = view({ status: status("none"), make: { state: "making", started, elapsed: 2 } as service.ReviewMake, progress: true });
     expect(h).toMatch(/<button class="primary" aria-disabled="true"[^>]*>Making the map · 2 s<\/button>/);
     expect(h).toContain(">Stop</button>");
     expect(h).not.toMatch(/spinner|spin/);
+  });
+
+  it("making, its first second (FR-23): only the busy button, Making the map…, no counter and no Stop", () => {
+    const h = view({ status: status("none"), make: { state: "making", started: new Date().toISOString(), elapsed: 0 } as service.ReviewMake });
+    expect(h).toMatch(/<button class="primary" aria-disabled="true"[^>]*>Making the map…<\/button>/);
+    expect(h).not.toContain(">Stop</button>");
+    expect(h).not.toContain("Making the map ·");
+  });
+
+  it("making over a moved map: Make it again turns Making the map…, Stop only with the progress line", () => {
+    const make = { state: "making", started: new Date().toISOString(), elapsed: 0 } as service.ReviewMake;
+    expect(view({ status: status("moved"), map: fixture, make })).toMatch(/aria-disabled="true"[^>]*>Making the map…<\/button><\/span>/);
+    expect(view({ status: status("moved"), map: fixture, make, progress: true })).toContain(">Stop</button>");
   });
 
   it("failed: the reason, Try again and Copy the command", () => {
@@ -137,5 +150,21 @@ describe("the crumb (§2)", () => {
     expect(text(h)).toContain("init-a › A card to review › Review");
     expect(h).toContain('<b aria-current="page">Review</b>');
     expect(h.match(/aria-current="page"/g)).toHaveLength(1);
+  });
+});
+
+describe("FR-22: a row's description is its full path", () => {
+  it("each changed row is described by its file", () => {
+    const h = view({ status: status("map"), map: fixture });
+    expect(h).toContain('aria-describedby="rv-path-ts:web/src/format.ts#formatName"');
+    expect(h).toContain('<span id="rv-path-ts:web/src/format.ts#formatName" class="sr-only">web/src/format.ts</span>');
+  });
+});
+
+describe("V-R5: the row's flags take flagLook", () => {
+  it("undeclared is amber, untested muted", () => {
+    const h = view({ status: status("map"), map: fixture });
+    expect(h).toContain('<span class="rv-flag amber">not in the card&#x27;s declared changes</span>');
+    expect(h).toContain('<span class="rv-flag muted">no direct test</span>');
   });
 });
