@@ -2,12 +2,15 @@ package service
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 
 	"organizer/internal/model"
 	"organizer/internal/review"
@@ -26,10 +29,78 @@ type ReviewCheckout struct {
 	Dir  string `json:"dir"`
 }
 
+// editorWait is how long OpenReviewAt waits on the editor (leftovers-43
+// FR-2): an exit in that time is an answer, a process still running is an
+// editor that opened.
+const editorWait = 2 * time.Second
+
 // startEditor runs the editor's argv. Tests replace it: no test launches
 // a real editor.
-var startEditor = func(argv []string) error {
-	return exec.Command(argv[0], argv[1:]...).Start()
+var startEditor = func(argv []string) error { return runEditor(argv, editorWait) }
+
+// runEditor starts argv and waits up to wait for it (FR-2): a start that
+// fails, or a non-zero exit in that time, is "editor didn't open: <the first
+// stderr line>"; exit 0, or still running, is opened. A process still
+// running is reaped in the background.
+func runEditor(argv []string, wait time.Duration) error {
+	cmd := exec.Command(argv[0], argv[1:]...)
+	stderr := &stderrLine{}
+	cmd.Stderr = stderr
+	// a launcher that exits and leaves a child holding stderr does not hold
+	// Wait for the child's life
+	cmd.WaitDelay = 100 * time.Millisecond
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("editor didn't open: %s", err)
+	}
+	done := make(chan error, 1)
+	go func() { done <- cmd.Wait() }()
+	select {
+	case err := <-done:
+		// ErrWaitDelay is a clean exit whose child kept stderr open
+		if err == nil || (errors.Is(err, exec.ErrWaitDelay) && cmd.ProcessState.Success()) {
+			return nil
+		}
+		if line := stderr.String(); line != "" {
+			return fmt.Errorf("editor didn't open: %s", line)
+		}
+		return fmt.Errorf("editor didn't open: %s", err)
+	case <-time.After(wait):
+		return nil
+	}
+}
+
+// stderrLine keeps the first non-blank line written to it, at most 512
+// bytes of it, and drops the rest: an editor's stderr is never buffered
+// whole.
+type stderrLine struct {
+	mu   sync.Mutex
+	buf  []byte
+	done bool
+}
+
+func (f *stderrLine) Write(p []byte) (int, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	for _, b := range p {
+		if f.done {
+			break
+		}
+		switch {
+		case b == '\n' && strings.TrimSpace(string(f.buf)) != "":
+			f.done = true
+		case b == '\n':
+			f.buf = f.buf[:0]
+		case len(f.buf) < 512:
+			f.buf = append(f.buf, b)
+		}
+	}
+	return len(p), nil
+}
+
+func (f *stderrLine) String() string {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return strings.TrimSpace(string(f.buf))
 }
 
 // reviewCheckouts is, per repo of the card, the first checkout whose HEAD
@@ -86,7 +157,9 @@ func checkoutOf(cos []ReviewCheckout, file string) (ReviewCheckout, string, bool
 // OpenReviewAt opens file of the card's shown map at line in the editor,
 // in the checkout whose HEAD is the map's head (FR-1). It refuses, opening
 // nothing, a card of another machine, a path outside the checkout, and a
-// head checked out nowhere here: "<short sha> is not checked out here".
+// head checked out nowhere here: "<short sha> is not checked out here". An
+// editor that exits non-zero within editorWait is "editor didn't open: …"
+// (leftovers-43 FR-2).
 func (s *Service) OpenReviewAt(initiativeID, slug, file string, line int) error {
 	if _, err := review.RepoPath(file); err != nil {
 		return err
