@@ -163,8 +163,9 @@ function MarkForm({ name, id, marks, onMark, onNext }: { name: string; id: strin
       <fieldset className="rs-radios">
         <legend className="sr-only">Mark {name}</legend>
         {opts.map(([s, label]) => (
-          <label key={s} className={`rs-radio ${s}`}>
-            <input type="radio" name={`rs-mark-${id}`} value={s} checked={state === s} onChange={() => setState(s)} /> {label}
+          <label key={s} className={`rs-radio ${s} ${state === s ? "on" : ""}`}>
+            <input type="radio" name={`rs-mark-${id}`} value={s} checked={state === s} onChange={() => setState(s)} />
+            <span>{label}</span>
           </label>
         ))}
       </fieldset>

@@ -110,7 +110,7 @@ describe("V-R8: the mark", () => {
     const q = (note: string) => ({ marks: [{ symbol: G, state: "question", note }], changed: [] }) as unknown as review.Marks;
     expect(panel({ id: G, marks: q("") })).toMatch(/<button disabled="">Save<\/button>/);
     expect(panel({ id: G, marks: q("why the comma?") })).toMatch(/<button>Save<\/button>/);
-    expect(panel({ id: G, marks: q("why the comma?") })).toMatch(/checked="" value="question"/);
+    expect(panel({ id: G, marks: q("why the comma?") })).toMatch(/checked="" value="question"\/><span>Question<\/span>/);
   });
 });
 
