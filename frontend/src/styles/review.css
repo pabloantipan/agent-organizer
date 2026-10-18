@@ -11,12 +11,15 @@
   height: 100%; min-width: 0; overflow: hidden;
 }
 
-/* The crumb: `<initiative> › <card title> › Review`. */
-/* The card title is what gives way: a zero basis that grows into the
-   bar's free space up to 32ch, so the bar never grows past the window (a
-   nowrap title would count at full width in the shell's column). */
-.tb-where.review-where, .review-where .crumbs { flex: 1 1 auto; }
-.crumbs .crumb-card { flex: 1 1 auto; width: 0; min-width: 0; max-width: 32ch; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--fg-muted); }
+/* The crumb: `<initiative> › <card title> › Review` (FR-21). The card
+   title shrink-wraps: its own width up to 32ch, cut only when the bar is
+   full, so `› Review` follows it and the free space falls after Review.
+   The zero width sits on the crumbs, not on the title: the bar's
+   min-content then does not count the nowrap title, which would widen the
+   shell's column and every screen at 1024. */
+.tb-where.review-where { flex: 1 1 auto; }
+.review-where .crumbs { flex: 1 1 auto; width: 0; }
+.crumbs .crumb-card { flex: 0 1 auto; min-width: 0; max-width: 32ch; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--fg-muted); }
 .crumbs .crumb-card ~ b, .crumbs .crumb-id { flex-shrink: 0; }
 
 .review-bar { display: flex; justify-content: flex-end; min-width: 0; }
