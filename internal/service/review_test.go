@@ -562,7 +562,8 @@ func TestAskReview(t *testing.T) {
 	}
 	m, _ = s.ReviewMarks("rv", "c1", "")
 	for _, mk := range m.Marks {
-		if mk.Symbol == b && (mk.State != "blocked" || mk.Note != "down" || mk.Asked != "") {
+		// the earlier ask of b is kept (leftovers-44 FR-1), no new one recorded
+		if mk.Symbol == b && (mk.State != "blocked" || mk.Note != "down" || mk.Asked != "M4" || mk.AskedThread != "T1" || mk.AskedNote != "3 now?") {
 			t.Errorf("the mark after a failed post %+v", mk)
 		}
 	}
