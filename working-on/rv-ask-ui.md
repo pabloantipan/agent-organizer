@@ -245,6 +245,50 @@ For aglaea:
 
 Not verified in WKWebView (vitest, DOM, or the stubbed binding only): a real successful ask and its thread (`? asked`, `Asked fse · Open the thread`, landing on that thread in Conversations: stub only, by the no-mailbox rule); `Asking…` on the primary (too fast); nobody to ask, `Save question` and `Save block` without `, next` (vitest); the closed-thread replacement (FR-26, au-review's); another machine's card; a pointer press on anything (no pointer, by rule).
 
+### Round 2
+au-ui (a fresh session), 2026-10-18, on 8ba6d0dd764685f930d1d4659c28588ed7a50f68 for every row; the branch did not move. **Verdict: pass.** No new finding of severity 3 or 4. Evidence is in `.wt-notes/au-ui/r2/`: `out/` holds the harness logs `h-1024x640.txt`, `h-1440x900.txt` and `h-reg-1024x640.txt`, plus the shots; the steps are `steps-*.txt`.
+
+Shared test run: **reused** run `ae6a7c37-38486` of 8ba6d0dd7646 by organizer-probe-au-review. Exit 0, go ok, vitest 76 files / 933 tests (`r2/maketest.log`).
+
+No mailbox: each of my three dev runs and the review build had `discuss_state_dir: <empty mktemp -d>` appended right after `fixture-home.sh --review`, with auth off (`out/*config-check.txt`). Every real ask failed with `open …/tokens.json: no such file or directory`, and every such dir is still empty. Nothing of mine reached discuss.
+
+How each state was checked:
+- **Review build** (`make review-build`, detached worktree, my pid, AXPress on that pid only). Seen at 1024×640 and 1440×900 on formatName, with Question and no note: `Ask fse, next`, `Save`, and `Saves the mark and asks fse (the initiative's FSE) in this review's thread. Wakes fse.` Shots: `wk-*-R2-question-nonote-rb.png`. The same as round 1.
+- **Tab harness** (my round-1 copy). It ran against my own `wails dev` on :34259 from a clean clone of 8ba6d0d, under `harness.lock`, offscreen, `isKey: true`. Each size used a fresh fixture. The steps are au-build's `b2.txt`, read and reused, plus a contrast check and focus sampling every 20 ms from the press of `Open the thread` until it lands.
+
+Round 1's findings:
+- **U1 (3): fixed (A9)**, at 1024×640 and also at 1440×900.
+  - formatName at 1024: the failure line is at 576–624, inside the panel's 169–624 (the panel scrolled 54). Focus stays on `Ask fse, next`. `aria-describedby` names the line. The live region says `Saved here; couldn't ask fse: …` once.
+  - `Try again`: same place, focus on `Try again`, said once again.
+  - The last symbol (Greet, Blocked, `Ask fse`): the line is at 576–624, inside 161–624. Focus is on `Ask fse`. The header reads `Reviewed 2 of 2`. The live region says only the failure line, never `Reviewed 2 of 2` (`wk-1024x640-A9-last-failed.png`).
+- **U2 (2): fixed (A10)**, with AskReview, GetAgents and GetCellThread stubbed in my page only; nothing posts.
+  - After `Open the thread`, focus went button → `← Review` (parked about 18 ms while the thread was unlisted) → the thread's divider (`Thread rv-fixture: review at stub, open, 1 of 12`). The 20 ms sampler never saw the body after the press.
+  - One Tab reaches `← Review`. Return goes back to Review with focus on `svc.Greet`'s h2. The same at both sizes (`wk-*-A10-landed.png`, `wk-*-A10-tab.png`).
+- **U4 (2): fixed (A11).** `asked` is rgb(181,175,195), which is `--fg-muted`, on both rows: 7.02:1 on the current row (#2f1b55) and 7.89:1 on the list. The glyphs keep their hue: `?` in `--tone` at 4.85:1, `✕` in `--danger` at 4.61:1, at 11 px semibold (`wk-*-A11-asked-rows.png`).
+- **U3 (2) and U5 (1):** unchanged, held by the FSE for the next leftovers (R26, R27). No new verdict. The raw tmp path still shows in the failure line.
+
+Regression: round 1's 1024 steps ran again on a fresh fixture (`h-reg-1024x640.txt`). The same result as round 1:
+- Tab order: radios → Note → primary → `Save` → `Try again`.
+- The h2 takes focus on N.
+- On the last symbol the primary reads `Reviewed`, or `Ask fse` without `, next`; focus stays; the header reads `Reviewed 2 of 2`; `Next to review` is gone.
+- The muted flag sits at 58 = name 58 with padding 0. The amber flag keeps 7 px.
+- No horizontal scroll at 1024.
+- Two differences, neither a finding:
+  - Round 1 caught `Asking…` on `Try again` and this run did not (timing; vitest covers it).
+  - After N away from a failed symbol, the live region's text stays the old failure line. It is not re-announced, since nothing changed.
+
+Conversations: the round-2 diff adds only `data-review-back` and the `slackDraft.threadId` landing (`landDivider`, which is a plain divider focus when there is no `← Review`, as before; vitest "without ← Review"). Both are in Amendment 5's boundary.
+
+Design words compared to the screen, round 2 only:
+- `Saved here; couldn't ask fse: <first error line>` and `Try again`: the same, in view at 1024.
+- `asked`: the word is the same; the colour is muted.
+- `← Review`: the same. It is the next Tab stop from the divider.
+Everything else is as in round 1.
+
+Observation (not this card's): in Conversations the chat list keeps `channel` highlighted while the timeline shows another chat. Round 1's archive landing showed the same, so it predates this card. For the FSE, to look at with the chat list.
+
+Not verified in WKWebView: a real successful ask, `? asked`, `Asked fse · Open the thread`, and landing on a real thread. These were seen only with stubbed bindings in my page, by the no-mailbox rule.
+
 ## Done
 - 2026-10-18 au-build round 2: A9 (0ae14ff), A11 (4513957), A10 (8ba6d0d) on rv-ask-ui rebased on aba9e8e; gate A4-A11, X0 met; notes `.wt-notes/au-build/progress.md`.
 - 2026-10-18 au-build: FR-28, FR-29, FR-38, FR-40 (e0dc71a) and FR-39 (60f74c3) on rv-ask-ui; gate A4, A5, X0, A6, A7, A8 met; notes `.wt-notes/au-build/progress.md`.
