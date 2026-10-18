@@ -4,17 +4,15 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
-## HAND-OFF 2026-10-17 (last SHA seen b194de3)
+## HAND-OFF 2026-10-17 (last SHA seen 13bfac1)
 
-- No supervisor running. lf40-verb-fit landed (sup79, 13 min vs 10-25, $4.96); installed v0.2.0-2363-gb194de3. Pablo pushes main.
-- Held for the next frontend leftovers (vf-ui, done/lf40-verb-fit.md ## UI review): UF1 sev 1, a test that renders every verb label Home.tsx can draw against `--ib-verb-w` (Rule · draft fits by 5.8 px; Answer · draft would not); spec gaps: the verb labels are listed nowhere, and wide Home (>=1920, rule-box.css) is unchecked for FR-1.
-- For Hephaistos when next writing: change-check false-flags CSS custom properties and footprint written as words (sup79).
-- Held for the next Go leftovers, from rm-v1-reconcile (sup80, thread 01M5651D): organizer help's review line lacks --card; a multi-repo card reconciles only its first repo (change-check runs once with rm.Base/rm.Head).
-- **Repetition, 2nd: my footprints omit test files** (lf40 SpecReader.test.tsx, rm-v1-reconcile internal/cli/review_test.go; each a change-check `outside footprint` flag). My craft fix: every footprint lists its test files by path (`*_test.go`, `*.test.ts(x)` beside each file). Own habit, no record.
-- Held for the next Go leftovers, from rm-v1-ts (sup80, thread 01M5644T): review's problem lines when cgo is off (PATH without a C compiler; nodes fine); embed placeholder retry costs ~1 s (c8e1773 4.2 s vs 3.2 s); `organizer help`'s review line says 'the Go change'; doctor/review never name tar; the summary's source line lists sources registered, not used.
-- Held for the next Go leftovers: setSeat notify-before-close (organizer run race); one shared spec-path helper (scan.cardSpecRel vs service.specRel). Gate habit: every make test row carries a temp XDG_DATA_HOME.
-- Raised 0145 (review-map v1: rm-v1-ts then rm-v1-reconcile, forecast 40-90 min over 2 waves); Q1 answered (odyssey is a clone of lodestar; review runs in its clone). Ruled 2026-10-17 ("ok", 945a5e8); sup80 runs both cards. On its closing report: end it.
-- My watcher (pid 51122) is the old binary from before discuss 80c3608 (Hephaistos, thread 01M518M3): the missed wake of 10-15 23:03 is fixed by restarting this seat, Pablo's call.
+- No supervisor running. Today: lf40-verb-fit (sup79, 13 min vs 10-25, $4.96) and review-map v1 (sup80, rm-v1-ts + rm-v1-reconcile, 42 min vs 40-90, $12.23, first-round passes, no false premise); installed at 13bfac1. Pablo pushes main.
+- review-map stage: exit 3 met; exits 1 (odyssey walks a branch in Deltagos) and 2 (question on a node -> supervisor thread) need v2 and v3. Asked Aglaea for the v2 Review view design (thread "review-map v2: the Review view, design request"); spec v2 from her design spec.
+- Held for the next frontend leftovers (vf-ui, done/lf40-verb-fit.md ## UI review): UF1 sev 1, a test of every verb label Home.tsx can draw against `--ib-verb-w`; spec gaps: verb labels listed nowhere; wide Home (>=1920) unchecked for FR-1.
+- Held for the next Go leftovers: from rm-v1-reconcile (thread 01M5651D): help's review line lacks --card; multi-repo cards reconcile only the first repo. From rm-v1-ts (thread 01M5644T): problem lines when cgo is off; placeholder retry ~1 s; help says 'the Go change'; doctor/review never name tar; summary lists sources registered not used. Older: setSeat notify-before-close; one shared spec-path helper. Gate habit: temp XDG_DATA_HOME on every make test row.
+- sup80: runs.jsonl attributes neither card when seats run from the root with code in .wt/ (session.MatchCard): a finding for the runs baseline, held.
+- **Repetition, 2nd: my footprints omit test files** (lf40, rm-v1-reconcile). Habit: every footprint names its test files by path.
+- My watcher is the old binary (before discuss 80c3608); restarting this seat fixes missed wakes, Pablo's call.
 
 ## HAND-OFF 2026-10-16 (last SHA seen 7f439a3)
 
