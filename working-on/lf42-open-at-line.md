@@ -6,7 +6,7 @@ branch: lf42-open-at-line
 seat:
 stage: review-map
 updated: 2026-10-18
-next: "pablo: rule 0150 (leftovers 42)"
+next: "sup83 runs it as wave 2, after leftovers 41 (0150 ruled in away mode, 2026-10-18)"
 risk: low
 footprint: [internal/service/review_open.go, internal/service/review_open_test.go, internal/service/review.go, app.go, frontend/wailsjs/*, frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css]
 depends_on: [lf41-review-words, lf41-review-go]

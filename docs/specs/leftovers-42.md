@@ -1,6 +1,6 @@
 # Leftovers 42: Open in editor at the symbol's line: the build spec
 
-status: proposed (0150)
+status: ruled (0150)
 by: the FSE, 2026-10-18, on main at the merge of leftovers 41's cards, in away mode
 sources: Aglaea's `docs/ux/specs/review-view.md` §3.3 ("`Open in editor`
 at the head line (secondary)"); rs-ui's U3 and G1 (`working-on/done/rv-symbol.md`,
