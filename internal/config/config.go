@@ -52,6 +52,12 @@ type Config struct {
 	// deaf and capped cannot be made on demand; empty (the default) asks
 	// discuss as always.
 	CannedHealth string `yaml:"canned_health" json:"canned_health"`
+	// CannedPost names a file PostToCell appends each post to, one JSON
+	// line, in place of posting: the reply is thread canned-<n> and nothing
+	// reaches discuss. A test seam for the fixture, where an ask must be
+	// seen to succeed without a mailbox (leftovers-41 FR-14); empty (the
+	// default) posts as always.
+	CannedPost string `yaml:"canned_post" json:"canned_post"`
 	// CrewModel is the model crew seats start with (ANTHROPIC_MODEL in the
 	// prelude, which beats the settings file). A cell.json "model" overrides
 	// it. Default opus: personas reason and talk, they do not need the top tier.

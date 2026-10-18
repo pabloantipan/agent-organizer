@@ -110,21 +110,3 @@ func TestReadSpecMissing(t *testing.T) {
 		t.Fatalf("ReadSpec = %+v, %v; want missing", doc, err)
 	}
 }
-
-func TestSpecRel(t *testing.T) {
-	for in, want := range map[string]string{
-		"docs/specs/diagrams.md (FR-6 to FR-8; diagrams-in-app D1-D8)": "docs/specs/diagrams.md",
-		"docs/x.md#sec":  "docs/x.md",
-		"docs/x.md#sec,": "docs/x.md",
-		"./a/../b.md":    "b.md",
-		"../out.md":      "",
-		"/abs.md":        "",
-		"#only":          "",
-		"   ":            "",
-	} {
-		got, ok := specRel(in)
-		if got != want || ok != (want != "") {
-			t.Errorf("specRel(%q) = %q, %v; want %q", in, got, ok, want)
-		}
-	}
-}

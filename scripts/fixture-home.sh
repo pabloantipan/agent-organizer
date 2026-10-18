@@ -14,6 +14,18 @@
 #   eval "$(scripts/fixture-home.sh --groups)"   # the default home without Asleep and Archived
 #   eval "$(scripts/fixture-home.sh --memory critical)"  # memory forced, with any of the above
 #   eval "$(scripts/fixture-home.sh --review)"   # the default home plus a card to review
+#   eval "$(scripts/fixture-home.sh --review --canned-post)"  # posts go to $tmp/posts.jsonl
+#
+# The mailbox (docs/specs/leftovers-41.md FR-13, FR-14): the default home,
+# --review and --groups write discuss_state_dir: $tmp/discuss, an empty
+# directory, so no token of the real mailbox is read and nothing the app or
+# this script does posts to it; asking_thread and decided_thread below find
+# no registry there and say so. Only --live-mailbox keeps the real one
+# (DISCUSS_STATE_DIR, else ~/.local/state/discuss). --canned-post, anywhere
+# among the options, adds canned_post: $tmp/posts.jsonl, so a post the app
+# makes (Ask on a review mark, a message in Conversations) is one JSON line
+# there and answers thread canned-<n>: an ask can be seen to succeed with no
+# mailbox at all.
 #
 # Review (docs/specs/review-map.md v2, FR-17): --review, anywhere among the
 # options of the default home, adds to init-a in the temp copy only the card
@@ -54,14 +66,14 @@
 # standin line at the end runs in init-a with the environment a probe launch
 # would give it; organizer-fixture-probe-sup9 has no AGENT_NAME, so its row
 # says "no identity". --live-mailbox drops canned_health and reads every
-# thread from discuss as it is. Either way the
+# thread from the real discuss as it is. Either way the
 # stand-ins are in FIXTURE_AGENT_PIDS; `kill $FIXTURE_AGENT_PIDS` ends them.
 #
 # Needs me has 15 rows in the default home, with or without discuss: the 14
 # of leftovers-11 V1 (see asking_thread's call below) and init-a's stalled
-# task, 0011 ruled 10 min back (leftovers-28 R2). With discuss, init-a's
-# Conversations also hold one solved thread whose ruling Solved draws (F5);
-# see decided_thread.
+# task, 0011 ruled 10 min back (leftovers-28 R2). With --live-mailbox and
+# discuss running, init-a's Conversations also hold one solved thread whose
+# ruling Solved draws (F5); see decided_thread.
 #
 # The default home also holds init-many (testdata/fixture-many), 76 decision
 # records for the find and limit rows (leftovers-6 FR-7).
@@ -143,6 +155,7 @@ set -euo pipefail
 # keep their place.
 args=()
 review=""
+canned_post=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --memory)
@@ -153,11 +166,13 @@ while [ $# -gt 0 ]; do
       echo "export ORGANIZER_MEMORY_FAKE='@$memfile'"
       shift 2 ;;
     --review) review=1; shift ;;
+    --canned-post) canned_post=1; shift ;;
     *) args+=("$1"); shift ;;
   esac
 done
 set -- ${args[@]+"${args[@]}"}
 case "${1:-}" in --twenty|--empty) [ -z "$review" ] || { echo "--review adds to the default home's init-a, not to $1" >&2; exit 2; } ;; esac
+case "${1:-}" in --twenty|--empty) [ -z "$canned_post" ] || { echo "--canned-post adds to the default home, not to $1" >&2; exit 2; } ;; esac
 # A shell that evaluated an earlier --memory keeps it otherwise.
 [ -n "${memfile:-}" ] || echo "unset ORGANIZER_MEMORY_FAKE FIXTURE_MEMORY_FILE"
 
@@ -191,7 +206,7 @@ pids=""
 # registry inside python and never printed. Without discuss it says so on
 # stderr and the canned file keeps no threads.
 asking_thread() {
-  DISCUSS_STATE="${DISCUSS_STATE_DIR:-$HOME/.local/state/discuss}" \
+  DISCUSS_STATE="$mailbox" \
   DISCUSS_ADDR="${DISCUSS_BIND:-127.0.0.1:9494}" python3 - "$1" <<'PY' >&2
 import json, os, sys, urllib.request
 path, project = sys.argv[1], "organizer-fixture"
@@ -236,7 +251,7 @@ PY
 # tokens are read inside python and never printed. Without discuss it says so
 # on stderr and writes no state.
 decided_thread() {
-  DISCUSS_STATE="${DISCUSS_STATE_DIR:-$HOME/.local/state/discuss}" \
+  DISCUSS_STATE="$mailbox" \
   DISCUSS_ADDR="${DISCUSS_BIND:-127.0.0.1:9494}" python3 - "$1" <<'PY' >&2
 import json, os, sys, time, urllib.request
 path, project = sys.argv[1], "organizer-fixture"
@@ -350,6 +365,14 @@ groups=""
 # lsof resolves symlinks in an agent's cwd, as in --twenty above.
 tmp="$(cd "$tmp" && pwd -P)"
 home="$tmp/home"
+# The mailbox this home reads and posts to (FR-13): its own empty one unless
+# --live-mailbox.
+mailbox="$tmp/discuss"
+if [ -n "$live_mailbox" ]; then
+  mailbox="${DISCUSS_STATE_DIR:-$HOME/.local/state/discuss}"
+else
+  mkdir -p "$mailbox"
+fi
 # node_modules and Library are ignore-dir fixtures; they are not needed here.
 (cd "$repo/testdata/home" && tar --exclude=./node_modules --exclude=./Library -cf - .) | (cd "$home" && tar -xf -)
 (cd "$repo/testdata/fixture-overlay" && tar --exclude=./README.md -cf - .) | (cd "$home" && tar -xf -)
@@ -564,6 +587,8 @@ zellij: /usr/bin/true
 probe_state_dir: $tmp/probe
 EOF
 [ -n "$live_mailbox" ] || echo "canned_health: $tmp/health.json" >> "$tmp/config.yaml"
+[ -n "$live_mailbox" ] || echo "discuss_state_dir: $mailbox" >> "$tmp/config.yaml"
+[ -z "$canned_post" ] || echo "canned_post: $tmp/posts.jsonl" >> "$tmp/config.yaml"
 # The transversal roles (docs/ux/specs/transversal-roles.md, R1-R4): the
 # default list's names and globs with every bitácora inside the fixture
 # home, never the real ones. Hephaistos keeps two HAND-OFFs (this machine's,

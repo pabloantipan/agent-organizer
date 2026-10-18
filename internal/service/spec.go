@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
+
+	"organizer/internal/specpath"
 )
 
 // SpecDoc is a spec file as the reader shows it (docs/specs/diagrams.md
@@ -33,7 +34,7 @@ func (s *Service) ReadSpec(initiativeID, path string) (SpecDoc, error) {
 	if err != nil {
 		return SpecDoc{}, err
 	}
-	rel, ok := cleanRel(path)
+	rel, ok := specpath.Clean(path)
 	allowed := map[string]bool{}
 	for _, files := range si.SpecFiles {
 		for _, f := range files {
@@ -41,7 +42,7 @@ func (s *Service) ReadSpec(initiativeID, path string) (SpecDoc, error) {
 		}
 	}
 	for _, c := range si.Cards {
-		if p, ok := specRel(c.Spec); ok {
+		if p, ok := specpath.Card(c.Spec); ok {
 			allowed[p] = true
 		}
 	}
@@ -59,29 +60,4 @@ func (s *Service) ReadSpec(initiativeID, path string) (SpecDoc, error) {
 	}
 	doc.Text = string(b)
 	return doc, nil
-}
-
-// specRel is the file a card's spec: field names: its first word (the rest
-// is prose, "docs/specs/x.md (FR-1 to FR-3)"), as cleanRel reads it.
-func specRel(ref string) (string, bool) {
-	f := strings.Fields(ref)
-	if len(f) == 0 {
-		return "", false
-	}
-	return cleanRel(strings.TrimRight(f[0], ",;:"))
-}
-
-// cleanRel is a path relative to the initiative root with forward slashes,
-// without its #section. A path that is absolute or climbs out of the root
-// names nothing.
-func cleanRel(path string) (string, bool) {
-	p, _, _ := strings.Cut(path, "#")
-	if strings.TrimSpace(p) == "" || filepath.IsAbs(p) || strings.HasPrefix(p, "/") {
-		return "", false
-	}
-	rel := filepath.Clean(filepath.FromSlash(p))
-	if rel == "." || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
-		return "", false
-	}
-	return filepath.ToSlash(rel), true
 }

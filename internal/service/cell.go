@@ -1,11 +1,15 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"organizer/internal/config"
@@ -322,13 +326,54 @@ func (s *Service) PostToCell(initiativeID string, p CellPost) (discuss.PostResul
 	if p.Kind == "" {
 		p.Kind = "msg"
 	}
+	req := discuss.PostRequest{To: p.To, ThreadID: p.ThreadID, ParentID: p.ParentID, Kind: p.Kind, Subject: strings.TrimSpace(p.Subject), Body: p.Body}
+	if f := config.Expand(s.cfg.CannedPost); f != "" {
+		return cannedPost(f, req, s.clock())
+	}
 	c, err := s.humanClient(si.Cell)
 	if err != nil {
 		return discuss.PostResult{}, err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	return c.Post(ctx, discuss.PostRequest{To: p.To, ThreadID: p.ThreadID, ParentID: p.ParentID, Kind: p.Kind, Subject: strings.TrimSpace(p.Subject), Body: p.Body})
+	return c.Post(ctx, req)
+}
+
+// cannedMu keeps two posts from counting the same line.
+var cannedMu sync.Mutex
+
+// cannedPost is PostToCell under canned_post (leftovers-41 FR-14): the
+// request as one JSON line appended to file, and no token, socket or
+// network touched. Post n of the file answers message canned-msg-<n> in
+// thread canned-<n>, or in the thread it was posted into.
+func cannedPost(file string, req discuss.PostRequest, now time.Time) (discuss.PostResult, error) {
+	line, err := json.Marshal(req)
+	if err != nil {
+		return discuss.PostResult{}, err
+	}
+	cannedMu.Lock()
+	defer cannedMu.Unlock()
+	old, err := os.ReadFile(file)
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return discuss.PostResult{}, err
+	}
+	n := bytes.Count(old, []byte("\n")) + 1
+	f, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0o644)
+	if err != nil {
+		return discuss.PostResult{}, err
+	}
+	if _, err := f.Write(append(line, '\n')); err != nil {
+		f.Close()
+		return discuss.PostResult{}, err
+	}
+	if err := f.Close(); err != nil {
+		return discuss.PostResult{}, err
+	}
+	res := discuss.PostResult{ID: fmt.Sprintf("canned-msg-%d", n), ThreadID: req.ThreadID, CreatedAt: now.Unix()}
+	if res.ThreadID == "" {
+		res.ThreadID = fmt.Sprintf("canned-%d", n)
+	}
+	return res, nil
 }
 
 // SetCellThreadStatus reopens, escalates or closes a thread as the human.

@@ -59,6 +59,7 @@ export namespace config {
 	    agent_binary: string;
 	    discuss_state_dir: string;
 	    canned_health: string;
+	    canned_post: string;
 	    crew_model: string;
 	    record_url: string;
 	    help_doc: string;
@@ -87,6 +88,7 @@ export namespace config {
 	        this.agent_binary = source["agent_binary"];
 	        this.discuss_state_dir = source["discuss_state_dir"];
 	        this.canned_health = source["canned_health"];
+	        this.canned_post = source["canned_post"];
 	        this.crew_model = source["crew_model"];
 	        this.record_url = source["record_url"];
 	        this.help_doc = source["help_doc"];
