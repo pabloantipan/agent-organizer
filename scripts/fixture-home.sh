@@ -487,7 +487,8 @@ CARD
   perl -pi -e 's/"hello " \+ name/"hello, " + name + "!"/' "$a/svc/greet.go"
   perl -pi -e 's/first \+ " " \+ last/last.toUpperCase() + ", " + first/' "$a/web/src/format.ts"
   g commit -q -am "feat: greet acme by name"
-  perl -pi -e 's/last.toUpperCase\(\) \+ ", " \+ first/`${last.toUpperCase()}, ${first}`/' "$a/web/src/format.ts"
+  # \$ keeps perl from interpolating ${…}: the commit is one real line (G2).
+  perl -pi -e 's/last.toUpperCase\(\) \+ ", " \+ first/`\${last.toUpperCase()}, \${first}`/' "$a/web/src/format.ts"
   g commit -q -am "fix: formatName with a template"
   g tag review-second
   g reset -q --hard HEAD^
