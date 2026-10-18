@@ -11,6 +11,7 @@ restating it (the discuss skill).
 - Held for the next frontend leftovers (vf-ui, done/lf40-verb-fit.md ## UI review): UF1 sev 1, a test of every verb label Home.tsx can draw against `--ib-verb-w`; spec gaps: verb labels listed nowhere; wide Home (>=1920) unchecked for FR-1.
 - Held for the next Go leftovers: from rm-v1-reconcile (thread 01M5651D): help's review line lacks --card; multi-repo cards reconcile only the first repo. From rm-v1-ts (thread 01M5644T): problem lines when cgo is off; placeholder retry ~1 s; help says 'the Go change'; doctor/review never name tar; summary lists sources registered not used. Older: setSeat notify-before-close; one shared spec-path helper. Gate habit: temp XDG_DATA_HOME on every make test row.
 - sup80: runs.jsonl attributes neither card when seats run from the root with code in .wt/ (session.MatchCard): a finding for the runs baseline, held.
+- 2026-10-18: v2 premise `readOnlyOf marks another machine's card` was false (I read the name, not the body; it is asleep/archived). Caught by rd-build via the premise table, as 0141 meant; Amendment 1 (102de58): another machine is `!c.local`. Lesson: a premise row cites the line I read, not the symbol's name.
 - **Repetition, 2nd: my footprints omit test files** (lf40, rm-v1-reconcile). Habit: every footprint names its test files by path.
 - My watcher is the old binary (before discuss 80c3608); restarting this seat fixes missed wakes, Pablo's call.
 
