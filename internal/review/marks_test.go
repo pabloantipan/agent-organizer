@@ -169,10 +169,10 @@ func TestMarksKeepThreadAndAsked(t *testing.T) {
 	if _, err := SetMark("init-m", "c1", rm, textIn(f, rm), a, "question", "why 2?", "pablo", at); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := SetAsked("init-m", rm.Head, "go:example.com/m/p.Z", "T1", "M1"); err == nil {
+	if _, err := SetAsked("init-m", rm.Head, "go:example.com/m/p.Z", "T1", "M1", "why 2?"); err == nil {
 		t.Error("asked on a symbol with no mark")
 	}
-	m, err := SetAsked("init-m", rm.Head, a, "T1", "M1")
+	m, err := SetAsked("init-m", rm.Head, a, "T1", "M1", "why 2?")
 	if err != nil || m.Thread != "T1" || m.Marks[0].Asked != "M1" {
 		t.Fatalf("asked %+v %v", m, err)
 	}
@@ -187,5 +187,62 @@ func TestMarksKeepThreadAndAsked(t *testing.T) {
 	m2, err := ReadMarks("init-m", "c1", rm2, textIn(f, rm2))
 	if err != nil || m2.Thread != "T1" || len(m2.Marks) != 1 || m2.Marks[0].Asked != "M1" {
 		t.Errorf("carried %+v %v", m2, err)
+	}
+}
+
+// K1 (leftovers-44 FR-1): a Save never forgets an ask. An asked mark saved
+// with an edited note, then saved as reviewed, keeps Asked, AskedThread
+// and AskedNote, the note it was asked with, both times, on disk too.
+func TestSetMarkKeepsTheAsk(t *testing.T) {
+	f, rm := marksRepo(t)
+	at := time.Date(2026, 10, 18, 9, 0, 0, 0, time.UTC)
+	a := "go:example.com/m/p.A"
+	if _, err := SetMark("init-m", "c1", rm, textIn(f, rm), a, "question", "why 2?", "pablo", at); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := SetAsked("init-m", rm.Head, a, "T1", "M1", "  why 2?\n"); err != nil {
+		t.Fatal(err)
+	}
+	asked := func(step string, m Marks, state, note string) {
+		t.Helper()
+		if len(m.Marks) != 1 {
+			t.Fatalf("%s: %+v", step, m.Marks)
+		}
+		mk := m.Marks[0]
+		if mk.State != state || mk.Note != note || mk.Asked != "M1" || mk.AskedThread != "T1" || mk.AskedNote != "why 2?" {
+			t.Errorf("%s: %+v", step, mk)
+		}
+		if m.ThreadOf(mk) != "T1" {
+			t.Errorf("%s: thread of %q", step, m.ThreadOf(mk))
+		}
+	}
+	m, err := SetMark("init-m", "c1", rm, textIn(f, rm), a, "question", "why 2, not 3?", "pablo", at.Add(time.Minute))
+	if err != nil {
+		t.Fatal(err)
+	}
+	asked("note edited", m, "question", "why 2, not 3?")
+	m, err = SetMark("init-m", "c1", rm, textIn(f, rm), a, "reviewed", "why 2, not 3?", "pablo", at.Add(2*time.Minute))
+	if err != nil {
+		t.Fatal(err)
+	}
+	asked("reviewed", m, "reviewed", "why 2, not 3?")
+	back, err := ReadMarks("init-m", "c1", rm, textIn(f, rm))
+	if err != nil {
+		t.Fatal(err)
+	}
+	asked("read back", back, "reviewed", "why 2, not 3?")
+	raw, _ := os.ReadFile(StatePath("init-m", rm.Head))
+	if !strings.Contains(string(raw), `"asked_note": "why 2?"`) {
+		t.Errorf("state.json:\n%s", raw)
+	}
+	// a mark never asked writes no ask fields
+	b := "go:example.com/m/p.B"
+	if m, err = SetMark("init-m", "c1", rm, textIn(f, rm), b, "reviewed", "", "pablo", at); err != nil {
+		t.Fatal(err)
+	}
+	for _, mk := range m.Marks {
+		if mk.Symbol == b && (mk.Asked != "" || mk.AskedThread != "" || mk.AskedNote != "") {
+			t.Errorf("never asked: %+v", mk)
+		}
 	}
 }
