@@ -3,6 +3,8 @@ import { createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 import type { review } from "../../wailsjs/go/models";
 import type { MarkState } from "../lib/review";
+// @ts-expect-error node:fs has no type declarations in this tsconfig
+import { readFileSync } from "node:fs";
 
 // The symbol's panel (review-map v2 FR-19; docs/ux/specs/review-view.md
 // §3.3): V-R4's diff, V-R5's flags, V-R6's affected view, V-R7's claim and
@@ -82,7 +84,7 @@ describe("V-R6: Called by → an affected symbol → ← back", () => {
   });
   it("the affected one: read-only, its line, no diff, no mark, and back", () => {
     const h = panel({ id: W, from: G });
-    expect(text(h)).toContain("unchanged · shown because it calls svc.Greet");
+    expect(text(h)).toContain("unchanged · calls svc.Greet");
     expect(h).toContain(">← back to svc.Greet</button>");
     expect(h).not.toContain("rs-diff");
     expect(h).not.toContain('type="radio"');
@@ -155,5 +157,52 @@ describe("V-R10: a mark that did not carry", () => {
     const h = renderToStaticMarkup(<ReviewSymbolView map={map} node={at(F)} row={worklist(map, m).flatMap((g) => g.rows).find((r) => r.id === F)!} marks={m} from={null} texts={texts} error={null}
       title={createRef()} onOpen={noop} onBack={noop} onMark={() => Promise.resolve()} onNext={noop} />);
     expect(h).toContain('<div class="rv-since">changed since you reviewed</div>');
+  });
+});
+
+describe("P1 (FR-30, FR-32): which way a neighbour points; an empty list", () => {
+  it("opened from Called by: calls; from Calls: called by", () => {
+    const L = "go:example.com/inita/svc.lower";
+    const m = { ...map, nodes: [...map.nodes, node({ id: L, file: "svc/lower.go", change: "affected" })],
+      edges: [...map.edges, { from: G, to: L, kind: "uses", change: "unchanged", source: "go/types" }] } as unknown as review.RevMap;
+    const drawn = (id: string) => text(renderToStaticMarkup(<ReviewSymbolView map={m} node={m.nodes.find((n) => n.id === id)!} row={null} marks={null} from={at(G)} texts={null} error={null}
+      title={createRef()} onOpen={noop} onBack={noop} onMark={() => Promise.resolve()} onNext={noop} />));
+    expect(text(panel({ id: G }))).toContain("Called by svc.Welcome");
+    expect(drawn(W)).toContain("unchanged · calls svc.Greet");
+    expect(drawn(L)).toContain("unchanged · called by svc.Greet");
+  });
+  it("Called by and Calls with none read none found", () => {
+    const h = text(panel({ id: F }));
+    expect(h).toContain("Called by none found Calls none found");
+    expect(text(panel({ id: G }))).toContain("Calls none found");
+  });
+});
+
+describe("P2 (FR-31): the primary saves the chosen mark", () => {
+  const saved = (state: string, note: string) => ({ marks: [{ symbol: G, state, note }], changed: [] }) as unknown as review.Marks;
+  it("Question with a note: Save question, next; Blocked: Save block, next; Reviewed or none: Reviewed, next", () => {
+    expect(panel({ id: G, marks: saved("question", "why the comma?") })).toMatch(/<button class="primary">Save question, next<\/button>/);
+    expect(panel({ id: G, marks: saved("blocked", "the comma breaks acme") })).toMatch(/<button class="primary">Save block, next<\/button>/);
+    expect(panel({ id: G, marks: saved("reviewed", "") })).toMatch(/<button class="primary">Reviewed, next<\/button>/);
+    expect(panel({ id: G })).toMatch(/<button class="primary">Reviewed, next<\/button>/);
+  });
+  it("Question or Blocked with no note: the primary waits for one", () => {
+    expect(panel({ id: G, marks: saved("question", "") })).toMatch(/<button class="primary" disabled="">Save question, next<\/button>/);
+    expect(panel({ id: G, marks: saved("blocked", "") })).toMatch(/<button class="primary" disabled="">Save block, next<\/button>/);
+  });
+});
+
+describe("P3, P4 (FR-33, FR-34, FR-36): the ring, the mono links, the flags' indent", () => {
+  const css = (f: string) => readFileSync(new URL(`../styles/${f}`, import.meta.url), "utf8");
+  it("the radio ring is drawn on :focus, in the panel and the rule box", () => {
+    expect(css("review.css")).toContain(".rs-radio input:focus + span { outline: 2px solid var(--focus-ring); outline-offset: 2px; }");
+    expect(css("rule-box.css")).toContain(".rb-option input:focus + span { outline: 2px solid var(--focus-ring); outline-offset: 2px; }");
+  });
+  it("Called by and Calls links take the mono family over button.link's font: inherit", () => {
+    expect(css("review.css")).toContain(".rs-links button.link.mono { font-family: var(--mono);");
+  });
+  it("the mark sits in the row's padding, so a wrapped flag starts at the name", () => {
+    expect(css("review.css")).toMatch(/\.rv-mark \{ position: absolute; left: var\(--space-5\);/);
+    expect(css("review.css")).toContain("padding: var(--space-1) var(--space-2) var(--space-1) calc(var(--space-5) + 1.5ch + var(--space-1-5));");
   });
 });

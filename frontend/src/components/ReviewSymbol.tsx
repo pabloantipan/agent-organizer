@@ -3,7 +3,7 @@ import type { review as rv } from "../../wailsjs/go/models";
 import { MarkReview, ReviewFile } from "../../wailsjs/go/main/App";
 import { busyButton, busyLabel } from "../lib/busy";
 import {
-  affectedLine, afterSave, backTo, calledBy, callsOf, canSave, flagLook, flagWords, isAffected, markOf, shasOf, shortName, symbolDiff, testsOf, WORDS,
+  affectedLine, afterSave, backTo, calledBy, callsOf, canSave, flagLook, flagWords, isAffected, markOf, primaryOf, shasOf, shortName, symbolDiff, testsOf, WORDS,
   type MarkState, type RangeText, type Row,
 } from "../lib/review";
 
@@ -65,7 +65,7 @@ export function ReviewSymbolView({ map, node, row, marks, from, texts, error, ti
   const callers = calledBy(map, node.id);
   const callees = callsOf(map, node.id);
   const tests = testsOf(map, node);
-  const links = (ns: rv.Node[]) => ns.length === 0 ? <span className="meta">none</span> : (
+  const links = (ns: rv.Node[]) => ns.length === 0 ? <span className="meta">{WORDS.noneFound}</span> : (
     <ul className="rs-links">{ns.map((n) => <li key={n.id}><button className="link mono" onClick={() => onOpen(n.id)}>{shortName(n, true)}</button></li>)}</ul>
   );
   return (
@@ -134,10 +134,11 @@ function Diff({ name, texts, error }: { name: string; texts: { base: RangeText |
   );
 }
 
-/** The mark (§3.3): a radio group, a note, `Reviewed, next` (marks Reviewed
- *  and moves on) and `Save` (keeps the chosen mark and stays), disabled
- *  until it has a mark, and for Question and Blocked a note (incomplete).
- *  The v3 line says where the note goes. */
+/** The mark (§3.3, Amendment 2): a radio group, a note, the primary (saves
+ *  the chosen mark, Reviewed when none, and moves on; its label says which,
+ *  primaryOf) and `Save` (keeps the chosen mark and stays), disabled until
+ *  it has a mark; for Question and Blocked both wait on a note
+ *  (incomplete). The v3 line says where the note goes. */
 function MarkForm({ name, id, marks, onMark, onNext }: { name: string; id: string; marks: rv.Marks | null; onMark: (s: MarkState, note: string) => Promise<void>; onNext: () => void }) {
   const saved = markOf(marks, id);
   const [state, setState] = useState<MarkState>(saved.state);
@@ -161,6 +162,7 @@ function MarkForm({ name, id, marks, onMark, onNext }: { name: string; id: strin
   };
   const opts: [MarkState, string][] = [["reviewed", WORDS.reviewed], ["question", WORDS.question], ["blocked", WORDS.blocked]];
   const noteId = `rs-note-${id}`;
+  const primary = primaryOf(state, note);
   return (
     <div className="rs-mark">
       <fieldset className="rs-radios">
@@ -176,7 +178,7 @@ function MarkForm({ name, id, marks, onMark, onNext }: { name: string; id: strin
       <textarea id={noteId} className="rs-note" rows={2} value={note} onChange={(e) => setNote(e.target.value)}
         placeholder={state === "question" || state === "blocked" ? "required for Question and Blocked" : "optional"} />
       <div className="rs-buttons">
-        <button className="primary" {...busyButton({ busy: busy === "next", disabled: busy !== "", onPress: run("next", "reviewed", onNext) })}>{busyLabel(busy === "next", WORDS.reviewedNext, "Saving…")}</button>
+        <button className="primary" {...busyButton({ busy: busy === "next", disabled: busy !== "" || !primary.ready, onPress: run("next", primary.mark, onNext) })}>{busyLabel(busy === "next", primary.label, "Saving…")}</button>
         <button {...busyButton({ busy: busy === "save", disabled: busy !== "" || !canSave(state, note, saved), onPress: run("save", state) })}>{busyLabel(busy === "save", WORDS.save, "Saving…")}</button>
       </div>
       <p className="rs-v3 meta">{WORDS.v3}</p>

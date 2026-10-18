@@ -67,15 +67,18 @@
 .rv-gcount { color: var(--fg-muted); font-weight: var(--weight-regular); }
 .rv-group.must > .rv-ghead { color: var(--warning); }
 
+/* The mark sits in the row's left padding, so the name starts the content
+   box and a wrapped line (the flags) starts at the name's indent (FR-36). */
 .rv-row {
+  position: relative;
   display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-0-5) var(--space-1-5);
-  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-5); border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-2) var(--space-1) calc(var(--space-5) + 1.5ch + var(--space-1-5)); border-radius: var(--radius-sm);
   font-size: var(--font-size-sm); color: var(--fg); cursor: pointer; min-width: 0;
 }
 .rv-row:hover { background: var(--surface-hover); }
 .rv-row.on { background: var(--surface-selected); }
 .rv-row.declared { cursor: default; color: var(--fg-muted); }
-.rv-mark { display: inline-block; width: 1.5ch; text-align: center; font-weight: var(--weight-bold); }
+.rv-mark { position: absolute; left: var(--space-5); top: var(--space-1); width: 1.5ch; text-align: center; font-weight: var(--weight-bold); }
 .rv-mark.reviewed { color: var(--fg-muted); }
 .rv-mark.question { color: var(--tone); }
 .rv-mark.blocked { color: var(--danger); }
@@ -127,6 +130,8 @@
 .rs-facts dd { margin: 0; min-width: 0; color: var(--fg); overflow-wrap: anywhere; }
 .rs-flags { display: flex; flex-wrap: wrap; gap: var(--space-1); }
 .rs-links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); }
+/* Symbol names are mono (FR-34); button.link's `font: inherit` outranks .mono. */
+.rs-links button.link.mono { font-family: var(--mono); font-weight: 450; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
 .rs-links button.link:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
 
 /* The builder's claim, never in the facts' style (§6.6.5). */
@@ -149,7 +154,10 @@
 .rs-radio:hover span { background: var(--surface-hover); color: var(--fg); }
 .rs-radio.on span { background: var(--surface-selected); border-color: var(--border-accent); color: var(--fg); }
 .rs-radio.on span::before { box-shadow: inset 0 0 0 4px var(--accent); }
-.rs-radio input:focus-visible + span { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+/* On :focus, not :focus-visible: WebKit drops :focus-visible on the radio
+   an arrow key checks (FR-33). A radio takes focus only by keyboard or its
+   own label. */
+.rs-radio input:focus + span { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .rs-note-label { font-size: var(--font-size-sm); color: var(--fg-muted); }
 .rs-note { resize: vertical; font-size: var(--font-size-sm); }
 .rs-note::placeholder { color: var(--fg-subtle); }

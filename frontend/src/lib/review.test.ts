@@ -3,7 +3,7 @@ import type { review, service } from "../../wailsjs/go/models";
 import {
   allReviewed, countsLine, coverage, coverageLine, elapsedOf, factsBeside, filesOf, flagWords, groupName, inTextField, listWidth,
   makingLabel, movedLine, nextToReview, nothingToReview, partialLines, reviewable, rowName, screenState, shortName, walkOf, WORDS, worklist,
-  afterASecond, affectedLine, makeOrigin, secondsSince, backTo, calledBy, callsOf, canSave, flagLook, markOf, progressDelay, shasOf, symbolDiff, testsOf,
+  afterASecond, affectedLine, primaryOf, makeOrigin, secondsSince, backTo, calledBy, callsOf, canSave, flagLook, markOf, progressDelay, shasOf, symbolDiff, testsOf,
 } from "./review";
 
 // review-map v2 FR-18 (docs/ux/specs/review-view.md §3.1, §3.2, §4, §5):
@@ -300,9 +300,10 @@ describe("V-R6: Called by, Calls and the affected view", () => {
     expect(calledBy(m, G).map((x) => x.id)).toEqual([W]);
     expect(callsOf(m, G).map((x) => x.id)).toEqual([L]);
   });
-  it("an affected symbol says why it is shown, and back names the changed one", () => {
-    expect(affectedLine(m, n(W), n(G))).toBe("unchanged · shown because it calls svc.Greet");
-    expect(affectedLine(m, n(L), n(G))).toBe("unchanged · shown because svc.Greet calls it");
+  it("P1 (FR-30): an affected symbol says which way it points, and back names the changed one", () => {
+    // from Called by: it calls the changed one; from Calls: the changed one calls it
+    expect(affectedLine(m, n(W), n(G))).toBe("unchanged · calls svc.Greet");
+    expect(affectedLine(m, n(L), n(G))).toBe("unchanged · called by svc.Greet");
     expect(backTo(n(G))).toBe("← back to svc.Greet");
   });
   it("Tests: each test that names it, linked when the test changed in this map", () => {
@@ -394,5 +395,16 @@ describe("V-R14 (FR-23): no flash, with fake timers", () => {
   it("the counter never reads 0 s once shown", () => {
     expect(secondsSince(1000, 1000)).toBe(1);
     expect(secondsSince(1000, 3999)).toBe(2);
+  });
+});
+
+describe("P2 (FR-31): the primary follows the chosen radio", () => {
+  it("none or Reviewed saves Reviewed; Question and Blocked save themselves, once there is a note", () => {
+    expect(primaryOf("", "")).toEqual({ label: "Reviewed, next", mark: "reviewed", ready: true });
+    expect(primaryOf("reviewed", "")).toEqual({ label: "Reviewed, next", mark: "reviewed", ready: true });
+    expect(primaryOf("question", "why the comma?")).toEqual({ label: "Save question, next", mark: "question", ready: true });
+    expect(primaryOf("blocked", " x ")).toEqual({ label: "Save block, next", mark: "blocked", ready: true });
+    expect(primaryOf("question", "  ").ready).toBe(false);
+    expect(primaryOf("blocked", "").ready).toBe(false);
   });
 });
