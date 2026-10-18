@@ -6,7 +6,7 @@ branch: rv-polish
 seat: rp-build
 stage: review-map
 updated: 2026-10-18
-next: "review: rv-polish, gate met (P1-P5, X0), 570d4b0"
+next: "file finding: rv-polish U1 (muted flag text 7 px off the name), U2/G1 (primary says , next with nothing next), G2 (fixture has no affected callee or mutual call), G3 (Boundary omits Review.test.tsx), aglaea A1/A2, the mutual-call direction note (sup82, then done/)"
 review: pass
 risk: low
 footprint: [frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/components/Review.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css, frontend/src/styles/rule-box.css (ring), scripts/fixture-home.sh (--review only)]
@@ -133,6 +133,8 @@ Explanations:
 Notes (not blocking):
 - Note: `affectedLine` reads direction from the edges, not from the list the link sat in (declared Risky). With mutual calls (W→G and G→W) opening W from `Calls` reads `unchanged · calls svc.Greet`, where FR-30 says `called by`; both are true then. → backlog line for the FSE (review-map), with the gate's Boundary omission of `Review.test.tsx`.
 - Note: the radio ring now draws on `:focus`, so it also shows when a radio's label is clicked; the design call is rp-ui's.
+
+Filing (after rp-ui's pass, 2026-10-18): no finding on this card has a destination yet (no card, record or backlog line names them, and a seat posts only to sup82), so the card stays open with `next: "file finding: …"` and is not moved. Each went to: nowhere yet — sup82 files it: rp-build's two Notes (the direction from edges; the 7 px flag text, = rp-ui U1), rp-ui U1, U2, G1, G2, G3, A1, A2, and my two Notes above (mutual-call direction; ring on click, = rp-ui A2).
 
 ## UI review
 rp-ui, 2026-10-18, on 570d4b0529f4e8aba90aea26d2ddb2f72d54571c (every row; the branch did not move). **Verdict: pass.** No severity 4 or 3 against the spec or the design. Evidence: `.wt-notes/rp-ui/` (`out/` shots and harness logs, `steps/`).
