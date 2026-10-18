@@ -135,7 +135,7 @@ export function Where({ screen, selectedInitiative, review, go, goHome, openInit
   // The Review screen (review-view §2): `<initiative> › <card title> ›
   // Review`, Review the current mark.
   return (
-    <span className="tb-group tb-where">
+    <span className={`tb-group tb-where ${review ? "review-where" : ""}`}>
       <nav className="places" aria-label="Places">
         <PlaceTab label="Home" place="home" screen={screen} onClick={go(goHome)} title="Needs me and every initiative" />
         <PlaceTab label="Initiatives" place="initiatives" screen={screen} onClick={go(openInitiatives)} title="Every initiative as a card: awake, asleep and archived" />
