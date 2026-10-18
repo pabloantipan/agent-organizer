@@ -3,66 +3,49 @@
 The Product Designer seat beside the organizer's FSE (0053). HAND-OFF at the
 top; one dated line per session below.
 
-## HAND-OFF — 2026-10-09, session cleaned up
+## HAND-OFF — 2026-10-18, paused for the new watcher (Pablo, via Hephaistos)
 
 Read first: the `aglaea` skill, `agents/aglaea.md`, `docs/ux/memory.md`,
-`docs/ux/principles.md`, `docs/design-system.md` (**mine since 0054**; the app
-is **Deltagos**, 0066; amended almost daily, every line cites its source).
+`docs/ux/principles.md`, `docs/design-system.md` (**mine since 0054**; the
+app is **Deltagos**, 0066). Restarted with `probe -r`; the conversation
+resumes. The seat moves to the new discuss watcher (wake-rearm, api
+80c3608) and current skills (spec-craft premises, 044b214).
 
-- **Mail waiting, undelivered (3, all from the FSE).** Read them with the
-  read-only inbox (below); they will be delivered on the first turn of a
-  seat that has its identity:
-  1. **ram-indicator (0101)**, thread 01M4CK6VQ11WY8YJW9YWQ4C63T: a design
-     spec `docs/ux/specs/ram-indicator.md`. It covers macOS memory pressure
-     (normal, warn, critical, free GB) in the top bar, quiet at normal,
-     beside Needs me (still the one badge) and Usage; a hover listing the
-     biggest agent sessions by memory, linking to their Agents rows; how the
-     floating icon shows warn and critical without a second badge; the
-     critical notification's words, rate and click; and every state
-     (no reading, normal, warn, critical, back to normal, reduced motion,
-     1024). Sampling is the 10 s agents tick.
-  2. **The Deltagos mark**, thread 01M4CKBP8N0MGTVP3E0BCZB7JB: Pablo's
-     sketch in `docs/ux/inputs/deltagos-mark/` (a D as one violet stroke with
-     three travelling gaps, two meshing gears in ember and amber, an Archivo
-     wordmark, its own palette).
-  3. **Pablo's ruling on it, 2026-10-09** (a decision in the same thread):
-     "adjust pallete to current one and let's draw it". Recolour it to our
-     tokens (#1a1523 ground, #8a3ffc accent, magenta tone, Manrope; dark
-     only, no gradients), keeping the form and motion, and **draw it**: an
-     HTML page in `docs/ux/inputs/deltagos-mark/` or a published artifact,
-     at 56/72/88 pt and at 16/32 px, plus reduced motion's static frame. Say
-     which rule the gears' extra colours bend, as a question for Pablo. Then
-     amend `docs/ux/specs/floating-icon.md`. **Do this first**, since it
-     shapes how the icon shows RAM (0101 may share its build card).
-- **Seat identity.** A resumed session can come up without `AGENT_NAME` and
-  `PROJECT_ID`, and then no hook delivers mail. The fix is to relaunch the
-  seat through its prelude (`organizer-probe-aglaea`). To look by hand
-  without consuming anything:
-  `line="$(discuss-api token env organizer aglaea)"; eval "export ${line% claude}"`
-  (zsh will not word-split an unquoted variable, and the line ends in
-  `claude`, so never `eval` it whole), then
-  `curl -s -H "Authorization: Bearer $DISCUSS_TOKEN" http://127.0.0.1:9494/projects/organizer/agents/aglaea/inbox`.
-  `discuss-hook drain` refuses by hand, which is correct. Never print the
-  token. On 2026-10-07 it was printed once into the session's output, and
-  Pablo was told he may rotate it (`discuss-api token add organizer aglaea`).
-- **The pattern of the work.** The FSE asks for design specs (proposed,
-  Technical notes left to it) and for rankings of each wave's UI leftovers
-  (`docs/ux/reviews/<date>-rank-leftovers-N.md`). Supervisors send
-  "[for aglaea]" design calls mid-wave. I answer in one message, put the
-  rule in the design system or the spec, and send the FSE a msg with the
-  row for its next batch.
-- **My design specs** in `docs/ux/specs/`: roadmap-time-zoom, decisions-view,
-  responsive-home, initiative-header, transversal-roles (0082, amendment 1),
-  floating-icon (0088, amendments 1-3: double-click, sizes 56/72/88 pt,
-  close at once), roadmap-as-a-plan (0093), usage (0098: money only in
-  Usage, tokens elsewhere per 0020).
-- **Waits on Pablo:** Q1 of leftovers-4 (does he use Tab? WKWebView reaches
-  buttons only with Keyboard navigation on).
-- **Checking the built app:** use `Deltagos Review.app` from a detached
-  worktree (`make review-build`) with the fixture, never the installed app.
-  `memory.md` "How I look at it" says how to drive the native panel and how
-  to clean up (`pkill -f <fixture dir>`).
-- **Done 2026-10-09:** the mark (e1cdce1), the RAM indicator spec, and the Initiatives view spec (0104). Next action: read mail; if none, stay silent.
+- **Nothing of mine is open.** Every question the FSE sent up to now is
+  answered and acked; the last were review-view Amendments 1-2 (R13-R17,
+  c494570). Mail that arrived during the pause waits; read it first.
+- **Lane**: design specs and amendments, findings, design-system rules;
+  never product code, build cards or rulings. Reply with `discuss-hook post
+  --to <seat> --kind answer|msg --thread <id> "<body>"`; ack questions and
+  decisions only, never a status, msg or answer. Never print
+  DISCUSS_TOKEN. Identity lost: `line="$(discuss-api token env organizer
+  aglaea)"; eval "export ${line% claude}"` (never eval the line whole).
+- **Live specs I keep** (`docs/ux/specs/`), each ends with its amendments:
+  - `launch-progress.md`: A1-A9, rows L1-L30. A9 moved `--focus-ring` to
+    `--violet-11` app-wide (the accent failed 3:1 on overlay, pressed,
+    selected); I told the FSE to raise a record for Pablo if he reads it as
+    visual direction.
+  - `needs-me-waits.md` (0134): A1-A3, W1-W12 plus `Rule · draft` in W12.
+  - `diagrams-in-app.md` (T11c): A1-A4, D1-D10. Dark class mapping (✚ ✎
+    ✕), SVG cache by block hash, spec reader drawer.
+  - `review-view.md` (review-map v2): A1-A2, R1-R17. Worklist, not a graph;
+    no React Flow, ELK or Monaco. R15-R17 wait for the review follow-up
+    card the FSE cuts after v2 lands.
+  - `map-and-roadmap.md`: a design note for Pablo, three open questions
+    (Map as a Roadmap mode, who writes `touches:`, is a place link enough
+    on odyssey). No answer yet.
+  - Also: `task-rows.md`, `tab-reaches-links.md`, `initiatives-view.md`.
+- **Design-system rules added recently**: newest answer wins and focus
+  never drops (fallback chain); sr-only live regions re-say after a 100 ms
+  `setTimeout`; busy keeps focus with `aria-disabled` and never dims the
+  ring; Derived tokens (busy twins, guarded by a test); the focus ring is
+  `--violet-11`.
+- **Open findings for whoever has a screen** (not gate rows): VoiceOver
+  order "focus, then polite words" (launch A7) and re-say at 100 ms (A6).
+- **Habits that saved me this run**: read the code's word before writing
+  "as X does"; measure a contrast pair on every surface before answering;
+  check a record's "today it shows X" against the code; list a row's
+  existing columns before placing a fact.
 
 ## Log
 
@@ -180,3 +163,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-17 — review-view spec (review-map v2): worklist from the card back, own screen, symbol diff of ranges, flags as words, mark with Reviewed-next, partial and moved-branch states, v3 room; graph, ELK, Monaco cut; rows R1-R12.
 - 2026-10-18 — rv-list graded: review-view Amendment 1 (TS qualifier = file stem, index → folder, collisions add parent; progress line after 1 s, no flash; FSE's focus-on-open and crumb rules confirmed), R13-R14.
 - 2026-10-18 — rv-symbol graded: review-view Amendment 2 (calls / called by, primary label follows the chosen mark, 'none found'), R15-R17.
+- 2026-10-18 — paused for the new watcher (Pablo via Hephaistos): HAND-OFF rewritten; nothing open.
