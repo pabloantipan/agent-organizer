@@ -310,8 +310,8 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 
 ## Open questions
 
-- Q1 (Pablo, via the FSE, leftovers-4): does he use Tab in the app? In
-  WKWebView, Tab reaches buttons only with macOS Keyboard navigation on.
+- Map and roadmap (2026-10-18, asked Pablo in a question with options): Map as a Roadmap mode, who writes `touches:`, is a place link enough on odyssey.
+- (Answered: Q1, Tab. 0117, "I use Tab, make links reachable app-wide next".)
 
 ## How I look at it
 

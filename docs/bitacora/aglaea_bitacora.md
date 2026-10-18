@@ -167,3 +167,4 @@ resumes. The seat moves to the new discuss watcher (wake-rearm, api
 - 2026-10-18 — resumed on the new watcher (identity intact); nothing open, waiting for mail.
 - 2026-10-18 — v3 (0147) read: review-view Amendment 3 (Ask <seat>, next as the primary, one thread per review, the wake said, 'asked' drawn, ← Review), R18-R21.
 - 2026-10-18 — sent A3 to the FSE as a msg (0147 may auto-rule under Pablo's 5-minute rule).
+- 2026-10-18 — asked Pablo the three map-and-roadmap choices (question with options); memory's stale Q1 marked answered (0117).
