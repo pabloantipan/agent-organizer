@@ -1,12 +1,12 @@
 ---
 title: "Open in editor's refusals and definition line, Save only when it saves, one page marker"
-status: now
+status: done
 repos: [organizer]
 branch: lf43-review-states
 seat: rs-build
 stage: review-map
 updated: 2026-10-18
-next: "review: lf43-review-states, gate met (S1-S5, X0), 78f5fe6"
+next: "merge lf43-review-states (78f5fe6) to main; review and UI review pass"
 risk: low
 footprint: [internal/service/review_open.go, internal/service/review_open_test.go, frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css]
 depends_on: []
@@ -111,9 +111,16 @@ Explained: no `undeclared`, `outside boundary` or `declared, not changed` lines.
 ### Notes (not blocking)
 
 - Note: S1's focus and region, S2's kept focus and S4's focus after Save are proved by pure helpers, callback logs and source-string assertions, not a pressed DOM: vitest here has no DOM library by convention. The gate's "vitest, mocked" allows it; a harness row would prove the focus moves. To the FSE.
-- Note: S4's test takes "the asking primary" from the pre-save controls; after saving an edited note on an asked mark, the saved note equals the asked note again, so the live form would land on the radio group, which the row's "else" allows. To the FSE.
+- Note: S4's test takes "the asking primary" from the pre-save controls, not the saved form. rs-ui's run (RS1) shows the live form lands on the primary because `review.SetMark` drops `Asked`. My earlier guess of the radio group was wrong. Either way the row is met. To the FSE.
 - Note: `failedId` is `rs-editor-failed-<file>`; a file path with a space would split `aria-describedby` into two ids. To the FSE.
 - Note: if the status re-read after a refusal answers a different `map_head`, `editorAt` is null and the muted line goes with the button. To the FSE.
+
+### Findings routed
+
+- rs-ui RS1 (an asked mark loses `Asked`/`AskedThread` on Save, `review.SetMark`, which predates this card): to the FSE, with the spec gap to aglaea.
+- rs-ui RS2 (Save drawn but disabled for a note with no mark): to the FSE.
+- rs-ui RS3 (Conversations lands on archive when the named thread is not listed, fixture only): to the FSE, for aglaea.
+- My four notes above: to the FSE.
 
 Reviewer `rs-review`, 2026-10-18.
 
