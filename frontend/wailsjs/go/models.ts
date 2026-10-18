@@ -1522,6 +1522,7 @@ export namespace review {
 	    hash: string;
 	    from?: string;
 	    asked?: string;
+	    asked_thread?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Mark(source);
@@ -1537,6 +1538,7 @@ export namespace review {
 	        this.hash = source["hash"];
 	        this.from = source["from"];
 	        this.asked = source["asked"];
+	        this.asked_thread = source["asked_thread"];
 	    }
 	}
 	export class Marks {
