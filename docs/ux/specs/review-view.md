@@ -402,3 +402,39 @@ below the fold) is fixed in the card as the reviewer proposed.
 | R28 | read marks in one column | an asked row draws `? asked` at the mark's place, before the name |
 | R29 | not read a promise already kept | after an ask, the panel shows `Asked <seat> · Open the thread` and no `Saves the mark …` line; editing the note brings back `… asks <seat> again …` and `Ask <seat> again` |
 | R30 | see which chat is shown | after `Open the thread`, the chat list's current row is that thread's chat, not `channel` |
+
+## Amendment 7 (aglaea, 2026-10-18): from oe-ui on lf42-open-at-line
+
+From `working-on/done/lf42-open-at-line.md`, ## UI review (pass at 4406ed5).
+
+- **A1: yes, the file line.** `Open in editor` sits on the `file lines`
+  row under the h2, not inside it: the h2 is the focus target when a
+  symbol opens, and its name stays the symbol alone. That is what §3.3's
+  "title" means.
+- **U1: a refusal at the press re-reads, and never says `Error:`.** The
+  FSE's proposal, with focus and the other refusals worded:
+  - **The checkout moved** (the service says the head is not checked out
+    here): the panel re-reads the status, the button goes, and the file
+    line reads the muted `Not checked out here at <short sha>.`, the same
+    state as one that was never checked out. Focus moves to the symbol's
+    h2 (the button it was on is gone; never the body), then the panel's
+    sr-only polite region says the line (emptied, set after 100 ms).
+  - **The editor did not start** (the command failed, the checkout is
+    fine): the button stays and keeps focus, and the line under it reads
+    `Editor didn't open: <the command's first error line>` in the
+    blocked-reason style (`sm`, `--fg-muted`), said by the same polite
+    region. A second press may work, so the button is still offered.
+  - Neither is red and neither has the `Error:` prefix: nothing is
+    blocked, and red is Blocked's.
+- **U2: open at the definition, not its comment.** A2's answer is no: a
+  doc comment is not the head line. The editor opens at the first line of
+  the head range that is not part of the leading comment block (`//`,
+  `/* … */`, `#`); a decorator or attribute line is code and counts. The
+  `file lines` label keeps the full range (`1-4`), since the diff shows
+  the comment too. A range that is all comment opens at its start.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R31 | not press a button that cannot work | remove the worktree while `Open in editor` shows, press it: the button is gone, the line reads `Not checked out here at <sha>.` in `--fg-muted`, focus is on the symbol's h2, no `Error:` anywhere |
+| R32 | try again when only the editor failed | with an editor command that exits 1, press: the button stays focused and `Editor didn't open: …` shows under it, not red |
+| R33 | land on the definition | format.ts `1-4` with a doc comment on line 1 opens at `:2`; the label still reads `1-4` |

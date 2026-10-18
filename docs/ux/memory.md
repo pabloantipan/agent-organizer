@@ -417,6 +417,9 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - Review view (2026-10-17): a worklist, not a graph (75 nodes / 91 edges for a 6-file change; a graph has no order, no 'next', relays out); the 1-hop neighbourhood is two lists; no React Flow, ELK or Monaco; flags as words ('no direct test'); claims in a quote block apart from facts; a partial map says it is partial (review-view.md).
 - Magenta (--tone) as text passes on the ground only (5.2:1); on selected/current rows it fails (4.31). Colour the glyph, set the word in --fg-muted (review-view A5).
 
+- A press that the service refuses re-reads the state before it words anything: if the refusal means the action can no longer work, the button goes and the screen shows the same state as one that never could (focus to the nearest heading); if it may work again, the button stays and the reason shows under it in the blocked-reason style. Never a raw `Error:` prefix, never red for a non-block (review-view A7).
+- "Open at the line" means the definition, not its doc comment: the label keeps the full range, the jump skips the leading comment block (review-view A7).
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).
