@@ -1,6 +1,6 @@
 ---
 title: Accept review-map v3 - ask the card's supervisor from a mark, with the review polish
-status: proposed
+status: ruled
 raised: 2026-10-18
 raised_by: fse
 owner: pablo
@@ -10,9 +10,9 @@ forecast: 70-140m
 stage: review-map
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-18
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -65,3 +65,5 @@ share no file), then rv-ask-ui. Exit 2 is then met in code; your trial on
 odyssey (exit 1) proves both.
 
 ## Ruling
+
+pablo, 2026-10-18, in the organizer on lodestar: No answer in 5 min (raised 11:42, text changed 11:47 with Aglaea's Amendment 3); ruled as recommended under Pablo's standing rule, relayed by Hephaistos, lodestar, 2026-10-18 ~02:10: "Till October 18th 12:00am Chilean time, if I dont answer in 5mins, do as recommended and SAVE desition taken" (thread 01M56PWG).
