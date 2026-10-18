@@ -254,10 +254,16 @@ describe("A4 (FR-29): an asked row is seen, not only heard", () => {
     expect(row(plain, G)).not.toContain("rv-asked");
     expect(row(plain, G)).toMatch(/<span class="rv-mark question" aria-hidden="true">\?<\/span><span class="rv-name mono">/);
   });
-  it("W3's CSS: the unit is pulled back by the padding's mark column, so the glyph sits where .rv-mark's does", () => {
+  it("W3's CSS: the unit sits in the padding where .rv-mark does; an asked row's padding grows by the word, so a wrapped flag starts at the name (FR-36)", () => {
     const css = readFileSync(new URL("../styles/review.css", import.meta.url), "utf8") as string;
-    expect(css).toContain(".rv-mark.rv-unit { position: static; width: auto; margin-left: calc(-1 * (1.5ch + var(--space-1-5))); white-space: nowrap; font-weight: var(--weight-regular); }");
-    expect(css).toContain(".rv-unit > .rv-glyph { display: inline-block; width: 1.5ch; text-align: center; font-weight: var(--weight-bold); }");
+    expect(css).toMatch(/\.rv-mark \{ position: absolute; left: var\(--space-5\);/);
+    expect(css).toContain(".rv-mark.rv-unit { width: auto; white-space: nowrap; }");
+    expect(css).toContain(".rv-unit > .rv-glyph { display: inline-block; width: 1.5ch; text-align: center; }");
+    expect(css).toContain(".rv-row.asked { --rv-asked-w: 32px; padding-left: calc(var(--space-5) + 1.5ch + var(--space-1) + var(--rv-asked-w) + var(--space-1-5)); }");
+    expect(css).toMatch(/\.rv-asked \{ display: inline-block; width: var\(--rv-asked-w\); margin-left: var\(--space-1\);/);
+    const h = view({ status: status("map"), map: fixture, marks: mk([{ symbol: G, state: "question", asked: "01A" }]) });
+    expect(row(h, G)).toMatch(/class="rv-row[^"]* asked"/);
+    expect(row(h, F)).not.toMatch(/class="rv-row[^"]* asked"/);
   });
   it("the live region carries what the screen says (Asked sup81, once: saidAfter)", () => {
     expect(view({ status: status("map"), map: fixture, said: "Asked sup81" })).toContain('<div class="sr-only" aria-live="polite">Asked sup81</div>');

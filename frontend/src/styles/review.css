@@ -87,15 +87,15 @@
 .rv-since { color: var(--tone); font-size: var(--font-size-xs); }
 /* An asked mark is seen, not only heard (FR-29): `? asked` is one unit in
    the mark's place, before the name, so every row's mark reads in one
-   column (leftovers-41 FR-3). The unit is in the flow, pulled back into the
-   padding so its glyph sits where .rv-mark's does; the name moves right by
-   the word. `asked` is muted on every row, since magenta text is 4.31:1 on
-   the current row (FR-42). The glyph keeps the hue. */
-/* The pull is in the row's weight, so its ch is the padding's; the glyph
-   is bold, so its 1.5ch is .rv-mark's. */
-.rv-mark.rv-unit { position: static; width: auto; margin-left: calc(-1 * (1.5ch + var(--space-1-5))); white-space: nowrap; font-weight: var(--weight-regular); }
-.rv-unit > .rv-glyph { display: inline-block; width: 1.5ch; text-align: center; font-weight: var(--weight-bold); }
-.rv-asked { margin-left: var(--space-1); font-size: var(--font-size-xs); font-weight: var(--weight-semibold); color: var(--fg-muted); }
+   column (leftovers-41 FR-3). The unit sits in the padding like .rv-mark,
+   its glyph where .rv-mark's is; an asked row's padding grows by the word,
+   so its name and a wrapped flag still start together (FR-36). `asked` is
+   muted on every row, since magenta text is 4.31:1 on the current row
+   (FR-42). The glyph keeps the hue. */
+.rv-row.asked { --rv-asked-w: 32px; padding-left: calc(var(--space-5) + 1.5ch + var(--space-1) + var(--rv-asked-w) + var(--space-1-5)); }
+.rv-mark.rv-unit { width: auto; white-space: nowrap; }
+.rv-unit > .rv-glyph { display: inline-block; width: 1.5ch; text-align: center; }
+.rv-asked { display: inline-block; width: var(--rv-asked-w); margin-left: var(--space-1); font-size: var(--font-size-xs); font-weight: var(--weight-semibold); color: var(--fg-muted); }
 
 /* Flags as words (§3.3's table, flagLook): amber lozenges for
    look-at-this (the text in --warning, V-R5), muted for the rest, dashed

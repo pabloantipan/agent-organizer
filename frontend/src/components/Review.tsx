@@ -403,7 +403,7 @@ function Worklist({ groups, active, setActive, shown, onOpen }: { groups: Group[
                 {g.rows.map((r) => (
                   <li key={r.id} role="treeitem" aria-level={2} aria-label={rowName(r)} aria-describedby={r.path ? `rv-path-${r.id}` : undefined} aria-selected={r.id === shown} aria-current={r.id === shown ? "true" : undefined} data-row={r.id}
                     tabIndex={current === r.id ? 0 : -1} ref={ref(r.id)}
-                    className={`rv-row ${r.id === shown ? "on" : ""} ${r.node ? "" : "declared"}`}
+                    className={`rv-row ${r.id === shown ? "on" : ""} ${r.node ? "" : "declared"} ${r.asked && r.mark && !r.changedSince ? "asked" : ""}`}
                     onFocus={(e) => { e.stopPropagation(); setActive(r.id); }}
                     onClick={(e) => { e.stopPropagation(); setActive(r.id); if (r.node) onOpen(r.id); }}>
                     {r.asked && r.mark && !r.changedSince
