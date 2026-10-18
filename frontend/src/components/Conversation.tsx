@@ -180,17 +180,23 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   useEffect(() => {
     if (!slackDraft) return;
     if (slackDraft.threadId) {
-      const t = all.find((x) => x.id === slackDraft.threadId);
-      const chat = t ? chatOf(t) : null;
-      if (chat !== focus) onFocus(chat);
-      if (!chat) setView(t ? (t.kind === "journal" ? "journal" : "channel") : "archive");
-      landing.current = slackDraft.threadId;
-      setTimeout(() => { setTarget(slackDraft.threadId!); setScrollTo(slackDraft.threadId!); }, 0);
-      // A thread the feed does not list yet (the one an ask just opened,
-      // review-map v3 FR-41): ask the feed now and land once it lists it;
-      // meanwhile focus waits on `← Review`, never the body.
-      if (!t) {
-        unlisted.sent(slackDraft.threadId);
+      const id = slackDraft.threadId;
+      const t = all.find((x) => x.id === id);
+      if (t) {
+        const chat = chatOf(t);
+        if (chat !== focus) onFocus(chat);
+        if (!chat) setView(t.kind === "journal" ? "journal" : "channel");
+        landing.current = id;
+        setTimeout(() => { setTarget(id); setScrollTo(id); }, 0);
+      } else {
+        // A thread the feed does not list yet (the one an ask just opened,
+        // review-map v3 FR-41): never the archive (leftovers-44 FR-3). It
+        // shows channel, then the direct chat of the seat the thread was
+        // asked of once its messages say who, and lands once the feed
+        // lists it, unless Pablo moved since; meanwhile focus waits on
+        // `← Review`, never the body.
+        unlisted.start(id);
+        api.getCellThread(initiativeId, id).then((v) => unlisted.asked(askedSeat(v.messages ?? [], human, seats)), () => undefined);
         api.getAgents().then(applyAgents, () => undefined);
         if (document.activeElement === document.body || !document.activeElement) reviewBackOf(document)?.focus({ preventScroll: true });
       }
@@ -266,10 +272,15 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   // (leftovers-24 FR-4, FR-5).
   const landOn = (id: string) => { landing.current = id; goTo(id); };
   // A landing on a thread the feed has not listed yet (FR-41) lands when it
-  // does, within LIST_WAIT_MS; past it the archive fallback stands.
+  // does, within LIST_WAIT_MS, unless Pablo moved since; past it the chat
+  // it showed stands (leftovers-44 FR-3).
   const landTo = useRef(landOn);
   landTo.current = landOn;
-  const [unlisted] = useState(() => sentWatch({ land: (id) => landTo.current(id), letGo: () => undefined }));
+  const chatNow = useRef(chat);
+  chatNow.current = chat;
+  const showFor = useRef((_seat: string | null) => undefined as void);
+  showFor.current = (seat) => { chatNow.current = chatKey(seat, "channel"); if (seat !== focus) onFocus(seat); setView("channel"); };
+  const [unlisted] = useState(() => unlistedLanding({ show: (seat) => showFor.current(seat), current: () => chatNow.current, land: (id) => landTo.current(id) }));
   useEffect(() => () => unlisted.stop(), [unlisted]);
   useEffect(() => { unlisted.feed(all.map((t) => t.id)); }, [unlisted, all]);
   // A new thread or a branch sent (leftovers-34 FR-2, F5): the form stays,
@@ -671,6 +682,32 @@ export function sentWatch(on: { land: (id: string) => void; letGo: () => void },
       on.land(id);
     },
     stop,
+  };
+}
+
+/** The seat a thread was asked of (leftovers-44 FR-3): the first message
+ *  from the human to one seat of the cell, else the first message to one;
+ *  null when no message names a seat. */
+export function askedSeat(msgs: { from: string; to: string }[], human: string, seats: string[]): string | null {
+  const to = (m: { to: string }) => seats.includes(m.to) && m.to !== human;
+  return (msgs.find((m) => m.from === human && to(m)) ?? msgs.find(to))?.to ?? null;
+}
+
+/** A landing on a thread the feed does not list yet (leftovers-44 FR-3,
+ *  review-view Amendment 9 RS3): `start` shows channel, never the archive
+ *  (closed threads); `asked` with the seat the thread was asked of shows
+ *  that seat's direct chat; `feed` lands it once listed. Each step happens
+ *  only while the chat shown is the one the landing put there: once Pablo
+ *  moves, nothing moves him back, and after LIST_WAIT_MS the chat stands. */
+export function unlistedLanding(on: { show: (seat: string | null) => void; current: () => string; land: (id: string) => void }, wait = LIST_WAIT_MS) {
+  let at: string | null = null;
+  const still = () => at !== null && on.current() === at;
+  const w = sentWatch({ land: (id) => { const ok = still(); at = null; if (ok) on.land(id); }, letGo: () => { at = null; } }, wait);
+  return {
+    start: (id: string) => { at = chatKey(null, "channel"); on.show(null); w.sent(id); },
+    asked: (seat: string | null) => { if (!seat || !still()) return; at = chatKey(seat, "channel"); on.show(seat); },
+    feed: w.feed,
+    stop: () => { at = null; w.stop(); },
   };
 }
 
