@@ -159,3 +159,33 @@ func TestReadRange(t *testing.T) {
 		t.Error("a missing file was read")
 	}
 }
+
+// v3 FR-26: the review's thread and a mark's asked id are kept on the
+// head's marks; the thread and the asked mark carry to the next head.
+func TestMarksKeepThreadAndAsked(t *testing.T) {
+	f, rm := marksRepo(t)
+	at := time.Date(2026, 10, 18, 9, 0, 0, 0, time.UTC)
+	a := "go:example.com/m/p.A"
+	if _, err := SetMark("init-m", "c1", rm, textIn(f, rm), a, "question", "why 2?", "pablo", at); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := SetAsked("init-m", rm.Head, "go:example.com/m/p.Z", "T1", "M1"); err == nil {
+		t.Error("asked on a symbol with no mark")
+	}
+	m, err := SetAsked("init-m", rm.Head, a, "T1", "M1")
+	if err != nil || m.Thread != "T1" || m.Marks[0].Asked != "M1" {
+		t.Fatalf("asked %+v %v", m, err)
+	}
+	if back, _ := ReadMarks("init-m", "c1", rm, textIn(f, rm)); back.Thread != "T1" || back.Marks[0].Asked != "M1" {
+		t.Errorf("read back %+v", back)
+	}
+	f.git("checkout", "-q", "c1")
+	f.write("p/a.go", "package p\n\nfunc A() int { return 2 }\n\nfunc B() int { return 3 }\n")
+	f.git("commit", "-q", "-am", "B returns 3")
+	f.git("checkout", "-q", "main")
+	rm2 := buildMap(t, f)
+	m2, err := ReadMarks("init-m", "c1", rm2, textIn(f, rm2))
+	if err != nil || m2.Thread != "T1" || len(m2.Marks) != 1 || m2.Marks[0].Asked != "M1" {
+		t.Errorf("carried %+v %v", m2, err)
+	}
+}

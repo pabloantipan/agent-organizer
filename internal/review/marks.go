@@ -31,6 +31,9 @@ type Marks struct {
 	Changed []Mark `json:"changed"`
 	// From is the head the marks were carried from, when they were.
 	From string `json:"from,omitempty"`
+	// Thread is the review's one discuss thread (v3 FR-26): opened by the
+	// first ask, carried to the card's next head with the marks.
+	Thread string `json:"thread,omitempty"`
 }
 
 // Mark is one symbol's mark. Hash is sha256 of the symbol's head text when
@@ -44,6 +47,9 @@ type Mark struct {
 	Hash   string `json:"hash"`
 	// From is the head a carried mark was made on; "" when made on this one.
 	From string `json:"from,omitempty"`
+	// Asked is the id of the message that asked about this mark (FR-26);
+	// "" when it was kept here and asked of no one.
+	Asked string `json:"asked,omitempty"`
 }
 
 // ChangedWords is what a mark that did not carry reads as.
@@ -83,7 +89,7 @@ func ReadMarks(initiative, card string, rm *RevMap, text TextOf) (Marks, error) 
 	if !ok {
 		return m, nil
 	}
-	m.From = prev.Head
+	m.From, m.Thread = prev.Head, prev.Thread
 	nodes := map[string]Node{}
 	for _, n := range rm.Nodes {
 		nodes[n.ID] = n
@@ -93,7 +99,7 @@ func ReadMarks(initiative, card string, rm *RevMap, text TextOf) (Marks, error) 
 			mk.From = prev.Head
 		}
 		n, ok := nodes[mk.Symbol]
-		if ok && markable(n) {
+		if ok && Markable(n) {
 			if t, err := text(n); err == nil && HashText(t) == mk.Hash {
 				m.Marks = append(m.Marks, mk)
 				continue
@@ -124,7 +130,7 @@ func SetMark(initiative, card string, rm *RevMap, text TextOf, symbol, state, no
 	if node == nil {
 		return Marks{}, fmt.Errorf("no symbol %s in the map of %s", symbol, short(rm.Head))
 	}
-	if !markable(*node) {
+	if !Markable(*node) {
 		return Marks{}, fmt.Errorf("%s is %s, not a changed symbol; only changed symbols take a mark", symbol, node.Change)
 	}
 	m, err := ReadMarks(initiative, card, rm, text)
@@ -156,7 +162,32 @@ func SetMark(initiative, card string, rm *RevMap, text TextOf, symbol, state, no
 	return m, saveMarks(StatePath(initiative, rm.Head), m)
 }
 
-func markable(n Node) bool { return n.Level == "symbol" && n.Change != "affected" }
+// SetAsked records the review's thread on head's marks and, when asked is
+// not "", that symbol's mark was asked in it by message asked (FR-26).
+func SetAsked(initiative, head, symbol, thread, asked string) (Marks, error) {
+	p := StatePath(initiative, head)
+	m, err := loadMarks(p)
+	if err != nil {
+		return Marks{}, err
+	}
+	m.Thread = thread
+	if asked != "" {
+		found := false
+		for i := range m.Marks {
+			if m.Marks[i].Symbol == symbol {
+				m.Marks[i].Asked, found = asked, true
+			}
+		}
+		if !found {
+			return Marks{}, fmt.Errorf("no mark on %s at %s", symbol, short(head))
+		}
+	}
+	return m, saveMarks(p, m)
+}
+
+// Markable is a changed symbol, the only kind that takes a mark: not a
+// package, not an affected one.
+func Markable(n Node) bool { return n.Level == "symbol" && n.Change != "affected" }
 
 func loadMarks(p string) (Marks, error) {
 	var m Marks
