@@ -386,6 +386,9 @@ keeps their place.
   count, and an unchanged one has nothing new to say. When the focused thing
   leaves, focus goes to a named next target, with a fallback chain that
   ends on a control that always exists, never the body (launch-progress A5).
+- **No fill, no border, no padding**: a word set beside a name in a muted
+  style is text, not a lozenge, and starts at the name's indent. Padding
+  belongs to a lozenge that has a fill or a border (review-view A4).
 - **A control does not move when it is pressed**: what it opens or hides
   may move the content, never the control itself (initiatives-view A5,
   the header's Details).

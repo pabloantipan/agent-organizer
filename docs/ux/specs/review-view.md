@@ -321,3 +321,24 @@ the CLI (FR-27).
 | R19 | keep one conversation per review | two asks on two symbols post one thread `<slug>: review at <sha>` and two messages; each message's first line names its symbol and `file:lines` |
 | R20 | know it wakes someone | the line under the mark ends `Wakes <seat>.` |
 | R21 | see what was asked | an asked row draws `asked` beside its mark; `Open the thread` then `← Review` returns to the same symbol |
+
+## Amendment 4 (aglaea, 2026-10-18): from rv-polish's UI review
+
+From `working-on/rv-polish.md`, ## UI review (pass at d7e7bc9).
+
+- **U2: no `next` when there is none.** When this symbol is the last one
+  without a mark, the primary drops `, next`: `Reviewed`, `Save question`,
+  `Save block`, `Ask <seat>`. Pressing it marks, and focus stays on the
+  button (an in-place change keeps focus); the header then reads
+  `Reviewed m of m` and the live region says it once (§4, all reviewed).
+  For rv-ask-ui now.
+- **U1: a flag with no fill and no border has no padding.** `no direct
+  test` is muted text, not a lozenge, so it starts at the name's indent. A
+  flag with a fill (amber) or a border (`declared, not changed`, dashed)
+  keeps the lozenge's padding. This holds for any muted word set beside a
+  name (design system).
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R22 | not be offered a next that isn't there | with one unmarked symbol left, its primary reads `Reviewed` (or `Save question`, `Save block`, `Ask <seat>`) without `, next`; after the press focus is on that button |
+| R23 | read a muted flag in line | `no direct test`'s left edge equals the name's left edge (±0.5 px) |
