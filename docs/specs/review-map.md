@@ -644,3 +644,15 @@ Boundary omits. So:
   list | `calls …` from Called by, `called by …` from Calls.
 - `rv-ask-ui`'s boundary adds `components/Review.test.tsx`; its gate adds
   A8. The fixture's missing affected callee (G2) is held.
+
+Amendment 3 (v3), 2026-10-18, the FSE, from au-build's `decide:` (58752b6):
+A5's premise "fixture health, no mailbox" is false. `--review` swaps only
+health (`canned_health`); posts still go to the real local discuss socket,
+so the run posted one ask to `organizer-fixture/fse` (thread
+01M57TKJC6HSEGBS46PQQV10YY). My premise row named health, not the post path.
+So:
+- **A5** runs on `fixture-home.sh --review` with `discuss_state_dir:
+  $(mktemp -d)` appended to its `config.yaml` (no socket there), so the ask
+  fails as the row expects. Expected unchanged. No fixture change.
+- The stray thread is in the fixture's project and asks no human; the
+  builder leaves it (it moves no Needs me count), noted on the card.
