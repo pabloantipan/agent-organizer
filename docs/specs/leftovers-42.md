@@ -63,3 +63,12 @@ go test, a mocked binding in vitest.
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf42-open-at-line` | E1, E2, E3, X0 | `lf41-review-words`, `lf41-review-go` | true |
+
+Amendment 1, 2026-10-18, the FSE, from sup83 after lf41-review-go merged
+(1d9d988): FR-10 gave each asked mark its own `asked_thread`, but `Open
+the thread` still reads the head's `thread`. It sits in this card's files:
+- **FR-4** `Open the thread` opens the mark's `asked_thread` when it has
+  one, else the head's `thread`.
+- **E4** (4) vitest: a mark asked in a replaced thread | `Open the thread`
+  opens its own thread, not the head's.
+- `lf42-open-at-line`'s gate adds E4.

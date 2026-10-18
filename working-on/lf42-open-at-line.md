@@ -12,7 +12,7 @@ footprint: [internal/service/review_open.go, internal/service/review_open_test.g
 depends_on: [lf41-review-words, lf41-review-go]
 boundary: ["docs/specs/leftovers-42.md Boundary"]
 spec: "docs/specs/leftovers-42.md (FR-1 to FR-3; docs/ux/specs/review-view.md §3.3)"
-gate: "docs/specs/leftovers-42.md Acceptance, rows E1, E2, E3 and X0"
+gate: "docs/specs/leftovers-42.md Acceptance, rows E1, E2, E3, E4 and X0"
 ui_review: true
 ---
 
@@ -20,7 +20,7 @@ ui_review: true
 From a symbol in the Review screen Pablo opens its code at the line, in a checkout that holds what he is reviewing.
 
 ## Gate
-docs/specs/leftovers-42.md, rows E1, E2, E3 and X0.
+docs/specs/leftovers-42.md, rows E1, E2, E3, E4 and X0.
 
 ## Declared changes
 
