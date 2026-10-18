@@ -414,6 +414,7 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - Before placing a fact in a row, list the row's existing columns: needs-me-waits put the age in a lozenge beside an age column (said twice) and displaced the kind lozenge. Kind stays in the reason column; emphasis goes on the existing column (A1).
 - Diagrams in the app (2026-10-15): dark-mapped change classes (glyph and shape constant across themes, hue may differ; removed is not red), SVG cached by block hash in the organizer's data dir, never committed; source shown with a reason when not drawn; a text line of the classes under every figure; specs read in a drawer (diagrams-in-app.md). Measured on --surface: lilac 5.1, amber 9.2, plum-10 5.3.
 - An accessible name with a suffix is one aria-label string, never a visible text plus an sr-only span (VoiceOver joins runs with a space: 'map , start here'). A fixed verb column must fit every label a row can draw, compound ones too ('Rule · draft').
+- Review view (2026-10-17): a worklist, not a graph (75 nodes / 91 edges for a 6-file change; a graph has no order, no 'next', relays out); the 1-hop neighbourhood is two lists; no React Flow, ELK or Monaco; flags as words ('no direct test'); claims in a quote block apart from facts; a partial map says it is partial (review-view.md).
 
 ## Participants in use
 
