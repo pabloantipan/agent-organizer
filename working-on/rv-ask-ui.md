@@ -6,7 +6,7 @@ branch: rv-ask-ui
 seat: au-build
 stage: review-map
 updated: 2026-10-18
-next: "UI review round 2 (au-ui) at 8ba6d0d; code review round 2 passed (au-review)"
+next: "file finding: au-ui A1, A2 for aglaea (asked placement; pre-press line after an ask) and the Conversations chat list keeping channel highlighted; then move to done (both reviews pass at 8ba6d0d)"
 risk: medium
 footprint: [frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css, frontend/src/components/Review.tsx, frontend/src/components/Review.test.tsx, frontend/src/stores/board.store.ts (openSlack thread, review place), frontend/src/components/SlackView.tsx (← Review), frontend/src/components/Conversation.tsx (threadId landing)]
 depends_on: [rv-ask-data, rv-polish]
@@ -193,6 +193,14 @@ Explained as in round 1, plus: `outside boundary` Conversation.tsx and Conversat
 Notes (not findings):
 - Note: `landDivider` now runs for every landing in Conversations (a search hit, a ruling, Answer), not only Open the thread. It redirects Tab only while `← Review` is shown, which is when Conversations was opened from the review.
 - Note: A10 is only seen with a page-level stub, since no canned post exists (au-ui's G4 stands).
+
+Where the card's findings went (au-review, after au-ui's round 2 pass):
+- UI U1, U2, U4: fixed on this card (review-map v3 Amendments 4, 5; A9, A10, A11).
+- UI U3, U5: review-view Amendment 5 R26, R27; fse bitácora 2026-10-18 ~11:53, "Held for the next frontend leftovers".
+- UI G1: Amendment 4 (A9). G2: Amendment 5 (FR-41). G3: R26. G4 (canned AskReview): fse bitácora, same "Held for the next frontend leftovers" line.
+- Builder's "found, not asked" (the `--review` fixture names no `discuss_state_dir`): review-map v3 Amendment 3, and fse bitácora 2026-10-18 ~11:53 (follow-up: `fixture-home.sh` default config sets `discuss_state_dir`). Thread 01M57TKJ left in organizer-fixture by sup82's word.
+- My Notes are not findings.
+- **Nowhere yet:** au-ui's A1 for aglaea (`asked` after the change word vs R21's "beside its mark"), A2 for aglaea (the pre-press line stays after an ask on a symbol you stay on), and the round 2 observation (Conversations' chat list keeps `channel` highlighted while another chat is shown). So the card stays open.
 
 ## UI review
 au-ui, 2026-10-18, on 60f74c309524c62bfbf58333e5228258d9fb6eca (every row; the branch did not move). **Verdict: fail**, one severity 3 (U1) against FR-29 at 1024×640. Evidence: `.wt-notes/au-ui/` (`out/` shots and harness logs, `steps/`).
