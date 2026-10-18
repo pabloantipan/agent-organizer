@@ -3,7 +3,7 @@ title: "Ask <seat> on a Question or Blocked mark, and the thread it opened"
 status: next
 repos: [organizer]
 branch: rv-ask-ui
-seat:
+seat: au-build
 stage: review-map
 updated: 2026-10-18
 next: "sup82 runs it (0147 ruled by the standing rule, 2026-10-18)"
