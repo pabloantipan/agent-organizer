@@ -1,12 +1,12 @@
 ---
 title: "A merged card resolves to its merge, and the app can read, make and mark a review map"
-status: next
+status: now
 repos: [organizer]
 branch: rv-data
 seat: rd-build
 stage: review-map
 updated: 2026-10-17
-next: "sup81 runs it; 0146 ruled"
+next: "rd-build: building FR-13 resolution"
 risk: medium
 footprint: [internal/review/resolve.go, internal/review/marks.go, internal/review/*_test.go, internal/service/review.go, internal/service/review_test.go, app.go, frontend/wailsjs/*, internal/cli/review.go, internal/cli/review_test.go, scripts/fixture-home.sh]
 depends_on: []
