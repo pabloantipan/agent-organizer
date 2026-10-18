@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 43 - Open in editor's refusals, the definition line, Save only when it saves
-status: proposed
+status: ruled
 raised: 2026-10-18
 raised_by: fse
 owner: pablo
@@ -10,9 +10,9 @@ forecast: 25-50m
 stage: review-map
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-18
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -46,3 +46,5 @@ The FSE: **"accept as written"**.
 On accept: one supervisor runs the card.
 
 ## Ruling
+
+pablo, 2026-10-18, in the organizer on lodestar: No answer in 5 min (raised 18:14, asked in the mailbox); ruled as recommended in away mode, Pablo, 2026-10-18 15:29 CLT, relayed by Hephaistos: "Ok. We enter in mode Operator is away. Tell FSEs about I'll be about 4 hours. I expect as much advancement as we can. Spawn judges as discresion" (factory decisions.md c788d64).
