@@ -233,3 +233,28 @@ func TestReposOf(t *testing.T) {
 		t.Errorf("two repos: %+v", r)
 	}
 }
+
+// G2 / leftovers-41 FR-9: Source names only the sources that produced a
+// node. A Go-only change reads go/types alone though typescript is
+// registered; a change that also touches a .ts file with no typescript
+// installed (the source runs and reads nothing) still reads go/types alone.
+func TestSourceNamesOnlyProducers(t *testing.T) {
+	dir, merge, _ := fixtureRepo(t)
+	open, err := exec.Command("git", "-C", dir, "rev-parse", "open").Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, rev := range []string{strings.TrimSpace(string(open)), merge} {
+		ranges, err := CommitRanges(rev, []Repo{{Dir: dir}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		rm, err := Build("init", rev, ranges, Sources(), t.TempDir())
+		if err != nil {
+			t.Fatal(err)
+		}
+		if rm.Source != "go/types" {
+			t.Errorf("%s: Source %q, want go/types", short(rev), rm.Source)
+		}
+	}
+}
