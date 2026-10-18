@@ -12,7 +12,18 @@ import { readFileSync } from "node:fs";
 // dependency). The harness rows press the keys.
 
 const openReviewAt = vi.fn((..._: unknown[]) => Promise.resolve());
-vi.mock("../../wailsjs/go/main/App", () => ({ MarkReview: vi.fn(), ReviewFile: vi.fn(), AskReview: vi.fn(), ReviewStatus: vi.fn(), OpenReviewAt: (...a: unknown[]) => openReviewAt(...a) }));
+vi.mock("../../wailsjs/go/main/App", () => ({
+  MarkReview: vi.fn(), ReviewFile: vi.fn(), AskReview: vi.fn(), ReviewStatus: vi.fn(), OpenReviewAt: (...a: unknown[]) => openReviewAt(...a),
+  // S5 renders the top bar
+  FloatAvailable: () => Promise.resolve(false), FloatCompact: () => Promise.resolve(), Help: () => Promise.resolve(null),
+}));
+// S5 renders the screen Open the thread lands on (top bar, initiative
+// header, Conversations) from a plain store; the panel reads none of it.
+const board = vi.hoisted(() => ({ state: {} as Record<string, unknown> }));
+vi.mock("../stores/board.store", () => ({ useBoard: Object.assign((sel?: (s: unknown) => unknown) => (sel ? sel(board.state) : board.state), { getState: () => board.state, setState: (p: Record<string, unknown>) => Object.assign(board.state, p) }) }));
+vi.mock("../../wailsjs/runtime/runtime", () => ({ EventsOn: () => () => undefined }));
+vi.mock("../hooks/useWails", () => ({ api: new Proxy({}, { get: () => vi.fn(async () => ({})) }) }));
+vi.mock("../lib/drafts", async (orig) => ({ ...(await orig<typeof import("../lib/drafts")>()), useDraft: () => undefined, useDrafts: () => new Set<string>() }));
 
 const { AskStatus, EditorAction, EditorFailed, editorRefused, markPress, openAt, ReviewSymbolView } = await import("./ReviewSymbol");
 const { afterSave, canSave, definitionLine, editorAt, focusAfterSave, markControls, markOf, saveShown, threadOf, worklist } = await import("../lib/review");
@@ -542,5 +553,41 @@ describe("S1-S4 (leftovers-43): the panel never offers a press that cannot work"
     expect(src).toContain('if (which === "save") afterSaveFocus.current = true;');
     expect(src).toContain('(to ?? radios.current?.querySelector<HTMLInputElement>("input:checked") ?? radios.current?.querySelector<HTMLInputElement>("input"))?.focus();');
     expect(src).not.toMatch(/document\.body\.focus|\.blur\(\)/);
+  });
+});
+
+describe("S5 (leftovers-43 FR-5, Amendment 1): Conversations after Open the thread", () => {
+  it("one aria-current=\"page\" (the crumb), one \"true\" in the chat list (the thread's chat), and the sub-tab's own \"true\"", async () => {
+    const { TopBar } = await import("./TopBar");
+    const { InitiativeHeader } = await import("./InitiativeHeader");
+    const { Conversation } = await import("./Conversation");
+    const store = readFileSync(new URL("../stores/board.store.ts", import.meta.url), "utf8") as string;
+    // Open the thread is openSlack(initiative, null, thread); it names screen and not review, so leaveReview drops the Review screen
+    expect(store).toMatch(/openSlack: \(selectedInitiative, slackFocus, threadId\) => set\(\(st\) => \(\{\n\s+ruleDraft: null, headerOpen: folded\(\), screen: "initiative", sub: "conversations", selectedInitiative, slackFocus, slackDraft: threadId \? \{ threadId \} : null,/);
+    expect(store).toContain('const q = "review" in p ? p : { ...p, review: null };');
+    const noop = () => undefined;
+    const i = { id: "init-a", title: "", description: "", machine: "lodestar", local: true, path: "/r/init-a", status: "active", goal: "g", measure: "", target: "",
+      scope: { in: [], out: [] }, stages: [], repos_state: [], problems: [], decisions: [], also_on: [], specs: [] } as unknown;
+    Object.assign(board.state, {
+      screen: "initiative", sub: "conversations", selectedInitiative: "init-a", review: null, reviewBack: null, slackFocus: null, slackDraft: null,
+      view: { board: { initiatives: [i], columns: {}, machines: [{}] }, order: {}, pulled_at: "2026-10-01T00:00:00Z" }, agents: null, headerOpen: false, widthClass: "wide",
+      loading: false, syncing: false, error: null, lastMessage: null, account: { signed_in: false, email: "" }, lock: null, authMode: "off", syncNote: null, memoryOpen: false,
+      goHome: noop, openSettings: noop, openUsage: noop, openInitiatives: noop, refresh: noop, sync: noop, setAccount: noop, setLock: noop, setOfflineChoice: noop, setMemoryOpen: noop,
+      openInitiative: noop, openDecision: noop, openStage: noop, setHeaderOpen: noop, clearSlackDraft: noop, applyAgents: noop, setResolved: noop, openCardLanding: noop,
+    });
+    // the review's thread, direct with fse: the landing focuses fse's chat (Conversation.test W5)
+    const thread = { id: "01THREAD", subject: "rv-fixture: review at 2bd87db", status: "open", kind: "question", posters: ["pablo"], opener: "pablo", to: "fse", age_seconds: 5, messages: 1 };
+    const group = { id: "init-a", human: "pablo", project: "organizer-fixture", can_post: false, discuss: "", cell: { agents: ["pablo", "fse", "po_ana"], reconciler: "po_ana" }, threads: [thread], crew: [], waiting: [] } as never;
+    const top = renderToStaticMarkup(<TopBar />);
+    const head = renderToStaticMarkup(<InitiativeHeader initiative={i as never} />);
+    const chats = renderToStaticMarkup(<Conversation group={group} focus="fse" onFocus={noop} />);
+    const screen = top + head + chats;
+    expect(screen.match(/aria-current="page"/g)).toHaveLength(1);
+    expect(top).toContain('<b class="mono crumb-id" title="init-a" aria-current="page">init-a</b>');
+    const current = [...chats.matchAll(/<button([^>]*)class="chat[^"]*"[^>]*>[\s\S]*?<span class="chat-name">([^<]*)<\/span>/g)].filter((m) => /aria-current="true"/.test(m[1])).map((m) => m[2]);
+    expect(current).toEqual(["fse"]);
+    const tabs = head.slice(head.indexOf('<nav class="subtabs"'), head.indexOf("</nav>", head.indexOf('<nav class="subtabs"')));
+    expect(tabs.match(/aria-current="true"/g)).toHaveLength(1);
+    expect(tabs).toMatch(/<button class="on" aria-current="true">Conversations<\/button>/);
   });
 });
