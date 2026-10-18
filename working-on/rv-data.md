@@ -43,6 +43,7 @@ docs/specs/review-map.md v2, rows D1 to D5 and X0.
 - Every call refuses a card that is not in this machine's scan ("card X of Y is on <machine>, not this machine; review it there").
 - Premise `readOnlyOf marks another machine's card` is false (`lib/queue.ts:57` is a sleeping initiative); not relied on by this card; rv-list should not use it for that.
 - Make passes change-check the scanned root, not the id (its id lookup walks ~ and missed fixtures and clones).
+- change-check on 5e66aa9: undeclared 0, declared-not-changed 0; `outside boundary` 14 are every file, because the card's `boundary:` entry ("docs/specs/review-map.md v2 Boundary, rv-data") does not parse ("no section 'v2 Boundary'": the spec's heading is `### Boundary` under `## v2`); all 14 are in the spec's rv-data Boundary. `outside footprint` 1 is `internal/review/git.go:Export`, the race fix, inside the Boundary's `internal/review`. The 31 `untested?` are helpers reached through tested callers.
 - Fixture: `eval "$(scripts/fixture-home.sh --review)"` exports `FIXTURE_REVIEW_CARD=rv-fixture` and `FIXTURE_REVIEW_MOVE` (moves the branch to its second commit).
 
 ## Declared changes
