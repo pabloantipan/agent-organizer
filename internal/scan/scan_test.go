@@ -443,19 +443,3 @@ func TestCardSpecNamesNoFile(t *testing.T) {
 		t.Errorf("spec problems = %+v, want only %+v (all: %+v)", got, want, si.Problems)
 	}
 }
-
-func TestCardSpecRel(t *testing.T) {
-	for ref, want := range map[string]string{
-		"docs/specs/x.md (FR-1 to FR-3)": "docs/specs/x.md",
-		"docs/x.md#shape":                "docs/x.md",
-		"docs/x.md, FR-2":                "docs/x.md",
-		"/abs/x.md":                      "",
-		"../agent-slack/specs/x.md":      "",
-		"":                               "",
-	} {
-		got, ok := cardSpecRel(ref)
-		if ok != (want != "") || got != want {
-			t.Errorf("cardSpecRel(%q) = %q, %v; want %q", ref, got, ok, want)
-		}
-	}
-}

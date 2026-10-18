@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"organizer/internal/model"
+	"organizer/internal/specpath"
 )
 
 const (
@@ -235,15 +236,15 @@ func readCard(path string, archived bool) (model.Card, []model.Problem) {
 // checkCardSpecs reports an open card whose spec: names a relative .md file
 // that is not under the initiative root (leftovers-39 FR-3): a builder
 // launched from it reads nothing. The file is the field's first word, read
-// as service.specRel reads it; prose, an absolute path or a path out of the
-// root (another repo) is no problem. Done cards are history and not checked.
+// by specpath.Card as the spec reader reads it; prose, an absolute path or a
+// path out of the root (another repo) is no problem. Done cards are history and not checked.
 func checkCardSpecs(root string, cards []model.Card) []model.Problem {
 	var problems []model.Problem
 	for _, c := range cards {
 		if c.Archived || c.Status == model.StatusDone {
 			continue
 		}
-		rel, ok := cardSpecRel(c.Spec)
+		rel, ok := specpath.Card(c.Spec)
 		if !ok || !strings.EqualFold(filepath.Ext(rel), ".md") {
 			continue
 		}
@@ -252,25 +253,6 @@ func checkCardSpecs(root string, cards []model.Card) []model.Problem {
 		}
 	}
 	return problems
-}
-
-// cardSpecRel is service.specRel (internal/service/spec.go), which the scan
-// cannot import: the first word of a card's spec:, without trailing
-// punctuation or its #section, relative to the root and not climbing out.
-func cardSpecRel(ref string) (string, bool) {
-	f := strings.Fields(ref)
-	if len(f) == 0 {
-		return "", false
-	}
-	p, _, _ := strings.Cut(strings.TrimRight(f[0], ",;:"), "#")
-	if strings.TrimSpace(p) == "" || filepath.IsAbs(p) || strings.HasPrefix(p, "/") {
-		return "", false
-	}
-	rel := filepath.Clean(filepath.FromSlash(p))
-	if rel == "." || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
-		return "", false
-	}
-	return filepath.ToSlash(rel), true
 }
 
 // validULID reports whether s is a 26-character Crockford base32 ULID, the id
