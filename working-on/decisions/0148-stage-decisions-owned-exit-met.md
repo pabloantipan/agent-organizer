@@ -1,6 +1,6 @@
 ---
 title: "Stage decisions-owned-and-used: exit met"
-status: proposed
+status: ruled
 raised: 2026-10-18
 raised_by: fse
 owner: pablo
@@ -9,9 +9,9 @@ cards: []
 stage: decisions-owned-and-used
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-18
+ruled_by: pablo
+chosen: exit met
 ---
 
 ## Question
@@ -44,3 +44,5 @@ Is the stage `decisions-owned-and-used` done? Its exits, in
 The FSE: **"exit met"**.
 
 ## Ruling
+
+pablo, 2026-10-18, in the organizer on lodestar: No answer in 5 min (raised 11:42); ruled as recommended under Pablo's standing rule, relayed by Hephaistos, lodestar, 2026-10-18 ~02:10: "Till October 18th 12:00am Chilean time, if I dont answer in 5mins, do as recommended and SAVE desition taken" (thread 01M56PWG).
