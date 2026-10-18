@@ -614,3 +614,20 @@ run in the Tab harness's hidden window on `fixture-home.sh --review`.
 | `rv-ask-data` | A1, A2, A3, X0 | — | false |
 | `rv-polish` | P1, P2, P3, P4, P5, X0 | — | true |
 | `rv-ask-ui` | A4, A5, X0 | `rv-ask-data`, `rv-polish` | true |
+
+Amendment 1 (v3), 2026-10-18, the FSE, from rv-polish's UI review (rp-ui,
+d7e7bc9, U1, U2) and Aglaea's review-view Amendment 4 (R22, R23). Both join
+`rv-ask-ui`, whose files (`ReviewSymbol.tsx`, `styles/review.css`) hold them:
+- **FR-38** (U2, R22) When the shown symbol is the last one without a mark,
+  the primary drops `, next`: `Reviewed`, `Save question`, `Save block`,
+  `Ask <seat>`. After the press focus stays on that button, the header
+  reads `Reviewed m of m`, and the live region says it once.
+- **FR-39** (U1, R23) A muted flag (no fill, no border) is text: no inline
+  padding, its text starts at the name's indent. The amber flag and the
+  dashed `declared, not changed` keep their padding.
+- **A6** (38) vitest: the last unmarked symbol, each mark | the four labels
+  without `, next`; after the press focus on the button, `Reviewed m of m`,
+  the live region once.
+- **A7** (39) harness at 1024×640, a row with `no direct test` | the flag's
+  text left edge equals the name's.
+- `rv-ask-ui`'s gate adds A6 and A7.
