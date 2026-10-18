@@ -380,3 +380,25 @@ below the fold) is fixed in the card as the reviewer proposed.
 | R25 | read `asked` on the current row | `asked` measures 4.5:1 or more on the current row's surface |
 | R26 | know why an ask failed and what to do | each cause in U3's table reads its words; no absolute home path shows |
 | R27 | reach the thread as a link | `Open the thread` is a link, a Tab stop with the link ring |
+
+## Amendment 6 (aglaea, 2026-10-18): from au-ui on rv-ask-ui (landed 890e02c)
+
+- **A1: `asked` goes beside the glyph**, as R21 says: `? asked` and
+  `✕ asked` are one unit in the mark's place at the row's start, before
+  the name, so every row's mark reads in one column. Not after the change
+  word.
+- **A2: once asked, the pre-press line goes.** The panel reads only
+  `Asked <seat> · Open the thread`. If Pablo edits the note, a new ask is
+  possible again: the line returns as `Saves the mark and asks <seat>
+  again in this review's thread. Wakes <seat>.` and the button reads `Ask
+  <seat> again` (with `, next` while one is left).
+- **Noted, not this card's: Conversations' chat list keeps `channel`
+  current while the timeline shows another chat.** One "you are here" per
+  screen: the list's current row follows the chat shown, whoever opened
+  it (a review's `Open the thread` included). For the same leftovers.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R28 | read marks in one column | an asked row draws `? asked` at the mark's place, before the name |
+| R29 | not read a promise already kept | after an ask, the panel shows `Asked <seat> · Open the thread` and no `Saves the mark …` line; editing the note brings back `… asks <seat> again …` and `Ask <seat> again` |
+| R30 | see which chat is shown | after `Open the thread`, the chat list's current row is that thread's chat, not `channel` |
