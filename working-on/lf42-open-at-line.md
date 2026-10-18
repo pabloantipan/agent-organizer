@@ -6,7 +6,7 @@ branch: lf42-open-at-line
 seat: oe-build
 stage: review-map
 updated: 2026-10-18
-next: "review: lf42-open-at-line, gate met (E1 E2 E3 E4 X0), 763c355"
+next: "review: lf42-open-at-line, gate met (E1 E2 E3 E4 X0), 4406ed5"
 risk: low
 footprint: [internal/service/review_open.go, internal/service/review_open_test.go, internal/service/review.go, app.go, frontend/wailsjs/*, frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css]
 depends_on: [lf41-review-words, lf41-review-go]
@@ -23,7 +23,7 @@ From a symbol in the Review screen Pablo opens its code at the line, in a checko
 docs/specs/leftovers-42.md, rows E1, E2, E3, E4 and X0.
 
 ## Done
-- oe-build, 2026-10-18: E1, E2 (go test, stubbed exec), E3, E4 (vitest, mocked binding) and X0 (clean clone: make test, pnpm run build, wails build, porcelain empty) pass on 969c9a1 (the same tree as 763c355, rebased onto main 1c1a90a, which adds only this card); not merged. Evidence and reviewer states in `.wt-notes/oe-build/progress.md`.
+- oe-build, 2026-10-18: E1, E2 (go test, stubbed exec), E3, E4 (vitest, mocked binding) and X0 (clean clone: make test, pnpm run build, wails build, porcelain empty) pass on 969c9a1 (the same code tree as 4406ed5; main since then adds only this card); not merged. Evidence and reviewer states in `.wt-notes/oe-build/progress.md`.
 
 ## Declared changes
 - added `internal/service/review_open.go`: `OpenReviewAt` (the checkout whose HEAD is the map's head, refusals), `ReviewCheckout`, `reviewCheckouts`, `checkoutsAt`, `headOf`, `checkoutOf`, `inside`, `editorCommand`, `startEditor` (FR-1, FR-2)
