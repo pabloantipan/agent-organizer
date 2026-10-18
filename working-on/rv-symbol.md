@@ -13,7 +13,7 @@ footprint: [frontend/src/components/ReviewSymbol.tsx, frontend/src/components/Re
 depends_on: [rv-list]
 boundary: ["docs/specs/review-map.md v2 Boundary, rv-symbol"]
 spec: "docs/specs/review-map.md (v2, FR-19, Amendment 2 FR-20, FR-21, Amendment 3 FR-22, FR-23; docs/ux/specs/review-view.md)"
-gate: "docs/specs/review-map.md v2 Acceptance, rows V-R4, V-R5, V-R6, V-R7, V-R8, V-R10, V-R12 and X0; Amendment 2 rows V-F1, V-F2; Amendment 3 rows V-R13, V-R14"
+gate: "docs/specs/review-map.md v2 Acceptance, rows V-R4, V-R5, V-R6, V-R7, V-R8, V-R10, V-R12 and X0; Amendment 2 rows V-F1, V-F2; Amendment 3 rows V-R13, V-R14; Amendment 6 row V-U1"
 ui_review: true
 ---
 

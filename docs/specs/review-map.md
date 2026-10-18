@@ -448,3 +448,15 @@ change of its own, not this card's. So:
   and the full title shown; at 1024×640: the accessible name is the full
   title, and the crumb never overlaps the bar's other items. The top bar's
   width budget at 1024 is held for a later card.
+
+Amendment 6 (v2), 2026-10-18, the FSE, from rv-symbol's UI review (rs-ui,
+3155162, U1): after the last `Reviewed, next` with nothing left, the panel
+keeps the old mark's radios and note and a live Save, which puts the mark
+back to Question. Joins `rv-symbol` with the V-R14 fix:
+- **FR-24** When `Reviewed, next` leaves nothing to review, the panel shows
+  the symbol just marked as Reviewed (its radios and note as saved), and
+  Save writes nothing unless the reader changes the mark.
+- **V-U1** vitest: mark the last unmarked symbol Question, then `Reviewed,
+  next`, then Save | the mark stays Reviewed.
+U2 (radio focus ring after an arrow, shared with the rule box), U3 (Open in
+editor at a line), U5, U6 and G2, G3 are held for a later card.
