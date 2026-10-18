@@ -6,7 +6,7 @@ branch: lf42-open-at-line
 seat: oe-build
 stage: review-map
 updated: 2026-10-18
-next: "none: merged review pass (oe-review, oe-ui); findings routed in ## Review"
+next: "none: review pass (oe-review, oe-ui); merge is sup83's; findings routed in ## Review"
 risk: low
 footprint: [internal/service/review_open.go, internal/service/review_open_test.go, internal/service/review.go, app.go, frontend/wailsjs/*, frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css]
 depends_on: [lf41-review-words, lf41-review-go]
