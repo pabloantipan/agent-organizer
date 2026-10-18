@@ -3,10 +3,11 @@ title: "An ask survives a Save, a note says it needs a mark, Open the thread nev
 status: next
 repos: [organizer]
 branch: lf44-ask-survives
-seat:
+seat: as-build
+reviewer: as-review, as-ui
 stage: review-map
 updated: 2026-10-18
-next: "sup85 runs it (0152 ruled in away mode, 2026-10-18)"
+next: "as-build builds it in .wt/lf44-ask-survives (sup85)"
 risk: low
 footprint: [internal/review/marks.go, internal/review/marks_test.go, internal/service/review_ask.go, internal/service/review_ask_test.go, frontend/wailsjs/go/*, frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css, frontend/src/components/Conversation.tsx (landing), frontend/src/components/Conversation.test.tsx]
 depends_on: []
