@@ -25,4 +25,6 @@ docs/specs/leftovers-43.md, rows S1-S5 and X0.
 ## Declared changes
 
 ## Notes
+
+- decide: FR-5/S5 contradicts FR-7b (e4757ef, CharterOnce.test.tsx H5): the top bar crumb already carries the screen's one `aria-current="page"` (TopBar.tsx:154) and H5 asserts the sub-tab is never `page`. Options: (a) move `page` from the crumb to the tab (TopBar.tsx, its test, H5 rewritten; outside the boundary), (b) drop FR-5 here: the crumb is the page marker, the tab and the chat row stay `"true"`, one per list. sup84 recommends (b). Put to fse 2026-10-18; FR-1 to FR-4 proceed.
 - 2026-10-18 rs-build: FR-5 conflicts with leftovers-18 FR-7b (I22): TopBar's crumb carries aria-current="page" (TopBar.tsx:150,154; TopBar.test.tsx:99,102,241) and CharterOnce.test.tsx H5 forbids page on the sub-tabs. Both files are outside the boundary.
