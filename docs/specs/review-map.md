@@ -427,3 +427,11 @@ Amendment 3 (v2), 2026-10-18, the FSE, from Aglaea's review-view Amendment 1
 - **FR-21** also: the crumb's card title carries the full title in its
   accessible name (Aglaea, same amendment); V-F2 checks it.
 - `rv-symbol`'s gate adds V-R13 and V-R14.
+
+Amendment 4 (v2), 2026-10-18, the FSE, from sup81 before rv-symbol's launch
+(thread 01M56JJC): V-R6 needs an affected symbol, and the `--review`
+fixture's map has none (4 nodes, 0 edges). So `rv-symbol`'s boundary adds
+`scripts/fixture-home.sh`, its `--review` branch only: an unchanged
+function on the fixture branch that calls `svc.Greet`, so the map holds an
+affected caller with a `uses` edge. No claim (v1 fills none; V-R7 stays
+vitest). D5's expectations still hold.

@@ -8,7 +8,7 @@ stage: review-map
 updated: 2026-10-17
 next: "sup81 runs it; 0146 ruled"
 risk: medium
-footprint: [frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css, frontend/src/components/Review.tsx, frontend/src/components/TopBar.tsx (crumb), frontend/src/components/TopBar.test.tsx]
+footprint: [frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css, frontend/src/components/Review.tsx, frontend/src/components/TopBar.tsx (crumb), frontend/src/components/TopBar.test.tsx, scripts/fixture-home.sh (--review only)]
 depends_on: [rv-list]
 boundary: ["docs/specs/review-map.md v2 Boundary, rv-symbol"]
 spec: "docs/specs/review-map.md (v2, FR-19, Amendment 2 FR-20, FR-21, Amendment 3 FR-22, FR-23; docs/ux/specs/review-view.md)"
