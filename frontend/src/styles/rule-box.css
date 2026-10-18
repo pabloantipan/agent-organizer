@@ -111,7 +111,8 @@
 .rb-option:hover span { background: var(--surface-hover); color: var(--fg); }
 .rb-option.on span { background: var(--surface-selected); border-color: var(--border-accent); color: var(--fg); }
 .rb-option.on span::before { box-shadow: inset 0 0 0 4px var(--accent); }
-.rb-option input:focus-visible + span { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+/* :focus, as review.css's radios: WebKit drops :focus-visible after an arrow (FR-33). */
+.rb-option input:focus + span { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .rb-options:disabled .rb-option { cursor: default; opacity: .45; }
 
 .rb-words { display: grid; gap: var(--space-1); }
