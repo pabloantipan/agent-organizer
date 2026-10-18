@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -184,6 +185,71 @@ func TestWallFormats(t *testing.T) {
 	for d, want := range cases {
 		if got := wall(d); got != want {
 			t.Errorf("wall(%s) = %q, want %q", d, got, want)
+		}
+	}
+}
+
+// slowRunning is stdout for TestRunPrintsEverySeatLine: a write of a seat's
+// running line takes 50 ms, which widens the race FR-11 closes from
+// microseconds to one the test always loses on main.
+type slowRunning struct {
+	mu  sync.Mutex
+	buf bytes.Buffer
+}
+
+func (w *slowRunning) Write(p []byte) (int, error) {
+	if strings.HasSuffix(string(p), " running\n") {
+		time.Sleep(50 * time.Millisecond)
+	}
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.buf.Write(p)
+}
+
+func (w *slowRunning) String() string {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.buf.String()
+}
+
+// TestRunPrintsEverySeatLine is G4 (leftovers-41 FR-11): a real launch
+// through the probe stub prints the seat's starting and running lines
+// before the verb returns, every time. Before FR-11 the start settled
+// before the last change was told, so the running line raced the exit.
+func TestRunPrintsEverySeatLine(t *testing.T) {
+	stub, err := filepath.Abs(filepath.Join("..", "..", "scripts", "probe-stub.sh"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	now := func() time.Time { return time.Date(2026, 9, 2, 12, 0, 0, 0, time.UTC) }
+	for i := 0; i < 20; i++ {
+		fixtureEnv(t)
+		t.Setenv("ORGANIZER_PROBE_BIN", stub)
+		t.Setenv("PROBE_STUB_SLEEP", "0")
+		t.Setenv("PROBE_STUB_FAIL", "")
+		cfg := "discuss_state_dir: " + t.TempDir() + "\n"
+		if err := os.WriteFile(os.Getenv("ORGANIZER_CONFIG"), []byte(cfg), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		prompts := filepath.Join(os.Getenv("XDG_DATA_HOME"), "organizer", "prompts")
+		if err := os.MkdirAll(prompts, 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(prompts, "init-a-alpha.md"), []byte("task\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		var out slowRunning
+		var errb bytes.Buffer
+		if code := runWith([]string{"run", "init-a", "alpha"}, &out, &errb, now); code != 0 {
+			t.Fatalf("run %d: exit %d\nstdout: %s\nstderr: %s", i, code, out.String(), errb.String())
+		}
+		for _, want := range []string{"alpha queued\n", "alpha starting\n", "alpha running\n", "launched init-a/alpha as alpha"} {
+			if !strings.Contains(out.String(), want) {
+				t.Fatalf("run %d: stdout missing %q; got:\n%s", i, want, out.String())
+			}
+		}
+		if strings.Index(out.String(), "alpha running") > strings.Index(out.String(), "launched") {
+			t.Fatalf("run %d: the running line came after the verb's last line:\n%s", i, out.String())
 		}
 	}
 }

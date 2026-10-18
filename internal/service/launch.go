@@ -89,7 +89,11 @@ type LaunchChange struct {
 	Seat       *SeatLaunch
 }
 
-func (l *InitiativeLaunch) settle(now time.Time) {
+// settle recounts the start. When this call settles it, settle returns the
+// channel WaitLaunch waits on instead of closing it: the caller closes it
+// (closeSettled) after it has told OnLaunch, so a waiter never returns
+// before the last seat's change is heard (leftovers-41 FR-11).
+func (l *InitiativeLaunch) settle(now time.Time) chan struct{} {
 	l.Running, l.Failed, l.Done = 0, 0, true
 	for _, s := range l.Seats {
 		switch s.State {
@@ -106,9 +110,15 @@ func (l *InitiativeLaunch) settle(now time.Time) {
 	}
 	if l.Done && l.doneAt.IsZero() {
 		l.doneAt = now
-		if l.settled != nil {
-			close(l.settled)
-		}
+		return l.settled
+	}
+	return nil
+}
+
+// closeSettled releases WaitLaunch once the changes are told.
+func closeSettled(ch chan struct{}) {
+	if ch != nil {
+		close(ch)
 	}
 }
 
@@ -158,21 +168,24 @@ func (s *Service) queueLaunch(initiative, kind string, seats []SeatLaunch) error
 		l.Seats = append(l.Seats, seat)
 		queued = append(queued, seat)
 	}
-	l.settle(s.clock())
+	settled := l.settle(s.clock())
 	start := !l.active
 	l.active = true
 	s.launchMu.Unlock()
 	for i := range queued {
 		s.notifyLaunch(LaunchChange{Initiative: initiative, Seat: &queued[i]})
 	}
+	closeSettled(settled)
 	if start {
 		go s.runLaunches(l)
 	}
 	return nil
 }
 
-// setSeat changes seat i of a start and tells OnLaunch. It works on the
-// start it was handed, not the map's: the map may have dropped or replaced it.
+// setSeat changes seat i of a start and tells OnLaunch, then lets WaitLaunch
+// return when the change settled the start: `organizer run` prints the last
+// seat's line before it exits (leftovers-41 FR-11). It works on the start it
+// was handed, not the map's: the map may have dropped or replaced it.
 func (s *Service) setSeat(l *InitiativeLaunch, i int, change func(*SeatLaunch)) {
 	initiative := l.Initiative
 	s.launchMu.Lock()
@@ -182,10 +195,11 @@ func (s *Service) setSeat(l *InitiativeLaunch, i int, change func(*SeatLaunch)) 
 		l.Seen = false
 	}
 	cp := *seat
-	l.settle(s.clock())
+	settled := l.settle(s.clock())
 	drop := l.Done && l.Failed == 0
 	s.launchMu.Unlock()
 	s.notifyLaunch(LaunchChange{Initiative: initiative, Seat: &cp})
+	closeSettled(settled)
 	if drop {
 		s.afterKeep(initiative)
 	}
@@ -283,12 +297,13 @@ func (s *Service) StopStarting(initiative string) {
 			skipped = append(skipped, l.Seats[i])
 		}
 	}
-	l.settle(s.clock())
+	settled := l.settle(s.clock())
 	drop := l.Done && l.Failed == 0 && len(skipped) > 0
 	s.launchMu.Unlock()
 	for i := range skipped {
 		s.notifyLaunch(LaunchChange{Initiative: initiative, Seat: &skipped[i]})
 	}
+	closeSettled(settled)
 	if drop {
 		s.afterKeep(initiative)
 	}
@@ -322,12 +337,13 @@ func (s *Service) RetrySeat(initiative, seat string) error {
 	if l.Done {
 		l.doneAt, l.settled = time.Time{}, make(chan struct{})
 	}
-	l.settle(s.clock())
+	settled := l.settle(s.clock())
 	cp := l.Seats[i]
 	start := !l.active
 	l.active = true
 	s.launchMu.Unlock()
 	s.notifyLaunch(LaunchChange{Initiative: initiative, Seat: &cp})
+	closeSettled(settled)
 	if start {
 		go s.runLaunches(l)
 	}
