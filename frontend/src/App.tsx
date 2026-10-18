@@ -11,6 +11,7 @@ import { DecisionsView } from "./components/DecisionsView";
 import { AgentsView } from "./components/AgentsView";
 import { SlackView } from "./components/SlackView";
 import { Usage } from "./components/Usage";
+import { Review } from "./components/Review";
 import { InitiativesView } from "./components/InitiativesView";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Gate } from "./components/Gate";
@@ -23,7 +24,7 @@ import { EventsOn } from "../wailsjs/runtime/runtime";
 import "./styles/shell.css";
 
 export default function App() {
-  const { screen, refresh, sync, applyAgents, railCollapsed, setWindowWidth } = useBoard();
+  const { screen, review, refresh, sync, applyAgents, railCollapsed, setWindowWidth } = useBoard();
 
   // The one width listener (responsive-home FR-1): the store keeps the class.
   useEffect(() => {
@@ -59,7 +60,9 @@ export default function App() {
     <div className="shell">
       <SkipLink />
       <TopBar />
-      {screen === "settings" ? (
+      {review ? (
+        <main id={MAIN_ID} tabIndex={-1} className="content"><ErrorBoundary name="Review"><Review key={`${review.initiative}/${review.card}`} /></ErrorBoundary></main>
+      ) : screen === "settings" ? (
         <main id={MAIN_ID} tabIndex={-1} className="content"><ErrorBoundary name="Settings"><Settings /></ErrorBoundary></main>
       ) : screen === "initiatives" ? (
         <main id={MAIN_ID} tabIndex={-1} className="content"><ErrorBoundary name="Initiatives"><InitiativesView /></ErrorBoundary></main>

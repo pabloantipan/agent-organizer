@@ -6,6 +6,7 @@ import { decSectionsOf, type DecSections } from "../lib/decisionsPage";
 import { storedHeaderOpen, storeFolded, storeHeaderOpen } from "../lib/fold";
 import { stageFocusOf } from "../lib/stageFocus";
 import { railCollapsedFor, roomyOf, widthClassOf, type WidthClass } from "../lib/width";
+import type { ReviewPlace } from "../lib/review";
 
 /** Navigation is Home, one initiative under its header with six sub-views,
  *  Settings behind the gear (FR-14), or Usage, the week's tokens and money
@@ -145,6 +146,18 @@ type State = {
   initiativesFocus: string | null;
   clearInitiativesFocus: () => void;
   selected: merge.BoardCard | null;
+  // The Review screen (review-view §2, review-map v2 FR-18): one card's
+  // change, its own screen over the initiative, so `screen` stays
+  // "initiative" and Initiatives keeps its parent mark. `back` is where the
+  // card back was opened, restored by closeReview with the card back open
+  // and focus on Review the change (reviewReturn, which CardDrawer consumes).
+  // Any other navigation (a set that names `screen`) leaves it.
+  review: ReviewOpen | null;
+  openReview: (c: merge.BoardCard) => void;
+  setReviewPlace: (patch: Partial<Pick<ReviewPlace, "head" | "symbol">>) => void;
+  closeReview: () => void;
+  reviewReturn: string | null;
+  clearReviewReturn: () => void;
   // The role whose drawer is open (transversal-roles, A click), by name;
   // null when none. Show only: opening it starts nothing.
   roleOpen: string | null;
@@ -166,6 +179,13 @@ type State = {
 
 export type RuleDraft = { key: string; chosen: string; words: string };
 
+export type ReviewOpen = ReviewPlace & { back: { screen: Screen; selectedInitiative: string | null; sub: Sub; card: merge.BoardCard } };
+
+/** A navigation names `screen`; one that does not also name `review` leaves
+ *  the Review screen. */
+type Patch = Partial<State> | State;
+const leaveReview = (p: Patch): Patch => ("screen" in p && !("review" in p) ? { ...p, review: null } : p);
+
 const NO_RULING: Draft = { chosen: "", words: "" };
 
 const RAIL_KEY = "rail.collapsed.strip";
@@ -177,7 +197,10 @@ const DEC_SECTIONS_KEY = "decisions.sections";
 const storedDecSections = () => { try { return decSectionsOf(localStorage.getItem(DEC_SECTIONS_KEY)); } catch { return decSectionsOf(null); } };
 const width0 = typeof window === "undefined" ? 1440 : window.innerWidth;
 
-export const useBoard = create<State>((set, get) => ({
+export const useBoard = create<State>((rawSet, get) => {
+  const set = ((p: Patch | ((st: State) => Patch), replace?: boolean) =>
+    rawSet((st) => leaveReview(typeof p === "function" ? p(st) : p) as State, replace as false)) as typeof rawSet;
+  return ({
   view: null,
   account: null,
   lock: null,
@@ -319,6 +342,20 @@ export const useBoard = create<State>((set, get) => ({
   initiativesFocus: null,
   clearInitiativesFocus: () => set({ initiativesFocus: null }),
   selected: null,
+  review: null,
+  openReview: (c) => set((st) => ({
+    review: { initiative: c.initiative_id, card: c.slug, head: "", symbol: "", back: { screen: st.screen, selectedInitiative: st.selectedInitiative, sub: st.sub, card: c } },
+    screen: "initiative", selectedInitiative: c.initiative_id, selected: null, reviewReturn: null,
+  })),
+  setReviewPlace: (patch) => set((st) => (st.review ? { review: { ...st.review, ...patch } } : {})),
+  closeReview: () => set((st) => {
+    if (!st.review) return {};
+    const { back, initiative, card } = st.review;
+    const fresh = Object.values(st.view?.board.columns ?? {}).flat().find((c) => c.initiative_id === initiative && c.slug === card && c.local);
+    return { review: null, screen: back.screen, selectedInitiative: back.selectedInitiative, sub: back.sub, selected: fresh ?? back.card, reviewReturn: `${initiative}/${card}` };
+  }),
+  reviewReturn: null,
+  clearReviewReturn: () => set({ reviewReturn: null }),
   roleOpen: null,
   openRole: (roleOpen) => set({ roleOpen }),
   filterMachine: null,
@@ -399,4 +436,5 @@ export const useBoard = create<State>((set, get) => ({
       set({ error: String(e) });
     }
   },
-}));
+  });
+});

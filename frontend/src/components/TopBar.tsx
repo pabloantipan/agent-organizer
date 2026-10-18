@@ -10,7 +10,7 @@ import { MemoryButton } from "./MemoryButton";
 import { FloatAvailable, FloatCompact } from "../../wailsjs/go/main/App";
 
 export function TopBar() {
-  const { screen, selectedInitiative, goHome, openSettings, openUsage, openInitiatives, widthClass, view, loading, syncing, refresh, sync, error, lastMessage, account, lock, authMode, syncNote, setAccount, setLock, setOfflineChoice, agents } = useBoard();
+  const { screen, selectedInitiative, review, goHome, openSettings, openUsage, openInitiatives, widthClass, view, loading, syncing, refresh, sync, error, lastMessage, account, lock, authMode, syncNote, setAccount, setLock, setOfflineChoice, agents } = useBoard();
   // With auth off there is no identity: no account menu, no Sign in, no email,
   // and no Sync button either, since sync is a skip nobody can act on.
   const identity = authMode === "firebase";
@@ -82,7 +82,7 @@ export function TopBar() {
           Mac · your work · the app, 16 px between groups and no rules. The
           version is in the brand's hover at every width (FR-5). */}
       <span className="brand" title={version ? `Deltagos ${version}` : "Deltagos"}>Deltagos</span>
-      <Where screen={screen} selectedInitiative={selectedInitiative} go={go} goHome={goHome} openInitiatives={openInitiatives} openUsage={openUsage} />
+      <Where screen={screen} selectedInitiative={selectedInitiative} review={review ? { initiative: review.initiative, title: review.back.card.title || review.card } : null} go={go} goHome={goHome} openInitiatives={openInitiatives} openUsage={openUsage} />
       <span className="tb-group tb-mac">
         <MemoryButton />
         {status}
@@ -121,7 +121,7 @@ export function TopBar() {
   );
 }
 
-type WhereProps = { screen: Screen; selectedInitiative: string | null; go: (to: () => void) => () => void; goHome: () => void; openInitiatives: () => void; openUsage: () => void };
+type WhereProps = { screen: Screen; selectedInitiative: string | null; review?: { initiative: string; title: string } | null; go: (to: () => void) => () => void; goHome: () => void; openInitiatives: () => void; openUsage: () => void };
 
 /** Where you are (initiatives-view Amendment 3, I22, I23): Home,
  *  Initiatives and Usage as one nav named Places, then, inside an
@@ -130,8 +130,10 @@ type WhereProps = { screen: Screen; selectedInitiative: string | null; go: (to: 
  *  initiative the title, with Initiatives as its parent (`placeOf`).
  *  Settings marks its own icon and shows no crumb. Help is an overlay
  *  (Amendment 4 §5, I31): the screen under it keeps its marks. */
-export function Where({ screen, selectedInitiative, go, goHome, openInitiatives, openUsage }: WhereProps) {
+export function Where({ screen, selectedInitiative, review, go, goHome, openInitiatives, openUsage }: WhereProps) {
   const crumb = screen === "initiative" ? selectedInitiative ?? "Agents" : null;
+  // The Review screen (review-view §2): `<initiative> › <card title> ›
+  // Review`, Review the current mark.
   return (
     <span className="tb-group tb-where">
       <nav className="places" aria-label="Places">
@@ -139,7 +141,15 @@ export function Where({ screen, selectedInitiative, go, goHome, openInitiatives,
         <PlaceTab label="Initiatives" place="initiatives" screen={screen} onClick={go(openInitiatives)} title="Every initiative as a card: awake, asleep and archived" />
         <PlaceTab label="Usage" place="usage" screen={screen} onClick={go(openUsage)} title="Tokens and money, week by week" />
       </nav>
-      {crumb && (
+      {review ? (
+        <span className="crumbs">
+          <span className="mono crumb-id" title={review.initiative}>{review.initiative}</span>
+          <span className="crumb-sep" aria-hidden="true">›</span>
+          <span className="crumb-card" title={review.title}>{review.title}</span>
+          <span className="crumb-sep" aria-hidden="true">›</span>
+          <b aria-current="page">Review</b>
+        </span>
+      ) : crumb && (
         <span className="crumbs">
           <b className={selectedInitiative ? "mono crumb-id" : undefined} title={crumb} aria-current="page">{crumb}</b>
         </span>

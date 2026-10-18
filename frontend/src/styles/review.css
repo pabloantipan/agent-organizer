@@ -1,0 +1,95 @@
+/* The Review screen (docs/ux/specs/review-view.md §3, §3.4, §4;
+   review-map v2 FR-18). Tier-2 role tokens and the seven type sizes only;
+   no nesting, @layer, color-mix or oklch (Safari 15.0). The page never
+   scrolls sideways: the list and the symbol scroll in their own frames,
+   code in its own. The symbol's panel (rv-symbol) fills .review-diff and
+   .review-facts. */
+
+.review-screen {
+  position: relative; /* the live region (.sr-only) stays inside it */
+  display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: var(--space-3);
+  height: 100%; min-width: 0; overflow: hidden;
+}
+
+/* The crumb: `<initiative> › <card title> › Review`. */
+.crumbs .crumb-card { max-width: 32ch; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--fg-muted); }
+
+.review-bar { display: flex; justify-content: flex-end; min-width: 0; }
+
+.review-head { display: grid; gap: var(--space-2); min-width: 0; }
+.review-counts { font-size: var(--font-size-sm); color: var(--fg-muted); overflow-wrap: anywhere; }
+.review-cover { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; min-width: 0; }
+.review-coverage { font-size: var(--font-size-md); font-weight: var(--weight-semibold); color: var(--fg); }
+.review-cover kbd {
+  font-family: var(--mono); font-size: var(--font-size-xs); padding: 0 var(--space-1);
+  border-radius: var(--radius-xs); border: 1px solid var(--border-subtle); color: var(--fg-on-accent);
+}
+.review-moved, .review-failed { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; font-size: var(--font-size-sm); color: var(--fg); min-width: 0; }
+.review-failed p { margin: 0; }
+/* Partial map, one line per reason, in --warning (§3.1). */
+.review-partial { font-size: var(--font-size-sm); color: var(--warning); overflow-wrap: anywhere; }
+.review-error { font-size: var(--font-size-sm); color: var(--danger); overflow-wrap: anywhere; }
+.review-reason { font-size: var(--font-size-sm); color: var(--fg); overflow-wrap: anywhere; }
+.review-make { display: inline-flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+
+/* §3.4: list 280 px | the symbol, with the facts under the diff, below
+   1440; list 300 px and the facts (360 px) beside the diff from 1440. */
+.review-body { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: var(--space-4); min-height: 0; min-width: 0; }
+
+.review-list {
+  min-height: 0; min-width: 0; overflow-y: auto; overflow-x: hidden;
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--surface); padding: var(--space-1);
+}
+.review-empty { display: grid; gap: var(--space-3); padding: var(--space-3); justify-items: start; min-width: 0; }
+.review-empty p { margin: 0; color: var(--fg); }
+.review-empty ul { margin: 0; color: var(--fg-muted); font-size: var(--font-size-sm); overflow-wrap: anywhere; }
+
+/* The worklist: one tree, one Tab stop (§5). */
+.rv-tree, .rv-tree ul { list-style: none; margin: 0; padding: 0; }
+.rv-group { border-radius: var(--radius-sm); }
+.rv-group:focus-visible, .rv-row:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.rv-ghead {
+  display: flex; align-items: baseline; gap: var(--space-1-5); padding: var(--space-1-5) var(--space-2);
+  font-size: var(--font-size-sm); font-weight: var(--weight-semibold); color: var(--fg); cursor: pointer; min-width: 0;
+}
+.rv-fold { color: var(--fg-subtle); width: 1ch; }
+.rv-gtitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.rv-gcount { color: var(--fg-muted); font-weight: var(--weight-regular); }
+.rv-group.must > .rv-ghead { color: var(--warning); }
+
+.rv-row {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-0-5) var(--space-1-5);
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-5); border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm); color: var(--fg); cursor: pointer; min-width: 0;
+}
+.rv-row:hover { background: var(--surface-hover); }
+.rv-row.on { background: var(--surface-selected); }
+.rv-row.declared { cursor: default; color: var(--fg-muted); }
+.rv-mark { display: inline-block; width: 1.5ch; text-align: center; font-weight: var(--weight-bold); }
+.rv-mark.reviewed { color: var(--fg-muted); }
+.rv-mark.question { color: var(--tone); }
+.rv-mark.blocked { color: var(--danger); }
+.rv-name { overflow-wrap: anywhere; min-width: 0; }
+.rv-change { color: var(--fg-muted); font-size: var(--font-size-xs); font-weight: var(--weight-regular); }
+.rv-since { color: var(--tone); font-size: var(--font-size-xs); }
+
+/* Flags as words (§3.3's table): amber lozenges for look-at-this, muted
+   for the rest, dashed for declared, not changed. */
+.rv-flag {
+  font-size: var(--font-size-xs); font-weight: var(--weight-semibold); padding: 1px 7px; border-radius: var(--radius-xs);
+  color: var(--fg-muted); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.rv-flag.undeclared, .rv-flag.outside_footprint { color: var(--fg-on-warning); background: var(--warning); }
+.rv-flag.declared_not_changed { border: 1px dashed var(--border); }
+
+/* Where the symbol's panel mounts. */
+.review-symbol { min-height: 0; min-width: 0; overflow-y: auto; overflow-x: hidden; display: grid; align-content: start; gap: var(--space-2); }
+.review-symbol-title { margin: 0; font-size: var(--font-size-lg); font-weight: var(--weight-semibold); color: var(--fg); overflow-wrap: anywhere; }
+.review-symbol-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); min-width: 0; }
+.review-diff, .review-facts { min-width: 0; }
+
+/* From 1440 (§3.4); last, so it wins over the rules above. */
+@media (min-width: 1440px) {
+  .review-body { grid-template-columns: 300px minmax(0, 1fr); }
+  .review-symbol-body { grid-template-columns: minmax(0, 1fr) 360px; }
+}
