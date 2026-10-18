@@ -14,6 +14,7 @@ Ruled by default (list for Pablo's return):
 - 0149 accept leftovers 41, `accept as written`, 16:39 (asked 16:34 in pane and mailbox).
 - 0150 accept leftovers 42, `accept as written`, 16:45 (asked 16:40).
 - 0151 accept leftovers 43, `accept as written`, 18:19 (asked 18:14).
+- 0152 accept leftovers 44, `accept as written`, 18:57 (asked 18:52).
 - Crossings (Themis): 0016 cells push to Hestia, acknowledged (push true); 0017 design system, each-initiative-decides, acknowledged. Name `crossing: 0016` / `0017` in the next record on either subject.
 
 Multi-repo reconciliation: Hephaistos adds `change-check --repo <name>` (no --repo: once per repo) in agent-slack card initiative-id-resolve, gate item 4, after judge-registry merges (later 2026-10-18). Then cut: organizer review runs it per repo range (resolve.go:172, review.go:104).

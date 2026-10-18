@@ -1,6 +1,6 @@
 # Leftovers 44: an ask survives a Save, a note says it needs a mark, and Open the thread never lands on archive: the build spec
 
-status: proposed (0152)
+status: ruled (0152)
 by: the FSE, 2026-10-18, on main at 49bb15f, in away mode
 sources: lf43-review-states' reviews (RS1-RS3 and rs-review's notes,
 `working-on/done/lf43-review-states.md`; sup84's report); Aglaea's
