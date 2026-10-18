@@ -11,7 +11,7 @@ stage: review-map
 supersedes: []
 superseded_by:
 ruled: 2026-10-18
-ruled_by: pablo
+ruled_by: pablo by standing rule
 chosen: accept as written
 ---
 

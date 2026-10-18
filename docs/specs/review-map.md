@@ -463,7 +463,7 @@ editor at a line), U5, U6 and G2, G3 are held for a later card.
 
 ## v3: ask from the mark (cards `rv-ask-data`, `rv-ask-ui`), and the review polish (card `rv-polish`)
 
-status: proposed (0147), by the FSE, 2026-10-18, on main at c6e5613.
+status: ruled (0147), by the FSE, 2026-10-18, on main at c6e5613.
 Aglaea's Amendment 3 (ad9450d, R18-R21) folded in before the ruling.
 sources: the stage's exit 2 ("a question marked on a node reaches the
 card's supervisor as a thread", `working-on/roadmap.yaml`); Aglaea's design

@@ -6,7 +6,7 @@ branch: rv-ask-data
 seat:
 stage: review-map
 updated: 2026-10-18
-next: "pablo: rule 0147 (review-map v3 and the review polish)"
+next: "sup82 runs it (0147 ruled by the standing rule, 2026-10-18)"
 risk: medium
 footprint: [internal/review/marks.go, internal/review/marks_test.go, internal/service/review.go, internal/service/review_test.go, app.go, frontend/wailsjs/*, internal/cli/review.go, internal/cli/review_test.go]
 depends_on: []

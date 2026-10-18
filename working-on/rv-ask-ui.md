@@ -6,7 +6,7 @@ branch: rv-ask-ui
 seat:
 stage: review-map
 updated: 2026-10-18
-next: "pablo: rule 0147 (review-map v3 and the review polish)"
+next: "sup82 runs it (0147 ruled by the standing rule, 2026-10-18)"
 risk: medium
 footprint: [frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css, frontend/src/components/Review.tsx, frontend/src/stores/board.store.ts (openSlack thread, review place), frontend/src/components/SlackView.tsx (← Review)]
 depends_on: [rv-ask-data, rv-polish]
