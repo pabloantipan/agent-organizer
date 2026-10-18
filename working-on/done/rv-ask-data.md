@@ -1,12 +1,12 @@
 ---
 title: "Who to ask about a review mark, and asking them in a thread"
-status: now
+status: done
 repos: [organizer]
 branch: rv-ask-data
 seat: ad-build
 stage: review-map
 updated: 2026-10-18
-next: "file finding: cli.go help line lacks --marks; --marks prints the replacement thread for marks asked in the closed one (sup82, then done/)"
+next: "done: merged by sup82"
 risk: medium
 footprint: [internal/review/marks.go, internal/review/marks_test.go, internal/service/review.go, internal/service/review_test.go, app.go, frontend/wailsjs/*, internal/cli/review.go, internal/cli/review_test.go]
 depends_on: []
@@ -91,7 +91,7 @@ repo organizer: base 895d265d0 (default main) ... head rv-ask-data f10f5064a; 10
 - No-gos: the only new `PostToCell` call is inside `AskReview` (review_ask.go:125, :128); it posts as the cell's human (`humanClient`); writes go only to `<data>/review/<initiative>/<head>/state.json`; no card or reviewed-repo write; no go.mod, go.sum, package.json or lockfile change.
 
 ### Findings
-- Found (builder, found-not-asked): `internal/cli/cli.go:175` help line for `organizer review` omits `--marks` (outside this boundary; review.go's usage has it). Went to: nowhere yet — sup82 files it.
-- Found (builder, found-not-asked; confirmed by reading `AskReview` and `reviewMarks`): after a closed thread is replaced, the head's single `thread` moves to the new id, so `--marks` (and rv-ask-ui's Open the thread) shows the new thread for marks asked in the old one. This is FR-26 as written (one thread per review, only `asked` per mark), so a spec question for the FSE, not a defect of this card. Went to: nowhere yet — sup82 files it.
+- Found (builder, found-not-asked): `internal/cli/cli.go:175` help line for `organizer review` omits `--marks` (outside this boundary; review.go's usage has it). Went to: the FSE, thread 01M57S928DE2NFQ7XVPTSDHAS2 (sup82, 12:15).
+- Found (builder, found-not-asked; confirmed by reading `AskReview` and `reviewMarks`): after a closed thread is replaced, the head's single `thread` moves to the new id, so `--marks` (and rv-ask-ui's Open the thread) shows the new thread for marks asked in the old one. This is FR-26 as written (one thread per review, only `asked` per mark), so a spec question for the FSE, not a defect of this card. Went to: the FSE, thread 01M57S928DE2NFQ7XVPTSDHAS2 (sup82, 12:15).
 - Note: two asks at once on a review with no thread would open two threads (declared Risky; the UI asks one at a time). Not a finding.
 - Note: FR-26 says a failed post "keeps the saved mark without `thread`"; gate row A2 says "without `asked`". The code meets both on a first ask and keeps an existing thread on a later one; the spec's wording could say `asked`.
