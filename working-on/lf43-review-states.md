@@ -6,7 +6,7 @@ branch: lf43-review-states
 seat: rs-build
 stage: review-map
 updated: 2026-10-18
-next: "rs-build builds it on lf43-review-states (sup84, launched 2026-10-18)"
+next: "decide: FR-5 premise false: the top bar crumb (TopBar.tsx:154) already holds the screen's one aria-current=page on Conversations, and CharterOnce.test.tsx H5 asserts the sub-tab is never page; the tab going page gives two pages per screen and fails make test. Options: (a) let me edit TopBar.tsx crumb (drop page) + TopBar.test.tsx + CharterOnce.test.tsx H5, (b) drop FR-5 from this card. FR-1..4 proceed meanwhile (rs-build)"
 risk: low
 footprint: [internal/service/review_open.go, internal/service/review_open_test.go, frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css, frontend/src/components/InitiativeHeader.tsx (tab aria-current), frontend/src/components/InitiativeHeader.test.tsx]
 depends_on: []
@@ -25,3 +25,4 @@ docs/specs/leftovers-43.md, rows S1-S5 and X0.
 ## Declared changes
 
 ## Notes
+- 2026-10-18 rs-build: FR-5 conflicts with leftovers-18 FR-7b (I22): TopBar's crumb carries aria-current="page" (TopBar.tsx:150,154; TopBar.test.tsx:99,102,241) and CharterOnce.test.tsx H5 forbids page on the sub-tabs. Both files are outside the boundary.
