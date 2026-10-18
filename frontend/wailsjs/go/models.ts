@@ -1479,6 +1479,319 @@ export namespace model {
 
 }
 
+export namespace review {
+	
+	export class Edge {
+	    from: string;
+	    to: string;
+	    kind: string;
+	    change: string;
+	    source: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Edge(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.from = source["from"];
+	        this.to = source["to"];
+	        this.kind = source["kind"];
+	        this.change = source["change"];
+	        this.source = source["source"];
+	    }
+	}
+	export class Evidence {
+	    tests: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Evidence(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.tests = source["tests"];
+	    }
+	}
+	export class Mark {
+	    symbol: string;
+	    state: string;
+	    note: string;
+	    by: string;
+	    at: string;
+	    hash: string;
+	    from?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Mark(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.symbol = source["symbol"];
+	        this.state = source["state"];
+	        this.note = source["note"];
+	        this.by = source["by"];
+	        this.at = source["at"];
+	        this.hash = source["hash"];
+	        this.from = source["from"];
+	    }
+	}
+	export class Marks {
+	    initiative: string;
+	    card: string;
+	    head: string;
+	    marks: Mark[];
+	    changed: Mark[];
+	    from?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Marks(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.initiative = source["initiative"];
+	        this.card = source["card"];
+	        this.head = source["head"];
+	        this.marks = this.convertValues(source["marks"], Mark);
+	        this.changed = this.convertValues(source["changed"], Mark);
+	        this.from = source["from"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Mismatch {
+	    type: string;
+	    node?: string;
+	    file?: string;
+	    symbol?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Mismatch(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.type = source["type"];
+	        this.node = source["node"];
+	        this.file = source["file"];
+	        this.symbol = source["symbol"];
+	    }
+	}
+	export class Review {
+	    state: string;
+	    by?: string;
+	    at?: string;
+	    note?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Review(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.state = source["state"];
+	        this.by = source["by"];
+	        this.at = source["at"];
+	        this.note = source["note"];
+	    }
+	}
+	export class Node {
+	    id: string;
+	    level: string;
+	    parent: string;
+	    kind: string;
+	    lang: string;
+	    file: string;
+	    range_head?: number[];
+	    range_base?: number[];
+	    change: string;
+	    risk?: string;
+	    evidence: Evidence;
+	    claim?: string;
+	    flags: string[];
+	    review: Review;
+	
+	    static createFrom(source: any = {}) {
+	        return new Node(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.level = source["level"];
+	        this.parent = source["parent"];
+	        this.kind = source["kind"];
+	        this.lang = source["lang"];
+	        this.file = source["file"];
+	        this.range_head = source["range_head"];
+	        this.range_base = source["range_base"];
+	        this.change = source["change"];
+	        this.risk = source["risk"];
+	        this.evidence = this.convertValues(source["evidence"], Evidence);
+	        this.claim = source["claim"];
+	        this.flags = source["flags"];
+	        this.review = this.convertValues(source["review"], Review);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class RepoPair {
+	    name: string;
+	    base: string;
+	    head: string;
+	    from: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RepoPair(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.base = source["base"];
+	        this.head = source["head"];
+	        this.from = source["from"];
+	    }
+	}
+	export class Stats {
+	    packages: number;
+	    changed: number;
+	    changed_tests: number;
+	    affected: number;
+	    untested: number;
+	    edges: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Stats(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.packages = source["packages"];
+	        this.changed = source["changed"];
+	        this.changed_tests = source["changed_tests"];
+	        this.affected = source["affected"];
+	        this.untested = source["untested"];
+	        this.edges = source["edges"];
+	    }
+	}
+	export class RevMap {
+	    version: string;
+	    initiative: string;
+	    target: string;
+	    base: string;
+	    head: string;
+	    repos?: RepoPair[];
+	    source: string;
+	    nodes: Node[];
+	    edges: Edge[];
+	    mismatches: Mismatch[];
+	    reconciled: boolean;
+	    reconciliation?: string;
+	    stats: Stats;
+	    problems?: string[];
+	    notes?: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new RevMap(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.version = source["version"];
+	        this.initiative = source["initiative"];
+	        this.target = source["target"];
+	        this.base = source["base"];
+	        this.head = source["head"];
+	        this.repos = this.convertValues(source["repos"], RepoPair);
+	        this.source = source["source"];
+	        this.nodes = this.convertValues(source["nodes"], Node);
+	        this.edges = this.convertValues(source["edges"], Edge);
+	        this.mismatches = this.convertValues(source["mismatches"], Mismatch);
+	        this.reconciled = source["reconciled"];
+	        this.reconciliation = source["reconciliation"];
+	        this.stats = this.convertValues(source["stats"], Stats);
+	        this.problems = source["problems"];
+	        this.notes = source["notes"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	
+	export class Text {
+	    path: string;
+	    sha: string;
+	    first: number;
+	    lines: string[];
+	    total: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Text(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.path = source["path"];
+	        this.sha = source["sha"];
+	        this.first = source["first"];
+	        this.lines = source["lines"];
+	        this.total = source["total"];
+	    }
+	}
+
+}
+
 export namespace service {
 	
 	export class TaskPost {
@@ -2401,6 +2714,80 @@ export namespace service {
 	        this.steps = source["steps"];
 	        this.errors = source["errors"];
 	    }
+	}
+	export class ReviewMake {
+	    initiative: string;
+	    card: string;
+	    state: string;
+	    started: string;
+	    elapsed: number;
+	    head: string;
+	    error: string;
+	    command: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ReviewMake(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.initiative = source["initiative"];
+	        this.card = source["card"];
+	        this.state = source["state"];
+	        this.started = source["started"];
+	        this.elapsed = source["elapsed"];
+	        this.head = source["head"];
+	        this.error = source["error"];
+	        this.command = source["command"];
+	    }
+	}
+	export class ReviewStatus {
+	    initiative: string;
+	    card: string;
+	    state: string;
+	    head: string;
+	    base: string;
+	    from: string;
+	    map_head: string;
+	    map_path: string;
+	    reason: string;
+	    make?: ReviewMake;
+	
+	    static createFrom(source: any = {}) {
+	        return new ReviewStatus(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.initiative = source["initiative"];
+	        this.card = source["card"];
+	        this.state = source["state"];
+	        this.head = source["head"];
+	        this.base = source["base"];
+	        this.from = source["from"];
+	        this.map_head = source["map_head"];
+	        this.map_path = source["map_path"];
+	        this.reason = source["reason"];
+	        this.make = this.convertValues(source["make"], ReviewMake);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	
 	export class RunsView {

@@ -17,6 +17,7 @@ import (
 	"organizer/internal/discuss"
 	"organizer/internal/merge"
 	"organizer/internal/model"
+	"organizer/internal/review"
 	"organizer/internal/service"
 	"organizer/internal/usage"
 )
@@ -672,4 +673,81 @@ func (a *App) RenderDiagram(source string) (string, error) {
 		a.diagrams = diagram.New()
 	}
 	return a.diagrams.Render(source)
+}
+
+// ReviewStatus is a local card's review state (review-map v2 FR-14): none,
+// map, moved (a map of an older head; both shas), or missing (no branch and
+// no merge; Reason names both), with the card's make when there is one.
+func (a *App) ReviewStatus(initiativeID, card string) (service.ReviewStatus, error) {
+	if a.svc == nil {
+		return service.ReviewStatus{}, errString(a.err)
+	}
+	return a.svc.ReviewStatus(initiativeID, card)
+}
+
+// ReviewMap is a local card's map at head; "" is the card's current head.
+func (a *App) ReviewMap(initiativeID, card, head string) (*review.RevMap, error) {
+	if a.svc == nil {
+		return nil, errString(a.err)
+	}
+	return a.svc.ReviewMap(initiativeID, card, head)
+}
+
+// ReviewFile is a file of a local card at sha, lines from..to plus 3 each
+// side (FR-14); a path out of the repo is refused.
+func (a *App) ReviewFile(initiativeID, card, sha, file string, from, to int) (review.Text, error) {
+	if a.svc == nil {
+		return review.Text{}, errString(a.err)
+	}
+	return a.svc.ReviewFile(initiativeID, card, sha, file, from, to)
+}
+
+// MakeReview starts `organizer review <initiative> <card> --json` in the
+// background (FR-15) and returns the make as it starts; its end is the Wails
+// event `review:make` with the ReviewMake. A second make of the card while
+// one runs is refused.
+func (a *App) MakeReview(initiativeID, card string) (service.ReviewMake, error) {
+	if a.svc == nil {
+		return service.ReviewMake{}, errString(a.err)
+	}
+	return a.svc.MakeReview(initiativeID, card, func(m service.ReviewMake) {
+		if a.ctx != nil {
+			wruntime.EventsEmit(a.ctx, "review:make", m)
+		}
+	})
+}
+
+// StopReview kills the card's make; it leaves no map and no work dir.
+func (a *App) StopReview(initiativeID, card string) (service.ReviewMake, error) {
+	if a.svc == nil {
+		return service.ReviewMake{}, errString(a.err)
+	}
+	return a.svc.StopReview(initiativeID, card)
+}
+
+// ReviewMakeState is the card's make, running (elapsed seconds now) or the
+// last that ended in this run of the app; null when none.
+func (a *App) ReviewMakeState(initiativeID, card string) *service.ReviewMake {
+	if a.svc == nil {
+		return nil
+	}
+	return a.svc.ReviewMakeState(initiativeID, card)
+}
+
+// ReviewMarks is the marks of the card's map at head ("" the current one),
+// with the previous head's carried and the rest in changed (FR-16).
+func (a *App) ReviewMarks(initiativeID, card, head string) (review.Marks, error) {
+	if a.svc == nil {
+		return review.Marks{}, errString(a.err)
+	}
+	return a.svc.ReviewMarks(initiativeID, card, head)
+}
+
+// MarkReview marks a changed symbol reviewed, question or blocked ("" clears
+// it); question and blocked need a note; signed by the ruler.
+func (a *App) MarkReview(initiativeID, card, head, symbol, state, note string) (review.Marks, error) {
+	if a.svc == nil {
+		return review.Marks{}, errString(a.err)
+	}
+	return a.svc.MarkReview(initiativeID, card, head, symbol, state, note)
 }

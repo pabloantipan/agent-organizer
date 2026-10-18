@@ -114,6 +114,14 @@ export function LockNow() {
   return window['go']['main']['App']['LockNow']();
 }
 
+export function MakeReview(arg1, arg2) {
+  return window['go']['main']['App']['MakeReview'](arg1, arg2);
+}
+
+export function MarkReview(arg1, arg2, arg3, arg4, arg5, arg6) {
+  return window['go']['main']['App']['MarkReview'](arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
 export function MemoryNotifications() {
   return window['go']['main']['App']['MemoryNotifications']();
 }
@@ -166,8 +174,28 @@ export function Reveal(arg1) {
   return window['go']['main']['App']['Reveal'](arg1);
 }
 
+export function ReviewFile(arg1, arg2, arg3, arg4, arg5, arg6) {
+  return window['go']['main']['App']['ReviewFile'](arg1, arg2, arg3, arg4, arg5, arg6);
+}
+
+export function ReviewMakeState(arg1, arg2) {
+  return window['go']['main']['App']['ReviewMakeState'](arg1, arg2);
+}
+
+export function ReviewMap(arg1, arg2, arg3) {
+  return window['go']['main']['App']['ReviewMap'](arg1, arg2, arg3);
+}
+
+export function ReviewMarks(arg1, arg2, arg3) {
+  return window['go']['main']['App']['ReviewMarks'](arg1, arg2, arg3);
+}
+
 export function ReviewPrompt(arg1) {
   return window['go']['main']['App']['ReviewPrompt'](arg1);
+}
+
+export function ReviewStatus(arg1, arg2) {
+  return window['go']['main']['App']['ReviewStatus'](arg1, arg2);
 }
 
 export function RuleDecision(arg1, arg2, arg3, arg4) {
@@ -244,6 +272,10 @@ export function StageType() {
 
 export function StopAgent(arg1) {
   return window['go']['main']['App']['StopAgent'](arg1);
+}
+
+export function StopReview(arg1, arg2) {
+  return window['go']['main']['App']['StopReview'](arg1, arg2);
 }
 
 export function StopStarting(arg1) {
