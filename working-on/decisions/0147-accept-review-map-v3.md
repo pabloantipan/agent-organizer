@@ -20,14 +20,16 @@ chosen:
 Review-map v3 and the review polish (`docs/specs/review-map.md`, "v3"),
 raised together for one ruling, as planned.
 
-- **Ask** (stage exit 2): on a Question or Blocked mark, `Save` becomes
-  `Ask <seat>`. The seat is the supervisor named in the card's `next` when
-  it is in discuss, else the initiative's FSE, else its reconciler. Pressing
-  it saves the mark and opens one thread to that seat, as you, with the
-  note, the file and lines, and `Next action: <seat> answers in this
-  thread`. The mark keeps the thread. The panel then reads `Asked <seat> ·
-  Open the thread`. `organizer review <i> <card> --marks` prints the
-  coverage for the card.
+- **Ask** (stage exit 2), with Aglaea's Amendment 3 (ad9450d) folded in:
+  on a Question or Blocked mark the primary reads `Ask <seat>, next`
+  (saves, asks, moves on); `Save` keeps it here. The seat is the
+  supervisor named in the card's `next` when it is in discuss, else the
+  initiative's FSE, else its reconciler; the line under it ends `Wakes
+  <seat>.` One thread per review, `<slug>: review at <sha>`, posted as
+  you; each ask is a message in it naming the symbol and lines, ending
+  `Next action: <seat> answers in this thread`. An asked row draws `?
+  asked`; `Open the thread` goes to Conversations, and `← Review` comes
+  back. `organizer review <i> <card> --marks` prints the coverage.
 - **Polish**, from Aglaea's Amendment 2 and the two UI reviews: `calls` /
   `called by` by direction; the primary reads `Save question, next` when
   Question is chosen and never overrides it; `none found`; the radio focus
@@ -39,8 +41,8 @@ raised together for one ruling, as planned.
 
 Three cards in two waves: the Go ask and the polish side by side, then the
 Ask button. Two get a UI review. No gate row posts to a real seat, drives
-your screen, starts a seat or writes your clipboard. The words of the Ask
-states are mine; Aglaea may amend them before the UI card launches.
+your screen, starts a seat or writes your clipboard. The Ask states' words
+are Aglaea's (Amendment 3).
 
 forecast: 70-140 min over 2 waves, plus no waits on you; basis: review-map
 v2 (112 min, three cards in three waves, this initiative) and rv-symbol's

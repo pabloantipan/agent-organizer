@@ -464,6 +464,7 @@ editor at a line), U5, U6 and G2, G3 are held for a later card.
 ## v3: ask from the mark (cards `rv-ask-data`, `rv-ask-ui`), and the review polish (card `rv-polish`)
 
 status: proposed (0147), by the FSE, 2026-10-18, on main at c6e5613.
+Aglaea's Amendment 3 (ad9450d, R18-R21) folded in before the ruling.
 sources: the stage's exit 2 ("a question marked on a node reaches the
 card's supervisor as a thread", `working-on/roadmap.yaml`); Aglaea's design
 §3.3 "Room for v3" (`docs/ux/specs/review-view.md`: "v3 replaces `Save`
@@ -497,14 +498,18 @@ Card `rv-ask-data` (Go):
   one of `runs this card`, `the initiative's FSE`, `the reconciler`, or
   for nobody `no cell` / `no FSE or reconciler in the cell`. Another
   machine's card is refused.
-- **FR-26** Ask, a bound write: for a mark whose state is question or
-  blocked with a note, save the mark (FR-16) and then post, as the cell's
-  human, one new thread `to: <seat>`, kind `question`, subject `<slug>:
-  review <symbol> (question)` or `(blocked)`, body: the note; a blank line;
-  `<file>:<head start>-<end> at <head short sha>`; and last
-  `Next action: <seat> answers in this thread`. The thread id is kept on
-  the mark (`thread`). Asking again on a mark that has a thread posts the
-  new note into that thread (kind `question`), no new thread. It refuses a
+- **FR-26** Ask, a bound write (Aglaea's Amendment 3, R19): for a mark
+  whose state is question or blocked with a note, save the mark (FR-16)
+  and then post, as the cell's human, `to: <seat>`, kind `question`, into
+  the review's one thread: the first ask of a card's review opens it,
+  subject `<slug>: review at <head short sha>`; every later ask, on any
+  symbol and again on the same one, is a message in it. A message's first
+  line is `<symbol> · <file>:<head start>-<end> · question` (or
+  `blocked`), then the note, and last `Next action: <seat> answers in this
+  thread`. The review's thread id is kept in the head's `state.json`
+  (`thread`) and carried to the card's next head with the marks; a thread
+  that refuses the post as closed is replaced by a new one, once. Each
+  asked mark records `asked: <message id>`. It refuses a
   reviewed mark, an empty note, nobody to ask and another machine's card,
   and writes nothing then. A post that fails keeps the saved mark without
   `thread` and returns the first error line.
@@ -517,16 +522,22 @@ Card `rv-ask-data` (Go):
 
 Card `rv-ask-ui` (frontend, after `rv-ask-data` and `rv-polish`):
 
-- **FR-28** On Question or Blocked, `Save` becomes `Ask <seat>` (FR-25),
-  disabled until a note, with the muted line `Saves the mark and opens a
-  thread to <seat> (<why>).` in place of the v3 line. With nobody to ask,
-  `Save` stays and the line reads `No one to ask here: <why>. Kept in
-  Deltagos.` On Reviewed or none the v3 line is gone.
-- **FR-29** After an ask, the panel reads `Asked <seat> · Open the thread`
-  (a link that opens Conversations on that thread, `openSlack`) and the
-  row's mark carries the word `asked` in its accessible name. A post that
-  failed reads `Saved here; couldn't ask <seat>: <first error line>` with
-  `Try again`. While posting, the button reads `Asking…` (the busy rule).
+- **FR-28** (Amendment 3, R18, R20) On Question or Blocked with someone to
+  ask (FR-25), the primary reads `Ask <seat>, next` (saves, posts, moves
+  on, disabled until a note) and the secondary `Save` keeps the mark here
+  and asks no one. The muted line, in place of the v3 line, reads `Saves
+  the mark and asks <seat> (<why>) in this review's thread. Wakes
+  <seat>.` With nobody to ask, FR-31's primary stands (`Save question,
+  next`, `Save block, next`) and the line reads `No one to ask here:
+  <why>. Kept in Deltagos.` On Reviewed or none the line is gone.
+- **FR-29** (Amendment 3, R21) After an ask, the row's mark draws `? asked`
+  or `✕ asked`, the live region says `Asked <seat>` once, and the panel,
+  when shown, reads `Asked <seat> · Open the thread`, a link that opens
+  Conversations on the review's thread. Conversations' header then offers
+  `← Review`, which returns to the same symbol (the place rides the
+  store). A post that failed reads `Saved here; couldn't ask <seat>:
+  <first error line>` with `Try again`. While posting, the button reads
+  `Asking…` (the busy rule).
 
 Card `rv-polish` (frontend and the fixture, parallel with `rv-ask-data`):
 
@@ -562,10 +573,10 @@ run in the Tab harness's hidden window on `fixture-home.sh --review`.
 | # | FR | Check | Expected (fails on main) |
 |---|---|---|---|
 | A1 | 25 | go test: `next: "sup81 runs it"` with sup81 in health; sup81 absent; a cell with a reconciler and no fse; no cell; another machine's card | sup81 `runs this card`; fse `the initiative's FSE`; the reconciler; nobody `no cell`; refused |
-| A2 | 26 | go test against a fake discuss server: ask a question; ask again; ask a reviewed mark; an empty note; the server down | one thread, to the seat, kind question, the subject and body as FR-26, last line `Next action: …`, `thread` on the mark; the second note in that thread; refused, refused with no write; the mark saved without `thread`, the error returned |
+| A2 | 26 | go test against a fake discuss server: ask on symbol a; ask on symbol b; ask a again; a remap to a new head, then an ask; the thread closed (409); ask a reviewed mark; an empty note; the server down | one thread `<slug>: review at <sha>`, to the seat, kind question; three messages in it, each first line `<symbol> · <file>:<lines> · question`, last line `Next action: …`; the new head's ask lands in the same thread; one new thread after the 409; refused, refused with no write; the mark saved without `asked`, the error returned |
 | A3 | 27 | go test of the CLI with two marks (one asked) and a card with no map | the count line and two lines, one `not asked`; exit 2 naming the command |
-| A4 | 28, 29 | vitest, mocked bindings: Question with a note; nobody to ask; after an ask; a failed ask | `Ask sup81` and its line; `Save` and `No one to ask here: no cell. Kept in Deltagos.`; `Asked sup81 · Open the thread`, the link calls `openSlack` with the thread id, the row's name has `asked`; the failure words and `Try again` |
-| A5 | 28, 29 | harness, `fixture-home.sh --review` (fixture health, no mailbox): Question, a note, `Ask fse` | the mark is saved (row `question`), the panel reads `Saved here; couldn't ask fse: …`; focus stays on the button |
+| A4 | 28, 29 | vitest, mocked bindings: Question with a note; nobody to ask; after an ask; a failed ask | primary `Ask sup81, next`, secondary `Save`, the line ending `Wakes sup81.`; primary `Save question, next` and `No one to ask here: no cell. Kept in Deltagos.`; the row draws `? asked`, the live region says `Asked sup81` once, `Open the thread` lands on Conversations with the thread and `← Review` returns to the same symbol; the failure words and `Try again` |
+| A5 | 28, 29 | harness, `fixture-home.sh --review` (fixture health, no mailbox): Question, a note, `Ask fse, next` | the mark is saved (row `question`, no `asked`), the panel reads `Saved here; couldn't ask fse: …`; focus stays on the button |
 | P1 | 30, 32 | vitest | both direction words; `none found` for an empty list |
 | P2 | 31 | vitest and harness: Question with a note, the primary | it reads `Save question, next`, the row reads `question`, focus on the next symbol's h2 |
 | P3 | 33 | harness: Tab into the radios, ↓, then the rule box's options the same way | the computed outline of the checked radio's span is `2px solid` `--focus-ring` after the arrow, in both |
@@ -583,9 +594,11 @@ run in the Tab harness's hidden window on `fixture-home.sh --review`.
   (the current row), `lib/review.ts` and its test, `styles/review.css`,
   `styles/rule-box.css` (the ring only), `scripts/fixture-home.sh`
   (`--review` only).
-- `rv-ask-ui`: `components/ReviewSymbol.tsx` and its test, `lib/review.ts`
-  and its test, `styles/review.css`, `stores/board.store.ts` only if
-  `openSlack` needs a thread argument.
+- `rv-ask-ui`: `components/ReviewSymbol.tsx` and its test, `components/Review.tsx`
+  (the row's `asked`), `lib/review.ts` and its test, `styles/review.css`,
+  `stores/board.store.ts` (`openSlack` with a thread, the review place to
+  return to), `components/SlackView.tsx` (the `← Review` in its header
+  only) and its test.
 - Not: Needs me, Home, the card files, Firestore, `change-check`, posting
   anywhere but the card's initiative's cell.
 
