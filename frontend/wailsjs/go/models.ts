@@ -2775,6 +2775,22 @@ export namespace service {
 		    return a;
 		}
 	}
+	export class ReviewCheckout {
+	    repo: string;
+	    head: string;
+	    dir: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ReviewCheckout(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.repo = source["repo"];
+	        this.head = source["head"];
+	        this.dir = source["dir"];
+	    }
+	}
 	export class ReviewMake {
 	    initiative: string;
 	    card: string;
@@ -2812,6 +2828,7 @@ export namespace service {
 	    map_path: string;
 	    reason: string;
 	    make?: ReviewMake;
+	    checkouts: ReviewCheckout[];
 	
 	    static createFrom(source: any = {}) {
 	        return new ReviewStatus(source);
@@ -2829,6 +2846,7 @@ export namespace service {
 	        this.map_path = source["map_path"];
 	        this.reason = source["reason"];
 	        this.make = this.convertValues(source["make"], ReviewMake);
+	        this.checkouts = this.convertValues(source["checkouts"], ReviewCheckout);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
