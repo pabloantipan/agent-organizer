@@ -7,8 +7,8 @@ import { openBox, openBoxes } from "../lib/boxStack";
 import { busyButton } from "../lib/busy";
 import { speaker } from "../lib/liveRegion";
 import {
-  afterASecond, allReviewed, countsLine, coverage, coverageLine, elapsedOf, filesOf, flagLook, groupName, inTextField, isAffected, MARK_GLYPH, makingLabel, movedLine,
-  nextToReview, nothingToReview, partialLines, rowName, screenState, worklist, WORDS, type Group, type Row,
+  afterASecond, allReviewed, countsLine, coverage, coverageLine, filesOf, flagLook, groupName, inTextField, isAffected, MARK_GLYPH, makeOrigin, makingLabel, movedLine,
+  nextToReview, nothingToReview, partialLines, rowName, screenState, secondsSince, worklist, WORDS, type Group, type Row,
 } from "../lib/review";
 import { ReviewSymbol } from "./ReviewSymbol";
 import "../styles/review.css";
@@ -125,7 +125,9 @@ export function Review() {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
+  const pressedAt = useRef<number | undefined>(undefined);
   const makeIt = async () => {
+    pressedAt.current = Date.now();
     setError(null);
     try { setMake(await MakeReview(initiative, card)); } catch (e) { setError(String(e)); }
   };
@@ -141,11 +143,15 @@ export function Review() {
   // No flash (FR-23): the counter and Stop show only once the make has run
   // 1 s; a make that ends sooner never draws them. Focus stays put.
   const [progress, setProgress] = useState(false);
+  const [origin, setOrigin] = useState(0);
   const makeKey = making && make ? make.started : "";
   useEffect(() => {
     setProgress(false);
     if (!makeKey || !make) return;
-    return afterASecond(make, () => setProgress(true));
+    const from = makeOrigin(make, Date.now(), pressedAt.current);
+    pressedAt.current = undefined;
+    setOrigin(from);
+    return afterASecond(from, () => setProgress(true));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [makeKey]);
 
@@ -174,7 +180,7 @@ export function Review() {
 
   return (
     <ReviewView status={status} make={make} map={map} marks={marks} error={error} symbol={symbol} active={active} setActive={setActive}
-      onBack={closeReview} onStep={step} onOpen={open} onMake={makeIt} onStop={stop} makeBtn={makeBtn} title={title} said={said} progress={progress}
+      onBack={closeReview} onStep={step} onOpen={open} onMake={makeIt} onStop={stop} makeBtn={makeBtn} title={title} said={said} progress={progress} origin={origin}
       panel={{ initiative, card, head: review?.head ?? "", from, onBack: () => open(from), onMarks: setMarks, onNext: () => step(1) }} />
   );
 }
@@ -191,6 +197,8 @@ export type ReviewViewProps = {
   makeBtn: React.RefObject<HTMLButtonElement | null>; title: React.RefObject<HTMLHeadingElement | null>; said: string;
   /** FR-23: the make has run 1 s, so its counter and Stop show. */
   progress?: boolean;
+  /** Where the 1 s and the counter count from (makeOrigin). */
+  origin?: number;
   /** What the symbol's panel needs beyond the map; none draws the title only. */
   panel?: PanelProps;
 };
@@ -199,7 +207,7 @@ type PanelProps = { initiative: string; card: string; head: string; from: string
 
 /** What the screen draws for a status, a make, a map and its marks: every
  *  §4 state, pure, so vitest renders each one. */
-export function ReviewView({ status, make, map, marks, error, symbol, active, setActive, onBack, onStep, onOpen, onMake, onStop, makeBtn, title, said, progress = false, panel }: ReviewViewProps) {
+export function ReviewView({ status, make, map, marks, error, symbol, active, setActive, onBack, onStep, onOpen, onMake, onStop, makeBtn, title, said, progress = false, origin = 0, panel }: ReviewViewProps) {
   const state = screenState(status, make);
   const groups = map ? worklist(map, marks) : [];
   const cov = map ? coverage(map, marks) : null;
@@ -226,7 +234,7 @@ export function ReviewView({ status, make, map, marks, error, symbol, active, se
         {state === "moved" && status && (
           <div className="review-moved">
             <span>{movedLine(status.map_head, status.head)}</span>
-            <MakeButton btn={makeBtn} label={WORDS.makeAgain} making={making} progress={progress} make={make} onMake={onMake} onStop={onStop} />
+            <MakeButton btn={makeBtn} label={WORDS.makeAgain} making={making} progress={progress} origin={origin} onMake={onMake} onStop={onStop} />
           </div>
         )}
         {shown && failed && make && <div className="review-failed"><p className="review-reason">{make.error}</p><CopyCommand command={make.command} /></div>}
@@ -240,7 +248,7 @@ export function ReviewView({ status, make, map, marks, error, symbol, active, se
           {(state === "none" || state === "making" || state === "failed") && (
             <div className="review-empty">
               {state === "failed" && make ? <p className="review-reason">{make.error}</p> : <p>{WORDS.noMap}</p>}
-              <MakeButton btn={makeBtn} label={state === "failed" ? WORDS.tryAgain : WORDS.makeMap} primary={state !== "failed"} making={making} progress={progress} make={make} onMake={onMake} onStop={onStop}>
+              <MakeButton btn={makeBtn} label={state === "failed" ? WORDS.tryAgain : WORDS.makeMap} primary={state !== "failed"} making={making} progress={progress} origin={origin} onMake={onMake} onStop={onStop}>
                 {state === "failed" && make && <CopyCommand command={make.command} />}
               </MakeButton>
             </div>
@@ -264,7 +272,7 @@ export function ReviewView({ status, make, map, marks, error, symbol, active, se
 /** Make the map, and while it runs the same button as `Making the map · 2 s`
  *  with Stop beside it: a counter, no spinner, and focus stays on the busy
  *  button (§4, the busy rule). */
-function MakeButton({ btn, label, primary, making, progress, make, onMake, onStop, children }: { btn: React.RefObject<HTMLButtonElement | null>; label: string; primary?: boolean; making: boolean; progress: boolean; make: service.ReviewMake | null; onMake: () => void; onStop: () => void; children?: React.ReactNode }) {
+function MakeButton({ btn, label, primary, making, progress, origin, onMake, onStop, children }: { btn: React.RefObject<HTMLButtonElement | null>; label: string; primary?: boolean; making: boolean; progress: boolean; origin: number; onMake: () => void; onStop: () => void; children?: React.ReactNode }) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
     if (!making || !progress) return;
@@ -274,7 +282,7 @@ function MakeButton({ btn, label, primary, making, progress, make, onMake, onSto
   }, [making, progress]);
   return (
     <span className="review-make">
-      <button ref={btn} className={primary ? "primary" : undefined} {...busyButton({ busy: making, onPress: onMake })}>{making ? (progress ? makingLabel(elapsedOf(make, now)) : WORDS.makingShort) : label}</button>
+      <button ref={btn} className={primary ? "primary" : undefined} {...busyButton({ busy: making, onPress: onMake })}>{making ? (progress ? makingLabel(secondsSince(origin, now)) : WORDS.makingShort) : label}</button>
       {making && progress && <button onClick={onStop}>{WORDS.stop}</button>}
       {children}
     </span>

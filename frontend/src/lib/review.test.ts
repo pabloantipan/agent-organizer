@@ -3,7 +3,7 @@ import type { review, service } from "../../wailsjs/go/models";
 import {
   allReviewed, countsLine, coverage, coverageLine, elapsedOf, factsBeside, filesOf, flagWords, groupName, inTextField, listWidth,
   makingLabel, movedLine, nextToReview, nothingToReview, partialLines, reviewable, rowName, screenState, shortName, walkOf, WORDS, worklist,
-  afterASecond, affectedLine, backTo, calledBy, callsOf, canSave, flagLook, markOf, progressDelay, shasOf, symbolDiff, testsOf,
+  afterASecond, affectedLine, makeOrigin, secondsSince, backTo, calledBy, callsOf, canSave, flagLook, markOf, progressDelay, shasOf, symbolDiff, testsOf,
 } from "./review";
 
 // review-map v2 FR-18 (docs/ux/specs/review-view.md §3.1, §3.2, §4, §5):
@@ -335,34 +335,59 @@ describe("V-R8: the mark", () => {
 
 describe("V-R14 (FR-23): no flash, with fake timers", () => {
   afterEach(() => { vi.useRealTimers(); });
-  const pressed = () => ({ started: new Date().toISOString(), elapsed: 0 });
-  it("a make that ends at 900 ms never shows the counter or Stop", () => {
-    vi.useFakeTimers({ now: Date.parse("2026-10-18T10:00:00Z") });
+  // As the binding returns it: Go's RFC3339, cut to the whole second
+  // (internal/service/review.go), with the press at .950 s of that second.
+  const PRESS = Date.parse("2026-10-18T10:00:00.950Z");
+  const made = { started: "2026-10-18T10:00:00Z", elapsed: 0 };
+  const pressAndSee = () => {
+    const pressedAt = Date.now();
+    vi.advanceTimersByTime(5); // MakeReview's round trip
+    return makeOrigin(made, Date.now(), pressedAt);
+  };
+  it("the origin is the press, not Go's whole second", () => {
+    vi.useFakeTimers({ now: PRESS });
+    expect(pressAndSee()).toBe(PRESS);
+    expect(progressDelay(PRESS, PRESS + 5)).toBe(995);
+  });
+  it("a make that ends at 900 ms after the press never shows the counter or Stop", () => {
+    vi.useFakeTimers({ now: PRESS });
     const show = vi.fn();
-    const cancel = afterASecond(pressed(), show);
-    vi.advanceTimersByTime(900);
-    cancel(); // the make's end
+    const cancel = afterASecond(pressAndSee(), show);
+    vi.advanceTimersByTime(895);
+    cancel(); // the make's end, 900 ms after the press
     vi.advanceTimersByTime(5_000);
     expect(show).not.toHaveBeenCalled();
   });
-  it("one that runs to 1500 ms shows them at 1 s, and show moves no focus", () => {
-    vi.useFakeTimers({ now: Date.parse("2026-10-18T10:00:00Z") });
+  it("one that runs to 1500 ms shows them 1 s after the press, counting 1 s, and show moves no focus", () => {
+    vi.useFakeTimers({ now: PRESS });
     // show is the screen's setProgress(true): it only redraws. This file runs
     // with no document, so a timer that reached for focus would throw here.
     const show = vi.fn();
-    const cancel = afterASecond(pressed(), show);
-    vi.advanceTimersByTime(999);
+    const origin = pressAndSee();
+    const cancel = afterASecond(origin, show);
+    vi.advanceTimersByTime(994);
     expect(show).not.toHaveBeenCalled();
     vi.advanceTimersByTime(1);
     expect(show).toHaveBeenCalledTimes(1);
+    expect(Date.now() - PRESS).toBe(1000);
+    expect(secondsSince(origin)).toBe(1);
     vi.advanceTimersByTime(500);
     cancel();
     expect(show).toHaveBeenCalledTimes(1);
     expect(typeof document).toBe("undefined");
   });
-  it("a make reopened after its first second shows at once", () => {
-    const now = Date.parse("2026-10-18T10:00:05Z");
-    expect(progressDelay({ started: "2026-10-18T10:00:00Z", elapsed: 5 }, now)).toBe(0);
-    expect(progressDelay({ started: "2026-10-18T10:00:05Z", elapsed: 0 }, now)).toBe(1000);
+  it("a make first seen here (a reload) counts from the latest instant it can have started", () => {
+    // seen at .950 of its second: it may have started just now, so the second counts from the sight
+    expect(makeOrigin(made, PRESS)).toBe(Date.parse("2026-10-18T10:00:00.950Z"));
+    expect(makeOrigin(made, Date.parse("2026-10-18T10:00:00.300Z"))).toBe(Date.parse("2026-10-18T10:00:00.300Z"));
+    // reopened after its first second: shows at once
+    const later = Date.parse("2026-10-18T10:00:05.200Z");
+    expect(progressDelay(makeOrigin({ started: "2026-10-18T10:00:00Z", elapsed: 5 }, later), later)).toBe(0);
+    expect(progressDelay(makeOrigin({ started: "2026-10-18T10:00:05Z", elapsed: 0 }, later), later)).toBe(1000);
+    expect(progressDelay(makeOrigin({ started: "", elapsed: 3 }, later), later)).toBe(0);
+  });
+  it("the counter never reads 0 s once shown", () => {
+    expect(secondsSince(1000, 1000)).toBe(1);
+    expect(secondsSince(1000, 3999)).toBe(2);
   });
 });

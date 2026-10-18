@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { createRef } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { review, service } from "../../wailsjs/go/models";
 
 // V-S (review-map v2 FR-18; docs/ux/specs/review-view.md §4): each state's
@@ -14,6 +14,7 @@ vi.mock("../../wailsjs/runtime/runtime", () => ({ ClipboardSetText: (t: string) 
 vi.mock("../stores/board.store", () => ({ useBoard: () => ({}) }));
 
 const { ReviewView, copyCommand } = await import("./Review");
+const { afterASecond, makeOrigin } = await import("../lib/review");
 const { Where } = await import("./TopBar");
 
 const node = (n: Partial<review.Node> & { id: string }) => ({
@@ -38,10 +39,10 @@ const status = (state: string, make: Partial<service.ReviewMake> | null = null) 
 const marks = (m: Record<string, string>) => ({ initiative: "init-a", card: "rv-fixture", head: "", marks: Object.entries(m).map(([symbol, state]) => ({ symbol, state })), changed: [] }) as unknown as review.Marks;
 
 const noop = () => undefined;
-function view(p: { status: service.ReviewStatus | null; make?: service.ReviewMake | null; map?: review.RevMap | null; marks?: review.Marks | null; symbol?: string; progress?: boolean }) {
+function view(p: { status: service.ReviewStatus | null; make?: service.ReviewMake | null; map?: review.RevMap | null; marks?: review.Marks | null; symbol?: string; progress?: boolean; origin?: number }) {
   return renderToStaticMarkup(
     <ReviewView status={p.status} make={p.make ?? null} map={p.map ?? null} marks={p.marks ?? null} error={null} symbol={p.symbol ?? ""} active="" setActive={noop}
-      onBack={noop} onStep={noop} onOpen={noop} onMake={noop} onStop={noop} makeBtn={createRef()} title={createRef()} said="" progress={p.progress} />,
+      onBack={noop} onStep={noop} onOpen={noop} onMake={noop} onStop={noop} makeBtn={createRef()} title={createRef()} said="" progress={p.progress} origin={p.origin} />,
   );
 }
 const text = (html: string) => html.replace(/<[^>]+>/g, " ").replace(/&#x27;/g, "'").replace(/&gt;/g, ">").replace(/\s+/g, " ");
@@ -55,7 +56,7 @@ describe("V-S: every §4 state in the design's words", () => {
 
   it("making: the counter on the busy button, no spinner, and Stop", () => {
     const started = new Date(Date.now() - 2_000).toISOString();
-    const h = view({ status: status("none"), make: { state: "making", started, elapsed: 2 } as service.ReviewMake, progress: true });
+    const h = view({ status: status("none"), make: { state: "making", started, elapsed: 2 } as service.ReviewMake, progress: true, origin: Date.now() - 2_000 });
     expect(h).toMatch(/<button class="primary" aria-disabled="true"[^>]*>Making the map · 2 s<\/button>/);
     expect(h).toContain(">Stop</button>");
     expect(h).not.toMatch(/spinner|spin/);
@@ -71,7 +72,57 @@ describe("V-S: every §4 state in the design's words", () => {
   it("making over a moved map: Make it again turns Making the map…, Stop only with the progress line", () => {
     const make = { state: "making", started: new Date().toISOString(), elapsed: 0 } as service.ReviewMake;
     expect(view({ status: status("moved"), map: fixture, make })).toMatch(/aria-disabled="true"[^>]*>Making the map…<\/button><\/span>/);
-    expect(view({ status: status("moved"), map: fixture, make, progress: true })).toContain(">Stop</button>");
+    expect(view({ status: status("moved"), map: fixture, make, progress: true, origin: Date.now() - 1_000 })).toContain(">Stop</button>");
+  });
+
+  describe("V-R14 (FR-23) as drawn: Go's whole-second started, the press at .950 s", () => {
+    afterEach(() => { vi.useRealTimers(); });
+    const PRESS = Date.parse("2026-10-18T10:00:00.950Z");
+    const make = { state: "making", started: "2026-10-18T10:00:00Z", elapsed: 0 } as service.ReviewMake;
+    // The screen's sequence (Review.tsx): the press is taken, MakeReview
+    // answers, the origin is set and afterASecond arms setProgress.
+    const press = () => {
+      vi.useFakeTimers({ now: PRESS });
+      const pressedAt = Date.now();
+      vi.advanceTimersByTime(5);
+      const origin = makeOrigin(make, Date.now(), pressedAt);
+      const s = { progress: false, origin, cancel: () => undefined as void };
+      s.cancel = afterASecond(origin, () => { s.progress = true; });
+      return s;
+    };
+    const drawn = (s: { progress: boolean; origin: number }, m: service.ReviewMake | null = make) => view({ status: status("none"), make: m, progress: s.progress, origin: s.origin });
+    it("a make ending 900 ms after the press never draws the counter or Stop", () => {
+      const s = press();
+      for (const t of [45, 500, 895]) {
+        vi.advanceTimersByTime(t - (Date.now() - PRESS - 5));
+        const h = drawn(s);
+        expect(h).toContain(">Making the map…</button>");
+        expect(h).not.toContain("Making the map ·");
+        expect(h).not.toContain(">Stop</button>");
+      }
+      s.cancel();
+      vi.advanceTimersByTime(5_000);
+      const h = drawn(s, { ...make, state: "done", elapsed: 0 } as service.ReviewMake);
+      expect(s.progress).toBe(false);
+      expect(h).not.toContain("Making the map ·");
+      expect(h).not.toContain(">Stop</button>");
+    });
+    it("one ending at 1500 ms draws them from 1 s after the press, the counter at 1 s, focus unmoved", () => {
+      const s = press();
+      vi.advanceTimersByTime(994);
+      expect(drawn(s)).not.toContain(">Stop</button>");
+      vi.advanceTimersByTime(1);
+      expect(Date.now() - PRESS).toBe(1000);
+      const h = drawn(s);
+      expect(h).toContain(">Making the map · 1 s</button>");
+      expect(h).not.toContain("· 0 s");
+      expect(h).toContain(">Stop</button>");
+      vi.advanceTimersByTime(500);
+      expect(drawn(s)).toContain(">Making the map · 1 s</button>");
+      s.cancel();
+      // no document in this run: nothing the timer did could have moved focus
+      expect(typeof document).toBe("undefined");
+    });
   });
 
   it("failed: the reason, Try again and Copy the command", () => {

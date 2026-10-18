@@ -49,17 +49,31 @@ export const makingLabel = (seconds: number) => `Making the map · ${Math.max(0,
  *  has run 1 s; before it only the button reads `Making the map…`. */
 export const PROGRESS_AFTER_MS = 1000;
 
-/** Milliseconds until a running make's progress line shows; 0 when it
- *  shows now (a make reopened after its first second). */
-export function progressDelay(make: Pick<service.ReviewMake, "started" | "elapsed"> | null | undefined, now: number = Date.now()): number {
-  return Math.max(0, PROGRESS_AFTER_MS - elapsedOf(make, now) * 1000);
+/** Where a make's 1 s and its counter count from, in this page's clock
+ *  (FR-23). Go's `started` is RFC3339 cut to the second, so it reads up
+ *  to 999 ms early: a press at .950 s would show the line 50 ms later.
+ *  The origin is the press, taken here, when this page pressed; for a make
+ *  first seen here (a reload, another window), the latest instant it can
+ *  have started: `started` + 1 s, or seenAt less its whole elapsed seconds,
+ *  whichever is earlier, never after seenAt. */
+export function makeOrigin(make: Pick<service.ReviewMake, "started" | "elapsed">, seenAt: number, pressedAt?: number): number {
+  const t = Date.parse(make.started);
+  const bounds = [pressedAt ?? seenAt, seenAt - (make.elapsed ?? 0) * 1000];
+  if (!Number.isNaN(t)) bounds.push(t + 1000);
+  return Math.min(...bounds);
 }
 
-/** Calls show() once a make has run 1 s (FR-23); the returned cancel, run
- *  when the make ends, keeps a make under 1 s from ever showing it. show
- *  only changes what is drawn: it never moves focus. */
-export function afterASecond(make: Pick<service.ReviewMake, "started" | "elapsed">, show: () => void, now: number = Date.now()): () => void {
-  const wait = progressDelay(make, now);
+/** Milliseconds until a running make's progress line shows; 0 when it
+ *  shows now (a make reopened after its first second). */
+export function progressDelay(origin: number, now: number = Date.now()): number {
+  return Math.max(0, PROGRESS_AFTER_MS - (now - origin));
+}
+
+/** Calls show() once a make has run 1 s from its origin (FR-23); the
+ *  returned cancel, run when the make ends, keeps a make under 1 s from
+ *  ever showing it. show only changes what is drawn: it never moves focus. */
+export function afterASecond(origin: number, show: () => void, now: number = Date.now()): () => void {
+  const wait = progressDelay(origin, now);
   if (wait === 0) {
     show();
     return () => undefined;
@@ -67,6 +81,10 @@ export function afterASecond(make: Pick<service.ReviewMake, "started" | "elapsed
   const t = setTimeout(show, wait);
   return () => clearTimeout(t);
 }
+
+/** The counter's seconds from the same origin; once the line shows it
+ *  has run 1 s, so it never reads `0 s`. */
+export const secondsSince = (origin: number, now: number = Date.now()) => Math.max(1, Math.floor((now - origin) / 1000));
 
 /** Seconds since a make started (RFC3339), never below its reported elapsed. */
 export function elapsedOf(make: Pick<service.ReviewMake, "started" | "elapsed"> | null | undefined, now: number = Date.now()): number {
