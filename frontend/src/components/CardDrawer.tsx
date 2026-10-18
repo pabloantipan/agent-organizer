@@ -1,8 +1,10 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { marked } from "marked";
-import { AtSign, Code2, FolderSearch, MessagesSquare, MessageSquareText, Pencil, Send, Terminal, Trash2, X } from "lucide-react";
+import { AtSign, Code2, FileDiff, FolderSearch, MessagesSquare, MessageSquareText, Pencil, Send, Terminal, Trash2, X } from "lucide-react";
 import { api } from "../hooks/useWails";
-import type { merge } from "../../wailsjs/go/models";
+import type { merge, service } from "../../wailsjs/go/models";
+import { ReviewStatus } from "../../wailsjs/go/main/App";
+import { reviewable, WORDS as REVIEW_WORDS } from "../lib/review";
 import { ageLabel, notesAsContext, shortHome, since } from "../lib";
 import { useBoard } from "../stores/board.store";
 import { readOnlyOf } from "../lib/queue";
@@ -51,7 +53,7 @@ export function CardDrawer() {
 // Trello-style card back: centered, description in the main column, labels
 // and actions in the side column.
 function CardBack() {
-  const { selected, select, view } = useBoard();
+  const { selected, select, view, reviewReturn, clearReviewReturn } = useBoard();
   // Escape closes the card back when it is the topmost open box
   // (leftovers-5 FR-1): opened over a rule box, it closes and the box stays.
   const open = !!selected;
@@ -73,6 +75,13 @@ function CardBack() {
   // before any press.
   useSpecProbe(selected?.initiative_id ?? "", selected?.spec ?? "", !!selected?.local && !!selected?.spec);
   useFocusOpener(selected ? `${selected.initiative_id}/${selected.slug}` : null, title);
+  // Back from the Review screen (review-view §2): focus on Review the
+  // change, after the title took it.
+  useLayoutEffect(() => {
+    if (!selected || reviewReturn !== `${selected.initiative_id}/${selected.slug}`) return;
+    box.current?.querySelector<HTMLButtonElement>("[data-review-open]")?.focus();
+    clearReviewReturn();
+  }, [selected, reviewReturn, clearReviewReturn]);
   if (!selected) return null;
   const c = selected;
   // FR-13: a card of an initiative that is not active takes no comment and
@@ -128,6 +137,7 @@ function CardBack() {
               <div className="meta">On {c.machine}. Actions work only on the local machine.</div>
             )}
             <Discuss card={c} readOnly={readOnly} />
+            <ReviewSection card={c} />
             <div className="section-label">Path</div>
             <div className="mono meta wrap">{shortHome(c.path)}</div>
           </aside>
@@ -150,6 +160,36 @@ function CardSpec({ card: c }: { card: merge.BoardCard }) {
       <div className="card-spec">
         {r ? <SpecOpener initiative={c.initiative_id} refText={c.spec} label={word} local={c.local} className="mono" /> : <span className="mono">{word}</span>}
         {rest && <div className="meta">{rest}</div>}
+      </div>
+    </>
+  );
+}
+
+/** The last status read per card, so the section draws at once when the
+ *  card back reopens from the Review screen and focus can land on it. */
+const reviewStatus = new Map<string, service.ReviewStatus>();
+
+/** The card's change to review (review-view §2, review-map v2 FR-18): a
+ *  local card whose change resolves, its branch or its merge. With neither,
+ *  or on another machine's card (`!local`, Amendment 1), no section: a
+ *  press that cannot act is not offered. */
+export function ReviewSection({ card: c }: { card: merge.BoardCard }) {
+  const { openReview } = useBoard();
+  const key = `${c.initiative_id}/${c.slug}`;
+  const [status, setStatus] = useState<service.ReviewStatus | null>(() => reviewStatus.get(key) ?? null);
+  useEffect(() => {
+    if (!c.local) return;
+    let live = true;
+    setStatus(reviewStatus.get(key) ?? null);
+    ReviewStatus(c.initiative_id, c.slug).then((st) => { reviewStatus.set(key, st); if (live) setStatus(st); }, () => undefined);
+    return () => { live = false; };
+  }, [key, c.initiative_id, c.slug, c.local]);
+  if (!reviewable(c.local, status)) return null;
+  return (
+    <>
+      <div className="section-label">{REVIEW_WORDS.sectionLabel}</div>
+      <div className="actions">
+        <button data-review-open onClick={() => openReview(c)}><FileDiff size={14} /> <span>{REVIEW_WORDS.reviewChange}</span></button>
       </div>
     </>
   );

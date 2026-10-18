@@ -34,7 +34,7 @@ describe("K2: Skip to content", () => {
     expect(shell.indexOf("<SkipLink />")).toBeGreaterThan(0);
     expect(shell.indexOf("<SkipLink />")).toBeLessThan(shell.indexOf("<TopBar />"));
     const mains = appSrc.match(/<main [^>]*>/g) ?? [];
-    expect(mains.length).toBe(4);
+    expect(mains.length).toBe(5); // Settings, Initiatives, Usage, Review, the rail's
     for (const m of mains) expect(m).toContain("id={MAIN_ID} tabIndex={-1}");
   });
 
