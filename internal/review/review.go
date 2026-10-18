@@ -3,8 +3,8 @@
 // review/pipeline-starter.md §6.6.3): the definitions a diff touches, their
 // one-hop callers and callees, and the tests that reference each, every
 // symbol under its package. Every node and edge comes from an index source;
-// nothing is guessed (§6.6.5), so risk, claim and mismatches are present and
-// empty.
+// nothing is guessed (§6.6.5), so risk and claim are present and empty, and
+// mismatches carry only what change-check flagged for a card (reconcile.go).
 package review
 
 import (
@@ -27,9 +27,14 @@ type RevMap struct {
 	Source     string     `json:"source"`
 	Nodes      []Node     `json:"nodes"`
 	Edges      []Edge     `json:"edges"`
-	Mismatches []any      `json:"mismatches"`
-	Stats      Stats      `json:"stats"`
-	Problems   []string   `json:"problems,omitempty"`
+	Mismatches []Mismatch `json:"mismatches"`
+	// Reconciled is FR-11: change-check's flags for the card are on the
+	// map, and Reconciliation names it; else Reconciliation is why they
+	// are not, in one line (FR-12).
+	Reconciled     bool     `json:"reconciled"`
+	Reconciliation string   `json:"reconciliation,omitempty"`
+	Stats          Stats    `json:"stats"`
+	Problems       []string `json:"problems,omitempty"`
 	// Notes are what the review did to an export to read it (FR-9), once.
 	Notes []string `json:"notes,omitempty"`
 }
@@ -94,7 +99,7 @@ func Build(initiative, target string, ranges []Range, srcs []Source, work string
 		names = append(names, s.Name())
 	}
 	rm := &RevMap{Version: "0", Initiative: initiative, Target: target, Source: strings.Join(names, ", "),
-		Nodes: []Node{}, Edges: []Edge{}, Mismatches: []any{}}
+		Nodes: []Node{}, Edges: []Edge{}, Mismatches: []Mismatch{}}
 	for i, r := range ranges {
 		if i == 0 {
 			rm.Base, rm.Head = r.Base, r.Head
@@ -523,6 +528,19 @@ func WriteSummary(w io.Writer, rm *RevMap, path string) {
 	fmt.Fprintf(w, "%s %s: %s..%s (%s)\n", rm.Initiative, rm.Target, short(rm.Base), short(rm.Head), rm.Source)
 	fmt.Fprintf(w, "changed %d (and %d tests), affected %d, untested %d, edges %d, packages %d\n",
 		rm.Stats.Changed, rm.Stats.ChangedTests, rm.Stats.Affected, rm.Stats.Untested, rm.Stats.Edges, rm.Stats.Packages)
+	if rm.Reconciled {
+		count := map[string]int{}
+		for _, m := range rm.Mismatches {
+			count[m.Type]++
+		}
+		var parts []string
+		for _, t := range MismatchTypes {
+			parts = append(parts, fmt.Sprintf("%s %d", t, count[t]))
+		}
+		fmt.Fprintf(w, "mismatches (%s): %s\n", rm.Reconciliation, strings.Join(parts, ", "))
+	} else if rm.Reconciliation != "" {
+		fmt.Fprintln(w, "no reconciliation: "+rm.Reconciliation)
+	}
 	in := map[string]int{}
 	for _, e := range rm.Edges {
 		in[e.To]++

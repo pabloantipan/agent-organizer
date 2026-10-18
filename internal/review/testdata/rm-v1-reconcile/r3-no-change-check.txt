@@ -1,0 +1,8 @@
+$ PATH=<git go tar node only> organizer review organizer 43c61fc --card lf40-verb-fit
+organizer 43c61fc: f4fd863..43c61fc (go/types, typescript)
+changed 1 (and 2 tests), affected 2, untested 0, edges 2, packages 2
+no reconciliation: change-check not on PATH
+top changed by callers:
+  modified   1 callers  1 tests  frontend/src/components/SpecReader.tsx#Contents
+wrote $XDG_DATA_HOME/organizer/review/organizer/43c61fc2e5189a6976d5275d9df93720f78f9664/revmap.json
+exit 0

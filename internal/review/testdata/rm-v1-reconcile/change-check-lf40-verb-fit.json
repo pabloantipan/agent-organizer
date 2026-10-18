@@ -1,0 +1,105 @@
+{
+ "card": "working-on/done/lf40-verb-fit.md",
+ "repos": [
+  {
+   "name": "organizer",
+   "dir": "/Users/pabloantipan/organizer",
+   "base": "f4fd863f9d829a5c728a8150571d98bbdf0bf24d",
+   "how": "--base 43c61fc^1",
+   "head_ref": "43c61fc",
+   "head": "43c61fc2e5189a6976d5275d9df93720f78f9664",
+   "files": [
+    {
+     "path": "frontend/src/components/SpecReader.test.tsx",
+     "status": "modified",
+     "test": true,
+     "symbols": []
+    },
+    {
+     "path": "frontend/src/components/SpecReader.tsx",
+     "status": "modified",
+     "test": false,
+     "symbols": [
+      "Contents"
+     ]
+    },
+    {
+     "path": "frontend/src/styles/shell.css",
+     "status": "modified",
+     "test": false,
+     "symbols": []
+    }
+   ]
+  }
+ ],
+ "skipped": [],
+ "flags": [
+  {
+   "flag": "outside footprint",
+   "repo": "organizer",
+   "path": "frontend/src/components/SpecReader.test.tsx",
+   "symbol": "",
+   "detail": "modified"
+  },
+  {
+   "flag": "undeclared",
+   "repo": "organizer",
+   "path": "frontend/src/styles/shell.css",
+   "symbol": "",
+   "detail": "modified"
+  },
+  {
+   "flag": "declared, not changed",
+   "repo": "",
+   "path": "",
+   "symbol": "frontend/src/styles/shell.css:.ib-row",
+   "detail": "no matching change"
+  }
+ ],
+ "declared": {
+  "changes": [
+   [
+    "modified",
+    "frontend/src/styles/shell.css:.ib-row",
+    "`--ib-verb-w` from 72px to `calc(5.5 * var(--font-size-sm) + 2 * var(--space-3) + 2px)` (92px), fits `Rule \u00b7 draft` (FR-1)"
+   ],
+   [
+    "modified",
+    "frontend/src/components/SpecReader.tsx:Contents",
+    "the map entry carries `aria-label=\"<heading>, start here\"`, the `sr-only` span is gone (FR-2)"
+   ],
+   [
+    "modified",
+    "frontend/src/components/SpecReader.test.tsx",
+    "lf38 O4 block replaced by leftovers-40 V2, asserting the exact name from aria-label and no sr-only span"
+   ]
+  ],
+  "risky": [
+   "`.ib-row`: the verb column is 20px wider, so every age moved 20px left and the subject column is 20px narrower at 1024"
+  ],
+  "not_changed": [
+   "`lib/drafts`, `Home.tsx` rows: the label stays `Rule \u00b7 draft`; only the floor moved (Boundary)",
+   "wide Home (`rule-box.css`): it reads the same `--ib-verb-w`; not measured, V1 names 1024 and 1440"
+  ],
+  "unread": []
+ },
+ "risk": {
+  "card": "low",
+  "missing": false,
+  "suggested": null,
+  "reasons": []
+ },
+ "counts": {
+  "outside boundary": 0,
+  "outside footprint": 1,
+  "undeclared": 1,
+  "declared, not changed": 1,
+  "new env var": 0,
+  "new dependency": 0,
+  "new host": 0,
+  "risk": 0,
+  "untested?": 0,
+  "could not read": 0,
+  "boundary unreadable": 0
+ }
+}

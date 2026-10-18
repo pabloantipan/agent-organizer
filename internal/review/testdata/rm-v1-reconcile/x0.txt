@@ -1,0 +1,24 @@
+X0 on a clean clone of rm-v1-reconcile at 1602af1, 2026-10-17
+XDG_DATA_HOME=$(mktemp -d) test-lease run -- make test: exit 0
+ok  	organizer	13.641s
+ok  	organizer/internal/auth	(cached)
+ok  	organizer/internal/cli	8.007s
+ok  	organizer/internal/config	(cached)
+ok  	organizer/internal/diagram	5.629s
+ok  	organizer/internal/discuss	(cached)
+ok  	organizer/internal/lock	(cached)
+ok  	organizer/internal/memory	(cached)
+ok  	organizer/internal/merge	1.853s
+ok  	organizer/internal/model	0.279s
+ok  	organizer/internal/prompt	0.810s
+ok  	organizer/internal/record	1.615s
+ok  	organizer/internal/review	9.041s
+ok  	organizer/internal/scan	4.388s
+ok  	organizer/internal/service	39.650s
+ok  	organizer/internal/session	3.106s
+ok  	organizer/internal/sync	2.875s
+ok  	organizer/internal/usage	3.579s
+      Tests  810 passed (810)
+test-lease run -- pnpm run build (frontend): exit 0
+test-lease run -- wails build: exit 0
+git status --porcelain: (empty)
