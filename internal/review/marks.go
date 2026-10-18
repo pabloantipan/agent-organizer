@@ -50,6 +50,24 @@ type Mark struct {
 	// Asked is the id of the message that asked about this mark (FR-26);
 	// "" when it was kept here and asked of no one.
 	Asked string `json:"asked,omitempty"`
+	// AskedThread is the thread it was asked in (leftovers-41 FR-10): the
+	// review's thread at the ask, which a closed thread's replacement does
+	// not move.
+	AskedThread string `json:"asked_thread,omitempty"`
+}
+
+// ThreadOf is the thread mk was asked in: its own AskedThread, else, for a
+// mark asked before that field existed, the review's Thread; "" when it
+// was not asked.
+func (m Marks) ThreadOf(mk Mark) string {
+	switch {
+	case mk.Asked == "":
+		return ""
+	case mk.AskedThread != "":
+		return mk.AskedThread
+	default:
+		return m.Thread
+	}
 }
 
 // ChangedWords is what a mark that did not carry reads as.
@@ -163,7 +181,8 @@ func SetMark(initiative, card string, rm *RevMap, text TextOf, symbol, state, no
 }
 
 // SetAsked records the review's thread on head's marks and, when asked is
-// not "", that symbol's mark was asked in it by message asked (FR-26).
+// not "", that symbol's mark was asked in it by message asked (FR-26),
+// keeping the thread on the mark (leftovers-41 FR-10).
 func SetAsked(initiative, head, symbol, thread, asked string) (Marks, error) {
 	p := StatePath(initiative, head)
 	m, err := loadMarks(p)
@@ -175,7 +194,7 @@ func SetAsked(initiative, head, symbol, thread, asked string) (Marks, error) {
 		found := false
 		for i := range m.Marks {
 			if m.Marks[i].Symbol == symbol {
-				m.Marks[i].Asked, found = asked, true
+				m.Marks[i].Asked, m.Marks[i].AskedThread, found = asked, thread, true
 			}
 		}
 		if !found {

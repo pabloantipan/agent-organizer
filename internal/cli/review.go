@@ -95,7 +95,8 @@ func reviewCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now f
 
 // reviewMarks is FR-27: the coverage of the marks on the card's map at its
 // current head, the count line and one line per question or block with
-// the review's thread or `not asked`. A card with no map there exits 2.
+// the thread it was asked in (leftovers-41 FR-10) or `not asked`. A card
+// with no map there exits 2.
 func reviewMarks(si *model.ScannedInitiative, card, head string, stdout, stderr io.Writer) int {
 	if card == "" {
 		fmt.Fprintln(stderr, "--marks needs a card, not a sha")
@@ -136,8 +137,8 @@ func reviewMarks(si *model.ScannedInitiative, card, head string, stdout, stderr 
 			continue
 		}
 		where := "not asked"
-		if mk.Asked != "" {
-			where = m.Thread
+		if t := m.ThreadOf(mk); t != "" {
+			where = t
 		}
 		lines = append(lines, mk.Symbol+"  "+mk.State+"  "+where)
 	}

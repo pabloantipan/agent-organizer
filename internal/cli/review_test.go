@@ -294,6 +294,24 @@ func TestReviewMarksCoverage(t *testing.T) {
 		t.Errorf("--marks:\n%s\nwant:\n%s", out.String(), want)
 	}
 
+	// G3 / leftovers-41 FR-10: each asked mark prints the thread it was
+	// asked in; F (above, no asked_thread) read the head's thread.
+	state = `{"initiative":"init-r","card":"cm","head":"` + head + `","thread":"T5","changed":[],"marks":[
+		{"symbol":"` + f + `","state":"question","note":"why 3?","by":"pablo","at":"2026-10-18T09:00:00Z","hash":"x","asked":"M1","asked_thread":"T1"},
+		{"symbol":"` + g + `","state":"blocked","note":"no","by":"pablo","at":"2026-10-18T09:00:00Z","hash":"x","asked":"M5","asked_thread":"T5"}]}`
+	if err := os.WriteFile(p, []byte(state), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	out.Reset()
+	errb.Reset()
+	if code := runWith([]string{"review", "init-r", "cm", "--marks"}, &out, &errb, time.Now); code != 0 {
+		t.Fatalf("--marks: exit %d, stderr %q", code, errb.String())
+	}
+	want = "Reviewed 0 of 3 · 1 questions · 1 blocked\n" + f + "  question  T1\n" + g + "  blocked  T5\n"
+	if out.String() != want {
+		t.Errorf("--marks with asked_thread:\n%s\nwant:\n%s", out.String(), want)
+	}
+
 	out.Reset()
 	errb.Reset()
 	code := runWith([]string{"review", "init-r", "nomap", "--marks"}, &out, &errb, time.Now)
