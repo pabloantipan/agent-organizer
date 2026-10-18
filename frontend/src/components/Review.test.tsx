@@ -9,7 +9,7 @@ import type { review, service } from "../../wailsjs/go/models";
 // label and a stubbed clipboard, never the real one.
 
 const clip = vi.fn((_: string) => Promise.resolve(true));
-vi.mock("../../wailsjs/go/main/App", () => ({ MakeReview: vi.fn(), ReviewMap: vi.fn(), ReviewMarks: vi.fn(), ReviewStatus: vi.fn(), StopReview: vi.fn() }));
+vi.mock("../../wailsjs/go/main/App", () => ({ MakeReview: vi.fn(), ReviewMap: vi.fn(), ReviewMarks: vi.fn(), ReviewStatus: vi.fn(), StopReview: vi.fn(), MarkReview: vi.fn(), ReviewFile: vi.fn() }));
 vi.mock("../../wailsjs/runtime/runtime", () => ({ ClipboardSetText: (t: string) => clip(t), EventsOn: () => () => undefined }));
 vi.mock("../stores/board.store", () => ({ useBoard: () => ({}) }));
 
@@ -39,10 +39,11 @@ const status = (state: string, make: Partial<service.ReviewMake> | null = null) 
 const marks = (m: Record<string, string>) => ({ initiative: "init-a", card: "rv-fixture", head: "", marks: Object.entries(m).map(([symbol, state]) => ({ symbol, state })), changed: [] }) as unknown as review.Marks;
 
 const noop = () => undefined;
-function view(p: { status: service.ReviewStatus | null; make?: service.ReviewMake | null; map?: review.RevMap | null; marks?: review.Marks | null; symbol?: string; progress?: boolean; origin?: number }) {
+function view(p: { status: service.ReviewStatus | null; make?: service.ReviewMake | null; map?: review.RevMap | null; marks?: review.Marks | null; symbol?: string; progress?: boolean; origin?: number; from?: string }) {
   return renderToStaticMarkup(
     <ReviewView status={p.status} make={p.make ?? null} map={p.map ?? null} marks={p.marks ?? null} error={null} symbol={p.symbol ?? ""} active="" setActive={noop}
-      onBack={noop} onStep={noop} onOpen={noop} onMake={noop} onStop={noop} makeBtn={createRef()} title={createRef()} said="" progress={p.progress} origin={p.origin} />,
+      onBack={noop} onStep={noop} onOpen={noop} onMake={noop} onStop={noop} makeBtn={createRef()} title={createRef()} said="" progress={p.progress} origin={p.origin}
+      panel={p.from === undefined ? undefined : { initiative: "init-a", card: "rv-fixture", head: "", from: p.from, onBack: noop, onMarks: noop, onNext: noop }} />,
   );
 }
 const text = (html: string) => html.replace(/<[^>]+>/g, " ").replace(/&#x27;/g, "'").replace(/&gt;/g, ">").replace(/\s+/g, " ");
@@ -217,5 +218,23 @@ describe("V-R5: the row's flags take flagLook", () => {
     const h = view({ status: status("map"), map: fixture });
     expect(h).toContain('<span class="rv-flag amber">not in the card&#x27;s declared changes</span>');
     expect(h).toContain('<span class="rv-flag muted">no direct test</span>');
+  });
+});
+
+describe("P4 (FR-35): the origin row stays current while an affected symbol is shown", () => {
+  const G = "go:example.com/inita/svc.Greet", W = "go:example.com/inita/svc.Welcome";
+  const m = { ...fixture, nodes: [...fixture.nodes, node({ id: W, parent: "go:example.com/inita/svc", file: "svc/welcome.go", change: "affected" })],
+    edges: [{ from: W, to: G, kind: "uses", change: "unchanged", source: "go/types" }] } as unknown as review.RevMap;
+  const row = (h: string, id: string) => h.match(new RegExp(`<li[^>]*data-row="${id.replace(/[.#/]/g, "\\$&")}"[^>]*>`))?.[0] ?? "";
+  it("Called by → svc.Welcome: Greet's row keeps .on and aria-current; no other row has them", () => {
+    const h = view({ status: status("map"), map: m, symbol: W, from: G });
+    expect(row(h, G)).toContain('aria-current="true"');
+    expect(row(h, G)).toMatch(/class="rv-row on /);
+    expect(h.match(/aria-current="true"/g)).toHaveLength(1);
+    expect(text(h)).toContain("unchanged · calls svc.Greet");
+  });
+  it("a changed symbol shown: its own row is current", () => {
+    const h = view({ status: status("map"), map: m, symbol: G, from: "" });
+    expect(row(h, G)).toContain('aria-current="true"');
   });
 });

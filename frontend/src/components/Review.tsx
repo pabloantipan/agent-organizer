@@ -185,6 +185,10 @@ export function Review() {
   );
 }
 
+/** The worklist's current row (FR-35, U6): the shown symbol's, or, while
+ *  an affected one is shown, the changed one's it was opened from. */
+export const currentRow = (symbol: string, from?: string) => from || symbol;
+
 /** FR-20's first target, in that order (a selector list would take
  *  document order, and ← Card comes first in it). */
 export const firstTarget = (root: ParentNode) =>
@@ -259,7 +263,7 @@ export function ReviewView({ status, make, map, marks, error, symbol, active, se
               <ul className="plain mono">{filesOf(map).map((f) => <li key={f}>{f}</li>)}</ul>
             </div>
           ) : (
-            <Worklist groups={groups} active={active || symbol} setActive={setActive} shown={symbol} onOpen={onOpen} />
+            <Worklist groups={groups} active={active || symbol} setActive={setActive} shown={currentRow(symbol, panel?.from)} onOpen={onOpen} />
           ))}
         </div>
         <SymbolPane map={map} node={node} row={row} marks={marks} title={title} onOpen={onOpen} panel={panel} />
@@ -369,7 +373,7 @@ function Worklist({ groups, active, setActive, shown, onOpen }: { groups: Group[
             {open && (
               <ul role="group">
                 {g.rows.map((r) => (
-                  <li key={r.id} role="treeitem" aria-level={2} aria-label={rowName(r)} aria-describedby={r.path ? `rv-path-${r.id}` : undefined} aria-selected={r.id === shown} data-row={r.id}
+                  <li key={r.id} role="treeitem" aria-level={2} aria-label={rowName(r)} aria-describedby={r.path ? `rv-path-${r.id}` : undefined} aria-selected={r.id === shown} aria-current={r.id === shown ? "true" : undefined} data-row={r.id}
                     tabIndex={current === r.id ? 0 : -1} ref={ref(r.id)}
                     className={`rv-row ${r.id === shown ? "on" : ""} ${r.node ? "" : "declared"}`}
                     onFocus={(e) => { e.stopPropagation(); setActive(r.id); }}

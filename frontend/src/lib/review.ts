@@ -37,9 +37,12 @@ export const WORDS = {
   blocked: "Blocked",
   note: "Note",
   reviewedNext: "Reviewed, next",
+  questionNext: "Save question, next",
+  blockNext: "Save block, next",
   save: "Save",
   v3: "Kept in Deltagos; asking the supervisor comes later.",
   unchanged: "unchanged",
+  noneFound: "none found",
 } as const;
 
 /** §4 making: `Making the map · 2 s`, a counter, no spinner. */
@@ -427,14 +430,16 @@ export const callsOf = (m: review.RevMap, id: string) => uniqNodes((m.edges ?? [
 /** An affected node is an unchanged neighbour, shown read-only (§3.3). */
 export const isAffected = (n: review.Node) => n.change === "affected";
 
-/** Why an affected symbol is in the map (§3.3): `unchanged · shown because
- *  it calls runLaunches`; when the changed one calls it instead, the same
- *  line the other way. */
+/** Which way an affected symbol points (review-view Amendment 2, A1;
+ *  FR-30): opened from `Called by` it calls the changed one, `unchanged ·
+ *  calls runLaunches`; opened from `Calls` the changed one calls it,
+ *  `unchanged · called by runLaunches`. Read from the edges, which is the
+ *  list it sits in. */
 export function affectedLine(m: review.RevMap, affected: review.Node, changedNode: review.Node | null): string {
   if (!changedNode) return WORDS.unchanged;
   const name = shortName(changedNode, true);
   const calls = (m.edges ?? []).some((e) => e.from === affected.id && e.to === changedNode.id);
-  return calls ? `${WORDS.unchanged} · shown because it calls ${name}` : `${WORDS.unchanged} · shown because ${name} calls it`;
+  return calls ? `${WORDS.unchanged} · calls ${name}` : `${WORDS.unchanged} · called by ${name}`;
 }
 
 /** `← back to runLaunches` (§3.3). */
@@ -458,6 +463,16 @@ export const needsNote = (s: MarkState) => s === "question" || s === "blocked";
  *  reader changes the mark). */
 export const canSave = (s: MarkState, note: string, saved: { state: MarkState; note: string } = { state: "", note: "" }) =>
   s !== "" && (!needsNote(s) || note.trim() !== "") && (s !== saved.state || note.trim() !== saved.note);
+
+/** The primary follows the chosen radio and saves it (Amendment 2, A2;
+ *  FR-31): none or Reviewed `Reviewed, next`, Question `Save question,
+ *  next`, Blocked `Save block, next`; it never overrides a chosen mark.
+ *  Question and Blocked need a note first (`ready`). */
+export function primaryOf(s: MarkState, note: string): { label: string; mark: Exclude<MarkState, "">; ready: boolean } {
+  const mark = s === "" ? "reviewed" : s;
+  const label = mark === "question" ? WORDS.questionNext : mark === "blocked" ? WORDS.blockNext : WORDS.reviewedNext;
+  return { label, mark, ready: !needsNote(mark) || note.trim() !== "" };
+}
 
 /** What the form shows once a mark is saved: the mark as saved (FR-24), so
  *  `Reviewed, next` with nothing left reads Reviewed, not the old radio. */
