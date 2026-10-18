@@ -64,3 +64,7 @@ Amendment 1, 2026-10-18, the FSE, from sup85 (thread 01M58GMD): FR-1 keeps
 an earlier ask, so `internal/service/review_test.go:566` (TestAskReview's
 `Asked == ""` after a failed re-ask) now expects the earlier ask kept. The
 boundary adds that one assertion of `internal/service/review_test.go`.
+- Also `frontend/src/components/Conversation.review.test.tsx:85`: its
+  source-string assertion pins the old landing code that FR-3 rewrites; the
+  builder updates that literal to the new landing (same meaning: lands on a
+  divider, asks the feed for an unlisted thread, never parks on body).
