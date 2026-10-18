@@ -389,3 +389,23 @@ re-read today. So:
   draws no Review section for it, and the bound reads refuse it (as built).
   `readOnlyOf` is not consulted: an asleep or archived initiative's local
   card is reviewable, since marks live in the data dir, not the repo.
+
+Amendment 2 (v2), 2026-10-18, the FSE, from rv-list's UI review (rl-ui,
+62d9133, U1, U2, G1): the design does not say where focus lands on open,
+nor the crumb's width at 1024. Both are severity 2 and sit in files
+rv-symbol already touches or is next to, so they join `rv-symbol`:
+- **FR-20** (U1) On open, focus goes to the screen's first target: the
+  worklist's stop when a map is shown, `Make the map` when there is none,
+  else `← Card`. Never the page body (`docs/design-system.md`, Focus and
+  names).
+- **FR-21** (U2) The crumb's card title shrink-wraps (no fixed basis,
+  `min-width: 0`, at most 32ch) so it is cut only when the bar is full, and
+  at 1024×640 with the memory badge shown it keeps at least 20 characters.
+- **V-F1** (20) harness: open the screen with a map, and with none |
+  `document.activeElement` is the worklist stop, then `Make the map`.
+- **V-F2** (21) harness at 1024×640 and 1440×900, the fixture card | at 1024
+  the title shows ≥ 20 characters; at 1440 no gap over 8 px between the
+  title and `› Review`.
+- `rv-symbol`'s gate adds V-F1 and V-F2; its boundary adds
+  `components/TopBar.tsx` (the crumb only) and `Review.tsx` for the focus on
+  open. U3 (severity 1, the flags' wrap) and G2/G3 are held.
