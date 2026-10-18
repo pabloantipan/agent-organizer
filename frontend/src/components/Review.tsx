@@ -133,11 +133,16 @@ export function Review() {
 
   // A make that ends with a map hands focus to the worklist (the result,
   // not the wait, moves focus); a failure keeps it on Try again.
+  // The map loads after the make's end, so the hand-off waits for it.
   const wasMaking = useRef(false);
+  const handoff = useRef(false);
   useEffect(() => {
-    if (wasMaking.current && !making && shown && make?.state === "done") document.querySelector<HTMLElement>(".rv-tree [tabindex='0']")?.focus();
+    if (wasMaking.current && !making && make?.state === "done") handoff.current = true;
     wasMaking.current = making;
-  }, [making, shown, make]);
+    if (!handoff.current || !shown || !map) return;
+    handoff.current = false;
+    document.querySelector<HTMLElement>(".rv-tree [tabindex='0'], .review-empty button")?.focus();
+  }, [making, shown, make, map]);
 
   return (
     <ReviewView status={status} make={make} map={map} marks={marks} error={error} symbol={symbol} active={active} setActive={setActive}
