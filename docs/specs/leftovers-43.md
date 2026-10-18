@@ -1,6 +1,6 @@
 # Leftovers 43: Open in editor's refusals, the definition line, Save only when it saves, and one page marker: the build spec
 
-status: proposed (0151)
+status: ruled (0151)
 by: the FSE, 2026-10-18, on main at aa29cb1, in away mode
 sources: Aglaea's `docs/ux/specs/review-view.md` Amendment 7 (104d92d,
 R31-R33, from oe-ui's U1, U2 on lf42-open-at-line) and Amendment 8
