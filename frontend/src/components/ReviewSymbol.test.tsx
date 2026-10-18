@@ -350,3 +350,14 @@ describe("A9 (FR-29, Amendment 4): a failed ask is seen and said", () => {
     expect(review).toContain("saidAfter({ asked: asked.current, failed: failed.current,");
   });
 });
+
+describe("A11 (FR-42): asked is muted on every row; the glyph keeps its colour", () => {
+  const css = readFileSync(new URL("../styles/review.css", import.meta.url), "utf8") as string;
+  it(".rv-asked is --fg-muted, with no per-mark or current-row colour", () => {
+    expect(css).toMatch(/\.rv-asked \{[^}]*color: var\(--fg-muted\);/);
+    expect(css).not.toMatch(/\.rv-asked\.(question|blocked)/);
+    expect(css).not.toMatch(/\.on[^{]*\.rv-asked/);
+    expect(css).toContain(".rv-mark.blocked { color: var(--danger); }");
+    expect(css).toMatch(/\.rv-mark\.question \{ color: var\(--tone\); \}/);
+  });
+});
