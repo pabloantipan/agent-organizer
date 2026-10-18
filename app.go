@@ -685,6 +685,16 @@ func (a *App) ReviewStatus(initiativeID, card string) (service.ReviewStatus, err
 	return a.svc.ReviewStatus(initiativeID, card)
 }
 
+// OpenReviewAt opens file of the card's shown map at line in the editor,
+// in the checkout here whose HEAD is the map's head (leftovers-42 FR-1);
+// "<short sha> is not checked out here" when none, opening nothing.
+func (a *App) OpenReviewAt(initiativeID, card, file string, line int) error {
+	if a.svc == nil {
+		return errString(a.err)
+	}
+	return a.svc.OpenReviewAt(initiativeID, card, file, line)
+}
+
 // ReviewMap is a local card's map at head; "" is the card's current head.
 func (a *App) ReviewMap(initiativeID, card, head string) (*review.RevMap, error) {
 	if a.svc == nil {
