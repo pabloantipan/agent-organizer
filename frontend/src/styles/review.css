@@ -201,3 +201,6 @@
 .rs-where-line { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3); min-width: 0; }
 .rs-where-line .rs-where { min-width: 0; }
 .rs-not-here { color: var(--fg-muted); }
+/* Why the editor did not open (leftovers-43 FR-2): under the button, in
+   the blocked-reason style (sm, --fg-muted), never red. */
+.rs-editor-failed { margin: var(--space-1) 0 0; overflow-wrap: anywhere; }

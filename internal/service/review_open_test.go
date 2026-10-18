@@ -2,15 +2,20 @@ package service
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"organizer/internal/model"
 	"organizer/internal/review"
 )
+
+// realStart is the editor start OpenReviewAt uses, kept before any stub.
+var realStart = startEditor
 
 // stubEditor records every argv instead of starting an editor.
 func stubEditor(t *testing.T) *[][]string {
@@ -144,5 +149,57 @@ func TestEditorCommand(t *testing.T) {
 		if got := editorCommand(c.editor, "f", 12); !reflect.DeepEqual(got, c.want) {
 			t.Errorf("%q: %v, want %v", c.editor, got, c.want)
 		}
+	}
+}
+
+// S2 (leftovers-43 FR-2): the editor is waited on up to editorWait. A
+// non-zero exit in that time says its first stderr line; one still running,
+// or exiting 0, opened. None of these is an editor.
+func TestStartEditorWaits(t *testing.T) {
+	for _, c := range []struct {
+		argv []string
+		want string
+	}{
+		{[]string{"sh", "-c", "echo nope >&2; exit 1"}, "editor didn't open: nope"},
+		{[]string{"sh", "-c", "printf '\\n  \\n' >&2; echo first >&2; echo second >&2; exit 2"}, "editor didn't open: first"},
+		{[]string{"sleep", "5"}, ""},
+		{[]string{"true"}, ""},
+		{[]string{"sh", "-c", "exit 3"}, "editor didn't open: exit status 3"},
+		{[]string{"/nonexistent/editor"}, "editor didn't open: "},
+	} {
+		start := time.Now()
+		err := realStart(c.argv)
+		took := time.Since(start)
+		switch {
+		case c.want == "" && err != nil:
+			t.Errorf("%v: %v, want opened", c.argv, err)
+		case c.want != "" && (err == nil || !strings.HasPrefix(err.Error(), c.want)):
+			t.Errorf("%v: %v, want %q", c.argv, err, c.want)
+		}
+		if took > 2500*time.Millisecond {
+			t.Errorf("%v took %v, want under 2.5 s", c.argv, took)
+		}
+		if c.want != "" && strings.Contains(fmt.Sprint(err), "Error:") {
+			t.Errorf("%v: %v says Error:", c.argv, err)
+		}
+	}
+}
+
+// S2: OpenReviewAt answers what the editor answered, word for word.
+func TestOpenReviewAtEditorFails(t *testing.T) {
+	s, root := reviewFixture(t, "ok")
+	head := gitIn(t, root, "rev-parse", "c1")
+	writeMap(t, "rv", "c1", gitIn(t, root, "rev-parse", "main"), head)
+	gitIn(t, root, "checkout", "-q", "c1")
+	s.cfg.Editor = "code"
+	orig := startEditor
+	t.Cleanup(func() { startEditor = orig })
+	var argv []string
+	startEditor = func(a []string) error { argv = a; return realStart([]string{"sh", "-c", "echo nope >&2; exit 1"}) }
+	if err := s.OpenReviewAt("rv", "c1", "p/a.go", 3); err == nil || err.Error() != "editor didn't open: nope" {
+		t.Errorf("failing editor: %v", err)
+	}
+	if len(argv) == 0 || argv[0] != "code" {
+		t.Errorf("argv %v", argv)
 	}
 }

@@ -4,7 +4,7 @@ import {
   allReviewed, countsLine, coverage, coverageLine, elapsedOf, factsBeside, filesOf, flagWords, groupName, inTextField, listWidth,
   makingLabel, movedLine, nextToReview, nothingToReview, partialLines, reviewable, rowName, screenState, shortName, walkOf, WORDS, worklist,
   afterASecond, affectedLine, askedLine, askFailedLine, askLine, askStage, firstLine, markControls, lastToReview, primaryOf, saidAfter, makeOrigin, secondsSince, backTo, calledBy, callsOf, canSave, flagLook, markOf, progressDelay, shasOf, symbolDiff, testsOf,
-  editorAt, notCheckedOut, threadOf,
+  editorAt, notCheckedOut, threadOf, definitionLine, editorRefusal, editorFailed, saveShown, focusAfterSave,
 } from "./review";
 
 // review-map v2 FR-18 (docs/ux/specs/review-view.md §3.1, §3.2, §4, §5):
@@ -591,5 +591,68 @@ describe("leftovers-42: editorAt, notCheckedOut, threadOf", () => {
     expect(threadOf(m, "a")).toBe("A");
     expect(threadOf(m, "b")).toBe("T");
     expect(threadOf(null, "a")).toBe("");
+  });
+});
+
+describe("S3 (leftovers-43 FR-3): the line opened is the definition, after the leading comment block", () => {
+  // ReviewFile's read: context lines before the range, so line l is lines[l - first]
+  const text = (first: number, lines: string[]) => ({ first, lines });
+  it("a // doc comment: the first code line", () => {
+    const t = text(1, ["package svc", "", "// Greet is what acme's board says first.", "// It never fails.", "func Greet(name string) string {", "}"]);
+    expect(definitionLine(t, [3, 6])).toBe(5);
+  });
+  it("a /** */ block, one line or several, and a code line after a closing */", () => {
+    const t = text(1, ["/**", " * formatName joins the parts.", " */", "export function formatName(p: string[]) {", "}"]);
+    expect(definitionLine(t, [1, 5])).toBe(4);
+    expect(definitionLine(text(10, ["/** one line */", "", "const x = 1;"]), [10, 12])).toBe(12);
+    expect(definitionLine(text(1, ["/* a */ func f() {", "}"]), [1, 2])).toBe(1);
+  });
+  it("a # comment: the first code line", () => {
+    expect(definitionLine(text(1, ["# greet says hello", "# twice", "def greet(name):", "    pass"]), [1, 4])).toBe(3);
+  });
+  it("a decorator or attribute first is code: its own line", () => {
+    expect(definitionLine(text(1, ["@Injectable()", "export class Svc {", "}"]), [1, 3])).toBe(1);
+    expect(definitionLine(text(1, ["// the service", "@Injectable()", "export class Svc {"]), [1, 3])).toBe(2);
+    expect(definitionLine(text(1, ["/// docs", "#[derive(Debug)]", "struct S;"]), [1, 3])).toBe(2);
+  });
+  it("all comment, no text read yet, or a range past the text: the range start", () => {
+    expect(definitionLine(text(1, ["// only", "// comment"]), [1, 2])).toBe(1);
+    expect(definitionLine(null, [7, 9])).toBe(7);
+    expect(definitionLine(text(1, ["// a"]), [1, 3])).toBe(1);
+  });
+  it("editorAt opens at the definition; the label's range is the node's, untouched", () => {
+    const n = { id: "x", file: "web/src/format.ts", range_head: [1, 4] } as unknown as review.Node;
+    const st = { map_head: "h1", checkouts: [{ repo: "", head: "c176574", dir: "/r" }] } as unknown as service.ReviewStatus;
+    expect(editorAt(st, "h1", n, text(1, ["// formatName joins", "export function formatName() {", "}", ""]))?.line).toBe(2);
+    expect(editorAt(st, "h1", n)?.line).toBe(1);
+    expect(n.range_head).toEqual([1, 4]);
+  });
+});
+
+describe("S1, S2 (leftovers-43 FR-1, FR-2): what a refused press means", () => {
+  it("the head left: moved, whether the binding rejects with an Error or a string", () => {
+    expect(editorRefusal(new Error("c176574 is not checked out here"))).toEqual({ moved: true });
+    expect(editorRefusal("c176574 is not checked out here")).toEqual({ moved: true });
+  });
+  it("the editor did not open: its first line, no Error: and no prefix twice", () => {
+    expect(editorRefusal(new Error("editor didn't open: nope"))).toEqual({ moved: false, line: "nope" });
+    expect(editorRefusal("Error: editor didn't open: nope\nmore")).toEqual({ moved: false, line: "nope" });
+    expect(editorFailed("nope")).toBe("Editor didn't open: nope");
+  });
+});
+
+describe("S4 (leftovers-43 FR-4): Save only while there is something to save", () => {
+  it("drawn only while the mark or the note differs from the saved one", () => {
+    expect(saveShown("", "", { state: "", note: "" })).toBe(false);
+    expect(saveShown("question", "why?", { state: "question", note: "why?" })).toBe(false);
+    expect(saveShown("question", " why? ", { state: "question", note: "why?" })).toBe(false);
+    expect(saveShown("question", "why, again?", { state: "question", note: "why?" })).toBe(true);
+    expect(saveShown("reviewed", "why?", { state: "question", note: "why?" })).toBe(true);
+    expect(saveShown("question", "", { state: "", note: "" })).toBe(true);
+  });
+  it("when Save leaves after its press: the asking primary, else the radio group", () => {
+    expect(focusAfterSave({ showPrimary: true, ask: true })).toBe("primary");
+    expect(focusAfterSave({ showPrimary: true, ask: false })).toBe("radios");
+    expect(focusAfterSave({ showPrimary: false, ask: true })).toBe("radios");
   });
 });
