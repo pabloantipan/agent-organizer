@@ -172,7 +172,7 @@ func usage(w io.Writer) {
   organizer crew <initiative> [--print] bring the initiative's persona cell up, one probe per seat; --print shows the lines
   organizer draft-cell <initiative> [--print] open a session that drafts the persona cell (persona-agents, references/drafting.md); --print shows its prompt
   organizer retire <initiative> [--retirable | --keep a,b] [--kill session] [--run]  end a wave: retire seats, kill sessions, close the mailbox, revoke tokens, rewrite cell.json (dry unless --run)
-  organizer review <initiative> <card | sha> [--json] [--out path] the Go change of a card's branch or a merge as revmap.json: changed definitions, 1-hop callers and callees, tests
+  organizer review <initiative> <card | sha> [--card slug] [--json] [--out path] [--work dir] [--marks]  the change of a card's branch or merge as revmap.json: changed definitions, 1-hop callers and callees, tests
   organizer clean                     delete exited probe sessions and stale statusline records
   organizer statusline                Claude Code statusLine command: records context fill per agent and prints it
   organizer factory-key [--rotate]    issue this laptop's factory key from discuss-record into ~/.local/state/discuss/push.key; --rotate issues a new one, then revokes the old

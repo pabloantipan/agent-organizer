@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -45,6 +47,54 @@ func TestReviewStatusNamesNode(t *testing.T) {
 	t.Setenv("PATH", t.TempDir())
 	if s := reviewStatus(); !strings.Contains(s, "go not on PATH") || !strings.Contains(s, "node not on PATH, so no TypeScript is read") {
 		t.Errorf("reviewStatus without tools %q", s)
+	}
+}
+
+// G1 / leftovers-41 FR-7: the help line for review reads as FR-7 and
+// names the same flags as review.go's usage.
+func TestReviewHelpLine(t *testing.T) {
+	var b bytes.Buffer
+	usage(&b)
+	var line string
+	for _, l := range strings.Split(b.String(), "\n") {
+		if strings.HasPrefix(l, "  organizer review ") {
+			line = l
+		}
+	}
+	const want = "  organizer review <initiative> <card | sha> [--card slug] [--json] [--out path] [--work dir] [--marks]  the change of a card's branch or merge as revmap.json"
+	if !strings.HasPrefix(line, want) || strings.Contains(line, "the Go change") {
+		t.Errorf("help line %q", line)
+	}
+	flags := regexp.MustCompile(`--[a-z]+`)
+	help, use := flags.FindAllString(line, -1), flags.FindAllString(reviewUsage, -1)
+	slices.Sort(help)
+	slices.Sort(use)
+	if !slices.Equal(slices.Compact(help), slices.Compact(use)) {
+		t.Errorf("help flags %v, usage flags %v", help, use)
+	}
+}
+
+// G1 / leftovers-41 FR-8: doctor's review line names tar beside go and
+// node, and says missing when it is not on the PATH.
+func TestReviewStatusNamesTar(t *testing.T) {
+	if s := reviewStatus(); !strings.Contains(s, "tar at ") {
+		t.Errorf("reviewStatus %q, want tar named", s)
+	}
+	bin := t.TempDir()
+	for _, tool := range []string{"go", "node"} {
+		if p, err := exec.LookPath(tool); err == nil {
+			if err := os.Symlink(p, filepath.Join(bin, tool)); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	t.Setenv("PATH", bin)
+	s := reviewStatus()
+	if !strings.Contains(s, "tar missing") || strings.Contains(s, "tar at ") {
+		t.Errorf("reviewStatus without tar %q", s)
+	}
+	if !strings.Contains(s, "go ") || !strings.Contains(s, "node ") {
+		t.Errorf("reviewStatus without tar dropped go or node: %q", s)
 	}
 }
 
@@ -242,6 +292,24 @@ func TestReviewMarksCoverage(t *testing.T) {
 	want := "Reviewed 1 of 3 · 1 questions · 1 blocked\n" + f + "  question  T1\n" + g + "  blocked  not asked\n"
 	if out.String() != want {
 		t.Errorf("--marks:\n%s\nwant:\n%s", out.String(), want)
+	}
+
+	// G3 / leftovers-41 FR-10: each asked mark prints the thread it was
+	// asked in; F (above, no asked_thread) read the head's thread.
+	state = `{"initiative":"init-r","card":"cm","head":"` + head + `","thread":"T5","changed":[],"marks":[
+		{"symbol":"` + f + `","state":"question","note":"why 3?","by":"pablo","at":"2026-10-18T09:00:00Z","hash":"x","asked":"M1","asked_thread":"T1"},
+		{"symbol":"` + g + `","state":"blocked","note":"no","by":"pablo","at":"2026-10-18T09:00:00Z","hash":"x","asked":"M5","asked_thread":"T5"}]}`
+	if err := os.WriteFile(p, []byte(state), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	out.Reset()
+	errb.Reset()
+	if code := runWith([]string{"review", "init-r", "cm", "--marks"}, &out, &errb, time.Now); code != 0 {
+		t.Fatalf("--marks: exit %d, stderr %q", code, errb.String())
+	}
+	want = "Reviewed 0 of 3 · 1 questions · 1 blocked\n" + f + "  question  T1\n" + g + "  blocked  T5\n"
+	if out.String() != want {
+		t.Errorf("--marks with asked_thread:\n%s\nwant:\n%s", out.String(), want)
 	}
 
 	out.Reset()

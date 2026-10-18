@@ -94,12 +94,9 @@ type Stats struct {
 // Build exports base and head of each range under work (removed by the
 // caller), reads both through every source, and assembles the map.
 func Build(initiative, target string, ranges []Range, srcs []Source, work string) (*RevMap, error) {
-	var names []string
-	for _, s := range srcs {
-		names = append(names, s.Name())
-	}
-	rm := &RevMap{Version: "0", Initiative: initiative, Target: target, Source: strings.Join(names, ", "),
+	rm := &RevMap{Version: "0", Initiative: initiative, Target: target,
 		Nodes: []Node{}, Edges: []Edge{}, Mismatches: []Mismatch{}}
+	produced := map[string]bool{}
 	for i, r := range ranges {
 		if i == 0 {
 			rm.Base, rm.Head = r.Base, r.Head
@@ -115,8 +112,21 @@ func Build(initiative, target string, ranges []Range, srcs []Source, work string
 		rm.Edges = append(rm.Edges, res.edges...)
 		rm.Problems = append(rm.Problems, res.problems...)
 		rm.Notes = append(rm.Notes, res.notes...)
+		for _, name := range res.sources {
+			produced[name] = true
+		}
 	}
 	rm.Notes = uniqKeep(rm.Notes)
+	// Source names only the sources that produced a node (leftovers-41
+	// FR-9), in their registered order: one that ran and read nothing, or
+	// never ran, is not what the map was read with.
+	var names []string
+	for _, s := range srcs {
+		if produced[s.Name()] {
+			names = append(names, s.Name())
+		}
+	}
+	rm.Source = strings.Join(names, ", ")
 	for _, n := range rm.Nodes {
 		switch {
 		case n.Level == "package":
@@ -151,6 +161,8 @@ type repoResult struct {
 	nodes           []Node
 	edges           []Edge
 	problems, notes []string
+	// sources are the names of the sources whose definitions are nodes.
+	sources []string
 }
 
 // merge adds another source's graph; ids never collide across languages.
@@ -379,11 +391,17 @@ func buildRepo(r Range, srcs []Source, work string) (repoResult, error) {
 		return n
 	}
 	var nodes []Node
+	produced := map[string]bool{}
 	for id, ch := range changed {
 		nodes = append(nodes, node(id, ch))
+		produced[srcOf[id]] = true
 	}
 	for id := range affected {
 		nodes = append(nodes, node(id, "affected"))
+		produced[srcOf[id]] = true
+	}
+	for name := range produced {
+		res.sources = append(res.sources, name)
 	}
 	sort.Slice(nodes, func(i, j int) bool {
 		ai, aj := nodes[i].Change == "affected", nodes[j].Change == "affected"
@@ -525,7 +543,11 @@ func DataDir() string {
 // WriteSummary prints what a reviewer reads first: the counts, then the
 // changed symbols with the most callers.
 func WriteSummary(w io.Writer, rm *RevMap, path string) {
-	fmt.Fprintf(w, "%s %s: %s..%s (%s)\n", rm.Initiative, rm.Target, short(rm.Base), short(rm.Head), rm.Source)
+	src := rm.Source
+	if src == "" {
+		src = "no source read a node"
+	}
+	fmt.Fprintf(w, "%s %s: %s..%s (%s)\n", rm.Initiative, rm.Target, short(rm.Base), short(rm.Head), src)
 	fmt.Fprintf(w, "changed %d (and %d tests), affected %d, untested %d, edges %d, packages %d\n",
 		rm.Stats.Changed, rm.Stats.ChangedTests, rm.Stats.Affected, rm.Stats.Untested, rm.Stats.Edges, rm.Stats.Packages)
 	if rm.Reconciled {
