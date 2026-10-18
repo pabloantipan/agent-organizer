@@ -751,3 +751,23 @@ func (a *App) MarkReview(initiativeID, card, head, symbol, state, note string) (
 	}
 	return a.svc.MarkReview(initiativeID, card, head, symbol, state, note)
 }
+
+// ReviewAddressee is who a question or block on the card is asked of, and
+// why (review-map v3 FR-25); Seat "" with the reason when nobody can be.
+func (a *App) ReviewAddressee(initiativeID, card string) (service.ReviewAddressee, error) {
+	if a.svc == nil {
+		return service.ReviewAddressee{}, errString(a.err)
+	}
+	return a.svc.ReviewAddressee(initiativeID, card)
+}
+
+// AskReview saves a question or block on a symbol and asks the addressee
+// in the review's one thread, as the cell's human (FR-26). A refusal is an
+// error and writes nothing; a failed post is the result's error, the mark
+// saved without asked.
+func (a *App) AskReview(initiativeID, card, head, symbol, state, note string) (service.ReviewAsk, error) {
+	if a.svc == nil {
+		return service.ReviewAsk{}, errString(a.err)
+	}
+	return a.svc.AskReview(initiativeID, card, head, symbol, state, note)
+}

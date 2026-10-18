@@ -1521,6 +1521,7 @@ export namespace review {
 	    at: string;
 	    hash: string;
 	    from?: string;
+	    asked?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Mark(source);
@@ -1535,6 +1536,7 @@ export namespace review {
 	        this.at = source["at"];
 	        this.hash = source["hash"];
 	        this.from = source["from"];
+	        this.asked = source["asked"];
 	    }
 	}
 	export class Marks {
@@ -1544,6 +1546,7 @@ export namespace review {
 	    marks: Mark[];
 	    changed: Mark[];
 	    from?: string;
+	    thread?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Marks(source);
@@ -1557,6 +1560,7 @@ export namespace review {
 	        this.marks = this.convertValues(source["marks"], Mark);
 	        this.changed = this.convertValues(source["changed"], Mark);
 	        this.from = source["from"];
+	        this.thread = source["thread"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -2714,6 +2718,58 @@ export namespace service {
 	        this.steps = source["steps"];
 	        this.errors = source["errors"];
 	    }
+	}
+	export class ReviewAddressee {
+	    seat: string;
+	    why: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ReviewAddressee(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.seat = source["seat"];
+	        this.why = source["why"];
+	    }
+	}
+	export class ReviewAsk {
+	    marks: review.Marks;
+	    to: ReviewAddressee;
+	    thread: string;
+	    asked: string;
+	    error: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ReviewAsk(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.marks = this.convertValues(source["marks"], review.Marks);
+	        this.to = this.convertValues(source["to"], ReviewAddressee);
+	        this.thread = source["thread"];
+	        this.asked = source["asked"];
+	        this.error = source["error"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class ReviewMake {
 	    initiative: string;
