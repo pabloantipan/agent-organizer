@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import type { review as rv, service } from "../../wailsjs/go/models";
 import { AskReview, MarkReview, OpenReviewAt, ReviewFile, ReviewStatus } from "../../wailsjs/go/main/App";
 import { busyButton, busyLabel } from "../lib/busy";
+import { useLiveRegion } from "../lib/liveRegion";
 import {
-  affectedLine, afterSave, askedLine, askFailedLine, backTo, calledBy, callsOf, canSave, editorAt, flagLook, flagWords, isAffected, markControls, markOf, notCheckedOut, shasOf, shortName, symbolDiff, testsOf, threadOf, WORDS,
+  affectedLine, afterSave, askedLine, askFailedLine, backTo, calledBy, callsOf, canSave, editorAt, editorFailed, editorRefusal, flagLook, flagWords, focusAfterSave, isAffected, markControls, markOf, notCheckedOut, saveShown, shasOf, shortName, symbolDiff, testsOf, threadOf, WORDS,
   type Addressee, type EditorAt, type MarkState, type RangeText, type Row, type Via,
 } from "../lib/review";
 
@@ -13,7 +14,10 @@ import {
  *  Calls), the builder's claim apart from them, and the mark. An affected
  *  symbol opens read-only: its line, no diff, no mark, and back. The
  *  title's `Open in editor` waits on the review status, read on mount, for
- *  the checkout that holds the map's head (leftovers-42 FR-3). */
+ *  the checkout that holds the map's head (leftovers-42 FR-3), and opens
+ *  at the definition once the head text is read (leftovers-43 FR-3). A
+ *  press refused because the head left re-reads the status and shows the
+ *  head as not here at once (FR-1). */
 export function ReviewSymbol({ initiative, card, head, map, node, row, marks, from, via, to, last, title, onOpen, onBack, onMarks, onAsked, onOpenThread, onNext }: {
   initiative: string; card: string; head: string; map: rv.RevMap; node: rv.Node; row: Row | null; marks: rv.Marks | null;
   /** The changed symbol an affected one was opened from, and the list. */
@@ -43,12 +47,21 @@ export function ReviewSymbol({ initiative, card, head, map, node, row, marks, fr
   // Which checkout holds the head, read with the status (FR-3); null
   // until read, so nothing is drawn before the panel knows.
   const [status, setStatus] = useState<service.ReviewStatus | null>(null);
+  // The head left since the read (FR-1): not here until a re-read answers.
+  const [left, setLeft] = useState(false);
+  const live = useRef(true);
   useEffect(() => {
-    let live = true;
-    ReviewStatus(initiative, card).then((st) => { if (live) setStatus(st); }, () => undefined);
-    return () => { live = false; };
+    live.current = true;
+    setLeft(false);
+    ReviewStatus(initiative, card).then((st) => { if (live.current) setStatus(st); }, () => undefined);
+    return () => { live.current = false; };
   }, [initiative, card, head]);
-  const editor = editorAt(status, head, node);
+  const onLeft = () => {
+    setLeft(true);
+    ReviewStatus(initiative, card).then((st) => { if (live.current) { setStatus(st); setLeft(false); } }, () => undefined);
+  };
+  const at = editorAt(status, head, node, texts?.head);
+  const editor = at && left ? { ...at, dir: "" } : at;
 
   const mark = async (state: MarkState, note: string) => onMarks(await MarkReview(initiative, card, head, node.id, state, note));
   const ask = async (state: MarkState, note: string) => {
@@ -57,7 +70,7 @@ export function ReviewSymbol({ initiative, card, head, map, node, row, marks, fr
     return r;
   };
   return <ReviewSymbolView map={map} node={node} row={row} marks={marks} from={from} via={via} to={to} last={last} texts={texts} error={error} title={title}
-    editor={editor} onOpenEditor={editor ? () => openAt(initiative, card, editor) : undefined}
+    editor={editor} onOpenEditor={editor ? () => openAt(initiative, card, editor) : undefined} onEditorLeft={onLeft}
     onOpen={onOpen} onBack={onBack} onMark={mark} onAsk={ask} onOpenThread={onOpenThread} onNext={onNext} />;
 }
 
@@ -68,15 +81,17 @@ export type ReviewSymbolViewProps = {
   title: React.RefObject<HTMLHeadingElement | null>;
   /** Where Open in editor opens (FR-3); null or absent draws neither it nor the line. */
   editor?: EditorAt | null; onOpenEditor?: () => Promise<void>;
+  /** A press was refused because the head is no longer checked out here (leftovers-43 FR-1). */
+  onEditorLeft?: () => void;
   onOpen: (id: string, via?: Via) => void; onBack: () => void; onMark: (state: MarkState, note: string) => Promise<void>;
   onAsk?: (state: MarkState, note: string) => Promise<service.ReviewAsk>; onOpenThread?: (thread: string) => void; onNext: () => void;
 };
 
 /** What the panel draws, pure, so vitest renders each case. */
-export function ReviewSymbolView({ map, node, row, marks, from, via, to = null, last = false, texts, error, title, editor = null, onOpenEditor, onOpen, onBack, onMark, onAsk, onOpenThread, onNext }: ReviewSymbolViewProps) {
+export function ReviewSymbolView({ map, node, row, marks, from, via, to = null, last = false, texts, error, title, editor = null, onOpenEditor, onEditorLeft, onOpen, onBack, onMark, onAsk, onOpenThread, onNext }: ReviewSymbolViewProps) {
   const name = shortName(node, true);
   const range = node.range_head ?? node.range_base;
-  const where = <TitleLine file={node.file} range={range} editor={editor} onOpenEditor={onOpenEditor} />;
+  const where = <TitleLine file={node.file} range={range} editor={editor} title={title} onOpenEditor={onOpenEditor} onLeft={onEditorLeft} />;
 
   if (isAffected(node)) {
     return (
@@ -140,32 +155,72 @@ export function ReviewSymbolView({ map, node, row, marks, from, via, to = null, 
 
 /** The title's file line (§3.3; leftovers-42 FR-3): `file lines`, then
  *  `Open in editor` (secondary) when a checkout here holds the head, else,
- *  muted, `Not checked out here at <sha>.`; a refusal at the press (the
- *  checkout moved since the read) says why under it. */
-function TitleLine({ file, range, editor, onOpenEditor }: { file: string; range: number[] | undefined; editor: EditorAt | null; onOpenEditor?: () => Promise<void> }) {
-  const [refused, setRefused] = useState<string | null>(null);
+ *  muted, `Not checked out here at <sha>.`. A press refused at the service
+ *  (leftovers-43 FR-1, FR-2; Amendment 7 U1), never red, never `Error:`:
+ *  the head left, so the button goes, the muted line takes its place,
+ *  focus moves to the symbol's h2 and the polite region says the line
+ *  once; or the editor did not open, so the button stays focused, named by
+ *  `Editor didn't open: <first line>` under it in the blocked-reason
+ *  style, which the region says too. */
+function TitleLine({ file, range, editor, title, onOpenEditor, onLeft }: {
+  file: string; range: number[] | undefined; editor: EditorAt | null; title: React.RefObject<HTMLHeadingElement | null>;
+  onOpenEditor?: () => Promise<void>; onLeft?: () => void;
+}) {
+  const [failed, setFailed] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [said, say] = useLiveRegion();
+  const failedId = `rs-editor-failed-${file}`;
   const open = () => {
-    setRefused(null);
-    onOpenEditor?.().catch((e) => setRefused(String(e)));
+    if (!onOpenEditor || !editor) return;
+    setFailed(null);
+    setBusy(true);
+    onOpenEditor().then(() => setBusy(false), (e) => {
+      setBusy(false);
+      editorRefused(e, { sha: editor.sha, left: () => onLeft?.(), focusTitle: () => title.current?.focus(), say, fail: setFailed });
+    });
   };
   return (
     <>
       <div className="rs-where-line">
         <span className="meta mono rs-where">{file}{range ? ` ${range[0]}-${range[1]}` : ""}</span>
-        {editor && <EditorAction at={editor} onOpen={open} />}
+        {editor && <EditorAction at={editor} busy={busy} describedBy={failed && editor.dir ? failedId : undefined} onOpen={open} />}
       </div>
-      {refused && <p className="review-error">{refused}</p>}
+      {failed && editor?.dir && <EditorFailed id={failedId} line={failed} />}
+      <div className="sr-only" aria-live="polite">{said}</div>
     </>
   );
 }
 
-/** Open in editor, or the muted line saying the head is not here (FR-3). */
-export function EditorAction({ at, onOpen }: { at: EditorAt; onOpen: () => void }) {
-  if (!at.dir) return <span className="meta rs-not-here">{notCheckedOut(at.sha)}</span>;
-  return <button type="button" className="rs-editor" onClick={onOpen}>{WORDS.openInEditor}</button>;
+/** A refused press (leftovers-43 FR-1, FR-2): the head left, so the panel
+ *  shows it not here, focus goes to the h2 and the line is said once; or
+ *  the editor did not open, so the line goes under the button, which keeps
+ *  focus, and is said. Neither says `Error:`. */
+export function editorRefused(e: unknown, o: { sha: string; left: () => void; focusTitle: () => void; say: (m: string) => void; fail: (line: string) => void }) {
+  const r = editorRefusal(e);
+  if (r.moved) {
+    o.left();
+    o.focusTitle();
+    o.say(notCheckedOut(o.sha));
+    return;
+  }
+  o.fail(editorFailed(r.line));
+  o.say(editorFailed(r.line));
 }
 
-/** The press (FR-1): the file at the head start line, in the checkout. */
+/** Why the editor did not open, under the button that names it (FR-2):
+ *  the blocked-reason style, `sm` in `--fg-muted`, never red. */
+export function EditorFailed({ id, line }: { id: string; line: string }) {
+  return <p id={id} className="blocked-reason rs-editor-failed">{line}</p>;
+}
+
+/** Open in editor, or the muted line saying the head is not here (FR-3).
+ *  It keeps focus while the service waits on the editor (the busy rule). */
+export function EditorAction({ at, busy = false, describedBy, onOpen }: { at: EditorAt; busy?: boolean; describedBy?: string; onOpen: () => void }) {
+  if (!at.dir) return <span className="meta rs-not-here">{notCheckedOut(at.sha)}</span>;
+  return <button type="button" className="rs-editor" aria-describedby={describedBy} {...busyButton({ busy, onPress: onOpen })}>{busyLabel(busy, WORDS.openInEditor, WORDS.opening)}</button>;
+}
+
+/** The press (FR-1): the file at its definition line, in the checkout. */
 export const openAt = (initiative: string, card: string, at: EditorAt) => OpenReviewAt(initiative, card, at.file, at.line);
 
 /** The scoped diff (§3.3): head line numbers, `+` / `−` in the gutter, no
@@ -200,7 +255,10 @@ function Diff({ name, texts, error }: { name: string; texts: { base: RangeText |
  *  unmarked symbol it stays (FR-38). After an ask the panel says who was
  *  asked and opens the thread; a failed post says why, with Try again
  *  (FR-29). Once asked, the line and an asking primary go until the note
- *  is edited, which brings back `Ask <seat> again` (leftovers-41 FR-4). */
+ *  is edited, which brings back `Ask <seat> again` (leftovers-41 FR-4).
+ *  Save is drawn only while the mark or the note differs from the saved
+ *  one; when it leaves after its press, focus goes to the asking primary,
+ *  else the radio group (leftovers-43 FR-4, Amendment 8 A1). */
 function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNext }: {
   name: string; id: string; marks: rv.Marks | null; to: Addressee | null; last: boolean;
   onMark: (s: MarkState, note: string) => Promise<void>; onAsk?: (s: MarkState, note: string) => Promise<service.ReviewAsk>; onOpenThread?: (thread: string) => void; onNext: () => void;
@@ -227,8 +285,22 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
     toLink.current = false;
     link.current.focus();
   });
+  // Save leaves once what is shown is what is saved (FR-4); a press that
+  // took it away hands focus on once the press has settled.
+  const dirty = saveShown(state, note, saved);
+  const afterSaveFocus = useRef(false);
+  const primaryButton = useRef<HTMLButtonElement>(null);
+  const radios = useRef<HTMLFieldSetElement>(null);
+  useEffect(() => {
+    if (!afterSaveFocus.current || busy !== "") return;
+    afterSaveFocus.current = false;
+    if (dirty) return;
+    const to = focusAfterSave({ showPrimary, ask: primary.ask }) === "primary" ? primaryButton.current : null;
+    (to ?? radios.current?.querySelector<HTMLInputElement>("input:checked") ?? radios.current?.querySelector<HTMLInputElement>("input"))?.focus();
+  });
   const run = (which: "next" | "save" | "retry", s: MarkState, ask: boolean, then?: () => void) => async () => {
     setBusy(which);
+    if (which === "save") afterSaveFocus.current = true;
     setError(null);
     try {
       const r = await markPress({ ask: ask && !!onAsk, state: s, note, seat, onAsk, onMark, then: () => {
@@ -252,7 +324,7 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
   const describedBy = failed ? failedId : undefined;
   return (
     <div className="rs-mark">
-      <fieldset className="rs-radios">
+      <fieldset ref={radios} className="rs-radios">
         <legend className="sr-only">Mark {name}</legend>
         {opts.map(([s, label]) => (
           <label key={s} className={`rs-radio ${s} ${state === s ? "on" : ""}`}>
@@ -264,10 +336,12 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
       <label className="rs-note-label" htmlFor={noteId}>{WORDS.note}</label>
       <textarea id={noteId} className="rs-note" rows={2} value={note} onChange={(e) => setNote(e.target.value)}
         placeholder={state === "question" || state === "blocked" ? "required for Question and Blocked" : "optional"} />
-      <div className="rs-buttons">
-        {showPrimary && <button className="primary" aria-describedby={describedBy} {...busyButton({ busy: busy === "next", disabled: busy !== "" || !primary.ready, onPress: run("next", primary.mark, primary.ask, last ? undefined : onNext) })}>{busyLabel(busy === "next", primary.label, primary.ask ? WORDS.asking : WORDS.saving)}</button>}
-        <button {...busyButton({ busy: busy === "save", disabled: busy !== "" || !canSave(state, note, saved), onPress: run("save", state, false) })}>{busyLabel(busy === "save", WORDS.save, WORDS.saving)}</button>
-      </div>
+      {(showPrimary || dirty) && (
+        <div className="rs-buttons">
+          {showPrimary && <button ref={primaryButton} className="primary" aria-describedby={describedBy} {...busyButton({ busy: busy === "next", disabled: busy !== "" || !primary.ready, onPress: run("next", primary.mark, primary.ask, last ? undefined : onNext) })}>{busyLabel(busy === "next", primary.label, primary.ask ? WORDS.asking : WORDS.saving)}</button>}
+          {dirty && <button {...busyButton({ busy: busy === "save", disabled: busy !== "" || !canSave(state, note, saved), onPress: run("save", state, false) })}>{busyLabel(busy === "save", WORDS.save, WORDS.saving)}</button>}
+        </div>
+      )}
       {line && <p className="rs-ask-line meta">{line}</p>}
       <AskStatus failed={failed} failedId={failedId} asked={!!mark?.asked} seat={seat} thread={thread} busy={busy} link={link} onRetry={failed ? run("retry", failed.state, true) : () => undefined} onOpenThread={() => onOpenThread?.(thread)} />
       {error && <p className="review-error">{error}</p>}

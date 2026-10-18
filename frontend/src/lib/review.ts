@@ -47,6 +47,7 @@ export const WORDS = {
   asking: "Asking…",
   openThread: "Open the thread",
   openInEditor: "Open in editor",
+  opening: "Opening…",
   backToReview: "← Review",
   unchanged: "unchanged",
   noneFound: "none found",
@@ -593,9 +594,10 @@ export function threadOf(marks: review.Marks | null | undefined, id: string): st
  *  draw: the status not read yet, or read for another head, or no head
  *  line (a deleted symbol). dir "" is not checked out here. */
 export type EditorAt = { file: string; line: number; sha: string; dir: string };
-export function editorAt(status: service.ReviewStatus | null | undefined, head: string, n: review.Node): EditorAt | null {
-  const line = n.range_head?.[0];
-  if (!status || !line || status.map_head !== head) return null;
+export function editorAt(status: service.ReviewStatus | null | undefined, head: string, n: review.Node, text?: RangeText | null): EditorAt | null {
+  const range = n.range_head;
+  if (!status || !range?.[0] || status.map_head !== head) return null;
+  const line = definitionLine(text, range);
   const cos = status.checkouts ?? [];
   const co = cos.length === 1 && !cos[0].repo ? cos[0] : cos.find((c) => c.repo && n.file.startsWith(`${c.repo}/`));
   if (!co) return null;
@@ -604,3 +606,57 @@ export function editorAt(status: service.ReviewStatus | null | undefined, head: 
 
 /** The muted words when the head is checked out nowhere here (FR-3). */
 export const notCheckedOut = (sha: string) => `Not checked out here at ${sha.slice(0, 7)}.`;
+
+/** The line `Open in editor` opens (leftovers-43 FR-3, Amendment 7 U2):
+ *  the first line of the head range after its leading comment block (`//`
+ *  lines, slash-star blocks, `#` lines, and the blank lines between them);
+ *  a decorator or attribute (`@x`, `#[x]`) is code. A range that is all
+ *  comment, or whose text is not read yet, opens at its start. `text` is
+ *  the head's ReviewFile read, context lines included. */
+export function definitionLine(text: RangeText | null | undefined, range: number[]): number {
+  const from = range[0], to = range[1] ?? from;
+  if (!text) return from;
+  let block = false;
+  for (let l = from; l <= to; l++) {
+    const raw = text.lines[l - text.first];
+    if (raw === undefined) return from;
+    let t = raw.trim();
+    if (block) {
+      const end = t.indexOf("*/");
+      if (end < 0) continue;
+      block = false;
+      t = t.slice(end + 2).trim();
+    }
+    while (t.startsWith("/*")) {
+      const end = t.indexOf("*/", 2);
+      if (end < 0) { block = true; t = ""; break; }
+      t = t.slice(end + 2).trim();
+    }
+    if (t === "" || t.startsWith("//") || (t.startsWith("#") && !/^#!?\[/.test(t))) continue;
+    return l;
+  }
+  return from;
+}
+
+/** What a refused press of `Open in editor` means (FR-1, FR-2): the head
+ *  is no longer checked out here (`moved`), or the editor or the service
+ *  said why, as one line without the `Error:` prefix. */
+export function editorRefusal(e: unknown): { moved: true } | { moved: false; line: string } {
+  const m = firstLine(e instanceof Error ? e.message : String(e));
+  if (/ is not checked out here$/.test(m)) return { moved: true };
+  return { moved: false, line: m.replace(/^editor didn't open:\s*/, "") };
+}
+
+/** The line under `Open in editor` when the editor did not start (FR-2). */
+export const editorFailed = (line: string) => `Editor didn't open: ${line}`;
+
+/** Whether the mark form draws Save (leftovers-43 FR-4, Amendment 8 A1):
+ *  only while the mark or the note differs from what is saved. Drawn, it
+ *  stays disabled until it can save (`canSave`). */
+export const saveShown = (s: MarkState, note: string, saved: { state: MarkState; note: string }) =>
+  s !== saved.state || note.trim() !== saved.note;
+
+/** Where focus goes when Save leaves after a press (FR-4): the asking
+ *  primary when it is drawn, else the mark's radio group; never the body. */
+export const focusAfterSave = (o: { showPrimary: boolean; ask: boolean }): "primary" | "radios" =>
+  o.showPrimary && o.ask ? "primary" : "radios";

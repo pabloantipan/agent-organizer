@@ -14,8 +14,8 @@ import { readFileSync } from "node:fs";
 const openReviewAt = vi.fn((..._: unknown[]) => Promise.resolve());
 vi.mock("../../wailsjs/go/main/App", () => ({ MarkReview: vi.fn(), ReviewFile: vi.fn(), AskReview: vi.fn(), ReviewStatus: vi.fn(), OpenReviewAt: (...a: unknown[]) => openReviewAt(...a) }));
 
-const { AskStatus, EditorAction, markPress, openAt, ReviewSymbolView } = await import("./ReviewSymbol");
-const { afterSave, canSave, editorAt, markOf, threadOf, worklist } = await import("../lib/review");
+const { AskStatus, EditorAction, EditorFailed, editorRefused, markPress, openAt, ReviewSymbolView } = await import("./ReviewSymbol");
+const { afterSave, canSave, definitionLine, editorAt, focusAfterSave, markControls, markOf, saveShown, threadOf, worklist } = await import("../lib/review");
 
 const node = (n: Partial<review.Node> & { id: string }) => ({
   level: "symbol", parent: "go:example.com/inita/svc", kind: "function", lang: "go", file: "svc/greet.go", change: "modified",
@@ -105,21 +105,24 @@ describe("V-R7: the builder's claim", () => {
 });
 
 describe("V-R8: the mark", () => {
-  it("the radio group, Note, Reviewed, next (primary) and Save; no line on none (FR-28)", () => {
+  it("the radio group, Note and Reviewed, next (primary); no Save with nothing to save (leftovers-43 FR-4); no line on none (FR-28)", () => {
     const h = text(panel({ id: G }));
-    expect(h).toContain("Reviewed Question Blocked Note Reviewed, next Save");
+    expect(h).toContain("Reviewed Question Blocked Note Reviewed, next");
+    expect(h).not.toContain("Save");
     expect(h).not.toContain("Kept in Deltagos");
     expect(panel({ id: G })).not.toContain("rs-ask-line");
-    expect(panel({ id: G })).toMatch(/<button class="primary">Reviewed, next<\/button><button disabled="">Save<\/button>/);
+    expect(panel({ id: G })).toContain('<div class="rs-buttons"><button class="primary">Reviewed, next</button></div>');
   });
   it("Question with no note keeps Save disabled; with a note it is enabled", () => {
     const q = (note: string) => ({ marks: [{ symbol: G, state: "question", note }], changed: [] }) as unknown as review.Marks;
-    expect(panel({ id: G, marks: q("") })).toMatch(/<button disabled="">Save<\/button>/);
+    // Question chosen on an unmarked symbol differs from the saved none: Save is drawn, disabled until a note
+    expect(saveShown("question", "", markOf(null, G))).toBe(true);
+    expect(canSave("question", "", markOf(null, G))).toBe(false);
     expect(panel({ id: G, marks: q("why the comma?") })).toMatch(/checked="" value="question"\/><span>Question<\/span>/);
     // a typed note on an unsaved Question enables Save (the harness types it)
     expect(canSave("question", "why the comma?", markOf(null, G))).toBe(true);
-    // a saved mark shown unchanged has nothing to save (FR-24)
-    expect(panel({ id: G, marks: q("why the comma?") })).toMatch(/<button disabled="">Save<\/button>/);
+    // a saved mark shown unchanged has nothing to save (FR-24): no Save (leftovers-43 FR-4)
+    expect(panel({ id: G, marks: q("why the comma?") })).not.toContain(">Save<");
   });
 });
 
@@ -144,11 +147,11 @@ describe("V-U1 (FR-24): Save after the last Reviewed, next keeps it", () => {
     expect(canSave(form.state, form.note, markOf(marks, G))).toBe(false);
     expect(writes).toEqual(["question", "reviewed"]);
     expect(markOf(marks, G).state).toBe("reviewed");
-    // and the panel drawn from those marks reads Reviewed, Save disabled
+    // and the panel drawn from those marks reads Reviewed, no Save (leftovers-43 FR-4)
     const h = panel({ id: G, marks });
     expect(h).toMatch(/checked="" value="reviewed"\/><span>Reviewed<\/span>/);
     expect(h).not.toMatch(/checked="" value="question"/);
-    expect(h).toMatch(/<button disabled="">Save<\/button>/);
+    expect(h).not.toContain(">Save<");
     // changing the mark again makes Save live
     expect(canSave("question", "still why?", markOf(marks, G))).toBe(true);
   });
@@ -213,9 +216,9 @@ describe("P3, P4 (FR-33, FR-34, FR-36): the ring, the mono links, the flags' ind
 describe("A4 (FR-28, FR-29): ask from the mark, mocked bindings", () => {
   const sup = { seat: "sup81", why: "runs this card" };
   const saved = (state: string, note: string, more: Record<string, string> = {}) => ({ marks: [{ symbol: G, state, note, ...more }], changed: [], ...(more.asked ? { thread: "01THREAD" } : {}) }) as unknown as review.Marks;
-  it("Question with a note and someone to ask: primary Ask sup81, next; secondary Save; the line ending Wakes sup81.", () => {
+  it("Question with a note and someone to ask: primary Ask sup81, next; Save only once edited; the line ending Wakes sup81.", () => {
     const h = panel({ id: G, marks: saved("question", "why the comma?"), to: sup });
-    expect(h).toMatch(/<button class="primary">Ask sup81, next<\/button><button disabled="">Save<\/button>/);
+    expect(h).toContain('<div class="rs-buttons"><button class="primary">Ask sup81, next</button></div>');
     expect(text(h)).toContain("Saves the mark and asks sup81 (runs this card) in this review's thread. Wakes sup81.");
     expect(h).not.toContain("Kept in Deltagos");
   });
@@ -343,7 +346,7 @@ describe("A9 (FR-29, Amendment 4): a failed ask is seen and said", () => {
   const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
   it("the primary names the failure line while it shows; the line scrolls into view, nearest, focus untouched", () => {
     expect(src).toContain("const describedBy = failed ? failedId : undefined;");
-    expect(src).toContain('<button className="primary" aria-describedby={describedBy}');
+    expect(src).toContain('<button ref={primaryButton} className="primary" aria-describedby={describedBy}');
     expect(src).toContain('useEffect(() => { line.current?.scrollIntoView?.({ block: "nearest" }); }, [failed]);');
     expect(src.slice(src.indexOf("function FailedLine"))).not.toContain(".focus(");
   });
@@ -390,7 +393,9 @@ describe("W4 (leftovers-41 FR-4, R29): the panel once asked", () => {
     expect(h).not.toContain("rs-ask-line");
     expect(text(h)).not.toContain("Saves the mark");
     expect(h).not.toContain('class="primary"');
-    expect(h).toContain('<div class="rs-buttons"><button disabled="">Save</button></div>');
+    // the panel ends at the asked line: no Save, no empty button row (leftovers-43 FR-4)
+    expect(h).not.toContain("rs-buttons");
+    expect(h).toMatch(/<\/textarea><p class="rs-asked">Asked sup81 · <a href="#" class="rs-thread">Open the thread<\/a><\/p><\/div>/);
   });
   it("the same on the last symbol", () => {
     const h = panel({ id: G, marks: asked("blocked", "b"), to: sup, last: true });
@@ -400,7 +405,7 @@ describe("W4 (leftovers-41 FR-4, R29): the panel once asked", () => {
   it("the note edited: MarkForm reads markControls with the asked note, so the again line and Ask sup81 again come back", () => {
     const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
     expect(src).toContain("markControls({ state, note, to, last, asked: !!mark?.asked, askedNote: saved.note })");
-    expect(src).toContain("{showPrimary && <button className=\"primary\"");
+    expect(src).toContain("{showPrimary && <button ref={primaryButton} className=\"primary\"");
     expect(src).toContain('{line && <p className="rs-ask-line meta">{line}</p>}');
   });
   it("an ask that stays (the last, Try again) hands focus to Open the thread, which took the button's place", () => {
@@ -459,5 +464,83 @@ describe("E4 (leftovers-42 FR-4): Open the thread opens the mark's own thread", 
     const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
     expect(src).toContain("const thread = threadOf(marks, id);");
     expect(src).toContain("onOpenThread={() => onOpenThread?.(thread)}");
+  });
+});
+
+describe("S1-S4 (leftovers-43): the panel never offers a press that cannot work", () => {
+  const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
+  const css = readFileSync(new URL("../styles/review.css", import.meta.url), "utf8") as string;
+  const status = (dir: string) => ({ initiative: "init-a", card: "rv-fixture", state: "map", head: map.head, map_head: map.head, checkouts: [{ repo: "", head: "c1765740000", dir }] }) as unknown as service.ReviewStatus;
+  const calls = () => {
+    const log: string[] = [];
+    return { log, o: { sha: "c1765740000", left: () => log.push("left"), focusTitle: () => log.push("focus h2"), say: (m: string) => log.push(`say ${m}`), fail: (l: string) => log.push(`fail ${l}`) } };
+  };
+
+  it("S1: refused with … is not checked out here: the head is left, focus on the h2, the line said once, no Error:", () => {
+    const { log, o } = calls();
+    editorRefused(new Error("c176574 is not checked out here"), o);
+    expect(log).toEqual(["left", "focus h2", "say Not checked out here at c176574."]);
+    expect(log.join(" ")).not.toContain("Error");
+  });
+  it("S1: the panel after it: no button, the muted line, one polite region; the container re-reads the status", () => {
+    const h = panel({ id: G, status: status("") });
+    expect(h).not.toContain("Open in editor");
+    expect(h).toContain('<span class="meta rs-not-here">Not checked out here at c176574.</span>');
+    expect(h).not.toContain("Error");
+    expect(h).not.toContain("review-error");
+    expect(h.match(/aria-live="polite"/g)).toHaveLength(1);
+    expect(h).toContain('<div class="sr-only" aria-live="polite"></div>');
+    // the press's refusal marks the head left at once, then the status read again answers
+    expect(src).toContain("const editor = at && left ? { ...at, dir: \"\" } : at;");
+    expect(src).toMatch(/const onLeft = \(\) => \{\n\s+setLeft\(true\);\n\s+ReviewStatus\(initiative, card\)/);
+    expect(src).toContain("editorRefused(e, { sha: editor.sha, left: () => onLeft?.(), focusTitle: () => title.current?.focus(), say, fail: setFailed });");
+    expect(css).toContain(".rs-not-here { color: var(--fg-muted); }");
+  });
+  it("S2: the editor didn't open: the line under the button, which keeps focus; said; no Error:, not red", () => {
+    const { log, o } = calls();
+    editorRefused(new Error("editor didn't open: nope"), o);
+    expect(log).toEqual(["fail Editor didn't open: nope", "say Editor didn't open: nope"]);
+    const where = editorAt(status("/r"), map.head, at(G))!;
+    const button = renderToStaticMarkup(<EditorAction at={where} describedBy="rs-editor-failed-x" onOpen={noop} />);
+    expect(button).toBe('<button type="button" class="rs-editor" aria-describedby="rs-editor-failed-x">Open in editor</button>');
+    expect(renderToStaticMarkup(<EditorFailed id="rs-editor-failed-x" line="Editor didn't open: nope" />)).toBe('<p id="rs-editor-failed-x" class="blocked-reason rs-editor-failed">Editor didn&#x27;t open: nope</p>');
+    expect(src).toContain("{failed && editor?.dir && <EditorFailed id={failedId} line={failed} />}");
+    expect(css).toMatch(/\.rs-editor-failed \{[^}]*\}/);
+    expect(css.match(/\.rs-editor-failed \{[^}]*\}/)![0]).not.toContain("danger");
+    // while the service waits on the editor (up to 2 s) the button keeps focus: the busy rule
+    expect(renderToStaticMarkup(<EditorAction at={where} busy onOpen={noop} />)).toBe('<button type="button" class="rs-editor" aria-disabled="true">Opening…</button>');
+  });
+  it("S3: with the head text read, the press opens at the line after the doc comment; the label keeps the range", async () => {
+    const h = panel({ id: G, status: status("/r") });
+    expect(text(h)).toContain("svc/greet.go 3-6");
+    const where = editorAt(status("/r"), map.head, at(G), texts.head)!;
+    expect(where.line).toBe(4);
+    openReviewAt.mockClear();
+    await openAt("init-a", "rv-fixture", where);
+    expect(openReviewAt).toHaveBeenCalledWith("init-a", "rv-fixture", "svc/greet.go", 4);
+    expect(src).toContain("const at = editorAt(status, head, node, texts?.head);");
+  });
+  it("S4: an asked unedited symbol has no Save; edited, Save and Ask <seat> again; after Save, focus to the asking primary, else the radio group", () => {
+    const sup = { seat: "sup81", why: "runs this card" };
+    const asked = { marks: [{ symbol: G, state: "question", note: "why the comma?", asked: "01MSG" }], changed: [], thread: "01THREAD" } as unknown as review.Marks;
+    const h = panel({ id: G, marks: asked, to: sup });
+    expect(h).not.toContain(">Save<");
+    expect(h).not.toContain("rs-buttons");
+    // the note edited: the form's state differs from the saved one
+    const saved = markOf(asked, G);
+    expect(saveShown("question", "why the comma, again?", saved)).toBe(true);
+    expect(canSave("question", "why the comma, again?", saved)).toBe(true);
+    const edited = markControls({ state: "question", note: "why the comma, again?", to: sup, last: false, asked: true, askedNote: saved.note });
+    expect(edited.showPrimary && edited.primary.label).toBe("Ask sup81 again, next");
+    // Save pressed: the form shows what was saved, so Save is gone, and focus goes to the asking primary
+    const after = afterSave("question", "why the comma, again?");
+    expect(saveShown(after.state, after.note, { state: "question", note: "why the comma, again?" })).toBe(false);
+    expect(focusAfterSave({ showPrimary: edited.showPrimary, ask: edited.primary.ask })).toBe("primary");
+    // no asking primary (Reviewed): the radio group, the checked radio first
+    expect(focusAfterSave({ showPrimary: true, ask: false })).toBe("radios");
+    expect(src).toContain("{dirty && <button {...busyButton({ busy: busy === \"save\"");
+    expect(src).toContain('if (which === "save") afterSaveFocus.current = true;');
+    expect(src).toContain('(to ?? radios.current?.querySelector<HTMLInputElement>("input:checked") ?? radios.current?.querySelector<HTMLInputElement>("input"))?.focus();');
+    expect(src).not.toMatch(/document\.body\.focus|\.blur\(\)/);
   });
 });
