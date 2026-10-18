@@ -7,6 +7,7 @@ import { ContextBar } from "./ContextBar";
 import { HEALTH, healthState, healthTitle, messages, peopleLabel, type HealthState } from "../lib/health";
 import { plural } from "../lib/initiatives";
 import { stateWord } from "../lib/stateWords";
+import { WORDS } from "../lib/review";
 import { Conversation } from "./Conversation";
 
 const PEOPLE_KEY = "slack.people";
@@ -17,7 +18,7 @@ const PEOPLE_KEY = "slack.people";
  *  threads ride the agents feed; only open conversations and the archive
  *  are fetched. Lifecycle stays in Agents. */
 export function SlackView() {
-  const { selectedInitiative, agents: view, slackFocus, setSlackFocus, view: board, widthClass } = useBoard();
+  const { selectedInitiative, agents: view, slackFocus, setSlackFocus, view: board, widthClass, reviewBack, backToReview } = useBoard();
   // People starts closed at compact, so the timeline keeps the width
   // (initiative-header FR-6); the stored choice is untouched until toggled.
   const [people, setPeople] = useState<boolean>(() => { try { return localStorage.getItem(PEOPLE_KEY) !== "closed" && useBoard.getState().widthClass !== "compact"; } catch { return true; } });
@@ -52,6 +53,7 @@ export function SlackView() {
       {/* No title row: the header above names the initiative (initiative-header
           FR-5); what is not the id stays on this toolbar line. */}
       <div className="slack-tools">
+        <ReviewBack initiative={g.id} reviewBack={reviewBack} onBack={backToReview} />
         <span className="spacer" />
         {slackFocus && <span className="badge persona focus">with {slackFocus} <button className="rail-icon" onClick={() => setSlackFocus(null)} title="back to the channel"><X size={11} /></button></span>}
         <button ref={peopleToggle} className={`tiny-btn ${deaf > 0 ? "hot" : ""}`} aria-pressed={people} aria-label={peopleLabel({ seats: seats.length, live, capped, deaf })} onClick={togglePeople} title={people ? "hide people" : "show people"}>
@@ -64,6 +66,14 @@ export function SlackView() {
       </div>
     </div>
   );
+}
+
+/** `← Review` (review-map v3 FR-29): Conversations opened from the Review
+ *  screen's Open the thread returns to the same symbol; the place rides
+ *  the store (reviewBack). */
+export function ReviewBack({ initiative, reviewBack, onBack }: { initiative: string; reviewBack: { initiative: string } | null; onBack: () => void }) {
+  if (reviewBack?.initiative !== initiative) return null;
+  return <button className="ghost" onClick={onBack}>{WORDS.backToReview}</button>;
 }
 
 /** The members panel: one row per seat, the human included, with the

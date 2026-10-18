@@ -85,6 +85,11 @@
 .rv-name { overflow-wrap: anywhere; min-width: 0; }
 .rv-change { color: var(--fg-muted); font-size: var(--font-size-xs); font-weight: var(--weight-regular); }
 .rv-since { color: var(--tone); font-size: var(--font-size-xs); }
+/* An asked mark is seen, not only heard (FR-29): `asked` in the mark's
+   colour, after the change word, so the name keeps its indent. */
+.rv-asked { font-size: var(--font-size-xs); font-weight: var(--weight-semibold); }
+.rv-asked.question { color: var(--tone); }
+.rv-asked.blocked { color: var(--danger); }
 
 /* Flags as words (§3.3's table, flagLook): amber lozenges for
    look-at-this (the text in --warning, V-R5), muted for the rest, dashed
@@ -164,7 +169,12 @@
 /* global.css drops the outline on focused fields; the ring stays here */
 .rs-note:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .rs-buttons { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-.rs-v3 { margin: 0; font-size: var(--font-size-sm); color: var(--fg-muted); }
+/* Who the mark asks, or why no one (FR-28); after an ask, who was asked
+   and the thread, or why the post failed (FR-29). */
+.rs-ask-line { margin: 0; font-size: var(--font-size-sm); color: var(--fg-muted); }
+.rs-asked { margin: 0; font-size: var(--font-size-sm); color: var(--fg); overflow-wrap: anywhere; }
+.rs-asked.review-error { color: var(--danger); }
+.rs-asked button.link:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
 
 /* From 1440 (§3.4); last, so it wins over the rules above. */
 @media (min-width: 1440px) {

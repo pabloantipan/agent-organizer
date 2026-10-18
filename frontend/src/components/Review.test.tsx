@@ -9,7 +9,7 @@ import type { review, service } from "../../wailsjs/go/models";
 // label and a stubbed clipboard, never the real one.
 
 const clip = vi.fn((_: string) => Promise.resolve(true));
-vi.mock("../../wailsjs/go/main/App", () => ({ MakeReview: vi.fn(), ReviewMap: vi.fn(), ReviewMarks: vi.fn(), ReviewStatus: vi.fn(), StopReview: vi.fn(), MarkReview: vi.fn(), ReviewFile: vi.fn() }));
+vi.mock("../../wailsjs/go/main/App", () => ({ MakeReview: vi.fn(), ReviewMap: vi.fn(), ReviewMarks: vi.fn(), ReviewStatus: vi.fn(), StopReview: vi.fn(), MarkReview: vi.fn(), ReviewFile: vi.fn(), ReviewAddressee: vi.fn(), AskReview: vi.fn() }));
 vi.mock("../../wailsjs/runtime/runtime", () => ({ ClipboardSetText: (t: string) => clip(t), EventsOn: () => () => undefined }));
 vi.mock("../stores/board.store", () => ({ useBoard: () => ({}) }));
 
@@ -39,11 +39,11 @@ const status = (state: string, make: Partial<service.ReviewMake> | null = null) 
 const marks = (m: Record<string, string>) => ({ initiative: "init-a", card: "rv-fixture", head: "", marks: Object.entries(m).map(([symbol, state]) => ({ symbol, state })), changed: [] }) as unknown as review.Marks;
 
 const noop = () => undefined;
-function view(p: { status: service.ReviewStatus | null; make?: service.ReviewMake | null; map?: review.RevMap | null; marks?: review.Marks | null; symbol?: string; progress?: boolean; origin?: number; from?: string }) {
+function view(p: { status: service.ReviewStatus | null; make?: service.ReviewMake | null; map?: review.RevMap | null; marks?: review.Marks | null; symbol?: string; progress?: boolean; origin?: number; from?: string; via?: "calledBy" | "calls"; to?: { seat: string; why: string }; said?: string }) {
   return renderToStaticMarkup(
     <ReviewView status={p.status} make={p.make ?? null} map={p.map ?? null} marks={p.marks ?? null} error={null} symbol={p.symbol ?? ""} active="" setActive={noop}
-      onBack={noop} onStep={noop} onOpen={noop} onMake={noop} onStop={noop} makeBtn={createRef()} title={createRef()} said="" progress={p.progress} origin={p.origin}
-      panel={p.from === undefined ? undefined : { initiative: "init-a", card: "rv-fixture", head: "", from: p.from, onBack: noop, onMarks: noop, onNext: noop }} />,
+      onBack={noop} onStep={noop} onOpen={noop} onMake={noop} onStop={noop} makeBtn={createRef()} title={createRef()} said={p.said ?? ""} progress={p.progress} origin={p.origin}
+      panel={p.from === undefined ? undefined : { initiative: "init-a", card: "rv-fixture", head: "", from: p.from, via: p.via, to: p.to, onBack: noop, onMarks: noop, onNext: noop }} />,
   );
 }
 const text = (html: string) => html.replace(/<[^>]+>/g, " ").replace(/&#x27;/g, "'").replace(/&gt;/g, ">").replace(/\s+/g, " ");
@@ -236,5 +236,51 @@ describe("P4 (FR-35): the origin row stays current while an affected symbol is s
   it("a changed symbol shown: its own row is current", () => {
     const h = view({ status: status("map"), map: m, symbol: G, from: "" });
     expect(row(h, G)).toContain('aria-current="true"');
+  });
+});
+
+describe("A4 (FR-29): an asked row is seen, not only heard", () => {
+  const G = "go:example.com/inita/svc.Greet", F = "ts:web/src/format.ts#formatName";
+  const row = (h: string, id: string) => h.match(new RegExp(`<li[^>]*data-row="${id.replace(/[.#/]/g, "\\$&")}"[^>]*>.*?</li>`))?.[0] ?? "";
+  const mk = (m: { symbol: string; state: string; asked?: string }[]) => ({ initiative: "init-a", card: "rv-fixture", head: "", marks: m.map((x) => ({ note: "n", ...x })), changed: [], thread: "01THREAD" }) as unknown as review.Marks;
+  it("? asked and ✕ asked beside the marks; a mark not asked draws no word", () => {
+    const h = view({ status: status("map"), map: fixture, marks: mk([{ symbol: G, state: "question", asked: "01A" }, { symbol: F, state: "blocked", asked: "01B" }]) });
+    expect(row(h, G)).toMatch(/<span class="rv-mark question" aria-hidden="true">\?<\/span>.*<span class="rv-asked question" aria-hidden="true">asked<\/span>/);
+    expect(row(h, G)).toContain('aria-label="Greet, modified, question, asked"');
+    expect(row(h, F)).toMatch(/<span class="rv-mark blocked" aria-hidden="true">✕<\/span>.*<span class="rv-asked blocked" aria-hidden="true">asked<\/span>/);
+    const plain = view({ status: status("map"), map: fixture, marks: mk([{ symbol: G, state: "question" }]) });
+    expect(row(plain, G)).not.toContain("rv-asked");
+  });
+  it("the live region carries what the screen says (Asked sup81, once: saidAfter)", () => {
+    expect(view({ status: status("map"), map: fixture, said: "Asked sup81" })).toContain('<div class="sr-only" aria-live="polite">Asked sup81</div>');
+  });
+  it("the panel shown: Asked sup81 · Open the thread", () => {
+    const h = view({ status: status("map"), map: fixture, symbol: G, from: "", to: { seat: "sup81", why: "runs this card" }, marks: mk([{ symbol: G, state: "question", asked: "01A" }]) });
+    expect(text(h)).toContain("Asked sup81 · Open the thread");
+  });
+});
+
+describe("A6 (FR-38): the last unmarked symbol, on the screen", () => {
+  const G = "go:example.com/inita/svc.Greet", F = "ts:web/src/format.ts#formatName";
+  const mk = (m: Record<string, string>) => ({ initiative: "init-a", card: "rv-fixture", head: "", marks: Object.entries(m).map(([symbol, state]) => ({ symbol, state, note: "n" })), changed: [] }) as unknown as review.Marks;
+  it("Greet with formatName marked: Reviewed with no next; with both open: Reviewed, next", () => {
+    expect(view({ status: status("map"), map: fixture, symbol: G, from: "", marks: mk({ [F]: "question" }) })).toMatch(/<button class="primary">Reviewed<\/button>/);
+    expect(view({ status: status("map"), map: fixture, symbol: G, from: "", marks: mk({}) })).toMatch(/<button class="primary">Reviewed, next<\/button>/);
+  });
+  it("after the press: Reviewed 2 of 2, Next to review gone", () => {
+    const h = view({ status: status("map"), map: fixture, symbol: G, from: "", marks: mk({ [F]: "question", [G]: "reviewed" }) });
+    expect(text(h)).toContain("Reviewed 2 of 2");
+    expect(h).not.toContain("Next to review");
+    expect(h).toMatch(/<button class="primary">Reviewed<\/button>/);
+  });
+});
+
+describe("A8 (FR-40): the screen hands the list to the panel", () => {
+  const G = "go:example.com/inita/svc.Greet", W = "go:example.com/inita/svc.Welcome";
+  const m = { ...fixture, nodes: [...fixture.nodes, node({ id: W, parent: "go:example.com/inita/svc", file: "svc/welcome.go", change: "affected" })],
+    edges: [{ from: W, to: G, kind: "uses", change: "unchanged", source: "go/types" }, { from: G, to: W, kind: "uses", change: "unchanged", source: "go/types" }] } as unknown as review.RevMap;
+  it("mutual calls: opened from Called by reads calls; from Calls reads called by", () => {
+    expect(text(view({ status: status("map"), map: m, symbol: W, from: G, via: "calledBy" }))).toContain("unchanged · calls svc.Greet");
+    expect(text(view({ status: status("map"), map: m, symbol: W, from: G, via: "calls" }))).toContain("unchanged · called by svc.Greet");
   });
 });

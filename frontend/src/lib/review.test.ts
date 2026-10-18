@@ -3,7 +3,7 @@ import type { review, service } from "../../wailsjs/go/models";
 import {
   allReviewed, countsLine, coverage, coverageLine, elapsedOf, factsBeside, filesOf, flagWords, groupName, inTextField, listWidth,
   makingLabel, movedLine, nextToReview, nothingToReview, partialLines, reviewable, rowName, screenState, shortName, walkOf, WORDS, worklist,
-  afterASecond, affectedLine, primaryOf, makeOrigin, secondsSince, backTo, calledBy, callsOf, canSave, flagLook, markOf, progressDelay, shasOf, symbolDiff, testsOf,
+  afterASecond, affectedLine, askedLine, askFailedLine, askLine, firstLine, lastToReview, primaryOf, saidAfter, makeOrigin, secondsSince, backTo, calledBy, callsOf, canSave, flagLook, markOf, progressDelay, shasOf, symbolDiff, testsOf,
 } from "./review";
 
 // review-map v2 FR-18 (docs/ux/specs/review-view.md §3.1, §3.2, §4, §5):
@@ -306,6 +306,15 @@ describe("V-R6: Called by, Calls and the affected view", () => {
     expect(affectedLine(m, n(L), n(G))).toBe("unchanged · called by svc.Greet");
     expect(backTo(n(G))).toBe("← back to svc.Greet");
   });
+  it("A8 (FR-40): with mutual calls the list it was opened from names the line, never the edges", () => {
+    const mutual = revmap(m.nodes, { edges: [...m.edges, { from: G, to: W, kind: "uses", change: "unchanged", source: "" }] as review.Edge[] });
+    expect(calledBy(mutual, G).map((x) => x.id)).toContain(W);
+    expect(callsOf(mutual, G).map((x) => x.id)).toContain(W);
+    expect(affectedLine(mutual, n(W), n(G), "calledBy")).toBe("unchanged · calls svc.Greet");
+    expect(affectedLine(mutual, n(W), n(G), "calls")).toBe("unchanged · called by svc.Greet");
+    // and against the edges' one direction too
+    expect(affectedLine(m, n(L), n(G), "calledBy")).toBe("unchanged · calls svc.Greet");
+  });
   it("Tests: each test that names it, linked when the test changed in this map", () => {
     const t = node({ id: "go:example.com/inita/svc.TestGreet", kind: "test", file: "svc/greet_test.go" });
     const g = node({ id: G, evidence: { tests: ["svc/greet_test.go::TestGreet", "svc/x_test.go::TestOther"] } as review.Evidence });
@@ -334,8 +343,8 @@ describe("V-R8: the mark", () => {
     expect(markOf(mk, "a")).toEqual({ state: "question", note: "why?" });
     expect(markOf(mk, "b")).toEqual({ state: "", note: "" });
   });
-  it("the v3 line and the buttons in the design's words", () => {
-    expect([WORDS.reviewedNext, WORDS.save, WORDS.v3, WORDS.builderSays]).toEqual(["Reviewed, next", "Save", "Kept in Deltagos; asking the supervisor comes later.", "The builder says"]);
+  it("the buttons in the design's words", () => {
+    expect([WORDS.reviewedNext, WORDS.save, WORDS.builderSays]).toEqual(["Reviewed, next", "Save", "The builder says"]);
   });
 });
 
@@ -400,11 +409,79 @@ describe("V-R14 (FR-23): no flash, with fake timers", () => {
 
 describe("P2 (FR-31): the primary follows the chosen radio", () => {
   it("none or Reviewed saves Reviewed; Question and Blocked save themselves, once there is a note", () => {
-    expect(primaryOf("", "")).toEqual({ label: "Reviewed, next", mark: "reviewed", ready: true });
-    expect(primaryOf("reviewed", "")).toEqual({ label: "Reviewed, next", mark: "reviewed", ready: true });
-    expect(primaryOf("question", "why the comma?")).toEqual({ label: "Save question, next", mark: "question", ready: true });
-    expect(primaryOf("blocked", " x ")).toEqual({ label: "Save block, next", mark: "blocked", ready: true });
+    expect(primaryOf("", "")).toEqual({ label: "Reviewed, next", mark: "reviewed", ready: true, ask: false });
+    expect(primaryOf("reviewed", "")).toEqual({ label: "Reviewed, next", mark: "reviewed", ready: true, ask: false });
+    expect(primaryOf("question", "why the comma?")).toEqual({ label: "Save question, next", mark: "question", ready: true, ask: false });
+    expect(primaryOf("blocked", " x ")).toEqual({ label: "Save block, next", mark: "blocked", ready: true, ask: false });
     expect(primaryOf("question", "  ").ready).toBe(false);
     expect(primaryOf("blocked", "").ready).toBe(false);
+  });
+});
+
+describe("A4 (FR-28, FR-29): who the mark asks, and what is said after", () => {
+  const sup = { seat: "sup81", why: "runs this card" };
+  it("with someone to ask, Question and Blocked read Ask <seat>, next and ask; Reviewed and none do not", () => {
+    expect(primaryOf("question", "why?", { seat: "sup81" })).toEqual({ label: "Ask sup81, next", mark: "question", ready: true, ask: true });
+    expect(primaryOf("blocked", "x", { seat: "sup81" })).toEqual({ label: "Ask sup81, next", mark: "blocked", ready: true, ask: true });
+    expect(primaryOf("question", "", { seat: "sup81" }).ready).toBe(false);
+    expect(primaryOf("reviewed", "", { seat: "sup81" })).toEqual({ label: "Reviewed, next", mark: "reviewed", ready: true, ask: false });
+    expect(primaryOf("", "", { seat: "sup81" }).ask).toBe(false);
+    // nobody to ask: FR-31's primary stands
+    expect(primaryOf("question", "why?", { seat: "" })).toEqual({ label: "Save question, next", mark: "question", ready: true, ask: false });
+  });
+  it("the muted line: the ask and its wake, or why nobody; none on Reviewed or none", () => {
+    expect(askLine(sup, "question")).toBe("Saves the mark and asks sup81 (runs this card) in this review's thread. Wakes sup81.");
+    expect(askLine(sup, "blocked")).toBe("Saves the mark and asks sup81 (runs this card) in this review's thread. Wakes sup81.");
+    expect(askLine({ seat: "", why: "no cell" }, "question")).toBe("No one to ask here: no cell. Kept in Deltagos.");
+    expect(askLine({ seat: "", why: "no FSE or reconciler in the cell" }, "blocked")).toBe("No one to ask here: no FSE or reconciler in the cell. Kept in Deltagos.");
+    expect(askLine(sup, "reviewed")).toBe("");
+    expect(askLine(sup, "")).toBe("");
+    expect(askLine(null, "question")).toBe("");
+  });
+  it("after an ask: Asked <seat>; a failed post: the failure words with the first error line", () => {
+    expect(askedLine("sup81")).toBe("Asked sup81");
+    expect(askFailedLine("fse", "Error: dial unix /tmp/x.sock: connect: no such file\nmore")).toBe("Saved here; couldn't ask fse: dial unix /tmp/x.sock: connect: no such file");
+    expect(firstLine("a\nb")).toBe("a");
+  });
+  it("the live region: Asked <seat> once, the coverage once, both when one press does both", () => {
+    const cov = { reviewed: 2, of: 2, mustLeft: 0, risk: null };
+    const part = { reviewed: 1, of: 2, mustLeft: 0, risk: null };
+    expect(saidAfter({ asked: "sup81", wasDone: false, done: false, cov: part })).toBe("Asked sup81");
+    // the next change with no new ask says nothing again
+    expect(saidAfter({ asked: "", wasDone: false, done: false, cov: part })).toBe("");
+    expect(saidAfter({ asked: "", wasDone: false, done: true, cov })).toBe("Reviewed 2 of 2");
+    expect(saidAfter({ asked: "", wasDone: true, done: true, cov })).toBe("");
+    expect(saidAfter({ asked: "sup81", wasDone: false, done: true, cov })).toBe("Asked sup81. Reviewed 2 of 2");
+    // the first marks loaded say nothing
+    expect(saidAfter({ asked: "", wasDone: null, done: true, cov })).toBe("");
+  });
+  it("an asked row: its name says asked after the mark", () => {
+    const G2 = "go:x/svc.Greet";
+    const mm = revmap([pkg("go:x/svc", "svc"), node({ id: G2, parent: "go:x/svc", file: "svc/greet.go" })]);
+    const mk = { marks: [{ symbol: G2, state: "question", note: "why?", asked: "01MSG" }], changed: [] } as unknown as review.Marks;
+    const r = worklist(mm, mk)[0].rows[0];
+    expect(r.asked).toBe(true);
+    expect(rowName(r)).toBe("Greet, modified, question, asked");
+    const plain = worklist(mm, { marks: [{ symbol: G2, state: "question", note: "why?" }], changed: [] } as unknown as review.Marks)[0].rows[0];
+    expect(rowName(plain)).toBe("Greet, modified, question");
+  });
+});
+
+describe("A6 (FR-38): no next when there is none", () => {
+  const A = "go:x/svc.A", B = "go:x/svc.B";
+  const mm = revmap([pkg("go:x/svc", "svc"), node({ id: A, parent: "go:x/svc", file: "svc/a.go" }), node({ id: B, parent: "go:x/svc", file: "svc/b.go" })]);
+  const marked = (m: Record<string, string>) => ({ marks: Object.entries(m).map(([symbol, state]) => ({ symbol, state, note: "n" })), changed: [] }) as unknown as review.Marks;
+  it("the last unmarked symbol is last; with another unmarked it is not", () => {
+    expect(lastToReview(worklist(mm, marked({})), A)).toBe(false);
+    expect(lastToReview(worklist(mm, marked({ [B]: "reviewed" })), A)).toBe(true);
+    expect(lastToReview(worklist(mm, marked({ [A]: "reviewed", [B]: "reviewed" })), A)).toBe(true);
+  });
+  it("the four labels drop , next on the last", () => {
+    expect(primaryOf("", "", { last: true }).label).toBe("Reviewed");
+    expect(primaryOf("reviewed", "", { last: true }).label).toBe("Reviewed");
+    expect(primaryOf("question", "q", { last: true }).label).toBe("Save question");
+    expect(primaryOf("blocked", "b", { last: true }).label).toBe("Save block");
+    expect(primaryOf("question", "q", { seat: "sup81", last: true }).label).toBe("Ask sup81");
+    expect(primaryOf("blocked", "b", { seat: "sup81", last: true }).label).toBe("Ask sup81");
   });
 });
