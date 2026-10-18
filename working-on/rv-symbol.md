@@ -1,12 +1,12 @@
 ---
 title: "The Review screen's symbol panel: diff, facts, claim and the mark"
-status: next
+status: now
 repos: [organizer]
 branch: rv-symbol
 seat: rs-build
 stage: review-map
-updated: 2026-10-17
-next: "sup81 runs it; 0146 ruled"
+updated: 2026-10-18
+next: "rs-build building in .wt/rv-symbol"
 risk: medium
 footprint: [frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css, frontend/src/components/Review.tsx, frontend/src/components/TopBar.tsx (crumb), frontend/src/components/TopBar.test.tsx, scripts/fixture-home.sh (--review only)]
 depends_on: [rv-list]
