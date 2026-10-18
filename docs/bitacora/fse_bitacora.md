@@ -7,7 +7,7 @@ restating it (the discuss skill).
 ## HAND-OFF 2026-10-17 (last SHA seen 13bfac1)
 
 - No supervisor running. Today: lf40-verb-fit (sup79, 13 min vs 10-25, $4.96) and review-map v1 (sup80, rm-v1-ts + rm-v1-reconcile, 42 min vs 40-90, $12.23, first-round passes, no false premise); installed at 13bfac1. Pablo pushes main.
-- review-map stage: exit 3 met; exits 1 (odyssey walks a branch in Deltagos) and 2 (question on a node -> supervisor thread) need v2 and v3. Asked Aglaea for the v2 Review view design (thread "review-map v2: the Review view, design request"); spec v2 from her design spec.
+- review-map stage: exit 3 met; exits 1 (odyssey walks a branch in Deltagos) and 2 (question on a node -> supervisor thread) need v2 and v3. Aglaea's design docs/ux/specs/review-view.md (3425cb3); v2 cut (7f13dbf): 0146 proposed, cards rv-data -> rv-list -> rv-symbol, forecast 90-180 min over 3 waves. Waiting on Pablo.
 - Held for the next frontend leftovers (vf-ui, done/lf40-verb-fit.md ## UI review): UF1 sev 1, a test of every verb label Home.tsx can draw against `--ib-verb-w`; spec gaps: verb labels listed nowhere; wide Home (>=1920) unchecked for FR-1.
 - Held for the next Go leftovers: from rm-v1-reconcile (thread 01M5651D): help's review line lacks --card; multi-repo cards reconcile only the first repo. From rm-v1-ts (thread 01M5644T): problem lines when cgo is off; placeholder retry ~1 s; help says 'the Go change'; doctor/review never name tar; summary lists sources registered not used. Older: setSeat notify-before-close; one shared spec-path helper. Gate habit: temp XDG_DATA_HOME on every make test row.
 - sup80: runs.jsonl attributes neither card when seats run from the root with code in .wt/ (session.MatchCard): a finding for the runs baseline, held.
