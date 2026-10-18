@@ -149,8 +149,9 @@ func reviewMarks(si *model.ScannedInitiative, card, head string, stdout, stderr 
 }
 
 // reviewStatus is doctor's line for organizer review's outside tools: the
-// go toolchain, which the go/types source runs as go list, and node, which
-// runs the typescript of the reviewed repo's own node_modules (FR-10).
+// go toolchain, which the go/types source runs as go list, node, which
+// runs the typescript of the reviewed repo's own node_modules (FR-10), and
+// tar, which unpacks each side's git archive (leftovers-41 FR-8).
 func reviewStatus() string {
 	var parts []string
 	if p, err := review.GoBinary(); err != nil {
@@ -162,6 +163,11 @@ func reviewStatus() string {
 		parts = append(parts, "node not on PATH, so no TypeScript is read; install Node (https://nodejs.org)")
 	} else {
 		parts = append(parts, "node at "+p+" (typescript from the reviewed repo's node_modules)")
+	}
+	if p, err := review.TarBinary(); err != nil {
+		parts = append(parts, "tar missing from PATH; organizer review unpacks each side's git archive with it")
+	} else {
+		parts = append(parts, "tar at "+p)
 	}
 	return strings.Join(parts, "; ")
 }

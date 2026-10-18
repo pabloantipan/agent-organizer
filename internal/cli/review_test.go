@@ -74,6 +74,30 @@ func TestReviewHelpLine(t *testing.T) {
 	}
 }
 
+// G1 / leftovers-41 FR-8: doctor's review line names tar beside go and
+// node, and says missing when it is not on the PATH.
+func TestReviewStatusNamesTar(t *testing.T) {
+	if s := reviewStatus(); !strings.Contains(s, "tar at ") {
+		t.Errorf("reviewStatus %q, want tar named", s)
+	}
+	bin := t.TempDir()
+	for _, tool := range []string{"go", "node"} {
+		if p, err := exec.LookPath(tool); err == nil {
+			if err := os.Symlink(p, filepath.Join(bin, tool)); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	t.Setenv("PATH", bin)
+	s := reviewStatus()
+	if !strings.Contains(s, "tar missing") || strings.Contains(s, "tar at ") {
+		t.Errorf("reviewStatus without tar %q", s)
+	}
+	if !strings.Contains(s, "go ") || !strings.Contains(s, "node ") {
+		t.Errorf("reviewStatus without tar dropped go or node: %q", s)
+	}
+}
+
 // reviewRepo is an initiative whose root is its one Go repo, with a commit
 // changing F and a card c1; it sets the config and data dir and returns
 // the commit and the root.

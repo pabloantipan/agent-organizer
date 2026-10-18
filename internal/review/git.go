@@ -91,6 +91,10 @@ func HasCommit(dir, rev string) bool {
 	return ok
 }
 
+// TarBinary is how Export finds tar, which unpacks git archive's output;
+// doctor reports it.
+func TarBinary() (string, error) { return exec.LookPath("tar") }
+
 // Export writes the tree of rev into dst with git archive, so the reviewed
 // repo gets no worktree, no index change and no file.
 func Export(dir, rev, dst string) error {
