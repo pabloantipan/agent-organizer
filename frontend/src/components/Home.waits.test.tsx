@@ -1,6 +1,8 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { model } from "../../wailsjs/go/models";
+// @ts-expect-error node:fs has no type declarations in this tsconfig
+import { readFileSync } from "node:fs";
 
 // leftovers-36 N2, N6 (and N3's empty group) and leftovers-37 P1, P4: the
 // rows of a long wait, the lead's and someone else's, rendered to markup with
@@ -16,9 +18,12 @@ vi.mock("../../wailsjs/runtime/runtime", () => ({ EventsOn: () => () => undefine
 vi.mock("../hooks/useWails", () => ({ api: {} }));
 // useDraft reads browser storage through useSyncExternalStore, which markup
 // rendering refuses without a server snapshot: no draft kept here.
-vi.mock("../lib/drafts", async (orig) => ({ ...(await orig<typeof import("../lib/drafts")>()), useDraft: () => null }));
+// W6 keeps words for one record to see `Rule · draft`.
+const kept = vi.hoisted(() => new Set<string>());
+vi.mock("../lib/drafts", async (orig) => ({ ...(await orig<typeof import("../lib/drafts")>()), useDraft: (k: string) => (kept.has(k) ? { words: "x" } : null) }));
 
-const { DecisionRow, OthersRow, WaitingOnOthers } = await import("./Home");
+const { DecisionRow, InboxRow, OthersRow, WaitingOnOthers } = await import("./Home");
+const { VERBS, VERB_LIST } = await import("../lib/verbs");
 const { longWait } = await import("../lib/queue");
 
 const rec = (number: string, owner: string, raised: string, title: string) => ({ number, status: "proposed", owner, raised, title, options: [] }) as unknown as model.Decision;
@@ -134,5 +139,60 @@ describe("N3, P4: the group", () => {
 
   it("is absent when empty", () => {
     expect(renderToStaticMarkup(<WaitingOnOthers rows={[]} />)).toBe("");
+  });
+});
+
+describe("W6 (leftovers-41 FR-6, lf40 UF1): each Needs me row kind renders its verb from the one list", () => {
+  const since = new Date(2026, 9, 10);
+  const base = { initiative: "camp", since };
+  const thread = { id: "01T", subject: "the store", status: "open", asked_by: "po_ana", messages: 2 } as never;
+  const task = { number: "0009", title: "Ship it", state: "over", forecast: "2h", forecast_top: 120, elapsed_minutes: 300, quiet_minutes: 0, cards: [] } as never;
+  const card = { initiative_id: "camp", slug: "pick", title: "Pick the store", next: "pablo: pick", local: true } as never;
+  const seat = { name: "dev_bruno", capped: false, undelivered: 2 } as never;
+  const launch = { initiative: "camp", kind: "crew", failed: 1, seats: [{ seat: "dev_bruno", state: "failed", reason: "no token" }] } as never;
+  const cell = { project: "camp", agents: ["pablo", "po_ana"] } as never;
+  const files = [{ path: "/r/working-on/x.md", reasons: ["no frontmatter"] }] as never;
+  /** The verb the row's one action button draws. */
+  const verbOf = (html: string) => {
+    const acts = [...html.matchAll(/<button class="act"[^>]*>([^<]*)<\/button>/g)].map((m) => m[1]);
+    expect(acts, "one verb per row").toHaveLength(1);
+    return acts[0];
+  };
+  const render = (row: unknown) => verbOf(renderToStaticMarkup(<InboxRow row={row as never} />));
+  const cases: [string, unknown, string][] = [
+    ["decision", { ...base, kind: "decision", key: "decision:camp/0007", decision: rec("0007", "pablo", "2026-10-10", "Pick the store"), waited: null }, VERBS.rule],
+    ["thread", { ...base, kind: "thread", key: "thread:01T", thread }, VERBS.answer],
+    ["task, with a live supervisor", { ...base, kind: "task", key: "task:camp/0009", task, supervisor: { group: "camp", id: "sup9" } }, VERBS.agents],
+    ["task, none", { ...base, kind: "task", key: "task:camp/0009", task, supervisor: null }, VERBS.open],
+    ["card", { ...base, kind: "card", key: "card:camp/pick", card }, VERBS.open],
+    ["seat", { ...base, kind: "seat", key: "seat:camp/dev_bruno", seat }, VERBS.agents],
+    ["start", { ...base, kind: "start", key: "start:camp", launch }, VERBS.agents],
+    ["launch, a persona missing", { ...base, since: null, kind: "launch", key: "launch:camp", cell, missing: "po_ana" }, VERBS.open],
+    ["launch", { ...base, since: null, kind: "launch", key: "launch:camp", cell, missing: null }, VERBS.launch],
+    ["unread", { ...base, since: null, kind: "unread", key: "unread:camp", path: "/r", files }, VERBS.show],
+  ];
+  for (const [kind, row, verb] of cases) {
+    it(`${kind}: ${verb}`, () => {
+      const v = render(row);
+      expect(v).toBe(verb);
+      expect(VERB_LIST).toContain(v);
+    });
+  }
+  it("decision, words kept: Rule · draft", () => {
+    kept.add("decision:camp/0007");
+    try {
+      expect(render(cases[0][1])).toBe(VERBS.ruleDraft);
+    } finally {
+      kept.clear();
+    }
+  });
+  it("waiting on others: Open", () => {
+    const d = rec("0005", "alejandro", "2026-09-20", "Who owns QA");
+    expect(verbOf(renderToStaticMarkup(<OthersRow row={othersRow(d, 25, new Date(2026, 8, 20))} />))).toBe(VERBS.open);
+  });
+  it("Home draws no verb literal: every row's verb is read from the list", () => {
+    const src = readFileSync(new URL("./Home.tsx", import.meta.url), "utf8") as string;
+    expect(src).toContain('import { ruleVerb, VERBS } from "../lib/verbs";');
+    expect(src).not.toMatch(/>(Rule|Answer|Open|Agents|Launch|Show)<\/button>/);
   });
 });

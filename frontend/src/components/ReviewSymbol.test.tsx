@@ -235,18 +235,20 @@ describe("A4 (FR-28, FR-29): ask from the mark, mocked bindings", () => {
   it("after an ask: Asked sup81 · Open the thread, which opens the review's thread", () => {
     const h = panel({ id: G, marks: saved("question", "why the comma?", { asked: "01MSG" }), to: sup });
     expect(text(h)).toContain("Asked sup81 · Open the thread");
-    expect(h).toContain('<button class="link">Open the thread</button>');
+    expect(h).toContain('<a href="#" class="rs-thread">Open the thread</a>');
     const opened: string[] = [];
-    const el = AskStatus({ failed: null, asked: true, seat: "sup81", thread: "01THREAD", busy: "", onRetry: noop, onOpenThread: () => opened.push("01THREAD") }) as unknown as { props: { children: { props: { onClick: () => void } }[] } };
-    el.props.children[2].props.onClick();
+    const el = AskStatus({ failed: null, asked: true, seat: "sup81", thread: "01THREAD", busy: "", onRetry: noop, onOpenThread: () => opened.push("01THREAD") }) as unknown as { props: { children: { props: { onClick: (e: { preventDefault: () => void }) => void } }[] } };
+    const prevent = vi.fn();
+    el.props.children[2].props.onClick({ preventDefault: prevent });
     expect(opened).toEqual(["01THREAD"]);
+    expect(prevent).toHaveBeenCalled();
     // not asked: no line
     expect(text(panel({ id: G, marks: saved("question", "why the comma?"), to: sup }))).not.toContain("Asked sup81");
   });
   it("a failed ask: the failure words and Try again; while posting, Asking…", () => {
     const f = { seat: "sup81", state: "question" as MarkState, error: "dial unix discuss.sock: connect: no such file or directory" };
     const h = renderToStaticMarkup(<AskStatus failed={f} asked={false} seat="sup81" thread="" busy="" onRetry={noop} onOpenThread={noop} />);
-    expect(text(h)).toContain("Saved here; couldn't ask sup81: dial unix discuss.sock: connect: no such file or directory Try again");
+    expect(text(h)).toContain("Saved here; couldn't ask sup81: discuss isn't running. organizer doctor says why. Try again");
     expect(h).toContain(">Try again</button>");
     const busy = renderToStaticMarkup(<AskStatus failed={f} asked={false} seat="sup81" thread="" busy="retry" onRetry={noop} onOpenThread={noop} />);
     expect(busy).toContain('aria-disabled="true"');
@@ -334,7 +336,7 @@ describe("A9 (FR-29, Amendment 4): a failed ask is seen and said", () => {
   const f = { seat: "fse", state: "question" as MarkState, error: "open /x/tokens.json: no such file or directory" };
   it("the failure line has an id that Try again names", () => {
     const h = renderToStaticMarkup(<AskStatus failed={f} failedId="rs-failed-G" asked={false} seat="fse" thread="" busy="" onRetry={noop} onOpenThread={noop} />);
-    expect(h).toContain('<span id="rs-failed-G">Saved here; couldn&#x27;t ask fse: open /x/tokens.json: no such file or directory</span>');
+    expect(h).toContain('<span id="rs-failed-G">Saved here; couldn&#x27;t ask fse: Deltagos has no discuss identity for this cell. organizer doctor says why.</span>');
     expect(h).toMatch(/<button aria-describedby="rs-failed-G"[^>]*>Try again<\/button>/);
   });
   const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
@@ -342,7 +344,7 @@ describe("A9 (FR-29, Amendment 4): a failed ask is seen and said", () => {
     expect(src).toContain("const describedBy = failed ? failedId : undefined;");
     expect(src).toContain('<button className="primary" aria-describedby={describedBy}');
     expect(src).toContain('useEffect(() => { line.current?.scrollIntoView?.({ block: "nearest" }); }, [failed]);');
-    expect(src).not.toMatch(/FailedLine[\s\S]*\.focus\(/);
+    expect(src.slice(src.indexOf("function FailedLine"))).not.toContain(".focus(");
   });
   it("the review's live region is told the failure (Review's onAsked)", () => {
     const review = readFileSync(new URL("./Review.tsx", import.meta.url), "utf8") as string;
@@ -359,5 +361,50 @@ describe("A11 (FR-42): asked is muted on every row; the glyph keeps its colour",
     expect(css).not.toMatch(/\.on[^{]*\.rv-asked/);
     expect(css).toContain(".rv-mark.blocked { color: var(--danger); }");
     expect(css).toMatch(/\.rv-mark\.question \{ color: var\(--tone\); \}/);
+  });
+});
+
+describe("W2 (leftovers-41 FR-2, R27): Open the thread is a link", () => {
+  const css = readFileSync(new URL("../styles/review.css", import.meta.url), "utf8") as string;
+  const h = renderToStaticMarkup(<AskStatus failed={null} asked seat="sup81" thread="01THREAD" busy="" onRetry={noop} onOpenThread={noop} />);
+  it("an <a> with an href, so it has role link, is a Tab stop and Enter activates it; no button", () => {
+    expect(h).toBe('<p class="rs-asked">Asked sup81 · <a href="#" class="rs-thread">Open the thread</a></p>');
+    expect(h).not.toContain("<button");
+    expect(h).not.toContain("tabindex");
+  });
+  it("drawn and ringed as the in-app links (.rd-init): accent text, underline on hover, the ring on :focus-visible only", () => {
+    expect(css).toContain(".rs-thread { color: var(--accent-fg); text-decoration: none; }");
+    expect(css).toContain(".rs-thread:hover { text-decoration: underline; }");
+    expect(css).toContain(".rs-thread:focus { outline: none; }");
+    expect(css).toContain(".rs-thread:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }");
+  });
+});
+
+describe("W4 (leftovers-41 FR-4, R29): the panel once asked", () => {
+  const sup = { seat: "sup81", why: "runs this card" };
+  const asked = (state: string, note: string) => ({ marks: [{ symbol: G, state, note, asked: "01MSG" }], changed: [], thread: "01THREAD" }) as unknown as review.Marks;
+  it("after an ask: only Asked sup81 · Open the thread; no Saves the mark line, no asking primary", () => {
+    const h = panel({ id: G, marks: asked("question", "why the comma?"), to: sup });
+    expect(text(h)).toContain("Asked sup81 · Open the thread");
+    expect(h).not.toContain("rs-ask-line");
+    expect(text(h)).not.toContain("Saves the mark");
+    expect(h).not.toContain('class="primary"');
+    expect(h).toContain('<div class="rs-buttons"><button disabled="">Save</button></div>');
+  });
+  it("the same on the last symbol", () => {
+    const h = panel({ id: G, marks: asked("blocked", "b"), to: sup, last: true });
+    expect(h).not.toContain('class="primary"');
+    expect(text(h)).not.toContain("Saves the mark");
+  });
+  it("the note edited: MarkForm reads markControls with the asked note, so the again line and Ask sup81 again come back", () => {
+    const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
+    expect(src).toContain("markControls({ state, note, to, last, asked: !!mark?.asked, askedNote: saved.note })");
+    expect(src).toContain("{showPrimary && <button className=\"primary\"");
+    expect(src).toContain('{line && <p className="rs-ask-line meta">{line}</p>}');
+  });
+  it("an ask that stays (the last, Try again) hands focus to Open the thread, which took the button's place", () => {
+    const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
+    expect(src).toContain("if (ask && !then) toLink.current = true;");
+    expect(src).toContain("link.current.focus();");
   });
 });

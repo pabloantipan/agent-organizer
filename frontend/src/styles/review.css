@@ -85,10 +85,17 @@
 .rv-name { overflow-wrap: anywhere; min-width: 0; }
 .rv-change { color: var(--fg-muted); font-size: var(--font-size-xs); font-weight: var(--weight-regular); }
 .rv-since { color: var(--tone); font-size: var(--font-size-xs); }
-/* An asked mark is seen, not only heard (FR-29): `asked` after the change
-   word, so the name keeps its indent; muted on every row, since magenta
-   text is 4.31:1 on the current row (FR-42). The glyph keeps the hue. */
-.rv-asked { font-size: var(--font-size-xs); font-weight: var(--weight-semibold); color: var(--fg-muted); }
+/* An asked mark is seen, not only heard (FR-29): `? asked` is one unit in
+   the mark's place, before the name, so every row's mark reads in one
+   column (leftovers-41 FR-3). The unit sits in the padding like .rv-mark,
+   its glyph where .rv-mark's is; an asked row's padding grows by the word,
+   so its name and a wrapped flag still start together (FR-36). `asked` is
+   muted on every row, since magenta text is 4.31:1 on the current row
+   (FR-42). The glyph keeps the hue. */
+.rv-row.asked { --rv-asked-w: 32px; padding-left: calc(var(--space-5) + 1.5ch + var(--space-1) + var(--rv-asked-w) + var(--space-1-5)); }
+.rv-mark.rv-unit { width: auto; white-space: nowrap; }
+.rv-unit > .rv-glyph { display: inline-block; width: 1.5ch; text-align: center; }
+.rv-asked { display: inline-block; width: var(--rv-asked-w); margin-left: var(--space-1); font-size: var(--font-size-xs); font-weight: var(--weight-semibold); color: var(--fg-muted); }
 
 /* Flags as words (§3.3's table, flagLook): amber lozenges for
    look-at-this (the text in --warning, V-R5), muted for the rest, dashed
@@ -176,7 +183,12 @@
 .rs-ask-line { margin: 0; font-size: var(--font-size-sm); color: var(--fg-muted); }
 .rs-asked { margin: 0; font-size: var(--font-size-sm); color: var(--fg); overflow-wrap: anywhere; }
 .rs-asked.review-error { color: var(--danger); }
-.rs-asked button.link:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
+/* Open the thread changes where you are, so it is a link, drawn and ringed
+   as the other in-app links (leftovers-41 FR-2; .rd-init). */
+.rs-thread { color: var(--accent-fg); text-decoration: none; }
+.rs-thread:hover { text-decoration: underline; }
+.rs-thread:focus { outline: none; }
+.rs-thread:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
 
 /* From 1440 (§3.4); last, so it wins over the rules above. */
 @media (min-width: 1440px) {
