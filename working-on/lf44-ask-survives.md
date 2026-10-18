@@ -7,7 +7,7 @@ seat: as-build
 reviewer: as-review, as-ui
 stage: review-map
 updated: 2026-10-18
-next: "as-build builds it in .wt/lf44-ask-survives (sup85)"
+next: "as-build waits on sup85: may it change two test literals outside the boundary (review_test.go:566, Conversation.review.test.tsx:85); FR-1/2/4 in de2ece8, 27c6ae2, FR-3 written"
 risk: low
 footprint: [internal/review/marks.go, internal/review/marks_test.go, internal/service/review_ask.go, internal/service/review_ask_test.go, frontend/wailsjs/go/*, frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css, frontend/src/components/Conversation.tsx (landing), frontend/src/components/Conversation.test.tsx]
 depends_on: []
