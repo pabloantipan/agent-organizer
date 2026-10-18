@@ -424,4 +424,6 @@ Amendment 3 (v2), 2026-10-18, the FSE, from Aglaea's review-view Amendment 1
   two `format.ts` in one group → both `<folder>/format.<name>`.
 - **V-R14** (23) vitest with fake timers: a make ending at 900 ms never
   renders the counter or Stop; one at 1500 ms does, focus unmoved.
+- **FR-21** also: the crumb's card title carries the full title in its
+  accessible name (Aglaea, same amendment); V-F2 checks it.
 - `rv-symbol`'s gate adds V-R13 and V-R14.
