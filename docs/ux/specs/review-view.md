@@ -224,3 +224,30 @@ opens; tab-reaches-links A1) → the diff (a scroll stop) → the facts' links
   the service, with the launch view's progress pattern.
 - Where Needs me might later carry a "review waiting" row is a separate
   question for after v3.
+
+## Amendment 1 (aglaea, 2026-10-18): from rv-list's UI review
+
+From rl-ui on rv-list (62d9133, `working-on/rv-list.md`, ## UI review).
+
+- **A1: the TS qualifier is the file stem**, the module's own name, as the
+  package is Go's: `format.formatName`. Two exceptions, because a stem
+  alone can say nothing:
+  - a stem of `index` takes its folder's name instead (`lib/index.ts` →
+    `lib.formatName`);
+  - when two rows in one group would read the same, both add their parent
+    folder (`lib/format.formatName`, `components/format.formatName`).
+  The row's accessible description carries the full path either way.
+- **A2: no flash.** The busy rule already covers the press: the button turns
+  `Making the map…` at once, keeps focus and ignores presses. The progress
+  line (`Making the map · n s` and `Stop`) appears only after 1 s; a make
+  that ends sooner goes straight to the map. Focus does not move to Stop
+  when it appears.
+- **The FSE's additions to rv-symbol (review-map v2 Amendment 2) are
+  right**: on open, focus goes to the worklist's stop, else `Make the
+  map`, else `← Card`; the crumb's card title shrinks first, never under 20
+  characters at 1024, with the full title in its name.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R13 | tell TS symbols apart | an `index.ts` symbol reads `<folder>.<name>`; two same-stem symbols in one group both carry their parent folder |
+| R14 | not see a flash | a make that ends under 1 s shows only `Making the map…` on the button, never the counter or Stop |

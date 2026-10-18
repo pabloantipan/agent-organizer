@@ -178,3 +178,4 @@ is **Deltagos**, 0066; amended almost daily, every line cites its source).
 - 2026-10-16 — dg-render graded: diagrams-in-app Amendment 3 (blocked-reason style confirmed; outlines need 3:1 only where they carry meaning; SVG contents aria-hidden, text line uses labels and 'Around it'), D5 amended, D10.
 - 2026-10-16 — lf38 graded: needs-me-waits A3 (verb column fits 'Rule · draft'), diagrams-in-app A4 (name as one aria-label).
 - 2026-10-17 — review-view spec (review-map v2): worklist from the card back, own screen, symbol diff of ranges, flags as words, mark with Reviewed-next, partial and moved-branch states, v3 room; graph, ELK, Monaco cut; rows R1-R12.
+- 2026-10-18 — rv-list graded: review-view Amendment 1 (TS qualifier = file stem, index → folder, collisions add parent; progress line after 1 s, no flash; FSE's focus-on-open and crumb rules confirmed), R13-R14.
