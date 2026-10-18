@@ -65,3 +65,16 @@ No row launches a real editor (go test stubs the command with `sh -c 'exit
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf43-review-states` | S1-S5, X0 | — | true |
+
+Amendment 1, 2026-10-18, the FSE, from rs-build's `decide:` (180077d): my
+FR-5 premise was half read. On Conversations the top bar's crumb already
+carries the screen's one `aria-current="page"` (`components/TopBar.tsx:154`),
+and leftovers-17 FR-7b's H5 (`CharterOnce.test.tsx:132`) holds the sub-tabs
+at `"true"`, never page. The design system's rule ("exactly one control
+carries `aria-current="page"`", `docs/design-system.md:362-370`) is already
+met; R35's "(the Conversations tab)" names the wrong holder. So:
+- **FR-5** No change to the tab or the crumb. **S5** checks the rule as it
+  stands: on Conversations after `Open the thread`, exactly one
+  `aria-current="page"` (the crumb) and one `"true"` in the chat list (the
+  thread's chat), plus the sub-tab's own `"true"`.
+- The boundary drops `InitiativeHeader.tsx`.
