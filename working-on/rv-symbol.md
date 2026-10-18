@@ -159,3 +159,58 @@ Notes (not blocking):
 - Note: the radio inputs are 1×1 with outline none when focused (harness vr-order#2); the focus look is rs-ui's call.
 - Note: Tab past `Reviewed, next` lands on body while Save is disabled (builder's "found, not asked").
 
+
+## UI review
+rs-ui, 2026-10-18, on 31551625286a1c550dd0149e55453aea773bd5c3 (every row; the branch did not move). **Verdict: pass.** No severity 4 or 3 against the spec or the design. rs-review's V-R14 fail is not repeated here; the screen agrees with it (U4). Evidence: `.wt-notes/rs-ui/` (`out/` shots, harness logs, steps).
+
+Shared test run: **reused**, run `357ddb79-82098` of 31551625286a by organizer-probe-rs-review (exit 0; go ok, vitest 74 files / 879 tests; `.wt-notes/rs-ui/x0-make-test.txt`).
+
+How each state was checked:
+- Review build (`make review-build` in my detached worktree): I launched `Deltagos Review` myself (pid saved) on `fixture-home.sh --review --memory critical` with auth off and the probe stub. I read its AX tree by that pid, pressed by AXPress on that pid, resized its window by AX and shot it with `screencapture -o -l` (`wk-<w>x<h>-*.png`). The screen was not locked. States seen live in WKWebView: no map, with focus on Make the map (V-F1). Making, which reads `Making the map…` and then the map, with focus on the worklist. formatName with flags, diff and facts at 1440: facts beside the diff at 360 (V-R5). Greet after `Reviewed, next`: `Reviewed 1 of 2`. Called by → svc.Welcome read-only, then `← back to svc.Greet` (V-R6). Question with no note: Save disabled, placeholder `required for Question and Blocked`. 1024×640 with the facts under the diff. All reviewed: `Reviewed 2 of 2`, Next to review gone, live region `Reviewed 2 of 2` once. Moved: `The branch moved since this map (391ae0f → d836522).` and `Make it again`. Remade (V-R10): Greet keeps ✓, formatName reads `changed since you reviewed` in the row and in the panel.
+- Process note: between two AXPresses (← Card, then Review the change) my review app became the frontmost app. I cannot tell whether a press or a click did it. I stopped pressing in that window and did the rest in the Tab harness. `wails dev` also brings its own `Deltagos` window front when it starts.
+- Tab harness (the builder's tabharness.swift and steps, read and copied to `.wt-notes/rs-ui/steps/`, with my own steps `a.txt` and `b.txt`): run against my own `wails dev -devserver localhost:34257` from a clean clone of 3155162, fixture `--review --memory critical`, auth off, under `harness.lock`. The window was offscreen, isKey true, with activation prohibited. Logs: `out/h-a-1024x640.txt`, `out/h-b-1440x900.txt`, `out/h-vf2-*.txt`.
+  - §5 order with real Tab: ← Card → Next to review → the worklist (one stop). From a symbol's h2: the diff region `<symbol>, diff` (V-R4) → Called by's link → the radio group (one stop) → Note → `Reviewed, next` → Save, which is skipped while disabled, so focus falls on body. N opens formatName with focus on its h2, ring 2 px `--focus-ring`, and the live region silent. `Reviewed, next` gives `Reviewed 1 of 2`, focus on h2 `svc.Greet`, and its row in view (V-R8). Called by → h2 svc.Welcome → Tab `← back to svc.Greet` → h2 svc.Greet (V-R6). Esc in Note stays on the screen. A typed note enables Save; Save keeps focus and gives row `Greet, modified, question`, ? in `--tone`.
+  - V-F1: no map → Make the map; with a map → the worklist stop; never body. Escape → the card back, focus on `Review the change`.
+  - V-R4 / design tokens: added rows on `--status-now-bg`, removed on `--surface-pressed` with text `--fg-muted`, 12 px (`sm`) JetBrains Mono, head line numbers, none on `−`.
+  - V-R5: `not in the card's declared changes` in rgb(255,176,32) = `--warning` on `--warning-bg`, in both row and panel. `no direct test` muted, no fill.
+  - V-R11 still holds: at 1440, list 300, facts 360 beside the diff; page scrollWidth equals the width at 1024 and at 1440. Radios are 24 px high.
+  - V-F2 as Amendment 5 wrote it: at 1440 the full title shows, 8 px to `›`. At 1024 the crumb's text and title attribute are the full title, with no overlaps; crumbs end at 473, before the Mac group at 489. On screen at 1024 with the critical badge the title shows `G…`, which Amendment 5 holds for a later card.
+- vitest: in the shared run (V-R7 claim, V-R13, V-R14, the §4 words).
+- V-R12: no reactflow, @xyflow, elkjs or monaco in `frontend/package.json` or the built `dist`.
+- rv-list's UI review: R1 (Review section, Esc back to the button), R2, R3's first step (N → Must visit), the partial-free map, R11 widths and the §4 words all show as they did. Its U3 (flags wrap at a smaller indent than the name) is still there, held. U1 is fixed: focus on open is Make the map, else the worklist stop. U2 is as Amendment 5 says.
+
+§4 and §3.3 words, design against screen:
+- `No review map for this change yet.` / `Make the map`: the same.
+- Making: `Making the map…` on the press; then `Making the map · 0 s`, `Stop`, `· 1 s` on a make longer than 1 s. The `0 s` is U4.
+- Failed (`Try again`, `Copy the command`) and docs-only: vitest only.
+- Moved and `Make it again`, `changed since you reviewed`, all reviewed: the same, live.
+- Panel: `Flags`, `Tests`, `none name it directly`, `Called by`, `Calls`, `unchanged · shown because it calls svc.Greet`, `← back to svc.Greet`, `Reviewed` / `Question` / `Blocked`, `Note`, `Reviewed, next`, `Save`, `Kept in Deltagos; asking the supervisor comes later.`: the same, live. `The builder says` is vitest only. Flag words: the same.
+- Words the design does not give: empty Called by and Calls read `none`; a callee reads `… because svc.Greet calls it`.
+
+Findings:
+- **U1 (2) After the last `Reviewed, next`, the panel still shows the old mark.**
+  - What the person cannot do: trust the panel's mark. The row says ✓ and the count says 2 of 2, but the radios still say Question with the note, and Save is live. Pressing Save then puts the mark back to Question.
+  - Where: Greet saved as Question, then `Reviewed, next` with nothing left to move to (`h-1024x640-R8-last-next.png`; harness `last`: rows `Greet, modified, reviewed`, checked `question`).
+  - Evidence: MarkForm keeps its own state and is keyed by the node. When no next symbol opens, nothing resets it from the saved mark.
+  - Proposal: after any save, set the radios and note from the saved mark (`markOf`). Or re-key the form on the mark.
+- **U2 (2) Moving between the radios with the arrow keys loses the focus ring.**
+  - What the person cannot do: see where focus is after choosing a mark by keyboard.
+  - Where: the mark's radio group (`h-1440x900-radio-tabin.png`, then `h-1440x900-radio-arrow.png`).
+  - Evidence: tabbing in, the focused radio matches `:focus-visible` and its span has `solid 2px` `--focus-ring`. After ↓, WebKit reports `:focus-visible` false on the newly checked input, and the span's outline is `none`. Only the selected look (accent border) remains. WCAG 2.4.7. The rule box's options use the same pattern; not measured there.
+  - Proposal: draw the ring on `input:focus + span`, not only on `:focus-visible`. A radio takes focus only by keyboard or a click on its own label. Check the rule box in the same way.
+- **U3 (2) `Open in editor` at the head line is not drawn, and Tests that did not change do not open the editor.** Pablo cannot jump from the diff to the code. The file and lines are shown, so he can open it by hand. FR-19 lists neither, and `OpenInEditor(path)` takes no line and knows no checkout of the reviewed head. I agree with the builder that this is a **spec gap**, not a fail. The severity is 2 because reading the change does not depend on it.
+- **U4 (1, rs-review's V-R14 cause) The counter first reads `Making the map · 0 s`** although it appears only after a second. Same cause as rs-review's finding (whole-second `started`). Fixing V-R14 fixes this.
+- **U5 (1) Called by and Calls links are in Manrope**, while every other symbol name (title, rows, Tests) is mono. The `link` class overrides `mono`.
+- **U6 (1) While an affected symbol is shown, no worklist row is current.** The row of the changed symbol it came from loses `.on`, so the list says nothing about where you are.
+
+Spec gaps (for the FSE):
+- G1: U3. `Open in editor` and "else the editor" for Tests need a line-taking binding and a decision on which checkout opens: the card's worktree, the root, or a temp checkout of the head.
+- G2: the fixture's second commit is broken. Its `perl -pi -e 's/…/`${last.toUpperCase()}, ${first}`/'` interpolates `${…}` and leaves `web/src/format.ts` 2 lines long (`git show review-second:web/src/format.ts`), so V-R10's changed symbol reads as a deleted body. This is rv-data's fixture (5e66aa9), not this card's. It still proves V-R10, but not as a real edit.
+- G3: the fixture has no claim, so `The builder says` is never seen live. It also has no make that fails and none under 1 s.
+
+For aglaea:
+- A1: §3.3 gives words for an affected caller only. The builder wrote `unchanged · shown because svc.Greet calls it` for a callee. Is that right?
+- A2: `Reviewed, next` marks Reviewed even when Question or Blocked is chosen with a note (§3.3 says so). With a Question chosen, should the primary ask before it overrides?
+- A3: empty Called by and Calls read `none`. The design gives no words for this.
+
+Not verified in WKWebView (vitest or code only): failed (`Try again`, `Copy the command`), docs-only, a claim (V-R7), a make that ends under 1 s (V-R14), Blocked (its ✕ in `--danger`), change-check off the PATH (V-R9, not rerun), Shift+N, the Tests group, another machine's card.
