@@ -631,3 +631,16 @@ d7e7bc9, U1, U2) and Aglaea's review-view Amendment 4 (R22, R23). Both join
 - **A7** (39) harness at 1024×640, a row with `no direct test` | the flag's
   text left edge equals the name's.
 - `rv-ask-ui`'s gate adds A6 and A7.
+
+Amendment 2 (v3), 2026-10-18, the FSE, from sup82's rv-polish report
+(thread 01M57SST): with mutual calls, the affected line reads its direction
+from the edges, so a symbol opened from `Calls` can read `calls` where
+FR-30 says `called by`. And rv-polish needed `Review.test.tsx`, which v3's
+Boundary omits. So:
+- **FR-40** An affected symbol's line follows the list it was opened from
+  (`Called by` → `calls <symbol>`, `Calls` → `called by <symbol>`), never
+  the edges' direction.
+- **A8** (40) vitest: two symbols that call each other, opened from each
+  list | `calls …` from Called by, `called by …` from Calls.
+- `rv-ask-ui`'s boundary adds `components/Review.test.tsx`; its gate adds
+  A8. The fixture's missing affected callee (G2) is held.
