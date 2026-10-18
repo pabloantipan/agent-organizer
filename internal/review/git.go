@@ -104,8 +104,9 @@ func Export(dir, rev, dst string) error {
 		return err
 	}
 	untar.Stdin = pipe
-	var errb bytes.Buffer
-	arch.Stderr, untar.Stderr = &errb, &errb
+	// one buffer each: os/exec copies each stderr in its own goroutine
+	var errb, untarErr bytes.Buffer
+	arch.Stderr, untar.Stderr = &errb, &untarErr
 	if err := untar.Start(); err != nil {
 		return err
 	}
@@ -113,7 +114,7 @@ func Export(dir, rev, dst string) error {
 		return fmt.Errorf("git archive %s: %v: %s", short(rev), err, errb.String())
 	}
 	if err := untar.Wait(); err != nil {
-		return fmt.Errorf("tar: %v: %s", err, errb.String())
+		return fmt.Errorf("tar: %v: %s", err, untarErr.String())
 	}
 	return nil
 }
