@@ -6,7 +6,7 @@ branch: rv-ask-ui
 seat: au-build
 stage: review-map
 updated: 2026-10-18
-next: "fix UI review U1 (sev 3): at 1024x640 a failed ask's line is below the panel's fold and nothing else says it failed; scroll it into view and announce it (code review passed, au-review)"
+next: "review: rv-ask-ui round 2, gate met (A4-A11, X0), 8ba6d0d"
 risk: medium
 footprint: [frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css, frontend/src/components/Review.tsx, frontend/src/components/Review.test.tsx, frontend/src/stores/board.store.ts (openSlack thread, review place), frontend/src/components/SlackView.tsx (← Review), frontend/src/components/Conversation.tsx (threadId landing)]
 depends_on: [rv-ask-data, rv-polish]
@@ -28,6 +28,11 @@ docs/specs/review-map.md v3, rows A4, A5 and X0.
 - [x] A6: vitest "A6 (FR-38)" in the three review test files; also in WK, .wt-notes/au-build/out/h-a-rows-1024x640.txt (`a6_after`)
 - [x] A7: harness 1024x640, .wt-notes/au-build/out/h-a5-1024x640.txt (`a7_row`: name 58, muted flag text 58), .wt-notes/au-build/out/a7-flags.png
 - [x] A8: vitest "A8 (FR-40)" in `lib/review.test.ts`, `components/ReviewSymbol.test.tsx`, `components/Review.test.tsx`
+- [x] A9: harness 1024x640, real failing ask (empty discuss dir), .wt-notes/au-build/out/h-b2-1024x640.txt (`a9_formatName`, `a9_retry`, `a9_last`: failure 576-624 inside panel 169/161-624, focus on the button, `aria-describedby` to the line, live region the failure line once, not `Reviewed 2 of 2` on Greet), b2-a9-formatName.png, b2-a9-last.png; vitest "A9" in `lib/review.test.ts`, `components/ReviewSymbol.test.tsx`
+- [x] A10: harness 1024x640, AskReview/GetAgents/GetCellThread stubbed in the page only, .wt-notes/au-build/out/h-b2-1024x640.txt (`a10_land`: activeElement the thread's divider, via `← Review` while unlisted; `a10_tab`: one Tab → `← Review`; `back_in_review`), b2-a10-landed.png, b2-a10-tab.png; vitest "A10 (FR-41)" in `components/Conversation.review.test.tsx`
+- [x] A11: harness, .wt-notes/au-build/out/h-b2-1024x640.txt (`a11`: `asked` rgb(181,175,195) = --fg-muted on the current Greet row and on formatName; glyphs ? --tone, ✕ --danger), b2-a11-rows.png; vitest "A11 (FR-42)" in `components/ReviewSymbol.test.tsx`
+- [x] A4-A8 still: A5, A7 rerun on a fresh fixture, .wt-notes/au-build/out/h-a5-r2-1024x640.txt; vitest in the X0 run
+- [x] X0 round 2: clean clone at 8ba6d0d: .wt-notes/au-build/x0r2-make-test.txt (933 vitest, go ok), x0r2-pnpm-build.txt, x0r2-wails-build.txt, x0r2-porcelain.txt (empty), x0r2-head.txt
 
 ## Declared changes
 - modified `frontend/src/lib/review.ts`: `askLine`, `askedLine`, `askFailedLine`, `firstLine`, `saidAfter`, `lastToReview`, `Addressee`, `Via`; `primaryOf` asks and drops `, next` on the last; `affectedLine` takes the list; `Row.asked`, `marksOf`, `rowName`; WORDS.v3 replaced
@@ -38,12 +43,19 @@ docs/specs/review-map.md v3, rows A4, A5 and X0.
 - modified `frontend/src/styles/review.css`: `.rv-asked`, `.rs-ask-line`, `.rs-asked`, `.rv-flag.muted` padding
 - modified `frontend/src/lib/review.test.ts`, `frontend/src/components/ReviewSymbol.test.tsx`, `frontend/src/components/Review.test.tsx`: A4, A6, A7, A8
 - added `frontend/src/components/SlackView.review.test.tsx`: the store round trip and `← Review` (A4)
+- modified `frontend/src/components/ReviewSymbol.tsx:FailedLine`: the failure line scrolls into view (nearest), named by the primary and Try again (A9)
+- modified `frontend/src/components/Review.tsx:Review`: onAsked hands a failed ask's line to the live region (A9)
+- modified `frontend/src/lib/review.ts:saidAfter`: a failed ask says its line alone (A9)
+- modified `frontend/src/components/Conversation.tsx`: `landDivider`, `reviewBackOf`, the `slackDraft.threadId` landing waits for an unlisted thread (A10)
+- added `frontend/src/components/Conversation.review.test.tsx`: A10
+- modified `frontend/src/components/SlackView.tsx:ReviewBack`: `data-review-back`, found by the landing (A10)
+- modified `frontend/src/styles/review.css`: `.rv-asked` in --fg-muted (A11)
 Risky:
 - `leaveReview`: every navigation naming a screen now also drops `reviewBack`
-- `openSlack`: a thread not yet in the 10 s feed lands Conversations on the archive (Conversation.tsx's draft handler, unchanged)
+- `openSlack`: a thread not yet in the 10 s feed lands Conversations on the archive until the feed lists it (asked at once), then on the thread
+- `landDivider`: the next Tab from the landed divider is redirected once to `← Review` (above it in the page)
 Not changed, on purpose:
 - any Go, `app.go`, `frontend/wailsjs/`: the bindings sufficed
-- `Conversation.tsx`: the existing `slackDraft.threadId` landing is used as is
 
 ## Notes
 - Harness runs set `discuss_state_dir: <an empty mktemp -d>` in the fixture's config from my own `run-dev.sh` (sup82, thread 01M57TR1): the `--review` fixture names none, so the app used the real token registry. With it every post fails before connecting (`open …/tokens.json: no such file or directory`), which is the spec's "no mailbox". Confirmed by the FSE as review-map v3 Amendment 3.
@@ -187,4 +199,5 @@ For aglaea:
 Not verified in WKWebView (vitest, DOM, or the stubbed binding only): a real successful ask and its thread (`? asked`, `Asked fse · Open the thread`, landing on that thread in Conversations: stub only, by the no-mailbox rule); `Asking…` on the primary (too fast); nobody to ask, `Save question` and `Save block` without `, next` (vitest); the closed-thread replacement (FR-26, au-review's); another machine's card; a pointer press on anything (no pointer, by rule).
 
 ## Done
+- 2026-10-18 au-build round 2: A9 (0ae14ff), A11 (4513957), A10 (8ba6d0d) on rv-ask-ui rebased on aba9e8e; gate A4-A11, X0 met; notes `.wt-notes/au-build/progress.md`.
 - 2026-10-18 au-build: FR-28, FR-29, FR-38, FR-40 (e0dc71a) and FR-39 (60f74c3) on rv-ask-ui; gate A4, A5, X0, A6, A7, A8 met; notes `.wt-notes/au-build/progress.md`.
