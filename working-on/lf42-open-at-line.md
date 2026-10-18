@@ -90,3 +90,51 @@ repo organizer: base 27702435c (default main) ... head lf42-open-at-line 4406ed5
 - Note (to the FSE): FR-1's multi-repo path (`checkoutOf` by repo prefix, the per-repo head from `rm.Repos`) has no Go test. E1 does not ask for one; the frontend covers the prefix in `editorAt`.
 - Note (to the FSE): the declared risk stands: `ReviewStatus` now runs `git rev-parse HEAD` in up to four directories per repo on every read, including CardDrawer's. No measurement was asked for.
 - Note (to the FSE): `Review.test.tsx`'s App mock has no `OpenReviewAt` (the builder found this). It is harmless under static rendering, but a future DOM test will need it.
+
+## UI review
+oe-ui, 2026-10-18, on 4406ed5228f939170968ab318bd2714e407c8167 for every row (the branch did not move). **Verdict: pass.** No finding of severity 4 or 3. Evidence is in `.wt-notes/oe-ui/` (`out/rb-*.png`, `out/wk-*.png`, `out/h-*.txt`, `out/editor-calls.txt`, `steps/`).
+
+Shared test run: **reused** run `71a0af2c-14664` of 4406ed5228f9 by organizer-probe-oe-review (exit 0; vitest 78 files / 981 tests; `.wt-notes/oe-ui/x0-make-test.log`).
+
+No mailbox, no editor. main's `fixture-home.sh --review` already writes `discuss_state_dir` under its temp dir. Each run checked that there was exactly one such line and that it sat under that temp dir, appended nothing, and confirmed `auth: off` (`out/rb-config-check.txt`, `out/dev-config-check.txt`). The probe was stubbed. `editor:` was set to `.wt-notes/oe-ui/bin/code`, a script that only logs its argv; its base name is `code`, so FR-2's `-g` path runs. No real editor was launched.
+
+How each state was checked:
+- **Review build** (`make review-build` in my detached worktree; pid saved, quit by pid). The screen was unlocked, so AX and `screencapture -o -l` worked on my window, at window sizes 1024×640 and 1440×900. I walked it by AXPress on my pid: init-a → Work → rv-fixture → Review the change → Make the map → a row.
+  - Not checked out (the fixture's default): `svc/greet.go 3-6  Not checked out here at c176574.`, with no button (`rb-*-E3-notcheckedout.png`).
+  - `git checkout rv-fixture` in the root, then a symbol picked: `Open in editor` appears. AXPress logged `-g …/init-a/svc/greet.go:3` (`rb-*-E3-root-*.png`).
+  - Root back on main plus `.wt/rv-fixture`: AXPress logged `-g …/init-a/.wt/rv-fixture/web/src/format.ts:1`.
+  - Worktree removed while the button showed, then pressed: nothing opens, and `Error: c176574 is not checked out here` appears (U1, `rb-1024x640-E3-refused-at-press.png`).
+- **Tab harness** (lw-ui's `tabharness.swift`, read and rebuilt; the builder left no copy under `oe-build/`). It ran offscreen with `isKey: true`, under `harness.lock`, against my own `wails dev -devserver localhost:34265` from a clean clone of 4406ed5. It used a fresh fixture at each size and the same four steps: A not checked out, B root, C worktree, D FR-4. The dev server and the fixture stand-ins were killed by saved pid (`out/killed.txt`).
+  - Both sizes, B and C: `Open in editor` and the file line sit on one row (centres within 2 px), and the file stays one line.
+  - Opening a symbol focuses the h2. One Tab reaches `Open in editor` (`:focus-visible`, `solid 2px rgb(192,171,254)`, offset 2px, 8.9:1 on the ground). The next Tab reaches the diff, and Shift+Tab goes back. Return and Space each logged one call (`out/editor-calls.txt`), and focus stayed on the button.
+  - A: from the h2, Tab goes straight to the diff, so the muted line is not a stop. There is no horizontal scroll (`scrollWidth` 1024/1440, screen 992/992 and 1408/1408).
+  - D (FR-4 / E4 in WK): stubs in my page only, nothing posted. With the review's `thread` 01REVIEWTHREAD and the mark's `asked_thread` 01MARKTHREAD, pressing `Open the thread` set `slackDraft` to `01MARKTHREAD` only, `sub: conversations`, `reviewBack: true`, at both sizes.
+- **Style** (computed): `Open in editor` is the default button, the same as Save: `rgb(39,32,51)` fill, 1px `rgba(255,255,255,.09)` border, radius 6, 13px/500, 28px tall, text 13.3:1. The muted line is `--fg-muted` rgb(181,175,195) on rgb(26,21,35) (8.4:1), Manrope 12px, the same size as the mono file line.
+- **Rest of the Review panel** (as lw-ui saw it on lf41): the header `head ← base · 2 symbols changed, 0 tests` and `Reviewed n of 2 · 1 must-visit left` stay 56px tall and unchanged at both sizes. The h2 is 21px, one line, and is focused on N. The title row grows from 20 to 28px only when the button is drawn. `? asked` sits before the name. `Asked fse · Open the thread` is a link. The primary reads `Ask fse, next` with Question and a note. `Reviewed 1 of 2` shows after the ask (`wk-*-E4-asked.png`).
+
+Words, design vs screen:
+- `Open in editor` (§3.3): same in RB and WK.
+- `Not checked out here at <short sha>.` (FR-3): `Not checked out here at c176574.` in RB, `… adbc0a1.` and `… 57d87e6.` in WK. Same, 7 characters, full stop.
+- `Open the thread`, `Asked fse · Open the thread`: same.
+
+Findings:
+- **U1 (2)**:
+  - What the person cannot do: when the checkout moves after the panel read it, the press opens nothing and the panel shows a raw error. The button stays, as if a second press would work.
+  - Where: the title, `rb-1024x640-E3-refused-at-press.png`.
+  - Evidence: `Error: c176574 is not checked out here` appears in `.review-error` red with the `Error:` prefix, and the status is not re-read.
+  - Severity: 2. It is rare, and the design and the spec never word this state.
+  - Proposal: on a refusal, re-read the status, so the muted `Not checked out here at <sha>.` replaces the button. Never show the `Error:` prefix.
+- **U2 (1)**:
+  - What the person cannot do: on a symbol with a doc comment, the editor opens at the comment, not at the definition.
+  - Where: format.ts `1-4`, logged as `:1`; the definition is line 2.
+  - Evidence: the map's head range starts at the doc comment. This is as FR-1 and FR-3 say ("head start line").
+  - Severity: 1.
+  - Proposal: none for now; it is noted for aglaea.
+
+Spec gaps (for the FSE): the refused-at-press state (U1) has no words or behaviour in FR-3 or §3.3. The moved branch (the map's head is older) is covered only by E1's logic.
+
+For aglaea:
+- A1: the button sits on the file line under the h2 rather than inside the h2. I read that as §3.3's "title" (the h2 keeps a clean name for focus); confirm.
+- A2: does a doc comment count as the head line (U2)?
+
+Not verified in WKWebView: the moved-branch state (`FIXTURE_REVIEW_MOVE`; vitest and E1 only), a multi-repo card's prefix match (vitest `editorAt` only), another machine's card (E1 only), and the `vim`/`subl`/`{line}` command forms (E2 only). FR-4 was seen in WK only with stubbed bindings; the real replaced-thread path through `state.json` was not driven.
