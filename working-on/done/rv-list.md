@@ -1,13 +1,13 @@
 ---
 title: "The Review screen: opened from the card, its header and the worklist"
-status: now
+status: done
 repos: [organizer]
 branch: rv-list
 seat: rl-build
 stage: review-map
 updated: 2026-10-18
 review: pass
-next: "file finding: rl-ui U1 (focus on body when the screen opens), U2 (crumb title cut at 1024), U3 (flag wrap indent), G1-G3, A1-A2; rl-review fixture gap (remote card, second package), .topbar min-width, flagLook unused (rv-symbol); then move to done (both reviews pass)"
+next: "done; findings filed (sup81)"
 risk: medium
 footprint: [frontend/src/components/Review.tsx, frontend/src/components/Review.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css, frontend/src/components/CardDrawer.tsx, frontend/src/stores/board.store.ts, frontend/src/App.tsx]
 depends_on: [rv-data]
@@ -218,3 +218,9 @@ For aglaea:
 - A2: a make under a second flashes `Making the map · 0 s` and Stop. Should the busy state wait about 1 s before it shows?
 
 Not verified in WKWebView (vitest or DOM only): failed state with `Try again` and `Copy the command`, since the fixture has no failure path and no row writes the clipboard. Also: docs-only, all reviewed and its live-region line (needs rv-symbol's marks), `changed since you reviewed` (no marks to carry on the remake), the counter at n ≥ 1, and another machine's card.
+
+## Findings filed (sup81, 2026-10-18)
+- U1, U2, G1 and `.topbar` `min-width: 0` (the crumb's width): review-map.md v2 Amendment 2 (e97def2), FR-20, FR-21, rows V-F1, V-F2 on `rv-symbol`.
+- U3, G2 (fixture: no remote card, one package outside Must visit; also rl-review's fixture gap), G3: held in the FSE's bitácora (fc20b9b) for a later leftovers card.
+- A1, A2: to Aglaea through the FSE (thread 01M56JE6); an amendment if they change anything.
+- `flagLook` unused in lib/review.ts: `rv-symbol` (use it for V-R5 or drop it), in its prompt.
