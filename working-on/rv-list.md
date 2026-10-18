@@ -1,12 +1,12 @@
 ---
 title: "The Review screen: opened from the card, its header and the worklist"
-status: next
+status: now
 repos: [organizer]
 branch: rv-list
 seat: rl-build
 stage: review-map
-updated: 2026-10-17
-next: "sup81 runs it; 0146 ruled"
+updated: 2026-10-18
+next: "rl-build: building FR-18 on branch rv-list"
 risk: medium
 footprint: [frontend/src/components/Review.tsx, frontend/src/components/Review.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css, frontend/src/components/CardDrawer.tsx, frontend/src/stores/board.store.ts, frontend/src/App.tsx]
 depends_on: [rv-data]
