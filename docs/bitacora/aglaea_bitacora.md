@@ -164,3 +164,4 @@ resumes. The seat moves to the new discuss watcher (wake-rearm, api
 - 2026-10-18 — rv-list graded: review-view Amendment 1 (TS qualifier = file stem, index → folder, collisions add parent; progress line after 1 s, no flash; FSE's focus-on-open and crumb rules confirmed), R13-R14.
 - 2026-10-18 — rv-symbol graded: review-view Amendment 2 (calls / called by, primary label follows the chosen mark, 'none found'), R15-R17.
 - 2026-10-18 — paused for the new watcher (Pablo via Hephaistos): HAND-OFF rewritten; nothing open.
+- 2026-10-18 — resumed on the new watcher (identity intact); nothing open, waiting for mail.
