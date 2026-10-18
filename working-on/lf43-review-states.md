@@ -1,12 +1,12 @@
 ---
 title: "Open in editor's refusals and definition line, Save only when it saves, one page marker"
-status: next
+status: now
 repos: [organizer]
 branch: lf43-review-states
-seat:
+seat: rs-build
 stage: review-map
 updated: 2026-10-18
-next: "sup84 runs it (0151 ruled in away mode, 2026-10-18)"
+next: "rs-build builds it on lf43-review-states (sup84, launched 2026-10-18)"
 risk: low
 footprint: [internal/service/review_open.go, internal/service/review_open_test.go, frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css, frontend/src/components/InitiativeHeader.tsx (tab aria-current), frontend/src/components/InitiativeHeader.test.tsx]
 depends_on: []
