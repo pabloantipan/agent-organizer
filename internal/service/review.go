@@ -51,6 +51,9 @@ type ReviewStatus struct {
 	// Make is the card's make running now, or the last one that ended in
 	// this process; nil when there was none.
 	Make *ReviewMake `json:"make"`
+	// Checkouts is, per repo of the card, which checkout here has the
+	// shown map's head as its HEAD (leftovers-42 FR-3); empty without a map.
+	Checkouts []ReviewCheckout `json:"checkouts"`
 }
 
 // Make states.
@@ -170,8 +173,8 @@ func (s *Service) resolveCard(initiativeID, slug string) (*model.ScannedInitiati
 // ReviewStatus is FR-14's status: none, the map for the current head, or
 // moved with both shas; missing when the card has no branch and no merge.
 func (s *Service) ReviewStatus(initiativeID, slug string) (ReviewStatus, error) {
-	_, ranges, _, err := s.resolveCard(initiativeID, slug)
-	st := ReviewStatus{Initiative: initiativeID, Card: slug, Make: currentMake(initiativeID, slug, s.now())}
+	si, ranges, repos, err := s.resolveCard(initiativeID, slug)
+	st := ReviewStatus{Initiative: initiativeID, Card: slug, Make: currentMake(initiativeID, slug, s.now()), Checkouts: []ReviewCheckout{}}
 	var m *review.Missing
 	switch {
 	case errors.As(err, &m):
@@ -183,10 +186,12 @@ func (s *Service) ReviewStatus(initiativeID, slug string) (ReviewStatus, error) 
 	st.Head, st.Base, st.From = ranges[0].Head, ranges[0].Base, ranges[0].From
 	if p := review.DefaultPath(initiativeID, st.Head); fileExists(p) {
 		st.State, st.MapHead, st.MapPath = ReviewMap, st.Head, p
+		st.Checkouts = checkoutsAt(si, slug, p, repos)
 		return st, nil
 	}
 	if head, p, ok := newestMap(initiativeID, slug); ok {
 		st.State, st.MapHead, st.MapPath = ReviewMoved, head, p
+		st.Checkouts = checkoutsAt(si, slug, p, repos)
 		return st, nil
 	}
 	st.State = ReviewNone
