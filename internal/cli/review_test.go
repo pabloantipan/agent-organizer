@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -45,6 +47,30 @@ func TestReviewStatusNamesNode(t *testing.T) {
 	t.Setenv("PATH", t.TempDir())
 	if s := reviewStatus(); !strings.Contains(s, "go not on PATH") || !strings.Contains(s, "node not on PATH, so no TypeScript is read") {
 		t.Errorf("reviewStatus without tools %q", s)
+	}
+}
+
+// G1 / leftovers-41 FR-7: the help line for review reads as FR-7 and
+// names the same flags as review.go's usage.
+func TestReviewHelpLine(t *testing.T) {
+	var b bytes.Buffer
+	usage(&b)
+	var line string
+	for _, l := range strings.Split(b.String(), "\n") {
+		if strings.HasPrefix(l, "  organizer review ") {
+			line = l
+		}
+	}
+	const want = "  organizer review <initiative> <card | sha> [--card slug] [--json] [--out path] [--work dir] [--marks]  the change of a card's branch or merge as revmap.json"
+	if !strings.HasPrefix(line, want) || strings.Contains(line, "the Go change") {
+		t.Errorf("help line %q", line)
+	}
+	flags := regexp.MustCompile(`--[a-z]+`)
+	help, use := flags.FindAllString(line, -1), flags.FindAllString(reviewUsage, -1)
+	slices.Sort(help)
+	slices.Sort(use)
+	if !slices.Equal(slices.Compact(help), slices.Compact(use)) {
+		t.Errorf("help flags %v, usage flags %v", help, use)
 	}
 }
 
