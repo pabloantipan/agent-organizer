@@ -292,6 +292,15 @@ describe("A6 (FR-38): the last unmarked symbol", () => {
   });
 });
 
+describe("A7 (FR-39): a muted flag is text", () => {
+  const css = readFileSync(new URL("../styles/review.css", import.meta.url), "utf8") as string;
+  it("no inline padding on .rv-flag.muted; amber and dashed keep the lozenge's", () => {
+    expect(css).toContain(".rv-flag.muted { padding-left: 0; padding-right: 0; }");
+    expect(css).toMatch(/\.rv-flag \{[^}]*padding: 1px 7px;/);
+    expect(css).not.toMatch(/\.rv-flag\.(amber|dashed) \{[^}]*padding/);
+  });
+});
+
 describe("A8 (FR-40): the line follows the list it was opened from", () => {
   const mutual = { ...map, edges: [...map.edges, { from: G, to: W, kind: "uses", change: "unchanged", source: "go/types" }] } as unknown as review.RevMap;
   const drawn = (via: "calledBy" | "calls") => text(renderToStaticMarkup(<ReviewSymbolView map={mutual} node={at(W)} row={null} marks={null} from={at(G)} via={via} texts={null} error={null}
