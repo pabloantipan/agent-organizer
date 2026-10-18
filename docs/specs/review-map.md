@@ -378,3 +378,14 @@ stubbed clipboard in vitest only.
 | `rv-data` | D1, D2, D3, D4, D5, X0 | — | false |
 | `rv-list` | V-R1, V-R2, V-R3, V-R9, V-R11, V-S, V-R12, X0 | `rv-data` | true |
 | `rv-symbol` | V-R4, V-R5, V-R6, V-R7, V-R8, V-R10, V-R12, X0 | `rv-list` | true |
+
+Amendment 1 (v2), 2026-10-18, the FSE, from rd-build via sup81 (thread
+01M56G76): the premise "`readOnlyOf` marks another machine's card" is false.
+`readOnlyOf` (`lib/queue.ts:57`) is the asleep/archived word of an inactive
+initiative; another machine's card is `c.local === false`
+(`CardDrawer.tsx:98`, `:128`, "Actions work only on the local machine"),
+re-read today. So:
+- **FR-14 / FR-18** "another machine's card" means `!c.local`: the card back
+  draws no Review section for it, and the bound reads refuse it (as built).
+  `readOnlyOf` is not consulted: an asleep or archived initiative's local
+  card is reviewable, since marks live in the data dir, not the repo.
