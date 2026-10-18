@@ -3,7 +3,7 @@ title: "organizer run prints every seat, one spec-path helper, and a fixture tha
 status: next
 repos: [organizer]
 branch: lf41-fixture-launch
-seat:
+seat: lf-build
 stage: review-map
 updated: 2026-10-18
 next: "sup83 runs it (0149 ruled in away mode, 2026-10-18)"

@@ -3,7 +3,7 @@ title: "The review's failure words, the thread link, marks in one column, and on
 status: next
 repos: [organizer]
 branch: lf41-review-words
-seat:
+seat: lw-build
 stage: review-map
 updated: 2026-10-18
 next: "sup83 runs it (0149 ruled in away mode, 2026-10-18)"

@@ -3,7 +3,7 @@ title: "organizer review's help, doctor's tar, the sources used, and each asked 
 status: next
 repos: [organizer]
 branch: lf41-review-go
-seat:
+seat: lg-build
 stage: review-map
 updated: 2026-10-18
 next: "sup83 runs it (0149 ruled in away mode, 2026-10-18)"
