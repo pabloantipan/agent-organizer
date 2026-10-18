@@ -460,3 +460,144 @@ back to Question. Joins `rv-symbol` with the V-R14 fix:
   next`, then Save | the mark stays Reviewed.
 U2 (radio focus ring after an arrow, shared with the rule box), U3 (Open in
 editor at a line), U5, U6 and G2, G3 are held for a later card.
+
+## v3: ask from the mark (cards `rv-ask-data`, `rv-ask-ui`), and the review polish (card `rv-polish`)
+
+status: proposed (0147), by the FSE, 2026-10-18, on main at c6e5613.
+sources: the stage's exit 2 ("a question marked on a node reaches the
+card's supervisor as a thread", `working-on/roadmap.yaml`); Aglaea's design
+§3.3 "Room for v3" (`docs/ux/specs/review-view.md`: "v3 replaces `Save`
+with `Ask <seat>` on those two marks") and its Amendment 2 (A1-A3, R15-R17);
+rs-ui's findings U2, U5, U6, G2 and rl-ui's U3 (`working-on/done/rv-symbol.md`,
+`working-on/done/rv-list.md`, ## UI review).
+
+### Premises
+
+| Premise | Shown by | Read |
+|---|---|---|
+| the app posts as the cell's human: `PostToCell(initiative, {thread_id, to, kind, subject, body})`, a new thread when `thread_id` is empty | `internal/service/cell.go:308-333` | 2026-10-18 |
+| a mark is `{symbol, state, note, by, at, hash, from}` in `<data>/review/<initiative>/<head>/state.json` | `internal/review/marks.go:38-47` | 2026-10-18 |
+| a running task's card `next` starts with its supervisor, `supN runs it (…)` (the FSE writes it at launch); a supervisor's discuss identity is `<project>/supN` | the fse skill's launch step; e.g. `git log -S 'sup81 runs it'` | 2026-10-18 |
+| discuss health lists one `AgentHealth{agent, watcher, …}` per registered seat | `internal/discuss/discuss.go:21-29` | 2026-10-18 |
+| organizer's `cell.json` has `agents: ["fse"]`, `reconciler: ""` | `agents/cell.json` | 2026-10-18 |
+| the panel's v3 line is `WORDS.v3`, `Kept in Deltagos; asking the supervisor comes later.` | `components/ReviewSymbol.tsx:182` | 2026-10-18 |
+| the affected words are `shown because it calls …` / `shown because … calls it` | `lib/review.ts:430-437` | 2026-10-18 |
+| the radio ring is drawn only on `input:focus-visible + span`, in the panel and the rule box | `styles/review.css:152`, `styles/rule-box.css:114` | 2026-10-18 |
+| the fixture's second commit writes `${…}` through perl, which interpolates it away | `scripts/fixture-home.sh:490` | 2026-10-18 |
+| the fixture's init-a has a cell; its health is `testdata/fixture-health.json` unless `--live-mailbox` | `scripts/fixture-home.sh:12, 48` | 2026-10-18 |
+
+### Requirements
+
+Card `rv-ask-data` (Go):
+
+- **FR-25** Who to ask, a bound read per card: the supervisor named at the
+  start of the card's `next` (`^sup[0-9]+\b`) when the initiative's discuss
+  health lists that agent; else the cell's `fse` when the roster has it;
+  else the cell's reconciler; else nobody. It returns `{seat, why}`, `why`
+  one of `runs this card`, `the initiative's FSE`, `the reconciler`, or
+  for nobody `no cell` / `no FSE or reconciler in the cell`. Another
+  machine's card is refused.
+- **FR-26** Ask, a bound write: for a mark whose state is question or
+  blocked with a note, save the mark (FR-16) and then post, as the cell's
+  human, one new thread `to: <seat>`, kind `question`, subject `<slug>:
+  review <symbol> (question)` or `(blocked)`, body: the note; a blank line;
+  `<file>:<head start>-<end> at <head short sha>`; and last
+  `Next action: <seat> answers in this thread`. The thread id is kept on
+  the mark (`thread`). Asking again on a mark that has a thread posts the
+  new note into that thread (kind `question`), no new thread. It refuses a
+  reviewed mark, an empty note, nobody to ask and another machine's card,
+  and writes nothing then. A post that fails keeps the saved mark without
+  `thread` and returns the first error line.
+- **FR-27** `organizer review <initiative> <card> --marks` prints
+  `Reviewed <n> of <m> · <q> questions · <b> blocked`, then one line per
+  question or block: symbol, state, thread id or `not asked`. Exit 0; a
+  card without a map exits 2 naming `organizer review` without `--marks`.
+  This is the coverage a reviewer quotes on the card; the app writes no
+  card.
+
+Card `rv-ask-ui` (frontend, after `rv-ask-data` and `rv-polish`):
+
+- **FR-28** On Question or Blocked, `Save` becomes `Ask <seat>` (FR-25),
+  disabled until a note, with the muted line `Saves the mark and opens a
+  thread to <seat> (<why>).` in place of the v3 line. With nobody to ask,
+  `Save` stays and the line reads `No one to ask here: <why>. Kept in
+  Deltagos.` On Reviewed or none the v3 line is gone.
+- **FR-29** After an ask, the panel reads `Asked <seat> · Open the thread`
+  (a link that opens Conversations on that thread, `openSlack`) and the
+  row's mark carries the word `asked` in its accessible name. A post that
+  failed reads `Saved here; couldn't ask <seat>: <first error line>` with
+  `Try again`. While posting, the button reads `Asking…` (the busy rule).
+
+Card `rv-polish` (frontend and the fixture, parallel with `rv-ask-data`):
+
+- **FR-30** (R15) Opened from `Called by`: `unchanged · calls <symbol>`;
+  from `Calls`: `unchanged · called by <symbol>`.
+- **FR-31** (R16) The primary's label follows the chosen radio: none or
+  Reviewed `Reviewed, next`; Question `Save question, next`; Blocked
+  `Save block, next`. Each saves the chosen mark with its note (required
+  for Question and Blocked) and moves on. `Save` (stay) is unchanged.
+- **FR-32** (R17) An empty `Called by` or `Calls` reads `none found`.
+- **FR-33** (U2) The radio ring shows on keyboard focus after an arrow key,
+  in the panel and in the rule box: drawn on `input:focus + span`.
+- **FR-34** (U5) `Called by` and `Calls` links are in the mono family, as
+  every other symbol name.
+- **FR-35** (U6) While an affected symbol is shown, the changed symbol's
+  row it came from stays the current row (`.on`, `aria-current`).
+- **FR-36** (rl-ui U3) A row's flags wrap at the name's indent.
+- **FR-37** (G2) The fixture's second commit is a real one-line edit of
+  `web/src/format.ts`: the file keeps its body and the function differs by
+  that line (`git show review-second:web/src/format.ts`).
+
+Held, not in v3: U3 / G1 (`Open in editor` at a line needs a line-taking
+binding and a choice of checkout), G3 (no claim, no failing make in the
+fixture; vitest covers them), Needs me's "review waiting" row (design §6).
+
+### Acceptance → gate
+
+No row posts to a real seat's mailbox, drives Pablo's screen, starts a
+seat or writes the clipboard (0095, 0108). Posts go to an `httptest`
+discuss server in go test, or to a mocked binding in vitest. Harness rows
+run in the Tab harness's hidden window on `fixture-home.sh --review`.
+
+| # | FR | Check | Expected (fails on main) |
+|---|---|---|---|
+| A1 | 25 | go test: `next: "sup81 runs it"` with sup81 in health; sup81 absent; a cell with a reconciler and no fse; no cell; another machine's card | sup81 `runs this card`; fse `the initiative's FSE`; the reconciler; nobody `no cell`; refused |
+| A2 | 26 | go test against a fake discuss server: ask a question; ask again; ask a reviewed mark; an empty note; the server down | one thread, to the seat, kind question, the subject and body as FR-26, last line `Next action: …`, `thread` on the mark; the second note in that thread; refused, refused with no write; the mark saved without `thread`, the error returned |
+| A3 | 27 | go test of the CLI with two marks (one asked) and a card with no map | the count line and two lines, one `not asked`; exit 2 naming the command |
+| A4 | 28, 29 | vitest, mocked bindings: Question with a note; nobody to ask; after an ask; a failed ask | `Ask sup81` and its line; `Save` and `No one to ask here: no cell. Kept in Deltagos.`; `Asked sup81 · Open the thread`, the link calls `openSlack` with the thread id, the row's name has `asked`; the failure words and `Try again` |
+| A5 | 28, 29 | harness, `fixture-home.sh --review` (fixture health, no mailbox): Question, a note, `Ask fse` | the mark is saved (row `question`), the panel reads `Saved here; couldn't ask fse: …`; focus stays on the button |
+| P1 | 30, 32 | vitest | both direction words; `none found` for an empty list |
+| P2 | 31 | vitest and harness: Question with a note, the primary | it reads `Save question, next`, the row reads `question`, focus on the next symbol's h2 |
+| P3 | 33 | harness: Tab into the radios, ↓, then the rule box's options the same way | the computed outline of the checked radio's span is `2px solid` `--focus-ring` after the arrow, in both |
+| P4 | 34, 35, 36 | harness at 1024×640: the links' font family; Called by → affected; a flagged row's boxes | mono; the origin row has `aria-current`; the flags' left edge equals the name's |
+| P5 | 37 | `fixture-home.sh --review`, `git show review-second:web/src/format.ts`, then V-R10 | the file has its body; V-R10 still holds with the change read as modified |
+| X0 | all | `XDG_DATA_HOME=$(mktemp -d) make test`, `cd frontend && pnpm run build`, `wails build`, then `git status --porcelain` | pass, empty |
+
+### Boundary
+
+- `rv-ask-data`: `internal/review/marks.go` (the `thread` field) and its
+  test, `internal/service` (the review file: addressee and ask) and
+  `internal/service/review_test.go`, `app.go` (two bound methods), `wails
+  generate module` output, `internal/cli/review.go` and its test.
+- `rv-polish`: `components/ReviewSymbol.tsx` and its test, `components/Review.tsx`
+  (the current row), `lib/review.ts` and its test, `styles/review.css`,
+  `styles/rule-box.css` (the ring only), `scripts/fixture-home.sh`
+  (`--review` only).
+- `rv-ask-ui`: `components/ReviewSymbol.tsx` and its test, `lib/review.ts`
+  and its test, `styles/review.css`, `stores/board.store.ts` only if
+  `openSlack` needs a thread argument.
+- Not: Needs me, Home, the card files, Firestore, `change-check`, posting
+  anywhere but the card's initiative's cell.
+
+### No-gos
+
+- No post without the reader's press of `Ask`. No post as a persona. No
+  write to the reviewed repo or a card. No new dependency.
+
+### Cards
+
+| Card | Gate rows | Depends on | ui_review |
+|---|---|---|---|
+| `rv-ask-data` | A1, A2, A3, X0 | — | false |
+| `rv-polish` | P1, P2, P3, P4, P5, X0 | — | true |
+| `rv-ask-ui` | A4, A5, X0 | `rv-ask-data`, `rv-polish` | true |
