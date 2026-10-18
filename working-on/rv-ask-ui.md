@@ -45,9 +45,9 @@ Not changed, on purpose:
 - `Conversation.tsx`: the existing `slackDraft.threadId` landing is used as is
 
 ## Notes
-- Harness runs set `discuss_state_dir: <an empty mktemp -d>` in the fixture's config from my own `run-dev.sh` (sup82, thread 01M57TR1): the `--review` fixture names none, so the app used the real token registry. With it every post fails before connecting (`open …/tokens.json: no such file or directory`), which is the spec's "no mailbox".
+- Harness runs set `discuss_state_dir: <an empty mktemp -d>` in the fixture's config from my own `run-dev.sh` (sup82, thread 01M57TR1): the `--review` fixture names none, so the app used the real token registry. With it every post fails before connecting (`open …/tokens.json: no such file or directory`), which is the spec's "no mailbox". Confirmed by the FSE as review-map v3 Amendment 3.
 - Before that, A5's premise ("fixture health, no mailbox") was false: the `--review` config names `canned_health` but no `discuss_state_dir`, so `discussStateDir` (internal/service/factory.go:119) uses the real `~/.local/state/discuss`, which has a token for `organizer-fixture/pablo`. My A5 run posted one ask: project `organizer-fixture`, to `fse`, thread `01M57TKJC6HSEGBS46PQQV10YY`, message `01M57TKJC6HSEGBS46PT5VTACG`. Nothing reached the `organizer` project. Detail: `.wt-notes/au-build/progress.md`.
-- sup82 reports the fixture gap and that thread to the FSE; I left it alone.
+- Thread 01M57TKJC6HSEGBS46PQQV10YY (organizer-fixture, to fse, from the first A5 run) is left as it is, as sup82 asked; sup82 reports it and the fixture gap to the FSE.
 
 ## Done
 - 2026-10-18 au-build: FR-28, FR-29, FR-38, FR-40 (e0dc71a) and FR-39 (60f74c3) on rv-ask-ui; gate A4, A5, X0, A6, A7, A8 met; notes `.wt-notes/au-build/progress.md`.
