@@ -6,6 +6,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"organizer/internal/model"
 )
 
 // fakeChangeCheck puts a change-check on the PATH that writes its
@@ -132,5 +134,119 @@ func TestChangeCheckFailures(t *testing.T) {
 	fakeChangeCheck(t, `{"flags": []}`, 0)
 	if f, err := ChangeCheck(t.TempDir(), "i", "c", "a", "b"); err != nil || len(f) != 0 {
 		t.Errorf("clean: %v %v", f, err)
+	}
+}
+
+// twoRepoCard is an initiative root holding repos alpha and beta, each a
+// Go module whose branch c2 changes A in p/a.go, and a card c2 across
+// both. It returns the scanned initiative.
+func twoRepoCard(t *testing.T) *model.ScannedInitiative {
+	root := t.TempDir()
+	for _, name := range []string{"alpha", "beta"} {
+		f := fixture{t: t, dir: filepath.Join(root, name)}
+		f.write("go.mod", "module example.com/"+name+"\n\ngo 1.22\n")
+		f.write("p/a.go", "package p\n\nfunc A() int { return 1 }\n")
+		f.git("init", "-q", "-b", "main")
+		f.git("add", ".")
+		f.git("commit", "-q", "-m", "base")
+		f.git("checkout", "-q", "-b", "c2")
+		f.write("p/a.go", "package p\n\nfunc A() int { return 2 }\n")
+		f.git("commit", "-q", "-am", "c2 in "+name)
+	}
+	return &model.ScannedInitiative{
+		Initiative: model.Initiative{ID: "init", Path: root, Repos: []string{"alpha", "beta"}},
+		Cards:      []model.Card{{Slug: "c2", Branch: "c2", Repos: []string{"alpha", "beta"}}},
+	}
+}
+
+// stubChangeCheck puts a change-check on the PATH that appends its
+// arguments to args.txt beside it, one line per call, exits 3 for
+// `--repo <failing>` and otherwise prints one undeclared flag on A named
+// by symbol alone, which matches A in both repos unless scoped.
+func stubChangeCheck(t *testing.T, failing string) (argsFile string) {
+	t.Helper()
+	dir := t.TempDir()
+	argsFile = filepath.Join(dir, "args.txt")
+	script := "#!/bin/sh\necho \"$@\" >> '" + argsFile + "'\n" +
+		"case \"$*\" in *\"--repo " + failing + " \"*) echo 'boom in " + failing + "' >&2; exit 3;; esac\n" +
+		"echo '{\"flags\": [{\"flag\": \"undeclared\", \"repo\": \"\", \"path\": \"\", \"symbol\": \"A\", \"detail\": \"function\"}]}'\nexit 1\n"
+	if err := os.WriteFile(filepath.Join(dir, "change-check"), []byte(script), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", dir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	return argsFile
+}
+
+// M2 (leftovers-45 FR-2): a two-repo card runs change-check once per repo
+// with its own --repo, base and head; beta's run fails, alpha's flag lands
+// on alpha's A only, and the reconciliation names beta and its error.
+func TestMakeChecksEachRepo(t *testing.T) {
+	si := twoRepoCard(t)
+	ranges, card, err := Resolve(si, "c2")
+	if err != nil || len(ranges) != 2 || card != "c2" {
+		t.Fatalf("resolve: %+v %q %v", ranges, card, err)
+	}
+	argsFile := stubChangeCheck(t, "beta")
+	rm, err := Make(si, "c2", card, ranges, t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	args, _ := os.ReadFile(argsFile)
+	t.Logf("change-check calls:\n%s", args)
+	var want []string
+	for _, r := range ranges {
+		want = append(want, si.Path+" c2 --repo "+r.Name+" --base "+r.Base+" --head "+r.Head+" --json")
+	}
+	if got := strings.Split(strings.TrimSpace(string(args)), "\n"); !slices.Equal(got, want) {
+		t.Errorf("calls %q, want %q", got, want)
+	}
+	if ranges[0].Base == ranges[1].Base || ranges[0].Head == ranges[1].Head {
+		t.Fatal("fixture: both repos share a range")
+	}
+	const a, b = "go:example.com/alpha/p.A", "go:example.com/beta/p.A"
+	nodes := byID(rm)
+	if !slices.Contains(nodes[a].Flags, "undeclared") || slices.Contains(nodes[b].Flags, "undeclared") {
+		t.Errorf("alpha A %v, beta A %v: want undeclared on alpha only", nodes[a].Flags, nodes[b].Flags)
+	}
+	if len(rm.Mismatches) != 1 || rm.Mismatches[0].Node == nil || *rm.Mismatches[0].Node != a {
+		t.Errorf("mismatches %+v, want one on %s", rm.Mismatches, a)
+	}
+	if rm.Reconciled || !strings.HasPrefix(rm.Reconciliation, "beta: change-check failed: exit status 3: boom in beta") {
+		t.Errorf("reconciled %v %q, want false naming beta and its error", rm.Reconciled, rm.Reconciliation)
+	}
+	t.Logf("reconciled %v, reconciliation %q", rm.Reconciled, rm.Reconciliation)
+
+	// Both repos check: each flag on its own repo's A, reconciled.
+	stubChangeCheck(t, "none")
+	rm, err = Make(si, "c2", card, ranges, t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	nodes = byID(rm)
+	if !rm.Reconciled || rm.Reconciliation != "change-check c2" || len(rm.Mismatches) != 2 ||
+		!slices.Contains(nodes[a].Flags, "undeclared") || !slices.Contains(nodes[b].Flags, "undeclared") {
+		t.Errorf("both check: %v %q %+v %v %v", rm.Reconciled, rm.Reconciliation, rm.Mismatches, nodes[a].Flags, nodes[b].Flags)
+	}
+}
+
+// A one-range card runs change-check once, as before FR-2: no --repo.
+func TestMakeOneRangeNoRepoFlag(t *testing.T) {
+	si := twoRepoCard(t)
+	si.Cards[0].Repos = []string{"alpha"}
+	ranges, card, err := Resolve(si, "c2")
+	if err != nil || len(ranges) != 1 {
+		t.Fatalf("resolve: %+v %v", ranges, err)
+	}
+	argsFile := stubChangeCheck(t, "none")
+	rm, err := Make(si, "c2", card, ranges, t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	args, _ := os.ReadFile(argsFile)
+	if got, want := strings.TrimSpace(string(args)), si.Path+" c2 --base "+ranges[0].Base+" --head "+ranges[0].Head+" --json"; got != want {
+		t.Errorf("call %q, want %q", got, want)
+	}
+	if !rm.Reconciled || rm.Reconciliation != "change-check c2" {
+		t.Errorf("reconciled %v %q", rm.Reconciled, rm.Reconciliation)
 	}
 }

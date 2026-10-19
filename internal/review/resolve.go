@@ -182,11 +182,40 @@ func Make(si *model.ScannedInitiative, target, card string, ranges []Range, pare
 	// change-check takes the root or the id; an id it looks up under ~,
 	// which finds no fixture or clone and may find another root with the
 	// same id, so it gets the root the scan read.
-	if flags, err := ChangeCheck(si.Path, si.Path, card, rm.Base, rm.Head); err != nil {
-		rm.Reconciliation = err.Error()
+	if len(ranges) <= 1 {
+		if flags, err := ChangeCheck(si.Path, si.Path, card, rm.Base, rm.Head); err != nil {
+			rm.Reconciliation = err.Error()
+		} else {
+			Reconcile(rm, flags)
+			rm.Reconciled, rm.Reconciliation = true, "change-check "+card
+		}
+		return rm, nil
+	}
+	// Several ranges (leftovers-45 FR-2): one run per repo with its own
+	// base and head, each run's flags on that repo's nodes only; a repo
+	// that fails is named and leaves the others' flags in place.
+	var failed []string
+	for _, r := range ranges {
+		flags, err := ChangeCheckRepo(si.Path, si.Path, card, r.Name, r.Base, r.Head)
+		if err != nil {
+			failed = append(failed, repoLabel(r)+": "+err.Error())
+			continue
+		}
+		ReconcileRepo(rm, flags, r.Name)
+	}
+	if len(failed) > 0 {
+		rm.Reconciliation = strings.Join(failed, "; ")
 	} else {
-		Reconcile(rm, flags)
 		rm.Reconciled, rm.Reconciliation = true, "change-check "+card
 	}
 	return rm, nil
+}
+
+// repoLabel names a range's repo for a reconciliation: its name, or its
+// directory for the root.
+func repoLabel(r Range) string {
+	if r.Name != "" {
+		return r.Name
+	}
+	return r.Repo
 }
