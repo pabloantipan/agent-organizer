@@ -4,6 +4,11 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## 2026-10-18 23:30
+
+- Pablo, this session: "you can go till 60% again" (my context cap, after I asked to rotate at ~290k). Push and the odyssey trial: "1 and 2 tomorrow".
+- Found checking "are revision tools ready?": `organizer review <i> <card>` misses merges whose subject puts a comma after the slug (`merge: lf44-ask-survives, …`): FR-13 matches only `merge: <slug> ` or `merge: <slug>(`. 14 of 131 first-parent merges use a comma (lf41-lf44 among them), 2 a `/`. Fix: match the slug followed by any non-slug character. Cut with multi-repo reconciliation (change-check --repo is live).
+
 ## HAND-OFF 2026-10-18 21:32 (last SHA seen 2a60d49; this seat at ~290k, past the 250k cap: rotate)
 
 - No supervisor running. sup85 ended: leftovers 44 landed (5164ee4, installed v0.2.0-2602-g5164ee4), 2h47m wall vs 25-50m, ~55 min of work, ~1h52m the usage limit; seats $11.57; runs/2026-10-18-sup85-leftovers-44.md. Held from it: marks asked before lf44 have no asked_note (SetMark should take was.Note when Asked is set and AskedNote empty); review_ask.go:88-90 doc stale; answered in review-view Amendment 10 (9cef151): AS1 remove the 'Choose a mark…' line (the primary saves with ✓), AS3 pass the asked seat with Open the thread (no channel flash), no clear to none (FR-1's clause reads ✓ only); AS2 (1) domId collapses 'a b' and 'a_b'; seats from the root leave runs unattributed (2nd sighting: carry).
