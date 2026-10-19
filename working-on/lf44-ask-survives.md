@@ -143,3 +143,70 @@ Explanations:
 - Note (to the FSE): a mark asked before this landed has no `asked_note`. SetMark carries the empty value forward, so after that note is edited and saved, `askOf` reads the new note as the asked one and no `Ask <seat> again` is offered. A scratch test shows it: legacy ask, then a SetMark with "why 2, not 3?", gives `asked="M1" asked_note=""`. On main the ask was lost on Save anyway, so nothing regresses. A fix: SetMark sets `AskedNote = was.Note` when `was.Asked != ""` and `AskedNote` is empty.
 - Note (to the FSE): AskReview's doc comment (`review_ask.go:88-90`) still says a failed post "leaves the mark saved without asked". It now keeps an earlier ask.
 - Note (to the FSE): K2 and K3 test the pure functions and source pins behind the panel, not a press, because there is no DOM test library in `frontend/`. That is the project's norm, and each claim is pinned to the code that draws it.
+
+## UI review
+
+as-ui, 2026-10-18. Every row checked on 9092eb3 (the branch did not move). **Verdict: pass.** No finding of severity 4 or 3 against leftovers-44 FR-1 to FR-4 or review-view Amendment 9 (R36-R38). Evidence in `.wt-notes/as-ui/`: harness logs `out/h-1024x640-final.txt` and `out/h-1440x900.txt`, shots `out/wk-*.png` and `out/rb-*.png`, AX dumps `out/rb-ax-*.txt`, the asks the canned post took `out/posts-*.jsonl`, and `out/killed.txt`.
+
+Shared test run: **fresh**, run `2c2f7c16-62247` of 9092eb3 (exit 0, go ok, vitest 78 files / 1013 tests; `maketest.log`). as-review reused it.
+
+No mailbox, no editor. Every fixture was `--review --canned-post`. Each launch checked for exactly one `discuss_state_dir:` line under the fixture's temp dir and `auth: off` (`out/rb-config-check.txt`, `out/dev-config-check.txt`). The probe was stubbed and `editor:` was a logging stub. I never pressed `Open in editor`, and no editor call was logged. The asks went only to the fixture's `posts.jsonl`.
+
+How each state was checked:
+- **WKWebView, Tab harness.** rs-build's `tabharness.swift` (read; rs-ui's `waitfile`, timeout raised to 1200 s) ran offscreen, `isKey: true`, under `harness.lock`, against my own `wails dev -devserver localhost:34265` from a clean clone of 9092eb3, a fresh fixture per run, at 1024×640 and 1440×900. Dev server and stand-ins killed by saved pid. The two sizes read the same.
+  - **R37 / K3** (format.formatName, unmarked, typed `why this?`): buttons are `Reviewed, next` only, no Save. `Choose a mark to save this note.` sits under the note in DOM and reading order (note, line, buttons). The note's `aria-describedby="rs-note-hint-ts_web_src_format_ts_formatName"` names that element. Computed style 12px/400 rgb(181,175,195) = `--fg-muted`, sm. Tab from the note goes `Reviewed, next`, then body (the document's end, A8 A2): Save is never a stop and the line is no stop. After choosing Question the line is gone and `Ask fse, next` and `Save` are drawn.
+  - **R36 / K2**: Question, then `Ask fse, next` (canned post). Coming back shows `Asked fse · Open the thread` and no Save. Editing the note to `why this? more` draws `Ask fse again, next`, `Save`, and `Saves the mark and asks fse again in this review's thread. Wakes fse.`. After Save, Save is gone; the panel keeps `Asked fse · Open the thread`, the line and `Ask fse again, next`; the row reads `? asked` (aria-label `…, question, asked`). Focus after Save is on `Ask fse again, next` with the 2px ring. Leaving to Greet and coming back reads the same from the backend.
+  - **FR-1, Reviewed**: Reviewed then Save. The link `Asked fse · Open the thread` stays, the row reads `✓` with no `asked`, there is no ask line and no `Ask …`, and focus is on the Reviewed radio.
+  - **R38 / K4**: `Open the thread` with the canned thread never listed lands on `# channel`, `Nothing here.`. That is never archive, as the spec says ("else channel": with no mailbox `GetCellThread` fails, so there is no seat to switch to). `aria-current="true"` and the `.active` fill (rgba(138,63,252,.18)) are on the same row, channel. `aria-current="page"` stays on the crumb. Focus is on `← Review`. It still reads the same at 10 s.
+  - No horizontal scroll (992/992, 1408/1408), no `Error:` in any state.
+- **Review build** (`make review-build` in my detached worktree). Pid saved; AX and AXPress on that pid only; `screencapture -o -l` of its window at 1440×900 and 1024×640. The screen was unlocked. AX cannot type, so I reached the asked-and-edited state by writing, in the fixture's own temp `state.json`, the record K1 says a Save leaves (`question`, note `why this? more`, `asked`, `asked_thread`, `asked_note: why this?`), then reopening the review.
+  - The panel reads `Ask fse again, next`, `Saves the mark and asks fse again in this review's thread. Wakes fse.` and `Asked fse · Open the thread`, with no Save; the row reads `? asked` (`rb-1440x900-K2-asked-saved.png`).
+  - AXPress Reviewed then Save: the backend file still holds `asked`, `asked_thread` and `asked_note`. The row reads `✓` and its AX name ends `reviewed`, the link stays, there is no ask, and AX focus is on the Reviewed radio (`rb-1024x640-K2-reviewed.png`).
+  - `Open the thread`: `channel` `.chat.active`, `Nothing here.`, AX focus on `← Review` (`rb-1024x640-K4-landing.png`).
+- **Rest of the panel, against lf43's UI review**, unchanged at both sizes:
+  - the header `<head> ← <base> · 2 symbols changed, 0 tests` and `Reviewed n of 2 · 1 must-visit left`;
+  - the h2 focused when a symbol opens;
+  - the file line `web/src/format.ts 1-4  Not checked out here at <sha>.`;
+  - `? asked` at the mark's place before the name;
+  - `Open the thread` a link;
+  - the 2px ring;
+  - at 1024 the panel scrolls inside itself, and `Asked fse · Open the thread` sits under the fold, as before.
+
+Words, design vs screen:
+- `Asked <seat> · Open the thread` reads `Asked fse · Open the thread`. Same.
+- `? asked` reads `? asked`. Same.
+- `Ask <seat> again` (`, next` while one is left) reads `Ask fse again, next`. Same.
+- `Saves the mark and asks <seat> again in this review's thread. Wakes <seat>.` reads `Saves the mark and asks fse again in this review's thread. Wakes fse.`. Same.
+- `Choose a mark to save this note.`: same.
+- `Save`: same.
+
+Findings:
+- **AS1 (2), for aglaea**:
+  - What the person cannot do: trust the new line. With a note typed and no mark, the panel says `Choose a mark to save this note.`, but `Reviewed, next` sits right under it and saves that note as Reviewed (the primary maps no mark to Reviewed, A2). The line says a mark is needed while the primary saves without one being chosen.
+  - Where: `wk-1024x640-K3-note-no-mark.png`, `wk-1440x900-K3-note-no-mark.png`.
+  - Evidence: the harness K3 state shows buttons `["Reviewed, next"]` beside the hint. `primaryOf("", …)` gives mark `reviewed`, and the press saves the note.
+  - Severity: 2. FR-2 and R37 are met as written.
+  - Proposal: aglaea words it, e.g. `Choose a mark to save this note, or Reviewed, next saves it as reviewed.`; or the line is dropped while a primary that saves is drawn.
+- **AS2 (1)**:
+  - What the person cannot do: nothing seen yet. `domId` maps every character but `[A-Za-z0-9_-]` to `_`, so `a b/c.ts` and `a_b/c.ts` (or `a.b`) give the same id. Two such symbols on one screen would make `aria-describedby` name the first one's line.
+  - Where: `lib/review.ts` `domId`.
+  - Evidence: code only. One symbol's panel shows at a time, so it cannot happen today.
+  - Severity: 1.
+  - Proposal: none now; an escape that keeps distinct inputs distinct if two panels ever show.
+- **AS3 (1)**:
+  - What the person cannot do: nothing seen. The landing shows channel first and switches to the asked seat's chat when `GetCellThread` answers, so with a live mailbox channel may flash for one round trip before the seat's chat.
+  - Where: `Conversation.tsx` `unlistedLanding`.
+  - Evidence: code and vitest K4. The fixture has no mailbox, so the switch never happens there.
+  - Severity: 1.
+  - Proposal: pass the review's seat with `Open the thread` (Review.tsx and the store, outside this boundary), so the first chat shown is already the seat's.
+
+Spec gaps (for the FSE):
+- FR-1's "or none keeps the link" is not reachable: the panel cannot clear a mark (builder's note).
+- AS1: the hint beside a primary that saves.
+
+For aglaea: AS1 (the line's words while `Reviewed, next` would save the note); AS3 (whether the seat should ride `Open the thread` so the landing never shows channel first).
+
+Not verified in WKWebView:
+- The landing on the asked seat's direct chat, then the thread selected once listed, and not selected after a move. There is no mailbox, so `GetCellThread` fails and the canned thread is never listed; vitest K4 covers it in the fresh run.
+- K5, the editor-failure id on a path with a space: the fixture has no such file (vitest K5; the ids seen are sanitised, `rs-note-hint-ts_web_src_format_ts_formatName`).
+- R36 typed in the review build: AX cannot type, so that state came from the seeded record there and was typed in the harness.
