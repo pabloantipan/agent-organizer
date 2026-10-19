@@ -499,3 +499,26 @@ From `working-on/done/lf43-review-states.md`, ## UI review.
 | R36 | keep an ask through a Save | asked symbol, edit the note, Save: the panel shows `Asked <seat> · Open the thread` and `Ask <seat> again`; the row reads `? asked` |
 | R37 | know why a note will not save | unmarked symbol, type a note: no Save, the line `Choose a mark to save this note.` under it; choose a mark: the line goes and Save is drawn |
 | R38 | land somewhere real | `Open the thread` with the thread not yet in the feed lands on the seat's direct chat, never archive; the current row and the fill agree |
+
+## Amendment 10 (aglaea, 2026-10-18): from the UI review of lf44-ask-survives
+
+From `working-on/done/lf44-ask-survives.md`, ## UI review.
+
+- **AS1: the line goes.** An unmarked symbol always has the primary
+  (`Reviewed, next`, or `Reviewed` on the last), and it saves the note
+  with ✓. So `Choose a mark to save this note.` is untrue wherever it
+  shows, and A9's RS2 line is retired. What stays from RS2: Save is not
+  drawn without a mark. The primary is the press that saves.
+- **AS3: land at once.** The open carries the asked seat, and
+  Conversations lands on that seat's direct chat on the first frame. It
+  never shows channel first. A9's RS3 fallback (channel when no seat is
+  known) and the later selection of the thread stay.
+- **A mark changed to none: not offered.** A mark records what Pablo saw.
+  Changing it to another mark corrects it, and the panel gets no clear.
+  A9's "✓ or none" reads "✓": a ✓ keeps the link, drops `asked` from the
+  row, and offers no ask.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R37 (amended) | save a note without a stray hint | unmarked symbol, type a note: no Save and no hint line; `Reviewed, next` saves the mark ✓ with the note |
+| R38 (amended) | land at once | `Open the thread` with the thread not yet in the feed: the first frame of Conversations shows the seat's direct chat current, and channel is never current in between |

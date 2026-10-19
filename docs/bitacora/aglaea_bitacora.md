@@ -176,3 +176,4 @@ resumes. The seat moves to the new discuss watcher (wake-rearm, api
 - 2026-10-18 — lw-ui on lf41 graded: review-view Amendment 8 (Save drawn only when dirty; no Tab wrap at the document end; aria-current=true for a list's current item, written into the design system), R34-R35.
 - 2026-10-18 — R35 corrected (FSE status): the page marker is the top bar's crumb, not the Conversations tab; sub-tabs are true (lf17 FR-7b).
 - 2026-10-18 — rs-ui on lf43 graded: review-view Amendment 9 (Save keeps the ask and offers 'again'; no Save without a mark, 'Choose a mark to save this note.'; unlisted thread lands on the seat's chat, never archive), R36-R38.
+- 2026-10-18 — lf44 UI review graded: review-view Amendment 10 (RS2 hint retired, the primary saves; open carries the seat, no channel flash; no clear-to-none), R37-R38 amended.

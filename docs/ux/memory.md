@@ -427,6 +427,8 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - A button that cannot act is not drawn; when the reason is not obvious, a muted line says what would make it act (review-view A9).
 - A landing whose target is not loaded yet goes to its likeliest home (the seat's chat), never to an archive, and moves to the target when it arrives unless the person moved (review-view A9).
 
+- Before wording a missing-action hint, check every press on the panel: if another control already does the act (the primary saves the note), the hint is false (review-view A10).
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).
