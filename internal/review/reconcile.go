@@ -47,13 +47,25 @@ var MismatchTypes = []string{"changed_not_declared", "declared_not_changed", "ou
 // the JSON; anything else, or output that is not it, is an error that
 // says why in one line (FR-12).
 func ChangeCheck(dir, initiative, card, base, head string) ([]CheckFlag, error) {
+	return ChangeCheckRepo(dir, initiative, card, "", base, head)
+}
+
+// ChangeCheckRepo is ChangeCheck limited to one repo of the card with
+// `--repo <name>` (leftovers-45 FR-2); an empty repo passes no --repo.
+// Every flag it returns is that repo's.
+func ChangeCheckRepo(dir, initiative, card, repo, base, head string) ([]CheckFlag, error) {
 	bin, err := exec.LookPath("change-check")
 	if err != nil {
 		return nil, errors.New("change-check not on PATH")
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
-	cmd := exec.CommandContext(ctx, bin, initiative, card, "--base", base, "--head", head, "--json")
+	args := []string{initiative, card}
+	if repo != "" {
+		args = append(args, "--repo", repo)
+	}
+	args = append(args, "--base", base, "--head", head, "--json")
+	cmd := exec.CommandContext(ctx, bin, args...)
 	cmd.Dir = dir
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &stdout, &stderr
@@ -67,6 +79,11 @@ func ChangeCheck(dir, initiative, card, base, head string) ([]CheckFlag, error) 
 	}
 	if json.Unmarshal(stdout.Bytes(), &out) != nil || out.Flags == nil {
 		return nil, fmt.Errorf("change-check failed: output is not its --json%s", firstLine(stderr.String()))
+	}
+	if repo != "" {
+		for i := range *out.Flags {
+			(*out.Flags)[i].Repo = repo
+		}
 	}
 	return *out.Flags, nil
 }
@@ -86,6 +103,30 @@ func firstLine(s string) string {
 // a path and no symbol names every changed node of that file; a declared
 // name is change-check's `file`, `Symbol` or `file:Symbol`.
 func Reconcile(rm *RevMap, flags []CheckFlag) {
+	reconcileIn(rm, flags, func(Node) bool { return true })
+}
+
+// ReconcileRepo is Reconcile for the flags of one repo's change-check run
+// (leftovers-45 FR-2): they land only on nodes of that repo, whose files
+// carry `<repo>/` on a map of several repos; the root's ("") are the nodes
+// under no other repo's name.
+func ReconcileRepo(rm *RevMap, flags []CheckFlag, repo string) {
+	reconcileIn(rm, flags, func(n Node) bool { return inRepo(rm, n, repo) })
+}
+
+func inRepo(rm *RevMap, n Node, repo string) bool {
+	if repo != "" {
+		return strings.HasPrefix(n.File, repo+"/")
+	}
+	for _, r := range rm.Repos {
+		if r.Name != "" && strings.HasPrefix(n.File, r.Name+"/") {
+			return false
+		}
+	}
+	return true
+}
+
+func reconcileIn(rm *RevMap, flags []CheckFlag, mine func(Node) bool) {
 	for _, f := range flags {
 		w, ok := checkWords[f.Flag]
 		if !ok {
@@ -105,7 +146,7 @@ func Reconcile(rm *RevMap, flags []CheckFlag) {
 		var hit []string
 		for i := range rm.Nodes {
 			n := &rm.Nodes[i]
-			if n.Level != "symbol" || (file != "" && n.File != file) {
+			if n.Level != "symbol" || !mine(*n) || (file != "" && n.File != file) {
 				continue
 			}
 			if sym == "" && (file == "" || n.Change == "affected") {

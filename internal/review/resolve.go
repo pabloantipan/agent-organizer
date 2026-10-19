@@ -43,7 +43,8 @@ func isRepo(dir string) bool {
 // CardRanges is FR-1 and FR-13 for a card: its branch against main's merge
 // base, in each of its repos that has the branch; else, in each repo, the
 // newest commit on main's first parent whose subject is the card's merge
-// (`merge: <slug> (…)`), against its first parent. A card with neither is
+// (`merge: <slug>` then the end or a character no slug has), against its
+// first parent. A card with neither is
 // Missing, naming both.
 func CardRanges(slug, branch string, repos []Repo) ([]Range, error) {
 	var out []Range
@@ -85,11 +86,11 @@ func CardRanges(slug, branch string, repos []Repo) ([]Range, error) {
 	if branch != "" {
 		branchWhy = fmt.Sprintf("branch %s of card %s does not exist in %s", branch, slug, in)
 	}
-	return nil, &Missing{What: fmt.Sprintf("%s, and no commit on main's first parent in %s starts \"merge: %s \" or \"merge: %s(\"", branchWhy, in, slug, slug)}
+	return nil, &Missing{What: fmt.Sprintf("%s, and no commit on main's first parent in %s has the subject \"merge: %s\" followed by the end of the subject or any character that cannot be in a slug (not a-z, 0-9, -), such as \"merge: %s \" or \"merge: %s,\"", branchWhy, in, slug, slug, slug)}
 }
 
 // mergeOf is the newest commit on the main line's first parent whose
-// subject starts `merge: <slug> ` or `merge: <slug>(` (FR-13): the merge a
+// subject is the card's merge (FR-13, leftovers-45 FR-1): the merge a
 // supervisor makes before deleting the card's branch.
 func mergeOf(dir, slug string) (string, bool) {
 	mb, ok := mainline(dir)
@@ -102,11 +103,23 @@ func mergeOf(dir, slug string) (string, bool) {
 	}
 	for _, l := range strings.Split(out, "\n") {
 		sha, subject, _ := strings.Cut(l, " ")
-		if strings.HasPrefix(subject, "merge: "+slug+" ") || strings.HasPrefix(subject, "merge: "+slug+"(") {
+		if isMergeOf(subject, slug) {
 			return sha, true
 		}
 	}
 	return "", false
+}
+
+// isMergeOf is leftovers-45 FR-1: the subject is `merge: <slug>` followed
+// by its end or a character that cannot be in a slug (not a-z, 0-9, -),
+// so `merge: x, y` and `merge: x/y` are x's and `merge: x-2 y` is not.
+func isMergeOf(subject, slug string) bool {
+	rest, ok := strings.CutPrefix(subject, "merge: "+slug)
+	if !ok || rest == "" {
+		return ok
+	}
+	c := rest[0]
+	return !(c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || c == '-')
 }
 
 // CommitRanges is FR-1 for a commit: against its first parent, in the
@@ -169,11 +182,40 @@ func Make(si *model.ScannedInitiative, target, card string, ranges []Range, pare
 	// change-check takes the root or the id; an id it looks up under ~,
 	// which finds no fixture or clone and may find another root with the
 	// same id, so it gets the root the scan read.
-	if flags, err := ChangeCheck(si.Path, si.Path, card, rm.Base, rm.Head); err != nil {
-		rm.Reconciliation = err.Error()
+	if len(ranges) <= 1 {
+		if flags, err := ChangeCheck(si.Path, si.Path, card, rm.Base, rm.Head); err != nil {
+			rm.Reconciliation = err.Error()
+		} else {
+			Reconcile(rm, flags)
+			rm.Reconciled, rm.Reconciliation = true, "change-check "+card
+		}
+		return rm, nil
+	}
+	// Several ranges (leftovers-45 FR-2): one run per repo with its own
+	// base and head, each run's flags on that repo's nodes only; a repo
+	// that fails is named and leaves the others' flags in place.
+	var failed []string
+	for _, r := range ranges {
+		flags, err := ChangeCheckRepo(si.Path, si.Path, card, r.Name, r.Base, r.Head)
+		if err != nil {
+			failed = append(failed, repoLabel(r)+": "+err.Error())
+			continue
+		}
+		ReconcileRepo(rm, flags, r.Name)
+	}
+	if len(failed) > 0 {
+		rm.Reconciliation = strings.Join(failed, "; ")
 	} else {
-		Reconcile(rm, flags)
 		rm.Reconciled, rm.Reconciliation = true, "change-check "+card
 	}
 	return rm, nil
+}
+
+// repoLabel names a range's repo for a reconciliation: its name, or its
+// directory for the root.
+func repoLabel(r Range) string {
+	if r.Name != "" {
+		return r.Name
+	}
+	return r.Repo
 }
