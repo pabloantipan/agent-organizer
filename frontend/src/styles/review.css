@@ -181,6 +181,8 @@
 /* Who the mark asks, or why no one (FR-28); after an ask, who was asked
    and the thread, or why the post failed (FR-29). */
 .rs-ask-line { margin: 0; font-size: var(--font-size-sm); color: var(--fg-muted); }
+/* leftovers-44 FR-2: a note with no mark says why it will not save, muted, under the note. */
+.rs-note-hint { margin: 0; font-size: var(--font-size-sm); color: var(--fg-muted); }
 .rs-asked { margin: 0; font-size: var(--font-size-sm); color: var(--fg); overflow-wrap: anywhere; }
 .rs-asked.review-error { color: var(--danger); }
 /* Open the thread changes where you are, so it is a link, drawn and ringed

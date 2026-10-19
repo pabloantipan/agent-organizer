@@ -1525,6 +1525,7 @@ export namespace review {
 	    from?: string;
 	    asked?: string;
 	    asked_thread?: string;
+	    asked_note?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Mark(source);
@@ -1541,6 +1542,7 @@ export namespace review {
 	        this.from = source["from"];
 	        this.asked = source["asked"];
 	        this.asked_thread = source["asked_thread"];
+	        this.asked_note = source["asked_note"];
 	    }
 	}
 	export class Marks {

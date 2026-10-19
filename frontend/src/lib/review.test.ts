@@ -5,6 +5,7 @@ import {
   makingLabel, movedLine, nextToReview, nothingToReview, partialLines, reviewable, rowName, screenState, shortName, walkOf, WORDS, worklist,
   afterASecond, affectedLine, askedLine, askFailedLine, askLine, askStage, firstLine, markControls, lastToReview, primaryOf, saidAfter, makeOrigin, secondsSince, backTo, calledBy, callsOf, canSave, flagLook, markOf, progressDelay, shasOf, symbolDiff, testsOf,
   editorAt, notCheckedOut, threadOf, definitionLine, editorRefusal, editorFailed, saveShown, focusAfterSave,
+  askOf, domId, marksOf, noteHint,
 } from "./review";
 
 // review-map v2 FR-18 (docs/ux/specs/review-view.md §3.1, §3.2, §4, §5):
@@ -654,5 +655,28 @@ describe("S4 (leftovers-43 FR-4): Save only while there is something to save", (
     expect(focusAfterSave({ showPrimary: true, ask: true })).toBe("primary");
     expect(focusAfterSave({ showPrimary: true, ask: false })).toBe("radios");
     expect(focusAfterSave({ showPrimary: false, ask: true })).toBe("radios");
+  });
+});
+
+describe("leftovers-44 FR-1, FR-2, FR-4: the ask kept, Save needs a mark, safe ids", () => {
+  const marks = (state: string) => ({ marks: [{ symbol: "s", state, note: "edited", asked: "M1", asked_thread: "T1", asked_note: "asked" }], changed: [] }) as unknown as review.Marks;
+  it("asked marks a question or a block only; the ask itself is kept on any mark", () => {
+    expect(marksOf(marks("question")).asked.has("s")).toBe(true);
+    expect(marksOf(marks("blocked")).asked.has("s")).toBe(true);
+    expect(marksOf(marks("reviewed")).asked.has("s")).toBe(false);
+    expect(askOf(marks("reviewed"), "s")).toEqual({ asked: true, askedNote: "asked" });
+    expect(threadOf(marks("reviewed"), "s")).toBe("T1");
+  });
+  it("Save is drawn only with a mark; a note with none says why", () => {
+    expect(saveShown("", "a note", { state: "", note: "" })).toBe(false);
+    expect(saveShown("reviewed", "a note", { state: "", note: "" })).toBe(true);
+    expect(noteHint("", "a note")).toBe(WORDS.chooseMark);
+    expect(WORDS.chooseMark).toBe("Choose a mark to save this note.");
+    expect(noteHint("question", "a note")).toBe("");
+    expect(noteHint("", "")).toBe("");
+  });
+  it("domId keeps letters, digits, - and _ only", () => {
+    expect(domId("rs-editor-failed", "a b/c.ts")).toBe("rs-editor-failed-a_b_c_ts");
+    expect(domId("rs-note", "go:example.com/m/p.A")).toMatch(/^[A-Za-z0-9_-]+$/);
   });
 });

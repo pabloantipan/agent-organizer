@@ -54,3 +54,33 @@ func TestAskReviewKeepsEachMarksThread(t *testing.T) {
 		t.Errorf("state.json:\n%s", raw)
 	}
 }
+
+// K1 (leftovers-44 FR-1) through the service: AskReview writes the note it
+// asked with, and MarkReview, the panel's Save, keeps the ask when the
+// note is edited and when the mark becomes reviewed.
+func TestAskReviewSurvivesASave(t *testing.T) {
+	s, root := reviewFixture(t, "build")
+	newFakeMailbox(t, s, "rv", "pablo", "fse", "sup81")
+	withCell(t, s, root, cellWithFSE, "sup81 runs it (0149 ruled)")
+	makeAndWait(t, s, "c1")
+	a := "go:example.com/rv/p.A"
+	r, err := s.AskReview("rv", "c1", "", a, "question", "why 2?")
+	if err != nil || r.Error != "" || r.Asked == "" {
+		t.Fatalf("ask %+v %v", r, err)
+	}
+	for _, step := range []struct{ state, note string }{{"question", "why 2, not 3?"}, {"reviewed", "why 2, not 3?"}} {
+		m, err := s.MarkReview("rv", "c1", "", a, step.state, step.note)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var mk review.Mark
+		for _, x := range m.Marks {
+			if x.Symbol == a {
+				mk = x
+			}
+		}
+		if mk.State != step.state || mk.Asked != r.Asked || mk.AskedThread != r.Thread || mk.AskedNote != "why 2?" {
+			t.Errorf("%s: %+v, want asked %s in %s with why 2?", step.state, mk, r.Asked, r.Thread)
+		}
+	}
+}

@@ -25,8 +25,8 @@ vi.mock("../../wailsjs/runtime/runtime", () => ({ EventsOn: () => () => undefine
 vi.mock("../hooks/useWails", () => ({ api: new Proxy({}, { get: () => vi.fn(async () => ({})) }) }));
 vi.mock("../lib/drafts", async (orig) => ({ ...(await orig<typeof import("../lib/drafts")>()), useDraft: () => undefined, useDrafts: () => new Set<string>() }));
 
-const { AskStatus, EditorAction, EditorFailed, editorRefused, markPress, openAt, ReviewSymbolView } = await import("./ReviewSymbol");
-const { afterSave, canSave, definitionLine, editorAt, focusAfterSave, markControls, markOf, saveShown, threadOf, worklist } = await import("../lib/review");
+const { AskStatus, EditorAction, EditorFailed, editorFailedId, editorRefused, markPress, openAt, ReviewSymbolView } = await import("./ReviewSymbol");
+const { afterSave, askOf, canSave, definitionLine, editorAt, focusAfterSave, markControls, markOf, noteHint, rowName, saveShown, threadOf, worklist } = await import("../lib/review");
 
 const node = (n: Partial<review.Node> & { id: string }) => ({
   level: "symbol", parent: "go:example.com/inita/svc", kind: "function", lang: "go", file: "svc/greet.go", change: "modified",
@@ -415,7 +415,8 @@ describe("W4 (leftovers-41 FR-4, R29): the panel once asked", () => {
   });
   it("the note edited: MarkForm reads markControls with the asked note, so the again line and Ask sup81 again come back", () => {
     const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
-    expect(src).toContain("markControls({ state, note, to, last, asked: !!mark?.asked, askedNote: saved.note })");
+    expect(src).toContain("const { asked, askedNote } = askOf(marks, id);");
+    expect(src).toContain("markControls({ state, note, to, last, asked, askedNote })");
     expect(src).toContain("{showPrimary && <button ref={primaryButton} className=\"primary\"");
     expect(src).toContain('{line && <p className="rs-ask-line meta">{line}</p>}');
   });
@@ -589,5 +590,97 @@ describe("S5 (leftovers-43 FR-5, Amendment 1): Conversations after Open the thre
     const tabs = head.slice(head.indexOf('<nav class="subtabs"'), head.indexOf("</nav>", head.indexOf('<nav class="subtabs"')));
     expect(tabs.match(/aria-current="true"/g)).toHaveLength(1);
     expect(tabs).toMatch(/<button class="on" aria-current="true">Conversations<\/button>/);
+  });
+});
+
+describe("K2 (leftovers-44 FR-1, R36): an ask survives a Save", () => {
+  const sup = { seat: "sup81", why: "runs this card" };
+  // the marks MarkReview answers with after the Save: the ask kept, with the note it was asked with
+  const saved = (state: string) => ({
+    marks: [{ symbol: G, state, note: "why the comma, not a dot?", asked: "01MSG", asked_thread: "01THREAD", asked_note: "why the comma?" }], changed: [], thread: "01THREAD",
+  }) as unknown as review.Marks;
+  const row = (marks: review.Marks) => worklist(map, marks).flatMap((g) => g.rows).find((r) => r.id === G)!;
+  it("asked, note edited and saved: Asked sup81 · Open the thread, Ask sup81 again with its line; the row ? asked", () => {
+    const marks = saved("question");
+    expect(askOf(marks, G)).toEqual({ asked: true, askedNote: "why the comma?" });
+    const h = text(panel({ id: G, marks, to: sup }));
+    expect(h).toContain("Asked sup81 · Open the thread");
+    expect(h).toContain("Ask sup81 again, next");
+    expect(h).toContain("Saves the mark and asks sup81 again in this review's thread. Wakes sup81.");
+    // nothing differs from what is saved: no Save
+    expect(h).not.toMatch(/\bSave\b(?! question| block)/);
+    expect(row(marks).asked).toBe(true);
+    expect(rowName(row(marks))).toMatch(/question, asked$/);
+    // ✕ asked the same
+    expect(rowName(row(saved("blocked")))).toMatch(/blocked, asked$/);
+    expect(text(panel({ id: G, marks: saved("blocked"), to: sup, last: true }))).toContain("Ask sup81 again");
+  });
+  it("then Reviewed: the link stays, the row drops asked, no ask is offered", () => {
+    const marks = saved("reviewed");
+    const h = text(panel({ id: G, marks, to: sup }));
+    expect(h).toContain("Asked sup81 · Open the thread");
+    expect(h).not.toContain("Ask sup81");
+    expect(h).not.toContain("Saves the mark");
+    expect(h).toContain("Reviewed, next");
+    expect(row(marks).asked).toBe(false);
+    expect(row(marks).mark).toBe("reviewed");
+    expect(rowName(row(marks))).toMatch(/reviewed$/);
+    // Review's row draws `asked` only from row.asked
+    const review = readFileSync(new URL("./Review.tsx", import.meta.url), "utf8") as string;
+    expect(review).toContain("{r.asked && r.mark && !r.changedSince");
+  });
+  it("an ask kept before asked_note existed reads its saved note as the one asked", () => {
+    const old = { marks: [{ symbol: G, state: "question", note: "why the comma?", asked: "01MSG" }], changed: [], thread: "01THREAD" } as unknown as review.Marks;
+    expect(askOf(old, G)).toEqual({ asked: true, askedNote: "why the comma?" });
+    expect(askOf(null, G)).toEqual({ asked: false, askedNote: "" });
+  });
+});
+
+describe("K3 (leftovers-44 FR-2, R37): no Save that cannot save", () => {
+  const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
+  const css = readFileSync(new URL("../styles/review.css", import.meta.url), "utf8") as string;
+  it("an unmarked symbol with a typed note: no Save, the line Choose a mark to save this note.", () => {
+    const none = markOf(null, G);
+    expect(saveShown("", "why the comma?", none)).toBe(false);
+    expect(noteHint("", "why the comma?")).toBe("Choose a mark to save this note.");
+    expect(noteHint("", "   ")).toBe("");
+    // drawn under the note, muted, and the note names it
+    expect(src).toContain('aria-describedby={hint ? hintId : undefined}');
+    expect(src).toMatch(/placeholder=\{[^\n]+\n\s+\{hint && <p id=\{hintId\} className="rs-note-hint meta">\{hint\}<\/p>\}/);
+    expect(css).toContain(".rs-note-hint { margin: 0; font-size: var(--font-size-sm); color: var(--fg-muted); }");
+  });
+  it("a mark chosen: the line goes, Save is drawn, and the note is kept as typed", () => {
+    const none = markOf(null, G);
+    for (const s of ["reviewed", "question", "blocked"] as MarkState[]) {
+      expect(noteHint(s, "why the comma?")).toBe("");
+      expect(saveShown(s, "why the comma?", none)).toBe(true);
+      expect(canSave(s, "why the comma?", none)).toBe(true);
+    }
+    // choosing a radio sets only the state; the note's own state is untouched
+    expect(src).toContain("onChange={() => setState(s)}");
+    // an unmarked, untyped symbol draws neither
+    const h = panel({ id: G });
+    expect(h).not.toContain("rs-note-hint");
+    expect(h).not.toContain(">Save<");
+  });
+});
+
+describe("K5 (leftovers-44 FR-4): the editor-failure line's id is safe", () => {
+  const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
+  it("a file a b/c.ts: the button's aria-describedby names an element that exists", () => {
+    const n = node({ id: "ts:a b/c.ts#f", file: "a b/c.ts", lang: "ts", range_head: [1, 2] });
+    const id = editorFailedId(n.id);
+    expect(id).toMatch(/^[A-Za-z0-9_-]+$/);
+    const html = renderToStaticMarkup(<><EditorAction at={{ file: n.file, line: 1, sha: "c1765740000", dir: "/r" }} describedBy={id} onOpen={noop} /><EditorFailed id={id} line="Editor didn't open: nope" /></>);
+    const refs = html.match(/aria-describedby="([^"]*)"/)![1].split(/\s+/);
+    const ids = [...html.matchAll(/ id="([^"]*)"/g)].map((m) => m[1]);
+    expect(refs).toHaveLength(1);
+    for (const r of refs) expect(ids).toContain(r);
+    // the line's id comes from the node id, never the raw path
+    expect(src).toContain("const failedId = editorFailedId(id);");
+    expect(src).not.toContain("rs-editor-failed-${file}");
+    // the mark form's ids are built the same way
+    expect(src).toContain('const failedId = domId("rs-failed", id);');
+    expect(src).toContain('const noteId = domId("rs-note", id);');
   });
 });

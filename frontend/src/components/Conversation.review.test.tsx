@@ -82,7 +82,7 @@ describe("A10 (FR-41): Open the thread lands on the thread's divider", () => {
   const src = readFileSync(new URL("./Conversation.tsx", import.meta.url), "utf8") as string;
   it("the landing uses landDivider, asks the feed for an unlisted thread, and parks focus on ← Review, not the body", () => {
     expect(src).toContain("if (divider) landDivider(divider, reviewBackOf(document));");
-    expect(src).toContain("unlisted.sent(slackDraft.threadId);");
+    expect(src).toContain("unlisted.start(id);");
     expect(src).toContain("if (document.activeElement === document.body || !document.activeElement) reviewBackOf(document)?.focus({ preventScroll: true });");
   });
 });

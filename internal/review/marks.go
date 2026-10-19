@@ -54,6 +54,10 @@ type Mark struct {
 	// review's thread at the ask, which a closed thread's replacement does
 	// not move.
 	AskedThread string `json:"asked_thread,omitempty"`
+	// AskedNote is the note the ask was sent with (leftovers-44 FR-1): a
+	// later Save that changes the note keeps the ask, and the panel offers
+	// to ask again while the note differs from it.
+	AskedNote string `json:"asked_note,omitempty"`
 }
 
 // ThreadOf is the thread mk was asked in: its own AskedThread, else, for a
@@ -130,7 +134,9 @@ func ReadMarks(initiative, card string, rm *RevMap, text TextOf) (Marks, error) 
 
 // SetMark marks symbol on rm's head, or clears its mark with state "".
 // Question and blocked need a note; only a changed symbol (not a package,
-// not an affected one) takes a mark.
+// not an affected one) takes a mark. A mark that was asked keeps its ask
+// (Asked, AskedThread, AskedNote) whatever the new state or note
+// (leftovers-44 FR-1): the ask is a message sent, not part of the mark.
 func SetMark(initiative, card string, rm *RevMap, text TextOf, symbol, state, note, by string, at time.Time) (Marks, error) {
 	note = strings.TrimSpace(note)
 	if state != "" && !contains(MarkStates, state) {
@@ -155,10 +161,13 @@ func SetMark(initiative, card string, rm *RevMap, text TextOf, symbol, state, no
 	if err != nil {
 		return Marks{}, err
 	}
+	var was Mark
 	keep := m.Marks[:0]
 	for _, mk := range m.Marks {
 		if mk.Symbol != symbol {
 			keep = append(keep, mk)
+		} else {
+			was = mk
 		}
 	}
 	m.Marks = keep
@@ -174,7 +183,8 @@ func SetMark(initiative, card string, rm *RevMap, text TextOf, symbol, state, no
 		if err != nil {
 			return Marks{}, err
 		}
-		m.Marks = append(m.Marks, Mark{Symbol: symbol, State: state, Note: note, By: by, At: at.UTC().Format(time.RFC3339), Hash: HashText(t)})
+		m.Marks = append(m.Marks, Mark{Symbol: symbol, State: state, Note: note, By: by, At: at.UTC().Format(time.RFC3339), Hash: HashText(t),
+			Asked: was.Asked, AskedThread: was.AskedThread, AskedNote: was.AskedNote})
 		sort.Slice(m.Marks, func(i, j int) bool { return m.Marks[i].Symbol < m.Marks[j].Symbol })
 	}
 	return m, saveMarks(StatePath(initiative, rm.Head), m)
@@ -182,8 +192,9 @@ func SetMark(initiative, card string, rm *RevMap, text TextOf, symbol, state, no
 
 // SetAsked records the review's thread on head's marks and, when asked is
 // not "", that symbol's mark was asked in it by message asked (FR-26),
-// keeping the thread on the mark (leftovers-41 FR-10).
-func SetAsked(initiative, head, symbol, thread, asked string) (Marks, error) {
+// keeping the thread on the mark (leftovers-41 FR-10) and the note it was
+// asked with (leftovers-44 FR-1).
+func SetAsked(initiative, head, symbol, thread, asked, note string) (Marks, error) {
 	p := StatePath(initiative, head)
 	m, err := loadMarks(p)
 	if err != nil {
@@ -194,7 +205,7 @@ func SetAsked(initiative, head, symbol, thread, asked string) (Marks, error) {
 		found := false
 		for i := range m.Marks {
 			if m.Marks[i].Symbol == symbol {
-				m.Marks[i].Asked, m.Marks[i].AskedThread, found = asked, thread, true
+				m.Marks[i].Asked, m.Marks[i].AskedThread, m.Marks[i].AskedNote, found = asked, thread, strings.TrimSpace(note), true
 			}
 		}
 		if !found {

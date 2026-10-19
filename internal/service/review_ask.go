@@ -131,7 +131,7 @@ func (s *Service) AskReview(initiativeID, slug, head, symbol, state, note string
 		out.Error = firstErrorLine(err.Error(), err)
 		return out, nil
 	}
-	marks, err = review.SetAsked(initiativeID, rm.Head, symbol, res.ThreadID, res.ID)
+	marks, err = review.SetAsked(initiativeID, rm.Head, symbol, res.ThreadID, res.ID, note)
 	if err != nil {
 		out.Error = firstErrorLine(err.Error(), err)
 		return out, nil
