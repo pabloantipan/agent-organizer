@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 45 - every merged card resolves, multi-repo cards checked per repo
-status: proposed
+status: ruled
 raised: 2026-10-18
 raised_by: fse
 owner: pablo
@@ -10,9 +10,9 @@ forecast: 25-50m
 stage: review-map
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-18
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -45,3 +45,5 @@ The FSE: **"accept as written"**.
 On accept: one supervisor runs the card tonight.
 
 ## Ruling
+
+pablo, 2026-10-18, in the organizer on lodestar: go
