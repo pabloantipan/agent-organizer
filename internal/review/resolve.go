@@ -86,7 +86,7 @@ func CardRanges(slug, branch string, repos []Repo) ([]Range, error) {
 	if branch != "" {
 		branchWhy = fmt.Sprintf("branch %s of card %s does not exist in %s", branch, slug, in)
 	}
-	return nil, &Missing{What: fmt.Sprintf("%s, and no commit on main's first parent in %s has the subject \"merge: %s\" followed by the end of the subject or any character that cannot be in a slug (not a-z, 0-9, -)", branchWhy, in, slug)}
+	return nil, &Missing{What: fmt.Sprintf("%s, and no commit on main's first parent in %s has the subject \"merge: %s\" followed by the end of the subject or any character that cannot be in a slug (not a-z, 0-9, -), such as \"merge: %s \" or \"merge: %s,\"", branchWhy, in, slug, slug, slug)}
 }
 
 // mergeOf is the newest commit on the main line's first parent whose
