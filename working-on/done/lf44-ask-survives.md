@@ -1,13 +1,13 @@
 ---
 title: "An ask survives a Save, a note says it needs a mark, Open the thread never lands on archive"
-status: next
+status: done
 repos: [organizer]
 branch: lf44-ask-survives
 seat: as-build
 reviewer: as-review, as-ui
 stage: review-map
 updated: 2026-10-18
-next: "review: lf44-ask-survives, gate met (K1-K5, X0 from a clean clone), 9092eb3"
+next: "landed; findings to the FSE (notes, spec gaps) and for aglaea (AS1, AS3); AS2 a note"
 risk: low
 footprint: [internal/review/marks.go, internal/review/marks_test.go, internal/service/review_ask.go, internal/service/review_ask_test.go, frontend/wailsjs/go/*, frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/styles/review.css, frontend/src/components/Conversation.tsx (landing), frontend/src/components/Conversation.test.tsx]
 depends_on: []
