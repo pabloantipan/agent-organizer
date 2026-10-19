@@ -4,6 +4,14 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF 2026-10-18 21:32 (last SHA seen 2a60d49; this seat at ~290k, past the 250k cap: rotate)
+
+- Running: sup85 on leftovers 44 (lf44-ask-survives): code review passed at 9092eb3; UI review (as-ui) and merge remain. The usage limit stopped every seat ~19:20-21:2x; forecast extended +40m at 21:31 and sup85 told to resume. On close: probe -k sup85, token rm organizer sup85, rm its prompt and prelude, clean, make install, close its done thread.
+- Away mode rulings (0149-0152) listed below for Pablo; tell him on return. Away mode ends when Pablo or Hephaistos says so.
+- Next after lf44: cut the next leftovers from what is held below (Go: wails CLI drift on runtime/, multi-repo reconciliation once change-check --repo lands, root-run seats in runs.jsonl, cgo-off lines, the extra packages.Load; frontend: top bar at 1024 and Home from 1920, measured first; a status re-read with another map_head drops the muted line).
+- review-map exits 1-2 wait on Pablo's trial on odyssey.
+- Lesson, 3rd today: premise rows must grep every holder and the write path, not one site.
+
 ## Away mode 2026-10-18 15:29 - ~19:30 CLT (Pablo via Hephaistos, thread 01M584E1; decisions.md c788d64)
 
 sup83 done 18:10: leftovers 41 in 53 min (40-80m; review-go 31, fixture-launch 42, review-words 51) and leftovers 42 in 37 min (25-50m), every review first-round pass; seats $32.10; installed v0.2.0-2560-ga8e2556; run record runs/2026-10-18-sup83-leftovers-41.md. sup83 ended. Held: wails generate module rewrites frontend/wailsjs/runtime/ on this Mac (CLI drift; pin wails or note in CLAUDE.md, Go leftovers); lw-ui A1-A3 sent to aglaea; lw-build ran ~265k with one extension.
