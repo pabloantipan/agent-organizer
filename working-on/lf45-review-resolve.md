@@ -7,7 +7,7 @@ seat: rr-build
 reviewer: rr-review
 stage: review-map
 updated: 2026-10-18
-next: "review: lf45-review-resolve, gate met (M1, M2, X0), fbc5fce"
+next: "review: lf45-review-resolve, gate met (M1, M2, X0), f81c09e"
 risk: low
 footprint: [internal/review/resolve.go, internal/review/reconcile.go, internal/review/resolve_test.go, internal/review/reconcile_test.go]
 depends_on: []
@@ -44,7 +44,7 @@ Not changed, on purpose:
 - `internal/review/review.go`, `internal/review/git.go`: Range already carries Name, Build already prefixes node files
 
 ## Done
-- 2026-10-18 rr-build: FR-1 and FR-2 on lf45-review-resolve (d9ee242, a5b130d, fbc5fce), rebased on main; M1, M2, X0 pass; evidence in .wt-notes/rr-build/
+- 2026-10-18 rr-build: FR-1 and FR-2 on lf45-review-resolve (7e41b56, 86d1e4d, f81c09e), rebased on main at cad0558; M1, M2, X0 pass; evidence in .wt-notes/rr-build/
 
 ## Notes
 - The refusal adds `such as "merge: <slug> " or "merge: <slug>,"` so `internal/service/review_test.go:216` (outside the boundary) keeps passing without an edit.
