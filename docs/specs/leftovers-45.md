@@ -1,6 +1,6 @@
 # Leftovers 45: every merged card resolves, and a multi-repo card is checked repo by repo: the build spec
 
-status: proposed (0153)
+status: ruled (0153)
 by: the FSE, 2026-10-18, on main at e615854
 sources: Pablo's "Are revision tools ready?" (this session, 2026-10-18
 ~23:30), answered by a check that found the merge-subject gap; Hephaistos's

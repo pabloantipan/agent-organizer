@@ -6,7 +6,7 @@ branch: lf45-review-resolve
 seat:
 stage: review-map
 updated: 2026-10-18
-next: "pablo: rule 0153 (leftovers 45)"
+next: "sup86 runs it (0153 ruled ok, 2026-10-18)"
 risk: low
 footprint: [internal/review/resolve.go, internal/review/reconcile.go, internal/review/resolve_test.go, internal/review/reconcile_test.go]
 depends_on: []
