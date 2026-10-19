@@ -1,13 +1,13 @@
 ---
 title: "Every merged card resolves to its merge, and a multi-repo card is checked repo by repo"
-status: next
+status: now
 repos: [organizer]
 branch: lf45-review-resolve
 seat: rr-build
 reviewer: rr-review
 stage: review-map
 updated: 2026-10-18
-next: "rr-build builds it in .wt/lf45-review-resolve (sup86)"
+next: "rr-build builds FR-1 and FR-2 on lf45-review-resolve"
 risk: low
 footprint: [internal/review/resolve.go, internal/review/reconcile.go, internal/review/resolve_test.go, internal/review/reconcile_test.go]
 depends_on: []
