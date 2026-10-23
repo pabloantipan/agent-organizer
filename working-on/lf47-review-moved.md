@@ -7,8 +7,8 @@ seat: m47-build
 reviewer: m47-review, m47-ui
 stage: review-map
 updated: 2026-10-23
-next: "review: lf47-review-moved, gate met (M1-M4, X0), 6c899f4"
-review: pass
+next: "m47-build: fix MV1 / M4 focus (FR-3 last sentence): after the last symbol's primary press (Reviewed, or Save question/block with no seat) the button unmounts and focus drops to body; arm the after-save focus for that press so it lands on the checked radio, with a test that reads focus"
+review: fail
 depends_on: []
 boundary: ["docs/specs/leftovers-47.md Boundary, lf47-review-moved"]
 spec: "docs/specs/leftovers-47.md (FR-1 to FR-3)"
@@ -55,7 +55,9 @@ Not changed, on purpose:
 
 ## Review
 
-**Verdict: pass** at 6c899f4 (branch lf47-review-moved, not moved during the review). Unmet gate items: none. Reviewer m47-review, 2026-10-23.
+**Verdict: fail** at 6c899f4 (branch lf47-review-moved, not moved during the review). Unmet gate items: **M4**, its focus clause (FR-3: "Focus after a save still follows `focusAfterSave`"). Reviewer m47-review, 2026-10-23.
+
+Revised from pass (f84f332) after m47-ui's MV1 landed. Proof: m47-ui's harness `R22_focus` gives `{"tag":"BODY"}` at 1024×640 and 1440×900, and the review build's AX shows no focused element, after `Reviewed` on the last unmarked symbol (## UI review, MV1). The code path agrees: `ReviewSymbol.tsx:342` arms `afterSaveFocus` only for `which === "save"`, and the last symbol's primary is `run("next", primary.mark, primary.ask, last ? undefined : onNext)` (`:380`). After the press `afterSave` makes the form as saved, FR-3 hides the primary, the focused button unmounts, and nothing moves focus. My M4 below checked `focusAfterSave`'s answer and the Save path only. I missed that FR-3 now unmounts the button the primary's own press focused. The M4 test checks the pure function, not where focus lands after the press. That is a test that checks less than the row.
 
 ### change-check (from a clean clone at 6c899f4)
 
@@ -123,7 +125,7 @@ repo organizer: base 1a091202b (default origin/main) ... head lf47-review-moved 
 - M1 met: `movedHead(A-shown, B-read)` is B and the rendered header reads `The branch moved since this map (4d2a91b → 7c3e5f2).` with `Make it again` (WORDS.makeAgain), map's worklist still drawn. Both panel reads (mount and the re-read after a refusal) call `onStatus`; `onStatus` only sets `newer`; `load` (the only caller of ReviewMap/ReviewMarks) does not depend on `newer` (Review.tsx:43-63), so nothing reloads and no focus call is made.
 - M2 met: same map head gives `""` and identical markup to the screen without a re-read.
 - M3 met: with fake timers the region reads `""`, the refusal line, `""`, then after 100 ms the moved line, once.
-- M4 met: ✓ reopened draws no primary and no `rs-buttons` (last and not last); note edit and mark change bring `Reviewed, next` / `Reviewed` / `Save question, next` / `Save block`; unmarked draws `Reviewed, next`; after a Save `focusAfterSave` answers radios.
+- M4 **not met** (focus, above); the rest holds: ✓ reopened draws no primary and no `rs-buttons` (last and not last); note edit and mark change bring `Reviewed, next` / `Reviewed` / `Save question, next` / `Save block`; unmarked draws `Reviewed, next`; after a Save `focusAfterSave` answers radios.
 - Words: `The branch moved since this map (<shown> → <new>).` and `Make it again` match FR-1 and Amendment 11 UW1 character for character.
 - X0 met: `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test` **reused run 0bd5ca43-69302 of 6c899f47503e** (by organizer-probe-m47-ui, 2026-10-23T20:39:45): go ok, vitest 78 files / 1035 tests passed. `test-lease run -- pnpm run build` exit 0, `test-lease run -- wails build` exit 0, `git status --porcelain` empty (wailsjs/runtime untouched).
 
