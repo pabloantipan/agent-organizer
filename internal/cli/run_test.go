@@ -253,3 +253,31 @@ func TestRunPrintsEverySeatLine(t *testing.T) {
 		}
 	}
 }
+
+// R2 (leftovers-46 FR-2): `organizer runs` shows a resumed conversation as
+// one row: wall from the earliest start to the latest end, the costs
+// summed, and `resumed 1`.
+func TestRunsFoldsAResumedConversation(t *testing.T) {
+	fixtureEnv(t)
+	at := func(h int) time.Time { return time.Date(2026, 10, 22, h, 0, 0, 0, time.Local) }
+	if err := session.AppendRuns(session.RunsPath(), []session.Run{
+		{PID: 10, SessionID: "conv", Session: "organizer-probe-rr-build", CostUSD: 1.00, FirstSeen: at(9), LastSeen: at(11), Ended: true},
+		{PID: 20, SessionID: "conv", Session: "organizer-probe-rr-build", CostUSD: 0.50, FirstSeen: at(12), LastSeen: at(14), Ended: true},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	var out, errb bytes.Buffer
+	now := func() time.Time { return at(15) }
+	if code := runWith([]string{"runs"}, &out, &errb, now); code != 0 {
+		t.Fatalf("exit %d: %s", code, errb.String())
+	}
+	got := out.String()
+	for _, want := range []string{"organizer-probe-rr-build (resumed 1)", "2026-10-22 09:00", "2026-10-22 14:00", "5h00m", "$1.50", "1 run "} {
+		if !strings.Contains(got, want) {
+			t.Errorf("table missing %q:\n%s", want, got)
+		}
+	}
+	if strings.Count(got, "organizer-probe-rr-build") != 1 {
+		t.Errorf("want one row for the conversation:\n%s", got)
+	}
+}

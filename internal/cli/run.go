@@ -125,6 +125,9 @@ func WriteRuns(w io.Writer, rows []session.Run) {
 		if sess == "" {
 			sess = r.SessionID
 		}
+		if r.Resumed > 0 {
+			sess += fmt.Sprintf(" (resumed %d)", r.Resumed)
+		}
 		ended := "running"
 		if r.Ended {
 			ended = stamp(r.LastSeen)

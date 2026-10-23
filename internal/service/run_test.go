@@ -235,3 +235,39 @@ func TestPrepareLaunchUsesTheCellFamily(t *testing.T) {
 		}
 	}
 }
+
+// R1 (leftovers-46 FR-1): the service hands the archiver each card's seat,
+// so a seat run from the root on main lands under its card; two cards
+// naming the seat leave it unattributed.
+func TestRunsFindTheirCardBySeat(t *testing.T) {
+	for _, tt := range []struct {
+		name  string
+		cards []model.Card
+		want  string
+	}{
+		{"one card names the seat", []model.Card{{Slug: "lf46-runs-seat", Branch: "lf46-runs-seat", Seat: "rr-build"}, {Slug: "x", Branch: "x"}}, "lf46-runs-seat"},
+		{"two cards name the seat", []model.Card{{Slug: "lf46-runs-seat", Branch: "lf46-runs-seat", Seat: "rr-build"}, {Slug: "x", Branch: "x", Seat: "rr-build"}}, ""},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv("XDG_DATA_HOME", t.TempDir())
+			root := t.TempDir()
+			si := model.ScannedInitiative{}
+			si.ID, si.Path, si.Cards = "organizer", root, tt.cards
+			s := &Service{state: cache.State{Local: model.Snapshot{Initiatives: []model.ScannedInitiative{si}}}}
+			rec := session.Record{PID: 9, SessionID: "s9", Session: "organizer-probe-rr-build", Cwd: root,
+				InputTokens: 1000, UpdatedAt: time.Date(2026, 10, 23, 10, 0, 0, 0, time.UTC)}
+			if err := session.Write(session.Dir(), rec); err != nil {
+				t.Fatal(err)
+			}
+			// an unattributed run names no initiative, so the view drops it
+			view := s.InitiativeRuns("organizer")
+			got := ""
+			if len(view.Cards) == 1 {
+				got = view.Cards[0].Card
+			}
+			if len(view.Cards) > 1 || got != tt.want {
+				t.Errorf("cards = %+v, want the run under %q", view.Cards, tt.want)
+			}
+		})
+	}
+}

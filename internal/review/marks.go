@@ -178,6 +178,12 @@ func SetMark(initiative, card string, rm *RevMap, text TextOf, symbol, state, no
 		}
 	}
 	m.Changed = changed
+	// A mark asked before the ask kept its note (leftovers-44) has the ask
+	// and no note of it: the note it carried until now is the one it was
+	// asked with (leftovers-46 FR-3).
+	if was.Asked != "" && was.AskedNote == "" {
+		was.AskedNote = strings.TrimSpace(was.Note)
+	}
 	if state != "" {
 		t, err := text(*node)
 		if err != nil {

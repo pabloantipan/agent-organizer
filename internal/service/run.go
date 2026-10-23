@@ -220,7 +220,7 @@ func (s *Service) cardRefsLocked() []session.CardRef {
 	for _, si := range s.state.Local.Initiatives {
 		for _, c := range si.Cards {
 			out = append(out, session.CardRef{
-				Initiative: si.ID, Slug: c.Slug, Branch: c.Branch, Root: si.Path,
+				Initiative: si.ID, Slug: c.Slug, Branch: c.Branch, Root: si.Path, Seat: c.Seat,
 			})
 		}
 	}
@@ -337,15 +337,16 @@ func (s *Service) archiveRuns(grace time.Duration) (int, error) {
 	return session.Retire(session.Dir(), session.RunsPath(), alive, grace, s.now(), opts.Cards, opts.BranchOf)
 }
 
-// Runs is the archive, newest last-seen first, optionally one initiative
-// only. It archives first, so a session that just ended is already in the
-// table.
+// Runs is the archive, one row per conversation (a resumed seat is one run,
+// its processes' costs summed), newest last-seen first, optionally one
+// initiative only. It archives first, so a session that just ended is
+// already in the table.
 func (s *Service) Runs(initiativeID string) []session.Run {
 	if _, err := s.ArchiveRuns(); err != nil {
 		// A broken archive must not hide the history already written.
 		_ = err
 	}
-	all := session.LoadRuns(session.RunsPath())
+	all := session.Conversations(session.LoadRuns(session.RunsPath()))
 	if initiativeID == "" {
 		return all
 	}
@@ -447,7 +448,7 @@ func (s *Service) liveRuns() []session.Run {
 			WindowSize: rec.WindowSize,
 			FirstSeen:  rec.UpdatedAt, LastSeen: rec.UpdatedAt,
 		}
-		if c, ok := session.MatchCard(rec.Cwd, branchOf(rec.Cwd), cards); ok {
+		if c, ok := session.MatchRun(rec.Cwd, branchOf(rec.Cwd), rec.Session, cards); ok {
 			r.Initiative, r.Card, r.Branch = c.Initiative, c.Slug, c.Branch
 		}
 		out = append(out, r)
