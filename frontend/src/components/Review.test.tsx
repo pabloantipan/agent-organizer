@@ -298,3 +298,16 @@ describe("A8 (FR-40): the screen hands the list to the panel", () => {
     expect(text(view({ status: status("map"), map: m, symbol: W, from: G, via: "calls" }))).toContain("unchanged · called by svc.Greet");
   });
 });
+
+describe("W2 (leftovers-46 FR-5): Open the thread passes the asked seat to openSlack", () => {
+  it("openSlack gets the initiative, the seat asked and the thread; no seat known, null", async () => {
+    const { openThread } = await import("./Review");
+    const openSlack = vi.fn();
+    openThread(openSlack, "init-a", { seat: "sup87", why: "runs this card" })("01THREAD");
+    openThread(openSlack, "init-a", { seat: "", why: "no one runs this card" })("01THREAD");
+    openThread(openSlack, "init-a", null)("01THREAD");
+    expect(openSlack.mock.calls).toEqual([["init-a", "sup87", "01THREAD"], ["init-a", null, "01THREAD"], ["init-a", null, "01THREAD"]]);
+    const src = readFileSync(new URL("./Review.tsx", import.meta.url), "utf8") as string;
+    expect(src).toContain("onOpenThread: openThread(openSlack, initiative, to)");
+  });
+});

@@ -5,7 +5,7 @@ import {
   makingLabel, movedLine, nextToReview, nothingToReview, partialLines, reviewable, rowName, screenState, shortName, walkOf, WORDS, worklist,
   afterASecond, affectedLine, askedLine, askFailedLine, askLine, askStage, firstLine, markControls, lastToReview, primaryOf, saidAfter, makeOrigin, secondsSince, backTo, calledBy, callsOf, canSave, flagLook, markOf, progressDelay, shasOf, symbolDiff, testsOf,
   editorAt, notCheckedOut, threadOf, definitionLine, editorRefusal, editorFailed, saveShown, focusAfterSave,
-  askOf, domId, marksOf, noteHint,
+  askOf, domId, marksOf, editorShown,
 } from "./review";
 
 // review-map v2 FR-18 (docs/ux/specs/review-view.md §3.1, §3.2, §4, §5):
@@ -667,16 +667,63 @@ describe("leftovers-44 FR-1, FR-2, FR-4: the ask kept, Save needs a mark, safe i
     expect(askOf(marks("reviewed"), "s")).toEqual({ asked: true, askedNote: "asked" });
     expect(threadOf(marks("reviewed"), "s")).toBe("T1");
   });
-  it("Save is drawn only with a mark; a note with none says why", () => {
+  it("Save is drawn only with a mark", () => {
     expect(saveShown("", "a note", { state: "", note: "" })).toBe(false);
     expect(saveShown("reviewed", "a note", { state: "", note: "" })).toBe(true);
-    expect(noteHint("", "a note")).toBe(WORDS.chooseMark);
-    expect(WORDS.chooseMark).toBe("Choose a mark to save this note.");
-    expect(noteHint("question", "a note")).toBe("");
-    expect(noteHint("", "")).toBe("");
   });
   it("domId keeps letters, digits, - and _ only", () => {
-    expect(domId("rs-editor-failed", "a b/c.ts")).toBe("rs-editor-failed-a_b_c_ts");
+    expect(domId("rs-editor-failed", "a b/c.ts")).toBe("rs-editor-failed-a_20_b_2f_c_2e_ts");
     expect(domId("rs-note", "go:example.com/m/p.A")).toMatch(/^[A-Za-z0-9_-]+$/);
+  });
+});
+
+describe("leftovers-46 (W1, W3, W4): no false hint, the ask's note, unique ids, the not-here line kept", () => {
+  it("W1 (FR-4): an unmarked symbol with a note: no hint word, no Save; the primary saves it ✓", () => {
+    expect(Object.values(WORDS)).not.toContain("Choose a mark to save this note.");
+    expect(saveShown("", "a note", { state: "", note: "" })).toBe(false);
+    const c = markControls({ state: "", note: "a note", to: null, last: false, asked: false, askedNote: "" });
+    expect(c.showPrimary).toBe(true);
+    expect(c.primary).toEqual({ label: "Reviewed, next", mark: "reviewed", ready: true, ask: false });
+    expect(markControls({ state: "", note: "a note", to: null, last: true, asked: false, askedNote: "" }).primary.label).toBe("Reviewed");
+  });
+  it("W1 (FR-8): an asked mark with asked_note empty reads its note as the one asked; edited, Ask <seat> again", () => {
+    const old = { marks: [{ symbol: "s", state: "question", note: "q", asked: "M1", asked_thread: "T1", asked_note: "" }], changed: [] } as unknown as review.Marks;
+    expect(askOf(old, "s")).toEqual({ asked: true, askedNote: "q" });
+    const sup = { seat: "sup87", why: "runs this card" };
+    const { askedNote } = askOf(old, "s");
+    expect(markControls({ state: "question", note: "q", to: sup, last: false, asked: true, askedNote }).stage).toBe("asked");
+    const c = markControls({ state: "question", note: "q2", to: sup, last: false, asked: true, askedNote });
+    expect(c.stage).toBe("again");
+    expect(c.showPrimary).toBe(true);
+    expect(c.primary.label).toBe("Ask sup87 again, next");
+  });
+  it("W3 (FR-6): a b, a_b, a.b, a/b are four ids, each a valid id; no two raw strings share one", () => {
+    const ids = ["a b", "a_b", "a.b", "a/b"].map((r) => domId("rs-note", r));
+    expect(new Set(ids).size).toBe(4);
+    for (const id of ids) expect(id).toMatch(/^[A-Za-z][A-Za-z0-9_-]*$/);
+    expect(domId("rs-note", "a b")).toBe("rs-note-a_20_b");
+    expect(domId("rs-note", "a_b")).toBe("rs-note-a_5f_b");
+    // an escape's end is marked, so a code point never runs into the next character
+    const raws = ["\u0201", " 1", "_", "_5f_", "_20_", " ", "a", "é", "😀", "", "-", "A", "go:example.com/m/p.A"];
+    const all = raws.map((r) => domId("x", r));
+    expect(new Set(all).size).toBe(raws.length);
+    for (const id of all) expect(id).toMatch(/^[A-Za-z][A-Za-z0-9_-]*$/);
+  });
+  it("W4 (FR-7): a re-read for another map_head keeps the muted line where the button was", () => {
+    const left = { file: "svc/a.go", line: 12, sha: "c1765740000", dir: "/r" };
+    const st = (map_head: string, dir: string) => ({ map_head, checkouts: [{ repo: "", head: "c1765740000", dir }] }) as unknown as service.ReviewStatus;
+    const n = { file: "svc/a.go", range_head: [12, 20] } as unknown as review.Node;
+    // refused, the re-read not back yet: not here
+    expect(editorShown(left, left, true)).toEqual({ ...left, dir: "" });
+    // the re-read answers for another head: editorAt has nothing, the line stays
+    const other = editorAt(st("9999999", "/r"), "h1", n);
+    expect(other).toBeNull();
+    expect(editorShown(other, left, false)).toEqual({ ...left, dir: "" });
+    // the re-read answers for this head: what it says, the button back or the line
+    expect(editorShown(editorAt(st("h1", "/r"), "h1", n), left, false)?.dir).toBe("/r");
+    expect(editorShown(editorAt(st("h1", ""), "h1", n), left, false)?.dir).toBe("");
+    // never refused: as editorAt says, nothing before the status or for another head
+    expect(editorShown(null, null, false)).toBeNull();
+    expect(editorShown(other, null, false)).toBeNull();
   });
 });

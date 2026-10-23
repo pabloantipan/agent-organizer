@@ -26,7 +26,7 @@ vi.mock("../hooks/useWails", () => ({ api: new Proxy({}, { get: () => vi.fn(asyn
 vi.mock("../lib/drafts", async (orig) => ({ ...(await orig<typeof import("../lib/drafts")>()), useDraft: () => undefined, useDrafts: () => new Set<string>() }));
 
 const { AskStatus, EditorAction, EditorFailed, editorFailedId, editorRefused, markPress, openAt, ReviewSymbolView } = await import("./ReviewSymbol");
-const { afterSave, askOf, canSave, definitionLine, editorAt, focusAfterSave, markControls, markOf, noteHint, rowName, saveShown, threadOf, worklist } = await import("../lib/review");
+const { afterSave, askOf, canSave, definitionLine, editorAt, focusAfterSave, markControls, markOf, rowName, saveShown, threadOf, worklist } = await import("../lib/review");
 
 const node = (n: Partial<review.Node> & { id: string }) => ({
   level: "symbol", parent: "go:example.com/inita/svc", kind: "function", lang: "go", file: "svc/greet.go", change: "modified",
@@ -503,8 +503,8 @@ describe("S1-S4 (leftovers-43): the panel never offers a press that cannot work"
     expect(h.match(/aria-live="polite"/g)).toHaveLength(1);
     expect(h).toContain('<div class="sr-only" aria-live="polite"></div>');
     // the press's refusal marks the head left at once, then the status read again answers
-    expect(src).toContain("const editor = at && left ? { ...at, dir: \"\" } : at;");
-    expect(src).toMatch(/const onLeft = \(\) => \{\n\s+setLeft\(true\);\n\s+ReviewStatus\(initiative, card\)/);
+    expect(src).toContain("const editor = editorShown(at, left, rereading);");
+    expect(src).toMatch(/const onLeft = \(\) => \{\n\s+setLeft\(editor\);\n\s+setRereading\(true\);\n\s+ReviewStatus\(initiative, card\)/);
     expect(src).toContain("editorRefused(e, { sha: editor.sha, left: () => onLeft?.(), focusTitle: () => title.current?.focus(), say, fail: setFailed });");
     expect(css).toContain(".rs-not-here { color: var(--fg-muted); }");
   });
@@ -636,23 +636,15 @@ describe("K2 (leftovers-44 FR-1, R36): an ask survives a Save", () => {
   });
 });
 
-describe("K3 (leftovers-44 FR-2, R37): no Save that cannot save", () => {
+describe("K3 (leftovers-44 FR-2, R37; the line retired by leftovers-46 FR-4): no Save that cannot save", () => {
   const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
-  const css = readFileSync(new URL("../styles/review.css", import.meta.url), "utf8") as string;
-  it("an unmarked symbol with a typed note: no Save, the line Choose a mark to save this note.", () => {
+  it("an unmarked symbol with a typed note: no Save", () => {
     const none = markOf(null, G);
     expect(saveShown("", "why the comma?", none)).toBe(false);
-    expect(noteHint("", "why the comma?")).toBe("Choose a mark to save this note.");
-    expect(noteHint("", "   ")).toBe("");
-    // drawn under the note, muted, and the note names it
-    expect(src).toContain('aria-describedby={hint ? hintId : undefined}');
-    expect(src).toMatch(/placeholder=\{[^\n]+\n\s+\{hint && <p id=\{hintId\} className="rs-note-hint meta">\{hint\}<\/p>\}/);
-    expect(css).toContain(".rs-note-hint { margin: 0; font-size: var(--font-size-sm); color: var(--fg-muted); }");
   });
-  it("a mark chosen: the line goes, Save is drawn, and the note is kept as typed", () => {
+  it("a mark chosen: Save is drawn, and the note is kept as typed", () => {
     const none = markOf(null, G);
     for (const s of ["reviewed", "question", "blocked"] as MarkState[]) {
-      expect(noteHint(s, "why the comma?")).toBe("");
       expect(saveShown(s, "why the comma?", none)).toBe(true);
       expect(canSave(s, "why the comma?", none)).toBe(true);
     }
@@ -682,5 +674,55 @@ describe("K5 (leftovers-44 FR-4): the editor-failure line's id is safe", () => {
     // the mark form's ids are built the same way
     expect(src).toContain('const failedId = domId("rs-failed", id);');
     expect(src).toContain('const noteId = domId("rs-note", id);');
+  });
+});
+
+describe("W1 (leftovers-46 FR-4, FR-8; Amendment 10 AS1, R37 amended): no hint, no Save without a mark; the old ask offered again", () => {
+  const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
+  const css = readFileSync(new URL("../styles/review.css", import.meta.url), "utf8") as string;
+  const sup = { seat: "sup87", why: "runs this card" };
+  it("an unmarked symbol with a note: no hint line anywhere, no Save; Reviewed, next saves ✓ with the note", async () => {
+    const h = panel({ id: G, to: sup });
+    expect(h).not.toContain("Choose a mark");
+    expect(h).not.toContain("rs-note-hint");
+    expect(h).not.toContain(">Save<");
+    expect(text(h)).toContain("Reviewed, next");
+    expect(src).not.toContain("noteHint");
+    expect(src).not.toContain("rs-note-hint");
+    expect(css).not.toContain("rs-note-hint");
+    // the primary's press with no mark and a typed note saves reviewed with that note
+    const saved: [string, string][] = [];
+    const { primary } = markControls({ state: "", note: "why the comma?", to: sup, last: false, asked: false, askedNote: "" });
+    await markPress({ ask: primary.ask, state: primary.mark, note: "why the comma? ", seat: "sup87", onMark: async (s, n) => { saved.push([s, n]); } });
+    expect(saved).toEqual([["reviewed", "why the comma?"]]);
+  });
+  it("an old asked mark (asked_note empty): as saved, Asked sup87 and no ask; its note edited, Ask sup87 again", () => {
+    const old = { marks: [{ symbol: G, state: "question", note: "why the comma?", asked: "01MSG", asked_thread: "01THREAD", asked_note: "" }], changed: [], thread: "01THREAD" } as unknown as review.Marks;
+    const h = text(panel({ id: G, marks: old, to: sup }));
+    expect(h).toContain("Asked sup87 · Open the thread");
+    expect(h).not.toContain("Ask sup87");
+    const { asked, askedNote } = askOf(old, G);
+    const c = markControls({ state: "question", note: "why the comma, not a dot?", to: sup, last: false, asked, askedNote });
+    expect(c.showPrimary).toBe(true);
+    expect(c.primary.label).toBe("Ask sup87 again, next");
+    expect(c.line).toBe("Saves the mark and asks sup87 again in this review's thread. Wakes sup87.");
+  });
+});
+
+describe("W4 (leftovers-46 FR-7): a re-read for another head keeps Not checked out here", () => {
+  const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
+  it("the panel with the place refused and the status read for another map_head: the muted line, no button", async () => {
+    const { editorShown } = await import("../lib/review");
+    const other = { initiative: "init-a", card: "rv-fixture", state: "map", head: "9999999ffff", map_head: "9999999ffff", checkouts: [{ repo: "", head: "9999999ffff", dir: "/r" }] } as unknown as service.ReviewStatus;
+    const left = { file: "svc/greet.go", line: 4, sha: "c1765740000", dir: "/r" };
+    const editor = editorShown(editorAt(other, map.head, at(G)), left, false);
+    const h = renderToStaticMarkup(
+      <ReviewSymbolView map={map} node={at(G)} row={rowOf(G)} marks={null} from={null} texts={texts} error={null}
+        title={createRef()} editor={editor} onOpenEditor={() => Promise.resolve()} onOpen={noop} onBack={noop} onMark={() => Promise.resolve()} onNext={noop} />,
+    );
+    expect(h).toContain('<span class="meta rs-not-here">Not checked out here at c176574.</span>');
+    expect(h).not.toContain("Open in editor");
+    // the container keeps the refused place until the head changes
+    expect(src).toContain("const editor = editorShown(at, left, rereading);");
   });
 });
