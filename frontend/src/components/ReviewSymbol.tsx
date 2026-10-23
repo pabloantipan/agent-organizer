@@ -268,7 +268,7 @@ function Diff({ name, texts, error }: { name: string; texts: { base: RangeText |
  *  (FR-29). Once asked, the line and an asking primary go until the note
  *  is edited, which brings back `Ask <seat> again` (leftovers-41 FR-4).
  *  Save is drawn only while the mark or the note differs from the saved
- *  one; when it leaves after its press, focus goes to the asking primary,
+ *  one, and so is a primary that would only save (leftovers-47 FR-3); when it leaves after its press, focus goes to the asking primary,
  *  else the radio group (leftovers-43 FR-4, Amendment 8 A1). An ask
  *  survives every Save (leftovers-44 FR-1): the panel keeps `Asked <seat>
  *  · Open the thread`, and a saved note that differs from the one asked
@@ -290,7 +290,7 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
   // Asked, note as asked: an ask would repeat a promise kept (FR-4). The
   // ask and its note are kept through a Save (leftovers-44 FR-1).
   const { asked, askedNote } = askOf(marks, id);
-  const { primary, showPrimary, line } = markControls({ state, note, to, last, asked, askedNote });
+  const { primary, showPrimary, line } = markControls({ state, note, to, last, asked, askedNote, saved });
   // An ask that stays (the last symbol, Try again) unmounts the pressed
   // button; focus goes to Open the thread, which took its place.
   // The mark's own thread, else the review's (leftovers-42 FR-4).

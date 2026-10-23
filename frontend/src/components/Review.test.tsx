@@ -285,7 +285,8 @@ describe("A6 (FR-38): the last unmarked symbol, on the screen", () => {
     const h = view({ status: status("map"), map: fixture, symbol: G, from: "", marks: mk({ [F]: "question", [G]: "reviewed" }) });
     expect(text(h)).toContain("Reviewed 2 of 2");
     expect(h).not.toContain("Next to review");
-    expect(h).toMatch(/<button class="primary">Reviewed<\/button>/);
+    // Updated for leftovers-47 FR-3: Greet as saved draws no primary.
+    expect(h).not.toContain('class="primary"');
   });
 });
 

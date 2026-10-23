@@ -78,18 +78,31 @@ export const askStage = (asked: boolean, note: string, askedNote: string): AskSt
 
 /** What the mark's controls read for the chosen mark and note (FR-28,
  *  FR-38; leftovers-41 FR-4): the primary, whether it shows (an ask
- *  already made with this note is not offered again), and the muted line
- *  (none once asked, the `again` line once the note is edited). */
-export function markControls(o: { state: MarkState; note: string; to: Addressee | null; last: boolean; asked: boolean; askedNote: string }) {
+ *  already made with this note is not offered again, and a saved mark
+ *  shown as saved offers no save of it again, leftovers-47 FR-3), and the
+ *  muted line (none once asked, the `again` line once the note is
+ *  edited). */
+export function markControls(o: { state: MarkState; note: string; to: Addressee | null; last: boolean; asked: boolean; askedNote: string; saved?: { state: MarkState; note: string } }) {
   const stage = askStage(o.asked, o.note, o.askedNote);
   const primary = primaryOf(o.state, o.note, { seat: o.to?.seat ?? "", last: o.last, again: stage === "again" });
+  const nothing = asSaved(o.state, o.note, o.saved) && !primary.ask;
   return {
     stage,
     primary,
-    showPrimary: !(stage === "asked" && primary.ask),
-    line: stage === "asked" ? "" : askLine(o.to, o.state, stage === "again"),
+    showPrimary: !(stage === "asked" && primary.ask) && !nothing,
+    // The line says what the primary does; with none drawn it goes too.
+    line: stage === "asked" || nothing ? "" : askLine(o.to, o.state, stage === "again"),
   };
 }
+
+/** A saved mark shown as it was saved (leftovers-47 FR-3, review-view
+ *  Amendment 11 UW2): its primary would save the same mark again, a press
+ *  that does nothing, so it is not drawn; N in the header is the way on.
+ *  An unmarked symbol is never as saved. A primary that asks still posts
+ *  (`Ask <seat> again` after a Save of an edited note, leftovers-44 FR-1),
+ *  so markControls keeps it. */
+export const asSaved = (s: MarkState, note: string, saved?: { state: MarkState; note: string }) =>
+  !!saved && saved.state !== "" && s === saved.state && note.trim() === saved.note.trim();
 
 /** After an ask (FR-29): the panel's line and the live region's words. */
 export const askedLine = (seat: string) => `Asked ${seat}`;
