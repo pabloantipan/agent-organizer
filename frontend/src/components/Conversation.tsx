@@ -41,6 +41,19 @@ function directWith(t: CellThread, human: string): string | null {
   return null;
 }
 
+/** Others (leftovers-47 FR-7 to FR-9, review-view Amendment 12): the names
+ *  outside the roster with an open direct thread with the human, in the
+ *  order first seen, plus the one shown, which a landing names before its
+ *  thread is in the feed. `seen` keeps that order across renders; a name
+ *  with no open thread that is not shown leaves the list. */
+export function othersOf(threads: CellThread[], human: string, seats: string[], shown: string | null, seen: string[]): string[] {
+  const outside = (a: string | null): a is string => !!a && a !== human && !seats.includes(a);
+  const open = new Set<string>();
+  for (const t of threads) { const a = t.status === "closed" ? null : directWith(t, human); if (outside(a)) open.add(a); }
+  for (const a of [...open, shown]) if (outside(a) && !seen.includes(a)) seen.push(a);
+  return seen.filter((a) => open.has(a) || a === shown);
+}
+
 function loadSeen(): Record<string, number> {
   try { return JSON.parse(localStorage.getItem(SEEN_KEY) || "{}"); } catch { return {}; }
 }
@@ -97,6 +110,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
 
   const human = group.human;
   const seats = (group.cell?.agents ?? []).filter((a) => a !== human);
+  const othersSeen = useRef<string[]>([]);
 
   // Reading the mailbox is picking up the mail: every message addressed to
   // the human is marked delivered when a chat of this cell is shown, and
@@ -314,6 +328,18 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
     if (!id) return;
     if (landPosted(document, id)) postedLanding.current = null;
   });
+  // A seat's row and an Other's are drawn alike: @, the name, the counts.
+  // Others are not seats, so no health words here or in the People panel.
+  const others = othersOf(all, human, seats, focus, othersSeen.current);
+  const personRow = (a: string) => {
+    const n = all.filter((t) => chatOf(t) === a).length;
+    const fresh = all.filter((t) => chatOf(t) === a && isNew(t)).length;
+    return (
+      <button key={a} aria-current={chat === chatKey(a, "channel") ? "true" : undefined} className={`chat ${focus === a ? "active" : ""} ${fresh > 0 ? "fresh" : ""}`} onClick={() => pickPerson(a)} title={`direct with ${a}`}>
+        <AtSign size={12} /><span className="chat-name">{a}</span>{draftMark(chatKey(a, "channel"), all.filter((t) => chatOf(t) === a))}{fresh > 0 ? <span className="chat-fresh">{fresh}</span> : n > 0 ? <span className="chat-n">{n}</span> : null}
+      </button>
+    );
+  };
   const setStatus = (id: string, s: string) => api.setCellThreadStatus(initiativeId, id, s).then(() => reload(), (e) => setErr(String(e)));
 
   return (
@@ -335,15 +361,9 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
         {reconciler && reconciler !== human && <button aria-current={chat === "reconciler" ? "true" : undefined} className={`chat ${!focus && view === "reconciler" ? "active" : ""}`} onClick={() => pick("reconciler")} title={`the reconciler's backlog: stalled, or answered and left without a decision. ${reconciler}'s work, not yours`}><Gavel size={12} /><span className="chat-name">needs {reconciler}</span>{draftMark("reconciler", all.filter(needsReconciler))}{counts.reconciler > 0 && <span className="chat-n">{counts.reconciler}</span>}</button>}
         <button aria-current={chat === "channel" ? "true" : undefined} className={`chat ${!focus && view === "channel" ? "active" : ""} ${counts.channelFresh > 0 ? "fresh" : ""}`} onClick={() => pick("channel")} title="every conversation not between you and one seat"><Hash size={12} /><span className="chat-name">channel</span>{draftMark("channel", all.filter((t) => chatOf(t) === null && t.kind !== "journal"))}{counts.channelFresh > 0 ? <span className="chat-fresh">{counts.channelFresh}</span> : counts.channel > 0 ? <span className="chat-n">{counts.channel}</span> : null}</button>
         <div className="chats-label sub"><span>People</span></div>
-        {seats.map((a) => {
-          const n = all.filter((t) => chatOf(t) === a).length;
-          const fresh = all.filter((t) => chatOf(t) === a && isNew(t)).length;
-          return (
-            <button key={a} aria-current={chat === chatKey(a, "channel") ? "true" : undefined} className={`chat ${focus === a ? "active" : ""} ${fresh > 0 ? "fresh" : ""}`} onClick={() => pickPerson(a)} title={`direct with ${a}`}>
-              <AtSign size={12} /><span className="chat-name">{a}</span>{draftMark(chatKey(a, "channel"), all.filter((t) => chatOf(t) === a))}{fresh > 0 ? <span className="chat-fresh">{fresh}</span> : n > 0 ? <span className="chat-n">{n}</span> : null}
-            </button>
-          );
-        })}
+        {seats.map(personRow)}
+        {others.length > 0 && <div className="chats-label sub"><span>Others</span></div>}
+        {others.map(personRow)}
         <div className="chats-label sub"><span>More</span></div>
         <button aria-current={chat === "journal" ? "true" : undefined} className={`chat ${!focus && view === "journal" ? "active" : ""}`} onClick={() => pick("journal")} title="self-addressed notes: each seat's open questions"><BookOpen size={12} /><span className="chat-name">journal</span>{draftMark("journal", all.filter((t) => t.kind === "journal"))}{counts.journal > 0 && <span className="chat-n">{counts.journal}</span>}</button>
         <button aria-current={chat === "archive" ? "true" : undefined} className={`chat ${!focus && view === "archive" ? "active" : ""}`} onClick={() => pick("archive")} title="closed threads"><Archive size={12} /><span className="chat-name">archive</span>{draftMark("archive", closed ?? [])}{closed && closed.length > 0 && <span className="chat-n">{closed.length}</span>}</button>
