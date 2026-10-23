@@ -3,7 +3,8 @@ title: "The review panel's last loose words: no false hint, the asked seat's cha
 status: next
 repos: [organizer]
 branch: lf46-review-words
-seat:
+seat: rw-build
+reviewer: rw-review, rw-ui
 stage: review-map
 updated: 2026-10-22
 next: "sup87 runs it (0154 ruled 2026-10-23)"

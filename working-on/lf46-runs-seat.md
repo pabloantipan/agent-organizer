@@ -3,7 +3,8 @@ title: "Runs find their card by seat and fold a resumed seat into one row; old a
 status: next
 repos: [organizer]
 branch: lf46-runs-seat
-seat:
+seat: ru-build
+reviewer: ru-review
 stage: review-map
 updated: 2026-10-22
 next: "sup87 runs it (0154 ruled 2026-10-23)"
