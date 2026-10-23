@@ -134,18 +134,22 @@ func matchByPlace(a model.Agent, cards []openCardRef, branchOf func(string) stri
 	return openCardRef{}, false
 }
 
-// matchBySeat is key 3: the card's seat against the agent's persona or its
-// session name — the two names the process table gives (FR-6). Two cards on one seat is no card, the same rule as the place
+// matchBySeat is key 3: the card's seat against the agent's persona, its
+// session name, or the session's short name after `<project>-probe-` — the
+// names the process table gives (FR-6; leftovers-47 FR-6, as session.MatchRun
+// reads it). Two cards on one seat is no card, the same rule as the place
 // keys — a seat that builds two cards at once is a card file to fix, not a
 // guess to make.
 func matchBySeat(a model.Agent, cards []openCardRef) (openCardRef, bool) {
+	_, short, _ := strings.Cut(a.Session, "-probe-")
 	var hit openCardRef
 	n := 0
 	for _, c := range cards {
 		if c.Seat == "" {
 			continue
 		}
-		if strings.EqualFold(c.Seat, a.Persona) || strings.EqualFold(c.Seat, a.Session) {
+		if strings.EqualFold(c.Seat, a.Persona) || strings.EqualFold(c.Seat, a.Session) ||
+			(short != "" && strings.EqualFold(c.Seat, short)) {
 			hit, n = c, n+1
 		}
 	}

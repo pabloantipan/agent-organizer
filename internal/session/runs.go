@@ -114,10 +114,14 @@ func LoadRuns(path string) []Run {
 // Conversations folds runs that share a non-empty session id into one: a
 // seat frozen and thawed resumes the same conversation under a new pid, and
 // is one piece of work. Started is the earliest first seen, ended the latest
-// last seen, the context, model and card those of the last process, the cost
-// the sum of each process's final cost, and Resumed how many processes came
-// after the first. A run with no session id stays one per pid. The archive is
-// not rewritten: this is a fold on read, sorted as LoadRuns sorts.
+// last seen, the context, model and card those of the last process, and
+// Resumed how many processes came after the first. The cost is usage's rule
+// (usage-audit Amendment 1, `foldCosts` in internal/usage): Claude Code's cost
+// carries across a resume, so the processes' final costs in time order are
+// split wherever one is lower than the one before it, and the cost is the sum
+// of each run's largest. With no drop that is the last process's cost. A run
+// with no session id stays one per pid. The archive is not rewritten: this is
+// a fold on read, sorted as LoadRuns sorts.
 func Conversations(runs []Run) []Run {
 	byID := map[string][]Run{}
 	var out []Run
@@ -136,9 +140,8 @@ func Conversations(runs []Run) []Run {
 			return rs[i].PID < rs[j].PID
 		})
 		c := rs[len(rs)-1]
-		c.CostUSD = 0
+		c.CostUSD = foldCost(rs)
 		for _, r := range rs {
-			c.CostUSD += r.CostUSD
 			if !r.FirstSeen.IsZero() && (c.FirstSeen.IsZero() || r.FirstSeen.Before(c.FirstSeen)) {
 				c.FirstSeen = r.FirstSeen
 			}
@@ -157,6 +160,20 @@ func Conversations(runs []Run) []Run {
 		return out[i].Key() < out[j].Key()
 	})
 	return out
+}
+
+// foldCost is one conversation's cost from its processes' final costs, in
+// time order: split into runs wherever a cost is lower than the one before it,
+// summed over each run's largest.
+func foldCost(rs []Run) float64 {
+	total, runMax := 0.0, rs[0].CostUSD
+	for i, r := range rs[1:] {
+		if r.CostUSD < rs[i].CostUSD {
+			total, runMax = total+runMax, 0
+		}
+		runMax = max(runMax, r.CostUSD)
+	}
+	return total + runMax
 }
 
 // AppendRuns adds lines to the archive. Append-only on purpose: a crash
