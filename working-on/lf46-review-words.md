@@ -142,3 +142,81 @@ The branch's five test files copied onto a main clone (644c47b, the merge base, 
 - Note: in this initiative the cell roster is only `fse`, so the addressee is often a supervisor (`sup87`) that has no row in the chat list. Rendered on the branch with `focus="sup87"`: the title reads `sup87`, channel is not current, and **no row is current** (R30's "the current row is the chat shown" cannot hold for a seat that has no row). This was already true on main once the landing reached that seat; it is not this card's. To the FSE, for rw-ui's view.
 - Note: `domId` is injective per prefix only (`domId("a", "b-c")` equals `domId("a-b", "c")`), as the builder recorded; today's prefixes `rs-note`, `rs-failed` and `rs-editor-failed` cannot collide that way. To the FSE if a prefix is ever added.
 - Note: FR-8 survives a Save only together with lf46-runs-seat FR-3 (as the card's Notes say). Goes to card `lf46-runs-seat`.
+
+## UI review
+
+rw-ui, 2026-10-23. Every row checked on 5e8510c (the branch did not move while I worked). **Verdict: pass.** No finding of severity 4 or 3 against leftovers-46 FR-4 to FR-8 or review-view Amendment 10 (AS1, AS3, R37 and R38 amended). Evidence is in `.wt-notes/rw-ui/`: harness logs `out/h-1024x640.txt` and `out/h-1440x900.txt`, the shell steps in `out/driver.log`, shots `out/wk-*.png` and `out/rb-*.png`, AX dumps `out/rb-ax-*.txt`, and `out/killed.txt`.
+
+Shared test run: **reused**. The run was `4c406a27-81063` of 5e8510cf2948, run by rw-review: exit 0, go ok, vitest 78 files / 1024 tests (`x0-make-test.txt`).
+
+No mailbox, no editor. Each fixture was `--review --canned-post` and `auth: off`, with exactly one `discuss_state_dir:` under its own temp dir (`out/dev-config-check.txt`, `out/rb-config-check.txt`). The probe was stubbed and `editor:` was a stub that logs its arguments. The one `Open in editor` press (W4) was refused before any editor ran, and `out/editor-calls.txt` was never written. The asks went only to the fixture's `posts.jsonl`.
+
+How each state was checked:
+- **WKWebView, Tab harness.** I used as-ui's `tabharness.swift` (read first, unchanged, rebuilt), offscreen with `isKey: true`, under `harness.lock`. It ran against my own `wails dev -devserver localhost:34265` from a clean clone of 5e8510c, with a fresh fixture at 1024×640 and again at 1440×900. Shell steps came from `driver.sh`, which watches for markers and touches only the fixture's temp copy and state.json. The two sizes read the same.
+  - **W1 / R37 amended**, on format.formatName, unmarked, with `why this?` typed:
+    - The only button is `Reviewed, next`. There is no Save and no hint line. `Choose a mark` is nowhere in the body text. The note has no `aria-describedby`.
+    - Reading order: the radios, `Note`, the textarea, `Reviewed, next`.
+    - Tab from the note reaches `Reviewed, next` (2px ring rgb(192,171,254), offset 2), then body.
+    - The press saves `reviewed` with note `why this?` (in `driver.log`'s state.json) and moves focus to the next symbol's h2. The row reads `✓`.
+  - **W1 / FR-8.** The asked Greet mark was seeded with `asked_note` removed and note `q`.
+    - Unedited, the panel reads `Asked fse · Open the thread` alone: no Save, no `again`.
+    - Typing `2` brings `Ask fse again`, `Save` and `Saves the mark and asks fse again in this review's thread. Wakes fse.`.
+  - **W2 / R38 amended.** I asked from Greet (canned, so the thread `canned-1` is never in the feed) and pressed `Open the thread`.
+    - A MutationObserver and rAF recorder logged every commit for 4 s. It recorded one state only, from the first commit of Conversations (t≈870 ms): `sub: conversations`, `slackFocus: fse`, title `fse`, `aria-current="true"` and `.chat.active` both on the `fse` row. Channel was never current.
+    - The fill is rgba(138,63,252,.18) on that row alone.
+    - The one `aria-current="page"` is the crumb. Focus is on `← Review`.
+    - At 1440, the People panel also marks fse `true` in its own list (one per list, A8 A3).
+  - **W3**: the note's id is `rs-note-ts_3a_web_2f_src_2f_format_2e_ts_23_formatName`. `querySelector('#'+id)` finds it, and it matches `^[A-Za-z][A-Za-z0-9_-]*$`. The four collision inputs are vitest W3's (fresh in the reused run).
+  - **W4 / FR-7**:
+    - I checked out rv-fixture in the fixture's init-a, and the button `Open in editor` showed.
+    - I moved the branch to `review-second` and made a map at the new head with the review build's `organizer review`, then pressed the button.
+    - The button is gone and the file line reads `web/src/format.ts 1-4  Not checked out here at f1b8102.` in 12px rgb(181,175,195) (`--fg-muted`, sm). It still reads so at 6 s.
+    - Focus is on the h2, and there is no `Error:` on screen.
+  - No horizontal scroll (1024/1024, 1440/1440).
+- **Review build** (`make review-build` in my detached worktree). I saved its pid, used AX and AXPress on that pid only, and shot its window (51444) with `screencapture -o -l` at 1440×900 and 1024×640. The screen was unlocked.
+  - Unmarked formatName: `Reviewed, next` only, no line under the note (`rb-1024x640-W1-unmarked.png`). AXPress saved `reviewed`.
+  - The seeded old asked Greet mark: the AX row reads `Greet, modified, question, asked`, and the panel reads `Asked fse` + AXLink `Open the thread`, with no Save.
+  - AXPress `Open the thread`: the `fse 1` row is `.chat.active`, the title is `@ fse`, and AX focus is on `← Review` (`rb-1024x640-W2-landing-0s.png`, taken right after the press; `rb-1440x900-W2-landing.png`).
+  - W4 as in the harness: `Open in editor`, then after the move and the press `Not checked out here at 17ab3cb.` and focus on the h2 (`rb-1440x900-W4-not-here.png`, `rb-1024x640-W4-not-here.png`).
+- **Rest of the panel against lf44's UI review**, unchanged at both sizes:
+  - the header `<head> ← <base> · 2 symbols changed, 0 tests` and `Reviewed n of 2 · 1 must-visit left`;
+  - the h2 focused when a symbol opens;
+  - the file line with `Not checked out here at <sha>.`;
+  - `? asked` at the mark's place before the name;
+  - `Open the thread` a link;
+  - the 2px ring;
+  - at 1440 the facts sit beside the diff, at 1024 under it.
+
+Words, design vs screen:
+- `Reviewed, next` / `Reviewed` read `Reviewed, next` / `Reviewed`. Same.
+- `Ask <seat>` (last symbol) reads `Ask fse`. Same.
+- `Ask <seat> again` reads `Ask fse again`. Same.
+- `Saves the mark and asks <seat> again in this review's thread. Wakes <seat>.` reads `Saves the mark and asks fse again in this review's thread. Wakes fse.`. Same.
+- `Asked <seat> · Open the thread` reads `Asked fse · Open the thread`. Same.
+- `Not checked out here at <short sha>.` reads `Not checked out here at 17ab3cb.`. Same.
+- `? asked` and `← Review`: same.
+- `Choose a mark to save this note.`: absent, as AS1 retires it.
+
+Findings (none of severity 4 or 3):
+- **UW1 (2), for aglaea**:
+  - What the person cannot do: know that a newer map exists while the Review screen is open. After the branch moved and a map was made at the new head, the screen keeps the old map's header (`17ab3cb ← 9bbdc53`) with no `The branch moved …` line, because the header's status is read when the screen opens. Only the editor line re-reads.
+  - Where: `rb-1440x900-W4-not-here.png`.
+  - Evidence: the W4 state, both engines.
+  - Severity: 2. Not this card's (FR-7 asks only for the line), and the move was made outside the app.
+  - Proposal: when the panel's re-read answers for another map_head, the header could take §4's moved line.
+- **UW2 (1), for aglaea**:
+  - What the person cannot do: nothing is lost. A reviewed, unedited symbol still draws the primary `Reviewed` (`Reviewed, next` while one is left), which saves the same mark again. A8 A1's "only when there is something to save" covers Save, not the primary.
+  - Where: `rb-1024x640-W4-not-here.png`.
+  - Evidence: AX and the harness `W1_formatName_reopened` show `Reviewed, next` on a ✓ symbol.
+  - Severity: 1. It was already there before this card.
+  - Proposal: aglaea decides whether a marked, unedited symbol's primary is just `Next to review` or stays.
+
+Spec gaps (for the FSE):
+- FR-7 says what the editor line shows after a re-read for another head, but not what the header says then (UW1).
+
+For aglaea: UW1, UW2.
+
+Not verified in WKWebView:
+- The W3 collision set (`a b`, `a_b`, `a.b`, `a/b`): the fixture has no such paths. vitest W3 covers it in the reused run; one real id was checked in the DOM.
+- The FR-8 edited state typed in the review build: AX cannot type, so that state was typed in the harness. The review build showed the seeded unedited state.
+- A live mailbox where `asked` names a seat other than the review's: no mailbox by rule (vitest W2/K4).
