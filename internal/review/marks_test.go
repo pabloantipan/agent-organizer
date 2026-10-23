@@ -246,3 +246,26 @@ func TestSetMarkKeepsTheAsk(t *testing.T) {
 		}
 	}
 }
+
+// R3 (leftovers-46 FR-3): a mark asked before the ask kept its note has
+// Asked set and AskedNote empty; saving it with an edited note keeps the
+// note it carried until then as the note it was asked with.
+func TestSetMarkGivesAnOldAskItsNote(t *testing.T) {
+	f, rm := marksRepo(t)
+	at := time.Date(2026, 10, 23, 9, 0, 0, 0, time.UTC)
+	a := "go:example.com/m/p.A"
+	if _, err := SetMark("init-m", "c1", rm, textIn(f, rm), a, "question", "q", "pablo", at); err != nil {
+		t.Fatal(err)
+	}
+	// the shape of an ask written before AskedNote existed
+	if _, err := SetAsked("init-m", rm.Head, a, "T1", "M1", ""); err != nil {
+		t.Fatal(err)
+	}
+	m, err := SetMark("init-m", "c1", rm, textIn(f, rm), a, "question", "q2", "pablo", at.Add(time.Minute))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(m.Marks) != 1 || m.Marks[0].Note != "q2" || m.Marks[0].Asked != "M1" || m.Marks[0].AskedNote != "q" {
+		t.Errorf("marks = %+v, want note q2 asked M1 with q", m.Marks)
+	}
+}
