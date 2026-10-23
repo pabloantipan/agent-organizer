@@ -4,6 +4,13 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## 2026-10-23 10:55
+
+- Last SHA seen: 1ae92bd (Pablo ruled 0154 "accept as written", words "ok", lodestar).
+- d6beac5: leftovers-46 spec ruled, both lf46 cards' next "sup87 runs it". sup87 launched detached (claude pid 17819), one wave of two cards, forecast 30-60m from ~10:55.
+- Learned after compaction: fse skill now says load `interaction-preferences` after every compaction, and every question to the operator also goes to the mailbox as kind question. 0154 was asked in session only until 10-22; posted then (thread 01M5KA411PM3DG12WG5QNBPEB8, now closed).
+- Open: Pablo's odyssey trial (review-map exits 1-2); held: top bar at 1024 and Home from 1920 (measure first), cgo-off lines, extra packages.Load, M2 path-qualified flag gate line.
+
 ## 2026-10-18 23:30
 
 - Pablo, this session: "you can go till 60% again" (my context cap, after I asked to rotate at ~290k). Push and the odyssey trial: "1 and 2 tomorrow".
