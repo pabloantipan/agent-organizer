@@ -6,7 +6,7 @@ branch: lf46-review-words
 seat:
 stage: review-map
 updated: 2026-10-22
-next: "pablo: rule 0154 (leftovers 46)"
+next: "sup87 runs it (0154 ruled 2026-10-23)"
 risk: low
 footprint: [frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/components/Review.tsx, frontend/src/components/Review.test.tsx, frontend/src/styles/review.css, frontend/src/components/Conversation.tsx (landing), frontend/src/stores/board.store.ts (openSlack seat)]
 depends_on: []

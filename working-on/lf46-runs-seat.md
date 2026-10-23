@@ -6,7 +6,7 @@ branch: lf46-runs-seat
 seat:
 stage: review-map
 updated: 2026-10-22
-next: "pablo: rule 0154 (leftovers 46)"
+next: "sup87 runs it (0154 ruled 2026-10-23)"
 risk: low
 footprint: [internal/session/runs.go, internal/session/runs_test.go, internal/service/run.go, internal/service/run_test.go, internal/cli/run.go, internal/cli/run_test.go, internal/review/marks.go, internal/review/marks_test.go]
 depends_on: []

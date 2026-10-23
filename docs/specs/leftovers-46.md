@@ -1,6 +1,6 @@
 # Leftovers 46: runs know their card and their resumes, and the review panel's last loose words: the build spec
 
-status: proposed (0154)
+status: ruled (0154, pablo 2026-10-23)
 by: the FSE, 2026-10-22, on main at ab419ac
 sources: the held list in `docs/bitacora/fse_bitacora.md` (2026-10-18
 hand-offs: sup83 to sup86's findings), Aglaea's `docs/ux/specs/review-view.md`
