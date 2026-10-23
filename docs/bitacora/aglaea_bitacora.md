@@ -179,3 +179,4 @@ resumes. The seat moves to the new discuss watcher (wake-rearm, api
 - 2026-10-18 — lf44 UI review graded: review-view Amendment 10 (RS2 hint retired, the primary saves; open carries the seat, no channel flash; no clear-to-none), R37-R38 amended.
 - 2026-10-23 — rw-ui on lf46 graded: review-view Amendment 11 (header takes the moved line on any re-read for another head; no primary on a marked, unedited symbol), R39-R40.
 - 2026-10-23 — sup87 finding 4 answered: review-view Amendment 12 (Others group under People for addressees outside the roster; the landing draws its row; gone when no open thread), R41.
+- 2026-10-23 — o47-ui on lf47-others graded: review-view Amendment 13 (landing scrolls the current row into view; state marks never ease, added to the design system; picker lists Others), R42-R44.

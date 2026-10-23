@@ -140,6 +140,10 @@ no `zero` or stylistic sets).
 - Hover and press 100ms, panels and the card back 200ms, nothing over 300ms;
   `--ease-out` in, `--ease-exit` out. Under `prefers-reduced-motion` nothing
   moves.
+- **State marks never ease.** Hover and press may ease; a mark that says
+  where you are or what is chosen (current, selected, open, disabled)
+  switches with no transition, so it is true on the first frame, even in a
+  window that draws no frames (review-view A13).
 - **Layers, one order everywhere**, from z-index tokens and never from bare
   numbers: content < sticky headings and heads < an inline box (rule box)
   and its scrim < the top bar < a drawer or modal (card back, Help) and its

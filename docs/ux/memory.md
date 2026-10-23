@@ -434,6 +434,9 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 
 - A list that a landing can point into must be able to draw the target's row: when a target falls outside the list's source (the roster), add a bounded group for it (`Others`) rather than landing on no row (review-view A12).
 
+- A landing into a scrolling list scrolls its current row into view (nearest, instant); a click in the list does not need it (review-view A13).
+- State marks never transition: a mark eased by a global button transition can lag a frame-starved window and show the wrong row (design system, review-view A13).
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).

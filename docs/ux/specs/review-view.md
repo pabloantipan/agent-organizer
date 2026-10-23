@@ -576,3 +576,29 @@ current row follows the chat shown, so that chat needs a row.
 | # | Pablo can | Checked by |
 |---|---|---|
 | R41 | see the chat with a supervisor | a review asked of `sup87` (not in the roster): `Open the thread` lands with `sup87` under `Others` as the one `aria-current="true"` row; once its thread closes and another chat is shown, the row and the group are gone |
+
+## Amendment 13 (aglaea, 2026-10-23): from o47-ui on lf47-others
+
+From `working-on/lf47-others.md`, ## UI review (pass at 09c5d11).
+
+- **UO1: a landing shows its row.** Whenever the chat list's current row
+  changes by a landing (an open from a review, a card, Message, or the
+  feed's later selection of the thread), the list scrolls that row into
+  view with `block: "nearest"`, instantly and never smooth (Safari 15, a
+  hidden window). A click inside the list needs no scroll, since that row
+  is already in view. Focus is not moved by the scroll.
+- **UO2: the current row's fill does not ease.** The design system now
+  says it: state marks (current, selected, open, disabled) switch with no
+  transition. `.chat.active`'s fill, and any current or selected fill
+  that rides the global button transition, opt out; hover keeps its 100 ms.
+- **The new-thread picker lists Others too.** Below the roster, under the
+  same `Others` divider, it lists the names the chat list's Others group
+  shows at that moment. It offers no free-typed name: a name the cell
+  cannot address does not belong in the picker. When Others is empty the
+  divider is absent.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R42 | see where he landed | 1024×640, `Open the thread` to `sup10` under Others: the current row is wholly inside the chat list's visible area on the first frame after landing |
+| R43 | trust the fill | click another chat in a window that draws no frames: the fill is on the clicked row (the same row as `aria-current`), with no frame on the old one |
+| R44 | write to an Other | with `sup10` in Others, the new-thread picker lists `sup10` under `Others`; with Others empty there is no divider |
