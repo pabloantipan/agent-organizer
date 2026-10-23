@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 47 - the review header follows the newest re-read, no save of nothing, a resumed seat's cost counted once, and a chat with someone outside the roster
-status: proposed
+status: ruled
 raised: 2026-10-23
 raised_by: fse
 owner: pablo
@@ -10,9 +10,9 @@ forecast: 25-50m
 stage: review-map
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-23
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -60,3 +60,7 @@ forecast: 25-50m over 1 wave, plus the two UI reviews; basis: 2 tasks, this
 initiative (leftovers 46: two cards, one of them a frontend card on these
 same files with UI review, handed over 10:47 and both merged 11:10, 23 min;
 leftovers 45: one card, 14 min).
+
+## Ruling
+
+pablo, 2026-10-23, in the organizer on lodestar: ok
