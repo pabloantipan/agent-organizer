@@ -445,8 +445,8 @@ func (s *Service) liveRuns() []session.Run {
 			PID: rec.PID, SessionID: rec.SessionID, Session: rec.Session,
 			Persona: rec.Persona, Cell: rec.Cell, Cwd: rec.Cwd, Model: rec.Model,
 			UsedPercent: rec.UsedPercent, InputTokens: rec.InputTokens,
-			WindowSize: rec.WindowSize,
-			FirstSeen:  rec.UpdatedAt, LastSeen: rec.UpdatedAt,
+			WindowSize: rec.WindowSize, CostUSD: rec.CostUSD,
+			FirstSeen: rec.UpdatedAt, LastSeen: rec.UpdatedAt,
 		}
 		if c, ok := session.MatchRun(rec.Cwd, branchOf(rec.Cwd), rec.Session, cards); ok {
 			r.Initiative, r.Card, r.Branch = c.Initiative, c.Slug, c.Branch
@@ -461,26 +461,10 @@ func (s *Service) liveRuns() []session.Run {
 // one — so they are folded by the archive's key and the live record wins: its
 // numbers are the newer ones, and the token sum must not count it twice.
 func runsView(initiativeID string, archived, live []session.Run) RunsView {
-	folded := make(map[string]RunInfo, len(archived)+len(live))
-	keep := func(r session.Run, isLive bool) {
-		if initiativeID != "" && r.Initiative != initiativeID {
-			return
-		}
-		folded[r.Key()] = runInfo(r, isLive)
-	}
-	for _, r := range archived {
-		keep(r, false)
-	}
-	for _, r := range live {
-		if prev, ok := folded[r.Key()]; ok && prev.FirstSeen.Before(r.FirstSeen) {
-			r.FirstSeen = prev.FirstSeen // the archive remembers when it started
-		}
-		keep(r, true)
-	}
-
 	view := RunsView{Initiative: initiativeID}
 	byCard := map[string]*CardRuns{}
-	for _, r := range folded {
+	for _, cr := range runConversations(initiativeID, archived, live) {
+		r := runInfo(cr.Run, cr.Live)
 		c, ok := byCard[r.Card]
 		if !ok {
 			c = &CardRuns{Card: r.Card}
@@ -510,6 +494,50 @@ func runsView(initiativeID string, archived, live []session.Run) RunsView {
 		return a.Card < b.Card
 	})
 	return view
+}
+
+// runConversations is the rows runsView draws: the archive with the live
+// records over it by the archive's key, then folded into one row per
+// conversation the way `organizer runs` folds (session.Conversations, which
+// also sets the cost the app never sees), then one initiative's. The fold
+// comes before the filter: a process that matched no card does not unclaim
+// its conversation. Each row says whether one of its processes is live.
+func runConversations(initiativeID string, archived, live []session.Run) []convRun {
+	byKey := make(map[string]session.Run, len(archived)+len(live))
+	for _, r := range archived {
+		byKey[r.Key()] = r
+	}
+	isLive := map[string]bool{}
+	for _, r := range live {
+		if prev, ok := byKey[r.Key()]; ok && prev.FirstSeen.Before(r.FirstSeen) {
+			r.FirstSeen = prev.FirstSeen // the archive remembers when it started
+		}
+		byKey[r.Key()] = r
+		isLive[r.Key()] = true
+	}
+	runs := make([]session.Run, 0, len(byKey))
+	liveConv := map[string]bool{}
+	for k, r := range byKey {
+		runs = append(runs, r)
+		if isLive[k] && r.SessionID != "" {
+			liveConv[r.SessionID] = true
+		}
+	}
+	var out []convRun
+	for _, r := range session.Conversations(runs) {
+		if initiativeID != "" && r.Initiative != initiativeID {
+			continue
+		}
+		l := isLive[r.Key()] || (r.SessionID != "" && liveConv[r.SessionID])
+		out = append(out, convRun{Run: r, Live: l})
+	}
+	return out
+}
+
+// convRun is one conversation and whether any of its processes still runs.
+type convRun struct {
+	session.Run
+	Live bool
 }
 
 // laterRun orders runs newest last-seen first, the session id breaking a tie

@@ -271,3 +271,47 @@ func TestRunsFindTheirCardBySeat(t *testing.T) {
 		})
 	}
 }
+
+// C2 (leftovers-47 FR-5): the app's runs fold per conversation as `organizer
+// runs` does, live records included: a seat thawed under a new pid is one
+// row, its cost by the conversation rule (carried, not summed).
+func TestInitiativeRunsFoldsAConversation(t *testing.T) {
+	root := t.TempDir()
+	wt := filepath.Join(root, ".wt", "lf47-runs-cost")
+	hour := func(h int) time.Time { return time.Date(2026, 10, 23, h, 0, 0, 0, time.UTC) }
+	card := func(r session.Run) session.Run {
+		r.SessionID, r.Cwd, r.Initiative, r.Card, r.Branch = "conv", wt, "organizer", "lf47-runs-cost", "lf47-runs-cost"
+		return r
+	}
+	archived := []session.Run{
+		card(session.Run{PID: 10, InputTokens: 50_000, CostUSD: 1.00, FirstSeen: hour(9), LastSeen: hour(11), Ended: true}),
+		// The thawed process's open line, stale against its live record.
+		card(session.Run{PID: 20, InputTokens: 10_000, CostUSD: 1.10, FirstSeen: hour(12), LastSeen: hour(12)}),
+	}
+	live := []session.Run{
+		card(session.Run{PID: 20, InputTokens: 60_000, CostUSD: 1.50, FirstSeen: hour(13), LastSeen: hour(13)}),
+	}
+
+	// The cost never reaches RunInfo (0020); the rows runsView draws carry it.
+	rows := runConversations("organizer", archived, live)
+	if len(rows) != 1 || rows[0].CostUSD != 1.50 || !rows[0].Live || rows[0].Resumed != 1 {
+		t.Fatalf("rows = %+v, want one live conversation at 1.50 (C1's rule), resumed 1", rows)
+	}
+
+	view := runsView("organizer", archived, live)
+	if len(view.Cards) != 1 || len(view.Cards[0].Runs) != 1 {
+		t.Fatalf("cards = %+v, want one card with one row", view.Cards)
+	}
+	c := view.Cards[0]
+	r := c.Runs[0]
+	if c.Card != "lf47-runs-cost" || c.Live != 1 || !r.Live || r.Ended {
+		t.Errorf("card %q live %d, row %+v; want lf47-runs-cost, one live row", c.Card, c.Live, r)
+	}
+	if r.InputTokens != 60_000 || c.InputTokens != 60_000 || view.InputTokens != 60_000 {
+		t.Errorf("tokens row %d card %d view %d, want 60000 each (the last process's context, once)",
+			r.InputTokens, c.InputTokens, view.InputTokens)
+	}
+	if !r.FirstSeen.Equal(hour(9)) || !r.LastSeen.Equal(hour(13)) {
+		t.Errorf("seen %s..%s, want %s..%s", r.FirstSeen, r.LastSeen, hour(9), hour(13))
+	}
+}
