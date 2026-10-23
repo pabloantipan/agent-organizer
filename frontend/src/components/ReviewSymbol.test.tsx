@@ -25,7 +25,7 @@ vi.mock("../../wailsjs/runtime/runtime", () => ({ EventsOn: () => () => undefine
 vi.mock("../hooks/useWails", () => ({ api: new Proxy({}, { get: () => vi.fn(async () => ({})) }) }));
 vi.mock("../lib/drafts", async (orig) => ({ ...(await orig<typeof import("../lib/drafts")>()), useDraft: () => undefined, useDrafts: () => new Set<string>() }));
 
-const { AskStatus, EditorAction, EditorFailed, editorFailedId, editorRefused, markPress, openAt, ReviewSymbolView } = await import("./ReviewSymbol");
+const { AskStatus, EditorAction, EditorFailed, editorFailedId, editorRefused, landAfterSave, leavesAfterPress, markPress, openAt, ReviewSymbolView } = await import("./ReviewSymbol");
 const { afterSave, askOf, canSave, definitionLine, editorAt, focusAfterSave, markControls, markOf, rowName, saveShown, threadOf, worklist } = await import("../lib/review");
 
 const node = (n: Partial<review.Node> & { id: string }) => ({
@@ -568,7 +568,8 @@ describe("S1-S4 (leftovers-43): the panel never offers a press that cannot work"
     expect(focusAfterSave({ showPrimary: true, ask: false })).toBe("radios");
     expect(src).toContain("{dirty && <button {...busyButton({ busy: busy === \"save\"");
     expect(src).toContain('if (which === "save") afterSaveFocus.current = true;');
-    expect(src).toContain('(to ?? radios.current?.querySelector<HTMLInputElement>("input:checked") ?? radios.current?.querySelector<HTMLInputElement>("input"))?.focus();');
+    // moved into landAfterSave for leftovers-47 Amendment 1; M4 reads where it lands
+    expect(src).toContain("landAfterSave({ showPrimary, ask: primary.ask, primary: primaryButton.current, radios: radios.current });");
     expect(src).not.toMatch(/document\.body\.focus|\.blur\(\)/);
   });
 });
@@ -787,5 +788,39 @@ describe("M4 (FR-3): no primary on a marked, unedited symbol", () => {
     expect(focusAfterSave({ showPrimary: c.showPrimary, ask: c.primary.ask })).toBe("radios");
     const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
     expect(src).toContain("markControls({ state, note, to, last, asked, askedNote, saved })");
+  });
+  // leftovers-47 Amendment 1 (MV1): the last symbol's own primary press
+  // saves and FR-3 removes the button; focus lands on the checked radio.
+  // No DOM library: a document stand-in whose focus() sets activeElement.
+  it("after the last unmarked symbol's own primary press, document.activeElement is the checked radio, never the body", async () => {
+    const doc = { activeElement: "body" as unknown };
+    const el = (name: string) => { const e = { name, focus: () => { doc.activeElement = e; } }; return e; };
+    const primary = el("Reviewed"), checked = el("radio reviewed"), first = el("radio first");
+    const radios = { querySelector: (q: string) => (q === "input:checked" ? checked : q === "input" ? first : null) } as unknown as ParentNode;
+    doc.activeElement = primary; // the press is on Reviewed
+    // the press: no next (last), no ask; it saved ✓ and the form shows what was saved
+    const onMark = vi.fn((_s: MarkState, _n: string) => Promise.resolve());
+    let armed = false;
+    await markPress({ ask: false, state: "reviewed", note: "", seat: "", onMark, then: () => { armed = leavesAfterPress({ ask: false, moves: false }); } });
+    expect(armed).toBe(true);
+    const after = afterSave("reviewed", "");
+    const c = markControls({ ...after, to: null, last: true, asked: false, askedNote: "", saved: after });
+    expect(c.showPrimary).toBe(false); // the pressed button is gone
+    expect(landAfterSave({ showPrimary: c.showPrimary, ask: c.primary.ask, primary: null, radios })).toBe(checked);
+    expect(doc.activeElement).toBe(checked);
+    // Save question / Save block with nobody to ask, on the last, the same
+    for (const s of ["question", "blocked"] as MarkState[]) {
+      doc.activeElement = primary;
+      const a = afterSave(s, "why?");
+      const k = markControls({ ...a, to: { seat: "", why: "no cell" }, last: true, asked: false, askedNote: "", saved: a });
+      expect(leavesAfterPress({ ask: k.primary.ask, moves: false })).toBe(true);
+      landAfterSave({ showPrimary: k.showPrimary, ask: k.primary.ask, primary: null, radios });
+      expect(doc.activeElement).toBe(checked);
+    }
+    // a press that moves on (the next symbol's h2) or asks (Open the thread) arms nothing
+    expect(leavesAfterPress({ ask: false, moves: true })).toBe(false);
+    expect(leavesAfterPress({ ask: true, moves: false })).toBe(false);
+    const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
+    expect(src).toContain('if (which === "next" && leavesAfterPress({ ask, moves: !!then })) afterSaveFocus.current = true;');
   });
 });

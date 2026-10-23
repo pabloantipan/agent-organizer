@@ -334,8 +334,7 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
     if (!afterSaveFocus.current || busy !== "") return;
     afterSaveFocus.current = false;
     if (dirty) return;
-    const to = focusAfterSave({ showPrimary, ask: primary.ask }) === "primary" ? primaryButton.current : null;
-    (to ?? radios.current?.querySelector<HTMLInputElement>("input:checked") ?? radios.current?.querySelector<HTMLInputElement>("input"))?.focus();
+    landAfterSave({ showPrimary, ask: primary.ask, primary: primaryButton.current, radios: radios.current });
   });
   const run = (which: "next" | "save" | "retry", s: MarkState, ask: boolean, then?: () => void) => async () => {
     setBusy(which);
@@ -347,6 +346,7 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
         setState(shown.state);
         setNote(shown.note);
         if (ask && !then) toLink.current = true;
+        if (which === "next" && leavesAfterPress({ ask, moves: !!then })) afterSaveFocus.current = true;
         then?.();
       } });
       setFailed(r);
@@ -386,6 +386,23 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
       {error && <p className="review-error">{error}</p>}
     </div>
   );
+}
+
+/** The primary's own press on the last symbol (no next) that only saves
+ *  (leftovers-47 Amendment 1, MV1): FR-3 then removes the pressed button,
+ *  so focus is handed on as after a Save. One that moves on opens the next
+ *  symbol, whose h2 takes focus; one that asks hands focus to Open the
+ *  thread (or keeps it on Try again). */
+export const leavesAfterPress = (o: { ask: boolean; moves: boolean }) => !o.ask && !o.moves;
+
+/** Where focus lands once Save, or a primary that only saved, has left
+ *  (leftovers-43 FR-4, leftovers-47 FR-3): the asking primary when drawn,
+ *  else the mark's checked radio, else its first; never the body. */
+export function landAfterSave(o: { showPrimary: boolean; ask: boolean; primary: HTMLElement | null; radios: ParentNode | null }): HTMLElement | null {
+  const to = focusAfterSave({ showPrimary: o.showPrimary, ask: o.ask }) === "primary" ? o.primary : null;
+  const el = to ?? o.radios?.querySelector<HTMLInputElement>("input:checked") ?? o.radios?.querySelector<HTMLInputElement>("input") ?? null;
+  el?.focus();
+  return el;
 }
 
 /** An ask whose post failed (ReviewAsk.error): the mark is saved here. */
