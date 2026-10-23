@@ -6,7 +6,7 @@ branch: lf47-runs-cost
 seat:
 stage: review-map
 updated: 2026-10-23
-next: "pablo: rule 0155 (leftovers 47)"
+next: "sup88 runs it (0155 ruled 2026-10-23)"
 depends_on: []
 boundary: ["docs/specs/leftovers-47.md Boundary, lf47-runs-cost"]
 spec: "docs/specs/leftovers-47.md (FR-4 to FR-6)"

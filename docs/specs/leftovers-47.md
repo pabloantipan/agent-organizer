@@ -1,6 +1,6 @@
 # Leftovers 47: the review header follows the newest re-read, no save of nothing, a resumed seat's cost counted once, and a chat with someone outside the roster: the build spec
 
-status: proposed (0155)
+status: ruled (0155, pablo 2026-10-23)
 by: the FSE, 2026-10-23, on main at 2715032
 sources: Aglaea's `docs/ux/specs/review-view.md` Amendments 11 (2715032)
 and 12 (235b415),
