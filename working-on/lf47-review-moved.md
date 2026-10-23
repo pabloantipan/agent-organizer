@@ -7,7 +7,7 @@ seat: m47-build
 reviewer: m47-review, m47-ui
 stage: review-map
 updated: 2026-10-23
-next: "m47-build: fix MV1 / M4 focus (FR-3 last sentence): after the last symbol's primary press (Reviewed, or Save question/block with no seat) the button unmounts and focus drops to body; arm the after-save focus for that press so it lands on the checked radio, with a test that reads focus"
+next: "review: lf47-review-moved, gate met (M1-M4 with Amendment 1, X0), 3301319"
 review: fail
 depends_on: []
 boundary: ["docs/specs/leftovers-47.md Boundary, lf47-review-moved"]
@@ -24,12 +24,13 @@ docs/specs/leftovers-47.md, rows M1-M4 and X0; the UI review checks review-view 
 
 ## Done
 - Built on branch lf47-review-moved (5c6af25 FR-3, 6c899f4 FR-1/FR-2), rebased on main at eefd82a; M1-M4 fail on main and pass on the branch, X0 passes from a clean clone; evidence and choices in `.wt-notes/m47-build/progress.md` (m47-build, 2026-10-23).
+- MV1 fixed on the same branch (3301319); M4's new focus test fails on 6c899f4 and passes; rebased on main at 4dd010d, X0 passes from a clean clone (m47-build, 2026-10-23).
 
 ## Notes
 - Tests updated because they pinned a primary on a marked, unedited symbol (FR-3): `ReviewSymbol.test.tsx` P2 (both), A4 "nobody to ask" and "Reviewed with someone to ask", A6 "each mark's primary drops , next", W4 source line (`markControls(... saved)`), "then Reviewed: the link stays"; `Review.test.tsx` A6 "after the press". Each now reads the label from the edited form, and says so in a comment.
 - FR-3 is read as "no primary that only saves": an asking primary stays on a saved, unedited mark (`Ask <seat> again` after a Save of an edited note, leftovers-44 FR-1; `Ask <seat>, next` on a saved Question never asked), since an ask posts. The muted ask line goes with a hidden primary.
 - FR-2: the live region's speaker replaces a pending line, and emptying in the same task as the refusal is set would batch both away; the moved line waits one 100 ms gap after the refusal line (`inTurn`).
-- The clean clone `.wt-notes/m47-build/clean` was left in place: the harness refused `rm -rf` on it.
+- MV1 fixed per Amendment 1: the last symbol's own primary press (no next, no ask) hands focus to the checked radio through `focusAfterSave`; armed only when the press succeeded. S4's source pin of the old focus line now pins `landAfterSave`.
 
 ## Declared changes
 - modified `frontend/src/lib/review.ts:markControls`: takes the saved mark; hides a primary that would only save, and its ask line (FR-3)
@@ -40,11 +41,13 @@ docs/specs/leftovers-47.md, rows M1-M4 and X0; the UI review checks review-view 
 - modified `frontend/src/components/ReviewSymbol.tsx:ReviewSymbol`: every status read goes to `onStatus`; passes `moved` down (FR-1, FR-2)
 - modified `frontend/src/components/ReviewSymbol.tsx:ReviewSymbolView`: `moved` prop to the title line (FR-2)
 - modified `frontend/src/components/ReviewSymbol.tsx:TitleLine`: refusals said through `inTurn.press`, the moved line through `inTurn.after` once per change (FR-2)
-- modified `frontend/src/components/ReviewSymbol.tsx:MarkForm`: passes the saved mark to markControls (FR-3)
+- modified `frontend/src/components/ReviewSymbol.tsx:MarkForm`: passes the saved mark to markControls (FR-3); arms the after-save focus for the last symbol's own primary press (Amendment 1, MV1)
+- added `frontend/src/components/ReviewSymbol.tsx:leavesAfterPress`: a primary press that neither moves on nor asks (Amendment 1)
+- added `frontend/src/components/ReviewSymbol.tsx:landAfterSave`: where focus lands once Save or that press has left, via focusAfterSave (Amendment 1)
 - modified `frontend/src/components/Review.tsx:Review`: `newer` state from `onStatus` via movedHead, cleared by load; passes `moved` and `onStatus` to the panel (FR-1)
 - modified `frontend/src/components/Review.tsx:ReviewView`: `newer` prop; the moved block drawn from headerMoved (FR-1)
 - modified `frontend/src/components/Review.test.tsx`: M1, M2, M3; A6 updated for FR-3
-- modified `frontend/src/components/ReviewSymbol.test.tsx`: M4; tests pinning a primary on a saved, unedited mark updated
+- modified `frontend/src/components/ReviewSymbol.test.tsx`: M4 (with Amendment 1's focus check); tests pinning a primary on a saved, unedited mark updated; S4's source pin follows landAfterSave
 Risky:
 - `inTurn`: a moved line that arrives while a press line is pending waits for it; if that press's line is dropped (speaker stopped on unmount), the moved line is dropped with it
 - `Review` `onStatus`: depends on `status` from load; a panel read that resolves before the screen's own load has a status is ignored (nothing shown yet)
