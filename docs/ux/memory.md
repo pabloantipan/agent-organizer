@@ -432,6 +432,8 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - "Only when there is something to do" applies to the primary as much as to Save: a marked, unedited item draws no primary; the screen's own Next carries the way on (review-view A11).
 - A state read made for one part of a screen (the editor line) updates every part that shows the same fact (the header's map head); a screen must never show two heads at once (review-view A11).
 
+- A list that a landing can point into must be able to draw the target's row: when a target falls outside the list's source (the roster), add a bounded group for it (`Others`) rather than landing on no row (review-view A12).
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).

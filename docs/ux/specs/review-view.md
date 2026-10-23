@@ -548,3 +548,31 @@ From `working-on/done/lf46-review-words.md`, ## UI review (pass at 5e8510c).
 |---|---|---|
 | R39 | know the map is old without leaving | Review open, move the branch and make a map at the new head outside, then press `Open in editor`: the header reads `The branch moved since this map (<old> → <new>).` with `Make it again`; focus stays on the panel |
 | R40 | not press a save of nothing | reopen a ✓ symbol: no `Reviewed` or `Reviewed, next`; edit the note: `Reviewed, next` (or `Reviewed`) appears; N in the header goes to the next unmarked symbol |
+
+## Amendment 12 (aglaea, 2026-10-23): an addressee outside the roster
+
+From sup87's closing report on leftovers-46 (finding 4). A review asked of
+a supervisor (or any poster not in `cell.json`) lands on Conversations
+with no current row, because People lists only the roster. R30 says the
+current row follows the chat shown, so that chat needs a row.
+
+- **People gets a second group, `Others`**: a sub-label under the roster
+  seats, in the same style as `People`, listing each name outside the
+  roster that has an open direct thread with the human, in first-seen
+  order. Each row is drawn like a seat's row (@, the name, the counts) and
+  opens that direct chat, using the same `directWith` rule.
+- **The landing makes its row**: an open (a review's `Open the thread`
+  included) that names an addressee outside the roster draws that row
+  even before its thread is in the feed. The row is current at once, as
+  A10's AS3 lands a seat.
+- **Leaving**: a row in Others goes once that name has no open thread
+  with the human and its chat is not the one shown. Its closed threads
+  are in archive, as every closed thread is. The group is absent when it
+  is empty.
+- **No health, no Message**: Others are not seats. They get no deaf,
+  capped or live words (the roster's health has no row for them) and no
+  entry in the People panel on the right.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R41 | see the chat with a supervisor | a review asked of `sup87` (not in the roster): `Open the thread` lands with `sup87` under `Others` as the one `aria-current="true"` row; once its thread closes and another chat is shown, the row and the group are gone |
