@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 46 - runs know their card and their resumes, and the review panel's last loose words
-status: proposed
+status: ruled
 raised: 2026-10-22
 raised_by: fse
 owner: pablo
@@ -10,9 +10,9 @@ forecast: 30-60m
 stage: review-map
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-23
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -50,3 +50,5 @@ The FSE: **"accept as written"**.
 On accept: one supervisor runs both cards in one wave.
 
 ## Ruling
+
+pablo, 2026-10-23, in the organizer on lodestar: ok
