@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"organizer/internal/model"
+	"organizer/internal/session"
 )
 
 const joinRoot = "/Users/p/organizer"
@@ -241,5 +242,19 @@ func TestParseETime(t *testing.T) {
 		if ok != tt.ok || got != tt.want {
 			t.Errorf("parseETime(%q) = %v, %v; want %v, %v", tt.in, got, ok, tt.want, tt.ok)
 		}
+	}
+}
+
+// C3 (leftovers-47 FR-6): a card's seat names the session's short name, after
+// `<project>-probe-`, as session.MatchRun reads it; two such cards name none.
+func TestMatchBySeatReadsTheShortName(t *testing.T) {
+	a := model.Agent{Session: "organizer-probe-ru-build"}
+	one := []openCardRef{{CardRef: session.CardRef{Initiative: "organizer", Slug: "lf46-runs-seat"}, Seat: "ru-build"}}
+	if got, ok := matchBySeat(a, one); !ok || got.Slug != "lf46-runs-seat" {
+		t.Errorf("one card = %+v %v, want lf46-runs-seat matched", got, ok)
+	}
+	two := append(one, openCardRef{CardRef: session.CardRef{Initiative: "organizer", Slug: "lf46-other"}, Seat: "ru-build"})
+	if got, ok := matchBySeat(a, two); ok {
+		t.Errorf("two cards = %+v, want none", got)
 	}
 }
