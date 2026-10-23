@@ -522,3 +522,29 @@ From `working-on/done/lf44-ask-survives.md`, ## UI review.
 |---|---|---|
 | R37 (amended) | save a note without a stray hint | unmarked symbol, type a note: no Save and no hint line; `Reviewed, next` saves the mark ✓ with the note |
 | R38 (amended) | land at once | `Open the thread` with the thread not yet in the feed: the first frame of Conversations shows the seat's direct chat current, and channel is never current in between |
+
+## Amendment 11 (aglaea, 2026-10-23): from rw-ui on lf46-review-words
+
+From `working-on/done/lf46-review-words.md`, ## UI review (pass at 5e8510c).
+
+- **UW1: the header follows the newest re-read.** Whenever a status read
+  made while the screen is open (the panel's re-read after a refusal
+  included) answers for a map head other than the one shown, the header
+  takes §4's moved state in place: `The branch moved since this map
+  (<shown> → <new>).` and `Make it again`. The map and the marks shown
+  stay as they are until Make it again. Focus does not move. The panel's
+  sr-only polite region says the moved line once (emptied, set after
+  100 ms), after any line the press itself caused. The header's height may
+  grow by that one line; nothing else moves.
+- **UW2: no primary on a marked, unedited symbol.** It would save the same
+  mark again, a press that does nothing (A8's rule, applied to the primary
+  as well as to Save). A symbol whose mark and note equal what is saved
+  draws no primary; the header's `Next to review` (N) is the way on. Once
+  the mark or the note changes, the primary returns in A2/A3/A9's forms.
+  The panel then ends at the note (or at `Asked <seat> · Open the
+  thread`, as A10 has it).
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R39 | know the map is old without leaving | Review open, move the branch and make a map at the new head outside, then press `Open in editor`: the header reads `The branch moved since this map (<old> → <new>).` with `Make it again`; focus stays on the panel |
+| R40 | not press a save of nothing | reopen a ✓ symbol: no `Reviewed` or `Reviewed, next`; edit the note: `Reviewed, next` (or `Reviewed`) appears; N in the header goes to the next unmarked symbol |

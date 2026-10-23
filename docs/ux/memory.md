@@ -429,6 +429,9 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 
 - Before wording a missing-action hint, check every press on the panel: if another control already does the act (the primary saves the note), the hint is false (review-view A10).
 
+- "Only when there is something to do" applies to the primary as much as to Save: a marked, unedited item draws no primary; the screen's own Next carries the way on (review-view A11).
+- A state read made for one part of a screen (the editor line) updates every part that shows the same fact (the header's map head); a screen must never show two heads at once (review-view A11).
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).
