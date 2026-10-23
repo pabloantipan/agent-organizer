@@ -1,13 +1,13 @@
 ---
 title: "Conversations lists a chat with someone outside the roster under Others, and lands on it at once"
-status: next
+status: done
 repos: [organizer]
 branch: lf47-others
 seat: o47-build
 reviewer: o47-review, o47-ui
 stage: review-map
 updated: 2026-10-23
-next: "review: lf47-others, O1-O3 and X0 pass, 09c5d11"
+next: "done: review pass (o47-review), UI review pass (o47-ui); findings routed to the FSE"
 depends_on: []
 boundary: ["docs/specs/leftovers-47.md Boundary, lf47-others"]
 spec: "docs/specs/leftovers-47.md (FR-7 to FR-9)"
@@ -62,6 +62,7 @@ Words: `Others` sub-label, `chats-label sub` like `People`, rows titled `direct 
 
 - Note: O3's leave-while-another-is-shown is proved on `othersOf` with a kept `seen` across calls; its one render assertion (`others(render([mine], "ru-build"))` null) also passes on main. The component's single `othersOf(all, human, seats, focus, ref)` call is covered by O1/O2 renders, so the row is met; a re-render test needs a DOM vitest does not have here. To the FSE (gate wording).
 - Note: the new-thread picker lists only the roster, so `+` in an Other's chat cannot address it (the builder's own note). Outside FR-7 to FR-9. To the FSE.
+- Routing of the UI review's findings (written there "for aglaea", none sev 4/3): UO1 (2), UO2 (1) and its two spec gaps go to the FSE, which takes them to aglaea for an amendment.
 
 Reviewer o47-review, 2026-10-23.
 
