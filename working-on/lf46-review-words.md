@@ -7,7 +7,7 @@ seat: rw-build
 reviewer: rw-review, rw-ui
 stage: review-map
 updated: 2026-10-23
-next: "review: lf46-review-words, gate met (W1-W4, X0), 86b57ac"
+next: "review: lf46-review-words, gate met (W1-W4, X0), 5e8510c"
 risk: low
 footprint: [frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/components/Review.tsx, frontend/src/components/Review.test.tsx, frontend/src/styles/review.css, frontend/src/components/Conversation.tsx (landing), frontend/src/stores/board.store.ts (openSlack seat)]
 depends_on: []
@@ -45,7 +45,7 @@ Not changed, on purpose:
 - `frontend/src/lib/review.ts:editorAt`: a first status read for another head still draws nothing (E3)
 
 ## Done
-- 2026-10-23 rw-build: FR-4 to FR-8 on `lf46-review-words` (c19b62f, 86b57ac); W1-W4 fail on main, pass on the branch; X0 passes from a clean clone (`.wt-notes/rw-build/progress.md`)
+- 2026-10-23 rw-build: FR-4 to FR-8 on `lf46-review-words` (105c9aa, 5e8510c); W1-W4 fail on main, pass on the branch; X0 passes from a clean clone (`.wt-notes/rw-build/progress.md`)
 
 ## Notes
 - FR-8's frontend fallback alone does not survive a Save of an old asked mark until lf46-runs-seat's FR-3 (SetMark keeps the previous note as AskedNote) merges; the two cards close it together.
