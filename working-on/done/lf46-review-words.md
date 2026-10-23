@@ -1,13 +1,13 @@
 ---
 title: "The review panel's last loose words: no false hint, the asked seat's chat at once, unique ids, the not-here line kept"
-status: now
+status: done
 repos: [organizer]
 branch: lf46-review-words
 seat: rw-build
 reviewer: rw-review, rw-ui
 stage: review-map
 updated: 2026-10-23
-next: "review: lf46-review-words, gate met (W1-W4, X0), 5e8510c"
+next: "merge lf46-review-words (5e8510c): review pass (rw-review), UI review pass (rw-ui)"
 risk: low
 footprint: [frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/components/Review.tsx, frontend/src/components/Review.test.tsx, frontend/src/styles/review.css, frontend/src/components/Conversation.tsx (landing), frontend/src/stores/board.store.ts (openSlack seat)]
 depends_on: []
@@ -138,7 +138,7 @@ The branch's five test files copied onto a main clone (644c47b, the merge base, 
 
 ### Notes (not blocking)
 
-- Note: the W2 render test (`focus="fse"`) passes on main by itself; it shows that a seat given to Conversations is current on the first render. What fails on main is the chain above it (`openThread`, `unlistedLanding.start` with a seat). The proof is the chain, not that one render.
+- Note: the W2 render test (`focus="fse"`) passes on main by itself; it shows that a seat given to Conversations is current on the first render. What fails on main is the chain above it (`openThread`, `unlistedLanding.start` with a seat). The proof is the chain, not that one render. To the FSE, as a note on how R38-style rows are tested.
 - Note: in this initiative the cell roster is only `fse`, so the addressee is often a supervisor (`sup87`) that has no row in the chat list. Rendered on the branch with `focus="sup87"`: the title reads `sup87`, channel is not current, and **no row is current** (R30's "the current row is the chat shown" cannot hold for a seat that has no row). This was already true on main once the landing reached that seat; it is not this card's. To the FSE, for rw-ui's view.
 - Note: `domId` is injective per prefix only (`domId("a", "b-c")` equals `domId("a-b", "c")`), as the builder recorded; today's prefixes `rs-note`, `rs-failed` and `rs-editor-failed` cannot collide that way. To the FSE if a prefix is ever added.
 - Note: FR-8 survives a Save only together with lf46-runs-seat FR-3 (as the card's Notes say). Goes to card `lf46-runs-seat`.
