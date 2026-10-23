@@ -337,15 +337,16 @@ func (s *Service) archiveRuns(grace time.Duration) (int, error) {
 	return session.Retire(session.Dir(), session.RunsPath(), alive, grace, s.now(), opts.Cards, opts.BranchOf)
 }
 
-// Runs is the archive, newest last-seen first, optionally one initiative
-// only. It archives first, so a session that just ended is already in the
-// table.
+// Runs is the archive, one row per conversation (a resumed seat is one run,
+// its processes' costs summed), newest last-seen first, optionally one
+// initiative only. It archives first, so a session that just ended is
+// already in the table.
 func (s *Service) Runs(initiativeID string) []session.Run {
 	if _, err := s.ArchiveRuns(); err != nil {
 		// A broken archive must not hide the history already written.
 		_ = err
 	}
-	all := session.LoadRuns(session.RunsPath())
+	all := session.Conversations(session.LoadRuns(session.RunsPath()))
 	if initiativeID == "" {
 		return all
 	}

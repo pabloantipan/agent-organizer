@@ -210,3 +210,48 @@ func TestMatchRunBySeat(t *testing.T) {
 		t.Errorf("archived = %+v, want the run under runs-seat", got)
 	}
 }
+
+// R2 (leftovers-46 FR-2): two processes of one conversation (a seat frozen
+// and thawed) are one run: started the earliest, ended the latest, context
+// the last, cost the sum, resumed 1. Lines with no session id stay per pid.
+func TestConversationsFoldResumes(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "runs.jsonl")
+	at := func(h int) time.Time { return time.Date(2026, 10, 22, h, 0, 0, 0, time.UTC) }
+	lines := []Run{
+		{PID: 10, SessionID: "conv", Session: "organizer-probe-rr-build", UsedPercent: 40, CostUSD: 1.00,
+			Initiative: "organizer", Card: "rr", FirstSeen: at(9), LastSeen: at(9)},
+		{PID: 10, SessionID: "conv", Session: "organizer-probe-rr-build", UsedPercent: 40, CostUSD: 1.00,
+			Initiative: "organizer", Card: "rr", FirstSeen: at(9), LastSeen: at(11), Ended: true},
+		{PID: 20, SessionID: "conv", Session: "organizer-probe-rr-build", UsedPercent: 55, CostUSD: 0.50,
+			FirstSeen: at(12), LastSeen: at(14), Ended: true},
+		{PID: 30, CostUSD: 2, FirstSeen: at(1), LastSeen: at(2), Ended: true},
+		{PID: 31, CostUSD: 3, FirstSeen: at(3), LastSeen: at(4), Ended: true},
+	}
+	if err := AppendRuns(path, lines); err != nil {
+		t.Fatal(err)
+	}
+	per := LoadRuns(path)
+	if len(per) != 4 {
+		t.Fatalf("LoadRuns stays one per process: %d, want 4", len(per))
+	}
+	got := Conversations(per)
+	if len(got) != 3 {
+		t.Fatalf("conversations = %+v, want 3", got)
+	}
+	c := got[0]
+	if c.SessionID != "conv" || c.Resumed != 1 || c.PID != 20 || !c.Ended {
+		t.Errorf("folded = %+v, want conv resumed 1, last pid 20, ended", c)
+	}
+	if c.CostUSD != 1.50 || c.UsedPercent != 55 {
+		t.Errorf("cost %.2f context %.0f, want 1.50 and 55", c.CostUSD, c.UsedPercent)
+	}
+	if !c.FirstSeen.Equal(at(9)) || !c.LastSeen.Equal(at(14)) || c.Wall() != 5*time.Hour {
+		t.Errorf("seen %s..%s, want %s..%s", c.FirstSeen, c.LastSeen, at(9), at(14))
+	}
+	if c.Card != "rr" {
+		t.Errorf("card = %q, want rr (the first process's, the last matched none)", c.Card)
+	}
+	if got[1].PID != 31 || got[2].PID != 30 || got[1].Resumed != 0 {
+		t.Errorf("no-session lines = %+v, %+v, want pids 31 then 30, not folded", got[1], got[2])
+	}
+}

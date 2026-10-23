@@ -54,6 +54,9 @@ type Run struct {
 	// Ended is true on the final line: the process is gone and the numbers
 	// will not move again.
 	Ended bool `json:"ended"`
+	// Resumed is how many more processes carried this conversation, set only
+	// by Conversations; the archive never writes it.
+	Resumed int `json:"resumed,omitempty"`
 }
 
 // Key identifies a run across its open and final lines. A pid is reused by
@@ -98,6 +101,54 @@ func LoadRuns(path string) []Run {
 	out := make([]Run, 0, len(byKey))
 	for _, r := range byKey {
 		out = append(out, r)
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if !out[i].LastSeen.Equal(out[j].LastSeen) {
+			return out[i].LastSeen.After(out[j].LastSeen)
+		}
+		return out[i].Key() < out[j].Key()
+	})
+	return out
+}
+
+// Conversations folds runs that share a non-empty session id into one: a
+// seat frozen and thawed resumes the same conversation under a new pid, and
+// is one piece of work. Started is the earliest first seen, ended the latest
+// last seen, the context, model and card those of the last process, the cost
+// the sum of each process's final cost, and Resumed how many processes came
+// after the first. A run with no session id stays one per pid. The archive is
+// not rewritten: this is a fold on read, sorted as LoadRuns sorts.
+func Conversations(runs []Run) []Run {
+	byID := map[string][]Run{}
+	var out []Run
+	for _, r := range runs {
+		if r.SessionID == "" {
+			out = append(out, r)
+			continue
+		}
+		byID[r.SessionID] = append(byID[r.SessionID], r)
+	}
+	for _, rs := range byID {
+		sort.Slice(rs, func(i, j int) bool {
+			if !rs[i].LastSeen.Equal(rs[j].LastSeen) {
+				return rs[i].LastSeen.Before(rs[j].LastSeen)
+			}
+			return rs[i].PID < rs[j].PID
+		})
+		c := rs[len(rs)-1]
+		c.CostUSD = 0
+		for _, r := range rs {
+			c.CostUSD += r.CostUSD
+			if !r.FirstSeen.IsZero() && (c.FirstSeen.IsZero() || r.FirstSeen.Before(c.FirstSeen)) {
+				c.FirstSeen = r.FirstSeen
+			}
+		}
+		// A process that matched no card does not unclaim the conversation.
+		for i := len(rs) - 1; c.Card == "" && i >= 0; i-- {
+			c.Initiative, c.Card, c.Branch = rs[i].Initiative, rs[i].Card, rs[i].Branch
+		}
+		c.Resumed = len(rs) - 1
+		out = append(out, c)
 	}
 	sort.Slice(out, func(i, j int) bool {
 		if !out[i].LastSeen.Equal(out[j].LastSeen) {
