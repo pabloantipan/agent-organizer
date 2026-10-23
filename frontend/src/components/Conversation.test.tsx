@@ -129,7 +129,7 @@ describe("K4 (leftovers-44 FR-3, R38): Open the thread never lands on archive", 
     const src = readFileSync(new URL("./Conversation.tsx", import.meta.url), "utf8") as string;
     const landing = src.slice(src.indexOf("if (slackDraft.threadId) {"), src.indexOf("if (slackDraft.subject !== undefined)"));
     expect(landing).not.toContain("archive\"");
-    expect(landing).toContain("unlisted.start(id);");
+    expect(landing).toContain("unlisted.start(id, focus);");
     expect(landing).toContain("api.getCellThread(initiativeId, id).then((v) => unlisted.asked(askedSeat(v.messages ?? [], human, seats)), () => undefined);");
   });
   it("the thread not yet listed, on the asked seat's chat: that row is current and has the fill; channel and archive have neither", () => {
@@ -142,5 +142,35 @@ describe("K4 (leftovers-44 FR-3, R38): Open the thread never lands on archive", 
     const c = filled(renderToStaticMarkup(<Conversation group={empty} focus={null} onFocus={() => undefined} />));
     expect(c.filter((r) => r.current).map((r) => r.name)).toEqual(["channel"]);
     expect(c.filter((r) => r.fill).map((r) => r.name)).toEqual(["channel"]);
+  });
+});
+
+describe("W2 (leftovers-46 FR-5; Amendment 10 AS3, R38 amended): Open the thread lands on the asked seat's chat at once", () => {
+  it("the landing starts on the seat it was opened with: channel is never shown, and the thread is selected once listed", () => {
+    const log: string[] = [];
+    let chat = "seat:sup87";
+    const w = unlistedLanding({ show: (seat) => { chat = seat ? `seat:${seat}` : "channel"; log.push(`show ${chat}`); }, current: () => chat, land: (id) => log.push(`land ${id}`) });
+    w.start("01THREAD", "sup87");
+    expect(chat).toBe("seat:sup87");
+    w.asked("sup87");
+    w.feed(["01THREAD"]);
+    expect(log).toEqual(["show seat:sup87", "land 01THREAD"]);
+    expect(log.join(" ")).not.toContain("channel");
+  });
+  it("no seat known: channel, as A9 had it", () => {
+    const log: string[] = [];
+    let chat = "seat:po_ana";
+    const w = unlistedLanding({ show: (seat) => { chat = seat ? `seat:${seat}` : "channel"; log.push(`show ${chat}`); }, current: () => chat, land: (id) => log.push(`land ${id}`) });
+    w.start("01THREAD", null);
+    w.feed(["01THREAD"]);
+    expect(log).toEqual(["show channel", "land 01THREAD"]);
+  });
+  it("the first render with the seat openSlack was given: that seat's row is current, channel is not; the landing starts there", () => {
+    const empty = { ...group, threads: [] } as unknown as AgentGroup;
+    const h = renderToStaticMarkup(<Conversation group={empty} focus="fse" onFocus={() => undefined} />);
+    expect(current(h)).toEqual(["fse"]);
+    expect(rows(h).find((r) => r.name === "channel")?.current).toBe(false);
+    const src = readFileSync(new URL("./Conversation.tsx", import.meta.url), "utf8") as string;
+    expect(src).toContain("unlisted.start(id, focus);");
   });
 });

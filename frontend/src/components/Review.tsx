@@ -206,9 +206,15 @@ export function Review() {
   return (
     <ReviewView status={status} make={make} map={map} marks={marks} error={error} symbol={symbol} active={active} setActive={setActive}
       onBack={closeReview} onStep={step} onOpen={open} onMake={makeIt} onStop={stop} makeBtn={makeBtn} title={title} said={said} progress={progress} origin={origin}
-      panel={{ initiative, card, head: review?.head ?? "", from, via, to, onBack: () => open(from), onMarks: setMarks, onAsked, onOpenThread: (thread) => openSlack(initiative, null, thread), onNext: () => step(1) }} />
+      panel={{ initiative, card, head: review?.head ?? "", from, via, to, onBack: () => open(from), onMarks: setMarks, onAsked, onOpenThread: openThread(openSlack, initiative, to), onNext: () => step(1) }} />
   );
 }
+
+/** Open the thread (leftovers-46 FR-5, Amendment 10 AS3): Conversations
+ *  with the seat the review asks, so the first frame shows that seat's
+ *  direct chat; no seat known, channel (A9 RS3). */
+export const openThread = (openSlack: (initiative: string, agent: string | null, thread?: string) => void, initiative: string, to: Addressee | null) =>
+  (thread: string) => openSlack(initiative, to?.seat || null, thread);
 
 /** The worklist's current row (FR-35, U6): the shown symbol's, or, while
  *  an affected one is shown, the changed one's it was opened from. */
