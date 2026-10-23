@@ -8,7 +8,7 @@ stage: review-map
 updated: 2026-10-23
 next: "pablo: rule 0155 (leftovers 47)"
 depends_on: []
-boundary: ["docs/specs/leftovers-47.md Boundary"]
+boundary: ["docs/specs/leftovers-47.md Boundary, lf47-review-moved"]
 spec: "docs/specs/leftovers-47.md (FR-1 to FR-3)"
 gate: "docs/specs/leftovers-47.md Acceptance, rows M1-M4 and X0"
 ui_review: true

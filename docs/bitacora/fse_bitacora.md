@@ -4,6 +4,14 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## 2026-10-23 11:25
+
+- Last SHA seen: 2715032 (Aglaea's review-view Amendment 11). leftovers 46 landed: f4a52fe (lf46-runs-seat), 804db0f (lf46-review-words); sup87 ~30 min against 30-60m, seats $11.71; run record runs/2026-10-23-sup87-leftovers-46.md. sup87 ended, token revoked, clean, installed v0.2.0-2641-g28975c4.
+- leftovers 47 (0155, proposed): lf47-review-moved (Amendment 11: UW1 moved header on re-read, UW2 no primary on a marked unedited symbol) and lf47-runs-cost (sup87 findings 1-2).
+- WRONG, mine: lf46 FR-2 summed each pid's final cost on a premise I marked "not verified". The archive says cost is cumulative across a resume; usage already had the right rule (`foldCosts`, usage-audit Amendment 1). leftovers-46 Amendment 1 records it. Repetition: fourth wrong premise in my specs (A5 mailbox, lf43 FR-5, lf46 FR-2). Lesson kept: a premise I cannot verify is not a requirement; grep for an existing rule (here `foldCosts`) before writing a new one.
+- Held from sup87: (4) a supervisor addressee has no chat row, so no row is current on landing (R30), predates lf46 — for Aglaea, not yet sent; (5) domId is injective per prefix only, today's prefixes cannot collide — no action.
+- Open: Pablo's odyssey trial (review-map exits 1-2); held: top bar at 1024 and Home from 1920 (measure first), cgo-off lines, extra packages.Load, M2 path-qualified flag gate line.
+
 ## 2026-10-23 10:55
 
 - Last SHA seen: 1ae92bd (Pablo ruled 0154 "accept as written", words "ok", lodestar).

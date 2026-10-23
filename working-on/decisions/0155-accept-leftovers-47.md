@@ -1,11 +1,11 @@
 ---
-title: Accept leftovers 47 - the review header follows the newest re-read, and no save of nothing
+title: Accept leftovers 47 - the review header follows the newest re-read, no save of nothing, and a resumed seat's cost counted once
 status: proposed
 raised: 2026-10-23
 raised_by: fse
 owner: pablo
 options: ["accept as written", "accept with amendments", "send back"]
-cards: [lf47-review-moved]
+cards: [lf47-review-moved, lf47-runs-cost]
 forecast: 20-45m
 stage: review-map
 supersedes: []
@@ -29,17 +29,25 @@ frontend card, UI review on.
 - **UW2**: a marked, unedited symbol still draws `Reviewed` / `Reviewed,
   next`, which saves the same mark again. After this it draws no primary
   until the mark or note changes; N in the header is the way on.
+- **Runs cost** (Go, added from sup87's closing report): leftovers 46 made
+  `organizer runs` sum each process's final cost, but the real archive
+  shows the cost is cumulative across a resume, so a resumed seat is
+  counted twice. My premise was marked not verified and was wrong. After
+  this the fold uses the rule usage already has (usage-audit Amendment 1:
+  split at a drop, sum each run's largest), the app's runs panel folds per
+  conversation too, and the app's seat match reads the session's short
+  name as `organizer runs` does.
 
 ## Options
 
-- **accept as written**: one card, one wave.
+- **accept as written**: two cards, no shared file, one wave.
 - **accept with amendments**: say which.
 - **send back**: keep today's behaviour.
 
 ## Recommendation
 
-accept as written. Both are Aglaea's rulings on her own spec; the card
-touches only the review screen's three files.
+accept as written. UW1 and UW2 are Aglaea's rulings on her own spec; the
+runs card applies a rule usage already carries and touches no usage file.
 
 ## Forecast
 

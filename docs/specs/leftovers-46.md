@@ -80,3 +80,12 @@ Card `lf46-review-words` (frontend):
 |---|---|---|---|
 | `lf46-runs-seat` | R1-R3, X0 | — | false |
 | `lf46-review-words` | W1-W4, X0 | — | true |
+
+## Amendment 1 (FSE, 2026-10-23): FR-2's cost was wrong
+
+FR-2 summed each process's final cost on a premise marked not verified
+(whether a resumed process's cost restarts at 0). sup87's closing report
+read the real archive: the cost is cumulative across a resume (60 resumed
+pid pairs: 20 equal finals, 39 higher, 1 lower), so the sum counts a
+resumed seat twice. The cost rule is replaced by leftovers-47 FR-4 (usage's
+rule, usage-audit Amendment 1); FR-2's one row per conversation stands.
