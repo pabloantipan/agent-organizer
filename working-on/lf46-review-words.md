@@ -1,13 +1,13 @@
 ---
 title: "The review panel's last loose words: no false hint, the asked seat's chat at once, unique ids, the not-here line kept"
-status: next
+status: now
 repos: [organizer]
 branch: lf46-review-words
 seat: rw-build
 reviewer: rw-review, rw-ui
 stage: review-map
-updated: 2026-10-22
-next: "sup87 runs it (0154 ruled 2026-10-23)"
+updated: 2026-10-23
+next: "build: rw-build on lf46-review-words (sup87)"
 risk: low
 footprint: [frontend/src/lib/review.ts, frontend/src/lib/review.test.ts, frontend/src/components/ReviewSymbol.tsx, frontend/src/components/ReviewSymbol.test.tsx, frontend/src/components/Review.tsx, frontend/src/components/Review.test.tsx, frontend/src/styles/review.css, frontend/src/components/Conversation.tsx (landing), frontend/src/stores/board.store.ts (openSlack seat)]
 depends_on: []

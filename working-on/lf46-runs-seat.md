@@ -1,13 +1,13 @@
 ---
 title: "Runs find their card by seat and fold a resumed seat into one row; old asks keep their note"
-status: next
+status: now
 repos: [organizer]
 branch: lf46-runs-seat
 seat: ru-build
 reviewer: ru-review
 stage: review-map
-updated: 2026-10-22
-next: "sup87 runs it (0154 ruled 2026-10-23)"
+updated: 2026-10-23
+next: "build: ru-build on lf46-runs-seat (sup87)"
 risk: low
 footprint: [internal/session/runs.go, internal/session/runs_test.go, internal/service/run.go, internal/service/run_test.go, internal/cli/run.go, internal/cli/run_test.go, internal/review/marks.go, internal/review/marks_test.go]
 depends_on: []
