@@ -3,10 +3,11 @@ title: "A resumed seat's cost is counted once, the app's runs fold per conversat
 status: next
 repos: [organizer]
 branch: lf47-runs-cost
-seat:
+seat: c47-build
+reviewer: c47-review
 stage: review-map
 updated: 2026-10-23
-next: "sup88 runs it (0155 ruled 2026-10-23)"
+next: "c47-build builds it on branch lf47-runs-cost (sup88)"
 depends_on: []
 boundary: ["docs/specs/leftovers-47.md Boundary, lf47-runs-cost"]
 spec: "docs/specs/leftovers-47.md (FR-4 to FR-6)"

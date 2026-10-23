@@ -3,10 +3,11 @@ title: "The review header says the branch moved after any re-read, and a marked,
 status: next
 repos: [organizer]
 branch: lf47-review-moved
-seat:
+seat: m47-build
+reviewer: m47-review, m47-ui
 stage: review-map
 updated: 2026-10-23
-next: "sup88 runs it (0155 ruled 2026-10-23)"
+next: "m47-build builds it on branch lf47-review-moved (sup88)"
 depends_on: []
 boundary: ["docs/specs/leftovers-47.md Boundary, lf47-review-moved"]
 spec: "docs/specs/leftovers-47.md (FR-1 to FR-3)"

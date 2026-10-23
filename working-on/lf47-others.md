@@ -3,10 +3,11 @@ title: "Conversations lists a chat with someone outside the roster under Others,
 status: next
 repos: [organizer]
 branch: lf47-others
-seat:
+seat: o47-build
+reviewer: o47-review, o47-ui
 stage: review-map
 updated: 2026-10-23
-next: "sup88 runs it (0155 ruled 2026-10-23)"
+next: "o47-build builds it on branch lf47-others (sup88)"
 depends_on: []
 boundary: ["docs/specs/leftovers-47.md Boundary, lf47-others"]
 spec: "docs/specs/leftovers-47.md (FR-7 to FR-9)"
