@@ -1,8 +1,9 @@
-# Leftovers 47: the review header follows the newest re-read, no save of nothing, and a resumed seat's cost counted once: the build spec
+# Leftovers 47: the review header follows the newest re-read, no save of nothing, a resumed seat's cost counted once, and a chat with someone outside the roster: the build spec
 
 status: proposed (0155)
 by: the FSE, 2026-10-23, on main at 2715032
-sources: Aglaea's `docs/ux/specs/review-view.md` Amendment 11 (2715032),
+sources: Aglaea's `docs/ux/specs/review-view.md` Amendments 11 (2715032)
+and 12 (235b415),
 from rw-ui's UI review of lf46-review-words
 (`working-on/done/lf46-review-words.md`, findings UW1, UW2); sup87's closing
 report on leftovers 46 (findings 1 and 2, 2026-10-23). Every premise read
@@ -21,6 +22,8 @@ today.
 | `Conversations` (leftovers-46 FR-2) sums each process's final cost; Claude Code's cost is cumulative across a resume in the real archive (60 resumed pid pairs: 20 equal finals, 39 higher, 1 lower), so `organizer runs` double-counts a resumed seat. leftovers-46 FR-2 was written on a premise marked not verified | `internal/session/runs.go:115-150`; sup87's report; `docs/specs/leftovers-46.md` premises |
 | usage already has the rule: records in time order split where one is lower than the one before, the cost is the sum of each run's largest (usage-audit Amendment 1) | `internal/usage/ledger.go:611-650` (`foldCosts`) |
 | the app's `InitiativeRuns` folds per pid (`LoadRuns`, not `Conversations`) | `internal/service/run.go:429-431` |
+| People lists only the roster's seats; a direct thread with a name outside `cell.json` (a supervisor) has no chat row, so a landing on it leaves no row current (R30) | `frontend/src/components/Conversation.tsx:33-42` (`directWith`), `337-346` (People) |
+| the landing already shows the asked seat's chat before the thread is listed (leftovers-46 FR-5) | `frontend/src/components/Conversation.tsx:284, 705` (`unlistedLanding`) |
 | `matchBySeat` compares a card's `seat:` with the agent's persona or its whole session name, so `seat: ru-build` never matches `organizer-probe-ru-build` | `internal/service/cardjoin.go:141-150` |
 
 ## Requirements
@@ -54,6 +57,20 @@ Card `lf47-runs-cost` (Go, one card, no shared file with the other):
   session's short name (after `<project>-probe-`), as `session.MatchRun`
   does; two such cards still match none.
 
+Card `lf47-others` (frontend, Amendment 12):
+
+- **FR-7** People gets a second sub-label, `Others`, under the roster's
+  seats and in the same style, listing each name outside the roster with
+  an open direct thread with the human (`directWith`), in first-seen
+  order. Each row is drawn like a seat's row (@, the name, the counts) and
+  opens that direct chat. The group is absent when empty.
+- **FR-8** An open naming an addressee outside the roster (a review's
+  `Open the thread` included) draws that row at once, before its thread is
+  in the feed, and makes it the one `aria-current="true"` row.
+- **FR-9** A row in Others leaves once its name has no open direct thread
+  with the human and its chat is not the one shown. Others get no health
+  words and no entry in the People panel on the right.
+
 ## Acceptance → gate
 
 | # | FR | Check | Expected (fails on main) |
@@ -65,10 +82,13 @@ Card `lf47-runs-cost` (Go, one card, no shared file with the other):
 | C1 | 4 | go test of `Conversations`: one session id, pids with finals 1.00 then 1.50; 1.00 then 0.40 | cost 1.50; cost 1.40 |
 | C2 | 5 | go test of `InitiativeRuns` (or `runsView`) with two pids of one session id | one row for the card, cost by C1's rule |
 | C3 | 6 | go test of `matchBySeat`: agent session `organizer-probe-ru-build`, one card `seat: ru-build`; two such cards | matched; none |
+| O1 | 7, 9 | vitest: a feed with open direct threads with `sup87` and `aglaea` (neither in the roster), one closed with `sup9`, roster `[ru-build]` | `Others` lists `sup87`, `aglaea` in first-seen order, not `sup9`; no health words on them; the People panel has neither; with no such thread the group is absent |
+| O2 | 8 | vitest: an open naming `sup87` with the thread not yet in the feed | the `sup87` row is drawn under Others and is the one `aria-current="true"` row on the first render |
+| O3 | 9 | vitest: `sup87`'s thread closes while another chat is shown; and while its chat is shown | the row leaves; the row stays while shown |
 | X0 | all | `XDG_DATA_HOME=$(mktemp -d) make test`, `cd frontend && pnpm run build`, `wails build`, then `git status --porcelain` | pass, empty |
 
-The UI review (ui_review: true) checks R39 and R40 of Amendment 11 in the
-review build.
+The UI reviews (ui_review: true) check R39 and R40 of Amendment 11 and R41
+of Amendment 12 in the review build.
 
 ## Boundary
 
@@ -80,7 +100,10 @@ marked, unedited symbol are updated, saying so in the card.
 `internal/service/run.go` (`InitiativeRuns`, `runsView`) and its test,
 `internal/service/cardjoin.go` and its test. Not `internal/usage`.
 
-The two share no file; one wave.
+`lf47-others`: `frontend/src/components/Conversation.tsx` and its tests,
+the chat list's stylesheet only if the sub-label needs a rule.
+
+The three share no file; one wave.
 
 ## Cards
 
@@ -88,3 +111,4 @@ The two share no file; one wave.
 |---|---|---|---|
 | `lf47-review-moved` | M1-M4, X0 | — | true |
 | `lf47-runs-cost` | C1-C3, X0 | — | false |
+| `lf47-others` | O1-O3, X0 | — | true |

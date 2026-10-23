@@ -1,12 +1,12 @@
 ---
-title: Accept leftovers 47 - the review header follows the newest re-read, no save of nothing, and a resumed seat's cost counted once
+title: Accept leftovers 47 - the review header follows the newest re-read, no save of nothing, a resumed seat's cost counted once, and a chat with someone outside the roster
 status: proposed
 raised: 2026-10-23
 raised_by: fse
 owner: pablo
 options: ["accept as written", "accept with amendments", "send back"]
-cards: [lf47-review-moved, lf47-runs-cost]
-forecast: 20-45m
+cards: [lf47-review-moved, lf47-runs-cost, lf47-others]
+forecast: 25-50m
 stage: review-map
 supersedes: []
 superseded_by:
@@ -37,21 +37,26 @@ frontend card, UI review on.
   split at a drop, sum each run's largest), the app's runs panel folds per
   conversation too, and the app's seat match reads the session's short
   name as `organizer runs` does.
+- **Others** (frontend, Aglaea's Amendment 12, from sup87's finding 4): a
+  review asked of a supervisor lands on Conversations with no current row,
+  since People lists only the roster. After this People gets an `Others`
+  group for names outside the roster with an open direct thread with you;
+  the landing draws and selects the row at once.
 
 ## Options
 
-- **accept as written**: two cards, no shared file, one wave.
+- **accept as written**: three cards, no shared file, one wave.
 - **accept with amendments**: say which.
 - **send back**: keep today's behaviour.
 
 ## Recommendation
 
-accept as written. UW1 and UW2 are Aglaea's rulings on her own spec; the
+accept as written. UW1, UW2 and Others are Aglaea's rulings on her own spec; the
 runs card applies a rule usage already carries and touches no usage file.
 
 ## Forecast
 
-forecast: 20-45m over 1 wave, plus the UI review; basis: 2 tasks, this
+forecast: 25-50m over 1 wave, plus the two UI reviews; basis: 2 tasks, this
 initiative (leftovers 46: two cards, one of them a frontend card on these
 same files with UI review, handed over 10:47 and both merged 11:10, 23 min;
 leftovers 45: one card, 14 min).
