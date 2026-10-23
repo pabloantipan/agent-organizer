@@ -51,7 +51,6 @@ export const WORDS = {
   backToReview: "← Review",
   unchanged: "unchanged",
   noneFound: "none found",
-  chooseMark: "Choose a mark to save this note.",
 } as const;
 
 /** Who a Question or Blocked asks (review-map v3 FR-25, the binding
@@ -586,10 +585,11 @@ export function markOf(marks: review.Marks | null | undefined, id: string): { st
 
 /** A symbol's ask (leftovers-44 FR-1): whether its mark was asked, kept
  *  through every Save, and the note it was asked with; a mark asked before
- *  `asked_note` was kept reads its saved note as that. */
+ *  `asked_note` was kept, which carries it empty, reads its saved note as
+ *  that (leftovers-46 FR-8). */
 export function askOf(marks: review.Marks | null | undefined, id: string): { asked: boolean; askedNote: string } {
   const m = (marks?.marks ?? []).find((x) => x.symbol === id && x.state);
-  return { asked: !!m?.asked, askedNote: m?.asked_note ?? m?.note ?? "" };
+  return { asked: !!m?.asked, askedNote: m?.asked_note || m?.note || "" };
 }
 
 /** The thread `Open the thread` opens for a symbol (leftovers-42 FR-4):
@@ -614,6 +614,14 @@ export function editorAt(status: service.ReviewStatus | null | undefined, head: 
   if (!co) return null;
   return { file: n.file, line, sha: co.head, dir: co.dir };
 }
+
+/** Where the title line points once a press was refused because the head
+ *  left (leftovers-43 FR-1, leftovers-46 FR-7): the refused place, not here,
+ *  while the status is read again and whenever the re-read has nothing to
+ *  say for this head (read for another map_head); else what the re-read
+ *  says. Never refused, it is `at`. */
+export const editorShown = (at: EditorAt | null, left: EditorAt | null, rereading: boolean): EditorAt | null =>
+  left && (rereading || !at) ? { ...left, dir: "" } : at;
 
 /** The muted words when the head is checked out nowhere here (FR-3). */
 export const notCheckedOut = (sha: string) => `Not checked out here at ${sha.slice(0, 7)}.`;
@@ -668,15 +676,13 @@ export const editorFailed = (line: string) => `Editor didn't open: ${line}`;
 export const saveShown = (s: MarkState, note: string, saved: { state: MarkState; note: string }) =>
   s !== "" && (s !== saved.state || note.trim() !== saved.note);
 
-/** The muted line under the note (leftovers-44 FR-2, Amendment 9 RS2): a
- *  note typed with no mark says why it will not save; "" once a mark is
- *  chosen or while the note is empty. */
-export const noteHint = (s: MarkState, note: string) => (s === "" && note.trim() !== "" ? WORDS.chooseMark : "");
-
-/** An element id built from a node id or a path (leftovers-44 FR-4): only
- *  letters, digits, `-` and `_`, so an `aria-describedby` that names it
- *  names one element even when the path holds a space. */
-export const domId = (prefix: string, raw: string) => `${prefix}-${raw.replace(/[^A-Za-z0-9_-]/g, "_")}`;
+/** An element id built from a node id or a path (leftovers-44 FR-4,
+ *  leftovers-46 FR-6): only letters, digits, `-` and `_`, so an
+ *  `aria-describedby` that names it names one element even when the path
+ *  holds a space; every other character, `_` included, is `_`, its code
+ *  point in hex and `_` again, so no two raw strings share an id. */
+export const domId = (prefix: string, raw: string) =>
+  `${prefix}-${raw.replace(/[^A-Za-z0-9-]/gu, (c) => `_${c.codePointAt(0)!.toString(16)}_`)}`;
 
 /** Where focus goes when Save leaves after a press (FR-4): the asking
  *  primary when it is drawn, else the mark's radio group; never the body. */

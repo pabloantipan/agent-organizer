@@ -4,7 +4,7 @@ import { AskReview, MarkReview, OpenReviewAt, ReviewFile, ReviewStatus } from ".
 import { busyButton, busyLabel } from "../lib/busy";
 import { useLiveRegion } from "../lib/liveRegion";
 import {
-  affectedLine, afterSave, askedLine, askOf, askFailedLine, backTo, calledBy, callsOf, canSave, domId, editorAt, editorFailed, editorRefusal, flagLook, flagWords, focusAfterSave, isAffected, markControls, markOf, notCheckedOut, noteHint, saveShown, shasOf, shortName, symbolDiff, testsOf, threadOf, WORDS,
+  affectedLine, afterSave, askedLine, askOf, askFailedLine, backTo, calledBy, callsOf, canSave, domId, editorAt, editorFailed, editorRefusal, editorShown, flagLook, flagWords, focusAfterSave, isAffected, markControls, markOf, notCheckedOut, saveShown, shasOf, shortName, symbolDiff, testsOf, threadOf, WORDS,
   type Addressee, type EditorAt, type MarkState, type RangeText, type Row, type Via,
 } from "../lib/review";
 
@@ -17,7 +17,8 @@ import {
  *  the checkout that holds the map's head (leftovers-42 FR-3), and opens
  *  at the definition once the head text is read (leftovers-43 FR-3). A
  *  press refused because the head left re-reads the status and shows the
- *  head as not here at once (FR-1). */
+ *  head as not here at once (FR-1), and keeps saying so when the re-read
+ *  answers for another head (leftovers-46 FR-7). */
 export function ReviewSymbol({ initiative, card, head, map, node, row, marks, from, via, to, last, title, onOpen, onBack, onMarks, onAsked, onOpenThread, onNext }: {
   initiative: string; card: string; head: string; map: rv.RevMap; node: rv.Node; row: Row | null; marks: rv.Marks | null;
   /** The changed symbol an affected one was opened from, and the list. */
@@ -47,21 +48,26 @@ export function ReviewSymbol({ initiative, card, head, map, node, row, marks, fr
   // Which checkout holds the head, read with the status (FR-3); null
   // until read, so nothing is drawn before the panel knows.
   const [status, setStatus] = useState<service.ReviewStatus | null>(null);
-  // The head left since the read (FR-1): not here until a re-read answers.
-  const [left, setLeft] = useState(false);
+  // The place a press was refused at because the head left (FR-1): not
+  // here until a re-read answers, and after it while the re-read has
+  // nothing for this head (leftovers-46 FR-7).
+  const [left, setLeft] = useState<EditorAt | null>(null);
+  const [rereading, setRereading] = useState(false);
   const live = useRef(true);
   useEffect(() => {
     live.current = true;
-    setLeft(false);
+    setLeft(null);
+    setRereading(false);
     ReviewStatus(initiative, card).then((st) => { if (live.current) setStatus(st); }, () => undefined);
     return () => { live.current = false; };
   }, [initiative, card, head]);
-  const onLeft = () => {
-    setLeft(true);
-    ReviewStatus(initiative, card).then((st) => { if (live.current) { setStatus(st); setLeft(false); } }, () => undefined);
-  };
   const at = editorAt(status, head, node, texts?.head);
-  const editor = at && left ? { ...at, dir: "" } : at;
+  const editor = editorShown(at, left, rereading);
+  const onLeft = () => {
+    setLeft(editor);
+    setRereading(true);
+    ReviewStatus(initiative, card).then((st) => { if (live.current) { setStatus(st); setRereading(false); } }, () => undefined);
+  };
 
   const mark = async (state: MarkState, note: string) => onMarks(await MarkReview(initiative, card, head, node.id, state, note));
   const ask = async (state: MarkState, note: string) => {
@@ -266,8 +272,9 @@ function Diff({ name, texts, error }: { name: string; texts: { base: RangeText |
  *  else the radio group (leftovers-43 FR-4, Amendment 8 A1). An ask
  *  survives every Save (leftovers-44 FR-1): the panel keeps `Asked <seat>
  *  · Open the thread`, and a saved note that differs from the one asked
- *  with offers `Ask <seat> again`. Save needs a mark (FR-2): a note with
- *  none says, muted under it, to choose one. */
+ *  with offers `Ask <seat> again`. Save needs a mark (FR-2); with none the
+ *  primary is the press that saves, ✓ with the note, so nothing under the
+ *  note says otherwise (leftovers-46 FR-4, Amendment 10 AS1). */
 function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNext }: {
   name: string; id: string; marks: rv.Marks | null; to: Addressee | null; last: boolean;
   onMark: (s: MarkState, note: string) => Promise<void>; onAsk?: (s: MarkState, note: string) => Promise<service.ReviewAsk>; onOpenThread?: (thread: string) => void; onNext: () => void;
@@ -329,8 +336,6 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
   };
   const opts: [MarkState, string][] = [["reviewed", WORDS.reviewed], ["question", WORDS.question], ["blocked", WORDS.blocked]];
   const noteId = domId("rs-note", id);
-  const hint = noteHint(state, note);
-  const hintId = domId("rs-note-hint", id);
   // A failed ask names its line on the button that stays focused (FR-29, Amendment 4).
   const failedId = domId("rs-failed", id);
   const describedBy = failed ? failedId : undefined;
@@ -346,9 +351,8 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
         ))}
       </fieldset>
       <label className="rs-note-label" htmlFor={noteId}>{WORDS.note}</label>
-      <textarea id={noteId} className="rs-note" rows={2} value={note} onChange={(e) => setNote(e.target.value)} aria-describedby={hint ? hintId : undefined}
+      <textarea id={noteId} className="rs-note" rows={2} value={note} onChange={(e) => setNote(e.target.value)}
         placeholder={state === "question" || state === "blocked" ? "required for Question and Blocked" : "optional"} />
-      {hint && <p id={hintId} className="rs-note-hint meta">{hint}</p>}
       {(showPrimary || dirty) && (
         <div className="rs-buttons">
           {showPrimary && <button ref={primaryButton} className="primary" aria-describedby={describedBy} {...busyButton({ busy: busy === "next", disabled: busy !== "" || !primary.ready, onPress: run("next", primary.mark, primary.ask, last ? undefined : onNext) })}>{busyLabel(busy === "next", primary.label, primary.ask ? WORDS.asking : WORDS.saving)}</button>}
