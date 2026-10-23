@@ -255,3 +255,29 @@ func TestConversationsFoldResumes(t *testing.T) {
 		t.Errorf("no-session lines = %+v, %+v, want pids 31 then 30, not folded", got[1], got[2])
 	}
 }
+
+// C1 (leftovers-47 FR-4): Claude Code's cost carries across a resume, so a
+// conversation's cost is usage's rule, not the sum of its processes' finals:
+// split where a final drops, sum each run's largest.
+func TestConversationsCostCountsAResumeOnce(t *testing.T) {
+	at := func(h int) time.Time { return time.Date(2026, 10, 23, h, 0, 0, 0, time.UTC) }
+	tests := []struct {
+		name         string
+		first, later float64
+		want         float64
+	}{
+		{"the resumed process carries the cost on", 1.00, 1.50, 1.50},
+		{"the cost restarted lower", 1.00, 0.40, 1.40},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := Conversations([]Run{
+				{PID: 20, SessionID: "conv", CostUSD: tc.later, FirstSeen: at(12), LastSeen: at(14), Ended: true},
+				{PID: 10, SessionID: "conv", CostUSD: tc.first, FirstSeen: at(9), LastSeen: at(11), Ended: true},
+			})
+			if len(got) != 1 || got[0].CostUSD != tc.want || got[0].Resumed != 1 {
+				t.Fatalf("conversations = %+v, want one at %.2f, resumed 1", got, tc.want)
+			}
+		})
+	}
+}
