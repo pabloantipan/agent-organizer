@@ -16,7 +16,8 @@ vi.mock("../../wailsjs/runtime/runtime", () => ({ ClipboardSetText: (t: string) 
 vi.mock("../stores/board.store", () => ({ useBoard: () => ({}) }));
 
 const { ReviewView, copyCommand } = await import("./Review");
-const { afterASecond, makeOrigin } = await import("../lib/review");
+const { afterASecond, makeOrigin, movedHead, headerMoved, inTurn, editorRefusal } = await import("../lib/review");
+const { speaker, SAY_GAP_MS } = await import("../lib/liveRegion");
 const { Where } = await import("./TopBar");
 
 const node = (n: Partial<review.Node> & { id: string }) => ({
@@ -41,9 +42,9 @@ const status = (state: string, make: Partial<service.ReviewMake> | null = null) 
 const marks = (m: Record<string, string>) => ({ initiative: "init-a", card: "rv-fixture", head: "", marks: Object.entries(m).map(([symbol, state]) => ({ symbol, state })), changed: [] }) as unknown as review.Marks;
 
 const noop = () => undefined;
-function view(p: { status: service.ReviewStatus | null; make?: service.ReviewMake | null; map?: review.RevMap | null; marks?: review.Marks | null; symbol?: string; progress?: boolean; origin?: number; from?: string; via?: "calledBy" | "calls"; to?: { seat: string; why: string }; said?: string }) {
+function view(p: { status: service.ReviewStatus | null; make?: service.ReviewMake | null; map?: review.RevMap | null; marks?: review.Marks | null; symbol?: string; progress?: boolean; origin?: number; from?: string; via?: "calledBy" | "calls"; to?: { seat: string; why: string }; said?: string; newer?: string }) {
   return renderToStaticMarkup(
-    <ReviewView status={p.status} make={p.make ?? null} map={p.map ?? null} marks={p.marks ?? null} error={null} symbol={p.symbol ?? ""} active="" setActive={noop}
+    <ReviewView status={p.status} newer={p.newer} make={p.make ?? null} map={p.map ?? null} marks={p.marks ?? null} error={null} symbol={p.symbol ?? ""} active="" setActive={noop}
       onBack={noop} onStep={noop} onOpen={noop} onMake={noop} onStop={noop} makeBtn={createRef()} title={createRef()} said={p.said ?? ""} progress={p.progress} origin={p.origin}
       panel={p.from === undefined ? undefined : { initiative: "init-a", card: "rv-fixture", head: "", from: p.from, via: p.via, to: p.to, onBack: noop, onMarks: noop, onNext: noop }} />,
   );
@@ -310,5 +311,103 @@ describe("W2 (leftovers-46 FR-5): Open the thread passes the asked seat to openS
     expect(openSlack.mock.calls).toEqual([["init-a", "sup87", "01THREAD"], ["init-a", null, "01THREAD"], ["init-a", null, "01THREAD"]]);
     const src = readFileSync(new URL("./Review.tsx", import.meta.url), "utf8") as string;
     expect(src).toContain("onOpenThread: openThread(openSlack, initiative, to)");
+  });
+});
+
+// leftovers-47 FR-1, FR-2 (review-view Amendment 11 UW1, R39): the header
+// follows the newest status read made while the screen is open. No DOM
+// library is a dependency, so the read's effect is its pure step, the
+// header is the view's markup, and the wiring is read from the source.
+describe("M1 (FR-1): a re-read answering another map head moves the header in place", () => {
+  const A = "4d2a91b0000", B = "7c3e5f2aaaa";
+  const shown = { ...status("map"), map_head: A } as service.ReviewStatus;
+  const reread = { ...status("map"), map_head: B, head: B } as service.ReviewStatus;
+  it("the screen showing map head A; the panel's re-read answers B: The branch moved since this map (A → B). and Make it again", () => {
+    const newer = movedHead(shown, reread);
+    expect(newer).toBe(B);
+    const h = view({ status: shown, map: fixture, newer });
+    expect(text(h)).toContain("The branch moved since this map (4d2a91b → 7c3e5f2). Make it again");
+    expect(h).toContain('<div class="review-moved"><span>The branch moved since this map (4d2a91b → 7c3e5f2).</span>');
+    // the map shown stays: its worklist is still drawn
+    expect(h).toContain('aria-label="Changed symbols"');
+    // a screen already moved (A → branch head) takes the newer map head
+    expect(headerMoved({ ...shown, state: "moved" } as service.ReviewStatus, B)).toBe("The branch moved since this map (4d2a91b → 7c3e5f2).");
+  });
+  it("every read the panel makes reaches the header; the header's step reloads nothing and moves no focus", () => {
+    const panel = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
+    // the mount read and the re-read after a refusal both tell the screen
+    expect(panel).toContain("ReviewStatus(initiative, card).then((st) => { if (live.current) { setStatus(st); told.current?.(st); } }, () => undefined);");
+    expect(panel).toContain("ReviewStatus(initiative, card).then((st) => { if (live.current) { setStatus(st); setRereading(false); told.current?.(st); } }, () => undefined);");
+    const src = readFileSync(new URL("./Review.tsx", import.meta.url), "utf8") as string;
+    // the screen's step is one state update: no load, so ReviewMap and ReviewMarks are not called again, and no focus
+    expect(src).toContain("const onStatus = useCallback((st: service.ReviewStatus) => setNewer(movedHead(status, st)), [status]);");
+    expect(src.match(/ReviewMap\(/g)?.length).toBe(1);
+    expect(src.match(/ReviewMarks\(/g)?.length).toBe(1);
+    expect(src).toContain("panel={{ initiative, card, head: review?.head ?? \"\", from, via, to, moved, onStatus,");
+    // Make it again: the make's end loads the new map, which clears the newer head
+    expect(src).toMatch(/setStatus\(st\);\n\s+setNewer\(""\);/);
+  });
+});
+
+describe("M2 (FR-1): a re-read answering the map head shown", () => {
+  it("the header is unchanged, no moved line", () => {
+    const shown = status("map");
+    const newer = movedHead(shown, { ...shown });
+    expect(newer).toBe("");
+    const h = view({ status: shown, map: fixture, newer });
+    expect(h).not.toContain("review-moved");
+    expect(h).not.toContain("The branch moved");
+    expect(h).toBe(view({ status: shown, map: fixture }));
+    // a read with no map (the map is gone) says nothing about a newer one
+    expect(movedHead(shown, { map_head: "" } as service.ReviewStatus)).toBe("");
+  });
+});
+
+describe("M3 (FR-2): the panel's polite region says the moved line once, after the refusal line", () => {
+  afterEach(() => vi.useRealTimers());
+  it("the refusal's line, then the region emptied and, 100 ms later, the moved line, once", async () => {
+    vi.useFakeTimers();
+    const seen: string[] = [];
+    const turn = inTurn(speaker((m) => seen.push(m)).say);
+    const moved = "The branch moved since this map (4d2a91b → 7c3e5f2).";
+    let reread: Promise<void> = Promise.resolve();
+    // the press refused because the head left: the panel re-reads (left) and says the refusal line
+    const { editorRefused } = await import("./ReviewSymbol");
+    editorRefused(new Error("moved: head 4d2a91b is not checked out here"), {
+      sha: "4d2a91b0000",
+      left: () => { reread = Promise.resolve().then(() => turn.after(moved)); },
+      focusTitle: () => undefined, say: turn.press, fail: () => undefined,
+    });
+    expect(editorRefusal(new Error("moved: head 4d2a91b is not checked out here")).moved).toBe(true);
+    await reread; // the re-read answers before the refusal line is set
+    expect(seen).toEqual([""]);
+    vi.advanceTimersByTime(SAY_GAP_MS);
+    expect(seen).toEqual(["", "Not checked out here at 4d2a91b."]);
+    // the refusal line stands a gap on its own before the region is emptied
+    vi.advanceTimersByTime(SAY_GAP_MS - 1);
+    expect(seen).toEqual(["", "Not checked out here at 4d2a91b."]);
+    vi.advanceTimersByTime(1);
+    expect(seen).toEqual(["", "Not checked out here at 4d2a91b.", ""]);
+    vi.advanceTimersByTime(SAY_GAP_MS - 1);
+    expect(seen).toEqual(["", "Not checked out here at 4d2a91b.", ""]);
+    vi.advanceTimersByTime(1);
+    expect(seen).toEqual(["", "Not checked out here at 4d2a91b.", "", moved]);
+    vi.advanceTimersByTime(10 * SAY_GAP_MS);
+    expect(seen.filter((m) => m === moved)).toHaveLength(1);
+  });
+  it("a moved line with no press line pending is said at once, emptied then set after 100 ms", () => {
+    vi.useFakeTimers();
+    const seen: string[] = [];
+    inTurn(speaker((m) => seen.push(m)).say).after("The branch moved since this map (4d2a91b → 7c3e5f2).");
+    expect(seen).toEqual([""]);
+    vi.advanceTimersByTime(SAY_GAP_MS);
+    expect(seen).toEqual(["", "The branch moved since this map (4d2a91b → 7c3e5f2)."]);
+  });
+  it("the panel's region is the one that says it: refusals through press, the header's moved line through after, only when it changes", () => {
+    const panel = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
+    expect(panel).toContain("const turn = useMemo(() => inTurn(sayNow), [sayNow]);");
+    expect(panel).toContain("const say = turn.press;");
+    expect(panel).toContain("if (moved && moved !== heard.current) turn.after(moved);");
+    expect(panel).toContain('<div className="sr-only" aria-live="polite">{said}</div>');
   });
 });
