@@ -437,6 +437,9 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - A landing into a scrolling list scrolls its current row into view (nearest, instant); a click in the list does not need it (review-view A13).
 - State marks never transition: a mark eased by a global button transition can lag a frame-starved window and show the wrong row (design system, review-view A13).
 
+- When a rule removes the control that a focus row names, amend that row the same day: name the new target (the checked radio, the closest control saying what was just done) (review-view A14).
+- "A press that changes nothing" is judged by every effect, not only the save: an ask posts and wakes, so it stays even when the mark is saved (review-view A14).
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).

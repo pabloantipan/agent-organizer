@@ -602,3 +602,21 @@ From `working-on/lf47-others.md`, ## UI review (pass at 09c5d11).
 | R42 | see where he landed | 1024×640, `Open the thread` to `sup10` under Others: the current row is wholly inside the chat list's visible area on the first frame after landing |
 | R43 | trust the fill | click another chat in a window that draws no frames: the fill is on the clicked row (the same row as `aria-current`), with no frame on the old one |
 | R44 | write to an Other | with `sup10` in Others, the new-thread picker lists `sup10` under `Others`; with Others empty there is no divider |
+
+## Amendment 14 (aglaea, 2026-10-23): from m47-ui on lf47-review-moved
+
+- **A1: R22 follows UW2.** On the last symbol, the press saves the mark,
+  and the symbol is then marked and unedited, so A11 removes its primary.
+  Focus goes to the mark's checked radio: the control that says what was
+  just saved, and one stop from the note. Never the body. As leftovers-47
+  Amendment 1 built it.
+- **A2: confirmed, the asking primary stays.** A saved Question or Blocked
+  that has not been asked, with a seat to ask, keeps `Ask <seat>, next`
+  (or `Ask <seat>`) and its pre-press line. The press posts and wakes a
+  seat, so it is not a save of nothing. A11's rule removes only a primary
+  whose press would change nothing. Once asked, A6 and A10 apply.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R22 (amended) | not be offered a next that isn't there | with one unmarked symbol left, its primary reads `Reviewed` (or `Save question`, `Save block`, `Ask <seat>`) without `, next`; after a press that leaves the symbol marked and unedited, the primary is gone and focus is on the mark's checked radio |
+| R45 | ask after saving first | save a Question with a note on a symbol with a seat, without asking: the panel still offers `Ask <seat>, next` and its line; reopening the symbol shows the same |
