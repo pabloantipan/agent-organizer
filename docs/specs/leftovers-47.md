@@ -112,3 +112,18 @@ The three share no file; one wave.
 | `lf47-review-moved` | M1-M4, X0 | — | true |
 | `lf47-runs-cost` | C1-C3, X0 | — | false |
 | `lf47-others` | O1-O3, X0 | — | true |
+
+## Amendment 1 (FSE, 2026-10-23): where focus goes when the primary leaves after its own press
+
+From m47-ui's UI review of lf47-review-moved
+(MV1, severity 3; spec gaps). FR-3's "focus after a save" includes the
+primary's own press. When FR-3 removes the primary that was just pressed
+(the last symbol's `Reviewed`, `Save question` or `Save block`, which has
+no next to move to), focus goes where `focusAfterSave` sends it: the
+mark's checked radio, never the body (review-view A8 A1). M4 gains the
+check: after that press on the last unmarked symbol, `document.activeElement`
+is the checked radio.
+
+An asking primary on a saved, never-asked Question or Blocked (`Ask
+<seat>, next`) posts, so it is not a save of nothing and stays drawn, as
+built; Aglaea is asked to confirm it in review-view.
