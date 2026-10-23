@@ -220,7 +220,7 @@ func (s *Service) cardRefsLocked() []session.CardRef {
 	for _, si := range s.state.Local.Initiatives {
 		for _, c := range si.Cards {
 			out = append(out, session.CardRef{
-				Initiative: si.ID, Slug: c.Slug, Branch: c.Branch, Root: si.Path,
+				Initiative: si.ID, Slug: c.Slug, Branch: c.Branch, Root: si.Path, Seat: c.Seat,
 			})
 		}
 	}
@@ -447,7 +447,7 @@ func (s *Service) liveRuns() []session.Run {
 			WindowSize: rec.WindowSize,
 			FirstSeen:  rec.UpdatedAt, LastSeen: rec.UpdatedAt,
 		}
-		if c, ok := session.MatchCard(rec.Cwd, branchOf(rec.Cwd), cards); ok {
+		if c, ok := session.MatchRun(rec.Cwd, branchOf(rec.Cwd), rec.Session, cards); ok {
 			r.Initiative, r.Card, r.Branch = c.Initiative, c.Slug, c.Branch
 		}
 		out = append(out, r)

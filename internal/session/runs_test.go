@@ -164,3 +164,49 @@ func TestLoadRunsSkipsJunkAndSortsNewestFirst(t *testing.T) {
 		t.Error("a missing archive should be empty, not an error")
 	}
 }
+
+// R1 (leftovers-46 FR-1): a seat run from the initiative root on main finds
+// its card by the card's seat, the session's short name; two cards naming
+// the seat leave it unattributed.
+func TestMatchRunBySeat(t *testing.T) {
+	one := append(cardFixtures(), CardRef{Initiative: "organizer", Slug: "runs-seat", Branch: "lf46-runs-seat", Root: "/home/p/organizer", Seat: "rr-build"})
+	two := append(append([]CardRef{}, one...), CardRef{Initiative: "organizer", Slug: "other", Branch: "other", Root: "/home/p/organizer", Seat: "rr-build"})
+	tests := []struct {
+		name    string
+		cwd     string
+		branch  string
+		session string
+		cards   []CardRef
+		want    string
+	}{
+		{"one card names the seat", "/home/p/organizer", "main", "organizer-probe-rr-build", one, "organizer/runs-seat"},
+		{"two cards name the seat", "/home/p/organizer", "main", "organizer-probe-rr-build", two, ""},
+		{"path still wins over seat", "/home/p/organizer/.wt/run-gate", "main", "organizer-probe-rr-build", one, "organizer/run-gate"},
+		{"no probe session", "/home/p/organizer", "main", "", one, ""},
+		{"a seat no card names", "/home/p/organizer", "main", "organizer-probe-ghost", one, ""},
+		{"another initiative's seat", "/home/p/organizer/agent-slack", "main", "slack-probe-rr-build", one, ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c, ok := MatchRun(tt.cwd, tt.branch, tt.session, tt.cards)
+			got := ""
+			if ok {
+				got = c.Initiative + "/" + c.Slug
+			}
+			if got != tt.want {
+				t.Errorf("MatchRun(%q, %q, %q) = %q, want %q", tt.cwd, tt.branch, tt.session, got, tt.want)
+			}
+		})
+	}
+
+	// The archiver uses it: the open line carries the card.
+	dir, runs := t.TempDir(), filepath.Join(t.TempDir(), "runs.jsonl")
+	t0 := time.Date(2026, 10, 23, 10, 0, 0, 0, time.UTC)
+	writeRecord(t, dir, Record{PID: 7, SessionID: "s7", Session: "organizer-probe-rr-build", Cwd: "/home/p/organizer", UpdatedAt: t0})
+	if _, err := Retire(dir, runs, map[int]bool{7: true}, time.Minute, t0, one, func(string) string { return "main" }); err != nil {
+		t.Fatal(err)
+	}
+	if got := LoadRuns(runs); len(got) != 1 || got[0].Card != "runs-seat" {
+		t.Errorf("archived = %+v, want the run under runs-seat", got)
+	}
+}
