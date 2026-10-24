@@ -116,41 +116,36 @@ Not changed, on purpose:
 Reviewer: l51-words-review, 2026-10-24.
 
 ## UI review
-l51-words-ui, 2026-10-24, commit 61d9d41 (review build `Deltagos Review`, fixture `--review --canned-post`, auth off, discuss_state_dir under the temp dir). **Verdict: fail** (one sev 3).
+l51-words-ui, 2026-10-24, re-review on **8e504fb** (rebased on main 24938f9), review build `Deltagos Review`, fixture `--review --canned-post`, auth off, discuss_state_dir under the temp dir. **Verdict: pass.** Checked against leftovers-51 FR-7 to FR-11 with Amendment 1 (FR-10 foot row) and rule-questions Q1-Q5 with Amendment 2's Q4; Q2 at 1024 as W5. UW2 (whole answers with room) and UW3 / Q6 (chosen said once while open) are out of this card per leftovers-51 Amendment 1 and were not judged.
 
-Shared test run: **reused**, `test-lease: reused run ef3e4ff5-16196 of 61d9d41854a5 by organizer-probe-l51-words-review`: go test ok, vitest 83 files / 1129 tests pass.
+Shared test run: **reused**, `test-lease: reused run a75c3167-31494 of 8e504fb51ba1 by organizer-probe-l51-words-review`: go test ok, vitest 83 files / 1131 tests pass.
 
-Fixture: lf49's `0037-big-picture-stage.md` copied into the temp `init-a` as 0013 (proposed), 0014 (ruled, `chosen: "Q1 after-graph-performs-start-now, Q2 record-page"`, a `## Ruling`), 0015 (proposed, no `**Q1. …**` line); committed in the temp repo only (76215a4). Nothing was ruled; root checkout unchanged.
+Fixture: lf49's `0037-big-picture-stage.md` copied into the temp `init-a` as 0013 (proposed), 0014 (ruled, `chosen: "Q1 after-graph-performs-start-now, Q2 record-page"`, a `## Ruling`), 0015 (proposed, no `**Q1. …**` line); committed in the temp repo only (5f8fcfc). Nothing was ruled; root checkout unchanged.
 
 ### Findings
-**UW1 (sev 3, fails Q4 / FR-10).** *Cannot do:* read what keeps Rule disabled, or the signature, in the Decisions rule box. *Where:* Decisions › 0013 › Rule, box foot, at 1024×640 and 1440×900 (the box is 354 px wide at both); `1024x640-Q3-box-empty.png`, `1024x640-Q4-box-q1-picked.png`, `1440x900-Q4-box-empty.png`. *Evidence:* `.rb-sign` (flex 1, min-width 0) is squeezed to 48 px, one word per line, and "commits" overflows into `.rb-missing`: on screen "commits" overprints "words are missing." (AX: `· commits one file` @1593,672 48×65 and the missing text @1601,672 183×33, overlapping). Happens whenever the missing text takes two lines (`Q1 and Q2 not answered yet. Your words are missing.`, `Q2 not answered yet. Your words are missing.`); `Your words are missing.` alone fits (sign wraps to 3 lines, no overlap, `1024x640-Q4-box-words-missing.png`). Needs me's box (528 px) is clean at 1024 (`1024x640-Q4-needsme-box-empty.png`). Main has no missing text, so this is new. *Proposal:* in a narrow box let the foot wrap: missing text on its own row above sign + buttons (e.g. `.rb-foot { flex-wrap: wrap }` with `.rb-missing { flex-basis: 100% }`, or a min-width on `.rb-sign`), never overprint; rule-box.css is in the boundary.
-
-**UW2 (sev 2).** *Cannot do:* read the whole ruled answer on the list with room to spare. *Where:* Ruled list, 0014, 1440×900 (`1440x900-Q2-ruled-line-closed.png`): `“Q1 after…, Q2 record…”` beside ~500 px of empty line. *Evidence:* `chosenFloor` always cuts to the first word (≤8 chars); a plain line ("figure", "as proposed") shows in full and ellipsizes only when short (leftovers-13 floor). Q2 is gated at 1024 only, where the cut is right. *Proposal:* full text with room, the per-answer floor only when the line is short (needs `.dec-ans` rules in decisions.css, outside this boundary; builder's progress.md says the same).
-
-**UW3 (sev 1).** While 0014 is open, its line's accessible name still says `“Q1 after-graph-performs-start-now, Q2 record-page”` (lineName, decisionsPage.ts) while the head's Chosen says it again. Visual rule met; a screen reader hears it twice. *Proposal:* drop it from the name while open, with lineName.
+- **UW1 (was sev 3), fixed.** The missing text is the foot's first row, full width, left-aligned; `signed pablo · commits one file`, Cancel and Rule keep one row under it; nothing overlaps (AX frames below; shots `1024x640-Q4-box-empty-8e504fb.png`, `1440x900-Q4-box-empty-8e504fb.png`, `1024x640-Q4-needsme-box-empty-8e504fb.png`, `1440x900-Q4-needsme-box-empty-8e504fb.png`).
+- No new sev 4 or 3. Held from the first pass by the FSE, not re-judged: UW2 (sev 2), UW3 (sev 1).
 
 ### Rows, how checked, words compared
 | Row | State | How | Screen string vs spec |
 |---|---|---|---|
-| Q1 | 0014 open, 1024×640 | AXPress line, AX tree, shot `1024x640-Q1-ruled-question-open.png` | `Chosen` / `Q1 after-graph-performs-start-now` / `Q2 record-page`, full, no cut = spec; line shows no chosen while open = spec |
-| Q1 | 0012 plain open | same, `1024x640-Q1-ruled-plain-open.png` | `Chosen` / `figure` = spec |
-| Q2 | 0014 closed, 1024×640 | shot `1024x640-Q2-ruled-line-closed.png`, AX name | `“Q1 after…, Q2 record…”` = spec `Q1 after…, Q2 record…` (quotes as plain lines); name `… ruled, “Q1 after-graph-performs-start-now, Q2 record-page”, by pablo …` = full chosen. Pass |
-| Q3 | 0013 / 0015 boxes | AX group names | `Q1 · Where in the order?`, `Q2 · Where does the view live?`; 0015 `Q1` alone = spec. Legend CSS wraps (`white-space: normal; overflow-wrap: anywhere`). Pass |
-| Q4 | 0013, 1024: only Q1 picked | AXPress radio; Rule's AXCustomContent `description` | `Q2 not answered yet. Your words are missing.` (words could not be typed, see not verified); Rule's description = that text, no live region (code). Words match spec; layout fails (UW1). Nothing picked: `Q1 and Q2 not answered yet. Your words are missing.` = spec both-missing form. Both picked: `Your words are missing.` = spec |
-| Q5 | 0013 / 0002 | AXPlaceholderValue | `Why these answers, in your words. They go under ## Ruling.` / `Why this option, in your words. They go under ## Ruling.` = spec word for word. Pass |
-| plain | 0002 box, 1024 | shot `1024x640-Q5-box-plain.png` | no foot text, foot `signed pablo · commits one file`, as on main |
+| Q4 (amended) | Decisions box (354 px), 0013, nothing picked, 1024×640 | AXPress Rule, AX tree, Rule's AXCustomContent | row 1 `Q1 and Q2 not answered yet. Your words are missing.` @1593,684 287×17; row 2 `signed pablo · commits one file` @1593,714 on one line, Cancel and Rule @709 on that row; Rule's description = the missing text. Pass |
+| Q4 | same, only Q1 picked, 1024 | AXPress radio | row 1 `Q2 not answered yet. Your words are missing.`, signature on one line under it. Pass |
+| Q4 | Decisions box, 1440×900 | same | row 1 @2009,944, signature @974 one line, buttons @969. Pass |
+| Q4 | Needs me box, 1024×640 and 1440×900 | Home › Show the other 8 › Rule init-a 0013 | row 1 @688 / @758, signature one line @718 / @788, buttons on its row; Rule's description = the missing text. Pass |
+| Q4 | nothing missing (plain 0005, owner alejandro) | AX | no missing row; signature and buttons on one row, as on main |
+| Q2 (W5) | 0014 closed, 1024×640 | AX name, shot `1024x640-Q2-ruled-line-closed-8e504fb.png` | `“Q1 after…, Q2 record…”`; name has the full `“Q1 after-graph-performs-start-now, Q2 record-page”`. Pass |
+| Q1, Q3, Q5 | as in the first pass at 61d9d41 | first pass; 8e504fb changes only the foot's order and CSS, and question-words parsing (b7e3dc6, gated by W6) | 0013 legends `Q1 · Where in the order?`, `Q2 · Where does the view live?`; placeholder `Why these answers, …` seen again on 8e504fb at 1440 |
 
-Shots under `.wt-notes/l51-words-ui/`. Screen was unlocked; AX and screencapture worked on my own pid only.
+Shots under `.wt-notes/l51-words-ui/`, suffixed `-8e504fb`. Screen unlocked; AX and screencapture only on my own pid.
 
 ### Spec gaps (for the FSE)
-- Amendment 1 U3 places the missing text "beside the disabled Rule" but says nothing of a narrow box where sign, text and two buttons do not fit on one row (UW1).
-- "Floors per answer" is gated only at 1024; whether a wide line shows the answers whole is not said (UW2).
+- None new. Amendment 1 closes the narrow-box gap.
 
 ### For aglaea
-- A1: in a narrow box, does the missing text go on its own row above the foot, or replace the signature while Rule is disabled?
-- A2: should a question line show answers whole when there is room (UW2)?
+- None new; A1 and A2 from the first pass are answered by rule-questions Amendment 2.
 
 ### Not verified in WKWebView
-- Typing words into the box: AX value set and AXSelectedText insertion do not reach React without focus, which I may not take; the state "Q1 picked + words written → `Q2 not answered yet.` alone" rests on vitest W7 and `missingWords`.
-- Ruling a question record in the review build (needs words), so the temp-repo commit after a ruling was not seen.
-- Keyboard order, focus ring on radios, the box's scroll at 640 tall beyond what the shots show.
+- The row going once Rule is enabled: needs words in the box, which AX value sets do not reach React without focus I may not take; rests on vitest W7 and the code (`missing` is empty when `ready`).
+- Ruling in the review build (needs words).
+- Q1 and Q3 were not re-shot on 8e504fb (unchanged code paths; Q3's parsing change is covered by W6).
