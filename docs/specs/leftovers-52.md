@@ -89,3 +89,31 @@ controls S3 names; that of lf52-decisions-line checks rule-questions Q2 at
 | `lf52-state-layer` | S1-S3, X0 | — | true |
 | `lf52-decisions-line` | D1-D2, X0 | lf52-state-layer | true |
 | `lf52-chosen-trim` | T1, X0 | — | false |
+
+## Amendment 1 (FSE, 2026-10-24): reduced motion, and three regressions from main
+
+From l52-layer-ui's UI review of lf52-state-layer (pass at e6d77d6; A3, U1-U3,
+A1, A2) and Aglaea's `docs/ux/specs/review-view.md` Amendment 18 (d45db6a).
+All inside the card's boundary (the stylesheets), so in this card:
+
+- **FR-1a** (A3, R51) Under `prefers-reduced-motion: reduce` no transition
+  runs, hover included, from one global guard in that media query, never per
+  control.
+- **FR-1b** (U1, R52) A bordered control's layer sits at inset -1px, so the
+  fill covers the border box.
+- **FR-1c** (U2, R52) The critical memory chip's open ring is 2px outside the
+  border's outer edge, as on main.
+- **FR-1d** (U3, A2, R52) Hover does nothing on an opaque mark: its rule
+  keeps `background: transparent` under the layer; see-through marks keep
+  their hover.
+- **FR-2a** (A1) The hover transition covers `color` too, so an ink-only
+  hover (the sub-tabs) eases.
+
+S2 adds: the reduced-motion guard exists once and sets every transition to
+none; the hover transition lists background-color and color. S3 adds: a
+bordered control's fill covers its border box; hover on the current rail
+row draws no rim. The UI re-review checks R51 and R52.
+
+Not in this card, for the next leftovers (Amendment 18): `.ib-row.focused`
+and every `focused` mark as state marks; the strip's role items and the
+rail's role rows in R50; the header's last-line gap (A4, R53).
