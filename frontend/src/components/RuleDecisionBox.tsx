@@ -226,8 +226,10 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
       </label>
       {error && <div className="rb-error" role="alert">{error}</div>}
       <div className="rb-foot">
-        <span className="rb-sign">signed {ruler}{forOwner} · commits one file</span>
+        {/* Amendment 1: the foot's first row, full width, above the
+            signature and the buttons, which keep their row (rule-box.css). */}
         {missing && <span id={missingId} className="rb-missing">{missing}</span>}
+        <span className="rb-sign">signed {ruler}{forOwner} · commits one file</span>
         <button className="ghost" onClick={() => close(true)} disabled={busy}>Cancel</button>
         <button className="primary" aria-describedby={missing ? missingId : undefined} {...busyButton({ busy, disabled: !ready, onPress: () => void rule() })}>{busyLabel(busy, "Rule", "Ruling…")}</button>
       </div>

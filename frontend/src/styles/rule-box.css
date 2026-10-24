@@ -134,10 +134,13 @@
   background: var(--danger-bg); border-radius: var(--radius-sm); padding: var(--space-2) var(--space-3);
   overflow-wrap: anywhere;
 }
-.rb-foot { display: flex; align-items: center; gap: var(--space-2); }
+.rb-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
 .rb-sign { flex: 1; min-width: 0; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-subtle); }
-/* leftovers-51 FR-10: what keeps Rule disabled, beside it */
-.rb-missing { flex: 0 1 auto; min-width: 0; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); }
+/* leftovers-51 FR-10 as amended (Amendment 1, UW1): what keeps Rule
+   disabled is the foot's first row at every width, full width, wrapping,
+   left-aligned; the signature and the buttons keep their row under it, so
+   no width squeezes the signature under it. */
+.rb-missing { flex: 0 0 100%; min-width: 0; text-align: left; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); }
 .rb-foot button { min-height: var(--control-md); font-size: var(--font-size-md); }
 @media (prefers-reduced-motion: reduce) { .rb-option span { transition: none; } }
 /* a record's sub-headings (a roster record's "Seats drafted") read as

@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import fixture from "../../../testdata/questions/0037-big-picture-stage.md?raw";
+// @ts-expect-error node:fs has no type declarations in this tsconfig
+import { readFileSync } from "node:fs";
+
+const ruleBoxCss = readFileSync(new URL("../styles/rule-box.css", import.meta.url), "utf8") as string;
 
 // leftovers-49 Q4 (FR-2, FR-3): the rule box on a question record draws one
 // radio group per question and rules with one pick per question. Vitest runs
@@ -200,6 +204,20 @@ describe("RuleDecisionBox speaks a question record (leftovers-51)", () => {
   it("W7: with nothing picked and no words, the foot reads Q1 and Q2 not answered yet first", () => {
     const html = box(fixtureOptions(), fixtureBody).draw();
     expect(/<span[^>]*class="rb-missing"[^>]*>([^<]*)</.exec(html)?.[1]).toBe("Q1 and Q2 not answered yet. Your words are missing.");
+  });
+
+  it("W7 (Amendment 1): the missing text is the foot's own first row, above the signature and the buttons", () => {
+    // Vitest has no layout: the row is the markup's order and the sheet's
+    // rules. A wrapping foot whose first item takes the full width puts the
+    // signature and the buttons on the next row, in the 354 px Decisions box
+    // and in Needs me's alike, so neither overlaps the other.
+    const foot = /<div class="rb-foot">([\s\S]*?)<\/div>/.exec(box(fixtureOptions(), fixtureBody).draw())![1];
+    const classes = [...foot.matchAll(/<(?:span|button)[^>]*? class="([^"]+)"/g)].map((m) => m[1]);
+    expect(classes).toEqual(["rb-missing", "rb-sign", "ghost", "primary"]);
+    const rule = (sel: string) => new RegExp(`(?:^|\\n)${sel.replace(/\./g, "\\.")} \\{([^}]*)\\}`).exec(ruleBoxCss)?.[1] ?? "";
+    expect(rule(".rb-foot")).toMatch(/flex-wrap: wrap/);
+    expect(rule(".rb-missing")).toMatch(/flex: 0 0 100%/);
+    expect(rule(".rb-sign")).toMatch(/flex: 1/);
   });
 
   it("W8: the words placeholder follows the record", () => {
