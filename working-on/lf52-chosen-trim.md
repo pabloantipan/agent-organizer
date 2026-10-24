@@ -7,7 +7,7 @@ seat: l52-trim
 reviewer: l52-trim-review
 stage:
 updated: 2026-10-24
-next: "l52-trim: FR-6 trims chosen but not options; a record with a quoted padded option (options: [\" tray \", fsnotify]) can no longer be ruled and the scan now flags it (review finding 1); compare trimmed options in rule.go and checkDecision, then review again"
+next: "review: lf52-chosen-trim, T1 and X0 pass after finding 1 fixed, 304d4e8"
 review: fail
 depends_on: []
 boundary: ["docs/specs/leftovers-52.md Boundary, lf52-chosen-trim"]
@@ -24,15 +24,17 @@ docs/specs/leftovers-52.md, rows T1 and X0.
 
 ## Done
 - FR-6 built on lf52-chosen-trim (d66f701): RuleDecision writes chosen trimmed, each answer of a question record too; the scan reads a hand-padded chosen with no problem. T1 fails on main, passes on the branch; X0 passes from a clean clone (.wt-notes/l52-trim/progress.md).
+- Review finding 1 and note 3 fixed (304d4e8): a plain chosen is compared against trimmed options in RuleDecision and checkDecision (`scan.IsOption`); TestRuleChosenTrimmed asserts the whole record and rules a padded option, TestChosenPaddedByHand reads `" a "` and `a` against `[" a ", b]`; those four cases fail at d66f701 and pass at 304d4e8; X0 passes again from a clean clone.
 
 ## Declared changes
 - added `internal/scan/decisions.go:TrimChosen`: the trimmed chosen a ruling writes
 - added `internal/scan/decisions.go:splitAnswers`: one split of a question record's chosen, each answer trimmed, for CheckAnswers and TrimChosen
 - modified `internal/scan/decisions.go:CheckAnswers`: uses splitAnswers
-- modified `internal/scan/decisions.go:checkDecision`: a plain chosen is compared trimmed
-- modified `internal/service/rule.go:RuleDecision`: trims chosen before checking and writing
+- added `internal/scan/decisions.go:IsOption`: a plain record's chosen against its options, both sides trimmed
+- modified `internal/scan/decisions.go:checkDecision`: a plain chosen is compared with IsOption
+- modified `internal/service/rule.go:RuleDecision`: trims chosen before checking and writing; a plain chosen is checked with IsOption
 - modified `internal/scan/decisions_test.go`: TestChosenPaddedByHand (T1)
-- modified `internal/service/rule_test.go`: TestRuleChosenTrimmed (T1)
+- modified `internal/service/rule_test.go`: TestRuleChosenTrimmed (T1), whole-record assert
 Risky:
 - `splitAnswers`: splits on `,` (was `, `), deciding a new answer on the trimmed piece; an alternative holding `, ` is glued back as written
 Not changed, on purpose:
