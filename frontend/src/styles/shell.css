@@ -58,7 +58,7 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .places { display: flex; align-items: center; gap: var(--space-1); flex-shrink: 0; }
 .places .place-tab { background: transparent; border-color: transparent; color: var(--fg-muted); padding: 2px var(--space-2); min-height: var(--control-sm); border-radius: var(--radius-xs); }
 .places .place-tab:hover { color: var(--fg); background: var(--surface-hover); border-color: transparent; }
-.places .place-tab.on { color: var(--fg); box-shadow: inset 0 -2px 0 var(--accent); border-radius: 0; }
+.places .place-tab.sl.on { --mark-line: inset 0 -2px 0 var(--accent); color: var(--fg); border-radius: 0; }
 /* The crumb is the screen's title (A3 §1, I23): no slash, after the places
    with the 16 px group gap (8 px of the group plus its own 8). */
 .crumbs { display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-md); color: var(--fg-muted); min-width: 0; margin-left: var(--space-2); }
@@ -85,8 +85,8 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
    gear on Settings) takes the tabs' 2 px accent underline and no fill; the
    opener of an open overlay (`?` while Help is open) takes the selected
    surface and no line, so over Settings the two read apart. */
-.gear.on { color: var(--fg); box-shadow: inset 0 -2px 0 var(--accent); border-radius: 0; }
-.gear.open { color: var(--fg); background: var(--surface-selected); }
+.gear.sl.on { --mark-line: inset 0 -2px 0 var(--accent); color: var(--fg); border-radius: 0; }
+.gear.sl.open { --mark-fill: var(--surface-selected); color: var(--fg); }
 
 /* ---------- Home ---------- */
 /* leftovers-8 FR-4 (A3): capped at the design system's 1,480 (Widths,
@@ -143,7 +143,7 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .ib-act .act { min-height: var(--control-sm); padding: 0 var(--space-3); font-size: var(--font-size-sm); }
 /* Focus and names, disclosure state (ui-leftovers FR-4): an open Rule is
    marked the way Conversations marks its Rule toggle */
-.ib-act .act[aria-expanded="true"] { background: var(--surface-selected); border-color: var(--border-strong); color: var(--fg); }
+.ib-act .act.sl[aria-expanded="true"] { --mark-fill: var(--surface-selected); border-color: var(--border-strong); color: var(--fg); }
 .home .sec-title:focus { outline: none; }
 .home .sec-title:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
 
@@ -239,7 +239,7 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .ihead-details { margin-left: auto; }
 .ihead-details { flex: none; display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--control-sm); padding: 0 var(--space-2); background: transparent; border-color: transparent; color: var(--fg-muted); font-size: var(--font-size-sm); }
 .ihead-details:hover { color: var(--fg); background: var(--surface-hover); border-color: transparent; }
-.ihead-details[aria-expanded="true"] { color: var(--fg); background: var(--surface-selected); }
+.ihead-details.sl[aria-expanded="true"] { --mark-fill: var(--surface-selected); color: var(--fg); }
 .ihead-details svg { transition: transform var(--dur-fast) var(--ease-out); }
 .ihead-details[aria-expanded="true"] svg { transform: rotate(180deg); }
 /* The stage is a button and looks it (FR-14): the pointer, the hover
@@ -314,19 +314,18 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .stg-x { font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .stg.done { border-style: solid; border-color: var(--border-subtle); }
 .stg.done .stg-n, .stg.done .stg-t, .stg.done .stg-x { color: var(--fg-subtle); }
-.stg.current { border-style: solid; border-color: var(--border-accent); background: var(--surface-selected); }
+.stg.sl.current { --mark-fill: var(--surface-selected); border-style: solid; border-color: var(--border-accent); }
 .stg.current .stg-n { color: var(--status-now); font-weight: var(--weight-semibold); }
 /* Drawn in the accent, so the ring sits at a 2px offset (FR-14). */
-.stg.current:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.stg.sl.current:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 
 .subtabs { display: flex; gap: var(--space-1); margin: 0 calc(-1 * var(--space-5)); padding: 0 var(--space-4); box-shadow: inset 0 -1px 0 var(--border-subtle); }
 .subtabs button {
   background: transparent; border: 0; border-radius: 0; color: var(--fg-muted);
   padding: var(--space-2) var(--space-3); min-height: var(--control-lg);
-  box-shadow: inset 0 -2px 0 transparent;
 }
 .subtabs button:hover { color: var(--fg); background: transparent; border: 0; }
-.subtabs button.on { color: var(--fg); box-shadow: inset 0 -2px 0 var(--accent); }
+.subtabs button.sl.on { --mark-line: inset 0 -2px 0 var(--accent); color: var(--fg); }
 
 /* Sub-views without a title row (initiative-header FR-5): what is not the id
    stays on one toolbar line. */
@@ -342,7 +341,7 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 .seg { display: inline-flex; gap: var(--space-0-5); padding: var(--space-0-5); border-radius: var(--radius-sm); background: var(--bg-sunken); margin-bottom: var(--space-3); }
 .seg button { min-height: var(--control-sm); background: transparent; border-color: transparent; color: var(--fg-muted); padding: 0 var(--space-3); font-size: var(--font-size-sm); }
 .seg button:hover { color: var(--fg); background: var(--surface-hover); border-color: transparent; }
-.seg button.on { background: var(--surface-raised); color: var(--fg); }
+.seg button.sl.on { --mark-fill: var(--surface-raised); color: var(--fg); }
 
 .ov-stub { color: var(--fg-subtle); }
 

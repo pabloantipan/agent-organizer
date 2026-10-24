@@ -105,7 +105,7 @@ export function UsageTable({ rows, cut, setCut, sessions }: { rows: UsageRow[]; 
     <section className="usage-sec" aria-label="where it went">
       <div className="seg" role="tablist" aria-label="cut the week">
         {CUTS.map((c) => (
-          <button key={c} role="tab" aria-selected={cut === c} className={cut === c ? "on" : ""} onClick={() => setCut(c)}>{CUT_WORDS[c]}</button>
+          <button key={c} role="tab" aria-selected={cut === c} className={cut === c ? "sl on" : "sl"} onClick={() => setCut(c)}>{CUT_WORDS[c]}</button>
         ))}
       </div>
       <div className="usage-table-wrap" ref={wrap}>

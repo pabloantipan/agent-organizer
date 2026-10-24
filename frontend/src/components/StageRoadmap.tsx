@@ -242,7 +242,7 @@ function DetailSwitch({ step, short, onStep }: { step: Step; short: boolean; onS
     <div className="seg ol-detail" role="radiogroup" aria-label="Detail" onKeyDown={onKeyDown}>
       {STEPS.map((s) => (
         <button key={s} ref={(el) => { if (el) refs.current.set(s, el); else refs.current.delete(s); }}
-          role="radio" aria-checked={step === s} tabIndex={step === s ? 0 : -1} className={step === s ? "on" : ""}
+          role="radio" aria-checked={step === s} tabIndex={step === s ? 0 : -1} className={step === s ? "sl on" : "sl"}
           aria-label={STEP_WORDS[s].long} title={STEP_WORDS[s].long}
           onClick={() => onStep(s)}>
           {short ? STEP_WORDS[s].short : STEP_WORDS[s].long}

@@ -138,7 +138,7 @@ describe("H5: the sub-tabs mark the current one aria-current true, never page (F
       const nav = h.slice(h.indexOf('<nav class="subtabs"'), h.indexOf("</nav>"));
       expect(nav).not.toContain('aria-current="page"');
       expect([...nav.matchAll(/aria-current="true"/g)]).toHaveLength(1);
-      expect(nav).toMatch(/<button class="on" aria-current="true">/);
+      expect(nav).toMatch(/<button class="sl on" aria-current="true">/);
       expect(h).not.toContain('aria-current="page"');
     }
   });

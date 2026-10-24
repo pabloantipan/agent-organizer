@@ -168,8 +168,8 @@ export function AppControls({ floats, help, settings, onCompact, onHelp, onSetti
   return (
     <>
       {floats && <button className="ghost gear" onClick={onCompact} title="Compact to icon (the icon floats on every desktop)" aria-label="Compact to icon"><CompactIcon /></button>}
-      <button className={`ghost gear ${help ? "open" : ""}`} onClick={onHelp} title="Help: how we build, from help_doc" aria-label="Help" aria-expanded={help}><CircleHelp size={14} /></button>
-      <button className={`ghost gear ${settings ? "on" : ""}`} onClick={onSettings} title="Settings" aria-label="Settings" aria-current={settings ? "page" : undefined}><Settings size={14} /></button>
+      <button className={`ghost gear sl ${help ? "open" : ""}`} onClick={onHelp} title="Help: how we build, from help_doc" aria-label="Help" aria-expanded={help}><CircleHelp size={14} /></button>
+      <button className={`ghost gear sl ${settings ? "on" : ""}`} onClick={onSettings} title="Settings" aria-label="Settings" aria-current={settings ? "page" : undefined}><Settings size={14} /></button>
     </>
   );
 }
@@ -180,7 +180,7 @@ export function AppControls({ floats, help, settings, onCompact, onHelp, onSetti
 function PlaceTab({ label, place, screen, onClick, title }: { label: string; place: Place; screen: Screen; onClick: () => void; title: string }) {
   const mark = markOf(place, screen);
   return (
-    <button type="button" className={`place-tab ${mark === "current" ? "on" : mark === "parent" ? "parent" : ""}`} aria-current={mark === "current" ? "page" : undefined} onClick={onClick} title={title}>{label}</button>
+    <button type="button" className={`place-tab sl ${mark === "current" ? "on" : mark === "parent" ? "parent" : ""}`} aria-current={mark === "current" ? "page" : undefined} onClick={onClick} title={title}>{label}</button>
   );
 }
 

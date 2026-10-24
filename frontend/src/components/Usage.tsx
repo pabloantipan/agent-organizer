@@ -186,12 +186,12 @@ function WeekPicker({ data, thisWeek, onPick }: { data: UsageData; thisWeek: str
       {open && (
         <div className="week-list" ref={list} role="menu" aria-label="recorded weeks" onKeyDown={onKey}>
           {!(data.weeks ?? []).some((w) => w.week === thisWeek) && (
-            <button role="menuitem" className="num" aria-current={data.week === thisWeek} onClick={() => { onPick(thisWeek); close(true); }}>
+            <button role="menuitem" className="num sl" aria-current={data.week === thisWeek} onClick={() => { onPick(thisWeek); close(true); }}>
               <span>This week</span><span className="wl-money">{money(0)}</span>
             </button>
           )}
           {(data.weeks ?? []).map((w) => (
-            <button key={w.week} role="menuitem" className="num" aria-current={w.week === data.week} onClick={() => { onPick(w.week); close(true); }}>
+            <button key={w.week} role="menuitem" className="num sl" aria-current={w.week === data.week} onClick={() => { onPick(w.week); close(true); }}>
               <span>{w.week === thisWeek ? "This week" : weekDays(w)}</span><span className="wl-money" title={unknownMoney(w) ? unknownWords(w.sessions) : undefined}>{moneyOf(w)}</span>
             </button>
           ))}

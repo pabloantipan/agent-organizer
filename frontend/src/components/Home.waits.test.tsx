@@ -154,7 +154,7 @@ describe("W6 (leftovers-41 FR-6, lf40 UF1): each Needs me row kind renders its v
   const files = [{ path: "/r/working-on/x.md", reasons: ["no frontmatter"] }] as never;
   /** The verb the row's one action button draws. */
   const verbOf = (html: string) => {
-    const acts = [...html.matchAll(/<button class="act"[^>]*>([^<]*)<\/button>/g)].map((m) => m[1]);
+    const acts = [...html.matchAll(/<button class="act(?: sl)?"[^>]*>([^<]*)<\/button>/g)].map((m) => m[1]);
     expect(acts, "one verb per row").toHaveLength(1);
     return acts[0];
   };

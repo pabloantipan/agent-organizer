@@ -1,5 +1,3 @@
-// @ts-expect-error node:fs has no type declarations in this tsconfig
-import { readdirSync, readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { AgentGroup, CellThread } from "../hooks/useWails";
@@ -7,9 +5,8 @@ import type { AgentGroup, CellThread } from "../hooks/useWails";
 // leftovers-48 L1 and L3 (review-view Amendment 13, R42 and R44): a landing
 // scrolls the chat list's current row into view and a pick in the list does
 // not, and the new-thread picker lists the chat list's Others; leftovers-51
-// K4 (Amendment 15, R49): hover eases both ways, a state mark never eases. Vitest runs in Node with no DOM library, so
-// the list is a stand-in row handed to `rowReveal`, the stylesheet is read
-// as text, and the picker is a server render.
+// K4 now lives in the StateLayer tests. Vitest runs in Node with no DOM library, so
+// the list is a stand-in row handed to `rowReveal`, and the picker is a server render.
 
 vi.mock("../hooks/useWails", () => ({ api: new Proxy({}, { get: () => vi.fn(async () => ({})) }) }));
 const state: Record<string, unknown> = { slackDraft: null, clearSlackDraft: () => undefined, applyAgents: () => undefined, view: null, setResolved: () => undefined, openCardLanding: () => undefined };
@@ -59,128 +56,10 @@ describe("L1: a landing shows its row, a pick in the list does not scroll", () =
   });
 });
 
-// Every stylesheet, global.css first: a mark in shell.css or usage.css that
-// sets no transition rides button's from global.css (F2).
-const dir = new URL("../styles/", import.meta.url);
-const sheets = ["global.css", ...(readdirSync(dir) as string[]).filter((f) => f.endsWith(".css") && f !== "global.css").sort()];
-const css = sheets.map((f) => readFileSync(new URL(f, dir), "utf8") as string).join("\n");
-/** Every rule as its selector list and body, comments dropped; a rule inside
- *  an @media block keeps only its own selectors. */
-const rules = css.replace(/\/\*[^]*?\*\//g, "").split("}").map((chunk) => {
-  const i = chunk.lastIndexOf("{");
-  return i < 0 ? null : { sels: chunk.slice(0, i).split(",").map((s) => s.trim()), body: chunk.slice(i + 1) };
-}).filter((r): r is { sels: string[]; body: string } => !!r);
-/** The transition the last rule naming `sel` exactly sets, or null. */
-const transitionOf = (sel: string) => {
-  let t: string | null = null;
-  for (const r of rules) if (r.sels.includes(sel)) { const m = /(?:^|;)\s*transition:\s*([^;]+)/.exec(r.body); if (m) t = m[1].trim(); }
-  return t;
-};
-
-describe("K4 (leftovers-51 FR-4, supersedes leftovers-48 L2): hover eases in and out alike on button's base rule; a state mark has no transition, hover included", () => {
-  const fills: [base: string, on: string, drawn?: string][] = [
-    ["button.person", "button.person.active", ".person.active"],
-    [".strip-all", ".strip-all.active"],
-    [".strip-item", ".strip-item.active"],
-    [".tiny-btn[aria-pressed]", '.tiny-btn[aria-pressed="true"]'],
-    [".seg button", ".seg button.on"],
-    [".subtabs button", ".subtabs button.on"],
-    [".places .place-tab", ".places .place-tab.on"],
-    [".gear", ".gear.on"],
-    [".gear", ".gear.open"],
-    [".stg", ".stg.current"],
-    [".fl-row", ".fl-row.on"],
-    [".week-list button", '.week-list button[aria-current="true"]'],
-    [".ib-act .act", '.ib-act .act[aria-expanded="true"]'],
-    [".ihead-details", '.ihead-details[aria-expanded="true"]'],
-    [".memory button.memory-btn", '.memory button.memory-btn[aria-expanded="true"]', '.memory button.memory-btn[aria-expanded="true"]:not(.critical)'],
-    [".ic-more", '.ic-more[aria-expanded="true"]'],
-  ];
-  const EASE = /^background var\(--dur-fast\) var\(--ease-out\), border-color var\(--dur-fast\) var\(--ease-out\), color var\(--dur-fast\) var\(--ease-out\)$/;
-  it("the base button rule carries the 100 ms ease, and no later rule naming button alone replaces it", () => {
-    expect(transitionOf("button")).toMatch(EASE);
-    expect(css).toMatch(/--dur-fast:\s*100ms/);
-  });
-  // Amendment 3: every control on lf48's list but the chat row switches at
-  // once until it gets its own layer, so a leaving mark never eases.
-  it.each(fills)("%s: transition none on the base and its hover, so the mark leaving %s switches at once (Amendment 3)", (base) => {
-    expect(transitionOf(base)).toBe("none");
-    expect(transitionOf(`${base}:hover`)).toBe("none");
-  });
-  it("the People panel: after a press, the row that lost .active has no fill in the next frame", () => {
-    // SlackView's People rows are button.person; .person.active draws the
-    // fill. With .active gone the row takes button.person's transition,
-    // which is none, hovered or not, so its fill drops at once.
-    expect(declOf(".person.active", "background").v).toBe("var(--accent-soft)");
-    for (const sel of ["button.person", "button.person:hover", "button.person.active", "button.person.active:hover"]) expect(transitionOf(sel)).toBe("none");
-    expect(rules.some((r) => r.sels.some((x) => /(^|\s)(button)?\.person(\.|:|$)/.test(x)) && [...r.body.matchAll(/(?:^|;)\s*transition:\s*([^;]+)/g)].some((m) => m[1].trim() !== "none"))).toBe(false);
-  });
-  it.each(fills)("%s: the mark %s is a fill some stylesheet draws", (_base, on, drawn) => {
-    expect(rules.some((r) => r.sels.includes(drawn ?? on) && /(^|;)\s*(background|color|border-color|box-shadow):/.test(r.body))).toBe(true);
-  });
-  it.each(fills)("%s → %s: transition none, hovered or not", (_base, on) => {
-    expect(transitionOf(on)).toBe("none");
-    expect(transitionOf(`${on}:hover`)).toBe("none");
-  });
-  // The chat row (Amendment 2, review-view A16, R43 and R49 amended): the
-  // mark is its own layer, so a leaving mark is gone in the next frame and
-  // hover eases the row's own background-color both ways on one curve.
-  /** The value the last rule naming `sel` exactly gives `prop`, and that rule's index. */
-  const declOf = (sel: string, prop: string) => {
-    let v: string | null = null, at = -1;
-    rules.forEach((r, i) => { if (!r.sels.includes(sel)) return; const m = new RegExp(`(?:^|;)\\s*${prop}:\\s*([^;]+)`).exec(r.body); if (m) { v = m[1].trim(); at = i; } });
-    return { v: v as string | null, at };
-  };
-  it(".chat: hover eases the row's own background-color over 100 ms on --ease-out, in and out (R49 amended, C2)", () => {
-    expect(transitionOf(".chat")).toBe("background-color var(--dur-fast) var(--ease-out)");
-    expect(transitionOf(".chat:hover")).toBeNull();
-    expect(declOf(".chat:hover", "background").v).toBe("var(--panel)");
-    expect(css).not.toMatch(/\.chat[^{]*\{[^}]*--ease-exit/);
-  });
-  it(".chat.active: the fill and outline are a ::before under the content with no transition", () => {
-    expect(declOf(".chat", "position").v).toBe("relative");
-    expect(declOf(".chat", "z-index").v).toBe("0");
-    const layer = ".chat.active::before";
-    expect(declOf(layer, "content").v).toBe('""');
-    expect(declOf(layer, "position").v).toBe("absolute");
-    expect(declOf(layer, "inset").v).toBe("-1px");
-    expect(declOf(layer, "z-index").v).toBe("-1");
-    expect(declOf(layer, "background").v).toBe("var(--accent-soft)");
-    expect(declOf(layer, "border").v).toBe("1px solid var(--border-accent)");
-    expect(transitionOf(layer)).toBe("none");
-  });
-  it(".chat.active leaves the row's own background and border as the base has them, so the leaving row has no fill in the next frame (R43 amended)", () => {
-    // Removing the class removes the layer, which no transition can hold;
-    // the row's own properties do not change, so its transition runs nothing.
-    expect(declOf(".chat.active", "background").v).toBe(declOf(".chat", "background").v);
-    expect(declOf(".chat.active", "border-color").v).toBe("transparent");
-    expect(declOf(".chat", "border").v).toBe("1px solid transparent");
-    expect(rules.some((r) => r.sels.some((x) => /^\.chat(\.|:|$)/.test(x) && x !== ".chat.active::before") && /(?:^|;)\s*(background|border-color):\s*var\(--(accent-soft|border-accent)\)/.test(r.body))).toBe(false);
-    expect(transitionOf(".chat.active")).toBe("none");
-    expect(transitionOf(".chat.active:hover")).toBe("none");
-  });
-  it("on the current row the fill does not change on hover", () => {
-    expect(declOf(".chat.active", "background").at).toBeGreaterThan(declOf(".chat:hover", "background").at);
-    expect(declOf(".chat.active:hover", "background").v).toBeNull();
-    expect(declOf(".chat.active::before", "background").at).toBeGreaterThan(-1);
-    expect(rules.some((r) => r.sels.some((x) => x.startsWith(".chat") && x.includes(":hover") && x.includes("::before")))).toBe(false);
-  });
-  // The rail's row is a button (Rail.tsx folded and role rows) whose base
-  // rule carries its own ease (global.css .rail-item, and the reduced-motion
-  // block), so hover leaves as it came; its selected mark never eases.
-  it(".rail-item → .rail-item.active: transition none, hovered or not; the base eases, its hover sets none of its own", () => {
-    expect(rules.some((r) => r.sels.includes(".rail-item.active") && /(^|;)\s*background:/.test(r.body))).toBe(true);
-    expect(transitionOf(".rail-item.active")).toBe("none");
-    expect(transitionOf(".rail-item.active:hover")).toBe("none");
-    expect(transitionOf(".rail-item")).toMatch(/^background /);
-    expect(transitionOf(".rail-item:hover")).toBeNull();
-  });
-  it("disabled, by attribute or by aria, has no transition, hover included", () => {
-    expect(transitionOf("button:disabled")).toBe("none");
-    expect(transitionOf('button[aria-disabled="true"]:not(.na-busy)')).toBe("none");
-    expect(transitionOf('button[aria-disabled="true"]:not(.na-busy):hover')).toBe("none");
-  });
-});
+// K4 (leftovers-51 FR-4, Amendments 2 and 3) moved to StateLayer.css.test.ts
+// and StateLayer.harness.test.tsx (leftovers-52 S1 to S3): every state mark,
+// the chat row's included, is painted by the shared layer, and hover eases
+// on every control; lf51's transition: none list is gone.
 
 /** The recipient select's options and groups, in order. */
 const recipients = (html: string) => {

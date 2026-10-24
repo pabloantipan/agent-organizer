@@ -45,7 +45,25 @@ button.ghost[aria-disabled="true"], button.ghost[aria-disabled="true"]:hover { c
 button.ghost { background: transparent; border-color: transparent; color: var(--muted); }
 button.ghost:hover { color: var(--fg); background: var(--surface-hover); }
 /* A toggle that is on is selected, never the accent (principle 3). */
-.tiny-btn[aria-pressed="true"] { background: var(--surface-selected); border-color: var(--border-strong); color: var(--fg); }
+.tiny-btn.sl[aria-pressed="true"] { --mark-fill: var(--surface-selected); border-color: var(--border-strong); color: var(--fg); }
+/* State marks, one layer for all (design system, Elevation and motion;
+   leftovers-52 FR-1, FR-2; review-view A16, A17, R43 amended, R50). A
+   control that can carry a current, selected, open, pressed or expanded
+   mark has .sl; its mark rule, written on .sl, sets --mark-fill and
+   --mark-line, and only this layer paints them: a ::before under the
+   content with no transition, so a mark arriving and a mark leaving are
+   both true on the first frame, even in a window that draws no frames.
+   The control's own background-color is hover's alone and eases 100 ms on
+   --ease-out, in and out; nothing else on it transitions, so a border or
+   ink that a mark changes switches at once too. A control whose ::before
+   is taken (the rule box's radio) takes .sl-shadow: the fill as an inset
+   shadow on itself. Every control joins by taking the class, never by its
+   own transition or a copy of the layer; StateLayer.css.test.ts finds
+   every marked selector and holds it to this. */
+.sl, .sl-shadow { --mark-fill: transparent; --mark-line: 0 0 transparent; transition: background-color var(--dur-fast) var(--ease-out); }
+.sl { position: relative; z-index: 0; }
+.sl::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--mark-fill); box-shadow: var(--mark-line); pointer-events: none; transition: none; }
+.sl-shadow { box-shadow: inset 0 0 0 100vmax var(--mark-fill); }
 :focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 input, textarea {
   font: inherit; color: var(--text);
@@ -99,7 +117,9 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
 .strip-all, .strip-item { width: 32px; height: 30px; border-radius: var(--radius-md); background: transparent; border: 1px solid transparent; color: var(--muted); font-family: var(--mono); font-size: var(--font-size-xs); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 2px; padding: 0; position: relative; }
 .strip-all { font-size: var(--font-size-xs); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
 .strip-all:hover, .strip-item:hover { background: var(--panel); color: var(--text); }
-.strip-all.active, .strip-item.active { background: var(--accent-soft); border-color: var(--border-accent); color: var(--text); }
+/* The fill is see-through, so the marked row keeps its own background as
+   at rest, hover included: the fill does not change on hover (R49). */
+.strip-all.sl.active, .strip-item.sl.active { --mark-fill: var(--accent-soft); background: transparent; border-color: var(--border-accent); color: var(--text); }
 .strip-item.now .strip-rank { color: var(--now); }
 .strip-item.blocked .strip-rank { color: var(--blocked); }
 .strip-item .live-dot { position: absolute; right: 3px; top: 3px; width: 6px; height: 6px; margin: 0; }
@@ -159,10 +179,10 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
 .rail-item {
   display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
   padding: 7px 10px; border-radius: var(--radius-sm); border: 1px solid transparent; background: transparent; color: var(--fg);
-  cursor: pointer; margin-bottom: 2px; user-select: none; transition: background var(--dur-fast) var(--ease-out);
+  cursor: pointer; margin-bottom: 2px; user-select: none;
 }
 .rail-item:hover { background: var(--surface); }
-.rail-item.active { background: var(--surface-selected); box-shadow: inset 2px 0 0 var(--accent); }
+.rail-item.sl.active { --mark-fill: var(--surface-selected); --mark-line: inset 2px 0 0 var(--accent); }
 /* The rows are one Tab stop (FR-5, T3): the ring sits inside the row, so
    it never meets the next row's. */
 .rail-item:focus-visible { outline-offset: -2px; }
@@ -353,7 +373,7 @@ button.tiny { padding: 0 5px; font-size: var(--font-size-xs); line-height: 14px;
 .settings .hint { color: var(--muted); font-size: var(--font-size-sm); }
 
 @media (prefers-reduced-motion: no-preference) {
-  .card, .rail-item { transition: background .12s ease, border-color .12s ease; }
+  .card { transition: background .12s ease, border-color .12s ease; }
 }
 
 /* initiatives list */
@@ -614,7 +634,7 @@ button.counts.linkish { font-family: var(--mono); }
 /* A button that keeps the row's look, ring inside the scrolled list (leftovers-24 FR-3). */
 button.person { width: 100%; border: 0; background: transparent; text-align: left; font-weight: inherit; line-height: inherit; white-space: normal; min-height: 0; }
 button.person:focus-visible { outline-offset: -2px; }
-.person.active { background: var(--accent-soft); }
+.person.sl.active { --mark-fill: var(--accent-soft); background: transparent; }
 .person.me { cursor: default; }
 .person .mono { color: var(--text); font-size: var(--font-size-sm); }
 .person-main { flex: 1; min-width: 0; display: grid; gap: 2px; }
@@ -639,94 +659,12 @@ button.person:focus-visible { outline-offset: -2px; }
 .chats-reason, .blocked-reason { font-size: var(--font-size-sm); color: var(--fg-muted); line-height: 1.35; }
 .chats-reason { margin: -2px 8px 8px; }
 .chats .cell-search { width: auto; margin: 0 4px 6px 0; }
-.chat { position: relative; z-index: 0; display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: var(--radius-md); background: transparent; border: 1px solid transparent; color: var(--muted); font-size: var(--font-size-sm); text-align: left; cursor: pointer; min-width: 0; transition: background-color var(--dur-fast) var(--ease-out); }
+.chat { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: var(--radius-md); background: transparent; border: 1px solid transparent; color: var(--muted); font-size: var(--font-size-sm); text-align: left; cursor: pointer; min-width: 0; }
 .chat:hover { background: var(--panel); color: var(--text); }
-/* The current mark is its own layer (leftovers-51 Amendment 2, review-view
-   A16 C1): hover eases the row's own background-color, in and out, and the
-   fill and outline are a ::before with no transition, under the content.
-   The mark leaves the row's own background and border as they were, so
-   removing it removes the layer at once and eases nothing. */
-.chat.active { background: transparent; border-color: transparent; color: var(--text); }
-.chat.active::before { content: ""; position: absolute; inset: -1px; z-index: -1; border-radius: inherit; background: var(--accent-soft); border: 1px solid var(--border-accent); pointer-events: none; transition: none; }
-/* State marks never ease (design system; leftovers-48 FR-2, leftovers-51
-   FR-4 with Amendments 2 and 3, review-view A13 UO2, A15 UL4, A16): a
-   control while it carries a current, selected, open or disabled mark has
-   no transition at all, hover included, so the mark is true on the first
-   frame even in a window that draws no frames. Buttons with no mark ease
-   hover in and out on button's own 100 ms (the base rule above). The chat
-   row paints its mark on a layer (.chat.active::before) so its hover eases;
-   the rail's row keeps its own base ease; the marked controls below, whose
-   marks live in their own stylesheets (shell, float, usage, memory,
-   initiatives), switch at once, hover included. */
-/* Until each gets its own layer (Amendment 3): a transition is read from
-   the style after the change, so a leaving mark would ease on any
-   transition its base or hover keeps; base and hover both set none. */
-button.person,
-.strip-all,
-.strip-item,
-.tiny-btn[aria-pressed],
-.seg button,
-.subtabs button,
-.places .place-tab,
-.gear,
-.stg,
-.fl-row,
-.week-list button,
-.ib-act .act,
-.ihead-details,
-.memory button.memory-btn,
-.ic-more,
-button.person:hover,
-.strip-all:hover,
-.strip-item:hover,
-.tiny-btn[aria-pressed]:hover,
-.seg button:hover,
-.subtabs button:hover,
-.places .place-tab:hover,
-.gear:hover,
-.stg:hover,
-.fl-row:hover,
-.week-list button:hover,
-.ib-act .act:hover,
-.ihead-details:hover,
-.memory button.memory-btn:hover,
-.ic-more:hover { transition: none; }
-.rail-item.active,
-.rail-item.active:hover,
-.chat.active,
-.chat.active:hover,
-button.person.active,
-button.person.active:hover,
-.strip-all.active,
-.strip-all.active:hover,
-.strip-item.active,
-.strip-item.active:hover,
-.tiny-btn[aria-pressed="true"],
-.tiny-btn[aria-pressed="true"]:hover,
-.seg button.on,
-.seg button.on:hover,
-.subtabs button.on,
-.subtabs button.on:hover,
-.places .place-tab.on,
-.places .place-tab.on:hover,
-.gear.on,
-.gear.on:hover,
-.gear.open,
-.gear.open:hover,
-.stg.current,
-.stg.current:hover,
-.fl-row.on,
-.fl-row.on:hover,
-.week-list button[aria-current="true"],
-.week-list button[aria-current="true"]:hover,
-.ib-act .act[aria-expanded="true"],
-.ib-act .act[aria-expanded="true"]:hover,
-.ihead-details[aria-expanded="true"],
-.ihead-details[aria-expanded="true"]:hover,
-.memory button.memory-btn[aria-expanded="true"],
-.memory button.memory-btn[aria-expanded="true"]:hover,
-.ic-more[aria-expanded="true"],
-.ic-more[aria-expanded="true"]:hover { transition: none; }
+/* The current row: its fill on the layer, its outline and ink on the row
+   (neither transitions); its own background stays as at rest, so hover
+   does not change the see-through fill (R43, R49 amended). */
+.chat.sl.active { --mark-fill: var(--accent-soft); background: transparent; border-color: var(--border-accent); color: var(--text); }
 .chat.fresh { color: var(--text); font-weight: 600; }
 .chat.hot { color: var(--blocked); }
 .chat-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-size: var(--font-size-sm); }

@@ -32,7 +32,7 @@ export function RoadmapView() {
   const modes = (
     <div className="seg" role="tablist" aria-label="roadmap view">
       {(["stages", "cards", "calendar"] as const).map((m) => (
-        <button key={m} role="tab" aria-selected={mode === m} className={mode === m ? "on" : ""} onClick={() => setPicked(m)}>
+        <button key={m} role="tab" aria-selected={mode === m} className={mode === m ? "sl on" : "sl"} onClick={() => setPicked(m)}>
           {m === "stages" ? "Stages" : m === "cards" ? "Cards" : "Calendar"}
         </button>
       ))}

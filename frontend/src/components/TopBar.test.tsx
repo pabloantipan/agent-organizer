@@ -65,24 +65,24 @@ describe("the top bar by kind (leftovers-17 FR-3)", () => {
     // An initiative, whichever door opened it: the screen is the same.
     const init = bar({ screen: "initiative", selectedInitiative: "organizer" });
     expect(marks(init)).toEqual(["organizer"]);
-    expect(init).toMatch(/<button type="button" class="place-tab parent"[^>]*>Initiatives<\/button>/);
+    expect(init).toMatch(/<button type="button" class="place-tab sl parent"[^>]*>Initiatives<\/button>/);
     expect(init).not.toMatch(/aria-current="page"[^>]*>Initiatives</);
     expect(marks(bar({ screen: "settings" }))).toEqual(["Settings"]);
-    expect(bar({ screen: "settings" })).toMatch(/class="ghost gear on"[^>]*aria-label="Settings" aria-current="page"/);
+    expect(bar({ screen: "settings" })).toMatch(/class="ghost gear sl on"[^>]*aria-label="Settings" aria-current="page"/);
   });
 
   it("opens Help over a screen without taking its mark (L4, I31)", () => {
     for (const screen of ["home", "initiatives", "usage", "initiative", "settings"]) {
       const html = where(screen) + renderToStaticMarkup(<AppControls floats help settings={screen === "settings"} onCompact={noop} onHelp={noop} onSettings={noop} />);
       // `?` is expanded and selected, never current.
-      expect(html, screen).toMatch(/<button class="ghost gear open"[^>]*aria-label="Help" aria-expanded="true">/);
+      expect(html, screen).toMatch(/<button class="ghost gear sl open"[^>]*aria-label="Help" aria-expanded="true">/);
       expect(html.match(/<button[^>]*aria-label="Help"[^>]*>/)![0]).not.toContain("aria-current");
       // The screen under it keeps its one mark.
       const under = { home: "Home", initiatives: "Initiatives", usage: "Usage", initiative: "organizer", settings: "Settings" }[screen];
       expect(marks(html), screen).toEqual([under]);
     }
     const closed = renderToStaticMarkup(<AppControls floats={false} help={false} settings={false} onCompact={noop} onHelp={noop} onSettings={noop} />);
-    expect(closed).toMatch(/<button class="ghost gear "[^>]*aria-label="Help" aria-expanded="false"/);
+    expect(closed).toMatch(/<button class="ghost gear sl "[^>]*aria-label="Help" aria-expanded="false"/);
   });
 
   it("never marks Needs me, on any screen (K1, U3)", () => {
@@ -141,8 +141,8 @@ describe("current against open in the bar (B1)", () => {
     expect(help(controls(true, false))).not.toContain("on");
     // Help over Settings: both show, and differ.
     const both = controls(true, true);
-    expect(gear(both)).toEqual(["ghost", "gear", "on"]);
-    expect(help(both)).toEqual(["ghost", "gear", "open"]);
+    expect(gear(both)).toEqual(["ghost", "gear", "sl", "on"]);
+    expect(help(both)).toEqual(["ghost", "gear", "sl", "open"]);
     // Neither: no mark at all.
     const none = controls(false, false);
     expect(gear(none)).not.toContain("on");
@@ -150,17 +150,18 @@ describe("current against open in the bar (B1)", () => {
   });
 
   it("draws the current gear as the tabs' 2 px accent underline with no fill", () => {
-    const on = rule(".gear.on");
-    expect(on).toContain("box-shadow: inset 0 -2px 0 var(--accent)");
-    expect(on).not.toMatch(/background/);
+    // Both marks ride the shared layer (leftovers-52 FR-1): --mark-line, --mark-fill.
+    const on = rule(".gear.sl.on");
+    expect(on).toContain("--mark-line: inset 0 -2px 0 var(--accent)");
+    expect(on).not.toMatch(/background|--mark-fill/);
     // The same line as the current place tab.
-    expect(rule(".places .place-tab.on")).toContain("box-shadow: inset 0 -2px 0 var(--accent)");
+    expect(rule(".places .place-tab.sl.on")).toContain("--mark-line: inset 0 -2px 0 var(--accent)");
   });
 
   it("draws `?` open as the selected surface with no underline", () => {
-    const open = rule(".gear.open");
-    expect(open).toContain("background: var(--surface-selected)");
-    expect(open).not.toMatch(/box-shadow/);
+    const open = rule(".gear.sl.open");
+    expect(open).toContain("--mark-fill: var(--surface-selected)");
+    expect(open).not.toMatch(/box-shadow|--mark-line/);
   });
 });
 

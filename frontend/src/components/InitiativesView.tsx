@@ -271,7 +271,7 @@ export function InitiativesView() {
           {note && <NoteLine id={noteId} note={note} onAgents={() => openInitiative(c.id, "agents")} />}
           {!conf && (
             <div className="ic-foot">
-              <button className="ic-more" aria-expanded={open} aria-controls={open ? detailsId : undefined} aria-label={`Details of ${c.id}`}
+              <button className="ic-more sl" aria-expanded={open} aria-controls={open ? detailsId : undefined} aria-label={`Details of ${c.id}`}
                 onClick={() => setDetails(detailsAfter(details, c.id))}>
                 Details {open ? <ChevronUp size={14} aria-hidden /> : <ChevronDown size={14} aria-hidden />}
               </button>
