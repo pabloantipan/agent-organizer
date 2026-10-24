@@ -8,7 +8,7 @@ reviewer: l51-words-review, l51-words-ui
 stage:
 updated: 2026-10-24
 next: "review: lf51-rule-words, W5-W8 (W6 fixed, W7 as amended) and X0 pass, 8e504fb"
-review: fail
+review: pass
 depends_on: [lf49-rule-questions]
 boundary: ["docs/specs/leftovers-51.md Boundary, lf51-rule-words"]
 spec: "docs/specs/leftovers-51.md (FR-7 to FR-11)"
@@ -45,58 +45,73 @@ Not changed, on purpose:
 
 
 ## Review
-**Fail** at 61d9d41 (l51-words-review, 2026-10-24). Unmet: W6, by one proved finding against FR-9; W5, W7, W8 and X0 are met.
+**Pass** at 8e504fb (l51-words-review, 2026-10-24). Unmet gate items: none. W5-W8, with W7 as amended (Amendment 1, 24938f9), and X0 are met. The earlier fail at 61d9d41 (W6, `questionWords`) is fixed by b7e3dc6. The branch was rebased on main f3cd3d8, and this review restarted on a fresh clean clone at 8e504fb.
 
-**Finding (blocking, W6 / FR-9).** `questionWords` (`frontend/src/lib/decisions.ts`) drops every `_`, `*` and `` ` `` in the line, not the markdown markers. FR-9 asks for "the record's `**Q<n>. …**` line without markdown". Run through vitest in a scratch clone of 61d9d41:
+**change-check** (`change-check organizer lf51-rule-words`, from the clean clone; base f3cd3d8):
 ```
-questionWords("## Question\n\n**Q2. Does `tech_lead_nicolas` keep his seat?**\n\n**Q5. 2*3 seats or 4?**")
-→ {"Q2":"Does techleadnicolas keep his seat?","Q5":"23 seats or 4?"}
-```
-The legend renders that value as it is (`RuleDecisionBox.tsx:189`), so it would read `Q2 · Does techleadnicolas keep his seat?`. Seat names in this factory carry underscores. No real record has such a `**Q` line today (8 `**Q<n>.` lines across the decision dirs, none with `_` or `*`), so it does not hurt yet. The fix is small: drop paired `**`/`*`/`_` emphasis markers and backticks, keep the text inside code spans and any `_` inside a word, and add the case to the W6 or helper test.
-
-**change-check** (`change-check organizer lf51-rule-words`, from the clean clone):
-```
-## Changed
 - organizer/frontend/src/components/DecisionsView.test.tsx (added, test)
 - organizer/frontend/src/components/DecisionsView.tsx (modified): DecisionsView
 - organizer/frontend/src/components/RuleDecisionBox.test.tsx (modified, test)
 - organizer/frontend/src/components/RuleDecisionBox.tsx (modified)
 - organizer/frontend/src/lib/decisions.test.ts (modified, test)
-- organizer/frontend/src/lib/decisions.ts (modified): chosenLines, chosenFloor, questionWords, missingWords
+- organizer/frontend/src/lib/decisions.ts (modified): chosenLines, chosenFloor, questionWords, unmark, missingWords
 - organizer/frontend/src/styles/rule-box.css (modified)
 | undeclared | organizer/frontend/src/components/RuleDecisionBox.tsx |  | modified |
+| untested? | organizer/frontend/src/lib/decisions.ts | unmark | no test file names it |
 | declared, not changed |  | frontend/src/components/RuleDecisionBox.tsx:RuleDecisionBox | no matching change |
-2 flags: outside boundary 0, outside footprint 0, undeclared 1, declared, not changed 1, new env var 0, new dependency 0, new host 0, risk 0, untested? 0, could not read 0, boundary unreadable 0
+3 flags: outside boundary 0, outside footprint 0, undeclared 1, declared, not changed 1, new env var 0, new dependency 0, new host 0, risk 0, untested? 1, could not read 0, boundary unreadable 0
 ```
-The two flags are one change seen twice. change-check gave RuleDecisionBox.tsx no symbol, so the declared `RuleDecisionBox.tsx:RuleDecisionBox` matched nothing, and the file read as undeclared. Every hunk (lines 83-233) falls inside `export function RuleDecisionBox`, which runs from line 45 to before line 239. So the declaration is true; the tool did not attribute the lines to the symbol. All 7 files are inside the Boundary, nothing under `frontend/wailsjs/`, and there is no new dependency (package.json and pnpm-lock.yaml unchanged; change-check: new dependency 0).
+- **undeclared** and **declared, not changed** are one change seen twice. change-check gave `RuleDecisionBox.tsx` no symbol, so the declared `RuleDecisionBox.tsx:RuleDecisionBox` matched nothing. Every hunk in the file falls inside `export function RuleDecisionBox`, which runs from line 45 to before line 239.
+- **untested?** `unmark` is private. Its only caller is `questionWords`, and the questionWords test in `decisions.test.ts` covers it ("keeps code-span text, an in-word _ and a lone *"), as does W6's legend test.
+- All 7 files are inside the Boundary, nothing is under `frontend/wailsjs/`, and no dependency changed (package.json and the lockfile are untouched).
 
-**Rows** (the new tests were copied onto a clone of main b5f844d; 11 of 13 new tests fail there, and the 2 that pass guard the plain record):
-- W5 met. `DecisionsView.test.tsx` uses the fixture's options, ruled `Q1 after-graph-performs-start-now, Q2 record-page`, plus a plain ruled record.
+**Rows.** I copied the three test files of 8e504fb onto a clone of main (b836de5): 13 of the 15 new tests fail there. The 2 that pass guard the plain record.
+- **W5 met** (`DecisionsView.test.tsx`, unchanged since 61d9d41).
   - Closed, the line reads `“Q1 after…, Q2 record…”`, and aria-label and title carry the full chosen.
   - Open, the line has no chosen and the head reads `Chosen`, `Q1 after-graph-performs-start-now`, `Q2 record-page`. The plain record shows `Chosen`, `accept as written`.
-  - On main: `Expected: "“Q1 after…, Q2 record…”" Received: "“Q1 after-graph-performs-start-now, Q2 record-page”"`, and open `expected '“Q1 after-graph-performs-start-now, Q…' to be null`, `expected '“accept as written”' to be null`.
-- W6 is unmet, by the finding above. The test itself asserts the row: legends `["Q1 · Where in the order?", "Q2 · Where does the view live?"]`, and `Q1` alone once the `**Q1.` line is removed. On main: `expected [ 'Q1', 'Q2' ] to deeply equal [ 'Q1 · Where in the order?', …(1) ]`.
-- W7 met.
-  - With Q1 picked and words typed, Rule's aria-describedby resolves to `Q2 not answered yet.`. With both picked and no words, it reads `Your words are missing.`. With everything filled, there is no description and no `rb-missing`. There is no `aria-live`.
-  - With nothing picked, the foot reads `Q1 and Q2 not answered yet. Your words are missing.`. The gate row says `Q1 and Q2 not answered yet.` for that input, but Aglaea's rule-questions Amendment 1 U3 says that when both are missing, both sentences show, and the code follows U3. The gate's expected text is short of its own source (to the FSE). Note: when nothing is picked, the order follows U3's "in reading order".
-  - On main: `expected null to be 'Q1 and Q2 not answered yet. Your word…'`.
-- W8 met. The placeholders match word for word: `Why these answers, in your words. They go under ## Ruling.` on the fixture and `Why this option, in your words. They go under ## Ruling.` on a plain record. On main: `Expected: "Why these answers, …" Received: "Why this option, …"`.
-- X0 met.
-  - `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test` was a **fresh** run, id `ef3e4ff5-16196` (sha 61d9d41, rc 0): all Go packages ok; vitest 83 files and 1129 tests passed.
+  - On main: `Expected: "“Q1 after…, Q2 record…”" Received: "“Q1 after-graph-performs-start-now, Q2 record-page”"`, and open `expected '“accept as written”' to be null`.
+- **W6 met.**
+  - The legends are `Q1 · Where in the order?` and `Q2 · Where does the view live?`. Without the `**Q1.` line they are `Q1` and `Q2 · …`.
+  - With my review's case they are `Q1 · Does tech_lead_nicolas keep his seat?` and `Q2 · Are 2*3 seats enough?`.
+  - On main: `expected [ 'Q1', 'Q2' ] to deeply equal [ 'Q1 · Where in the order?', …(1) ]`.
+- **W7 met, as amended.**
+  - Rule's `aria-describedby` reads `Q2 not answered yet.` (Q1 picked, words typed) and `Your words are missing.` (both picked, no words). With nothing picked it reads `Q1 and Q2 not answered yet. Your words are missing.`, both sentences, as rule-questions U3 says. There is no `aria-live`, and the row is gone once Rule is enabled.
+  - Amendment 1: in the foot's markup, `rb-missing` comes first, then `rb-sign`, Cancel and Rule. In `rule-box.css`, `.rb-foot` has `flex-wrap: wrap`, `.rb-missing` has `flex: 0 0 100%`, and `.rb-sign` keeps `flex: 1; min-width: 0`. A 100 % basis wraps the missing text onto its own first row at any width, and `.rb-sign`'s basis is 0, so the signature and the buttons stay on one row under it.
+  - The rule is the same in the 354 px Decisions box and in Needs me's. The only context rules are `.rb > .rb-foot` (sticky, padding) and `.home.wide .home-needs .rb > .rb-foot` (background). Neither touches flex, and I grepped every `rb-foot`, `rb-sign` and `rb-missing` selector.
+  - Vitest has no layout, so the no-overlap check is read from markup and CSS. The pixels are the UI reviewer's to see.
+  - On main: `expected [ 'rb-sign', 'ghost', 'primary' ] to deeply equal [ 'rb-missing', 'rb-sign', …(2) ]`.
+- **W8 met.** The placeholder reads `Why these answers, in your words. They go under ## Ruling.` on the fixture and `Why this option, in your words. They go under ## Ruling.` on a plain record. On main: `Expected: "Why these answers, …" Received: "Why this option, …"`.
+- **X0 met.**
+  - `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test` was a **fresh** run, id `a75c3167-31494` (sha 8e504fb, rc 0): 19 Go packages ok; vitest 83 files and 1131 tests passed.
   - `test-lease run -- pnpm run build` exited 0, and `test-lease run -- wails build` exited 0.
-  - `git status --porcelain` printed nothing (wails did not touch `frontend/wailsjs/runtime`).
+  - `git status --porcelain` printed nothing.
 
-**Own inputs** (vitest in a scratch clone):
-- A three-question record gives chosenLines `["Q1 a-b","Q2 fg-hi","Q3 long_alternative"]` and floor `Q1 a…, Q2 fg…, Q3 long…`. With Q2 open and no words, missing reads `Q1 and Q3 not answered yet. Your words are missing.`. Right.
-- When the `**Q1.**` line is missing beside a present Q2, the legends are `Q1` and `Q2 · Where does the view live?`. Right (the builder's W6 test).
-- Markdown in the line:
-  - Bold inside, `**Q1. Is it **bold** here?**`, gives `Is it bold here?`. Right.
-  - A link gives `Read the spec first?`. Right.
-  - `**Q4.** Split label?` gives `Split label?`. Right.
-  - Code with underscores and a literal `*` are wrong (the finding).
-  - A `**Q1.` line outside `## Question` is ignored. Right.
-- A plain record looks as it did on main: no foot text, the same placeholder and the same closed line (`“accept as written”`, `dec-opt floored`). The one change is that, when the record is open, the line drops its chosen and the head shows `Chosen` (FR-7 and FR-8).
-- Note: FR-8 floors each answer to its first word, up to 8 characters (`Q1 a…` for `a-b`). U1 says "cut to share the floor equally", which is not the same rule. That goes to the UI reviewer and the FSE, and the card's Notes say so.
+**Own inputs** (`questionWords` through vitest in a scratch clone at 8e504fb, then deleted):
+- A code span with underscores, `` `tech_lead_nicolas` ``, gives `tech_lead_nicolas`. Right.
+- A lone `*` is kept in each case, all right:
+  - `2*3` gives `2*3`.
+  - `2 * 3 or 4 * 5` is unchanged.
+  - `a*b and c*d` is unchanged.
+  - `A lone * here?` is unchanged.
+- `` `a*b*c` `` and `` `x__y__z` `` are kept verbatim. Right.
+- Markdown is removed where it should be, all right:
+  - Inner bold, `**bold**`, gives `bold`.
+  - `*really* _so_` gives `really so`.
+  - A link gives its text.
+  - `**Q1.** Split label?` gives `Split label?`.
+  - `__init__` gives `init`, which is how CommonMark renders it too.
+- An unclosed backtick is kept as a literal. Right.
+- When Q2 has no line between Q1 and Q3 lines, the result is `{Q1, Q3}`. Right.
+- Three questions:
+  - The lines are `Q1 a-b`, `Q2 fg-hi`, `Q3 long_alternative`, and the floor is `Q1 a…, Q2 fg…, Q3 long…`.
+  - With nothing picked and words typed, it reads `Q1, Q2 and Q3 not answered yet.`.
+  - With Q2 picked and no words, it reads `Q1 and Q3 not answered yet. Your words are missing.`.
+- A plain record looks as it does on main except for FR-7 and FR-8 when open: no foot text, the same placeholder, and the same closed line.
+
+**Notes (not blocking):**
+- Note: `unmark` tests word boundaries with ASCII `\w`. An emphasis-shaped `_x_` with a non-ASCII letter directly on both sides is therefore stripped: `ñ_x_ñ` gives `ñxñ`, while CommonMark keeps that `_` as text. `Año_nuevo` is kept, and no record has such a line. Fix with `[\p{L}\p{N}]` and the `u` flag. To the FSE (next leftovers).
+- Note: W7's row says `Q1 and Q2 not answered yet.` for "nothing picked, no words". Its source, rule-questions U3, adds `Your words are missing.` for that input, and the code follows U3. The gate row should quote U3. To the FSE.
+- Note: FR-8's floor is the first word, up to 8 characters. Amendment 2's UW2 (whole answers while the line has room) is out of this card's boundary, and the spec's Amendment 1 assigns it to the next leftovers. To the FSE.
 
 Reviewer: l51-words-review, 2026-10-24.
 
