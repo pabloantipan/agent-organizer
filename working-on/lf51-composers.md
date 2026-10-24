@@ -7,7 +7,7 @@ seat: l51-comp
 reviewer: l51-comp-review, l51-comp-ui
 stage:
 updated: 2026-10-24
-next: "l51-comp: K4 (FR-4): `.rail-item.active` (global.css:165, a button at Rail.tsx:302 and :388) eases its fill on `.rail-item`'s .12s transition (global.css:356); give the mark `transition: none`, hover included, and add it to the K4 fills"
+next: "review: lf51-composers, gate met (K1-K5, X0; K4 fixed: .rail-item.active), 15ec836"
 review: fail
 depends_on: [lf48-chat-landing]
 boundary: ["docs/specs/leftovers-51.md Boundary, lf51-composers"]
@@ -24,6 +24,7 @@ docs/specs/leftovers-51.md, rows K1-K5 and X0; the UI review checks review-view 
 
 ## Done
 - l51-comp, 2026-10-24: FR-1 to FR-5 on branch lf51-composers (97c8a79, 3dbe032, d7605a9), rebased on main 48c77ac; K1-K5 fail on main and pass on the branch, X0 passes from a clean clone; commands and output in .wt-notes/l51-comp/progress.md.
+- l51-comp, 2026-10-24, round 2: K4 fixed, `.rail-item.active` and its hover `transition: none`, K4 row added (15ec836); rebased on main b836de5 (head 15ec836, earlier commits now b37805c, 2007071, c615584); X0 passes again from a clean clone.
 
 ## Declared changes
 - added `frontend/src/components/Conversation.tsx:recipientsOf`: the one recipient list (roster, then Others, then an addressee in neither under Others), FR-1
@@ -41,6 +42,8 @@ docs/specs/leftovers-51.md, rows K1-K5 and X0; the UI review checks review-view 
 - modified `frontend/src/components/Conversation.reveal.test.tsx`: K3 through Conversation's click handlers
 - modified `frontend/src/components/Conversation.landing.test.tsx`: L2 replaced by K4
 - modified `scripts/fixture-home.sh`: `--review` writes a stand-in token for organizer-fixture/pablo and exports DISCUSS_BIND at an absent socket (FR-5)
+- modified `frontend/src/styles/global.css:.rail-item.active`: the rail's selected mark and its hover `transition: none` (round 2, K4)
+- modified `frontend/src/components/Conversation.landing.test.tsx:K4`: the `.rail-item.active` row
 Risky:
 - `global.css`: every button's transition is now the base rule's 100 ms on background, border and colour; before, the reduced-motion block made it .12 s without colour
 - `fixture-home.sh --review`: with a token, Conversations shows mailbox errors (absent socket) it used to hide behind "no token"
