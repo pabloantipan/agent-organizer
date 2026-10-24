@@ -26,6 +26,10 @@
 # makes (Ask on a review mark, a message in Conversations) is one JSON line
 # there and answers thread canned-<n>: an ask can be seen to succeed with no
 # mailbox at all.
+# --review also gives pablo a stand-in token in that empty mailbox, so
+# Conversations' new-thread form opens, and exports DISCUSS_BIND at a socket
+# nothing listens on, so whatever is not canned fails closed (leftovers-51
+# FR-5; see the stand-in token below).
 #
 # Review (docs/specs/review-map.md v2, FR-17): --review, anywhere among the
 # options of the default home, adds to init-a in the temp copy only the card
@@ -611,6 +615,27 @@ EOF
 [ -n "$live_mailbox" ] || echo "canned_health: $tmp/health.json" >> "$tmp/config.yaml"
 [ -n "$live_mailbox" ] || echo "discuss_state_dir: $mailbox" >> "$tmp/config.yaml"
 [ -z "$canned_post" ] || echo "canned_post: $tmp/posts.jsonl" >> "$tmp/config.yaml"
+# The human's stand-in token (leftovers-51 FR-5): --review writes one
+# tokens.json entry for organizer-fixture/pablo into this home's own empty
+# mailbox, after asking_thread and decided_thread have run, so the
+# new-thread form opens with no hand-made file. It is a random string no
+# discuss server issued, never a real token, and never printed. Nothing it
+# signs reaches a mailbox: a post goes to $tmp/posts.jsonl under
+# --canned-post, and every other call to the mailbox (a post without it,
+# reading a thread, picking up mail) dials DISCUSS_BIND, exported below as a
+# socket path in $tmp/discuss that nothing listens on, so it fails closed.
+# Not with --live-mailbox, whose mailbox is the real one.
+standin_bind=""
+if [ -n "$review" ] && [ -z "$live_mailbox" ]; then
+  python3 - "$mailbox/tokens.json" <<'PY'
+import json, os, secrets, sys
+path = sys.argv[1]
+fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+with os.fdopen(fd, "w") as f:
+    json.dump({"tokens": {"fixture-standin-" + secrets.token_hex(16): {"project": "organizer-fixture", "agent": "pablo"}}}, f, indent=1)
+PY
+  standin_bind="unix:$mailbox/none.sock"
+fi
 # The transversal roles (docs/ux/specs/transversal-roles.md, R1-R4): the
 # default list's names and globs with every bitácora inside the fixture
 # home, never the real ones. Hephaistos keeps two HAND-OFFs (this machine's,
@@ -700,4 +725,5 @@ echo "export FIXTURE_HOME='$home'"
 echo "export FIXTURE_AGENT_PIDS='${pids# }'"
 echo "export FIXTURE_FACTORY_DIR='$fd'"
 echo "export PATH='$fd/bin':\"\$PATH\""
+[ -z "$standin_bind" ] || echo "export DISCUSS_BIND='$standin_bind'"
 echo "export FIXTURE_NOFACTORY_ENV='HOME=$tmp/nohome PATH=/usr/bin:/bin:/usr/sbin:/sbin'"
