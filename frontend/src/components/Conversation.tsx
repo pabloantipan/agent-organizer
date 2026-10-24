@@ -113,6 +113,8 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   const othersSeen = useRef<string[]>([]);
   const chatsRef = useRef<HTMLElement>(null);
   const [reveal] = useState(rowReveal);
+  // The chat list's scroller: rows only, under the Chats head (leftovers-51 FR-2).
+  const rowsRef = useRef<HTMLDivElement>(null);
 
   // Reading the mailbox is picking up the mail: every message addressed to
   // the human is marked delivered when a chat of this cell is shown, and
@@ -272,8 +274,9 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   const askNew = () => { askedNew.current = chat; setTarget(null); setPrefill(null); };
   const pick = (v: View) => { onFocus(null); setView(v); setQuery(""); };
   const pickPerson = (a: string) => { setView("channel"); onFocus(a); setQuery(""); };
-  // A pick in the list is not a landing: its row is in view already (FR-1).
-  const listPick = (v: View) => { reveal.click(chatKey(null, v)); pick(v); };
+  // A pick in the list is not a landing; a row it cuts is revealed
+  // (leftovers-48 FR-1, leftovers-51 FR-3).
+  const listPick = (v: View, e?: { currentTarget: HTMLElement }) => { reveal.click(chatKey(null, v), e?.currentTarget, rowsRef.current); pick(v); };
   const targetThread = target ? threads.find((t) => t.id === target) : undefined;
   const targetDetail = target ? details[target] : undefined;
   const waitingByThread = new Map<string, string[]>();
@@ -341,7 +344,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
     const n = all.filter((t) => chatOf(t) === a).length;
     const fresh = all.filter((t) => chatOf(t) === a && isNew(t)).length;
     return (
-      <button key={a} aria-current={chat === chatKey(a, "channel") ? "true" : undefined} className={`chat ${focus === a ? "active" : ""} ${fresh > 0 ? "fresh" : ""}`} onClick={() => { reveal.click(chatKey(a, "channel")); pickPerson(a); }} title={`direct with ${a}`}>
+      <button key={a} aria-current={chat === chatKey(a, "channel") ? "true" : undefined} className={`chat ${focus === a ? "active" : ""} ${fresh > 0 ? "fresh" : ""}`} onClick={(e) => { reveal.click(chatKey(a, "channel"), e?.currentTarget, rowsRef.current); pickPerson(a); }} title={`direct with ${a}`}>
         <AtSign size={12} /><span className="chat-name">{a}</span>{draftMark(chatKey(a, "channel"), all.filter((t) => chatOf(t) === a))}{fresh > 0 ? <span className="chat-fresh">{fresh}</span> : n > 0 ? <span className="chat-n">{n}</span> : null}
       </button>
     );
@@ -358,21 +361,25 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
           {!readOnly && <button className="rail-icon" onClick={askNew} disabled={!canPost} aria-describedby={noToken} title={canPost ? (focus ? `new thread with ${focus}` : "new thread") : undefined} aria-label={draftVerb("new thread", newKept)}><Plus size={13} /></button>}
         </div>
         {noToken && <div id={noToken} className="chats-reason">no token for {human || "the human seat"} to post with; the cell bootstrap issues one</div>}
+        {/* Only rows scroll: the head above stays whole whatever a landing
+            or a click scrolls (leftovers-51 FR-2, review-view A15 UL2). */}
+        <div className="chats-rows" ref={rowsRef}>
         <div className="cell-search">
           <Search size={12} />
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="search" aria-label={`Search ${initiativeId}'s conversations`} />
           {query && <button className="rail-icon" onClick={() => setQuery("")} aria-label="Clear search" title="Clear search"><X size={12} /></button>}
         </div>
-        <button aria-current={chat === "needs" ? "true" : undefined} className={`chat ${!focus && view === "needs" ? "active" : ""} ${counts.needs > 0 ? "fresh hot" : ""}`} onClick={() => listPick("needs")} title="escalated to you, or a message addressed to you with no reply from you after it"><Inbox size={12} /><span className="chat-name">needs me</span>{draftMark("needs", openThreads)}{counts.needs > 0 && <span className="chat-fresh hot">{counts.needs}</span>}</button>
-        {reconciler && reconciler !== human && <button aria-current={chat === "reconciler" ? "true" : undefined} className={`chat ${!focus && view === "reconciler" ? "active" : ""}`} onClick={() => listPick("reconciler")} title={`the reconciler's backlog: stalled, or answered and left without a decision. ${reconciler}'s work, not yours`}><Gavel size={12} /><span className="chat-name">needs {reconciler}</span>{draftMark("reconciler", all.filter(needsReconciler))}{counts.reconciler > 0 && <span className="chat-n">{counts.reconciler}</span>}</button>}
-        <button aria-current={chat === "channel" ? "true" : undefined} className={`chat ${!focus && view === "channel" ? "active" : ""} ${counts.channelFresh > 0 ? "fresh" : ""}`} onClick={() => listPick("channel")} title="every conversation not between you and one seat"><Hash size={12} /><span className="chat-name">channel</span>{draftMark("channel", all.filter((t) => chatOf(t) === null && t.kind !== "journal"))}{counts.channelFresh > 0 ? <span className="chat-fresh">{counts.channelFresh}</span> : counts.channel > 0 ? <span className="chat-n">{counts.channel}</span> : null}</button>
+        <button aria-current={chat === "needs" ? "true" : undefined} className={`chat ${!focus && view === "needs" ? "active" : ""} ${counts.needs > 0 ? "fresh hot" : ""}`} onClick={(e) => listPick("needs", e)} title="escalated to you, or a message addressed to you with no reply from you after it"><Inbox size={12} /><span className="chat-name">needs me</span>{draftMark("needs", openThreads)}{counts.needs > 0 && <span className="chat-fresh hot">{counts.needs}</span>}</button>
+        {reconciler && reconciler !== human && <button aria-current={chat === "reconciler" ? "true" : undefined} className={`chat ${!focus && view === "reconciler" ? "active" : ""}`} onClick={(e) => listPick("reconciler", e)} title={`the reconciler's backlog: stalled, or answered and left without a decision. ${reconciler}'s work, not yours`}><Gavel size={12} /><span className="chat-name">needs {reconciler}</span>{draftMark("reconciler", all.filter(needsReconciler))}{counts.reconciler > 0 && <span className="chat-n">{counts.reconciler}</span>}</button>}
+        <button aria-current={chat === "channel" ? "true" : undefined} className={`chat ${!focus && view === "channel" ? "active" : ""} ${counts.channelFresh > 0 ? "fresh" : ""}`} onClick={(e) => listPick("channel", e)} title="every conversation not between you and one seat"><Hash size={12} /><span className="chat-name">channel</span>{draftMark("channel", all.filter((t) => chatOf(t) === null && t.kind !== "journal"))}{counts.channelFresh > 0 ? <span className="chat-fresh">{counts.channelFresh}</span> : counts.channel > 0 ? <span className="chat-n">{counts.channel}</span> : null}</button>
         <div className="chats-label sub"><span>People</span></div>
         {seats.map(personRow)}
         {others.length > 0 && <div className="chats-label sub"><span>Others</span></div>}
         {others.map(personRow)}
         <div className="chats-label sub"><span>More</span></div>
-        <button aria-current={chat === "journal" ? "true" : undefined} className={`chat ${!focus && view === "journal" ? "active" : ""}`} onClick={() => listPick("journal")} title="self-addressed notes: each seat's open questions"><BookOpen size={12} /><span className="chat-name">journal</span>{draftMark("journal", all.filter((t) => t.kind === "journal"))}{counts.journal > 0 && <span className="chat-n">{counts.journal}</span>}</button>
-        <button aria-current={chat === "archive" ? "true" : undefined} className={`chat ${!focus && view === "archive" ? "active" : ""}`} onClick={() => listPick("archive")} title="closed threads"><Archive size={12} /><span className="chat-name">archive</span>{draftMark("archive", closed ?? [])}{closed && closed.length > 0 && <span className="chat-n">{closed.length}</span>}</button>
+        <button aria-current={chat === "journal" ? "true" : undefined} className={`chat ${!focus && view === "journal" ? "active" : ""}`} onClick={(e) => listPick("journal", e)} title="self-addressed notes: each seat's open questions"><BookOpen size={12} /><span className="chat-name">journal</span>{draftMark("journal", all.filter((t) => t.kind === "journal"))}{counts.journal > 0 && <span className="chat-n">{counts.journal}</span>}</button>
+        <button aria-current={chat === "archive" ? "true" : undefined} className={`chat ${!focus && view === "archive" ? "active" : ""}`} onClick={(e) => listPick("archive", e)} title="closed threads"><Archive size={12} /><span className="chat-name">archive</span>{draftMark("archive", closed ?? [])}{closed && closed.length > 0 && <span className="chat-n">{closed.length}</span>}</button>
+        </div>
       </nav>
 
       <div className="cell-main">
@@ -394,6 +401,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
               cards={openCards}
               human={human}
               seats={seats}
+              others={others}
               notes={notes}
               resolved={resolved}
               initiativeId={initiativeId}
@@ -499,6 +507,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
               status={targetDetail?.status ?? targetThread.status}
               human={human}
               seats={group.cell?.agents ?? []}
+              others={others}
               canPost={group.can_post}
               wakesAll={targetDetail?.wakes_on_broadcast ?? seats.length}
               defaultTo={focus ?? lastAsker(targetDetail?.messages ?? [], human) ?? lastOther(targetDetail?.messages ?? [], human)}
@@ -580,7 +589,7 @@ function Msg({ m, parent, human, onReply, onBranch }: { m: CellMessage; parent?:
 /** The message box: posts into one thread. Kind first, then the recipient,
  *  then the cost. Stalled threads accept only a decision. */
 export function ReplyBox(p: {
-  initiativeId: string; threadId: string; subject: string; status: string; human: string; seats: string[]; canPost: boolean; wakesAll: number;
+  initiativeId: string; threadId: string; subject: string; status: string; human: string; seats: string[]; others?: string[]; canPost: boolean; wakesAll: number;
   defaultTo: string; replyTo: CellMessage | null; onClearReply: () => void; onNewThread?: () => void; newKept?: boolean; onSent: () => void;
 }) {
   // leftovers-9 FR-1: the message is kept per thread for the session, so
@@ -645,7 +654,7 @@ export function ReplyBox(p: {
         </select>
         <select value={to} onChange={(e) => setTo(e.target.value)} disabled={!writable} title="direct wakes one seat; everyone wakes them all" aria-label="Recipient">
           <option value="">everyone (wakes {p.wakesAll})</option>
-          {shownSeats(p.seats.filter((s) => s !== p.human), to).map((s) => <option key={s} value={s}>{s}</option>)}
+          <RecipientOptions seats={p.seats.filter((s) => s !== p.human)} others={p.others ?? []} to={to} />
         </select>
         <span className="spacer" />
         {err && <span className="meta err">{err}</span>}
@@ -734,12 +743,18 @@ export function askedSeat(msgs: { from: string; to: string }[], human: string, s
  *  row changes by a landing (a review, a card, Message, the feed's later
  *  selection), it is scrolled into view, nearest and instant: smooth never
  *  finishes in a window that draws no frames. A pick in the list says so
- *  first with `click(key)` and scrolls nothing. Focus is not moved. */
+ *  first with `click(key, row, list)`: a row the list cuts is revealed the
+ *  same way, a wholly visible one does not move, and the landing that
+ *  follows scrolls nothing (leftovers-51 FR-3, A15 UL3). Focus is not
+ *  moved. */
 export function rowReveal() {
   let last: string | null = null;
   let picked: string | null = null;
   return {
-    click(key: string) { picked = key; },
+    click(key: string, row?: Pick<HTMLElement, "scrollIntoView" | "getBoundingClientRect"> | null, list?: Pick<HTMLElement, "getBoundingClientRect"> | null) {
+      picked = key;
+      if (row && list && isCut(row.getBoundingClientRect(), list.getBoundingClientRect())) row.scrollIntoView({ block: "nearest" });
+    },
     current(key: string, row: Pick<HTMLElement, "scrollIntoView"> | null) {
       if (key === last) return;
       const byList = key === picked;
@@ -748,6 +763,10 @@ export function rowReveal() {
     },
   };
 }
+
+/** Whether the list's edges cut the row; half a pixel of subpixel layout
+ *  is not a cut. */
+const isCut = (row: { top: number; bottom: number }, list: { top: number; bottom: number }) => row.top < list.top - 0.5 || row.bottom > list.bottom + 0.5;
 
 export function unlistedLanding(on: { show: (seat: string | null) => void; current: () => string; land: (id: string) => void }, wait = LIST_WAIT_MS) {
   let at: string | null = null;
@@ -785,12 +804,28 @@ function WakeCount({ wakes, all }: { wakes: number; all: boolean }) {
   return <span className={`meta wakes${all ? " all" : ""}`}>wakes {wakes} seat{wakes === 1 ? "" : "s"}</span>;
 }
 
-/** The seats a recipient select offers: the cell's, plus the addressee when
- *  it is not one of them (a seat that left the roster, a guess from a card),
- *  so the select always shows whom Start or Send posts to (leftovers-11
- *  FR-6: no post reaches a seat the form did not show). An addressee under
- *  Others is shown there instead (leftovers-48 FR-3). */
-const shownSeats = (seats: string[], to: string, others: string[] = []) => (to && !seats.includes(to) && !others.includes(to) ? [...seats, to] : seats);
+/** Every composer's recipient list (leftovers-51 FR-1, review-view A15 UL1):
+ *  the roster, then under `Others` the names the chat list's Others shows,
+ *  then, still under `Others`, the addressee when it is in neither (a seat
+ *  that left the roster, a guess from a card), so the select always shows
+ *  whom Start, Send or Rule posts to (leftovers-11 FR-6). A name shows once.
+ *  The new-thread form, the reply box and the rule box all draw this, and
+ *  none appends a name outside it. */
+export function recipientsOf(seats: string[], others: string[], to: string): { roster: string[]; others: string[] } {
+  const rest = others.filter((s) => !seats.includes(s));
+  return { roster: seats, others: to && !seats.includes(to) && !rest.includes(to) ? [...rest, to] : rest };
+}
+
+/** The options after `everyone`: the roster, then the Others group. */
+function RecipientOptions({ seats, others, to }: { seats: string[]; others: string[]; to: string }) {
+  const r = recipientsOf(seats, others, to);
+  return (
+    <>
+      {r.roster.map((s) => <option key={s} value={s}>{s}</option>)}
+      {r.others.length > 0 && <optgroup label="Others">{r.others.map((s) => <option key={s} value={s}>{s}</option>)}</optgroup>}
+    </>
+  );
+}
 
 /** Starting a thread, or branching one: subject, recipient, kind, body. A
  *  branch arrives with its subject set and the quoted message as the first
@@ -843,9 +878,7 @@ export function NewThread({ initiativeId, chat, draftKey, seats, others = [], to
         <select value={kind} onChange={(e) => setKind(e.target.value)} disabled={!canPost} aria-label="Kind of message">{KINDS.map((k) => <option key={k} value={k}>{k}</option>)}</select>
         <select value={to} onChange={(e) => setTo(e.target.value)} disabled={!canPost} aria-label="Recipient">
           <option value="">everyone (wakes {seats.length})</option>
-          {shownSeats(seats, to, others).map((s) => <option key={s} value={s}>{s}</option>)}
-          {/* leftovers-48 FR-3: the names the chat list's Others shows, no free-typed one. */}
-          {others.length > 0 && <optgroup label="Others">{others.map((s) => <option key={s} value={s}>{s}</option>)}</optgroup>}
+          <RecipientOptions seats={seats} others={others} to={to} />
         </select>
         <span className="spacer" />
         {err && <span className="meta err">{err}</span>}
@@ -883,7 +916,7 @@ const seatGuess = (seats: string[], text: string) => seats.find((a) => text.toLo
  *  itself. The card file is the agents' to update: the next action reaches
  *  them as the decision, and they write it into the card. */
 function NeedsMe(p: {
-  threads: CellThread[]; cards: QueueCard[]; human: string; seats: string[]; notes: Record<string, { by: string; at: unknown; text: string }[]>; resolved: Record<string, string>;
+  threads: CellThread[]; cards: QueueCard[]; human: string; seats: string[]; others?: string[]; notes: Record<string, { by: string; at: unknown; text: string }[]>; resolved: Record<string, string>;
   initiativeId: string; allThreads: CellThread[]; canPost: boolean; blockedBy?: string; onRuled: () => void; onDiscussThread: (id: string) => void; onOpenThread: (id: string) => void; onDiscussCard: (c: QueueCard) => void; onOpenCard: (c: never) => void; onResolve: (key: string, v: boolean) => void;
 }) {
   const [showSolved, setShowSolved] = useState(false);
@@ -956,6 +989,7 @@ function NeedsMe(p: {
             {ruling === `card:${c.slug}` && (
               <RuleBox
                 seats={p.seats}
+                others={p.others}
                 defaultTo={seatGuess(p.seats, c.next || "") ?? p.seats[0] ?? ""}
                 where={`new thread "${c.slug}: …"`}
                 busy={busy}
@@ -985,6 +1019,7 @@ function NeedsMe(p: {
           {ruling === `thread:${t.id}` && (
             <RuleBox
               seats={p.seats}
+              others={p.others}
               defaultTo={t.asked_by || (t.participants ?? []).find((a) => a !== p.human) || ""}
               where={t.subject || t.id.slice(0, 8)}
               escalated={t.status === "escalated"}
@@ -1026,7 +1061,7 @@ function NeedsMe(p: {
 /** The inline ruling: who has to act, what was decided, what happens next.
  *  Enter sends from the decision box; the next action is one line on
  *  purpose, the way a card's `next` is one line. */
-function RuleBox(p: { seats: string[]; defaultTo: string; where: string; escalated?: boolean; busy: boolean; err: string | null; onRule: (to: string, text: string, next: string) => void; onCancel: () => void }) {
+export function RuleBox(p: { seats: string[]; others?: string[]; defaultTo: string; where: string; escalated?: boolean; busy: boolean; err: string | null; onRule: (to: string, text: string, next: string) => void; onCancel: () => void }) {
   const [to, setTo] = useState(p.defaultTo);
   const [text, setText] = useState("");
   const [next, setNext] = useState("");
@@ -1046,7 +1081,7 @@ function RuleBox(p: { seats: string[]; defaultTo: string; where: string; escalat
       <div className="composer-row">
         <select value={to} onChange={(e) => setTo(e.target.value)} title="direct wakes one seat; everyone wakes them all" aria-label="Recipient">
           <option value="">everyone (wakes {p.seats.length})</option>
-          {shownSeats(p.seats, to).map((s) => <option key={s} value={s}>{s}</option>)}
+          <RecipientOptions seats={p.seats} others={p.others ?? []} to={to} />
         </select>
         <span className="spacer" />
         {p.err && <span className="meta err">{p.err}</span>}

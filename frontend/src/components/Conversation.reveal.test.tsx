@@ -13,13 +13,14 @@ import type { AgentGroup, CellThread } from "../hooks/useWails";
 // list's ref is a stand-in nav that answers the effect's query with the row
 // drawn current in that tree.
 
-type Row = { name: string; current: boolean; onClick: () => void };
+type Row = { name: string; current: boolean; onClick: (e?: { currentTarget: unknown }) => void };
 type Stand = { scrollIntoView: ReturnType<typeof vi.fn>; focus: ReturnType<typeof vi.fn> };
 const h = vi.hoisted(() => ({
   i: 0,
   slots: [] as unknown[],
   layout: [] as { fn: () => void | (() => void); deps?: unknown[]; ran?: unknown[] }[],
   navRef: null as { current: unknown } | null,
+  revealAt: -1,
 }));
 
 vi.mock("react", async (orig) => {
@@ -29,7 +30,7 @@ vi.mock("react", async (orig) => {
     const i = h.i;
     const v = slot(() => (typeof init === "function" ? (init as () => T)() : init));
     // The chat list's ref is the one declared just before rowReveal's state.
-    if (typeof init === "function" && (init as { name?: string }).name === "rowReveal") h.navRef = h.slots[i - 1] as { current: unknown };
+    if (typeof init === "function" && (init as { name?: string }).name === "rowReveal") { h.navRef = h.slots[i - 1] as { current: unknown }; h.revealAt = i; }
     const set = (n: T | ((p: T) => T)) => { h.slots[i] = typeof n === "function" ? (n as (p: T) => T)(h.slots[i] as T) : n; };
     return [v, set] as const;
   }
@@ -75,7 +76,7 @@ function rowsOf(tree: ReactNode): Row[] {
     if (el.type === "nav" && el.props.className === "chats") inNav = true;
     if (inNav && el.type === "button" && /^chat\b/.test(String(el.props.className ?? ""))) {
       const name = [el.props.children].flat(3).find((c): c is ReactElement<{ className?: string; children?: ReactNode }> => !!c && typeof c === "object" && "props" in c && (c as ReactElement<{ className?: string }>).props.className === "chat-name");
-      out.push({ name: name ? text(name.props.children) : "", current: el.props["aria-current"] === "true", onClick: el.props.onClick as () => void });
+      out.push({ name: name ? text(name.props.children) : "", current: el.props["aria-current"] === "true", onClick: el.props.onClick as Row["onClick"] });
     } else walk(el.props.children);
     inNav = was;
   };
@@ -104,7 +105,7 @@ function commit(focus: string | null) {
 const scrolls = () => [...stands].flatMap(([name, s]) => s.scrollIntoView.mock.calls.map((c) => [name, c[0]]));
 const focused = () => [...stands.values()].some((s) => s.focus.mock.calls.length > 0);
 
-beforeEach(() => { h.slots = []; h.layout = []; h.navRef = null; stands.clear(); focusCalls.length = 0; });
+beforeEach(() => { h.slots = []; h.layout = []; h.navRef = null; h.revealAt = -1; stands.clear(); focusCalls.length = 0; });
 
 describe("L1 through Conversation: a landing shows its row, a click scrolls nothing", () => {
   it("a landing on sup10 under Others scrolls that row once, nearest, never smooth, focus untouched", () => {
@@ -136,5 +137,34 @@ describe("L1 through Conversation: a landing shows its row, a click scrolls noth
     commit("sup10");
     expect(scrolls()).toEqual([["sup10", { block: "nearest" }]]);
     expect(focused()).toBe(false);
+  });
+});
+
+// leftovers-51 K3 (FR-3, review-view R48), through Conversation's own click
+// handlers: the list's scroller is the ref declared just after rowReveal's
+// state; a row it cuts is revealed on the click, nearest and instant, and a
+// wholly visible row does not move.
+describe("K3 through Conversation: a click reveals a cut row, not a visible one", () => {
+  const boxed = (name: string, top: number) => Object.assign(stand(name), { getBoundingClientRect: () => ({ top, bottom: top + 30 }) });
+  const scroller = () => h.slots[h.revealAt + 1] as { current: unknown };
+  it("a click on journal, cut by the list's bottom edge, scrolls it once; the commit after scrolls nothing more", () => {
+    commit(null);
+    stands.clear();
+    scroller().current = { getBoundingClientRect: () => ({ top: 100, bottom: 400 }) };
+    const journal = rows.find((r) => r.name === "journal")!;
+    journal.onClick({ currentTarget: boxed("journal", 390) });
+    expect(scrolls()).toEqual([["journal", { block: "nearest" }]]);
+    commit(null);
+    expect(rows.find((r) => r.current)?.name).toBe("journal");
+    expect(scrolls()).toHaveLength(1);
+    expect(focused()).toBe(false);
+  });
+  it("a click on po_ana, wholly visible, scrolls nothing", () => {
+    commit(null);
+    stands.clear();
+    scroller().current = { getBoundingClientRect: () => ({ top: 100, bottom: 400 }) };
+    rows.find((r) => r.name === "po_ana")!.onClick({ currentTarget: boxed("po_ana", 200) });
+    commit("po_ana");
+    expect(scrolls()).toEqual([]);
   });
 });
