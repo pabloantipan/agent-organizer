@@ -1,6 +1,6 @@
 ---
 title: Stage review-map closes as moved to Elenx, exits 1-2 carried there
-status: proposed
+status: ruled
 raised: 2026-10-24
 raised_by: fse
 owner: pablo
@@ -11,9 +11,9 @@ crossing: 0020
 affects: [elenx]
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-24
+ruled_by: pablo
+chosen: close as moved
 ---
 
 ## Question
@@ -62,3 +62,7 @@ your goal for it; I draft it with the roadmapping skill when you say.
 
 No task: the ruling edits `roadmap.yaml` and one card's `stage:`, the FSE's
 own work, minutes.
+
+## Ruling
+
+pablo, 2026-10-24, in the organizer on lodestar: as recommended, Spawn a subagent for tiding these
