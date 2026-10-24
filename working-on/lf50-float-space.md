@@ -3,10 +3,11 @@ title: "The floating icon comes back after a desktop change: a second full-scree
 status: next
 repos: [organizer]
 branch: lf50-float-space
-seat:
+seat: f50-build
+reviewer: f50-review
 stage: review-map
 updated: 2026-10-24
-next: "sup89 runs it (0158 ruled 2026-10-24)"
+next: "f50-build builds it in .wt/lf50-float-space (sup89)"
 depends_on: []
 boundary: ["docs/specs/leftovers-50.md Boundary"]
 spec: "docs/specs/leftovers-50.md (FR-1 to FR-3)"
