@@ -100,7 +100,7 @@ func checkDecision(d model.Decision) []model.Problem {
 			if err := CheckAnswers(qs, d.Chosen); err != nil {
 				add("%s", err)
 			}
-		} else if !slices.Contains(d.Options, d.Chosen) {
+		} else if !IsOption(d.Options, d.Chosen) {
 			add("chosen %q is not one of the options", d.Chosen)
 		}
 	}
@@ -181,16 +181,7 @@ func CheckAnswers(qs []Question, chosen string) error {
 			}
 		}
 	}
-	// An alternative may itself hold ", ": a piece that does not open with
-	// a label belongs to the answer before it.
-	var answers []string
-	for _, p := range strings.Split(chosen, ", ") {
-		if len(answers) > 0 && !questionItem.MatchString(p) {
-			answers[len(answers)-1] += ", " + p
-			continue
-		}
-		answers = append(answers, p)
-	}
+	answers := splitAnswers(chosen)
 	for i, q := range qs {
 		if i >= len(answers) {
 			return fmt.Errorf("chosen %q does not answer %s; a question record is ruled as %q", chosen, q.Label, shape)
@@ -207,6 +198,42 @@ func CheckAnswers(qs []Question, chosen string) error {
 		return fmt.Errorf("chosen %q answers more than the record's %d questions; a question record is ruled as %q", chosen, len(qs), shape)
 	}
 	return nil
+}
+
+// splitAnswers cuts a question record's chosen into its answers, each
+// trimmed. An alternative may itself hold ", ": a piece that does not open
+// with a label belongs to the answer before it.
+func splitAnswers(chosen string) []string {
+	var answers []string
+	for _, p := range strings.Split(chosen, ",") {
+		if len(answers) > 0 && !questionItem.MatchString(strings.TrimSpace(p)) {
+			answers[len(answers)-1] += "," + p
+			continue
+		}
+		answers = append(answers, p)
+	}
+	for i := range answers {
+		answers[i] = strings.TrimSpace(answers[i])
+	}
+	return answers
+}
+
+// TrimChosen is chosen as a ruling writes it (leftovers-52 FR-6): trimmed,
+// and for a question record each answer trimmed and joined by ", ", so
+// `Q1 a , Q2 x` is `Q1 a, Q2 x`. Spaces inside an answer stay.
+func TrimChosen(qs []Question, chosen string) string {
+	if qs == nil {
+		return strings.TrimSpace(chosen)
+	}
+	return strings.Join(splitAnswers(chosen), ", ")
+}
+
+// IsOption says whether chosen is one of a plain record's options, both
+// sides trimmed (leftovers-52 FR-6): `" a "` written by hand on either side
+// reads as `a`.
+func IsOption(options []string, chosen string) bool {
+	c := strings.TrimSpace(chosen)
+	return slices.ContainsFunc(options, func(o string) bool { return strings.TrimSpace(o) == c })
 }
 
 // checkDecisionLinks reports supersede references to records that do not

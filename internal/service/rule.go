@@ -44,13 +44,16 @@ func (s *Service) RuleDecision(initiativeID, number, chosen, words string) error
 		return fmt.Errorf("decision %s is %s, not proposed; only a proposed record can be ruled", d.Number, d.Status)
 	}
 	qs := scan.Questions(d.Options)
+	// leftovers-52 FR-6: checked and written trimmed, each answer of a
+	// question record too.
+	chosen = scan.TrimChosen(qs, chosen)
 	if qs != nil {
 		// leftovers-49 FR-3: a question record is ruled with one answer
 		// per question, `Q1 <alt>, Q2 <alt>`.
 		if err := scan.CheckAnswers(qs, chosen); err != nil {
 			return fmt.Errorf("decision %s: %w", d.Number, err)
 		}
-	} else if !slices.Contains(d.Options, chosen) {
+	} else if !scan.IsOption(d.Options, chosen) {
 		return fmt.Errorf("chosen %q is not one of decision %s's options (%s)", chosen, d.Number, strings.Join(d.Options, ", "))
 	}
 	dir := filepath.Dir(d.Path)
