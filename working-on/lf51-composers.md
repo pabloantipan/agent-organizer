@@ -128,74 +128,62 @@ Verdict: **pass** at 490b943 (fourth round, reviewed whole; the a88877d, 15ec836
 Reviewer `l51-comp-review`, 2026-10-24.
 
 ## UI review
-l51-comp-ui, 2026-10-24, re-review on **a88877d**, which replaces the d7605a9 review. **Verdict: fail**, on one finding of severity 3 (C3).
+l51-comp-ui, 2026-10-24, re-review on **490b943**, which replaces the a88877d and d7605a9 reviews. **Verdict: pass.** There is no finding of severity 4 or 3.
 
-- R46, R47 and R48 still pass.
-- R43 and R49, as amended, pass on the chat list: C1 is fixed, and C2 is settled by Amendment 2.
-- The People panel's person rows keep the leaving-mark lag that C1 had. This branch made them lag.
+- C3 is fixed.
+- R43 and R49 (amended) hold.
+- R46, R47 and R48 still hold.
+- The spot-checked controls switch their marks at once.
 
-Evidence is in `.wt-notes/l51-comp-ui/r2/`: harness logs `h-1024x612.txt` and `h-1440x872.txt`, shots `wk-*.png` and `rb-*.png`, config checks `dev-*-config-check.txt`, canned posts `posts-*.jsonl` and `killed.txt`.
+Evidence is in `.wt-notes/l51-comp-ui/r3/`: harness logs `h-1024x612.txt` and `h-1440x872.txt`, shots `wk-*.png` and `rb-*.png`, config checks `dev-*-config-check.txt`, canned posts `posts-*.jsonl` and `killed.txt`.
 
-**Shared test run: fresh.** The run was `4430c780-32187` of a88877d52ed4, and l51-comp-review reused it. `make test` exited 0: Go ok, vitest 84 files and 1152 tests (`r2/x0-make-test.txt`). `make review-build` (test-lease, not shared) was ok.
+**Shared test run: fresh.** The run was `7a530487-88382` of 490b943f6bf8, and l51-comp-review reused it. `make test` exited 0: Go ok, vitest 84 files and 1153 tests (`r3/x0-make-test.txt`). `make review-build` (test-lease, not shared) was ok.
 
-**How the states were checked.**
-- **The review build**, from my worktree at a88877d with `--review --canned-post`, pid saved, killed by that pid.
-  - This time its AX tree exposed the page.
-  - I opened init-a › Conversations with AXPress on my pid and pressed chat rows: channel, then po_ana, then dev_bruno. I shot `screencapture -o -l` right after each press and 500 ms later (`rb-1440x900-R43-*.png`, `rb-1440x900-people-after-2s.png`).
-  - Home is shot at 1024×640 and 1440×900.
-- **The offscreen WKWebView harness**, as in the first review, against my own `wails dev` of a clean clone of a88877d, with a fresh fixture per size. The sizes are 1024×612 and 1440×872.
-  - Offscreen, `:hover` cannot be reached. Hover was emulated by copying each of the page's 105 `:hover` rules as `.fh`, inserted right after its original so cascade order holds, then toggling `.fh`.
-  - Transitions were read with `getAnimations()`.
+**How the states were checked.** These are the same methods as the a88877d review.
+- **The review build** from my worktree at 490b943, `--review --canned-post`, pid saved, killed by that pid.
+  - AXPress on my pid: init-a › Conversations › po_ana › dev_bruno.
+  - `screencapture -o -l` of its window 500 ms and 2 s after the last press, at 1440×900, plus a shot at 1024×640.
+- **The offscreen WKWebView harness** against my own `wails dev` of a clean clone of 490b943, with a fresh fixture per size, 1024×612 and 1440×872.
+  - Hover is emulated by copying each `:hover` rule as `.fh`, in place after its original.
+  - Transitions are read with `getAnimations()`.
 - **FR-5, as before.**
   - Each config has `discuss_state_dir` under its temp dir, `auth: off`, `canned_post` and `editor: /usr/bin/true`.
-  - `DISCUSS_BIND` is the absent `none.sock`. `tokens.json` (0600) holds one stand-in key for organizer-fixture/pablo, with no real path or socket in it.
-  - At each size a reply and a new thread from sup10's chat landed only in `posts.jsonl`.
+  - `DISCUSS_BIND` is the absent `none.sock`, and `tokens.json` holds one stand-in for organizer-fixture/pablo with no real path or socket.
+  - A reply and a new thread from sup10's chat landed only in `posts.jsonl` at each size.
 
 **Rows.**
-- **R46: pass, both sizes.** In sup10's chat, the new-thread form (docked and from `+`), the reply box and the rule box (needs me › Rule w-asks-pablo) read `everyone (wakes 3)`, fse, po_ana, dev_bruno, then `<optgroup label="Others">` with [sup10]. sup10 shows once in each.
-- **R47: pass, both sizes.**
-  - The head and `+` sit above `.chats-rows` and outside it. `elementFromPoint` at `+` is `+`.
-  - Landing on sup10 (`openSlack`) needs no scroll. A forced scroll of 59 px leaves the head and `+` rects unchanged.
+- **C3: fixed.**
+  - Harness at 1440: in the People panel, after a click on po_ana and then on dev_bruno, the 16 ms sample and every sample up to 2000 ms show one filled person row, the `.active` one. No animation runs on the row that lost it.
+  - Review build: 500 ms and 2 s after the press, only dev_bruno is filled in the People panel and in the chat list (`rb-1440x900-C3-dev_bruno-*.png`). The AX tree has `.person.active` on dev_bruno only.
+- **R43 (amended): pass, both sizes.**
+  - From 16 ms to 2000 ms after each click, one chat row carries the `::before` fill, the `aria-current` one.
+  - The snapshot draws one filled chat row.
+- **R49 (amended): pass, both sizes.**
+  - Non-current rows: `transition: background-color 0.1s cubic-bezier(0, 0.4, 0, 1)`. Hover in starts one 100 ms `--ease-out` transition, and hover out uses the same base rule.
+  - Current row: `transition: none`. Its own background and its layer are unchanged on hover, and no animation starts.
+- **R46: pass, both sizes.** The new-thread form (docked and from `+`), the reply box and the rule box in sup10's chat read `everyone (wakes 3)`, fse, po_ana, dev_bruno, then `Others` [sup10]. sup10 shows once in each.
+- **R47: pass, both sizes.** The head and `+` sit above and outside `.chats-rows`. The landing on sup10 needs no scroll, and a forced 59 px scroll leaves the head and `+` in place.
 - **R48: pass at 1024×612.**
-  - journal was cut at 580→608 under the list's 594 edge. One click reveals it whole (566→594, scrollTop 13→27), and the head does not move.
-  - A click on a wholly visible row leaves scrollTop at 27.
-  - At 1440 the list fits, so no row can be cut there.
-- **R43 (amended): pass on the chat list.**
-  - Harness: po_ana is clicked, then dev_bruno. At 16 ms after each click, and at every sample up to 2000 ms, the chat list has one fill, the `::before` layer of the `.active`/`aria-current` row. The old row reads background transparent with no layer and no running animation.
-  - The snapshot (`wk-*-R49-after-mark-moves.png`) draws one filled chat row.
-  - In the review build's window, 500 ms after each press, only the pressed chat row is filled.
-- **R49 (amended): pass.**
-  - A non-current row (fse, sup10) has computed `transition: background-color 0.1s cubic-bezier(0, 0.4, 0, 1)`, which is `--ease-out`.
-  - Hover in starts one `background-color 100ms cubic-bezier(0, 0.4, 0, 1)` transition.
-  - No `.chat:hover` rule sets a transition, so hover out eases on the same base rule. The emulated hover-out could not show it, because offscreen the in-transition never advanced.
-  - The current row (channel): `transition: none`. Its own background stays transparent and its layer stays `rgba(138,63,252,.18)` with and without hover, and no animation starts.
-  - A new current row has its layer within 16 ms.
-  - C2: one curve, `--ease-out`, as Amendment 2 says.
+  - Cut journal (580→608 under the 594 edge) is revealed whole by one click (scrollTop 13→27).
+  - A wholly visible row does not move.
+  - At 1440 nothing is cut.
+- **Amendment 3 spot check.**
+  - Every listed control present on these screens reads `transition: none` at base and under hover, with no animation: `button.person` 3, `.tiny-btn[aria-pressed]` 2, `.subtabs button` 6, `.places .place-tab` 3, `.gear` 3, `.ihead-details` 1, `.memory button.memory-btn` 1 (1440); `.strip-all` 1, `.strip-item` 16 (1024).
+  - Pressed in the harness:
+    - Sub-tab Conversations → Agents: the inset accent underline moves at 16 ms and stays put to 500 ms.
+    - Place tab Initiatives → Home: `.on` and its colour switch at the first sample.
+    - No animation runs on either.
+  - Absent on these screens and not checked: `.seg button`, `.stg`, `.fl-row`, `.week-list button`, `.ib-act .act`, `.ic-more`.
 
-**Findings.**
-- **C3 (3), the design system's "a state mark never eases" (A15 UL4 as corrected by A16); same defect as C1.**
-  - What Pablo cannot do: tell which seat is selected in the People panel after picking another chat. The person row that loses `.active` keeps its fill, so two or three seats read as selected.
-  - Where: the People panel beside Conversations, open at 1440.
-    - `r2/wk-1440x872-R49-after-mark-moves.png` (crop `r2/c-wk-1440-people.png`) has fse, po_ana and dev_bruno all filled, and only dev_bruno is `.active`.
-    - In the review build's own window, `r2/rb-1440x900-people-after-2s.png` has po_ana and dev_bruno filled 2 s after the press, with only dev_bruno `.person.active` in the AX tree.
-  - Evidence: harness `L2` (1440): from 16 ms to 2000 ms after each click, the old person rows read `rgba(138,63,252,.18)` with `background-color 100ms … running`.
-  - Cause:
-    - On main, `button.person` was in the `transition: none` base list (lf48 FR-2).
-    - FR-4 (d7605a9, now c0369ec..83305c3) removed that list, so `button.person` rides `button`'s 100 ms ease.
-    - Amendment 2 moved only `.chat`'s mark onto a layer, and kept `.rail-item.active`. `button.person.active` is still filled on its own background, and leaves by easing.
-    - In a window that draws frames this is a 100 ms fade. The review build's window, occluded and never brought front, kept it, like the harness.
-  - Proposal: the same `::before` layer for `button.person.active`, in `global.css`, which is inside the boundary. Or, as Amendment 2's fallback for `.rail-item`, restore `transition: none` on `button.person`'s base until its layer comes. For the FSE.
-  - The other controls FR-4 took out of that list (`.subtabs button`, `.seg button`, `.strip-item`, `.places .place-tab`, `.stg`, `.fl-row` and the rest) lose their marks the same way. I did not measure them.
+**Words, design vs screen.** `Others` (optgroup and list label), `Chats`/`CHATS`, `everyone (wakes 3)`: same as the design, unchanged.
 
-**Words, design vs screen.** `Others` (optgroup and list label), `Chats`/`CHATS`, `everyone (wakes 3)`: same as the design, unchanged since d7605a9.
+**Findings.** None of severity 4 or 3. The list is kept, not new:
+- The marked controls other than the chat row switch hover at once until they get layers (Amendment 3, next leftovers).
+- R48 is undefined where the list fits.
 
-**Spec gaps, for the FSE.**
-- Amendment 2 names the chat row and `.rail-item` and is silent on `button.person` and the rest of the old `transition: none` list, which FR-4 now makes ease when a mark leaves (C3).
-- R48 is undefined where the list fits (1440).
-
-**Design questions, for aglaea.** Whether A16's layer is the pattern for every state-marked control, and so whether R43's no-frames reading applies to the People panel and the other marked controls.
+**Design questions, for aglaea.** As before: whether A16's layer becomes the pattern for every marked control. Amendment 3 parks it for the next leftovers.
 
 **Not verified in WKWebView.**
-- A real pointer hover, in or out: rests on the computed transition, `getAnimations()` on an emulated hover, and the cascade.
-- A frontmost, drawing review window: I may not bring it front.
-- Keyboard order of the head.
+- A real pointer hover: rests on the computed transition, `getAnimations()` on the emulated hover, and the cascade.
+- A frontmost window: I may not bring one front.
+- The six listed controls absent from these screens.
