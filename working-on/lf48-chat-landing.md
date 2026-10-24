@@ -10,7 +10,7 @@ next: "pablo: rule 0156 (leftovers 48)"
 depends_on: []
 boundary: ["docs/specs/leftovers-48.md Boundary"]
 spec: "docs/specs/leftovers-48.md (FR-1 to FR-4)"
-gate: "docs/specs/leftovers-48.md Acceptance, rows L1-L4 and X0"
+gate: "docs/specs/leftovers-48.md#Acceptance → gate"
 ui_review: true
 ---
 
