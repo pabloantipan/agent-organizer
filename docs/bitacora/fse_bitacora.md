@@ -4,6 +4,12 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## 2026-10-24 19:20
+
+- Last SHA seen: 7b7a9c1. leftovers 51 landed (e779bd3; sup92 2h21m against 30-60m: 66 min usage-limit stop, three amendment rounds; ~$29.50 seats); installed v0.2.0-2788-ge779bd3. 0162 (leftovers 52) ruled by Pablo in the session ("accept as written"); sup93 runs it.
+- WRONG, mine: I built sup93's prelude by sed from sup89's, which I had deleted when sup89 ended, so the first sup93 started with an empty prelude (no identity, model or watcher). Caught by a grep count of 0 after launch; killed and relaunched with --fresh and a written prelude. Lesson: write each prelude from the template, never from another seat's file, and check the count before launching.
+- Held: [for hephaistos] after seat-thaw a write-chars send shows an empty prompt 10-20 s (sup92 finding 6).
+
 ## 2026-10-24 19:00
 
 - Last SHA seen: b96419d. leftovers 51: lf51-crew-flake merged 7a64ad7, lf51-rule-words merged 1954aa3, lf51-composers in its UI recheck after Amendments 2 (the chat mark on its own layer, Aglaea's review-view A16) and 3 (every other marked control back to transition: none). An account usage limit stopped every seat 16:54-18:00; sup92 extended to 19:01. Swap 95% at 18:00.
