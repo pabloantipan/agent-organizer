@@ -641,13 +641,78 @@ button.person:focus-visible { outline-offset: -2px; }
 .chat:hover { background: var(--panel); color: var(--text); }
 .chat.active { background: var(--accent-soft); border-color: var(--border-accent); color: var(--text); }
 /* State marks never ease (design system; leftovers-48 FR-2, review-view
-   A13 UO2): a current or selected fill on a button lands and leaves with no
-   transition, so it is true on the first frame even in a window that draws
-   no frames. A transition is read from the style after the change, so the
-   base drops it too; hover keeps its ease in. */
-.chat, button.person, .strip-all, .strip-item, .tiny-btn[aria-pressed] { transition: none; }
-.chat:hover, button.person:hover, .strip-all:hover, .strip-item:hover, .tiny-btn[aria-pressed]:hover { transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out); }
-.chat.active, .chat.active:hover, button.person.active, button.person.active:hover, .strip-all.active, .strip-all.active:hover, .strip-item.active, .strip-item.active:hover, .tiny-btn[aria-pressed="true"], .tiny-btn[aria-pressed="true"]:hover { transition: none; }
+   A13 UO2): a current, selected or open fill on a button lands and leaves
+   with no transition, so it is true on the first frame even in a window
+   that draws no frames. A transition is read from the style after the
+   change, so the base drops it too; hover keeps its ease in. The marks live
+   in their own stylesheets (shell, float, usage, memory, initiatives); none
+   sets a transition, so each rode button's. */
+.chat,
+button.person,
+.strip-all,
+.strip-item,
+.tiny-btn[aria-pressed],
+.seg button,
+.subtabs button,
+.places .place-tab,
+.gear,
+.stg,
+.fl-row,
+.week-list button,
+.ib-act .act,
+.ihead-details,
+.memory button.memory-btn,
+.ic-more { transition: none; }
+.chat:hover,
+button.person:hover,
+.strip-all:hover,
+.strip-item:hover,
+.tiny-btn[aria-pressed]:hover,
+.seg button:hover,
+.subtabs button:hover,
+.places .place-tab:hover,
+.gear:hover,
+.stg:hover,
+.fl-row:hover,
+.week-list button:hover,
+.ib-act .act:hover,
+.ihead-details:hover,
+.memory button.memory-btn:hover,
+.ic-more:hover { transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out); }
+.chat.active,
+.chat.active:hover,
+button.person.active,
+button.person.active:hover,
+.strip-all.active,
+.strip-all.active:hover,
+.strip-item.active,
+.strip-item.active:hover,
+.tiny-btn[aria-pressed="true"],
+.tiny-btn[aria-pressed="true"]:hover,
+.seg button.on,
+.seg button.on:hover,
+.subtabs button.on,
+.subtabs button.on:hover,
+.places .place-tab.on,
+.places .place-tab.on:hover,
+.gear.on,
+.gear.on:hover,
+.gear.open,
+.gear.open:hover,
+.stg.current,
+.stg.current:hover,
+.fl-row.on,
+.fl-row.on:hover,
+.week-list button[aria-current="true"],
+.week-list button[aria-current="true"]:hover,
+.ib-act .act[aria-expanded="true"],
+.ib-act .act[aria-expanded="true"]:hover,
+.ihead-details[aria-expanded="true"],
+.ihead-details[aria-expanded="true"]:hover,
+.memory button.memory-btn[aria-expanded="true"],
+.memory button.memory-btn[aria-expanded="true"]:hover,
+.ic-more[aria-expanded="true"],
+.ic-more[aria-expanded="true"]:hover { transition: none; }
 .chat.fresh { color: var(--text); font-weight: 600; }
 .chat.hot { color: var(--blocked); }
 .chat-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-size: var(--font-size-sm); }

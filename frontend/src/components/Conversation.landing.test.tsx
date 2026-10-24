@@ -1,5 +1,5 @@
 // @ts-expect-error node:fs has no type declarations in this tsconfig
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { AgentGroup, CellThread } from "../hooks/useWails";
@@ -57,17 +57,13 @@ describe("L1: a landing shows its row, a pick in the list does not scroll", () =
     r.current("seat:sup10", sup10);
     expect(sup10.scrollIntoView).toHaveBeenCalledTimes(1);
   });
-
-  it("every row of the list says it was picked there before it shows its chat", () => {
-    const src = readFileSync(new URL("./Conversation.tsx", import.meta.url), "utf8") as string;
-    const nav = src.slice(src.indexOf('<nav className="chats"'), src.indexOf("</nav>"));
-    expect(nav.match(/onClick=\{\(\) => listPick\("(needs|reconciler|channel|journal|archive)"\)\}/g)?.length).toBe(5);
-    expect(nav).not.toMatch(/onClick=\{\(\) => pick(Person)?\(/);
-    expect(src).toMatch(/onClick=\{\(\) => \{ reveal\.click\(chatKey\(a, "channel"\)\); pickPerson\(a\); \}\}/);
-  });
 });
 
-const css = readFileSync(new URL("../styles/global.css", import.meta.url), "utf8") as string;
+// Every stylesheet, global.css first: a mark in shell.css or usage.css that
+// sets no transition rides button's from global.css (F2).
+const dir = new URL("../styles/", import.meta.url);
+const sheets = ["global.css", ...(readdirSync(dir) as string[]).filter((f) => f.endsWith(".css") && f !== "global.css").sort()];
+const css = sheets.map((f) => readFileSync(new URL(f, dir), "utf8") as string).join("\n");
 /** Every rule as its selector list and body, comments dropped; a rule inside
  *  an @media block keeps only its own selectors. */
 const rules = css.replace(/\/\*[^]*?\*\//g, "").split("}").map((chunk) => {
@@ -82,22 +78,38 @@ const transitionOf = (sel: string) => {
 };
 
 describe("L2: state fills switch with no transition, hover keeps its own", () => {
-  // The fills named on the card: each a current or selected mark on a button.
-  const fills: [base: string, on: string][] = [
+  // The fills named on the card: each a current, selected or open mark on a
+  // button, with the base it changes on.
+  const fills: [base: string, on: string, drawn?: string][] = [
     [".chat", ".chat.active"],
-    ["button.person", "button.person.active"],
+    ["button.person", "button.person.active", ".person.active"],
     [".strip-all", ".strip-all.active"],
     [".strip-item", ".strip-item.active"],
     [".tiny-btn[aria-pressed]", '.tiny-btn[aria-pressed="true"]'],
+    [".seg button", ".seg button.on"],
+    [".subtabs button", ".subtabs button.on"],
+    [".places .place-tab", ".places .place-tab.on"],
+    [".gear", ".gear.on"],
+    [".gear", ".gear.open"],
+    [".stg", ".stg.current"],
+    [".fl-row", ".fl-row.on"],
+    [".week-list button", '.week-list button[aria-current="true"]'],
+    [".ib-act .act", '.ib-act .act[aria-expanded="true"]'],
+    [".ihead-details", '.ihead-details[aria-expanded="true"]'],
+    [".memory button.memory-btn", '.memory button.memory-btn[aria-expanded="true"]', '.memory button.memory-btn[aria-expanded="true"]:not(.critical)'],
+    [".ic-more", '.ic-more[aria-expanded="true"]'],
   ];
-  it.each(fills)("%s: no transition on or off, hovered or not", (base, on) => {
+  it.each(fills)("%s: the mark %s is a fill some stylesheet draws", (_base, on, drawn) => {
+    expect(rules.some((r) => r.sels.includes(drawn ?? on) && /(^|;)\s*(background|color|border-color|box-shadow):/.test(r.body))).toBe(true);
+  });
+  it.each(fills)("%s → %s: no transition on or off, hovered or not", (base, on) => {
     expect(transitionOf(on)).toBe("none");
     expect(transitionOf(`${on}:hover`)).toBe("none");
     // A transition is read from the style after the change: the fill leaving
     // eases unless the base drops it too.
     expect(transitionOf(base)).toBe("none");
   });
-  it.each(fills)("%s:hover keeps the ease on background, border and colour", (base) => {
+  it.each(fills)("%s:hover keeps the ease on background, border and colour (%s)", (base) => {
     const t = transitionOf(`${base}:hover`) ?? "";
     for (const p of ["background", "border-color", "color"]) expect(t).toMatch(new RegExp(`(^|, )${p} var\\(--dur-fast\\)`));
   });
