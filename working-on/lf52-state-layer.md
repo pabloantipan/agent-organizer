@@ -4,6 +4,7 @@ status: next
 repos: [organizer]
 branch: lf52-state-layer
 seat: l52-layer
+reviewer: l52-layer-review, l52-layer-ui
 stage:
 updated: 2026-10-24
 next: "review: lf52-state-layer, gate S1-S3 and X0 met, e6d77d6"
