@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { merge, model } from "../../wailsjs/go/models";
-import { allAnswered, answersOf, ownerPhrase, picksOf, questionsOf, recordSections, signalOwners, waitingDecisions, waitingOwners } from "./decisions";
+import { allAnswered, answersOf, chosenFloor, chosenLines, missingWords, ownerPhrase, picksOf, questionWords, questionsOf, recordSections, signalOwners, waitingDecisions, waitingOwners } from "./decisions";
 
 const initiative = (...decisions: Partial<model.Decision>[]) => ({ decisions }) as unknown as merge.BoardInitiative;
 const rec = (number: string, owner: string, raised: string, status = "proposed") => ({ number, owner, raised, status });
@@ -140,5 +140,36 @@ describe("answersOf and picksOf", () => {
     expect(picksOf(qs, "Q2 y")).toEqual({ Q2: "y" });
     expect(picksOf(qs, "Q1 nope, Q2 x")).toEqual({ Q2: "x" });
     expect(picksOf(qs, "")).toEqual({});
+  });
+});
+
+describe("leftovers-51 helpers", () => {
+  const opts = ["Q1 after-graph-performs-start-now | after-graph-performs-wait | before-graph-performs", "Q2 record-page | neo4j-perspective | organizer-view"];
+  const qs = questionsOf(opts)!;
+
+  it("chosenLines: one line per answer on a question record, the option on a plain one (FR-7)", () => {
+    expect(chosenLines(opts, "Q1 after-graph-performs-start-now, Q2 record-page")).toEqual(["Q1 after-graph-performs-start-now", "Q2 record-page"]);
+    expect(chosenLines(["accept as written", "send back"], "accept as written")).toEqual(["accept as written"]);
+    expect(chosenLines(opts, "something else")).toEqual(["something else"]);
+  });
+
+  it("chosenFloor: each answer cut to its first word, labels whole; null on a plain record (FR-8)", () => {
+    expect(chosenFloor(opts, "Q1 after-graph-performs-start-now, Q2 record-page")).toBe("Q1 after…, Q2 record…");
+    expect(chosenFloor(["Q1 yes | no", "Q2 extraordinarily | x"], "Q1 yes, Q2 extraordinarily")).toBe("Q1 yes, Q2 extraord…");
+    expect(chosenFloor(["accept as written"], "accept as written")).toBeNull();
+  });
+
+  it("questionWords: the **Q<n>. …** lines of the Question section without markdown (FR-9)", () => {
+    const body = "## Question\n\nIntro.\n\n**Q1. Where in the `order`?**\n\n**Q2. Where does the [view](x.md) live?** Say so.\n\n## Recommendation\n\n**Q3. Not here.**";
+    expect(questionWords(body)).toEqual({ Q1: "Where in the order?", Q2: "Where does the view live? Say so." });
+    expect(questionWords(undefined)).toEqual({});
+  });
+
+  it("missingWords: in reading order, joined with and (FR-10)", () => {
+    expect(missingWords(qs, {}, "")).toBe("Q1 and Q2 not answered yet. Your words are missing.");
+    expect(missingWords(qs, { Q1: "after-graph-performs-wait" }, "x")).toBe("Q2 not answered yet.");
+    expect(missingWords(qs, { Q1: "a", Q2: "b" }, " ")).toBe("Your words are missing.");
+    expect(missingWords(qs, { Q1: "a", Q2: "b" }, "x")).toBe("");
+    expect(missingWords(questionsOf(["Q1 a", "Q2 b", "Q3 c"])!, {}, "x")).toBe("Q1, Q2 and Q3 not answered yet.");
   });
 });
