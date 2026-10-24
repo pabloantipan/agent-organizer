@@ -7,7 +7,7 @@ seat: l51-comp
 reviewer: l51-comp-review, l51-comp-ui
 stage:
 updated: 2026-10-24
-next: "review: lf51-composers, gate met (K1-K5, X0; C1 per Amendment 2: the chat mark on its own layer), a88877d"
+next: "review: lf51-composers, gate met (K1-K5, X0; C3 per Amendment 3: lf48's marked controls switch at once), 490b943"
 review: pass
 depends_on: [lf48-chat-landing]
 boundary: ["docs/specs/leftovers-51.md Boundary, lf51-composers"]
@@ -26,6 +26,7 @@ docs/specs/leftovers-51.md, rows K1-K5 and X0; the UI review checks review-view 
 - l51-comp, 2026-10-24: FR-1 to FR-5 on branch lf51-composers (97c8a79, 3dbe032, d7605a9), rebased on main 48c77ac; K1-K5 fail on main and pass on the branch, X0 passes from a clean clone; commands and output in .wt-notes/l51-comp/progress.md.
 - l51-comp, 2026-10-24, round 2: K4 fixed, `.rail-item.active` and its hover `transition: none`, K4 row added (15ec836); rebased on main b836de5 (head 15ec836, earlier commits now b37805c, 2007071, c615584); X0 passes again from a clean clone.
 - l51-comp, 2026-10-24, round 3: UI review C1 per Amendment 2, the chat row's current fill and outline on `.chat.active::before` with no transition, hover easing the row's own background-color on `--ease-out` (a88877d); four K4 rows; rebased on main a15819f (earlier commits now 669f384, c0369ec, e8e6e0c, 83305c3); X0 passes from a clean clone.
+- l51-comp, 2026-10-24, round 4: UI re-review C3 per Amendment 3, the 15 other controls on lf48 FR-2's list set `transition: none` on base and hover (490b943); K4 checks each and the People panel row; rebased on main 070ae78 (earlier commits now d565532, 1ddeaf8, 7697bb5, 097aa89, 6847c41); X0 passes from a clean clone.
 
 ## Declared changes
 - added `frontend/src/components/Conversation.tsx:recipientsOf`: the one recipient list (roster, then Others, then an addressee in neither under Others), FR-1
@@ -47,6 +48,8 @@ docs/specs/leftovers-51.md, rows K1-K5 and X0; the UI review checks review-view 
 - modified `frontend/src/components/Conversation.landing.test.tsx:K4`: the `.rail-item.active` row
 - modified `frontend/src/styles/global.css:.chat`, `.chat.active`, added `.chat.active::before`: the current mark on its own layer, hover easing background-color only (round 3, Amendment 2)
 - modified `frontend/src/components/Conversation.landing.test.tsx:K4`: the chat row's layer, instant leave and hover ease rows
+- modified `frontend/src/styles/global.css`: lf48's marked controls other than the chat row set `transition: none` on base and hover (round 4, Amendment 3)
+- modified `frontend/src/components/Conversation.landing.test.tsx:K4`: base and hover none per control, the People panel row
 Risky:
 - `.chat`: `position: relative; z-index: 0` makes each chat row a stacking context for its layer
 - `global.css`: every button's transition is now the base rule's 100 ms on background, border and colour; before, the reduced-motion block made it .12 s without colour
@@ -58,7 +61,7 @@ Not changed, on purpose:
 
 ## Notes
 - l51-comp: FR-4 eases hover both ways on `--ease-out` from the base rule; Amendment 15 UL4 also names `--ease-exit` for the way out, which a base-only rule cannot carry. Reviewer's call whether that matters for R49.
-- l51-comp, round 3: the other marked controls in K4's list still take button's base ease, so their leaving mark eases out over 100 ms (C1's mechanism); Amendment 2 scopes the layer to the chat row (`.rail-item` next leftovers). Most of those fills live outside this card's boundary; a next-leftovers item if it matters.
+- l51-comp, round 4: round 3's note is settled by Amendment 3. Still open and older than this card: `.rail-item`'s own base ease (global.css and the reduced-motion block) eases the rail's selected fill as it leaves; its layer is next leftovers (Amendment 2).
 
 ## Review
 Verdict: **pass** at a88877d (third round; the 15ec836 pass and the d7605a9 fail are superseded). Gate: K1-K5 with K4 as amended by Amendment 2 (f16e172), and X0. Unmet gate items: none.
