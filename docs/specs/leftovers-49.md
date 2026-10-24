@@ -30,7 +30,10 @@ option A:
 - **FR-3** The ruling writes `chosen: "Q1 <alt>, Q2 <alt>"` (the questions
   in order, `, ` between them). `RuleDecision` accepts exactly that
   shape for a question record, each alternative one of its question's, and
-  refuses any other with the reason.
+  refuses any other with the reason. A question record with one question
+  also accepts a plain \`chosen: <alt>\` (one of its alternatives), so
+  older single-question records read as they are (hestia's ask, crossing
+  0019).
 - **FR-4** The scan accepts that `chosen` on a question record, so
   hestia's hand-fixed 0026, 0037 and 0038 read without a problem, and still
   reports a `chosen` naming an alternative the question does not offer.
@@ -41,7 +44,7 @@ option A:
 | # | FR | Check | Expected (fails on main) |
 |---|---|---|---|
 | Q1 | 1, 3 | go test of `RuleDecision` on a fixture copy of hestia 0037's frontmatter (two questions), chosen `Q1 after-graph-performs-start-now, Q2 record-page` | ruled; the file holds that `chosen`; every other byte unchanged |
-| Q2 | 3 | go test: chosen `Q1 after-graph-performs-start-now` (Q2 missing); `Q1 nope, Q2 record-page`; a record with plain options and chosen one of them | each of the first two refused with its reason, nothing written; the third rules as today |
+| Q2 | 3 | go test: chosen `Q1 after-graph-performs-start-now` (Q2 missing); `Q1 nope, Q2 record-page`; a record with plain options and chosen one of them; a one-question record `["Q1 a \| b"]` with chosen `b`, and with `Q1 b` | each of the first two refused with its reason, nothing written; the third rules as today; both one-question forms accepted, the scan reports neither |
 | Q3 | 4 | go test of the scan on the fixture ruled as in Q1, and with `Q2 nope` | no problem; one problem naming `Q2 nope` |
 | Q4 | 2 | vitest of `RuleDecisionBox` with the fixture | two radio groups, `Q1` with 3 radios, `Q2` with 3; Rule disabled until both are picked and words typed; `ruleDecision` gets `Q1 …, Q2 …` |
 | X0 | all | `XDG_DATA_HOME=$(mktemp -d) make test`, `cd frontend && pnpm run build`, `wails build`, then `git status --porcelain` | pass, empty |
