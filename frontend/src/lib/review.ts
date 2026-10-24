@@ -1,4 +1,5 @@
 import type { review, service } from "../../wailsjs/go/models";
+import { SAY_GAP_MS } from "./liveRegion";
 
 /** The Review view's pure half (docs/ux/specs/review-view.md §3.1, §3.2,
  *  §4, §5; review-map v2 FR-18): what the worklist holds and in what order,
@@ -78,18 +79,31 @@ export const askStage = (asked: boolean, note: string, askedNote: string): AskSt
 
 /** What the mark's controls read for the chosen mark and note (FR-28,
  *  FR-38; leftovers-41 FR-4): the primary, whether it shows (an ask
- *  already made with this note is not offered again), and the muted line
- *  (none once asked, the `again` line once the note is edited). */
-export function markControls(o: { state: MarkState; note: string; to: Addressee | null; last: boolean; asked: boolean; askedNote: string }) {
+ *  already made with this note is not offered again, and a saved mark
+ *  shown as saved offers no save of it again, leftovers-47 FR-3), and the
+ *  muted line (none once asked, the `again` line once the note is
+ *  edited). */
+export function markControls(o: { state: MarkState; note: string; to: Addressee | null; last: boolean; asked: boolean; askedNote: string; saved?: { state: MarkState; note: string } }) {
   const stage = askStage(o.asked, o.note, o.askedNote);
   const primary = primaryOf(o.state, o.note, { seat: o.to?.seat ?? "", last: o.last, again: stage === "again" });
+  const nothing = asSaved(o.state, o.note, o.saved) && !primary.ask;
   return {
     stage,
     primary,
-    showPrimary: !(stage === "asked" && primary.ask),
-    line: stage === "asked" ? "" : askLine(o.to, o.state, stage === "again"),
+    showPrimary: !(stage === "asked" && primary.ask) && !nothing,
+    // The line says what the primary does; with none drawn it goes too.
+    line: stage === "asked" || nothing ? "" : askLine(o.to, o.state, stage === "again"),
   };
 }
+
+/** A saved mark shown as it was saved (leftovers-47 FR-3, review-view
+ *  Amendment 11 UW2): its primary would save the same mark again, a press
+ *  that does nothing, so it is not drawn; N in the header is the way on.
+ *  An unmarked symbol is never as saved. A primary that asks still posts
+ *  (`Ask <seat> again` after a Save of an edited note, leftovers-44 FR-1),
+ *  so markControls keeps it. */
+export const asSaved = (s: MarkState, note: string, saved?: { state: MarkState; note: string }) =>
+  !!saved && saved.state !== "" && s === saved.state && note.trim() === saved.note.trim();
 
 /** After an ask (FR-29): the panel's line and the live region's words. */
 export const askedLine = (seat: string) => `Asked ${seat}`;
@@ -177,6 +191,50 @@ export const short = (sha: string | undefined) => (sha ?? "").slice(0, 7);
 
 /** §4 the branch moved: `The branch moved since this map (4d2a91b → 9e0f3c1).` */
 export const movedLine = (mapHead: string, head: string) => `The branch moved since this map (${short(mapHead)} → ${short(head)}).`;
+
+/** A status read made while the screen shows a map (leftovers-47 FR-1,
+ *  review-view Amendment 11 UW1): the map head it answers when that is
+ *  another than the one shown, else "". A read with no map head (the map
+ *  is gone) says nothing about a newer one, and nothing shown is nothing
+ *  to move from. */
+export function movedHead(shown: Pick<service.ReviewStatus, "state" | "map_head"> | null, read: Pick<service.ReviewStatus, "map_head">): string {
+  if (!shown || (shown.state !== "map" && shown.state !== "moved") || !shown.map_head) return "";
+  return read.map_head && read.map_head !== shown.map_head ? read.map_head : "";
+}
+
+/** The header's moved line (§4; leftovers-47 FR-1): from the newest read
+ *  that answered another map head, `<shown> → <that map head>`; else the
+ *  screen's own status when it read moved; else none. */
+export function headerMoved(status: Pick<service.ReviewStatus, "state" | "map_head" | "head"> | null, newer: string): string {
+  if (!status || (status.state !== "map" && status.state !== "moved")) return "";
+  if (newer) return movedLine(status.map_head, newer);
+  return status.state === "moved" ? movedLine(status.map_head, status.head) : "";
+}
+
+/** The panel's polite region in turn (leftovers-47 FR-2): a line the press
+ *  itself caused (`press`) is said first; a line that follows it (`after`,
+ *  the header's moved line) waits until the press's line is set and one
+ *  SAY_GAP_MS more, then is said on its own (emptied, set SAY_GAP_MS
+ *  later), so neither replaces the other: emptied in the same task as the
+ *  press's line is set, React would batch the two and draw neither. With
+ *  no press line pending it is said at once. */
+export function inTurn(say: (m: string, then?: () => void) => void, later: (f: () => void) => unknown = (f) => setTimeout(f, SAY_GAP_MS)) {
+  let pressing = false;
+  let queued = "";
+  return {
+    press: (m: string) => {
+      pressing = true;
+      say(m, () => {
+        pressing = false;
+        if (!queued) return;
+        const q = queued;
+        queued = "";
+        later(() => say(q));
+      });
+    },
+    after: (m: string) => { if (pressing) queued = m; else say(m); },
+  };
+}
 
 /** The flag words of §3.3's table; any other flag is drawn as written. */
 export const FLAG_WORDS: Record<string, string> = {

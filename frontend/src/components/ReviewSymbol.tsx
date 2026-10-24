@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { review as rv, service } from "../../wailsjs/go/models";
 import { AskReview, MarkReview, OpenReviewAt, ReviewFile, ReviewStatus } from "../../wailsjs/go/main/App";
 import { busyButton, busyLabel } from "../lib/busy";
 import { useLiveRegion } from "../lib/liveRegion";
 import {
-  affectedLine, afterSave, askedLine, askOf, askFailedLine, backTo, calledBy, callsOf, canSave, domId, editorAt, editorFailed, editorRefusal, editorShown, flagLook, flagWords, focusAfterSave, isAffected, markControls, markOf, notCheckedOut, saveShown, shasOf, shortName, symbolDiff, testsOf, threadOf, WORDS,
+  affectedLine, afterSave, askedLine, askOf, askFailedLine, backTo, calledBy, callsOf, canSave, domId, editorAt, editorFailed, editorRefusal, editorShown, flagLook, flagWords, focusAfterSave, inTurn, isAffected, markControls, markOf, notCheckedOut, saveShown, shasOf, shortName, symbolDiff, testsOf, threadOf, WORDS,
   type Addressee, type EditorAt, type MarkState, type RangeText, type Row, type Via,
 } from "../lib/review";
 
@@ -18,8 +18,12 @@ import {
  *  at the definition once the head text is read (leftovers-43 FR-3). A
  *  press refused because the head left re-reads the status and shows the
  *  head as not here at once (FR-1), and keeps saying so when the re-read
- *  answers for another head (leftovers-46 FR-7). */
-export function ReviewSymbol({ initiative, card, head, map, node, row, marks, from, via, to, last, title, onOpen, onBack, onMarks, onAsked, onOpenThread, onNext }: {
+ *  answers for another head (leftovers-46 FR-7). Every status it reads
+ *  goes to `onStatus` too, so the header follows the newest map head
+ *  (leftovers-47 FR-1); `moved` is the header's moved line once a read
+ *  made while the screen is open changed it, which the panel's polite
+ *  region says (FR-2). */
+export function ReviewSymbol({ initiative, card, head, map, node, row, marks, from, via, to, last, title, moved = "", onStatus, onOpen, onBack, onMarks, onAsked, onOpenThread, onNext }: {
   initiative: string; card: string; head: string; map: rv.RevMap; node: rv.Node; row: Row | null; marks: rv.Marks | null;
   /** The changed symbol an affected one was opened from, and the list. */
   from: rv.Node | null; via?: Via;
@@ -28,6 +32,10 @@ export function ReviewSymbol({ initiative, card, head, map, node, row, marks, fr
   /** No other symbol is unmarked (FR-38). */
   last: boolean;
   title: React.RefObject<HTMLHeadingElement | null>;
+  /** The header's moved line set by a read made while open (FR-1), else "". */
+  moved?: string;
+  /** Every status the panel reads, its re-read included (FR-1). */
+  onStatus?: (st: service.ReviewStatus) => void;
   onOpen: (id: string, via?: Via) => void; onBack: () => void; onMarks: (m: rv.Marks) => void; onAsked: (r: service.ReviewAsk) => void; onOpenThread: (thread: string) => void; onNext: () => void;
 }) {
   const [texts, setTexts] = useState<{ base: RangeText | null; head: RangeText | null } | null>(null);
@@ -54,11 +62,13 @@ export function ReviewSymbol({ initiative, card, head, map, node, row, marks, fr
   const [left, setLeft] = useState<EditorAt | null>(null);
   const [rereading, setRereading] = useState(false);
   const live = useRef(true);
+  const told = useRef(onStatus);
+  told.current = onStatus;
   useEffect(() => {
     live.current = true;
     setLeft(null);
     setRereading(false);
-    ReviewStatus(initiative, card).then((st) => { if (live.current) setStatus(st); }, () => undefined);
+    ReviewStatus(initiative, card).then((st) => { if (live.current) { setStatus(st); told.current?.(st); } }, () => undefined);
     return () => { live.current = false; };
   }, [initiative, card, head]);
   const at = editorAt(status, head, node, texts?.head);
@@ -66,7 +76,7 @@ export function ReviewSymbol({ initiative, card, head, map, node, row, marks, fr
   const onLeft = () => {
     setLeft(editor);
     setRereading(true);
-    ReviewStatus(initiative, card).then((st) => { if (live.current) { setStatus(st); setRereading(false); } }, () => undefined);
+    ReviewStatus(initiative, card).then((st) => { if (live.current) { setStatus(st); setRereading(false); told.current?.(st); } }, () => undefined);
   };
 
   const mark = async (state: MarkState, note: string) => onMarks(await MarkReview(initiative, card, head, node.id, state, note));
@@ -76,7 +86,7 @@ export function ReviewSymbol({ initiative, card, head, map, node, row, marks, fr
     return r;
   };
   return <ReviewSymbolView map={map} node={node} row={row} marks={marks} from={from} via={via} to={to} last={last} texts={texts} error={error} title={title}
-    editor={editor} onOpenEditor={editor ? () => openAt(initiative, card, editor) : undefined} onEditorLeft={onLeft}
+    editor={editor} onOpenEditor={editor ? () => openAt(initiative, card, editor) : undefined} onEditorLeft={onLeft} moved={moved}
     onOpen={onOpen} onBack={onBack} onMark={mark} onAsk={ask} onOpenThread={onOpenThread} onNext={onNext} />;
 }
 
@@ -89,15 +99,17 @@ export type ReviewSymbolViewProps = {
   editor?: EditorAt | null; onOpenEditor?: () => Promise<void>;
   /** A press was refused because the head is no longer checked out here (leftovers-43 FR-1). */
   onEditorLeft?: () => void;
+  /** The header's moved line, said by the polite region when it changes (leftovers-47 FR-2). */
+  moved?: string;
   onOpen: (id: string, via?: Via) => void; onBack: () => void; onMark: (state: MarkState, note: string) => Promise<void>;
   onAsk?: (state: MarkState, note: string) => Promise<service.ReviewAsk>; onOpenThread?: (thread: string) => void; onNext: () => void;
 };
 
 /** What the panel draws, pure, so vitest renders each case. */
-export function ReviewSymbolView({ map, node, row, marks, from, via, to = null, last = false, texts, error, title, editor = null, onOpenEditor, onEditorLeft, onOpen, onBack, onMark, onAsk, onOpenThread, onNext }: ReviewSymbolViewProps) {
+export function ReviewSymbolView({ map, node, row, marks, from, via, to = null, last = false, texts, error, title, editor = null, onOpenEditor, onEditorLeft, moved = "", onOpen, onBack, onMark, onAsk, onOpenThread, onNext }: ReviewSymbolViewProps) {
   const name = shortName(node, true);
   const range = node.range_head ?? node.range_base;
-  const where = <TitleLine id={node.id} file={node.file} range={range} editor={editor} title={title} onOpenEditor={onOpenEditor} onLeft={onEditorLeft} />;
+  const where = <TitleLine id={node.id} file={node.file} range={range} editor={editor} title={title} onOpenEditor={onOpenEditor} onLeft={onEditorLeft} moved={moved} />;
 
   if (isAffected(node)) {
     return (
@@ -169,14 +181,24 @@ export function ReviewSymbolView({ map, node, row, marks, from, via, to = null, 
  *  `Editor didn't open: <first line>` under it in the blocked-reason
  *  style, which the region says too. The line's id comes from the node
  *  id, sanitised (leftovers-44 FR-4): a path with a space would make the
- *  button's `aria-describedby` name two ids, neither of them the line. */
-function TitleLine({ id, file, range, editor, title, onOpenEditor, onLeft }: {
+ *  button's `aria-describedby` name two ids, neither of them the line.
+ *  When a read made while the screen is open moves the header (leftovers-47
+ *  FR-2), the region says the moved line once, after the press's own line
+ *  (`inTurn`); a panel opened on a header already moved says nothing. */
+function TitleLine({ id, file, range, editor, title, onOpenEditor, onLeft, moved }: {
   id: string; file: string; range: number[] | undefined; editor: EditorAt | null; title: React.RefObject<HTMLHeadingElement | null>;
-  onOpenEditor?: () => Promise<void>; onLeft?: () => void;
+  onOpenEditor?: () => Promise<void>; onLeft?: () => void; moved: string;
 }) {
   const [failed, setFailed] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [said, say] = useLiveRegion();
+  const [said, sayNow] = useLiveRegion();
+  const turn = useMemo(() => inTurn(sayNow), [sayNow]);
+  const say = turn.press;
+  const heard = useRef(moved);
+  useEffect(() => {
+    if (moved && moved !== heard.current) turn.after(moved);
+    heard.current = moved;
+  }, [moved, turn]);
   const failedId = editorFailedId(id);
   const open = () => {
     if (!onOpenEditor || !editor) return;
@@ -268,7 +290,7 @@ function Diff({ name, texts, error }: { name: string; texts: { base: RangeText |
  *  (FR-29). Once asked, the line and an asking primary go until the note
  *  is edited, which brings back `Ask <seat> again` (leftovers-41 FR-4).
  *  Save is drawn only while the mark or the note differs from the saved
- *  one; when it leaves after its press, focus goes to the asking primary,
+ *  one, and so is a primary that would only save (leftovers-47 FR-3); when it leaves after its press, focus goes to the asking primary,
  *  else the radio group (leftovers-43 FR-4, Amendment 8 A1). An ask
  *  survives every Save (leftovers-44 FR-1): the panel keeps `Asked <seat>
  *  · Open the thread`, and a saved note that differs from the one asked
@@ -290,7 +312,7 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
   // Asked, note as asked: an ask would repeat a promise kept (FR-4). The
   // ask and its note are kept through a Save (leftovers-44 FR-1).
   const { asked, askedNote } = askOf(marks, id);
-  const { primary, showPrimary, line } = markControls({ state, note, to, last, asked, askedNote });
+  const { primary, showPrimary, line } = markControls({ state, note, to, last, asked, askedNote, saved });
   // An ask that stays (the last symbol, Try again) unmounts the pressed
   // button; focus goes to Open the thread, which took its place.
   // The mark's own thread, else the review's (leftovers-42 FR-4).
@@ -312,8 +334,7 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
     if (!afterSaveFocus.current || busy !== "") return;
     afterSaveFocus.current = false;
     if (dirty) return;
-    const to = focusAfterSave({ showPrimary, ask: primary.ask }) === "primary" ? primaryButton.current : null;
-    (to ?? radios.current?.querySelector<HTMLInputElement>("input:checked") ?? radios.current?.querySelector<HTMLInputElement>("input"))?.focus();
+    landAfterSave({ showPrimary, ask: primary.ask, primary: primaryButton.current, radios: radios.current });
   });
   const run = (which: "next" | "save" | "retry", s: MarkState, ask: boolean, then?: () => void) => async () => {
     setBusy(which);
@@ -325,6 +346,7 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
         setState(shown.state);
         setNote(shown.note);
         if (ask && !then) toLink.current = true;
+        if (which === "next" && leavesAfterPress({ ask, moves: !!then })) afterSaveFocus.current = true;
         then?.();
       } });
       setFailed(r);
@@ -364,6 +386,23 @@ function MarkForm({ name, id, marks, to, last, onMark, onAsk, onOpenThread, onNe
       {error && <p className="review-error">{error}</p>}
     </div>
   );
+}
+
+/** The primary's own press on the last symbol (no next) that only saves
+ *  (leftovers-47 Amendment 1, MV1): FR-3 then removes the pressed button,
+ *  so focus is handed on as after a Save. One that moves on opens the next
+ *  symbol, whose h2 takes focus; one that asks hands focus to Open the
+ *  thread (or keeps it on Try again). */
+export const leavesAfterPress = (o: { ask: boolean; moves: boolean }) => !o.ask && !o.moves;
+
+/** Where focus lands once Save, or a primary that only saved, has left
+ *  (leftovers-43 FR-4, leftovers-47 FR-3): the asking primary when drawn,
+ *  else the mark's checked radio, else its first; never the body. */
+export function landAfterSave(o: { showPrimary: boolean; ask: boolean; primary: HTMLElement | null; radios: ParentNode | null }): HTMLElement | null {
+  const to = focusAfterSave({ showPrimary: o.showPrimary, ask: o.ask }) === "primary" ? o.primary : null;
+  const el = to ?? o.radios?.querySelector<HTMLInputElement>("input:checked") ?? o.radios?.querySelector<HTMLInputElement>("input") ?? null;
+  el?.focus();
+  return el;
 }
 
 /** An ask whose post failed (ReviewAsk.error): the mark is saved here. */

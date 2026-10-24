@@ -7,7 +7,7 @@ import { openBox, openBoxes } from "../lib/boxStack";
 import { busyButton } from "../lib/busy";
 import { speaker } from "../lib/liveRegion";
 import {
-  afterASecond, allReviewed, countsLine, coverage, coverageLine, filesOf, firstLine, flagLook, groupName, inTextField, isAffected, lastToReview, MARK_GLYPH, makeOrigin, makingLabel, movedLine,
+  afterASecond, allReviewed, countsLine, coverage, coverageLine, filesOf, firstLine, flagLook, groupName, headerMoved, inTextField, isAffected, lastToReview, MARK_GLYPH, makeOrigin, makingLabel, movedHead,
   askFailedLine, nextToReview, nothingToReview, partialLines, rowName, saidAfter, screenState, secondsSince, worklist, WORDS, type Addressee, type Group, type Row, type Via,
 } from "../lib/review";
 import { ReviewSymbol } from "./ReviewSymbol";
@@ -28,6 +28,10 @@ export function Review() {
   const [map, setMap] = useState<rv.RevMap | null>(null);
   const [marks, setMarks] = useState<rv.Marks | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // The map head a read made while the screen is open answered, when it is
+  // another than the one shown (leftovers-47 FR-1): the header says the
+  // branch moved; the map and marks stay until Make it again.
+  const [newer, setNewer] = useState("");
   // Who a Question or Blocked asks (FR-25), read once per card.
   const [to, setTo] = useState<Addressee | null>(null);
   useEffect(() => {
@@ -40,6 +44,7 @@ export function Review() {
     try {
       const st = await ReviewStatus(initiative, card);
       setStatus(st);
+      setNewer("");
       setMake(st.make ?? null);
       if (st.state === "map" || st.state === "moved") {
         const [m, mk] = await Promise.all([ReviewMap(initiative, card, st.map_head), ReviewMarks(initiative, card, st.map_head)]);
@@ -68,6 +73,9 @@ export function Review() {
   const back = useRef(closeReview);
   back.current = closeReview;
   useEffect(() => openBox(() => { if (!inTextField(document.activeElement)) back.current(); }), []);
+
+  const onStatus = useCallback((st: service.ReviewStatus) => setNewer(movedHead(status, st)), [status]);
+  const moved = newer ? headerMoved(status, newer) : "";
 
   const state = screenState(status, make);
   const groups = useMemo(() => (map ? worklist(map, marks) : []), [map, marks]);
@@ -204,9 +212,9 @@ export function Review() {
   }, [making, shown, make, map]);
 
   return (
-    <ReviewView status={status} make={make} map={map} marks={marks} error={error} symbol={symbol} active={active} setActive={setActive}
+    <ReviewView status={status} newer={newer} make={make} map={map} marks={marks} error={error} symbol={symbol} active={active} setActive={setActive}
       onBack={closeReview} onStep={step} onOpen={open} onMake={makeIt} onStop={stop} makeBtn={makeBtn} title={title} said={said} progress={progress} origin={origin}
-      panel={{ initiative, card, head: review?.head ?? "", from, via, to, onBack: () => open(from), onMarks: setMarks, onAsked, onOpenThread: openThread(openSlack, initiative, to), onNext: () => step(1) }} />
+      panel={{ initiative, card, head: review?.head ?? "", from, via, to, moved, onStatus, onBack: () => open(from), onMarks: setMarks, onAsked, onOpenThread: openThread(openSlack, initiative, to), onNext: () => step(1) }} />
   );
 }
 
@@ -227,6 +235,8 @@ export const firstTarget = (root: ParentNode) =>
 
 export type ReviewViewProps = {
   status: service.ReviewStatus | null; make: service.ReviewMake | null; map: rv.RevMap | null; marks: rv.Marks | null; error: string | null;
+  /** A read made while open answered this other map head (leftovers-47 FR-1). */
+  newer?: string;
   symbol: string; active: string; setActive: (k: string) => void;
   onBack: () => void; onStep: (dir: 1 | -1) => void; onOpen: (id: string, via?: Via) => void; onMake: () => void; onStop: () => void;
   makeBtn: React.RefObject<HTMLButtonElement | null>; title: React.RefObject<HTMLHeadingElement | null>; said: string;
@@ -240,12 +250,14 @@ export type ReviewViewProps = {
 
 type PanelProps = {
   initiative: string; card: string; head: string; from: string; via?: Via; to?: Addressee | null;
+  /** The header's moved line a read made while open set (FR-1, FR-2), else "". */
+  moved?: string; onStatus?: (st: service.ReviewStatus) => void;
   onBack: () => void; onMarks: (m: rv.Marks) => void; onAsked?: (r: service.ReviewAsk) => void; onOpenThread?: (thread: string) => void; onNext: () => void;
 };
 
 /** What the screen draws for a status, a make, a map and its marks: every
  *  §4 state, pure, so vitest renders each one. */
-export function ReviewView({ status, make, map, marks, error, symbol, active, setActive, onBack, onStep, onOpen, onMake, onStop, makeBtn, title, said, progress = false, origin = 0, panel }: ReviewViewProps) {
+export function ReviewView({ status, newer = "", make, map, marks, error, symbol, active, setActive, onBack, onStep, onOpen, onMake, onStop, makeBtn, title, said, progress = false, origin = 0, panel }: ReviewViewProps) {
   const state = screenState(status, make);
   const groups = map ? worklist(map, marks) : [];
   const cov = map ? coverage(map, marks) : null;
@@ -255,6 +267,7 @@ export function ReviewView({ status, make, map, marks, error, symbol, active, se
   const shown = state === "map" || state === "moved";
   const node = map?.nodes?.find((n) => n.id === symbol) ?? null;
   const row = groups.flatMap((g) => g.rows).find((r) => r.id === symbol) ?? null;
+  const moved = headerMoved(status, newer);
 
   return (
     <div className="review-screen">
@@ -269,9 +282,9 @@ export function ReviewView({ status, make, map, marks, error, symbol, active, se
             {!done && <button className="primary" onClick={() => onStep(1)} aria-keyshortcuts="N Shift+N" aria-label={WORDS.nextToReview}>{WORDS.nextToReview} <kbd>N</kbd></button>}
           </div>
         )}
-        {state === "moved" && status && (
+        {moved && (
           <div className="review-moved">
-            <span>{movedLine(status.map_head, status.head)}</span>
+            <span>{moved}</span>
             <MakeButton btn={makeBtn} label={WORDS.makeAgain} making={making} progress={progress} origin={origin} onMake={onMake} onStop={onStop} />
           </div>
         )}
@@ -443,7 +456,7 @@ function SymbolPane({ map, node, row, marks, last, title, onOpen, panel }: { map
     <section className="review-symbol" aria-label="Symbol">
       {panel ? (
         <ReviewSymbol key={node.id} initiative={panel.initiative} card={panel.card} head={panel.head} map={map} node={node} row={row} marks={marks} from={from} via={panel.via}
-          to={panel.to ?? null} last={last} title={title} onOpen={onOpen} onBack={panel.onBack} onMarks={panel.onMarks} onAsked={panel.onAsked ?? ((r) => panel.onMarks(r.marks))}
+          to={panel.to ?? null} last={last} title={title} moved={panel.moved} onStatus={panel.onStatus} onOpen={onOpen} onBack={panel.onBack} onMarks={panel.onMarks} onAsked={panel.onAsked ?? ((r) => panel.onMarks(r.marks))}
           onOpenThread={panel.onOpenThread ?? (() => undefined)} onNext={panel.onNext} />
       ) : (
         <h2 ref={title} tabIndex={-1} className="review-symbol-title"><span className="mono">{row?.name ?? node.id}</span> <span className="rv-change">{node.change}</span></h2>

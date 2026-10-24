@@ -25,7 +25,7 @@ vi.mock("../../wailsjs/runtime/runtime", () => ({ EventsOn: () => () => undefine
 vi.mock("../hooks/useWails", () => ({ api: new Proxy({}, { get: () => vi.fn(async () => ({})) }) }));
 vi.mock("../lib/drafts", async (orig) => ({ ...(await orig<typeof import("../lib/drafts")>()), useDraft: () => undefined, useDrafts: () => new Set<string>() }));
 
-const { AskStatus, EditorAction, EditorFailed, editorFailedId, editorRefused, markPress, openAt, ReviewSymbolView } = await import("./ReviewSymbol");
+const { AskStatus, EditorAction, EditorFailed, editorFailedId, editorRefused, landAfterSave, leavesAfterPress, markPress, openAt, ReviewSymbolView } = await import("./ReviewSymbol");
 const { afterSave, askOf, canSave, definitionLine, editorAt, focusAfterSave, markControls, markOf, rowName, saveShown, threadOf, worklist } = await import("../lib/review");
 
 const node = (n: Partial<review.Node> & { id: string }) => ({
@@ -197,15 +197,19 @@ describe("P1 (FR-30, FR-32): which way a neighbour points; an empty list", () =>
 
 describe("P2 (FR-31): the primary saves the chosen mark", () => {
   const saved = (state: string, note: string) => ({ marks: [{ symbol: G, state, note }], changed: [] }) as unknown as review.Marks;
+  // Updated for leftovers-47 FR-3: a saved mark shown as saved draws no
+  // primary, so the labels are read from the form edited away from it.
+  const edited = (state: MarkState, note: string, was: [MarkState, string]) =>
+    markControls({ state, note, to: null, last: false, asked: false, askedNote: "", saved: { state: was[0], note: was[1] } });
   it("Question with a note: Save question, next; Blocked: Save block, next; Reviewed or none: Reviewed, next", () => {
-    expect(panel({ id: G, marks: saved("question", "why the comma?") })).toMatch(/<button class="primary">Save question, next<\/button>/);
-    expect(panel({ id: G, marks: saved("blocked", "the comma breaks acme") })).toMatch(/<button class="primary">Save block, next<\/button>/);
-    expect(panel({ id: G, marks: saved("reviewed", "") })).toMatch(/<button class="primary">Reviewed, next<\/button>/);
+    expect(edited("question", "why the comma?", ["reviewed", ""]).primary.label).toBe("Save question, next");
+    expect(edited("blocked", "the comma breaks acme", ["question", "the comma breaks acme"]).primary.label).toBe("Save block, next");
+    expect(edited("reviewed", "", ["question", "why?"]).primary.label).toBe("Reviewed, next");
     expect(panel({ id: G })).toMatch(/<button class="primary">Reviewed, next<\/button>/);
   });
   it("Question or Blocked with no note: the primary waits for one", () => {
-    expect(panel({ id: G, marks: saved("question", "") })).toMatch(/<button class="primary" disabled="">Save question, next<\/button>/);
-    expect(panel({ id: G, marks: saved("blocked", "") })).toMatch(/<button class="primary" disabled="">Save block, next<\/button>/);
+    expect(edited("question", "", ["reviewed", ""]).primary.ready).toBe(false);
+    expect(edited("blocked", "", ["reviewed", ""]).primary.ready).toBe(false);
   });
 });
 
@@ -237,15 +241,25 @@ describe("A4 (FR-28, FR-29): ask from the mark, mocked bindings", () => {
     expect(panel({ id: G, marks: saved("blocked", "x"), to: sup })).toMatch(/<button class="primary">Ask sup81, next<\/button>/);
     expect(panel({ id: G, marks: saved("question", ""), to: sup })).toMatch(/<button class="primary" disabled="">Ask sup81, next<\/button>/);
   });
+  // Updated for leftovers-47 FR-3: the saved Question with nobody to ask
+  // and the saved Reviewed draw no primary until edited, and the line that
+  // says what the primary does goes with it.
   it("nobody to ask: Save question, next and No one to ask here: no cell. Kept in Deltagos.", () => {
-    const h = panel({ id: G, marks: saved("question", "why the comma?"), to: { seat: "", why: "no cell" } });
-    expect(h).toMatch(/<button class="primary">Save question, next<\/button>/);
-    expect(text(h)).toContain("No one to ask here: no cell. Kept in Deltagos.");
+    const nobody = { seat: "", why: "no cell" };
+    const h = panel({ id: G, marks: saved("question", "why the comma?"), to: nobody });
+    expect(h).not.toContain('class="primary"');
+    expect(h).not.toContain("rs-ask-line");
+    const c = markControls({ state: "question", note: "why the comma? and the dot", to: nobody, last: false, asked: false, askedNote: "", saved: markOf(saved("question", "why the comma?"), G) });
+    expect(c.showPrimary && c.primary.label).toBe("Save question, next");
+    expect(c.line).toBe("No one to ask here: no cell. Kept in Deltagos.");
   });
   it("Reviewed with someone to ask: no line, no ask", () => {
     const h = panel({ id: G, marks: saved("reviewed", ""), to: sup });
-    expect(h).toMatch(/<button class="primary">Reviewed, next<\/button>/);
+    expect(h).not.toContain('class="primary"');
     expect(h).not.toContain("rs-ask-line");
+    const c = markControls({ state: "reviewed", note: "fine", to: sup, last: false, asked: false, askedNote: "", saved: { state: "reviewed", note: "" } });
+    expect(c.showPrimary && c.primary).toEqual({ label: "Reviewed, next", mark: "reviewed", ready: true, ask: false });
+    expect(c.line).toBe("");
   });
   it("after an ask: Asked sup81 · Open the thread, which opens the review's thread", () => {
     const h = panel({ id: G, marks: saved("question", "why the comma?", { asked: "01MSG" }), to: sup });
@@ -291,10 +305,12 @@ describe("A4 (FR-28, FR-29): ask from the mark, mocked bindings", () => {
 
 describe("A6 (FR-38): the last unmarked symbol", () => {
   const saved = (state: string, note: string) => ({ marks: [{ symbol: G, state, note }], changed: [] }) as unknown as review.Marks;
+  // Updated for leftovers-47 FR-3: the saved marks are read edited.
+  const edited = (state: MarkState, note: string) => markControls({ state, note, to: null, last: true, asked: false, askedNote: "", saved: { state: "reviewed", note: "" } }).primary.label;
   it("each mark's primary drops , next", () => {
     expect(panel({ id: G, last: true })).toMatch(/<button class="primary">Reviewed<\/button>/);
-    expect(panel({ id: G, marks: saved("question", "q"), last: true })).toMatch(/<button class="primary">Save question<\/button>/);
-    expect(panel({ id: G, marks: saved("blocked", "b"), last: true })).toMatch(/<button class="primary">Save block<\/button>/);
+    expect(edited("question", "q")).toBe("Save question");
+    expect(edited("blocked", "b")).toBe("Save block");
     expect(panel({ id: G, marks: saved("question", "q"), last: true, to: { seat: "sup81", why: "runs this card" } })).toMatch(/<button class="primary">Ask sup81<\/button>/);
   });
   it("the press on the last does not move on, so focus stays on the button (the busy rule keeps it while it saves)", async () => {
@@ -416,7 +432,7 @@ describe("W4 (leftovers-41 FR-4, R29): the panel once asked", () => {
   it("the note edited: MarkForm reads markControls with the asked note, so the again line and Ask sup81 again come back", () => {
     const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
     expect(src).toContain("const { asked, askedNote } = askOf(marks, id);");
-    expect(src).toContain("markControls({ state, note, to, last, asked, askedNote })");
+    expect(src).toContain("markControls({ state, note, to, last, asked, askedNote, saved })");
     expect(src).toContain("{showPrimary && <button ref={primaryButton} className=\"primary\"");
     expect(src).toContain('{line && <p className="rs-ask-line meta">{line}</p>}');
   });
@@ -552,7 +568,8 @@ describe("S1-S4 (leftovers-43): the panel never offers a press that cannot work"
     expect(focusAfterSave({ showPrimary: true, ask: false })).toBe("radios");
     expect(src).toContain("{dirty && <button {...busyButton({ busy: busy === \"save\"");
     expect(src).toContain('if (which === "save") afterSaveFocus.current = true;');
-    expect(src).toContain('(to ?? radios.current?.querySelector<HTMLInputElement>("input:checked") ?? radios.current?.querySelector<HTMLInputElement>("input"))?.focus();');
+    // moved into landAfterSave for leftovers-47 Amendment 1; M4 reads where it lands
+    expect(src).toContain("landAfterSave({ showPrimary, ask: primary.ask, primary: primaryButton.current, radios: radios.current });");
     expect(src).not.toMatch(/document\.body\.focus|\.blur\(\)/);
   });
 });
@@ -621,7 +638,8 @@ describe("K2 (leftovers-44 FR-1, R36): an ask survives a Save", () => {
     expect(h).toContain("Asked sup81 · Open the thread");
     expect(h).not.toContain("Ask sup81");
     expect(h).not.toContain("Saves the mark");
-    expect(h).toContain("Reviewed, next");
+    // Updated for leftovers-47 FR-3: the saved Reviewed draws no primary.
+    expect(h).not.toContain("Reviewed, next");
     expect(row(marks).asked).toBe(false);
     expect(row(marks).mark).toBe("reviewed");
     expect(rowName(row(marks))).toMatch(/reviewed$/);
@@ -724,5 +742,85 @@ describe("W4 (leftovers-46 FR-7): a re-read for another head keeps Not checked o
     expect(h).not.toContain("Open in editor");
     // the container keeps the refused place until the head changes
     expect(src).toContain("const editor = editorShown(at, left, rereading);");
+  });
+});
+
+// leftovers-47 FR-3 (review-view Amendment 11 UW2, R40): a saved mark shown
+// as saved offers no save of it again; the primary returns once the mark or
+// the note changes, in primaryOf's forms; an unmarked symbol keeps it.
+describe("M4 (FR-3): no primary on a marked, unedited symbol", () => {
+  const ticked = { marks: [{ symbol: G, state: "reviewed", note: "reads right" }], changed: [] } as unknown as review.Marks;
+  const was = markOf(ticked, G);
+  const ctl = (state: MarkState, note: string, last = false) => markControls({ state, note, to: null, last, asked: false, askedNote: "", saved: was });
+  it("a ✓ symbol reopened: no Reviewed / Reviewed, next, no Save; the panel ends at the note", () => {
+    for (const last of [false, true]) {
+      const h = panel({ id: G, marks: ticked, last });
+      expect(h).not.toContain('class="primary"');
+      expect(h).not.toMatch(/<button[^>]*>Reviewed(, next)?<\/button>/);
+      expect(h).not.toContain("rs-buttons");
+      expect(h).toMatch(/<textarea[^>]*>reads right<\/textarea><\/div><\/div><\/div>$/);
+    }
+    expect(ctl("reviewed", "reads right").showPrimary).toBe(false);
+    expect(ctl("reviewed", " reads right ").showPrimary).toBe(false);
+  });
+  it("the note edited: the primary returns, Reviewed, next (Reviewed on the last), with Save", () => {
+    expect(ctl("reviewed", "reads right, mostly").showPrimary).toBe(true);
+    expect(ctl("reviewed", "reads right, mostly").primary.label).toBe("Reviewed, next");
+    expect(ctl("reviewed", "reads right, mostly", true).primary.label).toBe("Reviewed");
+    expect(saveShown("reviewed", "reads right, mostly", was)).toBe(true);
+  });
+  it("the mark changed: the primary returns in primaryOf's forms", () => {
+    expect(ctl("question", "reads right").showPrimary).toBe(true);
+    expect(ctl("question", "reads right").primary.label).toBe("Save question, next");
+    expect(ctl("blocked", "reads right", true).primary.label).toBe("Save block");
+    // back to the saved mark and note: gone again
+    expect(ctl("reviewed", "reads right").showPrimary).toBe(false);
+  });
+  it("an unmarked symbol draws Reviewed, next", () => {
+    expect(panel({ id: G })).toContain('<div class="rs-buttons"><button class="primary">Reviewed, next</button></div>');
+    expect(panel({ id: G, marks: { marks: [], changed: [] } as unknown as review.Marks })).toContain('<button class="primary">Reviewed, next</button>');
+    expect(markControls({ state: "", note: "", to: null, last: false, asked: false, askedNote: "", saved: { state: "", note: "" } }).showPrimary).toBe(true);
+  });
+  it("after a Save the primary is gone, so focus follows focusAfterSave to the radios", () => {
+    const after = afterSave("reviewed", "reads right, mostly");
+    const c = markControls({ ...after, to: null, last: false, asked: false, askedNote: "", saved: after });
+    expect(c.showPrimary).toBe(false);
+    expect(focusAfterSave({ showPrimary: c.showPrimary, ask: c.primary.ask })).toBe("radios");
+    const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
+    expect(src).toContain("markControls({ state, note, to, last, asked, askedNote, saved })");
+  });
+  // leftovers-47 Amendment 1 (MV1): the last symbol's own primary press
+  // saves and FR-3 removes the button; focus lands on the checked radio.
+  // No DOM library: a document stand-in whose focus() sets activeElement.
+  it("after the last unmarked symbol's own primary press, document.activeElement is the checked radio, never the body", async () => {
+    const doc = { activeElement: "body" as unknown };
+    const el = (name: string) => { const e = { name, focus: () => { doc.activeElement = e; } }; return e; };
+    const primary = el("Reviewed"), checked = el("radio reviewed"), first = el("radio first");
+    const radios = { querySelector: (q: string) => (q === "input:checked" ? checked : q === "input" ? first : null) } as unknown as ParentNode;
+    doc.activeElement = primary; // the press is on Reviewed
+    // the press: no next (last), no ask; it saved ✓ and the form shows what was saved
+    const onMark = vi.fn((_s: MarkState, _n: string) => Promise.resolve());
+    let armed = false;
+    await markPress({ ask: false, state: "reviewed", note: "", seat: "", onMark, then: () => { armed = leavesAfterPress({ ask: false, moves: false }); } });
+    expect(armed).toBe(true);
+    const after = afterSave("reviewed", "");
+    const c = markControls({ ...after, to: null, last: true, asked: false, askedNote: "", saved: after });
+    expect(c.showPrimary).toBe(false); // the pressed button is gone
+    expect(landAfterSave({ showPrimary: c.showPrimary, ask: c.primary.ask, primary: null, radios })).toBe(checked);
+    expect(doc.activeElement).toBe(checked);
+    // Save question / Save block with nobody to ask, on the last, the same
+    for (const s of ["question", "blocked"] as MarkState[]) {
+      doc.activeElement = primary;
+      const a = afterSave(s, "why?");
+      const k = markControls({ ...a, to: { seat: "", why: "no cell" }, last: true, asked: false, askedNote: "", saved: a });
+      expect(leavesAfterPress({ ask: k.primary.ask, moves: false })).toBe(true);
+      landAfterSave({ showPrimary: k.showPrimary, ask: k.primary.ask, primary: null, radios });
+      expect(doc.activeElement).toBe(checked);
+    }
+    // a press that moves on (the next symbol's h2) or asks (Open the thread) arms nothing
+    expect(leavesAfterPress({ ask: false, moves: true })).toBe(false);
+    expect(leavesAfterPress({ ask: true, moves: false })).toBe(false);
+    const src = readFileSync(new URL("./ReviewSymbol.tsx", import.meta.url), "utf8") as string;
+    expect(src).toContain('if (which === "next" && leavesAfterPress({ ask, moves: !!then })) afterSaveFocus.current = true;');
   });
 });
