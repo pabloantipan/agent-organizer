@@ -2,7 +2,7 @@ import { forwardRef, useEffect, useId, useLayoutEffect, useRef, useState, type C
 import { marked } from "marked";
 import type { model } from "../../wailsjs/go/models";
 import { api } from "../hooks/useWails";
-import { allAnswered, answersOf, picksOf, questionsOf, recordSections } from "../lib/decisions";
+import { allAnswered, answersOf, missingWords, picksOf, questionWords, questionsOf, recordSections } from "../lib/decisions";
 import { leadOf } from "../lib/queue";
 import { openBox } from "../lib/boxStack";
 import { loopTab } from "../lib/tabTrap";
@@ -83,6 +83,7 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
   const numId = useId();
   const titleId = useId();
   const bodyId = useId();
+  const missingId = useId();
   // leftovers-49 FR-2: a question record is ruled with one pick per
   // question; the kept chosen is the picks as the ruling reads them.
   const questions = questionsOf(options);
@@ -90,6 +91,12 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
   const pick = (label: string, alt: string) => setChosen(answersOf(questions!, { ...picks, [label]: alt }));
   const picked = questions ? allAnswered(questions, picks) : chosen !== "";
   const ready = picked && words.trim() !== "" && !busy;
+  // leftovers-51 FR-9: each group is named by its question's words when the
+  // record has a `**Q<n>. …**` line. FR-10: beside a disabled Rule the foot
+  // says what is missing, silently (no live region); a plain box keeps
+  // today's treatment (rule-questions Amendment 1, U3).
+  const asked = questions ? questionWords(d.body) : {};
+  const missing = questions && !busy ? missingWords(questions, picks, words) : "";
   const windowClass = useBoard((s) => s.widthClass);
   const widthClass = homeClass ?? windowClass;
   const { place, short, capped } = useFitViewport(box, record, widthClass);
@@ -179,7 +186,7 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
       ) : questions ? (
         questions.map((q) => (
           <fieldset key={q.label} className="rb-options" disabled={busy}>
-            <legend className="rb-label">{q.label}</legend>
+            <legend className="rb-label">{q.label}{asked[q.label] && <> · <span className="rb-question">{asked[q.label]}</span></>}</legend>
             {q.alts.map((a) => (
               <label key={a} className={`rb-option ${picks[q.label] === a ? "on" : ""}`}>
                 <input type="radio" name={`${name}-${q.label}`} value={a}
@@ -207,7 +214,7 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
             Principles): no autocorrect, capitalisation or spell-replace,
             which WKWebView applies silently; an Escape that ends a
             composition or a correction is the field's, not the box's. */}
-        <textarea rows={4} value={words} readOnly={busy} placeholder="Why this option, in your words. They go under ## Ruling."
+        <textarea rows={4} value={words} readOnly={busy} placeholder={questions ? "Why these answers, in your words. They go under ## Ruling." : "Why this option, in your words. They go under ## Ruling."}
           autoCorrect="off" autoCapitalize="off" spellCheck={false}
           onChange={(e) => setWords(e.target.value)} {...ime.props}
           onKeyDown={(e) => {
@@ -219,9 +226,12 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
       </label>
       {error && <div className="rb-error" role="alert">{error}</div>}
       <div className="rb-foot">
+        {/* Amendment 1: the foot's first row, full width, above the
+            signature and the buttons, which keep their row (rule-box.css). */}
+        {missing && <span id={missingId} className="rb-missing">{missing}</span>}
         <span className="rb-sign">signed {ruler}{forOwner} · commits one file</span>
         <button className="ghost" onClick={() => close(true)} disabled={busy}>Cancel</button>
-        <button className="primary" {...busyButton({ busy, disabled: !ready, onPress: () => void rule() })}>{busyLabel(busy, "Rule", "Ruling…")}</button>
+        <button className="primary" aria-describedby={missing ? missingId : undefined} {...busyButton({ busy, disabled: !ready, onPress: () => void rule() })}>{busyLabel(busy, "Rule", "Ruling…")}</button>
       </div>
     </div>
   );

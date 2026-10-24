@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import fixture from "../../../testdata/questions/0037-big-picture-stage.md?raw";
+// @ts-expect-error node:fs has no type declarations in this tsconfig
+import { readFileSync } from "node:fs";
+
+const ruleBoxCss = readFileSync(new URL("../styles/rule-box.css", import.meta.url), "utf8") as string;
 
 // leftovers-49 Q4 (FR-2, FR-3): the rule box on a question record draws one
 // radio group per question and rules with one pick per question. Vitest runs
@@ -55,9 +59,9 @@ function fixtureOptions(): string[] {
 }
 
 /** The box over a draft held here; draw() renders it as it stands. */
-function box(options: string[]) {
+function box(options: string[], body?: string) {
   const draft = { chosen: "", words: "", set: (p: { chosen?: string; words?: string }) => Object.assign(draft, p) };
-  const dec = { number: "0037", title: "A Big Picture stage", status: "proposed", options, owner: "pablo" } as never;
+  const dec = { number: "0037", title: "A Big Picture stage", status: "proposed", options, owner: "pablo", body } as never;
   const draw = () => {
     h.radios.clear();
     h.calls = [];
@@ -147,5 +151,83 @@ describe("RuleDecisionBox on a question record (leftovers-49 Q4)", () => {
     b.rule().onPress();
     await new Promise((r) => setTimeout(r, 0));
     expect(h.api.ruleDecision).toHaveBeenCalledWith("hestia", "0037", "fsnotify", "because");
+  });
+});
+
+/** The fixture's body, below its frontmatter, as the scan hands it. */
+const fixtureBody = fixture.split("\n---\n").slice(1).join("\n---\n");
+
+/** Each fieldset's legend as text, markup dropped. */
+const legends = (html: string) => [...html.matchAll(/<legend[^>]*>([\s\S]*?)<\/legend>/g)].map((m) => m[1].replace(/<[^>]*>/g, ""));
+
+/** Rule's description: the text of the element its aria-describedby names. */
+function ruleDescription(html: string): string | null {
+  const btn = /<button class="primary"[^>]*>/.exec(html)?.[0] ?? "";
+  const id = /aria-describedby="([^"]+)"/.exec(btn)?.[1];
+  if (!id) return null;
+  return new RegExp(`id="${id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"[^>]*>([^<]*)<`).exec(html)?.[1] ?? null;
+}
+
+const placeholder = (html: string) => /<textarea[^>]*placeholder="([^"]*)"/.exec(html)?.[1];
+
+describe("RuleDecisionBox speaks a question record (leftovers-51)", () => {
+  it("W6: names each group Q<n> · <the record's **Q<n>. …** words>, Q<n> alone without the line", () => {
+    expect(fixtureBody).toContain("**Q1. Where in the order?**");
+    expect(legends(box(fixtureOptions(), fixtureBody).draw())).toEqual(["Q1 · Where in the order?", "Q2 · Where does the view live?"]);
+    const noQ1 = fixtureBody.replace("**Q1. Where in the order?**", "");
+    expect(legends(box(fixtureOptions(), noQ1).draw())).toEqual(["Q1", "Q2 · Where does the view live?"]);
+    expect(legends(box(fixtureOptions()).draw())).toEqual(["Q1", "Q2"]);
+    const marked = fixtureBody.replace("**Q1. Where in the order?**", "**Q1. Does `tech_lead_nicolas` keep his seat?**").replace("**Q2. Where does the view live?**", "**Q2. Are 2*3 seats enough?**");
+    expect(legends(box(fixtureOptions(), marked).draw())).toEqual(["Q1 · Does tech_lead_nicolas keep his seat?", "Q2 · Are 2*3 seats enough?"]);
+  });
+
+  it("W7: beside a disabled Rule the foot names what is missing, and Rule is described by it", () => {
+    const b = box(fixtureOptions(), fixtureBody);
+    let html = b.draw();
+    expect(html).not.toMatch(/aria-live/);
+    expect(ruleDescription(html)).toBe("Q1 and Q2 not answered yet. Your words are missing.");
+    b.click("Q1", "after-graph-performs-start-now");
+    b.draft.words = "as recommended";
+    html = b.draw();
+    expect(b.rule().disabled).toBe(true);
+    expect(ruleDescription(html)).toBe("Q2 not answered yet.");
+    b.click("Q2", "record-page");
+    b.draft.words = "";
+    expect(ruleDescription(b.draw())).toBe("Your words are missing.");
+    b.draft.words = "as recommended";
+    html = b.draw();
+    expect(b.rule().disabled).toBe(false);
+    expect(ruleDescription(html)).toBeNull();
+    expect(html).not.toMatch(/rb-missing/);
+  });
+
+  it("W7: with nothing picked and no words, the foot reads Q1 and Q2 not answered yet first", () => {
+    const html = box(fixtureOptions(), fixtureBody).draw();
+    expect(/<span[^>]*class="rb-missing"[^>]*>([^<]*)</.exec(html)?.[1]).toBe("Q1 and Q2 not answered yet. Your words are missing.");
+  });
+
+  it("W7 (Amendment 1): the missing text is the foot's own first row, above the signature and the buttons", () => {
+    // Vitest has no layout: the row is the markup's order and the sheet's
+    // rules. A wrapping foot whose first item takes the full width puts the
+    // signature and the buttons on the next row, in the 354 px Decisions box
+    // and in Needs me's alike, so neither overlaps the other.
+    const foot = /<div class="rb-foot">([\s\S]*?)<\/div>/.exec(box(fixtureOptions(), fixtureBody).draw())![1];
+    const classes = [...foot.matchAll(/<(?:span|button)[^>]*? class="([^"]+)"/g)].map((m) => m[1]);
+    expect(classes).toEqual(["rb-missing", "rb-sign", "ghost", "primary"]);
+    const rule = (sel: string) => new RegExp(`(?:^|\\n)${sel.replace(/\./g, "\\.")} \\{([^}]*)\\}`).exec(ruleBoxCss)?.[1] ?? "";
+    expect(rule(".rb-foot")).toMatch(/flex-wrap: wrap/);
+    expect(rule(".rb-missing")).toMatch(/flex: 0 0 100%/);
+    expect(rule(".rb-sign")).toMatch(/flex: 1/);
+  });
+
+  it("W8: the words placeholder follows the record", () => {
+    expect(placeholder(box(fixtureOptions(), fixtureBody).draw())).toBe("Why these answers, in your words. They go under ## Ruling.");
+    expect(placeholder(box(["tray", "fsnotify", "none"]).draw())).toBe("Why this option, in your words. They go under ## Ruling.");
+  });
+
+  it("a plain record keeps today's foot: no missing line beside a disabled Rule", () => {
+    const html = box(["tray", "fsnotify", "none"]).draw();
+    expect(ruleDescription(html)).toBeNull();
+    expect(html).not.toMatch(/rb-missing/);
   });
 });

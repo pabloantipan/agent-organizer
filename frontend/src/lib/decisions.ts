@@ -112,3 +112,77 @@ export function picksOf(qs: Question[], chosen: string): Record<string, string> 
 
 /** Every question has a pick (FR-2). */
 export const allAnswered = (qs: Question[], picks: Record<string, string>) => qs.every((q) => !!picks[q.label]);
+
+/** A ruled record's chosen as its opened head shows it (leftovers-51 FR-7):
+ *  one `Q<n> <alt>` line per answer on a question record, in question order;
+ *  the one option on a plain record, or a chosen that names no answer. */
+export function chosenLines(options: string[] | undefined, chosen: string): string[] {
+  const qs = questionsOf(options);
+  const picks = qs ? picksOf(qs, chosen) : {};
+  const lines = (qs ?? []).filter((q) => picks[q.label]).map((q) => `${q.label} ${picks[q.label]}`);
+  return lines.length > 0 ? lines : [chosen];
+}
+
+/** How much of an alternative the Ruled line keeps (FR-8): its first word,
+ *  at most this many characters. */
+const ALT_FLOOR = 8;
+
+/** The Ruled line's chosen on a question record, floored per answer (FR-8):
+ *  `Q1 after…, Q2 record…`, each label whole and each alternative cut to its
+ *  first word (at most ALT_FLOOR characters); null on a plain record, whose
+ *  one option the line floors as a whole. */
+export function chosenFloor(options: string[] | undefined, chosen: string): string | null {
+  const qs = questionsOf(options);
+  if (!qs) return null;
+  const picks = picksOf(qs, chosen);
+  const answered = qs.filter((q) => picks[q.label]);
+  if (answered.length === 0) return null;
+  const cut = (alt: string) => {
+    const word = alt.split(/[-_\s]/)[0].slice(0, ALT_FLOOR);
+    return word.length < alt.length ? `${word}…` : alt;
+  };
+  return answered.map((q) => `${q.label} ${cut(picks[q.label])}`).join(", ");
+}
+
+/** Each question's words from the record's Question section (FR-9): the
+ *  `**Q<n>. …**` line without its markdown and its `Q<n>.`, by label. A
+ *  question with no such line is absent. */
+export function questionWords(body: string | undefined): Record<string, string> {
+  const words: Record<string, string> = {};
+  for (const line of (recordSections(body).question ?? "").split("\n")) {
+    if (!/^\s*\*\*Q\d+\./.test(line)) continue;
+    const plain = unmark(line);
+    const m = /^(Q\d+)\.\s*(.*)$/.exec(plain);
+    if (m && m[2] && !(m[1] in words)) words[m[1]] = m[2];
+  }
+  return words;
+}
+
+/** A line's text without its markdown (FR-9, review of lf51-rule-words):
+ *  a link keeps its text, a code span its content verbatim, and only paired
+ *  emphasis markers go (`**x**`, `__x__`, `*x*`, `_x_`), so an `_` inside a
+ *  word or a lone `*` (`2*3`) stays. */
+function unmark(line: string): string {
+  const spans: string[] = [];
+  const held = line
+    .replace(/`([^`]+)`/g, (_m, code: string) => `\u0000${spans.push(code) - 1}\u0000`)
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1");
+  const emphasis = /(^|[^\w*])(\*\*|__|\*|_)(?=\S)(.*?\S)\2(?![\w*])/;
+  let out = held;
+  for (let prev = ""; prev !== out;) { prev = out; out = out.replace(emphasis, "$1$3"); }
+  return out.replace(/\u0000(\d+)\u0000/g, (_m, i: string) => spans[Number(i)]).trim();
+}
+
+/** What keeps Rule disabled on a question record (FR-10), in reading order:
+ *  `Q2 not answered yet.`, `Q1 and Q2 …`, `Q1, Q2 and Q3 …`, then `Your
+ *  words are missing.`; empty when nothing is. */
+export function missingWords(qs: Question[], picks: Record<string, string>, words: string): string {
+  const open = qs.filter((q) => !picks[q.label]).map((q) => q.label);
+  const parts: string[] = [];
+  if (open.length > 0) {
+    const list = open.length === 1 ? open[0] : `${open.slice(0, -1).join(", ")} and ${open[open.length - 1]}`;
+    parts.push(`${list} not answered yet.`);
+  }
+  if (words.trim() === "") parts.push("Your words are missing.");
+  return parts.join(" ");
+}
