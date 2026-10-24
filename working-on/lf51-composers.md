@@ -4,6 +4,7 @@ status: next
 repos: [organizer]
 branch: lf51-composers
 seat: l51-comp
+reviewer: l51-comp-review, l51-comp-ui
 stage:
 updated: 2026-10-24
 next: "review: lf51-composers, gate met (K1-K5, X0), d7605a9"
