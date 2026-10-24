@@ -87,7 +87,7 @@ Shared test run: **fresh**, run id `3b176e2c-59731` (saved for reuse).
 
 Notes (not blocking):
 - Footprint omits `internal/cli/review_test.go` (change-check's `outside footprint`). → the FSE, thread 01M5651DDM58F2HX08BS85H02Z (sup80)
-- `organizer help`'s review line in cli.go does not mention `--card` (rr-build's "Found, not asked", outside the boundary). → the FSE, thread 01M5651DDM58F2HX08BS85H02Z (sup80)
+- `organizer help`'s review line in cli.go does not mention `--card` (rr-build's "Found, not asked", outside the boundary). → the FSE, thread 01M5651DDM58F2HX08BS85H02Z (sup80) Fixed since (`cli.go:175` names `--card`); carried to Elenx with the review map (0161; crossing 0020, 0159).
 - Multi-repo cards reconcile only the first repo (card Notes, rr-build). → the FSE, thread 01M5651DDM58F2HX08BS85H02Z (sup80)
 
 Reviewer: rr-review, 2026-10-17, commit c9951112b3aac4f54416989408695334c1cbeefa.
