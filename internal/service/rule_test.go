@@ -453,6 +453,18 @@ func TestRuleQuestionRefusals(t *testing.T) {
 		}
 	})
 
+	// Amendment 1: a question of one alternative (hestia 0038's shape).
+	t.Run("a question of one alternative", func(t *testing.T) {
+		src := strings.Replace(proposedRecord, "options: [tray, fsnotify, none]", `options: ["Q1 amend-exit", "Q2 threads-and-specs-ok | strip-code-blocks | exclude-threads"]`, 1)
+		s, record := ruleFixtureWith(t, now, src, "")
+		if err := s.RuleDecision("fix", "0002", "Q1 amend-exit, Q2 threads-and-specs-ok", "as recommended"); err != nil {
+			t.Fatal(err)
+		}
+		if got, _ := os.ReadFile(record); !strings.Contains(string(got), "\n"+`chosen: "Q1 amend-exit, Q2 threads-and-specs-ok"`+"\n") {
+			t.Errorf("record:\n%s", got)
+		}
+	})
+
 	oneQuestion := strings.Replace(proposedRecord, "options: [tray, fsnotify, none]", `options: ["Q1 a | b"]`, 1)
 	for _, tc := range []struct{ chosen, line string }{
 		{"b", `chosen: "b"`},

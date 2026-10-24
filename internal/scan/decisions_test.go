@@ -136,14 +136,45 @@ func TestQuestionRecordScan(t *testing.T) {
 	}
 }
 
+// TestQuestionRecord0038 is Q3 under Amendment 1: hestia 0038 as ruled
+// (testdata/questions, a first question with one alternative, chosen fixed
+// by hand) reads with no problem. On main: "is not one of the options".
+func TestQuestionRecord0038(t *testing.T) {
+	b, err := os.ReadFile(filepath.Join("..", "..", "testdata", "questions", "0038-usage-exit-amended-by-0018.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir := t.TempDir()
+	writeDecision(t, dir, "0038-usage-exit-amended-by-0018.md", string(b))
+	ds, ps := readDecisions(dir, nil)
+	if len(ds) != 1 || ds[0].Chosen != "Q1 amend-exit, Q2 threads-and-specs-ok" || len(Questions(ds[0].Options)) != 2 {
+		t.Fatalf("decisions %+v", ds)
+	}
+	if len(ps) != 0 {
+		t.Errorf("problems %+v, want none", ps)
+	}
+}
+
 // TestQuestionRecordOneQuestion is the scan's half of Q2: a one-question
 // record takes `b` and `Q1 b` alike.
 func TestQuestionRecordOneQuestion(t *testing.T) {
-	for _, chosen := range []string{"b", "Q1 b"} {
-		d := model.Decision{Title: "x", Status: "ruled", Raised: "2026-09-01", Ruled: "2026-09-01", RuledBy: "pablo", Options: []string{"Q1 a | b"}, Chosen: chosen}
+	for _, tc := range []struct {
+		options []string
+		chosen  string
+	}{
+		{[]string{"Q1 a | b"}, "b"},
+		{[]string{"Q1 a | b"}, "Q1 b"},
+		{[]string{"Q1 start-now, Q2 record-page"}, "Q1 start-now, Q2 record-page"},
+	} {
+		d := model.Decision{Title: "x", Status: "ruled", Raised: "2026-09-01", Ruled: "2026-09-01", RuledBy: "pablo", Options: tc.options, Chosen: tc.chosen}
 		if ps := checkDecision(d); len(ps) != 0 {
-			t.Errorf("chosen %q: %+v, want no problem", chosen, ps)
+			t.Errorf("%v chosen %q: %+v, want no problem", tc.options, tc.chosen, ps)
 		}
+	}
+	// Numbered any other way, the list is plain and held to its items.
+	d := model.Decision{Title: "x", Status: "ruled", Raised: "2026-09-01", Ruled: "2026-09-01", RuledBy: "pablo", Options: []string{"Q2 a | b", "Q3 x | y"}, Chosen: "Q2 a, Q3 x"}
+	if ps := checkDecision(d); len(ps) != 1 || !strings.Contains(ps[0].Msg, "not one of the options") {
+		t.Errorf("Q2/Q3 list: %+v, want the plain problem", ps)
 	}
 }
 
@@ -157,9 +188,13 @@ func TestQuestions(t *testing.T) {
 		{"spaces around the bar are trimmed", []string{"Q1 a|b  |  c"}, [][]string{{"Q1", "a", "b", "c"}}},
 		{"plain options", []string{"tray", "fsnotify", "none"}, nil},
 		{"one item plain", []string{"Q1 a | b", "none"}, nil},
-		{"one alternative", []string{"Q1 amend-exit", "Q2 a | b"}, nil},
+		{"one alternative (hestia 0038)", []string{"Q1 amend-exit", "Q2 a | b"}, [][]string{{"Q1", "amend-exit"}, {"Q2", "a", "b"}}},
+		{"one question of one alternative", []string{"Q1 a"}, [][]string{{"Q1", "a"}}},
+		{"not numbered from 1", []string{"Q2 a | b", "Q3 x | y"}, nil},
+		{"a number skipped", []string{"Q1 a | b", "Q3 x | y"}, nil},
+		{"out of order", []string{"Q2 a | b", "Q1 x | y"}, nil},
+		{"Q1 twice (full-answer options)", []string{"Q1 start-now, Q2 record-page", "Q1 wait, Q2 record-page"}, nil},
 		{"an empty alternative", []string{"Q1 a | | b"}, nil},
-		{"a full-answer option", []string{"Q1 start-now, Q2 record-page"}, nil},
 		{"no options", nil, nil},
 	} {
 		qs := Questions(tc.options)

@@ -69,18 +69,19 @@ export type Question = { label: string; alts: string[] };
 const questionItem = /^(Q\d+) (.+)$/;
 
 /** The record's options as questions, in order, or null when it is not a
- *  question record: every item reads `Q<n> <alt> | <alt> ...`, two or more
- *  alternatives, none empty, spaces around each `|` trimmed. The same shape
- *  as `scan.Questions` in internal/scan/decisions.go, which the rule and the
- *  scan read. */
+ *  question record (leftovers-49 FR-1, Amendment 1): every item reads
+ *  `Q<n> <alt>[ | <alt> ...]`, numbered Q1, Q2, ... in order from 1, one or
+ *  more alternatives, none empty, spaces around each `|` trimmed; numbered
+ *  any other way, the list is plain. The same shape as `scan.Questions` in
+ *  internal/scan/decisions.go, which the rule and the scan read. */
 export function questionsOf(options: string[] | undefined): Question[] | null {
   if (!options || options.length === 0) return null;
   const qs: Question[] = [];
-  for (const o of options) {
+  for (const [i, o] of options.entries()) {
     const m = questionItem.exec(o.trim());
-    if (!m) return null;
+    if (!m || m[1] !== `Q${i + 1}`) return null;
     const alts = m[2].split("|").map((a) => a.trim());
-    if (alts.length < 2 || alts.some((a) => a === "")) return null;
+    if (alts.some((a) => a === "")) return null;
     qs.push({ label: m[1], alts });
   }
   return qs;

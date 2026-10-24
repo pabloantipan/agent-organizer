@@ -121,34 +121,30 @@ type Question struct {
 // space, then the alternatives split by `|`.
 var questionItem = regexp.MustCompile(`^(Q\d+) (.+)$`)
 
-// minAlternatives is how many alternatives an item needs to read as a
-// question (FR-1: two or more).
-const minAlternatives = 2
-
 // Questions reads a record's options as questions, in order, or nil when the
-// record is not a question record: every item must read `Q<n> <alt> | <alt>
-// ...`, with no empty alternative. Spaces around each `|` are trimmed, so
-// `a|b` and `a | b` read alike. One parser for the rule and the scan; the box
-// reads the same shape with `questionsOf` in frontend/src/lib/decisions.ts.
+// record is not a question record (leftovers-49 FR-1, Amendment 1): every
+// item must read `Q<n> <alt>[ | <alt> ...]`, numbered Q1, Q2, ... in order
+// from 1, with one or more alternatives and none empty. Items numbered any
+// other way (Q2, Q3; Q1, Q3) are a plain list. Spaces around each `|` are
+// trimmed, so `a|b` and `a | b` read alike. One parser for the rule and the
+// scan; the box reads the same shape with `questionsOf` in
+// frontend/src/lib/decisions.ts.
 func Questions(options []string) []Question {
 	if len(options) == 0 {
 		return nil
 	}
 	qs := make([]Question, 0, len(options))
-	for _, o := range options {
+	for i, o := range options {
 		m := questionItem.FindStringSubmatch(strings.TrimSpace(o))
-		if m == nil {
+		if m == nil || m[1] != fmt.Sprintf("Q%d", i+1) {
 			return nil
 		}
 		alts := strings.Split(m[2], "|")
-		for i, a := range alts {
-			alts[i] = strings.TrimSpace(a)
-			if alts[i] == "" {
+		for j, a := range alts {
+			alts[j] = strings.TrimSpace(a)
+			if alts[j] == "" {
 				return nil
 			}
-		}
-		if len(alts) < minAlternatives {
-			return nil
 		}
 		qs = append(qs, Question{Label: m[1], Alts: alts})
 	}
@@ -175,8 +171,15 @@ func CheckAnswers(qs []Question, chosen string) error {
 		placeholders[i] = "<alt>"
 	}
 	shape := Answers(qs, placeholders)
-	if len(qs) == 1 && slices.Contains(qs[0].Alts, strings.TrimSpace(chosen)) {
-		return nil
+	if len(qs) == 1 {
+		// One question: `<alt>` or `Q1 <alt>` whole, whatever the
+		// alternative holds (a full-answer option `Q1 x, Q2 y` included).
+		c := strings.TrimSpace(chosen)
+		for _, a := range qs[0].Alts {
+			if c == a || c == qs[0].Label+" "+a {
+				return nil
+			}
+		}
 	}
 	// An alternative may itself hold ", ": a piece that does not open with
 	// a label belongs to the answer before it.

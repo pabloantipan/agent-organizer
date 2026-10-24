@@ -118,6 +118,26 @@ describe("RuleDecisionBox on a question record (leftovers-49 Q4)", () => {
     expect(h.api.ruleDecision).toHaveBeenCalledWith("hestia", "0037", "Q1 after-graph-performs-start-now, Q2 record-page", "as recommended");
   });
 
+  it("a question of one alternative draws one radio, not preselected (Amendment 1)", async () => {
+    const b = box(["Q1 amend-exit", "Q2 threads-and-specs-ok | strip-code-blocks | exclude-threads"]);
+    const html = b.draw();
+    expect(groups(html)).toEqual([
+      { legend: "Q1", radios: ["amend-exit"] },
+      { legend: "Q2", radios: ["threads-and-specs-ok", "strip-code-blocks", "exclude-threads"] },
+    ]);
+    expect(html).not.toMatch(/checked=""/);
+    b.draft.words = "as recommended";
+    b.click("Q2", "threads-and-specs-ok");
+    b.draw();
+    expect(b.rule().disabled, "Q1 not picked").toBe(true);
+    b.click("Q1", "amend-exit");
+    b.draw();
+    expect(b.rule().disabled).toBe(false);
+    b.rule().onPress();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(h.api.ruleDecision).toHaveBeenCalledWith("hestia", "0037", "Q1 amend-exit, Q2 threads-and-specs-ok", "as recommended");
+  });
+
   it("a plain record still draws one group of its options and rules the one picked", async () => {
     const b = box(["tray", "fsnotify", "none"]);
     expect(groups(b.draw())).toEqual([{ legend: "Chosen option", radios: ["tray", "fsnotify", "none"] }]);

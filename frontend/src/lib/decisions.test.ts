@@ -105,12 +105,21 @@ describe("questionsOf", () => {
     expect(questionsOf(["Q1 a|b  |  c"])).toEqual([{ label: "Q1", alts: ["a", "b", "c"] }]);
   });
 
+  it("takes a question of one alternative (Amendment 1, hestia 0038)", () => {
+    expect(questionsOf(["Q1 amend-exit", "Q2 a | b"])).toEqual([
+      { label: "Q1", alts: ["amend-exit"] },
+      { label: "Q2", alts: ["a", "b"] },
+    ]);
+  });
+
   it("is null for every other record", () => {
     expect(questionsOf(["tray", "fsnotify", "none"])).toBeNull();
     expect(questionsOf(["Q1 a | b", "none"])).toBeNull();
-    expect(questionsOf(["Q1 amend-exit", "Q2 a | b"])).toBeNull();
     expect(questionsOf(["Q1 a | | b"])).toBeNull();
-    expect(questionsOf(["Q1 start-now, Q2 record-page"])).toBeNull();
+    expect(questionsOf(["Q2 a | b", "Q3 x | y"])).toBeNull();
+    expect(questionsOf(["Q1 a | b", "Q3 x | y"])).toBeNull();
+    expect(questionsOf(["Q2 a | b", "Q1 x | y"])).toBeNull();
+    expect(questionsOf(["Q1 start-now, Q2 record-page", "Q1 wait, Q2 record-page"])).toBeNull();
     expect(questionsOf([])).toBeNull();
     expect(questionsOf(undefined)).toBeNull();
   });
