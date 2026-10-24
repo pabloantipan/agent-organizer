@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 48 - a landing shows its chat row, state fills do not ease, the picker reaches Others
-status: proposed
+status: ruled
 raised: 2026-10-23
 raised_by: fse
 owner: pablo
@@ -10,9 +10,9 @@ forecast: 25-50m
 stage: review-map
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-24
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -49,3 +49,7 @@ spec; the fixture line removes a hand edit the last UI review needed.
 forecast: 25-50m over 1 wave, plus the UI review; basis: 3 tasks, this
 initiative (leftovers 45: 1 card, 14 min; leftovers 46: 2 cards, 23 min;
 leftovers 47: 3 cards, past its 50 min top on the shared test queue).
+
+## Ruling
+
+pablo, 2026-10-24, in the organizer on lodestar: ok. As recommended
