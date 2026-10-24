@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  EASE, FILL, LAYER, LAYER_SHADOW, LINE, MARKS, dead, PAINT, RULES, SHEETS, isControl, onLayer, read, reaches, transitions, winners,
+  EASE, FILL, LAYER, LAYER_SHADOW, LINE, MARKS, dead, PAINT, RULES, SHEETS, isControl, onLayer, read, reaches, transitions, unclassified, winners,
   type Compound, type Mark, type Target,
 } from "./stateLayer.kit";
 
@@ -10,8 +10,10 @@ import {
 // here: MARKS is every selector, in every stylesheet but review.css, with a
 // compound carrying .active, .on, .current, .selected, .open,
 // [aria-current], [aria-selected], [aria-pressed="true"] or
-// [aria-expanded="true"], so a control added later is checked by the same
-// rules without editing this file.
+// [aria-expanded="true"] (quoted or not, and inside :is() or :where()), so a
+// control added later is checked by the same rules without editing this
+// file. The premise's own grep is run over the same sheets as a check on
+// that reading: a match the parser did not classify fails.
 //
 // A transition is read from the style after a change, so a mark that
 // leaves eases on whatever its unmarked element transitions, and one that
@@ -50,6 +52,9 @@ describe("FR-3: the test finds the marked selectors itself", () => {
     expect(SHEETS).not.toContain("review.css");
     expect(SHEETS.length).toBeGreaterThan(15);
     expect(new Set(MARKS.map((m) => m.file)).size).toBeGreaterThanOrEqual(10);
+  });
+  it("classifies every selector the premise's grep matches, so a spelling it does not foresee fails", () => {
+    expect(unclassified()).toEqual([]);
   });
   it("names the selectors it skips as not on screen", () => {
     expect(MARKS.filter((m) => dead(m.parts)).map(label).every((l) => /srm-/.test(l))).toBe(true);

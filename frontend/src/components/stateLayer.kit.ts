@@ -10,9 +10,10 @@ import { readdirSync, readFileSync } from "node:fs";
 // not match, so a rule this cannot read is never taken to reach a control.
 
 export type Compound = { tag: string | null; classes: string[]; attrs: string[]; pseudos: string[]; nots: Compound[]; pe: string | null };
-export type Rule = { file: string; order: number; sels: string[]; parts: Compound[][]; decls: Map<string, string>; media: string | null };
+export type Rule = { file: string; order: number; sels: string[]; raws: string[]; parts: Compound[][]; decls: Map<string, string>; media: string | null };
 
 /** The classes and attributes that say a control carries a state mark (the spec's premise). */
+export const PREMISE = /\.(active|on|current|selected|open)\b|aria-(current|selected|pressed|expanded)=/;
 export const STATE_CLASSES = ["active", "on", "current", "selected", "open"];
 const stateAttr = (a: string) =>
   /^aria-(current|selected)(=|$)/.test(a) && !/="false"$/.test(a) || a === 'aria-pressed="true"' || a === 'aria-expanded="true"';
@@ -39,13 +40,37 @@ const splitTop = (s: string, sep: string) => {
   return out.map((x) => x.trim()).filter(Boolean);
 };
 
+/** An attribute as `name="value"`: a bare value (`[aria-pressed=true]`) is the same selector as a quoted one. */
+const quoted = (a: string) => a.replace(/^([\w-]+[~|^$*]?=)([^"].*)$/, '$1"$2"');
+
+/**
+ * A selector with every :is() and :where() outside :not() unfolded into its
+ * alternatives (`.a:is(.b, .c) x` is `.a.b x` and `.a.c x`), so a state
+ * class written inside one is read like any other. :where() adds no
+ * specificity in a browser; unfolded here it counts as written, which no
+ * rule of these stylesheets depends on.
+ */
+export const unfold = (sel: string): string[] => {
+  const m = /:(is|where)\(/.exec(sel.replace(/:not\((?:[^()]|\([^()]*\))*\)/g, (x) => " ".repeat(x.length)));
+  if (!m) return [sel];
+  let depth = 1, j = m.index + m[0].length;
+  for (; j < sel.length && depth; j++) { if (sel[j] === "(") depth++; else if (sel[j] === ")") depth--; }
+  const before = sel.slice(0, m.index), after = sel.slice(j);
+  // A tag must lead its compound: `.x:is(button)` is `button.x`.
+  const start = Math.max(before.search(/[^\s>+~]*$/), 0);
+  return splitTop(sel.slice(m.index + m[0].length, j - 1), ",").flatMap((alt) => {
+    const tag = /^([a-zA-Z][\w-]*|\*)/.exec(alt)?.[0] ?? "";
+    return unfold(before.slice(0, start) + tag + before.slice(start) + alt.slice(tag.length) + after);
+  });
+};
+
 export const parseCompound = (s: string): Compound => {
   const c: Compound = { tag: null, classes: [], attrs: [], pseudos: [], nots: [], pe: null };
   const re = /^([a-zA-Z][\w-]*|\*)|\.([\w-]+)|\[([^\]]+)\]|::([\w-]+)|:([\w-]+)(\((?:[^()]|\([^()]*\))*\))?/g;
   for (const m of s.matchAll(re)) {
     if (m[1]) c.tag = m[1] === "*" ? null : m[1].toLowerCase();
     else if (m[2]) c.classes.push(m[2]);
-    else if (m[3]) c.attrs.push(m[3].replace(/\s+/g, "").replace(/'/g, '"'));
+    else if (m[3]) c.attrs.push(quoted(m[3].replace(/\s+/g, "").replace(/'/g, '"')));
     else if (m[4]) c.pe = m[4];
     else if (m[5] === "not" && m[6]) c.nots.push(...splitTop(m[6].slice(1, -1), ",").map(parseCompound));
     else if (m[5]) c.pseudos.push(m[5] + (m[6] ?? ""));
@@ -74,7 +99,12 @@ export const parseSheet = (file: string, text: string, out: Rule[], media: strin
     for (; j < text.length && depth; j++) { if (text[j] === "{") depth++; else if (text[j] === "}") depth--; }
     const body = text.slice(open + 1, j - 1);
     if (head.startsWith("@media")) parseSheet(file, body, out, head);
-    else if (!head.startsWith("@")) { const sels = splitTop(head, ","); out.push({ file, order: out.length, sels, parts: sels.map(parseSelector), decls: parseDecls(body), media }); }
+    else if (/^@(supports|container|layer|document)\b/.test(head)) parseSheet(file, body, out, media);
+    else if (!head.startsWith("@")) {
+      const raws = splitTop(head, ",").flatMap((raw) => unfold(raw).map(() => raw));
+      const sels = splitTop(head, ",").flatMap(unfold);
+      out.push({ file, order: out.length, sels, raws, parts: sels.map(parseSelector), decls: parseDecls(body), media });
+    }
     i = j;
   }
   return out;
@@ -184,9 +214,34 @@ export const PAINT = [...FILL, ...LINE, ...EDGE_INK];
 export const EASE = "background-color var(--dur-fast) var(--ease-out)";
 
 /** A state-marked selector of some rule, with the element it paints and that element with no mark. */
-export type Mark = { file: string; sel: string; rule: Rule; parts: Compound[]; plain: Compound[] };
+export type Mark = { file: string; sel: string; raw: string; rule: Rule; parts: Compound[]; plain: Compound[] };
 export const MARKS: Mark[] = RULES.flatMap((r) => r.parts.flatMap((parts, i) =>
-  parts.some(isStateCompound) ? [{ file: r.file, sel: r.sels[i], rule: r, parts, plain: parts.map(unmark) }] : []));
+  parts.some(isStateCompound) ? [{ file: r.file, sel: r.sels[i], raw: r.raws[i], rule: r, parts, plain: parts.map(unmark) }] : []));
+
+/** What the parser leaves out of MARKS on purpose: a state inside :not() (the element without it) and an aria state written "false". */
+export const unmarkedOnPurpose = (raw: string) =>
+  raw.replace(/:not\((?:[^()]|\([^()]*\))*\)/g, "").replace(/aria-[\w-]+=\s*(["']?)false\1/g, "");
+
+/**
+ * The premise's own grep over the stylesheets, as a check on MARKS: every
+ * selector whose raw text it matches (less what is left out on purpose) must
+ * be one MARKS classified, and every match in a sheet's text must sit in a
+ * selector the parser read. A spelling the parser does not foresee fails
+ * here instead of passing unread.
+ */
+export const unclassified = (files = SHEETS, rules = RULES) => {
+  const out: string[] = [];
+  for (const r of rules) if (files.includes(r.file)) new Set(r.raws).forEach((raw) => {
+    if (PREMISE.test(unmarkedOnPurpose(raw)) && !MARKS.some((m) => m.rule === r && m.raw === raw)) out.push(`${r.file}: ${raw}`);
+  });
+  const g = new RegExp(PREMISE.source, "g");
+  for (const f of files) {
+    const inText = (read(f).replace(/\/\*[^]*?\*\//g, "").match(g) ?? []).length;
+    const inRules = rules.filter((r) => r.file === f).reduce((n, r) => n + [...new Set(r.raws)].reduce((k, raw) => k + (raw.match(g) ?? []).length, 0), 0);
+    if (inText !== inRules) out.push(`${f}: ${inText} premise matches in the text, ${inRules} in the selectors read`);
+  }
+  return out;
+};
 
 /** A control: some hover rule paints the unmarked element's background, so hover has something to ease. */
 export const isControl = (plain: Compound[]) =>
