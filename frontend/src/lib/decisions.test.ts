@@ -165,6 +165,11 @@ describe("leftovers-51 helpers", () => {
     expect(questionWords(undefined)).toEqual({});
   });
 
+  it("questionWords keeps code-span text, an in-word _ and a lone * (review of lf51-rule-words)", () => {
+    const body = "## Question\n\n**Q1. Does `tech_lead_nicolas` keep his seat?**\n\n**Q2. Are 2*3 seats _enough_ for tech_lead_nicolas?**";
+    expect(questionWords(body)).toEqual({ Q1: "Does tech_lead_nicolas keep his seat?", Q2: "Are 2*3 seats enough for tech_lead_nicolas?" });
+  });
+
   it("missingWords: in reading order, joined with and (FR-10)", () => {
     expect(missingWords(qs, {}, "")).toBe("Q1 and Q2 not answered yet. Your words are missing.");
     expect(missingWords(qs, { Q1: "after-graph-performs-wait" }, "x")).toBe("Q2 not answered yet.");

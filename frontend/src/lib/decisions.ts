@@ -151,11 +151,26 @@ export function questionWords(body: string | undefined): Record<string, string> 
   const words: Record<string, string> = {};
   for (const line of (recordSections(body).question ?? "").split("\n")) {
     if (!/^\s*\*\*Q\d+\./.test(line)) continue;
-    const plain = line.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1").replace(/[*_`]/g, "").trim();
+    const plain = unmark(line);
     const m = /^(Q\d+)\.\s*(.*)$/.exec(plain);
     if (m && m[2] && !(m[1] in words)) words[m[1]] = m[2];
   }
   return words;
+}
+
+/** A line's text without its markdown (FR-9, review of lf51-rule-words):
+ *  a link keeps its text, a code span its content verbatim, and only paired
+ *  emphasis markers go (`**x**`, `__x__`, `*x*`, `_x_`), so an `_` inside a
+ *  word or a lone `*` (`2*3`) stays. */
+function unmark(line: string): string {
+  const spans: string[] = [];
+  const held = line
+    .replace(/`([^`]+)`/g, (_m, code: string) => `\u0000${spans.push(code) - 1}\u0000`)
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1");
+  const emphasis = /(^|[^\w*])(\*\*|__|\*|_)(?=\S)(.*?\S)\2(?![\w*])/;
+  let out = held;
+  for (let prev = ""; prev !== out;) { prev = out; out = out.replace(emphasis, "$1$3"); }
+  return out.replace(/\u0000(\d+)\u0000/g, (_m, i: string) => spans[Number(i)]).trim();
 }
 
 /** What keeps Rule disabled on a question record (FR-10), in reading order:

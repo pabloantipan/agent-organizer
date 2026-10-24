@@ -173,6 +173,8 @@ describe("RuleDecisionBox speaks a question record (leftovers-51)", () => {
     const noQ1 = fixtureBody.replace("**Q1. Where in the order?**", "");
     expect(legends(box(fixtureOptions(), noQ1).draw())).toEqual(["Q1", "Q2 · Where does the view live?"]);
     expect(legends(box(fixtureOptions()).draw())).toEqual(["Q1", "Q2"]);
+    const marked = fixtureBody.replace("**Q1. Where in the order?**", "**Q1. Does `tech_lead_nicolas` keep his seat?**").replace("**Q2. Where does the view live?**", "**Q2. Are 2*3 seats enough?**");
+    expect(legends(box(fixtureOptions(), marked).draw())).toEqual(["Q1 · Does tech_lead_nicolas keep his seat?", "Q2 · Are 2*3 seats enough?"]);
   });
 
   it("W7: beside a disabled Rule the foot names what is missing, and Rule is described by it", () => {
