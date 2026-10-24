@@ -156,6 +156,14 @@ no `zero` or stylistic sets).
   a fill mark on the layer, a line mark (the 2 px current underline or
   inset) on an untransitioned `::after` or inset shadow; a control whose
   `::before` is taken uses the shadow. Never a per-control copy (A17).
+  The layer looks exactly as the old background did: on a bordered control
+  it reaches the border's outer edge (`inset: -1px`), a ring mark spreads
+  from that edge, and hover on a control whose mark is an opaque fill
+  changes nothing (the mark is the stronger state). Hover's ease covers
+  surface and ink alike. A landing highlight (`focused`, the row Home
+  scrolls to) is a state mark too. **Under `prefers-reduced-motion` no
+  transition runs at all**, from one global guard, never per control
+  (A18).
 - **Layers, one order everywhere**, from z-index tokens and never from bare
   numbers: content < sticky headings and heads < an inline box (rule box)
   and its scrim < the top bar < a drawer or modal (card back, Help) and its

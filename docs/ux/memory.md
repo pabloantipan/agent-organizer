@@ -454,6 +454,9 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 
 - "No transition while marked" cannot hold on the way out when hover and mark share a property: CSS takes the transition from the new style. Put the state fill on its own untransitioned layer (::before or inset shadow) and let hover ease the base background (design system, review-view A16). Write such rules with both directions in mind before amending.
 
+- A refactor of how a mark is painted must reproduce main pixel for pixel: border box, ring spread, hover under an opaque mark. List those three before cutting it (review-view A18).
+- Reduced motion is one global guard, never per control; per-control guards get lost in refactors (review-view A18).
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).

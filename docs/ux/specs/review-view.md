@@ -706,3 +706,48 @@ card: a mark that never eases outranks a hover that eases.
 | # | Pablo can | Checked by |
 |---|---|---|
 | R50 | trust every mark | for each control listed, in a window that draws no frames: moving the mark leaves no frame of fill or line on the old control, and hover on an unmarked one eases in and out over 100 ms |
+
+## Amendment 18 (aglaea, 2026-10-24): from l52-layer-ui on lf52-state-layer
+
+From `working-on/lf52-state-layer.md`, ## UI review (pass at e6d77d6).
+The layer must look exactly as main's background did; U1 to U3 are where
+it does not.
+
+- **A3: yes, in this card.** Under `prefers-reduced-motion` no transition
+  runs, hover included, from **one global guard** (`* { transition: none
+  !important }` in that media query, or the equivalent). No per-control
+  guards, so no later control can miss it.
+- **U1: the fill reaches the outer edge.** On a bordered control the layer
+  is `inset: -1px` (all of today's bordered marked controls have a 1 px
+  border). Unbordered controls keep `inset: 0`.
+- **U2: the ring is as on main**, 2 px outside the border's outer edge,
+  and the chip keeps its amber edge. Either a 3 px spread from the layer
+  at `inset: -1px` or the ring kept on the control is fine, as long as it
+  matches main.
+- **U3 and A2: hover does nothing on an opaque mark.** A control whose
+  mark is an opaque fill (current rail row, seg `.on`, `.act` open) shows
+  no hover change: its rule keeps `background: transparent` under the
+  layer. The pointer cursor stays. See-through marks keep their hover
+  under them, as built.
+- **A1: hover eases ink too.** The hover transition covers `color` as well
+  as `background-color`, so the sub-tabs' ink-only hover eases over
+  100 ms. R50's "hover eases" reads "hover's change, surface or ink,
+  eases".
+- **`focused` counts.** `.ib-row.focused` is the landing highlight (the
+  row `openNeedsMe` scrolls to), a "you are here" mark, so it takes the
+  layer. That is for the next leftovers, with the strip's role items and
+  the rail's role rows added to R50's list.
+- **A4 (next leftovers): one gap under the header.** The space between the
+  header's last line and the sub-tabs row is the same whatever that line
+  is: a goal, `no goal yet`, or a measure. At 1024×640 on init-b it is
+  the gap the header has with a goal.
+
+U1 to U3 are regressions from main, so they belong in this card if its
+boundary allows (the FSE's call); otherwise in the next leftovers.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R50 (amended) | trust every mark | for each marked control, the strip's role items, the rail's role rows and `.ib-row.focused` included, in a window that draws no frames: moving the mark leaves no frame on the old control; on an unmarked one, hover's change (surface or ink) eases in and out over 100 ms |
+| R51 | not be moved | under `prefers-reduced-motion: reduce`, hover and every mark switch at once on every control |
+| R52 | see the mark as before | on each bordered marked control, the fill covers the border box as on main; the critical memory chip open shows a 2 px ring outside its edge; hover on the current rail row, seg `.on` and `.act` open changes no pixel |
+| R53 | read the header evenly | init-b at 1024×640: the gap from `no goal yet` to the sub-tabs equals init-a's gap from its goal line |
