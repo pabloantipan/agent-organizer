@@ -1,13 +1,13 @@
 ---
 title: "The rule box and the Decisions list speak a question record: chosen in full, per-answer floors, question words in the legend, what is missing, the right prompt"
-status: next
+status: done
 repos: [organizer]
 branch: lf51-rule-words
 seat: l51-words
 reviewer: l51-words-review, l51-words-ui
 stage:
 updated: 2026-10-24
-next: "review: lf51-rule-words, W5-W8 (W6 fixed, W7 as amended) and X0 pass, 8e504fb"
+next: "merged (0160)"
 review: pass
 depends_on: [lf49-rule-questions]
 boundary: ["docs/specs/leftovers-51.md Boundary, lf51-rule-words"]
