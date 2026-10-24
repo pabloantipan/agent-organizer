@@ -101,9 +101,19 @@ describe("K4 (leftovers-51 FR-4, supersedes leftovers-48 L2): hover eases in and
     expect(transitionOf("button")).toMatch(EASE);
     expect(css).toMatch(/--dur-fast:\s*100ms/);
   });
-  it.each(fills)("%s:hover sets no transition of its own, so hover in and out both ride button's (%s)", (base) => {
-    expect(transitionOf(base)).toBeNull();
-    expect(transitionOf(`${base}:hover`)).toBeNull();
+  // Amendment 3: every control on lf48's list but the chat row switches at
+  // once until it gets its own layer, so a leaving mark never eases.
+  it.each(fills)("%s: transition none on the base and its hover, so the mark leaving %s switches at once (Amendment 3)", (base) => {
+    expect(transitionOf(base)).toBe("none");
+    expect(transitionOf(`${base}:hover`)).toBe("none");
+  });
+  it("the People panel: after a press, the row that lost .active has no fill in the next frame", () => {
+    // SlackView's People rows are button.person; .person.active draws the
+    // fill. With .active gone the row takes button.person's transition,
+    // which is none, hovered or not, so its fill drops at once.
+    expect(declOf(".person.active", "background").v).toBe("var(--accent-soft)");
+    for (const sel of ["button.person", "button.person:hover", "button.person.active", "button.person.active:hover"]) expect(transitionOf(sel)).toBe("none");
+    expect(rules.some((r) => r.sels.some((x) => /(^|\s)(button)?\.person(\.|:|$)/.test(x)) && [...r.body.matchAll(/(?:^|;)\s*transition:\s*([^;]+)/g)].some((m) => m[1].trim() !== "none"))).toBe(false);
   });
   it.each(fills)("%s: the mark %s is a fill some stylesheet draws", (_base, on, drawn) => {
     expect(rules.some((r) => r.sels.includes(drawn ?? on) && /(^|;)\s*(background|color|border-color|box-shadow):/.test(r.body))).toBe(true);

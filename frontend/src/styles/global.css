@@ -649,14 +649,48 @@ button.person:focus-visible { outline-offset: -2px; }
 .chat.active { background: transparent; border-color: transparent; color: var(--text); }
 .chat.active::before { content: ""; position: absolute; inset: -1px; z-index: -1; border-radius: inherit; background: var(--accent-soft); border: 1px solid var(--border-accent); pointer-events: none; transition: none; }
 /* State marks never ease (design system; leftovers-48 FR-2, leftovers-51
-   FR-4, review-view A13 UO2 and A15 UL4): hover eases in and out alike on
-   button's own 100 ms (the base rule above, so leaving hover eases too),
-   and a control while it carries a current, selected, open or disabled
-   mark has no transition at all, hover included, so the mark is true on
-   the first frame even in a window that draws no frames. The marks live
-   in their own stylesheets (shell, float, usage, memory, initiatives);
-   their bases set no transition, so each rides button's; the rail's row
-   keeps its own base ease, which leaves hover as it came. */
+   FR-4 with Amendments 2 and 3, review-view A13 UO2, A15 UL4, A16): a
+   control while it carries a current, selected, open or disabled mark has
+   no transition at all, hover included, so the mark is true on the first
+   frame even in a window that draws no frames. Buttons with no mark ease
+   hover in and out on button's own 100 ms (the base rule above). The chat
+   row paints its mark on a layer (.chat.active::before) so its hover eases;
+   the rail's row keeps its own base ease; the marked controls below, whose
+   marks live in their own stylesheets (shell, float, usage, memory,
+   initiatives), switch at once, hover included. */
+/* Until each gets its own layer (Amendment 3): a transition is read from
+   the style after the change, so a leaving mark would ease on any
+   transition its base or hover keeps; base and hover both set none. */
+button.person,
+.strip-all,
+.strip-item,
+.tiny-btn[aria-pressed],
+.seg button,
+.subtabs button,
+.places .place-tab,
+.gear,
+.stg,
+.fl-row,
+.week-list button,
+.ib-act .act,
+.ihead-details,
+.memory button.memory-btn,
+.ic-more,
+button.person:hover,
+.strip-all:hover,
+.strip-item:hover,
+.tiny-btn[aria-pressed]:hover,
+.seg button:hover,
+.subtabs button:hover,
+.places .place-tab:hover,
+.gear:hover,
+.stg:hover,
+.fl-row:hover,
+.week-list button:hover,
+.ib-act .act:hover,
+.ihead-details:hover,
+.memory button.memory-btn:hover,
+.ic-more:hover { transition: none; }
 .rail-item.active,
 .rail-item.active:hover,
 .chat.active,
