@@ -1,6 +1,6 @@
 # Leftovers 51: one recipient list, the Chats head held still, hover that eases both ways, a crew test that stops flaking, and the rule box's words for question records: the build spec
 
-status: proposed (0160)
+status: ruled (0160, pablo 2026-10-24)
 by: the FSE, 2026-10-24, on main at ff86545
 sources: Aglaea's `docs/ux/specs/review-view.md` Amendment 15 (ff86545) and
 its design-system rule, from l48-ui's UI review of lf48-chat-landing (UL1 to

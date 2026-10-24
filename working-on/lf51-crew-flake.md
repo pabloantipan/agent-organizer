@@ -6,7 +6,7 @@ branch: lf51-crew-flake
 seat:
 stage:
 updated: 2026-10-24
-next: "pablo: rule 0160 (leftovers 51)"
+next: "fse: launch when sup90 and sup91 end (0160 ruled 2026-10-24)"
 depends_on: []
 boundary: ["docs/specs/leftovers-51.md Boundary, lf51-crew-flake"]
 spec: "docs/specs/leftovers-51.md (FR-6)"
