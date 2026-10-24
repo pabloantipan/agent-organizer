@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: lf49-rule-questions
 seat:
-stage:
+stage: review-map
 updated: 2026-10-24
 next: "sup91 runs it (0157 ruled 2026-10-24)"
 depends_on: []
