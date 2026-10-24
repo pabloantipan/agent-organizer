@@ -53,7 +53,7 @@ func (s *Service) RuleDecision(initiativeID, number, chosen, words string) error
 		if err := scan.CheckAnswers(qs, chosen); err != nil {
 			return fmt.Errorf("decision %s: %w", d.Number, err)
 		}
-	} else if !slices.Contains(d.Options, chosen) {
+	} else if !scan.IsOption(d.Options, chosen) {
 		return fmt.Errorf("chosen %q is not one of decision %s's options (%s)", chosen, d.Number, strings.Join(d.Options, ", "))
 	}
 	dir := filepath.Dir(d.Path)

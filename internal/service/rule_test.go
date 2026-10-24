@@ -492,14 +492,18 @@ func TestRuleQuestionRefusals(t *testing.T) {
 }
 
 // TestRuleChosenTrimmed is leftovers-52 T1 (FR-6): a chosen with spaces
-// around it, or around an answer of a question record, is written trimmed.
-// On main both are accepted and written as typed.
+// around it, or around an answer of a question record, is written trimmed,
+// and every other byte of the record is as it was (0019). An option quoted
+// with spaces around it is compared trimmed too, so it can still be ruled.
+// On main the padded chosen is written as typed.
 func TestRuleChosenTrimmed(t *testing.T) {
 	now := time.Date(2026, 10, 24, 10, 0, 0, 0, time.UTC)
 	for _, tc := range []struct{ name, options, chosen, line string }{
 		{"one question, plain", `options: ["Q1 a | b"]`, " b ", `chosen: "b"`},
 		{"two questions", `options: ["Q1 a | b", "Q2 x | y"]`, "Q1 a , Q2 x", `chosen: "Q1 a, Q2 x"`},
 		{"a plain record", "options: [tray, fsnotify, none]", " tray ", "chosen: tray"},
+		{"a padded option, chosen plain", `options: [" tray ", fsnotify]`, "tray", "chosen: tray"},
+		{"a padded option, chosen padded", `options: [" tray ", fsnotify]`, " tray ", "chosen: tray"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			src := strings.Replace(proposedRecord, "options: [tray, fsnotify, none]", tc.options, 1)
@@ -507,8 +511,34 @@ func TestRuleChosenTrimmed(t *testing.T) {
 			if err := s.RuleDecision("fix", "0002", tc.chosen, "as recommended"); err != nil {
 				t.Fatal(err)
 			}
-			if got, _ := os.ReadFile(record); !strings.Contains(string(got), "\n"+tc.line+"\n") {
-				t.Errorf("record, want %s:\n%s", tc.line, got)
+			got, err := os.ReadFile(record)
+			if err != nil {
+				t.Fatal(err)
+			}
+			want := src
+			for _, kv := range [][2]string{
+				{"status: proposed\n", "status: ruled\n"},
+				{"ruled:\n", "ruled: 2026-10-24\n"},
+				{"ruled_by:\n", "ruled_by: pablo\n"},
+				{"chosen:\n", tc.line + "\n"},
+				{"## Ruling\n\n\n\n## Consequences", "## Ruling\n\npablo, 2026-10-24, in the organizer on lodestar: as recommended\n\n## Consequences"},
+			} {
+				if !strings.Contains(want, kv[0]) {
+					t.Fatalf("fixture lacks %q", kv[0])
+				}
+				want = strings.Replace(want, kv[0], kv[1], 1)
+			}
+			if string(got) != want {
+				t.Errorf("record:\n%s\nwant:\n%s", got, want)
+			}
+			si, err := s.initiative("fix")
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, p := range si.Problems {
+				if strings.Contains(p.Path, "0002") {
+					t.Errorf("scan reports %s", p.Msg)
+				}
 			}
 		})
 	}

@@ -100,7 +100,7 @@ func checkDecision(d model.Decision) []model.Problem {
 			if err := CheckAnswers(qs, d.Chosen); err != nil {
 				add("%s", err)
 			}
-		} else if !slices.Contains(d.Options, strings.TrimSpace(d.Chosen)) {
+		} else if !IsOption(d.Options, d.Chosen) {
 			add("chosen %q is not one of the options", d.Chosen)
 		}
 	}
@@ -226,6 +226,14 @@ func TrimChosen(qs []Question, chosen string) string {
 		return strings.TrimSpace(chosen)
 	}
 	return strings.Join(splitAnswers(chosen), ", ")
+}
+
+// IsOption says whether chosen is one of a plain record's options, both
+// sides trimmed (leftovers-52 FR-6): `" a "` written by hand on either side
+// reads as `a`.
+func IsOption(options []string, chosen string) bool {
+	c := strings.TrimSpace(chosen)
+	return slices.ContainsFunc(options, func(o string) bool { return strings.TrimSpace(o) == c })
 }
 
 // checkDecisionLinks reports supersede references to records that do not

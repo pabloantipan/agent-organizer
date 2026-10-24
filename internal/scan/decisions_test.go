@@ -240,10 +240,13 @@ func TestCheckAnswers(t *testing.T) {
 
 // TestChosenPaddedByHand is leftovers-52 T1 (FR-6): a ruled record whose
 // chosen was written padded by hand reads with no problem; the scan compares
-// trimmed forms. On main the plain record is "not one of the options".
+// trimmed forms, on both sides. On main the plain record is "not one of the
+// options".
 func TestChosenPaddedByHand(t *testing.T) {
 	for _, tc := range []struct{ name, options, chosen string }{
 		{"a plain record", "[a, b]", `" b "`},
+		{"a padded option, chosen padded", `[" a ", b]`, `" a "`},
+		{"a padded option, chosen plain", `[" a ", b]`, "a"},
 		{"one question", `["Q1 a | b"]`, `" b "`},
 		{"two questions", `["Q1 a | b", "Q2 x | y"]`, `" Q1 a , Q2 x "`},
 	} {
