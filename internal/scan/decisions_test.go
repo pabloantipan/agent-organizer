@@ -237,3 +237,26 @@ func TestCheckAnswers(t *testing.T) {
 		}
 	}
 }
+
+// TestChosenPaddedByHand is leftovers-52 T1 (FR-6): a ruled record whose
+// chosen was written padded by hand reads with no problem; the scan compares
+// trimmed forms. On main the plain record is "not one of the options".
+func TestChosenPaddedByHand(t *testing.T) {
+	for _, tc := range []struct{ name, options, chosen string }{
+		{"a plain record", "[a, b]", `" b "`},
+		{"one question", `["Q1 a | b"]`, `" b "`},
+		{"two questions", `["Q1 a | b", "Q2 x | y"]`, `" Q1 a , Q2 x "`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			writeDecision(t, dir, "0001-padded.md", "---\ntitle: Padded\nstatus: ruled\nraised: 2026-10-01\nruled: 2026-10-02\nruled_by: pablo\noptions: "+tc.options+"\nchosen: "+tc.chosen+"\n---\n")
+			ds, ps := readDecisions(dir, nil)
+			if len(ds) != 1 {
+				t.Fatalf("decisions %+v", ds)
+			}
+			if len(ps) != 0 {
+				t.Errorf("problems %+v, want none", ps)
+			}
+		})
+	}
+}

@@ -490,3 +490,26 @@ func TestRuleQuestionRefusals(t *testing.T) {
 		})
 	}
 }
+
+// TestRuleChosenTrimmed is leftovers-52 T1 (FR-6): a chosen with spaces
+// around it, or around an answer of a question record, is written trimmed.
+// On main both are accepted and written as typed.
+func TestRuleChosenTrimmed(t *testing.T) {
+	now := time.Date(2026, 10, 24, 10, 0, 0, 0, time.UTC)
+	for _, tc := range []struct{ name, options, chosen, line string }{
+		{"one question, plain", `options: ["Q1 a | b"]`, " b ", `chosen: "b"`},
+		{"two questions", `options: ["Q1 a | b", "Q2 x | y"]`, "Q1 a , Q2 x", `chosen: "Q1 a, Q2 x"`},
+		{"a plain record", "options: [tray, fsnotify, none]", " tray ", "chosen: tray"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			src := strings.Replace(proposedRecord, "options: [tray, fsnotify, none]", tc.options, 1)
+			s, record := ruleFixtureWith(t, now, src, "")
+			if err := s.RuleDecision("fix", "0002", tc.chosen, "as recommended"); err != nil {
+				t.Fatal(err)
+			}
+			if got, _ := os.ReadFile(record); !strings.Contains(string(got), "\n"+tc.line+"\n") {
+				t.Errorf("record, want %s:\n%s", tc.line, got)
+			}
+		})
+	}
+}

@@ -44,6 +44,9 @@ func (s *Service) RuleDecision(initiativeID, number, chosen, words string) error
 		return fmt.Errorf("decision %s is %s, not proposed; only a proposed record can be ruled", d.Number, d.Status)
 	}
 	qs := scan.Questions(d.Options)
+	// leftovers-52 FR-6: checked and written trimmed, each answer of a
+	// question record too.
+	chosen = scan.TrimChosen(qs, chosen)
 	if qs != nil {
 		// leftovers-49 FR-3: a question record is ruled with one answer
 		// per question, `Q1 <alt>, Q2 <alt>`.
