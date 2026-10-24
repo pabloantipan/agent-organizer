@@ -640,6 +640,14 @@ button.person:focus-visible { outline-offset: -2px; }
 .chat { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: var(--radius-md); background: transparent; border: 1px solid transparent; color: var(--muted); font-size: var(--font-size-sm); text-align: left; cursor: pointer; min-width: 0; }
 .chat:hover { background: var(--panel); color: var(--text); }
 .chat.active { background: var(--accent-soft); border-color: var(--border-accent); color: var(--text); }
+/* State marks never ease (design system; leftovers-48 FR-2, review-view
+   A13 UO2): a current or selected fill on a button lands and leaves with no
+   transition, so it is true on the first frame even in a window that draws
+   no frames. A transition is read from the style after the change, so the
+   base drops it too; hover keeps its ease in. */
+.chat, button.person, .strip-all, .strip-item, .tiny-btn[aria-pressed] { transition: none; }
+.chat:hover, button.person:hover, .strip-all:hover, .strip-item:hover, .tiny-btn[aria-pressed]:hover { transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out); }
+.chat.active, .chat.active:hover, button.person.active, button.person.active:hover, .strip-all.active, .strip-all.active:hover, .strip-item.active, .strip-item.active:hover, .tiny-btn[aria-pressed="true"], .tiny-btn[aria-pressed="true"]:hover { transition: none; }
 .chat.fresh { color: var(--text); font-weight: 600; }
 .chat.hot { color: var(--blocked); }
 .chat-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-size: var(--font-size-sm); }
