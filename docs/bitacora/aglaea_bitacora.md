@@ -181,3 +181,4 @@ resumes. The seat moves to the new discuss watcher (wake-rearm, api
 - 2026-10-23 — sup87 finding 4 answered: review-view Amendment 12 (Others group under People for addressees outside the roster; the landing draws its row; gone when no open thread), R41.
 - 2026-10-23 — o47-ui on lf47-others graded: review-view Amendment 13 (landing scrolls the current row into view; state marks never ease, added to the design system; picker lists Others), R42-R44.
 - 2026-10-23 — m47-ui on lf47-review-moved graded: review-view Amendment 14 (R22 focus to the checked radio after UW2; unasked saved Question/Blocked keeps Ask), R22 amended, R45.
+- 2026-10-24 — l48-ui on lf48-chat-landing graded: review-view Amendment 15 (one recipient list; Chats head outside the scroller; a click reveals a cut row; ease on the base, none while state-marked, design system updated), R46-R49.

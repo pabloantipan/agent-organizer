@@ -440,6 +440,10 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - When a rule removes the control that a focus row names, amend that row the same day: name the new target (the checked radio, the closest control saying what was just done) (review-view A14).
 - "A press that changes nothing" is judged by every effect, not only the save: an ask posts and wakes, so it stays even when the mark is saved (review-view A14).
 
+- Choices that list the same people must come from one function: two composers listing one name in two ways is a fact said twice (review-view A15).
+- A scroll-into-view must never cut a list's own head; keep heads with controls outside the scroller (review-view A15).
+- Put a transition on the base rule, never on :hover only, or the exit snaps (design system, review-view A15).
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).

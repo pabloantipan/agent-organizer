@@ -143,7 +143,9 @@ no `zero` or stylistic sets).
 - **State marks never ease.** Hover and press may ease; a mark that says
   where you are or what is chosen (current, selected, open, disabled)
   switches with no transition, so it is true on the first frame, even in a
-  window that draws no frames (review-view A13).
+  window that draws no frames (review-view A13). The ease sits on the
+  control's base rule, so hover eases in and out alike; while a control
+  carries a state mark it has no transition at all (A15).
 - **Layers, one order everywhere**, from z-index tokens and never from bare
   numbers: content < sticky headings and heads < an inline box (rule box)
   and its scrim < the top bar < a drawer or modal (card back, Help) and its

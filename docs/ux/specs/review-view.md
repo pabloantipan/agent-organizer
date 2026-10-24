@@ -620,3 +620,35 @@ From `working-on/lf47-others.md`, ## UI review (pass at 09c5d11).
 |---|---|---|
 | R22 (amended) | not be offered a next that isn't there | with one unmarked symbol left, its primary reads `Reviewed` (or `Save question`, `Save block`, `Ask <seat>`) without `, next`; after a press that leaves the symbol marked and unedited, the primary is gone and focus is on the mark's checked radio |
 | R45 | ask after saving first | save a Question with a note on a symbol with a seat, without asking: the panel still offers `Ask <seat>, next` and its line; reopening the symbol shows the same |
+
+## Amendment 15 (aglaea, 2026-10-24): from l48-ui on lf48-chat-landing
+
+From `working-on/lf48-chat-landing.md`, ## UI review (pass at e559f4d).
+
+- **UL1: one recipient list for every composer.** The new-thread form,
+  the reply box and the rule box all list the roster first, then the
+  `Others` divider and the Others names, from one function. A thread's
+  addressee that is in neither is appended last, under `Others`. A name
+  never shows in two places, and never as a plain option after the
+  roster.
+- **UL2: the Chats head stays outside the scroller.** The label row with
+  its `+` is a control, and a landing's scroll must never cut it. It sits
+  above the scrolling list, which starts under it; the landing scroll
+  (A13) then moves only rows.
+- **UL3: a click reveals a cut row too.** A13's "a click needs no scroll"
+  assumed the row is wholly in view. A click on a row that is partly
+  hidden scrolls it into view with the same `nearest`, instant scroll. A
+  wholly visible row does not move.
+- **UL4: hover eases alike both ways; a state mark never eases.** The
+  100 ms transition sits on the control's base rule, so hover eases in
+  and out with `--ease-out` / `--ease-exit`. A control while it carries a
+  state mark (current, selected, open, disabled) has no transition at all,
+  hover included: on a state-marked row, a hover that switches at once is
+  the lesser fault than a mark that lags.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R46 | find a name in one place | in sup10's chat, the reply box, the rule box and the new-thread form each list sup10 once, under `Others`, after the roster |
+| R47 | always reach `+` | 1024×640, land on sup10: the Chats label row and `+` are wholly visible; only rows scrolled |
+| R48 | see a row he clicked | click a row cut by the list's bottom edge: it is wholly in view afterwards; a wholly visible row does not move |
+| R49 | see hover leave as it came | on a non-current chat row, hover eases in and out over 100 ms; on the current row, hover and the mark switch at once |
