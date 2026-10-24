@@ -3,10 +3,10 @@ title: "A landing shows its chat row, state fills do not ease, the new-thread pi
 status: next
 repos: [organizer]
 branch: lf48-chat-landing
-seat:
+seat: l48-build
 stage: review-map
-updated: 2026-10-23
-next: "sup90 runs it (0156 ruled 2026-10-24)"
+updated: 2026-10-24
+next: "l48-build builds it in .wt/lf48-chat-landing (sup90)"
 depends_on: []
 boundary: ["docs/specs/leftovers-48.md Boundary"]
 spec: "docs/specs/leftovers-48.md (FR-1 to FR-4)"
