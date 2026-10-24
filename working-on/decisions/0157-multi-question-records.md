@@ -1,6 +1,6 @@
 ---
 title: Records that ask several questions - Deltagos rules each question, or every record lists full answers
-status: proposed
+status: ruled
 raised: 2026-10-24
 raised_by: fse
 owner: pablo
@@ -12,9 +12,9 @@ affects: [hestia]
 crossing: 0019
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-24
+ruled_by: pablo
+chosen: "A: Deltagos rules each question"
 ---
 
 ## Question
@@ -61,3 +61,7 @@ before it is ruled.
 forecast: 30-60m over 1 wave, plus the UI review and no lease data;
 basis: 3 tasks, this initiative (leftovers 45-47: 14, 23 and 83 min, the
 last on one review round and the test-lease queue).
+
+## Ruling
+
+pablo, 2026-10-24, in the organizer on lodestar: as recommended
