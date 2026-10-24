@@ -4,6 +4,13 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## 2026-10-24 14:40
+
+- Last SHA seen: f82cd90. sup89 runs leftovers 50 (0158, floating icon after a desktop change; diagnosis by a read-only subagent: one-shot full-screen read, no recovery when the window server drops the panel). 0156 (leftovers 48) proposed; 0157 (multi-question records) held by crossing 0019, with Pablo; hestia agreed with A.
+- Odyssey pull reconciled (Hephaistos thread 01M5QCNBZ9HM655WP6C3SEEWW6): gate-check misreads a root-is-repo initiative (reported); gates now written path#heading; no lease data on lodestar.
+- Crossing 0020 (elenx 0004, Pablo: "Move to the new tool"): organizer agrees to move revmap and the Review view to Elenx. On its ruling: raise a record closing stage review-map as moved (exits 1-2 carried to Elenx), move lf48/lf49/lf50's stage, and later cut the card retiring organizer's review copies once Elenx reads a branch on its own. No new work on organizer's Review code meanwhile.
+- Held: LaunchServices clutter (~365 Deltagos registrations, review builds whose folders are gone): a card to unregister review builds when their worktree goes; Pablo's one-off cleanup offered in 0158.
+
 ## 2026-10-23 21:20
 
 - Last SHA seen: f2b9e37. leftovers 47 landed: bd04f92 (lf47-others), 4dd010d (lf47-runs-cost), f2b9e37 (lf47-review-moved). sup88 19:47-21:10, ~83 min against 25-50m (one review round on MV1, test-lease queue), $23.31 over 8 seats; run record runs/2026-10-23-sup88-leftovers-47.md. sup88 ended, token revoked, clean, installed v0.2.0-2675-gf2b9e37.
