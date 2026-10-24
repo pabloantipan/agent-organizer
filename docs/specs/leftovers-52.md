@@ -1,6 +1,6 @@
 # Leftovers 52: every state mark on one untransitioned layer, the Decisions line's last words, and a trimmed chosen: the build spec
 
-status: proposed (0162)
+status: ruled (0162, pablo 2026-10-24)
 by: the FSE, 2026-10-24, on main at e779bd3
 sources: Aglaea's `docs/ux/specs/review-view.md` Amendment 17 (039412c, R50)
 and `docs/ux/specs/rule-questions.md` Amendment 2 (0dc56ee, UW2, UW3);

@@ -6,7 +6,7 @@ branch: lf52-state-layer
 seat:
 stage:
 updated: 2026-10-24
-next: "pablo: rule 0162 (leftovers 52)"
+next: "sup93 runs it (0162 ruled 2026-10-24)"
 depends_on: []
 boundary: ["docs/specs/leftovers-52.md Boundary, lf52-state-layer"]
 spec: "docs/specs/leftovers-52.md (FR-1 to FR-3)"
