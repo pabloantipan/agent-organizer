@@ -125,3 +125,21 @@ UW2 (answers whole while the list line has room, the per-answer floor only
 when it has not; `decisions.css`) and UW3 (while a record is open, its line's
 accessible name drops the chosen; `lineName` in `decisionsPage.ts`). Both are
 outside this card's boundary.
+
+## Amendment 2 (FSE, 2026-10-24): the mark is its own layer
+
+From l51-comp-ui's UI review of lf51-composers (C1, severity 3: with the
+ease on the base rule a leaving mark eased out, so after a click the old
+row stayed filled; R43 failed) and Aglaea's `docs/ux/specs/review-view.md`
+Amendment 16 (1e3f9aa), which corrects her Amendment 15 UL4. FR-4 reads:
+hover eases the row's own `background-color` over 100 ms with `--ease-out`,
+in and out; the current or selected fill is painted by a separate layer
+with no transition (a `::before` at inset 0 under the content, or an inset
+`box-shadow`), so the mark arrives and leaves at once. CSS only, no
+short-lived class and no script; if the layer cannot be built inside the
+boundary, the fallback is a class the list sets on the row whose mark
+leaves, never giving up hover's ease-out nor accepting a fading mark.
+K4 adds: after a click, the row that lost the mark has no fill in the next
+frame (R43 as amended), and hover's background eases on the chat row (R49
+as amended). `.rail-item.active` keeps 15ec836's `transition: none` in this
+card; its layer follows in the next leftovers. C2: one curve, `--ease-out`.
