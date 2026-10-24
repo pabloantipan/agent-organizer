@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 50 - the floating icon comes back after a desktop change
-status: proposed
+status: ruled
 raised: 2026-10-24
 raised_by: fse
 owner: pablo
@@ -10,9 +10,9 @@ forecast: 30-60m
 stage: review-map
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-24
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -58,3 +58,7 @@ Clearing them touches your Dock: `lsregister -gc`, then
 
 forecast: 30-60m over 1 wave, no UI review, no lease data; basis: 3 tasks,
 this initiative (leftovers 45-47: 14, 23 and 83 min).
+
+## Ruling
+
+pablo, 2026-10-24, in the organizer on lodestar: go
