@@ -3,7 +3,7 @@ title: "Every composer lists recipients one way, the Chats head stays put, a cli
 status: next
 repos: [organizer]
 branch: lf51-composers
-seat:
+seat: l51-comp
 stage:
 updated: 2026-10-24
 next: "sup92 runs it (0160 ruled 2026-10-24)"

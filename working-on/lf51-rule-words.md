@@ -3,7 +3,7 @@ title: "The rule box and the Decisions list speak a question record: chosen in f
 status: next
 repos: [organizer]
 branch: lf51-rule-words
-seat:
+seat: l51-words
 stage:
 updated: 2026-10-24
 next: "sup92 runs it (0160 ruled 2026-10-24)"

@@ -3,7 +3,7 @@ title: "The crew launch test keeps its property with a bound swap cannot reach"
 status: next
 repos: [organizer]
 branch: lf51-crew-flake
-seat:
+seat: l51-flake
 stage:
 updated: 2026-10-24
 next: "sup92 runs it (0160 ruled 2026-10-24)"
