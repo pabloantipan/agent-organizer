@@ -143,3 +143,20 @@ K4 adds: after a click, the row that lost the mark has no fill in the next
 frame (R43 as amended), and hover's background eases on the chat row (R49
 as amended). `.rail-item.active` keeps 15ec836's `transition: none` in this
 card; its layer follows in the next leftovers. C2: one curve, `--ease-out`.
+
+## Amendment 3 (FSE, 2026-10-24): every other marked control keeps switching at once
+
+From l51-comp-ui's re-review of lf51-composers at a88877d (C3, severity 3;
+spec gap). Amendment 2 moved only the chat row's mark onto its own layer and
+kept `.rail-item.active` at `transition: none`; it was silent on the rest of
+the `transition: none` list lf48 FR-2 built (`button.person`, `.subtabs
+button`, `.seg button`, `.strip-item`, `.places .place-tab`, `.stg`,
+`.fl-row`, and every other entry), which FR-4 removed, so a mark leaving
+any of them eases again. FR-4 reads, for this card: the chat row as
+Amendment 2 has it; every other control on lf48's list keeps `transition:
+none` (hover included) until it gets its own layer, so no state mark eases
+anywhere. K4 adds: for each control on lf48's list, the computed transition
+is `none`, and after a press in the People panel the row that lost
+`.active` has no fill in the next frame. Moving those controls onto layers
+(so their hover eases too) is the next leftovers, with Aglaea's answer on
+whether the layer is the pattern for every marked control.
