@@ -3,7 +3,7 @@ import { marked } from "marked";
 import type { merge, model } from "../../wailsjs/go/models";
 import { DAY, dateWords, daysBetween, parseISO, today } from "../lib/dates";
 import { addLocalDays } from "../lib/axis";
-import { ownerPhrase } from "../lib/decisions";
+import { chosenFloor, chosenLines, ownerPhrase } from "../lib/decisions";
 import { RULED_LIMIT, countWords, decisionMatches, emptyRuledWords, lineName, rulerWords, ruledShown, shownSections, statusWord, summaryOf, timelineName, turnaroundWords, waitedWords, type DecSections } from "../lib/decisionsPage";
 import { readOnlyOf } from "../lib/queue";
 import { decisionKey, draftVerb, useDrafts, type Draft, type DraftFields } from "../lib/drafts";
@@ -270,7 +270,12 @@ export function DecisionsView() {
     const isOpen = expanded === r.key;
     const ruledOn = dateWords(parseISO(d.ruled) ?? now, now);
     const t = turnaroundWords(d.raised, d.ruled);
-    const chosen = d.status === "ruled" && d.chosen ? `“${d.chosen}”` : "";
+    const isRuled = d.status === "ruled" && !!d.chosen;
+    // leftovers-51 FR-8: a question record's line floors each answer
+    // (`Q1 after…, Q2 record…`), its name keeps the whole chosen; open, the
+    // line drops it, since the head shows it in full (FR-7).
+    const floor = isRuled ? chosenFloor(d.options, d.chosen) : null;
+    const chosen = isRuled && !isOpen ? `“${floor ?? d.chosen}”` : "";
     // FR-12, 0045: every proposed record offers Rule, whoever owns it.
     // FR-13: a record of an initiative that is not active offers none.
     const canRule = d.status === "proposed" && !readOnlyOf(view, r.initiative);
@@ -305,7 +310,7 @@ export function DecisionsView() {
       <div key={r.key} data-dec={r.key} className={`dec ${d.status} ${isOpen ? "expanded" : ""} ${focused ? "focused" : ""}`} style={style}>
         <div className={`dec-head ${stuck ? "stuck" : ""}`}>
           {/* §9: the name says each visible fact once ("waiting" once). */}
-          <button className="dec-line" ref={chosen ? watchLine : undefined} aria-expanded={isOpen} aria-label={`${lineName(d, now, all ? r.initiative : undefined, ruledOn)}${lineDraft ? ", draft" : ""}`} onClick={() => toggle(r.key)} title={`${chosen ? `${chosen} · ` : ""}${isOpen ? "collapse" : "show the record"}`}>
+          <button className="dec-line" ref={chosen ? watchLine : undefined} aria-expanded={isOpen} aria-label={`${lineName(d, now, all ? r.initiative : undefined, ruledOn)}${lineDraft ? ", draft" : ""}`} onClick={() => toggle(r.key)} title={`${chosen ? `“${d.chosen}” · ` : ""}${isOpen ? "collapse" : "show the record"}`}>
             <span className="dec-num mono">{d.number}</span>
             <span className={`dec-title${d.title.length > TITLE_FLOOR ? " floored" : ""}`}>{d.title}</span>
             {all && <span className="badge">{r.initiative}</span>}
@@ -314,8 +319,10 @@ export function DecisionsView() {
                 together (leftovers-13 FR-1): the option ellipsizes to its floor,
                 the title to its own, then watchLine drops both into the hover. */}
             {chosen && (
-              <span className={`dec-opt${chosen.length > CHOSEN_FLOOR ? " floored" : ""}`}>
-                <span className="dec-chosen" title={chosen}>{chosen}</span>
+              <span className={`dec-opt${chosen.length > CHOSEN_FLOOR && !floor ? " floored" : ""}`}>
+                {/* A floored question chosen is its floor: it does not shrink
+                    further, and past it watchLine drops it whole. */}
+                <span className="dec-chosen" title={`“${d.chosen}”`} style={floor ? { flex: "none" } : undefined}>{chosen}</span>
                 <span className="dec-sep">·</span>
               </span>
             )}
@@ -328,6 +335,16 @@ export function DecisionsView() {
             </span>
           </button>
           {isOpen && isRuling && facts}
+          {/* FR-7: the opened ruled record says what was ruled, one full
+              line per answer, wrapping, never cut. */}
+          {isOpen && isRuled && (
+            <div className="dec-facts">
+              <div>
+                <div>Chosen</div>
+                {chosenLines(d.options, d.chosen).map((l) => <div key={l}><b>{l}</b></div>)}
+              </div>
+            </div>
+          )}
           {isOpen && canRule && (
             <div className="dec-actions">
               <span className="rb-anchor">
