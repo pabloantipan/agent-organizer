@@ -4,6 +4,14 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## 2026-10-24 16:00
+
+- Last SHA seen: 1c79e4d. leftovers 50 landed: 80d617b (lf50-float-space), sup89 15:11-15:54, ~43 min against 30-60m, $4.39; run record runs/2026-10-24-sup89-leftovers-50.md. Installed v0.2.0-2700-g80d617b. leftovers-50 Amendment 1 (the drop stand-in is a window-server cover, not an orderOut).
+- 0157 ruled A by Pablo in Deltagos (1592af3); Themis told for crossing 0019; [for hephaistos] for the working-on skill format. sup91 runs lf49-rule-questions (launched when sup89 ended; swap 72-74%, pressure warn). sup90 runs lf48-chat-landing, in review.
+- 0159 (close review-map as moved, crossing 0020) proposed. I dropped lf49's stage before its ruling and put it back (1c79e4d): acting on a proposed record.
+- Repetition, second sighting: TestAppCreateCrewReturnsAtOnce's 1 s bound flakes under swap (1.10 s sup88, 1.16 s sup89). Cut as a hygiene card (HYGIENE: marker) in the next leftovers.
+- Held from sup89: change-check reads no Objective-C symbols (sent [for hephaistos]); a panel under another app's floating-level window is ordered above it once per read (builder's Risky, no card).
+
 ## 2026-10-24 14:40
 
 - Last SHA seen: f82cd90. sup89 runs leftovers 50 (0158, floating icon after a desktop change; diagnosis by a read-only subagent: one-shot full-screen read, no recovery when the window server drops the panel). 0156 (leftovers 48) proposed; 0157 (multi-question records) held by crossing 0019, with Pablo; hestia agreed with A.

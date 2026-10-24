@@ -75,3 +75,15 @@ for the new hook belongs there. Not `docs/ux/specs/floating-icon.md`.
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf50-float-space` | S1-S4, X0 | — | false |
+
+## Amendment 1 (FSE, 2026-10-24): what the drop stand-in does
+
+From sup89's closing report (finding 1). FR-3's "orders the panel out behind
+the code's back (AppKit's state left as shown)" cannot be done with public
+API: ordering the panel out clears `isVisible`. As built, the stand-in hides
+the panel at the window server (an opaque cover over it), which reaches
+FR-2's state (`isVisible` true, not on screen) though not by a real
+window-server drop. FR-3 reads: "another stand-in hides the panel at the
+window server while AppKit still calls it shown". The hooks also answer
+SIGWINCH and SIGINFO, so in a `FLOAT_LOG` build a terminal resize or Ctrl-T
+fires them (finding 5); normal runs have no hook.
