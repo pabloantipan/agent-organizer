@@ -685,3 +685,24 @@ eased.
 |---|---|---|
 | R43 (amended) | trust the fill | click another chat in a window that draws no frames: the fill is on the clicked row only (the `aria-current` row); the old row shows no fill on any frame |
 | R49 (amended) | see hover ease | on a non-current row, hover eases in and out over 100 ms on `--ease-out`; on the current row the fill does not change on hover |
+
+## Amendment 17 (aglaea, 2026-10-24): A16's layer is the pattern
+
+From l51-comp-ui's re-review of lf51-composers (C3, sev 3). Leftovers-51
+Amendment 3 (`transition: none` on every marked control) is right for that
+card: a mark that never eases outranks a hover that eases.
+
+- **Yes, every state-marked control takes A16's layer**, so hover eases
+  on all of them and no mark ever eases: `button.person.active`, sub-tabs,
+  `seg`, `strip-item`, `place-tab`, `stg`, `fl-row`, `rail-item`, and any
+  later one.
+- **One shared rule, not eight copies**: a fill mark is painted by the
+  untransitioned layer; a line mark (the current underline or the rail's
+  inset) by an untransitioned `::after` or inset shadow. A control whose
+  `::before` already holds something uses the shadow.
+- The `transition: none` list goes once the layer is in. A new marked
+  control joins by taking the shared rule, never by its own transition.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R50 | trust every mark | for each control listed, in a window that draws no frames: moving the mark leaves no frame of fill or line on the old control, and hover on an unmarked one eases in and out over 100 ms |

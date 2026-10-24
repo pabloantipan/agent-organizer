@@ -151,6 +151,11 @@ no `zero` or stylistic sets).
   instant, from CSS alone. Never put a state fill and a hover fill on the
   same property (A16). `--ease-exit` is for panels and boxes leaving, not
   for hover.
+  It is **one shared rule for every state-marked control** (chat row,
+  person, sub-tabs, seg, strip item, place tab, stage, flag row, rail item):
+  a fill mark on the layer, a line mark (the 2 px current underline or
+  inset) on an untransitioned `::after` or inset shadow; a control whose
+  `::before` is taken uses the shadow. Never a per-control copy (A17).
 - **Layers, one order everywhere**, from z-index tokens and never from bare
   numbers: content < sticky headings and heads < an inline box (rule box)
   and its scrim < the top bar < a drawer or modal (card back, Help) and its
