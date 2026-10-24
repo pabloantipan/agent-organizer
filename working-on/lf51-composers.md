@@ -64,37 +64,66 @@ Not changed, on purpose:
 - l51-comp, round 4: round 3's note is settled by Amendment 3. Still open and older than this card: `.rail-item`'s own base ease (global.css and the reduced-motion block) eases the rail's selected fill as it leaves; its layer is next leftovers (Amendment 2).
 
 ## Review
-Verdict: **pass** at a88877d (third round; the 15ec836 pass and the d7605a9 fail are superseded). Gate: K1-K5 with K4 as amended by Amendment 2 (f16e172), and X0. Unmet gate items: none.
+Verdict: **pass** at 490b943 (fourth round, reviewed whole; the a88877d, 15ec836 passes and the d7605a9 fail are superseded). Gate: K1-K5 with K4 as amended by Amendments 2 (f16e172) and 3 (b96419d), and X0. Unmet gate items: none.
 
-### change-check (from a fresh clean clone at a88877d)
+### change-check (from a fresh clean clone at 490b943)
 ```
-| outside boundary | frontend/src/components/Conversation.composers.test.tsx |  | added |
-| outside boundary | frontend/src/components/Conversation.landing.test.tsx |  | modified |
-| outside boundary | frontend/src/components/Conversation.reveal.test.tsx |  | modified |
-| untested? | frontend/src/components/Conversation.tsx | isCut | no test file names it |
-| untested? | frontend/src/components/Conversation.tsx | RecipientOptions | no test file names it |
+| outside boundary | organizer/frontend/src/components/Conversation.composers.test.tsx |  | added |
+| outside boundary | organizer/frontend/src/components/Conversation.landing.test.tsx |  | modified |
+| outside boundary | organizer/frontend/src/components/Conversation.reveal.test.tsx |  | modified |
+| untested? | organizer/frontend/src/components/Conversation.tsx | isCut | no test file names it |
+| untested? | organizer/frontend/src/components/Conversation.tsx | RecipientOptions | no test file names it |
 | declared, not changed |  | frontend/src/styles/global.css:.rail-item.active | no matching change |
 | declared, not changed |  | frontend/src/components/Conversation.landing.test.tsx:K4 | no matching change |
 | declared, not changed |  | frontend/src/styles/global.css:.chat | no matching change |
 | declared, not changed |  | frontend/src/components/Conversation.landing.test.tsx:K4 | no matching change |
-9 flags: outside boundary 3, outside footprint 0, undeclared 0, declared, not changed 4, new env var 0, new dependency 0, new host 0, risk 0, untested? 2
+| declared, not changed |  | frontend/src/components/Conversation.landing.test.tsx:K4 | no matching change |
+10 flags: outside boundary 3, outside footprint 0, undeclared 0, declared, not changed 5, new env var 0, new dependency 0, new host 0, risk 0, untested? 2, could not read 0, boundary unreadable 0
 ```
-- outside boundary ×3: Conversation.tsx's own tests, named by the Boundary; landing.test.tsx is also the CSS test that reads global.css. Explained.
-- untested? `isCut` (private, exercised through `rowReveal().click` in composers.test K3) and `RecipientOptions` (private, drawn by every K1 composer render). Explained.
-- declared, not changed ×4: change-check matches code symbols; CSS selectors (`.rail-item.active`, `.chat`) and a describe name (`K4`) are not symbols. The diff shows each: 83305c3..a88877d changes `.chat`, `.chat.active` and adds `.chat.active::before` (global.css:642-650) and four K4 tests; `.rail-item.active` none came in 15ec836 (still global.css list). Explained.
-- `git diff --stat main...a88877d`: the same 6 files. 83305c3..a88877d touches only global.css and Conversation.landing.test.tsx; Conversation.tsx, composers.test, reveal.test and fixture-home.sh are byte-identical (`git diff --quiet` exit 0). Lockfile as on main: no new dependency.
+- outside boundary ×3: Conversation.tsx's own tests, which the Boundary names; landing.test.tsx is also the CSS test that reads global.css. Explained.
+- untested? `isCut`: private, run through `rowReveal().click` in composers.test K3 (top cut, bottom cut, visible, within 0.5 px). `RecipientOptions`: private, drawn by every K1 render. Explained.
+- declared, not changed ×5: change-check matches code symbols, and CSS selectors (`.rail-item.active`, `.chat`) and a describe name (`K4`) are not symbols. The diff shows each one: `.rail-item.active` and its hover are in the none list (global.css:694-695). `.chat`, `.chat.active` and `.chat.active::before` are at global.css:643-650. The K4 rows are in landing.test.tsx. Explained.
+- `git diff --stat main...490b943`: 6 files, all in the Boundary. 6847c41..490b943 touches only global.css and landing.test.tsx. `pnpm-lock.yaml`, `package.json`, `go.mod` and `go.sum` are the same as on main, so no new dependency. Nothing under `frontend/wailsjs/`.
 
-### Rows
-- **K1 met.** composers.test: `recipientsOf`; new thread, reply box, rule box each `["", po_ana, dev_bruno, "# Others", sup10]` for `to=sup10`, `ghost` last under Others, a roster addressee not appended; Conversation's docked composer the same. The only recipient options are `RecipientOptions` plus each select's `everyone`; `shownSeats` gone. Fails on main (round 1): `expected [ '', 'po_ana', 'dev_bruno', 'sup10' ] to deeply equal [ …, '# Others', 'sup10' ]`.
-- **K2 met.** Label and `+` before `<div class="chats-rows">`, all rows and search inside; only `.chats-rows` scrolls. Main: `expected -1 to be greater than 0`.
-- **K3 met.** `scrollIntoView({ block: "nearest" })` once on a cut row (top or bottom), none on a visible one or on the commit after, also through Conversation's own handlers. Main: `called 1 times, but got 0 times`.
-- **K4 (amended) met.** Base `button` carries the 100 ms `--ease-out` on background, border, colour; the 15 other listed marks, `.rail-item.active` and disabled set `transition: none` with hover. The chat row: `.chat` has `transition: background-color var(--dur-fast) var(--ease-out)` and `.chat:hover` none of its own (hover eases in and out on one curve, no `--ease-exit`: C2); `.chat.active` keeps the base's `background: transparent; border-color: transparent` and sets `transition: none`; the fill and outline are `.chat.active::before` (absolute, inset -1px, z-index -1 under the content in the row's `z-index: 0` context, `transition: none`). My reading of the leaving row: its own background is transparent before and after the class goes, so its transition has nothing to run, and the layer goes with the class: no fill in the next frame (R43 amended). The row being clicked while hovered goes `--panel` → transparent under `.chat.active`'s `none`, so no fade there either. `.chat` is used only in Conversation.tsx. Reread global.css for every state-mark rule: covered, or not a control/fill (`.init.open` unused, `.rail-group-tools.open` a span, `.g-bar.open` a bar shape). Fails on main 09f65bb: `Tests 23 failed | 39 passed (62)` (base ease, 15 hovers, the four chat-row rows, rail-item, disabled). The new rows on 83305c3: `Tests 4 failed | 58 passed (62)`: `× .chat: hover eases the row's own background-color …`, `× .chat.active: the fill and outline are a ::before …`, `× .chat.active leaves the row's own background and border … (R43 amended)`, `× on the current row the fill does not change on hover`.
-- **K5 met.** From the a88877d clone, `scripts/fixture-home.sh --review`: `discuss/tokens.json` `-rw-------`, one `fixture-standin-… → {project: organizer-fixture, agent: pablo}`; config `discuss_state_dir: /private/tmp/organizer-fixture.*/discuss`, 0 lines matching `state/discuss|9494|.local/state`; `DISCUSS_BIND='unix:…/discuss/none.sock'` (no file). Without `--review` the script is byte-identical to the one I diffed against main in round 1 (same stdout, stderr, 194-file tree). Stand-in pids ended by saved pid, temp home removed.
-- **X0 met.** `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test`: **reused** run `4430c780-32187` of a88877d52ed4 (started by l51-comp-ui), exit 0: Go ok, `Test Files 84 passed (84)`, `Tests 1152 passed (1152)`. `pnpm run build` exit 0 `✓ built in 1.37s`; `wails build` exit 0; `git status --porcelain` empty.
+### Rows (each new test copied onto a clean clone of main c40eb66: `Tests 37 failed | 46 passed (83)`)
+- **K1 met.**
+  - `recipientsOf` is the one builder. The only recipient `<option>`s in Conversation.tsx are `RecipientOptions` (:824-825) plus each select's `everyone` (:656, :880, :1083). The new thread (:881), the reply box (:657) and the rule box (:1084) all draw it. `shownSeats` is gone from `frontend/src`.
+  - Tests: each of the three composers for `to=sup10` gives `["", po_ana, dev_bruno, "# Others", sup10]`; `ghost` goes last under Others; a roster addressee is not appended. Conversation's docked composer gives the same.
+  - Conversation passes `others` to ReplyBox (:510) and to NeedsMe, which passes it to both RuleBoxes (:992, :1022). Read, not rendered.
+  - On main: `expected [ '', 'po_ana', 'dev_bruno', 'sup10' ] to deeply equal [ '', 'po_ana', 'dev_bruno', …(2) ]`. RuleBox is not exported on main: `Element type is invalid … got: undefined`.
+- **K2 met.** The label and `+` come before `<div class="chats-rows">`. All rows and the search are inside it. Only `.chats-rows` has `overflow: auto`, since `.chats` lost it. On main: `expected -1 to be greater than 0`.
+- **K3 met.**
+  - `scrollIntoView({ block: "nearest" })` runs once, with no `behavior`, on a row cut at the bottom or at the top. It runs none on a visible row, none within 0.5 px of an edge, and none on the commit after.
+  - Every list row's onClick passes `e.currentTarget` and `rowsRef.current`.
+  - On main: `expected "vi.fn()" to be called 1 times, but got 0 times`.
+- **K4 (amended by A2 and A3) met.**
+  - Base `button` (global.css:22) carries `background|border-color|color var(--dur-fast) var(--ease-out)`, with `--dur-fast: 100ms`. The reduced-motion block no longer names `button`. `button:disabled` sets `transition: none`, and the aria-disabled rules do too.
+  - The 15 controls on lf48's list: base and `:hover` set `transition: none` (:664-693), and every mark and mark:hover sets none (:694-729).
+  - The chat row is per A2: a `::before` layer with no transition, and hover eases `background-color` on `--ease-out`.
+  - People panel: `.person.active` draws the fill. `button.person`, `button.person:hover`, `.active` and `.active:hover` are all none, and no `.person` rule in any stylesheet sets another transition. So the row that loses `.active` drops its fill in the next frame.
+  - The test reads every stylesheet, global.css first. I grepped every `transition:` in `frontend/src/styles/*.css` other than none. None lands on a listed control, so the computed value is none by the cascade.
+  - I reread global.css for every state-mark rule (`.active/.on/.open/.current`, `aria-current/expanded/pressed`, `:disabled`). Each is covered, or is not a control fill: `.init.open` is unused, `.rail-group-tools.open` is opacity on a span, `.g-bar.open` is a shape, and `.tiny-btn:disabled` is covered by `button:disabled`.
+  - On main, 23 K4 rows fail (base ease, hover none ×15, People, the chat rows, rail, disabled), for example `expected 'background var(--dur-fast) var(--ease…' to be 'none'`.
+  - The new rows against 6847c41's global.css (the C3 state): `Tests 17 failed | 46 passed (63)`, which is the 15 Amendment 3 rows plus `.gear.open` and the People panel row. So they catch C3.
+- **K5 met.** From the 490b943 clone, `scripts/fixture-home.sh --review` exits 0.
+  - `discuss/tokens.json` is `-rw-------` and holds 1 entry, `fixture-standin-… → {project: organizer-fixture, agent: pablo}`.
+  - The config has `discuss_state_dir: /private/tmp/organizer-fixture.AARuIA/discuss` and 0 lines matching `state/discuss|9494|.local/state|.local/share/organizer`.
+  - `DISCUSS_BIND='unix:…/discuss/none.sock'`, and the socket file does not exist.
+  - Without `--review`, branch and main give the same normalised env output and config, a 405-file tree that is the same apart from temp names, pids and git object hashes, and stderr that differs only in temp names. There is no `DISCUSS_BIND` and no tokens.json.
+  - I ended the 24 stand-in agents by the pids I saved (`organizer-fixture-agent`, checked with `ps` first) and removed the temp homes.
+- **X0 met.**
+  - `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test`: **reused** run `7a530487-88382` of 490b943f6bf8 (started by organizer-probe-l51-comp-ui), exit 0. Go is all ok; vitest gives `Test Files 84 passed (84)` and `Tests 1153 passed (1153)`.
+  - `test-lease run -- pnpm run build` exits 0 (`✓ built in 1.33s`). `test-lease run -- wails build` exits 0.
+  - `git status --porcelain` in the clone was empty, before and after `git checkout -- frontend/wailsjs/runtime`.
 
-### Notes
-- Note (the gate, to the FSE): Amendment 2 moves only the chat row's mark to a layer and defers `.rail-item.active`; it is silent on the other 15 marked controls (`button.person.active`, `.seg button.on`, `.subtabs button.on`, `.places .place-tab.on`, `.gear.on/.open`, `.stg.current`, …). On main their bases carried `transition: none` because "a transition is read from the style after the change" (0694b32 global.css:646, the base list ending :665); FR-4 as first written put the ease on the base and this branch removed those bases (`grep -c '^button.person,$'`: main 1, a88877d 0). So on those controls a leaving mark now eases out over 100 ms: C1 on every one but the chat row and the rail. The builder followed the gate; the gate needs the layer (or the leave rule) for them too, in this card or the next leftovers.
-- Note: the review fixture shows mailbox errors on the absent socket (declared Risky); expected under FR-5. To the FSE.
+### Notes (none blocking)
+- Note, to the next leftovers (Amendment 2 defers it): `.rail-item` keeps its own base ease (global.css `.rail-item` and the reduced-motion block). So the rail's selected fill still eases as it leaves, though `.rail-item.active` is none. The builder records the same.
+- Note, to the FSE (outside this Boundary, and older than this card): two marks outside lf48's list sit on bases that carry their own transition, so they ease in and out.
+  - `roles.css:31` `.r-row[aria-expanded="true"]` (its base `.r-row` eases background, :27).
+  - `rule-box.css:118` `.rb-option.on span` (its base eases background and border, :111).
+  - The design system's "a state mark never eases" reaches them too. They belong with Aglaea's answer on the layer pattern.
+- Note, to the FSE: K1's NeedsMe-to-RuleBox `others` path is read, not rendered by a test; the RuleBox render is tested directly.
+- Note, to the FSE: the review fixture shows mailbox errors on the absent socket (declared Risky). This is expected under FR-5.
 
 Reviewer `l51-comp-review`, 2026-10-24.
 
