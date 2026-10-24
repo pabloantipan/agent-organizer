@@ -13,12 +13,13 @@ import (
 
 // P2 (leftovers-27 FR-2): from the app, Bring crew up returns once the seats
 // are queued, before the probe stub's first sleep ends; the seats then start
-// in the background and all run.
+// in the background and all run. The bound is half the stub's sleep so swap
+// cannot reach it (leftovers-51 FR-6).
 func TestAppCreateCrewReturnsAtOnce(t *testing.T) {
 	stub, _ := filepath.Abs(filepath.Join("scripts", "probe-stub.sh"))
 	bin := t.TempDir()
 	t.Setenv("ORGANIZER_PROBE_BIN", stub)
-	t.Setenv("PROBE_STUB_SLEEP", "3")
+	t.Setenv("PROBE_STUB_SLEEP", "6")
 	t.Setenv("PROBE_STUB_FAIL", "")
 	t.Setenv("XDG_DATA_HOME", t.TempDir())
 	if err := os.WriteFile(filepath.Join(bin, "discuss-api"), []byte("#!/bin/sh\necho 'export DISCUSS_TOKEN=x'\n"), 0o755); err != nil {
@@ -52,8 +53,8 @@ func TestAppCreateCrewReturnsAtOnce(t *testing.T) {
 	if err != nil || len(res.Lines) != 3 || res.Running == nil || len(res.Running) != 0 {
 		t.Fatalf("CreateCrew: %+v, %v", res, err)
 	}
-	if took >= time.Second {
-		t.Errorf("CreateCrew took %v, want < 1 s (the stub sleeps 3 s per seat)", took)
+	if took >= 3*time.Second {
+		t.Errorf("CreateCrew took %v, want < 3 s (the stub sleeps 6 s per seat)", took)
 	}
 	t.Logf("App.CreateCrew returned in %v", took)
 	if v := svc.Launches(); len(v) != 1 || v[0].Done {
