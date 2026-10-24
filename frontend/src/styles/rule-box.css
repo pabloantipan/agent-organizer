@@ -92,7 +92,13 @@
 /* options: one radio each, drawn as a row; the native control is kept for
    keyboard and screen readers but not painted */
 .rb-options { display: grid; gap: var(--space-1); margin: 0; padding: 0; border: 0; min-width: 0; }
-.rb-options legend { margin-bottom: var(--space-1); }
+.rb-options legend { margin-bottom: var(--space-1); max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+/* leftovers-51 FR-9: the question's words beside Q<n>, read as words, not
+   as a label: wrapping in full, never cut */
+.rb-question {
+  font-size: var(--font-size-sm); line-height: var(--line-sm); letter-spacing: normal;
+  text-transform: none; color: var(--fg-muted);
+}
 .rb-option { position: relative; display: block; cursor: pointer; }
 .rb-option input {
   position: absolute; opacity: 0; width: 1px; height: 1px; min-height: 0; margin: 0; padding: 0; border: 0;
@@ -130,6 +136,8 @@
 }
 .rb-foot { display: flex; align-items: center; gap: var(--space-2); }
 .rb-sign { flex: 1; min-width: 0; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-subtle); }
+/* leftovers-51 FR-10: what keeps Rule disabled, beside it */
+.rb-missing { flex: 0 1 auto; min-width: 0; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); }
 .rb-foot button { min-height: var(--control-md); font-size: var(--font-size-md); }
 @media (prefers-reduced-motion: reduce) { .rb-option span { transition: none; } }
 /* a record's sub-headings (a roster record's "Seats drafted") read as
