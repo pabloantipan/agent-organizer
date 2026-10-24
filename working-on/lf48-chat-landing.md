@@ -7,7 +7,7 @@ seat: l48-build
 reviewer: l48-review, l48-ui
 stage: review-map
 updated: 2026-10-24
-next: "l48-build: fix review F1 (L1 test drives a landing through Conversation) and F2 (FR-2 opt-outs for .seg button.on, .week-list button[aria-current], .subtabs button.on, .place-tab.on, .gear.on in global.css) (sup90)"
+next: "review: lf48-chat-landing, gate L1-L4 and X0 pass after F1 and F2, b280b92"
 review: fail
 depends_on: []
 boundary: ["docs/specs/leftovers-48.md Boundary"]
@@ -23,12 +23,13 @@ Landing in Conversations always shows the row you landed on, the highlight never
 docs/specs/leftovers-48.md, rows L1-L4 and X0; the UI review checks review-view R42 to R44.
 
 ## Declared changes
-- modified `frontend/src/styles/global.css`: state fills switch with no transition on and off, hover keeps its ease in; opted out: `.chat.active`, `button.person.active`, `.strip-all.active`, `.strip-item.active`, `.tiny-btn[aria-pressed="true"]` (FR-2)
+- modified `frontend/src/styles/global.css`: every current, selected or open fill on a button that rode button's transition switches with none on and off, the base drops it, hover keeps its ease in; opted out: `.chat.active`, `button.person.active`, `.strip-all.active`, `.strip-item.active`, `.tiny-btn[aria-pressed="true"]`, `.seg button.on`, `.subtabs button.on`, `.places .place-tab.on`, `.gear.on`, `.gear.open`, `.stg.current`, `.fl-row.on`, `.week-list button[aria-current="true"]`, `.ib-act .act[aria-expanded="true"]`, `.ihead-details[aria-expanded="true"]`, `.memory button.memory-btn[aria-expanded="true"]`, `.ic-more[aria-expanded="true"]` (FR-2, F2)
 - added `frontend/src/components/Conversation.tsx:rowReveal`: scrolls the chat list's current row into view, nearest and instant, on a landing; a pick in the list scrolls nothing (FR-1)
 - modified `frontend/src/components/Conversation.tsx:Conversation`: a layout effect on the current chat calls `rowReveal`; list rows mark their pick (`listPick`, `reveal.click`); both new-thread forms get `others` (FR-1, FR-3)
 - modified `frontend/src/components/Conversation.tsx:NewThread`: `others` prop, an `Others` optgroup after the roster, none when empty (FR-3)
 - modified `frontend/src/components/Conversation.tsx:shownSeats`: an addressee under Others is not appended to the roster (FR-3)
-- added `frontend/src/components/Conversation.landing.test.tsx`: gate rows L1-L3
+- added `frontend/src/components/Conversation.landing.test.tsx`: L1 on `rowReveal`, L2 over every stylesheet, L3
+- added `frontend/src/components/Conversation.reveal.test.tsx`: L1 driven through `Conversation` (stand-in hooks run its layout effect), a landing and a click (F1)
 - modified `scripts/fixture-home.sh`: `--review` adds one open pablo/sup10 direct thread to the canned health (FR-4)
 Risky:
 - `global.css`: on the opted-out controls hover now eases in and leaves at once; an old row that is hovered while a landing moves the mark eases from the fill to the hover colour
@@ -36,10 +37,11 @@ Risky:
 Not changed, on purpose:
 - `testdata/fixture-health.json`: the script adds the thread
 - `frontend/src/components/Conversation.tsx:ReplyBox`, `RuleBox`: FR-3 names only NewThread's picker
-- other stylesheets' selected fills (`shell.css`, `roles.css`, `overview.css`, `work.css`, `.rail-item`): not on the global button transition, outside the boundary
+- fills that set their own transition, not button's: `.r-row[aria-expanded]` (roles.css), `.rb-option` (rule-box.css), `.rail-item`, `.card`, `.wk-*`, `.p-row`, `.gl-row`; fills on non-buttons or on a child (`.rv-row.on` li, `.chart-bar.on .chart-mark`, `.rs-radio.on span`): no button transition to opt out of
 
 ## Done
 - 2026-10-24 l48-build: FR-1 to FR-4 on `lf48-chat-landing` (dee2e79, 5d1bbdc, e559f4d); L1-L4 fail on main and pass on the branch; X0 passes from a clean clone (`.wt-notes/l48-build/progress.md`)
+- 2026-10-24 l48-build: review F1 and F2 fixed (6667274, b280b92), rebased on main at f0496c4; L1 now fails with the layout effect deleted, a list row's pick unmarked, or a smooth scroll; L1-L3 42 fail on main, 61 pass on the branch; X0 passes from a clean clone at b280b92
 
 ## Notes
 - L4's "last message the human's": the canned health carries a thread's head only (participants and a count, no bodies), so it is stated by the script and the participant order; the organizer reads no message in it, so it asks nothing.
@@ -76,7 +78,7 @@ repo organizer: base 0c80c717f (default origin/main) ... head lf48-chat-landing 
 
 - `testdata/fixture-health.json`: the script adds the thread
 - `frontend/src/components/Conversation.tsx:ReplyBox`, `RuleBox`: FR-3 names only NewThread's picker
-- other stylesheets' selected fills (`shell.css`, `roles.css`, `overview.css`, `work.css`, `.rail-item`): not on the global button transition, outside the boundary
+- fills that set their own transition, not button's: `.r-row[aria-expanded]` (roles.css), `.rb-option` (rule-box.css), `.rail-item`, `.card`, `.wk-*`, `.p-row`, `.gl-row`; fills on non-buttons or on a child (`.rv-row.on` li, `.chart-bar.on .chart-mark`, `.rs-radio.on span`): no button transition to opt out of
 
 ## Flags
 
