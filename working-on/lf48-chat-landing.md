@@ -6,7 +6,7 @@ branch: lf48-chat-landing
 seat:
 stage: review-map
 updated: 2026-10-23
-next: "pablo: rule 0156 (leftovers 48)"
+next: "sup90 runs it (0156 ruled 2026-10-24)"
 depends_on: []
 boundary: ["docs/specs/leftovers-48.md Boundary"]
 spec: "docs/specs/leftovers-48.md (FR-1 to FR-4)"
