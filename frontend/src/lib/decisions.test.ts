@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { merge, model } from "../../wailsjs/go/models";
-import { ownerPhrase, recordSections, signalOwners, waitingDecisions, waitingOwners } from "./decisions";
+import { allAnswered, answersOf, ownerPhrase, picksOf, questionsOf, recordSections, signalOwners, waitingDecisions, waitingOwners } from "./decisions";
 
 const initiative = (...decisions: Partial<model.Decision>[]) => ({ decisions }) as unknown as merge.BoardInitiative;
 const rec = (number: string, owner: string, raised: string, status = "proposed") => ({ number, owner, raised, status });
@@ -84,5 +84,52 @@ describe("signalOwners (0060)", () => {
   it("follows the lead, not the name pablo", () => {
     const i = initiative(rec("0001", "pablo", "2026-09-01"), rec("0002", "ana", "2026-09-02"));
     expect(signalOwners(i, "ana")).toEqual(["pablo", "you"]);
+  });
+});
+
+// leftovers-49 FR-1 to FR-3: the question shape, as scan.Questions reads it.
+describe("questionsOf", () => {
+  const hestia0037 = [
+    "Q1 after-graph-performs-start-now | after-graph-performs-wait | before-graph-performs",
+    "Q2 record-page | neo4j-perspective | organizer-view",
+  ];
+
+  it("reads one question per item, alternatives split by |", () => {
+    expect(questionsOf(hestia0037)).toEqual([
+      { label: "Q1", alts: ["after-graph-performs-start-now", "after-graph-performs-wait", "before-graph-performs"] },
+      { label: "Q2", alts: ["record-page", "neo4j-perspective", "organizer-view"] },
+    ]);
+  });
+
+  it("trims the spaces around each |", () => {
+    expect(questionsOf(["Q1 a|b  |  c"])).toEqual([{ label: "Q1", alts: ["a", "b", "c"] }]);
+  });
+
+  it("is null for every other record", () => {
+    expect(questionsOf(["tray", "fsnotify", "none"])).toBeNull();
+    expect(questionsOf(["Q1 a | b", "none"])).toBeNull();
+    expect(questionsOf(["Q1 amend-exit", "Q2 a | b"])).toBeNull();
+    expect(questionsOf(["Q1 a | | b"])).toBeNull();
+    expect(questionsOf(["Q1 start-now, Q2 record-page"])).toBeNull();
+    expect(questionsOf([])).toBeNull();
+    expect(questionsOf(undefined)).toBeNull();
+  });
+});
+
+describe("answersOf and picksOf", () => {
+  const qs = questionsOf(["Q1 a | b, c", "Q2 x | y"])!;
+
+  it("writes the picks in question order, , between", () => {
+    expect(answersOf(qs, { Q2: "y", Q1: "a" })).toBe("Q1 a, Q2 y");
+    expect(answersOf(qs, { Q2: "y" })).toBe("Q2 y");
+    expect(allAnswered(qs, { Q2: "y" })).toBe(false);
+    expect(allAnswered(qs, { Q1: "a", Q2: "y" })).toBe(true);
+  });
+
+  it("reads the picks back, an alternative holding , included", () => {
+    expect(picksOf(qs, "Q1 b, c, Q2 x")).toEqual({ Q1: "b, c", Q2: "x" });
+    expect(picksOf(qs, "Q2 y")).toEqual({ Q2: "y" });
+    expect(picksOf(qs, "Q1 nope, Q2 x")).toEqual({ Q2: "x" });
+    expect(picksOf(qs, "")).toEqual({});
   });
 });
