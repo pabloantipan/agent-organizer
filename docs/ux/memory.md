@@ -444,6 +444,10 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - A scroll-into-view must never cut a list's own head; keep heads with controls outside the scroller (review-view A15).
 - Put a transition on the base rule, never on :hover only, or the exit snaps (design system, review-view A15).
 
+- A floor applied to a compound value (several answers) must floor per part, or the second part is never read; and the open record itself must show what was ruled (rule-questions A1).
+- A radio group's name is its question, not its number: `Q1 · <words>` (rule-questions A1).
+- "Incomplete needs no reason text" holds only while the missing input is in view; in a scrolling box the foot names it (design system, rule-questions A1).
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).

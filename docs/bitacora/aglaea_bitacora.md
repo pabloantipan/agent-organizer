@@ -182,3 +182,4 @@ resumes. The seat moves to the new discuss watcher (wake-rearm, api
 - 2026-10-23 — o47-ui on lf47-others graded: review-view Amendment 13 (landing scrolls the current row into view; state marks never ease, added to the design system; picker lists Others), R42-R44.
 - 2026-10-23 — m47-ui on lf47-review-moved graded: review-view Amendment 14 (R22 focus to the checked radio after UW2; unasked saved Question/Blocked keeps Ask), R22 amended, R45.
 - 2026-10-24 — l48-ui on lf48-chat-landing graded: review-view Amendment 15 (one recipient list; Chats head outside the scroller; a click reveals a cut row; ease on the base, none while state-marked, design system updated), R46-R49.
+- 2026-10-24 — l49-ui on lf49-rule-questions graded: new docs/ux/specs/rule-questions.md Amendment 1 (Chosen in the open record's head, per-answer floor; legend Q1 · question; foot names what is missing, design system incomplete row amended; plural placeholder), Q1-Q5.
