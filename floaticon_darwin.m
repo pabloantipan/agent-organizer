@@ -71,7 +71,8 @@ static NSWindowAnimationBehavior homeAnimation;
 static BOOL started;
 static FILE *logFile;
 static char *logPath;                 // the float log's path, kept for the check hook
-static dispatch_source_t usr1, usr2; // the check hooks, only with FLOAT_LOG
+static dispatch_source_t usr1, usr2, winch, info; // the check hooks, only with FLOAT_LOG
+static NSMutableArray<NSNumber *> *fsStandIn; // the desktop-change hook's full-screen readings, one per read
 static NSUInteger spaceChanges;       // desktop-change notifications so far; a re-read acts only for the latest
 static NSString *placePath;
 static NSMutableDictionary *places;   // display key -> {x, y} of the tile from the visible frame's origin
@@ -550,6 +551,13 @@ static void markHome(NSString *why) {
 // FR-1): mid-slide the list holds both desktops' windows (the spike's
 // misfire), and the later read is the one that stands.
 static BOOL fullScreenSpace(void) {
+    if ([fsStandIn count]) {
+        BOOL v = [fsStandIn[0] boolValue];
+        [fsStandIn removeObjectAtIndex:0];
+        flog(@"full-screen test: stand-in %d from %s.fs (%lu left): %@", v, logPath, (unsigned long)[fsStandIn count],
+             v ? @"a full-screen Space" : @"a normal desktop");
+        return v;
+    }
     NSScreen *scr = [panel screen] ?: [NSScreen mainScreen];
     NSRect f = [scr frame];
     CGFloat top = NSMaxY([[NSScreen screens][0] frame]);
@@ -1304,6 +1312,53 @@ void FloatIconStart(const char *logArg, const char *placeFile) {
                 doubleClicked();
             });
             dispatch_resume(usr2);
+            // SIGWINCH posts the desktop-change notification with stand-in
+            // full-screen readings, one per read in order, from <FLOAT_LOG>.fs
+            // (`1` or `0` per line); past them the window list is read.
+            signal(SIGWINCH, SIG_IGN);
+            winch = dispatch_source_create(DISPATCH_SOURCE_TYPE_SIGNAL, SIGWINCH, 0, dispatch_get_main_queue());
+            dispatch_source_set_event_handler(winch, ^{
+                NSString *fs = [NSString stringWithContentsOfFile:[NSString stringWithFormat:@"%s.fs", logPath] encoding:NSUTF8StringEncoding error:nil];
+                fsStandIn = [NSMutableArray array];
+                for (NSString *l in [fs componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]) {
+                    if ([l isEqualToString:@"1"] || [l isEqualToString:@"0"]) [fsStandIn addObject:@([l isEqualToString:@"1"])];
+                }
+                flog(@"SIGWINCH: full-screen stand-in %@ from %s.fs; posting the desktop-change notification",
+                     [fsStandIn componentsJoinedByString:@","], logPath);
+                [[[NSWorkspace sharedWorkspace] notificationCenter] postNotificationName:NSWorkspaceActiveSpaceDidChangeNotification
+                                                                                  object:[NSWorkspace sharedWorkspace]];
+            });
+            dispatch_resume(winch);
+            // SIGINFO stands for the window server dropping the panel: a window
+            // of the panel's own level, frame and desktops is put over it, so
+            // the window server shows none of it while AppKit's isVisible stays
+            // 1; ordering the panel front again puts it back on top. No public
+            // call orders a window out and leaves isVisible set. The cover goes
+            // by itself 5 s later.
+            signal(SIGINFO, SIG_IGN);
+            info = dispatch_source_create(DISPATCH_SOURCE_TYPE_SIGNAL, SIGINFO, 0, dispatch_get_main_queue());
+            dispatch_source_set_event_handler(info, ^{
+                if (![panel isVisible]) {
+                    flog(@"SIGINFO: the icon is not shown; nothing to drop");
+                    return;
+                }
+                NSWindow *cover = [[NSWindow alloc] initWithContentRect:[panel frame] styleMask:NSWindowStyleMaskBorderless
+                                                                backing:NSBackingStoreBuffered defer:NO];
+                [cover setReleasedWhenClosed:NO];
+                [cover setOpaque:YES];
+                [cover setHasShadow:NO];
+                [cover setIgnoresMouseEvents:YES];
+                [cover setBackgroundColor:[NSColor blackColor]];
+                [cover setLevel:[panel level]];
+                [cover setCollectionBehavior:[panel collectionBehavior]];
+                [cover orderFrontRegardless];
+                after(0.1, ^{ flog(@"SIGINFO: the panel dropped at the window server: isVisible=%d on screen=%d", [panel isVisible], onScreen()); });
+                after(5, ^{
+                    [cover orderOut:nil];
+                    flog(@"SIGINFO: the drop stand-in's cover gone");
+                });
+            });
+            dispatch_resume(info);
             watchActivation();
         }
         flog(@"start: main=%@ min=%@ reduceMotion=%d ignoresMouse=%d icon window %ld", NSStringFromRect([mainWin frame]), NSStringFromSize(appMinSize), reduceMotion(), [panel ignoresMouseEvents], (long)[panel windowNumber]);
@@ -1316,6 +1371,14 @@ void FloatIconStart(const char *logArg, const char *placeFile) {
         if (logFile && show && strcmp(show, "1") == 0 && ![panel isVisible]) {
             showIcon();
             flog(@"FLOAT_SHOW_ICON: icon shown on the home desktop for a check");
+        }
+        // FLOAT_COMPACT=1 compacts at start, as the Compact control does: the
+        // icon is then wanted on every desktop, this one too, so a desktop
+        // change decides by the full-screen test alone.
+        const char *compact = getenv("FLOAT_COMPACT");
+        if (logFile && compact && strcmp(compact, "1") == 0) {
+            flog(@"FLOAT_COMPACT: compacting at start for a check");
+            FloatIconCompact();
         }
     });
 }

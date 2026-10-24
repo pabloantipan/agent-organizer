@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"regexp"
+	"strings"
 	"testing"
 )
 
@@ -44,5 +45,48 @@ func TestSpaceChangeReread(t *testing.T) {
 		if !want.MatchString(src) {
 			t.Errorf("floaticon_darwin.m: no %q", want)
 		}
+	}
+}
+
+// The check hooks exist only with FLOAT_LOG (leftovers-50 FR-3, S4): the
+// signals, the .fs read and FLOAT_COMPACT sit inside the logFile branch.
+func TestCheckHooksOnlyWithLog(t *testing.T) {
+	b, err := os.ReadFile("floaticon_darwin.m")
+	if err != nil {
+		t.Fatal(err)
+	}
+	src := string(b)
+	open := strings.Index(src, "if (logFile) {\n            signal(SIGUSR1")
+	if open < 0 {
+		t.Fatal("floaticon_darwin.m: no logFile branch around the SIGUSR1 hook")
+	}
+	depth, end := 0, -1
+	for i := open + len("if (logFile) "); i < len(src); i++ {
+		if src[i] == '{' {
+			depth++
+		} else if src[i] == '}' {
+			if depth--; depth == 0 {
+				end = i
+				break
+			}
+		}
+	}
+	if end < 0 {
+		t.Fatal("floaticon_darwin.m: the logFile branch does not close")
+	}
+	for _, s := range []string{"SIGWINCH", "SIGINFO", `%s.fs"`, "fsStandIn = "} {
+		for i := 0; ; i += len(s) {
+			j := strings.Index(src[i:], s)
+			if j < 0 {
+				break
+			}
+			i += j
+			if i < open || i > end {
+				t.Errorf("floaticon_darwin.m: %q at byte %d, outside the logFile branch (%d-%d)", s, i, open, end)
+			}
+		}
+	}
+	if !regexp.MustCompile(`if \(logFile && compact && strcmp\(compact, "1"\) == 0\)`).MatchString(src) {
+		t.Error("floaticon_darwin.m: FLOAT_COMPACT not guarded by logFile")
 	}
 }
