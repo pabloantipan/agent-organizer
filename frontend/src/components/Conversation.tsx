@@ -111,6 +111,8 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   const human = group.human;
   const seats = (group.cell?.agents ?? []).filter((a) => a !== human);
   const othersSeen = useRef<string[]>([]);
+  const chatsRef = useRef<HTMLElement>(null);
+  const [reveal] = useState(rowReveal);
 
   // Reading the mailbox is picking up the mail: every message addressed to
   // the human is marked delivered when a chat of this cell is shown, and
@@ -270,6 +272,8 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   const askNew = () => { askedNew.current = chat; setTarget(null); setPrefill(null); };
   const pick = (v: View) => { onFocus(null); setView(v); setQuery(""); };
   const pickPerson = (a: string) => { setView("channel"); onFocus(a); setQuery(""); };
+  // A pick in the list is not a landing: its row is in view already (FR-1).
+  const listPick = (v: View) => { reveal.click(chatKey(null, v)); pick(v); };
   const targetThread = target ? threads.find((t) => t.id === target) : undefined;
   const targetDetail = target ? details[target] : undefined;
   const waitingByThread = new Map<string, string[]>();
@@ -331,11 +335,13 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   // A seat's row and an Other's are drawn alike: @, the name, the counts.
   // Others are not seats, so no health words here or in the People panel.
   const others = othersOf(all, human, seats, focus, othersSeen.current);
+  // leftovers-48 FR-1: a landing shows its row, in the commit that draws it.
+  useLayoutEffect(() => { reveal.current(chat, chatsRef.current?.querySelector<HTMLElement>('.chat[aria-current="true"]') ?? null); }, [chat, reveal]);
   const personRow = (a: string) => {
     const n = all.filter((t) => chatOf(t) === a).length;
     const fresh = all.filter((t) => chatOf(t) === a && isNew(t)).length;
     return (
-      <button key={a} aria-current={chat === chatKey(a, "channel") ? "true" : undefined} className={`chat ${focus === a ? "active" : ""} ${fresh > 0 ? "fresh" : ""}`} onClick={() => pickPerson(a)} title={`direct with ${a}`}>
+      <button key={a} aria-current={chat === chatKey(a, "channel") ? "true" : undefined} className={`chat ${focus === a ? "active" : ""} ${fresh > 0 ? "fresh" : ""}`} onClick={() => { reveal.click(chatKey(a, "channel")); pickPerson(a); }} title={`direct with ${a}`}>
         <AtSign size={12} /><span className="chat-name">{a}</span>{draftMark(chatKey(a, "channel"), all.filter((t) => chatOf(t) === a))}{fresh > 0 ? <span className="chat-fresh">{fresh}</span> : n > 0 ? <span className="chat-n">{n}</span> : null}
       </button>
     );
@@ -345,7 +351,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
   return (
     <div className="cell with-chats">
       {/* The current row is the chat shown, whoever showed it (leftovers-41 FR-5). */}
-      <nav className="chats">
+      <nav className="chats" ref={chatsRef}>
         <div className="chats-label">
           <span>Chats</span>
           <span className="spacer" />
@@ -357,16 +363,16 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
           <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="search" aria-label={`Search ${initiativeId}'s conversations`} />
           {query && <button className="rail-icon" onClick={() => setQuery("")} aria-label="Clear search" title="Clear search"><X size={12} /></button>}
         </div>
-        <button aria-current={chat === "needs" ? "true" : undefined} className={`chat ${!focus && view === "needs" ? "active" : ""} ${counts.needs > 0 ? "fresh hot" : ""}`} onClick={() => pick("needs")} title="escalated to you, or a message addressed to you with no reply from you after it"><Inbox size={12} /><span className="chat-name">needs me</span>{draftMark("needs", openThreads)}{counts.needs > 0 && <span className="chat-fresh hot">{counts.needs}</span>}</button>
-        {reconciler && reconciler !== human && <button aria-current={chat === "reconciler" ? "true" : undefined} className={`chat ${!focus && view === "reconciler" ? "active" : ""}`} onClick={() => pick("reconciler")} title={`the reconciler's backlog: stalled, or answered and left without a decision. ${reconciler}'s work, not yours`}><Gavel size={12} /><span className="chat-name">needs {reconciler}</span>{draftMark("reconciler", all.filter(needsReconciler))}{counts.reconciler > 0 && <span className="chat-n">{counts.reconciler}</span>}</button>}
-        <button aria-current={chat === "channel" ? "true" : undefined} className={`chat ${!focus && view === "channel" ? "active" : ""} ${counts.channelFresh > 0 ? "fresh" : ""}`} onClick={() => pick("channel")} title="every conversation not between you and one seat"><Hash size={12} /><span className="chat-name">channel</span>{draftMark("channel", all.filter((t) => chatOf(t) === null && t.kind !== "journal"))}{counts.channelFresh > 0 ? <span className="chat-fresh">{counts.channelFresh}</span> : counts.channel > 0 ? <span className="chat-n">{counts.channel}</span> : null}</button>
+        <button aria-current={chat === "needs" ? "true" : undefined} className={`chat ${!focus && view === "needs" ? "active" : ""} ${counts.needs > 0 ? "fresh hot" : ""}`} onClick={() => listPick("needs")} title="escalated to you, or a message addressed to you with no reply from you after it"><Inbox size={12} /><span className="chat-name">needs me</span>{draftMark("needs", openThreads)}{counts.needs > 0 && <span className="chat-fresh hot">{counts.needs}</span>}</button>
+        {reconciler && reconciler !== human && <button aria-current={chat === "reconciler" ? "true" : undefined} className={`chat ${!focus && view === "reconciler" ? "active" : ""}`} onClick={() => listPick("reconciler")} title={`the reconciler's backlog: stalled, or answered and left without a decision. ${reconciler}'s work, not yours`}><Gavel size={12} /><span className="chat-name">needs {reconciler}</span>{draftMark("reconciler", all.filter(needsReconciler))}{counts.reconciler > 0 && <span className="chat-n">{counts.reconciler}</span>}</button>}
+        <button aria-current={chat === "channel" ? "true" : undefined} className={`chat ${!focus && view === "channel" ? "active" : ""} ${counts.channelFresh > 0 ? "fresh" : ""}`} onClick={() => listPick("channel")} title="every conversation not between you and one seat"><Hash size={12} /><span className="chat-name">channel</span>{draftMark("channel", all.filter((t) => chatOf(t) === null && t.kind !== "journal"))}{counts.channelFresh > 0 ? <span className="chat-fresh">{counts.channelFresh}</span> : counts.channel > 0 ? <span className="chat-n">{counts.channel}</span> : null}</button>
         <div className="chats-label sub"><span>People</span></div>
         {seats.map(personRow)}
         {others.length > 0 && <div className="chats-label sub"><span>Others</span></div>}
         {others.map(personRow)}
         <div className="chats-label sub"><span>More</span></div>
-        <button aria-current={chat === "journal" ? "true" : undefined} className={`chat ${!focus && view === "journal" ? "active" : ""}`} onClick={() => pick("journal")} title="self-addressed notes: each seat's open questions"><BookOpen size={12} /><span className="chat-name">journal</span>{draftMark("journal", all.filter((t) => t.kind === "journal"))}{counts.journal > 0 && <span className="chat-n">{counts.journal}</span>}</button>
-        <button aria-current={chat === "archive" ? "true" : undefined} className={`chat ${!focus && view === "archive" ? "active" : ""}`} onClick={() => pick("archive")} title="closed threads"><Archive size={12} /><span className="chat-name">archive</span>{draftMark("archive", closed ?? [])}{closed && closed.length > 0 && <span className="chat-n">{closed.length}</span>}</button>
+        <button aria-current={chat === "journal" ? "true" : undefined} className={`chat ${!focus && view === "journal" ? "active" : ""}`} onClick={() => listPick("journal")} title="self-addressed notes: each seat's open questions"><BookOpen size={12} /><span className="chat-name">journal</span>{draftMark("journal", all.filter((t) => t.kind === "journal"))}{counts.journal > 0 && <span className="chat-n">{counts.journal}</span>}</button>
+        <button aria-current={chat === "archive" ? "true" : undefined} className={`chat ${!focus && view === "archive" ? "active" : ""}`} onClick={() => listPick("archive")} title="closed threads"><Archive size={12} /><span className="chat-name">archive</span>{draftMark("archive", closed ?? [])}{closed && closed.length > 0 && <span className="chat-n">{closed.length}</span>}</button>
       </nav>
 
       <div className="cell-main">
@@ -477,6 +483,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
               key={`branch|${cleared}`}
               initiativeId={initiativeId}
               seats={seats}
+              others={others}
               draftKey={branchKey(initiativeId, branchFrom.id)}
               to={branchFrom.from}
               subject={`${BRANCH_PREFIX}${targetThread.subject}`}
@@ -508,6 +515,7 @@ export function Conversation({ group, focus, onFocus, readOnly = null }: { group
               chat={chat}
               draftKey={newThreadKey(initiativeId, chat)}
               seats={seats}
+              others={others}
               to={focus ?? ""}
               subject={landed?.subject || undefined}
               body={landed?.body || undefined}
@@ -722,6 +730,25 @@ export function askedSeat(msgs: { from: string; to: string }[], human: string, s
  *  chat; `feed` lands it once listed. Each step happens
  *  only while the chat shown is the one the landing put there: once Pablo
  *  moves, nothing moves him back, and after LIST_WAIT_MS the chat stands. */
+/** leftovers-48 FR-1 (review-view A13, UO1): when the chat list's current
+ *  row changes by a landing (a review, a card, Message, the feed's later
+ *  selection), it is scrolled into view, nearest and instant: smooth never
+ *  finishes in a window that draws no frames. A pick in the list says so
+ *  first with `click(key)` and scrolls nothing. Focus is not moved. */
+export function rowReveal() {
+  let last: string | null = null;
+  let picked: string | null = null;
+  return {
+    click(key: string) { picked = key; },
+    current(key: string, row: Pick<HTMLElement, "scrollIntoView"> | null) {
+      if (key === last) return;
+      const byList = key === picked;
+      last = key; picked = null;
+      if (!byList) row?.scrollIntoView({ block: "nearest" });
+    },
+  };
+}
+
 export function unlistedLanding(on: { show: (seat: string | null) => void; current: () => string; land: (id: string) => void }, wait = LIST_WAIT_MS) {
   let at: string | null = null;
   const still = () => at !== null && on.current() === at;
@@ -761,13 +788,14 @@ function WakeCount({ wakes, all }: { wakes: number; all: boolean }) {
 /** The seats a recipient select offers: the cell's, plus the addressee when
  *  it is not one of them (a seat that left the roster, a guess from a card),
  *  so the select always shows whom Start or Send posts to (leftovers-11
- *  FR-6: no post reaches a seat the form did not show). */
-const shownSeats = (seats: string[], to: string) => (to && !seats.includes(to) ? [...seats, to] : seats);
+ *  FR-6: no post reaches a seat the form did not show). An addressee under
+ *  Others is shown there instead (leftovers-48 FR-3). */
+const shownSeats = (seats: string[], to: string, others: string[] = []) => (to && !seats.includes(to) && !others.includes(to) ? [...seats, to] : seats);
 
 /** Starting a thread, or branching one: subject, recipient, kind, body. A
  *  branch arrives with its subject set and the quoted message as the first
  *  lines, so the link back survives in the record itself. */
-export function NewThread({ initiativeId, chat, draftKey, seats, to: initialTo, subject: initialSubject, body: initialBody, quote, canPost = true, cancellable = true, grab = true, onDone }: { initiativeId: string; chat?: string; draftKey: string; seats: string[]; to: string; subject?: string; body?: string; quote?: CellMessage; canPost?: boolean; cancellable?: boolean; grab?: boolean; onDone: (threadId: string | null) => void }) {
+export function NewThread({ initiativeId, chat, draftKey, seats, others = [], to: initialTo, subject: initialSubject, body: initialBody, quote, canPost = true, cancellable = true, grab = true, onDone }: { initiativeId: string; chat?: string; draftKey: string; seats: string[]; others?: string[]; to: string; subject?: string; body?: string; quote?: CellMessage; canPost?: boolean; cancellable?: boolean; grab?: boolean; onDone: (threadId: string | null) => void }) {
   // leftovers-9 FR-1: subject and body are one draft, kept for the session
   // under draftKey; Escape closes the form and keeps it, a kept draft wins
   // over what the form was opened with, and only cancel or Start discards it.
@@ -815,7 +843,9 @@ export function NewThread({ initiativeId, chat, draftKey, seats, to: initialTo, 
         <select value={kind} onChange={(e) => setKind(e.target.value)} disabled={!canPost} aria-label="Kind of message">{KINDS.map((k) => <option key={k} value={k}>{k}</option>)}</select>
         <select value={to} onChange={(e) => setTo(e.target.value)} disabled={!canPost} aria-label="Recipient">
           <option value="">everyone (wakes {seats.length})</option>
-          {shownSeats(seats, to).map((s) => <option key={s} value={s}>{s}</option>)}
+          {shownSeats(seats, to, others).map((s) => <option key={s} value={s}>{s}</option>)}
+          {/* leftovers-48 FR-3: the names the chat list's Others shows, no free-typed one. */}
+          {others.length > 0 && <optgroup label="Others">{others.map((s) => <option key={s} value={s}>{s}</option>)}</optgroup>}
         </select>
         <span className="spacer" />
         {err && <span className="meta err">{err}</span>}
