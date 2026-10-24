@@ -649,7 +649,10 @@ button.person:focus-visible { outline-offset: -2px; }
    mark has no transition at all, hover included, so the mark is true on
    the first frame even in a window that draws no frames. The marks live
    in their own stylesheets (shell, float, usage, memory, initiatives);
-   their bases set no transition, so each rides button's. */
+   their bases set no transition, so each rides button's; the rail's row
+   keeps its own base ease, which leaves hover as it came. */
+.rail-item.active,
+.rail-item.active:hover,
 .chat.active,
 .chat.active:hover,
 button.person.active,

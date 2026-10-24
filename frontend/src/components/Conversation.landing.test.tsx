@@ -113,6 +113,16 @@ describe("K4 (leftovers-51 FR-4, supersedes leftovers-48 L2): hover eases in and
     expect(transitionOf(on)).toBe("none");
     expect(transitionOf(`${on}:hover`)).toBe("none");
   });
+  // The rail's row is a button (Rail.tsx folded and role rows) whose base
+  // rule carries its own ease (global.css .rail-item, and the reduced-motion
+  // block), so hover leaves as it came; its selected mark never eases.
+  it(".rail-item → .rail-item.active: transition none, hovered or not; the base eases, its hover sets none of its own", () => {
+    expect(rules.some((r) => r.sels.includes(".rail-item.active") && /(^|;)\s*background:/.test(r.body))).toBe(true);
+    expect(transitionOf(".rail-item.active")).toBe("none");
+    expect(transitionOf(".rail-item.active:hover")).toBe("none");
+    expect(transitionOf(".rail-item")).toMatch(/^background /);
+    expect(transitionOf(".rail-item:hover")).toBeNull();
+  });
   it("disabled, by attribute or by aria, has no transition, hover included", () => {
     expect(transitionOf("button:disabled")).toBe("none");
     expect(transitionOf('button[aria-disabled="true"]:not(.na-busy)')).toBe("none");
