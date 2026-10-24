@@ -7,7 +7,7 @@ seat: f50-build
 reviewer: f50-review
 stage: review-map
 updated: 2026-10-24
-next: "review: lf50-float-space, gate met (S1-S4, X0), baadff1"
+next: "review: lf50-float-space, gate met (S1-S4, X0), b2b291a"
 depends_on: []
 boundary: ["docs/specs/leftovers-50.md Boundary"]
 spec: "docs/specs/leftovers-50.md (FR-1 to FR-3)"
@@ -22,7 +22,7 @@ Moving between desktops never leaves Pablo without the floating icon where it sh
 docs/specs/leftovers-50.md, rows S1-S4 and X0; no row moves between desktops.
 
 ## Done
-- f50-build, 2026-10-24: FR-1 to FR-3 on `lf50-float-space` (1f63c60, baadff1), rebased on main at 8a85721; S1-S4 and X0 pass, evidence and commands in `.wt-notes/f50-build/progress.md`.
+- f50-build, 2026-10-24: FR-1 to FR-3 on `lf50-float-space` (c0ea9c4, b2b291a), rebased on main at 2cf4882; code identical to the gated baadff1; S1-S4 and X0 pass, evidence and commands in `.wt-notes/f50-build/progress.md`.
 
 ## Declared changes
 - modified `floaticon_darwin.m:fullScreenSpace`: takes a stand-in reading from the hook's `.fs` queue when one is waiting (FR-3)
