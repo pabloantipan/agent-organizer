@@ -3,10 +3,11 @@ title: "Ruling a record with several questions picks one answer per question and
 status: next
 repos: [organizer]
 branch: lf49-rule-questions
-seat:
+seat: l49-build
+reviewer: l49-review, l49-ui
 stage: review-map
 updated: 2026-10-24
-next: "sup91 runs it (0157 ruled 2026-10-24)"
+next: "l49-build builds it in .wt/lf49-rule-questions (sup91)"
 depends_on: []
 boundary: ["docs/specs/leftovers-49.md Boundary"]
 spec: "docs/specs/leftovers-49.md (FR-1 to FR-5)"
