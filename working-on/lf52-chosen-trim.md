@@ -4,6 +4,7 @@ status: next
 repos: [organizer]
 branch: lf52-chosen-trim
 seat: l52-trim
+reviewer: l52-trim-review
 stage:
 updated: 2026-10-24
 next: "review: lf52-chosen-trim, T1 and X0 pass, d66f701"
