@@ -29,7 +29,7 @@ button svg { flex-shrink: 0; opacity: .9; }
 .hero-back { display: inline-flex; align-items: center; gap: 4px; }
 .init-grip svg, .init-caret svg { display: block; }
 button:hover { border-color: var(--border-strong); background: var(--button-bg-hover); }
-button:disabled { opacity: .45; cursor: default; }
+button:disabled { opacity: .45; cursor: default; transition: none; }
 /* Busy (the design system's busy rule, launch-progress L27, A8 L28): a
    pressed control keeps focus with aria-disabled. Its label, icon (current
    colour) and fill are drawn at 45%, hover included; the element keeps
@@ -353,7 +353,7 @@ button.tiny { padding: 0 5px; font-size: var(--font-size-xs); line-height: 14px;
 .settings .hint { color: var(--muted); font-size: var(--font-size-sm); }
 
 @media (prefers-reduced-motion: no-preference) {
-  .card, .rail-item, button { transition: background .12s ease, border-color .12s ease; }
+  .card, .rail-item { transition: background .12s ease, border-color .12s ease; }
 }
 
 /* initiatives list */
@@ -631,23 +631,36 @@ button.person:focus-visible { outline-offset: -2px; }
 .cell { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .cell.with-chats { display: grid; grid-template-columns: 200px 1fr; gap: 12px; }
 .cell-main { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
-.chats { display: flex; flex-direction: column; gap: 2px; min-height: 0; overflow: auto; padding-right: 4px; border-right: 1px solid var(--border); }
+.chats { display: flex; flex-direction: column; min-height: 0; padding-right: 4px; border-right: 1px solid var(--border); }
+/* The Chats head stays above the scroller; only rows scroll (leftovers-51 FR-2). */
+.chats-rows { display: flex; flex-direction: column; gap: 2px; flex: 1; min-height: 0; overflow: auto; }
 .chats-label { display: flex; align-items: center; font-size: var(--font-size-xs); color: var(--dim); margin: 2px 4px 6px 8px; text-transform: uppercase; letter-spacing: .04em; }
 .chats-label.sub { margin-top: 10px; }
 .chats-reason, .blocked-reason { font-size: var(--font-size-sm); color: var(--fg-muted); line-height: 1.35; }
 .chats-reason { margin: -2px 8px 8px; }
 .chats .cell-search { width: auto; margin: 0 4px 6px 0; }
-.chat { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: var(--radius-md); background: transparent; border: 1px solid transparent; color: var(--muted); font-size: var(--font-size-sm); text-align: left; cursor: pointer; min-width: 0; }
+.chat { position: relative; z-index: 0; display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: var(--radius-md); background: transparent; border: 1px solid transparent; color: var(--muted); font-size: var(--font-size-sm); text-align: left; cursor: pointer; min-width: 0; transition: background-color var(--dur-fast) var(--ease-out); }
 .chat:hover { background: var(--panel); color: var(--text); }
-.chat.active { background: var(--accent-soft); border-color: var(--border-accent); color: var(--text); }
-/* State marks never ease (design system; leftovers-48 FR-2, review-view
-   A13 UO2): a current, selected or open fill on a button lands and leaves
-   with no transition, so it is true on the first frame even in a window
-   that draws no frames. A transition is read from the style after the
-   change, so the base drops it too; hover keeps its ease in. The marks live
-   in their own stylesheets (shell, float, usage, memory, initiatives); none
-   sets a transition, so each rode button's. */
-.chat,
+/* The current mark is its own layer (leftovers-51 Amendment 2, review-view
+   A16 C1): hover eases the row's own background-color, in and out, and the
+   fill and outline are a ::before with no transition, under the content.
+   The mark leaves the row's own background and border as they were, so
+   removing it removes the layer at once and eases nothing. */
+.chat.active { background: transparent; border-color: transparent; color: var(--text); }
+.chat.active::before { content: ""; position: absolute; inset: -1px; z-index: -1; border-radius: inherit; background: var(--accent-soft); border: 1px solid var(--border-accent); pointer-events: none; transition: none; }
+/* State marks never ease (design system; leftovers-48 FR-2, leftovers-51
+   FR-4 with Amendments 2 and 3, review-view A13 UO2, A15 UL4, A16): a
+   control while it carries a current, selected, open or disabled mark has
+   no transition at all, hover included, so the mark is true on the first
+   frame even in a window that draws no frames. Buttons with no mark ease
+   hover in and out on button's own 100 ms (the base rule above). The chat
+   row paints its mark on a layer (.chat.active::before) so its hover eases;
+   the rail's row keeps its own base ease; the marked controls below, whose
+   marks live in their own stylesheets (shell, float, usage, memory,
+   initiatives), switch at once, hover included. */
+/* Until each gets its own layer (Amendment 3): a transition is read from
+   the style after the change, so a leaving mark would ease on any
+   transition its base or hover keeps; base and hover both set none. */
 button.person,
 .strip-all,
 .strip-item,
@@ -662,8 +675,7 @@ button.person,
 .ib-act .act,
 .ihead-details,
 .memory button.memory-btn,
-.ic-more { transition: none; }
-.chat:hover,
+.ic-more,
 button.person:hover,
 .strip-all:hover,
 .strip-item:hover,
@@ -678,7 +690,9 @@ button.person:hover,
 .ib-act .act:hover,
 .ihead-details:hover,
 .memory button.memory-btn:hover,
-.ic-more:hover { transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out); }
+.ic-more:hover { transition: none; }
+.rail-item.active,
+.rail-item.active:hover,
 .chat.active,
 .chat.active:hover,
 button.person.active,
