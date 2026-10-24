@@ -79,3 +79,161 @@ func TestDecisionLinks(t *testing.T) {
 		t.Fatalf("a duplicate number and a dangling reference: %+v", ps)
 	}
 }
+
+// questionFixture is hestia 0037's frontmatter (testdata/questions), read
+// from the repo and returned as text; tests write their copies to temp dirs.
+func questionFixture(t *testing.T) string {
+	t.Helper()
+	b, err := os.ReadFile(filepath.Join("..", "..", "testdata", "questions", "0037-big-picture-stage.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(b)
+}
+
+// ruleByHand rules a fixture text by hand, the way hestia's FSE did: status,
+// ruled, ruled_by and the given chosen line.
+func ruleByHand(src, chosen string) string {
+	for _, kv := range [][2]string{
+		{"status: proposed", "status: ruled"},
+		{"ruled:\n", "ruled: 2026-10-23\n"},
+		{"ruled_by:\n", "ruled_by: pablo\n"},
+		{"chosen:\n", "chosen: " + chosen + "\n"},
+	} {
+		src = strings.Replace(src, kv[0], kv[1], 1)
+	}
+	return src
+}
+
+// TestQuestionRecordScan is leftovers-49 Q3 (FR-4): a question record ruled
+// with one answer per question reads without a problem; an answer its
+// question does not offer is one problem naming it. On main the first is
+// reported as "chosen ... is not one of the options".
+func TestQuestionRecordScan(t *testing.T) {
+	for _, tc := range []struct {
+		name, chosen, want string
+	}{
+		{"both answered", `"Q1 after-graph-performs-start-now, Q2 record-page"`, ""},
+		{"an alternative Q2 does not offer", `"Q1 after-graph-performs-start-now, Q2 nope"`, "Q2 nope is not one of Q2's alternatives"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			writeDecision(t, dir, "0037-big-picture-stage.md", ruleByHand(questionFixture(t), tc.chosen))
+			ds, ps := readDecisions(dir, nil)
+			if len(ds) != 1 || len(ds[0].Options) != 2 {
+				t.Fatalf("decisions %+v", ds)
+			}
+			if tc.want == "" {
+				if len(ps) != 0 {
+					t.Errorf("problems %+v, want none", ps)
+				}
+				return
+			}
+			if len(ps) != 1 || !strings.Contains(ps[0].Msg, tc.want) {
+				t.Errorf("problems %+v, want one naming %q", ps, tc.want)
+			}
+		})
+	}
+}
+
+// TestQuestionRecord0038 is Q3 under Amendment 1: hestia 0038 as ruled
+// (testdata/questions, a first question with one alternative, chosen fixed
+// by hand) reads with no problem. On main: "is not one of the options".
+func TestQuestionRecord0038(t *testing.T) {
+	b, err := os.ReadFile(filepath.Join("..", "..", "testdata", "questions", "0038-usage-exit-amended-by-0018.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir := t.TempDir()
+	writeDecision(t, dir, "0038-usage-exit-amended-by-0018.md", string(b))
+	ds, ps := readDecisions(dir, nil)
+	if len(ds) != 1 || ds[0].Chosen != "Q1 amend-exit, Q2 threads-and-specs-ok" || len(Questions(ds[0].Options)) != 2 {
+		t.Fatalf("decisions %+v", ds)
+	}
+	if len(ps) != 0 {
+		t.Errorf("problems %+v, want none", ps)
+	}
+}
+
+// TestQuestionRecordOneQuestion is the scan's half of Q2: a one-question
+// record takes `b` and `Q1 b` alike.
+func TestQuestionRecordOneQuestion(t *testing.T) {
+	for _, tc := range []struct {
+		options []string
+		chosen  string
+	}{
+		{[]string{"Q1 a | b"}, "b"},
+		{[]string{"Q1 a | b"}, "Q1 b"},
+		{[]string{"Q1 start-now, Q2 record-page"}, "Q1 start-now, Q2 record-page"},
+	} {
+		d := model.Decision{Title: "x", Status: "ruled", Raised: "2026-09-01", Ruled: "2026-09-01", RuledBy: "pablo", Options: tc.options, Chosen: tc.chosen}
+		if ps := checkDecision(d); len(ps) != 0 {
+			t.Errorf("%v chosen %q: %+v, want no problem", tc.options, tc.chosen, ps)
+		}
+	}
+	// Numbered any other way, the list is plain and held to its items.
+	d := model.Decision{Title: "x", Status: "ruled", Raised: "2026-09-01", Ruled: "2026-09-01", RuledBy: "pablo", Options: []string{"Q2 a | b", "Q3 x | y"}, Chosen: "Q2 a, Q3 x"}
+	if ps := checkDecision(d); len(ps) != 1 || !strings.Contains(ps[0].Msg, "not one of the options") {
+		t.Errorf("Q2/Q3 list: %+v, want the plain problem", ps)
+	}
+}
+
+func TestQuestions(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		options []string
+		want    [][]string // per question: label, then alternatives
+	}{
+		{"two questions", []string{"Q1 a | b | c", "Q2 x | y"}, [][]string{{"Q1", "a", "b", "c"}, {"Q2", "x", "y"}}},
+		{"spaces around the bar are trimmed", []string{"Q1 a|b  |  c"}, [][]string{{"Q1", "a", "b", "c"}}},
+		{"plain options", []string{"tray", "fsnotify", "none"}, nil},
+		{"one item plain", []string{"Q1 a | b", "none"}, nil},
+		{"one alternative (hestia 0038)", []string{"Q1 amend-exit", "Q2 a | b"}, [][]string{{"Q1", "amend-exit"}, {"Q2", "a", "b"}}},
+		{"one question of one alternative", []string{"Q1 a"}, [][]string{{"Q1", "a"}}},
+		{"not numbered from 1", []string{"Q2 a | b", "Q3 x | y"}, nil},
+		{"a number skipped", []string{"Q1 a | b", "Q3 x | y"}, nil},
+		{"out of order", []string{"Q2 a | b", "Q1 x | y"}, nil},
+		{"Q1 twice (full-answer options)", []string{"Q1 start-now, Q2 record-page", "Q1 wait, Q2 record-page"}, nil},
+		{"an empty alternative", []string{"Q1 a | | b"}, nil},
+		{"no options", nil, nil},
+	} {
+		qs := Questions(tc.options)
+		var got [][]string
+		for _, q := range qs {
+			got = append(got, append([]string{q.Label}, q.Alts...))
+		}
+		if strings.Join(flat(got), "/") != strings.Join(flat(tc.want), "/") || (qs == nil) != (tc.want == nil) {
+			t.Errorf("%s: got %v, want %v", tc.name, got, tc.want)
+		}
+	}
+}
+
+func flat(xs [][]string) []string {
+	var out []string
+	for _, x := range xs {
+		out = append(out, strings.Join(x, ","))
+	}
+	return out
+}
+
+func TestCheckAnswers(t *testing.T) {
+	qs := Questions([]string{"Q1 a | b, c", "Q2 x | y"})
+	for _, tc := range []struct{ chosen, want string }{
+		{"Q1 a, Q2 y", ""},
+		{"Q1 b, c, Q2 x", ""},
+		{"Q1 a", "does not answer Q2"},
+		{"Q2 x, Q1 a", "does not answer Q1 in its place"},
+		{"Q1 nope, Q2 x", "Q1 nope is not one of Q1's alternatives (a, b, c)"},
+		{"Q1 a, Q2 x, Q3 z", "answers more than the record's 2 questions"},
+		{"a", "does not answer Q1 in its place"},
+		{"Q1 a | b, c", "Q1 a | b, c is not one of Q1's alternatives"},
+	} {
+		err := CheckAnswers(qs, tc.chosen)
+		switch {
+		case tc.want == "" && err != nil:
+			t.Errorf("%q: %v", tc.chosen, err)
+		case tc.want != "" && (err == nil || !strings.Contains(err.Error(), tc.want)):
+			t.Errorf("%q: %v, want %q", tc.chosen, err, tc.want)
+		}
+	}
+}

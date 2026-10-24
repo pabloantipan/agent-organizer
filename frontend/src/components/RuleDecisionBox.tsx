@@ -2,7 +2,7 @@ import { forwardRef, useEffect, useId, useLayoutEffect, useRef, useState, type C
 import { marked } from "marked";
 import type { model } from "../../wailsjs/go/models";
 import { api } from "../hooks/useWails";
-import { recordSections } from "../lib/decisions";
+import { allAnswered, answersOf, picksOf, questionsOf, recordSections } from "../lib/decisions";
 import { leadOf } from "../lib/queue";
 import { openBox } from "../lib/boxStack";
 import { loopTab } from "../lib/tabTrap";
@@ -34,7 +34,8 @@ export function focusBoxBelow(): boolean {
 /** A ruling of a proposed record, from its Needs me row (FR-22) or its row on
  *  the Decisions tab (FR-12). The ruler signs it, not the owner (0045): the
  *  cell's human, else pablo, the same rule as `ruler` in service/rule.go.
- *  One option and the words, then RuleDecision (FR-13) writes the record and
+ *  One option (for a question record, one per question, leftovers-49 FR-2)
+ *  and the words, then RuleDecision (FR-13) writes the record and
  *  commits it; the rescan that follows drops the row from the queue. A refusal
  *  is the service's own sentence, shown here with what was typed kept.
  *  `withRecord` (Needs me, lead-side-fixes FR-1, amended by ui-leftovers
@@ -82,7 +83,13 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
   const numId = useId();
   const titleId = useId();
   const bodyId = useId();
-  const ready = chosen !== "" && words.trim() !== "" && !busy;
+  // leftovers-49 FR-2: a question record is ruled with one pick per
+  // question; the kept chosen is the picks as the ruling reads them.
+  const questions = questionsOf(options);
+  const picks = questions ? picksOf(questions, chosen) : {};
+  const pick = (label: string, alt: string) => setChosen(answersOf(questions!, { ...picks, [label]: alt }));
+  const picked = questions ? allAnswered(questions, picks) : chosen !== "";
+  const ready = picked && words.trim() !== "" && !busy;
   const windowClass = useBoard((s) => s.widthClass);
   const widthClass = homeClass ?? windowClass;
   const { place, short, capped } = useFitViewport(box, record, widthClass);
@@ -169,6 +176,19 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
       {withRecord && <RecordBody ref={record} id={bodyId} initiative={initiative} decision={d} short={short} edges={recordEdges} />}
       {options.length === 0 ? (
         <div className="rb-error">This record lists no options, so it cannot be ruled here. Add `options:` to the record.</div>
+      ) : questions ? (
+        questions.map((q) => (
+          <fieldset key={q.label} className="rb-options" disabled={busy}>
+            <legend className="rb-label">{q.label}</legend>
+            {q.alts.map((a) => (
+              <label key={a} className={`rb-option ${picks[q.label] === a ? "on" : ""}`}>
+                <input type="radio" name={`${name}-${q.label}`} value={a}
+                  checked={picks[q.label] === a} onChange={() => pick(q.label, a)} />
+                <span>{a}</span>
+              </label>
+            ))}
+          </fieldset>
+        ))
       ) : (
         <fieldset className="rb-options" disabled={busy}>
           <legend className="rb-label">Chosen option</legend>
