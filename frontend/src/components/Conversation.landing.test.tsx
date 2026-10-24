@@ -4,10 +4,10 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { AgentGroup, CellThread } from "../hooks/useWails";
 
-// leftovers-48 L1 to L3 (review-view Amendment 13, R42 to R44): a landing
+// leftovers-48 L1 and L3 (review-view Amendment 13, R42 and R44): a landing
 // scrolls the chat list's current row into view and a pick in the list does
-// not, state fills switch with no transition, and the new-thread picker
-// lists the chat list's Others. Vitest runs in Node with no DOM library, so
+// not, and the new-thread picker lists the chat list's Others; leftovers-51
+// K4 (Amendment 15, R49): hover eases both ways, a state mark never eases. Vitest runs in Node with no DOM library, so
 // the list is a stand-in row handed to `rowReveal`, the stylesheet is read
 // as text, and the picker is a server render.
 
@@ -77,9 +77,7 @@ const transitionOf = (sel: string) => {
   return t;
 };
 
-describe("L2: state fills switch with no transition, hover keeps its own", () => {
-  // The fills named on the card: each a current, selected or open mark on a
-  // button, with the base it changes on.
+describe("K4 (leftovers-51 FR-4, supersedes leftovers-48 L2): hover eases in and out alike on button's base rule; a state mark has no transition, hover included", () => {
   const fills: [base: string, on: string, drawn?: string][] = [
     [".chat", ".chat.active"],
     ["button.person", "button.person.active", ".person.active"],
@@ -99,23 +97,26 @@ describe("L2: state fills switch with no transition, hover keeps its own", () =>
     [".memory button.memory-btn", '.memory button.memory-btn[aria-expanded="true"]', '.memory button.memory-btn[aria-expanded="true"]:not(.critical)'],
     [".ic-more", '.ic-more[aria-expanded="true"]'],
   ];
+  const EASE = /^background var\(--dur-fast\) var\(--ease-out\), border-color var\(--dur-fast\) var\(--ease-out\), color var\(--dur-fast\) var\(--ease-out\)$/;
+  it("the base button rule carries the 100 ms ease, and no later rule naming button alone replaces it", () => {
+    expect(transitionOf("button")).toMatch(EASE);
+    expect(css).toMatch(/--dur-fast:\s*100ms/);
+  });
+  it.each(fills)("%s:hover sets no transition of its own, so hover in and out both ride button's (%s)", (base) => {
+    expect(transitionOf(base)).toBeNull();
+    expect(transitionOf(`${base}:hover`)).toBeNull();
+  });
   it.each(fills)("%s: the mark %s is a fill some stylesheet draws", (_base, on, drawn) => {
     expect(rules.some((r) => r.sels.includes(drawn ?? on) && /(^|;)\s*(background|color|border-color|box-shadow):/.test(r.body))).toBe(true);
   });
-  it.each(fills)("%s → %s: no transition on or off, hovered or not", (base, on) => {
+  it.each(fills)("%s → %s: transition none, hovered or not", (_base, on) => {
     expect(transitionOf(on)).toBe("none");
     expect(transitionOf(`${on}:hover`)).toBe("none");
-    // A transition is read from the style after the change: the fill leaving
-    // eases unless the base drops it too.
-    expect(transitionOf(base)).toBe("none");
   });
-  it.each(fills)("%s:hover keeps the ease on background, border and colour (%s)", (base) => {
-    const t = transitionOf(`${base}:hover`) ?? "";
-    for (const p of ["background", "border-color", "color"]) expect(t).toMatch(new RegExp(`(^|, )${p} var\\(--dur-fast\\)`));
-  });
-  it("button keeps its transition", () => {
-    const t = rules.find((r) => r.sels.length === 1 && r.sels[0] === "button")?.body ?? "";
-    expect(t).toMatch(/transition: background var\(--dur-fast\) var\(--ease-out\), border-color var\(--dur-fast\) var\(--ease-out\), color var\(--dur-fast\) var\(--ease-out\)/);
+  it("disabled, by attribute or by aria, has no transition, hover included", () => {
+    expect(transitionOf("button:disabled")).toBe("none");
+    expect(transitionOf('button[aria-disabled="true"]:not(.na-busy)')).toBe("none");
+    expect(transitionOf('button[aria-disabled="true"]:not(.na-busy):hover')).toBe("none");
   });
 });
 

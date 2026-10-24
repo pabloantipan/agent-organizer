@@ -29,7 +29,7 @@ button svg { flex-shrink: 0; opacity: .9; }
 .hero-back { display: inline-flex; align-items: center; gap: 4px; }
 .init-grip svg, .init-caret svg { display: block; }
 button:hover { border-color: var(--border-strong); background: var(--button-bg-hover); }
-button:disabled { opacity: .45; cursor: default; }
+button:disabled { opacity: .45; cursor: default; transition: none; }
 /* Busy (the design system's busy rule, launch-progress L27, A8 L28): a
    pressed control keeps focus with aria-disabled. Its label, icon (current
    colour) and fill are drawn at 45%, hover included; the element keeps
@@ -353,7 +353,7 @@ button.tiny { padding: 0 5px; font-size: var(--font-size-xs); line-height: 14px;
 .settings .hint { color: var(--muted); font-size: var(--font-size-sm); }
 
 @media (prefers-reduced-motion: no-preference) {
-  .card, .rail-item, button { transition: background .12s ease, border-color .12s ease; }
+  .card, .rail-item { transition: background .12s ease, border-color .12s ease; }
 }
 
 /* initiatives list */
@@ -642,45 +642,14 @@ button.person:focus-visible { outline-offset: -2px; }
 .chat { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: var(--radius-md); background: transparent; border: 1px solid transparent; color: var(--muted); font-size: var(--font-size-sm); text-align: left; cursor: pointer; min-width: 0; }
 .chat:hover { background: var(--panel); color: var(--text); }
 .chat.active { background: var(--accent-soft); border-color: var(--border-accent); color: var(--text); }
-/* State marks never ease (design system; leftovers-48 FR-2, review-view
-   A13 UO2): a current, selected or open fill on a button lands and leaves
-   with no transition, so it is true on the first frame even in a window
-   that draws no frames. A transition is read from the style after the
-   change, so the base drops it too; hover keeps its ease in. The marks live
-   in their own stylesheets (shell, float, usage, memory, initiatives); none
-   sets a transition, so each rode button's. */
-.chat,
-button.person,
-.strip-all,
-.strip-item,
-.tiny-btn[aria-pressed],
-.seg button,
-.subtabs button,
-.places .place-tab,
-.gear,
-.stg,
-.fl-row,
-.week-list button,
-.ib-act .act,
-.ihead-details,
-.memory button.memory-btn,
-.ic-more { transition: none; }
-.chat:hover,
-button.person:hover,
-.strip-all:hover,
-.strip-item:hover,
-.tiny-btn[aria-pressed]:hover,
-.seg button:hover,
-.subtabs button:hover,
-.places .place-tab:hover,
-.gear:hover,
-.stg:hover,
-.fl-row:hover,
-.week-list button:hover,
-.ib-act .act:hover,
-.ihead-details:hover,
-.memory button.memory-btn:hover,
-.ic-more:hover { transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out); }
+/* State marks never ease (design system; leftovers-48 FR-2, leftovers-51
+   FR-4, review-view A13 UO2 and A15 UL4): hover eases in and out alike on
+   button's own 100 ms (the base rule above, so leaving hover eases too),
+   and a control while it carries a current, selected, open or disabled
+   mark has no transition at all, hover included, so the mark is true on
+   the first frame even in a window that draws no frames. The marks live
+   in their own stylesheets (shell, float, usage, memory, initiatives);
+   their bases set no transition, so each rides button's. */
 .chat.active,
 .chat.active:hover,
 button.person.active,
