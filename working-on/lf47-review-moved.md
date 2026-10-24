@@ -156,80 +156,92 @@ The builder updated tests that pinned a primary on a marked, unedited symbol. Al
 
 ## UI review
 
-m47-ui, 2026-10-23. Every row checked on **6c899f4** (the branch did not move while I worked). **Verdict: fail**, on one severity-3 finding, MV1. The last unmarked symbol's `Reviewed` press drops focus to the body. FR-3 covers this ("focus after a save still follows `focusAfterSave`"), and so does review-view A8 A1 ("never the body"). R39, R40 and M1-M4 hold in WKWebView and in the review build. Evidence is in `.wt-notes/m47-ui/out/`: harness logs `h-1024x640-run1.txt` and `h-1440x900.txt`, the shell steps in `driver.log` and `driver-run1.log`, shots `wk-*.png` and `rb-*.png`, AX dumps `rb-ax-*.txt`, and `killed.txt`.
+m47-ui, 2026-10-23. **Verdict: pass on 3301319** (rebased on main 4dd010d; leftovers-47 Amendment 1 at 2064179, review-view Amendment 14 at ba825d7). No finding of severity 4 or 3 is left. MV1 from the first round at 6c899f4 is fixed. The rows were re-run on 3301319 in a fresh worktree, a fresh dev clone and a fresh fixture:
+- M4 with Amendment 1's focus check;
+- R22 (amended);
+- R45;
+- R39, R40, M1-M3;
+- the rest of the panel at 1024×640 and 1440×900.
 
-Shared test run: **fresh**. Run `0bd5ca43-69302` of 6c899f47503e, run by me (m47-review reused it): exit 0, go ok, vitest 78 files / 1035 tests (`.wt-notes/m47-ui/x0-make-test.log`).
+Evidence is in `.wt-notes/m47-ui/out/`: harness logs `h-1024x640.txt` and `h-1440x900.txt`, the shell steps in `driver-*.log`, shots `wk-*.png` and `rb-*.png`, AX dumps `rb-ax-*.txt`, and `killed.txt`. The first round's evidence is kept in `.wt-notes/m47-ui/r1/`.
 
-No mailbox, no editor. Each fixture was `--review --canned-post` and `auth: off`, with exactly one `discuss_state_dir:` under its own temp dir (`out/dev-config-check.txt`, `out/rb-config-check.txt`). The probe was stubbed. `editor:` was `.wt-notes/m47-ui/bin/code`, which only logs its arguments. Every `Open in editor` press was refused before any editor ran, and `out/editor-calls.txt` was never written. Nothing was asked: no post.
+Shared test run: **fresh**. Run `1424b154-52953` of 33013194f8c6, run by me (m47-review reused it): exit 0, go ok, vitest 79 files / 1045 tests (`.wt-notes/m47-ui/x0-make-test.log`).
+
+No mailbox, no editor. Each fixture was `--review --canned-post` and `auth: off`, with exactly one `discuss_state_dir:` under its own temp dir (`out/dev-config-check.txt`, `out/rb-config-check.txt`). The probe was stubbed. `editor:` was a stub that only logs its arguments. Every `Open in editor` press was refused before any editor ran, and `out/editor-calls.txt` was never written. Nothing was asked, and no `posts.jsonl` was created.
+
+**Amendment 1 fails on 6c899f4**:
+- I copied 3301319's `ReviewSymbol.test.tsx` onto a clone at 6c899f4 and ran `npx vitest run … -t "after the last unmarked symbol"`. Result: `1 failed`, `TypeError: leavesAfterPress is not a function` (`.wt-notes/m47-ui/fail-on-6c899f4.txt`).
+- The behaviour fails too. My first-round harness on 6c899f4 recorded `R22_focus {"tag":"BODY"}` at both sizes (`r1/out-6c899f4/h-*.txt`), and the review build's AX showed no focused element.
 
 How each state was checked:
-- **WKWebView, Tab harness.** I used rw-ui's copy of as-ui's `tabharness.swift` (read first, unchanged, rebuilt), offscreen with `isKey: true`, under `harness.lock`. It ran against my own `wails dev -devserver localhost:34265` from a clean clone of 6c899f4, with a fresh fixture at 1024×640 and again at 1440×900. The steps are in `steps/M.txt`. Spies wrapped `window.go.main.App.ReviewMap`, `ReviewMarks` and `ReviewStatus`, and MutationObservers watched both polite regions. The two sizes read the same.
-  - **R40 / M4, unmarked**: formatName draws `Reviewed, next` only. The press saves ✓ and moves focus to Greet's h2.
-  - **R40 / M4, ✓ reopened**:
-    - No button in the mark form (`buttons: []`), no ask line, no Save. The panel ends at the note.
-    - Tab from the h2 goes diff region → radios (`reviewed`, ring on the span) → Note → body. No primary is a stop.
-    - `N` with focus on the h2 opens Greet, the next unmarked symbol (`R40_N`).
-  - **M4, note edited** (`x` typed): `Reviewed, next` and `Save` return. Tab from the note reaches `Reviewed, next`, then `Save`. With the note emptied again, both go.
-  - **M4, mark changed** to Blocked: `Ask fse, next` (disabled, incomplete) and `Save` (disabled) return. Back to Reviewed, both go.
-  - **Save of an edited note** (`y`): Save and the primary leave, and focus is on the `reviewed` radio, as `focusAfterSave` says.
-  - **M2**: every symbol open made a mount read that answered the shown map head. The header stayed `<head> ← <base> · 2 symbols changed, 0 tests / Reviewed n of 2` with no moved line. ReviewMap and ReviewMarks were called 0 times.
+- **WKWebView, Tab harness.** I used as-ui's `tabharness.swift` through rw-ui's copy (read first, unchanged), offscreen with `isKey: true`, under `harness.lock`. It ran against my own `wails dev -devserver localhost:34265` from a clean clone of 3301319, at 1024×640 and at 1440×900. The steps are in `steps/M.txt`. Spies wrapped `ReviewMap`, `ReviewMarks` and `ReviewStatus` on `window.go.main.App`, and MutationObservers watched both polite regions. The two sizes read the same.
+  - **M4 / R40**:
+    - Unmarked formatName: `Reviewed, next`. The press saves ✓ and moves focus to Greet's h2.
+    - ✓ reopened: the mark form has no button, no ask line and no Save. Tab goes h2 → diff → radio `reviewed` → Note → body, so no primary is a stop.
+    - `N` opens Greet.
+    - Note edited: `Reviewed, next` and `Save` return, in that Tab order. With the note emptied, both go.
+    - Mark changed to Blocked: `Ask fse, next` and `Save` return, both disabled until there is a note. Back to Reviewed, both go.
+    - Save of an edited note: focus is on the `reviewed` radio.
+  - **R22 (amended) / Amendment 1**: Greet is the last unmarked symbol and reads `Reviewed`, with no `, next`. Return on it saves ✓ and the button goes (`buttons: []`). `R22_focus` is `INPUT name=reviewed`, the checked radio, at both sizes. The ring is drawn on its span (`.rs-radio input:focus + span`, 2px `--focus-ring`). The screen's polite region says `Reviewed 2 of 2` once.
+  - **R45**:
+    - On formatName, with seat fse and both symbols marked (so it is the last), Question was picked with the note `y`. That drew `Ask fse` and `Save` plus `Saves the mark and asks fse (the initiative's FSE) in this review's thread. Wakes fse.`
+    - Pressing `Save` saved the Question without asking. The panel still offers `Ask fse` and the same line, and focus is on `Ask fse` (`focusAfterSave`: primary, since it asks).
+    - Reopened via Greet, the panel is the same: `Ask fse` and the line.
+    - Shots: `wk-1024x640-R45-after-save.png`, `wk-1440x900-R45-after-save.png`.
+    - The `, next` form was not reachable here: no unmarked symbol was left.
+  - **M2**: every mount read answered the shown head. The header had no moved line, and ReviewMap and ReviewMarks were called 0 times.
   - **R39 / M1**:
-    - The driver checked out `rv-fixture`, then moved the branch to `review-second` and made a map at the new head with `organizer review` from my dev build. Then Return on `Open in editor`.
-    - The header reads `The branch moved since this map (717e3f4 → 3a7a0c7).` with `Make it again` (1440: `776c18a → 00989d7`).
+    - The driver checked out `rv-fixture`, moved the branch to `review-second`, and made a map at the new head with `organizer review`. Then Return on `Open in editor`.
+    - The header reads `The branch moved since this map (f320a1d → 781e029).` + `Make it again` (1440: `9614cc9 → 2cbf02c`).
     - ReviewMap and ReviewMarks were called 0 times before and after, and the worklist is unchanged.
-    - Focus is on the symbol's h2, which is R31's refusal move; the header change moved nothing. The file line reads `Not checked out here at 717e3f4.`
-    - The header grew by one line (48 → 84 px). The moved line is 12 px, `--fg` rgb(238,235,244).
-    - No horizontal scroll (1024/1024, 1440/1440).
-  - **M3**: the panel's polite region logged `[602 "Not checked out here at 717e3f4."] [702 ""] [803 "The branch moved since this map (717e3f4 → 3a7a0c7)."]` (1440: 699 / 735 / 838). The moved line came once, after the refusal line, 100 ms after the emptying.
-  - **Once per change**: opening Greet on a header already moved left the header moved and logged nothing in the panel's region.
-  - **Header Tab order** (1440): `← Card` → `Make it again` (`Next to review` is gone, since 2 of 2 are reviewed) → the worklist's one stop → the diff → radios.
-  - **Make it again**: the header leaves the moved state and reads `3a7a0c7 ← 9e205c6 … Reviewed 1 of 2 · 1 must-visit left`. formatName reads `changed since you reviewed` (§4) and focus is on the worklist row.
-  - **MV1**: on Greet, the last unmarked symbol, `Reviewed` shows. Return on it saves ✓, the button unmounts, and `report R22_focus` gives `{"tag":"BODY"}` at both sizes.
-- **Review build** (`make review-build` in my detached worktree). I saved its pid (39912), used AX and AXPress on that pid only, and shot window 52484 with `screencapture -o -l` at 1440×900 and 1024×640. The screen was unlocked.
-  - Unmarked formatName: `Reviewed, next` (`rb-1440x900-M4-unmarked.png`).
-  - ✓ reopened: the radios (Reviewed `v=1`) and the Note, with no AXButton in the panel (`rb-ax-1440-reopened.txt`, `rb-1440x900-R40-reopened.png`).
-  - AXPress `Reviewed` on the last symbol: no element focused afterwards (`rb-ax-R22-focus.txt`, `rb-1440x900-R22-after.png`).
-  - R39: checkout, move, map outside (`rb-move.txt`), then AXPress `Open in editor`. The header reads `The branch moved since this map (2deab02 → 2890a49).` with AXButton `Make it again`; the file line reads `Not checked out here at 2deab02.`; the AX focus is on the h2. The panel's sr-only region holds the moved line (`rb-ax-1440-R39.txt`, `rb-ax-1024-R39.txt`; `rb-1440x900-R39-moved.png`, `rb-1024x640-R39-moved.png`).
+    - Focus is on the h2, which is R31's refusal move; the header change moved nothing.
+    - The header grew by one line (48 → 84 px).
+    - No horizontal scroll at 1024/1024 or 1440/1440.
+  - **M3**: the panel's polite region logged:
+    - 1024: `[1178 "Not checked out here at f320a1d."] [1618 ""] [1721 "The branch moved since this map (f320a1d → 781e029)."]`;
+    - 1440: `593 / 693 / 795`.
+    - The moved line comes once, after the press's own line, 100 ms after the emptying.
+  - Opening another symbol on a header already moved: the header stays moved and the panel's region says nothing.
+  - **Header Tab order** (1440): `← Card` → `Make it again` → the worklist's stop → the diff → radios.
+  - **Make it again** leaves the moved state: `2cbf02c ← … Reviewed 1 of 2 · 1 must-visit left`, and formatName reads `changed since you reviewed`.
+- **Review build** (`make review-build` in my detached worktree at 3301319). I saved its pid (97654), used AX and AXPress on that pid only, and shot window 52658 with `screencapture -o -l` at 1440×900 and 1024×640. The screen was unlocked.
+  - Unmarked: `Reviewed, next` (`rb-1440x900-M4-unmarked.png`).
+  - ✓ reopened: no `Reviewed` button (`rb-ax-1440-reopened.txt`, `rb-1440x900-R40-reopened.png`).
+  - R22: AXPress `Reviewed` on the last symbol. AXFocused is `AXRadioButton t="Reviewed" v=1` (`rb-ax-R22-focus.txt`, `rb-1440x900-R22-after.png`).
+  - R39: checkout, move, map outside (`rb-move.txt`), then AXPress `Open in editor`.
+    - The header reads `The branch moved since this map (adbe4d4 → eb054ea).` with AXButton `Make it again`.
+    - The file line reads `Not checked out here at adbe4d4.`
+    - The panel's sr-only region holds the moved line, and AX focus is on the h2 (`rb-ax-1440-R39.txt`, `rb-ax-1024-R39.txt`, `rb-1440x900-R39-moved.png`, `rb-1024x640-R39-moved.png`).
 - **Rest of the panel against lf46's UI review**, unchanged at both sizes:
   - the header `<head> ← <base> · 2 symbols changed, 0 tests` and `Reviewed n of 2 · 1 must-visit left`;
   - the h2 focused when a symbol opens;
-  - the file line with `Not checked out here at <sha>.`;
-  - the 2px ring rgb(192,171,254), offset 2;
-  - no `Error:` on screen;
+  - `Not checked out here at <sha>.`;
+  - the 2px ring;
+  - no `Error:`;
   - at 1440 the facts sit beside the diff, at 1024 under it.
 
 Words, design vs screen:
-- `The branch moved since this map (<shown> → <new>).` reads `The branch moved since this map (717e3f4 → 3a7a0c7).`. Same.
+- `The branch moved since this map (<shown> → <new>).` reads `The branch moved since this map (f320a1d → 781e029).`. Same.
 - `Make it again` reads `Make it again`. Same.
 - `Reviewed, next` / `Reviewed` read `Reviewed, next` / `Reviewed`. Same.
-- `Next to review` + `N` read `Next to review N`. Same.
-- `Reviewed 2 of 2` reads `Reviewed 2 of 2`. Same.
-- `Not checked out here at <short sha>.` reads `Not checked out here at 2deab02.`. Same.
+- `Ask <seat>` reads `Ask fse`. Same.
+- `Next to review` + `N`: same.
+- `Reviewed 2 of 2`: same.
+- `Not checked out here at <short sha>.`: same.
 - `changed since you reviewed`: same.
-- On a ✓ reopened, no `Reviewed` / `Reviewed, next` anywhere in the panel, as UW2 says.
+- On a ✓ reopened there is no `Reviewed` / `Reviewed, next`, as UW2 says.
 
 Findings:
-- **MV1 (3), against FR-3 and review-view A8 A1**:
-  - What the person cannot do: keep their place after marking the last symbol by keyboard. Pressing `Reviewed` (or `Save question` / `Save block` with no seat) on the last unmarked symbol saves the mark, and FR-3 then removes the pressed button. Focus falls to `body`, so VoiceOver loses the panel and the next Tab starts at `Skip to content`. Before this branch the button stayed and kept focus (A4 R22).
-  - Where: `wk-1024x640-R22-after.png`, `wk-1440x900-R22-after.png`, `rb-1440x900-R22-after.png`.
-  - Evidence:
-    - Harness `R22_focus` gives `{"tag":"BODY"}` at 1024×640 and 1440×900; the review build's AX shows no focused element.
-    - Cause: `MarkForm` arms `afterSaveFocus` only for `run("save", …)`. The last symbol's primary is `run("next", …, undefined)`, so `focusAfterSave` never runs for it.
-    - vitest A6 "the press on the last … focus stays on the button" checks only `markPress` and a source line, not where focus lands.
-  - Severity: 3. FR-3 says focus after a save follows `focusAfterSave` (the radios), and A1 says focus the app moves never drops to the body.
-  - Proposal: arm the same after-save focus for the primary's press when there is no `then` (the last symbol), so focus lands on the checked radio. Add a test that reads focus after that press.
-- **MV2 (1)**: Make it again lands focus on the worklist row of the symbol shown (Greet), not on `Make it again`'s successor or the h2. That matches Amendment 1 ("on open, focus goes to the worklist's stop"), so it is recorded only.
+- **MV1 (3), first round at 6c899f4, fixed at 3301319**: the last symbol's `Reviewed` press dropped focus to the body. Focus now lands on the checked radio (harness and AX, above).
+- **MV2 (1)**: after Make it again, focus is on the worklist row of the symbol shown. That matches Amendment 1 (on open, focus goes to the worklist's stop), so it is recorded only.
 
-Spec gaps (for the FSE):
-- Amendment 11 UW2 removes the button that A4 R22 says keeps focus ("after the press focus is on that button"). Neither the amendment nor FR-3 names where focus goes when the last symbol's primary leaves after its own press. FR-3's `focusAfterSave` sentence covers it only if "a save" includes the primary's press, which is how I read it.
-- M4 tests ✓ only, so whether an asking primary (`Ask <seat>, next` on a saved, never-asked Question) counts as "a primary" under FR-3 is the builder's reading (card Notes; m47-review Note 3).
+Spec gaps (for the FSE): none left. The R22/UW2 contradiction is settled by leftovers-47 Amendment 1 and review-view A14 A1.
 
-For aglaea:
-- A1 (from MV1): amend R22 for UW2. After the last symbol's press, focus goes to the mark's radio group, since the button is gone.
-- A2: confirm the builder's reading of UW2. On a saved, unedited Question or Blocked with a seat and never asked, `Ask <seat>, next` stays, because it posts, so it is not "a save of nothing". As built, the ask line goes with a hidden save-only primary.
+For aglaea: none. A14 answered both of the first round's questions.
 
 Not verified in WKWebView:
-- The asking primary kept on a saved, never-asked Question: the canned fixture could have shown it, but I asked nothing and AX cannot type a note. vitest P2/A4/S4 cover it in the fresh run.
-- The header's Tab order with `Make it again` at 1024×640: my first 1024 run's step started from the document top and ran out of Tabs before the header. 1440 shows the order, and the markup is the same at both widths.
-- VoiceOver speech itself: the polite region's contents and timing were read by MutationObserver and AX, not heard.
-- `Save question` / `Save block` on the last symbol without a seat (MV1's other two forms): the fixture has a cell, so the seat is always `fse`. This comes from the code path, which is shared with `Reviewed`.
+- `Save question` / `Save block` on the last symbol with no seat: the fixture always has the seat fse. vitest's Amendment 1 test covers both, in the fresh run.
+- R45's `Ask <seat>, next` form, with another symbol still unmarked: my order left none. vitest P2/A4 cover it.
+- R45 in the review build: AX cannot type the note a Question needs. It was checked in the harness only.
+- The header's Tab order at 1024×640: checked at 1440 only. The markup is the same at both widths.
+- VoiceOver speech itself: the polite regions were read by MutationObserver and AX, not heard.
