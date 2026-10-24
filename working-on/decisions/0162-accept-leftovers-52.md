@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 52 - every state mark on one layer, the Decisions line's last words, a trimmed chosen
-status: proposed
+status: ruled
 raised: 2026-10-24
 raised_by: fse
 owner: pablo
@@ -9,9 +9,9 @@ cards: [lf52-state-layer, lf52-decisions-line, lf52-chosen-trim]
 forecast: 45-90m
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-24
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -49,3 +49,7 @@ forecast: 45-90m over 2 waves, plus two UI reviews and no lease data; basis:
 6 tasks, this initiative (leftovers 46-51: 23, 83, 64, 33, 43 min, and
 141 min for leftovers 51, 66 of them a usage-limit stop and the rest three
 amendment rounds).
+
+## Ruling
+
+pablo, 2026-10-24, in the organizer on lodestar: accept as written (in the FSE session)
