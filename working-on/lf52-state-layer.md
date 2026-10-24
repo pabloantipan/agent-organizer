@@ -133,3 +133,62 @@ repo organizer: base 864a5eee1 (default origin/main) ... head lf52-state-layer (
 - `.ihead-details[aria-expanded] svg` still rotates over 100 ms while open: a motion, not a fill → to the FSE / Aglaea, if R50 means it.
 - The builder reports 92 tests in the CSS test. I count 95 at e6d77d6, all passing.
 - Declared changes should be one bullet per file (build-seat) so change-check can read them.
+
+## UI review
+
+**Verdict: pass** (R43 amended, R50). Reviewer `l52-layer-ui`, 2026-10-24, commit e6d77d6. No severity 4 or 3 finding. Shots, logs and harness output are in `.wt-notes/l52-layer-ui/` (`r/<w>x<h>-<state>.png`, `r/h-*.txt`, `r/s-*.txt`).
+
+**Shared test run: fresh**, test-lease run `43e52923-15747` of e6d77d6. `make test` exit 0, `Tests 1222 passed (1222)`. The code reviewer reused this run.
+
+### How each state was checked
+- **Setup.** Review build (`make review-build` in my worktree) launched on `fixture-home.sh --review` with `auth: off` and `discuss_state_dir` under the temp dir, pid saved. One real-window shot: `1024x640-init-b-conversations.png`. The AX resize to 1440 then hit the floating icon window, so the measurements come from an offscreen WKWebView harness (`tabharness`, window never ordered in, no system input). It ran over `wails dev` of a clean clone of e6d77d6 on the same fixture, at 1440×872 and 1024×612 content, which are the 1440×900 and 1024×640 windows minus the title bar.
+- **Moving the mark.** For each move I read the old control's own style and its `::before` (`getComputedStyle(el,'::before')`) plus `document.getAnimations()`. Samples: before the click, synchronously after it, at the microtask, and at 16, 50, 100, 200 and 400 ms. In every case the old control had no fill or line from the first post-render sample on (microtask), the layer read `transition: none | 0s`, and there were no animations on old or new. Controls moved:
+  - Rail row init-a → init-b (1440)
+  - Strip init-b → init-a (both sizes)
+  - Sub-tabs Overview → Work → Roadmap
+  - Roadmap's segmented control Stages → Cards → Calendar, and the outline's Detail segmented control
+  - People panel fse → po_ana (`button.person`)
+  - Chat row po_ana → dev_bruno (R43: afterwards only the `aria-current` row has a fill)
+  - People toggle (`tiny-btn[aria-pressed]`) on and off
+  - Details (`ihead-details`) open and close
+  - ⚙ `.gear.on`, and gear → place tab
+  - Home's Rule `.act` open and close
+  - Role row `r-row` open
+  - Rule box option one-machine → two-machines (`.sl-shadow`)
+- **Hover.** Emulated with a `.fh` copy of every `:hover` rule. An unmarked rail row, strip item, segmented button, person, chat row and stage tile each start a `background-color 100ms cubic-bezier(0, 0.4, 0, 1)` transition (`--ease-out`). Their rest state carries the same transition, which is the one the ease out uses. A marked person or chat row does not change on hover (no animation).
+- **Looks as on main.** Main's CSS diff: same tokens, the same 2px left accent inset and 2px underline, and the radius inherited. The shots (`1440x872-chat-dev_bruno.png`, `1024x612-people-B.png`, `1024x612-roadmap-calendar.png`) show text and icons above the fill. No `.sl` descendant has a negative z-index. `.sl` changes no control's `position` (only `z-index` auto → 0).
+- **Focus ring.** Tab through the top bar and rail reads `solid 2px rgb(192,171,254)`, offset 2px, unchanged.
+
+### Findings
+- **U1 (sev 1) The fill sits 1px inside a bordered control's edge.**
+  - What the person sees: the fill is drawn 1px in from where main drew it.
+  - Where: every `.sl` control with a 1px border: tiny-btn, `.act`, rail row, strip, chat, seg, stage tile.
+  - Evidence: `.sl::before` is `inset: 0`, the padding box, while main's `background` painted the border box. The 1px edge now shows the control's own background through a translucent border (e.g. `.act`: rgb(39,32,51) under rgba(255,255,255,.16)) instead of the selected fill. Not visible in the shots at 1×.
+  - Proposal: `inset: calc(-1 * border-width)` is not expressible, so leave it, or `inset: -1px` on bordered controls only.
+- **U2 (sev 1) The critical memory chip's ring, open, is half as wide outside the chip.**
+  - What the person sees: 1px of ring outside the chip instead of 2px, and the chip's amber loses 1px at its edge.
+  - Where: `.memory button.memory-btn.critical[aria-expanded="true"]`.
+  - Evidence: from CSS only. The ring `0 0 0 2px` now spreads from the layer's padding edge, so 1px of it covers the chip's 1px border. On main it spread 2px outside the border edge.
+  - Proposal: `--mark-line: 0 0 0 3px …`, or keep this ring on the control.
+- **U3 (sev 1) Hover on the current rail row shows a 1px rim around its fill.**
+  - What the person sees: a 1px rim of `--surface` eases in around the opaque fill.
+  - Where: the current rail row, and the same on other opaque-fill marks (seg `.on`, `.act` open).
+  - Evidence: `rail_hover_marked` starts a background-color transition under the layer. On main the active rule beat hover, so nothing changed.
+  - Proposal: restate `background: transparent` in the opaque mark rules, as the see-through ones already do.
+
+### Spec gaps (for the FSE)
+- S3's "vitest in the harness" is server renders over a cascade model, not WebKit. R50's no-frame check is this review's computed-style run. Word the row.
+- R50 lists eight controls. The strip's role items and the rail's role rows also take the layer and were checked only at rest.
+- `.ib-row.focused` (Home inbox) still eases its fill, outside the premise's words.
+
+### For aglaea (design questions, not findings)
+- A1: the sub-tabs' hover is ink only, and it switches at once, so R50's "hover eases" has nothing to ease there. Should sub-tab hover get a surface, or an ink ease?
+- A2: should hover on a marked control with an opaque fill show at all? R49 amended covers the chat row only (see U3).
+- A3: under `prefers-reduced-motion` hover still eases on every `.sl` control. The rule box lost its guard, and `button` never had one. The design system says "nothing moves".
+- A4 (outside this card): at 1024×640 on init-b, the header's "no goal yet" line sits against the sub-tabs row (`1024x640-init-b-conversations.png`). Not compared with main.
+
+### Not verified
+- The critical memory chip on screen (the fixture shows "high"; U2 is read from CSS).
+- The rail row move at 1024: my probe threw there and was not re-run (the strip was measured at 1024, the rail row at 1440).
+- The real review window at 1440×900 (AX resize hit the floating icon; the harness covers 1440).
+- Mark moves on stage tiles, the float list, the week list and the place tab: rest and hover only, or not reached.
