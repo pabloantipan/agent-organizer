@@ -31,7 +31,7 @@ option A:
   in order, `, ` between them). `RuleDecision` accepts exactly that
   shape for a question record, each alternative one of its question's, and
   refuses any other with the reason. A question record with one question
-  also accepts a plain \`chosen: <alt>\` (one of its alternatives), so
+  also accepts a plain `chosen: <alt>` (one of its alternatives), so
   older single-question records read as they are (hestia's ask, crossing
   0019).
 - **FR-4** The scan accepts that `chosen` on a question record, so
