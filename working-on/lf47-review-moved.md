@@ -8,7 +8,7 @@ reviewer: m47-review, m47-ui
 stage: review-map
 updated: 2026-10-23
 next: "review: lf47-review-moved, gate met (M1-M4 with Amendment 1, X0), 3301319"
-review: fail
+review: pass
 depends_on: []
 boundary: ["docs/specs/leftovers-47.md Boundary, lf47-review-moved"]
 spec: "docs/specs/leftovers-47.md (FR-1 to FR-3)"
@@ -58,23 +58,25 @@ Not changed, on purpose:
 
 ## Review
 
-**Verdict: fail** at 6c899f4 (branch lf47-review-moved, not moved during the review). Unmet gate items: **M4**, its focus clause (FR-3: "Focus after a save still follows `focusAfterSave`"). Reviewer m47-review, 2026-10-23.
+**Verdict: pass** at **3301319** (rebased on main 4dd010d; supersedes my fail at 6c899f4, 7077f1e). Unmet gate items: none. Reviewer m47-review, 2026-10-23.
 
-Revised from pass (f84f332) after m47-ui's MV1 landed. Proof: m47-ui's harness `R22_focus` gives `{"tag":"BODY"}` at 1024×640 and 1440×900, and the review build's AX shows no focused element, after `Reviewed` on the last unmarked symbol (## UI review, MV1). The code path agrees: `ReviewSymbol.tsx:342` arms `afterSaveFocus` only for `which === "save"`, and the last symbol's primary is `run("next", primary.mark, primary.ask, last ? undefined : onNext)` (`:380`). After the press `afterSave` makes the form as saved, FR-3 hides the primary, the focused button unmounts, and nothing moves focus. My M4 below checked `focusAfterSave`'s answer and the Save path only. I missed that FR-3 now unmounts the button the primary's own press focused. The M4 test checks the pure function, not where focus lands after the press. That is a test that checks less than the row.
+### What changed since 6c899f4
 
-### change-check (from a clean clone at 6c899f4)
+`git range-diff 1a09120..6c899f4 4dd010d..3a0543d`: both earlier commits are `=` (5c6af25 = 26c9c8f, 6c899f4 = 3a0543d), so the rebase changed nothing on the branch. My M1-M3 checks and their fails-on-main evidence below stand unchanged. New: 3301319 (MV1 fix, ReviewSymbol.tsx and its test only). Spec: leftovers-47 Amendment 1 (2064179) adds M4's focus check; review-view Amendment 14 (ba825d7).
+
+### change-check (clean clone at 3301319)
 
 ```
 change-check: working-on/lf47-review-moved.md
 risk: medium (missing, read as medium)
-repo organizer: base 1a091202b (default origin/main) ... head lf47-review-moved (clone HEAD 6c899f475, on detached) 6c899f475; 5 files, 7 flags; read in /Users/pabloantipan/organizer/.wt-notes/m47-review/clean
+repo organizer: base 587ee24ec (default origin/main) ... head lf47-review-moved (clone HEAD 33013194f, on detached) 33013194f; 5 files, 7 flags; read in /Users/pabloantipan/organizer/.wt-notes/m47-review/clean
 
 ## Changed
 
 - organizer/frontend/src/components/Review.test.tsx (modified, test)
 - organizer/frontend/src/components/Review.tsx (modified): Review, ReviewViewProps, PanelProps, ReviewView, SymbolPane
 - organizer/frontend/src/components/ReviewSymbol.test.tsx (modified, test)
-- organizer/frontend/src/components/ReviewSymbol.tsx (modified): ReviewSymbol, ReviewSymbolViewProps, ReviewSymbolView, TitleLine
+- organizer/frontend/src/components/ReviewSymbol.tsx (modified): ReviewSymbol, ReviewSymbolViewProps, ReviewSymbolView, TitleLine, leavesAfterPress, landAfterSave
 - organizer/frontend/src/lib/review.ts (modified): markControls, asSaved, movedHead, headerMoved, inTurn
 
 ## Tests touched
@@ -109,36 +111,48 @@ repo organizer: base 1a091202b (default origin/main) ... head lf47-review-moved 
 8 flags: outside boundary 0, outside footprint 0, undeclared 4, declared, not changed 1, new env var 0, new dependency 0, new host 0, risk 0, untested? 3, could not read 0, boundary unreadable 0
 ```
 
-- undeclared `ReviewViewProps`, `PanelProps` (Review.tsx), `ReviewSymbolViewProps` (ReviewSymbol.tsx): the prop types carrying `newer`, `moved`, `onStatus` that the declared `Review`, `ReviewView`, `ReviewSymbol`, `ReviewSymbolView` changes need; inside the boundary.
-- undeclared `SymbolPane`: one line passing `moved`/`onStatus` from `panel` to `ReviewSymbol`; inside the boundary.
-- declared, not changed `ReviewSymbol.tsx:MarkForm`: false flag; the diff changes MarkForm's `markControls(..., saved)` call (hunk `@@ -290 +312 @@ function MarkForm`); change-check attributed it to no symbol.
-- untested? `asSaved`: exercised through `markControls` in M4 and the updated P2/A4/A6; `TitleLine`: rendered by every panel test, its new effect read by M3's source check; `SymbolPane`: rendered by the screen tests with `from` set.
-- Outside boundary 0; no new dependency (`git diff main...6c899f4 --name-only` is the five boundary files; no package.json, lock or go.mod).
+The flags are the same as at 6c899f4, with the same explanations:
+- undeclared `ReviewViewProps`, `PanelProps`, `ReviewSymbolViewProps`: these prop types carry `newer`, `moved` and `onStatus` for the declared component changes.
+- undeclared `SymbolPane`: one pass-through line.
+- declared, not changed `MarkForm`: a false flag. The diff does change MarkForm (`markControls(..., saved)`, and 3301319's arming line and `landAfterSave` call); change-check attributes those hunks to no symbol.
+- untested? `asSaved`: tested through `markControls` in M4.
+- untested? `TitleLine` and `SymbolPane`: rendered by the panel and screen tests.
 
-### Fails on main (the branch's two test files copied onto a clone at main 1a09120, `npx vitest run` of both: 14 failed, 87 passed)
+Outside the boundary: 0. `git diff 4dd010d...3301319 --name-only` lists only the five boundary files, and no new dependency came in.
 
-- M1: `TypeError: movedHead is not a function`; and `expected 'import { useEffect, useRef, useState …' to contain 'ReviewStatus(initiative, card).then((…'` (main's re-read never reaches the header).
-- M2: `TypeError: movedHead is not a function` (only the helper is missing: on main the header already stays unchanged; see Note 2).
-- M3: `TypeError: inTurn is not a function` (both timer tests); `expected 'import …' to contain 'const turn = useMemo(() => inTurn(say…'`.
-- M4: `a ✓ symbol reopened` fails with `expected '<h2 …' not to contain 'class="primary"'`, received `…<textarea …>reads right</textarea><div class="rs-buttons"><button class="primary">Reviewed, next</button></div>…`; `the mark changed` and `after a Save` fail with `expected true to be false`. The note-edit and unmarked cases pass on main, as they should (main already draws those).
-- Tests the builder changed that pinned a primary on a marked, unedited symbol, all named in ## Notes and failing on main as expected: ReviewSymbol P2 (both), A4 "nobody to ask", A4 "Reviewed with someone to ask", A6 "each mark's primary drops , next", W4 source line, K2 "then Reviewed: the link stays"; Review A6 "after the press".
+### M4 with Amendment 1 (the focus check)
+
+- Fix: `run("next", …)` now arms the after-save focus when the press neither asks nor moves on (`leavesAfterPress({ ask, moves: !!then })`, i.e. the last symbol's `Reviewed` / `Save question` / `Save block` with no seat). The effect then calls `landAfterSave`, which is the old inline code moved out unchanged: the asking primary if one is drawn, else `input:checked`, else the first radio. The arming runs inside `then`, after `onMark` has resolved and `onMarks` has updated `saved`, so `dirty` is false when the effect runs. A press that moves on (h2 of the next symbol) or asks (Open the thread) is not armed, so those paths are unchanged.
+- Test (M4, new `it`): a stand-in document whose `focus()` sets `activeElement`. After `markPress` on the last symbol, `leavesAfterPress` arms, the primary is gone, and `landAfterSave` leaves `document.activeElement` on the checked radio. The same holds for Question and Blocked with no seat. Moving on or asking arms nothing. A source line pins the arming in `run`.
+- Fails on 6c899f4 (ReviewSymbol.test.tsx from 3301319 copied onto a 6c899f4 clone, `npx vitest run … -t "M4|S1-S4"`: 2 failed, 9 passed):
+  - `× after the last unmarked symbol's own primary press, document.activeElement is the checked radio, never the body`: `TypeError: leavesAfterPress is not a function`
+  - `× S4: …`: `expected 'import { useEffect, useMemo, useRef, …' to contain 'landAfterSave({ showPrimary, ask: pri…'` (S4's source line was moved with the refactor. It still pins the same focus target, and the builder's comment says so.)
+- The behaviour on 6c899f4 is proven by m47-ui's MV1: `R22_focus` gives `{"tag":"BODY"}`.
+
+### Fails on main, M1-M4 (from the 6c899f4 round; the branch commits are identical)
+
+The branch's test files were copied onto main 1a09120: 14 failed, 87 passed.
+- M1: `TypeError: movedHead is not a function`, plus the source check that the re-read reaches the header.
+- M2: `TypeError: movedHead is not a function` (see Note 2).
+- M3: `TypeError: inTurn is not a function`.
+- M4: the ✓-reopened case received `<button class="primary">Reviewed, next</button>`.
+
+The builder updated tests that pinned a primary on a marked, unedited symbol. All are named on the card: P2 (both), A4 ×2, A6, W4, K2, and Review A6.
 
 ### Rows
 
-- M1 met: `movedHead(A-shown, B-read)` is B and the rendered header reads `The branch moved since this map (4d2a91b → 7c3e5f2).` with `Make it again` (WORDS.makeAgain), map's worklist still drawn. Both panel reads (mount and the re-read after a refusal) call `onStatus`; `onStatus` only sets `newer`; `load` (the only caller of ReviewMap/ReviewMarks) does not depend on `newer` (Review.tsx:43-63), so nothing reloads and no focus call is made.
-- M2 met: same map head gives `""` and identical markup to the screen without a re-read.
-- M3 met: with fake timers the region reads `""`, the refusal line, `""`, then after 100 ms the moved line, once.
-- M4 **not met** (focus, above); the rest holds: ✓ reopened draws no primary and no `rs-buttons` (last and not last); note edit and mark change bring `Reviewed, next` / `Reviewed` / `Save question, next` / `Save block`; unmarked draws `Reviewed, next`; after a Save `focusAfterSave` answers radios.
-- Words: `The branch moved since this map (<shown> → <new>).` and `Make it again` match FR-1 and Amendment 11 UW1 character for character.
-- X0 met: `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test` **reused run 0bd5ca43-69302 of 6c899f47503e** (by organizer-probe-m47-ui, 2026-10-23T20:39:45): go ok, vitest 78 files / 1035 tests passed. `test-lease run -- pnpm run build` exit 0, `test-lease run -- wails build` exit 0, `git status --porcelain` empty (wailsjs/runtime untouched).
+- M1 met: the header reads `The branch moved since this map (4d2a91b → 7c3e5f2).` and shows `Make it again`. Nothing reloads: `load` does not depend on `newer`. No focus call.
+- M2 met.
+- M3 met: `""`, then the refusal line, then `""`, then the moved line 100 ms later, once.
+- M4 met: no primary on a reopened ✓. The primary returns when the note or the mark changes. An unmarked symbol draws `Reviewed, next`. After a Save, and after the last symbol's own press, focus is on the checked radio.
+- Words: they match FR-1 and Amendment 11 string for string.
+- X0 met. The shared `make test` reused run 1424b154-52953 of 33013194f8c6 (organizer-probe-m47-ui, 2026-10-23T21:02:13): 79 files, 1045 tests passed, go ok. `pnpm run build` exited 0, `wails build` exited 0, and `git status --porcelain` is empty.
 
 ### Notes (not blocking)
 
-- Note 1 (to the FSE): M1's "ReviewMap and ReviewMarks are not called again" and "focus unchanged" are proved by reading Review.tsx's source (one call site each) rather than by counting mocked calls on a mounted screen, since the frontend has no DOM test library; I checked the dependency array myself. A gate that wants call counts needs a DOM renderer in the frontend's devDependencies first.
-- Note 2 (to the FSE): M2 "fails on main" only through the missing helper; main's behaviour already meets M2. The gate's "Expected (fails on main)" column does not fit a row that checks a non-regression.
-- Note 3 (to the FSE, for aglaea's Amendment 11 wording): FR-3 says a marked, unedited symbol "draws no primary"; the build keeps an *asking* primary there (`Ask sup81, next` on a saved Question with a seat, never asked), as the card's Notes say, because hiding it would leave no way to ask without editing the note. M4 tests a ✓ only, so the gate does not settle it; the spec's words should say which.
-- Note 4 (to the FSE): M3 drives `inTurn` over the pure `speaker`, not over `useLiveRegion` inside a mounted TitleLine; the component's use of it is checked by source lines. Same DOM-library limit as Note 1.
-
+- Note 1 (to the FSE): the frontend has no DOM test library. M1's "not called again", M3's wiring and M4's focus wiring are therefore proved on the pure helpers plus source lines, not on a mounted component. Amendment 1's `document.activeElement` is a stand-in object. The live check is m47-ui's.
+- Note 2 (to the FSE): M2 fails on main only because a helper is missing. Main's behaviour already meets M2.
+- Note 3: the asking primary that stays on a saved, never-asked Question is settled by leftovers-47 Amendment 1 and review-view Amendment 14. Closed.
 
 ## UI review
 
