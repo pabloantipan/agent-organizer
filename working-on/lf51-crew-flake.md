@@ -4,6 +4,7 @@ status: next
 repos: [organizer]
 branch: lf51-crew-flake
 seat: l51-flake
+reviewer: l51-flake-review
 stage:
 updated: 2026-10-24
 next: "review: lf51-crew-flake, gate met (C4 20/20, X0 pass, porcelain empty), 202b718"
