@@ -64,3 +64,16 @@ helper in `frontend/src/lib/decisions.ts` and its test, the fixture under
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf49-rule-questions` | Q1-Q4, X0 | 0157 option A | true |
+
+## Amendment 1 (FSE, 2026-10-24): a question may have one alternative
+
+From l49-build's `decide:` (sup91). FR-1 asked for two or more alternatives
+per question, but FR-4 names hestia 0038, whose `Q1 amend-exit` has one, so
+as written 0038 kept its problem. FR-1 now reads: a record whose every
+`options:` item reads `Q<n> <alt>[ | <alt> ...]`, numbered `Q1`, `Q2`, ... in
+order from 1, is a question record; a question has one or more
+alternatives. A one-alternative question draws one radio, already picked
+only if Pablo picks it (no preselection). A plain options list whose items
+merely start `Q1 ` but are not numbered from 1 in order is not a question
+record. The gate rows stand; Q3's fixture adds hestia 0038's options and its
+hand-fixed `chosen`, which read with no problem.
