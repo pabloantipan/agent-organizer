@@ -9,6 +9,7 @@ cards: [lf49-rule-questions]
 forecast: 30-60m
 stage: review-map
 affects: [hestia]
+crossing: 0019
 supersedes: []
 superseded_by:
 ruled:
