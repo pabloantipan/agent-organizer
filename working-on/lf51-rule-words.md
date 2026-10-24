@@ -4,6 +4,7 @@ status: next
 repos: [organizer]
 branch: lf51-rule-words
 seat: l51-words
+reviewer: l51-words-review, l51-words-ui
 stage:
 updated: 2026-10-24
 next: "review: lf51-rule-words, W5-W8 and X0 pass, 61d9d41"
