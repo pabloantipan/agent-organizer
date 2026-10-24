@@ -1,10 +1,10 @@
 ---
 title: Organizer as the factory's registrar — keys and cell registration
-status: next
+status: done
 repos: [internal]
 branch: main
-updated: 2026-09-05
-next: "Set record_url to http://127.0.0.1:8090 and verify CreateCrew registers camp against the local record (it already is, by curl); the factory-key path waits for a record that can verify a Firebase token"
+updated: 2026-10-24
+next: "closed superseded by 0161, not delivered (the Hestia push, crossing 0016, covers it)"
 ---
 
 ## Goal
@@ -39,3 +39,7 @@ record — it stays one factory, one laptop.
 - Never store the key anywhere but the 0600 file; never log it
 - `registerCell`'s call site inside CreateCrew is uncommitted: `internal/service/crew.go` belongs to the crew-and-context card and is not in git yet. It ships when that card commits.
 - `discuss_state_dir` moved into the committed config here, ahead of the crew work, because locating push.key needs it
+
+## Closed
+
+Closed superseded by 0161, not delivered: Pablo, 2026-10-24 in the FSE session, "Close as superseded" (by the Hestia push, crossing 0016).
