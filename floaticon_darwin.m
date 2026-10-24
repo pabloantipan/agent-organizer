@@ -72,6 +72,7 @@ static BOOL started;
 static FILE *logFile;
 static char *logPath;                 // the float log's path, kept for the check hook
 static dispatch_source_t usr1, usr2; // the check hooks, only with FLOAT_LOG
+static NSUInteger spaceChanges;       // desktop-change notifications so far; a re-read acts only for the latest
 static NSString *placePath;
 static NSMutableDictionary *places;   // display key -> {x, y} of the tile from the visible frame's origin
 
@@ -545,8 +546,9 @@ static void markHome(NSString *why) {
 // stands on, where no single window covers the display). Should a macOS drop
 // the backdrop, a covering window on a desktop with no Finder desktop is
 // taken as full screen, the old test kept honest. Read only at a
-// desktop-change notification, after the slide: mid-slide the list holds
-// both desktops' windows (the spike's misfire).
+// desktop-change notification and once more 0.5 s later (leftovers-50
+// FR-1): mid-slide the list holds both desktops' windows (the spike's
+// misfire), and the later read is the one that stands.
 static BOOL fullScreenSpace(void) {
     NSScreen *scr = [panel screen] ?: [NSScreen mainScreen];
     NSRect f = [scr frame];
@@ -577,12 +579,32 @@ static BOOL fullScreenSpace(void) {
 
 static void watchPointer(void);
 
+static BOOL onScreen(void) { return ([panel occlusionState] & NSWindowOcclusionStateVisible) != 0; }
+
+static void readBack(void) {
+    flog(@"icon read back: isVisible=%d on screen=%d alpha=%.2f frame=%@", [panel isVisible], onScreen(), [panel alphaValue],
+         NSStringFromRect([panel frame]));
+}
+
+// AppKit can call the panel visible while the window server keeps it off
+// screen (floating-icon-3 Notes): every update then says "stays" and nothing
+// orders it in. Where the icon is wanted (the code left it visible), a read
+// that finds it off screen orders it front again, once for that read; the
+// read-back after it only logs, so a window server that refuses is no loop
+// (leftovers-50 FR-2).
+static void orderInIfDropped(NSString *at) {
+    if (![panel isVisible] || onScreen()) return;
+    flog(@"%@: icon wanted, isVisible=1 but off screen (occlusion %lu): ordered front again", at, (unsigned long)[panel occlusionState]);
+    [panel orderFrontRegardless];
+    after(0.3, ^{ readBack(); });
+}
+
 static void showIcon(void) {
     after(0.25, ^{ watchPointer(); }); // it may appear under a still pointer
     // Read back, not assumed: on screen is the window server's word.
     after(0.3, ^{
-        flog(@"icon read back: isVisible=%d on screen=%d alpha=%.2f frame=%@", [panel isVisible],
-             ([panel occlusionState] & NSWindowOcclusionStateVisible) != 0, [panel alphaValue], NSStringFromRect([panel frame]));
+        readBack();
+        orderInIfDropped(@"read-back");
     });
     if (reduceMotion()) {
         [panel setAlphaValue:1];
@@ -1239,7 +1261,19 @@ void FloatIconStart(const char *logArg, const char *placeFile) {
         watchOthers();
         NSNotificationCenter *wc = [[NSWorkspace sharedWorkspace] notificationCenter];
         [wc addObserverForName:NSWorkspaceActiveSpaceDidChangeNotification object:nil queue:[NSOperationQueue mainQueue]
-                    usingBlock:^(NSNotification *n) { update(@"space-change", YES); }];
+                    usingBlock:^(NSNotification *n) {
+                        // The full-screen test once more after the slide (FR-1); a
+                        // later change's re-read stands for this one's.
+                        NSUInteger k = ++spaceChanges;
+                        update(@"space-change", YES);
+                        after(0.5, ^{
+                            if (k != spaceChanges) return;
+                            BOOL was = [panel isVisible];
+                            update(@"space-change re-read", YES);
+                            // Just shown, its own read-back looks (FR-2).
+                            if (was) orderInIfDropped(@"re-read");
+                        });
+                    }];
         [wc addObserverForName:NSWorkspaceAccessibilityDisplayOptionsDidChangeNotification object:nil queue:[NSOperationQueue mainQueue]
                     usingBlock:^(NSNotification *n) { breathe(); applyRing(); setLook(LookResting, 0); }];
         [[NSNotificationCenter defaultCenter] addObserverForName:NSApplicationDidChangeScreenParametersNotification object:nil
