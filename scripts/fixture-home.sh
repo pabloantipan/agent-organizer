@@ -41,6 +41,9 @@
 # links to this repo's frontend/node_modules (excluded in the copy's
 # .git/info/exclude, so git status stays clean); without pnpm install there
 # it says so on stderr and the map carries the Go symbol only.
+# --review also adds to the canned health one open direct thread between
+# pablo and sup10 (leftovers-48 FR-4), pablo's word last, so sup10 sits
+# under Conversations' Others; it asks nothing and every count below stays.
 #
 # Memory (docs/specs/ram-indicator.md, Acceptance (ram-view)): --memory
 # normal|high|critical|fail|none, anywhere among the options, exports
@@ -573,6 +576,25 @@ p["threads"] = (p.get("threads") or []) + [{
     "id": "01FIXTUREFORAGLAEA000000000", "subject": "[for aglaea] does the roles row fold at 1024 the way you meant",
     "status": "open", "kind": "conversation", "participants": ["fse", "pablo"], "messages": 1,
     "since_decision": 1, "undecided": False, "quiet_seconds": 7200, "age_seconds": 7200}]
+json.dump(doc, open(path, "w"), indent=1)
+PY
+# A chat with a supervisor (leftovers-48 FR-4, review-view R41 to R44):
+# --review adds one open direct thread between pablo and sup10, who is in
+# the canned health but not in init-a's roster, so Conversations lists
+# sup10 under Others with no hand edit. Its posters are pablo and sup10 and
+# the last word is pablo's, so it asks nothing: the canned feed carries a
+# thread's head only (discuss.Thread: participants and a message count, no
+# bodies) and no mailbox holds its messages, so the organizer reads no
+# message addressed to pablo in it and Needs me keeps its count.
+[ -z "$review" ] || [ -n "$live_mailbox" ] || python3 - "$tmp/health.json" <<'PY'
+import json, sys
+path = sys.argv[1]
+doc = json.load(open(path))
+p = doc["organizer-fixture"]
+p["threads"] = (p.get("threads") or []) + [{
+    "id": "01FIXTURESUP10DIRECT0000000", "subject": "rv-fixture: the map holds Welcome as a caller",
+    "status": "open", "kind": "conversation", "participants": ["sup10", "pablo"], "messages": 2,
+    "since_decision": 2, "undecided": False, "quiet_seconds": 600, "age_seconds": 1800}]
 json.dump(doc, open(path, "w"), indent=1)
 PY
 cat > "$tmp/config.yaml" <<EOF
