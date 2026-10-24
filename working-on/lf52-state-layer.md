@@ -7,7 +7,7 @@ seat: l52-layer
 reviewer: l52-layer-review, l52-layer-ui
 stage:
 updated: 2026-10-24
-next: "review: lf52-state-layer, gate met (S1 FR-3 fixed), 75945c2"
+next: "l52-layer builds leftovers-52 Amendment 1 (FR-1a-1d, FR-2a; sup93)"
 depends_on: []
 boundary: ["docs/specs/leftovers-52.md Boundary, lf52-state-layer"]
 spec: "docs/specs/leftovers-52.md (FR-1 to FR-3)"
