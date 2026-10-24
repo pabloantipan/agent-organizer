@@ -339,7 +339,7 @@ func TestWriteRulingShapes(t *testing.T) {
 			if strings.Contains(tc.name, "several lines") {
 				words = "because.\nand also this."
 			}
-			got, err := writeRuling(tc.src, "2026-09-26", "pablo", "pablo", "a", words, "lodestar")
+			got, err := writeRuling(tc.src, "2026-09-26", "pablo", "pablo", "a", false, words, "lodestar")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -350,7 +350,131 @@ func TestWriteRulingShapes(t *testing.T) {
 			}
 		})
 	}
-	if _, err := writeRuling("no frontmatter here\n", "2026-09-26", "pablo", "pablo", "a", "because.", "lodestar"); err == nil {
+	if _, err := writeRuling("no frontmatter here\n", "2026-09-26", "pablo", "pablo", "a", false, "because.", "lodestar"); err == nil {
 		t.Error("a record without frontmatter must refuse")
+	}
+}
+
+// questionRecord is hestia 0037's frontmatter (testdata/questions); each test
+// rules its own temp copy, never the file in the repo.
+func questionRecord(t *testing.T) string {
+	t.Helper()
+	b, err := os.ReadFile(filepath.Join("..", "..", "testdata", "questions", "0037-big-picture-stage.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return string(b)
+}
+
+// TestRuleQuestionRecord is leftovers-49 Q1 (FR-1, FR-3): a two-question
+// record is ruled with one answer per question; the file holds that chosen
+// and every other byte is unchanged. On main RuleDecision refuses it as not
+// one of the options.
+func TestRuleQuestionRecord(t *testing.T) {
+	now := time.Date(2026, 10, 24, 9, 0, 0, 0, time.UTC)
+	src := questionRecord(t)
+	s, record := ruleFixtureWith(t, now, src, "")
+	chosen := "Q1 after-graph-performs-start-now, Q2 record-page"
+	if err := s.RuleDecision("fix", "0002", chosen, "as recommended"); err != nil {
+		t.Fatalf("rule: %v", err)
+	}
+	got, err := os.ReadFile(record)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := src
+	for _, kv := range [][2]string{
+		{"status: proposed\n", "status: ruled\n"},
+		{"ruled:\n", "ruled: 2026-10-24\n"},
+		{"ruled_by:\n", "ruled_by: pablo\n"},
+		{"chosen:\n", `chosen: "Q1 after-graph-performs-start-now, Q2 record-page"` + "\n"},
+		{"## Ruling\n\n", "## Ruling\n\npablo, 2026-10-24, in the organizer on lodestar: as recommended\n"},
+	} {
+		if !strings.Contains(want, kv[0]) {
+			t.Fatalf("fixture lacks %q", kv[0])
+		}
+		want = strings.Replace(want, kv[0], kv[1], 1)
+	}
+	if string(got) != want {
+		t.Errorf("record:\n%s\nwant:\n%s", got, want)
+	}
+	si, err := s.initiative("fix")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if d := si.Decisions[0]; d.Chosen != chosen || d.Status != "ruled" {
+		t.Errorf("rescanned chosen %q status %q", d.Chosen, d.Status)
+	}
+	for _, p := range si.Problems {
+		if strings.Contains(p.Path, "0002") {
+			t.Errorf("the ruled record is a problem: %s", p.Msg)
+		}
+	}
+}
+
+// TestRuleQuestionRefusals is leftovers-49 Q2 (FR-3): a missing question and
+// an alternative its question does not offer are refused with the reason,
+// writing nothing; a plain record rules as today; a one-question record
+// takes `b` and `Q1 b`, and the scan reports neither.
+func TestRuleQuestionRefusals(t *testing.T) {
+	now := time.Date(2026, 10, 24, 9, 0, 0, 0, time.UTC)
+	for _, tc := range []struct {
+		name, chosen, wantErr string
+	}{
+		{"Q2 missing", "Q1 after-graph-performs-start-now", "does not answer Q2"},
+		{"an alternative Q1 does not offer", "Q1 nope, Q2 record-page", "Q1 nope is not one of Q1's alternatives"},
+		{"a whole options item", "Q1 after-graph-performs-start-now | after-graph-performs-wait | before-graph-performs", "is not one of Q1's alternatives"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			s, record := ruleFixtureWith(t, now, questionRecord(t), "")
+			root := filepath.Dir(filepath.Dir(filepath.Dir(record)))
+			head := strings.TrimSpace(git(t, root, "rev-parse", "HEAD"))
+			before, _ := os.ReadFile(record)
+			err := s.RuleDecision("fix", "0002", tc.chosen, "as recommended")
+			if err == nil || !strings.Contains(err.Error(), tc.wantErr) {
+				t.Fatalf("error %v, want it to mention %q", err, tc.wantErr)
+			}
+			if got, _ := os.ReadFile(record); string(got) != string(before) {
+				t.Errorf("the record changed:\n%s", got)
+			}
+			if at := strings.TrimSpace(git(t, root, "rev-parse", "HEAD")); at != head {
+				t.Errorf("a commit was made: %s", at)
+			}
+		})
+	}
+
+	t.Run("a plain record rules as today", func(t *testing.T) {
+		s, record := ruleFixture(t, now)
+		if err := s.RuleDecision("fix", "0002", "tray", "tray it is."); err != nil {
+			t.Fatal(err)
+		}
+		if got, _ := os.ReadFile(record); !strings.Contains(string(got), "\nchosen: tray\n") {
+			t.Errorf("record:\n%s", got)
+		}
+	})
+
+	oneQuestion := strings.Replace(proposedRecord, "options: [tray, fsnotify, none]", `options: ["Q1 a | b"]`, 1)
+	for _, tc := range []struct{ chosen, line string }{
+		{"b", `chosen: "b"`},
+		{"Q1 b", `chosen: "Q1 b"`},
+	} {
+		t.Run("one question, chosen "+tc.chosen, func(t *testing.T) {
+			s, record := ruleFixtureWith(t, now, oneQuestion, "")
+			if err := s.RuleDecision("fix", "0002", tc.chosen, "b it is."); err != nil {
+				t.Fatal(err)
+			}
+			if got, _ := os.ReadFile(record); !strings.Contains(string(got), "\n"+tc.line+"\n") {
+				t.Errorf("record:\n%s", got)
+			}
+			si, err := s.initiative("fix")
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, p := range si.Problems {
+				if strings.Contains(p.Path, "0002") {
+					t.Errorf("scan reports %s", p.Msg)
+				}
+			}
+		})
 	}
 }

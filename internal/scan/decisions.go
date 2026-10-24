@@ -95,13 +95,115 @@ func checkDecision(d model.Decision) []model.Problem {
 	if d.Status == model.DecisionSuperseded && d.SupersededBy == "" {
 		add("superseded decision without superseded_by")
 	}
-	if d.Chosen != "" && len(d.Options) > 0 && !slices.Contains(d.Options, d.Chosen) {
-		add("chosen %q is not one of the options", d.Chosen)
+	if d.Chosen != "" && len(d.Options) > 0 {
+		if qs := Questions(d.Options); qs != nil {
+			if err := CheckAnswers(qs, d.Chosen); err != nil {
+				add("%s", err)
+			}
+		} else if !slices.Contains(d.Options, d.Chosen) {
+			add("chosen %q is not one of the options", d.Chosen)
+		}
 	}
 	if t := d.TurnaroundDays(); d.Ruled != "" && d.Raised != "" && t < 0 && validDate(d.Ruled) && validDate(d.Raised) {
 		add("ruled %s before it was raised %s", d.Ruled, d.Raised)
 	}
 	return ps
+}
+
+// Question is one item of a question record's options (leftovers-49 FR-1):
+// `Q1 a | b | c` is question Q1 with the alternatives a, b and c.
+type Question struct {
+	Label string // "Q1"
+	Alts  []string
+}
+
+// questionItem is one options item of a question record: `Q`, a number, a
+// space, then the alternatives split by `|`.
+var questionItem = regexp.MustCompile(`^(Q\d+) (.+)$`)
+
+// minAlternatives is how many alternatives an item needs to read as a
+// question (FR-1: two or more).
+const minAlternatives = 2
+
+// Questions reads a record's options as questions, in order, or nil when the
+// record is not a question record: every item must read `Q<n> <alt> | <alt>
+// ...`, with no empty alternative. Spaces around each `|` are trimmed, so
+// `a|b` and `a | b` read alike. One parser for the rule and the scan; the box
+// reads the same shape with `questionsOf` in frontend/src/lib/decisions.ts.
+func Questions(options []string) []Question {
+	if len(options) == 0 {
+		return nil
+	}
+	qs := make([]Question, 0, len(options))
+	for _, o := range options {
+		m := questionItem.FindStringSubmatch(strings.TrimSpace(o))
+		if m == nil {
+			return nil
+		}
+		alts := strings.Split(m[2], "|")
+		for i, a := range alts {
+			alts[i] = strings.TrimSpace(a)
+			if alts[i] == "" {
+				return nil
+			}
+		}
+		if len(alts) < minAlternatives {
+			return nil
+		}
+		qs = append(qs, Question{Label: m[1], Alts: alts})
+	}
+	return qs
+}
+
+// Answers is how a ruling of a question record reads (FR-3): `Q1 a, Q2 x`,
+// the questions in order, `, ` between them.
+func Answers(qs []Question, picks []string) string {
+	parts := make([]string, len(qs))
+	for i, q := range qs {
+		parts[i] = q.Label + " " + picks[i]
+	}
+	return strings.Join(parts, ", ")
+}
+
+// CheckAnswers says why chosen is not a ruling of the question record qs, or
+// nil when it is: one `Q<n> <alt>` per question, in order, each alternative
+// one of its question's. A record with one question also takes a plain
+// `<alt>`, so older single-question rulings read as they are (FR-3).
+func CheckAnswers(qs []Question, chosen string) error {
+	placeholders := make([]string, len(qs))
+	for i := range placeholders {
+		placeholders[i] = "<alt>"
+	}
+	shape := Answers(qs, placeholders)
+	if len(qs) == 1 && slices.Contains(qs[0].Alts, strings.TrimSpace(chosen)) {
+		return nil
+	}
+	// An alternative may itself hold ", ": a piece that does not open with
+	// a label belongs to the answer before it.
+	var answers []string
+	for _, p := range strings.Split(chosen, ", ") {
+		if len(answers) > 0 && !questionItem.MatchString(p) {
+			answers[len(answers)-1] += ", " + p
+			continue
+		}
+		answers = append(answers, p)
+	}
+	for i, q := range qs {
+		if i >= len(answers) {
+			return fmt.Errorf("chosen %q does not answer %s; a question record is ruled as %q", chosen, q.Label, shape)
+		}
+		m := questionItem.FindStringSubmatch(strings.TrimSpace(answers[i]))
+		if m == nil || m[1] != q.Label {
+			return fmt.Errorf("chosen %q does not answer %s in its place; a question record is ruled as %q", chosen, q.Label, shape)
+		}
+		if alt := strings.TrimSpace(m[2]); !slices.Contains(q.Alts, alt) {
+			return fmt.Errorf("chosen %q: %s %s is not one of %s's alternatives (%s)", chosen, q.Label, alt, q.Label, strings.Join(q.Alts, ", "))
+		}
+	}
+	if len(answers) > len(qs) {
+		return fmt.Errorf("chosen %q answers more than the record's %d questions; a question record is ruled as %q", chosen, len(qs), shape)
+	}
+	return nil
 }
 
 // checkDecisionLinks reports supersede references to records that do not

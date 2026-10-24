@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"organizer/internal/model"
+	"organizer/internal/scan"
 )
 
 // RuleDecision writes a ruling into a `proposed` decision record and commits
@@ -20,7 +21,8 @@ import (
 // ruled, not the owner (0045, FR-14 of twenty-at-a-glance): see ruler.
 //
 // It refuses a record that is not proposed, a chosen value that is not one of
-// the record's options, and empty words. It also refuses, before touching the
+// the record's options (for a question record, not one answer per question,
+// leftovers-49 FR-3, scan.CheckAnswers), and empty words. It also refuses, before touching the
 // file, a record outside a git repository (the commit could not happen). A
 // refusal writes nothing and commits nothing.
 func (s *Service) RuleDecision(initiativeID, number, chosen, words string) error {
@@ -41,7 +43,14 @@ func (s *Service) RuleDecision(initiativeID, number, chosen, words string) error
 	if d.Status != model.DecisionProposed {
 		return fmt.Errorf("decision %s is %s, not proposed; only a proposed record can be ruled", d.Number, d.Status)
 	}
-	if !slices.Contains(d.Options, chosen) {
+	qs := scan.Questions(d.Options)
+	if qs != nil {
+		// leftovers-49 FR-3: a question record is ruled with one answer
+		// per question, `Q1 <alt>, Q2 <alt>`.
+		if err := scan.CheckAnswers(qs, chosen); err != nil {
+			return fmt.Errorf("decision %s: %w", d.Number, err)
+		}
+	} else if !slices.Contains(d.Options, chosen) {
 		return fmt.Errorf("chosen %q is not one of decision %s's options (%s)", chosen, d.Number, strings.Join(d.Options, ", "))
 	}
 	dir := filepath.Dir(d.Path)
@@ -54,7 +63,7 @@ func (s *Service) RuleDecision(initiativeID, number, chosen, words string) error
 	}
 	cfg := s.Config()
 	ruled := s.now().Format("2006-01-02")
-	out, err := writeRuling(string(src), ruled, ruler(si), d.Owner, chosen, words, cfg.Machine)
+	out, err := writeRuling(string(src), ruled, ruler(si), d.Owner, chosen, qs != nil, words, cfg.Machine)
 	if err != nil {
 		return fmt.Errorf("%s: %w", filepath.Base(d.Path), err)
 	}
@@ -108,17 +117,23 @@ const rulingHeading = "## Ruling"
 // `chosen` set and the words under `## Ruling`, and nothing else changed. The
 // file is edited line by line rather than re-serialised so comments, key
 // order, blank lines and every other section stay exactly as they were.
-func writeRuling(src, ruled, ruler, owner, chosen, words, machine string) (string, error) {
+// A question record's chosen is quoted, as the records write it by hand
+// (`chosen: "Q1 a, Q2 x"`); any other is as plain as it reads back.
+func writeRuling(src, ruled, ruler, owner, chosen string, question bool, words, machine string) (string, error) {
 	lines := strings.Split(src, "\n")
 	end := frontmatterEnd(lines)
 	if end < 0 {
 		return "", fmt.Errorf("no frontmatter to write the ruling into")
 	}
+	value := yamlScalar(chosen)
+	if question {
+		value = fmt.Sprintf("%q", chosen)
+	}
 	set := [][2]string{
-		{"status", model.DecisionRuled},
-		{"ruled", ruled},
-		{"ruled_by", ruler},
-		{"chosen", chosen},
+		{"status", yamlScalar(model.DecisionRuled)},
+		{"ruled", yamlScalar(ruled)},
+		{"ruled_by", yamlScalar(ruler)},
+		{"chosen", value},
 	}
 	for _, kv := range set {
 		lines, end = setFrontmatterKey(lines, end, kv[0], kv[1])
@@ -140,10 +155,11 @@ func frontmatterEnd(lines []string) int {
 }
 
 // setFrontmatterKey replaces the key's line in place, or inserts it before the
-// closing `---` when the record does not carry the key. It returns the lines
-// and the (possibly moved) index of that closing `---`.
+// closing `---` when the record does not carry the key. The value is written
+// as given, already a YAML scalar. It returns the lines and the (possibly
+// moved) index of that closing `---`.
 func setFrontmatterKey(lines []string, end int, key, value string) ([]string, int) {
-	line := key + ": " + yamlScalar(value)
+	line := key + ": " + value
 	for i := 1; i < end; i++ {
 		if strings.HasPrefix(lines[i], key+":") {
 			lines[i] = line
