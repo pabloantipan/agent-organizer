@@ -136,6 +136,32 @@ export const BUTTON_CLASSES: Set<string> = (() => {
   return set;
 })();
 
+/**
+ * The classes a component always writes beside a class (`ghost memory-btn sl`:
+ * memory-btn never comes without ghost), from the static words of every
+ * className="…", {`…`} and {"…"} in the components, so a mark rule naming
+ * only `.memory-btn` is read on the element as it renders, ghost and all.
+ */
+export const COMPANIONS: Map<string, Set<string>> = (() => {
+  const cdir = new URL("./", import.meta.url);
+  const map = new Map<string, Set<string>>();
+  for (const f of readdirSync(cdir) as string[]) {
+    if (!f.endsWith(".tsx") || f.includes(".test.")) continue;
+    const src = readFileSync(new URL(f, cdir), "utf8") as string;
+    for (const m of src.matchAll(/className=(?:"([^"]*)"|\{`([^`]*)`\}|\{"([^"]*)"\})/g)) {
+      const words = (m[1] ?? m[2] ?? m[3] ?? "").replace(/\$\{[^}]*\}/g, " ").split(/\s+/).filter((w) => /^[\w-]+$/.test(w));
+      for (const w of words) { const prev = map.get(w); map.set(w, new Set(prev ? [...prev].filter((x) => words.includes(x)) : words)); }
+    }
+  }
+  return map;
+})();
+/** A compound with the classes its subject always renders beside; a companion never makes a non-button a button (`stg-n` renders beside `num`, which a week button also takes). */
+export const withCompanions = (c: Compound): Compound => {
+  const button = c.tag === "button" || c.classes.some((k) => BUTTON_CLASSES.has(k));
+  const extra = c.classes.flatMap((k) => [...(COMPANIONS.get(k) ?? [])]).filter((k) => button || !BUTTON_CLASSES.has(k));
+  return { ...c, classes: [...new Set([...c.classes, ...extra])] };
+};
+
 /** Every word the components' sources hold: a selector naming a class no component writes matches nothing on screen. */
 export const COMPONENT_WORDS: Set<string> = (() => {
   const cdir = new URL("./", import.meta.url);
@@ -192,6 +218,49 @@ export const winners = (t: Target, prop: string, rules = RULES) => {
   return vals;
 };
 
+/** The declaration that wins among `props` (a shorthand and its longhands) on `t`: highest specificity, then the later rule, then the later declaration. */
+export const winnerOf = (t: Target, props: string[], rules = RULES) => {
+  let best: { prop: string; v: string; rule: Rule; sel: string; s: number; k: number } | null = null;
+  for (const r of rules) {
+    if (!mediaOn(r.media)) continue;
+    const keys = [...r.decls.keys()];
+    r.parts.forEach((p, i) => {
+      if (!reaches(p, t)) return;
+      const s = specificity(p);
+      for (const prop of props) {
+        if (!r.decls.has(prop)) continue;
+        const k = r.order * 1000 + keys.indexOf(prop);
+        if (!best || s > best.s || (s === best.s && k >= best.k)) best = { prop, v: r.decls.get(prop)!, rule: r, sel: r.sels[i], s, k };
+      }
+    });
+  }
+  return best as { prop: string; v: string; rule: Rule; sel: string } | null;
+};
+
+/** A length in px from a value the stylesheets write (`0`, `1px`, `calc(-1 * 1px)`); null when it is none of these. */
+export const px = (v: string | null | undefined): number | null => {
+  if (v == null) return null;
+  const t = v.trim();
+  if (/^0(px)?$/.test(t)) return 0;
+  let m = /^(-?\d+(?:\.\d+)?)px$/.exec(t); if (m) return Number(m[1]);
+  m = /^calc\(\s*(-?\d+(?:\.\d+)?)\s*\*\s*(.+)\)$/.exec(t); if (m) { const n = px(m[2]); return n == null ? null : Number(m[1]) * n || 0; }
+  return null;
+};
+const WIDTH = /^(\d+(?:\.\d+)?px|0|thin|medium|thick)$/, STYLE = /^(none|hidden|solid|dashed|dotted|double|groove|ridge|inset|outset)$/;
+/** The border width on `t`, from `border` or `border-width`, whichever wins (0 when none is set or the style is none). */
+export const borderWidth = (t: Target) => {
+  const w = winnerOf(t, ["border", "border-width"]); if (!w) return 0;
+  if (/^(0|none)\b/.test(w.v)) return 0;
+  const n = splitTop(w.v, " ").find((x) => WIDTH.test(x));
+  return n ? px(n) ?? 0 : w.prop === "border" ? 3 : 0;
+};
+/** The border colour on `t`, from `border` or `border-color`, whichever wins. */
+export const borderColor = (t: Target) => {
+  const w = winnerOf(t, ["border", "border-color"]); if (!w) return null;
+  if (w.prop === "border-color") return w.v;
+  return splitTop(w.v, " ").filter((x) => !WIDTH.test(x) && !STYLE.test(x)).join(" ") || "currentcolor";
+};
+
 /** Whether a transition value runs on `prop` (shorthands included). */
 export const transitions = (value: string, prop: string) =>
   splitTop(value, ",").some((item) => {
@@ -210,13 +279,17 @@ export const LINE = ["box-shadow"];
 export const EDGE_INK = ["border", "border-color", "border-style", "border-top-color", "border-right-color", "border-bottom-color", "border-left-color", "outline", "outline-color", "color"];
 export const PAINT = [...FILL, ...LINE, ...EDGE_INK];
 
-/** The one ease hover takes (design system, Elevation and motion; leftovers-52 FR-2). */
-export const EASE = "background-color var(--dur-fast) var(--ease-out)";
+/** The one ease hover takes, surface and ink (design system, Elevation and motion; leftovers-52 FR-2, FR-2a). */
+export const EASE = "background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out)";
 
 /** A state-marked selector of some rule, with the element it paints and that element with no mark. */
 export type Mark = { file: string; sel: string; raw: string; rule: Rule; parts: Compound[]; plain: Compound[] };
+const rendered = (m: Mark): Mark => {
+  const subj = (ps: Compound[]) => [...ps.slice(0, -1), withCompanions(ps[ps.length - 1])];
+  return { ...m, parts: subj(m.parts), plain: subj(m.plain) };
+};
 export const MARKS: Mark[] = RULES.flatMap((r) => r.parts.flatMap((parts, i) =>
-  parts.some(isStateCompound) ? [{ file: r.file, sel: r.sels[i], raw: r.raws[i], rule: r, parts, plain: parts.map(unmark) }] : []));
+  parts.some(isStateCompound) ? [rendered({ file: r.file, sel: r.sels[i], raw: r.raws[i], rule: r, parts, plain: parts.map(unmark) })] : []));
 
 /** What the parser leaves out of MARKS on purpose: a state inside :not() (the element without it) and an aria state written "false". */
 export const unmarkedOnPurpose = (raw: string) =>

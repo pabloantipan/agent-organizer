@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  EASE, FILL, LAYER, LAYER_SHADOW, LINE, MARKS, dead, PAINT, RULES, SHEETS, isControl, onLayer, read, reaches, transitions, unclassified, winners,
+  EASE, FILL, LAYER, LAYER_SHADOW, LINE, MARKS, borderColor, borderWidth, dead, PAINT, RULES, SHEETS, isControl, mediaOn, onLayer, px, read, reaches, transitions, unclassified, winnerOf, winners,
   type Compound, type Mark, type Target,
 } from "./stateLayer.kit";
 
@@ -46,6 +46,8 @@ const label = (m: Mark) => `${m.file}: ${m.sel}`;
 const notAMark = (m: Mark) => paints(m).length === 0 && !sets(m, "--mark-");
 const marks = MARKS.filter((m) => !notAMark(m) && !dead(m.parts));
 const controls = marks.filter((m) => isControl(m.plain));
+/** The controls on .sl's ::before (the rule box's radio is on .sl-shadow, an inset shadow inside its own border, so FR-1b's edge does not apply to it). */
+const layered = controls.filter((m) => m.parts[m.parts.length - 1].classes.includes(LAYER));
 
 describe("FR-3: the test finds the marked selectors itself", () => {
   it("reads every stylesheet but review.css", () => {
@@ -74,7 +76,6 @@ describe("S1 (FR-1): every mark is painted through the shared layer, which sets 
     expect(host.decls.get("z-index")).toBe("0");
     expect(layer.decls.get("content")).toBe('""');
     expect(layer.decls.get("position")).toBe("absolute");
-    expect(layer.decls.get("inset")).toBe("0");
     expect(layer.decls.get("z-index")).toBe("-1");
     expect(layer.decls.get("pointer-events")).toBe("none");
     expect(layer.decls.get("transition")).toBe("none");
@@ -93,7 +94,8 @@ describe("S1 (FR-1): every mark is painted through the shared layer, which sets 
   });
 
   it.each(marks.map((m) => [label(m), m] as const))("%s: nothing it paints on the element itself is transitioned, marked or not, hovered or not", (_l, m) => {
-    for (const p of paints(m)) {
+    // Ink is left out: hover's ease covers color (FR-2a), so a mark's ink change eases with it; fill, line and edge do not.
+    for (const p of paints(m).filter((x) => x !== "color")) {
       if (FILL.includes(p) && restates(m, p)) continue;
       for (const t of fourWays(m)) for (const w of winners(t, "transition")) {
         expect.soft(transitions(w.v, p), `${p} eases on "${w.sel}" (${w.rule.file}): ${w.v}`).toBe(false);
@@ -112,6 +114,42 @@ describe("S1 (FR-1): every mark is painted through the shared layer, which sets 
       const at = (hover: boolean) => FILL.map((p) => winners(hovered(m.parts, hover), p).map((w) => w.v).join("|")).join(";");
       expect(at(true)).toBe(at(false));
     });
+
+  it("the layer reaches the border box: inset and width from --mark-edge, the border colour from --mark-rim (FR-1b, R52)", () => {
+    const [layer] = RULES.filter((r) => r.sels.includes(`.${LAYER}::before`));
+    expect(layer.decls.get("inset")).toMatch(/^calc\(-1 \* var\(--mark-edge, 0px\)\)$/);
+    expect(layer.decls.get("border")).toMatch(/^var\(--mark-edge, 0px\) solid var\(--mark-rim\)$/);
+    expect(RULES.find((r) => r.sels.includes(`.${LAYER}`) && r.decls.has("--mark-rim"))?.decls.get("--mark-rim")).toBe("transparent");
+  });
+
+  it.each(layered.map((m) => [label(m), m] as const))("%s: a bordered control's layer covers its border box, marked or not, hovered or not (FR-1b)", (_l, m) => {
+    for (const t of fourWays(m)) {
+      const edge = winnerOf(t, ["--mark-edge"]);
+      expect(px(edge?.v), `--mark-edge on "${edge?.sel ?? "nothing"}" for a ${borderWidth(t)}px border (${JSON.stringify(t.hover)})`).toBe(borderWidth(t));
+    }
+  });
+
+  it.each(layered.filter((m) => fillOf(m) !== null).map((m) => [label(m), m] as const))("%s: an opaque fill keeps the control's border drawn over it, a see-through one leaves it under (FR-1b)", (_l, m) => {
+    const t = hovered(m.parts, false), rim = winnerOf(t, ["--mark-rim"])?.v;
+    if (fillOf(m) === "opaque" && borderWidth(t) > 0) expect(rim, "--mark-rim restates the marked border colour").toBe(borderColor(t));
+    else expect(rim).toBe("transparent");
+  });
+
+  it("the critical memory chip's open ring is 2px outside its border, as on main (FR-1c, R52)", () => {
+    const rings = controls.filter((m) => /^0 0 0 /.test(m.rule.decls.get("--mark-line") ?? ""));
+    expect(rings.map(label).join("\n")).toContain("memory-btn.sl.critical");
+    for (const m of rings) {
+      expect(m.rule.decls.get("--mark-line")).toMatch(/^0 0 0 2px /);
+      const t = hovered(m.parts, false);
+      expect(borderWidth(t)).toBe(1);
+      expect(px(winnerOf(t, ["--mark-edge"])?.v), "the ring spreads from the layer, which sits on the border's outer edge").toBe(1);
+    }
+  });
+
+  it.each(controls.filter((m) => fillOf(m) === "opaque").map((m) => [label(m), m] as const))("%s: hover changes nothing on an opaque mark (FR-1d, R52)", (_l, m) => {
+    const at = (hover: boolean) => { const t = hovered(m.parts, hover); return [winnerOf(t, FILL)?.v, winnerOf(t, ["color"])?.v, winnerOf(t, ["--mark-rim"])?.v].join(" | "); };
+    expect(at(true)).toBe(at(false));
+  });
 });
 
 describe("S2 (FR-2): hover eases on every control, in and out, and no transition: none list remains", () => {
@@ -120,7 +158,21 @@ describe("S2 (FR-2): hover eases on every control, in and out, and no transition
     for (const host of [LAYER, LAYER_SHADOW]) expect(RULES.find((r) => r.sels.includes(`.${host}`) && r.decls.has("transition"))?.decls.get("transition")).toBe(EASE);
   });
 
-  it.each(controls.map((m) => [label(m), m] as const))("%s: background-color eases 100 ms on --ease-out, marked or not, hovered or not", (_l, m) => {
+  it("the hover transition lists background-color and color (FR-2a)", () => {
+    for (const host of [LAYER, LAYER_SHADOW]) {
+      const v = RULES.find((r) => r.sels.includes(`.${host}`) && r.decls.has("transition"))?.decls.get("transition") ?? "";
+      expect(transitions(v, "background-color") && transitions(v, "color"), `.${host}: ${v}`).toBe(true);
+    }
+  });
+
+  it("under reduced motion one global guard sets every transition to none, hover included, and no control has its own (FR-1a, R51)", () => {
+    const guards = RULES.filter((r) => /prefers-reduced-motion:\s*reduce/.test(r.media ?? "") && r.decls.has("transition"));
+    expect(guards.map((r) => `${r.file}: ${r.sels.join(", ")}`)).toEqual(["global.css: *, *::before, *::after"]);
+    expect(guards[0].decls.get("transition")).toBe("none");
+    expect(read("global.css").replace(/\/\*[^]*?\*\//g, "")).toMatch(/@media \(prefers-reduced-motion: reduce\) \{\s*\*, \*::before, \*::after \{ transition: none !important; \}/);
+  });
+
+  it.each(controls.map((m) => [label(m), m] as const))("%s: background-color and color ease 100 ms on --ease-out, marked or not, hovered or not", (_l, m) => {
     expect(m.rule.decls.has("transition"), "the mark rule sets no transition of its own").toBe(false);
     for (const t of fourWays(m)) {
       const w = winners(t, "transition");
@@ -130,11 +182,19 @@ describe("S2 (FR-2): hover eases on every control, in and out, and no transition
   });
 
   it("no rule sets transition: none on a marked control or its hover (lf51's list is gone)", () => {
-    const offenders = RULES.filter((r) => r.decls.get("transition") === "none" && r.parts.some((p) =>
+    // The reduced-motion guard is FR-1a's, checked above; this is the window at rest.
+    const offenders = RULES.filter((r) => mediaOn(r.media) && r.decls.get("transition") === "none" && r.parts.some((p) =>
       controls.some((m) => [false, true].some((hover) => reaches(p, hovered(m.plain, hover)) || reaches(p, hovered(m.parts, hover))))));
     expect(offenders.map((r) => `${r.file}: ${r.sels.join(", ")}`)).toEqual([]);
   });
 });
+
+/** Whether a mark paints a fill, and whether that fill lets what is under it show. */
+function fillOf(m: Mark): "opaque" | "see-through" | null {
+  const v = tokenOf(m.rule.decls.get("--mark-fill"));
+  if (!v || v === "transparent") return null;
+  return /rgba\(/.test(v) ? "see-through" : "opaque";
+}
 
 /** A --mark-fill value with its token resolved, so a see-through fill shows as rgba. */
 function tokenOf(v: string | undefined): string {

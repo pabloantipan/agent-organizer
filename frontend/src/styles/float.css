@@ -47,11 +47,11 @@
 
 .fl-row {
   display: flex; align-items: center; gap: var(--space-2); width: 100%; height: 36px;
-  padding: 0 var(--space-2); border: 0; border-radius: var(--radius-sm);
+  padding: 0 var(--space-2); border: 0; --mark-edge: 0; border-radius: var(--radius-sm);
   background: transparent; color: var(--fg); text-align: left; font: inherit; cursor: pointer;
 }
-.fl-row:hover { background: var(--surface-hover); border: 0; }
-.fl-row.sl.on { --mark-fill: var(--surface-selected); --mark-line: inset 2px 0 0 var(--accent); }
+.fl-row:hover { background: var(--surface-hover); border: 0; --mark-edge: 0; }
+.fl-row.sl.on { --mark-fill: var(--surface-selected); --mark-line: inset 2px 0 0 var(--accent); background: transparent; }
 .fl-row.folded .fl-id { color: var(--fg-muted); }
 .fl-rank { flex: 0 0 20px; font-family: var(--mono); font-size: var(--font-size-sm); color: var(--fg-subtle); text-align: right; }
 .fl-id { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-size: var(--font-size-sm); }

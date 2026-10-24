@@ -17,7 +17,7 @@ body {
 }
 button {
   font: inherit; color: var(--text);
-  background: var(--button-bg); border: 1px solid var(--button-border);
+  background: var(--button-bg); border: 1px solid var(--button-border); --mark-edge: 1px;
   border-radius: var(--radius-sm); min-height: var(--control-md); padding: 3px 10px; cursor: pointer;
   font-weight: var(--weight-medium); transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
   white-space: nowrap; flex-shrink: 0;
@@ -45,7 +45,8 @@ button.ghost[aria-disabled="true"], button.ghost[aria-disabled="true"]:hover { c
 button.ghost { background: transparent; border-color: transparent; color: var(--muted); }
 button.ghost:hover { color: var(--fg); background: var(--surface-hover); }
 /* A toggle that is on is selected, never the accent (principle 3). */
-.tiny-btn.sl[aria-pressed="true"] { --mark-fill: var(--surface-selected); border-color: var(--border-strong); color: var(--fg); }
+.tiny-btn.sl[aria-pressed="true"] { --mark-fill: var(--surface-selected); --mark-rim: var(--border-strong); background: var(--button-bg); border-color: var(--border-strong); color: var(--fg); }
+.ghost.tiny-btn.sl[aria-pressed="true"] { background: transparent; }
 /* State marks, one layer for all (design system, Elevation and motion;
    leftovers-52 FR-1, FR-2; review-view A16, A17, R43 amended, R50). A
    control that can carry a current, selected, open, pressed or expanded
@@ -59,10 +60,24 @@ button.ghost:hover { color: var(--fg); background: var(--surface-hover); }
    is taken (the rule box's radio) takes .sl-shadow: the fill as an inset
    shadow on itself. Every control joins by taking the class, never by its
    own transition or a copy of the layer; StateLayer.css.test.ts finds
-   every marked selector and holds it to this. */
-.sl, .sl-shadow { --mark-fill: transparent; --mark-line: 0 0 transparent; transition: background-color var(--dur-fast) var(--ease-out); }
+   every marked selector and holds it to this.
+   The layer covers the border box, as a background does (leftovers-52
+   FR-1b, R52): the rule that sets a control's border sets --mark-edge to
+   its width (button does, 1px), and the layer sits that far out and draws
+   a border of that width in --mark-rim, so an opaque fill keeps the
+   control's border over it (the mark rule restates its border colour as
+   --mark-rim; a see-through fill leaves the control's own border under
+   it). A line mark spreads from the layer, so a ring is outside the
+   border and an inset line inside it, as on main. An opaque mark keeps the
+   control's rest background, so hover changes nothing under it (FR-1d). */
+.sl, .sl-shadow { --mark-fill: transparent; --mark-line: 0 0 transparent; --mark-rim: transparent; transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out); }
 .sl { position: relative; z-index: 0; }
-.sl::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--mark-fill); box-shadow: var(--mark-line); pointer-events: none; transition: none; }
+.sl::before { content: ""; position: absolute; inset: calc(-1 * var(--mark-edge, 0px)); z-index: -1; border: var(--mark-edge, 0px) solid var(--mark-rim); border-radius: inherit; background: var(--mark-fill); box-shadow: var(--mark-line); pointer-events: none; transition: none; }
+/* Reduced motion: nothing eases, hover included, from this one guard and
+   never a control's own (FR-1a, R51). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; }
+}
 .sl-shadow { box-shadow: inset 0 0 0 100vmax var(--mark-fill); }
 :focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 input, textarea {
@@ -114,7 +129,7 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
 .content.with-rail.rail-strip { grid-template-columns: 46px 1fr; }
 .rail.strip { align-items: center; padding: 8px 0; gap: 4px; overflow-x: hidden; }
 .rail.strip > .strip-toggle { position: static; opacity: 1; margin-bottom: 4px; }
-.strip-all, .strip-item { width: 32px; height: 30px; border-radius: var(--radius-md); background: transparent; border: 1px solid transparent; color: var(--muted); font-family: var(--mono); font-size: var(--font-size-xs); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 2px; padding: 0; position: relative; }
+.strip-all, .strip-item { width: 32px; height: 30px; border-radius: var(--radius-md); background: transparent; border: 1px solid transparent; --mark-edge: 1px; color: var(--muted); font-family: var(--mono); font-size: var(--font-size-xs); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 2px; padding: 0; position: relative; }
 .strip-all { font-size: var(--font-size-xs); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 6px; }
 .strip-all:hover, .strip-item:hover { background: var(--panel); color: var(--text); }
 /* The fill is see-through, so the marked row keeps its own background as
@@ -178,11 +193,11 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
 .rail-list { padding: 0 10px 10px; }
 .rail-item {
   display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
-  padding: 7px 10px; border-radius: var(--radius-sm); border: 1px solid transparent; background: transparent; color: var(--fg);
+  padding: 7px 10px; border-radius: var(--radius-sm); border: 1px solid transparent; --mark-edge: 1px; background: transparent; color: var(--fg);
   cursor: pointer; margin-bottom: 2px; user-select: none;
 }
 .rail-item:hover { background: var(--surface); }
-.rail-item.sl.active { --mark-fill: var(--surface-selected); --mark-line: inset 2px 0 0 var(--accent); }
+.rail-item.sl.active { --mark-fill: var(--surface-selected); --mark-line: inset 2px 0 0 var(--accent); background: transparent; }
 /* The rows are one Tab stop (FR-5, T3): the ring sits inside the row, so
    it never meets the next row's. */
 .rail-item:focus-visible { outline-offset: -2px; }
@@ -632,7 +647,7 @@ button.counts.linkish { font-family: var(--mono); }
 .person { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: var(--radius-md); cursor: pointer; min-width: 0; font-size: var(--font-size-sm); color: var(--muted); }
 .person:hover { background: var(--panel-2); }
 /* A button that keeps the row's look, ring inside the scrolled list (leftovers-24 FR-3). */
-button.person { width: 100%; border: 0; background: transparent; text-align: left; font-weight: inherit; line-height: inherit; white-space: normal; min-height: 0; }
+button.person { width: 100%; border: 0; --mark-edge: 0; background: transparent; text-align: left; font-weight: inherit; line-height: inherit; white-space: normal; min-height: 0; }
 button.person:focus-visible { outline-offset: -2px; }
 .person.sl.active { --mark-fill: var(--accent-soft); background: transparent; }
 .person.me { cursor: default; }
@@ -659,7 +674,7 @@ button.person:focus-visible { outline-offset: -2px; }
 .chats-reason, .blocked-reason { font-size: var(--font-size-sm); color: var(--fg-muted); line-height: 1.35; }
 .chats-reason { margin: -2px 8px 8px; }
 .chats .cell-search { width: auto; margin: 0 4px 6px 0; }
-.chat { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: var(--radius-md); background: transparent; border: 1px solid transparent; color: var(--muted); font-size: var(--font-size-sm); text-align: left; cursor: pointer; min-width: 0; }
+.chat { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: var(--radius-md); background: transparent; border: 1px solid transparent; --mark-edge: 1px; color: var(--muted); font-size: var(--font-size-sm); text-align: left; cursor: pointer; min-width: 0; }
 .chat:hover { background: var(--panel); color: var(--text); }
 /* The current row: its fill on the layer, its outline and ink on the row
    (neither transitions); its own background stays as at rest, so hover

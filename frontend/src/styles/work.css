@@ -112,7 +112,3 @@
 .wk-threads .wk-badge { white-space: normal; overflow-wrap: anywhere; max-width: 100%; }
 .wk-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); color: var(--fg-subtle); font-size: var(--font-size-sm); line-height: var(--line-sm); min-width: 0; }
 .wk-foot .stale { color: var(--danger); }
-
-@media (prefers-reduced-motion: reduce) {
-  .wk-card, .wk-tile { transition: none; }
-}

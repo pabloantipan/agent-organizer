@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { merge } from "../../wailsjs/go/models";
 import type { Seat } from "../hooks/useWails";
-import { EASE, RULES, mediaOn, parseSelector, specificity, type Compound, type Rule } from "./stateLayer.kit";
+import { EASE, RULES, mediaOn, parseSelector, px, specificity, type Compound, type Rule } from "./stateLayer.kit";
 
 // leftovers-52 S3 (FR-1, FR-2; review-view R43 amended, R50): a click from
 // one marked control to another, in the rail, the People panel, the
@@ -95,7 +95,18 @@ function style(n: Node, prop: string, hover: Node | null = null, pe: string | nu
   return null;
 }
 /** A var(--x) reference resolved on `n`, so the layer reads what the control set. */
-const resolved = (n: Node, v: string | null, hover: Node | null = null) => v?.replace(/var\((--[\w-]+)\)/g, (_m, name) => style(n, name, hover) ?? "") ?? null;
+const resolved = (n: Node, v: string | null, hover: Node | null = null) =>
+  v?.replace(/var\((--[\w-]+)(?:,\s*([^()]*))?\)/g, (_m, name, fallback) => style(n, name, hover) ?? fallback ?? "") ?? null;
+/** The control's border width, from whichever of border and border-width the cascade picks (both read as the shorthand's first length). */
+const borderPx = (n: Node, hover: Node | null = null) => {
+  const v = style(n, "border-width", hover) ?? style(n, "border", hover) ?? "0";
+  return /^(0|none)\b/.test(v) ? 0 : px(/\d+(?:\.\d+)?px/.exec(v)?.[0]) ?? 0;
+};
+/** Where the layer's outer edge sits against the control's border box, and the width of the rim it draws there. */
+const edge = (n: Node, hover: Node | null = null) => ({
+  inset: px(resolved(n, style(n, "inset", hover, "before"), hover)),
+  rim: px(resolved(n, style(n, "border", hover, "before"), hover)?.split(/\s+/)[0]),
+});
 
 /** What a control looks like to the eye, layer and all. */
 const look = (n: Node, hover: Node | null = null) => ({
@@ -138,9 +149,21 @@ function clickCheck(before: string, after: string, pick: (t: Node, name: string)
     "hover on the unmarked control eases in and out (R49 amended, R50)": () => {
       expect(style(oldB, "transition", oldB)).toBe(EASE);
       expect(style(oldB, "transition")).toBe(EASE);
-      // The sub-tabs' hover is ink only (quiet text tabs, shell.css): the ease is set and runs on nothing; every other surface's hover fills.
-      if (!quietHover) expect(look(oldB, oldB).ownBackground, "hover paints the control's own background").not.toBe(look(oldB).ownBackground);
+      // The sub-tabs' hover is ink only (quiet text tabs, shell.css), which the ease covers (FR-2a); every other surface's hover fills.
+      if (quietHover) expect(look(oldB, oldB).ink, "hover changes the ink, and color is in the ease").not.toBe(look(oldB).ink);
+      else expect(look(oldB, oldB).ownBackground, "hover paints the control's own background").not.toBe(look(oldB).ownBackground);
       expect({ layerFill: look(oldB, oldB).layerFill, layerLine: look(oldB, oldB).layerLine }).toEqual(PLAIN);
+    },
+    "a bordered control's fill covers its border box (FR-1b, R52)": () => {
+      for (const n of [newB, oldB]) {
+        const w = borderPx(n);
+        expect(edge(n), `a ${w}px border`).toEqual({ inset: w ? -w : 0, rim: w });
+      }
+    },
+    "hover on the marked control draws no rim: nothing under its fill changes (FR-1d, R52)": () => {
+      const rest = look(newB), over = look(newB, newB);
+      expect(over.ownBackground, "the control's own background under the layer").toBe(rest.ownBackground);
+      expect(edge(newB, newB)).toEqual(edge(newB));
     },
     "hover on the marked control does not change its fill": () => {
       const rest = look(newB), over = look(newB, newB);
