@@ -96,3 +96,4 @@ stages:
         met: 2026-10-16
     gates: ["0137"]
     appetite: four small tasks, v0 to v3 (docs/specs/review-map.md)
+    done: 2026-10-24      # moved to Elenx (crossing 0020, 0159); exits 1-2 not met here

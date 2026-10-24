@@ -4,7 +4,7 @@ status: next
 repos: [organizer]
 branch: lf51-composers
 seat:
-stage: review-map
+stage:
 updated: 2026-10-24
 next: "pablo: rule 0160 (leftovers 51)"
 depends_on: [lf48-chat-landing]
