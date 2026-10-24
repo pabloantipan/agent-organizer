@@ -4,6 +4,13 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## 2026-10-24 16:35
+
+- Last SHA seen: 7cd423d. Landed: leftovers 48 (5255715, sup90, ~64 min vs 25-50m, $13.70 seats; UI review on the harness only, the screen was locked) and leftovers 49 (905d1ab, sup91, ~33 min vs 30-60m, ~$8.75). Both ended; installed v0.2.0-2735-g11b56cd. sup92 runs leftovers 51 (0160, three cards; swap 83% at launch).
+- 0159 ruled close as moved: roadmap review-map done 2026-10-24 (91f75ff); Deltagos has no current stage. 0160 was ruled 10 s before my commit adding lf51-rule-words, but the ruled text holds three cards (Deltagos read the file from disk).
+- Tidy subagent (Pablo's word on 0159): proposed 0161 (11b56cd): close 23 threads, delete merged local branch fix/agents-dedupe, mark the review map's files for the later retire card; four asks for Pablo (factory-integration, agents/cell.json push uncommitted since 10-18, Aglaea's three Map choices in 01M57QNP, the next stage's goal); remote branch deletes are Talos's.
+- Held from sup91: a one-question record accepts a padded plain chosen (' b ') and writes it padded; Q4's none-picked case tested only with blank words; change-check reads only the first name of a comma-separated declared bullet (for Hephaistos with the Objective-C ask).
+
 ## 2026-10-24 16:00
 
 - Last SHA seen: 1c79e4d. leftovers 50 landed: 80d617b (lf50-float-space), sup89 15:11-15:54, ~43 min against 30-60m, $4.39; run record runs/2026-10-24-sup89-leftovers-50.md. Installed v0.2.0-2700-g80d617b. leftovers-50 Amendment 1 (the drop stand-in is a window-server cover, not an orderOut).
