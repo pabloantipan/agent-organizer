@@ -58,6 +58,7 @@ Not changed, on purpose:
 
 ## Notes
 - l51-comp: FR-4 eases hover both ways on `--ease-out` from the base rule; Amendment 15 UL4 also names `--ease-exit` for the way out, which a base-only rule cannot carry. Reviewer's call whether that matters for R49.
+- l51-comp, round 3: the other marked controls in K4's list still take button's base ease, so their leaving mark eases out over 100 ms (C1's mechanism); Amendment 2 scopes the layer to the chat row (`.rail-item` next leftovers). Most of those fills live outside this card's boundary; a next-leftovers item if it matters.
 
 ## Review
 Verdict: **pass** at 15ec836 (restarted on the moved branch; the d7605a9 fail on K4 is superseded). Unmet gate items: none. K1-K5, X0 met.
@@ -153,4 +154,3 @@ l51-comp-ui, 2026-10-24, on **d7605a9**. **Verdict: fail**, on one finding of se
 - Real pointer hover in and out. The offscreen `:hover` was never reached, so R49's hover half rests on computed styles and CSSOM.
 - C1 in a window that draws frames. The review build's web content is not in its AX tree.
 - Keyboard order of the head after the move.
-- l51-comp, round 3: the other marked controls in K4's list still take button's base ease, so their leaving mark eases out over 100 ms (C1's mechanism); Amendment 2 scopes the layer to the chat row (`.rail-item` next leftovers). Most of those fills live outside this card's boundary; a next-leftovers item if it matters.
