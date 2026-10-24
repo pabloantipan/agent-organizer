@@ -4,6 +4,13 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## 2026-10-24 19:00
+
+- Last SHA seen: b96419d. leftovers 51: lf51-crew-flake merged 7a64ad7, lf51-rule-words merged 1954aa3, lf51-composers in its UI recheck after Amendments 2 (the chat mark on its own layer, Aglaea's review-view A16) and 3 (every other marked control back to transition: none). An account usage limit stopped every seat 16:54-18:00; sup92 extended to 19:01. Swap 95% at 18:00.
+- Repetition, third sighting in two days: my state-fill specs keep missing a control or a direction (lf48 FR-2 named only the chat row; lf51 FR-4 the leaving mark; Amendment 2 the other controls). Lesson: for a rule over "every control with a state", list the controls from the stylesheet in the spec and gate each one.
+- Next leftovers, held: the shared state-mark layer for every marked control (review-view Amendment 17, 039412c, R50; drops the transition: none list); rule-questions Amendment 2 UW2 (answers whole with room, decisions.css) and UW3 (line name drops the chosen while open, decisionsPage.ts); padded plain chosen on a one-question record (sup91); LaunchServices clutter from review builds.
+- Open for Pablo: the next stage's goal (in his words); Aglaea's three Map choices (thread 01M57QNP); Talos to delete merged remote branches on his word.
+
 ## 2026-10-24 16:35
 
 - Last SHA seen: 7cd423d. Landed: leftovers 48 (5255715, sup90, ~64 min vs 25-50m, $13.70 seats; UI review on the harness only, the screen was locked) and leftovers 49 (905d1ab, sup91, ~33 min vs 30-60m, ~$8.75). Both ended; installed v0.2.0-2735-g11b56cd. sup92 runs leftovers 51 (0160, three cards; swap 83% at launch).
