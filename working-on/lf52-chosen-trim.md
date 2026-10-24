@@ -3,10 +3,10 @@ title: "A ruling's chosen is written trimmed, and a padded one still reads"
 status: next
 repos: [organizer]
 branch: lf52-chosen-trim
-seat:
+seat: l52-trim
 stage:
 updated: 2026-10-24
-next: "sup93 runs it (0162 ruled 2026-10-24)"
+next: "l52-trim builds it (sup93, wave 1)"
 depends_on: []
 boundary: ["docs/specs/leftovers-52.md Boundary, lf52-chosen-trim"]
 spec: "docs/specs/leftovers-52.md (FR-6)"

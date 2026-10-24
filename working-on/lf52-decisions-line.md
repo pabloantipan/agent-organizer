@@ -3,7 +3,7 @@ title: "The Ruled list shows answers whole when there is room, and an open recor
 status: next
 repos: [organizer]
 branch: lf52-decisions-line
-seat:
+seat: l52-line
 stage:
 updated: 2026-10-24
 next: "sup93 runs it (0162 ruled 2026-10-24)"
