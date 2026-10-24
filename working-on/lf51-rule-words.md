@@ -7,7 +7,7 @@ seat: l51-words
 reviewer: l51-words-review, l51-words-ui
 stage:
 updated: 2026-10-24
-next: "l51-words: W6 (FR-9): questionWords strips every _ * ` from the **Q<n>. …** line, so `tech_lead_nicolas` reads techleadnicolas; strip only markdown markers (code-span content and in-word _ kept), add the case to the test"
+next: "review: lf51-rule-words, W5-W8 (W6 fixed, W7 as amended) and X0 pass, 8e504fb"
 review: fail
 depends_on: [lf49-rule-questions]
 boundary: ["docs/specs/leftovers-51.md Boundary, lf51-rule-words"]
@@ -24,13 +24,14 @@ docs/specs/leftovers-51.md, rows W5-W8 and X0; the UI review checks rule-questio
 
 ## Done
 - 2026-10-24 l51-words: FR-7 to FR-11 on branch lf51-rule-words (7d08b05, f20840e, 61d9d41, rebased on main 48c77ac); W5-W8 fail on main (7 of 13), pass on the branch; X0 passes from a clean clone (vitest 83 files, 1129 tests; build; wails build; porcelain empty). Progress and reviewer commands: .wt-notes/l51-words/progress.md.
+- 2026-10-24 l51-words, review round 1: W6 fixed (b7e3dc6, `questionWords` strips only paired emphasis and backticks; code-span text, in-word `_` and a lone `*` kept) and UW1 per Amendment 1 (8e504fb, the missing text is the foot's own first row); both new checks fail on the reviewed code and pass now; rebased on main 24938f9; X0 passes from a clean clone at 8e504fb (vitest 83 files, 1131 tests; build; wails build; porcelain empty).
 
 ## Declared changes
-- modified `frontend/src/lib/decisions.ts`: added `chosenLines`, `chosenFloor`, `questionWords`, `missingWords` (FR-7 to FR-10)
+- modified `frontend/src/lib/decisions.ts`: added `chosenLines`, `chosenFloor`, `questionWords` (with `unmark`: paired emphasis and backticks only), `missingWords` (FR-7 to FR-10)
 - modified `frontend/src/lib/decisions.test.ts`: tests of the four helpers
 - modified `frontend/src/components/RuleDecisionBox.tsx:RuleDecisionBox`: legend `Q<n> · <words>`, foot's missing text as Rule's description, question placeholder (FR-9 to FR-11)
-- modified `frontend/src/components/RuleDecisionBox.test.tsx`: W6, W7, W8; `box` takes a body
-- modified `frontend/src/styles/rule-box.css`: `.rb-question`, `.rb-missing`, legend wraps
+- modified `frontend/src/components/RuleDecisionBox.test.tsx`: W6 (with code span, in-word `_`, lone `*`), W7 (with the foot's row order and wrap rules), W8; `box` takes a body
+- modified `frontend/src/styles/rule-box.css`: `.rb-question`, `.rb-missing` (the foot's full-width first row, Amendment 1), `.rb-foot` wraps, legend wraps
 - modified `frontend/src/components/DecisionsView.tsx:DecisionsView`: opened ruled head shows Chosen; line floors per answer, drops its chosen while open (FR-7, FR-8)
 - added `frontend/src/components/DecisionsView.test.tsx`: W5
 Risky:
