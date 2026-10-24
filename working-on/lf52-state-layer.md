@@ -77,62 +77,55 @@ Not changed, on purpose:
 
 ## Review
 
-**Verdict: fail.** Reviewer `l52-layer-review` (code review, gate rows), 2026-10-24, branch `lf52-state-layer` at e6d77d6 (not moved during the review), from a clean clone.
+**Verdict: fail, against the gate as amended. The rows reviewed are met.** Reviewer `l52-layer-review` (code review, gate rows), 2026-10-24, round 2. Branch `lf52-state-layer` at **75945c2**, from a fresh clean clone. Round 1 failed e6d77d6 on S1 (FR-3): unquoted `[aria-expanded=true]` / `[aria-pressed=true]` and `:is(.active)` were not enumerated. The branch was rebased on main: `git range-diff` shows f84a45d and 998a280 `=` 8db6359 and e6d77d6, and the frontend at 998a280 is byte-identical to e6d77d6. Then 75945c2 changes only `stateLayer.kit.ts` and `StateLayer.css.test.ts` (+68 −8). Everything else that differs between e6d77d6 and 75945c2 is main's lf52-chosen-trim merge (Go and cards).
 
-**Unmet gate items: S1 (its FR-3 half).** S1 also cites FR-3 ("a control added later is checked without editing the test"), and the enumeration misses three legal spellings of the premise's own classes and attributes. The premise grep finds all three. S1's FR-1 half, S2, S3 and X0 are met.
+**Unmet gate items: the S2 and S3 additions of Amendment 1 (FR-1a to FR-1d, FR-2a).** Amendment 1 (91cc03f) landed after 75945c2 was sent to review, and none of it is built at this SHA (proof below). Against the rows as they stood when 75945c2 went to review, it passes: S1 (its FR-3 half, round 1's finding, is now fixed), S2, S3 and X0 are met. The card's `next` (sup93, 743d2e5) already names this work, so I left it as it is. The amended rows need a review on the SHA that builds them.
 
-### Blocking finding: the enumeration misses unquoted attribute values and `:is()`
+### Amendment 1 at 75945c2 (from the clean clone)
+- FR-1a / S2 "the reduced-motion guard exists once and sets every transition to none": `grep -n 'prefers-reduced-motion' frontend/src/styles/*.css` (review.css excluded) gives float.css:20 (an animation), global.css:375 (`no-preference`, `.card`), global.css:509 (an animation), spec-reader.css:13, outline.css:127, work.css:116 (`.wk-card, .wk-tile`). There is no global guard. Unmet.
+- FR-1b / S3 "a bordered control's fill covers its border box": global.css:65 `.sl::before { … inset: 0; … }`. Unmet.
+- FR-1c: memory.css:20 `--mark-line: 0 0 0 2px var(--surface-selected)`, which spreads from the layer's padding edge (U2). Unmet.
+- FR-1d / S3 "hover on the current rail row draws no rim": global.css:185 `.rail-item.sl.active { --mark-fill: …; --mark-line: … }` keeps no `background: transparent`; likewise shell.css:344 `.seg button.sl.on` and shell.css:146 `.ib-act .act.sl[aria-expanded="true"]`. Unmet.
+- FR-2a / S2 "the hover transition lists background-color and color": global.css:63 `transition: background-color var(--dur-fast) var(--ease-out)`. Unmet.
 
-`stateLayer.kit.ts`: `stateAttr` matches only `aria-pressed="true"` / `aria-expanded="true"` written with quotes (`parseCompound` turns `'` into `"` but does not quote a bare value), and `parseCompound` files `:is(...)`/`:where(...)` as an opaque pseudo, so a state class inside it is not seen. Proof: each line below was appended, one at a time, to a copy of `outline.css` in a scratch copy of the clone (`.wt-notes/l52-layer-review/exp`, test untouched), then `npx vitest run src/components/StateLayer.css.test.ts` was run:
-
-| input appended (each one a marked control whose mark eases 1 s) | result |
-|---|---|
-| `.ol-label:hover{background:red}` `.ol-label[aria-expanded=true]{background:blue;transition:background 1s}` | `Tests 95 passed (95)`: missed |
-| `.ol-label:hover{background:red}` `.ol-label[aria-pressed=true]{background:blue;transition:background 1s}` | `Tests 95 passed (95)`: missed |
-| `.ol-label:hover{background:red}` `.ol-label:is(.active){background:blue;transition:background 1s}` | `Tests 95 passed (95)`: missed |
-
-The spec premise's grep (`aria-(current|selected|pressed|expanded)=`, `\.(active|on|…)\b`) matches all three, so the test reads less than the premise names. Amendment 17 says "and any later one". Fix, inside the boundary (the CSS test): either read a bare value as quoted and look inside `:is`/`:where`, or cross-check MARKS against the premise regex over the raw selector text and fail on any match the parser did not classify.
-
-Sensitivity holds for the usual spellings, test untouched (same method):
-- V1 `.ol-label.active{background:blue}` + `.ol-label{transition:background 100ms ease}`: 3 fail (`nothing it paints … is transitioned`, `a control's fill and line are the layer's`, `background-color eases 100 ms`).
-- V2 a mark on the layer with `.ol-label.sl.active::before{transition:background 1s}`: 1 fail (`one layer, written once`).
-- V4 `.ol-sdot.current{transition:background 300ms}` (not a control): 1 fail.
-- V5 `.ol-label.selected{background:blue;transition:background-color 1s}`: 2 fail.
-
-### change-check (from the clean clone)
+### change-check (fresh clean clone of 75945c2)
 
 ```
 change-check: working-on/lf52-state-layer.md
 risk: medium (missing, read as medium)
-repo organizer: base 864a5eee1 (default origin/main) ... head lf52-state-layer (clone HEAD e6d77d6ff, on detached) e6d77d6ff; 34 files, 78 flags
-81 flags: outside boundary 26, outside footprint 0, undeclared 33, declared, not changed 3, new env var 0, new dependency 0, new host 0, risk 0, untested? 19, could not read 0, boundary unreadable 0
+repo organizer: base 129cd99f4 (default origin/main) ... head lf52-state-layer (clone HEAD 75945c298, on detached) 75945c298; 34 files, 47 flags
+47 flags: outside boundary 26, outside footprint 0, undeclared 0, declared, not changed 0, new env var 0, new dependency 0, new host 0, risk 0, untested? 21, could not read 0, boundary unreadable 0
 ```
-(The full table is in `.wt-notes/l52-layer-review/change-check.txt`.) Explanations:
-- **outside boundary (26)**: change-check reads the boundary's literal path, `styles/*.css`. The spec's Boundary also allows the class names on the components and the CSS test. 18 component `.tsx` files: I read every `-`/`+` line of `git diff main...e6d77d6 -- 'frontend/src/components/*.tsx' ':!*test*'`, and each one adds only `sl`/`sl-shadow` to a `className`, nothing else. That is in the boundary. `StateLayer.css.test.ts` + `stateLayer.kit.ts` are the CSS test and its helper (only the two StateLayer tests import the kit). `StateLayer.harness.test.tsx` is S3's test. The 7 markup tests (CardDetails, CharterOnce, Home.waits, InitiativesView, Rail.keys, ReviewSymbol, TopBar) only follow the new class literals (`"sl on"`, `--mark-line` in place of `box-shadow`), with no assertion weakened. `Conversation.landing.test.tsx` loses lf51's K4, which tested the `transition: none` list FR-2 removes. These are outside the letter but explained, not a finding. `review.css` is unchanged.
-- **undeclared (33)** and **declared, not changed (3)**: one parse. The card declares several files per bullet by basename (`modified \`Rail.tsx\`, \`SlackView.tsx\`, …`; `\`float.css\`, \`usage.css\`, …`). change-check takes the first name of each bullet without a path, so it misses those three (Rail.tsx, Conversation.landing.test.tsx, CardDetails.test.tsx) and never reads the rest. Every undeclared file is named in one of those bullets. Note: build-seat asks for one bullet per file.
-- **untested? (19)**: the component symbols changed by a class word only. They are covered by the S3 harness (Rail, People, InitiativeHeader, UsageTable) and by S1/S2 over their CSS. The kit's internals are exercised through the two tests that import them. Not a finding.
+(The full table is in `.wt-notes/l52-layer-review/change-check2.txt`.)
+- **outside boundary (26)**: the same 26 files as round 1, with the same explanation. change-check reads the boundary literally as `styles/*.css`. The 18 components change only by an `sl`/`sl-shadow` class word: I read every diff line, and that is allowed by the Boundary's "class names … in their components". The kit and the two StateLayer tests are the CSS test and S3's test. The 7 markup tests only follow the class literals, and `Conversation.landing.test.tsx` drops lf51's K4, which FR-2 retires. `review.css` is unchanged.
+- **undeclared 0 / declared, not changed 0**: the card now declares one bullet per file.
+- **untested? (21)**: the round-1 list plus the kit's new `unfold` and `unmarkedOnPurpose`. The new test `classifies every selector the premise's grep matches` exercises both. Not a finding.
 
-### Rows
+### Rows (as written before Amendment 1)
 
-- **S1 (FR-1, FR-3), unmet (FR-3, above).** FR-1 is met. One rule: `.sl, .sl-shadow` (vars and the one transition), `.sl` (relative, z-index 0) and `.sl::before` (inset 0, z-index -1, `background: var(--mark-fill)`, `box-shadow: var(--mark-line)`, `transition: none`), global.css:63-66, written once. The test asserts there is exactly one `.sl::before` rule and that no other rule sets `--mark-fill` off the layer. `.sl-shadow` is the inset-shadow form for the rule box's span, whose `::before` is the radio. The test enumerates from the sheets itself (`MARKS` over `RULES`, every `.css` but review.css), with no hand-written list. My grep (`grep -nE '\.(active|on|current|selected|open)\b|aria-(current|selected|pressed|expanded)=' frontend/src/styles/*.css`, review.css excluded) gives 62 lines. Every selector on them is in MARKS: I dumped the test's own classification, 22 controls, 17 not controls, 16 not a mark, 9 dead. Its exceptions, checked:
-  - "not a mark" (opacity, transform, mask, layout, grid-column; `.ihead-open` `border-top: 1px solid transparent`): they paint no fill or line. Holds.
-  - "not on screen": the `.srm-*` family, whose classes no component writes. Holds, and any new dead selector that is not `srm-` fails the test.
-  - "not a control" (no hover fill on the subject): the stage, legend and stepper marks, `.init.open`, `.usage-weeks tr.on td` and `.chart-axis span.on` (ink), `.stg.current .stg-n`, `.rb-option.on span::before`, `.chart-bar.on .chart-mark`. Every one of them is still held to "nothing it paints transitions". Holds. Note: `.chart-bar` is a pressable button (`aria-pressed`, UsageChart.tsx:51) whose mark is the child bar's colour, not a control fill. It switches at once, but it is not on the layer.
-  - Fails on main: copying the kit and both tests onto a clean clone of main (864a5ee) gives `Tests 64 failed | 58 passed (122)`, 49 of them in the CSS test, e.g. `× global.css: .rail-item.active: a control's fill and line are the layer's …`, `× one layer, written once …`, `× shell.css: .seg button.on: background-color eases 100 ms on --ease-out …`.
-- **S2, met.** Every control's four states (marked or not, hovered or not) win `background-color var(--dur-fast) var(--ease-out)` (`--dur-fast: 100ms`, which the test asserts). The mark rule sets no transition of its own. lf51's list is gone (global.css diff, −82 lines). `transition: none` left in the sheets but review.css:
-  - `header.css:60`, the compact header's chevron transform. Not a fill.
-  - `global.css:32` `button:disabled` and `:40` `aria-disabled`: the dim lands at once.
-  - `global.css:65`, the layer itself.
-  - `work.css:117`, the reduced-motion rule for cards.
-  None is the list. Fails on main: `× hover is 100 ms`, `× no rule sets transition: none on a marked control or its hover (lf51's list is gone)`, and the per-control rows.
-- **S3, met.** `StateLayer.harness.test.tsx` renders the real Rail (rows and strip), People, InitiativeHeader sub-tabs and UsageTable's segmented control twice, with the mark on A and then on B. It then computes the old control's style from every sheet over the rendered tree. The old control's layer reads transparent and `0 0 transparent`, its own background is unchanged, its transition is only the background-color ease, and hover on it eases and fills (the sub-tabs' hover is ink only, flagged in the test). Branch: 30/30. Fails on main: 15, e.g. `× the old control and the new one take the shared layer`, `× the row that lost its mark has no fill in the next frame (R43 amended)`, `× hover on the unmarked control eases in and out`. Note: the click is two server renders and the cascade is the kit's model, not WebKit. The gate's "vitest in the harness" is ambiguous here (this repo's "harness" is `scripts/tab-harness`, a WKWebView one), so the next frame on screen is the UI reviewer's R50 → to the FSE to word the row.
-- **X0, met.** `CI=true test-lease run -- pnpm install --frozen-lockfile` ok. `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test`: **reused** run `43e52923-15747` of e6d77d6ff150 by organizer-probe-l52-layer-ui (19 Go packages ok, `Test Files 86 passed (86)`, `Tests 1222 passed (1222)`, exit 0). `test-lease run -- pnpm run build`: `✓ built in 1.59s`, exit 0. `test-lease run -- wails build`: `Built '…/Deltagos.app/Contents/MacOS/organizer' in 14.033s`, exit 0. Runtime not touched. `git status --porcelain`: empty.
+- **S1 (FR-1, FR-3), met.**
+  - FR-1: the CSS and components are unchanged since round 1. There is one shared rule (`.sl, .sl-shadow`, `.sl`, `.sl::before` with `transition: none`, global.css:63-66), and the test asserts that only one `.sl::before` rule exists and that no rule sets `--mark-fill` off the layer.
+  - FR-3: enumeration now quotes bare values (`quoted`), unfolds `:is()`/`:where()` (`unfold`), also reads inside `@supports`/`@container`, and cross-checks MARKS against the premise's own regex (`unclassified()`). That cross-check fails on any selector the regex matches that the parser did not classify, and on any count mismatch between the sheet text and the selectors it read.
+  - My round-1 inputs, each appended to a copy of `outline.css` in a scratch copy of the clone, test untouched: `[aria-expanded=true]` → 3 fail; `[aria-pressed=true]` → 3 fail; `:is(.active)` → 3 fail (`× outline.css: .ol-label.active: nothing it paints … is transitioned`, `… a control's fill and line are the layer's …`, `… background-color eases 100 ms …`).
+  - My own spellings:
+    - `[aria-expanded="true" i]` → 1 fail (`× classifies every selector the premise's grep matches, so a spelling it does not foresee fails`).
+    - `[ aria-pressed = true ]` → 3 fail.
+    - `:where(:is(.x, .on))` → 3 fail.
+    - These four still pass: `[class~="active"]` → `Tests 96 passed (96)`; `[ARIA-EXPANDED="true"]` → `96 passed`; `.ol-sdot { transition-property: background; transition-duration: 300ms }` (eases the `.ol-sdot.current` mark) → `96 passed`; `.tiny-btn { transition-property: all; transition-duration: 1s }` → `96 passed`. See the notes below for why none of them blocks.
+  - My grep (`grep -nE '\.(active|on|current|selected|open)\b|aria-(current|selected|pressed|expanded)=' frontend/src/styles/*.css`, review.css excluded) is now in the test itself as `PREMISE`, and `unclassified()` returns `[]` on the branch. Round 1's per-selector comparison stands: the sheets have not changed.
+  - Fails on main: copying the three test files onto a clean clone of main (129cd99) gives `Tests 64 failed | 59 passed (123)` (49 CSS, 15 S3), e.g. `× one layer, written once …`, `× global.css: .rail-item.active: nothing it paints …`. Branch: `Tests 126 passed (126)`.
+- **S2 as first written, met.** The CSS has not changed since round 1. Every control's four states win `background-color var(--dur-fast) var(--ease-out)`, with `--dur-fast: 100ms`. lf51's list is gone. The `transition: none` left in the sheets is the compact header's chevron, disabled buttons, the layer itself and work.css's reduced-motion rule: none of it is the list. Fails on main: `× hover is 100 ms`, `× no rule sets transition: none on a marked control …`.
+- **S3 as first written, met.** The test file and the components are unchanged since round 1: 30 of 30 pass on the branch and 15 fail on main (`× the row that lost its mark has no fill in the next frame (R43 amended)`, `× the old control and the new one take the shared layer`, `× hover on the unmarked control eases in and out`).
+- **X0, met.** `CI=true test-lease run -- pnpm install --frozen-lockfile` ok. `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test`: **fresh**, run `eca3a4f1-7407` of 75945c2 (19 Go packages ok, `Test Files 86 passed (86)`, `Tests 1223 passed (1223)`, exit 0). `test-lease run -- pnpm run build`: `✓ built in 1.64s`, exit 0. `test-lease run -- wails build`: `Built '…/Deltagos.app/Contents/MacOS/organizer' in 13.612s`, exit 0. Runtime not touched. `git status --porcelain`: empty.
 
-### Notes (not blocking)
-- `.ib-row.focused` (Home's inbox) eases its fill. "focused" is outside the premise's words → to the FSE (a next leftovers).
-- `.ihead-details[aria-expanded] svg` still rotates over 100 ms while open: a motion, not a fill → to the FSE / Aglaea, if R50 means it.
-- The builder reports 92 tests in the CSS test. I count 95 at e6d77d6, all passing.
-- Declared changes should be one bullet per file (build-seat) so change-check can read them.
+### Notes (not blocking), each with where it goes
+- **Longhand transitions are not read** (proved above: `transition-property`/`transition-duration` pass). The kit reads only the `transition` shorthand. No stylesheet uses a longhand today (`grep -n 'transition-property\|transition-duration\|transition-delay' frontend/src/styles/*.css` prints nothing), so S1 and S2 hold for the sheets the gate checks. But a later rule could ease a mark this way unseen. → to the FSE (a next leftovers: read the longhands in `transitions`/`winners`).
+- **`[class~="active"]` and an uppercase `ARIA-*` attribute name** are not enumerated. The premise's own grep misses them too, so FR-3 as written ("the classes and attributes in the premise") is met. → to the FSE, if FR-3 should outrun its premise.
+- `.chart-bar` (pressable, `aria-pressed`) marks the child bar's colour, not its own fill. It switches at once, but it is not on the layer. → to the FSE / Aglaea.
+- `.ib-row.focused` still eases its fill ("focused" is outside the premise's words) → to the FSE (a next leftovers).
+- `.ihead-details[aria-expanded] svg` still rotates over 100 ms: a motion, not a fill → to Aglaea, if R50 means it.
+- S3's "vitest in the harness" is two server renders over the kit's cascade model, not WebKit. The next frame on screen is the UI reviewer's R50 → to the FSE to word the row.
+- Declared changes: the `float.css` bullet names week-list, which is in usage.css, and the `usage.css` bullet says "own background transition removed", but its diff changes one mark line only. → to the FSE (wording only).
 
 ## UI review
 
