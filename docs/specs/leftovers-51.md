@@ -108,3 +108,20 @@ rule-questions Q1 to Q5.
 | `lf51-composers` | K1-K5, X0 | lf48-chat-landing | true |
 | `lf51-crew-flake` | C4, X0 | — | false |
 | `lf51-rule-words` | W5-W8, X0 | lf49-rule-questions | true |
+
+## Amendment 1 (FSE, 2026-10-24): the foot's missing text has its own row
+
+From l51-words' UI review (UW1, severity 3; spec gap) and Aglaea's
+`docs/ux/specs/rule-questions.md` Amendment 2 (0dc56ee). FR-10 reads: the
+missing text is the foot's first row at every width, full width, wrapping,
+aligned left with the content; the signature and the buttons keep their own
+row under it, unchanged; the row goes once Rule is enabled. It never
+overprints the signature. W7 adds: in the Decisions box (354 px) and in Needs
+me's, the missing text's row sits above the signature's and neither overlaps
+the other. Inside the card's boundary (`rule-box.css`).
+
+Not in lf51-rule-words, for the next leftovers: rule-questions Amendment 2's
+UW2 (answers whole while the list line has room, the per-answer floor only
+when it has not; `decisions.css`) and UW3 (while a record is open, its line's
+accessible name drops the chosen; `lineName` in `decisionsPage.ts`). Both are
+outside this card's boundary.
