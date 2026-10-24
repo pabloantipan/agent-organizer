@@ -1,13 +1,13 @@
 ---
 title: "The review header says the branch moved after any re-read, and a marked, unedited symbol offers no save of nothing"
-status: next
+status: done
 repos: [organizer]
 branch: lf47-review-moved
 seat: m47-build
 reviewer: m47-review, m47-ui
 stage: review-map
 updated: 2026-10-23
-next: "review: lf47-review-moved, gate met (M1-M4 with Amendment 1, X0), 3301319"
+next: "done: review pass (m47-review) and UI review pass (m47-ui) at 3301319; merge to main is sup88's"
 review: pass
 depends_on: []
 boundary: ["docs/specs/leftovers-47.md Boundary, lf47-review-moved"]
@@ -153,6 +153,14 @@ The builder updated tests that pinned a primary on a marked, unedited symbol. Al
 - Note 1 (to the FSE): the frontend has no DOM test library. M1's "not called again", M3's wiring and M4's focus wiring are therefore proved on the pure helpers plus source lines, not on a mounted component. Amendment 1's `document.activeElement` is a stand-in object. The live check is m47-ui's.
 - Note 2 (to the FSE): M2 fails on main only because a helper is missing. Main's behaviour already meets M2.
 - Note 3: the asking primary that stays on a saved, never-asked Question is settled by leftovers-47 Amendment 1 and review-view Amendment 14. Closed.
+
+### Where the findings go
+
+- MV1 (UI review, sev 3): fixed on this card at 3301319. Nothing left to route.
+- MV2 (UI review, sev 1, recorded only): to the FSE, as a note against review-view Amendment 1's focus-on-open rule. No card.
+- Note 1 (no DOM test library, so the wiring is proved by source lines): to the FSE.
+- Note 2 (M2 cannot fail on main by behaviour): to the FSE.
+- Note 3: closed by leftovers-47 Amendment 1 and review-view Amendment 14.
 
 ## UI review
 
