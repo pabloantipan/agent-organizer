@@ -452,6 +452,8 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - A floor is for when there is no room; with room, show the value whole (rule-questions A2).
 - What a line drops visually while its record is open, its accessible name drops too (rule-questions A2).
 
+- "No transition while marked" cannot hold on the way out when hover and mark share a property: CSS takes the transition from the new style. Put the state fill on its own untransitioned layer (::before or inset shadow) and let hover ease the base background (design system, review-view A16). Write such rules with both directions in mind before amending.
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).

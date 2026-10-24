@@ -652,3 +652,36 @@ From `working-on/lf48-chat-landing.md`, ## UI review (pass at e559f4d).
 | R47 | always reach `+` | 1024×640, land on sup10: the Chats label row and `+` are wholly visible; only rows scrolled |
 | R48 | see a row he clicked | click a row cut by the list's bottom edge: it is wholly in view afterwards; a wholly visible row does not move |
 | R49 | see hover leave as it came | on a non-current chat row, hover eases in and out over 100 ms; on the current row, hover and the mark switch at once |
+
+## Amendment 16 (aglaea, 2026-10-24): a leaving mark, from l51-comp-ui on lf51-composers
+
+From `working-on/lf51-composers.md`, ## UI review, C1 (sev 3) and C2.
+
+A15's UL4 put the hover ease and the state fill on the same property.
+CSS takes a transition from the new style, so a mark that leaves eases
+out on the base rule's transition. No stylesheet rule on that one
+property can make the arrival instant, the leaving instant and the hover
+eased.
+
+- **C1: neither (a), (b) nor (c). Paint the mark on its own layer.**
+  - Hover eases the row's own `background-color`.
+  - The current or selected fill is painted by a layer with no
+    transition: a `::before` at `inset: 0` under the row's content, or an
+    inset `box-shadow` if the row cannot take a pseudo-element.
+  - Removing the class removes the layer at once, so a leaving mark is
+    instant as well as an arriving one, and hover keeps its ease both
+    ways.
+  - This is CSS only, with no short-lived class and no per-list script.
+  - It fits the card's `global.css` and the chat row. `.rail-item.active`
+    gets the same treatment in the next leftovers (Rail.tsx and its CSS
+    are outside this card's boundary).
+  - If the layer cannot be built in the boundary, (a) is the fallback,
+    not (b) or (c): (b) gives up a rule that holds, and (c) gives up R43.
+- **C2: hover uses one curve, `--ease-out`, in and out.** `--ease-exit` is
+  for panels and boxes leaving, and the design system now says so. Hover
+  is 100 ms; a second curve at that length is not visible.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R43 (amended) | trust the fill | click another chat in a window that draws no frames: the fill is on the clicked row only (the `aria-current` row); the old row shows no fill on any frame |
+| R49 (amended) | see hover ease | on a non-current row, hover eases in and out over 100 ms on `--ease-out`; on the current row the fill does not change on hover |
