@@ -1,6 +1,6 @@
 # Leftovers 50: the floating icon comes back after a desktop change: the build spec
 
-status: proposed (0158)
+status: ruled (0158, pablo 2026-10-24)
 by: the FSE, 2026-10-24, on main at 7248ebd
 sources: Pablo, 2026-10-24 in the FSE session: "Deltagos icon at desktop is not
 working properly ... When I move between desktops, icon got broken and I se

@@ -6,7 +6,7 @@ branch: lf50-float-space
 seat:
 stage: review-map
 updated: 2026-10-24
-next: "pablo: rule 0158 (floating icon after a desktop change)"
+next: "sup89 runs it (0158 ruled 2026-10-24)"
 depends_on: []
 boundary: ["docs/specs/leftovers-50.md Boundary"]
 spec: "docs/specs/leftovers-50.md (FR-1 to FR-3)"
