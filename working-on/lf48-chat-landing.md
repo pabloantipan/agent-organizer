@@ -4,9 +4,10 @@ status: next
 repos: [organizer]
 branch: lf48-chat-landing
 seat: l48-build
+reviewer: l48-review, l48-ui
 stage: review-map
 updated: 2026-10-24
-next: "review: lf48-chat-landing, gate L1-L4 and X0 pass, e559f4d"
+next: "review: l48-review and l48-ui on e559f4d (sup90)"
 depends_on: []
 boundary: ["docs/specs/leftovers-48.md Boundary"]
 spec: "docs/specs/leftovers-48.md (FR-1 to FR-4)"
