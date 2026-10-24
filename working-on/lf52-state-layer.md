@@ -7,7 +7,7 @@ seat: l52-layer
 reviewer: l52-layer-review, l52-layer-ui
 stage:
 updated: 2026-10-24
-next: "S1 (FR-3): the CSS test misses unquoted [aria-expanded=true]/[aria-pressed=true] and :is(.active); read them, or cross-check MARKS against the premise grep (## Review)"
+next: "l52-layer (fresh session) fixes S1 FR-3 per ## Review (sup93)"
 depends_on: []
 boundary: ["docs/specs/leftovers-52.md Boundary, lf52-state-layer"]
 spec: "docs/specs/leftovers-52.md (FR-1 to FR-3)"
