@@ -1,14 +1,14 @@
 ---
 title: "A landing shows its chat row, state fills do not ease, the new-thread picker reaches Others, and the fixture has a chat with a supervisor"
-status: next
+status: done
 repos: [organizer]
 branch: lf48-chat-landing
 seat: l48-build
 reviewer: l48-review, l48-ui
 stage: review-map
 updated: 2026-10-24
-next: "review: lf48-chat-landing, gate L1-L4 and X0 pass after F1 and F2, b280b92"
-review: fail
+next: "done: review pass at b280b92 (l48-review), UI review pass (l48-ui)"
+review: pass
 depends_on: []
 boundary: ["docs/specs/leftovers-48.md Boundary"]
 spec: "docs/specs/leftovers-48.md (FR-1 to FR-4)"
@@ -49,77 +49,55 @@ Not changed, on purpose:
 
 ## Review
 
-**Fail** at e559f4d (branch did not move during the review). Unmet gate items: **L1**. One proved finding outside the gate row: **F2** (FR-2).
+### Round 2: **pass** at b280b92 (l48-review, 2026-10-24)
 
-### change-check (from a clean clone at e559f4d)
+Unmet gate items: **none**. F1 and F2 from round 1 are fixed. The branch was rebased on main at f0496c4 and did not move during this review.
+
+**change-check** (fresh clean clone at b280b92; base origin/main, 5 files):
 
 ```
-change-check: working-on/lf48-chat-landing.md
-risk: medium (missing, read as medium)
-repo organizer: base 0c80c717f (default origin/main) ... head lf48-chat-landing (clone HEAD e559f4d70, on detached) e559f4d70; 4 files, 2 flags; read in /Users/pabloantipan/organizer/.wt-notes/l48-review/clean
-
-## Changed
-
-- organizer/frontend/src/components/Conversation.landing.test.tsx (added, test)
-- organizer/frontend/src/components/Conversation.tsx (modified): Conversation, rowReveal, shownSeats, NewThread
-- organizer/frontend/src/styles/global.css (modified)
-- organizer/scripts/fixture-home.sh (modified)
-
-## Tests touched
-
-- organizer/frontend/src/components/Conversation.landing.test.tsx
-
-## Risky (declared)
-
-- `global.css`: on the opted-out controls hover now eases in and leaves at once; an old row that is hovered while a landing moves the mark eases from the fill to the hover colour
-- `rowReveal`: scrolls on mount too, so opening Conversations with a seat focused scrolls its row into view (nearest: no-op when visible)
-
-## Not changed, on purpose (declared)
-
-- `testdata/fixture-health.json`: the script adds the thread
-- `frontend/src/components/Conversation.tsx:ReplyBox`, `RuleBox`: FR-3 names only NewThread's picker
-- fills that set their own transition, not button's: `.r-row[aria-expanded]` (roles.css), `.rb-option` (rule-box.css), `.rail-item`, `.card`, `.wk-*`, `.p-row`, `.gl-row`; fills on non-buttons or on a child (`.rv-row.on` li, `.chart-bar.on .chart-mark`, `.rs-radio.on span`): no button transition to opt out of
-
 ## Flags
 
 | flag | where | symbol | detail |
 |---|---|---|---|
 | outside boundary | organizer/frontend/src/components/Conversation.landing.test.tsx |  | added |
+| outside boundary | organizer/frontend/src/components/Conversation.reveal.test.tsx |  | added |
 | untested? | organizer/frontend/src/components/Conversation.tsx | shownSeats | no test file names it |
 
-2 flags: outside boundary 1, outside footprint 0, undeclared 0, declared, not changed 0, new env var 0, new dependency 0, new host 0, risk 0, untested? 1, could not read 0, boundary unreadable 0
+3 flags: outside boundary 2, outside footprint 0, undeclared 0, declared, not changed 0, new env var 0, new dependency 0, new host 0, risk 0, untested? 1, could not read 0, boundary unreadable 0
 ```
 
-- `outside boundary` on `Conversation.landing.test.tsx`: false flag. The spec's Boundary lists "Conversation.tsx and its tests" and "the CSS test that reads it" (global.css); this one file is both.
-- `untested?` on `shownSeats`: the L3 case "Others [sup10] with sup10 the addressee: listed once, under Others" exercises it through `NewThread`'s render. Explained.
-- No undeclared, no declared-not-changed, no new dependency, no Go code, no `frontend/wailsjs/` change (`git diff --stat main...e559f4d`: 4 files, all inside the Boundary).
+- `outside boundary` on `Conversation.landing.test.tsx` and `Conversation.reveal.test.tsx`: false flags. The Boundary lists "Conversation.tsx and its tests" and "the CSS test that reads it"; both files are those.
+- `untested?` on `shownSeats`: L3's "sup10 the addressee: listed once, under Others" renders it through `NewThread`.
+- No undeclared, no declared-not-changed, no new dependency, no new env var. `git diff main...b280b92` touches no Go code, `frontend/wailsjs/`, `go.mod` or lockfile.
 
-### Findings
+**Rows. Each fails on main (f0496c4, both test files copied onto it) and passes on the branch:**
 
-- **F1 (L1, blocking): the L1 test does not test a landing.** It calls `rowReveal()` by hand and regex-checks the list's onClicks; nothing drives `Conversation`'s `useLayoutEffect` that calls `reveal.current`. Proof, mutation on a scratch clone: e559f4d's `Conversation.tsx` with line 339 (`useLayoutEffect(() => { reveal.current(chat, ...) }, [chat, reveal]);`) deleted, so no landing scrolls in the app, and `npx vitest run src/components/Conversation.landing.test.tsx` prints `Tests  19 passed (19)`. The row asks for "a landing on a row: scrollIntoView called once on the landed row". The test only proves the helper's logic. Reading the code, the wiring looks right: every landing path FR-1 names (a review, a card, Message, the feed's later selection via `unlistedLanding`) changes `chat` from outside the list, so the effect runs, and only `listPick`/person-row clicks set `picked`. But no test shows it. Goes to: this card.
-- **F2 (FR-2, blocking): selected fills on buttons outside global.css still ease.** FR-2 says "any other current or selected fill that rides the global button transition opt out". The card's "Not changed, on purpose" says the other stylesheets' fills are "not on the global button transition". That is false for these `<button>` fills, which set no transition of their own and so take `button`'s (global.css:22, and :356 under no-preference): `.seg button.on` (background + colour; Roadmap Cards|Calendar, `UsageTable` cut), `.week-list button[aria-current="true"]` (background, Usage), `.subtabs button.on` (colour; the initiative's sub-view tabs), `.places .place-tab.on` and `.gear.on` (colour). Proof: the card's own L2 parser applied to global.css + shell.css + usage.css (`.wt-notes/l48-review/f1-check.mjs`):
-  ```
-  ok   .chat.active: transition none
-  FAIL .seg button.on: transition not set (inherits button: background/border-color/color var(--dur-fast))
-  FAIL .week-list button[aria-current="true"]: transition not set (inherits button: background/border-color/color var(--dur-fast))
-  FAIL .subtabs button.on: transition not set (inherits button: background/border-color/color var(--dur-fast))
-  ```
-  The Boundary allows global.css "state fills only", so an opt-out rule there for these selectors fits it. If the FSE meant FR-2 to stop at global.css's own fills, the spec should say so: to the FSE. Goes to: this card.
-- Note: L4's "last message the human's" cannot be read from `health.json`, because `discuss.Thread` (internal/discuss/discuss.go:44) carries participants and a count, no messages. It holds in substance: with no token under the fixture's `discuss_state_dir`, `threadFacts` reads no message, so `AskedOfMe` is 0, the status is open, `undecided` is false, and `needsHuman` and the reconciler's backlog stay unchanged. The gate's wording is to the FSE.
-- Note: `ReplyBox` and `RuleBox` recipient selects still lack Others (FR-3 names only `NewThread`). Possible follow-up card, to the FSE.
+- **L1, met.** On main, all 5 L1 cases fail (`rowReveal is not a function`, and the two driven cases).
+  - The new `Conversation.reveal.test.tsx` runs `Conversation` under stand-in hooks that run its layout effects. Landing on sup10 under Others gives `[["sup10", {block:"nearest"}]]` once, with no focus call; a redraw adds nothing. A click on po_ana or journal scrolls nothing, and a landing after the click scrolls again.
+  - F1 mutation: with the landing `useLayoutEffect` deleted from b280b92's `Conversation.tsx`, 2 of 2 fail (`expected [] to deeply equal [ [ 'sup10', { block: 'nearest' } ] ]`).
+  - Second mutation: the person row's `reveal.click` removed fails the click case (`expected [ [ 'po_ana', { block: 'nearest' } ] ] to deeply equal []`).
+  - Every landing path FR-1 names changes `chat` from outside the list, so the one effect covers them all.
+- **L2, met.** On main, 34 of 34 fill cases fail (`expected null to be 'none'`, and hover `expected '' to match …`). The branch passes 61 of 61 with L1 and L3.
+  - F2: `.wt-notes/l48-review/f2-check.mjs` lists every state-marked selector in every stylesheet. Each one left without `none` is either not on a button or has its own transition: a child span (`.chart-bar.on .chart-mark`, `.rs-radio.on span`, `.rb-option.on span`, `.stg.current .stg-n`, `.stepper i`), an `li` (`.rv-row.on`), a div or bar (`.srm-*`, `.tz-*`, `.g-bar`, `.ihead-open`, `.ol-*`), or a button with its own background transition (`.r-row`, `.rail-item`).
+  - `.memory button.memory-btn[aria-expanded="true"]:not(.critical)` takes `none` from the higher-specificity rule.
+  - `f1-check.mjs` now reads `ok` for `.seg button.on`, `.week-list button[aria-current="true"]` and `.subtabs button.on`.
+- **L3, met.** On main, 3 of 3 fail (`expected [ '', 'po_ana', 'dev_bruno' ] to deeply equal [ …, '# Others', 'sup10' ]`). "Others empty" passes on both. The picker has no free-typed input.
+- **L4, met.** `--review` `health.json` holds `01FIXTURESUP10DIRECT0000000 open conversation ['sup10','pablo'] 2`. On main that thread is absent.
+  - The FSE's question (thread 01M5QMWK7ZP8XQN06XEZ3BFDRV): I measured Needs me directly. `service.New` + `Scan` + `RefreshAgents` dumped, then the app's own `needsMeRows`, against a `--review` home per tree (`discuss_state_dir` under its temp dir each time). Result: **16 rows on main and 16 on the branch, the same 16 keys** (`rows-main.txt`, `rows-probeB.txt`, `diff` empty).
+  - The sup10 thread has `asked_of_me 0`, open, and adds no row. The 16 against the header's "15 rows" already exists on main, so it is not this card's.
+- **X0, met.** `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test` was **fresh**, run `e04e0e7c-12633` of b280b921, rc 0: 19 Go packages ok, vitest 81 files / 1106 tests. `test-lease run -- pnpm run build` ok, `test-lease run -- wails build` ok, wailsjs untouched, `git status --porcelain` empty.
+- lf47's Others, the roster and the needs-me entry: their existing tests pass in the 1106. No new dependency.
 
-### Per row, fails on main and passes on the branch
+**Where each finding goes:**
+- UL1 (and ReplyBox/RuleBox without Others), UL2, UL3: lf51-composers (0160).
+- The `TestAppCreateCrewReturnsAtOnce` flake: lf51-crew-flake.
+- L4's "last message the human's" cannot be read from `health.json` (`discuss.Thread` holds no messages): to the FSE.
+- `fixture-home.sh`'s header says Needs me has 15 rows, but it is 16 on main already: to the FSE.
 
-Main here is 0c733bf, the merge base; main's later commits are cards and docs only. The test was copied onto a main clone.
+### Round 1: fail at e559f4d (l48-review, 2026-10-24)
 
-- L1: on main, 4 of 4 fail (`TypeError: rowReveal is not a function`; `expected undefined to be 5`). Passes on the branch. **Unmet** (F1).
-- L2: on main, 10 of 10 fail (`expected null to be 'none'`; `expected '' to match /(^|, )background var\(--dur-fast\)/`). The "button keeps its transition" case passes on main as well (a guard, not a check). Passes on the branch. **Met as written** (the named fills); F2 covers the rest of FR-2.
-- L3: on main, 3 of 3 fail (`expected [ '', 'po_ana', 'dev_bruno' ] to deeply equal [ '', 'po_ana', 'dev_bruno', …(2) ]`; `expected [ '', 'po_ana', 'sup10' ] to deeply equal [ '', 'po_ana', '# Others', 'sup10' ]`; docked `expected [ '', 'po_ana' ] to deeply equal …`). "Others empty" passes on both, as it should. No free-typed input. **Met.**
-- L4: `eval "$(scripts/fixture-home.sh --review)"` (config held `discuss_state_dir: /private/tmp/organizer-fixture.1BY0CS/discuss`), `health.json` threads: `01FIXTUREFORAGLAEA000000000 open ['fse','pablo']` and `01FIXTURESUP10DIRECT0000000 open conversation ['sup10','pablo'] 2`. On main: `sup10 thread: False`. No Go or vitest test counts the fixture's Needs me; the header's 15 rows hold by the reading in the L4 note above. **Met** (gate wording note above).
-- X0: **met.** `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test` was **fresh**, run id `ff38278c-18736`, and exited 2 on `TestAppCreateCrewReturnsAtOnce` ("CreateCrew took 1.452763959s, want < 1 s") under machine load, before vitest ran. l48-ui reused that failing run. No Go changed in this diff, and the builder saw the same flake. A fresh rerun (`test-lease run -- make test`) exited 0: every Go package ok, vitest `80 files, 1064 tests passed`. `test-lease run -- pnpm run build` ok, `test-lease run -- wails build` ok, wailsjs untouched, `git status --porcelain` empty.
-- lf47's Others, the roster's seats and the needs-me entry: the existing Conversation tests pass in the 1064. No new dependency.
-
-Reviewer: l48-review, 2026-10-24.
+L1 unmet: the test passed with the landing's layout effect deleted (F1). F2 (FR-2): `.seg button.on`, `.week-list button[aria-current]`, `.subtabs button.on`, `.place-tab.on` and `.gear.on` rode the button transition. L2 to L4 met. The shared run was fresh, `ff38278c-18736`, rc 2 on the Go timing flake; the fresh rerun passed.
 
 ## UI review
 l48-ui, 2026-10-24. Every row was checked on **e559f4d**. The branch moved during this review, and per sup90 I report on e559f4d. The code review's fixes (F1, F2) land after it; sup90 will send the new SHA for a delta check of R43 alone. **Verdict: pass.** There is no finding of severity 4 or 3 against leftovers-48 FR-1 to FR-3 or review-view Amendment 13 (R42, R43, R44). Evidence is in `.wt-notes/l48-ui/out/`: harness logs `h-1024x612.txt`, `h-1440x872.txt` and `h-1024x640-run1.txt`; shots `wk-*.png`; `driver-dev.log`, `*-config-check.txt` and `killed.txt`.
