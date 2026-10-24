@@ -1,6 +1,6 @@
 # Leftovers 49: ruling a record that asks several questions: the build spec
 
-status: proposed (0157)
+status: ruled (0157, pablo 2026-10-24)
 by: the FSE, 2026-10-24, on main at c8f4b9a
 sources: hestia's FSE via Hephaistos (organizer thread 01M5QGN5VKP3PFQ6R0P44A42DH;
 hestia thread 01M5NF93GC99R4Q85PKNHG1F86), hestia records 0026, 0037, 0038;

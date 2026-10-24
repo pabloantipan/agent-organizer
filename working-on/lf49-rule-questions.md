@@ -6,7 +6,7 @@ branch: lf49-rule-questions
 seat:
 stage: review-map
 updated: 2026-10-24
-next: "pablo: rule 0157 (multi-question records)"
+next: "fse: launch when sup89 or sup90 ends (0157 ruled 2026-10-24; held for memory: swap 72%, pressure warn)"
 depends_on: []
 boundary: ["docs/specs/leftovers-49.md Boundary"]
 spec: "docs/specs/leftovers-49.md (FR-1 to FR-5)"
