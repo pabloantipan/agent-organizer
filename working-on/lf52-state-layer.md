@@ -7,7 +7,7 @@ seat: l52-layer
 reviewer: l52-layer-review, l52-layer-ui
 stage:
 updated: 2026-10-24
-next: "l52-layer (fresh session) fixes S1 FR-3 per ## Review (sup93)"
+next: "review: lf52-state-layer, gate met (S1 FR-3 fixed), 75945c2"
 depends_on: []
 boundary: ["docs/specs/leftovers-52.md Boundary, lf52-state-layer"]
 spec: "docs/specs/leftovers-52.md (FR-1 to FR-3)"
@@ -24,23 +24,50 @@ docs/specs/leftovers-52.md, rows S1-S3 and X0.
 
 ## Done
 - 2026-10-24 l52-layer: one shared layer (`.sl`, `.sl::before`, `.sl-shadow`) paints every state mark; S1 92/92, S2, S3 30/30 pass (49 and 15 fail on main); X0 passes from a clean clone of e6d77d6 (8db6359, e6d77d6; .wt-notes/l52-layer/progress.md).
+- 2026-10-24 l52-layer: review fix (S1 FR-3): the kit reads bare attribute values and `:is()`/`:where()`, and a premise-grep cross-check fails any match it did not classify; the review's three inputs now fail (3 each), no new control found, no stylesheet changed; CSS test 96/96, harness 30/30; X0 passes from a clean clone of 75945c2 (75945c2; rebased on main 6ff86ea, f84a45d 998a280 75945c2)
 
 ## Declared changes
-- modified `frontend/src/styles/global.css`: adds the shared layer (`.sl`, `.sl::before`, `.sl-shadow`); moves tiny-btn, strip, rail-item, person and chat marks onto it; removes lf51's `transition: none` list and the rail-item's own transitions
+- modified `frontend/src/styles/global.css`: adds the shared layer (`.sl`, `.sl::before`, `.sl-shadow`); tiny-btn, strip, rail-item, person and chat marks on it; removes lf51's `transition: none` list and the rail-item's own transitions
 - modified `frontend/src/styles/shell.css`: place-tab, gear (on, open), ib-act .act, ihead-details, stg (and its focus ring), subtabs and seg marks on the layer; drops the sub-tabs' transparent inset
-- modified `frontend/src/styles/float.css`, `usage.css`, `memory.css`, `roles.css`, `initiatives.css`, `rule-box.css`: their marks on the layer (rb-option via `.sl-shadow`); own background transitions removed
-- modified `Rail.tsx`, `SlackView.tsx`, `Conversation.tsx`, `UsageChart.tsx`, `TopBar.tsx`, `InitiativeHeader.tsx`, `UsageTable.tsx`, `RoadmapView.tsx`, `StageRoadmap.tsx`, `Usage.tsx`, `FloatList.tsx`, `Home.tsx`, `InitiativesView.tsx`, `MemoryButton.tsx`, `RuleDecisionBox.tsx`: class `sl` (or `sl-shadow`) on the marked controls, nothing else
-- added `frontend/src/components/stateLayer.kit.ts`: reads the stylesheets as rules, reaches/specificity/winners, MARKS
-- added `frontend/src/components/StateLayer.css.test.ts`: S1, S2, FR-3
+- modified `frontend/src/styles/float.css`: fl-row and week-list marks on the layer; own background transition removed
+- modified `frontend/src/styles/usage.css`: usage marks on the layer; own background transition removed
+- modified `frontend/src/styles/memory.css`: memory button marks on the layer (critical's outer ring as --mark-line)
+- modified `frontend/src/styles/roles.css`: r-row mark on the layer
+- modified `frontend/src/styles/initiatives.css`: marks on the layer; own background transition removed
+- modified `frontend/src/styles/rule-box.css`: rb-option span's mark via `.sl-shadow`; its reduced-motion `transition: none` goes with the layer
+- modified `frontend/src/components/Rail.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
+- modified `frontend/src/components/SlackView.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
+- modified `frontend/src/components/Conversation.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
+- modified `frontend/src/components/UsageChart.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
+- modified `frontend/src/components/TopBar.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
+- modified `frontend/src/components/InitiativeHeader.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
+- modified `frontend/src/components/UsageTable.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
+- modified `frontend/src/components/RoadmapView.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
+- modified `frontend/src/components/StageRoadmap.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
+- modified `frontend/src/components/Usage.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
+- modified `frontend/src/components/FloatList.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
+- modified `frontend/src/components/Home.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
+- modified `frontend/src/components/InitiativesView.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
+- modified `frontend/src/components/MemoryButton.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
+- modified `frontend/src/components/RuleDecisionBox.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
+- added `frontend/src/components/stateLayer.kit.ts`: reads the stylesheets as rules (bare attribute values quoted, `:is()`/`:where()` unfolded), reaches/specificity/winners, MARKS, and `unclassified` (the premise grep as a check on MARKS)
+- added `frontend/src/components/StateLayer.css.test.ts`: S1, S2, FR-3 (incl. the premise cross-check)
 - added `frontend/src/components/StateLayer.harness.test.tsx`: S3
-- modified `Conversation.landing.test.tsx`: lf51's K4 removed (superseded by S1-S3)
-- modified `CardDetails.test.tsx`, `CharterOnce.test.tsx`, `Home.waits.test.tsx`, `InitiativesView.test.tsx`, `Rail.keys.test.tsx`, `ReviewSymbol.test.tsx`, `TopBar.test.tsx`: class literals follow `sl`
+- modified `frontend/src/components/Conversation.landing.test.tsx`: lf51's K4 removed (superseded by S1-S3)
+- modified `frontend/src/components/CardDetails.test.tsx`: class literals follow `sl`
+- modified `frontend/src/components/CharterOnce.test.tsx`: class literals follow `sl`
+- modified `frontend/src/components/Home.waits.test.tsx`: class literals follow `sl`
+- modified `frontend/src/components/InitiativesView.test.tsx`: class literals follow `sl`
+- modified `frontend/src/components/Rail.keys.test.tsx`: class literals follow `sl`
+- modified `frontend/src/components/ReviewSymbol.test.tsx`: class literals follow `sl`
+- modified `frontend/src/components/TopBar.test.tsx`: class literals follow `sl`
 Risky:
 - `.sl`: `position: relative; z-index: 0` makes each control a stacking context (no control here holds a raised child today)
 - hover's border-color and ink no longer ease on these controls; the sub-tabs' hover is ink only
 Not changed, on purpose:
 - `review.css` (0159); `decisions.css` (no state fill there; `.dec-chev` is ink with no transition)
 - `.ib-row.focused`: its word is outside the premise's list (Notes)
+- every stylesheet and component in the review fix: the wider enumeration found no marked control off the layer
 - dead `.srm-*` rules in roadmap.css and time-zoom.css
 
 ## Notes
