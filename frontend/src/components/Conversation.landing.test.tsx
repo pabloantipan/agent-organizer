@@ -79,7 +79,6 @@ const transitionOf = (sel: string) => {
 
 describe("K4 (leftovers-51 FR-4, supersedes leftovers-48 L2): hover eases in and out alike on button's base rule; a state mark has no transition, hover included", () => {
   const fills: [base: string, on: string, drawn?: string][] = [
-    [".chat", ".chat.active"],
     ["button.person", "button.person.active", ".person.active"],
     [".strip-all", ".strip-all.active"],
     [".strip-item", ".strip-item.active"],
@@ -112,6 +111,49 @@ describe("K4 (leftovers-51 FR-4, supersedes leftovers-48 L2): hover eases in and
   it.each(fills)("%s → %s: transition none, hovered or not", (_base, on) => {
     expect(transitionOf(on)).toBe("none");
     expect(transitionOf(`${on}:hover`)).toBe("none");
+  });
+  // The chat row (Amendment 2, review-view A16, R43 and R49 amended): the
+  // mark is its own layer, so a leaving mark is gone in the next frame and
+  // hover eases the row's own background-color both ways on one curve.
+  /** The value the last rule naming `sel` exactly gives `prop`, and that rule's index. */
+  const declOf = (sel: string, prop: string) => {
+    let v: string | null = null, at = -1;
+    rules.forEach((r, i) => { if (!r.sels.includes(sel)) return; const m = new RegExp(`(?:^|;)\\s*${prop}:\\s*([^;]+)`).exec(r.body); if (m) { v = m[1].trim(); at = i; } });
+    return { v: v as string | null, at };
+  };
+  it(".chat: hover eases the row's own background-color over 100 ms on --ease-out, in and out (R49 amended, C2)", () => {
+    expect(transitionOf(".chat")).toBe("background-color var(--dur-fast) var(--ease-out)");
+    expect(transitionOf(".chat:hover")).toBeNull();
+    expect(declOf(".chat:hover", "background").v).toBe("var(--panel)");
+    expect(css).not.toMatch(/\.chat[^{]*\{[^}]*--ease-exit/);
+  });
+  it(".chat.active: the fill and outline are a ::before under the content with no transition", () => {
+    expect(declOf(".chat", "position").v).toBe("relative");
+    expect(declOf(".chat", "z-index").v).toBe("0");
+    const layer = ".chat.active::before";
+    expect(declOf(layer, "content").v).toBe('""');
+    expect(declOf(layer, "position").v).toBe("absolute");
+    expect(declOf(layer, "inset").v).toBe("-1px");
+    expect(declOf(layer, "z-index").v).toBe("-1");
+    expect(declOf(layer, "background").v).toBe("var(--accent-soft)");
+    expect(declOf(layer, "border").v).toBe("1px solid var(--border-accent)");
+    expect(transitionOf(layer)).toBe("none");
+  });
+  it(".chat.active leaves the row's own background and border as the base has them, so the leaving row has no fill in the next frame (R43 amended)", () => {
+    // Removing the class removes the layer, which no transition can hold;
+    // the row's own properties do not change, so its transition runs nothing.
+    expect(declOf(".chat.active", "background").v).toBe(declOf(".chat", "background").v);
+    expect(declOf(".chat.active", "border-color").v).toBe("transparent");
+    expect(declOf(".chat", "border").v).toBe("1px solid transparent");
+    expect(rules.some((r) => r.sels.some((x) => /^\.chat(\.|:|$)/.test(x) && x !== ".chat.active::before") && /(?:^|;)\s*(background|border-color):\s*var\(--(accent-soft|border-accent)\)/.test(r.body))).toBe(false);
+    expect(transitionOf(".chat.active")).toBe("none");
+    expect(transitionOf(".chat.active:hover")).toBe("none");
+  });
+  it("on the current row the fill does not change on hover", () => {
+    expect(declOf(".chat.active", "background").at).toBeGreaterThan(declOf(".chat:hover", "background").at);
+    expect(declOf(".chat.active:hover", "background").v).toBeNull();
+    expect(declOf(".chat.active::before", "background").at).toBeGreaterThan(-1);
+    expect(rules.some((r) => r.sels.some((x) => x.startsWith(".chat") && x.includes(":hover") && x.includes("::before")))).toBe(false);
   });
   // The rail's row is a button (Rail.tsx folded and role rows) whose base
   // rule carries its own ease (global.css .rail-item, and the reduced-motion

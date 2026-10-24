@@ -639,9 +639,15 @@ button.person:focus-visible { outline-offset: -2px; }
 .chats-reason, .blocked-reason { font-size: var(--font-size-sm); color: var(--fg-muted); line-height: 1.35; }
 .chats-reason { margin: -2px 8px 8px; }
 .chats .cell-search { width: auto; margin: 0 4px 6px 0; }
-.chat { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: var(--radius-md); background: transparent; border: 1px solid transparent; color: var(--muted); font-size: var(--font-size-sm); text-align: left; cursor: pointer; min-width: 0; }
+.chat { position: relative; z-index: 0; display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: var(--radius-md); background: transparent; border: 1px solid transparent; color: var(--muted); font-size: var(--font-size-sm); text-align: left; cursor: pointer; min-width: 0; transition: background-color var(--dur-fast) var(--ease-out); }
 .chat:hover { background: var(--panel); color: var(--text); }
-.chat.active { background: var(--accent-soft); border-color: var(--border-accent); color: var(--text); }
+/* The current mark is its own layer (leftovers-51 Amendment 2, review-view
+   A16 C1): hover eases the row's own background-color, in and out, and the
+   fill and outline are a ::before with no transition, under the content.
+   The mark leaves the row's own background and border as they were, so
+   removing it removes the layer at once and eases nothing. */
+.chat.active { background: transparent; border-color: transparent; color: var(--text); }
+.chat.active::before { content: ""; position: absolute; inset: -1px; z-index: -1; border-radius: inherit; background: var(--accent-soft); border: 1px solid var(--border-accent); pointer-events: none; transition: none; }
 /* State marks never ease (design system; leftovers-48 FR-2, leftovers-51
    FR-4, review-view A13 UO2 and A15 UL4): hover eases in and out alike on
    button's own 100 ms (the base rule above, so leaving hover eases too),
