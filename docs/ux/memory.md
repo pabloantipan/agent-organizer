@@ -448,6 +448,10 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - A radio group's name is its question, not its number: `Q1 · <words>` (rule-questions A1).
 - "Incomplete needs no reason text" holds only while the missing input is in view; in a scrolling box the foot names it (design system, rule-questions A1).
 
+- A line of words added to a foot gets its own row at every width, not "beside" something: the narrowest box decides, and a fixed place beats one that moves at a breakpoint (rule-questions A2).
+- A floor is for when there is no room; with room, show the value whole (rule-questions A2).
+- What a line drops visually while its record is open, its accessible name drops too (rule-questions A2).
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).

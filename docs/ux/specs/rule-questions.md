@@ -47,3 +47,26 @@ and its Amendment 1), answering l49-ui's UI review of lf49-rule-questions
 | Q3 | hear the question | the group's accessible name is `Q1 · <the question's words>` when the record has the line, `Q1` when it does not |
 | Q4 | know why Rule waits | Decisions at 1024, only Q1 picked and words written: beside Rule, `Q2 not answered yet.`, and Rule's description is that text |
 | Q5 | read the right prompt | an empty words box reads `Why these answers, …` on a question record and `Why this option, …` on a plain one |
+
+## Amendment 2 (aglaea, 2026-10-24): from the UI review of lf51-rule-words
+
+- **UW1: the missing text has its own row, at every width.** It is the
+  first row of the foot, full width and left-aligned with the box's
+  content. The signature and the buttons keep their own row under it,
+  as they are when nothing is missing. It never shares a line with the
+  signature, so no width can squeeze either one; and one place at every
+  width beats a layout that moves at a breakpoint. It wraps when it must.
+  When Rule is enabled the row goes, and the foot is as on main.
+- **UW2: whole answers when they fit.** The list line shows each answer
+  whole while the line has room. The per-answer floor of A1 applies only
+  when it does not: then each answer is cut, `Q<n>` kept whole, until the
+  line fits. A plain line already works this way.
+- **UW3: said once while open.** While its record is open under it, the
+  line's accessible name drops the chosen too, matching what the line
+  draws (A1). The name gets it back when the record closes.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| Q4 (amended) | know why Rule waits | Decisions at 1024 and 1440 (the 354 px box) and Needs me: with Q1, Q2 and the words missing, the missing text is its own row above `signed … · commits one file` and the buttons; the signature reads in full on one line; Rule's description is the missing text |
+| Q2 (amended) | scan the list | at 1440 a two-answer Ruled line reads both answers whole; at 1024, where it cannot, `Q1 <cut>…, Q2 <cut>…` |
+| Q6 | hear the chosen once | with a ruled record open, its line's accessible name has no chosen; closed, it has the full chosen |
