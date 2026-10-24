@@ -7,7 +7,7 @@ seat: l49-build
 reviewer: l49-review, l49-ui
 stage: review-map
 updated: 2026-10-24
-next: "l49-build builds it in .wt/lf49-rule-questions (sup91)"
+next: "decide: FR-1 says a question needs two or more alternatives, but hestia 0038 (named in FR-4) has `Q1 amend-exit`, one alternative, so as written 0038 keeps its problem. Allow one or more (0038 reads clean; the gate rows are unchanged), or keep two or more? (l49-build, sup91)"
 depends_on: []
 boundary: ["docs/specs/leftovers-49.md Boundary"]
 spec: "docs/specs/leftovers-49.md (FR-1 to FR-5)"
