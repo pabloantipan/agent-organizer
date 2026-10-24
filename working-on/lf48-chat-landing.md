@@ -7,7 +7,7 @@ seat: l48-build
 reviewer: l48-review, l48-ui
 stage: review-map
 updated: 2026-10-24
-next: "l48-build: L1 — make the landing test drive Conversation's layout effect, so deleting the useLayoutEffect that calls rowReveal fails it; and FR-2: opt .seg button.on, .week-list button[aria-current=\"true\"], .subtabs button.on, .place-tab.on, .gear.on out of the button transition (Review F1, F2)"
+next: "l48-build: fix review F1 (L1 test drives a landing through Conversation) and F2 (FR-2 opt-outs for .seg button.on, .week-list button[aria-current], .subtabs button.on, .place-tab.on, .gear.on in global.css) (sup90)"
 review: fail
 depends_on: []
 boundary: ["docs/specs/leftovers-48.md Boundary"]
