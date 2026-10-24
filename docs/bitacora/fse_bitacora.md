@@ -4,6 +4,15 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## 2026-10-23 21:20
+
+- Last SHA seen: f2b9e37. leftovers 47 landed: bd04f92 (lf47-others), 4dd010d (lf47-runs-cost), f2b9e37 (lf47-review-moved). sup88 19:47-21:10, ~83 min against 25-50m (one review round on MV1, test-lease queue), $23.31 over 8 seats; run record runs/2026-10-23-sup88-leftovers-47.md. sup88 ended, token revoked, clean, installed v0.2.0-2675-gf2b9e37.
+- leftovers-47 Amendment 1 (2064179): focus after the last primary's own press goes to the checked radio; Aglaea matched it in review-view Amendment 14 (R22 amended, R45).
+- 0156 (leftovers 48, Amendment 13: landing row in view, no easing on state fills, Others in the picker, fixture chat with sup10) proposed, waits on Pablo.
+- Repetition, second sighting: the code reviewer of a ui_review card idles after its pass waiting for the UI review (sup87, sup88). Posted [for hephaistos] with a proposal for the supervise skill.
+- Forecast miss: leftovers 47 ran 83 min against a 50 min top. Basis was too thin (three cards and two UI reviews on a shared test queue, against one- and two-card tasks). Next forecast with two UI reviews: count the queue.
+- Held from sup88: TestAppCreateCrewReturnsAtOnce flakes at 1.10 s against 1 s under memory pressure; reviewers named only in `reviewer:` stay unattributed in organizer runs; statusline first-seen is not launch time.
+
 ## 2026-10-23 11:25
 
 - Last SHA seen: 2715032 (Aglaea's review-view Amendment 11). leftovers 46 landed: f4a52fe (lf46-runs-seat), 804db0f (lf46-review-words); sup87 ~30 min against 30-60m, seats $11.71; run record runs/2026-10-23-sup87-leftovers-46.md. sup87 ended, token revoked, clean, installed v0.2.0-2641-g28975c4.
