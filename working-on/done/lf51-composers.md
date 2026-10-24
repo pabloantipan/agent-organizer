@@ -1,13 +1,13 @@
 ---
 title: "Every composer lists recipients one way, the Chats head stays put, a click reveals a cut row, and hover eases both ways"
-status: next
+status: done
 repos: [organizer]
 branch: lf51-composers
 seat: l51-comp
 reviewer: l51-comp-review, l51-comp-ui
 stage:
 updated: 2026-10-24
-next: "review: lf51-composers, gate met (K1-K5, X0; C3 per Amendment 3: lf48's marked controls switch at once), 490b943"
+next: "merged (0160)"
 review: pass
 depends_on: [lf48-chat-landing]
 boundary: ["docs/specs/leftovers-51.md Boundary, lf51-composers"]
