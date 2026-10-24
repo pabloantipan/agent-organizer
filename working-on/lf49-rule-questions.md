@@ -4,9 +4,9 @@ status: next
 repos: [organizer]
 branch: lf49-rule-questions
 seat:
-stage: review-map
+stage:
 updated: 2026-10-24
-next: "fse: launch when sup89 or sup90 ends (0157 ruled 2026-10-24; held for memory: swap 72%, pressure warn)"
+next: "sup91 runs it (0157 ruled 2026-10-24)"
 depends_on: []
 boundary: ["docs/specs/leftovers-49.md Boundary"]
 spec: "docs/specs/leftovers-49.md (FR-1 to FR-5)"
