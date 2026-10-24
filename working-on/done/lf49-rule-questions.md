@@ -1,6 +1,6 @@
 ---
 title: "Ruling a record with several questions picks one answer per question and writes them all into chosen"
-status: next
+status: done
 repos: [organizer]
 branch: lf49-rule-questions
 seat: l49-build
@@ -8,7 +8,7 @@ reviewer: l49-review, l49-ui
 stage: review-map
 updated: 2026-10-24
 review: pass
-next: "review: lf49-rule-questions, gate met (Q1-Q4, X0, with Amendment 1), 592359b"
+next: "done: code review and UI review pass at 592359b; merged by sup91"
 depends_on: []
 boundary: ["docs/specs/leftovers-49.md Boundary"]
 spec: "docs/specs/leftovers-49.md (FR-1 to FR-5)"
