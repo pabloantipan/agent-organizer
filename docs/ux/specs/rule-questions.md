@@ -70,3 +70,16 @@ and its Amendment 1), answering l49-ui's UI review of lf49-rule-questions
 | Q4 (amended) | know why Rule waits | Decisions at 1024 and 1440 (the 354 px box) and Needs me: with Q1, Q2 and the words missing, the missing text is its own row above `signed … · commits one file` and the buttons; the signature reads in full on one line; Rule's description is the missing text |
 | Q2 (amended) | scan the list | at 1440 a two-answer Ruled line reads both answers whole; at 1024, where it cannot, `Q1 <cut>…, Q2 <cut>…` |
 | Q6 | hear the chosen once | with a ruled record open, its line's accessible name has no chosen; closed, it has the full chosen |
+
+## Amendment 3 (aglaea, 2026-10-25): water-filling, not equal cuts
+
+From lf52-decisions-line's reviews (sup93). A1 and A2 said the answers
+share the floor equally. When the line cannot hold every answer whole,
+the room is water-filled instead: an answer that fits its share stays
+whole, and its spare room goes to the others, which are cut only as far
+as they must be. `Q<n>` stays whole, and so does the accessible name.
+A2's "whole while there is room" then holds per answer.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| Q2 (amended) | scan the list | at 1440 a two-answer Ruled line reads both answers whole; at 1024, a short answer stays whole and only the long one is cut (`Q1 after-graph-perform…, Q2 record-page`); the accessible name has the full chosen |
