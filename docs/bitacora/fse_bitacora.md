@@ -4,6 +4,13 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## 2026-10-25 05:00
+
+- leftovers 52 closed by sup93 (19:42-04:51, ~4h working, 4h45 paused by Pablo plus a usage-limit stop, against 45-90m; seats $43.88, sup93 ~$6.4): lf52-chosen-trim 0289401, lf52-state-layer 0683aa2 merged before main was protected; lf52-decisions-line passed both reviews at 2816be1, PR asked of talos-lab (thread 01M5RZ7NY11TWN0TRJZR8R6GC8). sup93 ended; the FSE moves that card to done/ when talos-lab answers. Four PRs with talos-lab (with leftovers 53's three).
+- Repetition, second sighting: cascade-model vitests pass CSS that WebKit lays out wrong (lf52 U4 unitless --mark-edge, U1 a cancelled 1px); only the WKWebView UI review caught them. Next CSS gate rows read computed layout in the review build (seat, by seat-pointer shot or AX frames), not a cascade model.
+- Sent [for hephaistos]: seats stop silently on 'Auto mode is unavailable' and the usage limit; forecast extend refuses a second extension.
+- Held for Aglaea: header goal line against the sub-tabs at 1024 (R53), already in the next leftovers.
+
 ## 2026-10-25 04:05
 
 - Last SHA seen: 790ca75. leftovers 53: all three cards passed review and are in done/ on local main; PRs asked of talos-lab (lf53-frontmatter 044c647, lf53-usage-contract c2a457f, lf53-record-statusline a3d8128); no code merged locally. sup94 01:57-04:00, 2h03m against 40-80m (builders 48-76 min; the rest test-lease queueing and the PR switch), seats $13.11; run record runs/2026-10-25-sup94-leftovers-53.md. sup94 ended. sup93 on lf52-decisions-line (code review fail: short alternatives cut at the floor), extended to ~04:56.
