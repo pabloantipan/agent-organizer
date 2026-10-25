@@ -136,9 +136,10 @@ export function ruledAnswers(options: string[] | undefined, chosen: string): Ans
   return answers.length > 0 ? answers : null;
 }
 
-/** The least of an alternative a cut answer keeps, in characters, before its
- *  ellipsis (rule-questions A1, UW2): `Q1 after…`. */
-const ALT_FLOOR = 5;
+/** The least of an alternative a cut answer keeps (rule-questions A1, UW2):
+ *  its first word, at most this many characters, then the ellipsis
+ *  (`Q1 after…`). An alternative no longer than that is never cut. */
+const ALT_FLOOR = 8;
 
 /** The Ruled line's chosen on a question record, quoted, in `room` pixels
  *  as `width` measures text (leftovers-52 FR-4, UW2). Whole while it fits.
@@ -146,7 +147,8 @@ const ALT_FLOOR = 5;
  *  the quotes and the `, ` between answers; one that fits its share stays
  *  whole and leaves the rest to the others; the others keep their `Q<n>`
  *  whole and cut the alternative with an ellipsis to their share, never
- *  below ALT_FLOOR characters. A room of 0 gives the line's floor. */
+ *  below its floor (ALT_FLOOR), so `Q1 yes` stays whole. A room of 0 gives
+ *  the line's floor. */
 export function fitAnswers(answers: Answer[], room: number, width: (s: string) => number): string {
   const full = answers.map((a) => `${a.label} ${a.alt}`);
   const quote = (parts: string[]) => `“${parts.join(", ")}”`;
@@ -165,8 +167,9 @@ export function fitAnswers(answers: Answer[], room: number, width: (s: string) =
   }
   const share = rest / Math.max(open.size, 1);
   const cut = ({ label, alt }: Answer) => {
+    const floor = alt.split(/[-_\s]/)[0].slice(0, ALT_FLOOR).length;
     let out = `${label} ${alt}`;
-    for (let k = alt.length - 1; k >= Math.min(ALT_FLOOR, alt.length - 1) && k > 0; k--) {
+    for (let k = alt.length - 1; k >= floor && k > 0; k--) {
       out = `${label} ${alt.slice(0, k).replace(/[-_\s]+$/, "")}…`;
       if (width(out) <= share) break;
     }
@@ -174,6 +177,24 @@ export function fitAnswers(answers: Answer[], room: number, width: (s: string) =
   };
   return quote(answers.map((a, i) => (open.has(i) ? cut(a) : full[i])));
 }
+
+/** Pixels a question chosen's line item asks for over its measure: the
+ *  canvas and the laid-out line round apart, by 1/64 px and more. */
+export const FIT_SLACK = 2;
+
+/** What a question chosen's item asks of the line (FR-4): its basis, the
+ *  whole answers, and its floor, every answer at its floor; each FIT_SLACK
+ *  over the measure. */
+export const answerSizes = (answers: Answer[], width: (s: string) => number) => ({
+  basis: width(fitAnswers(answers, Infinity, width)) + FIT_SLACK,
+  floor: width(fitAnswers(answers, 0, width)) + FIT_SLACK,
+});
+
+/** The text for the room the line gave the item: the fit keeps half the
+ *  slack, so a room as wide as the basis asked for reads whole (UI review
+ *  U1: one pixel each way cancelled out and cut `start-now`). */
+export const fitRoom = (answers: Answer[], room: number, width: (s: string) => number) =>
+  fitAnswers(answers, room - FIT_SLACK / 2, width);
 
 /** Each question's words from the record's Question section (FR-9): the
  *  `**Q<n>. …**` line without its markdown and its `Q<n>.`, by label. A

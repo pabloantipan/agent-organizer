@@ -3,7 +3,7 @@ import { marked } from "marked";
 import type { merge, model } from "../../wailsjs/go/models";
 import { DAY, dateWords, daysBetween, parseISO, today } from "../lib/dates";
 import { addLocalDays } from "../lib/axis";
-import { chosenLines, fitAnswers, ownerPhrase, ruledAnswers, type Answer } from "../lib/decisions";
+import { answerSizes, chosenLines, fitAnswers, fitRoom, ownerPhrase, ruledAnswers, type Answer } from "../lib/decisions";
 import { RULED_LIMIT, countWords, decisionMatches, emptyRuledWords, lineName, rulerWords, ruledShown, shownSections, statusWord, summaryOf, timelineName, turnaroundWords, waitedWords, type DecSections } from "../lib/decisionsPage";
 import { readOnlyOf } from "../lib/queue";
 import { decisionKey, draftVerb, useDrafts, type Draft, type DraftFields } from "../lib/drafts";
@@ -576,11 +576,11 @@ function RuledAnswers({ answers, title }: { answers: Answer[]; title: string }) 
     const line = ref.current?.closest<HTMLElement>(".dec-line");
     if (width && line) settleLines([line]);
   }, [width]);
-  // One pixel of slack each way: the canvas and the line round apart.
-  const sizes: CSSProperties | undefined = width
-    ? { flexBasis: `calc(${width.of(fitAnswers(answers, Infinity, width.of)) + 1}px + 4px + 1ch)`, minWidth: `calc(${width.of(fitAnswers(answers, 0, width.of)) + 1}px + 4px + 1ch)` }
+  const asked = width ? answerSizes(answers, width.of) : null;
+  const sizes: CSSProperties | undefined = asked
+    ? { flexBasis: `calc(${asked.basis}px + 4px + 1ch)`, minWidth: `calc(${asked.floor}px + 4px + 1ch)` }
     : undefined;
-  const text = width && room !== null ? fitAnswers(answers, room - 1, width.of) : fitAnswers(answers, Infinity, () => 0);
+  const text = width && room !== null ? fitRoom(answers, room, width.of) : fitAnswers(answers, Infinity, () => 0);
   return (
     <span className="dec-opt answers" style={sizes}>
       <span className="dec-chosen" ref={ref} title={title}>{text}</span>
