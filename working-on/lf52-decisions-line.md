@@ -7,7 +7,7 @@ seat: l52-line
 reviewer: l52-line-review, l52-line-ui
 stage:
 updated: 2026-10-25
-next: "l52-line: fitAnswers must not cut an alternative shorter than ALT_FLOOR (Q1 yes stays whole at the floor, as main's test asserted); restore that case in decisions.test.ts, then X0 and review again"
+next: "l52-line fixes F1 (short answers cut) and U1 (1440 cuts a fitting answer); see ## Review and ## UI review (sup93)"
 review: fail
 depends_on: [lf52-state-layer]
 boundary: ["docs/specs/leftovers-52.md Boundary, lf52-decisions-line"]
