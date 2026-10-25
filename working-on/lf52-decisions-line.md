@@ -8,7 +8,7 @@ reviewer: l52-line-review, l52-line-ui
 stage:
 updated: 2026-10-25
 next: "review: lf52-decisions-line, D1 D2 X0 pass, F1 U1 fixed, 2816be1"
-review: fail
+review: pass
 depends_on: [lf52-state-layer]
 boundary: ["docs/specs/leftovers-52.md Boundary, lf52-decisions-line"]
 spec: "docs/specs/leftovers-52.md (FR-4 to FR-5)"
@@ -47,53 +47,52 @@ Not changed, on purpose:
 
 ## Review
 
-**Verdict: fail** at 1f751f0 (pinned SHA, branch not moved). Gate rows met: D1, D2, X0; unmet gate items: none. The card fails on one proved finding outside the gate (F1).
+**Verdict: pass** at 2816be1 (the branch moved from 1f751f0; rebased on main 843f288, 0bdf0f3 and 3c53949 the old 88e7e38 and 1f751f0, plus 2816be1). Unmet gate items: none. D1 (as amended by leftovers-52 Amendment 3), D2 and X0 are met; F1, which failed round 1 at 1f751f0, is fixed.
 
-**F1 (blocking, proved): a short answer is cut at the floor, where main kept it whole.** `fitAnswers` (`frontend/src/lib/decisions.ts:169`) loops `k >= Math.min(ALT_FLOOR, alt.length - 1)`, so an alternative of 5 characters or fewer is still cut, by one letter, to a string no narrower than the whole one; its own doc says "never below ALT_FLOOR characters". The floor string (`fitAnswers(answers, 0, …)`) is also the item's `min-width` in `RuledAnswers`, so this is what the line shows at its narrowest. Inputs (7 px/char, as D1's test measures), what the branch gives:
+### change-check (fresh clean clone at 2816be1)
 ```
-options ["Q1 yes | no","Q2 extraordinarily | x"], chosen "Q1 yes, Q2 extraordinarily"
-  room 0   → “Q1 ye…, Q2 extra…”     room 100 → “Q1 ye…, Q2 extra…”
-options ["Q1 yes | no","Q2 extraordinarily-long-answer | x"], chosen "Q1 no, Q2 extraordinarily-long-answer"
-  room 0   → “Q1 n…, Q2 extra…”
-options ["Q1 abc | d", …], room 0 → “Q1 ab…, …”
-```
-On main the floor kept these whole: main's own test, which this diff deletes, asserted `chosenFloor(["Q1 yes | no", "Q2 extraordinarily | x"], "Q1 yes, Q2 extraordinarily")` is `"Q1 yes, Q2 extraord…"`. A yes/no question reads `Q1 n…`: the answer is lost and nothing is saved. Goes to: this card (l52-line), fix in `fitAnswers` and restore that case as a test.
-
-### change-check (from the clean clone at 1f751f0)
-```
-repo organizer: base 79f2e3b6d (default origin/main) ... head lf52-decisions-line (clone HEAD 1f751f07d, on detached) 1f751f07d; 7 files, 3 flags
-Changed: DecisionsView.test.tsx (test), DecisionsView.tsx (DecisionsView, RuledAnswers, textWidth), decisions.test.ts (test), decisions.ts (chosenFloor, Answer, ruledAnswers, fitAnswers), decisionsPage.test.ts (test), decisionsPage.ts (lineName), styles/decisions.css
+repo organizer: base abe1feca8 (default origin/main) ... head lf52-decisions-line (clone HEAD 2816be1f1, on detached) 2816be1f1; 7 files, 2 flags
 | untested? | DecisionsView.tsx | RuledAnswers | no test file names it |
 | untested? | DecisionsView.tsx | textWidth | no test file names it |
-| untested? | decisions.ts | chosenFloor | no test file names it |
-3 flags: outside boundary 0, outside footprint 0, undeclared 0, declared, not changed 0, new env var 0, new dependency 0, new host 0, risk 0, untested? 3, could not read 0, boundary unreadable 0
+2 flags: outside boundary 0, outside footprint 0, undeclared 0, declared, not changed 0, new env var 0, new dependency 0, new host 0, risk 0, untested? 2, could not read 0, boundary unreadable 0
 ```
-Explained: `chosenFloor` is deleted, so no test can name it. `RuledAnswers` is covered by DecisionsView.test.tsx through the rendered line (`class="dec-opt answers"`, whole text before the measure), not by name; `textWidth` (canvas) has no test, since jsdom has no canvas layout: a gap, its risk declared by the builder, left to the UI review on WKWebView. No undeclared, outside-boundary or declared-not-changed lines; all 7 files sit in the boundary.
+Explained: `RuledAnswers` is exercised through the rendered line in DecisionsView.test.tsx (`class="dec-opt answers"`, whole before the measure), and its arithmetic now lives in `answerSizes`/`fitRoom`, which decisions.test.ts tests by name (U1 case). `textWidth` is the canvas measure, which jsdom cannot run; the UI review covers it on WKWebView. All 7 files are inside the boundary; nothing undeclared or outside it.
 
 ### Rows
-- **D1** — `decisions.test.ts` "D1: …": wide room → `“Q1 after-graph-performs-start-now, Q2 record-page”` whole (also at exactly its width); narrow room 196 → `“Q1 after-gr…, Q2 record-p…”`, both `Q<n>` whole, equal px; plus DecisionsView.test.tsx draws the line whole before the measure. **Room is measured, not counted**: `RuledAnswers` reads `.dec-chosen`'s `getBoundingClientRect().width` under a ResizeObserver (the span is `flex: 1 1 0`, decisions.css), measures text by canvas in the element's computed font, re-measures on `document.fonts.ready`; the test's 7 px/char is only the injected measure. Plain record: same markup, class and title as main (`!answers` branch; `ruledAnswers` returns null). Met.
-- **D2** — `decisionsPage.test.ts` "D2": `lineName(…, true)` has no chosen, `false` and the default have the full `“Q1 …, Q2 record-page”`; DecisionsView passes `isOpen` into `lineName` for the `.dec-line` `aria-label` (DecisionsView.tsx:314), and DecisionsView.test.tsx asserts the open line's name holds no `Q1` and no `“`. Met.
-- **Fails on main** (clean clone of main 79f2e3b, the branch's three test files copied in):
+- **D1 (Amendment 3)**: decisions.test.ts. Wide room gives `“Q1 after-graph-performs-start-now, Q2 record-page”` whole; narrow room 287 gives `“Q1 after-graph-perform…, Q2 record-page”` (Amendment 3's string: the shorter whole, the longer cut); the both-long case (room 196) gives `“Q1 after-gr…, Q2 record-p…”` and `“Q1 after-gr…, Q2 neo4j-pe…”`, equal px, `Q<n>` whole. Room is measured, not counted: `.dec-chosen` (`flex: 1 1 0`) read by `getBoundingClientRect` under a ResizeObserver, text by canvas in its computed font, re-measured on `fonts.ready`. Plain records keep main's markup. Met.
+- **D2**: `lineName(…, true)` has no chosen, closed has it whole; DecisionsView passes `isOpen` into the `.dec-line` `aria-label` (DecisionsView.tsx:314); DecisionsView.test.tsx asserts the open name has no `Q1` and no `“`. Met.
+- **F1 (round 1)**: `cut` now floors at the first word, 8 characters at most, and never cuts below it. Test "an answer no longer than its floor is never cut (F1)" gives `“Q1 yes, Q2 extraord…”` at 0 and 100, `“Q1 no, Q2 extraord…”`, `“Q1 abc, Q2 x”`, `“Q1 renamed, Q2 after…”`. Fixed.
+- **Fails on main 843f288** (2816be1's three test files copied onto a clean clone):
 ```
 × D2: drops the chosen while the record is open, and has it whole closed
 × closed, the line draws the answers whole before it measures, and its name keeps the full chosen (leftovers-52 D1)
 × open, the head shows Chosen with both answers in full and the line has no chosen
 FAIL  src/lib/decisions.test.ts  TypeError: ruledAnswers is not a function
-AssertionError: expected '“Q1 after…, Q2 record…”' to be '“Q1 after-graph-performs-start-now, Q…'
 Test Files  3 failed (3)   Tests  3 failed | 25 passed (28)
 ```
-- **X0** — `CI=true test-lease run -- pnpm install --frozen-lockfile` exit 0; `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test` exit 0, **reused** run `32206d01-84766` of 1f751f07d993 (by l52-line-ui, 03:22:34): go `ok` lines, no FAIL, `Test Files 86 passed (86)`, `Tests 1303 passed (1303)`; `test-lease run -- pnpm run build` exit 0 (`✓ built in 1.44s`); `test-lease run -- wails build` exit 0; `git status --porcelain` empty (before and after the runtime checkout). `StateLayer.css.test.ts` + harness: 200 passed; decisions.css gains one rule (`.dec-opt.answers .dec-chosen { flex: 1 1 0 }`), no state mark, none left the `.sl` layer. Met.
+- **The new checks fail at 1f751f0** (same files on a clone of 1f751f0):
+```
+× no room: the floor, every alternative at its first word, at most 8 characters   expected '“Q1 after…, Q2 recor…”' to be '“Q1 after…, Q2 record…”'
+× an answer no longer than its floor is never cut (F1)   expected '“Q1 ye…, Q2 extra…”' to be '“Q1 yes, Q2 extraord…”'
+× a room equal to the basis the item asks for reads whole (U1)   TypeError: answerSizes is not a function
+Tests  3 failed | 57 passed (60)
+```
+  The Amendment 3 narrow and both-long cases pass at 1f751f0 too: water-filling was already there, so the amendment ruled what the code did.
+- **X0**: `CI=true test-lease run -- pnpm install --frozen-lockfile` exit 0; `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test` exit 0, **fresh**, run `dadac3ab-79676` of 2816be1 (l52-line-ui reused it at 04:21:14): 19 go `ok` lines, no FAIL, `Test Files 86 passed (86)`, `Tests 1306 passed (1306)`; `test-lease run -- pnpm run build` exit 0 (`✓ built in 1.22s`); `test-lease run -- wails build` exit 0; `git status --porcelain` empty before and after `git checkout -- frontend/wailsjs/runtime`. `StateLayer.css.test.ts` and its harness: 200 passed. The branch's only style change is `.dec-opt.answers .dec-chosen { flex: 1 1 0 }`; no state mark in decisions.css left the `.sl` layer. Met.
 
-### My own inputs (7 px/char)
-- three answers, rooms 1000/400/300/200: whole; `“Q1 alpha-beta-ga…, Q2 delta-epsilon, Q3 zeta-eta-thet…”`; `“Q1 alpha-be…, Q2 delta-ep…, Q3 zeta-eta…”`; floor `“Q1 alpha…, Q2 delta…, Q3 zeta…”`. Fits the spec.
-- one question, 1000/200/100/0: whole; `“Q1 after-graph-performs-s…”`; `“Q1 after-gr…”`; `“Q1 after…”`. Fits.
-- a plain long chosen: `ruledAnswers` null, plain path as on main. Fits.
-- an answer longer than the whole line (200 x's + `Q2 record-page`), room 350: `“Q1 xxxx…(28)…, Q2 record-page”`; room 150: the floor `“Q1 xxxxx…, Q2 recor…”` (22 ch in 21 ch: the item's min-width stops the line there and watchLine drops it past it). Fits.
-- widths between wide and narrow, 300/250: `“Q1 after-graph-performs…, Q2 record-page”`, `“Q1 after-graph-p…, Q2 record-page”`.
-- short alternatives: F1.
+### My own inputs at 2816be1 (7 px/char)
+- three answers, 57 ch: `“Q1 alpha-beta-ga…, Q2 delta-epsilon, Q3 zeta-eta-thet…”`; 43 ch: all three cut; floor `“Q1 alpha…, Q2 delta…, Q3 zeta…”`. As Amendment 3.
+- one question: whole at 143 ch, `“Q1 after-graph-performs-s…”` at 28.6, floor `“Q1 after…”`.
+- a plain long chosen: `ruledAnswers` null, main's plain path.
+- an answer longer than the line (200 x's): at 50 ch `“Q1 xxx…(28)…, Q2 record-page”`; floor `“Q1 xxxxxxxx…, Q2 record…”`; the item's min-width holds there and watchLine drops it below.
+- widths in between, 43 and 36 ch: `“Q1 after-graph-performs…, Q2 record-page”` and `“Q1 after-graph-p…, Q2 record-page”`.
+- F1's inputs: `yes` and `no` whole at every room; `yes-no` floors to `“Q1 yes…”`.
+- U1: `answerSizes` basis 359 / floor 163; `fitRoom` at basis and basis-1 gives the whole line, at basis-2 the cut begins, at the floor the floor.
 
-Note (to the FSE): at in-between widths a short answer stays whole and the long one takes the rest (water-filling). FR-4 says "each answer take an equal share … cut with an ellipsis", UW2 "each answer is cut … until the line fits"; the D1 row checks only the narrow case, where both are cut. Read as the builder did, a whole answer that fits its share is its share. Whether that is what Aglaea meant is the FSE's (or the UI review's) to say; not a finding.
-Note (to the FSE): D1 tests `fitAnswers` with an injected width, not a laid-out line; jsdom cannot lay out, so the real-width half of FR-4 rests on the UI review at 1024 and 1440.
+Note (to the FSE, next leftovers): `a-b` floors to `“Q1 a…”`, the same character count as `Q1 a-b`, because its first word is one letter. A cut that saves almost nothing; not ruled against by Amendment 3 ("shorter than the floor" is measured against the first word). It does not fail the card.
+Note (to the FSE): D1 runs `fitAnswers` with an injected width. The real-width half of FR-4 (canvas against WKWebView, FIT_SLACK 2 px) rests on the UI review at 1024 and 1440.
+
+Round 1 at 1f751f0: fail on F1 (790ca75), now fixed.
 
 Reviewer: l52-line-review, 2026-10-25.
 
