@@ -4,6 +4,7 @@ status: next
 repos: [organizer]
 branch: lf52-decisions-line
 seat: l52-line
+reviewer: l52-line-review, l52-line-ui
 stage:
 updated: 2026-10-25
 next: "review: lf52-decisions-line, D1 D2 X0 pass, 1f751f0"
