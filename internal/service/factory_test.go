@@ -180,10 +180,14 @@ func TestRegisterCellWritesPushAndRegistersWhenAFactory(t *testing.T) {
 	if body["cell"] != "camp" || body["initiative"] != "ccint-camp" || body["title"] != "Camp" || body["client"] != "acme" {
 		t.Errorf("registration body %v", body)
 	}
-	// Idempotent: a second run, and a conflict, both read as registered.
-	f.cells = 409
+	// Idempotent: the record upserts, so a second run answers 2xx again.
 	if err := registerCell(ctx, cfg, root, cell); err != nil {
-		t.Errorf("409 should count as registered: %v", err)
+		t.Errorf("a second registration should succeed: %v", err)
+	}
+	// The record never answers 409; one is an error, not "already registered".
+	f.cells = 409
+	if err := registerCell(ctx, cfg, root, cell); err == nil || !strings.Contains(err.Error(), "409") {
+		t.Errorf("409 should be an error: %v", err)
 	}
 	// The record refusing the key is a stop, not a skip.
 	f.cells = 403
