@@ -149,6 +149,9 @@ func statuslineCmd(cfg config.Config, stdin io.Reader, stdout, stderr io.Writer,
 		fmt.Fprintln(stderr, err)
 		return 1
 	}
+	if err := session.Capture(raw, os.Getenv); err != nil {
+		fmt.Fprintln(stderr, "organizer statusline: capture:", err)
+	}
 	rec, err := session.Parse(raw, os.Getenv, now())
 	if err != nil {
 		fmt.Fprintln(stderr, err)

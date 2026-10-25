@@ -1,6 +1,8 @@
 package session
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 )
@@ -66,5 +68,22 @@ func TestWriteLoadPrune(t *testing.T) {
 	}
 	if Write(dir, Record{}) == nil {
 		t.Error("pid 0 must be rejected")
+	}
+}
+
+func TestCapture(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "capture.json")
+	raw := []byte(`{"session_id":"x"}`)
+	if err := Capture(raw, env(nil)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		t.Fatalf("unset %s wrote a file: %v", CaptureEnv, err)
+	}
+	if err := Capture(raw, env(map[string]string{CaptureEnv: path})); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := os.ReadFile(path); string(got) != string(raw) {
+		t.Errorf("captured %q, want stdin byte for byte", got)
 	}
 }
