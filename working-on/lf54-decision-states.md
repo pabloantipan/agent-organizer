@@ -1,5 +1,5 @@
 ---
-title: "Decision states are read once on each side: awaiting-cells waits, applied and acknowledged count as ruled, an away mode is no ruler"
+title: "Decision states are read once on each side, and ruled_by reads as a person plus a mode"
 status: next
 repos: [organizer]
 branch: lf54-decision-states

@@ -30,7 +30,9 @@ Leftovers 54 (`docs/specs/leftovers-54.md`), four cards, no shared file:
   times go as null.
 - **lf54-decision-states** (UI review): "awaiting-cells" shows in Needs me
   and the header like a proposed record; "applied" and "acknowledged" count
-  as ruled; the away mode is never named as a ruler. One helper per side,
+  as ruled; `ruled_by` reads as a person plus a mode (your ruling 5 of
+  2026-10-25), so "pablo by away mode" and its old variants show as pablo,
+  away mode. One helper per side,
   so the literals stop drifting.
 
 The last three wait for leftovers 53's PRs to be on origin/main.

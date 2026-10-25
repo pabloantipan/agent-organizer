@@ -59,8 +59,16 @@ Card `lf54-decision-states` (Go and frontend), after lf53-frontmatter's PR merge
   owned by the lead; the Decisions timeline and turnaround count decided
   ones as ruled; `organizer decisions` buckets by it. Ruling stays
   `proposed` only (an `awaiting-cells` record is Themis's).
-- **FR-7** A `ruled_by` in the modes list (`operator away mode,
-  recommendation taken`) is shown as written and never as a ruler.
+- **FR-7** `ruled_by` reads as a person plus an optional mode, per
+  `agent-mailbox-specs` `contracts/working-on/expected.json`
+  `accepted_reading.ruled_by_reading` (0eeddc3; Pablo's ruling 5 of
+  2026-10-25: one form ahead, old variants read, never rewritten): `operator
+  away mode, recommendation taken` and `pablo by away mode` read as pablo,
+  mode away; `pablo (standing rule)` and `pablo by standing rule` as pablo,
+  mode standing rule; any other value is a person with no mode.
+  `internal/scan` carries both on the decision; the app names the person as
+  the ruler and the mode beside it ("pablo, away mode"); median turnaround
+  and every count by ruler use the person.
 
 ## Acceptance → gate
 
@@ -70,7 +78,7 @@ Card `lf54-decision-states` (Go and frontend), after lf53-frontmatter's PR merge
 | G2 | 2 | a Go or shell test reading `release.yml`; then `CONTRACTS_DIR=<a checkout of the pin>/contracts make test` locally | the workflow checks out `pabloantipan/agent-mailbox-specs` at a full SHA and sets `CONTRACTS_DIR` before `make test`; the local run passes |
 | G3 | 3 | go test against an httptest record answering 200 with one rejected row of three | two marked accepted, one kept with its reason, not resent on the next pass, resent once its content changes |
 | G4 | 4, 5 | go test of `organizer usage`'s output and of `usageRow` with zero times | the rejected row's session, day and reason are listed; `first`/`last` are null |
-| G5 | 6, 7 | go test of the CLI buckets and vitest of the helper and each reader with `awaiting-cells`, `applied`, `acknowledged` and an away-mode `ruled_by` | `awaiting-cells` is a Needs me row and in the header's count; `applied`/`acknowledged` count as ruled; the mode is no ruler; a test fails if any file under `frontend/src/lib` compares a decision status to a literal outside the helper |
+| G5 | 6, 7 | go test of the scan and the CLI buckets over the sample, and vitest of the helper and each reader with `awaiting-cells`, `applied`, `acknowledged` and each `ruled_by` variant | `awaiting-cells` is a Needs me row and in the header's count; `applied`/`acknowledged` count as ruled; each variant reads as `expected.json` maps it (pablo plus its mode); a test fails if any file under `frontend/src/lib` compares a decision status to a literal outside the helper |
 | X0 | all | `XDG_DATA_HOME=$(mktemp -d) CONTRACTS_DIR=~/agent-slack/specs/contracts make test`, `wails build`, then `git status --porcelain` | pass, empty |
 
 ## Boundary
@@ -82,8 +90,8 @@ Card `lf54-decision-states` (Go and frontend), after lf53-frontmatter's PR merge
 - `lf54-usage-rejected`: `internal/record/usage.go`,
   `internal/service/usagepost.go`, `internal/cli` (the usage and doctor
   output) and their tests.
-- `lf54-decision-states`: `internal/model/decision.go`,
-  `internal/cli/decisions.go`, and the frontend files named in the premise
+- `lf54-decision-states`: `internal/model/decision.go`, `internal/scan/`
+  (the ruled_by reading), `internal/cli/decisions.go`, and the frontend files named in the premise
   and their tests.
 - The four share no file. They merge through talos-lab PRs, and the last
   three wait for lf53's PRs to be on `origin/main`.
