@@ -94,8 +94,7 @@ describe("S1 (FR-1): every mark is painted through the shared layer, which sets 
   });
 
   it.each(marks.map((m) => [label(m), m] as const))("%s: nothing it paints on the element itself is transitioned, marked or not, hovered or not", (_l, m) => {
-    // Ink is left out: hover's ease covers color (FR-2a), so a mark's ink change eases with it; fill, line and edge do not.
-    for (const p of paints(m).filter((x) => x !== "color")) {
+    for (const p of paints(m)) {
       if (FILL.includes(p) && restates(m, p)) continue;
       for (const t of fourWays(m)) for (const w of winners(t, "transition")) {
         expect.soft(transitions(w.v, p), `${p} eases on "${w.sel}" (${w.rule.file}): ${w.v}`).toBe(false);
@@ -120,6 +119,22 @@ describe("S1 (FR-1): every mark is painted through the shared layer, which sets 
     expect(layer.decls.get("inset")).toMatch(/^calc\(-1 \* var\(--mark-edge, 0px\)\)$/);
     expect(layer.decls.get("border")).toMatch(/^var\(--mark-edge, 0px\) solid var\(--mark-rim\)$/);
     expect(RULES.find((r) => r.sels.includes(`.${LAYER}`) && r.decls.has("--mark-rim"))?.decls.get("--mark-rim")).toBe("transparent");
+  });
+
+  it("every custom property the layer's calc() reads is a length with a unit wherever it is set, and so is its fallback (U4)", () => {
+    // calc(-1 * 0) is a number, not a length: inset is then invalid at computed-value time, falls back to auto, and the layer lays out 0x0.
+    const [layer] = RULES.filter((r) => r.sels.includes(`.${LAYER}::before`));
+    const calcs = [...layer.decls.values()].flatMap((v) => v.match(/calc\((?:[^()]|\([^()]*\))*\)/g) ?? []);
+    expect(calcs.length).toBeGreaterThan(0);
+    const refs = calcs.flatMap((c) => [...c.matchAll(/var\((--[\w-]+)(?:,\s*([^()]*))?\)/g)]);
+    expect(refs.length).toBeGreaterThan(0);
+    const LENGTH = /^-?\d+(\.\d+)?(px|rem|em)$/;
+    const bad: string[] = [];
+    for (const [ref, name, fallback] of refs) {
+      if (fallback !== undefined && !LENGTH.test(fallback.trim())) bad.push(`fallback of ${ref}`);
+      for (const r of RULES) if (r.decls.has(name) && !LENGTH.test(r.decls.get(name)!)) bad.push(`${r.file}: ${r.sels.join(", ")} { ${name}: ${r.decls.get(name)} }`);
+    }
+    expect(bad).toEqual([]);
   });
 
   it.each(layered.map((m) => [label(m), m] as const))("%s: a bordered control's layer covers its border box, marked or not, hovered or not (FR-1b)", (_l, m) => {
@@ -158,10 +173,10 @@ describe("S2 (FR-2): hover eases on every control, in and out, and no transition
     for (const host of [LAYER, LAYER_SHADOW]) expect(RULES.find((r) => r.sels.includes(`.${host}`) && r.decls.has("transition"))?.decls.get("transition")).toBe(EASE);
   });
 
-  it("the hover transition lists background-color and color (FR-2a)", () => {
+  it("the hover transition lists background-color and not color: ink switches at once, hover and mark alike (Amendment 2, FR-2a withdrawn)", () => {
     for (const host of [LAYER, LAYER_SHADOW]) {
       const v = RULES.find((r) => r.sels.includes(`.${host}`) && r.decls.has("transition"))?.decls.get("transition") ?? "";
-      expect(transitions(v, "background-color") && transitions(v, "color"), `.${host}: ${v}`).toBe(true);
+      expect({ background: transitions(v, "background-color"), color: transitions(v, "color") }, `.${host}: ${v}`).toEqual({ background: true, color: false });
     }
   });
 
@@ -172,7 +187,7 @@ describe("S2 (FR-2): hover eases on every control, in and out, and no transition
     expect(read("global.css").replace(/\/\*[^]*?\*\//g, "")).toMatch(/@media \(prefers-reduced-motion: reduce\) \{\s*\*, \*::before, \*::after \{ transition: none !important; \}/);
   });
 
-  it.each(controls.map((m) => [label(m), m] as const))("%s: background-color and color ease 100 ms on --ease-out, marked or not, hovered or not", (_l, m) => {
+  it.each(controls.map((m) => [label(m), m] as const))("%s: background-color eases 100 ms on --ease-out, marked or not, hovered or not", (_l, m) => {
     expect(m.rule.decls.has("transition"), "the mark rule sets no transition of its own").toBe(false);
     for (const t of fourWays(m)) {
       const w = winners(t, "transition");

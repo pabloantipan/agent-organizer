@@ -63,14 +63,15 @@ button.ghost:hover { color: var(--fg); background: var(--surface-hover); }
    every marked selector and holds it to this.
    The layer covers the border box, as a background does (leftovers-52
    FR-1b, R52): the rule that sets a control's border sets --mark-edge to
-   its width (button does, 1px), and the layer sits that far out and draws
+   its width with its unit (button does, 1px; 0px, never 0, since
+   calc(-1 * 0) is a number and the layer would lay out 0x0), and the layer sits that far out and draws
    a border of that width in --mark-rim, so an opaque fill keeps the
    control's border over it (the mark rule restates its border colour as
    --mark-rim; a see-through fill leaves the control's own border under
    it). A line mark spreads from the layer, so a ring is outside the
    border and an inset line inside it, as on main. An opaque mark keeps the
    control's rest background, so hover changes nothing under it (FR-1d). */
-.sl, .sl-shadow { --mark-fill: transparent; --mark-line: 0 0 transparent; --mark-rim: transparent; transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out); }
+.sl, .sl-shadow { --mark-fill: transparent; --mark-line: 0 0 transparent; --mark-rim: transparent; transition: background-color var(--dur-fast) var(--ease-out); }
 .sl { position: relative; z-index: 0; }
 .sl::before { content: ""; position: absolute; inset: calc(-1 * var(--mark-edge, 0px)); z-index: -1; border: var(--mark-edge, 0px) solid var(--mark-rim); border-radius: inherit; background: var(--mark-fill); box-shadow: var(--mark-line); pointer-events: none; transition: none; }
 /* Reduced motion: nothing eases, hover included, from this one guard and
@@ -647,7 +648,7 @@ button.counts.linkish { font-family: var(--mono); }
 .person { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: var(--radius-md); cursor: pointer; min-width: 0; font-size: var(--font-size-sm); color: var(--muted); }
 .person:hover { background: var(--panel-2); }
 /* A button that keeps the row's look, ring inside the scrolled list (leftovers-24 FR-3). */
-button.person { width: 100%; border: 0; --mark-edge: 0; background: transparent; text-align: left; font-weight: inherit; line-height: inherit; white-space: normal; min-height: 0; }
+button.person { width: 100%; border: 0; --mark-edge: 0px; background: transparent; text-align: left; font-weight: inherit; line-height: inherit; white-space: normal; min-height: 0; }
 button.person:focus-visible { outline-offset: -2px; }
 .person.sl.active { --mark-fill: var(--accent-soft); background: transparent; }
 .person.me { cursor: default; }

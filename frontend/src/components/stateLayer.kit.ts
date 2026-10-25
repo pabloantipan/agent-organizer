@@ -237,13 +237,14 @@ export const winnerOf = (t: Target, props: string[], rules = RULES) => {
   return best as { prop: string; v: string; rule: Rule; sel: string } | null;
 };
 
-/** A length in px from a value the stylesheets write (`0`, `1px`, `calc(-1 * 1px)`); null when it is none of these. */
+/** A length in px from a value the stylesheets write (`0`, `1px`, `calc(-1 * 1px)`); null when it is none of these, `calc(-1 * 0)` included. */
 export const px = (v: string | null | undefined): number | null => {
   if (v == null) return null;
   const t = v.trim();
   if (/^0(px)?$/.test(t)) return 0;
   let m = /^(-?\d+(?:\.\d+)?)px$/.exec(t); if (m) return Number(m[1]);
-  m = /^calc\(\s*(-?\d+(?:\.\d+)?)\s*\*\s*(.+)\)$/.exec(t); if (m) { const n = px(m[2]); return n == null ? null : Number(m[1]) * n || 0; }
+  // calc(-1 * 0) is a number, not a length (invalid where a length is due), so a calc operand needs its unit.
+  m = /^calc\(\s*(-?\d+(?:\.\d+)?)\s*\*\s*(.+)\)$/.exec(t); if (m) { const n = /px$/.test(m[2].trim()) ? px(m[2]) : null; return n == null ? null : Number(m[1]) * n || 0; }
   return null;
 };
 const WIDTH = /^(\d+(?:\.\d+)?px|0|thin|medium|thick)$/, STYLE = /^(none|hidden|solid|dashed|dotted|double|groove|ridge|inset|outset)$/;
@@ -279,8 +280,8 @@ export const LINE = ["box-shadow"];
 export const EDGE_INK = ["border", "border-color", "border-style", "border-top-color", "border-right-color", "border-bottom-color", "border-left-color", "outline", "outline-color", "color"];
 export const PAINT = [...FILL, ...LINE, ...EDGE_INK];
 
-/** The one ease hover takes, surface and ink (design system, Elevation and motion; leftovers-52 FR-2, FR-2a). */
-export const EASE = "background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out)";
+/** The one ease hover takes, the surface only: ink switches at once, hover and mark alike (design system, Elevation and motion; leftovers-52 FR-2, Amendment 2). */
+export const EASE = "background-color var(--dur-fast) var(--ease-out)";
 
 /** A state-marked selector of some rule, with the element it paints and that element with no mark. */
 export type Mark = { file: string; sel: string; raw: string; rule: Rule; parts: Compound[]; plain: Compound[] };

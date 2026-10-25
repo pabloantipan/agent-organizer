@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { merge } from "../../wailsjs/go/models";
 import type { Seat } from "../hooks/useWails";
-import { EASE, RULES, mediaOn, parseSelector, px, specificity, type Compound, type Rule } from "./stateLayer.kit";
+import { EASE, RULES, mediaOn, parseSelector, px, specificity, transitions, type Compound, type Rule } from "./stateLayer.kit";
 
 // leftovers-52 S3 (FR-1, FR-2; review-view R43 amended, R50): a click from
 // one marked control to another, in the rail, the People panel, the
@@ -149,10 +149,15 @@ function clickCheck(before: string, after: string, pick: (t: Node, name: string)
     "hover on the unmarked control eases in and out (R49 amended, R50)": () => {
       expect(style(oldB, "transition", oldB)).toBe(EASE);
       expect(style(oldB, "transition")).toBe(EASE);
-      // The sub-tabs' hover is ink only (quiet text tabs, shell.css), which the ease covers (FR-2a); every other surface's hover fills.
-      if (quietHover) expect(look(oldB, oldB).ink, "hover changes the ink, and color is in the ease").not.toBe(look(oldB).ink);
-      else expect(look(oldB, oldB).ownBackground, "hover paints the control's own background").not.toBe(look(oldB).ownBackground);
+      // The sub-tabs' hover is ink only (quiet text tabs, shell.css): the ease is set and runs on nothing, the ink switches at once (Amendment 2); every other surface's hover fills.
+      if (!quietHover) expect(look(oldB, oldB).ownBackground, "hover paints the control's own background").not.toBe(look(oldB).ownBackground);
       expect({ layerFill: look(oldB, oldB).layerFill, layerLine: look(oldB, oldB).layerLine }).toEqual(PLAIN);
+    },
+    "the old control's ink is the unmarked ink in the next frame (Amendment 2)": () => {
+      // The cascade gives oldB the unmarked ink; nothing it keeps eases color, so that ink is on screen in the next frame.
+      for (const hover of [null, oldB]) expect(transitions(style(oldB, "transition", hover) ?? "", "color"), hover ? "hovered" : "at rest").toBe(false);
+      // ...and it is the ink the new control had before the press, when it was the unmarked one.
+      expect(look(oldB).ink).toBe(look(pick(A, to)).ink);
     },
     "a bordered control's fill covers its border box (FR-1b, R52)": () => {
       for (const n of [newB, oldB]) {
