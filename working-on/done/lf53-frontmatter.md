@@ -1,12 +1,12 @@
 ---
 title: "Deltagos reads every card and record the factory writes, scalar or list, crossing statuses and ledgers included, tested on the shared sample"
-status: next
+status: done
 repos: [organizer]
 branch: lf53-frontmatter
 seat: l53-front
 stage:
 updated: 2026-10-25
-next: "review pass; PR asked of talos-lab, done/ when it answers with the merged sha"
+next: "done: reviewed pass (l53-front-rev); Found 1 filed in docs/bitacora/fse_bitacora.md 2026-10-25 03:25 (9d3fa22)"
 depends_on: []
 boundary: ["docs/specs/leftovers-53.md Boundary, lf53-frontmatter"]
 spec: "docs/specs/leftovers-53.md (FR-1 to FR-4)"
