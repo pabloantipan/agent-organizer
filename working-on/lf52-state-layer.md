@@ -7,7 +7,7 @@ seat: l52-layer
 reviewer: l52-layer-review, l52-layer-ui
 stage:
 updated: 2026-10-24
-next: "l52-layer fixes U4 (unitless --mark-edge: 0 collapses the layer; ## UI review) (sup93)"
+next: "review: lf52-state-layer, gate met (S1-S3, X0; U4 fixed, Amendment 2), 949c3dc"
 depends_on: []
 boundary: ["docs/specs/leftovers-52.md Boundary, lf52-state-layer"]
 spec: "docs/specs/leftovers-52.md (FR-1 to FR-3)"
@@ -26,6 +26,7 @@ docs/specs/leftovers-52.md, rows S1-S3 and X0.
 - 2026-10-24 l52-layer: one shared layer (`.sl`, `.sl::before`, `.sl-shadow`) paints every state mark; S1 92/92, S2, S3 30/30 pass (49 and 15 fail on main); X0 passes from a clean clone of e6d77d6 (8db6359, e6d77d6; .wt-notes/l52-layer/progress.md).
 - 2026-10-24 l52-layer: review fix (S1 FR-3): the kit reads bare attribute values and `:is()`/`:where()`, and a premise-grep cross-check fails any match it did not classify; the review's three inputs now fail (3 each), no new control found, no stylesheet changed; CSS test 96/96, harness 30/30; X0 passes from a clean clone of 75945c2 (75945c2; rebased on main 6ff86ea, f84a45d 998a280 75945c2)
 - 2026-10-24 l52-layer: Amendment 1: one reduced-motion guard (FR-1a), the layer at the border box with the border over an opaque fill (FR-1b), the memory ring outside the border (FR-1c), no hover under an opaque mark (FR-1d), color in the hover ease (FR-2a); the new S2/S3 checks fail at 75945c2 (93 of 190), branch 194/194; X0 passes from a clean clone of 8b27732 (rebased on main 8f96d92: 279759b b8f4071 db50c11 8b27732)
+- 2026-10-24 l52-layer: U4 and Amendment 2: every `--mark-edge` zero is `0px`, a test rejects a unitless custom property in the layer's calc(); the hover ease is background-color only again, ink switches at once; the new checks fail at 8b27732 (56 of 200), branch 200/200; X0 passes from a clean clone of 949c3dc (rebased on main 82f0d30: 161240e e8a3610 9c4db53 0a9f374 949c3dc)
 
 ## Declared changes
 - modified `frontend/src/styles/global.css`: adds the shared layer (`.sl`, `.sl::before`, `.sl-shadow`) at the border box (`--mark-edge`, `--mark-rim`) with color in its ease and one reduced-motion guard; tiny-btn, strip, rail-item, person and chat marks on it; removes lf51's `transition: none` list
@@ -53,7 +54,7 @@ docs/specs/leftovers-52.md, rows S1-S3 and X0.
 - modified `frontend/src/components/MemoryButton.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
 - modified `frontend/src/components/RuleDecisionBox.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
 - added `frontend/src/components/stateLayer.kit.ts`: reads the stylesheets as rules (bare attribute values quoted, `:is()`/`:where()` unfolded), reaches/specificity/winners/winnerOf, border width and colour, component companions, MARKS, and `unclassified` (the premise grep as a check on MARKS)
-- added `frontend/src/components/StateLayer.css.test.ts`: S1, S2, FR-3 (incl. the premise cross-check), Amendment 1's FR-1a to FR-1d and FR-2a
+- added `frontend/src/components/StateLayer.css.test.ts`: S1, S2, FR-3 (incl. the premise cross-check), Amendment 1's FR-1a to FR-1d, U4 (a unitless length in the layer's calc), Amendment 2 (no color in the ease)
 - added `frontend/src/components/StateLayer.harness.test.tsx`: S3, with Amendment 1's border-box and no-rim checks
 - modified `frontend/src/components/Conversation.landing.test.tsx`: lf51's K4 removed (superseded by S1-S3)
 - modified `frontend/src/components/CardDetails.test.tsx`: class literals follow `sl`
@@ -65,7 +66,7 @@ docs/specs/leftovers-52.md, rows S1-S3 and X0.
 - modified `frontend/src/components/TopBar.test.tsx`: class literals follow `sl`
 Risky:
 - `.sl`: `position: relative; z-index: 0` makes each control a stacking context (no control here holds a raised child today)
-- hover's border-color no longer eases on these controls; a mark's ink change now eases 100 ms with hover's (FR-2a), its fill and line do not
+- hover's border-color and ink no longer ease on these controls (Amendment 2: only background-color eases); the sub-tabs' hover is ink only, so it switches at once
 - `--mark-edge`: a later control whose border rule omits it fails the FR-1b test, not the screen
 Not changed, on purpose:
 - `.sl-shadow` (rule box radio): an inset shadow inside its own border, so FR-1b's edge does not apply; its border sits over its rest background, not the fill (Notes)
@@ -76,7 +77,7 @@ Not changed, on purpose:
 - dead `.srm-*` rules in roadmap.css and time-zoom.css
 
 ## Notes
-- Amendment 1: a mark's ink now eases 100 ms with hover's (FR-2a puts color in the one transition; R50's no-frame is the fill and line). The S1 check on what a mark paints leaves color out for that reason.
+- (superseded by Amendment 2, 949c3dc: ink no longer eases; S1's check reads color again) Amendment 1: a mark's ink now eases 100 ms with hover's (FR-2a puts color in the one transition; R50's no-frame is the fill and line). The S1 check on what a mark paints leaves color out for that reason.
 - Amendment 1 FR-1d: "background: transparent" read as "the control's rest background": `.act` and the non-ghost tiny-btn rest on `--button-bg`, and a transparent mark there would ease the old control's background back in on leaving.
 - The rule box's radio span (`.sl-shadow`) is not on the border box: its fill is an inset shadow, inside its 1px border; noticed, not in R52's list.
 - The seven markup tests above pin class strings; updating them is outside the boundary's letter but follows from the class it allows.
