@@ -95,3 +95,40 @@ Note (to the FSE): at in-between widths a short answer stays whole and the long 
 Note (to the FSE): D1 tests `fitAnswers` with an injected width, not a laid-out line; jsdom cannot lay out, so the real-width half of FR-4 rests on the UI review at 1024 and 1440.
 
 Reviewer: l52-line-review, 2026-10-25.
+
+## UI review
+l52-line-ui, 2026-10-25, commit 1f751f0. **Verdict: fail** (one severity 3 against rule-questions Amendment 2 Q2 (amended), leftovers-52 FR-4).
+
+How it was checked: the review build (`make review-build` in `.wt/l52-line-ui`) was launched with the `--review` fixture (auth off, discuss_state_dir under its temp dir, checked), but the screen was locked (`CGSSessionScreenIsLocked` true): `screencapture -l` returned "could not create image" and AX gave no tree, so it was quit by its pid. Every state below was read in offscreen WKWebView (window never ordered in, no system input) over `wails dev` of a clean clone of 1f751f0, with the fixture's init-a and the leftovers-49 record 0037 ruled `"Q1 after-graph-performs-start-now, Q2 record-page"` per the builder's steps (copied into `$FIXTURE_HOME` only). Rendered text is the DOM's `textContent` of `.dec-chosen`; widths from `getBoundingClientRect`; the accessible name is the `.dec-line` button's `aria-label` (its accname, since AX was not reachable). Shots `.wt-notes/l52-line-ui/r/<w>x<h>-<state>.png` (WKWebView `takeSnapshot`, not the screen); harness output `r/h-q.txt`, `r/h-q2.txt`.
+
+Shared test run: **fresh**, test-lease run `32206d01-84766` of 1f751f0, `make test` rc 0 (go test ok; vitest 86 files, 1303 tests passed).
+
+| Row | State | Result |
+|---|---|---|
+| Q2 (amended), 1440×900 | closed, line 1132 px, title whole with room to spare | **fail**: reads `“Q1 after-graph-performs-start-no…, Q2 record-page”` |
+| Q2, between (1280, 1180, 1100, 1060) | closed | 1280-1100 the same `start-no…` (title never cut); 1060 `“Q1 after-graph-performs-start…, Q2 record-page”` (title cut, room 279 px) |
+| Q2 (amended), 1024×640 | closed, room 243 px | `“Q1 after-graph-perform…, Q2 record-page”`: Q1 and Q2 whole labels, Q1 cut, Q2 whole (see G1) |
+| plain ruled lines (0012, 0011, 0006, 0004, 0001) | 1024, 1440 | whole, no inline sizes, as on main: pass |
+| tooltip | closed | `.dec-line` title `“Q1 after-graph-performs-start-now, Q2 record-page” · show the record`, `.dec-chosen` title the full chosen: pass |
+| open head | open, 1024 and 1440 | `Chosen` / `Q1 after-graph-performs-start-now` / `Q2 record-page`, whole, wrapping: pass |
+| Q6 | open | name `0037 A Big Picture stage — … , ruled, by pablo, 24 Oct, after 1 day`, no chosen; line draws no chosen: pass |
+| Q6 | closed again | name has `“Q1 after-graph-performs-start-now, Q2 record-page”`: pass |
+| marks, R50 | before and after open | the view's marks are the rail row (`rail-item sl active`, 1440) or strip item (`strip-item sl active`, 1024) and the sub-tab (`sl on`): each `::before` paints the fill or inset line with `transition: none`, the control eases `background-color 0.1s` only. The Ruled list has no `.on`/`.current`/`.active` of its own; the open line has no fill (`aria-expanded` only, background transparent in the same frame as the click), unchanged from main: pass |
+| height, alignment, ellipsis | 1024, 1440 | every line 38 px, chosen 20 px on the title's row, 12 px `--fg-muted`-family ink, no second CSS ellipsis (`scrollWidth == clientWidth` at every width): pass |
+
+**U1 (severity 3): a two-answer line never shows both answers whole, even with room.**
+- What Pablo cannot do: read the ruled Q1 answer whole on the Ruled list at 1440. It ends `start-no…`: the one letter lost is the one that tells `start-now` from a cut.
+- Where: Decisions, Ruled, the 0037 line; `r/1440x900-closed-b.png`, `r/1280x800-closed.png`.
+- Evidence (`r/h-q2.txt`, 1440): the item gets exactly its basis (`flex-basis: calc(1ch + 300.4393px)`, item 307.75 px), the chosen's room is 296.4375 px; canvas measures the whole text at 295.4393 px, the DOM at 295.4531 px, so it fits the room. `RuledAnswers` asks `fitAnswers(answers, room - 1, …)`: 295.4375 < 295.4393 by 0.002 px, so it cuts. The "+1 px" in the basis and the "−1 px" on the room cancel, and layout rounding to 1/64 px takes the rest. The text is the same at 1440, 1280, 1180 and 1100, where the title is not cut, so the line had room every time.
+- Severity 3: Q2 (amended)'s 1440 check fails as written, on the card's own gated feature; D1 passes only because vitest feeds a synthetic width.
+- Proposal (for the builder; not built here): the slack must add up, not cancel. Either the basis carries 2 px over the measure, or the fit compares with the room and no −1 (the CSS ellipsis stays the fallback). Add a D1 case where the room equals the basis the item asks for: the answer stays whole.
+
+**Spec gaps (for the FSE)**
+- G1: Q2 (amended) at 1024 reads `Q1 <cut>…, Q2 <cut>…`; FR-4 and UW2 say each answer takes an equal share. At 1024 Q2 `record-page` (87 px) fits its equal share (~113 px), so the builder keeps it whole and gives the rest to Q1 (water-filling). That is what the line shows. I did not fail it: an answer cut while it fits its share would hide words for nothing. The row should say whether an answer that fits its share stays whole.
+- G2: the spec names no width "in between". 1060 cuts Q1 at `start…` with the title already cut at its floor, a reasonable order. I only recorded it.
+
+**For aglaea, not verified**
+- A1: whether water-filling (G1) or strict equal cuts is the design at 1024.
+- A2: at 1024 the initiative header's goal line sits on the sub-tabs with no gap (`r/1024x640-closed-b.png`, top). It is outside this card; it looks like leftovers-52 Amendment 1's A4/R53.
+
+**Not verified**: the review app on screen (screen locked: no AX tree, no window capture). Everything above is offscreen WKWebView over `wails dev`, the same engine but not the bundled `frontend/dist`. VoiceOver speech was not checked, only the aria-label.
