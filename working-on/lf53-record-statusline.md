@@ -19,3 +19,6 @@ A renamed statusline field fails a test instead of turning into zeros.
 
 ## Gate
 docs/specs/leftovers-53.md, rows R1, L1 and X0.
+
+## Notes
+- FR-8 capture (sup94, 2026-10-25): the root's git-ignored `.claude/settings.local.json` overrode the statusLine from 02:01:59 to 02:02:20 with `.wt-notes/l53-stat/capture-wrap.sh`. It ran the branch build (456a804) with `ORGANIZER_STATUSLINE_CAPTURE` for `AGENT_NAME=sup94` only; every other session ran the installed organizer. `~/.claude/settings.json` and the installed binary were not touched. FSE accepted, no recapture.
