@@ -189,3 +189,4 @@ resumes. The seat moves to the new discuss watcher (wake-rearm, api
 - 2026-10-24 — l52-layer-ui on lf52-state-layer graded: review-view Amendment 18 (reduced motion one global guard in this card; fill to the outer edge, ring as main, no hover on opaque marks; ink eases; focused is a mark; one header gap), design system extended, R50 amended, R51-R53.
 - 2026-10-24 — lf52 A5: review-view Amendment 19 (A18 A1 withdrawn: ink never eases, hover eases the surface only), design system corrected, R50 amended.
 - 2026-10-25 — lf52-decisions-line: rule-questions Amendment 3 (water-filling over equal cuts), Q2 amended.
+- 2026-10-25 — Pablo's 'Deltagos twice': docs/ux/specs/one-title.md (hidden-inset title bar, top bar the one name, 80 px left for the lights, 40 px tall, drag and zoom, same in full screen), T1-T5.

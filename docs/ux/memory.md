@@ -457,6 +457,8 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - A refactor of how a mark is painted must reproduce main pixel for pixel: border box, ring spread, hover under an opaque mark. List those three before cutting it (review-view A18).
 - Reduced motion is one global guard, never per control; per-control guards get lost in refactors (review-view A18).
 
+- The window's chrome is part of the screen for "a fact shows once": a native title that repeats the app's own brand is a duplicate. Hide the title text and keep the window title for the system (one-title).
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).
