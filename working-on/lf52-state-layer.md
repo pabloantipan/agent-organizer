@@ -7,7 +7,7 @@ seat: l52-layer
 reviewer: l52-layer-review, l52-layer-ui
 stage:
 updated: 2026-10-24
-next: "l52-layer builds leftovers-52 Amendment 1 (FR-1a-1d, FR-2a; sup93)"
+next: "review: lf52-state-layer, gate met (S1-S3, X0; Amendment 1), 8b27732"
 depends_on: []
 boundary: ["docs/specs/leftovers-52.md Boundary, lf52-state-layer"]
 spec: "docs/specs/leftovers-52.md (FR-1 to FR-3)"
@@ -25,16 +25,18 @@ docs/specs/leftovers-52.md, rows S1-S3 and X0.
 ## Done
 - 2026-10-24 l52-layer: one shared layer (`.sl`, `.sl::before`, `.sl-shadow`) paints every state mark; S1 92/92, S2, S3 30/30 pass (49 and 15 fail on main); X0 passes from a clean clone of e6d77d6 (8db6359, e6d77d6; .wt-notes/l52-layer/progress.md).
 - 2026-10-24 l52-layer: review fix (S1 FR-3): the kit reads bare attribute values and `:is()`/`:where()`, and a premise-grep cross-check fails any match it did not classify; the review's three inputs now fail (3 each), no new control found, no stylesheet changed; CSS test 96/96, harness 30/30; X0 passes from a clean clone of 75945c2 (75945c2; rebased on main 6ff86ea, f84a45d 998a280 75945c2)
+- 2026-10-24 l52-layer: Amendment 1: one reduced-motion guard (FR-1a), the layer at the border box with the border over an opaque fill (FR-1b), the memory ring outside the border (FR-1c), no hover under an opaque mark (FR-1d), color in the hover ease (FR-2a); the new S2/S3 checks fail at 75945c2 (93 of 190), branch 194/194; X0 passes from a clean clone of 8b27732 (rebased on main 8f96d92: 279759b b8f4071 db50c11 8b27732)
 
 ## Declared changes
-- modified `frontend/src/styles/global.css`: adds the shared layer (`.sl`, `.sl::before`, `.sl-shadow`); tiny-btn, strip, rail-item, person and chat marks on it; removes lf51's `transition: none` list and the rail-item's own transitions
-- modified `frontend/src/styles/shell.css`: place-tab, gear (on, open), ib-act .act, ihead-details, stg (and its focus ring), subtabs and seg marks on the layer; drops the sub-tabs' transparent inset
-- modified `frontend/src/styles/float.css`: fl-row and week-list marks on the layer; own background transition removed
-- modified `frontend/src/styles/usage.css`: usage marks on the layer; own background transition removed
-- modified `frontend/src/styles/memory.css`: memory button marks on the layer (critical's outer ring as --mark-line)
-- modified `frontend/src/styles/roles.css`: r-row mark on the layer
-- modified `frontend/src/styles/initiatives.css`: marks on the layer; own background transition removed
-- modified `frontend/src/styles/rule-box.css`: rb-option span's mark via `.sl-shadow`; its reduced-motion `transition: none` goes with the layer
+- modified `frontend/src/styles/global.css`: adds the shared layer (`.sl`, `.sl::before`, `.sl-shadow`) at the border box (`--mark-edge`, `--mark-rim`) with color in its ease and one reduced-motion guard; tiny-btn, strip, rail-item, person and chat marks on it; removes lf51's `transition: none` list
+- modified `frontend/src/styles/shell.css`: place-tab, gear, ib-act .act, ihead-details, stg, subtabs and seg marks on the layer; opaque marks keep their rest background; `--mark-edge` on .stg and the sub-tabs
+- modified `frontend/src/styles/float.css`: fl-row mark on the layer; `--mark-edge: 0`; keeps its rest background when on
+- modified `frontend/src/styles/usage.css`: week-list mark on the layer; keeps its rest background when current
+- modified `frontend/src/styles/memory.css`: memory button marks on the layer; the critical ring spreads from the border's outer edge
+- modified `frontend/src/styles/roles.css`: r-row mark on the layer; `--mark-edge: 0`; keeps its rest background when open
+- modified `frontend/src/styles/initiatives.css`: ic-more mark on the layer; keeps its rest background when open
+- modified `frontend/src/styles/rule-box.css`: rb-option span's mark via `.sl-shadow`; keeps its rest background when on
+- modified `frontend/src/styles/work.css`: its own reduced-motion `transition: none` removed (the global guard covers it)
 - modified `frontend/src/components/Rail.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
 - modified `frontend/src/components/SlackView.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
 - modified `frontend/src/components/Conversation.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
@@ -50,9 +52,9 @@ docs/specs/leftovers-52.md, rows S1-S3 and X0.
 - modified `frontend/src/components/InitiativesView.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
 - modified `frontend/src/components/MemoryButton.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
 - modified `frontend/src/components/RuleDecisionBox.tsx`: class `sl` (or `sl-shadow`) on its marked controls, nothing else
-- added `frontend/src/components/stateLayer.kit.ts`: reads the stylesheets as rules (bare attribute values quoted, `:is()`/`:where()` unfolded), reaches/specificity/winners, MARKS, and `unclassified` (the premise grep as a check on MARKS)
-- added `frontend/src/components/StateLayer.css.test.ts`: S1, S2, FR-3 (incl. the premise cross-check)
-- added `frontend/src/components/StateLayer.harness.test.tsx`: S3
+- added `frontend/src/components/stateLayer.kit.ts`: reads the stylesheets as rules (bare attribute values quoted, `:is()`/`:where()` unfolded), reaches/specificity/winners/winnerOf, border width and colour, component companions, MARKS, and `unclassified` (the premise grep as a check on MARKS)
+- added `frontend/src/components/StateLayer.css.test.ts`: S1, S2, FR-3 (incl. the premise cross-check), Amendment 1's FR-1a to FR-1d and FR-2a
+- added `frontend/src/components/StateLayer.harness.test.tsx`: S3, with Amendment 1's border-box and no-rim checks
 - modified `frontend/src/components/Conversation.landing.test.tsx`: lf51's K4 removed (superseded by S1-S3)
 - modified `frontend/src/components/CardDetails.test.tsx`: class literals follow `sl`
 - modified `frontend/src/components/CharterOnce.test.tsx`: class literals follow `sl`
@@ -63,14 +65,20 @@ docs/specs/leftovers-52.md, rows S1-S3 and X0.
 - modified `frontend/src/components/TopBar.test.tsx`: class literals follow `sl`
 Risky:
 - `.sl`: `position: relative; z-index: 0` makes each control a stacking context (no control here holds a raised child today)
-- hover's border-color and ink no longer ease on these controls; the sub-tabs' hover is ink only
+- hover's border-color no longer eases on these controls; a mark's ink change now eases 100 ms with hover's (FR-2a), its fill and line do not
+- `--mark-edge`: a later control whose border rule omits it fails the FR-1b test, not the screen
 Not changed, on purpose:
+- `.sl-shadow` (rule box radio): an inset shadow inside its own border, so FR-1b's edge does not apply; its border sits over its rest background, not the fill (Notes)
+- focused marks, role rows, the header gap (Amendment 1: next leftovers)
 - `review.css` (0159); `decisions.css` (no state fill there; `.dec-chev` is ink with no transition)
 - `.ib-row.focused`: its word is outside the premise's list (Notes)
 - every stylesheet and component in the review fix: the wider enumeration found no marked control off the layer
 - dead `.srm-*` rules in roadmap.css and time-zoom.css
 
 ## Notes
+- Amendment 1: a mark's ink now eases 100 ms with hover's (FR-2a puts color in the one transition; R50's no-frame is the fill and line). The S1 check on what a mark paints leaves color out for that reason.
+- Amendment 1 FR-1d: "background: transparent" read as "the control's rest background": `.act` and the non-ghost tiny-btn rest on `--button-bg`, and a transparent mark there would ease the old control's background back in on leaving.
+- The rule box's radio span (`.sl-shadow`) is not on the border box: its fill is an inset shadow, inside its 1px border; noticed, not in R52's list.
 - The seven markup tests above pin class strings; updating them is outside the boundary's letter but follows from the class it allows.
 - `.ib-row.focused` (Home's inbox) paints a fill on its own transitioned background, so its leaving mark eases; "focused" is not in the spec's state list, so S1 does not see it. A next leftovers could add it.
 - The rule box options lost their reduced-motion `transition: none` with the layer; they ease as every control does.
