@@ -1,12 +1,12 @@
 ---
 title: "Deltagos reads every card and record the factory writes, scalar or list, crossing statuses and ledgers included, tested on the shared sample"
-status: next
+status: done
 repos: [organizer]
 branch: lf53-frontmatter
 seat: l53-front
 stage:
 updated: 2026-10-25
-next: "file finding: crossing statuses are read only in internal/model; no app or CLI code reads Decision.Open(), so awaiting-cells is no Needs me row and applied/acknowledged are not counted as ruled (Review, Found 1; also the builder's Notes)"
+next: "done: reviewed pass (l53-front-rev); Found 1 sent to the FSE for a card, thread 01M5RVEH6KC5EAS3JWVMBGKWA6"
 depends_on: []
 boundary: ["docs/specs/leftovers-53.md Boundary, lf53-frontmatter"]
 spec: "docs/specs/leftovers-53.md (FR-1 to FR-4)"
@@ -74,4 +74,4 @@ Rows:
 - F4: `CONTRACTS_DIR=<empty dir> go test ./internal/scan -run TestWorkingOnContract` FAIL: `working-on contract sample missing: open …/emptyc/working-on/expected.json: no such file or directory`. TestLoadContractMissingFails PASS.
 - X0: `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test` exit 0 (19 Go packages ok, vitest 1153 passed); `test-lease run -- wails build` exit 0; `git status --porcelain` empty, before and after the runtime checkout.
 
-Found 1, outside the gate, for sup94 to file (no card yet): FR-2 says awaiting-cells "waits on a ruling", but only internal/model knows it. `Decision.Open()` has no caller outside tests (`grep -rn 'Open()' internal` → decisions_test.go, contract_test.go, decision_test.go, decision.go only). `internal/cli/decisions.go:78` and `internal/service/rule.go:43` match `DecisionProposed` directly, and the frontend reads `status === "proposed"` (builder's Notes). So in the app an awaiting-cells record is no Needs me row, `organizer decisions` buckets it as other, applied/acknowledged are not ruled, and rulerWords shows the away mode as a ruler. The gate does not cover it: F2 checks only the model, not the reading anywhere a person sees it. The builder's other Notes (`run --print` omits Launch.Spec; unread cards kept in ScannedInitiative.Cards) go with the same filing.
+Found 1, outside the gate (filed: to the FSE for a card, sup94, thread 01M5RVEH6KC5EAS3JWVMBGKWA6): FR-2 says awaiting-cells "waits on a ruling", but only internal/model knows it. `Decision.Open()` has no caller outside tests (`grep -rn 'Open()' internal` → decisions_test.go, contract_test.go, decision_test.go, decision.go only). `internal/cli/decisions.go:78` and `internal/service/rule.go:43` match `DecisionProposed` directly, and the frontend reads `status === "proposed"` (builder's Notes). So in the app an awaiting-cells record is no Needs me row, `organizer decisions` buckets it as other, applied/acknowledged are not ruled, and rulerWords shows the away mode as a ruler. The gate does not cover it: F2 checks only the model, not the reading anywhere a person sees it. The builder's other Notes (`run --print` omits Launch.Spec; unread cards kept in ScannedInitiative.Cards) go with the same filing.
