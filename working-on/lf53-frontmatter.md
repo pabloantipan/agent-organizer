@@ -3,7 +3,7 @@ title: "Deltagos reads every card and record the factory writes, scalar or list,
 status: next
 repos: [organizer]
 branch: lf53-frontmatter
-seat:
+seat: l53-front
 stage:
 updated: 2026-10-25
 next: "sup94 runs it (0163 ruled 2026-10-25)"

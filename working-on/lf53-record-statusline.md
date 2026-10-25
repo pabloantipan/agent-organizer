@@ -3,7 +3,7 @@ title: "No dead 409 branch in cell registration, and the statusline test reads a
 status: next
 repos: [organizer]
 branch: lf53-record-statusline
-seat:
+seat: l53-stat
 stage:
 updated: 2026-10-25
 next: "sup94 runs it (0163 ruled 2026-10-25)"

@@ -3,7 +3,7 @@ title: "The usage post is tested against the record's own sample, posts every co
 status: next
 repos: [organizer]
 branch: lf53-usage-contract
-seat:
+seat: l53-usage
 stage:
 updated: 2026-10-25
 next: "sup94 runs it (0163 ruled 2026-10-25; usage-batch.json landed, specs 1e36d6b)"
