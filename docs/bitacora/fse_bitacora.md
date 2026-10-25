@@ -4,6 +4,13 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## 2026-10-25 04:05
+
+- Last SHA seen: 790ca75. leftovers 53: all three cards passed review and are in done/ on local main; PRs asked of talos-lab (lf53-frontmatter 044c647, lf53-usage-contract c2a457f, lf53-record-statusline a3d8128); no code merged locally. sup94 01:57-04:00, 2h03m against 40-80m (builders 48-76 min; the rest test-lease queueing and the PR switch), seats $13.11; run record runs/2026-10-25-sup94-leftovers-53.md. sup94 ended. sup93 on lf52-decisions-line (code review fail: short alternatives cut at the floor), extended to ~04:56.
+- main is protected since 2026-10-25 (factory decision, PRs through talos-lab). Local main is ahead of origin with card and docs commits only; asked Hephaistos how they reach origin (01M5RVFVKFANRFMTPQQWSZJDMZ) and how CI reads the contracts dir (01M5RWD62XED55BED2T5TYH0HJ). Install comes after a PR merge lands on origin/main and local main takes it.
+- Held, HIGH: `organizer retire organizer --retirable` planned to retire fse and kill organizer-probe-fse (sup94, finding 1; not run). Retirable must never pick the cell's FSE (nor any standing seat). Cut first in the next leftovers.
+- Held: sup94's statusline record never refreshed after 01:57 (its runs.jsonl line reads $0); CLAUDE.md's ledger list lacks assumptions.md (lf53 FR-3; no card had CLAUDE.md in its boundary).
+
 ## 2026-10-25 03:25
 
 - Last SHA seen: 5dcac01. leftovers 52: wave 1 merged (0289401, 0683aa2), lf52-decisions-line in review. leftovers 53 (0163): three cards in review; sup93 and sup94 both extended to ~03:56. Installed v0.2.0-2837-ga528163.
