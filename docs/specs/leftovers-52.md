@@ -117,3 +117,16 @@ row draws no rim. The UI re-review checks R51 and R52.
 Not in this card, for the next leftovers (Amendment 18): `.ib-row.focused`
 and every `focused` mark as state marks; the strip's role items and the
 rail's role rows in R50; the header's last-line gap (A4, R53).
+
+## Amendment 2 (FSE, 2026-10-24): ink never eases, FR-2a withdrawn
+
+From l52-layer-ui's re-review of lf52-state-layer at 8b27732 (A5, U5:
+FR-2a's `color` under the hover transition made a leaving mark's ink ease,
+the old sub-tab keeping its current ink for 400 ms) and Aglaea's
+`docs/ux/specs/review-view.md` Amendment 19 (41523a6), which withdraws her
+Amendment 18 A1. FR-2a is withdrawn: the hover transition covers
+`background-color` only; ink switches at once, hover and mark alike. S2
+reads: the hover transition lists `background-color` and not `color`. S3
+adds: after a press on another sub-tab, the old one's ink is the unmarked
+ink in the next frame. The UI re-review checks R50 as amended by
+Amendment 19.
