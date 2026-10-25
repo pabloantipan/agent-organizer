@@ -1,12 +1,12 @@
 ---
 title: "The usage post is tested against the record's own sample, posts every cost source, and a refused batch no longer blocks the rest"
-status: next
+status: done
 repos: [organizer]
 branch: lf53-usage-contract
 seat: l53-usage
 stage:
 updated: 2026-10-25
-next: "file finding: CI has no usage-batch.json (release.yml make test fails on U1); a 200's rejected rows are marked accepted and never resent; a zero first/last is sent as a formatted time, not null"
+next: "done: reviewed pass (l53-usage-rev); the three findings filed in docs/bitacora/fse_bitacora.md 2026-10-25 03:25 (7ac9cdb)"
 review: pass
 reviewer: l53-usage-rev
 depends_on: []
@@ -66,7 +66,7 @@ It printed 0 flags, so there are no `undeclared`, `outside boundary` or `declare
 - **Fails on main**: I ran the branch's test file on 742a20e, minus one assertion on the new `Refused` field, which does not compile there. `TestRefusedBatchDoesNotEndThePass` FAILs "batch sizes [500 500], want [500 500 203]" and `TestUsagePostStatusNamesRefusals` FAILs. `TestUsageRowsMatchTheSample` passes on main, because main's `usageRow` already matched the sample. U1 is a test-only change, as the card says.
 - **X0** met. `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test` exits 0: every Go package ok, vitest 1297 passed. `test-lease run -- wails build` exits 0, and `git status --porcelain` is empty.
 
-Outside the gate (Notes; none is proved against the gate). The builder's three "found, not asked" items stand and none is filed yet:
+Outside the gate (Notes; none is proved against the gate). The builder's three "found, not asked" items stand; filed by the FSE in its held list for the next leftovers, docs/bitacora/fse_bitacora.md 2026-10-25 03:25 (7ac9cdb), the CI one also asked of Hephaistos:
 1. `release.yml` runs `make test` where the sample does not exist, so a tag build fails on U1 by design.
 2. `PostUsage` ignores a 200's `rejected` rows, so a row the record refuses at row level is marked accepted and never sent again.
 3. `usageRow` formats a zero `first`/`last` instead of sending null.
