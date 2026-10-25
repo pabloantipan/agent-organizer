@@ -146,59 +146,53 @@ Each new check fails at 75945c2: I copied 8b27732's three test files onto a clea
 
 ## UI review
 
-**Verdict: pass** (R43 amended, R50). Reviewer `l52-layer-ui`, 2026-10-24, commit e6d77d6. No severity 4 or 3 finding. Shots, logs and harness output are in `.wt-notes/l52-layer-ui/` (`r/<w>x<h>-<state>.png`, `r/h-*.txt`, `r/s-*.txt`).
+**Verdict: fail.** Reviewer `l52-layer-ui`, 2026-10-24, commit 8b27732 (re-review: R43 amended, R50 amended, R51, R52; the round at e6d77d6 passed). One severity 3 finding, U4. Shots, logs and harness output are in `.wt-notes/l52-layer-ui/r2b/`.
 
-**Shared test run: fresh**, test-lease run `43e52923-15747` of e6d77d6. `make test` exit 0, `Tests 1222 passed (1222)`. The code reviewer reused this run.
+**Shared test run: fresh**, test-lease run `69843041-32146` of 8b27732. `make test` exit 0, `Tests 1291 passed (1291)`. The code reviewer reused this run.
 
-### How each state was checked
-- **Setup.** Review build (`make review-build` in my worktree) launched on `fixture-home.sh --review` with `auth: off` and `discuss_state_dir` under the temp dir, pid saved. One real-window shot: `1024x640-init-b-conversations.png`. The AX resize to 1440 then hit the floating icon window, so the measurements come from an offscreen WKWebView harness (`tabharness`, window never ordered in, no system input). It ran over `wails dev` of a clean clone of e6d77d6 on the same fixture, at 1440×872 and 1024×612 content, which are the 1440×900 and 1024×640 windows minus the title bar.
-- **Moving the mark.** For each move I read the old control's own style and its `::before` (`getComputedStyle(el,'::before')`) plus `document.getAnimations()`. Samples: before the click, synchronously after it, at the microtask, and at 16, 50, 100, 200 and 400 ms. In every case the old control had no fill or line from the first post-render sample on (microtask), the layer read `transition: none | 0s`, and there were no animations on old or new. Controls moved:
-  - Rail row init-a → init-b (1440)
-  - Strip init-b → init-a (both sizes)
-  - Sub-tabs Overview → Work → Roadmap
-  - Roadmap's segmented control Stages → Cards → Calendar, and the outline's Detail segmented control
-  - People panel fse → po_ana (`button.person`)
-  - Chat row po_ana → dev_bruno (R43: afterwards only the `aria-current` row has a fill)
-  - People toggle (`tiny-btn[aria-pressed]`) on and off
-  - Details (`ihead-details`) open and close
-  - ⚙ `.gear.on`, and gear → place tab
-  - Home's Rule `.act` open and close
-  - Role row `r-row` open
-  - Rule box option one-machine → two-machines (`.sl-shadow`)
-- **Hover.** Emulated with a `.fh` copy of every `:hover` rule. An unmarked rail row, strip item, segmented button, person, chat row and stage tile each start a `background-color 100ms cubic-bezier(0, 0.4, 0, 1)` transition (`--ease-out`). Their rest state carries the same transition, which is the one the ease out uses. A marked person or chat row does not change on hover (no animation).
-- **Looks as on main.** Main's CSS diff: same tokens, the same 2px left accent inset and 2px underline, and the radius inherited. The shots (`1440x872-chat-dev_bruno.png`, `1024x612-people-B.png`, `1024x612-roadmap-calendar.png`) show text and icons above the fill. No `.sl` descendant has a negative z-index. `.sl` changes no control's `position` (only `z-index` auto → 0).
-- **Focus ring.** Tab through the top bar and rail reads `solid 2px rgb(192,171,254)`, offset 2px, unchanged.
+### Finding that fails
+- **U4 (sev 3) Four controls lose their mark entirely.**
+  - What the person cannot do: see which sub-view they are on, which person's chat is open in People, which role row is open on Home, and which float-list row is current.
+  - Where: `.subtabs button`, `button.person`, `.r-row` and `.fl-row`, the four rules that set `--mark-edge: 0`, written unitless.
+  - Shots:
+    - Harness: `1440x872-chat-people.png` (Conversations current and dev_bruno open: no underline, no fill), `1024x612-U-before.png`, and `1024x612-U-with-0px.png` (the same screen with `0px`: both marks back).
+    - Review build at 1024×640: `1024x640-rb-conversations-people.png`, Conversations current with no underline. At e6d77d6 the same screen had both marks (`r/1440x872-chat-dev_bruno.png`, `r/1024x612-people-B.png`).
+  - Evidence: `inset: calc(-1 * var(--mark-edge, 0px))` with `--mark-edge: 0` is `calc(-1 * 0)`, a number and not a length. That makes it invalid at computed-value time, so `inset` falls back to `auto`. The `::before` then reads `width 0px, height 0px` at its static position, for example top 16px and left 12px on the sub-tab, and top 26px and left 8px on the person row (`r2b/h-U-1024x612.txt`). The fill and the 2px underline are computed but painted on a 0×0 box. Forcing `--mark-edge: 0px` gives the layer 113×32 and 236×52, inset 0, and both marks show. S3's harness models the cascade, not WebKit layout, so it could not see this.
+  - Severity 3: the current-place mark on the primary sub-view navigation and on People is gone, a regression from main against R52 "see the mark as before" and R50.
+  - Proposal: write `--mark-edge: 0px` in those four rules, or make the layer `calc(-1px * var(--mark-edge-n, 0))`. Add a test that rejects a unitless `--mark-edge`.
 
-### Findings
-- **U1 (sev 1) The fill sits 1px inside a bordered control's edge.**
-  - What the person sees: the fill is drawn 1px in from where main drew it.
-  - Where: every `.sl` control with a 1px border: tiny-btn, `.act`, rail row, strip, chat, seg, stage tile.
-  - Evidence: `.sl::before` is `inset: 0`, the padding box, while main's `background` painted the border box. The 1px edge now shows the control's own background through a translucent border (e.g. `.act`: rgb(39,32,51) under rgba(255,255,255,.16)) instead of the selected fill. Not visible in the shots at 1×.
-  - Proposal: `inset: calc(-1 * border-width)` is not expressible, so leave it, or `inset: -1px` on bordered controls only.
-- **U2 (sev 1) The critical memory chip's ring, open, is half as wide outside the chip.**
-  - What the person sees: 1px of ring outside the chip instead of 2px, and the chip's amber loses 1px at its edge.
-  - Where: `.memory button.memory-btn.critical[aria-expanded="true"]`.
-  - Evidence: from CSS only. The ring `0 0 0 2px` now spreads from the layer's padding edge, so 1px of it covers the chip's 1px border. On main it spread 2px outside the border edge.
-  - Proposal: `--mark-line: 0 0 0 3px …`, or keep this ring on the control.
-- **U3 (sev 1) Hover on the current rail row shows a 1px rim around its fill.**
-  - What the person sees: a 1px rim of `--surface` eases in around the opaque fill.
-  - Where: the current rail row, and the same on other opaque-fill marks (seg `.on`, `.act` open).
-  - Evidence: `rail_hover_marked` starts a background-color transition under the layer. On main the active rule beat hover, so nothing changed.
-  - Proposal: restate `background: transparent` in the opaque mark rules, as the see-through ones already do.
+### Rows
+- **R43 (amended), met.** Chat po_ana → dev_bruno: the old row's layer is transparent from the first post-render sample on, the layer has `transition: none`, and afterwards only the `aria-current` row has a fill.
+- **R50 (amended), met for fill and line, apart from U4.**
+  - Mark moves: rail row, strip, sub-tabs, Roadmap's segmented control, People and chat at 1440×872 and 1024×612 content. The old control's fill and line are gone from the first post-render sample on, the layer has no transition, and no fill or line animation runs.
+  - Hover on an unmarked control: rail and seg start `background-color 100ms --ease-out`, and the seg adds `color`. The sub-tabs' ink-only hover now eases `color 100ms` (FR-2a). The rest state carries `background-color, color | 0.1s`.
+  - Not this card (Amendment 1 defers them): the role rows and `.ib-row.focused` in R50's amended list.
+- **R51, met (emulated).** I copied the `prefers-reduced-motion: reduce` block's rules out of their media query. There is one guard, `*, ::before, ::after { transition: none !important }`. With it applied:
+  - every element on the initiative view and on Home reads transition-duration 0s;
+  - sub-tab and rail moves and rail and sub-tab hovers start no animation.
+  - The system setting was not changed (0108), so this is emulation, not a real reduce.
+- **R52.**
+  - **Fill covers the border box, met** on the bordered marks: rail, strip, chat, seg, stage tile, Details, `.act`, the People toggle, gear and memory. The layer is at `-1px` with a 1px border in `--mark-rim`, and the opaque marks restate their border colour there.
+  - **Hover changes no pixel, met.** Rest against hovered with transitions forced off shows no difference on the current rail row, the strip, seg `.on`, the stage tile, Details, `.act` open and the People toggle.
+  - **Memory chip ring: not verified.** `--memory critical` did not take with `--review` (the chip read "high", then "reading…"). From CSS, the chip is a `button` with `--mark-edge: 1px`, so its `0 0 0 2px` ring spreads from the border's outer edge, as on main.
+  - **Not met for the four controls in U4.**
+
+### Found, not failing
+- **U5 (sev 2) A mark's ink now eases.**
+  - What the person sees: the ink of a marked control (sub-tab, chat row, strip) eases over 100 ms when the mark arrives and when it leaves.
+  - Why: FR-2a puts `color` in `.sl`'s own transition, and the unmarked style's transition governs a leaving mark.
+  - Evidence: the moves start `color 100ms` on the old control. In a window that draws no frames, the old sub-tab keeps current ink (`rgb(238,235,244)` at 400 ms) while its underline has already gone.
+  - This contradicts the design system's "State marks never ease" (including a border or ink that a mark changes) and the card's goal. It is the same CSS limit A16 solved for fill, and ink cannot go on a layer. See A5.
 
 ### Spec gaps (for the FSE)
-- S3's "vitest in the harness" is server renders over a cascade model, not WebKit. R50's no-frame check is this review's computed-style run. Word the row.
-- R50 lists eight controls. The strip's role items and the rail's role rows also take the layer and were checked only at rest.
-- `.ib-row.focused` (Home inbox) still eases its fill, outside the premise's words.
+- S3 reads the cascade, not WebKit layout, so a layer that computes but lays out at 0×0 passes it. U4 needs a check in WebKit, or one that rejects unitless lengths in `calc`.
+- `fixture-home.sh --memory critical --review` does not give a critical chip, so R52's ring row cannot be reached on screen.
 
-### For aglaea (design questions, not findings)
-- A1: the sub-tabs' hover is ink only, and it switches at once, so R50's "hover eases" has nothing to ease there. Should sub-tab hover get a surface, or an ink ease?
-- A2: should hover on a marked control with an opaque fill show at all? R49 amended covers the chat row only (see U3).
-- A3: under `prefers-reduced-motion` hover still eases on every `.sl` control. The rule box lost its guard, and `button` never had one. The design system says "nothing moves".
-- A4 (outside this card): at 1024×640 on init-b, the header's "no goal yet" line sits against the sub-tabs row (`1024x640-init-b-conversations.png`). Not compared with main.
+### For aglaea
+- A5: hover ink easing (A1, FR-2a) and "marks never ease" conflict for every mark that changes ink. Pick one: mark ink switches at once (hover ink does not ease), or mark ink eases.
+- A4 stands (R53, next leftovers).
 
 ### Not verified
-- The critical memory chip on screen (the fixture shows "high"; U2 is read from CSS).
-- The rail row move at 1024: my probe threw there and was not re-run (the strip was measured at 1024, the rail row at 1440).
-- The real review window at 1440×900 (AX resize hit the floating icon; the harness covers 1440).
-- Mark moves on stage tiles, the float list, the week list and the place tab: rest and hover only, or not reached.
+- The memory chip's critical ring on screen (see R52).
+- The role rows, `.ib-row.focused`, the float list and the week list: mark moves not driven. Role rows and `.fl-row` are covered by U4 from CSS and the role row's 0×0 layer was measured.
+- R51 under a real system reduce setting.
