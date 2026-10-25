@@ -1,0 +1,80 @@
+{
+  "session_id": "00000000-0000-4000-8000-000000000000",
+  "transcript_path": "/home/agent/.claude/projects/-work-repo/00000000-0000-4000-8000-000000000000.jsonl",
+  "cwd": "/work/repo",
+  "scratchpad_dir": "/tmp/claude/-work-repo/00000000-0000-4000-8000-000000000000/scratchpad",
+  "prompt_id": "00000000-0000-4000-8000-000000000001",
+  "effort": {
+    "level": "medium"
+  },
+  "session_name": "example-probe-seat",
+  "model": {
+    "id": "claude-opus-5-5",
+    "display_name": "Opus 5.5"
+  },
+  "workspace": {
+    "current_dir": "/work/repo",
+    "project_dir": "/work/repo",
+    "added_dirs": [],
+    "repo": {
+      "host": "example.com",
+      "owner": "example",
+      "name": "repo"
+    }
+  },
+  "version": "2.1.310",
+  "output_style": {
+    "name": "default"
+  },
+  "cost": {
+    "total_cost_usd": 1.25,
+    "total_duration_ms": 297075,
+    "total_api_duration_ms": 177090,
+    "total_lines_added": 0,
+    "total_lines_removed": 0
+  },
+  "context_window": {
+    "total_input_tokens": 118114,
+    "total_output_tokens": 394,
+    "context_window_size": 1000000,
+    "current_usage": {
+      "input_tokens": 2,
+      "output_tokens": 394,
+      "cache_creation_input_tokens": 766,
+      "cache_read_input_tokens": 117346
+    },
+    "used_percentage": 12,
+    "remaining_percentage": 88
+  },
+  "exceeds_200k_tokens": false,
+  "prompt_cache": {
+    "warm": true,
+    "caching_observed": true,
+    "ttl": "1h",
+    "expires_at": 1767225600,
+    "requests": 24,
+    "misses": 0,
+    "expected_rebuilds": 0,
+    "hit_ratio": 0.9642308673130775,
+    "cache_write_tokens": 88880,
+    "miss_recache_tokens": 0,
+    "last_miss_at": null,
+    "last_miss_cause": null,
+    "miss_causes": {},
+    "recache_tokens_if_cold": 118114
+  },
+  "fast_mode": false,
+  "thinking": {
+    "enabled": true
+  },
+  "rate_limits": {
+    "five_hour": {
+      "used_percentage": 40,
+      "resets_at": 1767225600
+    },
+    "seven_day": {
+      "used_percentage": 66,
+      "resets_at": 1767225600
+    }
+  }
+}
