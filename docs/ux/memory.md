@@ -457,6 +457,9 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - A refactor of how a mark is painted must reproduce main pixel for pixel: border box, ring spread, hover under an opaque mark. List those three before cutting it (review-view A18).
 - Reduced motion is one global guard, never per control; per-control guards get lost in refactors (review-view A18).
 
+- The window's chrome and the macOS menu bar are part of the screen for "a fact shows once": with the window in front, the menu bar already names the app, so the window draws its name nowhere; the window title stays for the system (Dock, Cmd-Tab, VoiceOver, seat-pointer). Count the width a fix costs at 1024 before keeping a brand (one-title).
+- Answer the whole ask, not the two options offered: "a proper approach" meant the top edge as a whole; my first reply picked between the FSE's options and had to be replaced (one-title).
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).
