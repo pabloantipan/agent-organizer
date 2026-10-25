@@ -6,7 +6,7 @@ branch: lf53-record-statusline
 seat: l53-stat
 stage:
 updated: 2026-10-25
-next: "decide: FR-7 breaks internal/service/factory_test.go:183-187 (TestRegisterCellWritesPushAndRegistersWhenAFactory asserts '409 should count as registered'), outside my boundary; may l53-stat flip it to expect an error (and CLAUDE.md's Record line, '2xx or 409 both count as registered')? Branch at 7aee595, R1 and L1 pass, X0 fails only on that test"
+next: "l53-stat: flip factory_test.go 409 case to an error and edit the CLAUDE.md Record sentence (Amendment 1, 184e534), then X0"
 depends_on: []
 boundary: ["docs/specs/leftovers-53.md Boundary, lf53-record-statusline"]
 spec: "docs/specs/leftovers-53.md (FR-7 to FR-8)"
