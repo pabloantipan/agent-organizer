@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 53 - Deltagos's side of the factory contract map
-status: proposed
+status: ruled
 raised: 2026-10-25
 raised_by: fse
 owner: pablo
@@ -9,9 +9,9 @@ cards: [lf53-frontmatter, lf53-usage-contract, lf53-record-statusline]
 forecast: 40-80m
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-25
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -53,3 +53,7 @@ forecast: 40-80m over 1 wave once both samples exist, plus waits on
 Hephaistos's and hestia's samples and no lease data; basis: 7 tasks, this
 initiative (Go-only cards: lf47-runs-cost and lf52-chosen-trim built and
 reviewed within their waves).
+
+## Ruling
+
+pablo, 2026-10-25, in the organizer on lodestar: ok
