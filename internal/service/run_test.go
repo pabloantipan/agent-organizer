@@ -11,6 +11,8 @@ import (
 	"organizer/internal/cache"
 	"organizer/internal/model"
 	"organizer/internal/session"
+
+	"gopkg.in/yaml.v3"
 )
 
 func TestLaunchDir(t *testing.T) {
@@ -313,5 +315,27 @@ func TestInitiativeRunsFoldsAConversation(t *testing.T) {
 	}
 	if !r.FirstSeen.Equal(hour(9)) || !r.LastSeen.Equal(hour(13)) {
 		t.Errorf("seen %s..%s, want %s..%s", r.FirstSeen, r.LastSeen, hour(9), hour(13))
+	}
+}
+
+// leftovers-53 FR-1a: a card whose spec: names several references is
+// launched against the first.
+func TestPrepareLaunchUsesTheFirstSpec(t *testing.T) {
+	t.Setenv("XDG_DATA_HOME", t.TempDir())
+	var c model.Card
+	if err := yaml.Unmarshal([]byte("spec: [docs/specs/x.md#goals, decisions 0002]\ngate: g\nboundary: x/"), &c); err != nil {
+		t.Fatal(err)
+	}
+	c.Slug = "two-specs"
+	si := model.ScannedInitiative{}
+	si.ID, si.Path = "organizer", t.TempDir()
+	si.Cards = []model.Card{c}
+	s := &Service{state: cache.State{Local: model.Snapshot{Initiatives: []model.ScannedInitiative{si}}}}
+	l, err := s.PrepareLaunch("organizer", "two-specs")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if l.Spec != "docs/specs/x.md#goals" {
+		t.Errorf("launch spec %q, want the first reference", l.Spec)
 	}
 }

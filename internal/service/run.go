@@ -47,7 +47,10 @@ type Launch struct {
 	Dir        string `json:"dir"`
 	Prelude    string `json:"prelude"`
 	Prompt     string `json:"prompt"`
-	Command    string `json:"command"`
+	// Spec is the reference the builder is launched against: the card's
+	// first spec: entry when it names several (leftovers-53 FR-1a).
+	Spec    string `json:"spec"`
+	Command string `json:"command"`
 	// Warnings are things that will bite at launch but are not refusals:
 	// a session name probe will truncate, a prompt file nobody wrote yet.
 	Warnings []string `json:"warnings"`
@@ -131,6 +134,7 @@ func (s *Service) PrepareLaunch(initiativeID, slug string) (Launch, error) {
 		Dir:        launchDir(si.Path, *card),
 		Prelude:    cardPreludePath(),
 		Prompt:     cardPromptPath(initiativeID, slug),
+		Spec:       card.Spec,
 	}
 	l.Command = launchLine(l.Prelude, l.Prompt, probeWrapper(family), l.Session, l.Dir)
 

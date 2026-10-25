@@ -276,10 +276,15 @@ type Card struct {
 	DependsOn []string `yaml:"depends_on" json:"depends_on"`
 	// Boundary is the paths a builder may touch. Disjoint across a wave.
 	Boundary []string `yaml:"boundary" json:"boundary"`
-	// Spec is where the work is specified, "<path>#<section>".
-	Spec string `yaml:"spec" json:"spec"`
-	// Gate is the verification that defines done.
-	Gate string `yaml:"gate" json:"gate"`
+	// Spec is where the work is specified, "<path>#<section>": the first of
+	// SpecRefs, the one a builder is launched against (leftovers-53 FR-1a).
+	Spec string `yaml:"-" json:"spec"`
+	// SpecRefs is spec: as written, one reference or a list of several.
+	SpecRefs []string `yaml:"spec" json:"spec_refs"`
+	// Gate is the verification that defines done: the first of GateRefs.
+	Gate string `yaml:"-" json:"gate"`
+	// GateRefs is gate: as written, one reference or a list of several.
+	GateRefs []string `yaml:"gate" json:"gate_refs"`
 	// Review is who or what checks the result before it merges.
 	Review string `yaml:"review" json:"review"`
 	// ThreadState is those threads resolved against the live cell. Derived,
