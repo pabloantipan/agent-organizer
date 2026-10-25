@@ -7,7 +7,7 @@ seat: l52-line
 reviewer: l52-line-review, l52-line-ui
 stage:
 updated: 2026-10-25
-next: "review: lf52-decisions-line, D1 D2 X0 pass, F1 U1 fixed, 2816be1"
+next: "talos-lab merges the PR (both reviews pass at 2816be1; [for talos-lab] PR lf52-decisions-line, sup93)"
 review: pass
 depends_on: [lf52-state-layer]
 boundary: ["docs/specs/leftovers-52.md Boundary, lf52-decisions-line"]
