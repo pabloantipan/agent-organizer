@@ -298,7 +298,7 @@ function UnreadRow({ row }: { row: Extract<NeedsMeRow, { kind: "unread" }> }) {
       <Shell row={row} reason="unreadable" tone="warning"
         subject={<><span className="mono">{row.initiative}</span> · {unreadLabel(row.files.length)}</>}
         context={`${underRoot(first.path, row.path)}: ${oneLine(first.reasons[0] ?? "")}${rest > 0 ? ` · and ${rest} more` : ""}`}>
-        <button className="act" aria-expanded={open} aria-controls={listId} aria-label={`${open ? "Hide" : VERBS.show} the ${unreadLabel(row.files.length)} in ${row.initiative}`} onClick={() => setOpen(!open)}>{open ? "Hide" : VERBS.show}</button>
+        <button className="act sl" aria-expanded={open} aria-controls={listId} aria-label={`${open ? "Hide" : VERBS.show} the ${unreadLabel(row.files.length)} in ${row.initiative}`} onClick={() => setOpen(!open)}>{open ? "Hide" : VERBS.show}</button>
       </Shell>
       {open && <UnreadFiles id={listId} files={row.files} root={row.path} local={local} />}
     </>
@@ -402,7 +402,7 @@ function RuleAction({ rowKey, initiative, decision, describedBy }: { rowKey: str
       {/* The scrim sits outside the row, on the page's ground, so the
           opener's row can stand above it (FR-23). */}
       {open && widthClass !== "wide" && createPortal(<div className="rb-scrim" aria-hidden="true" onClick={closeKeep} />, document.body)}
-      <button ref={btn} className="act" aria-expanded={open} aria-describedby={describedBy} aria-label={draftVerb(`${VERBS.rule} ${initiative} ${decision.number}`, kept)} onClick={() => openRule(open ? null : rowKey)}>{ruleVerb(kept)}</button>
+      <button ref={btn} className="act sl" aria-expanded={open} aria-describedby={describedBy} aria-label={draftVerb(`${VERBS.rule} ${initiative} ${decision.number}`, kept)} onClick={() => openRule(open ? null : rowKey)}>{ruleVerb(kept)}</button>
       {open && <RuleDecisionBox initiative={initiative} decision={decision} withRecord widthClass={widthClass} opener={btn} afterRule={focusNeedsMe} onClose={() => openRule(null)} onCancel={() => dropRule(rowKey)}
         draft={{ chosen: ruleDraft.chosen, words: ruleDraft.words, set: setRuleDraft }} />}
     </span>
@@ -1023,7 +1023,7 @@ function Roles({ roles }: { roles: model.Role[] }) {
       {open && (
         <div id="home-roles-list" ref={fit.ref} className={`panel roles-list ${fit.hide.where ? "no-where" : ""} ${fit.hide.doing ? "no-doing" : ""}`} style={fit.style}>
           {rows.map((x) => (
-            <button key={x.name} type="button" className="r-row" data-role={x.name} aria-label={x.label} title={x.label.split("; ").join("\n")} aria-haspopup="dialog" aria-expanded={roleOpen === x.name}
+            <button key={x.name} type="button" className="r-row sl" data-role={x.name} aria-label={x.label} title={x.label.split("; ").join("\n")} aria-haspopup="dialog" aria-expanded={roleOpen === x.name}
               onClick={(e) => openRoleFrom(e.currentTarget, x.name)}>
               <span className="r-rank" aria-hidden="true" />
               <span className="r-name">{x.name}</span>

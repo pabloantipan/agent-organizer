@@ -56,7 +56,7 @@ export function SlackView() {
         <ReviewBack initiative={g.id} reviewBack={reviewBack} onBack={backToReview} />
         <span className="spacer" />
         {slackFocus && <span className="badge persona focus">with {slackFocus} <button className="rail-icon" onClick={() => setSlackFocus(null)} title="back to the channel"><X size={11} /></button></span>}
-        <button ref={peopleToggle} className={`tiny-btn ${deaf > 0 ? "hot" : ""}`} aria-pressed={people} aria-label={peopleLabel({ seats: seats.length, live, capped, deaf })} onClick={togglePeople} title={people ? "hide people" : "show people"}>
+        <button ref={peopleToggle} className={`tiny-btn sl ${deaf > 0 ? "hot" : ""}`} aria-pressed={people} aria-label={peopleLabel({ seats: seats.length, live, capped, deaf })} onClick={togglePeople} title={people ? "hide people" : "show people"}>
           <Users size={13} /> {seats.length}{live > 0 ? ` · ${live} live` : ""}{capped > 0 ? ` · ${capped} ${HEALTH.capped.label}` : ""}{deaf > 0 ? ` · ${deaf} ${HEALTH.deaf.label}` : ""}
         </button>
       </div>
@@ -100,7 +100,7 @@ export function People({ seats, human, focus, onFocus, onClose }: { seats: Seat[
             {/* leftovers-24 FR-3: shows the chat in place, so a button (F3).
                 leftovers-25 FR-3: it stays mounted and keeps focus; the chat
                 it shows does not take it (Conversation's askedNew). */}
-            <button type="button" className={`person ${s.agent?.state ?? "off"} ${s.deaf && !s.capped ? "deaf" : ""} ${s.capped ? "capped" : ""} ${focus === s.name ? "active" : ""}`} aria-label={`Chat with ${s.name}`} aria-describedby={`${d}-facts`} aria-current={focus === s.name ? "true" : undefined} onClick={() => onFocus(focus === s.name ? null : s.name)} title={`${s.agent ? s.agent.state : "no session"}. Click for the conversation with ${s.name}.`}>
+            <button type="button" className={`person sl ${s.agent?.state ?? "off"} ${s.deaf && !s.capped ? "deaf" : ""} ${s.capped ? "capped" : ""} ${focus === s.name ? "active" : ""}`} aria-label={`Chat with ${s.name}`} aria-describedby={`${d}-facts`} aria-current={focus === s.name ? "true" : undefined} onClick={() => onFocus(focus === s.name ? null : s.name)} title={`${s.agent ? s.agent.state : "no session"}. Click for the conversation with ${s.name}.`}>
             <i className={`dot ${s.agent?.state ?? "off"}`} />
             <span className="sr-only" id={`${d}-facts`}>{personFacts(s)}</span>
             <span className="person-main">

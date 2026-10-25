@@ -191,7 +191,7 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
               <label key={a} className={`rb-option ${picks[q.label] === a ? "on" : ""}`}>
                 <input type="radio" name={`${name}-${q.label}`} value={a}
                   checked={picks[q.label] === a} onChange={() => pick(q.label, a)} />
-                <span>{a}</span>
+                <span className="sl-shadow">{a}</span>
               </label>
             ))}
           </fieldset>
@@ -203,7 +203,7 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
             <label key={o} className={`rb-option ${chosen === o ? "on" : ""}`}>
               <input type="radio" name={name} value={o}
                 checked={chosen === o} onChange={() => setChosen(o)} />
-              <span>{o}</span>
+              <span className="sl-shadow">{o}</span>
             </label>
           ))}
         </fieldset>

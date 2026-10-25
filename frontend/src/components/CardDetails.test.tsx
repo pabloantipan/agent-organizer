@@ -55,7 +55,7 @@ describe("C2: the header's Details reads one label, one height, aria-expanded (F
   const button = (open: boolean) => {
     store.useBoard.setState({ view: { board: { initiatives: [init], columns: {} }, order: {} }, agents: null, headerOpen: open, sub: "overview", widthClass: "wide" });
     const h = renderToStaticMarkup(<InitiativeHeader initiative={init} />);
-    const m = h.match(/<button class="ihead-details"[^>]*>(.*?)<\/button>/);
+    const m = h.match(/<button class="ihead-details sl"[^>]*>(.*?)<\/button>/);
     expect(m).not.toBeNull();
     return { tag: m![0], label: m![1].replace(/<[^>]+>/g, "").trim() };
   };

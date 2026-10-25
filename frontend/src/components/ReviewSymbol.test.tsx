@@ -606,7 +606,7 @@ describe("S5 (leftovers-43 FR-5, Amendment 1): Conversations after Open the thre
     expect(current).toEqual(["fse"]);
     const tabs = head.slice(head.indexOf('<nav class="subtabs"'), head.indexOf("</nav>", head.indexOf('<nav class="subtabs"')));
     expect(tabs.match(/aria-current="true"/g)).toHaveLength(1);
-    expect(tabs).toMatch(/<button class="on" aria-current="true">Conversations<\/button>/);
+    expect(tabs).toMatch(/<button class="sl on" aria-current="true">Conversations<\/button>/);
   });
 });
 

@@ -32,7 +32,7 @@ export function MemoryButton() {
       <button
         ref={btn}
         type="button"
-        className={`ghost memory-btn ${state}`}
+        className={`ghost memory-btn sl ${state}`}
         aria-label={name}
         title={name}
         aria-haspopup="dialog"

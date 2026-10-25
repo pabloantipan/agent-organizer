@@ -231,7 +231,7 @@ export function Rail() {
             {...drag.dragHandleProps}
             {...roving(e.id)}
             aria-label={rowName(e, rank.get(e.id))}
-            className={`rail-item ${selectedInitiative === e.id ? "active" : ""} ${snap.isDragging ? "dragging" : ""}`}
+            className={`rail-item sl ${selectedInitiative === e.id ? "active" : ""} ${snap.isDragging ? "dragging" : ""}`}
             onClick={() => setSelectedInitiative(e.id)}
             title={e.title}
           >
@@ -299,7 +299,7 @@ export function Rail() {
       {list.map((id) => {
         const e = byId.get(id)!;
         return (
-          <button key={id} type="button" className={`rail-item folded ${selectedInitiative === id ? "active" : ""}`} onClick={() => setSelectedInitiative(id)} title={e.title}>
+          <button key={id} type="button" className={`rail-item sl folded ${selectedInitiative === id ? "active" : ""}`} onClick={() => setSelectedInitiative(id)} title={e.title}>
             <span className="rail-rank" aria-hidden="true" />
             <span className="rail-main">
               <span className="rail-title">{e.id}</span>
@@ -319,12 +319,12 @@ export function Rail() {
       <>
       <nav ref={navRef} id={RAIL_ID} className="rail strip" aria-label="initiatives">
         <button className="rail-icon strip-toggle" onClick={() => setRailCollapsed(false)} title="expand the rail" aria-label="Initiatives rail" aria-expanded={false} aria-controls={RAIL_ID}><PanelLeftOpen size={14} /></button>
-        <button className={`strip-all ${selectedInitiative === null ? "active" : ""}`} onClick={() => setSelectedInitiative(null)} title={`Home: ${totals.now} now, ${totals.blocked} blocked, ${totals.next} next`}>all</button>
+        <button className={`strip-all sl ${selectedInitiative === null ? "active" : ""}`} onClick={() => setSelectedInitiative(null)} title={`Home: ${totals.now} now, ${totals.blocked} blocked, ${totals.next} next`}>all</button>
         {roles.map((r) => {
           const st = roleState(r);
           const m = roleMail(r);
           return (
-            <button key={`role:${r.name}`} type="button" className={`strip-item role ${roleOpen === r.name ? "active" : ""}`} data-role={r.name} {...roving(roleKey(r.name))}
+            <button key={`role:${r.name}`} type="button" className={`strip-item sl role ${roleOpen === r.name ? "active" : ""}`} data-role={r.name} {...roving(roleKey(r.name))}
               onClick={(ev) => openRoleFrom(ev.currentTarget, r.name)} aria-label={roleItemWords(r).join(", ")} aria-haspopup="dialog" aria-expanded={roleOpen === r.name}
               title={`${r.name}: ${st.text}${m.text ? `, ${m.text}` : m.unknown ? ", mailbox not reachable" : ""}`}>
               {initials.get(r.name)}
@@ -339,7 +339,7 @@ export function Rail() {
             type="button"
             {...roving(e.id)}
             aria-label={rowName(e, rank.get(e.id))}
-            className={`strip-item ${selectedInitiative === e.id ? "active" : ""} ${e.blocked > 0 ? "blocked" : e.now > 0 ? "now" : ""}`}
+            className={`strip-item sl ${selectedInitiative === e.id ? "active" : ""} ${e.blocked > 0 ? "blocked" : e.now > 0 ? "now" : ""}`}
             onClick={() => setSelectedInitiative(e.id)}
             title={`${e.id}${e.client ? ` (${e.client})` : ""}: ${e.now} now, ${e.blocked} blocked, ${e.next} next${e.live > 0 ? `, ${e.live} live agent${e.live === 1 ? "" : "s"}` : ""}${defining(e) ? `\ncell in definition: ${definitionWaits(e.cell!, e.missing)}` : ""}`}
           >
@@ -385,7 +385,7 @@ export function Rail() {
                   const st = roleState(r);
                   const m = roleMail(r);
                   return (
-                    <button key={r.name} type="button" className={`rail-item role ${roleOpen === r.name ? "active" : ""}`} data-role={r.name} {...roving(roleKey(r.name))}
+                    <button key={r.name} type="button" className={`rail-item sl role ${roleOpen === r.name ? "active" : ""}`} data-role={r.name} {...roving(roleKey(r.name))}
                       onClick={(ev) => openRoleFrom(ev.currentTarget, r.name)} aria-haspopup="dialog" aria-expanded={roleOpen === r.name}
                       aria-label={roleItemName(r)} title={`${r.name}: ${st.text}`}>
                       <span className="rail-rank" aria-hidden="true" />

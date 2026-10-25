@@ -90,7 +90,7 @@ function StageStrip({ i, compact }: { i: merge.BoardInitiative; compact: boolean
                 return (
                   <li key={n} className={short ? "short" : ""}>
                     <button
-                      className={`stg ${st}`}
+                      className={`stg sl ${st}`}
                       aria-current={st === "current" ? "step" : undefined}
                       aria-label={`Stage ${n} of ${stages.length}: ${title}${word ? `, ${word}` : ""}. Open it in Roadmap`}
                       title={s.outcome ? `${title}\n${s.outcome}` : title}
@@ -208,7 +208,7 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
           {i.target && <span className="ihead-target">target <b className="num">{dateWords(i.target)}</b></span>}
           {!headerOpen && <span className={`ihead-goal-line ${i.goal ? "" : "missing"}`} title={i.goal || undefined}>{i.goal || "no goal yet"}</span>}
         </div>
-        <button className="ihead-details" aria-expanded={headerOpen} aria-controls={`ihead-open-${i.id}`} onClick={() => setHeaderOpen(!headerOpen)}>
+        <button className="ihead-details sl" aria-expanded={headerOpen} aria-controls={`ihead-open-${i.id}`} onClick={() => setHeaderOpen(!headerOpen)}>
           {/* One label and one height open or closed, the chevron turning, as
               the card's Details (leftovers-19 FR-8, I34): swapped, not rotated,
               since WebKit's AX frame of a rotated svg grows the button's. */}
@@ -237,7 +237,7 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
           holds the screen's one "page" (leftovers-18 FR-7b, I22). */}
       <nav className="subtabs" aria-label="initiative views">
         {SUBS.map((s) => (
-          <button key={s.id} className={s.id === sub ? "on" : ""} aria-current={s.id === sub ? "true" : undefined} onClick={() => openInitiative(i.id, s.id)}>
+          <button key={s.id} className={s.id === sub ? "sl on" : "sl"} aria-current={s.id === sub ? "true" : undefined} onClick={() => openInitiative(i.id, s.id)}>
             {s.label}
           </button>
         ))}

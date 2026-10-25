@@ -35,7 +35,7 @@
   color: var(--fg); font-size: var(--font-size-md); font-weight: var(--weight-regular);
 }
 .week-list button:hover { background: var(--surface-hover); border-color: transparent; }
-.week-list button[aria-current="true"] { background: var(--surface-selected); }
+.week-list button.sl[aria-current="true"] { --mark-fill: var(--surface-selected); background: transparent; }
 .week-list .wl-money { color: var(--fg-muted); }
 .usage-mac { font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-subtle); cursor: default; border-radius: var(--radius-xs); }
 .usage-filter { color: var(--fg); background: var(--surface-selected); font-size: var(--font-size-sm); }

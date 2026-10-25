@@ -19,7 +19,7 @@ export function UsageChart({ history, week, thisWeek, onPick, every }: { history
         <h2 className="sec-title">Money per week</h2>
         <span className="sec-sub">{history.length === 1 ? "1 week recorded" : `${history.length} weeks`}{every ? ", every initiative" : ""}</span>
         <span className="spacer" />
-        <button className="ghost tiny-btn" onClick={() => setTable(!table)} aria-pressed={table}>{table ? "Show as chart" : "Show as table"}</button>
+        <button className="ghost tiny-btn sl" onClick={() => setTable(!table)} aria-pressed={table}>{table ? "Show as chart" : "Show as table"}</button>
       </div>
       {table ? (
         <table className="usage-weeks num">

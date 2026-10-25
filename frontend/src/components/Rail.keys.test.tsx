@@ -154,7 +154,7 @@ describe("E5: Roles join the rail's roving set (FR-9, T11)", () => {
 
   it("the rail's role rows are in the walk, tabindex -1, opening their drawer by a click", () => {
     const html = rail({ roles: 2 });
-    const roles = html.match(/<button[^>]*class="rail-item role[^"]*"[^>]*>/g) ?? [];
+    const roles = html.match(/<button[^>]*class="rail-item sl role[^"]*"[^>]*>/g) ?? [];
     expect(roles).toHaveLength(2);
     for (const r of roles) {
       expect(r).toContain('tabindex="-1"');

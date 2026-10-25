@@ -80,7 +80,8 @@
   display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--control-sm); padding: 0 var(--space-2);
   background: transparent; border-color: transparent; color: var(--fg-muted); font-size: var(--font-size-sm); font-weight: var(--weight-medium);
 }
-.ic-more:hover, .ic-more[aria-expanded="true"] { background: var(--surface-hover); border-color: transparent; color: var(--fg); }
+.ic-more:hover { background: var(--surface-hover); border-color: transparent; color: var(--fg); }
+.ic-more.sl[aria-expanded="true"] { --mark-fill: var(--surface-hover); background: transparent; border-color: transparent; color: var(--fg); }
 
 /* Details open: the card spans its row and grows down, the cards after it
    flow below, nothing overlays (FR-2, I18). Charter and Workspace side by

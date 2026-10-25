@@ -149,7 +149,7 @@ export function FloatList() {
       role="option"
       aria-selected={current === r.id}
       tabIndex={-1}
-      className={`fl-row ${current === r.id ? "on" : ""} ${folded ? "folded" : ""}`}
+      className={`fl-row sl ${current === r.id ? "on" : ""} ${folded ? "folded" : ""}`}
       onClick={() => pick(r.id)}
       onMouseMove={() => current !== r.id && setActive(r.id)}
       aria-label={[r.id, ...r.signals.map((s) => s.text)].join(", ")}
@@ -185,7 +185,7 @@ export function FloatList() {
           <div className="fl-rows">
           {!query.trim() && (
             <button type="button" id={optionId(HOME)} data-key={HOME} role="option" aria-selected={current === HOME} tabIndex={-1}
-              className={`fl-row fl-home ${current === HOME ? "on" : ""}`} onClick={() => pick(HOME)} onMouseMove={() => current !== HOME && setActive(HOME)}>
+              className={`fl-row sl fl-home ${current === HOME ? "on" : ""}`} onClick={() => pick(HOME)} onMouseMove={() => current !== HOME && setActive(HOME)}>
               <span className="fl-rank" aria-hidden="true" />
               <span className="fl-home-t">{homeLabel(needs)}</span>
             </button>

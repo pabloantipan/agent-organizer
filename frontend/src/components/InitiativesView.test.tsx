@@ -85,7 +85,7 @@ describe("C1: a press on the card's body opens it; its buttons never do (FR-1)",
   it("the body is one press target and Details sits in the card's foot, folded", () => {
     for (const c of cards) {
       expect(c).toMatch(/<div class="ic-main">/);
-      expect(c).toMatch(/<div class="ic-foot"><button class="ic-more" aria-expanded="false" aria-label="Details of \w+">Details/);
+      expect(c).toMatch(/<div class="ic-foot"><button class="ic-more sl" aria-expanded="false" aria-label="Details of \w+">Details/);
       expect(c).not.toContain("ic-details");
     }
   });
@@ -207,7 +207,7 @@ describe("D2: the header's Details keeps one frame open and closed (leftovers-20
   };
   const bar = (h: string) => {
     const pills = h.indexOf('<div class="ihead-pills">');
-    const details = h.indexOf('<button class="ihead-details"');
+    const details = h.indexOf('<button class="ihead-details sl"');
     return { pills, details, pillsEnd: h.lastIndexOf("</div>", details) };
   };
 
@@ -217,7 +217,7 @@ describe("D2: the header's Details keeps one frame open and closed (leftovers-20
       const b = bar(h);
       expect(b.pills).toBeGreaterThan(-1);
       expect(b.details).toBeGreaterThan(b.pillsEnd);
-      expect(h).toMatch(new RegExp(`<button class="ihead-details" aria-expanded="${open}"`));
+      expect(h).toMatch(new RegExp(`<button class="ihead-details sl" aria-expanded="${open}"`));
     }
   });
 

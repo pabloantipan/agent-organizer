@@ -15,8 +15,9 @@
 .memory button.memory-btn.high { color: var(--warning); }
 .memory button.memory-btn.critical { background: var(--warning); color: var(--fg-on-warning); border-radius: var(--radius-sm); }
 .memory button.memory-btn.critical:hover { background: var(--warning); color: var(--fg-on-warning); }
-.memory button.memory-btn[aria-expanded="true"]:not(.critical) { background: var(--surface-selected); }
-.memory button.memory-btn.critical[aria-expanded="true"] { box-shadow: 0 0 0 2px var(--surface-selected); }
+.memory button.memory-btn.sl[aria-expanded="true"]:not(.critical) { --mark-fill: var(--surface-selected); background: transparent; }
+/* The critical chip keeps its amber; open, it is ringed outside it. */
+.memory button.memory-btn.sl.critical[aria-expanded="true"] { --mark-line: 0 0 0 2px var(--surface-selected); }
 
 .memory-pop {
   position: absolute; top: calc(100% + var(--space-1-5)); right: 0;
