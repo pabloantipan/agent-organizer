@@ -1,13 +1,13 @@
 ---
 title: "Every state mark is painted on one untransitioned layer, so a mark never eases and hover eases on every control"
-status: next
+status: done
 repos: [organizer]
 branch: lf52-state-layer
 seat: l52-layer
 reviewer: l52-layer-review, l52-layer-ui
 stage:
 updated: 2026-10-25
-next: "review: lf52-state-layer, gate met (S1-S3, X0; U4 fixed, Amendment 2), 949c3dc"
+next: "merged (sup93); code review pass and UI review pass at 949c3dc"
 depends_on: []
 boundary: ["docs/specs/leftovers-52.md Boundary, lf52-state-layer"]
 spec: "docs/specs/leftovers-52.md (FR-1 to FR-3)"
