@@ -6,7 +6,7 @@ branch: lf53-record-statusline
 seat: l53-stat
 stage:
 updated: 2026-10-25
-next: "sup94: run .wt-notes/l53-stat/organizer as the statusLine for one turn with ORGANIZER_STATUSLINE_CAPTURE=.wt-notes/l53-stat/capture.raw.json, then wake l53-stat (capture at 456a804)"
+next: "decide: FR-7 breaks internal/service/factory_test.go:183-187 (TestRegisterCellWritesPushAndRegistersWhenAFactory asserts '409 should count as registered'), outside my boundary; may l53-stat flip it to expect an error (and CLAUDE.md's Record line, '2xx or 409 both count as registered')? Branch at 7aee595, R1 and L1 pass, X0 fails only on that test"
 depends_on: []
 boundary: ["docs/specs/leftovers-53.md Boundary, lf53-record-statusline"]
 spec: "docs/specs/leftovers-53.md (FR-7 to FR-8)"
@@ -16,6 +16,9 @@ ui_review: false
 
 ## Goal
 A renamed statusline field fails a test instead of turning into zeros.
+
+## Notes
+- 2026-10-25: X0 from a clean clone fails only `internal/service` `TestRegisterCellWritesPushAndRegistersWhenAFactory` (factory_test.go:186, "409 should count as registered"), which pins the dead branch FR-7 removes; the file is outside this card's boundary. CLAUDE.md's Record paragraph says the same.
 
 ## Gate
 docs/specs/leftovers-53.md, rows R1, L1 and X0.
