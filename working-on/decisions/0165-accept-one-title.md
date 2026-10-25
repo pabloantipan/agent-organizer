@@ -1,5 +1,5 @@
 ---
-title: Accept leftovers 55 - Deltagos's name shows once, in the top bar
+title: Accept leftovers 55 - one band at the top, the name only where the system shows it (revises 0066)
 status: proposed
 raised: 2026-10-25
 raised_by: fse
@@ -18,13 +18,24 @@ chosen:
 
 You asked, 2026-10-25, with a screenshot: "I see deltagos twice here, is it
 neceesary?", then "Send to Aglaea for a propper aproach please". Aglaea's
-design is `docs/ux/specs/one-title.md` (e10e5af): the native title bar
-stops drawing its text and the content runs under it, so the top bar is the
-one place "Deltagos" shows; the traffic lights sit inside the top bar, which
-keeps 80 px free for them and stays a drag region (double-click zooms). The
-window keeps its title, so Cmd-Tab, Mission Control, VoiceOver and the review
-tooling still find "Deltagos". 0066's naming stands; only the drawn
-duplicate goes. One card, `docs/specs/leftovers-55.md`, with a UI review.
+design, `docs/ux/specs/one-title.md` as rewritten (269ebd7): with the window
+in front the name shows three times today (the macOS menu bar, the native
+title bar, the top bar's brand). After this it shows once, in the menu bar:
+
+- the native title bar draws no text and the content runs to the top edge;
+  the traffic lights sit in an 80 px box at the top bar's left, which is
+  where the brand word was, so the bar folds at 1024 as today;
+- the brand word leaves the top bar;
+- the window keeps its title, so the Dock, Cmd-Tab, Mission Control,
+  VoiceOver and the review tooling still say Deltagos;
+- the version, hover-only today, gets real homes: About Deltagos in the app
+  menu, and `Deltagos <version> · <machine>` at the foot of Settings;
+- empty bar space drags the window and a double-click follows your system
+  setting; full screen and the lock screen keep the lights' box.
+
+This revises 0066's "the top bar says Deltagos" (the name itself stays
+Deltagos everywhere the system reads it). One card,
+`docs/specs/leftovers-55.md`, with a UI review.
 
 ## Options
 

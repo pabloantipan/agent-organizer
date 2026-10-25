@@ -1,38 +1,56 @@
-# Leftovers 55: Deltagos's name shows once, in the top bar: the build spec
+# Leftovers 55: one band at the top, the name only where the system shows it: the build spec
 
 status: proposed (0165)
-by: the FSE, 2026-10-25, on main at e10e5af
+by: the FSE, 2026-10-25, on main at 269ebd7 (rewritten from Aglaea's second
+reply the same day)
 sources: Pablo, 2026-10-25 in the FSE session, with a screenshot: "I see
 deltagos twice here, is it neceesary?", then "Send to Aglaea for a propper
-aproach please"; Aglaea's `docs/ux/specs/one-title.md` (e10e5af), rows
-T1-T5; record 0066 (the name Deltagos in the window and the top bar).
-Premises read today.
+aproach please"; Aglaea's `docs/ux/specs/one-title.md` as rewritten
+(269ebd7), rows T1-T9, which replaces her first reply (e10e5af); record 0066
+(the name Deltagos in the window and the top bar). Premises read today.
 
-## Premises (read 2026-10-25 at e10e5af)
+## Premises (read 2026-10-25 at 269ebd7)
 
 | Premise | Shown by |
 |---|---|
-| the window draws the native title bar with "Deltagos", and the top bar under it starts with the brand "● Deltagos" and the version | Pablo's screenshot; `main.go:28-30` (`mac.Options` sets only `TabFocusesLinks`); `frontend/src/components/TopBar.tsx` |
-| the top bar is already a drag region, its children no-drag | `frontend/src/styles/global.css:99-109` |
+| the name shows three times with the window in front: the macOS menu bar, the native title bar, and the top bar's brand | Pablo's screenshot; one-title (269ebd7) |
+| the window's title is set from `windowTitle()`; `mac.Options` sets only `TabFocusesLinks`, no title bar style and no About | `main.go:28-30, 45` |
+| the top bar's first item is the brand `Deltagos`, and the version is only in its hover | `frontend/src/components/TopBar.tsx:30-31, 83-84` |
+| the top bar is a drag region with no-drag children | `frontend/src/styles/global.css:99-109` |
+| the lock screen draws its own lockup | `frontend/src/components/Gate.tsx:51` (`LockScreen`), `DeltagosMark.tsx:203` |
 | the floating icon's list mode drops `NSWindowStyleMaskTitled` and restores the saved style mask | `floaticon_darwin.m:672-698` |
-| seat-pointer and the review tooling find the window by its title | supervise 7b; one-title T5 |
+| CLAUDE.md states 0066's naming ("the window, the top bar, the version line … say so") | `CLAUDE.md`, first paragraph |
 
 ## Requirements
 
-Card `lf55-one-title` (Go window options and frontend top bar):
+Card `lf55-one-title` (Go window options and frontend):
 
-- **FR-1** (T1) The window uses a hidden-inset title bar: no native title
-  text is drawn, the content runs under the bar, the traffic lights stay;
-  the window's title stays "Deltagos" for Cmd-Tab, Mission Control, the
-  Window menu, VoiceOver and seat-pointer (T5).
-- **FR-2** (T2) The top bar is at least 40 px high, the lights centred on
-  its content line ±2 px, and nothing in it lies within 80 px of the
-  window's left edge; that space is a drag region. The 80 px holds in full
-  screen, so the brand does not move (T4).
-- **FR-3** (T3) Empty top bar space drags the window and a double-click
-  zooms it; every control stays no-drag.
-- **FR-4** Compact and restore through the floating icon keep the hidden
-  title bar (the restored style mask includes the full-size content view).
+- **FR-1** (T1, T3) The native title bar is hidden and draws no text; the
+  content runs to the window's top edge (Wails `TitleBar` Hidden or
+  HiddenInset, whichever centres the lights per FR-3); the traffic lights
+  stay. The brand word leaves the top bar: with the window in front, the
+  name is in the macOS menu bar and nowhere inside the window.
+- **FR-2** (T2) The window's title stays `Deltagos` (`Deltagos Review` in
+  the review build) for Cmd-Tab, Mission Control, the Window menu, the
+  Dock's window list, VoiceOver and seat-pointer.
+- **FR-3** (T4, T5) The top bar starts with an 80 px box for the lights:
+  no text or control in it, draggable; then Places and the crumbs, then the
+  groups as today. Its height is 40 to 52 px, measured so the lights are
+  centred on the content line ±2 px. At 1024×640 the bar folds at the same
+  step as on main with the same content.
+- **FR-4** (T6) Every empty stretch of the bar drags the window; a
+  double-click there does what the system setting says (zoom, minimise or
+  nothing); a control never drags.
+- **FR-5** (T7) The version has real homes: the app menu's About Deltagos
+  (`mac.Options.About`, `Version <version>`), and Settings' foot reads
+  `Deltagos <version> · <machine>`. The brand's hover goes with the brand.
+- **FR-6** (T8, T9) The 80 px box stays in full screen, so the places keep
+  their x; the lock screen keeps the box free and shows no title text.
+- **FR-7** Compact and restore through the floating icon keep the hidden
+  title bar.
+- **FR-8** CLAUDE.md's naming paragraph says where the name shows now (the
+  menu bar, the window title, About, Settings' foot, the bundle and the DMG),
+  per 0165.
 
 ## Acceptance → gate
 
@@ -41,25 +59,26 @@ the seat's own review build, by seat-pointer against its own pid.
 
 | # | FR | Check | Expected (fails on main) |
 |---|---|---|---|
-| H1 | 1 | the review build, AX read of its window (`seat-pointer window --pid`), and `shot` | the window's AX title is `Deltagos Review` (the review bundle's name); no native title text in the shot |
-| H2 | 2 | vitest reading `TopBar` and the top bar's CSS; the shot at 1024×640 and 1440×900 | min-height 40 px; the first control's left edge at or past 80 px; the lights' centre within 2 px of the content line |
-| H3 | 3 | seat, by seat-pointer: `drag` from empty top bar space, `click --double` there, `click` on a control | the window moves, zooms, and the control acts without a drag |
-| H4 | 4 | the floating icon's compact then restore, through its FLOAT_LOG hooks, then `shot` | the title bar is still hidden-inset after restore |
-| H5 | 2 | seat, by seat-pointer: full screen on the seat's own window (`front --pid` first), `shot` | the brand at the same x as windowed |
+| H1 | 1, 2 | review build: `seat-pointer window --pid` (AX title), `shot` | AX title `Deltagos Review`; no title text and no brand word in the shot; content from the top edge |
+| H2 | 3 | vitest of `TopBar` (no brand; the lights' box first) and the bar's CSS; shots at 1024×640 and 1440×900 | the box 80 px with no child control; height in 40-52 px; the lights' centre within 2 px of the content line; 1024 folds at main's step |
+| H3 | 4 | seat, by seat-pointer: `drag` from empty bar space, `click --double` there, `click` on a control | the window moves; the double-click does what `defaults read -g AppleActionOnDoubleClick` says; the control acts without a drag |
+| H4 | 5 | review build: About Deltagos from the app menu (AX), Settings' foot (vitest and shot) | `Version <version>`; `Deltagos <version> · <machine>` |
+| H5 | 6, 7 | full screen on the seat's own window (`front --pid` first), the lock screen (fixture with a passcode), and the floating icon's compact then restore through its FLOAT_LOG hooks, each with `shot` | the places at the same x; the box free on the lock screen; the title bar still hidden after restore |
+| H6 | 8 | grep CLAUDE.md | the naming paragraph lists the new places and cites 0165 |
 | X0 | all | `XDG_DATA_HOME=$(mktemp -d) CONTRACTS_DIR=~/agent-slack/specs/contracts make test`, `wails build`, `make review-build` in the worktree, then `git status --porcelain` | pass, empty |
 
-The UI review (ui_review: true) checks one-title T1 to T5.
+The UI review (ui_review: true) checks one-title T1 to T9.
 
 ## Boundary
 
-`main.go` (`mac.Options`), `frontend/src/components/TopBar.tsx` and its
-test, `frontend/src/styles/global.css` (`.topbar` and `.brand` only),
-`frontend/src/styles/shell.css` (the top bar's rules only),
-`floaticon_darwin.m` only if FR-4 needs it. Not CLAUDE.md's naming
-paragraph: the name stays Deltagos everywhere it is read.
+`main.go` (`mac.Options`, the window options), `frontend/src/components/TopBar.tsx`,
+`Settings.tsx` (the foot), `Gate.tsx` (the lock screen's top) and their
+tests, `frontend/src/styles/global.css` and `shell.css` (the top bar's and
+the lock screen's rules only), `floaticon_darwin.m` only if FR-7 needs it,
+CLAUDE.md's naming paragraph.
 
 ## Cards
 
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
-| `lf55-one-title` | H1-H5, X0 | — | true |
+| `lf55-one-title` | H1-H6, X0 | — | true |
