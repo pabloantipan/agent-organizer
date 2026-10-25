@@ -86,64 +86,57 @@ Not changed, on purpose:
 
 ## Review
 
-**Verdict: pass.** Reviewer `l52-layer-review` (code review, gate rows), 2026-10-24, round 3. Branch `lf52-state-layer` at **8b27732**, from a fresh clean clone; the branch did not move during the review.
-- History: round 1 (e6d77d6) failed S1 (FR-3). Round 2 (75945c2) fixed FR-3 but failed, because Amendment 1 (91cc03f) was not built yet.
-- This SHA: `git range-diff` shows 279759b, b8f4071 and db50c11 `=` f84a45d, 998a280 and 75945c2. Then 8b27732 builds Amendment 1 in 9 stylesheets and the kit and two StateLayer tests (+210 −43). Its stylesheets: float, global, initiatives, memory, roles, rule-box, shell, usage, plus work.css, which loses its own reduced-motion rule to the global guard.
+**Verdict: pass.** Reviewer `l52-layer-review` (code review, gate rows), 2026-10-24, round 4. Branch `lf52-state-layer` at **949c3dc**, from a fresh clean clone; the branch did not move during the review.
+- History: rounds 1 to 3 were e6d77d6 (fail, S1 FR-3), 75945c2 (fail, Amendment 1 not built) and 8b27732 (pass).
+- Round 3 missed U4, which the UI review found: `--mark-edge: 0` (unitless) made `calc(-1 * var(--mark-edge))` a number, so four controls laid out 0x0. My round 3 described that value without catching it.
+- This SHA: `git range-diff` shows 161240e, e8a3610, 9c4db53 and 0a9f374 `=` 279759b, b8f4071, db50c11 and 8b27732. Then 949c3dc (+43 −21) gives `--mark-edge` its unit in float, global, roles and shell. It drops `color` from the `.sl, .sl-shadow` ease (Amendment 2, 82f0d30, FR-2a withdrawn) and changes the kit and the two StateLayer tests to match.
 
-**Unmet gate items: none.** S1, S2 and S3, each with its Amendment 1 additions, and X0 are met.
+**Unmet gate items: none.** S1, S2 and S3 as amended by Amendments 1 and 2, and X0, are met.
 
-### change-check (fresh clean clone of 8b27732)
+### change-check (fresh clean clone of 949c3dc)
 
 ```
-repo organizer: base 3009067cb (default origin/main) ... head lf52-state-layer (clone HEAD 8b27732a4, on detached) 8b27732a4; 35 files, 49 flags
+repo organizer: base f812182e5 (default origin/main) ... head lf52-state-layer (clone HEAD 949c3dcc5, on detached) 949c3dcc5; 35 files, 49 flags
 49 flags: outside boundary 26, outside footprint 0, undeclared 0, declared, not changed 0, new env var 0, new dependency 0, new host 0, risk 0, untested? 23, could not read 0, boundary unreadable 0
 ```
-(The full table is in `.wt-notes/l52-layer-review/change-check3.txt`.)
-- **outside boundary (26)**: the same 26 component and test files as rounds 1 and 2, with the same explanation. The components carry class words only (8b27732 touches no component). The rest are the CSS test, its kit and S3's test, the class literals the 7 markup tests follow, and the removal of lf51's K4. The new 35th file, `work.css`, is a stylesheet and inside the boundary. `review.css` is unchanged.
-- **undeclared 0 / declared, not changed 0.**
-- **untested? (23)**: round 2's list plus the kit's new helpers (`withCompanions`, `winnerOf`, `px`, `borderWidth`, `borderColor`), all exercised by the new checks. Not a finding.
+(The full table is in `.wt-notes/l52-layer-review/change-check4.txt`.) The flags are the same as round 3, with the same explanations. The 26 outside the boundary are the components (class words only; 949c3dc touches none), the CSS test, its kit and S3's test, the 7 markup tests' class literals, and lf51's K4 removed. `review.css` is unchanged. There are 0 undeclared and 0 declared-not-changed. The 23 untested are kit helpers and class-only component symbols.
 
 ### Rows
 
-Each new check fails at 75945c2: I copied 8b27732's three test files onto a clean clone of 75945c2 (`Tests 93 failed | 97 passed (190)`). On the branch: `Tests 194 passed (194)`. Per new check, failures at 75945c2 → passes at 8b27732:
+New and changed checks, with 949c3dc's three test files copied onto a clean clone of 8b27732: `Tests 56 failed | 144 passed (200)`. On the branch: `Tests 200 passed (200)`.
 
-| new check (Amendment 1) | fail at 75945c2 | pass at 8b27732 |
+| check | fail at 8b27732 | pass at 949c3dc |
 |---|---|---|
-| S1 `the layer reaches the border box … (FR-1b, R52)` | 1/1 | 1 |
-| S1 `a bordered control's layer covers its border box …` (per control) | 21/21 | 21 |
-| S1 `an opaque fill keeps the control's border drawn over it …` (per control) | 16/16 | 16 |
-| S1 `the critical memory chip's open ring is 2px outside its border (FR-1c)` | 1/1 | 1 |
-| S1 `hover changes nothing on an opaque mark (FR-1d)` (per control) | 12 of 13 | 13 (one control already met it) |
-| S2 `the hover transition lists background-color and color (FR-2a)` | 1/1 | 1 |
-| S2 `under reduced motion one global guard … (FR-1a, R51)` | 1/1 | 1 |
-| S2 `background-color and color ease 100 ms …` (per control, rewritten) | 22/22 | 22 |
-| S3 `a bordered control's fill covers its border box (FR-1b)` | 5/5 surfaces | 5 |
-| S3 `hover on the marked control draws no rim (FR-1d)` | 2 of 5 (rail, seg; People, strip and sub-tabs have no opaque fill) | 5 |
+| S1 `every custom property the layer's calc() reads is a length with a unit wherever it is set, and so is its fallback (U4)` | 1/1 | 1 |
+| S1 `nothing it paints … is transitioned` (ink no longer exempt) | 13 of 39 | 39 |
+| S2 `the hover transition lists background-color and not color … (Amendment 2)` | 1/1 | 1 |
+| S2 `hover is 100 ms` (EASE back to background-color only) | 1/1 | 1 |
+| S2 `background-color eases 100 ms on --ease-out …` (per control) | 23/23 | 23 |
+| S3 `the old control's ink is the unmarked ink in the next frame (Amendment 2)` | 5/5 | 5 |
+| S3 `a bordered control's fill covers its border box (FR-1b)` (U4: `px` rejects `calc(-1 * 0)`) | 2 of 5 (People, sub-tabs) | 5 |
 
 - **S1, met.**
-  - One rule, written once (global.css:73-80). `.sl::before` sits at `inset: calc(-1 * var(--mark-edge, 0px))` and draws `border: var(--mark-edge, 0px) solid var(--mark-rim)`. `--mark-edge` is set by each rule that sets a control's border (`button` 1px; `border: 0` controls reset it to 0). An opaque mark restates its border colour as `--mark-rim`.
-  - FR-1c: the memory chip's `0 0 0 2px` now spreads from the border's outer edge, unchanged in memory.css, because the layer moved.
-  - FR-1d: every opaque mark restates its rest background (`transparent`, or `var(--button-bg)` on the non-ghost tiny-btn and `.act`).
-  - My S1 inputs, re-run at 8b27732 (appended to a copy of outline.css in a scratch copy of the clone, test untouched): V1 3 fail, V2 3, V3 `[aria-expanded=true]` 3, V4 1, V5 2, V6 `:is(.active)` 3, V7 `[aria-pressed=true]` 3, `[… i]` 1 (the cross-check), `[ aria-pressed = true ]` 3, `:where(:is(.x, .on))` 3.
-  - Inputs aimed at Amendment 1: a control's own reduced-motion `transition: none` → 1 fail (the guard check); a 2px-bordered control on the layer with no `--mark-edge` → 2 fail (FR-1b); an opaque mark with no restated background → 1 fail (FR-1d); a mark whose ink eases 2 s → 1 fail (S2's ease).
-  - Still passing, as in round 2 (notes): `[class~="active"]`, `[ARIA-EXPANDED="true"]`, longhand `transition-property`/`transition-duration` (no sheet uses them today).
-- **S2, met.**
-  - The ease is `background-color …, color …` on `.sl` and `.sl-shadow` (FR-2a).
-  - The one guard is `@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }` (global.css:78-80). The test asserts it is the only reduced-motion `transition` rule, and work.css's own rule is gone.
-  - lf51's list is still gone. `transition: none` left in the sheets but review.css: global.css:32 and :40 (disabled), :75 (the layer), :79 (the guard), header.css:60 (the compact chevron). None is a list.
-- **S3, met.** Branch: the 5 surfaces × 8 checks all pass. The new checks are above.
+  - The layer is unchanged except that every `--mark-edge` now has its unit. `grep -n -- '--mark-edge:' frontend/src/styles/*.css | grep -v '1px\|0px'` prints nothing.
+  - The U4 test reads every `var()` inside the layer's `calc()` and rejects any rule setting that property without a unit, and a unitless fallback. Sensitivity (appended to a copy of outline.css in a scratch copy of the clone, test untouched): `.ol-label { border: 0; --mark-edge: 0; }` → 1 fail (U4); `0rem` passes, which is right, since it is a length.
+  - "Nothing it paints transitions" covers ink again: a mark whose ink eases with `color` in an `.sl` transition → 2 fail.
+  - My earlier inputs, re-run: `[aria-expanded=true]`, `:is(.active)`, `[aria-pressed=true]` → 3 fail each. A control's own reduced-motion rule → 1 fail (the guard check). A bordered control with no `--mark-edge` → 2 fail. An opaque mark with no restated background → 1 fail (FR-1d).
+- **S2, met.** `.sl, .sl-shadow { … transition: background-color var(--dur-fast) var(--ease-out); }` (global.css:74) and `--dur-fast: 100ms`. The one reduced-motion guard is at global.css:79-81. lf51's list is gone. The `transition: none` left are disabled buttons (:32, :40), the layer (:76), the guard (:80) and header.css:60's chevron.
+- **S3, met.** 5 surfaces × 9 checks, all passing on the branch. The new ink check fails on all 5 at 8b27732.
 - **X0, met.**
   - `CI=true test-lease run -- pnpm install --frozen-lockfile` ok.
-  - `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test`: **reused**, run `69843041-32146` of 8b27732a42d6 by organizer-probe-l52-layer-ui at 21:07:03 (`Test Files 86 passed (86)`, `Tests 1291 passed (1291)`, exit 0).
-  - `test-lease run -- pnpm run build`: `✓ built in 1.34s`, exit 0.
-  - `test-lease run -- wails build`: `Built '…/Deltagos.app/Contents/MacOS/organizer' in 9.979s`, exit 0.
+  - `XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test`: **reused**, run `2042905c-65822` of 949c3dcc5b4e by organizer-probe-l52-layer-ui at 21:21:36 (`Test Files 86 passed (86)`, `Tests 1297 passed (1297)`, exit 0).
+  - `test-lease run -- pnpm run build`: `✓ built in 1.32s`, exit 0.
+  - `test-lease run -- wails build`: `Built '…/Deltagos.app/Contents/MacOS/organizer' in 10.358s`, exit 0.
   - Runtime not touched. `git status --porcelain`: empty.
 
 ### Notes (not blocking), each with where it goes
-- **A mark's ink now eases 100 ms.** S1's "nothing it paints transitions" check leaves out `color`, because FR-2a puts `color` in the hover ease and the ease cannot tell a hover from a mark. So a sub-tab, gear or chat row whose mark changes ink eases its ink when the mark moves. Fill and line stay instant, which is what R50 names. This follows from Amendment 1 as written → to the FSE / Aglaea, if R50 should cover ink.
-- See-through marks with a coloured border (`.chat.sl.active`, the strip) keep `--mark-rim: transparent`. Their rgba fill now sits over the control's own border, which tints the border slightly where main drew the border on the layer → to the UI re-review (R52).
-- Longhand transitions, `[class~="active"]` and uppercase `ARIA-*` names are not read (proved in round 2, still true) → to the FSE (a next leftovers).
-- From earlier rounds, still open: `.chart-bar`'s mark is not on the layer → FSE / Aglaea. `.ib-row.focused` eases → the next leftovers (Amendment 1 already names it). S3's "vitest in the harness" is a cascade model → FSE.
+- **The tests model the cascade and cannot see layout.** U4 slipped past the code review and every vitest until the UI review measured a 0x0 box. The new test covers this one case, but the kit cannot tell a valid value from an invalid one in general → to the FSE: keep R50/R52's computed-box check in the UI review for any change to `.sl::before`.
+- Round 3's ink note is closed by Amendment 2.
+- Still open, from earlier rounds:
+  - Longhand transitions, `[class~="active"]` and uppercase `ARIA-*` names are not read → FSE (a next leftovers).
+  - A see-through mark's fill sits over a coloured border (`.chat`, strip) → UI re-review.
+  - `.chart-bar` is not on the layer → FSE / Aglaea.
+  - `.ib-row.focused` → the next leftovers.
 
 ## UI review
 
