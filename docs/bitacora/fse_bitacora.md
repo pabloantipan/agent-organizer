@@ -4,6 +4,12 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## 2026-10-25 03:25
+
+- Last SHA seen: 5dcac01. leftovers 52: wave 1 merged (0289401, 0683aa2), lf52-decisions-line in review. leftovers 53 (0163): three cards in review; sup93 and sup94 both extended to ~03:56. Installed v0.2.0-2837-ga528163.
+- Crossing 0021 acknowledged (Elenx writes working-on/reviews/; the scan and tidy-check ignore it); [for hephaistos] to filter working-on/reviews/ out of the card-change post-commit hook.
+- Held for the next leftovers (filed from lf53-frontmatter's review, Found 1): the app and the CLI use the crossing statuses — awaiting-cells counts as a decision waiting (Needs me, the header's count, `organizer decisions`), applied and acknowledged count as ruled (Decisions timeline, turnaround); `frontend/src/lib/queue.ts`, `lib/decisions.ts`, `internal/cli` decisions. Also held: the shared-layer follow-ups (focused marks, role rows, header gap R53), rule-questions UW2/UW3 leftovers if any remain, LaunchServices clutter.
+
 ## 2026-10-24 19:20
 
 - Last SHA seen: 7b7a9c1. leftovers 51 landed (e779bd3; sup92 2h21m against 30-60m: 66 min usage-limit stop, three amendment rounds; ~$29.50 seats); installed v0.2.0-2788-ge779bd3. 0162 (leftovers 52) ruled by Pablo in the session ("accept as written"); sup93 runs it.
