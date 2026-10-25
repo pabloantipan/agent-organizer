@@ -3,7 +3,7 @@ import { marked } from "marked";
 import type { merge, model } from "../../wailsjs/go/models";
 import { DAY, dateWords, daysBetween, parseISO, today } from "../lib/dates";
 import { addLocalDays } from "../lib/axis";
-import { chosenFloor, chosenLines, ownerPhrase } from "../lib/decisions";
+import { chosenLines, fitAnswers, ownerPhrase, ruledAnswers, type Answer } from "../lib/decisions";
 import { RULED_LIMIT, countWords, decisionMatches, emptyRuledWords, lineName, rulerWords, ruledShown, shownSections, statusWord, summaryOf, timelineName, turnaroundWords, waitedWords, type DecSections } from "../lib/decisionsPage";
 import { readOnlyOf } from "../lib/queue";
 import { decisionKey, draftVerb, useDrafts, type Draft, type DraftFields } from "../lib/drafts";
@@ -271,11 +271,12 @@ export function DecisionsView() {
     const ruledOn = dateWords(parseISO(d.ruled) ?? now, now);
     const t = turnaroundWords(d.raised, d.ruled);
     const isRuled = d.status === "ruled" && !!d.chosen;
-    // leftovers-51 FR-8: a question record's line floors each answer
-    // (`Q1 after…, Q2 record…`), its name keeps the whole chosen; open, the
-    // line drops it, since the head shows it in full (FR-7).
-    const floor = isRuled ? chosenFloor(d.options, d.chosen) : null;
-    const chosen = isRuled && !isOpen ? `“${floor ?? d.chosen}”` : "";
+    // leftovers-52 FR-4: a question record's line shows its answers whole
+    // while they fit and cuts each to an equal share when they do not
+    // (RuledAnswers); open, the line and its name drop the chosen, since the
+    // head shows it in full (leftovers-51 FR-7, leftovers-52 FR-5).
+    const answers = isRuled ? ruledAnswers(d.options, d.chosen) : null;
+    const chosen = isRuled && !isOpen ? `“${d.chosen}”` : "";
     // FR-12, 0045: every proposed record offers Rule, whoever owns it.
     // FR-13: a record of an initiative that is not active offers none.
     const canRule = d.status === "proposed" && !readOnlyOf(view, r.initiative);
@@ -310,7 +311,7 @@ export function DecisionsView() {
       <div key={r.key} data-dec={r.key} className={`dec ${d.status} ${isOpen ? "expanded" : ""} ${focused ? "focused" : ""}`} style={style}>
         <div className={`dec-head ${stuck ? "stuck" : ""}`}>
           {/* §9: the name says each visible fact once ("waiting" once). */}
-          <button className="dec-line" ref={chosen ? watchLine : undefined} aria-expanded={isOpen} aria-label={`${lineName(d, now, all ? r.initiative : undefined, ruledOn)}${lineDraft ? ", draft" : ""}`} onClick={() => toggle(r.key)} title={`${chosen ? `“${d.chosen}” · ` : ""}${isOpen ? "collapse" : "show the record"}`}>
+          <button className="dec-line" ref={chosen ? watchLine : undefined} aria-expanded={isOpen} aria-label={`${lineName(d, now, all ? r.initiative : undefined, ruledOn, isOpen)}${lineDraft ? ", draft" : ""}`} onClick={() => toggle(r.key)} title={`${chosen ? `“${d.chosen}” · ` : ""}${isOpen ? "collapse" : "show the record"}`}>
             <span className="dec-num mono">{d.number}</span>
             <span className={`dec-title${d.title.length > TITLE_FLOOR ? " floored" : ""}`}>{d.title}</span>
             {all && <span className="badge">{r.initiative}</span>}
@@ -318,11 +319,10 @@ export function DecisionsView() {
             {/* The chosen option and its separator are one item, so they drop
                 together (leftovers-13 FR-1): the option ellipsizes to its floor,
                 the title to its own, then watchLine drops both into the hover. */}
-            {chosen && (
-              <span className={`dec-opt${chosen.length > CHOSEN_FLOOR && !floor ? " floored" : ""}`}>
-                {/* A floored question chosen is its floor: it does not shrink
-                    further, and past it watchLine drops it whole. */}
-                <span className="dec-chosen" title={`“${d.chosen}”`} style={floor ? { flex: "none" } : undefined}>{chosen}</span>
+            {chosen && answers && <RuledAnswers answers={answers} title={chosen} />}
+            {chosen && !answers && (
+              <span className={`dec-opt${chosen.length > CHOSEN_FLOOR ? " floored" : ""}`}>
+                <span className="dec-chosen" title={chosen}>{chosen}</span>
                 <span className="dec-sep">·</span>
               </span>
             )}
@@ -545,6 +545,59 @@ function timelineCountOf(matched: number, total: number, hidden: number, hiddenH
  *  title to about 20. A text no longer than its floor never shrinks. */
 const CHOSEN_FLOOR = 9; // the quotes count: “accept as…”
 const TITLE_FLOOR = 20;
+
+/** A question record's chosen on its Ruled line (leftovers-52 FR-4, UW2):
+ *  the item asks the line for the whole answers' width and gives way down to
+ *  their floor (every answer at ALT_FLOOR), both measured in the chosen's
+ *  own font, so the title and watchLine see the same item as a plain
+ *  option's; the text then fits the room the line actually gave it,
+ *  measured on every resize. Before the first measure it is whole, cut by
+ *  CSS. */
+function RuledAnswers({ answers, title }: { answers: Answer[]; title: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [width, setWidth] = useState<{ of: (s: string) => number } | null>(null);
+  const [room, setRoom] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => { const w = textWidth(el); if (w) setWidth({ of: w }); };
+    measure();
+    let live = true;
+    document.fonts?.ready.then(() => { if (live) measure(); });
+    const read = () => setRoom(el.getBoundingClientRect().width);
+    read();
+    const ro = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(read);
+    ro?.observe(el);
+    return () => { live = false; ro?.disconnect(); };
+  }, []);
+  // A new measure changes the item's sizes, not the line's: settle the line
+  // again, since its own observer will not fire.
+  useLayoutEffect(() => {
+    const line = ref.current?.closest<HTMLElement>(".dec-line");
+    if (width && line) settleLines([line]);
+  }, [width]);
+  // One pixel of slack each way: the canvas and the line round apart.
+  const sizes: CSSProperties | undefined = width
+    ? { flexBasis: `calc(${width.of(fitAnswers(answers, Infinity, width.of)) + 1}px + 4px + 1ch)`, minWidth: `calc(${width.of(fitAnswers(answers, 0, width.of)) + 1}px + 4px + 1ch)` }
+    : undefined;
+  const text = width && room !== null ? fitAnswers(answers, room - 1, width.of) : fitAnswers(answers, Infinity, () => 0);
+  return (
+    <span className="dec-opt answers" style={sizes}>
+      <span className="dec-chosen" ref={ref} title={title}>{text}</span>
+      <span className="dec-sep">·</span>
+    </span>
+  );
+}
+
+/** Text width in an element's font, by canvas; null where there is none. */
+const canvas = typeof document === "undefined" ? null : document.createElement("canvas");
+function textWidth(el: HTMLElement): ((s: string) => number) | null {
+  const ctx = canvas?.getContext("2d");
+  if (!ctx) return null;
+  const cs = getComputedStyle(el);
+  const font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+  return (s) => { ctx.font = font; return ctx.measureText(s).width; };
+}
 
 /** Past both floors a line would overflow: its chosen option drops whole,
  *  with its separator, and the title gives way below its floor. One

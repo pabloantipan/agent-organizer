@@ -110,5 +110,10 @@ button.dec-more:hover { background: var(--surface-hover); }
 .dec-chosen { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .dec-sep { flex-shrink: 0; width: 1ch; text-align: center; }
 .dec-title.floored { min-width: 20ch; }
+/* leftovers-52 FR-4 (UW2): a question record's answers. The item's basis
+   and floor are the whole answers' width and their floor, measured and set
+   inline (DecisionsView, RuledAnswers); the text takes the room the item
+   gets, so it is never what sizes the line. */
+.dec-opt.answers .dec-chosen { flex: 1 1 0; }
 .dec-line[data-drop] .dec-opt { display: none; }
 .dec-line[data-drop] .dec-title { min-width: 0; }

@@ -55,9 +55,10 @@ const chosenOnLine = (rec: string) => /<span class="dec-chosen"[^>]*>([^<]*)<\/s
 const text = (s: string) => s.replace(/<[^>]*>/g, "\n").split("\n").map((t) => t.trim()).filter(Boolean);
 
 describe("W5: the Ruled list speaks a question record (leftovers-51 FR-7, FR-8)", () => {
-  it("closed, the line floors per answer and its name keeps the full chosen", () => {
+  it("closed, the line draws the answers whole before it measures, and its name keeps the full chosen (leftovers-52 D1)", () => {
     const rec = recordOf(draw(null), "0037");
-    expect(chosenOnLine(rec)).toBe("“Q1 after…, Q2 record…”");
+    expect(chosenOnLine(rec)).toBe(`“${CHOSEN}”`);
+    expect(lineOf(rec)).toMatch(/class="dec-opt answers"/);
     expect(/aria-label="([^"]*)"/.exec(lineOf(rec))![1]).toContain(`“${CHOSEN}”`);
     expect(/<span class="dec-chosen" title="([^"]*)"/.exec(rec)![1]).toBe(`“${CHOSEN}”`);
     expect(rec).not.toMatch(/>Chosen</);
@@ -75,8 +76,10 @@ describe("W5: the Ruled list speaks a question record (leftovers-51 FR-7, FR-8)"
     const head = /<div class="dec-head[^"]*">([\s\S]*?)<div class="dec-body">/.exec(rec)![1];
     const after = text(head.slice(head.indexOf("</button>")));
     expect(after.slice(0, 3)).toEqual(["Chosen", "Q1 after-graph-performs-start-now", "Q2 record-page"]);
-    // still named in full on the line, so the open line keeps its name
-    expect(/aria-label="([^"]*)"/.exec(lineOf(rec))![1]).toContain(`“${CHOSEN}”`);
+    // leftovers-52 D2 (FR-5, UW3): the head says it, so the line's name does not
+    const name = /aria-label="([^"]*)"/.exec(lineOf(rec))![1];
+    expect(name).not.toContain("Q1");
+    expect(name).not.toContain("“");
   });
 
   it("open, a plain ruled record's head shows its one option", () => {

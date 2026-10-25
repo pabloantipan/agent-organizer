@@ -123,25 +123,56 @@ export function chosenLines(options: string[] | undefined, chosen: string): stri
   return lines.length > 0 ? lines : [chosen];
 }
 
-/** How much of an alternative the Ruled line keeps (FR-8): its first word,
- *  at most this many characters. */
-const ALT_FLOOR = 8;
+/** One answer of a ruled question record: its label and the alternative. */
+export type Answer = { label: string; alt: string };
 
-/** The Ruled line's chosen on a question record, floored per answer (FR-8):
- *  `Q1 after…, Q2 record…`, each label whole and each alternative cut to its
- *  first word (at most ALT_FLOOR characters); null on a plain record, whose
- *  one option the line floors as a whole. */
-export function chosenFloor(options: string[] | undefined, chosen: string): string | null {
+/** A ruled question record's answers in question order, or null on a plain
+ *  record or a chosen that names no answer, whose line keeps one option. */
+export function ruledAnswers(options: string[] | undefined, chosen: string): Answer[] | null {
   const qs = questionsOf(options);
   if (!qs) return null;
   const picks = picksOf(qs, chosen);
-  const answered = qs.filter((q) => picks[q.label]);
-  if (answered.length === 0) return null;
-  const cut = (alt: string) => {
-    const word = alt.split(/[-_\s]/)[0].slice(0, ALT_FLOOR);
-    return word.length < alt.length ? `${word}…` : alt;
+  const answers = qs.filter((q) => picks[q.label]).map((q) => ({ label: q.label, alt: picks[q.label] }));
+  return answers.length > 0 ? answers : null;
+}
+
+/** The least of an alternative a cut answer keeps, in characters, before its
+ *  ellipsis (rule-questions A1, UW2): `Q1 after…`. */
+const ALT_FLOOR = 5;
+
+/** The Ruled line's chosen on a question record, quoted, in `room` pixels
+ *  as `width` measures text (leftovers-52 FR-4, UW2). Whole while it fits.
+ *  When it does not, each answer gets an equal share of the room left by
+ *  the quotes and the `, ` between answers; one that fits its share stays
+ *  whole and leaves the rest to the others; the others keep their `Q<n>`
+ *  whole and cut the alternative with an ellipsis to their share, never
+ *  below ALT_FLOOR characters. A room of 0 gives the line's floor. */
+export function fitAnswers(answers: Answer[], room: number, width: (s: string) => number): string {
+  const full = answers.map((a) => `${a.label} ${a.alt}`);
+  const quote = (parts: string[]) => `“${parts.join(", ")}”`;
+  if (width(quote(full)) <= room) return quote(full);
+  let rest = room - width("“”") - width(", ") * (answers.length - 1);
+  const open = new Set(full.keys());
+  for (let moved = true; moved && open.size > 0;) {
+    moved = false;
+    const share = rest / open.size;
+    for (const i of [...open]) {
+      if (width(full[i]) > share) continue;
+      open.delete(i);
+      rest -= width(full[i]);
+      moved = true;
+    }
+  }
+  const share = rest / Math.max(open.size, 1);
+  const cut = ({ label, alt }: Answer) => {
+    let out = `${label} ${alt}`;
+    for (let k = alt.length - 1; k >= Math.min(ALT_FLOOR, alt.length - 1) && k > 0; k--) {
+      out = `${label} ${alt.slice(0, k).replace(/[-_\s]+$/, "")}…`;
+      if (width(out) <= share) break;
+    }
+    return out;
   };
-  return answered.map((q) => `${q.label} ${cut(picks[q.label])}`).join(", ");
+  return quote(answers.map((a, i) => (open.has(i) ? cut(a) : full[i])));
 }
 
 /** Each question's words from the record's Question section (FR-9): the
