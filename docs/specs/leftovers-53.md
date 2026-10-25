@@ -22,24 +22,40 @@ premise was re-read on lodestar today.
 | the first refused batch ends the pass, so one bad row blocks every later row | `internal/service/usagepost.go:141-147`; map D-usage-2 |
 | `RegisterCell` reads a 409 as registered, but the record upserts and never answers 409 | `internal/record/record.go:92-102`; map H2 |
 | the statusline test parses a hand-written sample; only `session_id` is required, so a renamed upstream field becomes a silent zero | `internal/session/session_test.go:8-11`, `session.go:70-99`; map L1 |
-| the shared samples do not exist yet: `contracts/working-on/` is Hephaistos's, `contracts/usage-batch.json` hestia's | `ls ~/agent-slack/specs/contracts/` (only the map, 2026-10-25) |
+| `contracts/working-on/` landed (20 files and `expected.json`, Hephaistos, 2026-10-25); `contracts/usage-batch.json` is hestia's, not yet written | `~/agent-slack/specs/contracts/working-on/expected.json`; `contracts/README.md` |
 
 ## Requirements
 
-Card `lf53-frontmatter` (Go, F2), once `contracts/working-on/` lands:
+Card `lf53-frontmatter` (Go, F2), against `contracts/working-on/` (landed
+2026-10-25; its `expected.json` → `accepted_reading` is the target, the rules
+in `contracts/README.md`):
 
-- **FR-1** `boundary`, `threads` and `spec` read as a scalar or a list,
-  as the record reads them: a scalar is one item; `spec` written as a list
-  joins into the one place it names, or keeps its first item, whichever the
-  sample's README states. A card is never unread for this.
-- **FR-2** The crossing statuses `awaiting-cells`, `applied` and
-  `acknowledged` read as statuses of a crossing record, not as unknown,
-  and none of them counts as waiting on a ruling in this initiative.
-- **FR-3** `assumptions.md` is a ledger.
-- **FR-4** The scan's tests read every file under
-  `${CONTRACTS_DIR:-~/agent-slack/specs/contracts}/working-on/` and agree
-  with the sample's expected readings; a missing directory fails the test,
-  never skips it.
+- **FR-1** Every field the skill writes as a list also reads one scalar as a
+  one-item list, and an empty scalar as an empty list: on a card `repos`,
+  `depends_on`, `boundary`, `footprint`, `threads`; on a decision `options`,
+  `cards`, `threads`, `affects`, `supersedes`; on a stage `gates`.
+- **FR-1a** `spec` and `gate` read as one reference or a list of several;
+  the first is the one `organizer run` launches against. A card is never
+  unread for either.
+- **FR-2** The crossing statuses are valid in any `decisions/` folder:
+  `awaiting-cells` is open (waits on a ruling, like `proposed`); `applied`
+  and `acknowledged` are decided (like `ruled`, never waiting).
+- **FR-2a** A `ruled_by` listed in `ruled_by_modes` (`operator away mode,
+  recommendation taken`) names a mode, not a person: it is shown as written
+  and is never counted as a ruler.
+- **FR-3** Every ledger in `accepted_reading.ledgers` is skipped silently:
+  `tickets.md`, `jira-map.md`, `jira-estimates.md`, `assumptions.md`,
+  `jira-report-*.md`, and `jira-*.md` with no front-matter. No problem, no
+  unread row.
+- **FR-3a** A card under `working-on/done/` is done whatever its `status`
+  says; any other status there is reported as a problem and the card is
+  still read. A card status outside the four is kept as written, reported,
+  and counted in no bucket (as today).
+- **FR-4** The scan's tests read
+  `${CONTRACTS_DIR:-~/agent-slack/specs/contracts}/working-on/` and compare
+  the scan's reading with `expected.json` (cards, decisions, stages,
+  current stage, specs, skipped silently, problems); a missing directory
+  fails the test, never skips it.
 
 Card `lf53-usage-contract` (Go, H3), once `contracts/usage-batch.json` lands:
 
@@ -67,9 +83,9 @@ Card `lf53-record-statusline` (Go, H2, L1):
 
 | # | FR | Check | Expected (fails on main) |
 |---|---|---|---|
-| F1 | 1, 4 | go test of the scan over `contracts/working-on/` | every card reads; a scalar `boundary` is one item; a list `spec` reads as the README says; none is unread |
-| F2 | 2 | the same test on the sample's crossing records | no problem for `awaiting-cells`, `applied`, `acknowledged`; none in Needs me |
-| F3 | 3 | go test of `isLedger` | `assumptions.md` is a ledger |
+| F1 | 1, 1a, 4 | go test of the scan over `contracts/working-on/` against `expected.json` | the reading equals `expected.json` field by field; `next-scalars.md` and `blocked-spec-list.md` read, none unread |
+| F2 | 2, 2a | the same test on decisions 0005-0007 and 0006's `ruled_by` | no problem for the crossing statuses; `awaiting-cells` waits, `applied` and `acknowledged` do not; the away-mode `ruled_by` is not a ruler |
+| F3 | 3, 3a | the same test on the ledgers and `done/stale-status.md` | the ledgers are skipped with no problem; `stale-status` reads as done with one problem; `dropped.md` keeps its status with one problem |
 | F4 | 4 | the test with `CONTRACTS_DIR` pointing at an empty dir | fails, naming the missing sample |
 | U1 | 5 | go test of every CostSource path against `usage-batch.json` | each row's keys equal the sample's; each `cost_from` is in its enum; `contractKeys` is gone from the source |
 | U2 | 6 | go test: three batches, the second refused | the first and third are accepted; the second's rows stay unsent; the state and log name the refusal |
@@ -83,9 +99,12 @@ row starts a claude seat.
 
 ## Boundary
 
-- `lf53-frontmatter`: `internal/model/model.go` (the three fields and
-  their YAML), `internal/model/decision.go`, `internal/scan/` and their
-  tests.
+- `lf53-frontmatter`: `internal/model/` (the list fields' YAML, the spec
+  and gate references, decision statuses), `internal/scan/`,
+  `internal/service/run.go` (the first spec reference) and their tests;
+  `frontend/wailsjs/go/models.ts` if a bound type changes, regenerated,
+  and the frontend's reads of `spec` and decision status only if a type
+  changed (`lib/queue.ts`, `lib/decisions.ts`).
 - `lf53-usage-contract`: `internal/service/usagepost.go` and its test,
   `internal/record/usage.go` and its test.
 - `lf53-record-statusline`: `internal/record/record.go` and its test,
@@ -98,6 +117,6 @@ row starts a claude seat.
 
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
-| `lf53-frontmatter` | F1-F4, X0 | `contracts/working-on/` (Hephaistos) | false |
+| `lf53-frontmatter` | F1-F4, X0 | — (sample landed) | false |
 | `lf53-usage-contract` | U1-U2, X0 | `contracts/usage-batch.json` (hestia) | false |
 | `lf53-record-statusline` | R1, L1, X0 | — | false |

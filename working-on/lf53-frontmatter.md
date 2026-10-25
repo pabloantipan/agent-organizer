@@ -6,7 +6,7 @@ branch: lf53-frontmatter
 seat:
 stage:
 updated: 2026-10-25
-next: "pablo: rule 0163; then waits on contracts/working-on/ (Hephaistos)"
+next: "pablo: rule 0163"
 depends_on: []
 boundary: ["docs/specs/leftovers-53.md Boundary, lf53-frontmatter"]
 spec: "docs/specs/leftovers-53.md (FR-1 to FR-4)"
