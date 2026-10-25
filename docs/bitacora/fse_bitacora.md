@@ -4,6 +4,26 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## 2026-10-25 05:00
+
+- leftovers 52 closed by sup93 (19:42-04:51, ~4h working, 4h45 paused by Pablo plus a usage-limit stop, against 45-90m; seats $43.88, sup93 ~$6.4): lf52-chosen-trim 0289401, lf52-state-layer 0683aa2 merged before main was protected; lf52-decisions-line passed both reviews at 2816be1, PR asked of talos-lab (thread 01M5RZ7NY11TWN0TRJZR8R6GC8). sup93 ended; the FSE moves that card to done/ when talos-lab answers. Four PRs with talos-lab (with leftovers 53's three).
+- Repetition, second sighting: cascade-model vitests pass CSS that WebKit lays out wrong (lf52 U4 unitless --mark-edge, U1 a cancelled 1px); only the WKWebView UI review caught them. Next CSS gate rows read computed layout in the review build (seat, by seat-pointer shot or AX frames), not a cascade model.
+- Sent [for hephaistos]: seats stop silently on 'Auto mode is unavailable' and the usage limit; forecast extend refuses a second extension.
+- Held for Aglaea: header goal line against the sub-tabs at 1024 (R53), already in the next leftovers.
+
+## 2026-10-25 04:05
+
+- Last SHA seen: 790ca75. leftovers 53: all three cards passed review and are in done/ on local main; PRs asked of talos-lab (lf53-frontmatter 044c647, lf53-usage-contract c2a457f, lf53-record-statusline a3d8128); no code merged locally. sup94 01:57-04:00, 2h03m against 40-80m (builders 48-76 min; the rest test-lease queueing and the PR switch), seats $13.11; run record runs/2026-10-25-sup94-leftovers-53.md. sup94 ended. sup93 on lf52-decisions-line (code review fail: short alternatives cut at the floor), extended to ~04:56.
+- main is protected since 2026-10-25 (factory decision, PRs through talos-lab). Local main is ahead of origin with card and docs commits only; asked Hephaistos how they reach origin (01M5RVFVKFANRFMTPQQWSZJDMZ) and how CI reads the contracts dir (01M5RWD62XED55BED2T5TYH0HJ). Install comes after a PR merge lands on origin/main and local main takes it.
+- Held, HIGH: `organizer retire organizer --retirable` planned to retire fse and kill organizer-probe-fse (sup94, finding 1; not run). Retirable must never pick the cell's FSE (nor any standing seat). Cut first in the next leftovers.
+- Held: sup94's statusline record never refreshed after 01:57 (its runs.jsonl line reads $0); CLAUDE.md's ledger list lacks assumptions.md (lf53 FR-3; no card had CLAUDE.md in its boundary).
+
+## 2026-10-25 03:25
+
+- Last SHA seen: 5dcac01. leftovers 52: wave 1 merged (0289401, 0683aa2), lf52-decisions-line in review. leftovers 53 (0163): three cards in review; sup93 and sup94 both extended to ~03:56. Installed v0.2.0-2837-ga528163.
+- Crossing 0021 acknowledged (Elenx writes working-on/reviews/; the scan and tidy-check ignore it); [for hephaistos] to filter working-on/reviews/ out of the card-change post-commit hook.
+- Held for the next leftovers (filed from lf53-frontmatter's review, Found 1): the app and the CLI use the crossing statuses — awaiting-cells counts as a decision waiting (Needs me, the header's count, `organizer decisions`), applied and acknowledged count as ruled (Decisions timeline, turnaround); `frontend/src/lib/queue.ts`, `lib/decisions.ts`, `internal/cli` decisions. Same filing, from lf53-frontmatter's builder notes (sup94): `organizer run --print` omits Launch.Spec; unread cards are kept in ScannedInitiative.Cards; `internal/cli/decisions.go:78` and `internal/service/rule.go:43` match DecisionProposed directly; rulerWords names the away mode as a ruler. From lf53-usage-contract's review: rows a 200 answer rejects are marked accepted and never resent; a zero first/last is sent as a formatted time, not null (map D-usage-3); CI (release.yml) has no contracts dir, so `make test` fails on U1 and F4 there (asked Hephaistos). Also held: the shared-layer follow-ups (focused marks, role rows, header gap R53), rule-questions UW2/UW3 leftovers if any remain, LaunchServices clutter.
+
 ## 2026-10-24 19:20
 
 - Last SHA seen: 7b7a9c1. leftovers 51 landed (e779bd3; sup92 2h21m against 30-60m: 66 min usage-limit stop, three amendment rounds; ~$29.50 seats); installed v0.2.0-2788-ge779bd3. 0162 (leftovers 52) ruled by Pablo in the session ("accept as written"); sup93 runs it.

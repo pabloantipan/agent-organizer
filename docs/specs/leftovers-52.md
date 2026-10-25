@@ -130,3 +130,14 @@ reads: the hover transition lists `background-color` and not `color`. S3
 adds: after a press on another sub-tab, the old one's ink is the unmarked
 ink in the next frame. The UI re-review checks R50 as amended by
 Amendment 19.
+
+## Amendment 3 (FSE, 2026-10-25): the Ruled line water-fills
+
+From lf52-decisions-line's reviews (sup93; both reviewers named the gap) and
+Aglaea's `docs/ux/specs/rule-questions.md` Amendment 3 (b8f3a17). FR-4
+reads: while the line has room every answer is whole; when it has not, an
+answer that fits its equal share stays whole and gives its spare room to the
+others, and only an answer that does not fit is cut, with an ellipsis. An
+answer shorter than the floor is never cut. D1's narrow case reads
+`Q1 after-graph-perform…, Q2 record-page` (the shorter answer whole), and
+adds a case where both are long and both are cut.
