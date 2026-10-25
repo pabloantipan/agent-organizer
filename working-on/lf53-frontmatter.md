@@ -6,7 +6,7 @@ branch: lf53-frontmatter
 seat:
 stage:
 updated: 2026-10-25
-next: "pablo: rule 0163"
+next: "fse: launch when sup93 ends (0163 ruled 2026-10-25; swap 90%, probe refuses new seats over 85%)"
 depends_on: []
 boundary: ["docs/specs/leftovers-53.md Boundary, lf53-frontmatter"]
 spec: "docs/specs/leftovers-53.md (FR-1 to FR-4)"

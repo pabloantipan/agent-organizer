@@ -1,6 +1,6 @@
 # Leftovers 53: Deltagos's side of the factory contract map: the build spec
 
-status: proposed (0163)
+status: ruled (0163, pablo 2026-10-25)
 by: the FSE, 2026-10-25, on main at 34afa7d
 sources: Hephaistos's relay of Pablo's ruling (agent-slack docs
 `decisions.md` bfcefd1, 2026-10-25: "ok. Do. And let's solve all of these.

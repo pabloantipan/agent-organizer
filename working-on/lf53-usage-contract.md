@@ -6,7 +6,7 @@ branch: lf53-usage-contract
 seat:
 stage:
 updated: 2026-10-25
-next: "pablo: rule 0163; then waits on contracts/usage-batch.json (hestia)"
+next: "waits on contracts/usage-batch.json (hestia; 0163 ruled 2026-10-25)"
 depends_on: []
 boundary: ["docs/specs/leftovers-53.md Boundary, lf53-usage-contract"]
 spec: "docs/specs/leftovers-53.md (FR-5 to FR-6)"
