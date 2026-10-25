@@ -109,7 +109,9 @@ row starts a claude seat.
   `internal/record/usage.go` and its test.
 - `lf53-record-statusline`: `internal/record/record.go` and its test,
   `internal/cli/crew.go` (the statusline command), `internal/session/`
-  and its test, the fixture under `internal/session/testdata/`.
+  and its test, the fixture under `internal/session/testdata/`;
+  `internal/service/factory_test.go` (the 409 case) and the one CLAUDE.md
+  Record sentence (Amendment 1).
 - The three share no file; one wave, each card launched once its sample
   exists.
 
@@ -120,3 +122,14 @@ row starts a claude seat.
 | `lf53-frontmatter` | F1-F4, X0 | — (sample landed) | false |
 | `lf53-usage-contract` | U1-U2, X0 | `contracts/usage-batch.json` (hestia) | false |
 | `lf53-record-statusline` | R1, L1, X0 | — | false |
+
+## Amendment 1 (FSE, 2026-10-25): FR-7's test and doc line
+
+From l53-stat's `decide:` (sup94). FR-7 removes the 409 branch, which breaks
+`internal/service/factory_test.go:183-187` (`TestRegisterCellWritesPushAndRegistersWhenAFactory`
+asserts "409 should count as registered") and contradicts CLAUDE.md's Record
+paragraph ("2xx or 409 both count as registered"). Both are outside the
+card's boundary, so the boundary grows: `lf53-record-statusline` also edits
+that test (the 409 case expects an error; idempotence is a second 2xx run)
+and that one CLAUDE.md sentence (it reads "a 2xx counts as registered; the
+record upserts"). No other lf53 card touches either file.
