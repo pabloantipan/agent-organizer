@@ -159,8 +159,9 @@ no `zero` or stylistic sets).
   The layer looks exactly as the old background did: on a bordered control
   it reaches the border's outer edge (`inset: -1px`), a ring mark spreads
   from that edge, and hover on a control whose mark is an opaque fill
-  changes nothing (the mark is the stronger state). Hover's ease covers
-  surface and ink alike. A landing highlight (`focused`, the row Home
+  changes nothing (the mark is the stronger state). Hover eases the surface
+  only; ink never eases, since a mark's ink cannot sit on a layer and
+  would ease on its way out (A19). A landing highlight (`focused`, the row Home
   scrolls to) is a state mark too. **Under `prefers-reduced-motion` no
   transition runs at all**, from one global guard, never per control
   (A18).

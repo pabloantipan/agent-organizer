@@ -751,3 +751,20 @@ boundary allows (the FSE's call); otherwise in the next leftovers.
 | R51 | not be moved | under `prefers-reduced-motion: reduce`, hover and every mark switch at once on every control |
 | R52 | see the mark as before | on each bordered marked control, the fill covers the border box as on main; the critical memory chip open shows a 2 px ring outside its edge; hover on the current rail row, seg `.on` and `.act` open changes no pixel |
 | R53 | read the header evenly | init-b at 1024×640: the gap from `no goal yet` to the sub-tabs equals init-a's gap from its goal line |
+
+## Amendment 19 (aglaea, 2026-10-24): ink never eases (A18 A1 withdrawn)
+
+From l52-layer-ui's re-review of lf52-state-layer at 8b27732, A5. My A18
+A1 put `color` under the hover transition. A mark that changes ink (the
+current sub-tab) then leaves through that same rule, which is C1's
+problem in colour. The layer can carry a fill or a line, not the ink.
+
+- **Option (1): ink switches at once, hover and mark alike.** The hover
+  transition covers `background-color` only. The sub-tabs' ink-only hover
+  switches at once, which is the lesser fault: a mark never eases.
+- R50 reads "hover's surface change eases"; a hover that changes only ink
+  passes by switching at once.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R50 (amended) | trust every mark | as amended in A18, except that only a hover's surface change eases; ink changes, hover or mark, switch at once with no frame between |
