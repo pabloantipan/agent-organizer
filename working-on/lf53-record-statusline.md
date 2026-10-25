@@ -1,6 +1,6 @@
 ---
 title: "No dead 409 branch in cell registration, and the statusline test reads a real captured payload"
-status: done
+status: next
 repos: [organizer]
 branch: lf53-record-statusline
 seat: l53-stat
@@ -8,7 +8,7 @@ reviewer: l53-stat-rev
 review: pass
 stage:
 updated: 2026-10-25
-next: "merge lf53-record-statusline (a3d8128); review passed"
+next: "review pass; PR asked of talos-lab, done/ when it answers with the merged sha"
 depends_on: []
 boundary: ["docs/specs/leftovers-53.md Boundary, lf53-record-statusline"]
 spec: "docs/specs/leftovers-53.md (FR-7 to FR-8)"
