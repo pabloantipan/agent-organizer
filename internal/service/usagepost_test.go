@@ -379,6 +379,116 @@ func TestU2BatchesOf500(t *testing.T) {
 	}
 }
 
+// leftovers-53 U2 (FR-6): three batches, the record refuses the second.
+// The first and third are accepted; the second's rows stay unsent and are
+// the only rows the next pass sends; the state and organizer.log name the
+// refusal. The state is read as JSON so this compiles against any version.
+func TestRefusedBatchDoesNotEndThePass(t *testing.T) {
+	f := newUsageRecord(t, http.StatusOK, http.StatusBadRequest, http.StatusOK)
+	dir := t.TempDir()
+	ls := usageLines(1203)
+	postUsage(context.Background(), usageTarget(f), dir, ls, fixedNow)
+
+	posts := f.got()
+	var sizes []int
+	for _, p := range posts {
+		sizes = append(sizes, len(p.rows))
+	}
+	if !reflect.DeepEqual(sizes, []int{500, 500, 203}) {
+		t.Fatalf("batch sizes %v, want [500 500 203]: a refused batch ended the pass", sizes)
+	}
+	refused := map[string]bool{}
+	for _, r := range posts[1].rows {
+		refused[r["session_id"].(string)+"|"+r["day"].(string)] = true
+	}
+
+	b, err := os.ReadFile(filepath.Join(dir, usagePostFile))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var st struct {
+		Accepted map[string]string `json:"accepted"`
+		Last     map[string]any    `json:"last"`
+	}
+	if err := json.Unmarshal(b, &st); err != nil {
+		t.Fatal(err)
+	}
+	if len(st.Accepted) != 703 {
+		t.Errorf("accepted rows %d, want 703 (batches 1 and 3)", len(st.Accepted))
+	}
+	for k := range refused {
+		if _, ok := st.Accepted[k]; ok {
+			t.Errorf("refused row %s marked accepted", k)
+		}
+	}
+	if st.Last["ok"] != false || st.Last["rows"] != float64(703) {
+		t.Errorf("last outcome %v, want not ok with 703 rows", st.Last)
+	}
+	rs, _ := st.Last["refused"].([]any)
+	if len(rs) != 1 {
+		t.Fatalf("state names %d refusals, want 1: %s", len(rs), b)
+	}
+	r := rs[0].(map[string]any)
+	if r["batch"] != float64(2) || r["of"] != float64(3) || r["rows"] != float64(500) || !strings.Contains(r["reason"].(string), "HTTP 400") {
+		t.Errorf("refusal %v", r)
+	}
+	if strings.Contains(string(b), testKey) {
+		t.Error("state carries the key")
+	}
+
+	lb, _ := os.ReadFile(filepath.Join(dir, "organizer.log"))
+	log := strings.TrimSpace(string(lb))
+	if n := len(strings.Split(log, "\n")); log == "" || n != 1 {
+		t.Fatalf("organizer.log has %d lines, want 1:\n%s", n, log)
+	}
+	if !strings.Contains(log, "refused batch 2 of 3") || !strings.Contains(log, "HTTP 400") || !strings.Contains(log, "500 rows unsent") || strings.Contains(log, testKey) {
+		t.Errorf("log line: %s", log)
+	}
+
+	// The next pass resends exactly the refused rows.
+	postUsage(context.Background(), usageTarget(f), dir, ls, fixedNow)
+	posts = f.got()
+	if len(posts) != 4 || len(posts[3].rows) != 500 {
+		t.Fatalf("retry: %d posts, last %d rows; want 4 and 500", len(posts), len(posts[len(posts)-1].rows))
+	}
+	for _, r := range posts[3].rows {
+		if !refused[r["session_id"].(string)+"|"+r["day"].(string)] {
+			t.Errorf("retry sent %v, not a refused row", r["session_id"])
+		}
+	}
+}
+
+// Doctor's line after a pass with a refused batch says how many were
+// refused, what still went, and the record's answer.
+func TestUsagePostStatusNamesRefusals(t *testing.T) {
+	dataDir := usageHome(t)
+	f := newUsageRecord(t, http.StatusOK, http.StatusBadRequest, http.StatusOK)
+	postUsage(context.Background(), usageTarget(f), dataDir, usageLines(1203), fixedNow)
+	got := UsagePostStatus(config.Config{RecordURL: f.srv.URL, DiscussStateDir: usageStateDir(t, true)})
+	want := "failed " + postNow.Format(time.RFC3339) + ": 1 of 3 batches refused, 703 rows posted: HTTP 400: store down"
+	if !strings.HasPrefix(got, want) || strings.Contains(got, testKey) {
+		t.Errorf("status %q, want prefix %q", got, want)
+	}
+}
+
+// A batch that gets no answer ends the pass: every later batch would wait
+// out the same timeout, and all its rows stay unsent.
+func TestUnansweredBatchEndsThePass(t *testing.T) {
+	closed := httptest.NewServer(http.NotFoundHandler())
+	url := closed.URL
+	closed.Close()
+	dir := t.TempDir()
+	postUsage(context.Background(), usagePostTarget{url: url, key: testKey, factory: "testfactory"}, dir, usageLines(1203), fixedNow)
+	st := loadUsagePostState(filepath.Join(dir, usagePostFile))
+	if len(st.Accepted) != 0 || st.Last == nil || st.Last.OK || len(st.Last.Refused) != 0 {
+		t.Errorf("state %+v", st)
+	}
+	lb, _ := os.ReadFile(filepath.Join(dir, "organizer.log"))
+	if log := strings.TrimSpace(string(lb)); !strings.Contains(log, "1203 rows unsent") || strings.Count(log, "\n") != 0 {
+		t.Errorf("log: %s", log)
+	}
+}
+
 // U3: a second pass with nothing changed posts nothing; then one line's
 // tokens grow and one post carries that one row.
 func TestU3OnlyChangedRows(t *testing.T) {
