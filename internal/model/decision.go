@@ -4,26 +4,50 @@ import (
 	"fmt"
 	"math"
 	"regexp"
+	"slices"
 	"strconv"
+	"strings"
 	"time"
 )
 
 // Decision statuses, a closed set like card statuses; the working-on skill
-// owns it.
+// owns it. awaiting-cells, applied and acknowledged are the crossing statuses
+// (working-on templates/crossing.md), valid in any decisions/ folder
+// (leftovers-53 FR-2): awaiting-cells is open like proposed, applied and
+// acknowledged come after the ruling, so they are decided like ruled.
 const (
-	DecisionProposed   = "proposed"
-	DecisionRuled      = "ruled"
-	DecisionSuperseded = "superseded"
-	DecisionWithdrawn  = "withdrawn"
+	DecisionProposed      = "proposed"
+	DecisionRuled         = "ruled"
+	DecisionSuperseded    = "superseded"
+	DecisionWithdrawn     = "withdrawn"
+	DecisionAwaitingCells = "awaiting-cells"
+	DecisionApplied       = "applied"
+	DecisionAcknowledged  = "acknowledged"
 )
 
-// ValidDecisionStatus reports whether s is one of the four statuses.
+// ValidDecisionStatus reports whether s is one of the seven statuses.
 func ValidDecisionStatus(s string) bool {
-	switch s {
-	case DecisionProposed, DecisionRuled, DecisionSuperseded, DecisionWithdrawn:
-		return true
-	}
-	return false
+	return DecisionOpen(s) || DecisionDecided(s) || s == DecisionSuperseded || s == DecisionWithdrawn
+}
+
+// DecisionOpen reports whether a record with status s waits on a ruling:
+// proposed or awaiting-cells.
+func DecisionOpen(s string) bool { return s == DecisionProposed || s == DecisionAwaitingCells }
+
+// DecisionDecided reports whether a record with status s has been ruled and
+// stands: ruled, applied or acknowledged. Never waiting.
+func DecisionDecided(s string) bool {
+	return s == DecisionRuled || s == DecisionApplied || s == DecisionAcknowledged
+}
+
+// RuledByModes are ruled_by values that name a mode, not a person
+// (contracts working-on/expected.json, ruled_by_modes; FR-2a). Shown as
+// written, never counted as a ruler.
+var RuledByModes = []string{"operator away mode, recommendation taken"}
+
+// RuledByMode reports whether ruled_by names a mode rather than a person.
+func RuledByMode(ruledBy string) bool {
+	return slices.Contains(RuledByModes, strings.TrimSpace(ruledBy))
 }
 
 // Decision is one working-on/decisions/<NNNN>-<slug>.md record: a question,
@@ -81,7 +105,19 @@ func ForecastTopMinutes(s string) (int, error) {
 }
 
 // Open reports whether the decision still waits on a ruling.
-func (d Decision) Open() bool { return d.Status == DecisionProposed }
+func (d Decision) Open() bool { return DecisionOpen(d.Status) }
+
+// Decided reports whether the decision was ruled and stands.
+func (d Decision) Decided() bool { return DecisionDecided(d.Status) }
+
+// Ruler is who ruled the record: ruled_by, or empty when it names a mode
+// (RuledByModes) or nobody. RuledBy keeps the words as written.
+func (d Decision) Ruler() string {
+	if RuledByMode(d.RuledBy) {
+		return ""
+	}
+	return strings.TrimSpace(d.RuledBy)
+}
 
 // TurnaroundDays is ruled minus raised, in whole days, or -1 when the record
 // was never ruled or a date is missing.
