@@ -147,11 +147,191 @@ func keysOf(m map[string]any) []string {
 	return ks
 }
 
-var contractKeys = []string{"cache_read", "cache_write", "cost", "cost_from", "day", "first", "initiative", "input", "last", "messages", "models", "output", "role", "seat", "session_id", "task"}
+// usageSample is the record's own sample of POST /v1/usage
+// (~/agent-slack/specs/contracts/usage-batch.json, contract H3), the shape
+// both sides test against (leftovers-53 FR-5).
+type usageSample struct {
+	BatchKeys []string  `json:"batch_keys"`
+	RowKeys   []string  `json:"row_keys"`
+	ModelKeys []string  `json:"model_keys"`
+	CostFrom  []*string `json:"cost_from"`
+	Valid     []struct {
+		Name string         `json:"name"`
+		Row  map[string]any `json:"row"`
+	} `json:"valid"`
+}
 
-// U1: one pass over three lines is one POST to /v1/usage, Bearer the test
-// key, factory the test id, three rows with exactly the contract's keys.
+// loadUsageSample reads the sample by path, $CONTRACTS_DIR else
+// ~/agent-slack/specs/contracts; a missing sample fails, never skips
+// (contracts/README.md, rules 2 and 3).
+func loadUsageSample(t *testing.T) usageSample {
+	t.Helper()
+	dir := os.Getenv("CONTRACTS_DIR")
+	if dir == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			t.Fatalf("no home for the contracts dir: %v", err)
+		}
+		dir = filepath.Join(home, "agent-slack", "specs", "contracts")
+	}
+	path := filepath.Join(dir, "usage-batch.json")
+	b, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("the usage contract sample is missing: %v", err)
+	}
+	var s usageSample
+	if err := json.Unmarshal(b, &s); err != nil {
+		t.Fatalf("%s: %v", path, err)
+	}
+	if len(s.RowKeys) == 0 || len(s.CostFrom) == 0 || len(s.Valid) == 0 {
+		t.Fatalf("%s has no row_keys, cost_from or valid cases", path)
+	}
+	return s
+}
+
+// sampleCase is the sample's valid row with that name.
+func (s usageSample) sampleCase(t *testing.T, name string) map[string]any {
+	t.Helper()
+	for _, v := range s.Valid {
+		if v.Name == name {
+			return v.Row
+		}
+	}
+	t.Fatalf("usage-batch.json has no valid case %q", name)
+	return nil
+}
+
+// lineOf is the ledger line usageRow turns into the sample row r.
+func lineOf(t *testing.T, r map[string]any) usage.Line {
+	t.Helper()
+	num := func(k string) int64 { f, _ := r[k].(float64); return int64(f) }
+	kinds := func(m map[string]any) usage.Kinds {
+		f := func(k string) int64 { v, _ := m[k].(float64); return int64(v) }
+		return usage.Kinds{Input: f("input"), Output: f("output"), CacheRead: f("cache_read"), CacheWrite: f("cache_write")}
+	}
+	at := func(k string) time.Time {
+		v, err := time.Parse(time.RFC3339, r[k].(string))
+		if err != nil {
+			t.Fatalf("%s: %v", k, err)
+		}
+		return v
+	}
+	str := func(k string) string { v, _ := r[k].(string); return v }
+	l := usage.Line{
+		SessionID: str("session_id"),
+		Day:       str("day"),
+		Attribution: usage.Attribution{
+			Name: str("seat"), Initiative: str("initiative"), Role: str("role"), Task: str("task"),
+		},
+		Kinds:    kinds(r),
+		Models:   map[string]usage.Kinds{},
+		Messages: int(num("messages")),
+		First:    at("first"),
+		Last:     at("last"),
+		CostFrom: str("cost_from"),
+	}
+	if l.Initiative == "unattributed" {
+		l.Initiative = ""
+	}
+	for m, k := range r["models"].(map[string]any) {
+		l.Models[m] = kinds(k.(map[string]any))
+	}
+	if c, ok := r["cost"].(float64); ok {
+		l.Cost = &c
+	}
+	return l
+}
+
+// rowJSON is a row as the record reads it.
+func rowJSON(t *testing.T, r record.UsageRow) map[string]any {
+	t.Helper()
+	b, err := json.Marshal(r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var m map[string]any
+	if err := json.Unmarshal(b, &m); err != nil {
+		t.Fatal(err)
+	}
+	return m
+}
+
+// leftovers-53 U1 (FR-5): every cost source the ledger can give a line
+// (costOf: record, transcript, priced, a reset session's record or its
+// priced tokens, none) goes through usageRow as the sample's own row for
+// that cost_from: the same keys, model keys and values, and a cost_from in
+// the sample's enum. Reset is the ledger's and is not sent.
+func TestUsageRowsMatchTheSample(t *testing.T) {
+	s := loadUsageSample(t)
+	enum := map[string]bool{}
+	var enumWords []string
+	for _, v := range s.CostFrom {
+		w := "null"
+		if v != nil {
+			w = *v
+		}
+		enum[w] = true
+		enumWords = append(enumWords, w)
+	}
+	rowKeys := append([]string(nil), s.RowKeys...)
+	sort.Strings(rowKeys)
+	modelKeys := append([]string(nil), s.ModelKeys...)
+	sort.Strings(modelKeys)
+
+	paths := []struct {
+		name, sample string
+		reset        bool
+	}{
+		{"record", "cost_from record", false},
+		{"record, reset", "cost_from record", true},
+		{"transcript", "cost_from transcript", false},
+		{"priced", "cost_from priced", false},
+		{"reset and priced", "cost_from priced", true},
+		{"null", "cost_from null, no cost", false},
+		{"unattributed", "unattributed, no task or seat", false},
+	}
+	for _, p := range paths {
+		t.Run(p.name, func(t *testing.T) {
+			want := s.sampleCase(t, p.sample)
+			l := lineOf(t, want)
+			l.Reset = p.reset
+			got := rowJSON(t, usageRow(l))
+
+			keys := rowKeys
+			if l.Initiative == "" {
+				keys = keysOf(want) // the sample's unattributed row: no task, no seat
+			}
+			if !reflect.DeepEqual(keysOf(got), keys) {
+				t.Errorf("row keys %v, want %v", keysOf(got), keys)
+			}
+			for m, k := range got["models"].(map[string]any) {
+				if mk := keysOf(k.(map[string]any)); !reflect.DeepEqual(mk, modelKeys) {
+					t.Errorf("model %s keys %v, want %v", m, mk, modelKeys)
+				}
+			}
+			from := "null"
+			if v, ok := got["cost_from"].(string); ok {
+				from = v
+			}
+			if !enum[from] {
+				t.Errorf("cost_from %q is not in the sample's enum %v", from, enumWords)
+			}
+			if !reflect.DeepEqual(got, want) {
+				t.Errorf("row differs from the sample's %q:\n got %v\nwant %v", p.sample, got, want)
+			}
+		})
+	}
+}
+
+// usage-post U1: one pass over three lines is one POST to /v1/usage, Bearer
+// the test key, factory the test id, the sample's batch keys, and three
+// rows with exactly the sample's row keys.
 func TestU1PostsThreeRowsWithContractKeys(t *testing.T) {
+	s := loadUsageSample(t)
+	batchKeys := append([]string(nil), s.BatchKeys...)
+	sort.Strings(batchKeys)
+	rowKeys := append([]string(nil), s.RowKeys...)
+	sort.Strings(rowKeys)
 	f := newUsageRecord(t)
 	postUsage(context.Background(), usageTarget(f), t.TempDir(), usageLines(3), fixedNow)
 
@@ -163,29 +343,19 @@ func TestU1PostsThreeRowsWithContractKeys(t *testing.T) {
 	if p.path != "/v1/usage" || p.auth != "Bearer "+testKey {
 		t.Errorf("path %q auth %q", p.path, p.auth)
 	}
-	if p.body["factory"] != "testfactory" || !reflect.DeepEqual(keysOf(p.body), []string{"factory", "rows"}) {
+	if p.body["factory"] != "testfactory" || !reflect.DeepEqual(keysOf(p.body), batchKeys) {
 		t.Errorf("body keys %v factory %v", keysOf(p.body), p.body["factory"])
 	}
 	if len(p.rows) != 3 {
 		t.Fatalf("rows = %d, want 3", len(p.rows))
 	}
 	for _, r := range p.rows {
-		if got := keysOf(r); !reflect.DeepEqual(got, contractKeys) {
-			t.Errorf("row keys %v, want %v", got, contractKeys)
+		if got := keysOf(r); !reflect.DeepEqual(got, rowKeys) {
+			t.Errorf("row keys %v, want %v", got, rowKeys)
 		}
 		if r["seat"] != "organizer-probe-up-build" || r["task"] != "usage-post" || r["first"] != "2026-10-05T10:00:00Z" || r["cost_from"] != "record" || r["cost"] != 0.25 {
 			t.Errorf("row values %v", r)
 		}
-		if m, ok := r["models"].(map[string]any)["claude-opus-5-5"].(map[string]any); !ok || !reflect.DeepEqual(keysOf(m), []string{"cache_read", "cache_write", "input", "output"}) {
-			t.Errorf("models %v", r["models"])
-		}
-	}
-	// A line with no cost goes as null, with cost_from null.
-	l := usageLine(9)
-	l.Cost, l.CostFrom = nil, ""
-	b, _ := json.Marshal(usageRow(l))
-	if !strings.Contains(string(b), `"cost":null`) || !strings.Contains(string(b), `"cost_from":null`) {
-		t.Errorf("no-cost row %s", b)
 	}
 }
 
