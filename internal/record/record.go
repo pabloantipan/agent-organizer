@@ -91,13 +91,9 @@ func (c *Client) RevokeKey(ctx context.Context, devToken, factory, keyHash strin
 
 // RegisterCell tells the record which initiative a cell belongs to, with the
 // factory key. The record upserts on (factory, cell), so registering twice
-// is fine; a 409 is read the same way, as already registered.
+// answers 2xx like the first time; any other answer is an error.
 func (c *Client) RegisterCell(ctx context.Context, factoryKey, factory string, cell Cell) error {
 	_, err := c.post(ctx, factoryKey, "/v1/factories/"+factory+"/cells", cell, nil)
-	var re *Error
-	if errors.As(err, &re) && re.Status == http.StatusConflict {
-		return nil
-	}
 	return err
 }
 
