@@ -6,7 +6,7 @@ branch: lf52-decisions-line
 seat: l52-line
 stage:
 updated: 2026-10-24
-next: "sup93 runs it (0162 ruled 2026-10-24)"
+next: "l52-line builds it (sup93, wave 2)"
 depends_on: [lf52-state-layer]
 boundary: ["docs/specs/leftovers-52.md Boundary, lf52-decisions-line"]
 spec: "docs/specs/leftovers-52.md (FR-4 to FR-5)"
