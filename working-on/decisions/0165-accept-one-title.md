@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 55 - one band at the top, the name only where the system shows it (revises 0066)
-status: proposed
+status: ruled
 raised: 2026-10-25
 raised_by: fse
 owner: pablo
@@ -9,9 +9,9 @@ cards: [lf55-one-title]
 forecast: 30-60m
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-26
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -51,3 +51,7 @@ accept as written.
 
 forecast: 30-60m over 1 wave, plus the UI review and no lease data; basis:
 9 tasks, this initiative (one-card tasks: 14, 33, 43 min).
+
+## Ruling
+
+pablo, 2026-10-26, in the organizer on lodestar: ok
