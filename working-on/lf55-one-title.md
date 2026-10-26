@@ -6,7 +6,7 @@ branch: lf55-one-title
 seat:
 stage:
 updated: 2026-10-25
-next: "pablo: rule 0165 (one title)"
+next: "sup95 runs it (0165 ruled 2026-10-26)"
 depends_on: []
 boundary: ["docs/specs/leftovers-55.md Boundary"]
 spec: "docs/specs/leftovers-55.md (FR-1 to FR-8)"

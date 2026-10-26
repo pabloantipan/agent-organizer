@@ -1,6 +1,6 @@
 # Leftovers 54: retire never picks a standing seat, CI reads the contracts, the record's rejected rows, and decision states read once: the build spec
 
-status: proposed (0164)
+status: ruled (0164, pablo 2026-10-26)
 by: the FSE, 2026-10-25, on main at c3ded63
 sources: sup94's closing report on leftovers 53 (finding 1: `organizer retire
 organizer --retirable` planned to retire fse); Pablo's rulings relayed by

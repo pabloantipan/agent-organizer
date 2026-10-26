@@ -6,7 +6,7 @@ branch: lf54-retire-guard
 seat:
 stage:
 updated: 2026-10-25
-next: "pablo: rule 0164 (leftovers 54)"
+next: "sup95 runs it (0164 ruled 2026-10-26)"
 depends_on: []
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-retire-guard"]
 spec: "docs/specs/leftovers-54.md (FR-1)"

@@ -1,6 +1,6 @@
 # Leftovers 55: one band at the top, the name only where the system shows it: the build spec
 
-status: proposed (0165)
+status: ruled (0165, pablo 2026-10-26)
 by: the FSE, 2026-10-25, on main at 269ebd7 (rewritten from Aglaea's second
 reply the same day)
 sources: Pablo, 2026-10-25 in the FSE session, with a screenshot: "I see
