@@ -212,8 +212,6 @@ func (s *Service) PlanRetire(o RetireOptions) (RetirePlan, error) {
 // that out would make the test depend on this machine's live sessions.
 var sessionLister = liveSessions
 
-// liveSessions is the zellij session names that exist, exited included:
-// probe -k deletes both.
 // namedSeats is the seats some card of the initiative, open or done, names
 // in seat:. A wave's builders are named by their cards; a seat no card
 // names is standing (the FSE, a role) and retire leaves it unless forced.
@@ -227,6 +225,8 @@ func namedSeats(si *model.ScannedInitiative) map[string]bool {
 	return named
 }
 
+// liveSessions is the zellij session names that exist, exited included:
+// probe -k deletes both.
 func liveSessions(zellij string) map[string]bool {
 	out := map[string]bool{}
 	for _, line := range strings.Split(runZellij(zellij, "list-sessions", "-n"), "\n") {
