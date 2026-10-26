@@ -8,7 +8,7 @@ reviewer: l54-retire-rev
 review: pass
 stage:
 updated: 2026-10-26
-next: "review: lf54-retire-guard, Note A fixed, 73de0b1"
+next: "PR with talos-lab"
 depends_on: []
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-retire-guard"]
 spec: "docs/specs/leftovers-54.md (FR-1)"
@@ -46,29 +46,17 @@ Not changed, on purpose:
 - `frontend/wailsjs`: no bound type changed
 
 ## Review
-**Verdict: pass** at 01e77d40c8c2a880bd256541496f067b93df1966. Unmet gate items: none. Reviewer `l54-retire-rev`, 2026-10-26. X0 run fresh (test-lease `make test` started 02:23:39 at sha 01e77d4, rc 0, saved; not a replay). Logs: `.wt-notes/l54-retire-rev/`.
+**Verdict: pass** at 73de0b16b009d7f33a7b627ddf3d98923aefae82. Unmet gate items: none. Reviewer `l54-retire-rev`, 2026-10-26. X0 run fresh (test-lease `make test` started 02:39:12 at sha 73de0b1, rc 0, saved; not a replay). Logs: `.wt-notes/l54-retire-rev/`.
 
-Superseded: pass at 5402624 (G1 and X0 before Amendment 1); its findings 1-4 became Amendment 1, finding 5 is on the FSE's held list.
+Superseded: pass at 01e77d4 (and before it 5402624, whose findings 1-4 became Amendment 1 and finding 5 went to the FSE's held list).
 
-change-check (from a fresh clean clone at 01e77d4):
-```
-repo organizer: base aa3214225 (default origin/main) ... head lf54-retire-guard (clone HEAD 01e77d40c, on detached) 01e77d40c; 7 files, 6 flags
-| outside boundary | organizer/CLAUDE.md |  | modified |
-| outside boundary | organizer/frontend/src/components/Retire.tsx |  | modified |
-| outside boundary | organizer/internal/cli/retire.go |  | modified |
-| outside boundary | organizer/internal/cli/retire_test.go |  | added |
-| untested? | organizer/internal/cli/retire.go | retireCmd | no test file names it |
-| untested? | organizer/internal/service/retire.go | namedSeats | no test file names it |
-6 flags: outside boundary 4, outside footprint 0, undeclared 0, declared, not changed 0, new env var 0, new dependency 0, new host 0, risk 0, untested? 2, could not read 0, boundary unreadable 0
-```
-- `outside boundary` ×4: change-check reads the original Boundary bullet. Amendment 1 adds `internal/cli/retire.go`, `Retire.tsx` (words only) and CLAUDE.md's "Retire and clean" paragraph; `internal/cli/retire_test.go` is "their tests". Checked: Retire.tsx changes only a doc comment, two labels/titles and one plan line's text (`cell.json unchanged`); CLAUDE.md changes only that paragraph. Explained.
-- `untested?` ×2: `retireCmd` is driven through `runWith` by `TestRetireCmdDefaultAndEmptyPlans`; `namedSeats` through `Retirable`/`PlanRetire`. Explained.
-- Undeclared 0, declared-not-changed 0.
+- **Delta from 01e77d4**: `git range-diff main...01e77d4 main...73de0b1` shows the four build commits unchanged (`=`) after the rebase onto 3834fbd, plus one new commit, 73de0b1, which touches only `internal/service/retire_test.go`. That commit stubs `probe` (`probeBin` and `ORGANIZER_PROBE_BIN`), points `PATH` at logging stubs only (probe, zellij, discuss-api, launchctl, git, ps, lsof), uses a temp `HOME` and discuss state dir, sets the zellij binary to the stub, and fails on any stub call in a defer. `Retire` now runs with every option on. No absolute-path exec on Retire's paths (`grep '"/(usr|bin|sbin|opt)/'` finds only launch.go's `/bin/sh`, which is not reached).
+- **No real exec on main**: the branch's test file copied onto merge base 3834fbd fails as G1 needs and reaches only stubs. The defer reports them after the panic: `probe -k g1-probe-fse`, `zellij list-sessions -n`, `ps -axEo …`. `zellij list-sessions -n` count: 15 before, 15 after.
+- **G1** met: `go test ./internal/service/ ./internal/cli/ -run Retir -v` → 9 PASS on the branch; on main the three G1 tests fail (`retirable [fse b1]`, `default plans seats [fse b1]`, CLI `retire seats:  fse, b1`).
+- **X0** met from a fresh clean clone at 73de0b1: `pnpm install --frozen-lockfile`; `XDG_DATA_HOME=$(mktemp -d) CONTRACTS_DIR=…/sup95/specs/contracts test-lease run --share -- make test` exit 0 (19 Go packages ok, vitest 1297 passed); `test-lease run -- wails build` exit 0; `git status --porcelain` empty.
+- **change-check** (base 068947c): 7 files, 6 flags, the same as at 01e77d4. `outside boundary` ×4 are the files Amendment 1 adds to the boundary (`internal/cli/retire.go` and its test, `Retire.tsx` words, the CLAUDE.md paragraph); `untested?` ×2 (`retireCmd`, `namedSeats`) are covered through `runWith` and through `Retirable`/`PlanRetire`. Undeclared 0, declared-not-changed 0.
 
-- **G1 (as amended)** met. Branch: `go test ./internal/service/ ./internal/cli/ -run Retir -v` → 9 PASS. On main (aa32142 merge base, the three G1 tests copied in): `retirable [fse b1], want [b1]`; `--seats fse plans seats [fse]`; `default plans seats [fse b1] … sessions [g1-probe-fse g1-probe-b1]`; empty plan `Seats:[fse b1]`, no "nothing to retire"; CLI `retire seats:  fse, b1`; `Retire` panics (nil deref in `archiveRuns`). So it fails on main and passes on the branch.
-- **X0** met. `pnpm install --frozen-lockfile`; `XDG_DATA_HOME=$(mktemp -d) CONTRACTS_DIR=…/sup95/specs/contracts test-lease run --share -- make test` exit 0 (19 Go packages ok, vitest 1297 passed); `test-lease run -- wails build` exit 0; `git status --porcelain` empty before and after the runtime checkout.
-- Real-home dry runs of the branch binary (never `--run`): default, `--retirable`, `--seats=fse` and `--keep=fse` all print `retire seats:  none`, `keep seats:    fse`, `kill sessions: none`, `close threads: 0`, `revoke tokens: none`, `cell.json: …, unchanged`, `! nothing to retire`.
-
-Notes (none blocks):
-- A. `TestRetireDefaultFollowsCardsAndAnEmptyPlanTouchesNothing` calls `s.Retire` with a `sessionLister` stub that says `g1-probe-fse` is live, and `KillAgent` is not stubbed. On a regression it shells out to the real `probe -k g1-probe-fse`. Shown on main: the copied test reached `Retire` and its kill loop before panicking (harmless here, since `zellij list-sessions -n` has no g1 session). Nowhere yet.
-- B. The Retire dialog still preselects every seat but the reconciler when nothing is retirable, so on the organizer cell it opens with fse checked. Safe, because PlanRetire keeps fse with its reason. Declared by the builder, outside "words only". Nowhere yet, unless the FSE judges the declaration enough.
+Findings, each with where it went:
+- 01e77d4 Note A (G1's Retire step could reach the real `probe -k`): fixed at 73de0b1, shown above.
+- 01e77d4 Note B (the Retire dialog preselects fse when nothing is retirable): held on the FSE's list (3834fbd).
+- 5402624 findings 1-4: Amendment 1 (c4235cd), built and met here; finding 5: FSE held list.
