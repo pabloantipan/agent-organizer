@@ -28,7 +28,7 @@ type RetireOptions struct {
 	InitiativeID string   `json:"initiative_id"`
 	Seats        []string `json:"seats"`         // seats to retire; empty = every seat but the reconciler
 	Retirable    bool     `json:"retirable"`     // seats = Retirable(): done with, by the cards and the sessions
-	Force        bool     `json:"force"`         // retire a seat even if an open card names it or it is working
+	Force        bool     `json:"force"`         // retire a seat even if no card names it, an open card names it, or it is working
 	WaveThreads  bool     `json:"wave_threads"`  // close only threads whose participants are all retired seats (and the human)
 	Sessions     []string `json:"sessions"`      // extra probe sessions to kill (e.g. the supervisor's)
 	CloseThreads bool     `json:"close_threads"` // close every open thread of the project as the human
@@ -89,9 +89,10 @@ func (s *Service) PlanRetire(o RetireOptions) (RetirePlan, error) {
 			// A roster being defined is not a wave that ended (FR-9).
 			p.Problems = append(p.Problems, "no seat is retirable: the cell is in definition")
 		default:
-			p.Problems = append(p.Problems, "no seat is retirable: every seat is the human, the reconciler, named by an open card, or working")
+			p.Problems = append(p.Problems, "no seat is retirable: every seat is the human, the reconciler, named by no card, named by an open card, or working")
 		}
 	}
+	named := namedSeats(si)
 	busy := map[string]string{}
 	for _, c := range si.Cards {
 		if c.Seat != "" && !c.Archived && c.Status != model.StatusDone {
@@ -113,6 +114,10 @@ func (s *Service) PlanRetire(o RetireOptions) (RetirePlan, error) {
 		for _, a := range o.Seats {
 			if !slices.Contains(cell.Agents, a) {
 				p.Problems = append(p.Problems, fmt.Sprintf("%s is not a seat of %s", a, cell.Project))
+				continue
+			}
+			if !named[a] && !o.Force {
+				p.Problems = append(p.Problems, fmt.Sprintf("%s kept: no card names it in seat:, so it is a standing seat, not a wave's (use force to retire it anyway)", a))
 				continue
 			}
 			if why, ok := busy[a]; ok && !o.Force {
@@ -209,6 +214,19 @@ var sessionLister = liveSessions
 
 // liveSessions is the zellij session names that exist, exited included:
 // probe -k deletes both.
+// namedSeats is the seats some card of the initiative, open or done, names
+// in seat:. A wave's builders are named by their cards; a seat no card
+// names is standing (the FSE, a role) and retire leaves it unless forced.
+func namedSeats(si *model.ScannedInitiative) map[string]bool {
+	named := map[string]bool{}
+	for _, c := range si.Cards {
+		if c.Seat != "" {
+			named[c.Seat] = true
+		}
+	}
+	return named
+}
+
 func liveSessions(zellij string) map[string]bool {
 	out := map[string]bool{}
 	for _, line := range strings.Split(runZellij(zellij, "list-sessions", "-n"), "\n") {

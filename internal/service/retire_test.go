@@ -41,8 +41,8 @@ func TestRetirableReadsCardsAndSessions(t *testing.T) {
 	}
 	si.Agents = []model.Agent{{Session: "rpex-probe-w1-b", State: model.AgentWorking}}
 	got := Retirable(si)
-	if len(got) != 2 || got[0] != "w1-a" || got[1] != "reviewer" {
-		t.Errorf("retirable %v: w1-a is done, reviewer has no cards; w1-b works, w2-a has an open card, supervisor reconciles", got)
+	if len(got) != 1 || got[0] != "w1-a" {
+		t.Errorf("retirable %v: w1-a is done; reviewer has no cards, w1-b works, w2-a has an open card, supervisor reconciles", got)
 	}
 }
 
@@ -81,7 +81,9 @@ func TestPlanRetireFindsEverySeatsSessionOnTheCampCell(t *testing.T) {
 	si.ID, si.Path, si.Cell = "ccint-camp-monorepo", t.TempDir(), cell
 	s := &Service{state: cache.State{Local: model.Snapshot{Initiatives: []model.ScannedInitiative{si}}}}
 
-	p, err := s.PlanRetire(RetireOptions{InitiativeID: si.ID, Seats: cell.Agents})
+	// The camp seats are personas no card names, standing seats since
+	// leftovers-54 FR-1, so naming them takes force.
+	p, err := s.PlanRetire(RetireOptions{InitiativeID: si.ID, Seats: cell.Agents, Force: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -167,6 +169,8 @@ func TestRetireOfTheLastSeatKeepsTheCell(t *testing.T) {
 	os.MkdirAll(filepath.Join(root, "agents"), 0o755)
 	os.WriteFile(filepath.Join(root, "working-on", "initiative.yaml"), []byte("id: rpex\ntitle: R\n"), 0o644)
 	os.WriteFile(filepath.Join(root, "agents", "cell.json"), []byte(`{"project":"rpex","workdir":"/w","agents":["w1-a"],"human":"pablo","reconciler":"supervisor","push":true}`), 0o644)
+	os.MkdirAll(filepath.Join(root, "working-on", "done"), 0o755)
+	os.WriteFile(filepath.Join(root, "working-on", "done", "a.md"), []byte("---\ntitle: A\nstatus: done\nseat: w1-a\nupdated: 2026-10-25\nnext: none\n---\n"), 0o644)
 
 	si := scan.ReadInitiative(root, scan.Options{})
 	if si.Cell == nil {
@@ -213,6 +217,9 @@ func TestRetirableIsEmptyWhileTheCellIsInDefinition(t *testing.T) {
 		si := &model.ScannedInitiative{}
 		si.ID = "init-define"
 		si.Cell = &model.Cell{Project: "define-fixture", Agents: []string{"po_carla", "tech_lead_elena", "designer_diego"}, Human: "pablo", Draft: draft}
+		for _, seat := range si.Cell.Agents {
+			si.Cards = append(si.Cards, model.Card{Slug: seat, Seat: seat, Status: model.StatusDone, Archived: true})
+		}
 		return si
 	}
 	ran := []session.Run{{PID: 3, SessionID: "c", Persona: "po_carla", Cell: "define-fixture", Ended: true}}
@@ -238,5 +245,60 @@ func TestRetirableIsEmptyWhileTheCellIsInDefinition(t *testing.T) {
 	live.Agents = []model.Agent{{Session: "define-fixture-probe-carla", State: model.AgentRunning}}
 	if got := Retirable(live); len(got) != 3 {
 		t.Errorf("a seat's session is live, not working: retirable %v, want all three", got)
+	}
+}
+
+// leftovers-54 G1 (FR-1): only a seat some card named in seat:, open or
+// done, is retirable. The FSE and any standing role no card names is never
+// picked, and naming one in --seats is refused unless force.
+func TestRetirableOnlyPicksSeatsACardNamed(t *testing.T) {
+	defer func(prev func(string) map[string]bool) { sessionLister = prev }(sessionLister)
+	sessionLister = func(string) map[string]bool { return map[string]bool{} }
+	t.Setenv("XDG_DATA_HOME", t.TempDir())
+
+	root := t.TempDir()
+	os.MkdirAll(filepath.Join(root, "working-on", "done"), 0o755)
+	os.MkdirAll(filepath.Join(root, "agents"), 0o755)
+	os.WriteFile(filepath.Join(root, "working-on", "initiative.yaml"), []byte("id: g1\ntitle: G1\n"), 0o644)
+	os.WriteFile(filepath.Join(root, "working-on", "done", "c1.md"), []byte("---\ntitle: C1\nstatus: done\nseat: b1\nupdated: 2026-10-25\nnext: none\n---\n"), 0o644)
+	os.WriteFile(filepath.Join(root, "working-on", "c2.md"), []byte("---\ntitle: C2\nstatus: now\nseat: b2\nupdated: 2026-10-25\nnext: build\n---\n"), 0o644)
+	os.WriteFile(filepath.Join(root, "agents", "cell.json"), []byte(`{"project":"g1","workdir":"/w","agents":["fse","b1","b2"],"human":"pablo","reconciler":""}`), 0o644)
+
+	si := scan.ReadInitiative(root, scan.Options{})
+	if si.Cell == nil || len(si.Cards) != 2 {
+		t.Fatalf("fixture not read: cell %v cards %d problems %v", si.Cell, len(si.Cards), si.Problems)
+	}
+	// A seat has run, so the cell is a wave, not a roster in definition.
+	si.Agents = []model.Agent{{Persona: "b1", State: model.AgentRunning}}
+	if got := Retirable(&si); !slices.Equal(got, []string{"b1"}) {
+		t.Errorf("retirable %v, want [b1]: fse is named by no card, b2 by an open one", got)
+	}
+
+	s := &Service{state: cache.State{Local: model.Snapshot{Initiatives: []model.ScannedInitiative{si}}}}
+	p, err := s.PlanRetire(RetireOptions{InitiativeID: si.ID, Retirable: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(p.Seats, []string{"b1"}) {
+		t.Errorf("--retirable plans %v, want [b1]", p.Seats)
+	}
+
+	p, err = s.PlanRetire(RetireOptions{InitiativeID: si.ID, Seats: []string{"fse"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(p.Seats) != 0 || !slices.Contains(p.Keep, "fse") {
+		t.Errorf("--seats fse plans seats %v keep %v, want fse kept", p.Seats, p.Keep)
+	}
+	if len(p.Problems) != 1 || !strings.Contains(p.Problems[0], "fse kept: no card names it in seat:") {
+		t.Errorf("problems %v, want why fse is kept", p.Problems)
+	}
+
+	p, err = s.PlanRetire(RetireOptions{InitiativeID: si.ID, Seats: []string{"fse"}, Force: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(p.Seats, []string{"fse"}) || len(p.Problems) != 0 {
+		t.Errorf("--seats fse --force plans %v problems %v, want fse", p.Seats, p.Problems)
 	}
 }
