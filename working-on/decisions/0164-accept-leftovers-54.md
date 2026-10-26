@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 54 - retire never picks the FSE, CI reads the contracts, the record's rejected rows, decision states read once
-status: proposed
+status: ruled
 raised: 2026-10-25
 raised_by: fse
 owner: pablo
@@ -9,9 +9,9 @@ cards: [lf54-retire-guard, lf54-ci-contracts, lf54-usage-rejected, lf54-decision
 forecast: 60-120m
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-26
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -53,3 +53,7 @@ your 2026-10-25 rulings and what leftovers 53's reviews found.
 forecast: 60-120m over 1 wave, plus the wait for leftovers 53's PRs, one UI
 review and the test-lease queue (no lease data; leftovers 52 and 53 queued
 6-11 deep); basis: 8 tasks, this initiative.
+
+## Ruling
+
+pablo, 2026-10-26, in the organizer on lodestar: ok
