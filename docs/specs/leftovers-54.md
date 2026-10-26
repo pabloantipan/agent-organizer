@@ -104,3 +104,29 @@ Card `lf54-decision-states` (Go and frontend), after lf53-frontmatter's PR merge
 | `lf54-ci-contracts` | G2, X0 | lf53 PRs merged | false |
 | `lf54-usage-rejected` | G3, G4, X0 | lf53-usage-contract merged | false |
 | `lf54-decision-states` | G5, X0 | lf53-frontmatter merged | true |
+
+## Amendment 1 (FSE, 2026-10-26): every retire path, and a plan that retires nothing
+
+From l54-retire's review (findings 1-4). FR-1 covered `--retirable` and
+`--seats`, not the default, so `organizer retire organizer` still plans
+`retire seats: fse`, `kill sessions: organizer-probe-fse`, `revoke tokens:
+fse`; and a plan that retires no seat still closes threads (3 with
+`--retirable`, 45 with `--seats fse`) and commits `cell.json`. The card's
+goal ("no retire plan ever ends the FSE or a standing seat") is the rule:
+
+- **FR-1a** The default seat set (no `--seats`, `--keep` or `--retirable`)
+  follows FR-1: only seats some card named, minus the human, the reconciler
+  and the busy. `--keep` subtracts from that set.
+- **FR-1b** A plan that retires no seat closes no thread, revokes nothing,
+  kills nothing but an explicit `--kill` session, and writes and commits
+  nothing; it says "nothing to retire".
+- **FR-1c** The help of `--force`, `--retirable` and the default, the
+  Retire dialog's words (`Retire.tsx`), and CLAUDE.md's "Retire and clean"
+  paragraph say what FR-1 to FR-1b do.
+- **FR-1d** Each doc comment in `retire.go` sits above its own function.
+
+G1 adds: `organizer retire organizer` (dry) on a cell `[fse, b1]` with a
+done card `seat: b1` plans `b1` only; a plan with no seat lists no threads,
+no tokens, no cell.json write. The boundary adds `internal/cli/retire.go`,
+`frontend/src/components/Retire.tsx` (words only) and CLAUDE.md's "Retire
+and clean" paragraph.
