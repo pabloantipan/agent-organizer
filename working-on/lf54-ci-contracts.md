@@ -6,7 +6,7 @@ branch: lf54-ci-contracts
 seat:
 stage:
 updated: 2026-10-25
-next: "pablo: rule 0164 (leftovers 54)"
+next: "the FSE relaunches it once its lf53 dependency is on origin/main (0164 ruled 2026-10-26; sup95 stopped 2026-10-26, unmerged)"
 depends_on: [lf53-frontmatter, lf53-usage-contract]
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-ci-contracts"]
 spec: "docs/specs/leftovers-54.md (FR-2)"

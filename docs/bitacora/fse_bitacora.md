@@ -4,6 +4,13 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## 2026-10-26
+
+- leftovers 54 and 55 with sup95 (0164, 0165 ruled 2026-10-26). lf54-retire-guard passed review, then Amendment 1 sent it back: the default retire still planned to retire fse, and a no-seat plan closed threads and committed cell.json (l54-retire's review findings 1-4).
+- leftovers 56 (0166, crossing 0022 ruled by Pablo in the Themis seat) proposed: every run attributed to an initiative, a task and a role.
+- talos-lab merged the working-on PRs #1 and #2 but has not opened the four code PRs (lf52-decisions-line, lf53-frontmatter, lf53-usage-contract, lf53-record-statusline); asked (thread 01M5V8JKZZ13ZKA4GYCAY9GT7Q). Installed v0.2.0-2837 lacks them.
+- Held: the Retire dialog preselects every seat but the reconciler when nothing is retirable, so on the organizer cell it opens with fse checked (PlanRetire keeps fse with its reason; safe, but misleading) — lf54-retire-guard review note B, for the next leftovers with Aglaea. A fresh worktree needs frontend/dist to build the binary (l54-retire's Found 5); ~/agent-slack/specs on a feature branch behind main (asked Hephaistos).
+
 ## 2026-10-25 05:00
 
 - leftovers 52 closed by sup93 (19:42-04:51, ~4h working, 4h45 paused by Pablo plus a usage-limit stop, against 45-90m; seats $43.88, sup93 ~$6.4): lf52-chosen-trim 0289401, lf52-state-layer 0683aa2 merged before main was protected; lf52-decisions-line passed both reviews at 2816be1, PR asked of talos-lab (thread 01M5RZ7NY11TWN0TRJZR8R6GC8). sup93 ended; the FSE moves that card to done/ when talos-lab answers. Four PRs with talos-lab (with leftovers 53's three).
