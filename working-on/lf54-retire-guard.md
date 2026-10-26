@@ -8,7 +8,7 @@ reviewer: l54-retire-rev
 review: pass
 stage:
 updated: 2026-10-26
-next: "file finding: the default retire (no --seats/--retirable/--keep) still plans to retire fse; Review findings 1-5 have no card, record or backlog line yet"
+next: "review: lf54-retire-guard, godoc fix, 7441934"
 depends_on: []
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-retire-guard"]
 spec: "docs/specs/leftovers-54.md (FR-1)"
