@@ -4,6 +4,7 @@ status: next
 repos: [organizer]
 branch: lf54-retire-guard
 seat: l54-retire
+reviewer: l54-retire-rev
 stage:
 updated: 2026-10-26
 next: "review: lf54-retire-guard, G1 and X0 pass, 5402624"
