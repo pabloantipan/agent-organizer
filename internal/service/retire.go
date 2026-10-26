@@ -26,8 +26,8 @@ import (
 // RetireOptions is what the human chooses.
 type RetireOptions struct {
 	InitiativeID string   `json:"initiative_id"`
-	Seats        []string `json:"seats"`         // seats to retire; empty = every seat but the reconciler
-	Retirable    bool     `json:"retirable"`     // seats = Retirable(): done with, by the cards and the sessions
+	Seats        []string `json:"seats"`         // seats to retire; nil = the default, Retirable(); empty but not nil = none
+	Retirable    bool     `json:"retirable"`     // seats = Retirable(): named by a card, done with, by the cards and the sessions
 	Force        bool     `json:"force"`         // retire a seat even if no card names it, an open card names it, or it is working
 	WaveThreads  bool     `json:"wave_threads"`  // close only threads whose participants are all retired seats (and the human)
 	Sessions     []string `json:"sessions"`      // extra probe sessions to kill (e.g. the supervisor's)
@@ -81,7 +81,9 @@ func (s *Service) PlanRetire(o RetireOptions) (RetirePlan, error) {
 		p.CellIsGit = true
 	}
 	retire := map[string]bool{}
-	if o.Retirable {
+	// The default is the seats --retirable picks (leftovers-54 FR-1a): a
+	// seat no card named is standing, and no retire picks it unasked.
+	if o.Retirable || o.Seats == nil {
 		o.Seats = Retirable(si)
 		switch {
 		case len(o.Seats) > 0:
@@ -104,28 +106,20 @@ func (s *Service) PlanRetire(o RetireOptions) (RetirePlan, error) {
 			busy[a.Persona] = "working right now"
 		}
 	}
-	if len(o.Seats) == 0 && !o.Retirable {
-		for _, a := range cell.Agents {
-			if a != cell.Reconciler {
-				retire[a] = true
-			}
+	for _, a := range o.Seats {
+		if !slices.Contains(cell.Agents, a) {
+			p.Problems = append(p.Problems, fmt.Sprintf("%s is not a seat of %s", a, cell.Project))
+			continue
 		}
-	} else {
-		for _, a := range o.Seats {
-			if !slices.Contains(cell.Agents, a) {
-				p.Problems = append(p.Problems, fmt.Sprintf("%s is not a seat of %s", a, cell.Project))
-				continue
-			}
-			if !named[a] && !o.Force {
-				p.Problems = append(p.Problems, fmt.Sprintf("%s kept: no card names it in seat:, so it is a standing seat, not a wave's (use force to retire it anyway)", a))
-				continue
-			}
-			if why, ok := busy[a]; ok && !o.Force {
-				p.Problems = append(p.Problems, fmt.Sprintf("%s kept: %s (use force to retire it anyway)", a, why))
-				continue
-			}
-			retire[a] = true
+		if !named[a] && !o.Force {
+			p.Problems = append(p.Problems, fmt.Sprintf("%s kept: no card names it in seat:, so it is a standing seat, not a wave's (use force to retire it anyway)", a))
+			continue
 		}
+		if why, ok := busy[a]; ok && !o.Force {
+			p.Problems = append(p.Problems, fmt.Sprintf("%s kept: %s (use force to retire it anyway)", a, why))
+			continue
+		}
+		retire[a] = true
 	}
 	for _, a := range cell.Agents {
 		if retire[a] {
@@ -161,6 +155,13 @@ func (s *Service) PlanRetire(o RetireOptions) (RetirePlan, error) {
 		if !slices.Contains(p.Sessions, sess) {
 			p.Sessions = append(p.Sessions, sess)
 		}
+	}
+
+	// A plan that retires no seat touches nothing but an explicit --kill:
+	// no thread, token, file or roster write (leftovers-54 FR-1b).
+	if len(p.Seats) == 0 {
+		p.Problems = append(p.Problems, "nothing to retire")
+		return p, nil
 	}
 
 	dir := discussStateDir(s.Config())
@@ -266,6 +267,10 @@ func (s *Service) Retire(o RetireOptions) (RetireReport, error) {
 		} else {
 			r.step("killed session %s (conversation stays resumable)", sess)
 		}
+	}
+	if len(p.Seats) == 0 {
+		r.step("nothing to retire")
+		return r, nil
 	}
 
 	if o.CloseThreads {

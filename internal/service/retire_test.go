@@ -98,14 +98,14 @@ func TestPlanRetireFindsEverySeatsSessionOnTheCampCell(t *testing.T) {
 		t.Errorf("nothing to report: %v", p.Problems)
 	}
 
-	// The default, every seat but the reconciler: four sessions, andrea's
-	// left alone because po_andrea reconciles.
+	// The default follows leftovers-54 FR-1a: no card names a camp seat, so
+	// it plans none and kills nothing.
 	p, err = s.PlanRetire(RetireOptions{InitiativeID: si.ID})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if slices.Contains(p.Sessions, "camp-probe-andrea") || len(p.Sessions) != 4 {
-		t.Errorf("sessions %v, want the four that are not the reconciler's", p.Sessions)
+	if len(p.Seats) != 0 || len(p.Sessions) != 0 {
+		t.Errorf("default plans seats %v sessions %v, want none: no card names a seat", p.Seats, p.Sessions)
 	}
 }
 
@@ -121,7 +121,7 @@ func TestPlanRetireReportsASeatItCannotName(t *testing.T) {
 	si.Cell = &model.Cell{Project: "ccint-camp-monorepo-and-a-project-name-no-socket-dir-can-hold", Agents: []string{"po_andrea", "dev_bruno"}, Human: "pablo", Reconciler: "po_andrea"}
 	s := &Service{state: cache.State{Local: model.Snapshot{Initiatives: []model.ScannedInitiative{si}}}}
 
-	p, err := s.PlanRetire(RetireOptions{InitiativeID: si.ID})
+	p, err := s.PlanRetire(RetireOptions{InitiativeID: si.ID, Seats: []string{"dev_bruno"}, Force: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -151,8 +151,8 @@ func TestPlanRetireRetirableSaysTheCellIsInDefinition(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if len(p.Seats) != 0 || len(p.Problems) != 1 || p.Problems[0] != "no seat is retirable: the cell is in definition" {
-			t.Errorf("draft %v: seats %v, problems %v, want none and the cell is in definition", draft, p.Seats, p.Problems)
+		if len(p.Seats) != 0 || len(p.Problems) != 2 || p.Problems[0] != "no seat is retirable: the cell is in definition" || p.Problems[1] != "nothing to retire" {
+			t.Errorf("draft %v: seats %v, problems %v, want none, the cell is in definition, nothing to retire", draft, p.Seats, p.Problems)
 		}
 	}
 }
@@ -290,8 +290,8 @@ func TestRetirableOnlyPicksSeatsACardNamed(t *testing.T) {
 	if len(p.Seats) != 0 || !slices.Contains(p.Keep, "fse") {
 		t.Errorf("--seats fse plans seats %v keep %v, want fse kept", p.Seats, p.Keep)
 	}
-	if len(p.Problems) != 1 || !strings.Contains(p.Problems[0], "fse kept: no card names it in seat:") {
-		t.Errorf("problems %v, want why fse is kept", p.Problems)
+	if len(p.Problems) != 2 || !strings.Contains(p.Problems[0], "fse kept: no card names it in seat:") || p.Problems[1] != "nothing to retire" {
+		t.Errorf("problems %v, want why fse is kept, then nothing to retire", p.Problems)
 	}
 
 	p, err = s.PlanRetire(RetireOptions{InitiativeID: si.ID, Seats: []string{"fse"}, Force: true})
@@ -300,5 +300,61 @@ func TestRetirableOnlyPicksSeatsACardNamed(t *testing.T) {
 	}
 	if !slices.Equal(p.Seats, []string{"fse"}) || len(p.Problems) != 0 {
 		t.Errorf("--seats fse --force plans %v problems %v, want fse", p.Seats, p.Problems)
+	}
+}
+
+// leftovers-54 G1, Amendment 1 (FR-1a, FR-1b): the default plans only the
+// seats a card named; a plan with no seat lists no thread, token or file,
+// and Retire on it leaves cell.json as it was.
+func TestRetireDefaultFollowsCardsAndAnEmptyPlanTouchesNothing(t *testing.T) {
+	defer func(prev func(string) map[string]bool) { sessionLister = prev }(sessionLister)
+	sessionLister = func(string) map[string]bool { return map[string]bool{"g1-probe-fse": true, "g1-probe-b1": true} }
+	t.Setenv("XDG_DATA_HOME", t.TempDir())
+
+	root := t.TempDir()
+	os.MkdirAll(filepath.Join(root, "working-on", "done"), 0o755)
+	os.MkdirAll(filepath.Join(root, "agents"), 0o755)
+	os.WriteFile(filepath.Join(root, "working-on", "initiative.yaml"), []byte("id: g1\ntitle: G1\n"), 0o644)
+	os.WriteFile(filepath.Join(root, "working-on", "done", "c1.md"), []byte("---\ntitle: C1\nstatus: done\nseat: b1\nupdated: 2026-10-25\nnext: none\n---\n"), 0o644)
+	cellJSON := []byte(`{"project":"g1","workdir":"/w","agents":["fse","b1"],"human":"pablo","reconciler":""}`)
+	os.WriteFile(filepath.Join(root, "agents", "cell.json"), cellJSON, 0o644)
+
+	si := scan.ReadInitiative(root, scan.Options{})
+	si.Agents = []model.Agent{{Persona: "b1", State: model.AgentRunning}}
+	s := &Service{state: cache.State{Local: model.Snapshot{Initiatives: []model.ScannedInitiative{si}}}}
+
+	p, err := s.PlanRetire(RetireOptions{InitiativeID: si.ID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(p.Seats, []string{"b1"}) || !slices.Equal(p.Keep, []string{"fse"}) || !slices.Equal(p.Sessions, []string{"g1-probe-b1"}) {
+		t.Errorf("default plans seats %v keep %v sessions %v, want b1 retired, fse kept, only b1's session", p.Seats, p.Keep, p.Sessions)
+	}
+
+	// Nothing chosen (the dialog with no box checked, or --keep b1): no seat,
+	// so no thread, token, file or roster write, whatever the options say.
+	empty := RetireOptions{InitiativeID: si.ID, Seats: []string{}, CloseThreads: true, RevokeTokens: true, CommitCell: true}
+	p, err = s.PlanRetire(empty)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(p.Seats) != 0 || len(p.Sessions) != 0 || len(p.Threads) != 0 || len(p.Tokens) != 0 || len(p.Files) != 0 || p.RestartAPI {
+		t.Errorf("empty plan %+v, want no seat, session, thread, token or file", p)
+	}
+	if len(p.Problems) == 0 || p.Problems[len(p.Problems)-1] != "nothing to retire" {
+		t.Errorf("problems %v, want nothing to retire last", p.Problems)
+	}
+
+	// Retire on it, mailbox and tokens off so a regression cannot reach a
+	// real mailbox: one step, and cell.json byte for byte as it was.
+	r, err := s.Retire(RetireOptions{InitiativeID: si.ID, Seats: []string{"fse"}, CommitCell: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(r.Steps, []string{"nothing to retire"}) || len(r.Errors) != 0 {
+		t.Errorf("report %+v, want only nothing to retire", r)
+	}
+	if b, _ := os.ReadFile(filepath.Join(root, "agents", "cell.json")); string(b) != string(cellJSON) {
+		t.Errorf("cell.json %s, want it untouched", b)
 	}
 }
