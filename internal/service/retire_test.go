@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"organizer/internal/cache"
+	"organizer/internal/config"
 	"organizer/internal/model"
 	"organizer/internal/scan"
 	"organizer/internal/session"
@@ -306,10 +307,31 @@ func TestRetirableOnlyPicksSeatsACardNamed(t *testing.T) {
 // leftovers-54 G1, Amendment 1 (FR-1a, FR-1b): the default plans only the
 // seats a card named; a plan with no seat lists no thread, token or file,
 // and Retire on it leaves cell.json as it was.
+//
+// Nothing here can reach a real probe, zellij, discuss-api, launchctl, git,
+// ps or lsof, nor the real mailbox, even on a regression that retires a
+// seat: probe is a stub, PATH holds only stubs, HOME and the discuss state
+// dir are empty temp dirs, and the sessions come from sessionLister. Every
+// stub logs its call, and any call fails the test, checked in a defer so a
+// panic further down still reports it.
 func TestRetireDefaultFollowsCardsAndAnEmptyPlanTouchesNothing(t *testing.T) {
 	defer func(prev func(string) map[string]bool) { sessionLister = prev }(sessionLister)
 	sessionLister = func(string) map[string]bool { return map[string]bool{"g1-probe-fse": true, "g1-probe-b1": true} }
 	t.Setenv("XDG_DATA_HOME", t.TempDir())
+	bin, calls := t.TempDir(), filepath.Join(t.TempDir(), "calls.log")
+	for _, name := range []string{"probe", "zellij", "discuss-api", "launchctl", "git", "ps", "lsof"} {
+		os.WriteFile(filepath.Join(bin, name), []byte("#!/bin/sh\necho \"${0##*/} $*\" >> "+calls+"\n"), 0o755)
+	}
+	defer func(prev func() string) { probeBin = prev }(probeBin)
+	probeBin = func() string { return filepath.Join(bin, "probe") }
+	t.Setenv(probeBinEnv, filepath.Join(bin, "probe"))
+	t.Setenv("HOME", t.TempDir())
+	t.Setenv("DISCUSS_STATE_DIR", t.TempDir())
+	defer func() {
+		if b, err := os.ReadFile(calls); err == nil && len(b) > 0 {
+			t.Errorf("reached a binary it must never run for real (a stub here):\n%s", b)
+		}
+	}()
 
 	root := t.TempDir()
 	os.MkdirAll(filepath.Join(root, "working-on", "done"), 0o755)
@@ -321,7 +343,10 @@ func TestRetireDefaultFollowsCardsAndAnEmptyPlanTouchesNothing(t *testing.T) {
 
 	si := scan.ReadInitiative(root, scan.Options{})
 	si.Agents = []model.Agent{{Persona: "b1", State: model.AgentRunning}}
-	s := &Service{state: cache.State{Local: model.Snapshot{Initiatives: []model.ScannedInitiative{si}}}}
+	// From here on PATH holds only the stubs.
+	t.Setenv("PATH", bin)
+	cfg := config.Config{DiscussStateDir: t.TempDir(), Zellij: filepath.Join(bin, "zellij"), AgentBinary: "organizer-test-no-agent"}
+	s := &Service{cfg: cfg, state: cache.State{Local: model.Snapshot{Initiatives: []model.ScannedInitiative{si}}}}
 
 	p, err := s.PlanRetire(RetireOptions{InitiativeID: si.ID})
 	if err != nil {
@@ -345,9 +370,9 @@ func TestRetireDefaultFollowsCardsAndAnEmptyPlanTouchesNothing(t *testing.T) {
 		t.Errorf("problems %v, want nothing to retire last", p.Problems)
 	}
 
-	// Retire on it, mailbox and tokens off so a regression cannot reach a
-	// real mailbox: one step, and cell.json byte for byte as it was.
-	r, err := s.Retire(RetireOptions{InitiativeID: si.ID, Seats: []string{"fse"}, CommitCell: true})
+	// Retire on it, every option on: one step, no call to any stub, and
+	// cell.json byte for byte as it was.
+	r, err := s.Retire(RetireOptions{InitiativeID: si.ID, Seats: []string{"fse"}, CloseThreads: true, RevokeTokens: true, CommitCell: true})
 	if err != nil {
 		t.Fatal(err)
 	}
