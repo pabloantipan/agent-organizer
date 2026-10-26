@@ -130,3 +130,22 @@ done card `seat: b1` plans `b1` only; a plan with no seat lists no threads,
 no tokens, no cell.json write. The boundary adds `internal/cli/retire.go`,
 `frontend/src/components/Retire.tsx` (words only) and CLAUDE.md's "Retire
 and clean" paragraph.
+
+## Amendment 2 (FSE, 2026-10-26): the facts samples' readings
+
+From Hephaistos (crossing 0022's samples, agent-mailbox-specs a6869bf: the
+working-on schemas, `expected.json` facts and `readers_today`). Deltagos
+differs in two places, both read in `internal/model/decision.go`, which is
+this card's:
+
+- **FR-7** reads `ruled_by` per `expected.json` at a6869bf, which adds
+  `operator` and `pablo (away mode)` to the variants (person pablo, mode
+  present or away as the sample maps them).
+- **FR-8** A record's `forecast:` band is read when text follows it:
+  `40-90 min of …` reads `{lo: 40, hi: 90}` in minutes, as the sample's facts
+  do; `forecastBand` (`decision.go:63`) stops being anchored at the end.
+  Every forecast in this initiative's records reads to the sample's value.
+
+G5 adds: every `ruled_by` variant and every forecast form in the sample read
+as `expected.json` says; `readers_today` for Deltagos then matches
+`accepted_reading`. The pin is a6869bf.
