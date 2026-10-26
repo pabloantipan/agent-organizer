@@ -4,6 +4,13 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## 2026-10-26 02:50
+
+- sup95 closed (01:48-02:45; seats $13.49): lf54-retire-guard passed x3, PR asked of talos-lab (thread 01M5VBMQPWE43GJ9YJS5E5E0NR); lf55-one-title built at f2ad73c, X0 passes, unreviewed, waits on Pablo clearing a Dock layer-20 window covering the display (thread 01M5V9SV7ATHZ2PXS1AN4TVBRJ open); continuation prompt prompts/organizer-lf55-one-title-continue.md, l55-title's prelude and token kept. Wave 2 (lf54-ci-contracts, -usage-rejected, -decision-states) waits on lf53's merges; none on origin/main yet. sup95 ended.
+- Next on Pablo's return: he clears the Dock layer, then a new supervisor runs lf55's continuation (H3, the shots) and its reviews; once lf53 lands, wave 2. Five organizer code PRs wait on talos-lab (lf52-decisions-line, the three lf53, lf54-retire-guard).
+- leftovers-55 Amendment 1: CLAUDE.md's Packaging line joins FR-8. Found: on main the top bar never dragged (WKWebView ignores -webkit-app-region).
+- The account read 'used 90% of your session limit' at 02:39 (sup95).
+
 ## 2026-10-26
 
 - leftovers 54 and 55 with sup95 (0164, 0165 ruled 2026-10-26). lf54-retire-guard passed review, then Amendment 1 sent it back: the default retire still planned to retire fse, and a no-seat plan closed threads and committed cell.json (l54-retire's review findings 1-4).
