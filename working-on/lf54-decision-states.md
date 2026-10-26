@@ -6,7 +6,7 @@ branch: lf54-decision-states
 seat:
 stage:
 updated: 2026-10-25
-next: "sup95 runs it once its lf53 dependency is on origin/main (0164 ruled 2026-10-26)"
+next: "the FSE relaunches it once its lf53 dependency is on origin/main (0164 ruled 2026-10-26; sup95 stopped 2026-10-26, unmerged)"
 depends_on: [lf53-frontmatter]
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-decision-states"]
 spec: "docs/specs/leftovers-54.md (FR-6 to FR-7)"

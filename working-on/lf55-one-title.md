@@ -6,7 +6,7 @@ branch: lf55-one-title
 seat: l55-title
 stage:
 updated: 2026-10-26
-next: "sup95: a fresh l55-title seat runs H3, the window shots and the Hidden-vs-HiddenInset hit-test once Pablo clears the Dock layer (.wt-notes/l55-title/progress.md); branch at f2ad73c, X0 passes"
+next: "the FSE relaunches l55-title from prompts/organizer-lf55-one-title-continue.md once Pablo has cleared the Dock layer-20 window (H3, window shots); branch at f2ad73c, X0 passes"
 depends_on: []
 boundary: ["docs/specs/leftovers-55.md Boundary"]
 spec: "docs/specs/leftovers-55.md (FR-1 to FR-8)"
