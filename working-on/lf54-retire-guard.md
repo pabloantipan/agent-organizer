@@ -8,7 +8,7 @@ reviewer: l54-retire-rev
 review: pass
 stage:
 updated: 2026-10-26
-next: "review: lf54-retire-guard, godoc fix, 7441934"
+next: "review: lf54-retire-guard, G1 (amended) and X0, 01e77d4"
 depends_on: []
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-retire-guard"]
 spec: "docs/specs/leftovers-54.md (FR-1)"
@@ -24,21 +24,25 @@ docs/specs/leftovers-54.md, rows G1 and X0.
 
 ## Done
 - l54-retire, 2026-10-26: FR-1 in `Retirable` and `PlanRetire` (5402624, branch lf54-retire-guard rebased on main e52083d); G1 fails on main, passes on the branch; X0 passes from a clean clone. Evidence and reviewer commands: `.wt-notes/l54-retire/progress.md`.
+- l54-retire, 2026-10-26: review finding 4 (godoc) fixed; Amendment 1 built: FR-1a and FR-1b (1ee3bae), FR-1c words (01e77d4), rebased on main a7d26f8; amended G1 fails at the pre-amendment head 54841cc and passes; X0 passes from a clean clone at 01e77d4; real-home dry runs of the default, `--retirable`, `--seats fse` and `--keep fse` all plan nothing and keep fse.
 
 ## Declared changes
 - modified `internal/service/crew.go:Retirable`: a seat counts only when some card, open or done, names it in `seat:` (FR-1)
-- modified `internal/service/retire.go:PlanRetire`: an explicit seat no card names is kept with the reason unless force; the empty `--retirable` message names "named by no card"
 - added `internal/service/retire.go:namedSeats`: the seats any card of the initiative names, read by both
-- modified `internal/service/retire.go:RetireOptions`: the `Force` comment says what it now overrides
-- modified `internal/service/retire_test.go`: G1 (`TestRetirableOnlyPicksSeatsACardNamed`); four tests that relied on a cardless seat being retirable give it a card or force
+- modified `internal/service/retire.go:PlanRetire`: the default (`Seats == nil`, no `--retirable`) is `Retirable` (FR-1a); an explicit seat no card names is kept with the reason unless force (FR-1); a plan with no seat returns before threads, tokens and files with "nothing to retire" (FR-1b)
+- modified `internal/service/retire.go:Service.Retire`: with no seat it kills only the explicit sessions and returns, so no mailbox, token, roster write, commit or run archive (FR-1b)
+- modified `internal/service/retire.go:RetireOptions`: `Seats` nil is the default, empty but not nil is no seat; `Force` comment says what it overrides
+- modified `internal/service/retire_test.go`: G1 (`TestRetirableOnlyPicksSeatsACardNamed`, `TestRetireDefaultFollowsCardsAndAnEmptyPlanTouchesNothing`); older tests that relied on a cardless seat or the old default give the seat a card, force, or expect "nothing to retire"
+- modified `internal/cli/retire.go:retireCmd`: `--keep` subtracts from the default plan's seats into a non-nil list (FR-1a); help of `--seats`, `--retirable`, `--force`, `--keep` and the doc comment (FR-1c); `cell.json: …, unchanged` on a plan with no seat
+- added `internal/cli/retire_test.go`: G1 CLI half (`TestRetireCmdDefaultAndEmptyPlans`, fixture `retireHome`)
+- modified `frontend/src/components/Retire.tsx`: words only: doc comment, force label, done badge title, "cell.json unchanged" when the plan has no seat (FR-1c)
+- modified `CLAUDE.md`: the "Retire and clean" paragraph only (FR-1c)
 Risky:
-- `PlanRetire`: the CLI's `--keep` sends an explicit list, so an unnamed seat in its "rest" is now kept with a reason instead of retired
+- `RetireOptions.Seats`: nil vs empty is now meaningful; a caller that sends an empty list to mean "the default" gets nothing (the dialog always sends its checked seats, the CLI leaves nil)
+- `PlanRetire`: an initiative in definition, or one whose cards name no seat, now retires nothing by default where it used to retire everyone but the reconciler
 Not changed, on purpose:
-- the default retire (no `--seats`, `--retirable` or `--keep`): FR-1 does not name it, and `--keep` computes from it; still plans every seat but the reconciler
-- `internal/cli/retire.go`, `frontend/src/components/Retire.tsx`: the force help text is stale but outside the boundary
-
-## Notes
-- Found on the real-home dry run: a plan retiring no seat still closes threads (3 for `--retirable`, 44 for `--seats fse`). The default retire still includes the FSE. Both in progress.md, Found, not asked.
+- `Retire.tsx` preselection when nothing is retirable (everyone but the reconciler): logic, outside "words only"; PlanRetire keeps any unnamed seat with its reason
+- `frontend/wailsjs`: no bound type changed
 
 ## Review
 **Verdict: pass** at 54026246ccdb2f5fc5de2dcd46a68270177b71a8. Unmet gate items: none. Reviewer `l54-retire-rev`, 2026-10-26. X0 run fresh (test-lease `make test` started 02:00:41 at sha 5402624, rc 0, saved; not a replay). Logs: `.wt-notes/l54-retire-rev/`.
