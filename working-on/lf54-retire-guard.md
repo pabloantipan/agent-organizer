@@ -3,7 +3,7 @@ title: "Retire picks only seats a card named, never the FSE or a standing role"
 status: next
 repos: [organizer]
 branch: lf54-retire-guard
-seat:
+seat: l54-retire
 stage:
 updated: 2026-10-25
 next: "sup95 runs it (0164 ruled 2026-10-26)"

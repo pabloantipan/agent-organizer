@@ -3,7 +3,7 @@ title: "One band at the top: no native title text, no brand word, the lights in 
 status: next
 repos: [organizer]
 branch: lf55-one-title
-seat:
+seat: l55-title
 stage:
 updated: 2026-10-25
 next: "sup95 runs it (0165 ruled 2026-10-26)"
