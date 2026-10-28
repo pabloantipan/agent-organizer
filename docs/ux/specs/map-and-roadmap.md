@@ -137,3 +137,77 @@ panel is the full text equivalent of the map. Pins are buttons named
 3. On odyssey, is the place link (initiative, stage, node) enough to share
    a view, or do you want a picture of the map lens in records and specs
    too?
+
+## Amendment 1 (aglaea, 2026-10-28): the map lens on the C4 base map
+
+From Pablo, 2026-10-27 ("C4 are for being integrated to Deltagos and
+Elenx, send fses"). Relayed by Hephaistos with the spec
+`docs/specs/c4-base-map.md` (claudecode `origin/spec/c4-base-map`,
+f3d2346): `bin/c4-map gen` writes `docs/architecture/containers.md`,
+`modules.md` and one index, `map.json` (schema `c4-map/1`). Every node
+carries a stable `snake_case` id and a grounding row (`node | level |
+kind | status | evidence`). This note's lens draws on it. What follows is
+my position on its two questions that touch Deltagos, and what the lens
+takes from it.
+
+- **Its Q3: Deltagos reads `map.json`, and does not parse the pages.**
+  This is the factory report's rule: one computation, and the screen
+  computes nothing. The pages are for people and for GitHub. The schema is
+  versioned, so the lens refuses a version it does not know with one line
+  (`Map not drawn: map.json is c4-map/2; this Deltagos reads c4-map/1`),
+  never a half-drawn map.
+- **Its Q1 (Pablo's ruling; my position): the base map draws what exists,
+  plus `status`, with no change classes.** The one idea of this note is
+  that the base map is the canvas and every change is a lens on it. A base
+  map that draws a ruled target in added/changed classes bakes one lens
+  into the canvas, and every other lens (a stage, a spec, a record's
+  option) would then fight it. Status is drawn as a fact about the node,
+  not as a change:
+  - `exists`: plain;
+  - `ruled`: a dashed outline and the record number under the label
+    (`ruled 0012`, a link), the way planned work is dashed on the Timeline;
+  - `retiring`: the label in `--fg-muted`, with the word `retiring`.
+
+  A lens's classes draw over status. ✕ removed is dashed and struck, so
+  `retiring` keeps its word to tell the two apart.
+- **Rendering: the dark render, from the source.** The lens renders each
+  map page's mermaid block through `mermaid2svg --style dark` into the
+  per-machine cache (diagrams-in-app §2). It never shows the committed
+  `*.md-N.svg`, which are light ("no white cards"). The generator must
+  keep each node's id recoverable from its SVG element (mermaid writes
+  `flowchart-<id>-<n>`). The lens reads that mapping and nothing else.
+- **What the lens needs from `map.json` per node**: `id`, `label`,
+  `level`, `kind`, `status`, `evidence[]`, the container it belongs to (for
+  L3), the members of a merge, and whether diagram-check found it
+  ungrounded. That is a request to the spec's FR-12, Hephaistos's.
+- **The node panel** (seed 2) ends with **Grounding**: each evidence entry
+  as a line.
+  - `repo harbor-ledger@1a2b3c4` (mono) opens the editor at the repo.
+  - `deploy <path>` opens the file.
+  - `record 0012` opens the record in the drawer.
+  - `curated: context.md` opens the page in the spec reader.
+
+  A merged node lists its members, each with its own grounding. Hidden
+  nodes are not drawn and not listed.
+- **An ungrounded node is drawn as drift**: a dotted outline and the word
+  `not grounded` in the panel and the node's name. This is the drift
+  odyssey found, made visible in the one place Pablo looks. The rest of
+  the map draws as usual.
+- **Levels** follow the generator's: context (L1, hand-kept), containers
+  (L2), and modules (L3, only for the containers `c4.json` asks for). A
+  container without L3 opens nothing, and its panel says `No module map
+  for this container.`
+- **No map yet** (`docs/architecture/map.json` absent): Map is still on
+  the Roadmap switch and shows the Empty state, `No base map yet.` / `Daedalus
+  makes one with c4-map gen; the FSE cuts the card.` There is no action.
+- **Elenx** gets the same lens, unchanged: the map is per initiative and
+  the lens reads only that initiative's `map.json`.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| M1 | read the base map | an initiative with the spec's fixture `map.json`: Map draws L2 in dark, no light panel, every node a button named `<label>, <kind>, <status>` |
+| M2 | tell what is planned from what runs | a `ruled` node is dashed with `ruled 0012` linking the record; a `retiring` node reads `retiring` |
+| M3 | see where a node lives in code | a node's panel ends with Grounding, each evidence entry a working link |
+| M4 | spot drift | an ungrounded node is dotted and named `not grounded` |
+| M5 | not be shown a half map | a `map.json` of an unknown schema shows `Map not drawn: …`; no file shows the empty state |
+| M6 | keep his place | switching a lens (stage, spec) recolours the same layout; no node moves |
