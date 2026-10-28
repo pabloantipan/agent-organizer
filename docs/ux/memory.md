@@ -467,6 +467,8 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - When the lead rules that the computation is shared (one command, JSON), the screen draws from it and computes nothing; the text form is a copy of the same command for the window shown, and the caption names the window so a difference from someone's pasted text explains itself (run-report A1).
 - Read the other machine's spec before designing on a field: a 'track' was not a stage (run-report A1).
 
+- Joining two charts: name the joining rule first (a progress line's card belongs to the wave whose cards: lists it) and refuse guesses (`no wave`); then grow the view the lead already reads before adding a new one (progress-and-waves).
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).
