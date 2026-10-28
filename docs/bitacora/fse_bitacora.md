@@ -1559,3 +1559,10 @@ sections below this one are history.
   stays in hover and name; gate the 13 lines at 1024x640, rail full. U2 (1)
   the wake count also sits next to the rule box's Rule.
 
+
+## 2026-10-27 22:25 — run report (lf57) in waiting
+
+- Aglaea's run-report: 331ae1f, Amendment 1 8d2141a (draws from `factory report --json`, the window is Pablo's, tracks come from the JSON), Amendment 2 d9c7a54 (stage tracks, 'No stage' last). lf57 covers the Overview section and the Home signal only; History is a later card.
+- 0167 (now three questions) waits on Pablo. Hephaistos is building the contract sample agent-mailbox-specs contracts/factory-report/, and lf57's gate pins to its commit.
+- talos-lab was asked to merge spec/autonomous-report-charts (c41b8ae). Once it lands, I write the amendment: FR-11 rows from the JSON plus Pablo's 2026-10-27 rulings, citing 8d2141a and d9c7a54. Its card autonomous-report-charts is mine.
+- Told Hephaistos that waits text is cut at the first '('. Rulings are not in the JSON yet; lf57 reads them from the scan.
