@@ -1,6 +1,6 @@
 ---
 title: Progress over time joined with waves - which view first
-status: proposed
+status: ruled
 raised: 2026-10-27
 raised_by: fse
 owner: pablo
@@ -9,9 +9,9 @@ cards: []
 threads: [01M6022GYPSWMS5HTNC1Y5XJEA]
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-27
+ruled_by: pablo
+chosen: "Q1 B now A later, Q2 waves block"
 ---
 
 ## Question
@@ -69,3 +69,7 @@ waves show token consumption, not dollars"), so it is not asked again.
 B joins lf57's build spec (leftovers-57) next to 0167's answers, as one
 accept record with a forecast. A becomes its own card after the 0042
 ledger lands. If you pick the waves block, Q2 goes to Hephaistos.
+
+## Ruling
+
+pablo, 2026-10-27, in the organizer on lodestar: Pablo in the FSE session, 2026-10-28: "excecute please", answering the FSE's ask to rule 0167 and 0168 as recommended.
