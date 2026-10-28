@@ -1,7 +1,7 @@
 ---
 title: The C4 map lens in Deltagos - the plan, and two questions before its spec
 status: proposed
-raised: 2026-10-28
+raised: 2026-10-27
 raised_by: fse
 owner: pablo
 options: ["Q1 status only | change classes", "Q2 roadmap mode | own sub-view"]

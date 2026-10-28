@@ -1,7 +1,7 @@
 ---
 title: Accept leftovers 57 - the run report on Overview, with its waves, and the Home signal
 status: proposed
-raised: 2026-10-28
+raised: 2026-10-27
 raised_by: fse
 owner: pablo
 options: ["accept as written", "accept with amendments", "send back"]
@@ -16,7 +16,7 @@ chosen:
 
 ## Question
 
-You said "excecute please" on 2026-10-28 in my session, and 0167 and 0168
+You said "excecute please" on 2026-10-27 in my session, and 0167 and 0168
 are ruled. Leftovers 57 (`docs/specs/leftovers-57.md`) builds Aglaea's run
 report (run-report §3 and §5 with Amendments 1 and 2) and progress-and-waves
 option B:

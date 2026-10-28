@@ -1,9 +1,9 @@
 # Leftovers 57: the run report on Overview, with its waves, and the Home signal: the build spec
 
 status: proposed (0169)
-by: the FSE, 2026-10-28, on main at 5a0e280
+by: the FSE, 2026-10-27, on main at 5a0e280
 sources: Pablo, 2026-10-27: "to be able to generate in Deltagos dynamically
-that kind of report"; 2026-10-28 (Aglaea's session, after the design canvas):
+that kind of report"; 2026-10-27 (Aglaea's session, after the design canvas):
 "send these to fse for exectuting", then in the FSE session "excecute please";
 records 0167 (Q1 roadmap mode, Q2 seen plus 24 h, Q3 no percent) and 0168
 (Q1 B now A later, Q2 waves block), 0020 (tokens, not dollars); Aglaea's
@@ -19,13 +19,13 @@ footer, and §5 (the Home signal). Out: §4 Roadmap › History (0167 Q1 places
 it there; it is option A, a later card after the 0042 facts ledger), and the
 waves block in `factory report`'s text (0168 Q2, Hephaistos's command).
 
-## Premises (read 2026-10-28 at 5a0e280)
+## Premises (read 2026-10-27 at 5a0e280)
 
 | Premise | Shown by |
 |---|---|
 | `factory report <init> [--window last\|current \| --since T --until T] [--text\|--json]` is installed on lodestar and computes the progress lines, the dead spans, the tracks and the rulings | `~/bin/factory`; `~/claudecode/scripts/factory/report.py` (bd66232, personal-cloude #4 4ee1f71) |
 | its contract is agent-mailbox-specs main 5d34115, `contracts/factory-report/`: `make-fixture.sh DIR`, `case.json` (window 2026-10-20 00:00-09:00, `ignore_fields: [root]`), `expected.json`, `expected.txt` (byte-equal), `factory-report.schema.json`; top-level keys `initiative, root, generated, why, window, progress, tracks, rulings`; times epoch ints with `*_iso` | Hephaistos, thread 01M603675S5Q3J8DEZC0E28W73; `git -C ~/agent-slack/specs ls-tree 5d34115 contracts/factory-report/` |
-| the command has no list of windows: `--window last` and `current` only | `report.py:9-14, 582-589`; asked of Hephaistos 2026-10-28 (`--windows --json`) |
+| the command has no list of windows: `--window last` and `current` only | `report.py:9-14, 582-589`; asked of Hephaistos 2026-10-27 (`--windows --json`) |
 | a wave's rounds carry no cause in Deltagos: `model.Round` is card, kind, start, end, result, reviewer, reason; the contract's sample run record carries `cause:` (hestia 0042 enum approach, execution, gate, environment, unclear) | `internal/model/wave.go:35-43`; agent-mailbox-specs `contracts/working-on/sample/docs/runs/2026-10-22-sample-run.md` |
 | tokens per session are in the usage report, and runs carry their card | `internal/usage/report.go:29-102`; `internal/session/runs.go` (`Run.Card`, `InputTokens`) |
 | the service shells out to programs by name; Overview and Home exist, Home's signals come from `signalFacts` | `internal/service/retire.go:229`; `frontend/src/components/Overview.tsx`, `Home.tsx:435` |

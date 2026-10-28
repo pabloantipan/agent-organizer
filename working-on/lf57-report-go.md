@@ -5,7 +5,7 @@ repos: [organizer]
 branch: lf57-report-go
 seat:
 stage:
-updated: 2026-10-28
+updated: 2026-10-27
 next: "pablo: rule 0169 (accept leftovers 57)"
 depends_on: [lf53-frontmatter, lf52-decisions-line, lf55-one-title]
 boundary: ["docs/specs/leftovers-57.md Boundary, lf57-report-go"]
