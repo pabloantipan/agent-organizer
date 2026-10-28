@@ -410,3 +410,57 @@ moves, the window, dead time, grouping, the deploy record, `track:`,
 | AR16 | see why nothing is drawn | with `factory` off the PATH, the section reads `Report not drawn: factory report not found` and draws no chart |
 | AR17 | not see another machine's run | a remote initiative's Overview reads `Run reports are drawn on <machine>.`; its Home row has no run signal |
 | AR18 | read tracks as the factory marks them | cards with `track:` draw one row per track, in the depends_on tree; none carry it: `No card carries track: yet.`; untracked cards are one `[untracked]` row last |
+
+## Amendment 2 (aglaea, 2026-10-27): drawn from the merged `factory report`
+
+`factory report <init> [--window last|current | --since T --until T]
+[--text|--json]` is merged (claudecode 4ee1f71, `scripts/factory/report.py`).
+I ran it on organizer `--window last` (18 Oct 16:31–19:30). Its JSON has
+`window`, `progress` (`denominator`, `moves`, `lines`, `dead`, `notes`) and
+`tracks` (`rev`, `rev_time`, `envs`, `tracks`, `goal`). The screen maps to
+it as follows, and nothing is computed in the app (AR15).
+
+- **The window control's presets** are the command's: `Running now`
+  (`--window current`, present only while a window is open), then each
+  run of the last 14 days, the latest being `--window last`, chosen on
+  arrival, then `Last 24 hours` and `Custom…` (`--since/--until`).
+- **Progress rows** are `progress.lines`: time `t`, `cards` as links to
+  each card's back (its commit sha in the link's name and hover, not on
+  the row), and `pct`. The bar width comes from `pct`; `hashes` belongs to
+  the text form. `progress.dead` draws the dead rows, and `progress.notes`
+  are lines under the table in `sm` `--fg-muted`.
+- **The caption** is drawn from `denominator.count` and the window, in
+  words: `5 cards passed review between 16:31 and 19:30, 18 Oct.` With a
+  `planned` kind it says `of the 9 planned`.
+- **Tracks are what the JSON gives**, today the roadmap's stages plus one
+  row for cards with no stage (`id` empty), drawn last as `No stage`. A1
+  read tracks from `track:` after odyssey's proposal; the merged command
+  reads stages, and the screen does not care which. If the command adopts
+  `track:`, nothing here changes.
+  - **A chain is a column, not a staircase**: a track that is its
+    parent's only child sits at its parent's indent, with a `↓` connector.
+    Indent shows a branch only.
+  - **Done tracks fold.** Tracks with `done` set and no move in the
+    window collapse into one line at the top, `7 tracks done · Show`, a
+    disclosure (`aria-expanded`) that lists them with their done dates in
+    words. The text form keeps them all; the screen leads with what is
+    open.
+  - A track with nothing planned (`planned` 0) reads `–` under `local` and
+    `no card names it` in `sm` `--fg-muted`.
+  - `envs` are the columns. With `local` alone there is no environments
+    line (A1).
+  - **The board's moment**: one `sm` `--fg-muted` line above the table,
+    `Board as of 2a60d49 · 19:17` (`rev`, `rev_time`), so a rerun that
+    matches is visibly the same board.
+  - The **goal line** is `tracks.goal` as given.
+- **Rulings are not in the JSON.** Until they are, `Ruled while you were
+  away` reads the scan's own `RuledAt` within the window. It is a list,
+  not a number, so AR15 holds. Asked of Hephaistos: a `rulings` list in
+  the report (number, ruled_at, ruled_by, ruled_mode), so the text form
+  carries them too.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| AR19 | read open work first | on organizer `--window last`: one line `7 tracks done · Show` at the top of Tracks, then `review-map` and `No stage` with their fractions and what is left; Show lists the seven with dates in words |
+| AR20 | read a chain plainly | stages that follow one another without a branch share one indent, joined by `↓` |
+| AR21 | know which board was read | the line `Board as of <rev> · <time>` equals the JSON's `rev` and `rev_time` |
