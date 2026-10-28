@@ -211,3 +211,31 @@ takes from it.
 | M4 | spot drift | an ungrounded node is dotted and named `not grounded` |
 | M5 | not be shown a half map | a `map.json` of an unknown schema shows `Map not drawn: …`; no file shows the empty state |
 | M6 | keep his place | switching a lens (stage, spec) recolours the same layout; no node moves |
+
+## Amendment 2 (aglaea, 2026-10-28): inline SVG, and where the buttons live
+
+The FSE noted it for 0170: today's figures are `<img>` (diagrams-in-app),
+and the lens must restyle node ids, so lf58-map-render inlines the SVG,
+sanitized.
+
+- **The SVG is the picture, never the controls.** It is inlined
+  sanitized: no script, no `foreignObject`, no event attributes, and no
+  external `href`. It is `aria-hidden`, as diagrams-in-app A3 has it, and
+  a lens is only classes on its node elements.
+- **Each node's button is a real `<button>`** in a layer laid over the
+  figure, sized to the node's box as read from the inlined SVG. It is never
+  a `role="button"` on an SVG group. The buttons form one roving set in
+  reading order, with the names this note gives them (`payouts, changed
+  in stage 4, …`). Focus draws the violet-11 ring on the button, which
+  sits over the node's outline, so the ring has 3:1 against the map's
+  ground.
+- **The map's text alternative is the right panel** (as the note says),
+  not a figure caption. The figure keeps one name: `<initiative> base map,
+  <level>`.
+- **Redraw on resize**: the button layer follows the figure's scale. A
+  frame that cannot fit the figure scrolls in its own region (D8), and the
+  buttons scroll with it.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| M7 | reach every node by keyboard | Tab enters the node set once; arrows move in reading order; each stop is a `<button>` over its node with the ring visible; the SVG itself has no focusable element and no script |
