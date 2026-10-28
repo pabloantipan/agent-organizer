@@ -453,6 +453,10 @@ it as follows, and nothing is computed in the app (AR15).
     `Board as of 2a60d49 · 19:17` (`rev`, `rev_time`), so a rerun that
     matches is visibly the same board.
   - The **goal line** is `tracks.goal` as given.
+  - **No tracks at all** (`tracks.drawn` false, or an empty `tracks`):
+    one line, `No tracks to draw: no roadmap stages, and no card names a
+    track.` A1's `No card carries track: yet.` is withdrawn, since the
+    stages are drawn when no card carries `track:`.
 - **Rulings are not in the JSON.** Until they are, `Ruled while you were
   away` reads the scan's own `RuledAt` within the window. It is a list,
   not a number, so AR15 holds. Asked of Hephaistos: a `rulings` list in
