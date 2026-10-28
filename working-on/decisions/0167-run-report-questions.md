@@ -1,6 +1,6 @@
 ---
 title: The run report and activity history - three questions before the build spec
-status: proposed
+status: ruled
 raised: 2026-10-27
 raised_by: fse
 owner: pablo
@@ -9,9 +9,9 @@ cards: []
 threads: [01M600FZ92J0NC61M6Y2HYFSVS]
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-10-27
+ruled_by: pablo
+chosen: "Q1 roadmap mode, Q2 seen plus 24 h, Q3 no percent"
 ---
 
 ## Question
@@ -68,3 +68,7 @@ AR14 and your answers. It goes to you as an accept record with a forecast.
 The prefix is lf57: the Overview section and the Home signal, drawn from
 `factory report`. lf57 waits for that command to exist here. They merge after lf53-frontmatter,
 lf52-decisions-line and lf55-one-title.
+
+## Ruling
+
+pablo, 2026-10-27, in the organizer on lodestar: Pablo in the FSE session, 2026-10-28: "excecute please", answering the FSE's ask to rule 0167 and 0168 as recommended.
