@@ -311,3 +311,102 @@ Ruled while you were away · 2
 | AR12 | read the history | Roadmap › History lists events by day, newest day first, each with time, kind word, subject link and role; the kind checkboxes filter the list and the lanes; a run band opens its report |
 | AR13 | see it from Home | the row signal reads `last run · 12 cards · 2 h stopped`, goes to the section, and leaves under §3's rule |
 | AR14 | fit at 1024 | at 1024×640, Tracks keeps its columns at one x with `waits on` under the row, and no part of the section scrolls sideways |
+
+## Amendment 1 (aglaea, 2026-10-27): Pablo's three rulings, and odyssey's charts spec
+
+Pablo, 2026-10-27 (relayed by Hephaistos; docs decisions.md):
+
+1. Show only the environments a factory uses; lodestar is local only.
+2. The user picks the time window in Deltagos, so its result differs from
+   the FSE's text whenever the window does. Both run one computation,
+   `factory report <init> --since/--until --json` (being built). Deltagos
+   does not paste the FSE's text.
+3. Each factory draws its own charts, with no sync.
+
+Read with them: odyssey's Hephaistos's spec, agent-organizer
+`spec/autonomous-report-charts` (bdb54c7, c41b8ae),
+`docs/specs/autonomous-report-charts.md`. It owns the computation: done
+moves, the window, dead time, grouping, the deploy record, `track:`,
+`waits_on:`. This spec owns how Deltagos shows it, and so answers its Q2
+(which sub-view: Overview, §2).
+
+### What changes here
+
+- **One computation, read as JSON.** §1's `organizer activity` and
+  `organizer report` are replaced, for the charts, by `factory report
+  <init> --since --until --json`. Deltagos draws from that JSON and
+  computes nothing of its own.
+  - Grouping, denominators, dead spans and percentages are the
+    computation's (odyssey FR-5 to FR-8; moves grouped at a 20 min gap),
+    so §3's "within 10 minutes" goes.
+  - **Copy as text** copies `factory report <init> --since <shown> --until
+    <shown>` text, byte for byte, for the window on screen.
+  - When the command is missing or fails, the section shows the source of
+    nothing: one line in the blocked-reason style, `Report not drawn:
+    factory report not found` or its first error line, with no chart
+    (diagrams-in-app D3's pattern).
+- **The window is Pablo's to pick.** §3's `Run` select becomes a window
+  control in the section's heading row:
+  - presets as a select: each autonomous window of the last 14 days
+    (`26 Oct 23:40 – 07:10`, newest first, the latest chosen on arrival),
+    then `Last 24 hours`, then `Custom…`;
+  - `Custom…` shows two `datetime-local` fields, `From` and `To`, applied
+    on change, with no button. `To` before `From` disables nothing; the
+    line under them reads `From must come before To.` and the chart keeps
+    the last good window.
+  - **The caption always names the window** (`12 cards passed review
+    between 23:40 and 07:10.`), so a chart that differs from the FSE's
+    text says why. With a custom window the mode rows read `window start`
+    / `window end` (odyssey FR-8).
+  - The chosen preset is remembered per machine. A custom window is not
+    remembered: the next arrival shows the latest run.
+- **Environments: only those the factory uses.** The columns are the
+  environments that some deploy entry of this factory names (odyssey
+  FR-19). On lodestar that is none, so Tracks shows `local` alone, with no
+  line about missing columns: nothing is missing. §3's `No environment
+  data yet` line and its AR5 reading go.
+- **Tracks are `track:`, not stages.** Odyssey P17 shows tracks are not
+  roadmap stages. A track is the cards' `track:` (odyssey FR-16), and the
+  tree comes from `depends_on` across tracks (FR-17). `after:` on stages is
+  withdrawn (Q2 below). With no `track:` on any card, Tracks is the one line
+  `No card carries track: yet.`
+  - `local` counts cards still to cut from the track's ruled records
+    (FR-18), so the caption reads as odyssey FR-21 has it.
+  - Untracked cards are one `[untracked]` row, last.
+  - The letter, indent, `waits on` (`who` as the role) and the
+    shortest-path line stay as §3 draws them. The path line is drawn only
+    when the computation gives one (odyssey Q6).
+- **No sync.** An initiative shown from another machine's snapshot has no
+  report here. Its Overview shows, in place of the section, the one line
+  `Run reports are drawn on <machine>.` and Home shows no run signal for
+  it.
+- **Drawn rows, not the text in a mono block.** Odyssey FR-11 asks the
+  view to show the text verbatim in mono. With ruling 2 the app no longer
+  pastes text, and the morning reader needs what the text cannot give:
+  cards as links, a ruling that opens its record, and a name per row for
+  VoiceOver (a mono block of `#` and `x` reads as noise). So the view
+  draws §3's rows from the JSON, and the text is one press away (Copy as
+  text). The same numbers, two forms. Odyssey FR-11 should be amended to
+  say so (spec-craft step 7), which is Hephaistos's.
+- **History is a later step.** The computation being built is the report.
+  §4's Roadmap › History needs an events source beyond it (seat starts,
+  merges, rulings in one list), so it is its own card once that source
+  exists. lf57 is §3 and §5 only.
+
+### Questions, as they stand (record 0167)
+
+- Q1 (History's place): stands, for the later card.
+- Q2: ruled for environments. The `after:` part is withdrawn: tracks come
+  from `track:` and `depends_on`.
+- Q3 (how long the report heads Overview) and Q4 (no percent on Home):
+  stand.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| AR5 (amended) | see only his environments | on lodestar (no deploy entries) Tracks has the `local` column alone and no line about environments; with deploy entries naming qa, a `qa` column appears with `on qa · <ref>`, `0%` or `–` |
+| AR7 (amended) | pick the window | the window select lists the last 14 days' runs (latest chosen), `Last 24 hours` and `Custom…`; Custom's From/To redraw the chart on change; the caption names the window shown |
+| AR9 (amended) | pass it on | Copy as text equals `factory report <id> --since <shown> --until <shown>` text, byte for byte |
+| AR15 | trust the numbers | every count and percent drawn equals the `--json` output for the same window; no number is computed in the frontend |
+| AR16 | see why nothing is drawn | with `factory` off the PATH, the section reads `Report not drawn: factory report not found` and draws no chart |
+| AR17 | not see another machine's run | a remote initiative's Overview reads `Run reports are drawn on <machine>.`; its Home row has no run signal |
+| AR18 | read tracks as the factory marks them | cards with `track:` draw one row per track, in the depends_on tree; none carry it: `No card carries track: yet.`; untracked cards are one `[untracked]` row last |

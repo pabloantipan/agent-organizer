@@ -464,6 +464,9 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - When a text chart the lead liked becomes a screen, keep its rows (with links and real bars) before reaching for an axis; the names are what is read (run-report).
 - Past dead time is hatched neutral with its cause; only dead time still going is drawn blocked (run-report).
 
+- When the lead rules that the computation is shared (one command, JSON), the screen draws from it and computes nothing; the text form is a copy of the same command for the window shown, and the caption names the window so a difference from someone's pasted text explains itself (run-report A1).
+- Read the other machine's spec before designing on a field: a 'track' was not a stage (run-report A1).
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).
