@@ -1566,3 +1566,4 @@ sections below this one are history.
 - 0167 (now three questions) waits on Pablo. Hephaistos is building the contract sample agent-mailbox-specs contracts/factory-report/, and lf57's gate pins to its commit.
 - talos-lab was asked to merge spec/autonomous-report-charts (c41b8ae). Once it lands, I write the amendment: FR-11 rows from the JSON plus Pablo's 2026-10-27 rulings, citing 8d2141a and d9c7a54. Its card autonomous-report-charts is mine.
 - Told Hephaistos that waits text is cut at the first '('. Rulings are not in the JSON yet; lf57 reads them from the scan.
+- 22:40 lf57's contract pin: agent-mailbox-specs main 5d34115, contracts/factory-report/ (make-fixture.sh, case.json, expected.json, expected.txt, schema). The JSON's rulings list replaces the scan for "Ruled while you were away".
