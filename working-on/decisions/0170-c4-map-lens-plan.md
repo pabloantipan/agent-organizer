@@ -1,10 +1,10 @@
 ---
-title: The C4 map lens in Deltagos - the plan, and two questions before its spec
+title: The C4 map lens in Deltagos - the plan, and where Map lives
 status: proposed
 raised: 2026-10-27
 raised_by: fse
 owner: pablo
-options: ["Q1 status only | change classes", "Q2 roadmap mode | own sub-view"]
+options: ["roadmap mode", "own sub-view"]
 cards: []
 threads: [01M604ZJYQVBX3HGDBW6TX2Q59, 01M6051CZHV0D8YERRRWYNPZ9Q]
 supersedes: []
@@ -50,39 +50,49 @@ Cards, cut once you rule and the sample exists:
   recolour.
 - **lf58-map-lens (frontend, UI review):** the Map view with the levels and
   breadcrumb, the node panel with its grounding, dotted ungrounded nodes,
-  ruled nodes dashed with their record, and the empty state.
+  planned nodes dashed with their record, and the empty state.
 
 Later and not in this plan: the stage lens, record pins and `touches:`
 (Aglaea's other open questions from 2026-10-18).
 
-Two questions:
+Q1 was settled outside this record (below), so one question is left:
+
+- **Q2 (the question)** Where does Map live: as a mode of Roadmap (Stages, Map, Cards,
+  Calendar, History), or as a sub-view of its own? 0167 put History in
+  Roadmap.
+
+Settled elsewhere, kept for the record:
 
 - **Q1** What does the base map draw: only what exists, with its status, so
   that each change is a lens over it (Aglaea's position)? Or does it also
   bake the change classes in (added, changed, removed), as odyssey's
   hand-made map did? This is also the generator spec's blocker Q1, so your
   answer goes to Hephaistos too.
-- **Q2** Where does Map live: as a mode of Roadmap (Stages, Map, Cards,
-  Calendar, History), or as a sub-view of its own? 0167 put History in
-  Roadmap.
+  Ruled by Pablo in the Hephaistos session on lodestar, 2026-10-31, on
+  the atlas proposal: "let's ammend the best way we figure out here"
+  (agent-slack docs/decisions.md 2026-10-31, entry (4), relayed in thread
+  01M6054SPVXXD8H9KK7QJD657Q). The base map draws what exists, with no
+  change classes, which belong to a change order's diagram. In schema
+  c4-map/2 the node field `status` becomes `lifecycle` (live, planned,
+  deprecated, retired), and nodes gain `maturity` (sketched, probed,
+  stable, authored) and `source` (authored, derived). The reader is built
+  on c4-map/2 and never reads `status`.
 
 ## Options
 
-- **Q1** status only | change classes
-- **Q2** roadmap mode | own sub-view
+- **roadmap mode**
+- **own sub-view**
 
 ## Recommendation
 
-**Q1 status only, Q2 roadmap mode.**
+**roadmap mode.**
 
-- **Q1:** with change classes baked in, every other lens has to fight them.
-  A plan's changes are then a lens over the map that exists.
-- **Q2:** Roadmap already owns the stages that the map is coloured by, and a
-  seventh sub-view breaks FR-14.
+Roadmap already owns the stages that the map is coloured by, and a
+seventh sub-view breaks FR-14.
 
 ## Asked of Hephaistos for the contract
 
-- `schema` and a full `map.json` example;
+- `schema` and a full `map.json` example (now c4-map/2, which Hephaistos posts first);
 - per node, the SVG element id, or the exact rule to find it, since the id
   carries a mermaid counter;
 - each level's mermaid source, or its page and block, so Deltagos renders it
