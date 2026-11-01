@@ -133,3 +133,14 @@ card's boundary, so the boundary grows: `lf53-record-statusline` also edits
 that test (the 409 case expects an error; idempotence is a second 2xx run)
 and that one CLAUDE.md sentence (it reads "a 2xx counts as registered; the
 record upserts"). No other lf53 card touches either file.
+
+## Amendment 1 (2026-11-01, the FSE, on talos-lab's refusal of lf53-frontmatter)
+
+The shared working-on contract moved after these cards were reviewed
+(agent-mailbox-specs ed3c6b5 to cfd5a80: `ruled_by` modes, `touches` and
+`change_order`, the hestia 0042 fields), so `make test` on the merge reads
+a sample the cards were never built against. X0 for the three lf53 cards
+runs with `CONTRACTS_DIR` at a checkout of specs **ed3c6b5**, the contract
+they were reviewed on. Reading the moved contract is leftovers 54's work:
+`lf54-ci-contracts` pins CI to a specs sha, and `lf54-decision-states`
+reads the `ruled_by` modes; their pin moves to specs main when they launch.
