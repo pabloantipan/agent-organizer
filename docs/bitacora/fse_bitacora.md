@@ -4,15 +4,16 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
-## HAND-OFF 2026-11-01 19:27 (last sha 130e677)
+## HAND-OFF 2026-11-01 20:27 (last sha see git log)
 
-- AUTONOMOUS since 16:19, no end set. Goal (Pablo via Hephaistos): the factory model built in atlax. Hourly cron wake (session-only). A usage-limit stop ~17:00-18:50 paused every seat.
-- Supervisors (cap 3, all within forecast at 19:27): sup101 leftovers 57 (lf57-run-report in review at 2f7dccb; lf57-home-signal next, after lf61 which merged); sup102 atlax (lf59-atlax-authored in review at 62fe627; window extended to ~20:20); sup103 leftovers 58 map lens (0174 ruled by recommendation 18:58; map-read in review d395b7f, map-render in review 6935178; lens is wave 2).
-- Merged today: #4-#23. origin/main a1c0f7a. Installed v0.2.0-3135 (atlax-only merges since need no install).
-- To cut when free: PW7 (finished wave's footer opens its run record, after lf57-run-report merges); the next frontend leftovers from the held lines below (DS7, R53 live resize, rule.go owner, usage --json rejected rows, tasks.go/FsePanel literals, stripComments); htmlLabels at the source; the organizer's own map.json (Daedalus, c4-map gen).
-- Waits on Pablo: lf55-one-title (Dock window; needs-operator; rebase over lf60 first); restart Deltagos for the icon fix.
+- AUTONOMOUS since 16:19, no end set. Goal (Pablo via Hephaistos): the factory model built in atlax. Hourly cron wake (session-only).
+- Supervisors (cap 3, all within forecast at 20:27): sup101 leftovers 57 (lf57-home-signal passed code and UI review, PR with talos-lab; lf57-wave-footer round 2 in review at b98452f, Amendments 4-6); sup103 leftovers 58 (lf58-map-lens building, wave 2; read #24 and render #27 merged); sup104 leftovers 62 (0175 by recommendation 19:44; lf62-go in review at 83fe879; lf62-ui after it).
+- Merged today: #4-#27. origin/main e968fc1. Installed v0.2.0-3200 (through #26).
+- atlax for organizer: seed, calls, record, 107-element surface, 3 authored (#12, #13, #21, #23, #25); check 0 findings.
+- To cut when free: the organizer's own map.json (Daedalus, c4-map gen); htmlLabels at the source; docs/runs scan gap; FR-9 consumes completeness (low).
+- Waits on Pablo: lf55-one-title (Dock window; needs-operator; rebase over lf60 first); restart Deltagos for the icon fix. The screen is locked: UI reviews render offscreen.
 - 0167 and 0168 carry "2026-10-28" in their ruling words. They were ruled on 10-27 by the clock. Ruled records are not edited.
-- Rules I learned today: atlax cards carry touches and change_order at cut; a premise listing call sites greps all of frontend/src; bitácora inserts go after the day-log heading, never replacing an anchor.
+- Rules learned today: atlax cards carry touches and change_order at cut; a premise listing call sites greps all of frontend/src; bitácora inserts go after the day-log heading.
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
