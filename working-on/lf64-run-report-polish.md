@@ -6,7 +6,7 @@ branch: lf64-run-report-polish
 seat:
 stage:
 updated: 2026-11-01
-next: "the FSE launches its supervisor once 0177 is ruled"
+next: "sup106 runs it (0177 ruled 2026-11-01, autonomous mode)"
 depends_on: []
 boundary: ["frontend/src/components/RunReport.tsx", "frontend/src/components/RunTracks.tsx", "frontend/src/components/SpecReader.tsx", "frontend/src/lib/runReport.ts", "frontend/src/lib/specReader.ts", "frontend/src/styles/runreport.css"]
 spec: "docs/specs/leftovers-64.md (FR-1 to FR-8)"
