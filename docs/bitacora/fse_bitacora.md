@@ -16,6 +16,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- Held for the next frontend leftovers (Aglaea 26f96ce): DS7, the header chip says both counts when they differ ('6 decisions waiting · 5 on you'); DS8 no Home signal for crossings; R53 amended (A20), the header's height follows a live resize to 1024.
+
 - 18:50 after the usage limit reset (all seats stopped ~17:00-18:50): merged #19 lf57-report-go, #20 lf61, #21 lf59-atlax-record, #22 working-on (bf66580); sup100 closed (~55 min, within) and ended; sup102 extended +90m for lf59-atlax-surface (launched 18:52; derive now 81 wails + 26 cli); sup101's l57-ui resumed 18:51. Installed v0.2.0-3135. Sent Aglaea sup100's UI1 (header 6 vs panel 5), A1, A2. leftovers-58 and 0174 proposed 18:53 (cd392b9).
 
 - Held for the next leftovers (lf61 code review pass at 7de55a1): `internal/service/rule.go` signs "owner operator" in a record's Ruling when pablo rules an operator-owned record; DS6 stops at the box, the written ruling should read the owner through the same person reader (and drop it when the ruler is pablo).
