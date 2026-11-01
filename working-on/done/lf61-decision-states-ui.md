@@ -1,12 +1,12 @@
 ---
 title: "Records waiting on the cells leave Needs me, and every view uses one word per status"
-status: now
+status: done
 repos: [organizer]
 branch: lf61-decision-states-ui
 seat: l61-states
 stage:
 updated: 2026-11-01
-next: "PR with talos-lab (branch pushed at 7de55a1, asked 2026-11-01 16:5x). Finding (rule.go signs \"owner operator\" in a Ruling): filed to the FSE (bitácora, next leftovers, 88b5584)"
+next: "done: merged #20 37b1763"
 review: pass
 reviewer: l61-states-rev
 depends_on: [lf54-decision-states]
