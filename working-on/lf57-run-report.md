@@ -12,6 +12,7 @@ boundary: ["docs/specs/leftovers-57.md Boundary, lf57-run-report"]
 spec: "docs/specs/leftovers-57.md (FR-7 to FR-13)"
 gate: "docs/specs/leftovers-57.md#Acceptance → gate"
 ui_review: true
+autonomy: unattended
 ---
 
 ## Goal

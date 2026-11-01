@@ -12,6 +12,7 @@ boundary: ["docs/specs/leftovers-61.md Boundary"]
 spec: "docs/specs/leftovers-61.md (FR-1 to FR-6)"
 gate: "docs/specs/leftovers-61.md#Acceptance → gate"
 ui_review: true
+autonomy: unattended
 ---
 
 ## Goal

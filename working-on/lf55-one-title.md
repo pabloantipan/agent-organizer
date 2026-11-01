@@ -12,6 +12,7 @@ boundary: ["docs/specs/leftovers-55.md Boundary"]
 spec: "docs/specs/leftovers-55.md (FR-1 to FR-8)"
 gate: "docs/specs/leftovers-55.md#Acceptance → gate"
 ui_review: true
+autonomy: needs-operator(H3 shots need Pablo to clear the Dock layer-20 window on his display)
 ---
 
 ## Goal
