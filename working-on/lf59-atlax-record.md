@@ -20,6 +20,8 @@ change_order:
   adds: []
   modifies: [prod:agent-organizer.record.PostUsage, prod:agent-organizer.scan.ReadInitiative]
   retires: []
+prs:
+  - {repo: organizer, pr: 21, target: main, state: merged, merge: b56a224}
 ---
 
 ## Goal
