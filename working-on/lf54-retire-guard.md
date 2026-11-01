@@ -14,6 +14,8 @@ boundary: ["docs/specs/leftovers-54.md Boundary, lf54-retire-guard"]
 spec: "docs/specs/leftovers-54.md (FR-1)"
 gate: "docs/specs/leftovers-54.md#Acceptance → gate"
 ui_review: false
+prs:
+  - {repo: organizer, pr: 9, target: main, state: merged, merge: 111bb38}
 ---
 
 ## Goal
