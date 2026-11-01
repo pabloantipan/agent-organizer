@@ -61,3 +61,10 @@ Not `floaticon_darwin.go` unless a hook needs a Go line, then that one.
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf60-icon-spaces` | I1-I4, X0 | — | false |
+
+## Amendment 1 (2026-11-01, the FSE, on l60-icon-rev's finding at aa63f8d)
+
+The premise "nothing listens for a display change" was wrong: an observer
+already sits near `floaticon_darwin.m:1287`. FR-2 holds as built: the
+display change now runs the same recovery read. Kept here, not deleted, so
+the next spec does not repeat it.
