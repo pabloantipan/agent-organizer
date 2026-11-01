@@ -3,8 +3,8 @@ import { marked } from "marked";
 import type { merge, model } from "../../wailsjs/go/models";
 import { DAY, dateWords, daysBetween, parseISO, today } from "../lib/dates";
 import { addLocalDays } from "../lib/axis";
-import { answerSizes, chosenLines, decisionTone, fitAnswers, fitRoom, isDecided, isOpen as waitsOnRuling, isRulable, NOT_RULABLE_LINE, ownerPhrase, ruledAnswers, type Answer } from "../lib/decisions";
-import { RULED_LIMIT, countWords, decisionMatches, emptyRuledWords, lineName, rulerWords, ruledShown, shownSections, statusWord, summaryOf, timelineName, turnaroundWords, waitedWords, type DecSections } from "../lib/decisionsPage";
+import { answerSizes, chosenLines, decisionTone, fitAnswers, fitRoom, isDecided, isOpen as waitsOnRuling, isRulable, NOT_RULABLE_LINE, ownerHover, ownerPhrase, ruledAnswers, type Answer } from "../lib/decisions";
+import { RULED_LIMIT, countWords, decisionMatches, emptyRuledWords, lineName, rulerWords, ruledShown, sectionOf, sectionRows, shownSections, statusWord, summaryOf, timelineName, turnaroundWords, waitedWords, type DecSections } from "../lib/decisionsPage";
 import { readOnlyOf } from "../lib/queue";
 import { decisionKey, draftVerb, useDrafts, type Draft, type DraftFields } from "../lib/drafts";
 import { useMarkdownEdges } from "../lib/useScrollEdges";
@@ -17,8 +17,6 @@ import { EdgePointer, TimeFrame, ZoomControl, useTimeZoom } from "./TimeZoom";
 import "../styles/decisions.css";
 
 type Row = { d: model.Decision; initiative: string; machine: string; key: string };
-
-const sectionOf = (d: model.Decision): keyof DecSections => (waitsOnRuling(d) ? "rule" : "ruled");
 
 /** The decisions tab, the operator's main view (docs/ux/specs/decisions-view.md):
  *  working-on/decisions/ records across initiatives, or the one selected in
@@ -72,9 +70,9 @@ export function DecisionsView() {
     return out;
   }, [view, selectedInitiative]);
 
-  const open = rows.filter((r) => waitsOnRuling(r.d)).sort((a, b) => a.d.raised.localeCompare(b.d.raised) || a.d.number.localeCompare(b.d.number));
-  const ruled = rows.filter((r) => isDecided(r.d)).sort((a, b) => (b.d.ruled ?? "").localeCompare(a.d.ruled ?? "") || b.d.number.localeCompare(a.d.number));
-  const closed = rows.filter((r) => !waitsOnRuling(r.d) && !isDecided(r.d));
+  // leftovers-61 FR-2: To rule holds what the lead can rule, With the cells
+  // what waits on the cells it affects, Ruled the rest.
+  const { rule: open, cells, ruled, closed } = sectionRows(rows);
   // Ruled's list: the ruled newest first, then superseded and withdrawn under
   // their small heading, inside the same limit (§4).
   const past = [...ruled, ...closed];
@@ -82,12 +80,13 @@ export function DecisionsView() {
   // Timeline rows: superseded and withdrawn only when asked for.
   const shown = [...rows].filter((r) => showClosed || waitsOnRuling(r.d) || isDecided(r.d)).sort((a, b) => a.d.raised.localeCompare(b.d.raised) || a.d.number.localeCompare(b.d.number));
   const openHits = open.filter(hit);
+  const cellsHits = cells.filter(hit);
   const pastHits = past.filter(hit);
   const shownHits = shown.filter(hit);
   // What shows open: while a find is on, every section with a hit (row 6);
   // a landing's section for this visit (row 8); else the stored layout,
   // which holds only what was toggled by hand.
-  const sections = shownSections(decSections, visit, filtering ? { rule: openHits.length > 0, ruled: pastHits.length > 0, timeline: shownHits.length > 0 } : null, findHand);
+  const sections = shownSections(decSections, visit, filtering ? { rule: openHits.length > 0, cells: cellsHits.length > 0, ruled: pastHits.length > 0, timeline: shownHits.length > 0 } : null, findHand);
   // A find stores nothing, toggles included (leftovers-6 FR-5, row 9):
   // while one is on, opening and closing are for the visit, and clearing it
   // restores the stored layout.
@@ -160,7 +159,7 @@ export function DecisionsView() {
     // Focus and names, navigating (ui-leftovers FR-5): focus lands on the
     // record's row, never on the page body.
     el.querySelector<HTMLButtonElement>("button.dec-line")?.focus({ preventScroll: true });
-  }, [expanded, landSeq, sections.rule, sections.ruled, sections.timeline, showAllRuled, query]);
+  }, [expanded, landSeq, sections.rule, sections.cells, sections.ruled, sections.timeline, showAllRuled, query]);
 
   // Amendment 1 §8: an expanded record taller than the view keeps its head
   // (line and Rule) stuck under the section heading until its end. `tall`
@@ -193,7 +192,7 @@ export function DecisionsView() {
     ro.observe(el);
     ro.observe(wrap);
     return () => ro.disconnect();
-  }, [expanded, ruling, sections.rule, sections.ruled, sections.timeline, view]);
+  }, [expanded, ruling, sections.rule, sections.cells, sections.ruled, sections.timeline, view]);
 
   // The Timeline's axis sticks under its heading (row 4), whose height grows
   // when its tools wrap: measured, so the axis sits right under it.
@@ -329,7 +328,7 @@ export function DecisionsView() {
             )}
             <span className="dec-meta">
               {waitsOnRuling(d)
-                ? <>{ownerPhrase(d.owner)} · <b>{waitedWords(age(d))}</b>{lineDraft && <> · draft</>}</>
+                ? <><span title={ownerHover(d.owner)}>{ownerPhrase(d.owner)}</span> · <b>{waitedWords(age(d))}</b>{lineDraft && <> · draft</>}</>
                 : isDecided(d)
                   ? <>{rulerWords(d)} · {ruledOn}{t && <> · {t}</>}</>
                   : d.superseded_by ? <>by {d.superseded_by}</> : null}
@@ -402,7 +401,7 @@ export function DecisionsView() {
     );
   };
 
-  const anyHit = openHits.length + pastHits.length + closed.filter(hit).length > 0;
+  const anyHit = openHits.length + cellsHits.length + pastHits.length + closed.filter(hit).length > 0;
   const summary = summaryOf(open.map((r) => r.d), ruled.map((r) => r.d), now);
   const oldest = open[0];
   const limited = ruledShown(pastHits, showAllRuled, filtering);
@@ -454,6 +453,14 @@ export function DecisionsView() {
             : openHits.length === 0 ? noMatch : openHits.map(record)
         )}
       </section>
+
+      {/* leftovers-61 FR-2 (DS2): between To rule and Ruled, absent at 0. */}
+      {cells.length > 0 && (
+        <section className="dec-section dec-cells">
+          {heading("cells", "With the cells", countWords(cellsHits.length, cells.length, filtering), "oldest first")}
+          {sections.cells && (cellsHits.length === 0 ? noMatch : cellsHits.map(record))}
+        </section>
+      )}
 
       <section className="dec-section dec-ruled">
         {heading("ruled", "Ruled", countWords(pastHits.length, past.length, filtering), "newest first")}

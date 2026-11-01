@@ -1,7 +1,7 @@
 import type { AgentGroup, AgentsView, BoardView } from "../hooks/useWails";
 import type { merge, model } from "../../wailsjs/go/models";
 import { leadOf, needsMeRows } from "./queue";
-import { isOpen, ownerPerson } from "./decisions";
+import { isRulable, ownerPerson } from "./decisions";
 
 /** One state per initiative, what Home says at a glance (FR-6 of
  *  docs/specs/twenty-at-a-glance.md). First match wins, in this order:
@@ -40,7 +40,7 @@ const executing = (group: AgentGroup | undefined) =>
 const waitsOnBusiness = (i: merge.BoardInitiative, lead: string) =>
   (i.decisions ?? []).some((d) => {
     const o = owner(d);
-    return isOpen(d) && o !== "" && o !== lead && o !== FSE;
+    return isRulable(d) && o !== "" && o !== lead && o !== FSE;
   });
 
 /** The state of every initiative on the board, by id. An initiative on two

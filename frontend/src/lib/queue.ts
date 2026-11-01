@@ -2,7 +2,7 @@ import type { AgentGroup, AgentsView, BoardView, CellThread, Seat } from "../hoo
 import { sleepyWord } from "./initiatives";
 import type { merge, model, service } from "../../wailsjs/go/models";
 import { parseISO } from "./dates";
-import { decisionStatusWord, isOpen, isRulable, ownerPerson } from "./decisions";
+import { decisionStatusWord, isRulable, ownerName, ownerPerson } from "./decisions";
 import { VERBS } from "./verbs";
 import { unreadFiles, type UnreadFile } from "./unread";
 import { HEALTH, healthState, type HealthState } from "./health";
@@ -154,7 +154,9 @@ export function needsMeRows(view: BoardView | null, agents: AgentsView | null, n
     if (folded.has(i.id)) continue;
     const lead = leadOf(groups.get(i.id));
     for (const d of i.decisions ?? []) {
-      if (isOpen(d) && ownedByLead(d, lead)) rows.push({ kind: "decision", key: `decision:${i.id}/${d.number}`, initiative: i.id, since: day(d.raised), decision: d, waited: longWait(d.raised, now) });
+      // leftovers-61 FR-1 (0173): only what the lead can rule; a record with
+      // the cells is listed in Decisions, never here.
+      if (isRulable(d) && ownedByLead(d, lead)) rows.push({ kind: "decision", key: `decision:${i.id}/${d.number}`, initiative: i.id, since: day(d.raised), decision: d, waited: longWait(d.raised, now) });
     }
     // Files the scan could not read: whatever ask they hold is missing from
     // every other row, so the initiative gets one row that says so.
@@ -216,9 +218,9 @@ export function waitingOnOthers(view: BoardView | null, agents: AgentsView | nul
     if (folded.has(i.id)) continue;
     const lead = leadOf(groups.get(i.id));
     for (const d of i.decisions ?? []) {
-      if (!isOpen(d) || ownedByLead(d, lead)) continue;
+      if (!isRulable(d) || ownedByLead(d, lead)) continue;
       const waited = longWait(d.raised, now);
-      if (waited !== null) out.push({ key: `others:${i.id}/${d.number}`, initiative: i.id, owner: (d.owner ?? "").trim(), waited, since: day(d.raised), decision: d });
+      if (waited !== null) out.push({ key: `others:${i.id}/${d.number}`, initiative: i.id, owner: ownerName(d.owner), waited, since: day(d.raised), decision: d });
     }
   }
   return out.sort((a, b) => b.waited - a.waited);

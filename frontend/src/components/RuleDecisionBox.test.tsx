@@ -231,3 +231,26 @@ describe("RuleDecisionBox speaks a question record (leftovers-51)", () => {
     expect(html).not.toMatch(/rb-missing/);
   });
 });
+
+// leftovers-61 D6 (FR-6, DS6): the signature names the owner only when
+// someone else rules, through the person reader: owner operator is pablo.
+describe("leftovers-61 D6: the rule box's owner", () => {
+  const sign = (owner: string, human?: string) => {
+    if (human) h.state.agents = { groups: [{ id: "hestia", cell: { human } }] };
+    const dec = { number: "0040", title: "Pick", status: "proposed", options: ["a", "b"], owner, body: "" } as never;
+    const html = renderToStaticMarkup(<RuleDecisionBox initiative="hestia" decision={dec} onClose={() => undefined} />);
+    return /<span class="rb-sign"([^>]*)>([^<]*(?:<!-- -->[^<]*)*)<\/span>/.exec(html)!.slice(1).map((s) => s.replace(/<!-- -->/g, ""));
+  };
+  it("drops the owner when pablo rules a record owned by operator", () => {
+    expect(sign("operator")).toEqual(["", "signed pablo · commits one file"]);
+  });
+  it("drops it when pablo owns it, as before", () => {
+    expect(sign("pablo")[1]).toBe("signed pablo · commits one file");
+  });
+  it("names another owner", () => {
+    expect(sign("alejandro")[1]).toBe("signed pablo · owner alejandro · commits one file");
+  });
+  it("names operator as pablo when someone else rules, the raw value in the hover", () => {
+    expect(sign("operator", "ana")).toEqual([` title="owner: operator"`, "signed ana · owner pablo · commits one file"]);
+  });
+});

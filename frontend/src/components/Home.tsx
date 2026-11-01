@@ -11,7 +11,7 @@ import { dateWords } from "../lib/dates";
 import { draftVerb, useDraft } from "../lib/drafts";
 import { HEALTH, messages } from "../lib/health";
 import { ruleVerb, VERBS } from "../lib/verbs";
-import { isRulable, ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
+import { isRulable, ownerHover, ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
 import { compactColumns, fixedColumns, FOLD, frTracks, giveSlack, GOAL_CHARS, GOAL_FLOOR_CHARS, goalFloor, homeClassOf, NO_EMPTY, REGULAR_FIXED, shareRoom, signalsNeed, signalsShown, wideGoalRoom, type Empty, type Fold, type WidthClass } from "../lib/width";
 import { useBoard } from "../stores/board.store";
 import { nextDate, stageState } from "./InitiativeHeader";
@@ -334,7 +334,8 @@ export function DecisionRow({ row, decision: d }: { row: Extract<NeedsMeRow, { k
   return (
     <Shell row={row} reason="decision" tone="waiting" long={aged}
       subject={<><span className="mono">{row.initiative} {d.number}</span> · {d.title}</>}
-      hover={desc ? desc.split(", ").join(" · ") : undefined}
+      // leftovers-61 FR-6: an owner shown as pablo keeps `operator` in the hover.
+      hover={[desc?.split(", ").join(" · "), ownerHover(d.owner)].filter(Boolean).join(" · ") || undefined}
       context={decisionContext(d)}>
       {decisionRowAction(d).verb === VERBS.rule
         ? <RuleAction rowKey={row.key} initiative={row.initiative} decision={d} describedBy={desc ? descId : undefined} />
