@@ -15,6 +15,8 @@ boundary: ["docs/specs/leftovers-56.md Boundary"]
 spec: "docs/specs/leftovers-56.md (FR-1 to FR-6)"
 gate: "docs/specs/leftovers-56.md#Acceptance → gate"
 ui_review: false
+prs:
+  - {repo: organizer, pr: 11, target: main, state: merged, merge: 4bd5102}
 ---
 
 ## Goal
