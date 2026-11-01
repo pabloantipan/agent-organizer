@@ -177,6 +177,8 @@
    whole noun, leftovers-5 FR-8) and the ellipsis on its text span, so "+N"
    stays inside the column. */
 .home .p-sig.one-line > .lz { overflow: hidden; }
+/* The run signal is exempt from the 200px lozenge cap (leftovers-57 Amendment 5): its words are FR-14's; OneLine still caps it and folds it first when the row is tight. */
+.home .p-sig .lz.run { max-width: none; }
 .lz.sig-more { background: var(--surface-raised); color: var(--fg-muted); }
 /* FR-14: a lozenge is a flex box, which clips its text mid-word; its words
    sit in a text span that takes the ellipsis instead. */
