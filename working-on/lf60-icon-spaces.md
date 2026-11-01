@@ -1,12 +1,12 @@
 ---
 title: "The floating icon keeps its place on every desktop, and comes back after a display change"
-status: next
+status: now
 repos: [organizer]
 branch: lf60-icon-spaces
-seat:
+seat: l60-icon
 stage:
 updated: 2026-11-01
-next: "sup98 runs it (0172 ruled 2026-11-01)"
+next: "l60-icon builds it (sup98, launched 2026-11-01 14:10)"
 depends_on: []
 boundary: ["docs/specs/leftovers-60.md Boundary"]
 spec: "docs/specs/leftovers-60.md (FR-1 to FR-3)"
