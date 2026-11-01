@@ -3,7 +3,7 @@ import { ChevronDown, ChevronRight, ChevronUp, Code2, FileText, Lock, Route } fr
 import type { merge, model } from "../../wailsjs/go/models";
 import { dateWords, parseISO, today } from "../lib/dates";
 import { api } from "../hooks/useWails";
-import { firstWaiting, phaseRuns, stagePosition, waitingChip } from "../lib/header";
+import { firstWaiting, firstWithCells, phaseRuns, stagePosition, waitingChip, withCellsLine } from "../lib/header";
 import { leadOf, readOnlyOf } from "../lib/queue";
 import "../styles/initiatives.css";
 import { unreadFiles, unreadLabel } from "../lib/unread";
@@ -154,6 +154,11 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
   const lead = leadOf((agents?.groups ?? []).find((g) => g.id === i.id));
   const chip = waitingChip(i.decisions, lead);
   const first = firstWaiting(i.decisions);
+  // leftovers-61 FR-3 (DS3): the records waiting on the cells, said once
+  // beside the lead's count in muted text, no badge; it opens Decisions at
+  // their group, on the oldest of them.
+  const cells = withCellsLine(i.decisions);
+  const firstCells = firstWithCells(i.decisions);
   // FR-13: not active means read-only, said in words beside the id.
   const readOnly = readOnlyOf(view, i.id);
   const stages = i.stages ?? [];
@@ -200,7 +205,12 @@ export function InitiativeHeader({ initiative: i }: { initiative: merge.BoardIni
           ) : <span className="ihead-stage none"><Route size={13} aria-hidden /> no roadmap yet</span>)}
           {chip && first ? (
             <button className="lz waiting ihead-chip" onClick={() => openDecision(i.id, first)} title="open Decisions on the first record waiting on a ruling">{chip}</button>
-          ) : headerOpen ? <span className="ihead-nochip">no decision waiting</span> : null}
+          ) : headerOpen && !cells ? <span className="ihead-nochip">no decision waiting</span> : null}
+          {cells && firstCells && (
+            <button className="linkish ihead-cells" onClick={() => openDecision(i.id, firstCells)} title="open Decisions at With the cells: records waiting on the cells they affect, Themis's to settle">
+              {chip ? `· ${cells}` : cells}
+            </button>
+          )}
           {unread.length > 0 && (
             <button className="lz warning ihead-chip" aria-expanded={unreadOpen} aria-controls={`ihead-unread-${i.id}`} onClick={() => setUnreadOpen(!unreadOpen)}
               title="the files the scan skipped, with why; fix them and they read again">{unreadLabel(unread.length)}</button>

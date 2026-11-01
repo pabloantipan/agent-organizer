@@ -1,5 +1,5 @@
 import type { model } from "../../wailsjs/go/models";
-import { isOpen, ownerPerson } from "./decisions";
+import { isRulable, isWithCells, ownerPerson } from "./decisions";
 
 /** A run of stages under one phase word (initiative-header FR-3, §4). */
 export type PhaseRun = { phase: string; stages: { stage: model.Stage; n: number }[] };
@@ -39,7 +39,7 @@ export function stagePosition(stages: model.Stage[]): { current: number; label: 
  *  0034), else "N decisions waiting"; "1 decision" for one. Null at zero: the
  *  chip is not drawn. */
 export function waitingChip(decisions: model.Decision[] | undefined, lead: string): string | null {
-  const waiting = (decisions ?? []).filter(isOpen);
+  const waiting = (decisions ?? []).filter(isRulable);
   if (waiting.length === 0) return null;
   const mine = waiting.every((d) => {
     const o = ownerPerson(d.owner);
@@ -52,7 +52,26 @@ export function waitingChip(decisions: model.Decision[] | undefined, lead: strin
 /** The record the chip lands on: the oldest waiting one, as Decisions lists
  *  them (raised ascending), the lower number on a tie. */
 export function firstWaiting(decisions: model.Decision[] | undefined): string | null {
-  const waiting = (decisions ?? []).filter(isOpen);
-  waiting.sort((a, b) => (a.raised ?? "").localeCompare(b.raised ?? "") || a.number.localeCompare(b.number));
-  return waiting[0]?.number ?? null;
+  return oldest((decisions ?? []).filter(isRulable));
+}
+
+const oldest = (records: model.Decision[]) => {
+  const sorted = [...records].sort((a, b) => (a.raised ?? "").localeCompare(b.raised ?? "") || a.number.localeCompare(b.number));
+  return sorted[0]?.number ?? null;
+};
+
+/** The header's quiet line beside the chip (leftovers-61 FR-3, DS3):
+ *  "· N with the cells" after the lead's count, "N with the cells" alone
+ *  when nothing waits on the lead; null at zero. Muted, no badge: it is a
+ *  signal, not a call to act. */
+export function withCellsLine(decisions: model.Decision[] | undefined): string | null {
+  const n = (decisions ?? []).filter(isWithCells).length;
+  if (n === 0) return null;
+  return `${n} with the cells`;
+}
+
+/** The record the "with the cells" line lands on, so Decisions opens at that
+ *  group: the oldest of them, as the group lists them. */
+export function firstWithCells(decisions: model.Decision[] | undefined): string | null {
+  return oldest((decisions ?? []).filter(isWithCells));
 }

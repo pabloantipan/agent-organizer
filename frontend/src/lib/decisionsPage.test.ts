@@ -131,9 +131,9 @@ describe("sections", () => {
   });
 
   it("opens To rule and Ruled and closes the Timeline unless remembered", () => {
-    expect(decSectionsOf(null)).toEqual({ rule: true, ruled: true, timeline: false });
-    expect(decSectionsOf("not json")).toEqual({ rule: true, ruled: true, timeline: false });
-    expect(decSectionsOf('{"ruled":false,"timeline":true,"rule":"x"}')).toEqual({ rule: true, ruled: false, timeline: true });
+    expect(decSectionsOf(null)).toEqual({ rule: true, cells: true, ruled: true, timeline: false });
+    expect(decSectionsOf("not json")).toEqual({ rule: true, cells: true, ruled: true, timeline: false });
+    expect(decSectionsOf('{"ruled":false,"timeline":true,"rule":"x"}')).toEqual({ rule: true, cells: true, ruled: false, timeline: true });
   });
 
   it("says nothing ruled yet without a find, no match only with one (row 5)", () => {
@@ -141,21 +141,21 @@ describe("sections", () => {
     expect(emptyRuledWords(true)).toBe("no match");
   });
 
-  const stored = { rule: true, ruled: false, timeline: false };
+  const stored = { rule: true, cells: true, ruled: false, timeline: false };
   it("opens the sections with a hit while finding and restores the layout after (row 6)", () => {
-    const hits = { rule: false, ruled: true, timeline: true };
-    expect(shownSections(stored, {}, hits, {})).toEqual({ rule: true, ruled: true, timeline: true });
+    const hits = { rule: false, cells: false, ruled: true, timeline: true };
+    expect(shownSections(stored, {}, hits, {})).toEqual({ rule: true, cells: true, ruled: true, timeline: true });
     expect(shownSections(stored, {}, null, {})).toEqual(stored);
   });
 
   it("lets a hand toggle win during a find, and drops it with the find", () => {
-    const hits = { rule: false, ruled: true, timeline: false };
+    const hits = { rule: false, cells: false, ruled: true, timeline: false };
     expect(shownSections(stored, {}, hits, { ruled: false }).ruled).toBe(false);
     expect(shownSections(stored, {}, null, { ruled: true }).ruled).toBe(false);
   });
 
   it("opens a landing's section for the visit over the stored layout (row 8)", () => {
-    expect(shownSections(stored, { ruled: true }, null, {})).toEqual({ rule: true, ruled: true, timeline: false });
+    expect(shownSections(stored, { ruled: true }, null, {})).toEqual({ rule: true, cells: true, ruled: true, timeline: false });
     expect(shownSections(stored, {}, null, {}).ruled).toBe(false);
   });
 });

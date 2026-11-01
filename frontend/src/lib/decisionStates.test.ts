@@ -48,26 +48,27 @@ describe("decisionClass", () => {
   });
 });
 
-describe("the readers count awaiting-cells as waiting and applied, acknowledged as ruled", () => {
+// leftovers-61 FR-1 (0173) replaced 0164 FR-6 for the lead's counts: an
+// awaiting-cells record is open but no Needs me row and no waiting count.
+describe("the readers leave awaiting-cells out of the lead's counts and count applied, acknowledged as ruled", () => {
   const ds = [rec("0001", "proposed"), rec("0002", "awaiting-cells", { raised: "2026-08-20" }), rec("0003", "applied", { ruled: "2026-09-02", ruled_by: "pablo" }), rec("0004", "acknowledged", { ruled: "2026-09-03", ruled_by: "operator" }), rec("0005", "withdrawn")];
   const now = new Date("2026-09-10T12:00:00");
 
-  it("Needs me has a row for the awaiting-cells record", () => {
+  it("Needs me has no row for the awaiting-cells record", () => {
     const keys = needsMeRows(board(initiative("a", ds)), agents("a"), now).map((r) => r.key);
-    expect(keys).toContain("decision:a/0002");
-    expect(keys).toContain("decision:a/0001");
-    expect(keys.filter((k) => k.startsWith("decision:"))).toHaveLength(2);
+    expect(keys).not.toContain("decision:a/0002");
+    expect(keys.filter((k) => k.startsWith("decision:"))).toEqual(["decision:a/0001"]);
   });
-  it("the header counts it and lands on it, the oldest", () => {
-    expect(waitingChip(ds, "pablo")).toBe("2 decisions waiting on you");
-    expect(firstWaiting(ds)).toBe("0002");
-    expect(waitingDecisions(initiative("a", ds))).toBe(2);
+  it("the header counts the proposed one only and lands on it", () => {
+    expect(waitingChip(ds, "pablo")).toBe("1 decision waiting on you");
+    expect(firstWaiting(ds)).toBe("0001");
+    expect(waitingDecisions(initiative("a", ds))).toBe(1);
     expect(waitingOwners(initiative("a", ds))).toEqual(["pablo"]);
   });
-  it("an awaiting-cells record owned by someone else waits on others", () => {
+  it("an awaiting-cells record owned by someone else waits on the cells, not on its owner", () => {
     const others = [rec("0006", "awaiting-cells", { owner: "ana", raised: "2026-08-01" })];
-    expect(waitingOnOthers(board(initiative("a", others)), agents("a"), now).map((o) => o.key)).toEqual(["others:a/0006"]);
-    expect(initiativeStates(board(initiative("a", others)), agents("a")).get("a")).toBe("business");
+    expect(waitingOnOthers(board(initiative("a", others)), agents("a"), now)).toEqual([]);
+    expect(initiativeStates(board(initiative("a", others)), agents("a")).get("a")).toBe("quiet");
   });
   it("the timeline draws a ruled diamond for applied and acknowledged", () => {
     expect(gemsOf(ds[2]).map((g) => g.kind)).toEqual(["raised", "ruled"]);
@@ -153,9 +154,14 @@ describe("decision status literals", () => {
       // the date field `ruled` of model.Decision, not the status
       `type Dated = Pick<model.Decision, "number" | "raised" | "ruled">;`,
       `type Named = Pick<model.Decision, "number" | "title" | "status" | "owner" | "raised" | "ruled" | "ruled_by" | "chosen" | "superseded_by"> & Partial<Pick<model.Decision, "ruler" | "ruler_mode">>;`,
+      // the date field `ruled` of model.Decision, not the status (leftovers-61)
+      `export function sectionRows<T extends { d: Pick<model.Decision, "status" | "raised" | "ruled" | "number"> }>(rows: T[]): { rule: T[]; cells: T[]; ruled: T[]; closed: T[] } {`,
+      `export function gateRowWords(d: Pick<model.Decision, "status" | "ruled">, waited: number | null, now?: Date): { word: string; when: string } {`,
       // the Decisions view's section key (DecSections), not the status
-      `return { rule: pick("rule"), ruled: pick("ruled"), timeline: pick("timeline") };`,
-      `return { rule: one("rule"), ruled: one("ruled"), timeline: one("timeline") };`,
+      `return { rule: pick("rule"), cells: pick("cells"), ruled: pick("ruled"), timeline: pick("timeline") };`,
+      `return { rule: one("rule"), cells: one("cells"), ruled: one("ruled"), timeline: one("timeline") };`,
+      `export const sectionOf = (d: Pick<model.Decision, "status">): "rule" | "cells" | "ruled" =>`,
+      `isRulable(d) ? "rule" : isWithCells(d) ? "cells" : "ruled";`,
     ],
     "outline.ts": [
       // a timeline gem's kind, not the status
@@ -195,7 +201,7 @@ describe("decision status literals", () => {
 describe("owner operator", () => {
   const now = new Date("2026-09-10T12:00:00");
   it("is the lead's record: a Needs me row and the header says on you", () => {
-    const ds = [rec("0001", "awaiting-cells", { owner: "operator" })];
+    const ds = [rec("0001", "proposed", { owner: "operator" })];
     expect(needsMeRows(board(initiative("a", ds)), agents("a"), now).map((r) => r.key)).toContain("decision:a/0001");
     expect(waitingChip(ds, "pablo")).toBe("1 decision waiting on you");
     expect(waitingOnOthers(board(initiative("a", ds)), agents("a"), now)).toEqual([]);
@@ -220,9 +226,9 @@ describe("FR-6a: a decision row's verb and words", () => {
       expect(decisionRowAction({ status, options: [] }).verb).toBe(isRulable({ status }) ? VERBS.rule : VERBS.open);
     }
   });
-  it("on Needs me: the awaiting-cells row is a row, its verb Open; the proposed one's Rule", () => {
+  it("on Needs me: the proposed row's verb is Rule and the awaiting-cells record is no row (leftovers-61 FR-1)", () => {
     const rows = needsMeRows(board(initiative("init-a", [rec("0002", "proposed", { options: ["a", "b"] }), rec("0013", "awaiting-cells", { options: ["x", "y"] })])), agents("init-a"), new Date(2026, 9, 1));
     const verbs = Object.fromEntries(rows.filter((r) => r.kind === "decision").map((r) => [(r as { decision: model.Decision }).decision.number, decisionRowAction((r as { decision: model.Decision }).decision).verb]));
-    expect(verbs).toEqual({ "0002": VERBS.rule, "0013": VERBS.open });
+    expect(verbs).toEqual({ "0002": VERBS.rule });
   });
 });

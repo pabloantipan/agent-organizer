@@ -24,8 +24,9 @@ export function decisionClass(status: string | undefined): DecisionClass {
 
 type Stated = Pick<model.Decision, "status">;
 
-/** The record waits on a ruling: Needs me, the header's count, the waiting
- *  owners and the To rule section read this. */
+/** The record waits on a ruling, the lead's or the cells' (proposed,
+ *  awaiting-cells): the timeline's open bar reads this. Lead counts read
+ *  isRulable (leftovers-61 FR-1). */
 export const isOpen = (d: Stated) => decisionClass(d.status) === "open";
 
 /** The record was ruled and stands: the Ruled list, the timeline's ruled
@@ -36,6 +37,16 @@ export const isDecided = (d: Stated) => decisionClass(d.status) === "decided";
  *  awaiting-cells record is open but is Themis's to settle, not the rule
  *  box's (FR-6). */
 export const isRulable = (d: Stated) => (d.status ?? "").trim() === "proposed";
+
+/** The record waits on the cells it affects, not on the lead (leftovers-61
+ *  FR-2, 0173): open and not rulable, today `awaiting-cells`. Decisions
+ *  lists it under "With the cells"; Needs me and every lead count leave it
+ *  out (FR-1). */
+export const isWithCells = (d: Stated) => isOpen(d) && !isRulable(d);
+
+/** How many records of an initiative wait on the cells (FR-3): the header's
+ *  muted "· N with the cells". */
+export const withCellsCount = (decisions: Stated[] | undefined) => (decisions ?? []).filter(isWithCells).length;
 
 /** What an open record that is not rulable shows, expanded in Decisions,
  *  where Rule would be (leftovers-54 FR-6b). */
@@ -50,9 +61,15 @@ export const decisionTone = (d: Stated) => {
   return c === "open" ? "proposed" : c === "decided" ? "ruled" : d.status;
 };
 
-/** A status in the Decisions view's words: proposed reads "waiting". */
-const STATUS_WORDS: Record<string, string> = { proposed: "waiting", "awaiting-cells": "awaiting cells", ruled: "ruled", superseded: "superseded", withdrawn: "withdrawn" };
-export const decisionStatusWord = (status: string) => STATUS_WORDS[status] ?? status;
+/** A status as every view and line names it (leftovers-61 FR-4, FR-5): its
+ *  own word, written with a space, never its bucket's; proposed reads
+ *  "waiting". A status the skill does not know reads as written, its
+ *  hyphens as spaces. */
+const STATUS_WORDS: Record<string, string> = { proposed: "waiting", "awaiting-cells": "awaiting cells", ruled: "ruled", applied: "applied", acknowledged: "acknowledged", superseded: "superseded", withdrawn: "withdrawn" };
+export const decisionStatusWord = (status: string | undefined) => {
+  const s = (status ?? "").trim();
+  return STATUS_WORDS[s] ?? s.replace(/-/g, " ");
+};
 
 /** How a ruling was given: present (the person ruled), autonomous (an agent
  *  ruled in the person's name, the old "away mode") or a standing rule. */
@@ -72,6 +89,29 @@ const personOf = (w: string) => (w === "operator" ? "pablo" : w);
  *  case, and `operator` read as pablo (expected.json ruled_by_note, 19d5f44).
  *  Empty when the record names none. Shown owners keep the words as written. */
 export const ownerPerson = (owner: string | undefined) => personOf((owner ?? "").trim().toLowerCase());
+
+/** A record's owner as the app shows it (leftovers-61 FR-6): through the
+ *  same person reading as ruled_by, so `operator` shows as pablo; any other
+ *  owner keeps the words as written. Empty when the record names none. */
+export const ownerName = (owner: string | undefined) => {
+  const o = (owner ?? "").trim();
+  return o.toLowerCase() === "operator" ? "pablo" : o;
+};
+
+/** The hover that keeps an owner's raw value where the shown name differs
+ *  (FR-6: `owner: operator` behind "pablo"); undefined when they agree. */
+export const ownerHover = (owner: string | undefined) => {
+  const o = (owner ?? "").trim();
+  return o !== "" && ownerName(o) !== o ? `owner: ${o}` : undefined;
+};
+
+/** The rule box's signature tail (FR-6; CLAUDE.md, the owner named only
+ *  when someone else rules): " · owner <name>" when the owner, read as a
+ *  person, is not the ruler; empty when the ruler owns it or nobody does. */
+export const ownerSign = (owner: string | undefined, ruler: string) => {
+  const p = ownerPerson(owner);
+  return p !== "" && p !== ruler.trim().toLowerCase() ? ` · owner ${ownerName(owner)}` : "";
+};
 
 /** ruled_by read as a person and a mode (leftovers-54 FR-7; expected.json
  *  accepted_reading.ruled_by_reading at 54cf10d): the same rules as
@@ -123,20 +163,21 @@ export function rulerName(d: Ruled): string {
   return r.person;
 }
 
-/** Decision records waiting on a ruling in one initiative. */
-export const waitingDecisions = (i: Waiting) => (i.decisions ?? []).filter(isOpen).length;
+/** Decision records waiting on a ruling in one initiative: the rulable
+ *  ones (leftovers-61 FR-1); a record with the cells waits on nobody here. */
+export const waitingDecisions = (i: Waiting) => (i.decisions ?? []).filter(isRulable).length;
 
 /** Whose rulings an initiative waits on (FR-10 of lead-side-fixes, 0056):
  *  the owners of its proposed records, distinct, in the order their oldest
  *  record was raised. A record with no owner is "no owner"; an undated one
  *  sorts last; a tie on the date goes to the lower record number. */
 export function waitingOwners(i: Waiting): string[] {
-  const proposed = (i.decisions ?? []).filter(isOpen);
+  const proposed = (i.decisions ?? []).filter(isRulable);
   const key = (raised: string | undefined) => raised || "￿";
   proposed.sort((a, b) => key(a.raised).localeCompare(key(b.raised)) || a.number.localeCompare(b.number));
   const owners: string[] = [];
   for (const d of proposed) {
-    const o = d.owner?.trim() || "no owner";
+    const o = ownerName(d.owner) || "no owner";
     if (!owners.includes(o)) owners.push(o);
   }
   return owners;
@@ -151,7 +192,7 @@ export const signalOwners = (i: Waiting, lead: string) =>
 /** How a row or a signal names a record's owner (ui-leftovers FR-10): one
  *  phrase everywhere, "no owner" when the field is empty. */
 export const ownerPhrase = (owner: string | undefined) => {
-  const o = owner?.trim();
+  const o = ownerName(owner);
   return o ? `owner ${o}` : "no owner";
 };
 
