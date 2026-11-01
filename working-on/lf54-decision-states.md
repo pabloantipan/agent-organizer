@@ -97,3 +97,42 @@ export const x3 = (d: { status: string }) => new Set(["applied"]).has(d.status);
 Note: `decisions.ts` says `decisionStatusLiterals.test.ts` fails on a literal; the file is `decisionStates.test.ts`.
 Note: no scan test reads a record whose `ruled_by` is refused (the sample has none). The problem path is covered only at `model.ReadRuling`.
 Note (gate gap): G5's guard covers only `frontend/src/lib`. `internal/service/tasks.go:110` (`status == ruled`, the builder's Found) and `FsePanel.tsx:31` still compare literals, and nothing on the Go side guards against it.
+
+## UI review
+**fail** at 1df5001 (branch lf54-decision-states, pinned). Severity 3: UI1. Reviewer l54-states-ui, 2026-11-01.
+cause: gate (the premise and Amendment 5 never named Home's rule box, which offers a ruling whatever the status)
+Test run: **fresh** (`test-lease run --share -- make test` exactly as the brief, from the worktree at 1df5001, exit 0; test-lease printed no run id and no "reused"; Go all ok, vitest 87 files, 1385 tests; log `.wt-notes/l54-states-ui/x0-make-test.log`). `make review-build` exit 0.
+How checked: `Deltagos Review` built at 1df5001, launched by me (pid saved) on `fixture-home.sh --review` (auth off, `discuss_state_dir` under the temp dir checked); text read from the AX tree of that pid, window shot with `screencapture -l`, at 1440×900 and 1024×640. Shots: `.wt-notes/l54-states-ui/<w>x<h>-<state>.png`. Colour and dash judged on the shots and the CSS source; offscreen WebKit computed styles not run.
+
+States:
+- (a) 0013 is a `decision` row of Needs me (17 rows, the overlay's 0013 among them, "owner operator · raised 20 Oct by fse", 12d, verb Rule); init-a's header chip reads "7 decisions waiting" (0002, 0003, 0005, 0008, 0009, 0010, 0013). **Rule does not land in Decisions: it opens Home's rule box** (UI1).
+- (b) Decisions "To rule · 7" lists 0013 last with the badge "awaiting cells", "owner operator · 12 days"; expanded, it has no Rule button (0002 expanded has "Rule 0002 …"). Timeline: 0013 is a dashed fuchsia bar to today (`.dec-bar.proposed`), named "…, awaiting cells, raised 20 Oct, owner operator".
+- (c) 0014 in "Ruled · 8": `applied` "apply" · by pablo, autonomous mode · 21 Oct · after 3 days; solid accent bar (`.dec-bar.ruled`); counted: `organizer decisions init-a` reads "ruled (7), median turnaround 1d" with 0014 at 3d (the app shows no median, only each line's "after N days").
+- (d) 0015: `acknowledged` "acknowledge" · by pablo, standing rule · 20 Oct · after 1 day; solid accent bar. At 1024 both lines stay on one line, mode beside the person, not crowded.
+- (e) proposed records keep the fuchsia "waiting" badge, border and dashed bar; ruled ones the accent badge and solid bar/dot; classes unchanged from main (`decisionTone` returns proposed/ruled).
+- (f) gates 0013-0015 added to stage joins in the temp fixture only (no gate names them in the overlay): Overview reads "0013 … waiting 12d" (hollow diamond), "0014 … ruled 21 Oct", "0015 … ruled 20 Oct" (solid diamonds).
+
+**UI1 (3) Home offers a ruling the organizer refuses.**
+1. What the person cannot do: rule 0013 is impossible (FR-6: ruling stays `proposed` only; an awaiting-cells record is Themis's), yet Rule on its Needs me row opens the full rule box: question, two options, "Your words", "signed pablo · owner operator · commits one file", an enabled-looking Rule. The record's own text in the box says "the organizer offers no Rule on it".
+2. Where: Home, Needs me, row init-a 0013. Shots `1440x900-a-home-rulebox-0013.png`, `1024x640-a-home-rulebox-0013.png`.
+3. Evidence: AX after pressing "Rule init-a 0013": group "init-a 0013 Which cells take the shared format" `.rb.with-record` with radio buttons "both cells", "the record only", textarea "YOUR WORDS", button "Rule" `.primary`. Choosing an option also turns the verb into "Rule · draft". Source: `Home.tsx:334`/`:388` `RuleAction` renders the box for every decision row, without `isRulable`. The service refuses the result: the same ruling through the built CLI on the fixture prints "decision 0013 is awaiting-cells, not proposed; only a proposed record can be ruled" (nothing written). So the person writes the ruling, presses Rule and gets an error.
+4. Severity 3: a task the spec defines (FR-6) leads to wasted work and an error; the brief's expected state (a) is "its Rule verb lands in Decisions, where the record has no Rule button".
+5. Proposal: for an open record that is not rulable, the row's verb opens the record in Decisions (as the brief and CLAUDE.md say) or reads Open, and the row says "awaiting cells". Needs `Home.tsx` (or the row's verb in `lib/queue.ts`/`lib/verbs.ts`) inside the boundary: spec gap S1.
+
+**UI2 (2) The three crossing statuses lose the colour pair on their badge.** "awaiting cells", "applied" and "acknowledged" are neutral grey badges, while their lines' left border and timeline bars carry the waiting/ruled tones. `DecisionsView.tsx:318` uses `dec-status ${d.status}`; `global.css:875-876` style only `.proposed` and `.ruled`. Words are present, so status is not by colour alone. Shots `*-b-torule-ruled.png`, `*-cd-ruled-0014-0015.png`. Proposal: `dec-status ${decisionTone(d)}` keeping the status word.
+
+**UI3 (2) An awaiting-cells record never says what it waits on.** The Needs me row reads exactly like a proposed one ("decision", owner, options), and expanded in Decisions it has no Rule and no line saying who settles it. Shots `1440x900-a-needsme-0013.png`, `1440x900-b-0013-expanded.png`. Proposal: "awaiting cells" on the row and one line in the expanded record where Rule would be ("waits on the cells it affects; Themis settles it").
+
+**UI4 (1) Words differ between views.** Owner `operator` shows raw (Needs me, Decisions, the rule box) though it reads as pablo; Overview's gate rows say "ruled" for applied/acknowledged where Decisions says "applied"/"acknowledged"; `organizer decisions` prints "waiting" for 0013 where the app says "awaiting cells". FsePanel's "waiting on you: 5" leaves 0013 out (Amendment 5 left it).
+
+Spec gaps (for the FSE):
+- S1: what Needs me's verb and row words are for an open record that is not rulable, and `Home.tsx` (RuleAction) in the boundary; the premise and Amendment 5 missed it.
+- S2: what an expanded awaiting-cells record shows in place of Rule.
+- S3: the status word for applied/acknowledged on Overview gate rows and in the CLI's open bucket.
+
+For aglaea (design questions, not findings):
+- A1: should an awaiting-cells record be a Needs me row at all with a decision verb, given the lead cannot act on it? (FR-6 says it counts; the verb is open.)
+- A2: should applied/acknowledged badges take the ruled accent or a sub-tone of it?
+- A3 (not this card): at 1024×640 the header's target/goal line sits on the sub-view tabs (`1024x640-*.png`).
+
+Not verified: computed styles (offscreen WebKit not run), badge contrast; the error the Home box shows after Rule (words could not be typed without synthetic keys; the refusal is the CLI's on the same fixture); keyboard focus through the 0013 row and box.
