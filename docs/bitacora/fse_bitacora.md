@@ -33,7 +33,10 @@ restating it (the discuss skill).
 - 0173 ruled (take Aglaea's DS1-DS6, docs/ux/specs/decision-states.md d05ea58): crossings leave Needs me. Cut leftovers-61 (one card, DS1-DS6) once lf54-decision-states merges; it changes 0164's FR-6 and G5.
 - Held for the next leftovers (lf54-usage-rejected review pass at 4c78439): (1) the record's rejected usage rows are not in `organizer usage --json` nor the app's Usage view; (2) a rejected row that leaves the ledger stays in the post state's rejected list forever; (3) doctor prints a blank line before the rejected rows.
 - lf54-decision-states merged (#16 29e7d2c), in done/. Three supervisors live (the cap): sup99 (lf54 ci + usage, PRs next), sup100 (leftovers 61 from 0173, lf61-decision-states-ui, 45-90m), sup101 (leftovers 57, 3 waves, 180-300m; lf55 dependency dropped, home signal after lf61: Amendment 2 d67768f). lf55-one-title still waits on the Dock window, and its branch now conflicts with lf60 on floaticon_darwin.m: its continuation rebases first. Next when a supervisor frees: lf58 (C4 map, roadmap mode) and the record consumes: card.
-- 0167 and 0168 carry "2026-10-28" in their ruling words. They were ruled on 10-27 by the clock. Ruled records are not edited.
+- sup99 closed (14:38-16:19, 101 min against 60-120; seats $24.46, decision-states $15.24 with a rotation and two rounds per review): leftovers 54 wave 2 merged #16-#18, cards in done/, installed v0.2.0-3096. sup99 ended.
+- Lessons for my specs (sup99 Found 2, 3): a premise listing call sites greps all of frontend/src, not lib only (Amendments 5 and 6 cost a rotation and a UI round); a pin bump that moves a contract test into one card's boundary sequences the others after it from the start (Amendment 4).
+- Held for the next leftovers: internal/service/tasks.go:110 and FsePanel.tsx:31 still compare status literals, and the Go side has no literal guard (sup99 Found 5). Sent [for hephaistos]: the supervise skill's seat-prelude recipe lacks the discuss-hook watch line, so sup99's builders never woke on mail (Found 1).
+ "2026-10-28" in their ruling words. They were ruled on 10-27 by the clock. Ruled records are not edited.
 
 ## 2026-10-26 02:50
 
