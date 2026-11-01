@@ -1,12 +1,12 @@
 ---
 title: "The usage post reads the record's rejected rows, stops resending them, shows them, and sends zero times as null"
-status: now
+status: done
 repos: [organizer]
 branch: lf54-usage-rejected
 seat: l54-usage
 stage:
 updated: 2026-11-01
-next: "PR with talos-lab (4f33b33, review pass, X0 on the rebased head). Findings (usage --json / Usage view, rejected rows kept forever, doctor blank line): filed to the FSE (bitácora, next leftovers)"
+next: "done: PR #18 merged 43e2bcd (2026-11-01)"
 depends_on: [lf53-usage-contract]
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-usage-rejected"]
 spec: "docs/specs/leftovers-54.md (FR-3 to FR-5)"
