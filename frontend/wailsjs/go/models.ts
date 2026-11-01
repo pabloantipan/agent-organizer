@@ -3863,6 +3863,22 @@ export namespace usage {
 	        this.sessions = source["sessions"];
 	    }
 	}
+	export class RejectedRow {
+	    session_id: string;
+	    day: string;
+	    reason: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new RejectedRow(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.session_id = source["session_id"];
+	        this.day = source["day"];
+	        this.reason = source["reason"];
+	    }
+	}
 	export class RowSession {
 	    id: string;
 	    name: string;
@@ -4105,6 +4121,7 @@ export namespace usage {
 	    cuts: Record<string, Array<Row>>;
 	    sessions: SessionRow[];
 	    stats: Stats;
+	    rejected: RejectedRow[];
 	
 	    static createFrom(source: any = {}) {
 	        return new View(source);
@@ -4122,6 +4139,7 @@ export namespace usage {
 	        this.cuts = this.convertValues(source["cuts"], Array<Row>, true);
 	        this.sessions = this.convertValues(source["sessions"], SessionRow);
 	        this.stats = this.convertValues(source["stats"], Stats);
+	        this.rejected = this.convertValues(source["rejected"], RejectedRow);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
