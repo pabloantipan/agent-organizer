@@ -468,3 +468,43 @@ it as follows, and nothing is computed in the app (AR15).
 | AR19 | read open work first | on organizer `--window last`: one line `7 tracks done · Show` at the top of Tracks, then `review-map` and `No stage` with their fractions and what is left; Show lists the seven with dates in words |
 | AR20 | read a chain plainly | stages that follow one another without a branch share one indent, joined by `↓` |
 | AR21 | know which board was read | the line `Board as of <rev> · <time>` equals the JSON's `rev` and `rev_time` |
+
+## Amendment 3 (aglaea, 2026-11-01): leftovers 57 UI notes
+
+From the UI reviews of lf57-run-report and lf57-home-signal
+(`working-on/done/`, ## UI review). All were measured on an offscreen
+WKWebView of the merged sha, the screen being locked; none is above
+severity 2.
+
+- **run-report U3, several waits in one cell.** The owner goes in
+  parentheses, as Copy as text writes it: `0002 (pablo) · rule-x (pablo)`.
+  `·` then separates waits only. One line still; past the cell, the
+  usual "+N" with the rest in the hover and name.
+- **run-report U4, not drawn.** No red rule: red is blocked only. The
+  not-drawn line is `sm` `--fg-muted` text with no rule and no hue; its
+  words carry it.
+- **run-report U1, U2, U5**, the reviewer's proposals taken: the time
+  column is sized for `Ddd HH:MM` when the window spans days; card links,
+  disclosures and the done fold get a 24 px target by padding; a line the
+  usage ledger has no run for reads `no tokens recorded`, never `0 tokens`.
+- **The chain connector `↓`** is `--fg-subtle` (4.5:1), not
+  `--border-strong`: it says the row runs after the one above, which is
+  content, not frame. It stays hidden from the accessible name (AR11
+  already says "after" in words).
+- **home-signal U1, the run folds at 1440 with the rail open: by design.**
+  The run signal informs and asks nothing, so it folds first, before
+  live, now and problems (the design system's fold order now names it).
+  Dropped as a finding.
+- **home-signal U2, a folded signal cannot be pressed: kept as is.** A
+  signal may fold only when the row's own press reaches where its link
+  goes. The run's link goes to Overview, where a recent run heads the
+  page, and the row's chevron reaches it. "+N" stays text, its name lists
+  what it holds. Dropped as a finding.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| AR22 | tell several waits apart | a track waiting on two records: `waits on` reads `0002 (pablo) · 0003 (pablo)` |
+| AR23 | read a failed report without alarm | the not-drawn state: no rule, no red, `--fg-muted` words |
+| AR24 | hit every control | `.rr-card`, `.rr-more`, `.rt-fold` and the `waits on` links each at least 24 px high |
+| AR25 | not read a missing measure as zero | a line with no ledger run reads `no tokens recorded` |
+| AR26 | read a day-change row | a window over two days: `Tue 01:00` sits whole in the time column, with the column gap before the wave |

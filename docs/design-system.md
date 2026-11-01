@@ -496,8 +496,9 @@ anything gives way (rule-words-and-dates, U1).
 
 **What gives way first.** A column that is empty on every row (all "—")
 gives way before any column with content. Signals fold into "+N" from the
-least urgent: waits on you, blocked and waiting stay in view; problems, now
-and live fold first, in that order (live, now, problems), and the cell's state folds last of the foldable ones
+least urgent: waits on you, blocked and waiting stay in view; the last run,
+problems, now and live fold first, in that order (last run, live, now,
+problems; the run informs and asks nothing, run-report A3), and the cell's state folds last of the foldable ones
 (it is not in the never-fold set; a cell that waits on him is already a
 Needs me row) (leftovers-3, W2; home-widths-4, 0076). Whether something
 folds is decided against what stays **at its floor** (waiting with its
@@ -506,7 +507,8 @@ beside a cut waiting (leftovers-5). Inside the never-fold set the order is
 **waits on you, blocked, waiting**: when they do not all fit whole, waiting
 gives way first (its names, then its noun down to the floor, then into
 "+N"); blocked and waits-on-you are never cut or folded. Red never reaches
-the lead only through a "+N" (home-signals-5, U1).
+the lead only through a "+N" (home-signals-5, U1). A signal folds only when the row's own press reaches
+where its link goes; "+N" stays text (run-report A3).
 
 **A region that scrolls inside a view shows it does**: each edge with
 content hidden past it carries a 1 px `--fg-subtle` line (4.5:1, not
