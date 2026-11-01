@@ -16,6 +16,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- 18:50 after the usage limit reset (all seats stopped ~17:00-18:50): merged #19 lf57-report-go, #20 lf61, #21 lf59-atlax-record, #22 working-on (bf66580); sup100 closed (~55 min, within) and ended; sup102 extended +90m for lf59-atlax-surface (launched 18:52; derive now 81 wails + 26 cli); sup101's l57-ui resumed 18:51. Installed v0.2.0-3135. Sent Aglaea sup100's UI1 (header 6 vs panel 5), A1, A2. leftovers-58 and 0174 proposed 18:53 (cd392b9).
+
 - Held for the next leftovers (lf61 code review pass at 7de55a1): `internal/service/rule.go` signs "owner operator" in a record's Ruling when pablo rules an operator-owned record; DS6 stops at the box, the written ruling should read the owner through the same person reader (and drop it when the ruler is pablo).
 
 - No supervisor is running. origin/main is at 21b5d5d. Hephaistos is reconciling the six unmerged branches. I answered that all six are to be reconciled, in this order: lf52-decisions-line, lf53-frontmatter, lf53-usage-contract, lf53-record-statusline, lf54-retire-guard, spec/autonomous-report-charts. Each merges clean (thread 01M6AHE7XTRSVAVA3VR1CY8Q60). After the merges: fast-forward local main, run make install, launch leftovers 54 wave 2.
