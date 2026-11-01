@@ -107,7 +107,9 @@ func tasksOf(si *model.ScannedInitiative, snap discuss.Snapshot, fs map[string]f
 	family := probeFamily(si)
 	var out []Task
 	for _, d := range si.Decisions {
-		if d.Status != model.DecisionRuled || d.Forecast == "" || len(d.Cards) == 0 {
+		// Decided, as the model reads it (leftovers-62 FR-4): ruled, or
+		// applied or acknowledged after its ruling.
+		if !d.Decided() || d.Forecast == "" || len(d.Cards) == 0 {
 			continue
 		}
 		t := Task{Number: d.Number, Title: d.Title, Forecast: d.Forecast, ForecastTop: d.ForecastTop}
