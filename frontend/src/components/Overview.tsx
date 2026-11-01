@@ -7,6 +7,7 @@ import { gateRowWords } from "../lib/decisionsPage";
 import { useBoard } from "../stores/board.store";
 import { FsePanel } from "./FsePanel";
 import { PhaseWord } from "./InitiativeHeader";
+import { RunReport } from "./RunReport";
 import { gateKey, recordsByGate } from "./StageRoadmap";
 import "../styles/overview.css";
 
@@ -260,6 +261,7 @@ export function Overview({ initiative }: { initiative: BoardInitiative }) {
   }, []);
   return (
     <div ref={pane} className={stacked ? "ov stacked" : "ov"}>
+      <RunReport initiative={initiative} />
       <div className="ov-main">
         <StageGates initiative={initiative} />
         <WorkSummary initiative={initiative} />
