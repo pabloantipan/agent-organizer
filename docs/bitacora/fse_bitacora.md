@@ -17,6 +17,9 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- sup101 closed (16:13-20:31, 4h18m against 180-300m +90m, ~2h07 the usage limit; seats $40.76, 11 seats): leftovers 57 merged #19, #26, #28, #29. Ended. Installed v0.2.0-3239.
+- From sup101, held for the next leftovers: (1) runs.jsonl leaves 9 of 11 seats with no card: seats launch from the initiative root, so MatchCard never sees a worktree path (the P0.6 baseline loses per-card cost for supervised waves; check whether lf56's read-time attribution by seat: already fixes the runs view, else a card); (5) ReadSpec follows a symlink under specs/ or runs/ out of the root; (4) gate gaps: W7 depends on rail state, the fixture has no remote initiative, the contract's window is fixed at 20 Oct; (3) fixture-home.sh's stub `factory` shadows `factory report`. Sent: (4) dead_minutes total in factory report to Hephaistos; (6) UI notes to Aglaea. No UI row ran on a real window this evening (screen locked; reviews used offscreen WKWebView).
+
 - Held: run records under docs/runs/ the scan does not read need a scan card (l57-foot's note, lf57-wave-footer).
 
 - sup102 closed (16:22-19:37, ~1h15m working, ~2h usage-limit stop; seats $9.17): #21 record, #23 surface (107 elements), #25 authored (3); all first-round passes. Ended. Its Found: an empty CONTRACTS_DIR falls back to ~/agent-slack/specs/contracts (a 'fails without the sample' row holds only against an empty dir); change-check defaults to local main, so review prompts should pass --base origin/main; FR-9 completeness unchecked (held, low).
