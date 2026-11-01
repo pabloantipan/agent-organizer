@@ -136,3 +136,54 @@ The builder listed this under "Found, not asked" without routing it. The gate do
 
 - docs/runs/ records unread by the scan: the Notes say it needs a scan card. It has no slug yet, so it goes to the FSE with this fail.
 - inactive-initiative unread row: this card's fail (above).
+
+## UI review
+
+**pass.** Commit reviewed 957cc37. Reviewer `l57-foot-ux`, 2026-11-01. W10 met, measured offscreen. No severity 4 or 3 finding.
+
+**Shared test run: reused.** `test-lease: reused run c507c2c7-82527 of 957cc371050e by organizer-probe-l57-foot-rev`, exit 0, vitest 94 files / 1565 tests (`.wt-notes/l57-foot-ux/x0-make-test.log`).
+
+### How each state was checked
+
+The screen was locked (`CGSSessionScreenIsLocked` = 1). I launched the review build myself from my worktree (`make review-build`, pid 51979, `auth: off`, `discuss_state_dir` under the fixture temp dir). Its AX tree came back as nested `AXApplication` nodes with no web content, so AX reads, AXPress, AXSize and `screencapture -l` were not possible. I quit it by its pid. Instead I measured with the offscreen WKWebView harness (`h.swift`, copied from l57-foot, from l57-ui-ux) over `wails dev` of the same SHA, using the contract fixture (`make-fixture.sh`) plus `fixture-home.sh`. The stub `factory` was dropped from PATH, so the real `factory report` read the fixture's state. Presses were DOM clicks. The window size was set by the harness, not by AXSize. This is the builder's recipe from progress.md; the only difference is my own step file (`steps-*.txt`).
+
+- **(a) Footer lines.** At 1440×900 and 1024×640 there are two `<button>` lines. `sup2/1 · sup2 · … · not merged` has accessible name and title `show sup2 on Work`. `sup1/1 · sup1 · …` has accessible name and title `open sup1's run record`. The visible text is the FR-8 line, as PW7 says. Each line is 28 px high: 1118 px wide at 1440, 906 px at 1024. Shots `1440x900-a-footer.png`, `1024x640-a-footer.png`.
+- **(b) W10.** Pressing `open sup1's run record` opens the drawer (`role=dialog`, labelled by its title) over the dimmed report. The drawer reads `runs/2026-10-20-sup1.md`, with no error and no horizontal scroll. Its header has `← Back`, named `Back to the run report`, 28 px high. The frontmatter shows as a yaml code block. Pressing Back closes the drawer and puts focus on the link. Scroll position:
+  - 1440×900: `.board-wrap` scrollTop 17 → 17 → 17, link top 496 → 496.
+  - 1024×640: scrollTop 147 → 147, link top 366 → 366.
+  - Escape gives the same result at both sizes.
+
+  The drawer matches the existing reader (surface `rgb(46,39,60)`, 880 px, Back in `--text-muted`). Shots `1440x900-b-drawer.png`, `1440x900-b-back.png`, `1024x640-b-drawer.png`, `1024x640-b-back.png`.
+- **(c) Running wave.** sup2/1 has no merge, so the footer press is the Work press. Work opens with Work selected and the fixture in the crumbs. The fixture's Work draws no WaveStrip (0 strips), so nothing scrolls into view (U1). The press is checked here; the strip scroll rests on vitest W9. Shots `1440x900-c-work.png`, `1024x640-c-work.png`.
+- **(d) Unread record.** In a temp copy only (`.wt-notes/l57-foot-ux/fx2`), I changed sup1's `cards: [a, c]` to a map in the copy's `runs/2026-10-20-sup1.md`. The real factory still lists sup1/1 as finished, and the scan reports the file unreadable. The footer is named `show sup1's run record in Needs me, Deltagos can't read it`. Pressing it opens Home, and the `fixture · 1 file Deltagos can't read` row is highlighted (`focused`), with focus on its `Show`. Shots `1440x900-d-unread-footer.png`, `1440x900-d-needs-me.png`.
+
+All shots are under `.wt-notes/l57-foot-ux/`.
+
+### Findings
+
+- **U1 (2) — for aglaea, spec gap.**
+  - What the person cannot do: after pressing `show sup2 on Work`, they cannot see sup2 on Work.
+  - Where: Work after the running wave's footer press, `1440x900-c-work.png`.
+  - Evidence: the report says `not merged`, but Work draws no WaveStrip for sup2 in this fixture (Work draws strips only for waves it sees as live, Amendment 3). The press keeps its promise only when a strip exists.
+  - Proposal: aglaea to decide what a running wave with no strip shows (for example, Work with the wave's cards marked). This is not this card's boundary.
+- **U2 (1) — for aglaea.**
+  - What the person cannot do: read the wave's story at a glance.
+  - Where: the drawer, `1440x900-b-drawer.png`.
+  - Evidence: the record opens on about 60 lines of the `waves:` yaml (rounds, verdicts, causes) before its prose heading `2026-10-20 - sample run`. It is legible, but it is code.
+  - Proposal: aglaea to decide whether a run record's yaml folds under the prose, or the prose comes first.
+
+### Not verified
+
+- Anything in the real window: AX names, AXPress and `screencapture -l`. The screen was locked.
+- Window sizes set by AXSize.
+- An unread record of a non-active initiative. The code review's FR-17 fail covers it from code; I did not put it on screen.
+- A finished wave whose record is in `docs/runs/` (Notes: it keeps the Work press).
+
+### Spec gaps (for the FSE)
+
+- U1: what a running wave's footer shows when Work draws no strip for it.
+- The unread link's name: the spec gives two names, and the builder chose the third. It reads clearly in the hover.
+
+### For aglaea
+
+U1 and U2.
