@@ -6,7 +6,7 @@ branch: lf57-wave-footer
 seat: l57-foot
 stage:
 updated: 2026-11-01
-next: "file finding: the scan reads run records under runs/ only, not docs/runs/ (a scan card); then PR with talos-lab"
+next: "PR with talos-lab"
 review: pass
 reviewer: l57-foot-rev
 depends_on: [lf57-run-report]
@@ -126,7 +126,7 @@ Note: a symlink in `runs/` named like a record reads its target outside the root
 ### Findings and where they go
 
 - My round 1 finding (FR-17, non-active initiative): fixed in b98452f (Amendment 6).
-- Builder's "Found, not asked": the scan reads `runs/` only, not `docs/runs/`. A finished wave recorded under `docs/runs/` keeps the Work press. **No card, record or backlog line yet**, hence `next`.
+- Builder's "Found, not asked": the scan reads `runs/` only, not `docs/runs/`. A finished wave recorded under `docs/runs/` keeps the Work press. Filed: to the FSE for a later scan card (sup101, 2026-11-01, thread 01M6CPAHB5313WHY2AH3EC1KSV; the FSE took it in its answer to the FR-17 question).
 - Builder's "Found, not asked": the inactive-initiative unread row. Closed by Amendment 6.
 
 ## UI review
