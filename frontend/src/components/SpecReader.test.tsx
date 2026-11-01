@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it } from "vitest";
-import { Contents, SpecOpenerView, useSpecReader } from "./SpecReader";
+import { Contents, ReaderBack, SpecOpenerView, useSpecReader } from "./SpecReader";
+import src from "./SpecReader.tsx?raw";
 import { withAnchors } from "../lib/specReader";
 import { marked } from "marked";
 import initSrc from "./Initiatives.tsx?raw";
@@ -10,7 +11,7 @@ import cardSrc from "./CardDrawer.tsx?raw";
 // docs/specs/diagrams.md FR-7, FR-8: the openers. No DOM library here: the
 // states are rendered to markup and the wiring is read from the sources.
 
-afterEach(() => useSpecReader.setState({ initiative: null, stack: [], missing: {} }));
+afterEach(() => useSpecReader.setState({ initiative: null, stack: [], missing: {}, back: undefined }));
 
 const opener = (p: Partial<Parameters<typeof SpecOpenerView>[0]> = {}) =>
   renderToStaticMarkup(<SpecOpenerView initiative="init-a" refText="docs/reader.md#the-scan-report" label="docs/reader.md#the-scan-report" local missing={false} {...p} />);
@@ -70,5 +71,36 @@ describe("leftovers-40 V2 (D9, A4): the map's Contents entry has one accessible 
     expect(buttons[0].inner).not.toContain("sr-only");
     expect(buttons[0].inner).toBe('<span class="sr-map-mark" aria-hidden="true">✎</span>Change on the map');
     expect(buttons[1].inner).toBe("Problem");
+  });
+});
+
+// leftovers-57 FR-15 (PW4 amended): a run record opened from the report has
+// ← Back onto the report, which closes the drawer; a spec opened with no
+// `back` keeps today's header.
+describe("FR-15: the drawer over the run report has Back", () => {
+  const calls: string[] = [];
+  const back = () => calls.push("back");
+  const close = () => calls.push("close");
+  it("the first file opened over the report: Back named after it, and it closes", () => {
+    const el = ReaderBack({ over: "the run report", back, close })!;
+    expect(renderToStaticMarkup(el)).toBe('<button type="button" class="ghost sr-back" aria-label="Back to the run report">← Back</button>');
+    (el.props.onClick as () => void)();
+    expect(calls).toEqual(["close"]);
+  });
+  it("a file over another file goes back to it first", () => {
+    calls.length = 0;
+    const el = ReaderBack({ prev: "docs/specs/a.md", over: "the run report", back, close })!;
+    expect(el.props["aria-label"]).toBe("Back to docs/specs/a.md");
+    (el.props.onClick as () => void)();
+    expect(calls).toEqual(["back"]);
+  });
+  it("no Back for a spec opened from anywhere else", () => {
+    expect(ReaderBack({ back, close })).toBeNull();
+  });
+  it("opening from the report keeps what it opened over; closing clears it", () => {
+    expect(src).toContain("useSpecReader.setState({ initiative, stack: [entry], back });");
+    expect(src).toContain("useSpecReader.setState({ initiative: null, stack: [], back: undefined });");
+    expect(src).toContain("<ReaderBack prev={prev?.path} over={backTo} back={back} close={close} />");
+    expect(src).toContain("frontmatterAsCode(top.text)");
   });
 });

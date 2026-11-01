@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { marked } from "marked";
-import { joinPath, linkTarget, pathRef, sectionId, slug, specRef, withAnchors, type ReaderIndex } from "./specReader";
+import { frontmatterAsCode, joinPath, linkTarget, pathRef, sectionId, slug, specRef, withAnchors, type ReaderIndex } from "./specReader";
 import { slotDiagrams } from "./diagram";
 
 // docs/specs/diagrams.md FR-7, FR-8: the reader's pure halves.
@@ -83,5 +83,26 @@ describe("FR-8: where a link inside goes", () => {
   });
   it("from a record, relative to its folder", () => {
     expect(linkTarget("working-on/decisions/0012-draw-the-change-on-the-map.md", "../../docs/reader.md", idx)).toEqual({ kind: "spec", path: "docs/reader.md", section: "" });
+  });
+});
+
+// leftovers-57 FR-15: a run record's frontmatter reads as a yaml block.
+describe("frontmatterAsCode", () => {
+  it("fences a leading block and keeps the rest", () => {
+    expect(frontmatterAsCode("---\nwaves:\n  - wave: 1\n  - wave: 2\n---\n# sup1\n")).toBe("```yaml\nwaves:\n  - wave: 1\n  - wave: 2\n```\n\n# sup1\n");
+    expect(frontmatterAsCode("---\r\na: 1\r\nb: 2\r\n---\r\nbody")).toBe("```yaml\na: 1\r\nb: 2\n```\n\nbody");
+    expect(frontmatterAsCode("---\na: 1\nb: 2\n---")).toBe("```yaml\na: 1\nb: 2\n```\n\n");
+  });
+  it("renders as one code block, no rule and no heading from the fences", () => {
+    const html = marked.parse(frontmatterAsCode("---\nwaves:\n  - wave: 1\n  - wave: 2\n---\n# sup1\n")) as string;
+    expect(html).not.toContain("<hr");
+    expect(html.match(/<h[1-6]/g)).toEqual(["<h1"]);
+    expect(html).toContain('<code class="language-yaml">');
+  });
+  it("leaves alone a file with no frontmatter, a rule later in the file, an unclosed block, and empty text", () => {
+    for (const t of ["# A\n\ntext\n", "# A\n\n---\n\nb\n", "---\na: 1\nno close\n", ""]) expect(frontmatterAsCode(t)).toBe(t);
+  });
+  it("uses a longer fence when the block holds backticks", () => {
+    expect(frontmatterAsCode("---\nx: \"```\"\ny: 1\n---\nz")).toBe("~~~~yaml\nx: \"```\"\ny: 1\n~~~~\n\nz");
   });
 });
