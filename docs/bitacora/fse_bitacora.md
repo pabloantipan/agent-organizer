@@ -16,6 +16,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- WRONG, mine (lf59-atlax-surface): I wrote 'the builder fills touches and change_order' in its Pre-answered, but atlax freezes the change order when the card first goes now; FR-8 authored none. Rule for my atlax cards: list touches and change_order on the card when I cut it. Follow-up lf59-atlax-authored (Amendment 5).
+
 - Held: render without HTML labels at the source (root htmlLabels:false in the dark mermaid config or internal/diagram; changes every cached figure's key). leftovers-58 Amendment 1 swaps foreignObject for <text> meanwhile.
 
 - Held for the next frontend leftovers (Aglaea 26f96ce): DS7, the header chip says both counts when they differ ('6 decisions waiting · 5 on you'); DS8 no Home signal for crossings; R53 amended (A20), the header's height follows a live resize to 1024.
