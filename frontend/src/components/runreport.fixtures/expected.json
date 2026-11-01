@@ -1,0 +1,430 @@
+{
+  "initiative": "fixture",
+  "root": "<fixture>/init",
+  "generated": "2026-10-21T00:00:00+00:00",
+  "window": {
+    "since": 1792454400,
+    "until": 1792486800,
+    "kind": "given",
+    "source": "--since/--until",
+    "since_iso": "2026-10-20T00:00:00+00:00",
+    "until_iso": "2026-10-20T09:00:00+00:00"
+  },
+  "progress": {
+    "denominator": {
+      "count": 4,
+      "kind": "cards that passed review (moved to working-on/done/) in the window"
+    },
+    "moves": [
+      {
+        "t": 1792458000,
+        "slug": "a",
+        "commit": "60eceeb"
+      },
+      {
+        "t": 1792458600,
+        "slug": "b",
+        "commit": "5e511bb"
+      },
+      {
+        "t": 1792468800,
+        "slug": "c",
+        "commit": "9696df4"
+      },
+      {
+        "t": 1792483200,
+        "slug": "d",
+        "commit": "d277111"
+      }
+    ],
+    "lines": [
+      {
+        "t": 1792458600,
+        "cards": [
+          "a",
+          "b"
+        ],
+        "commits": [
+          "60eceeb",
+          "5e511bb"
+        ],
+        "done": 2,
+        "pct": 50,
+        "hashes": 17
+      },
+      {
+        "t": 1792468800,
+        "cards": [
+          "c"
+        ],
+        "commits": [
+          "9696df4"
+        ],
+        "done": 3,
+        "pct": 75,
+        "hashes": 26
+      },
+      {
+        "t": 1792483200,
+        "cards": [
+          "d"
+        ],
+        "commits": [
+          "d277111"
+        ],
+        "done": 4,
+        "pct": 100,
+        "hashes": 34
+      }
+    ],
+    "dead": [
+      {
+        "start": 1792461600,
+        "end": 1792465200,
+        "cause": "usage limit, every seat stopped",
+        "source": "pulse-history.jsonl",
+        "minutes": 60
+      },
+      {
+        "start": 1792472400,
+        "end": 1792474200,
+        "source": "pulse-history.jsonl",
+        "cause": "no pulse row: no live seat, machine asleep or Argos down",
+        "minutes": 30
+      }
+    ],
+    "notes": []
+  },
+  "waves": {
+    "source": "run records under runs/ and docs/runs/ (frontmatter waves:), as written now",
+    "records": [
+      "docs/runs/2026-10-15-sup0.md",
+      "runs/2026-10-20-sup1.md"
+    ],
+    "lines": [
+      {
+        "t": 1792458600,
+        "cards": [
+          {
+            "slug": "a",
+            "waves": [
+              "sup1/1"
+            ],
+            "label": "sup1/1"
+          },
+          {
+            "slug": "b",
+            "waves": [
+              "sup2/1"
+            ],
+            "label": "sup2/1"
+          }
+        ],
+        "waves": [
+          "sup1/1",
+          "sup2/1"
+        ],
+        "round_count": 7,
+        "failed": 2,
+        "failed_by_cause": {
+          "execution": 1,
+          "no cause given": 1
+        },
+        "build_minutes": 68
+      },
+      {
+        "t": 1792468800,
+        "cards": [
+          {
+            "slug": "c",
+            "waves": [
+              "sup1/1"
+            ],
+            "label": "sup1/1"
+          }
+        ],
+        "waves": [
+          "sup1/1"
+        ],
+        "round_count": 2,
+        "failed": 0,
+        "failed_by_cause": {},
+        "build_minutes": 35
+      },
+      {
+        "t": 1792483200,
+        "cards": [
+          {
+            "slug": "d",
+            "waves": [],
+            "label": "no wave"
+          }
+        ],
+        "waves": [],
+        "round_count": 0,
+        "failed": 0,
+        "failed_by_cause": {},
+        "build_minutes": 0
+      }
+    ],
+    "waves": [
+      {
+        "key": "sup2/1",
+        "record": "runs/2026-10-20-sup1.md",
+        "wave": 1,
+        "supervisor": "sup2",
+        "task": "b and e",
+        "cards": [
+          "b",
+          "e"
+        ],
+        "launched": 1792440000,
+        "launched_iso": "2026-10-19T20:00:00+00:00",
+        "merged": null,
+        "merged_iso": null,
+        "rounds": [
+          {
+            "card": "b",
+            "kind": "review",
+            "start": 1792455600,
+            "end": 1792456200,
+            "result": "fail",
+            "reviewer": "b-rev",
+            "reason": "B1 unmet, no cause written",
+            "cause": null,
+            "start_iso": "2026-10-20T00:20:00+00:00",
+            "end_iso": "2026-10-20T00:30:00+00:00"
+          },
+          {
+            "card": "b",
+            "kind": "build",
+            "start": 1792456260,
+            "end": 1792458000,
+            "result": "n/a",
+            "reviewer": null,
+            "reason": "B1 fixed (flow map, as 22 organizer records write rounds)",
+            "cause": null,
+            "start_iso": "2026-10-20T00:31:00+00:00",
+            "end_iso": "2026-10-20T01:00:00+00:00"
+          },
+          {
+            "card": "b",
+            "kind": "review",
+            "start": 1792458120,
+            "end": 1792458480,
+            "result": "pass",
+            "reviewer": "b-rev",
+            "reason": "unmet none",
+            "cause": null,
+            "start_iso": "2026-10-20T01:02:00+00:00",
+            "end_iso": "2026-10-20T01:08:00+00:00"
+          },
+          {
+            "card": "e",
+            "kind": "build",
+            "start": 1792474800,
+            "end": null,
+            "result": "n/a",
+            "reviewer": null,
+            "reason": "in progress",
+            "cause": null,
+            "start_iso": "2026-10-20T05:40:00+00:00",
+            "end_iso": null
+          }
+        ],
+        "round_count": 4,
+        "failed": 1,
+        "failed_by_cause": {
+          "no cause given": 1
+        },
+        "build_minutes": 29
+      },
+      {
+        "key": "sup1/1",
+        "record": "runs/2026-10-20-sup1.md",
+        "wave": 1,
+        "supervisor": "sup1",
+        "task": "a and c",
+        "cards": [
+          "a",
+          "c"
+        ],
+        "launched": 1792454700,
+        "launched_iso": "2026-10-20T00:05:00+00:00",
+        "merged": 1792469100,
+        "merged_iso": "2026-10-20T04:05:00+00:00",
+        "rounds": [
+          {
+            "card": "a",
+            "kind": "build",
+            "start": 1792455000,
+            "end": 1792456800,
+            "result": "n/a",
+            "reviewer": null,
+            "reason": "built",
+            "cause": null,
+            "start_iso": "2026-10-20T00:10:00+00:00",
+            "end_iso": "2026-10-20T00:40:00+00:00"
+          },
+          {
+            "card": "a",
+            "kind": "review",
+            "start": 1792456860,
+            "end": 1792457100,
+            "result": "fail",
+            "reviewer": "a-rev",
+            "reason": "A2 unmet",
+            "cause": "execution",
+            "start_iso": "2026-10-20T00:41:00+00:00",
+            "end_iso": "2026-10-20T00:45:00+00:00"
+          },
+          {
+            "card": "a",
+            "kind": "build",
+            "start": 1792457160,
+            "end": 1792457700,
+            "result": "n/a",
+            "reviewer": null,
+            "reason": "A2 fixed",
+            "cause": "execution",
+            "start_iso": "2026-10-20T00:46:00+00:00",
+            "end_iso": "2026-10-20T00:55:00+00:00"
+          },
+          {
+            "card": "a",
+            "kind": "review",
+            "start": 1792457760,
+            "end": 1792457940,
+            "result": "pass",
+            "reviewer": "a-rev",
+            "reason": "unmet none",
+            "cause": null,
+            "start_iso": "2026-10-20T00:56:00+00:00",
+            "end_iso": "2026-10-20T00:59:00+00:00"
+          },
+          {
+            "card": "c",
+            "kind": "build",
+            "start": 1792465500,
+            "end": 1792467600,
+            "result": "n/a",
+            "reviewer": null,
+            "reason": "built",
+            "cause": null,
+            "start_iso": "2026-10-20T03:05:00+00:00",
+            "end_iso": "2026-10-20T03:40:00+00:00"
+          },
+          {
+            "card": "c",
+            "kind": "review",
+            "start": 1792467660,
+            "end": 1792468500,
+            "result": "pass",
+            "reviewer": "c-rev",
+            "reason": "unmet none",
+            "cause": null,
+            "start_iso": "2026-10-20T03:41:00+00:00",
+            "end_iso": "2026-10-20T03:55:00+00:00"
+          }
+        ],
+        "round_count": 6,
+        "failed": 1,
+        "failed_by_cause": {
+          "execution": 1
+        },
+        "build_minutes": 74
+      }
+    ],
+    "notes": []
+  },
+  "tracks": {
+    "drawn": true,
+    "rev": "d277111",
+    "rev_time": 1792483200,
+    "envs": [
+      "local"
+    ],
+    "tracks": [
+      {
+        "id": "base",
+        "title": "The base",
+        "done": "2026-10-01",
+        "gates": [],
+        "roadmap": true,
+        "done_cards": [],
+        "open_cards": [],
+        "to_cut": [],
+        "passed": 0,
+        "planned": 0,
+        "pct": null,
+        "left": [],
+        "waits": [],
+        "env": {
+          "local": null
+        }
+      },
+      {
+        "id": "build",
+        "title": "The build",
+        "done": "",
+        "gates": [
+          "0002"
+        ],
+        "roadmap": true,
+        "done_cards": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ],
+        "open_cards": [
+          "e"
+        ],
+        "to_cut": [
+          "f"
+        ],
+        "passed": 4,
+        "planned": 6,
+        "pct": 67,
+        "left": [
+          "e",
+          "f"
+        ],
+        "waits": [
+          {
+            "what": "0002",
+            "who": "pablo",
+            "from": "stage gate"
+          }
+        ],
+        "env": {
+          "local": 67
+        }
+      }
+    ],
+    "goal": "Goal, stage build done: 2 cards left (e, f); in its way: 0002 (pablo)."
+  },
+  "rulings": [
+    {
+      "id": "0003",
+      "title": "three",
+      "file": "decisions/0003-three.md",
+      "source": "git",
+      "commit": "40c3ec3",
+      "ruled_at": 1792463400,
+      "ruled_at_iso": "2026-10-20T02:30:00+00:00",
+      "ruled_by": "pablo",
+      "mode": "autonomous"
+    },
+    {
+      "id": "0004",
+      "title": "four",
+      "file": "decisions/0004-four.md",
+      "source": "ruled_at",
+      "ruled_at": 1792480200,
+      "ruled_at_iso": "2026-10-20T07:10:00+00:00",
+      "ruled_by": "pablo",
+      "mode": "present"
+    }
+  ]
+}

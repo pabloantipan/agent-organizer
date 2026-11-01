@@ -1,0 +1,33 @@
+Cumulative share of the 4 cards that passed review (moved to working-on/done/) between 2026-10-20 00:00 and 2026-10-20 09:00.
+
+00:00  window start
+01:10  #################.................  2 cards (a, b)                                                50%
+02:00  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  usage limit, every seat stopped (about 60 min)
+03:00  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+04:00  ##########################........  1 card (c)                                                    75%
+05:00  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  no pulse row: no live seat, machine asleep or Argos down (about 30 min)
+05:30  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+08:00  ##################################  1 card (d)                                                   100%
+09:00  window end
+
+Waves, joined by the run records' cards: lists (a card no wave lists reads no wave):
+01:10  a: sup1/1 · b: sup2/1
+         7 rounds, 2 failed (execution 1, no cause given 1) · 68 min building
+04:00  c: sup1/1
+         2 rounds, none failed · 35 min building
+08:00  d: no wave
+Waves in this window:
+  sup2/1 · sup2 · 2 cards (b, e) · 4 rounds, 1 failed (no cause given 1) · 29 min building · not merged
+  sup1/1 · sup1 · 2 cards (a, c) · 6 rounds, 1 failed (execution 1) · 74 min building
+
+Local % = local cards passed review (in working-on/done/) / local cards planned (done, open, and still to cut), per roadmap stage, at d277111 (2026-10-20 08:00).
+Environments: local only (FACTORY_REPORT_ENVS=local): this factory deploys nowhere else.
+
+                                          local
+[A] base (stage 1)                        -       done 2026-10-01
+  |  0/0 no card names it
+  v
+[B] build (stage 2)                       67%
+  |  4/6  left: e, f (1 to cut)
+  |    <- 0002 (pablo)
+Goal, stage build done: 2 cards left (e, f); in its way: 0002 (pablo).
