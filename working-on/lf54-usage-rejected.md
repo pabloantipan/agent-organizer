@@ -65,3 +65,4 @@ change-check (clean clone, base origin/main, head 4c78439): 8 files, 20 flags: o
 - Note: when rows are rejected, doctor prints a blank line between its lines (`writeUsageRejected` starts with "\n").
 - Note: the gate has no row for `usage --json`, so the Found, not asked above was never in scope.
 - Found, not asked (builder): the rejected rows are not in `usage --json` or the Usage view. Not filed yet: `next` says so.
+- 2026-11-01, X0 on 4f33b33 (4c78439 rebased on origin/main 29e7d2c, with lf54-decision-states merged; range-diff shows both commits unchanged, and `git diff 4c78439 4f33b33` equals `git diff 6b6e349 29e7d2c`): `make test` exit 0, fresh run (19 Go packages ok, vitest 87 files and 1397 tests passed); wails build ok; porcelain empty. Verdict stays pass. (Also run on merge 04df964 = 4c78439 + ae0d9c6: make test passed, 1397 vitest tests.)
