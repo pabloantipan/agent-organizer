@@ -182,3 +182,11 @@ which `lf54-decision-states` fixes. So X0 for `lf54-ci-contracts` and
 `lf54-decision-states` head, and that one failure, identical on origin/main,
 is recorded and not counted until then. Merge order: decision-states first,
 then the other two rebased on it.
+
+## Amendment 5 (FSE, 2026-11-01, on sup99's decide: at 473fd10)
+
+FR-6 (every reader takes a decision's state from the one helper) cannot be
+met inside the premise's lib files: `DecisionsView.tsx` (the Ruled list,
+timeline, turnaround and rule box) and `Overview.tsx:43-44` compare status
+literals. `lf54-decision-states`'s boundary adds both, to call the helper
+only. `FsePanel.tsx:31` stays as is. No other running card touches them.
