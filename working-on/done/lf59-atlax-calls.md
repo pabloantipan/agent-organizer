@@ -1,19 +1,21 @@
 ---
 title: "Deltagos's atlax slice names its five other mailbox calls"
-status: now
+status: done
 repos: [organizer]
 branch: lf59-atlax-calls
 seat: l59-calls
 reviewer: l59-calls-rev
 stage:
 updated: 2026-11-01
-next: "talos-lab merges the PR (seed first, then calls); the FSE moves it to done/ on the merge sha. sup97 ended 2026-11-01"
+next: "done: PR #13 merged d89b90f (2026-11-01)"
 review: pass
 depends_on: [lf59-atlax-seed]
 boundary: ["docs/specs/atlax-seed.md Boundary"]
 spec: "docs/specs/atlax-seed.md (Amendment 2)"
 gate: "docs/specs/atlax-seed.md#Acceptance → gate"
 ui_review: false
+prs:
+  - {repo: organizer, pr: 13, target: main, state: merged, merge: d89b90f}
 ---
 
 ## Goal

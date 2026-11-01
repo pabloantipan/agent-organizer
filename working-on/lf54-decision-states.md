@@ -1,12 +1,12 @@
 ---
 title: "Decision states are read once on each side, and ruled_by reads as a person plus a mode"
-status: next
+status: now
 repos: [organizer]
 branch: lf54-decision-states
-seat:
+seat: l54-states
 stage:
-updated: 2026-10-25
-next: "the FSE relaunches it once its lf53 dependency is on origin/main (0164 ruled 2026-10-26; sup95 stopped 2026-10-26, unmerged)"
+updated: 2026-11-01
+next: "l54-states builds it from origin/main 076eb5c (sup99, specs pin 54cf10d)"
 depends_on: [lf53-frontmatter]
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-decision-states"]
 spec: "docs/specs/leftovers-54.md (FR-6 to FR-7)"

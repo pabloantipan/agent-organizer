@@ -1,16 +1,18 @@
 ---
 title: "Deltagos draws the two autonomous-report charts: progress along a run, then where each track is"
-status: next
+status: done
 repos: [organizer]
 branch: spec/autonomous-report-charts
 seat:
 stage:
-updated: 2026-10-27
-next: "fse: review the spec, rule the open questions with Pablo, cut the step cards"
+updated: 2026-11-01
+next: "closed superseded by 0169, not delivered: factory report draws the charts and leftovers 57 builds the view (spec Amendment 1)"
 depends_on: []
 spec: "docs/specs/autonomous-report-charts.md"
 risk: low
 autonomy: needs-operator(open questions Q1-Q6 wait on Pablo and the talos and working-on skill owners; end-to-end rows S8 and T5 read a real initiative on its own machine)
+prs:
+  - {repo: organizer, pr: 10, target: main, state: merged, merge: 9eeb878}
 ---
 
 ## Goal

@@ -1,12 +1,12 @@
 ---
 title: "The usage post reads the record's rejected rows, stops resending them, shows them, and sends zero times as null"
-status: next
+status: now
 repos: [organizer]
 branch: lf54-usage-rejected
-seat:
+seat: l54-usage
 stage:
-updated: 2026-10-25
-next: "the FSE relaunches it once its lf53 dependency is on origin/main (0164 ruled 2026-10-26; sup95 stopped 2026-10-26, unmerged)"
+updated: 2026-11-01
+next: "l54-usage builds it from origin/main 076eb5c (sup99, specs pin 54cf10d)"
 depends_on: [lf53-usage-contract]
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-usage-rejected"]
 spec: "docs/specs/leftovers-54.md (FR-3 to FR-5)"

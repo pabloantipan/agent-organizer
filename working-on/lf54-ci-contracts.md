@@ -1,12 +1,12 @@
 ---
 title: "The release build reads the contract samples from the specs repo, pinned"
-status: next
+status: now
 repos: [organizer]
 branch: lf54-ci-contracts
-seat:
+seat: l54-ci
 stage:
-updated: 2026-10-25
-next: "the FSE relaunches it once its lf53 dependency is on origin/main (0164 ruled 2026-10-26; sup95 stopped 2026-10-26, unmerged)"
+updated: 2026-11-01
+next: "l54-ci builds it from origin/main 076eb5c (sup99, specs pin 54cf10d)"
 depends_on: [lf53-frontmatter, lf53-usage-contract]
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-ci-contracts"]
 spec: "docs/specs/leftovers-54.md (FR-2)"

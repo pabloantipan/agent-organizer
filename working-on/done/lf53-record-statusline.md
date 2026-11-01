@@ -14,6 +14,8 @@ boundary: ["docs/specs/leftovers-53.md Boundary, lf53-record-statusline"]
 spec: "docs/specs/leftovers-53.md (FR-7 to FR-8)"
 gate: "docs/specs/leftovers-53.md#Acceptance → gate"
 ui_review: false
+prs:
+  - {repo: organizer, pr: 8, target: main, state: merged, merge: 076eb5c}
 ---
 
 ## Goal

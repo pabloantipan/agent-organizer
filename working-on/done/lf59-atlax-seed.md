@@ -1,6 +1,6 @@
 ---
 title: "Deltagos's atlax slice: the nameplate, its readers and what it consumes, seeded by hand"
-status: now
+status: done
 repos: [organizer]
 branch: lf59-atlax-seed
 seat: l59-atlax
@@ -8,12 +8,14 @@ reviewer: l59-atlax-rev
 review: pass
 stage:
 updated: 2026-11-01
-next: "talos-lab merges the PR (seed first, then calls); the FSE moves it to done/ on the merge sha. sup97 ended 2026-11-01"
+next: "done: PR #12 merged 54a29b3 (2026-11-01)"
 depends_on: []
 boundary: ["docs/specs/atlax-seed.md Boundary"]
 spec: "docs/specs/atlax-seed.md (FR-1 to FR-4)"
 gate: "docs/specs/atlax-seed.md#Acceptance → gate"
 ui_review: false
+prs:
+  - {repo: organizer, pr: 12, target: main, state: merged, merge: 54a29b3}
 ---
 
 ## Goal

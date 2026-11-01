@@ -389,4 +389,32 @@ FR-2) and the factory state dir (FR-3, FR-4), which is Q1 and Q3.
 
 ## Amendments
 
-- none yet
+### Amendment 1 (the organizer FSE, 2026-11-01): superseded by the factory report and leftovers 57
+
+Written on odyssey 2026-10-27 before Pablo's rulings that day (agent-slack
+`docs/decisions.md`, "the autonomous-run report: a script per factory, any
+window", in the Hephaistos session on lodestar). Since then:
+
+- **The charts are drawn by `factory report`**, one script per factory, any
+  window (rulings 2-4; claudecode c3be84f; contract agent-mailbox-specs
+  `contracts/factory-report/`, 8474386). FR-1 to FR-10 and FR-13 to FR-22
+  (the window, dead time, the denominator, the lines, deploys, tracks,
+  waits) are that script's, not Deltagos's. Environment columns are the
+  ones a factory uses, not a field (ruling 1): FR-13 to FR-15 and FR-19's
+  deploy record are dropped.
+- **Deltagos reads the report's JSON** for the window the user picks and
+  computes nothing itself (organizer 0167, 0168, 0169; spec
+  `docs/specs/leftovers-57.md` with Amendment 1).
+- **FR-11 is replaced**: the view draws rows from the JSON, in Aglaea's
+  run report (`docs/ux/specs/run-report.md`, Amendments 1 and 2, 8d2141a
+  and d9c7a54), not the text verbatim in mono; the text stays byte-equal
+  behind Copy as text (leftovers-57 FR-7 to FR-13). FR-12 is leftovers-57
+  FR-2 (a remote initiative is refused, named).
+- **Open questions:** Q1 answered by ruling 3 (each factory draws its own);
+  Q2 by 0167 and Aglaea's run report (Overview's "While you were away");
+  Q3 to Q5 were the factory's and are settled in `factory report` (ruling
+  5: rebuilt from disk now, the 0042 facts ledger later); Q6 by Aglaea's
+  run report (no goal line).
+
+Nothing in this spec is built from it; the card `autonomous-report-charts`
+is closed superseded by 0169.

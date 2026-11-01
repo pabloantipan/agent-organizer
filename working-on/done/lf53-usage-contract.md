@@ -14,6 +14,8 @@ boundary: ["docs/specs/leftovers-53.md Boundary, lf53-usage-contract"]
 spec: "docs/specs/leftovers-53.md (FR-5 to FR-6)"
 gate: "docs/specs/leftovers-53.md#Acceptance → gate"
 ui_review: false
+prs:
+  - {repo: organizer, pr: 6, target: main, state: merged, merge: ca900f1}
 ---
 
 ## Goal

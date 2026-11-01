@@ -14,6 +14,8 @@ gate: "docs/specs/leftovers-53.md#Acceptance → gate"
 ui_review: false
 review: pass
 reviewer: l53-front-rev
+prs:
+  - {repo: organizer, pr: 7, target: main, state: merged, merge: 6531d5b}
 ---
 
 ## Goal

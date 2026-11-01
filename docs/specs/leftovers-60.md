@@ -68,3 +68,7 @@ The premise "nothing listens for a display change" was wrong: an observer
 already sits near `floaticon_darwin.m:1287`. FR-2 holds as built: the
 display change now runs the same recovery read. Kept here, not deleted, so
 the next spec does not repeat it.
+The observer called only `placeIcon()`; the build added the recovery read
+to it (sup98's closing report). Check hooks: with `FLOAT_SHOW_ICON` alone a
+SIGWINCH hides the icon (state home), so the desktop-change path is checked
+only with `FLOAT_COMPACT`; I1 and I2 used SIGUSR1.

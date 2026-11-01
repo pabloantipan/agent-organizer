@@ -1,19 +1,21 @@
 ---
 title: "The Ruled list shows answers whole when there is room, and an open record's line does not read its chosen twice"
-status: next
+status: done
 repos: [organizer]
 branch: lf52-decisions-line
 seat: l52-line
 reviewer: l52-line-review, l52-line-ui
 stage:
 updated: 2026-10-25
-next: "talos-lab merges the PR (both reviews pass at 2816be1; [for talos-lab] PR lf52-decisions-line, sup93)"
+next: "done: PR #5 merged c985273 (2026-11-01)"
 review: pass
 depends_on: [lf52-state-layer]
 boundary: ["docs/specs/leftovers-52.md Boundary, lf52-decisions-line"]
 spec: "docs/specs/leftovers-52.md (FR-4 to FR-5)"
 gate: "docs/specs/leftovers-52.md#Acceptance → gate"
 ui_review: true
+prs:
+  - {repo: organizer, pr: 5, target: main, state: merged, merge: c985273}
 ---
 
 ## Goal

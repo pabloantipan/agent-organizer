@@ -1,13 +1,13 @@
 ---
 title: "Every run is attributed to an initiative, a task and a role, and runs and usage agree"
-status: now
+status: done
 repos: [organizer]
 branch: lf56-run-roles
 seat: l56-roles
 supervisor: organizer-probe-sup96
 stage:
 updated: 2026-11-01
-next: "talos-lab merges the PR (thread 01M6C0E2XR49SSXWY76HANW1PF; review pass at 161bf86); the FSE moves it to done/ on the merge sha. sup96 ended 2026-11-01"
+next: "done: PR #11 merged 4bd5102 (2026-11-01)"
 review: pass
 reviewer: l56-roles-rev
 depends_on: []
@@ -15,6 +15,8 @@ boundary: ["docs/specs/leftovers-56.md Boundary"]
 spec: "docs/specs/leftovers-56.md (FR-1 to FR-6)"
 gate: "docs/specs/leftovers-56.md#Acceptance → gate"
 ui_review: false
+prs:
+  - {repo: organizer, pr: 11, target: main, state: merged, merge: 4bd5102}
 ---
 
 ## Goal
