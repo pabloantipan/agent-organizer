@@ -14,13 +14,14 @@ import type { service } from "../../wailsjs/go/models";
 import sample from "./runreport.fixtures/expected.json?raw";
 import sampleText from "./runreport.fixtures/expected.txt?raw";
 import sampleWindows from "./runreport.fixtures/expected-windows.json?raw";
+import runReportSrc from "./RunReport.tsx?raw";
 
 vi.mock("../stores/board.store", () => ({ useBoard: () => ({}) }));
 const reportText = vi.fn(async (..._a: string[]) => sampleText);
 vi.mock("../../wailsjs/go/main/App", () => ({ ReportText: (...a: string[]) => reportText(...a) }));
 
-const { Progress, Rulings, RunReport, RunReportView, headingOf } = await import("./RunReport");
-const { COPIED, argsOf, copyReport, presetsOf } = await import("../lib/runReport");
+const { Progress, Rulings, RunReport, RunReportView, goToWave, headingOf } = await import("./RunReport");
+const { COPIED, argsOf, copyReport, presetsOf, waveTarget } = await import("../lib/runReport");
 
 const env = (globalThis as { process?: { env: Record<string, string | undefined> } }).process!.env;
 const fs: { readFileSync(p: string, enc: "utf8"): string } = await import("node:" + "fs");
@@ -155,7 +156,7 @@ describe("W2: the wave column, the disclosure, the footer (FR-8)", () => {
       "sup1/1 · sup1 · 2 cards (a, c) · 6 rounds, 1 failed (execution 1) · 74 min building",
     ]);
     (lines[1].props.onClick as () => void)();
-    expect(nav.wave).toHaveBeenCalledWith(report.waves!.waves[1]);
+    expect(nav.wave.mock.calls[0][0]).toBe(report.waves!.waves[1]);
   });
 });
 
@@ -208,5 +209,88 @@ describe("W5: Copy as text (FR-11)", () => {
     await copyReport(async () => sampleText, async () => { throw new Error("denied"); }, (m) => said.push(m));
     expect(said).toEqual(["The clipboard refused the report."]);
     expect(draw()).toContain(">Copy as text</button>");
+  });
+});
+
+// W9 (leftovers-57 FR-15 to FR-17, PW4 amended, PW7): from the committed
+// sample, sup1/1 is finished with a record the scan read, sup2/1 is running,
+// and sup0/1 is sup1/1 copied onto a record the scan reported unread.
+describe("W9: a wave footer's target and name (FR-15 to FR-17)", () => {
+  const root = "/fixture/init";
+  const [running, finished] = report.waves!.waves;
+  const unread = { ...finished, key: "sup0/1", supervisor: "sup0", record: "runs/2026-10-19-sup0.md" } as service.RunWave;
+  const waves = [running, finished, unread];
+  const scan = {
+    root,
+    waves: [{ record: "2026-10-20-sup1.md" }, { record: "2026-10-20-sup1.md" }, { record: "2026-10-19-sup0.md" }],
+    problems: [
+      { path: `${root}/runs/2026-10-19-sup0.md`, msg: "run record waves: yaml: line 3: did not find expected key", unread: true },
+      { path: `${root}/working-on/x.md`, msg: "no frontmatter", unread: true },
+    ],
+  } as Parameters<typeof waveTarget>[1];
+  const targetOf = (w: service.RunWave) => waveTarget(w, scan);
+  const wNav = { card: vi.fn(), decision: vi.fn(), wave: vi.fn(), waveTarget: targetOf };
+  const sampled = { ...report, waves: { ...report.waves!, waves } } as service.FactoryReport;
+  const buttons = () => elements(Progress({ report: sampled, lineTokens: data.line_tokens, shown: { kind: "custom", since: 0, until: 0, live: false }, nav: wNav }))
+    .filter((e) => e.props.className === "rr-wave-line");
+
+  it("targets the run record, Work and Needs me by the wave's state", () => {
+    expect(finished.merged).not.toBeNull();
+    expect(running.merged).toBeNull();
+    expect(waves.map(targetOf)).toEqual([
+      { kind: "work" },
+      { kind: "record", path: "runs/2026-10-20-sup1.md" },
+      { kind: "unread", path: "runs/2026-10-19-sup0.md" },
+    ]);
+  });
+  it("a finished wave whose record the scan did not read (docs/runs/) goes to Work, never a dead press", () => {
+    expect(targetOf({ ...finished, record: "docs/runs/2026-10-15-sup0.md" } as service.RunWave)).toEqual({ kind: "work" });
+    expect(targetOf({ ...finished, record: `${root}/runs/2026-10-20-sup1.md` } as service.RunWave)).toEqual({ kind: "record", path: "runs/2026-10-20-sup1.md" });
+  });
+  it("names and hovers each link by where it goes; the visible text stays the wave's", () => {
+    const b = buttons();
+    expect(b.map((e) => e.props["aria-label"])).toEqual([
+      "show sup2 on Work",
+      "open sup1's run record",
+      "show sup0's run record in Needs me, Deltagos can't read it",
+    ]);
+    expect(b.map((e) => e.props.title)).toEqual(b.map((e) => e.props["aria-label"]));
+    expect(b[1].props.children).toBe("sup1/1 · sup1 · 2 cards (a, c) · 6 rounds, 1 failed (execution 1) · 74 min building");
+  });
+  it("a press opens the record in the reader over the report, Work, or Needs me's unread row", () => {
+    const go = { openSpec: vi.fn(async () => undefined), openNeedsMe: vi.fn(), openWave: vi.fn() };
+    const el = {} as HTMLElement;
+    for (const w of waves) goToWave("init", w, targetOf(w), el, go);
+    expect(go.openSpec.mock.calls).toEqual([[el, "init", "runs/2026-10-20-sup1.md", true, "the run report", undefined]]);
+    expect(go.openWave.mock.calls).toEqual([["init", 1]]);
+    expect(go.openNeedsMe.mock.calls).toEqual([["unread:init"]]);
+  });
+  it("an initiative with no Needs me rows (paused) opens its unread record in the reader with the scan's reason (Amendment 6)", () => {
+    const paused = { ...scan, root: "/fixture/paused", active: false, problems: [
+      { path: "/fixture/paused/runs/2026-10-19-sup0.md", msg: "run record waves: yaml: line 3: did not find expected key", unread: true },
+      { path: "/fixture/paused/runs/2026-10-19-sup0.md", msg: "second\n  line", unread: true },
+    ] } as Parameters<typeof waveTarget>[1];
+    const t = waveTarget(unread, paused);
+    expect(t).toEqual({ kind: "record", path: "runs/2026-10-19-sup0.md", unread: "run record waves: yaml: line 3: did not find expected key; second line" });
+    expect(waveTarget(unread, { ...paused, active: true })).toEqual({ kind: "unread", path: "runs/2026-10-19-sup0.md" });
+    expect(waveTarget(finished, { ...paused, waves: [{ record: "2026-10-20-sup1.md" }, { record: "2026-10-19-sup0.md" }] })).toEqual({ kind: "record", path: "runs/2026-10-20-sup1.md" });
+    const go = { openSpec: vi.fn(async () => undefined), openNeedsMe: vi.fn(), openWave: vi.fn() };
+    const el = {} as HTMLElement;
+    goToWave("paused", unread, t, el, go);
+    expect(go.openSpec.mock.calls).toEqual([[el, "paused", "runs/2026-10-19-sup0.md", true, "the run report", t.kind === "record" ? t.unread : ""]]);
+    expect(go.openNeedsMe).not.toHaveBeenCalled();
+    const names = elements(Progress({ report: sampled, lineTokens: null, shown: { kind: "custom", since: 0, until: 0, live: false }, nav: { ...wNav, waveTarget: (w: service.RunWave) => waveTarget(w, paused) } }))
+      .filter((e) => e.props.className === "rr-wave-line").map((e) => e.props["aria-label"]);
+    expect(names[2]).toBe("open sup0's run record");
+  });
+  it("the report reads active from Needs me's own rule (inactiveIds)", () => {
+    expect(runReportSrc).toContain("const active = !inactiveIds(view).has(id);");
+    expect(runReportSrc).toContain('go.openSpec(el, id, t.path, true, "the run report", t.unread)');
+  });
+  it("names a wave by its key when its supervisor runs two waves in the report", () => {
+    const again = { ...running, key: "sup2/2", wave: 2 } as service.RunWave;
+    const names = elements(Progress({ report: { ...report, waves: { ...report.waves!, waves: [running, again] } } as service.FactoryReport, lineTokens: null, shown: { kind: "custom", since: 0, until: 0, live: false }, nav: wNav }))
+      .filter((e) => e.props.className === "rr-wave-line").map((e) => e.props["aria-label"]);
+    expect(names).toEqual(["show sup2/1 on Work", "show sup2/2 on Work"]);
   });
 });

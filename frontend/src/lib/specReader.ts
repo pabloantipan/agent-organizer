@@ -125,3 +125,14 @@ export function linkTarget(from: string, href: string, idx: ReaderIndex): LinkTa
   if (idx.specs.has(path)) return { kind: "spec", path, section };
   return { kind: "file", path };
 }
+
+/** A file's leading YAML frontmatter as a fenced yaml block, the rest as it
+ *  is: a run record's `waves:` block (leftovers-57 FR-15) would otherwise
+ *  render as a rule and a setext heading. A file with no frontmatter, or
+ *  an opening `---` that never closes, is returned unchanged. */
+export function frontmatterAsCode(text: string): string {
+  const m = /^---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/.exec(text ?? "");
+  if (!m) return text ?? "";
+  const fence = m[1].includes("```") ? "~~~~" : "```";
+  return `${fence}yaml\n${m[1]}\n${fence}\n\n${text.slice(m[0].length)}`;
+}
