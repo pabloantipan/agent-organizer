@@ -1,0 +1,16 @@
+# Deltagos's read of the mailbox's health view (atlax-seed FR-2): the roster's
+# deaf, capped and undelivered counts the Agents view shows.
+designation: prod:agent-organizer.discuss.Health
+kind: outbound
+summary: Reads a cell's health (roster and live threads) as the cell's human, for the Agents view and the crew block.
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  method: GET
+  path: /projects/{pid}/health
+consumes:
+  - ext:agent-mailbox-api#fn:mailbox.health
+test:
+  path: internal/discuss/discuss_test.go
+  name: TestTokenAndHealthOverUnixSocket
