@@ -1,0 +1,15 @@
+# Deltagos's call to the record that revokes a factory key by its sha256
+# (atlax-seed FR-2, Amendment 1). The provider, agent-mailbox-record, is not
+# published, so no consumes: yet; planned ext:agent-mailbox-record#fn:record.factories.keys.revoke.
+designation: prod:agent-organizer.record.RevokeKey
+kind: outbound
+summary: "organizer factory-key --rotate revokes the old key by hash at the record (agent-mailbox-record, unpublished; planned fn:record.factories.keys.revoke)."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  method: POST
+  path: /v1/factories/{f}/keys/revoke
+test:
+  path: internal/record/record_test.go
+  name: TestIssueRevokeAndRegister

@@ -1,0 +1,15 @@
+# Deltagos's call to the record that registers a cell under the factory
+# (atlax-seed FR-2, Amendment 1). The provider, agent-mailbox-record, is not
+# published, so no consumes: yet; planned ext:agent-mailbox-record#fn:record.factories.cells.register.
+designation: prod:agent-organizer.record.RegisterCell
+kind: outbound
+summary: "Bring crew up registers the cell's initiative, title and client with the record (agent-mailbox-record, unpublished; planned fn:record.factories.cells.register); 409 reads as registered."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  method: POST
+  path: /v1/factories/{f}/cells
+test:
+  path: internal/record/record_test.go
+  name: TestIssueRevokeAndRegister
