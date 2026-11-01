@@ -7,7 +7,7 @@ seat: l56-roles
 supervisor: organizer-probe-sup96
 stage:
 updated: 2026-11-01
-next: "file finding: FR-2 ignores a card's own supervisor: (~1.1% of runs cost), and organizer runs reads the ledger as main left it until organizer usage runs once (0% overhead, 40.6% no task on lodestar); then PR with talos-lab"
+next: "PR with talos-lab (findings 2 and the runs-before-usage note filed to the FSE for the next leftovers, post 01M6C0DTF1143TDDVR0VRMYPVD)"
 review: pass
 reviewer: l56-roles-rev
 depends_on: []
