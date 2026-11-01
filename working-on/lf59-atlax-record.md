@@ -6,7 +6,9 @@ branch: lf59-atlax-record
 seat: l59-record
 stage:
 updated: 2026-11-01
-next: "review: lf59-atlax-record, gate met (S1, S2, S5, X0; S4 exit 0 with --card, see Notes), c7cb263"
+next: "PR with talos-lab"
+review: pass
+reviewer: l59-record-rev
 depends_on: [lf59-atlax-calls]
 boundary: ["atlax/"]
 spec: "docs/specs/atlax-seed.md (Amendment 3, FR-5 and FR-6)"
@@ -52,6 +54,17 @@ Not changed, on purpose:
 - 2026-11-01 l59-record: FR-5 and FR-6 on lf59-atlax-record (4fbd098, c7cb263, unmerged). S1, S2 valid; S5 exit 0, 0 findings, both named tests run by verify and pass; X0 make test pass, tree clean. Evidence and commands in .wt-notes/l59-record/ (progress.md, verify-s5.json).
 
 ## Notes
-- S4 run bare (`atlax verify --repo .`, no --card) exits 1 with two book-guard findings, exactly PostUsage and ReadInitiative: with no card there is no change order. That is the guard working; S4 holds with the card (identical to S5). Once a card authors an element, S4 needs --card.
-- ReadInitiative's contract path is now the directory contracts/working-on/ (was expected.json): the test reads expected.json and sample/.
+- S4 run bare (`atlax verify --repo .`, no --card) exits 1 with two book-guard findings, exactly PostUsage and ReadInitiative: with no card there is no change order. That is the guard working; S4 holds with the card (identical to S5). Once a card authors an element, S4 needs --card. Went to: docs/specs/atlax-seed.md Amendment 3, last paragraph (c9ab0c6).
+- ReadInitiative's contract path is now the directory contracts/working-on/ (was expected.json): the test reads expected.json and sample/. Went to: nothing to file; FR-6 names `contracts/working-on/` itself.
 
+## Review
+- Verdict: **pass**. Unmet gate items: none.
+- Reviewer: l59-record-rev, 2026-11-01, on c7cb263 (base origin/main 43e2bcd, origin re-pointed to github and fetched in the clean clone).
+- Pin: card added at c1bda4c, ancestor of 525014f4; `git diff 525014f4 -- working-on/lf59-atlax-record.md` leaves `touches:` and `change_order:` unchanged. Pass.
+- change-check (exit 0; it diffed against local main c9ab0c6, which shows the same 5 files as 43e2bcd..c7cb263): 5 files changed, all under `atlax/elements/`; `0 flags: outside boundary 0, outside footprint 0, undeclared 0, declared, not changed 0, new env var 0, new dependency 0, new host 0, risk 0, untested? 0, could not read 0, boundary unreadable 0`. Nothing to explain.
+- S1, S2: Draft 2020-12 jsonschema against specs 54cf10d's plant/element schemas: plant.yaml and all 13 element files `valid`; file list identical to 43e2bcd (13). FR-5: the four record elements consume `fn:record.usage.post`, `fn:record.factories.keys.issue`, `.keys.revoke`, `.cells.post`, each present in `atlax/artifacts/agent-mailbox-record/elements/`; no summary says "unpublished".
+- FR-6 / authored count: 2 (PostUsage, ReadInitiative); Report `authored: false`. `TestU1PostsThreeRowsWithContractKeys` (internal/service/usagepost_test.go:351) and `TestWorkingOnContract` (internal/scan/contract_test.go:150) exist at 43e2bcd, PASS with CONTRACTS_DIR, and FAIL naming the missing sample with an empty CONTRACTS_DIR, so each reads its sample. No code, test or fixture in the diff.
+- S4 bare: `atlax verify agent-organizer: 2 finding(s), 2 blocking (book-guard 2); exit 1` (PostUsage, ReadInitiative not in a change order). Judged by --card per Amendment 3 (c9ab0c6).
+- S4/S5 with `--card`: `atlax verify agent-organizer: 0 finding(s), 0 blocking; exit 0` (base_sha 43e2bcd, head_sha c7cb263, change_order modifies PostUsage and ReadInitiative).
+- X0: pnpm install --frozen-lockfile, then `CONTRACTS_DIR=… XDG_DATA_HOME=$(mktemp -d) test-lease run --share -- make test` exit 0 (go: all ok; vitest 87 files, 1397 tests passed); `git status --porcelain` empty. Fresh run (full output, no replay; test-lease printed no run id).
+- Evidence: .wt-notes/l59-record-rev/ (change-check.txt, s1s2.txt, s4-bare.txt, s4-card.txt, s5.json, x0.log).
