@@ -88,3 +88,29 @@ Card `lf59-atlax-calls` adds one unauthored element per call with its
 `consumes:` (`fn:mailbox.thread.get`, `messages.post`,
 `thread.status.set`, `search`, `drain`), on top of `lf59-atlax-seed`.
 Gate rows S1, S2 (over the five), S4 and X0; boundary `atlax/` only.
+
+## Amendment 3 (2026-11-01, the FSE): the record's consumes, and the first authored readers
+
+`agent-mailbox-record` is published in atlax (fd888e3, 50 elements), and
+the contract tests of lf53-usage-contract (#6) and lf53-frontmatter (#7)
+are on origin/main. Card `lf59-atlax-record`, within 0171 (one element per
+call, each with `consumes:`; authored where the contract sample and test
+exist):
+
+- **FR-5** The record's four calls gain their `consumes:`:
+  `prod:agent-organizer.record.PostUsage` →
+  `ext:agent-mailbox-record#fn:record.usage.post`; `IssueKey` →
+  `fn:record.factories.keys.issue`; `RevokeKey` →
+  `fn:record.factories.keys.revoke`; `RegisterCell` →
+  `fn:record.factories.cells.post`; their summaries drop "unpublished".
+- **FR-6** Each reader whose contract sample and named test are now on the
+  base becomes `authored: true` through the card's `change_order`
+  (`modifies`), naming its sample and test: the usage post
+  (`contracts/usage-batch.json`) and the working-on reader
+  (`contracts/working-on/`), if `atlax verify` finds their tests passing.
+  The factory-report reader stays unauthored until lf57-report-go lands.
+
+Gate rows S1, S2 (the changed files), S4 and X0; plus **S5**: `atlax
+verify --card working-on/lf59-atlax-record.md` passes the book guard with
+the card's `touches:` and `change_order:`. After the merge, the FSE checks
+`atlax check` reports no ext-break for agent-organizer.
