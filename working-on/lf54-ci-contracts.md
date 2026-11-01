@@ -58,3 +58,4 @@ change-check (clean clone at 82ed5a6):
 - X0 on 82ed5a6 alone: make test fails only TestWorkingOnContract (ruled_by modes, 0012 forecast band), byte-identical to `go test ./internal/scan/` on 076eb5c; wails build ok; porcelain empty.
 - X0 on e5a8bf8: make test passes (Go all ok, vitest 87 files / 1385 tests); wails build ok; porcelain empty.
 - Note: no gate row runs a tag build; the first tag after merge proves the workflow in Actions (builder's Risky).
+- 2026-11-01, X0 rerun: on dca1222 (82ed5a6 rebased by sup99 onto origin/main 29e7d2c; range-diff shows both commits `=`, and `git diff 82ed5a6 dca1222` equals `git diff 6b6e349 29e7d2c`, so only origin/main's changes) make test passes fresh (Go all ok, vitest 87 files / 1397 tests), wails build ok, porcelain empty. Verdict stays pass. (Merge 1131f36 with ae0d9c6 had passed make test too before the rebase superseded it.)
