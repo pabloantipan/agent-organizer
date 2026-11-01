@@ -1,12 +1,12 @@
 ---
 title: "Records waiting on the cells leave Needs me, and every view uses one word per status"
-status: next
+status: now
 repos: [organizer]
 branch: lf61-decision-states-ui
-seat:
+seat: l61-states
 stage:
 updated: 2026-11-01
-next: "sup100 runs it (0173 ruled 2026-11-01)"
+next: "l61-states builds D1-D6 on lf61-decision-states-ui (sup100 launched 2026-11-01 16:15)"
 depends_on: [lf54-decision-states]
 boundary: ["docs/specs/leftovers-61.md Boundary"]
 spec: "docs/specs/leftovers-61.md (FR-1 to FR-6)"
