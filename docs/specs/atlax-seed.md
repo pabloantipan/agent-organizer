@@ -114,3 +114,7 @@ Gate rows S1, S2 (the changed files), S4 and X0; plus **S5**: `atlax
 verify --card working-on/lf59-atlax-record.md` passes the book guard with
 the card's `touches:` and `change_order:`. After the merge, the FSE checks
 `atlax check` reports no ext-break for agent-organizer.
+For `lf59-atlax-record` and every later card that authors or modifies an
+element, S4 runs `atlax verify --repo . --card <the card>`: bare, the book
+guard has no change order and flags exactly the elements the card lists,
+which is the guard working (l59-record's note at c7cb263).
