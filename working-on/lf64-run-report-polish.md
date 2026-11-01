@@ -7,7 +7,7 @@ seat: l64-build
 reviewer: l64-rev, l64-ui
 stage:
 updated: 2026-11-01
-next: "l64-build builds lf64-run-report-polish (sup106 launched 2026-11-01)"
+next: "l64-build stopped at phase 0 (usage limit); resume from .wt-notes/l64-build/progress.md, phase 1"
 depends_on: []
 boundary: ["frontend/src/components/RunReport.tsx", "frontend/src/components/RunTracks.tsx", "frontend/src/components/SpecReader.tsx", "frontend/src/lib/runReport.ts", "frontend/src/lib/specReader.ts", "frontend/src/styles/runreport.css"]
 spec: "docs/specs/leftovers-64.md (FR-1 to FR-8)"
