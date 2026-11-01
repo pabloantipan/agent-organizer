@@ -4,17 +4,34 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
-## HAND-OFF 2026-11-01 16:45 (last sha c1bda4c)
+## HAND-OFF 2026-11-01 20:27 (last sha see git log)
 
-- AUTONOMOUS since 16:19, no end set. Pablo's goal for the window (relayed by Hephaistos): the factory model built in atlax. Hourly cron wake (session-only).
-- Live supervisors (the cap of 3): sup100 on lf61-decision-states-ui (0173, 45-90m, from 16:15); sup101 on leftovers 57 (0169, 3 waves, 180-300m, from 16:15; lf57-home-signal waits on lf61); sup102 on lf59-atlax-record (0171, atlax-seed Amendment 3, 30-60m, from ~16:40). talos-lab sits in the cell and merges every PR (cell.json fc685a6).
-- Next: when Hephaistos posts the atlax-wails merge sha, cut the Wails and CLI elements card (the dry run derived 78 wails, 26 cli). Then lf58, the C4 map lens (0170 roadmap mode, contract c4-map/1 at specs 54cf10d), when a supervisor slot frees.
-- Waits on Pablo: lf55-one-title (Dock layer-20 window on his display; card needs-operator; its branch now conflicts with lf60 on floaticon_darwin.m, so the continuation rebases first); restarting Deltagos to run the icon fix (asked in one [for pablo] post).
-- No proposed records. Installed v0.2.0-3096. Local main is ahead of origin with card and doc commits only; talos-lab's closing working-on PR carries them.
+- AUTONOMOUS since 16:19, no end set. Goal (Pablo via Hephaistos): the factory model built in atlax. Hourly cron wake (session-only).
+- Supervisors (cap 3, all within forecast at 20:27): sup101 leftovers 57 (lf57-home-signal passed code and UI review, PR with talos-lab; lf57-wave-footer round 2 in review at b98452f, Amendments 4-6); sup103 leftovers 58 (lf58-map-lens building, wave 2; read #24 and render #27 merged); sup104 leftovers 62 (0175 by recommendation 19:44; lf62-go in review at 83fe879; lf62-ui after it).
+- Merged today: #4-#27. origin/main e968fc1. Installed v0.2.0-3200 (through #26).
+- atlax for organizer: seed, calls, record, 107-element surface, 3 authored (#12, #13, #21, #23, #25); check 0 findings.
+- To cut when free: the organizer's own map.json (Daedalus, c4-map gen); htmlLabels at the source; docs/runs scan gap; FR-9 consumes completeness (low).
+- Waits on Pablo: lf55-one-title (Dock window; needs-operator; rebase over lf60 first); restart Deltagos for the icon fix. The screen is locked: UI reviews render offscreen.
 - 0167 and 0168 carry "2026-10-28" in their ruling words. They were ruled on 10-27 by the clock. Ruled records are not edited.
-- WRONG, mine: a bitácora insert in 2f29b62 replaced its anchor line instead of inserting before it, losing the line above until this hand-off restored it.
+- Rules learned today: atlax cards carry touches and change_order at cut; a premise listing call sites greps all of frontend/src; bitácora inserts go after the day-log heading.
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
+
+- Held: run records under docs/runs/ the scan does not read need a scan card (l57-foot's note, lf57-wave-footer).
+
+- sup102 closed (16:22-19:37, ~1h15m working, ~2h usage-limit stop; seats $9.17): #21 record, #23 surface (107 elements), #25 authored (3); all first-round passes. Ended. Its Found: an empty CONTRACTS_DIR falls back to ~/agent-slack/specs/contracts (a 'fails without the sample' row holds only against an empty dir); change-check defaults to local main, so review prompts should pass --base origin/main; FR-9 completeness unchecked (held, low).
+
+- Held, low: no gate proves FR-9's consumes: complete over all 107 surface elements (15+ spot-checks clean, l59-surface-rev). Worth a derive-side check (a call site to discuss or record without consumes:) if Hephaistos's extractor can trace calls; otherwise drop.
+
+- To cut after lf57-run-report merges (Aglaea, progress-and-waves Amendment 1, 754615b: PW4 amended, PW7): a finished wave's footer opens its run record (runs/*.md) in the spec reader drawer, Back returns to the report; a running wave keeps Work at its strip; names 'open sup95's run record' / 'show sup96 on Work'; an unread record goes to Needs me's unread row.
+
+- WRONG, mine (lf59-atlax-surface): I wrote 'the builder fills touches and change_order' in its Pre-answered, but atlax freezes the change order when the card first goes now; FR-8 authored none. Rule for my atlax cards: list touches and change_order on the card when I cut it. Follow-up lf59-atlax-authored (Amendment 5).
+
+- Held: render without HTML labels at the source (root htmlLabels:false in the dark mermaid config or internal/diagram; changes every cached figure's key). leftovers-58 Amendment 1 swaps foreignObject for <text> meanwhile.
+
+- Held for the next frontend leftovers (Aglaea 26f96ce): DS7, the header chip says both counts when they differ ('6 decisions waiting · 5 on you'); DS8 no Home signal for crossings; R53 amended (A20), the header's height follows a live resize to 1024.
+
+- 18:50 after the usage limit reset (all seats stopped ~17:00-18:50): merged #19 lf57-report-go, #20 lf61, #21 lf59-atlax-record, #22 working-on (bf66580); sup100 closed (~55 min, within) and ended; sup102 extended +90m for lf59-atlax-surface (launched 18:52; derive now 81 wails + 26 cli); sup101's l57-ui resumed 18:51. Installed v0.2.0-3135. Sent Aglaea sup100's UI1 (header 6 vs panel 5), A1, A2. leftovers-58 and 0174 proposed 18:53 (cd392b9).
 
 - Held for the next leftovers (lf61 code review pass at 7de55a1): `internal/service/rule.go` signs "owner operator" in a record's Ruling when pablo rules an operator-owned record; DS6 stops at the box, the written ruling should read the owner through the same person reader (and drop it when the ruler is pablo).
 

@@ -146,3 +146,18 @@ Gate: S1, S2 (every derived element has exactly one file, none extra:
 `atlax derive --json` against `atlax/elements/`), S4 and S5 with `--card`,
 and X0, with the atlax tool at claudecode 3d7aea5 or later and
 CONTRACTS_DIR at specs 230a515 or later.
+
+## Amendment 5 (2026-11-01, the FSE): author the report readers, change order first
+
+`atlax verify` freezes a card's change order when the card first goes
+`now`; lf59-atlax-surface went with `adds: []` (my Pre-answered said the
+builder fills it), so FR-8 authored none. Its builder found three that
+qualify: `fn:organizer.App.Report` (`contracts/factory-report/expected.json`,
+`TestReportDecodesContract`) and `App.ReportWindows`
+(`expected-windows.json`, `TestReportWindows`), both in
+`internal/service/report_test.go`, plus `prod:agent-organizer.service.Report`
+(planned, its test on main since lf57-report-go). `App.ReportText` stays
+unauthored: its test needs the real `factory` installed. Card
+`lf59-atlax-authored` lists them in `touches:` and `change_order` before
+it goes now, and flips them (`authored: true`, `lifecycle: live`), with
+gate rows S2 (the changed files), S4 and S5 with `--card`, and X0.

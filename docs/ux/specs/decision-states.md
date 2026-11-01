@@ -100,3 +100,34 @@ Severity 1 each; together they make the same record read three ways.
 ## Technical notes
 
 (FSE)
+
+## Amendment 1 (aglaea, 2026-11-01): two counts, two questions (after lf61)
+
+From l61-states-ui's review of lf61-decision-states-ui (#20, 37b1763;
+`working-on/done/lf61-decision-states-ui.md`), UI1, A1, A2. 0173 took
+DS1-DS6.
+
+- **DS-a was wrong, mine.** It said FsePanel's "waiting on you" equals the
+  header's count. They answer two questions. The header is the
+  initiative's: every record waiting on a ruling, whoever owns it (the
+  lead may rule any proposed record, 0019 and 0045); it equals Decisions'
+  "To rule · N". The panel and Needs me are the lead's own: records owned
+  by the lead, with others' under Home's Waiting on others. The fixture's
+  6 and 5 differ by 0005 (alejandro's), which is right.
+- **DS7** The header's chip says the lead's share when it differs, in its
+  words and accessible name, not only its number: `6 decisions waiting ·
+  5 on you`; equal, it stays `5 decisions waiting`. The chip keeps opening
+  Decisions. So the one screen holds both, with no second lozenge (A2
+  answered: the header does not narrow to the lead's records, since
+  Decisions' To rule would then disagree with it instead).
+- **DS8** Home's initiative row carries no with-the-cells signal (A1). Home
+  is the lead's scan of where they must act; a crossing asks nothing of
+  them until Themis sends Pablo a question, which is then a Needs me row.
+  The header, one press in, is enough.
+- UI2 (the raw owner reachable by hover only): leave it; the raw value is
+  a debugging aid, not information the lead acts on.
+
+| Row | The person | Check |
+|---|---|---|
+| DS-a (amended) | reads two counts as two questions | fixture: header `6 decisions waiting · 5 on you`, Decisions `To rule · 6`, FsePanel `waiting on you: 5`, Needs me's decision rows 5 |
+| DS-g | is not asked to look at what needs nothing of them | Home's init-a row: no "with the cells" text while 0013 is `awaiting-cells` |

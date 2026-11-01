@@ -180,3 +180,67 @@ the CLAUDE.md lines. `lf57-home-signal` touches `Home.tsx`, as
 `lf61-decision-states-ui` (sup100, running) does: it starts after lf61 is
 on origin/main. X0 for every card runs with `CONTRACTS_DIR` at a checkout
 of agent-mailbox-specs 54cf10d (it holds factory-report 8474386).
+
+## Amendment 3 (FSE, 2026-11-01, on l57-ui's gap at 2f7dccb)
+
+FR-8's "opening Work with that WaveStrip in view" holds only for a running
+wave: Work draws a WaveStrip for running waves alone (`Board.tsx`,
+`WaveStrip.tsx`, outside this boundary), and the report's waves are mostly
+finished. For `lf57-run-report`, a wave's footer opens Work and scrolls to
+its strip when one is drawn; for a finished wave it opens Work. W2 checks
+the navigation call. What a finished wave's footer should show instead is
+asked of Aglaea, for a later card.
+
+## Amendment 4 (FSE, 2026-11-01): a finished wave's footer opens its run record (PW7)
+
+Aglaea, `docs/ux/specs/progress-and-waves.md` Amendment 1 (754615b), PW4
+amended and PW7, closing the gap of Amendment 3. Card `lf57-wave-footer`,
+within 0169:
+
+- **FR-15** A finished wave's footer opens its run record (the `runs/*.md`
+  its wave came from) in the spec reader drawer over the report; Back
+  returns to the report where it was. A running wave's footer keeps Work
+  scrolled to its strip.
+- **FR-16** The link's accessible name and hover say where it goes:
+  `open sup95's run record`, `show sup96 on Work`.
+- **FR-17** A run record the scan reported unread goes to Needs me's
+  unread row, never a dead press.
+
+Gate: **W9** vitest of the footer's target and name for a finished, a
+running and an unread wave; **W10** review build (in the worktree, never
+auth: firebase, launched by its own path, pid saved, AX of that pid,
+`screencapture -l`): pressing a finished wave's footer by AX opens its run
+record in the drawer, and Back returns to the report at the same scroll;
+X0. Boundary: `frontend/src/components/RunReport.tsx`,
+`frontend/src/lib/runReport.ts`, `frontend/src/lib/specReader.ts`,
+`frontend/src/components/SpecReader.tsx` (opening a run record, if it does
+not already), and their tests. ui_review true.
+
+Amendment 4, addendum (FSE, 2026-11-01, on sup101's precondition check):
+the drawer reads files only through `App.ReadSpec`, and
+`Service.ReadSpec` (`internal/service/spec.go:32-50`) refuses any path
+that is not one of the initiative's specs. **FR-18** `ReadSpec` also
+allows exactly the run record files the scan read for this initiative's
+waves (under its `runs/` and `docs/runs/`), and nothing else; the footer
+opens them as kind `spec`. The footer keys on the report's
+`waves[].record` (the path the factory read), matched to the scan's files.
+**W11** go test: a wave's run record reads; a path outside those files,
+a `../` path and another initiative's run record are refused as today.
+The boundary adds `internal/service/spec.go` and its test.
+
+## Amendment 5 (FSE, 2026-11-01, on l57-home's measure at 57a04e9)
+
+Home's signal cap (`.lz` max-width 200px, `styles/shell.css`) cuts FR-14's
+words (`last run · 4 cards · 1 h 30 min stopped` is 205 px). The run signal
+is exempt from that cap by one rule in `frontend/src/styles/home.css`
+(`.home .p-sig .lz.run { max-width: none; }`); `lib/width.ts` still folds it
+first when the row is tight. `lf57-home-signal`'s boundary adds that one
+rule.
+
+## Amendment 6 (FSE, 2026-11-01, on lf57-wave-footer's review at 957cc37)
+
+FR-17 for an initiative that is not active: Needs me has no rows for it
+(`lib/queue.ts:154`), so the unread row cannot be the target. There, the
+footer opens the run record in the drawer as text (ReadSpec already allows
+it, FR-18), with the scan's unread reason as the drawer's error line; an
+active initiative keeps Needs me's unread row. W9 adds the non-active case.
