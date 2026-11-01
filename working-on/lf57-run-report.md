@@ -15,6 +15,8 @@ ui_review: true
 autonomy: unattended
 review: pass
 reviewer: l57-ui-rev
+prs:
+  - {repo: organizer, pr: 26, target: main, state: merged, merge: d4c67af}
 ---
 
 ## Goal
