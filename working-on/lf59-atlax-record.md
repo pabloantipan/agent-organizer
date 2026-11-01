@@ -1,12 +1,12 @@
 ---
 title: "Deltagos's atlax slice consumes the record, and its first two readers are authored"
-status: next
+status: now
 repos: [organizer]
 branch: lf59-atlax-record
-seat:
+seat: l59-record
 stage:
 updated: 2026-11-01
-next: "sup102 runs it (0171, atlax-seed Amendment 3)"
+next: "l59-record builds FR-5, FR-6 on lf59-atlax-record (sup102 launched 2026-11-01 16:30)"
 depends_on: [lf59-atlax-calls]
 boundary: ["atlax/"]
 spec: "docs/specs/atlax-seed.md (Amendment 3, FR-5 and FR-6)"
