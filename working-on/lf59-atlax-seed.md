@@ -8,7 +8,7 @@ reviewer: l59-atlax-rev
 review: pass
 stage:
 updated: 2026-11-01
-next: "file finding: Found 1 (atlax-seed.md 5c33dd0 and Amendment 1 77b2321 not on origin/main) and review Note 1 (five mailbox calls without an element); then PR with talos-lab"
+next: "PR with talos-lab"
 depends_on: []
 boundary: ["docs/specs/atlax-seed.md Boundary"]
 spec: "docs/specs/atlax-seed.md (FR-1 to FR-4)"
@@ -66,3 +66,4 @@ Not changed, on purpose:
   - Found 2 (the two readers have no ext: producer) went to atlax-seed.md Amendment 1 (77b2321, under 0171).
 - Note 1 (outside the gate, does not fail the card): internal/discuss/client.go makes five more mailbox calls that have no element: thread get (:139), post message (:146), thread status (:152), search (:180) and drain (:224). FR-2 names only the thread list and health, so the gate holds. Still, if upstream changes `/messages` or `/drain`, nothing will tell this repo. It has no home yet; see next.
 - Note 2: PostUsage covers both the usage reader and the `/v1/usage` call in one element. Both of FR-2's lists name it, so I read one file as correct, not as a missing one.
+- Findings filed (sup97, 2026-11-01): Found 1 → talos-lab's working-on PR carries 5c33dd0 and 77b2321 to origin; Note 1 → FSE, thread 01M6C098RAEXKJN36RCRYKRJFX (five unelemented mailbox calls).
