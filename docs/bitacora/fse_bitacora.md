@@ -4,7 +4,19 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
-## HAND-OFF 2026-11-01 (last sha a73d86b)
+## HAND-OFF 2026-11-01 16:45 (last sha c1bda4c)
+
+- AUTONOMOUS since 16:19, no end set. Pablo's goal for the window (relayed by Hephaistos): the factory model built in atlax. Hourly cron wake (session-only).
+- Live supervisors (the cap of 3): sup100 on lf61-decision-states-ui (0173, 45-90m, from 16:15); sup101 on leftovers 57 (0169, 3 waves, 180-300m, from 16:15; lf57-home-signal waits on lf61); sup102 on lf59-atlax-record (0171, atlax-seed Amendment 3, 30-60m, from ~16:40). talos-lab sits in the cell and merges every PR (cell.json fc685a6).
+- Next: when Hephaistos posts the atlax-wails merge sha, cut the Wails and CLI elements card (the dry run derived 78 wails, 26 cli). Then lf58, the C4 map lens (0170 roadmap mode, contract c4-map/1 at specs 54cf10d), when a supervisor slot frees.
+- Waits on Pablo: lf55-one-title (Dock layer-20 window on his display; card needs-operator; its branch now conflicts with lf60 on floaticon_darwin.m, so the continuation rebases first); restarting Deltagos to run the icon fix (asked in one [for pablo] post).
+- No proposed records. Installed v0.2.0-3096. Local main is ahead of origin with card and doc commits only; talos-lab's closing working-on PR carries them.
+- 0167 and 0168 carry "2026-10-28" in their ruling words. They were ruled on 10-27 by the clock. Ruled records are not edited.
+- WRONG, mine: a bitácora insert in 2f29b62 replaced its anchor line instead of inserting before it, losing the line above until this hand-off restored it.
+
+## 2026-11-01 (day log, the earlier hand-off and what followed)
+
+- Held for the next leftovers (lf61 code review pass at 7de55a1): `internal/service/rule.go` signs "owner operator" in a record's Ruling when pablo rules an operator-owned record; DS6 stops at the box, the written ruling should read the owner through the same person reader (and drop it when the ruler is pablo).
 
 - No supervisor is running. origin/main is at 21b5d5d. Hephaistos is reconciling the six unmerged branches. I answered that all six are to be reconciled, in this order: lf52-decisions-line, lf53-frontmatter, lf53-usage-contract, lf53-record-statusline, lf54-retire-guard, spec/autonomous-report-charts. Each merges clean (thread 01M6AHE7XTRSVAVA3VR1CY8Q60). After the merges: fast-forward local main, run make install, launch leftovers 54 wave 2.
 - Waiting on Pablo:
@@ -28,7 +40,15 @@ restating it (the discuss skill).
 - sup98 closed (14:04-14:27, 23 min against 45-90; seats $2.74): lf60-icon-spaces pass at d4d0e35, PR with talos-lab (01M6C28DQ9TS5YWJ00QKMEQENW). sup98 ended. Repetition, second sighting today: change-check reports correct declarations as undeclared (sup96: several symbols per bullet, 30 false; sup98: file:Symbol vs repo-prefixed paths, 8 false); sent [for hephaistos].
 - 2026-11-01 talos-lab merging: #4 working-on 171614c, #5 lf52-decisions-line c985273, #6 lf53-usage-contract ca900f1, #7 lf53-frontmatter 6531d5b (after leftovers-53 Amendment 1, X0 at specs ed3c6b5), #8 lf53-record-statusline 076eb5c. Installed v0.2.0-2989 (through 6531d5b); reinstall at the chain's end. sup99 runs leftovers 54 wave 2 at specs pin 54cf10d (Amendment 3, 1182932); until lf54-ci-contracts and lf54-decision-states land, plain make test on main fails TestWorkingOnContract.
 - lf56 (#11 4bd5102) and lf59 seed and calls (#12 54a29b3, #13 d89b90f) merged and in done/. At 14:5x atlax had not yet published agent-organizer (listed in platform/artifacts.yaml, notify organizer/fse; atlax-watch runs every 3 min): check artifacts/agent-organizer/ and `atlax check` on the next wake. agent-mailbox-record IS now published (fd888e3): the record's four consumes: lines (atlax-seed Amendment 1's later card) can be cut.
-- 0167 and 0168 carry "2026-10-28" in their ruling words. They were ruled on 10-27 by the clock. Ruled records are not edited.
+- talos-lab cleared the backlog (#4-#15; #15 working-on 6b6e349); local main = origin/main; installed v0.2.0-3033 (lf60 icon fix included; Pablo restarts Deltagos to run it). atlax published artifacts/agent-organizer; `atlax check` 0 findings (after-merge line of atlax-seed met). leftovers-54 Amendment 5 (c15ceaa): decision-states may edit DecisionsView.tsx and Overview.tsx to call the helper.
+- Held for the next leftovers: decisionStates.test.ts stripComments drops code after a // inside a string (lf54-decision-states code review, 1df5001). leftovers-54 Amendment 6 (1360269): awaiting-cells Needs me rows read Open, never the rule box (UI review UI1, sev 3, my gap: Home.tsx was never named). UI4 and A1-A3 sent to Aglaea.
+- 0173 ruled (take Aglaea's DS1-DS6, docs/ux/specs/decision-states.md d05ea58): crossings leave Needs me. Cut leftovers-61 (one card, DS1-DS6) once lf54-decision-states merges; it changes 0164's FR-6 and G5.
+- Held for the next leftovers (lf54-usage-rejected review pass at 4c78439): (1) the record's rejected usage rows are not in `organizer usage --json` nor the app's Usage view; (2) a rejected row that leaves the ledger stays in the post state's rejected list forever; (3) doctor prints a blank line before the rejected rows.
+- lf54-decision-states merged (#16 29e7d2c), in done/. Three supervisors live (the cap): sup99 (lf54 ci + usage, PRs next), sup100 (leftovers 61 from 0173, lf61-decision-states-ui, 45-90m), sup101 (leftovers 57, 3 waves, 180-300m; lf55 dependency dropped, home signal after lf61: Amendment 2 d67768f). lf55-one-title still waits on the Dock window, and its branch now conflicts with lf60 on floaticon_darwin.m: its continuation rebases first. Next when a supervisor frees: lf58 (C4 map, roadmap mode) and the record consumes: card.
+- sup99 closed (14:38-16:19, 101 min against 60-120; seats $24.46, decision-states $15.24 with a rotation and two rounds per review): leftovers 54 wave 2 merged #16-#18, cards in done/, installed v0.2.0-3096. sup99 ended.
+- Lessons for my specs (sup99 Found 2, 3): a premise listing call sites greps all of frontend/src, not lib only (Amendments 5 and 6 cost a rotation and a UI round); a pin bump that moves a contract test into one card's boundary sequences the others after it from the start (Amendment 4).
+- Held for the next leftovers: internal/service/tasks.go:110 and FsePanel.tsx:31 still compare status literals, and the Go side has no literal guard (sup99 Found 5). Sent [for hephaistos]: the supervise skill's seat-prelude recipe lacks the discuss-hook watch line, so sup99's builders never woke on mail (Found 1).
+ "2026-10-28" in their ruling words. They were ruled on 10-27 by the clock. Ruled records are not edited.
 
 ## 2026-10-26 02:50
 

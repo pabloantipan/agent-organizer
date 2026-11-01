@@ -1,0 +1,102 @@
+---
+status: proposed
+raised: 2026-11-01
+by: aglaea
+for: fse
+from: lf54-decision-states UI review (card working-on/lf54-decision-states.md, ## UI review, 1df5001), A1-A3 and UI4
+---
+
+# Decision states: the crossing statuses on the lead's screens
+
+A design note for a later leftovers. leftovers-54 Amendment 6 (1360269)
+stays as written for `lf54-decision-states`: it stops the refused ruling,
+which is what the review failed on. This note answers the questions the
+review left for design and goes past the amendment in one place (DS1),
+which changes FR-6 and G5 and so needs a record.
+
+## The person and the job
+
+The lead opens Needs me to find what only they can settle. Every row there
+costs a look; a row they cannot act on teaches them to skim the list.
+
+## A1: an awaiting-cells record is not a Needs me row
+
+**Finding.** The lead cannot act on an `awaiting-cells` record, yet it is a
+Needs me row and in the badge. Where: Home, Needs me, init-a 0013, at
+1df5001 (`.wt-notes/l54-states-ui/1440x900-a-needsme-0013.png`). Evidence:
+heuristic: the design system's Inbox row is "one row per thing asked of
+the human" (`docs/design-system.md`, Inbox row), and CLAUDE.md's "Needs me
+means the human's queue and nothing else"; the Themis skill (The wake, 2
+and 4; Wake routine, 4 and 5) asks the cells, not the operator, while a
+record is `awaiting-cells`, and when it needs the operator it posts one
+`question` to pablo, which is already a Needs me row of its own (Answer).
+Kept as a decision row, the record is counted twice once Themis sends it,
+and for the whole wait before that it is a row whose only verb opens a
+page that says there is nothing to do. Severity 2. Proposal below.
+
+- **DS1** Needs me, its badge, the initiative header's "N decisions
+  waiting" and the FSE panel's "waiting on you" count the records the lead
+  can rule: `proposed` ones. An `awaiting-cells` record is none of these.
+  (FR-6 and G5 say it is a Needs me row and in the header's count; this
+  changes them, so it goes through a record for Pablo.)
+- **DS2** Decisions lists it in its own group between To rule and Ruled:
+  **"With the cells · N"**, the record's line in the waiting pair (badge
+  "awaiting cells", dashed bar to today), expanded with Amendment 6's line
+  "Waits on the cells it affects. Themis settles it." where Rule would be.
+  The group is absent when N is 0, like the others.
+- **DS3** The header says it once beside the lead's count, as a quiet
+  signal, not a call to act: `2 decisions waiting · 1 with the cells`
+  (muted text, no badge); `1 with the cells` alone when nothing waits on
+  the lead. It opens Decisions at that group.
+
+## A2: applied and acknowledged take the ruled tone, no sub-tone
+
+The tone answers one question, open or decided; the word says which kind.
+A third hue would have to pass the colour-vision check against both
+fuchsia and indigo on raised and on the selected row, and it would carry a
+difference the lead does not act on (applied versus ruled changes nothing
+they do). Evidence: heuristic (design system, Timeline: "hollow fuchsia
+waiting, solid indigo ruled"; the pair passed the dataviz validator).
+
+- **DS4** `applied` and `acknowledged` badges, bars and diamonds are the
+  ruled pair (Amendment 6 FR-6c already does this for the badge); the
+  status word stays, written with a space: "applied", "acknowledged",
+  "awaiting cells".
+
+## A3: the header line on the sub-view tabs at 1024×640
+
+Already held as R53 (`review-view.md`): the gap from the goal line to the
+tabs is one gap whatever the initiative. Nothing new here; it goes with
+whichever card takes R53.
+
+## UI4: one word per status, one name per person
+
+Severity 1 each; together they make the same record read three ways.
+
+- **DS5** Every place that names a decision's status uses its word, not
+  the bucket's: Overview's gate rows read `applied 21 Oct`,
+  `acknowledged 20 Oct`, `awaiting cells 12d` (Decisions already does);
+  `organizer decisions` prints "awaiting cells" on the line where it
+  prints "waiting" today. A bucket heading may group ("Ruled · 8") but a
+  line never renames its record's status.
+- **DS6** The owner reads through the same person reader as `ruled_by`
+  (FR-7): owner `operator` shows as **pablo** everywhere (Needs me,
+  Decisions, the rule box's "signed … · owner …"), the raw value in the
+  hover; so "owner operator" never appears, and the rule box's
+  "owner pablo" drops when the ruler is pablo (CLAUDE.md: the owner named
+  only when someone else rules).
+
+## Acceptance (rows for the gate)
+
+| Row | The person | Check |
+|---|---|---|
+| DS-a | sees only what they can rule in Needs me | fixture with 0013 `awaiting-cells`: Needs me has no 0013 row, the badge and the header's waiting count leave it out, FsePanel's "waiting on you" equals the header's count |
+| DS-b | finds the crossing when they look for it | Decisions shows "With the cells · 1" between To rule and Ruled, 0013 in it with the waiting badge and dashed bar; expanded, the Themis line and no Rule |
+| DS-c | knows a crossing exists without being asked to act | init-a's header reads `N decisions waiting · 1 with the cells` in muted text; pressing it opens Decisions at that group |
+| DS-d | reads open or decided by tone, which by word | 0014 and 0015 badges, bars and diamonds in the ruled pair, with the words "applied", "acknowledged" |
+| DS-e | reads the same status everywhere | Overview's gate rows for 0013-0015 and `organizer decisions init-a` print "awaiting cells", "applied", "acknowledged" |
+| DS-f | reads one name for the operator | no screen text "operator" for 0013's owner; the hover holds it |
+
+## Technical notes
+
+(FSE)

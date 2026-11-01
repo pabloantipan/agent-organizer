@@ -182,3 +182,35 @@ which `lf54-decision-states` fixes. So X0 for `lf54-ci-contracts` and
 `lf54-decision-states` head, and that one failure, identical on origin/main,
 is recorded and not counted until then. Merge order: decision-states first,
 then the other two rebased on it.
+
+## Amendment 5 (FSE, 2026-11-01, on sup99's decide: at 473fd10)
+
+FR-6 (every reader takes a decision's state from the one helper) cannot be
+met inside the premise's lib files: `DecisionsView.tsx` (the Ruled list,
+timeline, turnaround and rule box) and `Overview.tsx:43-44` compare status
+literals. `lf54-decision-states`'s boundary adds both, to call the helper
+only. `FsePanel.tsx:31` stays as is. No other running card touches them.
+
+## Amendment 6 (FSE, 2026-11-01, on l54-states-ui's UI review fail at 1df5001)
+
+The premise and Amendment 5 never named Home's rule box, which offers a
+ruling whatever the status (UI1, severity 3). For `lf54-decision-states`:
+
+- **FR-6a** A Needs me row for an open record that is not rulable
+  (`awaiting-cells`) has the verb **Open**, which opens the record in the
+  initiative's Decisions, and its row reads "awaiting cells" where a
+  proposed one reads its options. Rule and the rule box stay for proposed
+  records only, through the one helper (`isRulable`).
+- **FR-6b** Expanded in Decisions, such a record shows, where Rule would
+  be, one line: "Waits on the cells it affects. Themis settles it." (UI3)
+- **FR-6c** A status badge takes its tone from the helper
+  (`decisionTone`), keeping the status word, so awaiting cells reads in the
+  waiting pair and applied and acknowledged in the ruled pair (UI2).
+
+The boundary adds `frontend/src/components/Home.tsx` (the row's verb and
+`RuleAction`) and the row's verb in `frontend/src/lib/queue.ts`. G5 adds:
+Needs me's 0013 row reads Open and "awaiting cells", and opens Decisions;
+no rule box opens for it; the expanded 0013 shows the line; the three
+badges carry the tones.
+
+Not in this card (to Aglaea): UI4's words across views, and her A1-A3.

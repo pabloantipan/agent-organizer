@@ -468,6 +468,7 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - Read the other machine's spec before designing on a field: a 'track' was not a stage (run-report A1).
 
 - Joining two charts: name the joining rule first (a progress line's card belongs to the wave whose cards: lists it) and refuse guesses (`no wave`); then grow the view the lead already reads before adding a new one (progress-and-waves).
+- A record the lead cannot act on (awaiting-cells, Themis's) is not a Needs me row: Themis's own question to pablo already is one, so keeping it counts the crossing twice; show it in Decisions as "With the cells" and as a muted header signal (decision-states DS1-DS3, needs a record since FR-6/G5 say otherwise). Tone = open or decided, word = which status; no sub-tones (DS4-DS6).
 
 ## Participants in use
 
