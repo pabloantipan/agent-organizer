@@ -6,7 +6,7 @@ branch: lf60-icon-spaces
 seat:
 stage:
 updated: 2026-11-01
-next: "pablo: rule 0172 (accept leftovers 60)"
+next: "sup98 runs it (0172 ruled 2026-11-01)"
 depends_on: []
 boundary: ["docs/specs/leftovers-60.md Boundary"]
 spec: "docs/specs/leftovers-60.md (FR-1 to FR-3)"
