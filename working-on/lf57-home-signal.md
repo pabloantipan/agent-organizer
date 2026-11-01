@@ -8,7 +8,7 @@ stage:
 updated: 2026-11-01
 next: "review: lf57-home-signal, W8 X0 pass, W7 for the UI reviewer (screen locked here), 57a04e9"
 depends_on: [lf57-run-report, lf61-decision-states-ui]
-boundary: ["docs/specs/leftovers-57.md Boundary, lf57-home-signal"]
+boundary: ["docs/specs/leftovers-57.md Boundary, lf57-home-signal", "frontend/src/styles/home.css"]
 spec: "docs/specs/leftovers-57.md (FR-14)"
 gate: "docs/specs/leftovers-57.md#Acceptance → gate"
 ui_review: true

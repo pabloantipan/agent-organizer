@@ -227,3 +227,12 @@ opens them as kind `spec`. The footer keys on the report's
 **W11** go test: a wave's run record reads; a path outside those files,
 a `../` path and another initiative's run record are refused as today.
 The boundary adds `internal/service/spec.go` and its test.
+
+## Amendment 5 (FSE, 2026-11-01, on l57-home's measure at 57a04e9)
+
+Home's signal cap (`.lz` max-width 200px, `styles/shell.css`) cuts FR-14's
+words (`last run · 4 cards · 1 h 30 min stopped` is 205 px). The run signal
+is exempt from that cap by one rule in `frontend/src/styles/home.css`
+(`.home .p-sig .lz.run { max-width: none; }`); `lib/width.ts` still folds it
+first when the row is tight. `lf57-home-signal`'s boundary adds that one
+rule.
