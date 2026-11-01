@@ -7,7 +7,7 @@ seat: l60-icon
 reviewer: l60-icon-rev
 stage:
 updated: 2026-11-01
-next: "PR with talos-lab"
+next: "talos-lab merges the PR (thread 01M6C28DQ9TS5YWJ00QKMEQENW; pass at d4d0e35); the FSE moves it to done/ on the merge sha. sup98 ended 2026-11-01"
 review: pass
 depends_on: []
 boundary: ["docs/specs/leftovers-60.md Boundary"]
