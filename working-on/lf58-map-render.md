@@ -15,6 +15,8 @@ spec: "docs/specs/leftovers-58.md (FR-4 and FR-5)"
 gate: "docs/specs/leftovers-58.md#Acceptance → gate"
 ui_review: false
 autonomy: unattended
+prs:
+  - {repo: organizer, pr: 27, target: main, state: merged, merge: e968fc1}
 ---
 
 ## Goal
