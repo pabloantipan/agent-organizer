@@ -1,0 +1,15 @@
+{
+  "schema": "c4-map/1",
+  "system": "deltagos",
+  "adapters": [
+    {"name": "repos"},
+    {"name": "manifests"}
+  ],
+  "pages": {"context": "context.md", "containers": "containers.md", "modules": "modules.md"},
+  "externals": [
+    {"id": "discuss_mailbox", "label": "discuss mailbox (agent-mailbox-api)", "evidence": "external `ext:agent-mailbox-api#fn:mailbox.drain`; external `ext:agent-mailbox-api#fn:mailbox.health`; external `ext:agent-mailbox-api#fn:mailbox.healthz`; external `ext:agent-mailbox-api#fn:mailbox.messages.post`; external `ext:agent-mailbox-api#fn:mailbox.search`; external `ext:agent-mailbox-api#fn:mailbox.thread.get`; external `ext:agent-mailbox-api#fn:mailbox.thread.status.set`; external `ext:agent-mailbox-api#fn:mailbox.threads.list`", "why": "read and posted over the unix socket; the designations are the consumes: lines of atlax/elements/"},
+    {"id": "record", "label": "the record (agent-mailbox-record)", "evidence": "external `ext:agent-mailbox-record#fn:record.factories.cells.post`; external `ext:agent-mailbox-record#fn:record.factories.keys.issue`; external `ext:agent-mailbox-record#fn:record.factories.keys.revoke`; external `ext:agent-mailbox-record#fn:record.usage.post`", "why": "write-only client; the designations are the consumes: lines of atlax/elements/"},
+    {"id": "firebase", "label": "Firebase: Auth and Firestore", "evidence": "curated: context.md", "why": "only with auth: firebase; no atlax designation reads it"},
+    {"id": "factory_tools", "label": "the factory's tools: factory, probe, zellij, the agent CLI", "evidence": "curated: context.md", "why": "run as subprocesses; no atlax designation reads them"}
+  ]
+}
