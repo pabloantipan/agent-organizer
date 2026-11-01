@@ -82,6 +82,11 @@ type State = {
   // A task row's Open (task-rows §4): the card's back over its initiative's
   // Work, focused on its title (CardDrawer's own focus), header folded.
   openCardInWork: (c: merge.BoardCard) => void;
+  // A wave of the run report's footer (leftovers-57 FR-8, PW4): Work, with
+  // the WaveStrip named `wave <n>` scrolled into view when Work draws it.
+  // waveFocus is that label; any other navigation leaves it unread.
+  waveFocus: string | null;
+  openWave: (initiativeId: string, wave: number | string) => void;
   openStage: (initiativeId: string, index: number) => void;
   clearStageFocus: () => void;
   slackFocus: string | null;
@@ -276,6 +281,12 @@ export const useBoard = create<State>((rawSet, get) => {
   }),
   stageFocus: null,
   openCardLanding: (selected) => set({ selected, headerOpen: folded() }),
+  waveFocus: null,
+  openWave: (selectedInitiative, wave) => {
+    const waveFocus = `wave ${wave}`;
+    set({ ruleDraft: null, headerOpen: folded(), screen: "initiative", selectedInitiative, sub: "work", selected: null, needsMeFocus: null, decisionFocus: null, stageFocus: null, waveFocus });
+    scrollToWave(waveFocus);
+  },
   openCardInWork: (selected) => set({ ruleDraft: null, headerOpen: folded(), screen: "initiative", selectedInitiative: selected.initiative_id, sub: "work", selected, needsMeFocus: null, decisionFocus: null, stageFocus: null }),
   openStage: (selectedInitiative, index) => set({ ruleDraft: null, headerOpen: folded(), screen: "initiative", selectedInitiative, sub: "roadmap", selected: null, needsMeFocus: null, decisionFocus: null, stageFocus: stageFocusOf(selectedInitiative, index) }),
   clearStageFocus: () => set({ stageFocus: null }),
@@ -454,3 +465,14 @@ export const useBoard = create<State>((rawSet, get) => {
   },
   });
 });
+
+/** Brings Work's WaveStrip for a wave into view once Work has drawn it
+ *  (leftovers-57 FR-8): WaveStrip is a section named by its label. Tries
+ *  for a second, then gives up quietly: a wave with no running card has no
+ *  strip in Work. */
+function scrollToWave(label: string, tries = 20) {
+  if (typeof document === "undefined" || typeof window === "undefined") return;
+  const el = Array.from(document.querySelectorAll<HTMLElement>("section.wk-wave")).find((s) => s.getAttribute("aria-label") === label);
+  if (el) { el.scrollIntoView({ block: "start" }); el.setAttribute("tabindex", "-1"); el.focus({ preventScroll: true }); return; }
+  if (tries > 0) window.setTimeout(() => scrollToWave(label, tries - 1), 50);
+}
