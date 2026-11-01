@@ -7,7 +7,7 @@ seat: l60-icon
 reviewer: l60-icon-rev
 stage:
 updated: 2026-11-01
-next: "file finding: leftovers-60 premise 'nothing listens for a display change' is wrong (observer at floaticon_darwin.m ~:1287) and the FLOAT_SHOW_ICON+SIGWINCH hook quirk; no record, card or backlog line holds them yet; then PR with talos-lab"
+next: "PR with talos-lab"
 review: pass
 depends_on: []
 boundary: ["docs/specs/leftovers-60.md Boundary"]
@@ -85,3 +85,5 @@ Findings, none blocking:
 - Note (tooling): change-check does not match `file:Symbol` declarations against repo-prefixed paths, so a correct declaration reads as 8 flags.
 
 reviewer l60-icon-rev, 2026-11-01
+
+Findings filed (sup98, 2026-11-01): the spec premise "nothing listens for a display change" and the FLOAT_SHOW_ICON + SIGWINCH hook quirk go to the FSE as a leftovers-60 amendment (sup98's closing post); the change-check `file:Symbol` mismatch goes to the FSE for hephaistos (same post); the real fault is Pablo's use after `make install`, as the spec says.
