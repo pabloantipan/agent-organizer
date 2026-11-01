@@ -157,3 +157,13 @@ For aglaea (design questions, not findings):
 - A3 (not this card): at 1024×640 the header's target/goal line sits on the sub-view tabs (`1024x640-*.png`).
 
 Not verified: computed styles (offscreen WebKit not run), badge contrast; the error the Home box shows after Rule (words could not be typed without synthetic keys; the refusal is the CLI's on the same fixture); keyboard focus through the 0013 row and box.
+
+### Re-review at ae0d9c6 (2026-11-01, l54-states-ui)
+**pass** at ae0d9c6 (d0a5e51, ae0d9c6 on 1df5001), against Amendment 6 (FR-6a to FR-6c). Severity 4/3: none.
+Test run: **fresh** (same `--share` line from a new worktree at ae0d9c6, exit 0; no run id and no "reused" printed; vitest 87 files, 1397 tests; log `.wt-notes/l54-states-ui/x0-make-test-ae0d9c6.log`). `make review-build` exit 0. New app launched with its own saved pid on a new `fixture-home.sh --review` home (auth off, mailbox under the temp dir); gates 0013-0015 added to the temp roadmap only. AX on that pid, window shots `.wt-notes/l54-states-ui/<w>x<h>-r-*.png` at 1440×900 and 1024×640.
+- UI1 fixed (FR-6a): the 0013 Needs me row reads "owner operator · raised 20 Oct by fse · awaiting cells" with verb "Open init-a 0013". Open lands in init-a's Decisions with 0013 expanded and focused, and no `.rb` rule box exists anywhere in the tree. A proposed row (Rule init-a 0002) still opens the rule box.
+- UI3 fixed (FR-6b): the expanded 0013 shows "Waits on the cells it affects. Themis settles it." where Rule would be.
+- UI2 fixed (FR-6c): "awaiting cells" has the fuchsia waiting badge, and "applied" and "acknowledged" have the accent ruled badge; the words are kept.
+- (a)-(f) still hold: the header reads "7 decisions waiting"; To rule · 7 lists 0013, and the timeline bar is dashed fuchsia; Ruled · 8 reads "by pablo, autonomous mode" and "by pablo, standing rule" on one line at 1024; plain waiting/ruled are unchanged; Overview gates read 0013 waiting 12d, and 0014/0015 ruled.
+- Note (1): at 1024 compact Home clips every row's second line (AX 14 px wide), so "awaiting cells" is not visible there. Open is the only sign at that width. This is the existing compact rule, not this card. UI4 and A1-A3 stay with Aglaea (Amendment 6).
+Not verified: computed styles (offscreen WebKit not run), badge contrast.
