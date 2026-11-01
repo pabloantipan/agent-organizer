@@ -6,7 +6,7 @@ branch: lf54-decision-states
 seat: l54-states
 stage:
 updated: 2026-11-01
-next: "l54-states (rotated) fixes UI1-UI3 per leftovers-54 Amendment 6, then UI re-review, then PR with talos-lab. stripComments note-finding (Review 1df5001): filed to the FSE (bitácora, next leftovers)"
+next: "review: lf54-decision-states, G5 and X0 pass (Amendment 6 FR-6a to FR-6c added), ae0d9c6; then UI re-review, then PR with talos-lab. stripComments note-finding (Review 1df5001): filed to the FSE (bitácora, next leftovers)"
 review: pass
 reviewer: l54-states-rev, l54-states-ui
 depends_on: [lf53-frontmatter]
@@ -30,6 +30,7 @@ docs/specs/leftovers-54.md, rows G5 and X0.
 ## Done
 - 2026-11-01 l54-states: FR-6, FR-7 (pin 54cf10d), FR-8 built on branch lf54-decision-states, rebased on origin/main 6b6e349, head 39f64de; G5 fails on 076eb5c and passes here; X0 passes from a clean clone. progress.md in .wt-notes/l54-states.
 - 2026-11-01 l54-states: review finding 1 fixed in 1df5001 (the literal guard fails on a template literal, includes() and Set.has()); X0 passes again from a clean clone at 1df5001.
+- 2026-11-01 l54-states: UI review fail fixed per Amendment 6 (d0a5e51 FR-6a: Needs me's awaiting-cells row reads Open and "awaiting cells", no rule box; ae0d9c6 FR-6b, FR-6c: the expanded record's line, badges toned by decisionTone). Rebased on origin/main 6b6e349; X0 passes from a clean clone at ae0d9c6 (vitest 1397).
 
 ## Declared changes
 - modified `internal/model/decision.go`: `ReadRuledBy`, `ReadMode`, `PersonOf`, `Decision.ReadRuling`, `Class`, `Ruler` (the person), fields `RuledMode`, `Person`, `Mode`, `ForecastLow`; `ForecastBand` reads a band followed by text or with a low-end unit; `RuledByModes`/`RuledByMode` deleted (FR-7, FR-8)
@@ -46,15 +47,24 @@ docs/specs/leftovers-54.md, rows G5 and X0.
 - note: `decisionStates.test.ts` guard rewritten in 1df5001 (review finding 1): any decision-status literal in lib code outside decisions.ts fails, with an exact-line allow-list for the non-status word `ruled`
 - modified `frontend/src/components/DecisionsView.tsx`, `Overview.tsx`: call the helper (Amendment 5)
 - modified `frontend/wailsjs/go/models.ts`: `wails generate module` after the bound-type change
+- modified `frontend/src/lib/queue.ts:decisionRowAction`: added; a decision row's verb (Rule if isRulable, else Open) and its line's end (options, else the status word) (Amendment 6 FR-6a)
+- modified `frontend/src/components/Home.tsx`: `DecisionRow` renders `RuleAction` only for Rule, else `OpenDecision` (added, shared with `OthersRow`); `decisionContext` ends with the row's tail (FR-6a)
+- modified `frontend/src/lib/decisions.ts:NOT_RULABLE_LINE`: added, the line an expanded not-rulable record shows (FR-6b)
+- modified `frontend/src/components/DecisionsView.tsx`: the badge's class is `decisionTone(d)` (FR-6c); an expanded open, not rulable record shows `NOT_RULABLE_LINE` in `.dec-actions` (FR-6b)
+- modified `frontend/src/styles/global.css`: `.badge.dec-status.ruled` colour is the tier-2 `--decision-ruled-fg` (same value), comment names decisionTone (FR-6c)
+- modified `frontend/src/components/Home.waits.test.tsx`, `DecisionsView.test.tsx`, `frontend/src/lib/decisionStates.test.ts`: FR-6a to FR-6c tests
 - added `testdata/fixture-overlay/init-a/working-on/decisions/0013-which-cells-take-the-crossing.md`, `0014-apply-the-shared-format.md`, `0015-acknowledge-the-record-fields.md`: UI review states
 Risky:
 - `ReadRuledBy`: reads the general forms, not only the listed values; a one-word value is always a person, mode present
 - `Decision.Ruler`: now returns pablo for the old mode wordings, so counts by ruler include them
-- `decisionTone`: applied and acknowledged rows now draw as ruled, awaiting-cells as waiting
+- `decisionTone`: applied and acknowledged rows now draw as ruled, awaiting-cells as waiting; their badges too (FR-6c)
+- `OthersRow`: an others' awaiting-cells row also ends with "awaiting cells" (shared `decisionContext`)
 Not changed, on purpose:
 - `internal/service/rule.go`: ruling stays proposed only (FR-6)
 - `internal/service/tasks.go`: service, outside the boundary (noted above)
 - `frontend/src/components/FsePanel.tsx`: left as is (Amendment 5)
+- `frontend/src/lib/verbs.ts`: no new verb; Open is already in the list
+- UI4 and Aglaea's A1-A3: not this card (Amendment 6)
 
 ## Review
 **pass** at 1df5001 (the branch moved from 39f64de by one commit, `test(frontend)`, which changes only `decisionStates.test.ts` and one comment in `decisions.ts`). Unmet: none.
