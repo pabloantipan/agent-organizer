@@ -46,9 +46,11 @@ func usageCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now fu
 		return 2
 	}
 	// The pass posts its changed rows in the background; wait for it, at
-	// most 10 s, once the output is printed (usage-post Amendment 1).
-	defer service.WaitUsagePost()
+	// most 10 s, once the output is printed (usage-post Amendment 1). The
+	// rows the record rejected are listed after the wait, so they include
+	// what this pass's post was answered (leftovers-54 FR-4).
 	if asJSON {
+		defer service.WaitUsagePost()
 		enc := json.NewEncoder(stdout)
 		enc.SetIndent("", "  ")
 		if err := enc.Encode(v); err != nil {
@@ -58,7 +60,25 @@ func usageCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now fu
 		return 0
 	}
 	WriteUsage(stdout, v, by)
+	service.WaitUsagePost()
+	writeUsageRejected(stdout, service.UsageRejected())
 	return 0
+}
+
+// writeUsageRejected lists the rows the record rejected, for `organizer
+// usage` and doctor (leftovers-54 FR-4): the count, then one line per row
+// with its session, day and the record's reason. Nothing when none is.
+func writeUsageRejected(w io.Writer, rows []service.RejectedUsageRow) {
+	if len(rows) == 0 {
+		return
+	}
+	fmt.Fprintf(w, "\nrejected by the record: %d %s, not resent until %s\n", len(rows), plural(len(rows), "row"),
+		map[bool]string{true: "it changes", false: "they change"}[len(rows) == 1])
+	tw := tabwriter.NewWriter(w, 0, 4, 2, ' ', 0)
+	for _, r := range rows {
+		fmt.Fprintf(tw, "  %s\t%s\t%s\n", r.SessionID, r.Day, r.Reason)
+	}
+	tw.Flush()
 }
 
 // WriteUsage renders a week: the three tiles as lines, then one cut.

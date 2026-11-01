@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -47,18 +48,35 @@ var (
 )
 
 // usagePostState is what usage-post.json holds: the hash of each
-// (session_id, day) row as the record last accepted it, and the last post's
-// outcome for `organizer doctor`.
+// (session_id, day) row as the record last accepted it, each row the record
+// answered in `rejected` with the hash it was rejected at and the reason
+// (leftovers-54 FR-3), and the last post's outcome for `organizer doctor`.
 type usagePostState struct {
-	Accepted map[string]string `json:"accepted"`
-	Last     *usagePostOutcome `json:"last,omitempty"`
+	Accepted map[string]string           `json:"accepted"`
+	Rejected map[string]RejectedUsageRow `json:"rejected,omitempty"`
+	Last     *usagePostOutcome           `json:"last,omitempty"`
+}
+
+// RejectedUsageRow is one row the record refused inside an accepted batch:
+// its key, the record's reason, when, and the hash of the row as sent. It
+// is not sent again until the row's hash differs (leftovers-54 FR-3), and
+// `organizer usage` and doctor list it (FR-4).
+type RejectedUsageRow struct {
+	SessionID string    `json:"session_id"`
+	Day       string    `json:"day"`
+	Reason    string    `json:"reason"`
+	Hash      string    `json:"hash"`
+	At        time.Time `json:"at"`
 }
 
 type usagePostOutcome struct {
-	At     time.Time `json:"at"`
-	OK     bool      `json:"ok"`
-	Rows   int       `json:"rows"`
-	Reason string    `json:"reason,omitempty"`
+	At   time.Time `json:"at"`
+	OK   bool      `json:"ok"`
+	Rows int       `json:"rows"`
+	// RejectedRows counts the rows the record answered in `rejected` in
+	// this pass; they are not in Rows.
+	RejectedRows int    `json:"rejected_rows,omitempty"`
+	Reason       string `json:"reason,omitempty"`
 	// Refused names each batch the record refused in the pass, in order;
 	// Rows counts only the accepted ones (leftovers-53 FR-6).
 	Refused []usageRefusal `json:"refused,omitempty"`
@@ -116,8 +134,11 @@ func startUsagePost(cfg config.Config, dataDir, ledgerPath string, now func() ti
 	}()
 }
 
-// postUsage sends the rows whose hash differs from the one last accepted,
-// in batches of record.MaxUsageRows, and records each accepted batch. A
+// postUsage sends the rows whose hash differs from the one last accepted
+// and from the one last rejected, in batches of record.MaxUsageRows, and
+// records each accepted batch: the rows the record answered in `rejected`
+// are kept with their reason and logged once, the others are accepted
+// (leftovers-54 FR-3). A
 // batch the record refuses (it answered, not 2xx) does not end the pass
 // (leftovers-53 FR-6): its rows stay unsent for the next pass, the later
 // batches are still posted, and each refusal is one line in organizer.log
@@ -136,9 +157,13 @@ func postUsage(ctx context.Context, t usagePostTarget, dataDir string, lines []u
 		row := usageRow(l)
 		h := rowHash(row)
 		k := l.SessionID + "|" + l.Day
-		if st.Accepted[k] != h {
-			todo = append(todo, pending{k, h, row})
+		if st.Accepted[k] == h {
+			continue
 		}
+		if r, ok := st.Rejected[k]; ok && r.Hash == h {
+			continue // rejected as it is; resent only once it changes
+		}
+		todo = append(todo, pending{k, h, row})
 	}
 	if len(todo) == 0 {
 		return
@@ -155,7 +180,7 @@ func postUsage(ctx context.Context, t usagePostTarget, dataDir string, lines []u
 		for i, p := range todo[:n] {
 			batch[i] = p.row
 		}
-		err := rc.PostUsage(ctx, t.key, t.factory, batch)
+		res, err := rc.PostUsage(ctx, t.key, t.factory, batch)
 		if err != nil {
 			reason := usagePostReason(err, t.key)
 			out.OK = false
@@ -173,15 +198,51 @@ func postUsage(ctx context.Context, t usagePostTarget, dataDir string, lines []u
 			out.Refused = append(out.Refused, usageRefusal{Batch: b, Of: batches, Rows: n, Reason: reason})
 			logUsagePost(dataDir, now(), fmt.Sprintf("usage post refused batch %d of %d: %s (%d rows unsent)", b, batches, reason, n))
 		} else {
-			for _, p := range todo[:n] {
-				st.Accepted[p.key] = p.hash
+			rejected := rejectedIn(res.Rejected, batch)
+			for i, p := range todo[:n] {
+				why, refused := rejected[i]
+				if !refused {
+					st.Accepted[p.key] = p.hash
+					delete(st.Rejected, p.key)
+					out.Rows++
+					continue
+				}
+				why = cutKey(why, t.key)
+				delete(st.Accepted, p.key)
+				if st.Rejected == nil {
+					st.Rejected = map[string]RejectedUsageRow{}
+				}
+				st.Rejected[p.key] = RejectedUsageRow{SessionID: p.row.SessionID, Day: p.row.Day, Reason: why, Hash: p.hash, At: now()}
+				out.RejectedRows++
+				logUsagePost(dataDir, now(), fmt.Sprintf("usage post: the record rejected %s %s: %s (kept, not resent until it changes)", p.row.SessionID, p.row.Day, why))
 			}
-			out.Rows += n
 		}
 		todo = todo[n:]
 		out.At = now()
 		_ = saveUsagePostState(path, st)
 	}
+}
+
+// rejectedIn maps the record's rejected rows to their place in the batch
+// sent: by index when the row there has the same session and day, else by
+// session and day, since an index that does not match its key is not to be
+// trusted. A rejection that names no row of the batch is dropped, and that
+// row counts as landed, as the record says every row it does not name did.
+func rejectedIn(rs []record.UsageRejected, batch []record.UsageRow) map[int]string {
+	out := map[int]string{}
+	for _, r := range rs {
+		if r.Index >= 0 && r.Index < len(batch) && batch[r.Index].SessionID == r.SessionID && batch[r.Index].Day == r.Day {
+			out[r.Index] = r.Reason
+			continue
+		}
+		for i, row := range batch {
+			if row.SessionID == r.SessionID && row.Day == r.Day {
+				out[i] = r.Reason
+				break
+			}
+		}
+	}
+	return out
 }
 
 // usageRow is a ledger line in the contract's shape (FR-2, FR-3): a line
@@ -195,8 +256,8 @@ func usageRow(l usage.Line) record.UsageRow {
 		UsageKinds: kindsOf(l.Kinds),
 		Models:     map[string]record.UsageKinds{},
 		Messages:   l.Messages,
-		First:      l.First.Format(time.RFC3339),
-		Last:       l.Last.Format(time.RFC3339),
+		First:      rfc3339OrNull(l.First),
+		Last:       rfc3339OrNull(l.Last),
 		Cost:       l.Cost,
 	}
 	for m, k := range l.Models {
@@ -213,6 +274,17 @@ func usageRow(l usage.Line) record.UsageRow {
 	task, seat := l.Task, l.Name
 	r.Task, r.Seat = &task, &seat
 	return r
+}
+
+// rfc3339OrNull is a time as the contract carries it: RFC 3339, or null
+// when the ledger has none (leftovers-54 FR-5; the sample's "first and last
+// null").
+func rfc3339OrNull(t time.Time) *string {
+	if t.IsZero() {
+		return nil
+	}
+	s := t.Format(time.RFC3339)
+	return &s
 }
 
 func kindsOf(k usage.Kinds) record.UsageKinds {
@@ -239,7 +311,11 @@ func usagePostReason(err error, key string) string {
 			s += ": " + re.Message
 		}
 	}
-	s = strings.TrimPrefix(s, "record: ")
+	return cutKey(strings.TrimPrefix(s, "record: "), key)
+}
+
+// cutKey replaces the factory key wherever a record's text echoes it.
+func cutKey(s, key string) string {
 	if key != "" {
 		s = strings.ReplaceAll(s, key, "<key>")
 	}
@@ -277,6 +353,9 @@ func saveUsagePostState(path string, st usagePostState) error {
 // logUsagePost appends one line to organizer.log in the data dir, the file
 // the app's logger writes.
 func logUsagePost(dataDir string, at time.Time, msg string) {
+	// A fresh data dir may not exist yet: the state's save makes it, but
+	// a rejection is logged before the batch's state is saved.
+	_ = os.MkdirAll(dataDir, 0o700)
 	f, err := os.OpenFile(filepath.Join(dataDir, "organizer.log"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return
@@ -297,6 +376,8 @@ func UsagePostStatus(cfg config.Config) string {
 	switch {
 	case st.Last == nil:
 		return "nothing posted yet"
+	case st.Last.OK && st.Last.RejectedRows > 0:
+		return fmt.Sprintf("ok %s, %d rows, %d rejected", st.Last.At.Format(time.RFC3339), st.Last.Rows, st.Last.RejectedRows)
 	case st.Last.OK:
 		return fmt.Sprintf("ok %s, %d rows", st.Last.At.Format(time.RFC3339), st.Last.Rows)
 	case len(st.Last.Refused) > 0:
@@ -305,6 +386,25 @@ func UsagePostStatus(cfg config.Config) string {
 	default:
 		return fmt.Sprintf("failed %s: %s", st.Last.At.Format(time.RFC3339), st.Last.Reason)
 	}
+}
+
+// UsageRejected is every row the record rejected and has not since taken,
+// from the post state in the data dir, oldest day first (leftovers-54
+// FR-4): what `organizer usage` and doctor list. It reads the state whether
+// or not the post is on now, since the rows stay refused either way.
+func UsageRejected() []RejectedUsageRow {
+	st := loadUsagePostState(filepath.Join(filepath.Dir(session.Dir()), usagePostFile))
+	out := make([]RejectedUsageRow, 0, len(st.Rejected))
+	for _, r := range st.Rejected {
+		out = append(out, r)
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].Day != out[j].Day {
+			return out[i].Day < out[j].Day
+		}
+		return out[i].SessionID < out[j].SessionID
+	})
+	return out
 }
 
 // WaitUsagePost blocks until the post a ledger pass started has finished,

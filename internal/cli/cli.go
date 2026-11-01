@@ -296,6 +296,7 @@ func doctor(cfg config.Config, args []string, stdout, stderr io.Writer, now func
 	fmt.Fprintf(stdout, "statusline: %s\n", statuslineStatus())
 	fmt.Fprintf(stdout, "discuss: %s\n", discussStatus(cfg))
 	fmt.Fprintf(stdout, "usage post: %s\n", service.UsagePostStatus(cfg))
+	writeUsageRejected(stdout, service.UsageRejected())
 	fmt.Fprintf(stdout, "review: %s\n", reviewStatus())
 	fmt.Fprintf(stdout, "diagrams: %s\n", diagram.New().Status())
 

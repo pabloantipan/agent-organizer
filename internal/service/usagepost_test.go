@@ -39,6 +39,9 @@ type usageRecord struct {
 	statuses []int
 	hold     time.Duration
 	posts    []fakePost
+	// rejects names the rows (by session_id) a 200 answers in `rejected`,
+	// with the reason, as contracts/usage-batch.json `response` shapes it.
+	rejects map[string]string
 }
 
 type fakePost struct {
@@ -66,6 +69,20 @@ func newUsageRecord(t *testing.T, statuses ...int) *usageRecord {
 			status, f.statuses = f.statuses[0], f.statuses[1:]
 		}
 		hold := f.hold
+		type rejection struct {
+			Index     int    `json:"index"`
+			SessionID string `json:"session_id"`
+			Day       string `json:"day"`
+			Reason    string `json:"reason"`
+		}
+		rejected := []rejection{}
+		for i, r := range p.rows {
+			id, _ := r["session_id"].(string)
+			if why, ok := f.rejects[id]; ok {
+				day, _ := r["day"].(string)
+				rejected = append(rejected, rejection{i, id, day, why})
+			}
+		}
 		f.mu.Unlock()
 		if hold > 0 {
 			select {
@@ -79,7 +96,8 @@ func newUsageRecord(t *testing.T, statuses ...int) *usageRecord {
 			fmt.Fprintf(w, `{"error":"store down (saw %s)"}`, p.auth)
 			return
 		}
-		fmt.Fprintf(w, `{"upserted":%d,"unchanged":0}`, len(p.rows))
+		rj, _ := json.Marshal(rejected)
+		fmt.Fprintf(w, `{"upserted":%d,"unchanged":0,"rejected":%s}`, len(p.rows)-len(rejected), rj)
 	}))
 	t.Cleanup(f.srv.Close)
 	return f
@@ -210,6 +228,9 @@ func lineOf(t *testing.T, r map[string]any) usage.Line {
 		return usage.Kinds{Input: f("input"), Output: f("output"), CacheRead: f("cache_read"), CacheWrite: f("cache_write")}
 	}
 	at := func(k string) time.Time {
+		if r[k] == nil {
+			return time.Time{} // the sample's null time
+		}
 		v, err := time.Parse(time.RFC3339, r[k].(string))
 		if err != nil {
 			t.Fatalf("%s: %v", k, err)
@@ -289,6 +310,7 @@ func TestUsageRowsMatchTheSample(t *testing.T) {
 		{"reset and priced", "cost_from priced", true},
 		{"null", "cost_from null, no cost", false},
 		{"unattributed", "unattributed, no task or seat", false},
+		{"first and last null", "first and last null", false},
 	}
 	for _, p := range paths {
 		t.Run(p.name, func(t *testing.T) {
@@ -725,5 +747,120 @@ func TestWaitUsagePostIsBounded(t *testing.T) {
 	}
 	if !waitUsagePost(5 * time.Second) {
 		t.Error("post did not finish after the record answered")
+	}
+}
+
+// leftovers-54 G3 (FR-3): the record answers 200 with one rejected row of
+// three. The two landed rows are accepted; the rejected one is kept in the
+// post state with its reason, logged once, not resent on the next pass,
+// and resent once its content changes (and accepted when it then lands).
+// The state is read as JSON so this compiles against any version.
+func TestG3RejectedRowKeptNotResent(t *testing.T) {
+	const why = "token counts and messages cannot be negative"
+	f := newUsageRecord(t)
+	f.rejects = map[string]string{"s-0001": why}
+	dir := t.TempDir()
+	ls := usageLines(3)
+
+	type rejectedRow struct {
+		SessionID string `json:"session_id"`
+		Day       string `json:"day"`
+		Reason    string `json:"reason"`
+		Hash      string `json:"hash"`
+	}
+	type state struct {
+		Accepted map[string]string      `json:"accepted"`
+		Rejected map[string]rejectedRow `json:"rejected"`
+	}
+	read := func() state {
+		t.Helper()
+		b, err := os.ReadFile(filepath.Join(dir, usagePostFile))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var st state
+		if err := json.Unmarshal(b, &st); err != nil {
+			t.Fatal(err)
+		}
+		if strings.Contains(string(b), testKey) {
+			t.Error("state carries the key")
+		}
+		return st
+	}
+	logLines := func() []string {
+		b, _ := os.ReadFile(filepath.Join(dir, "organizer.log"))
+		if s := strings.TrimSpace(string(b)); s != "" {
+			return strings.Split(s, "\n")
+		}
+		return nil
+	}
+
+	postUsage(context.Background(), usageTarget(f), dir, ls, fixedNow)
+	if n := len(f.got()); n != 1 || len(f.got()[0].rows) != 3 {
+		t.Fatalf("first pass: %d posts, want 1 of 3 rows", n)
+	}
+	st := read()
+	for _, k := range []string{"s-0000|2026-10-05", "s-0002|2026-10-05"} {
+		if st.Accepted[k] == "" {
+			t.Errorf("landed row %s not marked accepted: %v", k, st.Accepted)
+		}
+	}
+	if _, ok := st.Accepted["s-0001|2026-10-05"]; ok || len(st.Accepted) != 2 {
+		t.Errorf("accepted %v, want only the two landed rows", st.Accepted)
+	}
+	r, ok := st.Rejected["s-0001|2026-10-05"]
+	if !ok || len(st.Rejected) != 1 || r.SessionID != "s-0001" || r.Day != "2026-10-05" || r.Reason != why || r.Hash == "" {
+		t.Fatalf("rejected %+v, want s-0001 2026-10-05 with %q", st.Rejected, why)
+	}
+	lg := logLines()
+	if len(lg) != 1 || !strings.Contains(lg[0], "s-0001") || !strings.Contains(lg[0], "2026-10-05") || !strings.Contains(lg[0], why) {
+		t.Fatalf("organizer.log %q, want one line naming s-0001 and its reason", lg)
+	}
+
+	// The next pass sends nothing: the rejected row has not changed.
+	postUsage(context.Background(), usageTarget(f), dir, ls, fixedNow)
+	if n := len(f.got()); n != 1 {
+		t.Fatalf("unchanged pass posted: %d posts, want still 1 (rejected row resent)", n)
+	}
+	if lg := logLines(); len(lg) != 1 {
+		t.Errorf("the rejection was logged again: %q", lg)
+	}
+	if st := read(); len(st.Rejected) != 1 || st.Rejected["s-0001|2026-10-05"].Reason != why {
+		t.Errorf("rejected row lost after an unchanged pass: %+v", st.Rejected)
+	}
+
+	// Its content changes: it alone is resent, lands, and leaves the list.
+	f.mu.Lock()
+	f.rejects = nil
+	f.mu.Unlock()
+	ls[1].Output += 500
+	postUsage(context.Background(), usageTarget(f), dir, ls, fixedNow)
+	posts := f.got()
+	if len(posts) != 2 || len(posts[1].rows) != 1 || posts[1].rows[0]["session_id"] != "s-0001" {
+		t.Fatalf("changed pass: %d posts, last %v; want one post of s-0001", len(posts), posts[len(posts)-1].rows)
+	}
+	st = read()
+	if len(st.Accepted) != 3 || st.Accepted["s-0001|2026-10-05"] == "" || len(st.Rejected) != 0 {
+		t.Errorf("after the changed row landed: accepted %d, rejected %+v", len(st.Accepted), st.Rejected)
+	}
+}
+
+// leftovers-54 G4 (FR-5): a line with zero first and last sends both as
+// JSON null, the keys present, as the sample's "first and last null" does.
+func TestG4ZeroTimesAreNull(t *testing.T) {
+	l := usageLine(0)
+	l.First, l.Last = time.Time{}, time.Time{}
+	got := rowJSON(t, usageRow(l))
+	for _, k := range []string{"first", "last"} {
+		v, ok := got[k]
+		if !ok || v != nil {
+			t.Errorf("%s = %#v (present %v), want null", k, v, ok)
+		}
+	}
+	l = usageLine(0)
+	l.Last = time.Time{}
+	got = rowJSON(t, usageRow(l))
+	if got["first"] != "2026-10-05T10:00:00Z" || got["last"] != nil {
+		t.Errorf("first %v last %v, want a time and null", got["first"], got["last"])
 	}
 }
