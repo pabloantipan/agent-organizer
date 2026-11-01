@@ -1,4 +1,5 @@
 import type { model } from "../../wailsjs/go/models";
+import { isOpen, ownerPerson } from "./decisions";
 
 /** A run of stages under one phase word (initiative-header FR-3, §4). */
 export type PhaseRun = { phase: string; stages: { stage: model.Stage; n: number }[] };
@@ -38,10 +39,10 @@ export function stagePosition(stages: model.Stage[]): { current: number; label: 
  *  0034), else "N decisions waiting"; "1 decision" for one. Null at zero: the
  *  chip is not drawn. */
 export function waitingChip(decisions: model.Decision[] | undefined, lead: string): string | null {
-  const waiting = (decisions ?? []).filter((d) => d.status === "proposed");
+  const waiting = (decisions ?? []).filter(isOpen);
   if (waiting.length === 0) return null;
   const mine = waiting.every((d) => {
-    const o = (d.owner ?? "").trim().toLowerCase();
+    const o = ownerPerson(d.owner);
     return o === "" || o === lead;
   });
   const noun = waiting.length === 1 ? "decision" : "decisions";
@@ -51,7 +52,7 @@ export function waitingChip(decisions: model.Decision[] | undefined, lead: strin
 /** The record the chip lands on: the oldest waiting one, as Decisions lists
  *  them (raised ascending), the lower number on a tie. */
 export function firstWaiting(decisions: model.Decision[] | undefined): string | null {
-  const waiting = (decisions ?? []).filter((d) => d.status === "proposed");
+  const waiting = (decisions ?? []).filter(isOpen);
   waiting.sort((a, b) => (a.raised ?? "").localeCompare(b.raised ?? "") || a.number.localeCompare(b.number));
   return waiting[0]?.number ?? null;
 }

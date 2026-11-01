@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { merge, model } from "../../wailsjs/go/models";
 import { api, type RunsView } from "../hooks/useWails";
 import { parseISO, today, daysBetween, dateWords } from "../lib/dates";
+import { isDecided, isOpen } from "../lib/decisions";
 import { useBoard } from "../stores/board.store";
 import { FsePanel } from "./FsePanel";
 import { PhaseWord } from "./InitiativeHeader";
@@ -40,8 +41,8 @@ function GateRow({ initiative, number, record }: { initiative: string; number: s
       </li>
     );
   }
-  const waiting = record.status === "proposed";
-  const ruled = record.status === "ruled";
+  const waiting = isOpen(record);
+  const ruled = isDecided(record);
   const waited = daysSince(record.raised);
   // Navigating lands on the thing named (design system, Focus and names): a
   // record not waiting opens expanded and focused in Decisions (FR-19).

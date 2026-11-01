@@ -773,6 +773,8 @@ export namespace model {
 	    owner: string;
 	    ruled: string;
 	    ruled_by: string;
+	    ruler: string;
+	    ruler_mode: string;
 	    options: string[];
 	    chosen: string;
 	    cards: string[];
@@ -781,6 +783,7 @@ export namespace model {
 	    supersedes: string[];
 	    superseded_by: string;
 	    forecast: string;
+	    forecast_low: number;
 	    forecast_top: number;
 	    ruled_at: string;
 	    body: string;
@@ -801,6 +804,8 @@ export namespace model {
 	        this.owner = source["owner"];
 	        this.ruled = source["ruled"];
 	        this.ruled_by = source["ruled_by"];
+	        this.ruler = source["ruler"];
+	        this.ruler_mode = source["ruler_mode"];
 	        this.options = source["options"];
 	        this.chosen = source["chosen"];
 	        this.cards = source["cards"];
@@ -809,6 +814,7 @@ export namespace model {
 	        this.supersedes = source["supersedes"];
 	        this.superseded_by = source["superseded_by"];
 	        this.forecast = source["forecast"];
+	        this.forecast_low = source["forecast_low"];
 	        this.forecast_top = source["forecast_top"];
 	        this.ruled_at = source["ruled_at"];
 	        this.body = source["body"];

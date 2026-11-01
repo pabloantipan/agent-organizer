@@ -50,11 +50,14 @@ func readDecisions(dir string, problems []model.Problem) ([]model.Decision, []mo
 		}
 		d.Body = body
 		if d.Forecast != "" {
-			top, err := model.ForecastTopMinutes(d.Forecast)
+			lo, hi, err := model.ForecastBand(d.Forecast)
 			if err != nil {
 				problems = append(problems, model.Problem{Path: p, Msg: err.Error()})
 			}
-			d.ForecastTop = top
+			d.ForecastLow, d.ForecastTop = lo, hi
+		}
+		if note := d.ReadRuling(); note != "" {
+			problems = append(problems, model.Problem{Path: p, Msg: note})
 		}
 		problems = append(problems, checkDecision(d)...)
 		out = append(out, d)
@@ -266,7 +269,7 @@ func rulingTimes(ds []model.Decision, timeout time.Duration) {
 	}
 	for i := range ds {
 		d := &ds[i]
-		if d.Forecast == "" || d.Status != model.DecisionRuled {
+		if d.Forecast == "" || !d.Decided() {
 			continue
 		}
 		d.RuledAt = rulingCommitTime(d.Path, timeout)

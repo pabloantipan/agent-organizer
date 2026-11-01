@@ -3,7 +3,7 @@ import { marked } from "marked";
 import type { merge, model } from "../../wailsjs/go/models";
 import { DAY, dateWords, daysBetween, parseISO, today } from "../lib/dates";
 import { addLocalDays } from "../lib/axis";
-import { answerSizes, chosenLines, fitAnswers, fitRoom, ownerPhrase, ruledAnswers, type Answer } from "../lib/decisions";
+import { answerSizes, chosenLines, decisionTone, fitAnswers, fitRoom, isDecided, isOpen as waitsOnRuling, isRulable, NOT_RULABLE_LINE, ownerPhrase, ruledAnswers, type Answer } from "../lib/decisions";
 import { RULED_LIMIT, countWords, decisionMatches, emptyRuledWords, lineName, rulerWords, ruledShown, shownSections, statusWord, summaryOf, timelineName, turnaroundWords, waitedWords, type DecSections } from "../lib/decisionsPage";
 import { readOnlyOf } from "../lib/queue";
 import { decisionKey, draftVerb, useDrafts, type Draft, type DraftFields } from "../lib/drafts";
@@ -18,7 +18,7 @@ import "../styles/decisions.css";
 
 type Row = { d: model.Decision; initiative: string; machine: string; key: string };
 
-const sectionOf = (d: model.Decision): keyof DecSections => (d.status === "proposed" ? "rule" : "ruled");
+const sectionOf = (d: model.Decision): keyof DecSections => (waitsOnRuling(d) ? "rule" : "ruled");
 
 /** The decisions tab, the operator's main view (docs/ux/specs/decisions-view.md):
  *  working-on/decisions/ records across initiatives, or the one selected in
@@ -72,15 +72,15 @@ export function DecisionsView() {
     return out;
   }, [view, selectedInitiative]);
 
-  const open = rows.filter((r) => r.d.status === "proposed").sort((a, b) => a.d.raised.localeCompare(b.d.raised) || a.d.number.localeCompare(b.d.number));
-  const ruled = rows.filter((r) => r.d.status === "ruled").sort((a, b) => (b.d.ruled ?? "").localeCompare(a.d.ruled ?? "") || b.d.number.localeCompare(a.d.number));
-  const closed = rows.filter((r) => r.d.status === "superseded" || r.d.status === "withdrawn");
+  const open = rows.filter((r) => waitsOnRuling(r.d)).sort((a, b) => a.d.raised.localeCompare(b.d.raised) || a.d.number.localeCompare(b.d.number));
+  const ruled = rows.filter((r) => isDecided(r.d)).sort((a, b) => (b.d.ruled ?? "").localeCompare(a.d.ruled ?? "") || b.d.number.localeCompare(a.d.number));
+  const closed = rows.filter((r) => !waitsOnRuling(r.d) && !isDecided(r.d));
   // Ruled's list: the ruled newest first, then superseded and withdrawn under
   // their small heading, inside the same limit (§4).
   const past = [...ruled, ...closed];
   const hit = (r: Row) => decisionMatches(r.d, query);
   // Timeline rows: superseded and withdrawn only when asked for.
-  const shown = [...rows].filter((r) => showClosed || (r.d.status !== "superseded" && r.d.status !== "withdrawn")).sort((a, b) => a.d.raised.localeCompare(b.d.raised) || a.d.number.localeCompare(b.d.number));
+  const shown = [...rows].filter((r) => showClosed || waitsOnRuling(r.d) || isDecided(r.d)).sort((a, b) => a.d.raised.localeCompare(b.d.raised) || a.d.number.localeCompare(b.d.number));
   const openHits = open.filter(hit);
   const pastHits = past.filter(hit);
   const shownHits = shown.filter(hit);
@@ -270,7 +270,7 @@ export function DecisionsView() {
     const isOpen = expanded === r.key;
     const ruledOn = dateWords(parseISO(d.ruled) ?? now, now);
     const t = turnaroundWords(d.raised, d.ruled);
-    const isRuled = d.status === "ruled" && !!d.chosen;
+    const isRuled = isDecided(d) && !!d.chosen;
     // leftovers-52 FR-4: a question record's line shows its answers whole
     // while they fit and cuts each to an equal share when they do not
     // (RuledAnswers); open, the line and its name drop the chosen, since the
@@ -279,7 +279,7 @@ export function DecisionsView() {
     const chosen = isRuled && !isOpen ? `“${d.chosen}”` : "";
     // FR-12, 0045: every proposed record offers Rule, whoever owns it.
     // FR-13: a record of an initiative that is not active offers none.
-    const canRule = d.status === "proposed" && !readOnlyOf(view, r.initiative);
+    const canRule = isRulable(d) && !readOnlyOf(view, r.initiative);
     const isRuling = canRule && ruling === r.key;
     const dk = decisionKey(r.initiative, d.number);
     const hasDraft = kept.has(dk);
@@ -308,14 +308,15 @@ export function DecisionsView() {
     );
     // The highlight is Home's focused row (shell.css .ib-row.focused).
     return (
-      <div key={r.key} data-dec={r.key} className={`dec ${d.status} ${isOpen ? "expanded" : ""} ${focused ? "focused" : ""}`} style={style}>
+      <div key={r.key} data-dec={r.key} className={`dec ${decisionTone(d)} ${isOpen ? "expanded" : ""} ${focused ? "focused" : ""}`} style={style}>
         <div className={`dec-head ${stuck ? "stuck" : ""}`}>
           {/* §9: the name says each visible fact once ("waiting" once). */}
           <button className="dec-line" ref={chosen ? watchLine : undefined} aria-expanded={isOpen} aria-label={`${lineName(d, now, all ? r.initiative : undefined, ruledOn, isOpen)}${lineDraft ? ", draft" : ""}`} onClick={() => toggle(r.key)} title={`${chosen ? `“${d.chosen}” · ` : ""}${isOpen ? "collapse" : "show the record"}`}>
             <span className="dec-num mono">{d.number}</span>
             <span className={`dec-title${d.title.length > TITLE_FLOOR ? " floored" : ""}`}>{d.title}</span>
             {all && <span className="badge">{r.initiative}</span>}
-            <span className={`badge dec-status ${d.status}`}>{statusWord(d.status)}</span>
+            {/* leftovers-54 FR-6c: the badge's tone is the helper's, the word stays the status. */}
+            <span className={`badge dec-status ${decisionTone(d)}`}>{statusWord(d.status)}</span>
             {/* The chosen option and its separator are one item, so they drop
                 together (leftovers-13 FR-1): the option ellipsizes to its floor,
                 the title to its own, then watchLine drops both into the hover. */}
@@ -327,10 +328,10 @@ export function DecisionsView() {
               </span>
             )}
             <span className="dec-meta">
-              {d.status === "proposed"
+              {waitsOnRuling(d)
                 ? <>{ownerPhrase(d.owner)} · <b>{waitedWords(age(d))}</b>{lineDraft && <> · draft</>}</>
-                : d.status === "ruled"
-                  ? <>{rulerWords(d.ruled_by)} · {ruledOn}{t && <> · {t}</>}</>
+                : isDecided(d)
+                  ? <>{rulerWords(d)} · {ruledOn}{t && <> · {t}</>}</>
                   : d.superseded_by ? <>by {d.superseded_by}</> : null}
             </span>
           </button>
@@ -343,6 +344,13 @@ export function DecisionsView() {
                 <div>Chosen</div>
                 {chosenLines(d.options, d.chosen).map((l) => <div key={l}><b>{l}</b></div>)}
               </div>
+            </div>
+          )}
+          {/* leftovers-54 FR-6b: an open record nobody here can rule says,
+              where Rule would be, who settles it. */}
+          {isOpen && waitsOnRuling(d) && !isRulable(d) && (
+            <div className="dec-actions">
+              <span className="dec-facts">{NOT_RULABLE_LINE}</span>
             </div>
           )}
           {isOpen && canRule && (
@@ -451,11 +459,11 @@ export function DecisionsView() {
         {heading("ruled", "Ruled", countWords(pastHits.length, past.length, filtering), "newest first")}
         {sections.ruled && (pastHits.length === 0 ? <div className={`meta ${filtering ? "dec-nomatch" : "dec-empty"}`}>{emptyRuledWords(filtering)}</div> : (
           <>
-            {pastShown.filter((r) => r.d.status === "ruled").map(record)}
-            {pastShown.some((r) => r.d.status !== "ruled") && (
+            {pastShown.filter((r) => isDecided(r.d)).map(record)}
+            {pastShown.some((r) => !isDecided(r.d)) && (
               <>
                 <h3 className="meta">Superseded or withdrawn</h3>
-                {pastShown.filter((r) => r.d.status !== "ruled").map(record)}
+                {pastShown.filter((r) => !isDecided(r.d)).map(record)}
               </>
             )}
             {!filtering && past.length > 10 && (
@@ -482,30 +490,30 @@ export function DecisionsView() {
             <div className="gantt-body dec-timeline tz-host">
               <TimeFrame z={z} label="Decisions timeline" extents={shownHits.map((r) => {
                 const raised = parseISO(r.d.raised) ?? now;
-                const until = r.d.status === "proposed" ? now : parseISO(r.d.ruled) ?? raised;
+                const until = waitsOnRuling(r.d) ? now : parseISO(r.d.ruled) ?? raised;
                 return { from: raised.getTime(), to: endOfDay(until < raised ? raised : until) };
               })}>
                 {shownHits.map((r) => {
                   const d = r.d;
                   const raised = parseISO(d.raised) ?? now;
                   const ruledAt = parseISO(d.ruled);
-                  let until = d.status === "proposed" ? now : ruledAt ?? raised;
+                  let until = waitsOnRuling(d) ? now : ruledAt ?? raised;
                   if (until < raised) until = raised;
-                  const dot = daysBetween(raised, until) < 1 && d.status !== "proposed";
+                  const dot = daysBetween(raised, until) < 1 && !waitsOnRuling(d);
                   const from = raised.getTime();
                   const to = endOfDay(until);
                   // §5: one line; the status is in the name and the title.
                   // Dates as words (leftovers-8 FR-5): the name reads them as the line does.
                   const name = timelineName({ ...d, raised: dateWords(d.raised, now), ruled: d.ruled ? dateWords(d.ruled, now) : d.ruled }, all ? r.initiative : undefined);
                   return (
-                    <div key={r.key} className={`g-row tz-row dec-row ${d.status}`}>
+                    <div key={r.key} className={`g-row tz-row dec-row ${decisionTone(d)}`}>
                       <button className="g-label link tz-label" onClick={() => land(r.key)} title={name} aria-label={name}>
                         <span className="g-title"><span className="mono dim">{d.number}</span> {d.title}</span>
                       </button>
                       <div className="g-lane tz-lane" title={name}>
                         {dot
-                          ? <div className={`dec-dot ${d.status}`} style={{ left: (x(from) + x(to)) / 2 }} />
-                          : <div className={`dec-bar ${d.status}`} style={{ left: x(from), width: Math.max(x(to) - x(from), 4) }} />}
+                          ? <div className={`dec-dot ${decisionTone(d)}`} style={{ left: (x(from) + x(to)) / 2 }} />
+                          : <div className={`dec-bar ${decisionTone(d)}`} style={{ left: x(from), width: Math.max(x(to) - x(from), 4) }} />}
                         <EdgePointer z={z} from={from} to={to} />
                       </div>
                     </div>

@@ -25,6 +25,7 @@ vi.mock("../lib/drafts", async (orig) => {
 });
 
 const { DecisionsView } = await import("./DecisionsView");
+const { NOT_RULABLE_LINE } = await import("../lib/decisions");
 
 /** The fixture's options, from its frontmatter. */
 const options: string[] = JSON.parse(fixture.split("\n").find((l) => l.startsWith("options: "))!.slice("options: ".length));
@@ -87,5 +88,54 @@ describe("W5: the Ruled list speaks a question record (leftovers-51 FR-7, FR-8)"
     expect(chosenOnLine(rec)).toBeNull();
     const head = /<div class="dec-head[^"]*">([\s\S]*?)<div class="dec-body">/.exec(rec)![1];
     expect(text(head.slice(head.indexOf("</button>"))).slice(0, 2)).toEqual(["Chosen", "accept as written"]);
+  });
+});
+
+// leftovers-54 Amendment 6: FR-6b (an expanded awaiting-cells record says who
+// settles it where Rule would be) and FR-6c (the badge's tone is decisionTone).
+describe("FR-6b, FR-6c: records in the crossing states", () => {
+  const base = { raised: "2026-10-20", owner: "operator", body: "", options: ["x", "y"] };
+  const recs = [
+    { ...base, number: "0002", title: "Pick a store", status: "proposed", path: "working-on/decisions/0002-p.md" },
+    { ...base, number: "0013", title: "Which cells take it", status: "awaiting-cells", path: "working-on/decisions/0013-w.md" },
+    { ...base, number: "0014", title: "Apply it", status: "applied", ruled: "2026-10-21", ruled_by: "pablo (autonomous mode)", chosen: "x", path: "working-on/decisions/0014-a.md" },
+    { ...base, number: "0015", title: "Acknowledge it", status: "acknowledged", ruled: "2026-10-21", ruled_by: "pablo by standing rule", chosen: "x", path: "working-on/decisions/0015-k.md" },
+  ];
+  function drawAll(focus: string | null) {
+    Object.keys(state).forEach((k) => delete state[k]);
+    Object.assign(state, {
+      view: { board: { initiatives: [{ id: "init-a", machine: "lodestar", local: true, status: "active", decisions: recs, cards: [] }] } },
+      selectedInitiative: "init-a", select: () => undefined, decisionFocus: focus, decisionSeq: 0,
+      decSections: { rule: true, ruled: true, timeline: false }, setDecSection: () => undefined,
+    });
+    return renderToStaticMarkup(<DecisionsView />);
+  }
+  const at = (html: string, n: string) => {
+    const start = html.indexOf(`data-dec="init-a/${n}"`);
+    expect(start, `${n} drawn`).toBeGreaterThan(-1);
+    const next = html.indexOf("data-dec=", start + 1);
+    return html.slice(start, next < 0 ? undefined : next);
+  };
+  const badge = (r: string) => /<span class="badge dec-status ([^"]*)">([^<]*)<\/span>/.exec(r)!.slice(1);
+
+  it("expanded, 0013 shows the line where Rule would be, and no Rule", () => {
+    const r = at(drawAll("init-a/0013"), "0013");
+    expect(r).toContain(`<div class="dec-actions"><span class="dec-facts">${NOT_RULABLE_LINE}</span></div>`);
+    expect(r).not.toMatch(/>Rule</);
+  });
+  it("expanded, a proposed record keeps Rule and has no such line", () => {
+    const r = at(drawAll("init-a/0002"), "0002");
+    expect(r).toMatch(/>Rule</);
+    expect(r).not.toContain(NOT_RULABLE_LINE);
+  });
+  it("collapsed, 0013 has neither", () => {
+    expect(at(drawAll(null), "0013")).not.toContain(NOT_RULABLE_LINE);
+  });
+  it("each badge takes its tone from decisionTone and keeps its status word", () => {
+    const html = drawAll(null);
+    expect(badge(at(html, "0002"))).toEqual(["proposed", "waiting"]);
+    expect(badge(at(html, "0013"))).toEqual(["proposed", "awaiting cells"]);
+    expect(badge(at(html, "0014"))).toEqual(["ruled", "applied"]);
+    expect(badge(at(html, "0015"))).toEqual(["ruled", "acknowledged"]);
   });
 });

@@ -872,8 +872,11 @@ button.q-ruling, button.q-ruling:hover { width: 100%; border: 0; background: var
 .dec-num, .dec-line .badge, .dec-meta { flex-shrink: 0; }
 .dec-meta { font-size: var(--font-size-sm); color: var(--muted); white-space: nowrap; }
 .dec-meta b { color: var(--text); font-weight: 600; }
+/* The badge's class is decisionTone (leftovers-54 FR-6c): every open record
+   (proposed, awaiting-cells) draws in the waiting pair, every decided one
+   (ruled, applied, acknowledged) in the ruled pair; the word keeps the status. */
 .badge.dec-status.proposed { background: var(--decision-waiting-bg); color: var(--decision-waiting); border-color: transparent; }
-.badge.dec-status.ruled { background: var(--decision-ruled-bg); color: #b9a3ff; border-color: transparent; }
+.badge.dec-status.ruled { background: var(--decision-ruled-bg); color: var(--decision-ruled-fg); border-color: transparent; }
 /* Superseded and withdrawn keep the neutral lozenge's own tokens: --done
    on its tint read 2.05:1 (leftovers-4 L9); the word carries the status. */
 .dec-body { padding: 0 14px 12px 14px; border-top: 1px solid var(--border); }
