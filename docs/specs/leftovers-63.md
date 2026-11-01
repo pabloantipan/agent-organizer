@@ -41,7 +41,7 @@ Card `lf63-organizer-map` (docs only):
 | C2 | 1 | `map.json` against `contracts/c4-map/map.schema.json` (specs checkout) | valid |
 | C3 | 3 | `diagram-check` over `docs/architecture/` | no `ungrounded:` line |
 | C4 | 2 | `mermaid2svg <page> --check` per page | exit 0 |
-| C5 | 2 | `go test -run TestMap` in the service package with the organizer root (lf58-map-read's reader) | the map reads, no "Map not drawn" |
+| C5 | 2 | lf58-map-read's reader (`service.ReadMap`) on the organizer root, through a program kept outside the tree (`.wt-notes/<seat>/c5`), and the existing `TestMap` | state drawn, no "Map not drawn" (main: empty); TestMap green |
 | X0 | all | `git status --porcelain` outside `docs/architecture/` | empty |
 
 ## Boundary
