@@ -1,13 +1,13 @@
 # Deltagos's working-on reader (atlax-seed FR-2): the scan of an initiative
 # root's working-on/ (initiative.yaml, cards, decisions, roadmap, runs).
 # The format is the working-on skill's, sampled in the specs repo's
-# contracts/working-on/; no published artifact owns it, so no consumes:
-# (Amendment 1). Unauthored: the test that reads the sample is
-# lf53-frontmatter's, not on the base (FR-3).
+# contracts/working-on/ (sample/ and expected.json); no published artifact
+# owns it, so no consumes: (Amendment 1). Authored (Amendment 3, FR-6): the
+# named test reads the sample through CONTRACTS_DIR, field by field.
 designation: prod:agent-organizer.scan.ReadInitiative
 kind: data
 summary: "Reads an initiative root's working-on/ files into the board; format owned by the working-on skill (contracts/working-on/, no published artifact)."
-authored: false
+authored: true
 lifecycle: live
 owner: organizer-fse
 terminal:
@@ -15,4 +15,7 @@ terminal:
   entity: card
 contract:
   repo: specs
-  path: contracts/working-on/expected.json
+  path: contracts/working-on/
+test:
+  path: internal/scan/contract_test.go
+  name: TestWorkingOnContract
