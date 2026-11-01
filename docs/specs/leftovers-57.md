@@ -89,8 +89,11 @@ Card `lf57-run-report` (frontend, `ui_review: true`):
   when there are none.
 - **FR-10** `Ruled while you were away` from the JSON's `rulings`: one
   decision record line each (lf52's line) with who ruled it, the time and
-  `while away` for an away mode; opening it opens the record; absent when
-  the list is empty.
+  `while away` for a ruling whose `mode` is `autonomous` or `away` (the old
+  name, still valid; factory ruling 2026-11-01); opening it opens the
+  record; absent when the list is empty. A refused `ruled_by` (empty, mode
+  null, a note `ruled_by '<v>' refused`) shows the record line with no ruler
+  and the note under it in `sm` `--fg-muted`, never a guessed name.
 - **FR-11** Copy as text writes `ReportText` for the window shown, byte for
   byte; the polite region says `Copied the report as text.` (AR9).
 - **FR-12** States: live (heading `Running now · since <t>`, last row `now
@@ -133,7 +136,7 @@ files; no gate row runs against the real home's away log.
 | W1 | 7, 12 | vitest over `expected.json`: rows, caption, dead rows, notes; a live report with the dead span still going; a custom window | rows as FR-7; `stopped now` only live; `window start`/`window end` |
 | W2 | 8 | vitest: FR-5's join | wave column values, the disclosure's words, the footer lines, a footer press calls the WaveStrip navigation |
 | W3 | 9 | vitest: `expected.json`'s tracks; a JSON with `drawn: false` | `Board as of`, the fold, `↓`, `No stage` last, `local` only; the no-tracks line |
-| W4 | 10 | vitest: two rulings, one `away` mode; an empty list | two record lines, one `while away`; no subsection |
+| W4 | 10 | vitest: three rulings, modes `autonomous`, `away` and none; one refused `ruled_by`; an empty list | `while away` on the first two only; the refused one shows its note and no ruler; no subsection for the empty list |
 | W5 | 11 | vitest with a mocked clipboard | the written text equals `ReportText`'s bytes; the polite region's words |
 | W6 | 12 | vitest of the recent rule: seen and 23 h; seen and 25 h; unseen 8 days; live | heads; folds; folds; heads |
 | W7 | 13, 14 | review build at 1024×640 and 1440×900 on the fixture home, seat, by seat-pointer: `shot --out` of Overview and Home | no sideways scroll; `waits on` under the row at 1024; Home's signal reads as FR-14 |
