@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import type { merge, model } from "../../wailsjs/go/models";
 import type { CellThread } from "../hooks/useWails";
 import { parseISO, today, daysBetween } from "../lib/dates";
+import { isRulable, ownerPerson } from "../lib/decisions";
 import { useBoard } from "../stores/board.store";
 
 /** One FSE-signed commit (FR-11). model.FSECommit reaches the frontend only
@@ -27,8 +28,10 @@ export function fseWaiting(i: merge.BoardInitiative, threads: CellThread[], huma
   // owner is then anyone but the FSE itself (auth off: the owner runs it).
   const ownedByHuman = (owner: string) => (human ? owner === human : owner !== "" && owner !== FSE);
   const items: WaitItem[] = [];
+  // leftovers-61 FR-1, FR-6: the records the lead can rule, the owner read
+  // as a person (operator is pablo), as Needs me reads them.
   for (const d of i.decisions ?? []) {
-    if (d.status === "proposed" && d.raised_by === FSE && ownedByHuman(d.owner)) {
+    if (isRulable(d) && d.raised_by === FSE && ownedByHuman(ownerPerson(d.owner))) {
       items.push({ kind: "decision", key: `decision:${i.id}/${d.number}`, since: parseISO(d.raised?.slice(0, 10)), decision: d });
     }
   }

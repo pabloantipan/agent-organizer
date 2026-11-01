@@ -2,7 +2,7 @@ import { forwardRef, useEffect, useId, useLayoutEffect, useRef, useState, type C
 import { marked } from "marked";
 import type { model } from "../../wailsjs/go/models";
 import { api } from "../hooks/useWails";
-import { allAnswered, answersOf, missingWords, picksOf, questionWords, questionsOf, recordSections } from "../lib/decisions";
+import { allAnswered, answersOf, missingWords, ownerHover, ownerSign, picksOf, questionWords, questionsOf, recordSections } from "../lib/decisions";
 import { leadOf } from "../lib/queue";
 import { openBox } from "../lib/boxStack";
 import { loopTab } from "../lib/tabTrap";
@@ -66,8 +66,9 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
 }) {
   const { refresh, agents } = useBoard();
   const ruler = leadOf((agents?.groups ?? []).find((g) => g.id === initiative));
-  const owner = (d.owner ?? "").trim();
-  const forOwner = owner !== "" && owner.toLowerCase() !== ruler ? ` · owner ${owner}` : "";
+  // leftovers-61 FR-6 (DS6): the owner reads as a person, `operator` as
+  // pablo, and is named only when someone else rules; the raw value hovers.
+  const forOwner = ownerSign(d.owner, ruler);
   const options = d.options ?? [];
   const [own, setOwn] = useState({ chosen: "", words: "" });
   const { chosen, words } = draft ?? own;
@@ -229,7 +230,7 @@ export function RuleDecisionBox({ initiative, decision: d, withRecord = false, w
         {/* Amendment 1: the foot's first row, full width, above the
             signature and the buttons, which keep their row (rule-box.css). */}
         {missing && <span id={missingId} className="rb-missing">{missing}</span>}
-        <span className="rb-sign">signed {ruler}{forOwner} · commits one file</span>
+        <span className="rb-sign" title={forOwner ? ownerHover(d.owner) : undefined}>signed {ruler}{forOwner} · commits one file</span>
         <button className="ghost" onClick={() => close(true)} disabled={busy}>Cancel</button>
         <button className="primary" aria-describedby={missing ? missingId : undefined} {...busyButton({ busy, disabled: !ready, onPress: () => void rule() })}>{busyLabel(busy, "Rule", "Ruling…")}</button>
       </div>

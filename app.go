@@ -592,6 +592,34 @@ func (a *App) Usage(week string) (usage.View, error) {
 	return a.svc.Usage(week)
 }
 
+// Report is the run report of an initiative for a window (leftovers-57
+// FR-1, FR-5): `factory report --json` as given, plus the tokens per line.
+// since and until are passed to the factory as given ("@<epoch>" for a
+// picked window). A remote initiative is refused with "drawn on <machine>".
+func (a *App) Report(initiativeID, since, until string) (service.RunReport, error) {
+	if a.svc == nil {
+		return service.RunReport{}, errString(a.err)
+	}
+	return a.svc.Report(initiativeID, since, until)
+}
+
+// ReportText is the same window's `factory report --text`, byte for byte
+// (FR-1, the Copy as text of FR-11).
+func (a *App) ReportText(initiativeID, since, until string) (string, error) {
+	if a.svc == nil {
+		return "", errString(a.err)
+	}
+	return a.svc.ReportText(initiativeID, since, until)
+}
+
+// ReportWindows is the windows of the last 14 days, newest first (FR-3).
+func (a *App) ReportWindows(initiativeID string) (service.ReportWindows, error) {
+	if a.svc == nil {
+		return service.ReportWindows{}, errString(a.err)
+	}
+	return a.svc.ReportWindows(initiativeID)
+}
+
 // RuleDecision writes the owner's ruling into a proposed decision record and
 // commits that one file (FR-13, 0019). It is the app's only write over a
 // record, and it refuses anything but the owner's own ruling of a proposed one.

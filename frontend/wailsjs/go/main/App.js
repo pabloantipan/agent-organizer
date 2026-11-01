@@ -166,6 +166,18 @@ export function RenderDiagram(arg1) {
   return window['go']['main']['App']['RenderDiagram'](arg1);
 }
 
+export function Report(arg1, arg2, arg3) {
+  return window['go']['main']['App']['Report'](arg1, arg2, arg3);
+}
+
+export function ReportText(arg1, arg2, arg3) {
+  return window['go']['main']['App']['ReportText'](arg1, arg2, arg3);
+}
+
+export function ReportWindows(arg1) {
+  return window['go']['main']['App']['ReportWindows'](arg1);
+}
+
 export function ResetPassword(arg1) {
   return window['go']['main']['App']['ResetPassword'](arg1);
 }

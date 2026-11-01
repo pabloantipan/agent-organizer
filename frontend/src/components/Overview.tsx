@@ -1,8 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { merge, model } from "../../wailsjs/go/models";
 import { api, type RunsView } from "../hooks/useWails";
-import { parseISO, today, daysBetween, dateWords } from "../lib/dates";
-import { isDecided, isOpen } from "../lib/decisions";
+import { parseISO, today, daysBetween } from "../lib/dates";
+import { isDecided, isOpen, isRulable } from "../lib/decisions";
+import { gateRowWords } from "../lib/decisionsPage";
 import { useBoard } from "../stores/board.store";
 import { FsePanel } from "./FsePanel";
 import { PhaseWord } from "./InitiativeHeader";
@@ -46,18 +47,23 @@ function GateRow({ initiative, number, record }: { initiative: string; number: s
   const waited = daysSince(record.raised);
   // Navigating lands on the thing named (design system, Focus and names): a
   // record not waiting opens expanded and focused in Decisions (FR-19).
-  const open = () => (waiting ? openNeedsMe(`decision:${initiative}/${record.number}`) : openDecision(initiative, record.number));
+  // leftovers-61 FR-1: only a rulable record is a Needs me row; one waiting
+  // on the cells opens in Decisions, in its group.
+  const rulable = isRulable(record);
+  const open = () => (rulable ? openNeedsMe(`decision:${initiative}/${record.number}`) : openDecision(initiative, record.number));
+  // FR-5 (DS5): the line names the record's own status, never its bucket's.
+  const words = gateRowWords(record, waited);
   return (
     <li>
-      <button className="gl-row" onClick={open} title={waiting ? "Open this record's row in Needs me" : "Open in Decisions"}>
+      <button className="gl-row" onClick={open} title={rulable ? "Open this record's row in Needs me" : "Open in Decisions"}>
         <span className={`diamond ${waiting ? "waiting" : ruled ? "ruled" : "other"}`} aria-hidden />
         <span className="gl-text"><span className="mono num">{record.number}</span> {record.title || record.slug}</span>
         {waiting ? (
-          <span className="lz waiting">waiting <span className="num">{waited === null ? "" : `${waited}d`}</span></span>
+          <span className="lz waiting">{words.word} <span className="num">{words.when}</span></span>
         ) : ruled ? (
-          <span className="lz ruled">ruled <span className="num">{dateWords(record.ruled)}</span></span>
+          <span className="lz ruled">{words.word} <span className="num">{words.when}</span></span>
         ) : (
-          <span className="lz">{record.status}</span>
+          <span className="lz">{words.word}</span>
         )}
       </button>
     </li>

@@ -877,6 +877,9 @@ button.q-ruling, button.q-ruling:hover { width: 100%; border: 0; background: var
    (ruled, applied, acknowledged) in the ruled pair; the word keeps the status. */
 .badge.dec-status.proposed { background: var(--decision-waiting-bg); color: var(--decision-waiting); border-color: transparent; }
 .badge.dec-status.ruled { background: var(--decision-ruled-bg); color: var(--decision-ruled-fg); border-color: transparent; }
+/* The header's "· N with the cells" (leftovers-61 FR-3, DS3): muted text, no
+   badge, a signal and not a call to act; it still opens Decisions. */
+button.linkish.ihead-cells { flex: none; font-size: var(--font-size-sm); color: var(--fg-subtle); }
 /* Superseded and withdrawn keep the neutral lozenge's own tokens: --done
    on its tint read 2.05:1 (leftovers-4 L9); the word carries the status. */
 .dec-body { padding: 0 14px 12px 14px; border-top: 1px solid var(--border); }

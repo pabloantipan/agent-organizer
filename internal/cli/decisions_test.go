@@ -39,3 +39,34 @@ func TestWriteDecisionsBucketsByClass(t *testing.T) {
 		t.Errorf("operator is pablo:\n%s", out)
 	}
 }
+
+// leftovers-61 D5 (FR-5, DS5) and FR-6: every line names its record's own
+// status ("awaiting cells", "applied", "acknowledged"), never its bucket's,
+// and owner operator reads as pablo.
+func TestWriteDecisionsNamesEachStatus(t *testing.T) {
+	var b bytes.Buffer
+	WriteDecisions(&b, []DecisionRow{
+		{Initiative: "init-a", Decision: model.Decision{Number: "0002", Title: "where", Status: "proposed", Owner: "pablo", Raised: "2026-09-20"}, AgeDays: 42},
+		{Initiative: "init-a", Decision: model.Decision{Number: "0013", Title: "which cells", Status: "awaiting-cells", Owner: "operator", Raised: "2026-10-20"}, AgeDays: 12},
+		{Initiative: "init-a", Decision: model.Decision{Number: "0014", Title: "apply", Status: "applied", RuledBy: "pablo (autonomous mode)", Raised: "2026-10-18", Ruled: "2026-10-21"}, TurnaroundDays: 3},
+		{Initiative: "init-a", Decision: model.Decision{Number: "0015", Title: "acknowledge", Status: "acknowledged", RuledBy: "pablo by standing rule", Raised: "2026-10-19", Ruled: "2026-10-20"}, TurnaroundDays: 1},
+		{Initiative: "init-a", Decision: model.Decision{Number: "0006", Title: "roadmap", Status: "ruled", RuledBy: "pablo", Raised: "2026-09-27", Ruled: "2026-09-28"}, TurnaroundDays: 1},
+	})
+	lines := map[string]string{}
+	for _, l := range strings.Split(b.String(), "\n") {
+		if f := strings.Fields(l); len(f) > 1 && f[0] == "init-a" {
+			lines[f[1]] = l
+		}
+	}
+	for n, want := range map[string]string{"0002": "42d waiting", "0013": "12d awaiting cells", "0014": "applied 2026-10-21", "0015": "acknowledged 2026-10-20", "0006": "ruled 2026-09-28"} {
+		if !strings.Contains(lines[n], want) {
+			t.Errorf("%s: want %q on its line, got %q", n, want, lines[n])
+		}
+	}
+	if strings.Contains(lines["0013"], " waiting") || strings.Contains(lines["0014"], " ruled ") || strings.Contains(lines["0015"], " ruled ") {
+		t.Errorf("a line renames its status by its bucket:\n%s", b.String())
+	}
+	if !strings.Contains(lines["0013"], "owner pablo") || strings.Contains(b.String(), "operator") {
+		t.Errorf("owner operator reads as pablo:\n%s", b.String())
+	}
+}

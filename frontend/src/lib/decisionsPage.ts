@@ -1,6 +1,6 @@
 import type { model } from "../../wailsjs/go/models";
-import { daysBetween, parseISO } from "./dates";
-import { decisionStatusWord, isDecided, isOpen, rulerName } from "./decisions";
+import { dateWords, daysBetween, parseISO } from "./dates";
+import { decisionStatusWord, isDecided, isOpen, isRulable, isWithCells, ownerPhrase, ownerName, rulerName } from "./decisions";
 
 // The Decisions sub-view's words (docs/ux/specs/decisions-view.md): the find
 // match, the summary line, the turnaround and the record line's name. Pure,
@@ -87,8 +87,7 @@ export function lineName(d: Named, now: Date, initiative?: string, ruledOn?: str
   if (initiative) parts.push(initiative);
   parts.push(statusWord(d.status));
   if (isOpen(d)) {
-    const o = d.owner?.trim();
-    parts.push(o ? `owner ${o}` : "no owner");
+    parts.push(ownerPhrase(d.owner));
     const r = parseISO(d.raised);
     parts.push(waitedWords(r ? daysBetween(r, now) : 0));
   } else if (isDecided(d)) {
@@ -119,7 +118,7 @@ export function timelineName(d: Named, initiative?: string): string {
   const facts = [statusWord(d.status), `raised ${d.raised}`];
   const by = rulerName(d);
   if (d.ruled) facts.push(`ruled ${d.ruled}${by ? ` by ${by}` : ""}`);
-  if (d.owner) facts.push(`owner ${d.owner}`);
+  if (ownerName(d.owner)) facts.push(`owner ${ownerName(d.owner)}`);
   return `${d.number} ${d.title}, ${initiative ? `${initiative}, ` : ""}${facts.join(", ")}`;
 }
 
@@ -131,17 +130,18 @@ export function ruledShown<T>(rows: T[], showAll: boolean, filtering: boolean): 
   return { shown: rows.slice(0, RULED_LIMIT), hidden: rows.length - RULED_LIMIT };
 }
 
-/** The three sections and whether each is open (§3): To rule and Ruled open,
- *  the Timeline closed, unless this machine remembers otherwise. A stored
- *  value that is not an object of booleans falls back key by key. */
-export type DecSections = { rule: boolean; ruled: boolean; timeline: boolean };
-export const DEC_SECTIONS_DEFAULT: DecSections = { rule: true, ruled: true, timeline: false };
+/** The sections and whether each is open (§3; leftovers-61 FR-2): To rule,
+ *  With the cells and Ruled open, the Timeline closed, unless this machine
+ *  remembers otherwise. A stored value that is not an object of booleans
+ *  falls back key by key. */
+export type DecSections = { rule: boolean; cells: boolean; ruled: boolean; timeline: boolean };
+export const DEC_SECTIONS_DEFAULT: DecSections = { rule: true, cells: true, ruled: true, timeline: false };
 export function decSectionsOf(stored: string | null): DecSections {
   let v: unknown = null;
   try { v = stored ? JSON.parse(stored) : null; } catch { v = null; }
   const o = (v && typeof v === "object" ? v : {}) as Record<string, unknown>;
   const pick = (k: keyof DecSections) => (typeof o[k] === "boolean" ? (o[k] as boolean) : DEC_SECTIONS_DEFAULT[k]);
-  return { rule: pick("rule"), ruled: pick("ruled"), timeline: pick("timeline") };
+  return { rule: pick("rule"), cells: pick("cells"), ruled: pick("ruled"), timeline: pick("timeline") };
 }
 
 /** The sections as shown (§3, §6, rows 6 and 8). Precedence, highest first:
@@ -155,9 +155,42 @@ export function shownSections(stored: DecSections, visit: Partial<DecSections>, 
     if (hits && hits[k]) return true;
     return visit[k] ?? stored[k];
   };
-  return { rule: one("rule"), ruled: one("ruled"), timeline: one("timeline") };
+  return { rule: one("rule"), cells: one("cells"), ruled: one("ruled"), timeline: one("timeline") };
 }
 
 /** Ruled's line when it lists nothing (row 5): `Nothing ruled yet.` with no
  *  find on, `no match` only while one is. */
+/** The section a record is listed under (leftovers-61 FR-2): To rule for a
+ *  rulable record, With the cells for one waiting on the cells, Ruled for
+ *  every other (decided, then superseded and withdrawn under their small
+ *  heading). */
+export const sectionOf = (d: Pick<model.Decision, "status">): "rule" | "cells" | "ruled" =>
+  isRulable(d) ? "rule" : isWithCells(d) ? "cells" : "ruled";
+
+/** The records of each section in the order it lists them (§2, §4; FR-2):
+ *  To rule and With the cells oldest raised first, the lower number on a
+ *  tie; Ruled the decided newest ruled first, then the closed in their
+ *  order. With the cells is drawn only when it holds a record. */
+export function sectionRows<T extends { d: Pick<model.Decision, "status" | "raised" | "ruled" | "number"> }>(rows: T[]): { rule: T[]; cells: T[]; ruled: T[]; closed: T[] } {
+  const byRaised = (a: T, b: T) => (a.d.raised ?? "").localeCompare(b.d.raised ?? "") || a.d.number.localeCompare(b.d.number);
+  return {
+    rule: rows.filter((r) => sectionOf(r.d) === "rule").sort(byRaised),
+    cells: rows.filter((r) => sectionOf(r.d) === "cells").sort(byRaised),
+    ruled: rows.filter((r) => isDecided(r.d)).sort((a, b) => (b.d.ruled ?? "").localeCompare(a.d.ruled ?? "") || b.d.number.localeCompare(a.d.number)),
+    closed: rows.filter((r) => !isOpen(r.d) && !isDecided(r.d)),
+  };
+}
+
 export const emptyRuledWords = (filtering: boolean) => (filtering ? "no match" : "Nothing ruled yet.");
+
+/** A gate row's lozenge on Overview (leftovers-61 FR-5, DS5): the record's
+ *  own status word, then its age for an open record (`awaiting cells 12d`,
+ *  `waiting 3d`) or its ruling date for a decided one (`applied 21 Oct`,
+ *  `acknowledged 20 Oct`); a closed record its word alone. `waited` is the
+ *  open record's age in days, null when undated. */
+export function gateRowWords(d: Pick<model.Decision, "status" | "ruled">, waited: number | null, now?: Date): { word: string; when: string } {
+  const word = decisionStatusWord(d.status);
+  if (isOpen(d)) return { word, when: waited === null ? "" : `${waited}d` };
+  if (isDecided(d)) return { word, when: dateWords(d.ruled, now) };
+  return { word, when: "" };
+}

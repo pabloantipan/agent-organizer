@@ -39,7 +39,7 @@ function draw(focus: string | null) {
   Object.assign(state, {
     view: { board: { initiatives: [{ id: "hestia", machine: "lodestar", local: true, decisions: [question, plain], cards: [] }] } },
     selectedInitiative: "hestia", select: () => undefined, decisionFocus: focus, decisionSeq: 0,
-    decSections: { rule: true, ruled: true, timeline: false }, setDecSection: () => undefined,
+    decSections: { rule: true, cells: true, ruled: true, timeline: false }, setDecSection: () => undefined,
   });
   return renderToStaticMarkup(<DecisionsView />);
 }
@@ -106,7 +106,7 @@ describe("FR-6b, FR-6c: records in the crossing states", () => {
     Object.assign(state, {
       view: { board: { initiatives: [{ id: "init-a", machine: "lodestar", local: true, status: "active", decisions: recs, cards: [] }] } },
       selectedInitiative: "init-a", select: () => undefined, decisionFocus: focus, decisionSeq: 0,
-      decSections: { rule: true, ruled: true, timeline: false }, setDecSection: () => undefined,
+      decSections: { rule: true, cells: true, ruled: true, timeline: false }, setDecSection: () => undefined,
     });
     return renderToStaticMarkup(<DecisionsView />);
   }
@@ -137,5 +137,56 @@ describe("FR-6b, FR-6c: records in the crossing states", () => {
     expect(badge(at(html, "0013"))).toEqual(["proposed", "awaiting cells"]);
     expect(badge(at(html, "0014"))).toEqual(["ruled", "applied"]);
     expect(badge(at(html, "0015"))).toEqual(["ruled", "acknowledged"]);
+  });
+});
+
+// leftovers-61 D2 (FR-2, DS2) and D6 (FR-6, DS6): With the cells sits between
+// To rule and Ruled, absent at 0; 0013 in it in the waiting pair, expanded
+// with the Themis line and no Rule; owner operator reads pablo, raw in the hover.
+describe("leftovers-61 D2, D6: the group With the cells", () => {
+  const base = { raised: "2026-10-20", body: "", options: ["x", "y"] };
+  const recs = [
+    { ...base, number: "0002", title: "Pick a store", status: "proposed", owner: "pablo", path: "working-on/decisions/0002-p.md" },
+    { ...base, number: "0013", title: "Which cells take it", status: "awaiting-cells", owner: "operator", path: "working-on/decisions/0013-w.md" },
+    { ...base, number: "0014", title: "Apply it", status: "applied", owner: "pablo", ruled: "2026-10-21", ruled_by: "pablo (autonomous mode)", chosen: "x", path: "working-on/decisions/0014-a.md" },
+  ];
+  function drawWith(decisions: unknown[], focus: string | null) {
+    Object.keys(state).forEach((k) => delete state[k]);
+    Object.assign(state, {
+      view: { board: { initiatives: [{ id: "init-a", machine: "lodestar", local: true, status: "active", decisions, cards: [] }] } },
+      selectedInitiative: "init-a", select: () => undefined, decisionFocus: focus, decisionSeq: 0,
+      decSections: { rule: true, cells: true, ruled: true, timeline: false }, setDecSection: () => undefined,
+    });
+    return renderToStaticMarkup(<DecisionsView />);
+  }
+  const headings = (html: string) => [...html.matchAll(/<h2 id="dec-(\w+)-h"[^>]*>[\s\S]*?<span>([^<]*)<\/span>[\s\S]*?<\/h2>/g)].map((m) => m[2]);
+  const sectionHtml = (html: string, cls: string) => {
+    const start = html.indexOf(`<section class="dec-section ${cls}"`);
+    return start < 0 ? "" : html.slice(start, html.indexOf("</section>", start));
+  };
+
+  it("reads To rule, With the cells · 1, Ruled, in that order", () => {
+    expect(headings(drawWith(recs, null))).toEqual(["To rule · 1", "With the cells · 1", "Ruled · 1", "Timeline"]);
+  });
+  it("holds 0013 and To rule does not", () => {
+    const html = drawWith(recs, null);
+    expect(sectionHtml(html, "dec-cells")).toContain(`data-dec="init-a/0013"`);
+    expect(sectionHtml(html, "dec-rule")).not.toContain(`data-dec="init-a/0013"`);
+    expect(/<span class="badge dec-status ([^"]*)">([^<]*)<\/span>/.exec(sectionHtml(html, "dec-cells"))!.slice(1)).toEqual(["proposed", "awaiting cells"]);
+  });
+  it("is absent when nothing waits on the cells", () => {
+    const html = drawWith(recs.filter((d) => d.number !== "0013"), null);
+    expect(html).not.toContain("dec-cells");
+    expect(headings(html)).toEqual(["To rule · 1", "Ruled · 1", "Timeline"]);
+  });
+  it("expanded, 0013 says Themis settles it and has no Rule", () => {
+    const cells = sectionHtml(drawWith(recs, "init-a/0013"), "dec-cells");
+    expect(cells).toContain("Waits on the cells it affects. Themis settles it.");
+    expect(cells).not.toMatch(/>Rule</);
+  });
+  it("0013's owner reads pablo, operator only in the hover (D6)", () => {
+    const cells = sectionHtml(drawWith(recs, null), "dec-cells");
+    expect(cells).toContain(`<span title="owner: operator">owner pablo</span>`);
+    expect(text(cells).join(" ")).not.toContain("operator");
   });
 });
