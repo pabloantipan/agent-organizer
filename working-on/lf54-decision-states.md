@@ -6,7 +6,7 @@ branch: lf54-decision-states
 seat: l54-states
 stage:
 updated: 2026-11-01
-next: "G5: the literal guard in decisionStates.test.ts must fail on a template-literal, array includes() or Set.has() status comparison under frontend/src/lib (review, 39f64de)"
+next: "review: lf54-decision-states, G5 and X0 pass (guard fixed for finding 1; clean clone, specs 54cf10d), 1df5001"
 review: fail
 reviewer: l54-states-rev
 cause: execution
@@ -30,6 +30,7 @@ docs/specs/leftovers-54.md, rows G5 and X0.
 
 ## Done
 - 2026-11-01 l54-states: FR-6, FR-7 (pin 54cf10d), FR-8 built on branch lf54-decision-states, rebased on origin/main 6b6e349, head 39f64de; G5 fails on 076eb5c and passes here; X0 passes from a clean clone. progress.md in .wt-notes/l54-states.
+- 2026-11-01 l54-states: review finding 1 fixed in 1df5001 (the literal guard fails on a template literal, includes() and Set.has()); X0 passes again from a clean clone at 1df5001.
 
 ## Declared changes
 - modified `internal/model/decision.go`: `ReadRuledBy`, `ReadMode`, `PersonOf`, `Decision.ReadRuling`, `Class`, `Ruler` (the person), fields `RuledMode`, `Person`, `Mode`, `ForecastLow`; `ForecastBand` reads a band followed by text or with a low-end unit; `RuledByModes`/`RuledByMode` deleted (FR-7, FR-8)
@@ -43,6 +44,7 @@ docs/specs/leftovers-54.md, rows G5 and X0.
 - modified `frontend/src/lib/header.ts`, `outline.ts`, `initiativeState.ts`, `queue.ts`: read status and owner through decisions.ts
 - added `frontend/src/lib/decisionStates.test.ts`: G5 vitest, contract readings and the literal guard
 - modified `frontend/src/lib/decisionsPage.test.ts`: `rulerWords` call sites
+- note: `decisionStates.test.ts` guard rewritten in 1df5001 (review finding 1): any decision-status literal in lib code outside decisions.ts fails, with an exact-line allow-list for the non-status word `ruled`
 - modified `frontend/src/components/DecisionsView.tsx`, `Overview.tsx`: call the helper (Amendment 5)
 - modified `frontend/wailsjs/go/models.ts`: `wails generate module` after the bound-type change
 - added `testdata/fixture-overlay/init-a/working-on/decisions/0013-which-cells-take-the-crossing.md`, `0014-apply-the-shared-format.md`, `0015-acknowledge-the-record-fields.md`: UI review states
