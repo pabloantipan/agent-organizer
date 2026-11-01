@@ -6,7 +6,7 @@ branch: lf54-decision-states
 seat: l54-states
 stage:
 updated: 2026-11-01
-next: "decide: sup99 — may l54-states edit DecisionsView.tsx (the Ruled list, timeline, turnaround and rule box read status literals at :21, :75-77, :83, :273, :282, :330-333, :454-458, :485-494) and Overview.tsx:43-44 to call the lib helper? The premise names only lib files; FR-6 cannot be met without them. Recommend yes for both; FsePanel.tsx:31 left as is"
+next: "l54-states builds it; DecisionsView.tsx and Overview.tsx may call the lib helper only, FsePanel.tsx as is (leftovers-54 Amendment 5, c15ceaa)"
 depends_on: [lf53-frontmatter]
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-decision-states"]
 spec: "docs/specs/leftovers-54.md (FR-6 to FR-7)"
