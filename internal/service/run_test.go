@@ -295,12 +295,12 @@ func TestInitiativeRunsFoldsAConversation(t *testing.T) {
 	}
 
 	// The cost never reaches RunInfo (0020); the rows runsView draws carry it.
-	rows := runConversations("organizer", archived, live)
+	rows := runConversations("organizer", archived, live, nil)
 	if len(rows) != 1 || rows[0].CostUSD != 1.50 || !rows[0].Live || rows[0].Resumed != 1 {
 		t.Fatalf("rows = %+v, want one live conversation at 1.50 (C1's rule), resumed 1", rows)
 	}
 
-	view := runsView("organizer", archived, live)
+	view := runsView("organizer", archived, live, nil)
 	if len(view.Cards) != 1 || len(view.Cards[0].Runs) != 1 {
 		t.Fatalf("cards = %+v, want one card with one row", view.Cards)
 	}

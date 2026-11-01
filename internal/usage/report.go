@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -290,7 +291,8 @@ func cut(c string, ls []Line, weekMoney float64) []Row {
 			}
 			if c == "task" && key != "" {
 				r.Initiative, r.Cards = l.Initiative, l.Cards
-				if len(r.Cards) == 0 {
+				// An overhead task names no card, so the view links none.
+				if len(r.Cards) == 0 && IsCardTask(l.Task) {
 					r.Cards = []string{l.Task}
 				}
 			}
@@ -464,6 +466,121 @@ func sessions(ls []Line, running map[string]bool) []SessionRow {
 			return out[i].Start.After(out[j].Start)
 		}
 		return out[i].ID < out[j].ID
+	})
+	return out
+}
+
+// Shares is FR-6's two numbers over a list of tasks and their costs: the
+// share of the cost whose task is overhead:<role>, and the share with no
+// task at all. Both are 0 when nothing has a cost.
+func Shares(tasks []string, costs []float64) (overhead, none float64) {
+	var total, o, n float64
+	for i, t := range tasks {
+		c := costs[i]
+		total += c
+		switch {
+		case t == "":
+			n += c
+		case strings.HasPrefix(t, OverheadPrefix):
+			o += c
+		}
+	}
+	if total <= 0 {
+		return 0, 0
+	}
+	return o / total, n / total
+}
+
+// SessionShares is Shares over a week's sessions, the usage report's line.
+func SessionShares(rows []SessionRow) (overhead, none float64) {
+	tasks := make([]string, len(rows))
+	costs := make([]float64, len(rows))
+	for i, r := range rows {
+		tasks[i] = r.Task
+		if r.Money != nil {
+			costs[i] = *r.Money
+		}
+	}
+	return Shares(tasks, costs)
+}
+
+// BySession is each session's attribution as the ledger keeps it, from its
+// latest day: what `organizer runs` and the app's runs view name a run's
+// initiative and task by, so a run and its usage row never disagree
+// (leftovers-56 FR-5).
+func BySession(lines []Line) map[string]Attribution {
+	out := map[string]Attribution{}
+	last := map[string]string{}
+	for _, l := range lines {
+		if d, ok := last[l.SessionID]; ok && d > l.Day {
+			continue
+		}
+		last[l.SessionID] = l.Day
+		out[l.SessionID] = l.Attribution
+	}
+	return out
+}
+
+// The causes of a cost with no task (leftovers-56 Amendment 2), read from
+// the attribution's Reason. CauseNoUsageRow is a run the ledger has not
+// seen, which only `organizer runs` can have.
+const (
+	CauseSupervisor  = "a supervisor no record or card names"
+	CauseSeveral     = "a seat several cards name"
+	CauseNoSeat      = "a builder or reviewer no card's seat: matches"
+	CauseOutside     = "a card role outside every initiative root"
+	CauseNoUsageRow  = "a run with no usage row"
+	CauseUnexplained = "not attributed, no reason given"
+)
+
+// CauseOf groups an attribution's Reason (the strings Attribute writes) by
+// cause. A reason none of them covers is its own cause, verbatim, so a new
+// one shows up in the breakdown rather than hiding in another.
+func CauseOf(reason string) string {
+	switch {
+	case reason == "":
+		return CauseUnexplained
+	case strings.HasPrefix(reason, "no record or card names "):
+		return CauseSupervisor
+	case strings.Contains(reason, " cards (") && (strings.HasPrefix(reason, "seat ") || strings.HasPrefix(reason, "reviewer ")):
+		return CauseSeveral
+	case strings.HasPrefix(reason, "no card's seat: matches "):
+		return CauseNoSeat
+	case strings.Contains(reason, "outside every initiative root"):
+		return CauseOutside
+	}
+	return reason
+}
+
+// CauseShare is one cause's share of the whole cost.
+type CauseShare struct {
+	Cause string
+	Share float64
+}
+
+// ByCause is the share with no task split by cause: each item's cost under
+// its cause, over the total cost of everything (so the shares add up to the
+// share with none). Largest first, then by name; nothing when the total is
+// zero or no item has a cost.
+func ByCause(causes []string, costs []float64, total float64) []CauseShare {
+	if total <= 0 {
+		return nil
+	}
+	sum := map[string]float64{}
+	for i, c := range causes {
+		sum[c] += costs[i]
+	}
+	var out []CauseShare
+	for c, v := range sum {
+		if v > 0 {
+			out = append(out, CauseShare{c, v / total})
+		}
+	}
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].Share != out[j].Share {
+			return out[i].Share > out[j].Share
+		}
+		return out[i].Cause < out[j].Cause
 	})
 	return out
 }

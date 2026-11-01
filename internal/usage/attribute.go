@@ -22,13 +22,44 @@ const (
 	NotAttributed  = "Not attributed"
 )
 
+// Factory is the initiative of a run outside every initiative root
+// (Hephaistos, a pair session in the home directory): the factory's own
+// cost (leftovers-56 FR-1).
+const Factory = "factory"
+
+// OverheadPrefix starts the task of a role that works for its initiative
+// and not for a card: overhead:fse, overhead:persona, overhead:pair,
+// overhead:session (leftovers-56 FR-1).
+const OverheadPrefix = "overhead:"
+
+// IsCardTask is a task that names work on cards: a card slug or a
+// supervisor's wave:<seat>. Empty and overhead tasks are not.
+func IsCardTask(task string) bool {
+	return task != "" && !strings.HasPrefix(task, OverheadPrefix)
+}
+
+// overheadRoles work for the initiative, not a card.
+var overheadRoles = map[string]bool{RoleFSE: true, RolePersona: true, RolePair: true, RoleSession: true}
+
 // Initiative is what attribution needs to know about one initiative root:
-// where it is, its cards (open and done) and its cell's seats.
+// where it is, its cards (open and done), its cell's seats and its decision
+// records that name a supervisor.
 type Initiative struct {
 	ID    string
 	Root  string
 	Cards []Card
 	Seats []string // agents/cell.json's roster, persona seats
+	// Records are the decision records with a supervisor: (LoadRoles reads
+	// them from Root).
+	Records []Record
+}
+
+// Record is one decision record as attribution reads it: the supervisor
+// session the FSE launched for it and the cards it accepts.
+type Record struct {
+	Number     string
+	Supervisor string   // the record's supervisor:, a session name
+	Cards      []string // the record's cards:
 }
 
 // Card is one working-on card as attribution reads it.
@@ -36,7 +67,10 @@ type Card struct {
 	Slug  string
 	Title string
 	Seat  string // the card's seat: field
-	Body  string // the card's markdown, where its supervisor is named
+	// Reviewers are the seats the card's reviewer: names (a reviewer and a
+	// UI reviewer, "a, b"); LoadRoles reads them from the card file.
+	Reviewers []string
+	Body      string // the card's markdown, where its supervisor is named
 }
 
 // Seen is what the transcript and the records said about a session.
@@ -72,8 +106,9 @@ func seatOf(name string) string {
 	return name
 }
 
-// Attribute names a session's initiative, role and task. It is called once
-// per session, when the ledger first sees it, and its answer is kept.
+// Attribute names a session's initiative, role and task (leftovers-56 FR-1
+// to FR-3). The ledger keeps an answer with a card task; one without is
+// asked again at every pass until it has one (FR-4).
 func Attribute(s Seen, inits []Initiative) Attribution {
 	a := Attribution{Name: s.Name, Cwd: s.Cwd}
 	if a.Name == "" {
@@ -81,13 +116,12 @@ func Attribute(s Seen, inits []Initiative) Attribution {
 	}
 	var reasons []string
 
+	// Outside every initiative root is the factory's (FR-1).
 	in := initiativeOf(s.Cwd, inits)
 	if in != nil {
 		a.Initiative = in.ID
-	} else if s.Cwd == "" {
-		reasons = append(reasons, "no working directory in the transcript")
 	} else {
-		reasons = append(reasons, "no initiative root above "+s.Cwd)
+		a.Initiative = Factory
 	}
 
 	seat := seatOf(a.Name)
@@ -95,39 +129,115 @@ func Attribute(s Seen, inits []Initiative) Attribution {
 		seat = strings.ToLower(s.Persona)
 	}
 	a.Role = roleOf(seat, s, in)
-	if a.Role == "" {
-		reasons = append(reasons, "no session name")
-	}
 
-	if in != nil {
-		switch a.Role {
-		case RoleSupervisor:
-			cards := supervisedBy(seat, in.Cards)
-			switch len(cards) {
-			case 0:
-				reasons = append(reasons, "no card names "+seat+" as its supervisor")
-			case 1:
-				a.Task, a.TaskTitle = cards[0].Slug, cards[0].Title
-			default:
-				slugs := make([]string, len(cards))
-				for i, c := range cards {
-					slugs[i] = c.Slug
-				}
-				a.Task = "wave:" + seat
-				a.TaskTitle = seat + " · " + strings.Join(slugs, ", ")
-				a.Cards = slugs
+	switch {
+	case overheadRoles[a.Role]:
+		a.Task = OverheadPrefix + a.Role
+	case in == nil:
+		reasons = append(reasons, "a "+a.Role+" outside every initiative root has no card")
+	case a.Role == RoleSupervisor:
+		cards, why := supervisorCards(seat, in)
+		switch len(cards) {
+		case 0:
+			reasons = append(reasons, why)
+		case 1:
+			a.Task, a.TaskTitle = cards[0].Slug, cards[0].Title
+		default:
+			slugs := make([]string, len(cards))
+			for i, c := range cards {
+				slugs[i] = c.Slug
 			}
-		case RoleBuilder, RoleReviewer, RoleUIReviewer:
-			c, why := cardOfSeat(seat, in.Cards)
-			if c != nil {
-				a.Task, a.TaskTitle = c.Slug, c.Title
-			} else {
-				reasons = append(reasons, why)
-			}
+			a.Task = "wave:" + seat
+			a.TaskTitle = seat + " · " + strings.Join(slugs, ", ")
+			a.Cards = slugs
+		}
+	default: // builder, reviewer, ui reviewer
+		var c *Card
+		why := ""
+		if a.Role == RoleReviewer || a.Role == RoleUIReviewer {
+			c, why = cardOfReviewer(seat, in.Cards)
+		}
+		if c == nil && why == "" {
+			c, why = cardOfSeat(seat, in.Cards)
+		}
+		if c != nil {
+			a.Task, a.TaskTitle = c.Slug, c.Title
+		} else {
+			reasons = append(reasons, why)
 		}
 	}
 	a.Reason = strings.Join(reasons, "; ")
 	return a
+}
+
+// supervisorCards is a supervisor's cards (FR-2): the cards of the accept
+// records whose supervisor: is its session, else the cards whose body names
+// it (supervisedBy). A record's card no longer on disk still counts, by
+// slug, since the record is what launched the supervisor.
+func supervisorCards(seat string, in *Initiative) ([]Card, string) {
+	seen := map[string]bool{}
+	var out []Card
+	for _, r := range in.Records {
+		if r.Supervisor == "" || seatOf(r.Supervisor) != seat {
+			continue
+		}
+		for _, slug := range r.Cards {
+			slug = strings.TrimSpace(slug)
+			if slug == "" || seen[slug] {
+				continue
+			}
+			seen[slug] = true
+			c := Card{Slug: slug}
+			for _, k := range in.Cards {
+				if k.Slug == slug {
+					c = k
+					break
+				}
+			}
+			out = append(out, c)
+		}
+	}
+	if len(out) == 0 {
+		out = supervisedBy(seat, in.Cards)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Slug < out[j].Slug })
+	if len(out) == 0 {
+		return nil, "no record or card names " + seat + " as its supervisor"
+	}
+	return out, ""
+}
+
+// reviewedBy is the cards whose reviewer: names the seat.
+func reviewedBy(seat string, cards []Card) []*Card {
+	var out []*Card
+	for i := range cards {
+		for _, r := range cards[i].Reviewers {
+			if r = seatOf(r); r != "" && r == seat {
+				out = append(out, &cards[i])
+				break
+			}
+		}
+	}
+	return out
+}
+
+// cardOfReviewer is the card a reviewer reviews by the cards' reviewer:
+// field (FR-3). No card naming it is no answer and no reason, so the seat:
+// rule runs next; two cards naming it is no answer, as cardOfSeat has it.
+func cardOfReviewer(seat string, cards []Card) (*Card, string) {
+	got := reviewedBy(seat, cards)
+	switch len(got) {
+	case 0:
+		return nil, ""
+	case 1:
+		return got[0], ""
+	}
+	slugs := make([]string, len(got))
+	for i, c := range got {
+		slugs[i] = c.Slug
+	}
+	sort.Strings(slugs)
+	return nil, fmt.Sprintf("reviewer %s is named by %d cards (%s)", seat, len(got), strings.Join(slugs, ", "))
 }
 
 // initiativeOf is the longest initiative root that holds the directory; a
@@ -156,7 +266,7 @@ func roleOf(seat string, s Seen, in *Initiative) string {
 	case seat == "" && s.Pair != "":
 		return RolePair
 	case seat == "":
-		return ""
+		return RoleSession // a plain session with no name
 	case supRe.MatchString(seat):
 		return RoleSupervisor
 	case seat == "fse":
@@ -165,6 +275,8 @@ func roleOf(seat string, s Seen, in *Initiative) string {
 		return RolePair
 	case uiRe.MatchString(seat):
 		return RoleUIReviewer
+	case in != nil && len(reviewedBy(seat, in.Cards)) > 0:
+		return RoleReviewer // a card's reviewer: names it (l54-retire-rev)
 	case reviewerRe.MatchString(seat):
 		return RoleReviewer
 	case builderRe.MatchString(seat):
