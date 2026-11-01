@@ -7,7 +7,7 @@ seat: l56-roles
 supervisor: organizer-probe-sup96
 stage:
 updated: 2026-11-01
-next: "sup96 runs it: l56-roles builds on branch lf56-run-roles from 21b5d5d (2026-11-01)"
+next: "decide: FR-2/FR-3 inputs do not reach usage.Attribute: model.Card has no reviewer:, model.Decision no supervisor:, and usage.Initiative (built in internal/service/usage.go, outside the boundary) carries no records. (a) read reviewer: and records' supervisor:/cards: in internal/usage from Initiative.Root (in boundary, a second small frontmatter read; recommended) or (b) widen the boundary to model, scan and service/usage.go. l56-roles builds FR-1/4/5/6 meanwhile"
 depends_on: []
 boundary: ["docs/specs/leftovers-56.md Boundary"]
 spec: "docs/specs/leftovers-56.md (FR-1 to FR-6)"
