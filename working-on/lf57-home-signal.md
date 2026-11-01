@@ -1,12 +1,12 @@
 ---
 title: "Home's row says the last run: cards passed and time stopped"
-status: next
+status: now
 repos: [organizer]
 branch: lf57-home-signal
-seat:
+seat: l57-home
 stage:
 updated: 2026-11-01
-next: "sup101 runs it (0169; leftovers-57 Amendment 2)"
+next: "l57-home builds it (sup101, launched 2026-11-01 19:50, base d4c67af)"
 depends_on: [lf57-run-report, lf61-decision-states-ui]
 boundary: ["docs/specs/leftovers-57.md Boundary, lf57-home-signal"]
 spec: "docs/specs/leftovers-57.md (FR-14)"
