@@ -1,12 +1,12 @@
 ---
 title: "A C4 level draws as an inline, sanitized dark SVG with a real button over each node"
-status: next
+status: now
 repos: [organizer]
 branch: lf58-map-render
-seat:
+seat: l58-render
 stage:
 updated: 2026-11-01
-next: "sup103 runs it (0174 ruled 2026-11-01, autonomous mode)"
+next: "l58-render builds on lf58-map-render (sup103 launched 2026-11-01, wave 1)"
 depends_on: []
 boundary: ["frontend/src/lib/mapSvg.ts", "frontend/src/lib/mapSvg.test.ts", "frontend/src/components/MapFigure.tsx", "frontend/src/components/MapFigure.test.tsx", "frontend/package.json", "frontend/pnpm-lock.yaml", "frontend/src/lib/testdata/"]
 spec: "docs/specs/leftovers-58.md (FR-4 and FR-5)"

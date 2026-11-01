@@ -1,12 +1,12 @@
 ---
 title: "Deltagos reads an initiative's C4 map.json and each level's mermaid source"
-status: next
+status: now
 repos: [organizer]
 branch: lf58-map-read
-seat:
+seat: l58-read
 stage:
 updated: 2026-11-01
-next: "sup103 runs it (0174 ruled 2026-11-01, autonomous mode)"
+next: "l58-read builds on lf58-map-read (sup103 launched 2026-11-01, wave 1)"
 depends_on: []
 boundary: ["internal/service/map.go", "internal/service/map_test.go", "app.go", "frontend/wailsjs/", "testdata/fixture-map/", "CLAUDE.md"]
 spec: "docs/specs/leftovers-58.md (FR-1 to FR-3)"
