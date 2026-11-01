@@ -169,3 +169,14 @@ c3be84f): `factory report --json` has a `waves` block (0168 Q2) and
 8474386. FR-3 reads the list; FR-4 and R5 are withdrawn; FR-5 reads the
 waves block and adds only tokens, which the report lacks; R4 and R6 follow.
 lf57-report-go no longer waits on Hephaistos.
+
+## Amendment 2 (FSE, 2026-11-01): launch without lf55, home signal after lf61
+
+lf52, the three lf53 cards and the waves block are on origin/main (PRs
+#5-#8). lf55-one-title is still unmerged (its H3 waits on a Dock window on
+Pablo's display); its only overlap with this task is `CLAUDE.md`, so
+`lf57-report-go` no longer depends on it: whichever lands second merges
+the CLAUDE.md lines. `lf57-home-signal` touches `Home.tsx`, as
+`lf61-decision-states-ui` (sup100, running) does: it starts after lf61 is
+on origin/main. X0 for every card runs with `CONTRACTS_DIR` at a checkout
+of agent-mailbox-specs 54cf10d (it holds factory-report 8474386).

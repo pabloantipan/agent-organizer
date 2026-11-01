@@ -6,8 +6,8 @@ branch: lf57-home-signal
 seat:
 stage:
 updated: 2026-11-01
-next: "waits on lf57-run-report (0169 ruled 2026-11-01)"
-depends_on: [lf57-run-report]
+next: "sup101 runs it (0169; leftovers-57 Amendment 2)"
+depends_on: [lf57-run-report, lf61-decision-states-ui]
 boundary: ["docs/specs/leftovers-57.md Boundary, lf57-home-signal"]
 spec: "docs/specs/leftovers-57.md (FR-14)"
 gate: "docs/specs/leftovers-57.md#Acceptance → gate"
