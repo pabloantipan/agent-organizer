@@ -4,7 +4,17 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
-## HAND-OFF 2026-11-01 (last sha a73d86b)
+## HAND-OFF 2026-11-01 16:45 (last sha c1bda4c)
+
+- AUTONOMOUS since 16:19, no end set. Pablo's goal for the window (relayed by Hephaistos): the factory model built in atlax. Hourly cron wake (session-only).
+- Live supervisors (the cap of 3): sup100 on lf61-decision-states-ui (0173, 45-90m, from 16:15); sup101 on leftovers 57 (0169, 3 waves, 180-300m, from 16:15; lf57-home-signal waits on lf61); sup102 on lf59-atlax-record (0171, atlax-seed Amendment 3, 30-60m, from ~16:40). talos-lab sits in the cell and merges every PR (cell.json fc685a6).
+- Next: when Hephaistos posts the atlax-wails merge sha, cut the Wails and CLI elements card (the dry run derived 78 wails, 26 cli). Then lf58, the C4 map lens (0170 roadmap mode, contract c4-map/1 at specs 54cf10d), when a supervisor slot frees.
+- Waits on Pablo: lf55-one-title (Dock layer-20 window on his display; card needs-operator; its branch now conflicts with lf60 on floaticon_darwin.m, so the continuation rebases first); restarting Deltagos to run the icon fix (asked in one [for pablo] post).
+- No proposed records. Installed v0.2.0-3096. Local main is ahead of origin with card and doc commits only; talos-lab's closing working-on PR carries them.
+- 0167 and 0168 carry "2026-10-28" in their ruling words. They were ruled on 10-27 by the clock. Ruled records are not edited.
+- WRONG, mine: a bitácora insert in 2f29b62 replaced its anchor line instead of inserting before it, losing the line above until this hand-off restored it.
+
+## 2026-11-01 (day log, the earlier hand-off and what followed)
 
 - No supervisor is running. origin/main is at 21b5d5d. Hephaistos is reconciling the six unmerged branches. I answered that all six are to be reconciled, in this order: lf52-decisions-line, lf53-frontmatter, lf53-usage-contract, lf53-record-statusline, lf54-retire-guard, spec/autonomous-report-charts. Each merges clean (thread 01M6AHE7XTRSVAVA3VR1CY8Q60). After the merges: fast-forward local main, run make install, launch leftovers 54 wave 2.
 - Waiting on Pablo:
