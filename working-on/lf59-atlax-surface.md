@@ -1,12 +1,12 @@
 ---
 title: "Deltagos's atlax slice names every Wails method and CLI command"
-status: next
+status: now
 repos: [organizer]
 branch: lf59-atlax-surface
-seat:
+seat: l59-surface
 stage:
 updated: 2026-11-01
-next: "sup102 runs it after lf59-atlax-record (0171, atlax-seed Amendment 4)"
+next: "l59-surface builds FR-7 to FR-9 on lf59-atlax-surface (sup102 launched 2026-11-01 18:55)"
 depends_on: [lf59-atlax-record]
 boundary: ["atlax/"]
 spec: "docs/specs/atlax-seed.md (Amendment 4, FR-7 to FR-9)"
