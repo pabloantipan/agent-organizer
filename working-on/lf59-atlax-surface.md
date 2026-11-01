@@ -20,6 +20,8 @@ change_order:
   adds: []
   modifies: []
   retires: []
+prs:
+  - {repo: organizer, pr: 23, target: main, state: merged, merge: a1c0f7a}
 ---
 
 ## Goal
