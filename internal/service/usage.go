@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"organizer/internal/scan"
 	"organizer/internal/session"
 	"organizer/internal/usage"
 )
@@ -44,64 +43,11 @@ func (s *Service) Usage(week string) (usage.View, error) {
 	}
 	v.Machine = cfg.Machine
 	v.Stats = st
-	// A rejected row whose ledger row is gone leaves the state at this pass,
-	// before the view lists what is left (leftovers-62 FR-3).
-	pruneUsageRejected(dataDir, lines)
-	v.Rejected = []usage.RejectedRow{}
-	for _, r := range UsageRejected() {
-		v.Rejected = append(v.Rejected, usage.RejectedRow{SessionID: r.SessionID, Day: r.Day, Reason: r.Reason})
-	}
+	v.Rejected = passRejected(dataDir, lines)
 	// The changed rows go to the record after the view is built, in the
 	// background, so the post never delays it (usage-post FR-6).
 	startUsagePost(cfg, dataDir, ledger, s.now)
 	return v, nil
-}
-
-// usageInputs is what a ledger pass attributes and costs sessions with: the
-// initiatives on disk (scanned without git) and every cost record, plus the
-// sessions still running. Usage passes them to Ingest and the runs readers
-// to Attributions, so both apply one rule to the same inputs (leftovers-62
-// FR-1).
-type usageInputs struct {
-	inits   []usage.Initiative
-	costs   []usage.CostSource
-	running map[string]bool
-}
-
-func (s *Service) usageInputs() usageInputs {
-	// scanOptions reads the state for its agent options; the runs readers
-	// call this from the app's goroutines, so it is built under the lock.
-	s.mu.Lock()
-	opts := s.scanOptions(false)
-	s.mu.Unlock()
-	opts.Agents = nil
-	roots, _ := scan.Discover(opts)
-	in := usageInputs{inits: make([]usage.Initiative, 0, len(roots)), running: map[string]bool{}}
-	for _, root := range roots {
-		si := scan.ReadInitiative(root, opts)
-		ui := usage.Initiative{ID: si.ID, Root: root}
-		for _, c := range si.Cards {
-			ui.Cards = append(ui.Cards, usage.Card{Slug: c.Slug, Title: c.Title, Seat: c.Seat, Body: c.Body})
-		}
-		if si.Cell != nil {
-			ui.Seats = si.Cell.Agents
-		}
-		in.inits = append(in.inits, ui)
-	}
-
-	// A record that says $0 has not seen a cost yet (the statusline's open
-	// line, a session killed before its first refresh): a session with
-	// tokens never costs nothing, so it is "no cost recorded", not $0.
-	for _, r := range session.LoadRuns(session.RunsPath()) {
-		in.costs = append(in.costs, usage.CostSource{SessionID: r.SessionID, PID: r.PID, At: r.LastSeen, Session: r.Session, Persona: r.Persona, CostUSD: r.CostUSD, HasCost: r.CostUSD > 0})
-	}
-	for pid, r := range session.Load(session.Dir()) {
-		in.costs = append(in.costs, usage.CostSource{SessionID: r.SessionID, PID: r.PID, At: r.UpdatedAt, Session: r.Session, Persona: r.Persona, CostUSD: r.CostUSD, HasCost: r.CostUSD > 0})
-		if alive(pid) {
-			in.running[r.SessionID] = true
-		}
-	}
-	return in
 }
 
 // alive reports whether a process exists; EPERM means it does, as someone

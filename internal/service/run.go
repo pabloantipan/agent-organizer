@@ -581,3 +581,50 @@ func laterRun(a, b RunInfo) bool {
 	}
 	return a.SessionID < b.SessionID
 }
+
+// usageInputs is what a ledger pass attributes and costs sessions with: the
+// initiatives on disk (scanned without git) and every cost record, plus the
+// sessions still running. Usage passes them to Ingest and the runs readers
+// to Attributions, so both apply one rule to the same inputs (leftovers-62
+// FR-1).
+type usageInputs struct {
+	inits   []usage.Initiative
+	costs   []usage.CostSource
+	running map[string]bool
+}
+
+func (s *Service) usageInputs() usageInputs {
+	// scanOptions reads the state for its agent options; the runs readers
+	// call this from the app's goroutines, so it is built under the lock.
+	s.mu.Lock()
+	opts := s.scanOptions(false)
+	s.mu.Unlock()
+	opts.Agents = nil
+	roots, _ := scan.Discover(opts)
+	in := usageInputs{inits: make([]usage.Initiative, 0, len(roots)), running: map[string]bool{}}
+	for _, root := range roots {
+		si := scan.ReadInitiative(root, opts)
+		ui := usage.Initiative{ID: si.ID, Root: root}
+		for _, c := range si.Cards {
+			ui.Cards = append(ui.Cards, usage.Card{Slug: c.Slug, Title: c.Title, Seat: c.Seat, Body: c.Body})
+		}
+		if si.Cell != nil {
+			ui.Seats = si.Cell.Agents
+		}
+		in.inits = append(in.inits, ui)
+	}
+
+	// A record that says $0 has not seen a cost yet (the statusline's open
+	// line, a session killed before its first refresh): a session with
+	// tokens never costs nothing, so it is "no cost recorded", not $0.
+	for _, r := range session.LoadRuns(session.RunsPath()) {
+		in.costs = append(in.costs, usage.CostSource{SessionID: r.SessionID, PID: r.PID, At: r.LastSeen, Session: r.Session, Persona: r.Persona, CostUSD: r.CostUSD, HasCost: r.CostUSD > 0})
+	}
+	for pid, r := range session.Load(session.Dir()) {
+		in.costs = append(in.costs, usage.CostSource{SessionID: r.SessionID, PID: r.PID, At: r.UpdatedAt, Session: r.Session, Persona: r.Persona, CostUSD: r.CostUSD, HasCost: r.CostUSD > 0})
+		if alive(pid) {
+			in.running[r.SessionID] = true
+		}
+	}
+	return in
+}

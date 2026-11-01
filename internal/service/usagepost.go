@@ -263,6 +263,18 @@ func pruneUsageRejected(dataDir string, lines []usage.Line) {
 	}
 }
 
+// passRejected is what a ledger pass lists of the rows the record rejected
+// (leftovers-62 FR-3): a row whose ledger row is gone leaves the state first,
+// then what is left, as the usage view carries it, never null.
+func passRejected(dataDir string, lines []usage.Line) []usage.RejectedRow {
+	pruneUsageRejected(dataDir, lines)
+	out := []usage.RejectedRow{}
+	for _, r := range UsageRejected() {
+		out = append(out, usage.RejectedRow{SessionID: r.SessionID, Day: r.Day, Reason: r.Reason})
+	}
+	return out
+}
+
 // rejectedIn maps the record's rejected rows to their place in the batch
 // sent: by index when the row there has the same session and day, else by
 // session and day, since an index that does not match its key is not to be
