@@ -1,12 +1,12 @@
 ---
 title: "Roadmap gains Map: levels, status, drift and each node's grounding"
-status: next
+status: now
 repos: [organizer]
 branch: lf58-map-lens
-seat:
+seat: l58-lens
 stage:
 updated: 2026-11-01
-next: "sup103 runs it (0174 ruled 2026-11-01, autonomous mode)"
+next: "l58-lens builds on lf58-map-lens (sup103 launched 2026-11-01, wave 2)"
 depends_on: [lf58-map-read, lf58-map-render]
 boundary: ["frontend/src/components/RoadmapView.tsx", "frontend/src/components/MapView.tsx", "frontend/src/components/MapPanel.tsx", "frontend/src/components/MapView.test.tsx", "frontend/src/styles/map.css"]
 spec: "docs/specs/leftovers-58.md (FR-6 to FR-9)"
