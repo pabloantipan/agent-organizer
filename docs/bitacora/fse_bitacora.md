@@ -20,6 +20,7 @@ restating it (the discuss skill).
 - 2026-11-01: 0171 ruled (atlax seed, accept as written); sup97 runs lf59-atlax-seed. Hephaistos answered in 01M6BZ9CJH5X531M6DTYNJYFFG: map lens reads atlax as lf58-map-atlax (cut with lf58); fixture-many's 0041/0010 read as written by yaml.v3 into strings, kept.
 - Found, held for a card: `organizer rule` writes only the ruling fields, so no accept record ever carries `supervisor:` (fse skill asks for it in the ruling commit). Cost: 8.5% of runs cost has no task (lf56 A6, Amendment 2 f5a8751). Next leftovers: `rule --supervisor <session>`.
 - Held for the next leftovers (lf56 review pass at 161bf86): `organizer runs` reads the attribution ledger as main left it until `organizer usage` runs once (lodestar: 0% overhead, 40.6% no task before; the runs view should attribute on read too). FR-2 ignores a card's own `supervisor:` (~1.1%), left out on purpose. lf59 review Note 1 carded as lf59-atlax-calls (2583cf3).
+- sup96 closed (13:17-13:55, 38 min against 60-120m; $10.46): lf56-run-roles pass at 161bf86, PR with talos-lab (thread 01M6C0E2XR49SSXWY76HANW1PF), worktree .wt/lf56-run-roles kept for a rebase over lf53-frontmatter. sup96 ended. Gate rule, from its Found 3: any row that runs `organizer usage` on a copied data dir must strip record_url first, or it posts to the real record. Found 5: the builder reached 231k of 250k on a one-card Go task.
 - 0167 and 0168 carry "2026-10-28" in their ruling words. They were ruled on 10-27 by the clock. Ruled records are not edited.
 
 ## 2026-10-26 02:50

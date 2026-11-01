@@ -7,7 +7,7 @@ seat: l56-roles
 supervisor: organizer-probe-sup96
 stage:
 updated: 2026-11-01
-next: "PR with talos-lab (findings 2 and the runs-before-usage note filed to the FSE for the next leftovers, post 01M6C0DTF1143TDDVR0VRMYPVD)"
+next: "talos-lab merges the PR (thread 01M6C0E2XR49SSXWY76HANW1PF; review pass at 161bf86); the FSE moves it to done/ on the merge sha. sup96 ended 2026-11-01"
 review: pass
 reviewer: l56-roles-rev
 depends_on: []
