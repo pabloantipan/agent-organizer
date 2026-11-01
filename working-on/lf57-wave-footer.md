@@ -1,12 +1,12 @@
 ---
 title: "A finished wave's footer opens its run record over the report"
-status: next
+status: now
 repos: [organizer]
 branch: lf57-wave-footer
-seat:
+seat: l57-foot
 stage:
 updated: 2026-11-01
-next: "sup101 runs it after lf57-home-signal or beside it (0169, leftovers-57 Amendment 4)"
+next: "l57-foot builds it (sup101, launched 2026-11-01 19:52, base d4c67af)"
 depends_on: [lf57-run-report]
 boundary: ["frontend/src/components/RunReport.tsx", "frontend/src/lib/runReport.ts", "frontend/src/lib/specReader.ts", "frontend/src/components/SpecReader.tsx", "internal/service/spec.go", "internal/service/spec_test.go"]
 spec: "docs/specs/leftovers-57.md (Amendment 4, FR-15 to FR-17)"
