@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 62 - today's review findings
-status: proposed
+status: ruled
 raised: 2026-11-01
 raised_by: fse
 owner: pablo
@@ -9,9 +9,10 @@ cards: [lf62-go, lf62-ui]
 forecast: 90-180m
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-11-01
+ruled_by: pablo (autonomous mode)
+supervisor: organizer-probe-sup104
+chosen: accept as written
 ---
 
 ## Question
@@ -40,3 +41,11 @@ accept as written.
 
 forecast: 90-180m over 2 waves; basis: this initiative's small Go and
 frontend leftovers today (lf56 38 min, lf61 55 min, lf54 wave 2 101 min).
+
+## Ruling
+
+pablo (autonomous mode), 2026-11-01 19:44: the recommendation taken after
+five minutes without an answer. Asked at 19:39 in the mailbox ("0175:
+accept leftovers 62, today's review findings?", options accept as written
+or send back); recommended "accept as written". Not sensitive: the
+organizer's own record, no data leaves the Mac, no account or setting.

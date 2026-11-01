@@ -6,7 +6,7 @@ branch: lf62-go
 seat:
 stage:
 updated: 2026-11-01
-next: "the FSE launches its supervisor once 0175 is ruled"
+next: "sup104 runs it (0175 ruled 2026-11-01, autonomous mode)"
 depends_on: []
 boundary: ["internal/service/run.go", "internal/service/rule.go", "internal/service/usagepost.go", "internal/service/tasks.go", "internal/service/literals_test.go", "internal/usage/", "internal/cli/"]
 spec: "docs/specs/leftovers-62.md (FR-1 to FR-4)"

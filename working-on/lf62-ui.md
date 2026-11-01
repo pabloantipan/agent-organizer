@@ -6,7 +6,7 @@ branch: lf62-ui
 seat:
 stage:
 updated: 2026-11-01
-next: "the FSE launches its supervisor once 0175 is ruled"
+next: "sup104 runs it (0175 ruled 2026-11-01, autonomous mode)"
 depends_on: [lf62-go]
 boundary: ["frontend/src/components/InitiativeHeader.tsx", "frontend/src/lib/header.ts", "frontend/src/styles/shell.css", "frontend/src/components/Usage.tsx", "frontend/src/components/UsageTable.tsx", "frontend/src/lib/decisionStates.test.ts", "frontend/wailsjs/"]
 spec: "docs/specs/leftovers-62.md (FR-5 to FR-8)"
