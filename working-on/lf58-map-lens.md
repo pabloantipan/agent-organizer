@@ -6,7 +6,7 @@ branch: lf58-map-lens
 seat:
 stage:
 updated: 2026-11-01
-next: "the FSE launches its supervisor once 0174 is ruled"
+next: "sup103 runs it (0174 ruled 2026-11-01, autonomous mode)"
 depends_on: [lf58-map-read, lf58-map-render]
 boundary: ["frontend/src/components/RoadmapView.tsx", "frontend/src/components/MapView.tsx", "frontend/src/components/MapPanel.tsx", "frontend/src/components/MapView.test.tsx", "frontend/src/styles/map.css"]
 spec: "docs/specs/leftovers-58.md (FR-6 to FR-9)"

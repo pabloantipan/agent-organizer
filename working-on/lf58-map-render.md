@@ -6,7 +6,7 @@ branch: lf58-map-render
 seat:
 stage:
 updated: 2026-11-01
-next: "the FSE launches its supervisor once 0174 is ruled"
+next: "sup103 runs it (0174 ruled 2026-11-01, autonomous mode)"
 depends_on: []
 boundary: ["frontend/src/lib/mapSvg.ts", "frontend/src/lib/mapSvg.test.ts", "frontend/src/components/MapFigure.tsx", "frontend/src/components/MapFigure.test.tsx", "frontend/package.json", "frontend/pnpm-lock.yaml", "frontend/src/lib/testdata/"]
 spec: "docs/specs/leftovers-58.md (FR-4 and FR-5)"

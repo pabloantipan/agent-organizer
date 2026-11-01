@@ -6,7 +6,7 @@ branch: lf58-map-read
 seat:
 stage:
 updated: 2026-11-01
-next: "the FSE launches its supervisor once 0174 is ruled"
+next: "sup103 runs it (0174 ruled 2026-11-01, autonomous mode)"
 depends_on: []
 boundary: ["internal/service/map.go", "internal/service/map_test.go", "app.go", "frontend/wailsjs/", "testdata/fixture-map/", "CLAUDE.md"]
 spec: "docs/specs/leftovers-58.md (FR-1 to FR-3)"
