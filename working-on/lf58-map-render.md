@@ -6,7 +6,7 @@ branch: lf58-map-render
 seat: l58-render
 stage:
 updated: 2026-11-01
-next: "fix FR-4: the sanitizer lets CSS load external resources (quoted url with ')', CSS-escaped url, -webkit-image-set); add those inputs to V1's test"
+next: "review: lf58-map-render, V1 V2 X0 pass (round 2, CSS fix), 9c545b6"
 review: fail
 reviewer: l58-render-rev
 cause: execution
@@ -38,20 +38,22 @@ docs/specs/leftovers-58.md, rows V1, V2 and X0.
 ## Done
 - 2026-11-01: FR-4 and FR-5 built (f226344 mapSvg, 6935178 MapFigure), on origin/main bf66580; V1, V2 fail on the base (modules absent) and pass on the branch (43 tests); X0 passes from a clean clone (vitest 1475, Go, pnpm build, wails build, review-build, porcelain empty). Detail and the lens's API: `.wt-notes/l58-render/progress.md`.
 
+- 2026-11-01: review fail fixed (9c545b6): the drawing's CSS is read as the browser's tokenizer reads it (strings, bad strings, escapes, comments, nesting) and every fetching function but url(#fragment) is denied, in sheets, style and presentation attributes; V1 carries the reviewer's six forms, the brace-in-string case and more. Rebased on origin/main a7bd633 (7897f06, e5a4f53, 9c545b6); X0 passes again from a fresh clean clone (vitest 1504); the reviewer's live probe makes no request.
+
 ## Notes
 - The dark render draws node labels as HTML in `<foreignObject>` (mermaid 11 ignores `flowchart.htmlLabels`); ruled as Amendment 1 (a): the sanitizer swaps each for `<text>`. Root `htmlLabels: false` at the source is held for a later card.
 - mmdc's SVG carries the dark style's CSS unscoped (`.node rect`, `marker path`, …); inlined it would restyle the page, so the sanitizer renames the root (`map-svg-N`) and scopes every rule under it. A lens rule therefore needs `#id .node rect`-level specificity or `!important`.
 
 ## Declared changes
-- added `frontend/src/lib/mapSvg.ts`: FR-4 sanitizer (own XML reader and escaping serializer, element allowlist, foreignObject label to `<text>`, stylesheet scoping, aria-hidden root) and FR-5 node boxes, reading order, roving step, button names, lens classes
-- added `frontend/src/lib/mapSvg.test.ts`: V1 (hostile SVG; Amendment 1 over the real L2 render) and V2 (id to box over the fixture's L2)
+- added `frontend/src/lib/mapSvg.ts`: FR-4 sanitizer (own XML reader and escaping serializer, element allowlist, foreignObject label to `<text>`, stylesheet read the tokenizer's way and scoped, default-deny for every CSS load but url(#fragment), aria-hidden root) and FR-5 node boxes, reading order, roving step, button names, lens classes
+- added `frontend/src/lib/mapSvg.test.ts`: V1 (hostile SVG; the review's CSS load forms and brace cases; Amendment 1 over the real L2 render) and V2 (id to box over the fixture's L2)
 - added `frontend/src/lib/testdata/harbor-containers.svg`: the contract's L2 block rendered through `internal/diagram`, the V2 test data
 - added `frontend/src/lib/testdata/README.md`: the SVG's source, contract sha and how it was rendered
 - added `frontend/src/components/MapFigure.tsx`: renders a level through RenderDiagram, inlines the sanitized SVG, a roving set of real buttons over the nodes, lens classes as a prop
 - added `frontend/src/components/MapFigure.test.tsx`: the figure's states, names, roving stop, percent placement, lens classes
 Risky:
 - `parseXml`: a hand-written XML reader; it throws on what it cannot read (the figure then says `Map not drawn`), and only escaped, allowlisted output is inlined
-- `scopeCss`: a brace-counting CSS splitter; enough for mmdc's sheets, not a general CSS parser
+- `scopeCss`/`walkCss`: a hand-written CSS scanner mirroring the tokenizer's strings, escapes and comments; where it could disagree with the browser (a bad string) the rule is dropped, and a sheet still fetching is dropped whole
 Not changed, on purpose:
 - `frontend/src/components/DiagramFigure.tsx`: its render cache is copied in MapFigure, not exported from it
 - `frontend/package.json`, `frontend/pnpm-lock.yaml`: no sanitizer dependency; DOMParser is absent in vitest's Node and a DOM test library is outside the boundary
