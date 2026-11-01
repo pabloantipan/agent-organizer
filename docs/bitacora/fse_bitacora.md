@@ -19,6 +19,7 @@ restating it (the discuss skill).
 - 2026-11-01, Pablo ruled one by one in my session: 0166 accept as written (8769246), 0169 accept as written (86a5d26), 0170 roadmap mode (e60b890). Menu name: keep it, no agent app. sup96 launched on lf56-run-roles (forecast 60-120m); lf57 waits on lf52-decisions-line, lf53-frontmatter and lf55-one-title on origin/main; lf58 is cut against contracts/c4-map/ next.
 - 2026-11-01: 0171 ruled (atlax seed, accept as written); sup97 runs lf59-atlax-seed. Hephaistos answered in 01M6BZ9CJH5X531M6DTYNJYFFG: map lens reads atlax as lf58-map-atlax (cut with lf58); fixture-many's 0041/0010 read as written by yaml.v3 into strings, kept.
 - Found, held for a card: `organizer rule` writes only the ruling fields, so no accept record ever carries `supervisor:` (fse skill asks for it in the ruling commit). Cost: 8.5% of runs cost has no task (lf56 A6, Amendment 2 f5a8751). Next leftovers: `rule --supervisor <session>`.
+- Held for the next leftovers (lf56 review pass at 161bf86): `organizer runs` reads the attribution ledger as main left it until `organizer usage` runs once (lodestar: 0% overhead, 40.6% no task before; the runs view should attribute on read too). FR-2 ignores a card's own `supervisor:` (~1.1%), left out on purpose. lf59 review Note 1 carded as lf59-atlax-calls (2583cf3).
 - 0167 and 0168 carry "2026-10-28" in their ruling words. They were ruled on 10-27 by the clock. Ruled records are not edited.
 
 ## 2026-10-26 02:50
