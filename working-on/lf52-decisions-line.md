@@ -14,6 +14,8 @@ boundary: ["docs/specs/leftovers-52.md Boundary, lf52-decisions-line"]
 spec: "docs/specs/leftovers-52.md (FR-4 to FR-5)"
 gate: "docs/specs/leftovers-52.md#Acceptance → gate"
 ui_review: true
+prs:
+  - {repo: organizer, pr: 5, target: main, state: merged, merge: c985273}
 ---
 
 ## Goal
