@@ -30,6 +30,7 @@ restating it (the discuss skill).
 - lf56 (#11 4bd5102) and lf59 seed and calls (#12 54a29b3, #13 d89b90f) merged and in done/. At 14:5x atlax had not yet published agent-organizer (listed in platform/artifacts.yaml, notify organizer/fse; atlax-watch runs every 3 min): check artifacts/agent-organizer/ and `atlax check` on the next wake. agent-mailbox-record IS now published (fd888e3): the record's four consumes: lines (atlax-seed Amendment 1's later card) can be cut.
 - talos-lab cleared the backlog (#4-#15; #15 working-on 6b6e349); local main = origin/main; installed v0.2.0-3033 (lf60 icon fix included; Pablo restarts Deltagos to run it). atlax published artifacts/agent-organizer; `atlax check` 0 findings (after-merge line of atlax-seed met). leftovers-54 Amendment 5 (c15ceaa): decision-states may edit DecisionsView.tsx and Overview.tsx to call the helper.
 - Held for the next leftovers: decisionStates.test.ts stripComments drops code after a // inside a string (lf54-decision-states code review, 1df5001). leftovers-54 Amendment 6 (1360269): awaiting-cells Needs me rows read Open, never the rule box (UI review UI1, sev 3, my gap: Home.tsx was never named). UI4 and A1-A3 sent to Aglaea.
+- 0173 ruled (take Aglaea's DS1-DS6, docs/ux/specs/decision-states.md d05ea58): crossings leave Needs me. Cut leftovers-61 (one card, DS1-DS6) once lf54-decision-states merges; it changes 0164's FR-6 and G5.
 - 0167 and 0168 carry "2026-10-28" in their ruling words. They were ruled on 10-27 by the clock. Ruled records are not edited.
 
 ## 2026-10-26 02:50
