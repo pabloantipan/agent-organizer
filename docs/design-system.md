@@ -277,7 +277,15 @@ surface, and a chevron on hover and focus. *Carbon progress indicator.*
 
 ### Decision record
 Number (mono), title, status lozenge (waiting / ruled / superseded /
-withdrawn), owner and age or ruler and date. Expanded: options, the question,
+withdrawn), owner and age or ruler and date. **Status words and tones**
+(decision-states, DS4-DS6): the tone says open (waiting pair) or decided
+(ruled pair), the word says which status, everywhere the record is named
+(lozenge, Overview gate row, CLI line): "waiting", "awaiting cells",
+"ruled", "applied", "acknowledged"; a bucket heading groups, a line never
+renames. No sub-tone for crossing statuses. A person (owner, ruler) is
+read through one reader, so `operator` shows as pablo, the raw value in
+the hover. Needs me holds only what the lead can rule (DS1, pending its
+record). Expanded: options, the question,
 recommendation, ruling in the owner's words, consequences, linked cards and
 threads, supersedes chain. Superseded records stay, dimmed, linked forward. Dimmed means the
 `--fg-muted` text token, **never opacity**: a row at .7 opacity took its
