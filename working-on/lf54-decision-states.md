@@ -6,7 +6,7 @@ branch: lf54-decision-states
 seat: l54-states
 stage:
 updated: 2026-11-01
-next: "review: lf54-decision-states, G5 and X0 pass (Amendment 6 FR-6a to FR-6c added), ae0d9c6; then UI re-review, then PR with talos-lab. stripComments note-finding (Review 1df5001): filed to the FSE (bitácora, next leftovers)"
+next: "UI re-review at ae0d9c6, then PR with talos-lab. stripComments note-finding (Review 1df5001): filed to the FSE (bitácora, next leftovers)"
 review: pass
 reviewer: l54-states-rev, l54-states-ui
 depends_on: [lf53-frontmatter]
@@ -76,6 +76,17 @@ Re-review at 1df5001:
 - X0: `make test` exit 0 (Go 19 packages ok; vitest 87 files, 1385 tests). `test-lease run -- wails build` exit 0. `git status --porcelain` was empty.
 - Note (filed as `next`, not blocking): `stripComments` treats `//` inside a string as a comment unless a `:` or a quote precedes it. So `const u = "a//b"; return d.status === "ruled"` on one line passes the guard (scratch x5: 79 of 79 passed). No lib line today has `//` inside a string (grep over `frontend/src/lib/*.ts`), so it hides nothing now. Two more forms pass, and I read neither as the gate's "literal compared": a map lookup with unquoted keys (`{ applied: true }[d.status]`) and a concatenation (`"rul" + "ed"`).
 - The 39f64de notes stand: Go and component literals unguarded (`tasks.go:110`, `FsePanel.tsx:31`), and no scan test reads a refused `ruled_by`. The stale comment is fixed in 1df5001.
+
+### Re-review at ae0d9c6 (2026-11-01, l54-states-rev): pass
+**pass** at ae0d9c6 (d0a5e51 and ae0d9c6 on 1df5001, for the UI review fail; leftovers-54 Amendment 6). Unmet: none. Fresh clean clone at ae0d9c6, specs 54cf10d. X0's `make test` was **reused**: `--share` replayed the same command at ae0d9c63c9aa, run by organizer-probe-l54-states-ui from 16:00:56 (it printed no run id; log `.wt-notes/l54-states-rev/x0-make-test-ae0d9c6.log`). `wails build` and porcelain ran fresh.
+- The diff `1df5001..ae0d9c6` is frontend only: `Home.tsx`, `DecisionsView.tsx`, `lib/queue.ts`, `lib/decisions.ts`, `styles/global.css` and three tests. All are inside Amendment 6's boundary as sup99 relayed it. The amendment's own text names only Home.tsx and queue.ts, but FR-6c implies the badge classes. In `global.css` the only rule change swaps `#b9a3ff` for `var(--decision-ruled-fg)`, which is `#b9a3ff` (tokens.css:103), so nothing renders differently.
+- FR-6a: `decisionRowAction` (queue.ts) gives Rule plus the options when `isRulable`, else Open plus `decisionStatusWord` ("awaiting cells"). `DecisionRow` mounts `RuleAction` only for verb Rule, else `OpenDecision`, which is the `openDecision(initiative, number)` landing OthersRow already used. Tests: decisionStates.test.ts (FR-6a, including "verb follows isRulable for every open status") and Home.waits.test.tsx (0013 reads Open, labelled "Open camp 0013", with no aria-expanded and no `rb-anchor`, and reads "· awaiting cells" with no options).
+- isRulable is the only gate to a rule box. `RuleDecisionBox` is mounted in two places only: `RuleAction` in Home.tsx (reached only through `decisionRowAction`, so `isRulable`) and DecisionsView's `canRule = isRulable(d) && !readOnly` (unchanged). Go is untouched (`internal/service/rule.go` still refuses non-proposed).
+- FR-6b: DecisionsView shows `NOT_RULABLE_LINE` ("Waits on the cells it affects. Themis settles it.") in `.dec-actions` when the record is expanded, open and not rulable. The test checks that 0013 has the line and no Rule, that 0002 has Rule and no line, and that a collapsed 0013 has neither.
+- FR-6c: the badge class is `decisionTone(d)`, the word `statusWord(d.status)`. The test checks 0002 proposed/waiting, 0013 proposed/awaiting cells, 0014 ruled/applied and 0015 ruled/acknowledged.
+- 1df5001's met list still holds. The Go code, contract test and guard are unchanged. The x1 to x3 guard check is unchanged and still passes over the new queue.ts (no literal; `decisionStatusWord` is used instead).
+- X0: `make test` exit 0 (Go 19 packages ok; vitest 87 files, 1397 tests). `test-lease run -- wails build` exit 0. `git status --porcelain` was empty.
+- Note: the Open click itself (landing in Decisions) is not driven by a test. It reuses OthersRow's `openDecision` call. The UI re-review sees it.
 
 ### History: review at 39f64de (fail)
 **fail** at 39f64de. Unmet: **G5** (its last clause). X0 met.
