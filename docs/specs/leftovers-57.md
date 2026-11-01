@@ -180,3 +180,13 @@ the CLAUDE.md lines. `lf57-home-signal` touches `Home.tsx`, as
 `lf61-decision-states-ui` (sup100, running) does: it starts after lf61 is
 on origin/main. X0 for every card runs with `CONTRACTS_DIR` at a checkout
 of agent-mailbox-specs 54cf10d (it holds factory-report 8474386).
+
+## Amendment 3 (FSE, 2026-11-01, on l57-ui's gap at 2f7dccb)
+
+FR-8's "opening Work with that WaveStrip in view" holds only for a running
+wave: Work draws a WaveStrip for running waves alone (`Board.tsx`,
+`WaveStrip.tsx`, outside this boundary), and the report's waves are mostly
+finished. For `lf57-run-report`, a wave's footer opens Work and scrolls to
+its strip when one is drawn; for a finished wave it opens Work. W2 checks
+the navigation call. What a finished wave's footer should show instead is
+asked of Aglaea, for a later card.
