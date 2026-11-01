@@ -1,12 +1,13 @@
 ---
 title: "The run report reads clearly at every size, and every wave footer keeps its promise"
-status: next
+status: now
 repos: [organizer]
 branch: lf64-run-report-polish
-seat:
+seat: l64-build
+reviewer: l64-rev, l64-ui
 stage:
 updated: 2026-11-01
-next: "sup106 runs it (0177 ruled 2026-11-01, autonomous mode)"
+next: "l64-build builds lf64-run-report-polish (sup106 launched 2026-11-01)"
 depends_on: []
 boundary: ["frontend/src/components/RunReport.tsx", "frontend/src/components/RunTracks.tsx", "frontend/src/components/SpecReader.tsx", "frontend/src/lib/runReport.ts", "frontend/src/lib/specReader.ts", "frontend/src/styles/runreport.css"]
 spec: "docs/specs/leftovers-64.md (FR-1 to FR-8)"
