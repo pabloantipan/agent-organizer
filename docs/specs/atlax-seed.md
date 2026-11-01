@@ -118,3 +118,31 @@ For `lf59-atlax-record` and every later card that authors or modifies an
 element, S4 runs `atlax verify --repo . --card <the card>`: bare, the book
 guard has no change order and flags exactly the elements the card lists,
 which is the guard working (l59-record's note at c7cb263).
+
+## Amendment 4 (2026-11-01, the FSE): the Wails and CLI elements
+
+Hephaistos's extractor is merged (claudecode 3d7aea5, specs 230a515):
+`atlax derive` on this repo finds 78 `wails` elements (each exported method
+bound in `wails.Run`'s `Bind:`) and 26 `cli` elements (each `organizer`
+subcommand). The seed's FR-4 waited for it. Card `lf59-atlax-surface`,
+within 0171 and Pablo's goal for the window (the factory model built,
+relayed by Hephaistos 2026-11-01):
+
+- **FR-7** One element file per derived `wails` and `cli` element, named
+  as `atlax derive` designates it (`fn:organizer.App.<Method>`,
+  `fn:organizer.cli.<command>`), in the shape of
+  `contracts/atlax/element-wails.sample.yaml` and its CLI sample (specs
+  230a515), each with a one-line summary of what the person or seat gets
+  from it, `owner: organizer-fse`, `authored: false`.
+- **FR-8** An element whose behaviour has a contract sample in
+  agent-mailbox-specs and a test that reads it on the base becomes
+  `authored: true` through the card's `change_order` (`adds`), naming both;
+  the card lists which ones and why each other one stays unauthored. No
+  test is written to qualify an element.
+- **FR-9** A `wails` or `cli` element that reads another published
+  artifact names it in `consumes:` (only published providers, Amendment 1).
+
+Gate: S1, S2 (every derived element has exactly one file, none extra:
+`atlax derive --json` against `atlax/elements/`), S4 and S5 with `--card`,
+and X0, with the atlax tool at claudecode 3d7aea5 or later and
+CONTRACTS_DIR at specs 230a515 or later.
