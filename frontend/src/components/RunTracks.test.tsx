@@ -64,3 +64,26 @@ describe("W3: tracks (FR-9)", () => {
     expect(text(draw(empty))).toContain(NO_TRACKS);
   });
 });
+
+// FR-13, AR14: at 1024 the section is narrower than RR_NARROW_BELOW (the
+// rail open leaves Overview about 780 px), `waits on` takes its own line
+// under the row, and every growing column can shrink to nothing, so no
+// part scrolls sideways. The window itself is W7's, in the review build.
+describe("the section at 1024 (FR-13)", async () => {
+  const fs: { readFileSync(p: URL, enc: "utf8"): string } = await import("node:" + "fs");
+  const css = fs.readFileSync(new URL("../styles/runreport.css", import.meta.url), "utf8");
+  const { RR_NARROW_BELOW } = await import("./RunReport");
+  it("is narrow under 820 px of its own width", () => {
+    expect(RR_NARROW_BELOW).toBe(820);
+  });
+  it("moves waits on under the row, after the fraction line", () => {
+    expect(css).toMatch(/\.rt\.narrow \.rt-waits \{ grid-row: 3; grid-column: 1 \/ -1;/);
+    expect(css).toMatch(/\.rt-frac \{ grid-row: 2;/);
+  });
+  it("lets every growing column shrink, and keeps no scroller", () => {
+    expect(css).toMatch(/grid-template-columns: 6\.5ch minmax\(4ch, 9ch\) minmax\(64px, 220px\) minmax\(0, 1fr\) 5ch;/);
+    expect(css).toMatch(/grid-template-columns: minmax\(0, 1\.2fr\) repeat\(var\(--rt-envs, 1\), 6ch\) minmax\(0, 1fr\);/);
+    expect(css).not.toMatch(/overflow(-x)?: (auto|scroll)/);
+    expect(css.replace(/\/\*[\s\S]*?\*\//g, "")).not.toMatch(/@layer|color-mix|oklch|@media/);
+  });
+});
