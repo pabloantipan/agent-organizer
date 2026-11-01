@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 60 - the floating icon keeps its place on every desktop
-status: proposed
+status: ruled
 raised: 2026-11-01
 raised_by: fse
 owner: pablo
@@ -9,9 +9,9 @@ cards: [lf60-icon-spaces]
 forecast: 45-90m
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-11-01
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -36,3 +36,7 @@ accept as written.
 
 forecast: 45-90m over 1 wave; basis: leftovers 50 (the same file, one
 card with check hooks).
+
+## Ruling
+
+pablo, 2026-11-01, in the organizer on lodestar: Pablo chose "accept as written" in the FSE session on 2026-11-01.
