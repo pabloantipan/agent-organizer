@@ -7,7 +7,7 @@ seat: l56-roles
 supervisor: organizer-probe-sup96
 stage:
 updated: 2026-11-01
-next: "decide: A6 share with none is 13.6% of runs cost (10.9% of W44 usage) on this Mac's archive, over 5%: 8.5% is supervisors no record or card names (no record carries supervisor: yet), 3.1% seats named by 2-3 cards, 0.9% unmatched builders, 1.0% runs with no usage row. Accept A6 as measured (history before supervisor: on records), or amend? Branch lf56-run-roles at bf60948, A1-A5 and X0 pass"
+next: "review: lf56-run-roles, A1-A6 and X0 pass (A6 per Amendment 2, on lodestar), 161bf86"
 depends_on: []
 boundary: ["docs/specs/leftovers-56.md Boundary"]
 spec: "docs/specs/leftovers-56.md (FR-1 to FR-6)"
@@ -22,7 +22,7 @@ No run's cost is left without an initiative, a task and a role, so Hestia's fact
 docs/specs/leftovers-56.md, rows A1-A6 and X0.
 
 ## Done
-- 2026-11-01 l56-roles: FR-1 to FR-6 built on lf56-run-roles (bcc75a4, bc7a323, bf60948, on origin/main 21b5d5d). A1-A5 fail on main and pass on the branch; X0 passes from a clean clone (make test: 19 Go packages ok, vitest 1297 passed; wails build ok; git status empty). A6 ran on this Mac, not lodestar (ssh refused), on a copy of the data dir with record_url stripped from a config copy: `organizer usage` W44 63.5% overhead, 10.9% with no task; `organizer runs` 25.5% overhead, 13.6% with no task. That is over 5%, nothing loosened; causes in .wt-notes/l56-roles/progress.md.
+- 2026-11-01 l56-roles: FR-1 to FR-6 built on lf56-run-roles (bcc75a4, bc7a323, bf60948), plus the share with none by cause for A6 (161bf86, Amendment 2, f5a8751); on origin/main 21b5d5d. A1-A5 fail on main and pass on the branch. X0 passes from a clean clone at 161bf86 (make test: 19 Go packages ok, vitest 1297 passed; wails build ok; git status empty). A6 ran on lodestar (this Mac, lodestar.local), on a copy of the data dir with record_url stripped from a config copy. `organizer usage` W44: 63.1% overhead, 11.5% with no task (9.4% supervisor no record or card names, 2.0% seat several cards name). `organizer runs`: 25.5% overhead, 13.6% with no task (8.6% supervisor, 3.1% seat several cards name, 1.0% no usage row, 0.9% no card's seat: matches).
 
 ## Declared changes
 - modified `internal/usage/attribute.go:Attribute`: initiative `factory` outside every root; `overhead:<role>` for fse, persona, pair, session; a nameless session is a plain session (FR-1)
@@ -34,7 +34,8 @@ docs/specs/leftovers-56.md, rows A1-A6 and X0.
 - modified `internal/usage/report.go:cut`: an overhead task row gets no `cards`, so the view links no card
 - added `internal/usage/report.go:BySession`, `Shares`, `SessionShares`: the ledger's attribution per session (FR-5) and the two shares (FR-6)
 - modified `internal/service/run.go:Runs`, `InitiativeRuns`, `runsView`, `runConversations`; added `withAttribution`, `ledgerTasks`: a run's initiative and card come from its usage row (FR-5)
-- modified `internal/cli/usage.go:WriteUsage`, `internal/cli/run.go:WriteRuns`; added `sharesLine`: the overhead and no-task shares (FR-6)
+- modified `internal/cli/usage.go:WriteUsage`, `internal/cli/run.go:WriteRuns` (now takes the ledger's reasons), `runsCmd`; added `sharesLine`, `writeCauses`: the overhead and no-task shares (FR-6) and the no-task share by cause (Amendment 2)
+- added `internal/usage/report.go:CauseOf`, `ByCause`, `CauseShare`, the `Cause*` constants: the no-task share by cause (Amendment 2)
 - modified `internal/cli/testdata/runs.golden`: the shares line
 - added tests `internal/usage/lf56_test.go`, `internal/usage/roles_test.go`, `internal/service/runs_lf56_test.go`, `internal/cli/runs_lf56_test.go`; modified `attribute_test.go`, `ledger_test.go`, `usage_test.go`, `run_test.go` (expectations moved by FR-1, and the new runsView argument)
 Risky:
