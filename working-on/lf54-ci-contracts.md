@@ -1,12 +1,12 @@
 ---
 title: "The release build reads the contract samples from the specs repo, pinned"
-status: next
+status: now
 repos: [organizer]
 branch: lf54-ci-contracts
-seat:
+seat: l54-ci
 stage:
 updated: 2026-11-01
-next: "sup99 runs it (lf53 on origin/main 6531d5b; leftovers-54 Amendment 3, pin 54cf10d)"
+next: "l54-ci builds it from origin/main 076eb5c (sup99, specs pin 54cf10d)"
 depends_on: [lf53-frontmatter, lf53-usage-contract]
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-ci-contracts"]
 spec: "docs/specs/leftovers-54.md (FR-2)"
