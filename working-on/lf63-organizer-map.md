@@ -24,6 +24,7 @@ docs/specs/leftovers-63.md, rows C1-C5 and X0.
 ## Pre-answered
 - Base: origin/main at the card's start (lf58-map-read merged, #24).
 - Merge target: `main` through talos-lab's PR.
+- Tests: no new test; the gate rows run the c4-map tools and lf58-map-read's existing TestMap.
 - Tools: `~/claudecode/bin/c4-map`, `diagram-check`, `mermaid2svg` (claudecode main); mmdc under ~/.nvm.
 - The method: claudecode `docs/specs/c4-base-map.md`; the README from `~/.claude/skills/spec-craft/templates/architecture-README.md`.
 - Short-sample fallback: a node the adapters do not find and no evidence grounds is left out, never drawn ungrounded or invented; say which on the card.
