@@ -1,17 +1,16 @@
-# Deltagos's call to the record that issues a factory key (atlax-seed FR-2,
-# Amendment 1). The provider, agent-mailbox-record, is not published in the
-# atlax repo, so there is no consumes: line yet; a later card's change order
-# adds ext:agent-mailbox-record#fn:record.factories.keys.issue (a planned name)
-# once it publishes.
+# Deltagos's call to the record that issues a factory key (atlax-seed FR-2;
+# consumes: added by Amendment 3, FR-5, once agent-mailbox-record published).
 designation: prod:agent-organizer.record.IssueKey
 kind: outbound
-summary: "organizer factory-key asks the record (agent-mailbox-record, unpublished; planned fn:record.factories.keys.issue) for a factory key as the signed-in developer."
+summary: "organizer factory-key asks the record (agent-mailbox-record) for a factory key as the signed-in developer."
 authored: false
 lifecycle: live
 owner: organizer-fse
 terminal:
   method: POST
   path: /v1/factories/keys
+consumes:
+  - ext:agent-mailbox-record#fn:record.factories.keys.issue
 test:
   path: internal/record/record_test.go
   name: TestIssueRevokeAndRegister
