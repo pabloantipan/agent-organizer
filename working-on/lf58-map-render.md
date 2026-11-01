@@ -6,7 +6,10 @@ branch: lf58-map-render
 seat: l58-render
 stage:
 updated: 2026-11-01
-next: "review: lf58-map-render, V1 V2 X0 pass, 6935178"
+next: "fix FR-4: the sanitizer lets CSS load external resources (quoted url with ')', CSS-escaped url, -webkit-image-set); add those inputs to V1's test"
+review: fail
+reviewer: l58-render-rev
+cause: execution
 depends_on: []
 boundary: ["frontend/src/lib/mapSvg.ts", "frontend/src/lib/mapSvg.test.ts", "frontend/src/components/MapFigure.tsx", "frontend/src/components/MapFigure.test.tsx", "frontend/package.json", "frontend/pnpm-lock.yaml", "frontend/src/lib/testdata/"]
 spec: "docs/specs/leftovers-58.md (FR-4 and FR-5)"
@@ -54,3 +57,36 @@ Not changed, on purpose:
 - `frontend/package.json`, `frontend/pnpm-lock.yaml`: no sanitizer dependency; DOMParser is absent in vitest's Node and a DOM test library is outside the boundary
 - `internal/diagram`, `~/.mermaid/mermaid-config-dark.json`: Amendment 1 holds the source-side fix for a later card
 - `frontend/src/styles/`: the lens's map.css; the figure's only styles are inline layout
+
+## Review
+**Verdict: fail.** Gate rows V1, V2 and X0 pass as written; the card fails on a proved FR-4 finding outside V1's four inputs: the sanitizer lets the inlined SVG's CSS load external resources.
+- Unmet gate items: none of V1, V2, X0 as written; FR-4 ("no external href", the brief's "loads an external resource") is not met.
+- Reviewer `l58-render-rev`, 2026-11-01, X0 on 6935178, fresh run (test-lease printed no run id; it queued and executed, not replayed).
+- cause: execution (the regex in `localUrls`, `mapSvg.ts:116`, misses valid CSS url forms).
+
+**change-check** (from the clean clone; base f97c622, which adds only cards/docs over bf66580; `git diff --stat bf66580...6935178` shows the same 6 files):
+```
+6 files, 19 flags: outside boundary 0, outside footprint 0, undeclared 0, declared, not changed 0, new env var 0, new dependency 0, new host 0, risk 0, untested? 19
+untested?: reasonOf, escText, escAttr, attrOf, setAttr, localUrls, cleanAttr, scopeSelectors, blockEnd, labelText, cleanChildren, cleanEl, newMapId, mul, nums, transformOf, arcPoints, shapePoints, boxOf
+```
+No undeclared, outside-boundary or declared-not-changed lines. The 19 `untested?` are private helpers exercised through `sanitizeMapSvg`/`drawnNodes` in mapSvg.test.ts; `localUrls` is the one whose coverage missed the finding below.
+
+**Blocking finding (FR-4): external loads survive the sanitizer.** Input bundled from `mapSvg.ts` at 6935178, run through `sanitizeMapSvg`, inlined by `innerHTML` (as `dangerouslySetInnerHTML` does) in headless Chrome against a local server (`.wt-notes/l58-render-rev/mkpage.mjs`, `probe/sanitized.txt`, `http.log`). Sanitized output kept, e.g.:
+```
+case 1: <style>#map-svg-1{background:url("http://127.0.0.1:48731/hit-1?a)b")}</style>
+case 2: <style>#map-svg-2{background:u\rl(http://127.0.0.1:48731/hit-2)}</style>
+case 3: <style>#map-svg-3{background:\75 rl(http://127.0.0.1:48731/hit-3)}</style>
+case 4: <svg id="map-svg-4" style="background:url('http://127.0.0.1:48731/hit-4?x)y')" …>
+case 5: <svg id="map-svg-5" style="background:u\rl(http://127.0.0.1:48731/hit-5)" …>
+case 6: <style>#map-svg-6{background-image:-webkit-image-set("http://127.0.0.1:48731/hit-6" 1x)}</style>
+case 7 (control, plain url()): <style>#map-svg-7{background:none}</style>
+```
+Server log: `GET /hit-1?a)b`, `/hit-2`, `/hit-3`, `/hit-4?x)y`, `/hit-5`, `/hit-6`; no `/hit-7`. Six forms fetch; plain `url()` is blocked. Root cause: `url\(\s*(['"]?)([^)'"]*)\1\s*\)` cannot match a quoted url containing `)`, a CSS-escaped `url` name, or a string url in `image-set`. These are standard CSS, so this is not just a Chrome behaviour; WebKit was not driven.
+
+**Adversarial inputs handled** (`.wt-notes/l58-render-rev/adversarial.txt`): `<SCRIPT>`, `<Script>`, `<svg:script>` dropped (case-sensitive allowlist); `ONLOAD`/`OnClick` dropped; `xlink:onload`/`ev:onclick` kept, but they are not event handlers in the HTML parser (Note); `javascript:` href on `a` dropped, `a` unwrapped; `<use>` with https, data:, `//`, `XLINK:HREF` stripped, `#ok` kept; `@import`, plain `url()` in sheets, `@font-face src` and `fill="url(...)"` made `none`; foreignObject turned into text, lowercase `foreignobject` dropped; escaped `</svg><img onerror>` in text and style stays escaped; CDATA breakout emptied; `animate`/`set`/`image`/`feImage` dropped; malformed and unquoted markup throws (`Map not drawn`).
+
+**Checked and met:** FR-4 aria-hidden on the svg, the name `<initiative> base map, <level>` on the figure (`MapFigure.tsx:152`); Amendment 1 over the committed render and over a fresh render (`foreignObject left: 0`, all six labels as `<text>`). FR-5: nodes by `flowchart-<id>-<n>` with a `node` class, boxes from transforms and shapes, real `<button>`s named by `nodeName`, one roving tabIndex set in reading order with arrows/Home/End, positioned in % of the viewBox so they follow scale, lens = classes on node elements (`withNodeClasses`), no geometry change. Safari 15: no lookbehind, `.at`, `structuredClone`, `hasOwn`, `findLast`, oklch or color-mix; `aspect-ratio` is 15.0+. `harbor-containers.svg`: re-rendered via `internal/diagram` `Renderer.Render` (throwaway test in a copy outside the clone). It is byte-identical after stripping path `d` data; two fresh renders also differ only in `d` (mmdc's rough paths are random), and the flowchart ids and viewBox are identical. Fails on main: the new tests on bf66580's code end `Cannot find module './mapSvg'` / `'./MapFigure'`. Lens API in progress.md exists as listed. X0: `make test` exit 0 (Go ok, vitest 1475 passed), `pnpm run build` 0, `wails build` 0, `make review-build` 0, porcelain empty.
+
+Note: `scopeCss` counts braces without reading strings, so `a{content:"}"} body{background:red}` gives `#map-svg-1 a{content:"}#map-svg-1 "} body{background:red}`, which the browser reads as an unscoped `body` rule. That is a page restyle, not a load or script. Fix it with the finding.
+Note: `@keyframes` names stay global (progress.md says so too).
+Gate gap: V1 tests one url form; it should carry the escaped, quoted-paren and image-set forms.
