@@ -6,7 +6,9 @@ branch: lf59-atlax-authored
 seat: l59-authored
 stage:
 updated: 2026-11-01
-next: "review: lf59-atlax-authored, gate met (S2, S4, S5, X0 pass), 62fe627"
+next: "PR with talos-lab"
+review: pass
+reviewer: l59-authored-rev
 depends_on: [lf59-atlax-surface]
 boundary: ["atlax/"]
 spec: "docs/specs/atlax-seed.md (Amendment 5)"
@@ -49,3 +51,16 @@ Not changed, on purpose:
 
 ## Done
 - 2026-11-01 l59-authored: 62fe627 on lf59-atlax-authored (unmerged; talos-lab's PR). Both tests pass with CONTRACTS_DIR and fail naming the sample with an empty dir; S2 valid, `atlax verify --card` exit 0 no finding, X0 pass. Evidence in `.wt-notes/l59-authored/`.
+
+## Review
+- **Verdict: pass.** Unmet gate items: none. Reviewer l59-authored-rev, 2026-11-01, at 62fe627 on a1c0f7a, from a clean clone.
+- Pin: the card was added at 3fe9e92, an ancestor of c6aaeb8; `git diff c6aaeb8` leaves `touches:` and `change_order:` unchanged. Holds.
+- change-check (default base): base 49656bd (local main, which does not contain a1c0f7a), 108 files, 105 undeclared, all `added` files of lf59-atlax-surface plus a "high suggested" risk on two of them (ResetPassword, cli.login): the default base is behind origin, nothing of this card. With `--base a1c0f7a`: `3 files, 0 flags` (the three declared files, modified; tests touched none).
+- S2: the three files valid against `element.schema.json` (Draft 2020-12, jsonschema 4.26, specs ca14f12). Samples exist: `factory-report/expected.json`, `factory-report/expected-windows.json`. ReportText untouched since a1c0f7a, `authored: false`. `internal/` identical to a1c0f7a; both tests are on the base (report_test.go:121, :259).
+- Tests (`go test ./internal/service -run '^<name>$' -v`):
+  - TestReportDecodesContract: CONTRACTS_DIR=specs-230 PASS; CONTRACTS_DIR=<empty dir> FAIL "contract sample expected.json is missing"; unset with HOME=<empty dir> FAIL, same line.
+  - TestReportWindows: CONTRACTS_DIR=specs-230 PASS; <empty dir> FAIL "contract sample expected-windows.json is missing"; unset with empty HOME FAIL, same.
+- S4/S5: `atlax verify --repo <clone> --base a1c0f7a --card working-on/lf59-atlax-authored.md` → `atlax verify agent-organizer: 0 finding(s), 0 blocking; exit 0` (atlax 69d0e77, change order frozen 2026-11-01T22:18:18Z).
+- X0: fresh run (not replayed), `make test` exit 0 (Go all ok, vitest 1431 passed), `git status --porcelain` empty.
+- Note 1 (to the FSE via sup102): with CONTRACTS_DIR set to the empty string both tests PASS on this Mac: `reportContractDir` falls back to `~/agent-slack/specs/contracts`, which holds the samples. "Fails with an empty CONTRACTS_DIR" therefore depends on the machine; read it as an empty directory (done above).
+- Note 2 (to the FSE via sup102): change-check's default base is local main, which lacks the origin merge a1c0f7a; review prompts on this route should pass `--base`.
