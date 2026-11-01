@@ -6,7 +6,7 @@ branch: lf57-run-report
 seat: l57-ui
 stage:
 updated: 2026-11-01
-next: "fix AR15/FR-1: RunReport.tsx:95 sums waves[].failed into \"N review rounds failed in this window.\", a number the report does not carry; drop the line (the footer already gives each wave's failed) or read it from the report"
+next: "review: lf57-run-report, W1-W6 and X0 pass, review fix (no failed-rounds total, AR15) at 2bfe217; UI review continues on 2f7dccb"
 depends_on: [lf57-report-go]
 boundary: ["docs/specs/leftovers-57.md Boundary, lf57-run-report"]
 spec: "docs/specs/leftovers-57.md (FR-7 to FR-13)"
@@ -118,3 +118,4 @@ pass, commit 2f7dccb. Reviewer l57-ui-ux, 2026-11-01. No severity 4 or 3. Shared
 **Design questions, for aglaea:** U3, U4; and the `↓` connector in `--border-strong` at `sm` is faint between chained rows (`1440x900-c-tracks-fx2.png`), as §3 asks.
 
 **Not verified:** `stopped now` live (no live window in the fixture; vitest W1), a refused `ruled_by` (vitest W4), the exact `factory report not found` (R3, vitest), anything on the real review window (screen locked), keyboard focus order (harness clicks are DOM clicks, not presses).
+- l57-ui fixed the code review's finding: the summed "N review rounds failed in this window." line is gone, with a test that no such line is drawn (fails on 2f7dccb, passes now). Rebased on origin/main a1c0f7a; head 2bfe217; X0 passes from a clean clone.
