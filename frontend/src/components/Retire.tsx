@@ -4,8 +4,9 @@ import { api, type AgentGroup, type RetirePlan, type RetireReport } from "../hoo
 import { busyButton, busyLabel } from "../lib/busy";
 
 /** Retire seats of a cell: the end of a wave as one action. The plan is
- *  shown first; nothing happens until Retire. Seats default to every one
- *  but the reconciler; sessions beyond the seats' own can be added. */
+ *  shown first; nothing happens until Retire. Only seats some card named in
+ *  seat: retire unless forced; a plan with no seat touches nothing but the
+ *  sessions added here. Sessions beyond the seats' own can be added. */
 export function Retire({ group, onClose }: { group: AgentGroup; onClose: () => void }) {
   const cell = group.cell!;
   // Preselect what the wave is done with when the organizer knows it;
@@ -68,7 +69,7 @@ export function Retire({ group, onClose }: { group: AgentGroup; onClose: () => v
                 <div className="section-label">Seats to retire</div>
                 <ul className="plain checks">
                   {(cell.agents ?? []).map((a) => (
-                    <li key={a}><label><input type="checkbox" checked={!!seats[a]} onChange={(e) => setSeats({ ...seats, [a]: e.target.checked })} /> <span className="mono">{a}</span>{a === cell.reconciler && <span className="meta"> reconciler</span>}{retirable.has(a) && <span className="badge watcher alive" title="named by no open card, not working">done</span>}</label></li>
+                    <li key={a}><label><input type="checkbox" checked={!!seats[a]} onChange={(e) => setSeats({ ...seats, [a]: e.target.checked })} /> <span className="mono">{a}</span>{a === cell.reconciler && <span className="meta"> reconciler</span>}{retirable.has(a) && <span className="badge watcher alive" title="named by a card, by no open one, not working">done</span>}</label></li>
                   ))}
                 </ul>
                 {others.length > 0 && (
@@ -86,7 +87,7 @@ export function Retire({ group, onClose }: { group: AgentGroup; onClose: () => v
                   <li><label><input type="checkbox" checked={closeThreads} onChange={(e) => setCloseThreads(e.target.checked)} /> close every open thread of the project as {cell.human}, and pick up the kept seats' mail</label></li>
                   <li><label><input type="checkbox" checked={revoke} onChange={(e) => setRevoke(e.target.checked)} /> revoke the retired seats' tokens, then restart the discuss API</label></li>
                   <li><label><input type="checkbox" checked={commit} onChange={(e) => setCommit(e.target.checked)} /> commit agents/cell.json</label></li>
-                  <li><label><input type="checkbox" checked={force} onChange={(e) => setForce(e.target.checked)} /> force: retire a seat even if an open card names it or it is working</label></li>
+                  <li><label><input type="checkbox" checked={force} onChange={(e) => setForce(e.target.checked)} /> force: retire a seat even if no card names it, an open card names it, or it is working</label></li>
                 </ul>
                 <div className="section-label">Plan</div>
                 {err && <div className="meta err">{err}</div>}
@@ -97,7 +98,7 @@ export function Retire({ group, onClose }: { group: AgentGroup; onClose: () => v
                     <li>close <b>{plan.threads?.length ?? 0}</b> threads{waveOnly ? " (the wave's own)" : " (every open thread of the project)"}</li>
                     <li>revoke <b>{plan.tokens?.length ?? 0}</b> tokens{plan.restart_api ? ", restart the API" : ""}</li>
                     <li>delete <b>{plan.files?.length ?? 0}</b> crew files</li>
-                    <li>rewrite cell.json{plan.cell_is_git && commit ? " and commit" : ""}</li>
+                    <li>{plan.seats?.length ? `rewrite cell.json${plan.cell_is_git && commit ? " and commit" : ""}` : "cell.json unchanged"}</li>
                     {plan.problems?.map((p, i) => <li key={i} className="err">! {p}</li>)}
                   </ul>
                 )}

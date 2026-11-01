@@ -122,6 +122,21 @@ func Parse(raw []byte, getenv func(string) string, now time.Time) (Record, error
 	return r, nil
 }
 
+// CaptureEnv names the file `organizer statusline` copies its stdin to, byte
+// for byte, when set. It is how the session test's fixture is taken from a
+// live session (testdata/statusline.json); unset, nothing is written.
+const CaptureEnv = "ORGANIZER_STATUSLINE_CAPTURE"
+
+// Capture writes raw to the file CaptureEnv names, if any. It runs before
+// Parse so a payload Parse refuses is captured too.
+func Capture(raw []byte, getenv func(string) string) error {
+	path := getenv(CaptureEnv)
+	if path == "" {
+		return nil
+	}
+	return os.WriteFile(path, raw, 0o600)
+}
+
 // AgentPID finds the agent process this statusline command runs under. The
 // command is a child of the agent, possibly through a shell, so walk the
 // parent chain until the command basename matches the agent binary. Falls

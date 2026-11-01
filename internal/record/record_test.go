@@ -123,10 +123,15 @@ func TestIssueRevokeAndRegister(t *testing.T) {
 	if !errors.As(err, &re) || re.Status != 403 {
 		t.Errorf("403 should surface: %v", err)
 	}
-	// A conflict is "already registered", not a failure.
-	f.cellStatus = 409
+	// The record upserts and never answers 409, so a 409 is not "already
+	// registered": every answer but a 2xx is an error.
+	f.cellStatus = 201
 	if err := c.RegisterCell(ctx, "fk_lodestar_b", "lodestar", cell); err != nil {
-		t.Errorf("409 should count as registered: %v", err)
+		t.Errorf("201 is registered: %v", err)
+	}
+	f.cellStatus = 409
+	if err := c.RegisterCell(ctx, "fk_lodestar_b", "lodestar", cell); err == nil {
+		t.Error("409 is a failure")
 	}
 	f.cellStatus = 500
 	if err := c.RegisterCell(ctx, "fk_lodestar_b", "lodestar", cell); err == nil {

@@ -13,15 +13,16 @@ import (
 )
 
 // retireCmd ends a wave: retires seats of a cell, kills their sessions,
-// closes the mailbox, revokes tokens, rewrites the roster. Dry by default;
-// --run does it.
+// closes the mailbox, revokes tokens, rewrites the roster. Only seats some
+// card named in seat: are retired unless --force; a plan with no seat
+// touches nothing but --kill. Dry by default; --run does it.
 func retireCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now func() time.Time) int {
 	fs := flag.NewFlagSet("retire", flag.ContinueOnError)
 	fs.SetOutput(stderr)
-	seats := fs.String("seats", "", "comma-separated seats to retire (default: every seat but the reconciler)")
-	retirable := fs.Bool("retirable", false, "retire the seats a wave is done with: named by no open card, not working; closes only the wave's own threads")
-	force := fs.Bool("force", false, "retire a seat even if an open card names it or it is working")
-	keep := fs.String("keep", "", "comma-separated seats to keep; the rest retire")
+	seats := fs.String("seats", "", "comma-separated seats to retire; a seat no card names in seat: is kept unless --force (default: the seats --retirable picks)")
+	retirable := fs.Bool("retirable", false, "retire the seats a wave is done with: named in seat: by some card and by no open one, not the human or the reconciler, not working; closes only the wave's own threads")
+	force := fs.Bool("force", false, "retire a seat even if no card names it in seat:, an open card names it, or it is working")
+	keep := fs.String("keep", "", "comma-separated seats to keep; the rest of the default seats retire")
 	kill := fs.String("kill", "", "comma-separated extra probe sessions to kill, e.g. the supervisor's")
 	noThreads := fs.Bool("keep-threads", false, "do not close the project's open threads")
 	noTokens := fs.Bool("keep-tokens", false, "do not revoke the retired seats' tokens (no API restart then)")
@@ -58,13 +59,14 @@ func retireCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now f
 			fmt.Fprintln(stderr, err)
 			return 1
 		}
-		all := append(append([]string{}, si.Seats...), si.Keep...)
+		// --keep subtracts from the default set; keeping all of it is no
+		// seat, not the default again, so the list is empty but not nil.
 		k := map[string]bool{}
 		for _, a := range split(*keep) {
 			k[a] = true
 		}
-		o.Seats = nil
-		for _, a := range all {
+		o.Seats = []string{}
+		for _, a := range si.Seats {
 			if !k[a] {
 				o.Seats = append(o.Seats, a)
 			}
@@ -85,7 +87,11 @@ func retireCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now f
 	fmt.Fprintf(stdout, "  close threads: %d%s\n", len(plan.Threads), map[bool]string{true: " (the wave's own)", false: ""}[o.WaveThreads])
 	fmt.Fprintf(stdout, "  revoke tokens: %s%s\n", orNone(plan.Tokens), map[bool]string{true: " (then restart the discuss API)", false: ""}[plan.RestartAPI])
 	fmt.Fprintf(stdout, "  delete files:  %d under ~/.local/share/organizer/crew\n", len(plan.Files))
-	fmt.Fprintf(stdout, "  cell.json:     %s%s\n", plan.CellPath, map[bool]string{true: ", commit", false: ""}[o.CommitCell && plan.CellIsGit])
+	if len(plan.Seats) == 0 {
+		fmt.Fprintf(stdout, "  cell.json:     %s, unchanged\n", plan.CellPath)
+	} else {
+		fmt.Fprintf(stdout, "  cell.json:     %s%s\n", plan.CellPath, map[bool]string{true: ", commit", false: ""}[o.CommitCell && plan.CellIsGit])
+	}
 	for _, p := range plan.Problems {
 		fmt.Fprintf(stdout, "  ! %s\n", p)
 	}
