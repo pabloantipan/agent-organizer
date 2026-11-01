@@ -1,12 +1,12 @@
 ---
 title: "Deltagos's factory-report readers become authored atlax promises"
-status: next
+status: now
 repos: [organizer]
 branch: lf59-atlax-authored
-seat:
+seat: l59-authored
 stage:
 updated: 2026-11-01
-next: "sup102 runs it after lf59-atlax-surface merges (0171, atlax-seed Amendment 5)"
+next: "l59-authored builds Amendment 5 on lf59-atlax-authored (sup102 launched 2026-11-01 19:20)"
 depends_on: [lf59-atlax-surface]
 boundary: ["atlax/"]
 spec: "docs/specs/atlax-seed.md (Amendment 5)"
