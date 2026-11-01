@@ -58,7 +58,7 @@ focus.
 | D3 | 3 | the review build's init-a header; AX press on its "with the cells" text | reads `N decisions waiting · 1 with the cells`, muted; the press opens Decisions at that group |
 | D4 | 4 | vitest of the tone helper; the review build's Decisions and Overview | 0014 and 0015 badges, bars and diamonds in the ruled pair, words "applied", "acknowledged" |
 | D5 | 5 | vitest of Overview's gate row text; `go test` of the CLI and `organizer decisions init-a` on the fixture | "awaiting cells", "applied", "acknowledged" on their lines |
-| D6 | 6 | vitest of the owner reader; the review build's Needs me, Decisions and rule box | no screen text "operator" for 0013's owner; the hover holds it; the rule box drops "owner pablo" when the ruler is pablo |
+| D6 | 6 | vitest of the owner reader; the review build's Needs me, Decisions and rule box | no screen text "operator" for 0013's owner; the hover holds it; the rule box drops "owner pablo" when the ruler is pablo (unattended: the fixture's records stand for it; "operator" is a field value, no person is asked) |
 | X0 | all | `XDG_DATA_HOME=$(mktemp -d) CONTRACTS_DIR=<specs 54cf10d checkout>/contracts make test`, `wails build`, `make review-build` in the worktree, then `git status --porcelain` | pass, empty |
 
 ## Boundary
@@ -66,7 +66,7 @@ focus.
 `frontend/src/lib/decisions.ts`, `queue.ts`, `header.ts`,
 `decisionsPage.ts`, `initiativeState.ts` and their tests;
 `frontend/src/components/Home.tsx`, `DecisionsView.tsx`,
-`InitiativeHeader.tsx`, `Overview.tsx`, `TopBar.tsx` (the FSE panel's
+`InitiativeHeader.tsx`, `Overview.tsx`, `FsePanel.tsx` (the FSE panel's
 count), `RuleDecisionBox.tsx`, and the decision styles in
 `frontend/src/styles/global.css`; `internal/cli/decisions.go` and its test;
 the fixture overlay's records 0013-0015 if a row needs them. Not
