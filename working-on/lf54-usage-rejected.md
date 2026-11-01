@@ -6,12 +6,14 @@ branch: lf54-usage-rejected
 seat: l54-usage
 stage:
 updated: 2026-11-01
-next: "review: lf54-usage-rejected, G3 G4 pass, X0 passes but for TestWorkingOnContract (identical on 076eb5c, lf54-decision-states), 4c78439"
+next: "file finding: the record's rejected rows are not in `organizer usage --json` nor the app's Usage view (Notes, Found, not asked; no card, record or backlog line names it)"
 depends_on: [lf53-usage-contract]
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-usage-rejected"]
 spec: "docs/specs/leftovers-54.md (FR-3 to FR-5)"
 gate: "docs/specs/leftovers-54.md#Acceptance → gate"
 ui_review: false
+review: pass
+reviewer: l54-usage-rev
 ---
 
 ## Goal
@@ -45,3 +47,21 @@ Not changed, on purpose:
 ## Notes
 - Found, not asked: the rejected rows are not in `usage --json` or the app's Usage view (bound type and frontend, outside this boundary); a later card can add them.
 
+## Review
+Verdict: **pass** at 4c78439. Unmet gate items: none (G3, G4, X0 met).
+Reviewer l54-usage-rev, 2026-11-01. X0 ran on the branch alone (4c78439) and on its merge with lf54-decision-states 1df5001 (merge 0f38d10, parents 4c78439 + 1df5001). Both runs were fresh (`test-lease run --share` queued and ran them; neither was a replay). CONTRACTS_DIR was specs 54cf10d.
+
+change-check (clean clone, base origin/main, head 4c78439): 8 files, 20 flags: outside boundary 1, undeclared 12, declared, not changed 0, untested? 7.
+- undeclared (12: `UsageRejected` in record; `usagePostOutcome`, `rejectedIn`, `usageRow`, `rfc3339OrNull`, `usagePostReason`, `cutKey`, `logUsagePost`, `UsagePostStatus`, `UsageRejected` in usagepost.go; `usagepost_test.go`; `usage_rejected_test.go`): each is named in a Declared changes bullet, but the bullets list several symbols each and change-check reads only the first. Explained. Note: the bullets break the one-symbol-per-bullet format.
+- outside boundary (`internal/service/usagepost_rejected_test.go`): the Boundary includes "and their tests", and this file tests usagepost.go. Explained.
+- untested? (7): `usageCmd`, `writeUsageRejected` (TestG4UsageAndDoctorListRejectedRows via runWith); `rejectedIn`, `logUsagePost` (TestG3RejectedRowKeptNotResent, TestRejectedRowRejectedAgain); `rfc3339OrNull` (TestG4ZeroTimesAreNull); `usagePostReason`, `cutKey` (the existing key-redaction tests; G3 asserts the state carries no key). Explained.
+
+- G3: met. On 4c78439, TestG3RejectedRowKeptNotResent, TestRejectedRowRejectedAgain and TestPostUsageReturnsTheResponse pass. Run with the branch's tests on 076eb5c, TestG3RejectedRowKeptNotResent fails on behaviour: `accepted map[... s-0001 ...], want only the two landed rows` and `rejected map[], want s-0001`. The record tests do not build there (`PostUsage returns 1 value`).
+- G4: met. On 4c78439, TestG4UsageAndDoctorListRejectedRows (usage and doctor), TestG4ZeroTimesAreNull and TestUsageRowsMatchTheSample/first_and_last_null pass. All three fail on 076eb5c (`first = "0001-01-01T00:00:00Z" ..., want null`; no rejected lines).
+- X0, branch alone: `make test` fails only TestWorkingOnContract/decisions and /problems (internal/scan), with messages identical to 076eb5c (Amendment 4, not counted); wails build ok; porcelain empty.
+- X0 on merge 0f38d10: `make test` exit 0 (19 Go packages ok, vitest 87 files and 1385 tests passed); wails build ok; porcelain empty against the merge commit.
+- FR-3 to FR-5 read against the diff: no finding.
+- Note: a rejected row that leaves the ledger stays in the post state's `rejected` and is listed forever.
+- Note: when rows are rejected, doctor prints a blank line between its lines (`writeUsageRejected` starts with "\n").
+- Note: the gate has no row for `usage --json`, so the Found, not asked above was never in scope.
+- Found, not asked (builder): the rejected rows are not in `usage --json` or the Usage view. Not filed yet: `next` says so.
