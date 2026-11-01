@@ -91,6 +91,12 @@ export function ReadSpec(arg1:string,arg2:string):Promise<service.SpecDoc>;
 
 export function RenderDiagram(arg1:string):Promise<string>;
 
+export function Report(arg1:string,arg2:string,arg3:string):Promise<service.RunReport>;
+
+export function ReportText(arg1:string,arg2:string,arg3:string):Promise<string>;
+
+export function ReportWindows(arg1:string):Promise<service.ReportWindows>;
+
 export function ResetPassword(arg1:string):Promise<void>;
 
 export function Retire(arg1:service.RetireOptions):Promise<service.RetireReport>;

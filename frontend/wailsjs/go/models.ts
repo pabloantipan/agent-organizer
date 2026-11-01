@@ -2557,6 +2557,516 @@ export namespace service {
 	        this.session = source["session"];
 	    }
 	}
+	export class DeadSpan {
+	    start: number;
+	    end: number;
+	    cause: string;
+	    source: string;
+	    minutes: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new DeadSpan(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.start = source["start"];
+	        this.end = source["end"];
+	        this.cause = source["cause"];
+	        this.source = source["source"];
+	        this.minutes = source["minutes"];
+	    }
+	}
+	export class Denominator {
+	    count: number;
+	    kind: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Denominator(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.count = source["count"];
+	        this.kind = source["kind"];
+	    }
+	}
+	export class Ruling {
+	    id: string;
+	    title: string;
+	    file: string;
+	    source: string;
+	    commit?: string;
+	    ruled_at: number;
+	    ruled_at_iso: string;
+	    ruled_by: string;
+	    mode?: string;
+	    note?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Ruling(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.title = source["title"];
+	        this.file = source["file"];
+	        this.source = source["source"];
+	        this.commit = source["commit"];
+	        this.ruled_at = source["ruled_at"];
+	        this.ruled_at_iso = source["ruled_at_iso"];
+	        this.ruled_by = source["ruled_by"];
+	        this.mode = source["mode"];
+	        this.note = source["note"];
+	    }
+	}
+	export class Wait {
+	    what: string;
+	    who: string;
+	    from: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Wait(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.what = source["what"];
+	        this.who = source["who"];
+	        this.from = source["from"];
+	    }
+	}
+	export class Track {
+	    id: string;
+	    title: string;
+	    done: string;
+	    gates: string[];
+	    roadmap: boolean;
+	    done_cards: string[];
+	    open_cards: string[];
+	    to_cut: string[];
+	    passed: number;
+	    planned: number;
+	    pct?: number;
+	    left: string[];
+	    waits: Wait[];
+	    env: Record<string, any>;
+	
+	    static createFrom(source: any = {}) {
+	        return new Track(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.title = source["title"];
+	        this.done = source["done"];
+	        this.gates = source["gates"];
+	        this.roadmap = source["roadmap"];
+	        this.done_cards = source["done_cards"];
+	        this.open_cards = source["open_cards"];
+	        this.to_cut = source["to_cut"];
+	        this.passed = source["passed"];
+	        this.planned = source["planned"];
+	        this.pct = source["pct"];
+	        this.left = source["left"];
+	        this.waits = this.convertValues(source["waits"], Wait);
+	        this.env = source["env"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class Tracks {
+	    drawn: boolean;
+	    why?: string;
+	    rev?: string;
+	    rev_time?: number;
+	    envs?: string[];
+	    tracks?: Track[];
+	    goal?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Tracks(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.drawn = source["drawn"];
+	        this.why = source["why"];
+	        this.rev = source["rev"];
+	        this.rev_time = source["rev_time"];
+	        this.envs = source["envs"];
+	        this.tracks = this.convertValues(source["tracks"], Track);
+	        this.goal = source["goal"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ReportRound {
+	    card: string;
+	    kind: string;
+	    start: number;
+	    end?: number;
+	    result: string;
+	    reviewer?: string;
+	    reason?: string;
+	    cause?: string;
+	    start_iso: string;
+	    end_iso?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ReportRound(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.card = source["card"];
+	        this.kind = source["kind"];
+	        this.start = source["start"];
+	        this.end = source["end"];
+	        this.result = source["result"];
+	        this.reviewer = source["reviewer"];
+	        this.reason = source["reason"];
+	        this.cause = source["cause"];
+	        this.start_iso = source["start_iso"];
+	        this.end_iso = source["end_iso"];
+	    }
+	}
+	export class RunWave {
+	    key: string;
+	    record: string;
+	    wave: any;
+	    supervisor?: string;
+	    task?: string;
+	    cards: string[];
+	    launched?: number;
+	    launched_iso?: string;
+	    merged?: number;
+	    merged_iso?: string;
+	    rounds: ReportRound[];
+	    round_count: number;
+	    failed: number;
+	    failed_by_cause: Record<string, number>;
+	    build_minutes: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new RunWave(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.key = source["key"];
+	        this.record = source["record"];
+	        this.wave = source["wave"];
+	        this.supervisor = source["supervisor"];
+	        this.task = source["task"];
+	        this.cards = source["cards"];
+	        this.launched = source["launched"];
+	        this.launched_iso = source["launched_iso"];
+	        this.merged = source["merged"];
+	        this.merged_iso = source["merged_iso"];
+	        this.rounds = this.convertValues(source["rounds"], ReportRound);
+	        this.round_count = source["round_count"];
+	        this.failed = source["failed"];
+	        this.failed_by_cause = source["failed_by_cause"];
+	        this.build_minutes = source["build_minutes"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class WaveLineCard {
+	    slug: string;
+	    waves: string[];
+	    label: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new WaveLineCard(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.slug = source["slug"];
+	        this.waves = source["waves"];
+	        this.label = source["label"];
+	    }
+	}
+	export class WaveLine {
+	    t: number;
+	    cards: WaveLineCard[];
+	    waves: string[];
+	    round_count: number;
+	    failed: number;
+	    failed_by_cause: Record<string, number>;
+	    build_minutes: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new WaveLine(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.t = source["t"];
+	        this.cards = this.convertValues(source["cards"], WaveLineCard);
+	        this.waves = source["waves"];
+	        this.round_count = source["round_count"];
+	        this.failed = source["failed"];
+	        this.failed_by_cause = source["failed_by_cause"];
+	        this.build_minutes = source["build_minutes"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ReportWaves {
+	    source: string;
+	    records: string[];
+	    lines: WaveLine[];
+	    waves: RunWave[];
+	    notes: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ReportWaves(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.source = source["source"];
+	        this.records = source["records"];
+	        this.lines = this.convertValues(source["lines"], WaveLine);
+	        this.waves = this.convertValues(source["waves"], RunWave);
+	        this.notes = source["notes"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ProgressLine {
+	    t: number;
+	    cards: string[];
+	    commits: string[];
+	    done: number;
+	    pct: number;
+	    hashes: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ProgressLine(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.t = source["t"];
+	        this.cards = source["cards"];
+	        this.commits = source["commits"];
+	        this.done = source["done"];
+	        this.pct = source["pct"];
+	        this.hashes = source["hashes"];
+	    }
+	}
+	export class ProgressMove {
+	    t: number;
+	    slug: string;
+	    commit: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ProgressMove(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.t = source["t"];
+	        this.slug = source["slug"];
+	        this.commit = source["commit"];
+	    }
+	}
+	export class Progress {
+	    denominator: Denominator;
+	    moves: ProgressMove[];
+	    lines: ProgressLine[];
+	    dead: DeadSpan[];
+	    notes: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new Progress(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.denominator = this.convertValues(source["denominator"], Denominator);
+	        this.moves = this.convertValues(source["moves"], ProgressMove);
+	        this.lines = this.convertValues(source["lines"], ProgressLine);
+	        this.dead = this.convertValues(source["dead"], DeadSpan);
+	        this.notes = source["notes"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class ReportWindow {
+	    since: number;
+	    until: number;
+	    kind: string;
+	    source: string;
+	    since_iso: string;
+	    until_iso: string;
+	    moved?: boolean;
+	    moves?: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ReportWindow(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.since = source["since"];
+	        this.until = source["until"];
+	        this.kind = source["kind"];
+	        this.source = source["source"];
+	        this.since_iso = source["since_iso"];
+	        this.until_iso = source["until_iso"];
+	        this.moved = source["moved"];
+	        this.moves = source["moves"];
+	    }
+	}
+	export class FactoryReport {
+	    initiative: string;
+	    root: string;
+	    generated: string;
+	    why?: string;
+	    window?: ReportWindow;
+	    progress?: Progress;
+	    waves?: ReportWaves;
+	    tracks?: Tracks;
+	    rulings: Ruling[];
+	
+	    static createFrom(source: any = {}) {
+	        return new FactoryReport(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.initiative = source["initiative"];
+	        this.root = source["root"];
+	        this.generated = source["generated"];
+	        this.why = source["why"];
+	        this.window = this.convertValues(source["window"], ReportWindow);
+	        this.progress = this.convertValues(source["progress"], Progress);
+	        this.waves = this.convertValues(source["waves"], ReportWaves);
+	        this.tracks = this.convertValues(source["tracks"], Tracks);
+	        this.rulings = this.convertValues(source["rulings"], Ruling);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class FactorySeen {
 	    id: string;
 	    root: string;
@@ -2641,6 +3151,22 @@ export namespace service {
 	    }
 	}
 	
+	export class LineTokens {
+	    t: number;
+	    tokens: number;
+	    sessions: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new LineTokens(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.t = source["t"];
+	        this.tokens = source["tokens"];
+	        this.sessions = source["sessions"];
+	    }
+	}
 	export class LockState {
 	    enabled: boolean;
 	    unlocked: boolean;
@@ -2658,6 +3184,54 @@ export namespace service {
 	        this.cooldown_secs = source["cooldown_secs"];
 	        this.failures_left = source["failures_left"];
 	    }
+	}
+	
+	
+	
+	
+	
+	
+	export class ReportWindows {
+	    initiative: string;
+	    root: string;
+	    generated: string;
+	    days: number;
+	    from: number;
+	    from_iso: string;
+	    windows: ReportWindow[];
+	
+	    static createFrom(source: any = {}) {
+	        return new ReportWindows(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.initiative = source["initiative"];
+	        this.root = source["root"];
+	        this.generated = source["generated"];
+	        this.days = source["days"];
+	        this.from = source["from"];
+	        this.from_iso = source["from_iso"];
+	        this.windows = this.convertValues(source["windows"], ReportWindow);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class RetireOptions {
 	    initiative_id: string;
@@ -2880,6 +3454,40 @@ export namespace service {
 		}
 	}
 	
+	
+	export class RunReport {
+	    report: FactoryReport;
+	    line_tokens: LineTokens[];
+	
+	    static createFrom(source: any = {}) {
+	        return new RunReport(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.report = this.convertValues(source["report"], FactoryReport);
+	        this.line_tokens = this.convertValues(source["line_tokens"], LineTokens);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
 	export class RunsView {
 	    initiative: string;
 	    input_tokens: number;
@@ -3019,6 +3627,11 @@ export namespace service {
 		    return a;
 		}
 	}
+	
+	
+	
+	
+	
 	
 	
 	
