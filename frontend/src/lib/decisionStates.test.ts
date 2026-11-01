@@ -137,26 +137,56 @@ describe("ruled_by per the contract sample", () => {
   });
 });
 
-// FR-6: no file under frontend/src/lib compares a decision status to a
-// literal outside decisions.ts. A comparison (===, !==, ==, !=, case) or an
-// includes() with one of the seven statuses is a finding.
+// FR-6 (review finding 1 of 39f64de): no decision-status literal anywhere
+// in frontend/src/lib code outside decisions.ts and the tests, in any quote
+// style ("", '', ``), so no comparison of any shape (===, case, includes,
+// Set.has, a map key) can name a status there. Comments are stripped first.
+// `ruled` is also a word that is not a status: the record's date field, a
+// Decisions section key and a timeline gem kind. Those lines are allowed by
+// their exact text, each with its reason; a new line naming a status fails,
+// and an allowed line that no longer exists fails too, so the list stays true.
 describe("decision status literals", () => {
-  const LITERAL = /(?:[=!]==?\s*|case\s+|includes\(\s*)["'](?:proposed|awaiting-cells|ruled|applied|acknowledged|superseded|withdrawn)["']|["'](?:proposed|awaiting-cells|ruled|applied|acknowledged|superseded|withdrawn)["']\s*[=!]==?/;
+  const LITERAL = /["'`](?:proposed|awaiting-cells|ruled|applied|acknowledged|superseded|withdrawn)["'`]/;
+  const ALLOWED: Record<string, string[]> = {
+    "decisionsPage.ts": [
+      // the date field `ruled` of model.Decision, not the status
+      `type Dated = Pick<model.Decision, "number" | "raised" | "ruled">;`,
+      `type Named = Pick<model.Decision, "number" | "title" | "status" | "owner" | "raised" | "ruled" | "ruled_by" | "chosen" | "superseded_by"> & Partial<Pick<model.Decision, "ruler" | "ruler_mode">>;`,
+      // the Decisions view's section key (DecSections), not the status
+      `return { rule: pick("rule"), ruled: pick("ruled"), timeline: pick("timeline") };`,
+      `return { rule: one("rule"), ruled: one("ruled"), timeline: one("timeline") };`,
+    ],
+    "outline.ts": [
+      // a timeline gem's kind, not the status
+      `export type Gem = { number: string; at: number; kind: "raised" | "ruled" | "waiting" };`,
+      `if (ruled !== undefined) out.push({ number: d.number, at: ruled, kind: "ruled" });`,
+    ],
+  };
+  const stripComments = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " ")).replace(/(^|[^:"'`])\/\/.*$/gm, "$1");
   const here = new URL(".", import.meta.url).pathname;
   const files = (readdirSync(here) as string[]).filter((f) => /\.tsx?$/.test(f) && !/\.test\.tsx?$/.test(f) && f !== "decisions.ts");
+  const linesOf = (f: string) => stripComments(readFileSync(`${here}${f}`, "utf8") as string).split("\n").map((l, i) => [i + 1, l.trim()] as const);
 
   it("finds the lib files", () => {
     expect(files).toContain("queue.ts");
   });
-  it("the guard catches a comparison", () => {
-    expect(LITERAL.test(`d.status === "awaiting-cells"`)).toBe(true);
-    expect(LITERAL.test(`"ruled" !== d.status`)).toBe(true);
-    expect(LITERAL.test(`case 'applied':`)).toBe(true);
-    expect(LITERAL.test(`isOpen(d)`)).toBe(false);
+  it("the guard catches every shape of comparison", () => {
+    for (const l of [
+      `d.status === "awaiting-cells"`, `"ruled" !== d.status`, `case 'applied':`,
+      "x1 = d.status === `ruled`", `["proposed", "awaiting-cells"].includes(d.status)`, `new Set(["applied"]).has(d.status)`,
+      `const S = { withdrawn: 1, "superseded": 2 }`,
+    ]) expect([l, LITERAL.test(l)]).toEqual([l, true]);
+    expect(LITERAL.test("isOpen(d)")).toBe(false);
+    expect(stripComments(`a // "ruled"\n/* "applied" */ b`).match(LITERAL)).toBeNull();
   });
-  it.each(files)("%s reads decision status only through decisions.ts", (f) => {
-    const hits = (readFileSync(`${here}${f}`, "utf8") as string).split("\n").map((l, i) => [i + 1, l] as const).filter(([, l]) => LITERAL.test(l));
-    expect(hits.map(([n, l]) => `${f}:${n}: ${l.trim()}`)).toEqual([]);
+  it.each(files)("%s names no decision status outside the allowed lines", (f) => {
+    const allowed = ALLOWED[f] ?? [];
+    const hits = linesOf(f).filter(([, l]) => LITERAL.test(l) && !allowed.includes(l));
+    expect(hits.map(([n, l]) => `${f}:${n}: ${l}`)).toEqual([]);
+  });
+  it.each(Object.entries(ALLOWED))("every allowed line of %s still exists", (f, allowed) => {
+    const lines = linesOf(f).map(([, l]) => l);
+    expect(allowed.filter((a) => !lines.includes(a))).toEqual([]);
   });
 });
 

@@ -9,7 +9,7 @@ type Waiting = Pick<merge.BoardInitiative, "decisions">;
  *  acknowledged), closed is everything else (superseded, withdrawn, and a
  *  status the skill does not know). The same reading as model.Decision.Class
  *  in Go. This file is the one place in lib that names a decision status;
- *  decisionStatusLiterals.test.ts fails on any other. */
+ *  "decision status literals" in decisionStates.test.ts fails on any other. */
 export type DecisionClass = "open" | "decided" | "closed";
 
 const OPEN = ["proposed", "awaiting-cells"];
