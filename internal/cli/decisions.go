@@ -89,11 +89,11 @@ func WriteDecisions(w io.Writer, rows []DecisionRow) {
 	tw := tabwriter.NewWriter(w, 0, 4, 2, ' ', 0)
 	fmt.Fprintf(tw, "open (%d)\n", len(open))
 	for _, r := range open {
-		fmt.Fprintf(tw, "  %s %s\t%s\towner %s\traised %s\t%dd waiting\n", r.Initiative, r.Number, clip(r.Title, 60), dashIfEmpty(r.Owner), r.Raised, r.AgeDays)
+		fmt.Fprintf(tw, "  %s %s\t%s\towner %s\traised %s\t%dd %s\n", r.Initiative, r.Number, clip(r.Title, 60), dashIfEmpty(ownerName(r.Owner)), r.Raised, r.AgeDays, statusWord(r.Status))
 	}
 	fmt.Fprintf(tw, "ruled (%d)%s\n", len(ruled), medianNote(ruled))
 	for _, r := range ruled {
-		fmt.Fprintf(tw, "  %s %s\t%s\tby %s\truled %s\t%dd\n", r.Initiative, r.Number, clip(r.Title, 60), rulerWords(r.Decision), r.Ruled, r.TurnaroundDays)
+		fmt.Fprintf(tw, "  %s %s\t%s\tby %s\t%s %s\t%dd\n", r.Initiative, r.Number, clip(r.Title, 60), rulerWords(r.Decision), statusWord(r.Status), r.Ruled, r.TurnaroundDays)
 	}
 	if len(closed) > 0 {
 		fmt.Fprintf(tw, "superseded or withdrawn (%d)\n", len(closed))
@@ -106,6 +106,28 @@ func WriteDecisions(w io.Writer, rows []DecisionRow) {
 		}
 	}
 	tw.Flush()
+}
+
+// statusWord is a decision's status as a line names it (leftovers-61 FR-5,
+// DS5): its own word with a space, never its bucket's; proposed reads
+// "waiting", as the app reads it (decisionStatusWord in lib/decisions.ts).
+func statusWord(status string) string {
+	s := strings.TrimSpace(status)
+	if s == "proposed" {
+		return "waiting"
+	}
+	return strings.ReplaceAll(s, "-", " ")
+}
+
+// ownerName is a record's owner as a line names it (leftovers-61 FR-6):
+// operator reads as pablo through the person reader; any other owner as
+// written.
+func ownerName(owner string) string {
+	o := strings.TrimSpace(owner)
+	if strings.EqualFold(o, "operator") {
+		return model.PersonOf("operator")
+	}
+	return o
 }
 
 // rulerWords names who ruled and how: the person, with the mode beside it
