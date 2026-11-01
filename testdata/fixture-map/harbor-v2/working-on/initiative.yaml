@@ -1,0 +1,7 @@
+# Deltagos map-lens fixture (docs/specs/leftovers-58.md): map.json says c4-map/2. Invented; the
+# contract's ferry-ticket shop, no real system.
+id: harbor-v2
+title: Harbor, an unknown schema
+status: active
+started: 2026-10-01
+goal: Harbor sells ferry tickets at the counter and online

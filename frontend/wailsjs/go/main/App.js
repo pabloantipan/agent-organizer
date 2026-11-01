@@ -122,6 +122,10 @@ export function MakeReview(arg1, arg2) {
   return window['go']['main']['App']['MakeReview'](arg1, arg2);
 }
 
+export function Map(arg1) {
+  return window['go']['main']['App']['Map'](arg1);
+}
+
 export function MarkReview(arg1, arg2, arg3, arg4, arg5, arg6) {
   return window['go']['main']['App']['MarkReview'](arg1, arg2, arg3, arg4, arg5, arg6);
 }

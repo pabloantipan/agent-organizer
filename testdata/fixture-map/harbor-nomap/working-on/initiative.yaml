@@ -1,0 +1,7 @@
+# Deltagos map-lens fixture (docs/specs/leftovers-58.md): no docs/architecture/map.json. Invented; the
+# contract's ferry-ticket shop, no real system.
+id: harbor-nomap
+title: Harbor, no map yet
+status: active
+started: 2026-10-01
+goal: Harbor sells ferry tickets at the counter and online

@@ -1,0 +1,7 @@
+# Deltagos map-lens fixture (docs/specs/leftovers-58.md): mail_relay at L2 has no grounding row. Invented; the
+# contract's ferry-ticket shop, no real system.
+id: harbor-ungrounded
+title: Harbor, an ungrounded node
+status: active
+started: 2026-10-01
+goal: Harbor sells ferry tickets at the counter and online

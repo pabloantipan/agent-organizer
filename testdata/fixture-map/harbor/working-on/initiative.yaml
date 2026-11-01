@@ -1,0 +1,7 @@
+# Deltagos map-lens fixture (docs/specs/leftovers-58.md): the contract's harbor map as c4-map gen wrote it. Invented; the
+# contract's ferry-ticket shop, no real system.
+id: harbor
+title: Harbor, the contract's map
+status: active
+started: 2026-10-01
+goal: Harbor sells ferry tickets at the counter and online
