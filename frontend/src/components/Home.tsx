@@ -4,14 +4,14 @@ import { Briefcase, ChevronDown, ChevronRight, CircleDashed, Compass, Hammer, Ha
 import type { merge, model, service } from "../../wailsjs/go/models";
 import { oneLine, underRoot, unreadLabel } from "../lib/unread";
 import { UnreadFiles } from "./UnreadFiles";
-import { failedStartLine, inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, needsMeShown, NEEDS_ME_FIRST, waitingOnOthers, type OthersWait, boardCard, forecastWords, pastFirst, taskCard, taskContext, taskFact, taskLine, taskTone, threadContext, type NeedsMeRow } from "../lib/queue";
+import { decisionRowAction, failedStartLine, inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, needsMeShown, NEEDS_ME_FIRST, waitingOnOthers, type OthersWait, boardCard, forecastWords, pastFirst, taskCard, taskContext, taskFact, taskLine, taskTone, threadContext, type NeedsMeRow } from "../lib/queue";
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
 import { dateWords } from "../lib/dates";
 import { draftVerb, useDraft } from "../lib/drafts";
 import { HEALTH, messages } from "../lib/health";
 import { ruleVerb, VERBS } from "../lib/verbs";
-import { ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
+import { isRulable, ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
 import { compactColumns, fixedColumns, FOLD, frTracks, giveSlack, GOAL_CHARS, GOAL_FLOOR_CHARS, goalFloor, homeClassOf, NO_EMPTY, REGULAR_FIXED, shareRoom, signalsNeed, signalsShown, wideGoalRoom, type Empty, type Fold, type WidthClass } from "../lib/width";
 import { useBoard } from "../stores/board.store";
 import { nextDate, stageState } from "./InitiativeHeader";
@@ -309,8 +309,10 @@ function UnreadRow({ row }: { row: Extract<NeedsMeRow, { kind: "unread" }> }) {
  *  options. An others' row already leads its subject with the owner, so its
  *  line starts at `raised` (needs-me-waits W11, leftovers-38 FR-1). */
 const decisionContext = (d: model.Decision, withOwner = true) => {
-  const opts = d.options ?? [];
-  return `${withOwner ? `${ownerPhrase(d.owner)} · ` : ""}raised ${d.raised ? dateWords(d.raised) : "—"}${d.raised_by ? ` by ${d.raised_by}` : ""}${opts.length > 0 ? ` · options: ${opts.join(", ")}` : ""}`;
+  // leftovers-54 FR-6a: a record that is not rulable ends with "awaiting
+  // cells" where a proposed one ends with its options.
+  const { tail } = decisionRowAction(d);
+  return `${withOwner ? `${ownerPhrase(d.owner)} · ` : ""}raised ${d.raised ? dateWords(d.raised) : "—"}${d.raised_by ? ` by ${d.raised_by}` : ""}${tail ? ` · ${tail}` : ""}`;
 };
 
 /** `n days`, in full: a screen reader reads `d` as a letter (needs-me-waits
@@ -318,7 +320,10 @@ const decisionContext = (d: model.Decision, withOwner = true) => {
 const daysWords = (n: number) => `${n} days`;
 
 /** A decision waiting on a ruling. Its action is a slot: RuleAction opens
- *  the box that writes the ruling (FR-22). Every record row keeps the
+ *  the box that writes the ruling (FR-22), for a proposed record only; an
+ *  open record that is not rulable (awaiting cells) reads Open instead and
+ *  lands on the record in Decisions, and no rule box opens for it
+ *  (leftovers-54 FR-6a, through isRulable in decisionRowAction). Every record row keeps the
  *  `decision` lozenge (leftovers-37 FR-1); a wait of a week or more says its
  *  age once, in its age column drawn amber (FR-2), and the verb is described
  *  by the drawn line (leftovers-36 FR-5). */
@@ -331,7 +336,9 @@ export function DecisionRow({ row, decision: d }: { row: Extract<NeedsMeRow, { k
       subject={<><span className="mono">{row.initiative} {d.number}</span> · {d.title}</>}
       hover={desc ? desc.split(", ").join(" · ") : undefined}
       context={decisionContext(d)}>
-      <RuleAction rowKey={row.key} initiative={row.initiative} decision={d} describedBy={desc ? descId : undefined} />
+      {decisionRowAction(d).verb === VERBS.rule
+        ? <RuleAction rowKey={row.key} initiative={row.initiative} decision={d} describedBy={desc ? descId : undefined} />
+        : <OpenDecision initiative={row.initiative} decision={d} describedBy={desc ? descId : undefined} />}
       {desc && <span id={descId} hidden>{desc}</span>}
     </Shell>
   );
@@ -360,7 +367,6 @@ export function WaitingOnOthers({ rows }: { rows: OthersWait[] }) {
  *  Decisions, focused as Rule's landing is, where Rule is still offered
  *  (0045). */
 export function OthersRow({ row }: { row: OthersWait }) {
-  const openDecision = useBoard((s) => s.openDecision);
   const descId = useId();
   const d = row.decision;
   const desc = `waiting on ${row.owner}, ${daysWords(row.waited)}, ${row.initiative} ${d.number}, ${d.title}`;
@@ -369,10 +375,18 @@ export function OthersRow({ row }: { row: OthersWait }) {
       subject={<>{ownerPhrase(row.owner)} · <span className="mono">{row.initiative} {d.number}</span> · {d.title}</>}
       hover={desc.split(", ").join(" · ")}
       context={decisionContext(d, false)}>
-      <button className="act" aria-label={`${VERBS.open} ${row.initiative} ${d.number}`} aria-describedby={descId} onClick={() => openDecision(row.initiative, d.number)} title="the record on its Decisions, where Rule is">{VERBS.open}</button>
+      <OpenDecision initiative={row.initiative} decision={d} describedBy={descId} />
       <span id={descId} hidden>{desc}</span>
     </Shell>
   );
+}
+
+/** Open on a decision row: lands on the record in the initiative's
+ *  Decisions, focused as Rule's landing is. Rule is offered there only when
+ *  the record is rulable (leftovers-54 FR-6a). */
+function OpenDecision({ initiative, decision: d, describedBy }: { initiative: string; decision: model.Decision; describedBy?: string }) {
+  const openDecision = useBoard((s) => s.openDecision);
+  return <button className="act" aria-label={`${VERBS.open} ${initiative} ${d.number}`} aria-describedby={describedBy} onClick={() => openDecision(initiative, d.number)} title={isRulable(d) ? "the record on its Decisions, where Rule is" : "the record on its Decisions; it waits on the cells it affects"}>{VERBS.open}</button>;
 }
 
 /** Rule on a Needs me row: a disclosure, so it stays marked while its box

@@ -1,17 +1,137 @@
-import type { merge } from "../../wailsjs/go/models";
+import type { merge, model } from "../../wailsjs/go/models";
 import { uniq } from ".";
 
 type Waiting = Pick<merge.BoardInitiative, "decisions">;
 
+/** A decision's state (leftovers-54 FR-6; agent-mailbox-specs
+ *  expected.json accepted_reading.decision_statuses): open waits on a ruling
+ *  (proposed, awaiting-cells), decided was ruled and stands (ruled, applied,
+ *  acknowledged), closed is everything else (superseded, withdrawn, and a
+ *  status the skill does not know). The same reading as model.Decision.Class
+ *  in Go. This file is the one place in lib that names a decision status;
+ *  "decision status literals" in decisionStates.test.ts fails on any other. */
+export type DecisionClass = "open" | "decided" | "closed";
+
+const OPEN = ["proposed", "awaiting-cells"];
+const DECIDED = ["ruled", "applied", "acknowledged"];
+
+export function decisionClass(status: string | undefined): DecisionClass {
+  const s = (status ?? "").trim();
+  if (OPEN.includes(s)) return "open";
+  if (DECIDED.includes(s)) return "decided";
+  return "closed";
+}
+
+type Stated = Pick<model.Decision, "status">;
+
+/** The record waits on a ruling: Needs me, the header's count, the waiting
+ *  owners and the To rule section read this. */
+export const isOpen = (d: Stated) => decisionClass(d.status) === "open";
+
+/** The record was ruled and stands: the Ruled list, the timeline's ruled
+ *  diamond and the turnaround read this. */
+export const isDecided = (d: Stated) => decisionClass(d.status) === "decided";
+
+/** The one status the organizer rules (0019, 0045): proposed. An
+ *  awaiting-cells record is open but is Themis's to settle, not the rule
+ *  box's (FR-6). */
+export const isRulable = (d: Stated) => (d.status ?? "").trim() === "proposed";
+
+/** What an open record that is not rulable shows, expanded in Decisions,
+ *  where Rule would be (leftovers-54 FR-6b). */
+export const NOT_RULABLE_LINE = "Waits on the cells it affects. Themis settles it.";
+
+/** The class a record's line, bar and dot are drawn with (styles/global.css
+ *  .dec.<tone>, .dec-bar.<tone>): open records draw as waiting (proposed),
+ *  decided ones as ruled; closed ones keep their status (superseded,
+ *  withdrawn), and an unknown status draws as itself, unstyled. */
+export const decisionTone = (d: Stated) => {
+  const c = decisionClass(d.status);
+  return c === "open" ? "proposed" : c === "decided" ? "ruled" : d.status;
+};
+
+/** A status in the Decisions view's words: proposed reads "waiting". */
+const STATUS_WORDS: Record<string, string> = { proposed: "waiting", "awaiting-cells": "awaiting cells", ruled: "ruled", superseded: "superseded", withdrawn: "withdrawn" };
+export const decisionStatusWord = (status: string) => STATUS_WORDS[status] ?? status;
+
+/** How a ruling was given: present (the person ruled), autonomous (an agent
+ *  ruled in the person's name, the old "away mode") or a standing rule. */
+export type RulingMode = "present" | "autonomous" | "standing rule";
+export type Ruling = { person: string; mode: RulingMode | "" };
+
+const LISTED: Record<string, Ruling> = {
+  "operator away mode, recommendation taken": { person: "pablo", mode: "autonomous" },
+  "(autonomous mode)": { person: "pablo", mode: "autonomous" },
+  "(away mode)": { person: "pablo", mode: "autonomous" },
+};
+const WORD = /^[^\s()]+$/;
+const PAREN = /^([^\s()]+)\s+\(([^()]+)\)$/;
+const personOf = (w: string) => (w === "operator" ? "pablo" : w);
+
+/** A record's owner as the person compared against the lead: trimmed, lower
+ *  case, and `operator` read as pablo (expected.json ruled_by_note, 19d5f44).
+ *  Empty when the record names none. Shown owners keep the words as written. */
+export const ownerPerson = (owner: string | undefined) => personOf((owner ?? "").trim().toLowerCase());
+
+/** ruled_by read as a person and a mode (leftovers-54 FR-7; expected.json
+ *  accepted_reading.ruled_by_reading at 54cf10d): the same rules as
+ *  model.ReadRuledBy in Go. Null when the value is refused
+ *  (ruled_by_refused): no person, no mode, never a guess. An empty value is
+ *  nobody: person "". */
+export function readRuledBy(ruledBy: string | undefined): Ruling | null {
+  const s = (ruledBy ?? "").trim();
+  if (s === "") return { person: "", mode: "" };
+  if (LISTED[s]) return LISTED[s];
+  if (WORD.test(s)) return { person: personOf(s), mode: "present" };
+  const p = PAREN.exec(s);
+  if (p) {
+    const note = p[2].trim();
+    if (note === "autonomous mode" || note === "away mode") return { person: personOf(p[1]), mode: "autonomous" };
+    if (note === "standing rule" || /^FR-4\s+\S/.test(note)) return { person: personOf(p[1]), mode: "standing rule" };
+    return null;
+  }
+  const f = s.split(/\s+/);
+  if (f.length === 4 && f[1] === "by" && WORD.test(f[0])) {
+    const tail = `${f[2]} ${f[3]}`;
+    if (tail === "away mode") return { person: personOf(f[0]), mode: "autonomous" };
+    if (tail === "standing rule") return { person: personOf(f[0]), mode: "standing rule" };
+  }
+  return null;
+}
+
+type Ruled = Pick<model.Decision, "ruled_by"> & Partial<Pick<model.Decision, "ruler" | "ruler_mode">>;
+
+/** Who ruled a record and how. The scan's reading (`ruler`, `ruler_mode`,
+ *  which also weighs a written ruled_mode) when the record carries it, else
+ *  ruled_by read here. Null when refused. */
+export function rulingOf(d: Ruled): Ruling | null {
+  if (d.ruler !== undefined && d.ruler !== null) {
+    if (d.ruler === "" && (d.ruled_by ?? "").trim() !== "") return null;
+    return { person: d.ruler, mode: (d.ruler_mode ?? "") as Ruling["mode"] };
+  }
+  return readRuledBy(d.ruled_by);
+}
+
+/** The ruler as the app names it (FR-7): the person, with the mode beside it
+ *  when it is not present: "pablo", "pablo, autonomous mode", "pablo,
+ *  standing rule". Empty when nobody ruled or the reading was refused. */
+export function rulerName(d: Ruled): string {
+  const r = rulingOf(d);
+  if (!r || !r.person) return "";
+  if (r.mode === "autonomous") return `${r.person}, autonomous mode`;
+  if (r.mode === "standing rule") return `${r.person}, standing rule`;
+  return r.person;
+}
+
 /** Decision records waiting on a ruling in one initiative. */
-export const waitingDecisions = (i: Waiting) => (i.decisions ?? []).filter((d) => d.status === "proposed").length;
+export const waitingDecisions = (i: Waiting) => (i.decisions ?? []).filter(isOpen).length;
 
 /** Whose rulings an initiative waits on (FR-10 of lead-side-fixes, 0056):
  *  the owners of its proposed records, distinct, in the order their oldest
  *  record was raised. A record with no owner is "no owner"; an undated one
  *  sorts last; a tie on the date goes to the lower record number. */
 export function waitingOwners(i: Waiting): string[] {
-  const proposed = (i.decisions ?? []).filter((d) => d.status === "proposed");
+  const proposed = (i.decisions ?? []).filter(isOpen);
   const key = (raised: string | undefined) => raised || "￿";
   proposed.sort((a, b) => key(a.raised).localeCompare(key(b.raised)) || a.number.localeCompare(b.number));
   const owners: string[] = [];

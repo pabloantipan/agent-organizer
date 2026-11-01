@@ -2,6 +2,8 @@ import type { AgentGroup, AgentsView, BoardView, CellThread, Seat } from "../hoo
 import { sleepyWord } from "./initiatives";
 import type { merge, model, service } from "../../wailsjs/go/models";
 import { parseISO } from "./dates";
+import { decisionStatusWord, isOpen, isRulable, ownerPerson } from "./decisions";
+import { VERBS } from "./verbs";
 import { unreadFiles, type UnreadFile } from "./unread";
 import { HEALTH, healthState, type HealthState } from "./health";
 
@@ -23,7 +25,7 @@ export const leadOf = (group: AgentGroup | undefined) => (group?.cell?.human || 
 /** A decision record asks the lead when its owner is the lead or nobody
  *  (FR-8, 0034); one owned by business or the FSE stays on its Decisions tab. */
 const ownedByLead = (d: model.Decision, lead: string) => {
-  const o = (d.owner ?? "").trim().toLowerCase();
+  const o = ownerPerson(d.owner);
   return o === "" || o === lead;
 };
 
@@ -152,7 +154,7 @@ export function needsMeRows(view: BoardView | null, agents: AgentsView | null, n
     if (folded.has(i.id)) continue;
     const lead = leadOf(groups.get(i.id));
     for (const d of i.decisions ?? []) {
-      if (d.status === "proposed" && ownedByLead(d, lead)) rows.push({ kind: "decision", key: `decision:${i.id}/${d.number}`, initiative: i.id, since: day(d.raised), decision: d, waited: longWait(d.raised, now) });
+      if (isOpen(d) && ownedByLead(d, lead)) rows.push({ kind: "decision", key: `decision:${i.id}/${d.number}`, initiative: i.id, since: day(d.raised), decision: d, waited: longWait(d.raised, now) });
     }
     // Files the scan could not read: whatever ask they hold is missing from
     // every other row, so the initiative gets one row that says so.
@@ -214,7 +216,7 @@ export function waitingOnOthers(view: BoardView | null, agents: AgentsView | nul
     if (folded.has(i.id)) continue;
     const lead = leadOf(groups.get(i.id));
     for (const d of i.decisions ?? []) {
-      if (d.status !== "proposed" || ownedByLead(d, lead)) continue;
+      if (!isOpen(d) || ownedByLead(d, lead)) continue;
       const waited = longWait(d.raised, now);
       if (waited !== null) out.push({ key: `others:${i.id}/${d.number}`, initiative: i.id, owner: (d.owner ?? "").trim(), waited, since: day(d.raised), decision: d });
     }
@@ -387,6 +389,20 @@ export function failedStartLine(l: Pick<service.InitiativeLaunch, "initiative" |
  *  is Open, since the fix is on Agents and not a launch; else Launch. */
 export function launchVerb(row: { missing: string | null }): { verb: "Open" | "Launch"; blocker: string | null } {
   return row.missing ? { verb: "Open", blocker: personaMissing([row.missing]) } : { verb: "Launch", blocker: null };
+}
+
+/** A decision row's verb and the end of its context line (leftovers-54
+ *  Amendment 6, FR-6a): a proposed record is the lead's to rule, so its verb
+ *  is Rule and its line ends with its options; an open record that is not
+ *  rulable (awaiting cells, Themis's to settle) has the verb Open, which
+ *  lands on the record in the initiative's Decisions, and its line ends with
+ *  its status word in place of the options. Both read the one helper. */
+export function decisionRowAction(d: Pick<model.Decision, "status" | "options">): { verb: "Rule" | "Open"; tail: string | null } {
+  if (isRulable(d)) {
+    const opts = d.options ?? [];
+    return { verb: VERBS.rule, tail: opts.length > 0 ? `options: ${opts.join(", ")}` : null };
+  }
+  return { verb: VERBS.open, tail: decisionStatusWord((d.status ?? "").trim()) };
 }
 
 /** The seats of a cell with no persona file under agents/, in roster order. */

@@ -46,6 +46,11 @@ type contractCard struct {
 	DoneFolder bool     `json:"done_folder"`
 }
 
+type ruledByReading struct {
+	Person string `json:"person"`
+	Mode   string `json:"mode"`
+}
+
 type contractDecision struct {
 	Number        string   `json:"number"`
 	Status        string   `json:"status"`
@@ -55,6 +60,9 @@ type contractDecision struct {
 	Cards         []string `json:"cards"`
 	Supersedes    []string `json:"supersedes"`
 	RuledByIsMode bool     `json:"ruled_by_is_mode"`
+	// RuledBy is the reading of the record's ruled_by (person and mode);
+	// nil when the record has none.
+	RuledBy *ruledByReading `json:"ruled_by"`
 }
 
 type contractStage struct {
@@ -69,9 +77,13 @@ type contractStage struct {
 type contract struct {
 	Root     string `json:"root"`
 	Accepted struct {
-		DecisionStatuses map[string]any `json:"decision_statuses"`
-		RuledByModes     []string       `json:"ruled_by_modes"`
-		Ledgers          struct {
+		DecisionStatuses map[string]any            `json:"decision_statuses"`
+		RuledByModes     []string                  `json:"ruled_by_modes"`
+		RuledByReading   map[string]ruledByReading `json:"ruled_by_reading"`
+		RuledByRefused   struct {
+			Values []string `json:"values"`
+		} `json:"ruled_by_refused"`
+		Ledgers struct {
 			Names []string `json:"names"`
 		} `json:"ledgers"`
 	} `json:"accepted_reading"`
@@ -87,6 +99,17 @@ type contract struct {
 	Specs        []struct {
 		Path string `json:"path"`
 	} `json:"specs"`
+	Facts struct {
+		Decision []struct {
+			Number   string `json:"number"`
+			RuledBy  string `json:"ruled_by"`
+			Mode     string `json:"ruled_mode"`
+			Forecast *struct {
+				Lo int `json:"lo"`
+				Hi int `json:"hi"`
+			} `json:"forecast"`
+		} `json:"decision"`
+	} `json:"facts"`
 	Skipped  []string `json:"skipped_silently"`
 	Problems []struct {
 		Path   string `json:"path"`
@@ -235,15 +258,35 @@ func TestWorkingOnContract(t *testing.T) {
 			if w.Supersedes != nil && !reflect.DeepEqual(d.Supersedes, w.Supersedes) {
 				t.Errorf("%s supersedes %v, want %v", d.Number, d.Supersedes, w.Supersedes)
 			}
-			if w.RuledByIsMode {
-				if !slices.Contains(want.Accepted.RuledByModes, d.RuledBy) {
-					t.Errorf("%s ruled_by %q is not shown as written (modes %v)", d.Number, d.RuledBy, want.Accepted.RuledByModes)
-				}
-				if d.Ruler() != "" {
-					t.Errorf("%s: the mode %q counted as ruler %q", d.Number, d.RuledBy, d.Ruler())
-				}
-			} else if d.RuledBy != "" && d.Ruler() != d.RuledBy {
-				t.Errorf("%s: ruler %q, want %q", d.Number, d.Ruler(), d.RuledBy)
+			if w.RuledByIsMode && !slices.Contains(want.Accepted.RuledByModes, d.RuledBy) {
+				t.Errorf("%s ruled_by %q is not one of the contract's modes %v", d.Number, d.RuledBy, want.Accepted.RuledByModes)
+			}
+			// ruled_by reads as a person plus a mode (FR-7); the words stay
+			// as written.
+			if w.RuledBy != nil && (d.Ruler() != w.RuledBy.Person || d.Mode != w.RuledBy.Mode) {
+				t.Errorf("%s ruled_by %q reads %q, %q; want %q, %q", d.Number, d.RuledBy, d.Ruler(), d.Mode, w.RuledBy.Person, w.RuledBy.Mode)
+			}
+			if w.RuledBy == nil && d.Ruler() != "" {
+				t.Errorf("%s: ruler %q, the contract reads none", d.Number, d.Ruler())
+			}
+		}
+		// The facts' decision rows: the person, the mode and the forecast
+		// band in minutes (FR-8).
+		byNumber := map[string]model.Decision{}
+		for _, d := range si.Decisions {
+			byNumber[d.Number] = d
+		}
+		for _, f := range want.Facts.Decision {
+			d, ok := byNumber[f.Number]
+			if !ok {
+				t.Errorf("fact %s: no such decision read", f.Number)
+				continue
+			}
+			if d.Ruler() != f.RuledBy || d.Mode != f.Mode {
+				t.Errorf("fact %s: ruler %q mode %q, want %q %q", f.Number, d.Ruler(), d.Mode, f.RuledBy, f.Mode)
+			}
+			if f.Forecast != nil && (d.ForecastLow != f.Forecast.Lo || d.ForecastTop != f.Forecast.Hi) {
+				t.Errorf("fact %s: forecast %q reads %d-%d, want %d-%d", f.Number, d.Forecast, d.ForecastLow, d.ForecastTop, f.Forecast.Lo, f.Forecast.Hi)
 			}
 		}
 		// Every status the contract lists reads the way it classes it.
@@ -265,8 +308,19 @@ func TestWorkingOnContract(t *testing.T) {
 				}
 			}
 		}
-		if !reflect.DeepEqual(model.RuledByModes, want.Accepted.RuledByModes) {
-			t.Errorf("model.RuledByModes = %q, contract %q", model.RuledByModes, want.Accepted.RuledByModes)
+		// Every reading the contract lists, and every value it refuses.
+		if len(want.Accepted.RuledByReading) == 0 {
+			t.Error("the contract lists no ruled_by_reading")
+		}
+		for v, r := range want.Accepted.RuledByReading {
+			if p, m, ok := model.ReadRuledBy(v); !ok || p != r.Person || m != r.Mode {
+				t.Errorf("ruled_by %q reads %q, %q (ok %v); want %q, %q", v, p, m, ok, r.Person, r.Mode)
+			}
+		}
+		for _, v := range want.Accepted.RuledByRefused.Values {
+			if p, m, ok := model.ReadRuledBy(v); ok || p != "" || m != "" {
+				t.Errorf("ruled_by %q read as %q, %q; the contract refuses it", v, p, m)
+			}
 		}
 	})
 

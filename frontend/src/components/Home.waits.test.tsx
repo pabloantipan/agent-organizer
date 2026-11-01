@@ -196,3 +196,29 @@ describe("W6 (leftovers-41 FR-6, lf40 UF1): each Needs me row kind renders its v
     expect(src).not.toMatch(/>(Rule|Answer|Open|Agents|Launch|Show)<\/button>/);
   });
 });
+
+// leftovers-54 Amendment 6, FR-6a: an awaiting-cells record on Needs me reads
+// Open and "awaiting cells", and no rule box opens for it.
+describe("FR-6a: a Needs me row for a record that is not rulable", () => {
+  const waiting = { ...rec("0013", "operator", "2026-10-20", "Which cells take the shared format"), status: "awaiting-cells", options: ["both cells", "the record only"] } as model.Decision;
+  const proposed = { ...rec("0002", "pablo", "2026-10-20", "Pick the store"), options: ["a", "b"] } as model.Decision;
+  const row = (d: model.Decision) => renderToStaticMarkup(<DecisionRow row={leadRow(d, null)} decision={d} />);
+  it("awaiting cells: the verb is Open, named for the record, with no disclosure", () => {
+    const html = row(waiting);
+    const btns = [...html.matchAll(/<button[^>]*>([^<]*)<\/button>/g)];
+    expect(btns.map((m) => m[1])).toEqual([VERBS.open]);
+    expect(btns[0][0]).toContain(`aria-label="${VERBS.open} camp 0013"`);
+    expect(btns[0][0]).not.toContain("aria-expanded");
+    expect(html).not.toContain("rb-anchor");
+  });
+  it("awaiting cells: the row reads awaiting cells where a proposed one reads its options", () => {
+    expect(row(waiting)).toContain("· awaiting cells");
+    expect(row(waiting)).not.toContain("options:");
+    expect(row(proposed)).toContain("· options: a, b");
+    expect(row(proposed)).not.toContain("awaiting cells");
+  });
+  it("proposed keeps Rule and its disclosure", () => {
+    const html = row(proposed);
+    expect(html).toMatch(/<button[^>]*aria-expanded="false"[^>]*>Rule<\/button>/);
+  });
+});
