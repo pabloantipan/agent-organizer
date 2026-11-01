@@ -189,18 +189,17 @@ export function MapPanel({ initiative, index, nodes, levelName, picked, pick, dr
   // back on the node's list entry, else on the panel's title. A press on
   // the figure keeps focus on its node.
   const box = useRef<HTMLElement>(null);
-  const was = useRef<string | null>(null);
-  const first = useRef(true);
   const shown = `${levelName}:${picked?.id ?? ""}`;
+  const last = useRef({ shown, picked: picked?.id ?? null });
   useEffect(() => {
+    const prev = last.current;
+    if (prev.shown === shown) return; // the first run (twice under StrictMode) moves nothing
+    last.current = { shown, picked: picked?.id ?? null };
     const el = box.current;
-    const prev = was.current;
-    was.current = picked?.id ?? null;
-    if (first.current) { first.current = false; return; }
     if (!el || typeof document === "undefined") return;
     const a = document.activeElement;
     if (a && a !== document.body && !el.contains(a)) return;
-    const back = !picked && prev ? el.querySelector<HTMLElement>(`[data-node="${CSS.escape(prev)}"]`) : null;
+    const back = !picked && prev.picked ? el.querySelector<HTMLElement>(`[data-node="${CSS.escape(prev.picked)}"]`) : null;
     (back ?? el.querySelector<HTMLElement>(".map-panel-title"))?.focus();
   }, [shown]);
   if (!picked) {

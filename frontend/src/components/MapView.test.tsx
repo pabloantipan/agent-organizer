@@ -122,9 +122,9 @@ describe("FR-7: status and drift as lens classes", () => {
     expect(html).toContain('aria-label="Mail relay, kind unknown, status unknown, not grounded"');
   });
   it("map.css: dashed ruled, muted retiring, dotted ungrounded, the ring on the node button; no oklch, color-mix, nesting or @layer", () => {
-    expect(mapCss).toMatch(/\.node\.map-ruled \.label-container \{[^}]*stroke-dasharray: 6 4 !important/);
+    expect(mapCss).toMatch(/\.node\.map-ruled \.label-container,\n[^{]*\.node\.map-ruled \.label-container path\[fill="none"\] \{[^}]*stroke-dasharray: 6 4 !important/);
     expect(mapCss).toMatch(/\.node\.map-retiring text \{ fill: var\(--fg-muted\) !important/);
-    expect(mapCss).toMatch(/\.node\.map-ungrounded \.label-container \{[^}]*stroke-dasharray: 1\.5 3\.5 !important/);
+    expect(mapCss).toMatch(/\.node\.map-ungrounded \.label-container,\n[^{]*\.node\.map-ungrounded \.label-container path\[fill="none"\] \{[^}]*stroke-dasharray: 1\.5 3\.5 !important/);
     expect(mapCss).toMatch(/button\.map-node:focus-visible \{ outline: 2px solid var\(--focus-ring\)/);
     const rules = mapCss.replace(/\/\*[\s\S]*?\*\//g, "");
     expect(rules).not.toMatch(/oklch|color-mix|@layer|--(plum|violet|lilac|red|amber|indigo)-\d/);

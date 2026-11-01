@@ -36,13 +36,21 @@
 .map-figure-nodes button.map-node:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 
 /* FR-7: status and drift. `exists` is the drawing as drawn. */
-.map-figure-svg .node.map-ruled .label-container { stroke: var(--decision-ruled-fg) !important; stroke-width: 1.5px !important; stroke-dasharray: 6 4 !important; }
-.map-figure-svg .node.map-retiring .label-container { stroke: var(--border-strong) !important; fill: var(--bg) !important; }
+.map-figure-svg .node.map-ruled .label-container,
+.map-figure-svg .node.map-ruled .label-container path[fill="none"] { stroke: var(--decision-ruled-fg) !important; stroke-width: 1.5px !important; stroke-dasharray: 6 4 !important; }
+.map-figure-svg .node.map-retiring .label-container,
+.map-figure-svg .node.map-retiring .label-container path[fill="none"] { stroke: var(--border-strong) !important; }
+.map-figure-svg .node.map-retiring .label-container:not(g),
+.map-figure-svg .node.map-retiring .label-container path:not([fill="none"]) { fill: var(--bg) !important; }
 .map-figure-svg .node.map-retiring text { fill: var(--fg-muted) !important; }
-.map-figure-svg .node.map-ungrounded .label-container { stroke: var(--warning) !important; stroke-width: 1.5px !important; stroke-dasharray: 1.5 3.5 !important; stroke-linecap: round !important; }
-.map-figure-svg .node.map-picked .label-container { stroke: var(--accent-fg) !important; stroke-width: 2px !important; }
+.map-figure-svg .node.map-ungrounded .label-container,
+.map-figure-svg .node.map-ungrounded .label-container path[fill="none"] { stroke: var(--warning) !important; stroke-width: 1.5px !important; stroke-dasharray: 1.5 3.5 !important; stroke-linecap: round !important; }
+.map-figure-svg .node.map-picked .label-container,
+.map-figure-svg .node.map-picked .label-container path[fill="none"] { stroke: var(--accent-fg) !important; stroke-width: 2px !important; }
 .map-figure-svg .node.map-picked.map-ruled .label-container,
-.map-figure-svg .node.map-picked.map-ungrounded .label-container { stroke-width: 2px !important; }
+.map-figure-svg .node.map-picked.map-ruled .label-container path[fill="none"] { stroke: var(--decision-ruled-fg) !important; }
+.map-figure-svg .node.map-picked.map-ungrounded .label-container,
+.map-figure-svg .node.map-picked.map-ungrounded .label-container path[fill="none"] { stroke: var(--warning) !important; }
 
 /* The words under a node: `ruled 0002`, `retiring`, `not grounded`. */
 .map-tags { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
@@ -80,8 +88,8 @@
 
 .map-ground { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-1-5); }
 .map-ground-line { display: flex; flex-direction: column; gap: var(--space-0-5); overflow-wrap: anywhere; }
-.map-ground .mono { font-family: var(--mono); font-size: var(--font-size-sm); }
-.map-ground-kind { color: var(--fg-muted); }
-.map-ground-act { text-align: left; color: var(--accent-fg); }
+.map-ground .mono { font-family: var(--mono); font-size: var(--font-size-sm); overflow-wrap: anywhere; }
+.map-ground-kind { color: var(--fg-muted); white-space: nowrap; }
+.map-ground-act { display: block; max-width: 100%; text-align: left; white-space: normal; color: var(--accent-fg); }
 .map-ground-off { color: var(--fg-muted); }
 .map-ground-why { color: var(--fg-subtle); font-size: var(--font-size-sm); line-height: var(--line-sm); }
