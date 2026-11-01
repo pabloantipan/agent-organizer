@@ -1,5 +1,6 @@
 import type { model } from "../../wailsjs/go/models";
 import { daysBetween, parseISO } from "./dates";
+import { decisionStatusWord, isDecided, isOpen, rulerName } from "./decisions";
 
 // The Decisions sub-view's words (docs/ux/specs/decisions-view.md): the find
 // match, the summary line, the turnaround and the record line's name. Pure,
@@ -69,12 +70,10 @@ export const summaryText = (s: Summary) => `${s.lead}${s.number ? ` (${s.number}
  *  field filters. */
 export const countWords = (matched: number, total: number, filtering: boolean) => (filtering ? `${matched} of ${total}` : `${total}`);
 
-const STATUS: Record<string, string> = { proposed: "waiting", ruled: "ruled", superseded: "superseded", withdrawn: "withdrawn" };
-
 /** A status in the view's words: proposed reads "waiting". */
-export const statusWord = (status: string) => STATUS[status] ?? status;
+export const statusWord = decisionStatusWord;
 
-type Named = Pick<model.Decision, "number" | "title" | "status" | "owner" | "raised" | "ruled" | "ruled_by" | "chosen" | "superseded_by">;
+type Named = Pick<model.Decision, "number" | "title" | "status" | "owner" | "raised" | "ruled" | "ruled_by" | "chosen" | "superseded_by"> & Partial<Pick<model.Decision, "ruler" | "ruler_mode">>;
 
 /** The record line's accessible name (§9, B14): its visible facts in order,
  *  each once. "0007 Stage normalize: exit met, waiting, owner pablo, 5 days";
@@ -87,14 +86,14 @@ export function lineName(d: Named, now: Date, initiative?: string, ruledOn?: str
   const parts = [`${d.number} ${d.title}`];
   if (initiative) parts.push(initiative);
   parts.push(statusWord(d.status));
-  if (d.status === "proposed") {
+  if (isOpen(d)) {
     const o = d.owner?.trim();
     parts.push(o ? `owner ${o}` : "no owner");
     const r = parseISO(d.raised);
     parts.push(waitedWords(r ? daysBetween(r, now) : 0));
-  } else if (d.status === "ruled") {
+  } else if (isDecided(d)) {
     if (d.chosen && !open) parts.push(`“${d.chosen}”`);
-    parts.push(rulerWords(d.ruled_by));
+    parts.push(rulerWords(d));
     if (ruledOn) parts.push(ruledOn);
     const t = turnaroundWords(d.raised, d.ruled);
     if (t) parts.push(t);
@@ -105,16 +104,21 @@ export function lineName(d: Named, now: Date, initiative?: string, ruledOn?: str
 }
 
 /** Who ruled, as the record line shows it and its name says it (row 15,
- *  WCAG 2.5.3): `by pablo`, or `no ruler recorded` where the record names
- *  none (a scanner problem already). */
+ *  WCAG 2.5.3): the person with the mode beside it (leftovers-54 FR-7),
+ *  `by pablo`, `by pablo, autonomous mode`, or `no ruler recorded` where the
+ *  record names none or its ruled_by is refused (a scanner problem already). */
 export const NO_RULER = "no ruler recorded";
-export const rulerWords = (ruledBy?: string) => (ruledBy?.trim() ? `by ${ruledBy.trim()}` : NO_RULER);
+export const rulerWords = (d: Pick<model.Decision, "ruled_by"> & Partial<Pick<model.Decision, "ruler" | "ruler_mode">>) => {
+  const name = rulerName(d);
+  return name ? `by ${name}` : NO_RULER;
+};
 
 /** A Timeline row's name and hover title (§5, B11): the number, the title and
  *  the status, which the row no longer shows as a second line. */
 export function timelineName(d: Named, initiative?: string): string {
   const facts = [statusWord(d.status), `raised ${d.raised}`];
-  if (d.ruled) facts.push(`ruled ${d.ruled}${d.ruled_by ? ` by ${d.ruled_by}` : ""}`);
+  const by = rulerName(d);
+  if (d.ruled) facts.push(`ruled ${d.ruled}${by ? ` by ${by}` : ""}`);
   if (d.owner) facts.push(`owner ${d.owner}`);
   return `${d.number} ${d.title}, ${initiative ? `${initiative}, ` : ""}${facts.join(", ")}`;
 }

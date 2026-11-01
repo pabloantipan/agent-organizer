@@ -2,6 +2,7 @@ import type { AgentGroup, AgentsView, BoardView, CellThread, Seat } from "../hoo
 import { sleepyWord } from "./initiatives";
 import type { merge, model, service } from "../../wailsjs/go/models";
 import { parseISO } from "./dates";
+import { isOpen, ownerPerson } from "./decisions";
 import { unreadFiles, type UnreadFile } from "./unread";
 import { HEALTH, healthState, type HealthState } from "./health";
 
@@ -23,7 +24,7 @@ export const leadOf = (group: AgentGroup | undefined) => (group?.cell?.human || 
 /** A decision record asks the lead when its owner is the lead or nobody
  *  (FR-8, 0034); one owned by business or the FSE stays on its Decisions tab. */
 const ownedByLead = (d: model.Decision, lead: string) => {
-  const o = (d.owner ?? "").trim().toLowerCase();
+  const o = ownerPerson(d.owner);
   return o === "" || o === lead;
 };
 
@@ -152,7 +153,7 @@ export function needsMeRows(view: BoardView | null, agents: AgentsView | null, n
     if (folded.has(i.id)) continue;
     const lead = leadOf(groups.get(i.id));
     for (const d of i.decisions ?? []) {
-      if (d.status === "proposed" && ownedByLead(d, lead)) rows.push({ kind: "decision", key: `decision:${i.id}/${d.number}`, initiative: i.id, since: day(d.raised), decision: d, waited: longWait(d.raised, now) });
+      if (isOpen(d) && ownedByLead(d, lead)) rows.push({ kind: "decision", key: `decision:${i.id}/${d.number}`, initiative: i.id, since: day(d.raised), decision: d, waited: longWait(d.raised, now) });
     }
     // Files the scan could not read: whatever ask they hold is missing from
     // every other row, so the initiative gets one row that says so.
@@ -214,7 +215,7 @@ export function waitingOnOthers(view: BoardView | null, agents: AgentsView | nul
     if (folded.has(i.id)) continue;
     const lead = leadOf(groups.get(i.id));
     for (const d of i.decisions ?? []) {
-      if (d.status !== "proposed" || ownedByLead(d, lead)) continue;
+      if (!isOpen(d) || ownedByLead(d, lead)) continue;
       const waited = longWait(d.raised, now);
       if (waited !== null) out.push({ key: `others:${i.id}/${d.number}`, initiative: i.id, owner: (d.owner ?? "").trim(), waited, since: day(d.raised), decision: d });
     }

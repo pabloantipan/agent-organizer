@@ -1,6 +1,7 @@
 import type { merge, model } from "../../wailsjs/go/models";
 import { addLocalDays, hhmm, startOfDay, when, type When } from "./axis";
 import { dateWords, parseISO } from "./dates";
+import { isDecided, isOpen, rulerName } from "./decisions";
 
 /** Roadmap › Stages as an outline (docs/ux/specs/roadmap-as-a-plan.md,
  *  docs/specs/roadmap-as-a-plan.md FR-4): which rows each Detail step shows,
@@ -251,8 +252,9 @@ export function stageDecisions(stages: model.Stage[], index: number, decisions: 
  *  `0002 …, raised 20 Sep, waiting`. */
 export function decisionName(d: model.Decision, now?: Date): string {
   const head = `${d.number} ${d.title}`.trim();
-  if (d.status === "ruled" && d.ruled) return `${head}, ruled ${dateWords(d.ruled, now)}${d.ruled_by ? ` by ${d.ruled_by}` : ""}`;
-  if (d.status === "proposed") return `${head}, raised ${dateWords(d.raised, now)}, waiting`;
+  const by = rulerName(d);
+  if (isDecided(d) && d.ruled) return `${head}, ruled ${dateWords(d.ruled, now)}${by ? ` by ${by}` : ""}`;
+  if (isOpen(d)) return `${head}, raised ${dateWords(d.raised, now)}, waiting`;
   return `${head}, ${d.status}${d.raised ? `, raised ${dateWords(d.raised, now)}` : ""}`;
 }
 
@@ -262,9 +264,9 @@ export type Gem = { number: string; at: number; kind: "raised" | "ruled" | "wait
  *  at ruled. Superseded and withdrawn records keep their raised diamond. */
 export function gemsOf(d: model.Decision): Gem[] {
   const raised = parseISO(d.raised)?.getTime();
-  const ruled = d.status === "ruled" ? parseISO(d.ruled)?.getTime() : undefined;
+  const ruled = isDecided(d) ? parseISO(d.ruled)?.getTime() : undefined;
   const out: Gem[] = [];
-  if (raised !== undefined) out.push({ number: d.number, at: raised, kind: d.status === "proposed" ? "waiting" : "raised" });
+  if (raised !== undefined) out.push({ number: d.number, at: raised, kind: isOpen(d) ? "waiting" : "raised" });
   if (ruled !== undefined) out.push({ number: d.number, at: ruled, kind: "ruled" });
   return out;
 }

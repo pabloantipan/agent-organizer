@@ -105,9 +105,9 @@ describe("lineName", () => {
 
   it("says no ruler recorded in the text and the name alike (row 15)", () => {
     const r = { ...waiting, status: "ruled", ruled: "2026-10-01", ruled_by: "", chosen: "" };
-    expect(rulerWords("")).toBe("no ruler recorded");
-    expect(rulerWords("  ")).toBe("no ruler recorded");
-    expect(rulerWords("pablo")).toBe("by pablo");
+    expect(rulerWords({ ruled_by: "" })).toBe("no ruler recorded");
+    expect(rulerWords({ ruled_by: "  " })).toBe("no ruler recorded");
+    expect(rulerWords({ ruled_by: "pablo" })).toBe("by pablo");
     expect(lineName(r, now, undefined, "1 Oct")).toBe("0007 Stage normalize: exit met, ruled, no ruler recorded, 1 Oct, after 3 days");
   });
 
