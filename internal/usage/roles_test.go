@@ -114,3 +114,42 @@ func TestLoadRolesFromRoot(t *testing.T) {
 		t.Errorf("a missing root = %+v", out)
 	}
 }
+
+// A6 (Amendment 2): every reason Attribute writes falls under one named
+// cause, and the causes add up to the share with none.
+func TestLF56A6CauseOfAttributeReasons(t *testing.T) {
+	inits := fixtureInitiatives()
+	inits[0].Cards = append(inits[0].Cards, Card{Slug: "dup-a", Seat: "dup-build"}, Card{Slug: "dup-b", Seat: "dup-build"},
+		Card{Slug: "rv-a", Reviewers: []string{"two-rev"}}, Card{Slug: "rv-b", Reviewers: []string{"two-rev"}})
+	tests := []struct {
+		seen Seen
+		want string
+	}{
+		{Seen{Name: "org-probe-sup9", Cwd: "/home/p/org"}, CauseSupervisor},
+		{Seen{Name: "org-probe-dup-build", Cwd: "/home/p/org"}, CauseSeveral},
+		{Seen{Name: "org-probe-two-rev", Cwd: "/home/p/org"}, CauseSeveral},
+		{Seen{Name: "org-probe-zz-build", Cwd: "/home/p/org"}, CauseNoSeat},
+		{Seen{Name: "x-probe-zz-build", Cwd: "/elsewhere"}, CauseOutside},
+	}
+	for _, tt := range tests {
+		a := Attribute(tt.seen, inits)
+		if a.Task != "" || CauseOf(a.Reason) != tt.want {
+			t.Errorf("%s: task %q reason %q is cause %q, want %q", tt.seen.Name, a.Task, a.Reason, CauseOf(a.Reason), tt.want)
+		}
+	}
+	if got := CauseOf("something new"); got != "something new" {
+		t.Errorf("an unknown reason = %q, want it verbatim", got)
+	}
+	if got := CauseOf(""); got != CauseUnexplained {
+		t.Errorf("empty reason = %q", got)
+	}
+
+	got := ByCause([]string{CauseSupervisor, CauseSeveral, CauseSupervisor, CauseNoUsageRow}, []float64{2, 1, 3, 0}, 20)
+	want := []CauseShare{{CauseSupervisor, 0.25}, {CauseSeveral, 0.05}}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("ByCause = %+v, want %+v", got, want)
+	}
+	if ByCause([]string{CauseSeveral}, []float64{1}, 0) != nil {
+		t.Error("a zero total has no shares")
+	}
+}

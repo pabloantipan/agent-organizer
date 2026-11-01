@@ -85,6 +85,20 @@ func WriteUsage(w io.Writer, v ledger.View, by string) {
 	}
 	fmt.Fprintln(w, sess)
 	fmt.Fprintln(w, sharesLine(ledger.SessionShares(v.Sessions)))
+	var causes []string
+	var costs []float64
+	var total float64
+	for _, s := range v.Sessions {
+		m := 0.0
+		if s.Money != nil {
+			m = *s.Money
+		}
+		total += m
+		if s.Task == "" {
+			causes, costs = append(causes, ledger.CauseOf(s.Reason)), append(costs, m)
+		}
+	}
+	writeCauses(w, ledger.ByCause(causes, costs, total))
 	fmt.Fprintln(w)
 
 	fmt.Fprintf(w, "by %s\n", by)
@@ -171,6 +185,14 @@ func compact(n int64) string {
 		return fmt.Sprintf("%.0fk", float64(n)/1e3)
 	}
 	return fmt.Sprintf("%d", n)
+}
+
+// writeCauses is the share with no task by cause, one line each under the
+// shares line (leftovers-56 Amendment 2).
+func writeCauses(w io.Writer, cs []ledger.CauseShare) {
+	for _, c := range cs {
+		fmt.Fprintf(w, "          %.1f%% %s\n", 100*c.Share, c.Cause)
+	}
 }
 
 // sharesLine is leftovers-56 FR-6: the share of the cost spent on overhead

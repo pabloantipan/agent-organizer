@@ -80,7 +80,7 @@ func TestUsageCmdOverATranscript(t *testing.T) {
 	// (leftovers-56 FR-1), and the report says what share that is (FR-6).
 	if code := runWith([]string{"usage", "--by", "task"}, &out, &errb, now); code != 0 ||
 		!strings.Contains(out.String(), "factory/overhead:session") ||
-		!strings.Contains(out.String(), "cost      100.0% overhead · 0.0% with no task") {
+		!strings.Contains(out.String(), "cost      100.0% overhead · 0.0% with no task\n\n") {
 		t.Errorf("task cut should name the factory's overhead and print the shares:\n%s", out.String())
 	}
 }
