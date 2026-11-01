@@ -19,7 +19,7 @@ import { openBox } from "../lib/boxStack";
 import { loopTab } from "../lib/tabTrap";
 import { slotDiagrams } from "../lib/diagram";
 import { useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
-import { linkTarget, pathRef, sectionId, specRef, withAnchors, type ContentsItem, type ReaderIndex } from "../lib/specReader";
+import { frontmatterAsCode, linkTarget, pathRef, sectionId, specRef, withAnchors, type ContentsItem, type ReaderIndex } from "../lib/specReader";
 import { useDiagrams } from "./DiagramFigure";
 import "../styles/spec-reader.css";
 
@@ -36,6 +36,10 @@ export type ReaderEntry = {
   number?: string;
   title?: string;
   error?: string;
+  /** The scan's reason it could not read this file (a run record of an
+   *  initiative with no Needs me rows, leftovers-57 Amendment 6): the
+   *  drawer's error line, over whatever text ReadSpec returned. */
+  unread?: string;
   scroll?: number;
 };
 
@@ -44,6 +48,10 @@ type ReaderState = {
   stack: ReaderEntry[];
   /** `<initiative>:<path>` of the specs read as missing. */
   missing: Record<string, true>;
+  /** What the drawer opened over, when its opener names it ("the run
+   *  report"): the first file then has ← Back, which closes the drawer onto
+   *  it (leftovers-57 FR-15, PW4 amended). */
+  back?: string;
 };
 
 export const useSpecReader = create<ReaderState>(() => ({ initiative: null, stack: [], missing: {} }));
@@ -93,13 +101,14 @@ function clearMissing(initiative: string, path: string) {
  *  link), which gets focus back when it closes. `ref` may carry a
  *  `#section`, which the drawer lands on. A missing file opens nothing and
  *  its opener reads `missing`. */
-export async function openSpec(el: HTMLElement | null, initiative: string, ref: string, exact = false) {
+export async function openSpec(el: HTMLElement | null, initiative: string, ref: string, exact = false, back?: string, unread?: string) {
   const r = exact ? pathRef(ref) : specRef(ref);
   if (!r) return;
-  const entry = await readSpec(initiative, r.path, r.section);
+  const read = await readSpec(initiative, r.path, r.section);
+  const entry = unread ? { ...(read ?? { kind: "spec" as const, path: r.path, section: r.section, text: "" }), error: undefined, unread } : read;
   if (!entry) return;
   opener = el;
-  useSpecReader.setState({ initiative, stack: [entry] });
+  useSpecReader.setState({ initiative, stack: [entry], back });
 }
 
 /** Asks once whether a spec is there, so an opener that names a file the
@@ -160,7 +169,7 @@ function readerIndex(i: merge.BoardInitiative | undefined, cards: merge.BoardCar
 
 /** The drawer. Mounted once, beside the card back (CardDrawer). */
 export function SpecReader() {
-  const { initiative, stack } = useSpecReader();
+  const { initiative, stack, back: backTo } = useSpecReader();
   const { view } = useBoard();
   const top = stack[stack.length - 1] ?? null;
   const open = !!initiative && !!top;
@@ -177,7 +186,7 @@ export function SpecReader() {
 
   const rendered = useMemo(() => {
     if (!top) return { html: "", contents: [] };
-    const md = top.kind === "record" ? `# ${top.number} ${top.title ?? ""}\n\n${top.text}` : top.text;
+    const md = top.kind === "record" ? `# ${top.number} ${top.title ?? ""}\n\n${top.text}` : frontmatterAsCode(top.text);
     return withAnchors(slotDiagrams(marked.parse(md || "") as string));
   }, [top]);
   const html = rendered.html;
@@ -200,7 +209,7 @@ export function SpecReader() {
   const close = () => {
     const el = scroller.current;
     if (top && el && initiative) leftAt.set(`${initiative}:${top.path}`, el.scrollTop);
-    useSpecReader.setState({ initiative: null, stack: [] });
+    useSpecReader.setState({ initiative: null, stack: [], back: undefined });
   };
   const closeRef = useRef(close);
   closeRef.current = close;
@@ -212,7 +221,7 @@ export function SpecReader() {
     if (!open && wasOpen.current) {
       const o = opener;
       opener = null;
-      if (o?.isConnected) o.focus();
+      if (o?.isConnected) o.focus({ preventScroll: true });
     }
     wasOpen.current = open;
   }, [open]);
@@ -321,15 +330,14 @@ export function SpecReader() {
     <div className="modal-backdrop sr-backdrop" onClick={close}>
       <div ref={box} className="sr-drawer" role="dialog" aria-modal="true" aria-labelledby={titleId} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => loopTab(e, box.current)}>
         <header className="sr-head">
-          {prev && <button type="button" className="ghost sr-back" onClick={back} aria-label={`Back to ${prev.path}`}>← Back</button>}
+          <ReaderBack prev={prev?.path} over={backTo} back={back} close={close} />
           <h2 ref={title} id={titleId} tabIndex={-1} className="sr-path mono" title={top.path}>{top.path}</h2>
           {local && <button type="button" className="sr-editor" onClick={() => api.openInEditor(`${root}/${top.path}`)}>Open in editor</button>}
           <button type="button" className="ghost sr-close" onClick={close} aria-label={`Close ${top.path}`}><X size={16} aria-hidden /></button>
         </header>
         <div ref={scroller} className={`sr-body ${edges.top ? "edge-top" : ""} ${edges.bottom ? "edge-bottom" : ""}`}>
-          {top.error ? (
-            <p className="sr-error" role="status">Not read: {top.error}</p>
-          ) : (
+          <ReaderError entry={top} />
+          {top.error || (top.unread && !top.text) ? null : (
             <>
               <Contents items={rendered.contents} go={goSection} />
               <div ref={body} className="markdown sr-doc" onClick={onBodyClick} />
@@ -340,6 +348,23 @@ export function SpecReader() {
       </div>
     </div>
   );
+}
+
+/** The drawer's error line: ReadSpec's refusal, or the scan's reason it
+ *  could not read the file, shown over the text that was read. */
+export function ReaderError({ entry }: { entry: Pick<ReaderEntry, "error" | "unread"> }) {
+  if (entry.unread) return <p className="sr-error" role="status">Deltagos can't read this run record: {entry.unread}</p>;
+  if (entry.error) return <p className="sr-error" role="status">Not read: {entry.error}</p>;
+  return null;
+}
+
+/** The header's ← Back: to the file under this one, else, when the drawer
+ *  opened over a view that names itself (`over`, "the run report"), onto
+ *  that view by closing (leftovers-57 FR-15); else nothing. */
+export function ReaderBack({ prev, over, back, close }: { prev?: string; over?: string; back: () => void; close: () => void }) {
+  if (prev) return <button type="button" className="ghost sr-back" onClick={back} aria-label={`Back to ${prev}`}>← Back</button>;
+  if (over) return <button type="button" className="ghost sr-back" onClick={close} aria-label={`Back to ${over}`}>← Back</button>;
+  return null;
 }
 
 /** The document's Contents, the change map first. The ✎ is drawn only; the

@@ -14,6 +14,8 @@ import { ruleVerb, VERBS } from "../lib/verbs";
 import { isRulable, ownerHover, ownerPhrase, signalOwners, waitingDecisions } from "../lib/decisions";
 import { compactColumns, fixedColumns, FOLD, frTracks, giveSlack, GOAL_CHARS, GOAL_FLOOR_CHARS, goalFloor, homeClassOf, NO_EMPTY, REGULAR_FIXED, shareRoom, signalsNeed, signalsShown, wideGoalRoom, type Empty, type Fold, type WidthClass } from "../lib/width";
 import { useBoard } from "../stores/board.store";
+import * as App from "../../wailsjs/go/main/App";
+import { argsOf, cardsWord, latestRun, presetsOf, runPlace, seenAtOf, spanWords } from "../lib/runReport";
 import { nextDate, stageState } from "./InitiativeHeader";
 import { sleepyOf } from "../lib/initiatives";
 import "../styles/initiatives.css";
@@ -442,12 +444,18 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
   const ids = uniq(all.map((i) => i.id)).filter((id) => !folded.has(id));
   const cols = view.board.columns ?? {};
   const states = initiativeStates(view, agents);
+  const runs = useRunReads(ids.map((id) => {
+    const rows = all.filter((i) => i.id === id);
+    const i = rows.find((r) => r.local) ?? rows[0];
+    return { id, local: !!i?.local, key: runKey(id, rows, cols, agents?.groups?.find((g) => g.id === id)?.waves ?? []) };
+  }));
   const items = ids.map((id) => {
     const rows = all.filter((i) => i.id === id);
     const i = rows.find((r) => r.local) ?? rows[0];
     const cards = (["now", "blocked", "next"] as const).flatMap((st) => (cols[st] ?? []).filter((c) => c.initiative_id === id));
     const group = agents?.groups?.find((g) => g.id === id);
-    const sig = signalFacts(i, rows, cards, group?.waves ?? [], group?.cell);
+    const run = runSignalFor(i, runs[id], Date.now());
+    const sig = signalFacts(i, rows, cards, group?.waves ?? [], group?.cell, run);
     return { id, rows, i, cards, group, sig, next: nextDate(i, cards) };
   });
   // FR-20: a column empty ("—") on every shown row gives way first.
@@ -488,7 +496,7 @@ function Initiatives({ view }: { view: NonNullable<ReturnType<typeof useBoard.ge
               <Phase stages={i.stages ?? []} />
               <span title={i.goal || undefined} className={`p-goal ${i.goal ? "" : "missing"}`}>{i.goal || "no goal yet"}</span>
               <MiniStepper stages={i.stages ?? []} compact={compact} />
-              <Signals i={i} sig={sig} cell={group?.cell} missing={missingPersonas(group?.crew)} lead={leadOf(group)} />
+              <Signals i={i} sig={sig} cell={group?.cell} missing={missingPersonas(group?.crew)} lead={leadOf(group)} onRun={() => openRunReport(id)} />
               <NextDate next={next} />
               <button className="p-more ghost" onClick={() => setOpen({ ...open, [id]: !open[id] })} aria-expanded={!!open[id]} aria-label={detailsName(id)} title={detailsName(id)}>
                 {open[id] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -786,9 +794,112 @@ function useSigFloor(): [number, (id: string, px: number) => void] {
   return [floor, report];
 }
 
+// ---------- the last run (leftovers-57 FR-14, run-report §5, 0169) ----------
+
+/** What Home read for one initiative's run signal: the windows
+ *  `App.ReportWindows` listed and, when the latest heads by the recent
+ *  rule, `App.Report` for it. Nothing else is kept. */
+export type RunRead = { windows: service.ReportWindow[]; report: service.FactoryReport | null };
+/** The signal as the report gives it: the cards that passed review
+ *  (`progress.denominator.count`) and the report's dead minutes. */
+export type RunSignal = { live: boolean; cards: number; deadMin: number };
+
+/** The run signal of a row, or null (FR-14): none for a remote initiative,
+ *  none before the read lands, none when the window list has no run, none
+ *  once the recent rule (`runPlace`, the one Overview reads) folds the
+ *  latest run, and none when its report was not drawn. The count is the
+ *  report's denominator and the stopped time the sum of the report's own
+ *  `minutes` per dead span: no count or span computed here (AR15). */
+export function runSignalFor(i: merge.BoardInitiative | undefined, read: RunRead | undefined, nowMs: number): RunSignal | null {
+  if (!i?.local || !read) return null;
+  const latest = latestRun(presetsOf(read.windows, Math.floor(nowMs / 1000)));
+  if (!latest) return null;
+  const live = latest.kind === "current";
+  if (runPlace({ live, until: latest.until * 1000, seenAt: live ? null : seenAtOf(i.id, latest.until), now: nowMs }) !== "head") return null;
+  const p = read.report?.progress;
+  if (!p) return null;
+  const deadMin = (p.dead ?? []).reduce((a, d) => a + (d.minutes ?? 0), 0);
+  return { live, cards: p.denominator?.count ?? 0, deadMin };
+}
+
+/** `last run · 4 cards · 1 h 30 min stopped`, `last run · 4 cards` with no
+ *  dead time, `running now · 3 cards so far`. No percent (0167 Q3). */
+export function runSignalWords(s: RunSignal): string {
+  if (s.live) return `running now · ${cardsWord(s.cards)} so far`;
+  return s.deadMin > 0 ? `last run · ${cardsWord(s.cards)} · ${spanWords(s.deadMin)} stopped` : `last run · ${cardsWord(s.cards)}`;
+}
+
+/** What changes an initiative's run: a card moving column (one passing
+ *  review moves to done), a wave building, seats coming or going. The
+ *  read runs again only when this changes (FR-14, the card's item 4). */
+export function runKey(id: string, rows: merge.BoardInitiative[], cols: Record<string, merge.BoardCard[] | null | undefined>, waves: service.Wave[]): string {
+  const cards = Object.entries(cols).flatMap(([st, cs]) => (cs ?? []).filter((c) => c.initiative_id === id && c.local).map((c) => `${st}:${c.slug}`)).sort();
+  const seats = rows.reduce((a, r) => a + (r.live ?? 0), 0);
+  const building = waves.map((w) => `${w.n}:${(w.building ?? []).length}`);
+  return JSON.stringify([cards, seats, building]);
+}
+
+/** Which initiatives to read now: local ones whose key differs from the one
+ *  last read in this Home (`done`); never a remote one. */
+export function runReadsDue(rows: { id: string; local: boolean; key: string }[], done: Map<string, string>): string[] {
+  return rows.filter((r) => r.local && done.get(r.id) !== r.key).map((r) => r.id);
+}
+
+/** One read: the windows, then the report only when the latest run heads
+ *  by the recent rule. A failure reads as no signal: Overview says why. */
+async function readRun(id: string): Promise<RunRead> {
+  const windows = (await App.ReportWindows(id)).windows ?? [];
+  const nowMs = Date.now();
+  const latest = latestRun(presetsOf(windows, Math.floor(nowMs / 1000)));
+  if (!latest) return { windows, report: null };
+  const live = latest.kind === "current";
+  if (runPlace({ live, until: latest.until * 1000, seenAt: live ? null : seenAtOf(id, latest.until), now: nowMs }) !== "head") return { windows, report: null };
+  const [s, u] = argsOf(latest.since, live ? Math.floor(nowMs / 1000) : latest.until);
+  return { windows, report: (await App.Report(id, s, u)).report ?? null };
+}
+
+/** Home's reads of the run signal: at most one per local initiative per
+ *  Home load, and again only when its runKey changes (the agents feed or a
+ *  rescan moved it). A remote initiative is never read. */
+function useRunReads(rows: { id: string; local: boolean; key: string }[]): Record<string, RunRead> {
+  const done = useRef(new Map<string, string>());
+  const [reads, setReads] = useState<Record<string, RunRead>>({});
+  const sig = JSON.stringify(rows);
+  useEffect(() => {
+    for (const id of runReadsDue(rows, done.current)) {
+      done.current.set(id, rows.find((r) => r.id === id)!.key);
+      readRun(id).then((r) => setReads((p) => ({ ...p, [id]: r }))).catch(() => setReads((p) => ({ ...p, [id]: { windows: [], report: null } })));
+    }
+    // rows is read through sig: a new array each render is not a change.
+  }, [sig]);
+  return reads;
+}
+
+/** Opens the initiative's Overview and brings `While you were away` into
+ *  view once Overview has drawn it (it needs its windows first): tries for
+ *  three seconds, then gives up quietly. */
+function openRunReport(id: string) {
+  useBoard.getState().openInitiative(id, "overview");
+  const find = (tries: number) => {
+    const el = document.getElementById("while-you-were-away");
+    if (el) { el.scrollIntoView({ block: "start" }); return; }
+    if (tries > 0) window.setTimeout(() => find(tries - 1), 50);
+  };
+  window.setTimeout(() => find(60), 0);
+}
+
+/** The run signal's lozenge: its words, a press that opens the report. */
+export function RunSignalLz({ run, onOpen }: { run: RunSignal; onOpen: () => void }) {
+  return (
+    <button type="button" className="lz run" data-fold={FOLD.run} onClick={onOpen} title="Open the run report in Overview">
+      <span className="lz-t">{runSignalWords(run)}</span>
+    </button>
+  );
+}
+
 /** What a row's signals count, apart from how they are drawn: Home asks
  *  whether the column is empty on every row (FR-20) before it draws one. */
-function signalFacts(i: merge.BoardInitiative, rows: merge.BoardInitiative[], cards: merge.BoardCard[], waves: service.Wave[], cell?: model.Cell | null) {
+export function signalFacts(i: merge.BoardInitiative, rows: merge.BoardInitiative[], cards: merge.BoardCard[], waves: service.Wave[], cell?: model.Cell | null, run: RunSignal | null = null) {
   const waiting = waitingDecisions(i);
   const blocked = cards.filter((c) => c.status === "blocked").length;
   const now = cards.filter((c) => c.status === "now").length;
@@ -797,8 +908,8 @@ function signalFacts(i: merge.BoardInitiative, rows: merge.BoardInitiative[], ca
   const running = waves.filter((w) => (w.building?.length ?? 0) > 0);
   const problems = i.problems?.length ?? 0;
   const defining = cell?.state === "in_definition";
-  const none = !waiting && !blocked && !now && !live && !running.length && !problems && !defining;
-  return { waiting, blocked, now, live, working, running, problems, none };
+  const none = !waiting && !blocked && !now && !live && !running.length && !problems && !defining && !run;
+  return { waiting, blocked, now, live, working, running, problems, run, none };
 }
 
 /** A row's signals. Each lozenge's words sit in a text span that takes the
@@ -806,8 +917,8 @@ function signalFacts(i: merge.BoardInitiative, rows: merge.BoardInitiative[], ca
  *  text mid-word instead of cutting it. `data-fold` is how soon a signal
  *  folds into "+N" (FR-20); one without it (blocked) never folds
  *  (leftovers-7 FR-4). */
-function Signals({ i, sig, cell, missing, lead }: { i: merge.BoardInitiative; sig: SignalFacts; cell?: model.Cell | null; missing: string[]; lead: string }) {
-  const { waiting, blocked, now, live, working, running, problems, none } = sig;
+export function Signals({ i, sig, cell, missing, lead, onRun }: { i: merge.BoardInitiative; sig: SignalFacts; cell?: model.Cell | null; missing: string[]; lead: string; onRun: () => void }) {
+  const { waiting, blocked, now, live, working, running, problems, run, none } = sig;
   return (
     <OneLine id={i.id}>
       {waiting > 0 && <span className="lz waiting" data-fold={FOLD.waiting}><span className="lz-t"><span className="lz-floor"><span className="num">{waiting}</span> waiting</span> · {signalOwners(i, lead).join(", ")}</span></span>}
@@ -817,6 +928,7 @@ function Signals({ i, sig, cell, missing, lead }: { i: merge.BoardInitiative; si
       {live > 0 && <span className="lz" data-fold={FOLD.live}><span className="lz-t">{working > 0 ? <><span className="num">{working}</span> working</> : <><span className="num">{live}</span> live</>}</span></span>}
       <CellStateLz cell={cell} missing={missing} label="cell in definition" fold={FOLD.cell} />
       {problems > 0 && <span className="lz warning" data-fold={FOLD.problems}><span className="lz-t"><span className="num">{problems}</span> problem{problems === 1 ? "" : "s"}</span></span>}
+      {run && <RunSignalLz run={run} onOpen={onRun} />}
       {none && <span className="p-quiet" title="no signals">—</span>}
     </OneLine>
   );

@@ -7,8 +7,10 @@ import {
   CUSTOM, NO_CARD_PASSED, argsOf, arrivalPreset, captionOf, clock, copyReport, costWords, customWindow, day,
   latestRun, markSeen, notDrawn, presetsOf, reasonOf, remoteLine, rememberPreset, rememberedPreset, roundWords, roundsOf,
   rowName, rowTime, rowsOf, rulingName, runPlace, seenAtOf, spanWords, spansDays, toLocalInput, waveCell, waveFooterWords,
-  whileAway, type LineRow, type Preset, type PresetKind, type Row,
+  waveLabel, waveLinkName, waveTarget, whileAway, type LineRow, type Preset, type PresetKind, type Row, type WaveTarget,
 } from "../lib/runReport";
+import { inactiveIds } from "../lib/queue";
+import { openSpec } from "./SpecReader";
 import { RunTracks } from "./RunTracks";
 import "../styles/runreport.css";
 
@@ -20,8 +22,27 @@ export const LIVE_EVERY_MS = 60000;
 export const RR_NARROW_BELOW = 820;
 
 /** Where the view goes when a link is pressed: a card's back, a decision
- *  record, Work with a wave's strip. */
-export type Nav = { card: (slug: string) => void; decision: (id: string) => void; wave: (w: service.RunWave) => void };
+ *  record, a wave by its target (`waveTarget`: its run record in the
+ *  reader, Needs me's unread row, or Work with its strip). Without
+ *  `waveTarget` every wave goes to Work. */
+export type Nav = {
+  card: (slug: string) => void;
+  decision: (id: string) => void;
+  wave: (w: service.RunWave, el?: HTMLElement | null) => void;
+  waveTarget?: (w: service.RunWave) => WaveTarget;
+};
+
+/** What a wave's press calls, by its target (FR-15, FR-17): the run record
+ *  in the reader over the report, the initiative's unread row in Needs me,
+ *  or Work with the wave's strip (PW4). */
+export function goToWave(
+  id: string, w: service.RunWave, t: WaveTarget, el: HTMLElement | null,
+  go: { openSpec: typeof openSpec; openNeedsMe: (key: string) => void; openWave: (id: string, wave: number | string) => void },
+) {
+  if (t.kind === "record") void go.openSpec(el, id, t.path, true, "the run report", t.unread);
+  else if (t.kind === "unread") go.openNeedsMe(`unread:${id}`);
+  else go.openWave(id, w.wave);
+}
 
 /** One window drawn: the preset (or Custom's window) and what came back. */
 export type Shown = { kind: PresetKind; since: number; until: number; live: boolean };
@@ -107,11 +128,14 @@ export function Progress({ report, lineTokens, shown, nav, openRows }: { report:
         <div className="rr-waves">
           <h4 className="rr-sub">Waves in this window</h4>
           <ul>
-            {waves.map((w) => (
-              <li key={w.key}>
-                <button type="button" className="rr-wave-line" onClick={() => nav.wave(w)} title="Open Work with this wave in view">{waveFooterWords(w)}</button>
-              </li>
-            ))}
+            {waves.map((w) => {
+              const name = waveLinkName(waveLabel(w, waves), nav.waveTarget?.(w) ?? { kind: "work" });
+              return (
+                <li key={w.key}>
+                  <button type="button" className="rr-wave-line" onClick={(e) => nav.wave(w, e?.currentTarget)} title={name} aria-label={name}>{waveFooterWords(w)}</button>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
@@ -255,7 +279,7 @@ export function RunReport({ initiative }: { initiative: BoardInitiative }) {
 }
 
 function LocalRunReport({ id }: { id: string }) {
-  const { openCardLanding, openDecision, openWave, view } = useBoard();
+  const { openCardLanding, openDecision, openNeedsMe, openWave, view } = useBoard();
   const [windows, setWindows] = useState<service.ReportWindow[] | null>(null);
   const [wErr, setWErr] = useState("");
   const [pick, setPick] = useState<string | null>(null);
@@ -330,6 +354,10 @@ function LocalRunReport({ id }: { id: string }) {
   }
   if (!windows || !latest) return null; // never a run in the 14 days: absent
 
+  const init = view?.board.initiatives.find((x) => x.id === id);
+  const active = !inactiveIds(view).has(id);
+  const targetOf = (w: service.RunWave) => waveTarget(w, { root: init?.path ?? data?.report?.root ?? "", waves: init?.waves, problems: init?.problems, active });
+
   const nav: Nav = {
     card: (slug) => {
       const cols = view?.board.columns ?? {};
@@ -338,7 +366,8 @@ function LocalRunReport({ id }: { id: string }) {
       if (card) openCardLanding(card);
     },
     decision: (n) => openDecision(id, n),
-    wave: (w) => openWave(id, w.wave),
+    waveTarget: (w) => targetOf(w),
+    wave: (w, el) => goToWave(id, w, targetOf(w), el ?? null, { openSpec, openNeedsMe, openWave }),
   };
   const onPick = (key: string) => {
     setPick(key);
