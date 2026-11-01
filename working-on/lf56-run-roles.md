@@ -3,7 +3,7 @@ title: "Every run is attributed to an initiative, a task and a role, and runs an
 status: next
 repos: [organizer]
 branch: lf56-run-roles
-seat: organizer-probe-sup96
+seat:
 stage:
 updated: 2026-11-01
 next: "sup96 runs it (launched 2026-11-01)"
