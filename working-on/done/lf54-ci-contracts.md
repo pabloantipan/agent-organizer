@@ -1,12 +1,12 @@
 ---
 title: "The release build reads the contract samples from the specs repo, pinned"
-status: now
+status: done
 repos: [organizer]
 branch: lf54-ci-contracts
 seat: l54-ci
 stage:
 updated: 2026-11-01
-next: "PR with talos-lab (dca1222, review pass, X0 on the rebased head)"
+next: "done: PR #17 merged 274c8e1 (2026-11-01)"
 depends_on: [lf53-frontmatter, lf53-usage-contract]
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-ci-contracts"]
 spec: "docs/specs/leftovers-54.md (FR-2)"
