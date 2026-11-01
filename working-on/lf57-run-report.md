@@ -6,13 +6,16 @@ branch: lf57-run-report
 seat: l57-ui
 stage:
 updated: 2026-11-01
-next: "review: lf57-run-report, W1-W6 and X0 pass, W7 needs a seat with Screen Recording (the UI reviewer's), 2f7dccb"
+next: "fix AR15/FR-1: RunReport.tsx:95 sums waves[].failed into \"N review rounds failed in this window.\", a number the report does not carry; drop the line (the footer already gives each wave's failed) or read it from the report"
 depends_on: [lf57-report-go]
 boundary: ["docs/specs/leftovers-57.md Boundary, lf57-run-report"]
 spec: "docs/specs/leftovers-57.md (FR-7 to FR-13)"
 gate: "docs/specs/leftovers-57.md#Acceptance → gate"
 ui_review: true
 autonomy: unattended
+review: fail
+reviewer: l57-ui-rev
+cause: execution
 ---
 
 ## Goal
@@ -60,3 +63,24 @@ Not changed, on purpose:
 - Report waves vs Work's WaveStrip: the report keys waves `<supervisor>/<wave>` from run records, while Work builds strips from `wave<N>-` seat names and only for running waves. PW4 ("opens Work with that WaveStrip in view") cannot land on a merged wave. Asked sup101 (--kind question).
 - Mode-row words come from the picked preset, not from `window.kind`: a picked window is drawn with `@since/@until`, so it always comes back as `given`.
 - "Opening the record in the drawer" (§3): Deltagos has no record drawer; the line opens the record in Decisions (`openDecision`), as Overview's gate rows do.
+
+## Review
+fail: every gate row W1-W6 and X0 passes on 2f7dccb, but a proved finding outside the rows breaks FR-1/AR15 (below). Unmet gate items: none of W1-W6, X0 (W7 is the UI reviewer's). Reviewer l57-ui-rev, 2026-11-01. X0 ran on 2f7dccb in a clean clone, make test fresh (test-lease run de30aa46-78374, rc 0; l57-ui-ux reused it).
+cause: execution
+
+Found (blocking, outside the rows): `frontend/src/components/RunReport.tsx:95` sums `waves.waves[].failed` in the frontend and draws `{failed} review rounds failed in this window.` (line 107). The report carries no such total (`waves` keys: source, records, lines, waves, notes), and FR-1/AR15 says no count is computed in the frontend ("every count and percent drawn equals the --json output"); neither run-report §3 nor progress-and-waves option B draws this line. Proof, a probe test over the contract's expected.json in a scratch copy (.wt-notes/l57-ui-rev/ar15-probe.log): `drawn line: 2 review rounds failed in this window.` / `a total failed field in the JSON: false` / `AssertionError: expected [ …(2) ] to be null`. Fix: drop the line (the footer already says each wave's failed by cause), or ask the factory for a total.
+
+Rows:
+- W1-W6: `npx vitest run` of RunReport.test.tsx, RunTracks.test.tsx, lib/runReport.test.ts with CONTRACTS_DIR at 54cf10d: 46 passed, every W1-W6 test by name; the committed samples equal the contract's byte for byte (test and diff). Fails on main: the three files on b3905ba fail (`Cannot find module ./runReport`, `/src/components/RunReport`, `/src/components/RunTracks`).
+- X0: make test ok (go all ok; vitest 92 files, 1478 tests), pnpm run build rc 0, wails build rc 0, git status --porcelain empty (wailsjs/runtime unchanged).
+- FR-8 (Amendment 3): `openWave` sets Work and retries for 1 s to scroll to `section.wk-wave[aria-label="wave <n>"]`; W2 checks the press calls `nav.wave` with the wave, wired to `openWave(id, w.wave)`. Met on Amendment 3.
+
+change-check (base 14bad79 = origin/main in the clone; branch rebased on bf66580; 13 files, 44 flags):
+- outside boundary x4 `runreport.fixtures/{SOURCE.md,expected.json,expected-windows.json,expected.txt}`: the tests' fixtures, copies of the contract (Pre-answered: Data); explained.
+- undeclared `board.store.ts` State, scrollToWave and declared-not-changed `board.store.ts:openWave`: one change; the bullet names openWave, waveFocus and scrollToWave, but openWave is a property of the State type and the store literal, which change-check does not read as a symbol; explained.
+- untested? x37: helpers covered through the exported functions the tests call (rowName, rulingName, trackName, costWords, Rulings, RunTracks); LocalRunReport (fetch, 60 s re-read, markSeen, onCopy's wiring) has no test (Note).
+
+Note: `tracksOf` numbers stages (`stage N`) and marks the `current` one from the tracks' order; the JSON carries neither. §3 draws both, so not a finding; the factory could carry them.
+Note: `openWave` matches strips by `wave <n>` alone: report waves sup1/1 and sup2/1 both look for `wave 1` and land on the first strip. A finished wave lands on Work with nothing in view (Amendment 3, Aglaea's later card).
+Note: W5 tests `copyReport` with a mocked writer; the component's `navigator.clipboard.writeText` path is read, not run (correct by reading).
+Note: Overview's change is the import and the mount line only. Bars, hatching, `↓` and letters are `aria-hidden`; rows and tracks have names in words. Tokens only, no money.
