@@ -4,6 +4,19 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF 2026-11-01 (last sha a73d86b)
+
+- No supervisor is running. origin/main is at 21b5d5d. Hephaistos is reconciling the six unmerged branches. I answered that all six are to be reconciled, in this order: lf52-decisions-line, lf53-frontmatter, lf53-usage-contract, lf53-record-statusline, lf54-retire-guard, spec/autonomous-report-charts. Each merges clean (thread 01M6AHE7XTRSVAVA3VR1CY8Q60). After the merges: fast-forward local main, run make install, launch leftovers 54 wave 2.
+- Waiting on Pablo:
+  - 0166, run attribution (lf56);
+  - 0169, accept leftovers 57: the run report with Amendment 1, pinned to specs 8474386;
+  - 0170, where Map lives (lf58 is cut against contracts/c4-map/ c4-map/1 once ruled);
+  - the Dock window (layer 20, number 55378) blocking lf55's H3. Hephaistos was asked whether seat-pointer should skip it.
+- Once spec/autonomous-report-charts merges: amend its FR-11 (rows from the JSON, text byte-equal behind Copy as text, citing Aglaea 8d2141a and d9c7a54) and cover Pablo's 2026-10-27 rulings. Its card autonomous-report-charts is mine.
+- lf54-decision-states: when Hephaistos says feat/ruled-by-autonomous has merged, re-pin its readers_today (sample records 0013-0015, mode autonomous).
+- Pablo's open ask "can we avoid Deltagos in the menu?" is unanswered: the macOS app menu name can only be dropped by making Deltagos an agent app (LSUIElement).
+- 0167 and 0168 carry "2026-10-28" in their ruling words. They were ruled on 10-27 by the clock. Ruled records are not edited.
+
 ## 2026-10-26 02:50
 
 - sup95 closed (01:48-02:45; seats $13.49): lf54-retire-guard passed x3, PR asked of talos-lab (thread 01M5VBMQPWE43GJ9YJS5E5E0NR); lf55-one-title built at f2ad73c, X0 passes, unreviewed, waits on Pablo clearing a Dock layer-20 window covering the display (thread 01M5V9SV7ATHZ2PXS1AN4TVBRJ open); continuation prompt prompts/organizer-lf55-one-title-continue.md, l55-title's prelude and token kept. Wave 2 (lf54-ci-contracts, -usage-rejected, -decision-states) waits on lf53's merges; none on origin/main yet. sup95 ended.
