@@ -12,6 +12,7 @@ import (
 	"organizer/internal/model"
 	"organizer/internal/scan"
 	"organizer/internal/session"
+	"organizer/internal/usage"
 )
 
 // launchLine is the one shape a probe is started with: the prelude the pane
@@ -346,7 +347,7 @@ func (s *Service) Runs(initiativeID string) []session.Run {
 		// A broken archive must not hide the history already written.
 		_ = err
 	}
-	all := session.Conversations(session.LoadRuns(session.RunsPath()))
+	all := withAttribution(session.Conversations(session.LoadRuns(session.RunsPath())), ledgerTasks())
 	if initiativeID == "" {
 		return all
 	}
@@ -427,7 +428,32 @@ type RunsView struct {
 // keep runs.jsonl current — so a live session is read from its record, whose
 // numbers are the fresh ones anyway.
 func (s *Service) InitiativeRuns(initiativeID string) RunsView {
-	return runsView(initiativeID, session.LoadRuns(session.RunsPath()), s.liveRuns())
+	return runsView(initiativeID, session.LoadRuns(session.RunsPath()), s.liveRuns(), ledgerTasks())
+}
+
+// ledgerTasks is the usage ledger's attribution per session, read as the
+// last usage pass left it (leftovers-56 FR-5).
+func ledgerTasks() map[string]usage.Attribution {
+	ledger, _ := usage.DataPaths(filepath.Dir(session.Dir()))
+	return usage.BySession(usage.LoadLedger(ledger))
+}
+
+// withAttribution names each run's initiative and card from the usage
+// ledger, the one attribution (FR-5): its card is the ledger's task (a card
+// slug, wave:<seat> or overhead:<role>). A run the ledger has not seen keeps
+// what MatchRun gave it. The archive itself is not rewritten (FR-4).
+func withAttribution(runs []session.Run, tasks map[string]usage.Attribution) []session.Run {
+	for i, r := range runs {
+		a, ok := tasks[r.SessionID]
+		if !ok || r.SessionID == "" {
+			continue
+		}
+		if a.Task != r.Card {
+			runs[i].Branch = "" // MatchRun's branch belonged to its card
+		}
+		runs[i].Initiative, runs[i].Card = a.Initiative, a.Task
+	}
+	return runs
 }
 
 // liveRuns is every statusline record on disk as a run, with the card matched
@@ -460,10 +486,10 @@ func (s *Service) liveRuns() []session.Run {
 // appears in both — the archiver writes an open line the first time it sees
 // one — so they are folded by the archive's key and the live record wins: its
 // numbers are the newer ones, and the token sum must not count it twice.
-func runsView(initiativeID string, archived, live []session.Run) RunsView {
+func runsView(initiativeID string, archived, live []session.Run, tasks map[string]usage.Attribution) RunsView {
 	view := RunsView{Initiative: initiativeID}
 	byCard := map[string]*CardRuns{}
-	for _, cr := range runConversations(initiativeID, archived, live) {
+	for _, cr := range runConversations(initiativeID, archived, live, tasks) {
 		r := runInfo(cr.Run, cr.Live)
 		c, ok := byCard[r.Card]
 		if !ok {
@@ -502,7 +528,7 @@ func runsView(initiativeID string, archived, live []session.Run) RunsView {
 // also sets the cost the app never sees), then one initiative's. The fold
 // comes before the filter: a process that matched no card does not unclaim
 // its conversation. Each row says whether one of its processes is live.
-func runConversations(initiativeID string, archived, live []session.Run) []convRun {
+func runConversations(initiativeID string, archived, live []session.Run, tasks map[string]usage.Attribution) []convRun {
 	byKey := make(map[string]session.Run, len(archived)+len(live))
 	for _, r := range archived {
 		byKey[r.Key()] = r
@@ -524,7 +550,7 @@ func runConversations(initiativeID string, archived, live []session.Run) []convR
 		}
 	}
 	var out []convRun
-	for _, r := range session.Conversations(runs) {
+	for _, r := range withAttribution(session.Conversations(runs), tasks) {
 		if initiativeID != "" && r.Initiative != initiativeID {
 			continue
 		}
