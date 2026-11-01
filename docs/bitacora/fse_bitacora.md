@@ -17,6 +17,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- sup105 closed and ended: lf63-organizer-map parked (blocked on Hephaistos's c4-map self-repo fix, asked 2026-11-01), drafts 9749dd9 on the unpushed branch, builder $1.42. On relaunch: new tokens and preludes; decide whether L1 draws the subprocess externals (Keychain, git, osascript/Terminal/iTerm), a judge-architecture question if Pablo is still away.
+
 - Held for the next frontend leftovers (Aglaea 60ea44c): run-report Amendment 3, AR22-AR26 (waits as '0002 (pablo) · …', not-drawn without the red rule, 24 px targets, 'no tokens recorded', Ddd HH:MM column, ↓ in --fg-subtle); progress-and-waves Amendment 2, PW4 again and PW8 (footer opens Work only when Work draws that wave's strip, else the run record; the reader opens a run record at its prose with the waves yaml under a closed 'Rounds as recorded').
 
 - sup101 closed (16:13-20:31, 4h18m against 180-300m +90m, ~2h07 the usage limit; seats $40.76, 11 seats): leftovers 57 merged #19, #26, #28, #29. Ended. Installed v0.2.0-3239.
