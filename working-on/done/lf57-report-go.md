@@ -1,12 +1,12 @@
 ---
 title: "Deltagos reads factory report's JSON and text, its windows, and joins its lines to the waves and their rounds"
-status: now
+status: done
 repos: [organizer]
 branch: lf57-report-go
 seat: l57-go
 stage:
 updated: 2026-11-01
-next: "PR with talos-lab"
+next: "merged b3905ba (PR #19)"
 review: pass
 reviewer: l57-go-rev
 depends_on: [lf53-frontmatter, lf52-decisions-line]
