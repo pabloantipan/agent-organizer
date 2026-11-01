@@ -20,6 +20,8 @@ change_order:
   adds: [fn:organizer.App.Report, fn:organizer.App.ReportWindows]
   modifies: [prod:agent-organizer.service.Report]
   retires: []
+prs:
+  - {repo: organizer, pr: 25, target: main, state: merged, merge: a7bd633}
 ---
 
 ## Goal
