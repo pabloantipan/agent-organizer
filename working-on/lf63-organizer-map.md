@@ -1,12 +1,12 @@
 ---
 title: "The organizer has its own C4 base map, every node grounded"
-status: next
+status: now
 repos: [organizer]
 branch: lf63-organizer-map
-seat:
+seat: lf63-build
 stage:
 updated: 2026-11-01
-next: "sup105 runs it (0176 ruled 2026-11-01, autonomous mode)"
+next: "lf63-build builds on lf63-organizer-map (sup105 launched 2026-11-01)"
 depends_on: [lf58-map-read]
 boundary: ["docs/architecture/"]
 spec: "docs/specs/leftovers-63.md (FR-1 to FR-3)"
