@@ -6,7 +6,7 @@ branch: lf54-ci-contracts
 seat: l54-ci
 stage:
 updated: 2026-11-01
-next: "PR with talos-lab"
+next: "PR with talos-lab after lf54-decision-states (Amendment 4); merged X0 rerun on its final head first. Note (no tag build in the gate; the first tag proves the workflow): filed to the FSE in the closing report"
 depends_on: [lf53-frontmatter, lf53-usage-contract]
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-ci-contracts"]
 spec: "docs/specs/leftovers-54.md (FR-2)"
