@@ -460,6 +460,15 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - The window's chrome and the macOS menu bar are part of the screen for "a fact shows once": with the window in front, the menu bar already names the app, so the window draws its name nowhere; the window title stays for the system (Dock, Cmd-Tab, VoiceOver, seat-pointer). Count the width a fix costs at 1024 before keeping a brand (one-title).
 - Answer the whole ask, not the two options offered: "a proper approach" meant the top edge as a whole; my first reply picked between the FSE's options and had to be replaced (one-title).
 
+- A report whose denominator is "what got done in the window" always ends at 100%: never put that percent where it stands alone (a Home signal); say the count instead (run-report).
+- When a text chart the lead liked becomes a screen, keep its rows (with links and real bars) before reaching for an axis; the names are what is read (run-report).
+- Past dead time is hatched neutral with its cause; only dead time still going is drawn blocked (run-report).
+
+- When the lead rules that the computation is shared (one command, JSON), the screen draws from it and computes nothing; the text form is a copy of the same command for the window shown, and the caption names the window so a difference from someone's pasted text explains itself (run-report A1).
+- Read the other machine's spec before designing on a field: a 'track' was not a stage (run-report A1).
+
+- Joining two charts: name the joining rule first (a progress line's card belongs to the wave whose cards: lists it) and refuse guesses (`no wave`); then grow the view the lead already reads before adding a new one (progress-and-waves).
+
 ## Participants in use
 
 - none yet (`docs/ux/participants/` when built).

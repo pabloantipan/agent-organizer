@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 56 - every run attributed to an initiative, a task and a role
-status: proposed
+status: ruled
 raised: 2026-10-26
 raised_by: fse
 owner: pablo
@@ -10,9 +10,9 @@ forecast: 60-120m
 crossing: 0022
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-11-01
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -46,3 +46,7 @@ accept as written. It is the organizer's part of your 0022 ruling.
 forecast: 60-120m over 1 wave, plus the test-lease queue (no lease data);
 basis: 10 tasks, this initiative (Go-only cards: lf47-runs-cost, lf52-chosen-
 trim, lf53 cards, 48-76 min to build).
+
+## Ruling
+
+pablo, 2026-11-01, in the organizer on lodestar: Pablo chose "accept as written" in the FSE session on 2026-11-01, ruling the records one by one.

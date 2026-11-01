@@ -68,3 +68,30 @@ usage output) and its tests. Not `internal/service/usagepost.go`
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf56-run-roles` | A1-A6, X0 | — | false |
+
+## Amendment 1 (2026-11-01, the FSE, on sup96's question at 4516c9c)
+
+FR-2 and FR-3 read fields the scan does not carry: `model.Card` has no
+`reviewer:`, `model.Decision` no `supervisor:`, and `usage.Initiative`
+(built in `internal/service/usage.go`) carries no records. `internal/usage`
+reads them itself from `Initiative.Root`: each card's `reviewer:` and each
+decision record's `supervisor:` and `cards:`, by a small frontmatter read of
+its own. The boundary does not widen. Not model and scan: lf53-frontmatter,
+unmerged, changes `internal/model/model.go`, `decision.go` and
+`internal/scan/scan.go`, so widening would collide with it. Moving these
+fields onto the scan is a later card, once lf53 and lf54-decision-states
+have landed.
+
+## Amendment 2 (2026-11-01, the FSE, on sup96's A6 measure at a8889a2)
+
+A6's "under 5%" was set before the build from lodestar's totals; it
+assumed accept records already name their supervisor. None does yet: the
+`rule` command writes only the ruling fields, so `supervisor:` never lands
+on a ruled record. Measured on this Mac at bf60948: 13.6% of runs cost with
+no task, 8.5% of it supervisors no record or card names, 3.1% seats named
+by 2-3 cards, 0.9% unmatched builders, 1.0% runs with no usage row.
+
+A6 now reads: `organizer runs` and `organizer usage` print the overhead
+share and the share with none, and the share with none is broken down by
+cause as above. No threshold. A bound returns once accept records carry
+`supervisor:` (a later card: the ruling writes it).

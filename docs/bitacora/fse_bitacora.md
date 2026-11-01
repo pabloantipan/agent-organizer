@@ -4,6 +4,36 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF 2026-11-01 (last sha a73d86b)
+
+- No supervisor is running. origin/main is at 21b5d5d. Hephaistos is reconciling the six unmerged branches. I answered that all six are to be reconciled, in this order: lf52-decisions-line, lf53-frontmatter, lf53-usage-contract, lf53-record-statusline, lf54-retire-guard, spec/autonomous-report-charts. Each merges clean (thread 01M6AHE7XTRSVAVA3VR1CY8Q60). After the merges: fast-forward local main, run make install, launch leftovers 54 wave 2.
+- Waiting on Pablo:
+  - 0166, run attribution (lf56);
+  - 0169, accept leftovers 57: the run report with Amendment 1, pinned to specs 8474386;
+  - 0170, where Map lives (lf58 is cut against contracts/c4-map/ c4-map/1 once ruled);
+  - the Dock window (layer 20, number 55378) blocking lf55's H3. Hephaistos was asked whether seat-pointer should skip it.
+- Once spec/autonomous-report-charts merges: amend its FR-11 (rows from the JSON, text byte-equal behind Copy as text, citing Aglaea 8d2141a and d9c7a54) and cover Pablo's 2026-10-27 rulings. Its card autonomous-report-charts is mine.
+- lf54-decision-states: when Hephaistos says feat/ruled-by-autonomous has merged, re-pin its readers_today (sample records 0013-0015, mode autonomous).
+- Pablo's open ask "can we avoid Deltagos in the menu?" is unanswered: the macOS app menu name can only be dropped by making Deltagos an agent app (LSUIElement).
+- The card-change hook now skips working-on/reviews/ (crossing 0021; organizer/agents 1b73be6), so Elenx review commits no longer wake me. Thread 01M5RR7SZQSXT8C3BS8B9V8F98 closed. The untracked working-on/reviews/ in this root is Elenx's, not mine to commit.
+- 2026-11-01, Pablo ruled one by one in my session: 0166 accept as written (8769246), 0169 accept as written (86a5d26), 0170 roadmap mode (e60b890). Menu name: keep it, no agent app. sup96 launched on lf56-run-roles (forecast 60-120m); lf57 waits on lf52-decisions-line, lf53-frontmatter and lf55-one-title on origin/main; lf58 is cut against contracts/c4-map/ next.
+- 2026-11-01: 0171 ruled (atlax seed, accept as written); sup97 runs lf59-atlax-seed. Hephaistos answered in 01M6BZ9CJH5X531M6DTYNJYFFG: map lens reads atlax as lf58-map-atlax (cut with lf58); fixture-many's 0041/0010 read as written by yaml.v3 into strings, kept.
+- Found, held for a card: `organizer rule` writes only the ruling fields, so no accept record ever carries `supervisor:` (fse skill asks for it in the ruling commit). Cost: 8.5% of runs cost has no task (lf56 A6, Amendment 2 f5a8751). Next leftovers: `rule --supervisor <session>`.
+- Held for the next leftovers (lf56 review pass at 161bf86): `organizer runs` reads the attribution ledger as main left it until `organizer usage` runs once (lodestar: 0% overhead, 40.6% no task before; the runs view should attribute on read too). FR-2 ignores a card's own `supervisor:` (~1.1%), left out on purpose. lf59 review Note 1 carded as lf59-atlax-calls (2583cf3).
+- sup96 closed (13:17-13:55, 38 min against 60-120m; $10.46): lf56-run-roles pass at 161bf86, PR with talos-lab (thread 01M6C0E2XR49SSXWY76HANW1PF), worktree .wt/lf56-run-roles kept for a rebase over lf53-frontmatter. sup96 ended. Gate rule, from its Found 3: any row that runs `organizer usage` on a copied data dir must strip record_url first, or it posts to the real record. Found 5: the builder reached 231k of 250k on a one-card Go task.
+- Floating icon missing on normal desktops again (Pablo, 2026-11-01). Read-only subagent: the panel sits on Space 3 only (CGSCopySpacesForWindows [3] while on 4), off screen even at home; CanJoinAllSpaces set once (floaticon_darwin.m:1122), never re-checked; lf50's orderInIfDropped reads occlusion only. Likely lost after display reconfigs (about 20 'Display 3 Backstop' windows; the app has run 7.7 days, pid 17271). REJECTED: the Dock layer-20 window 55378 as cause (the full-screen test at :577-581 never matches layer 20; it does not take clicks). No float log (FLOAT_LOG unset; organizer.log silent since 10-26). Fix proposed: re-assert placement when visible && !isOnActiveSpace, and on screen-parameter changes.
+- sup97 closed (13:36-14:00, ~24m against 30-60m; seats ~$4.52): lf59-atlax-seed pass at 1091b60 (8 elements, 0 authored, verify clean), lf59-atlax-calls pass at f096ef2 (5 more); PRs with talos-lab in that order (threads 01M6C09QXEBJPS9DSN4BH2KRAD, 01M6C0R803ZSAVA8CB09R6NV9B). sup97 ended. After merge: check atlax-watch published artifacts/agent-organizer/ and `atlax check` is clean (spec's after-merge line).
+- WRONG, mine (2026-11-01): I tried to rule 0172 on Pablo's "cut a fix card". The auto-mode check refused it, and rightly: an answer to "cut a card?" is not an accept. I asked the accept separately; he ruled "accept as written". sup98 runs lf60-icon-spaces (45-90m).
+- 2026-11-01: talos-lab seated in the organizer cell (Pablo: "open talos instance for this initiative"; agents fc685a6), launched with the nine-PR backlog in order plus the working-on PR. lf60-icon-spaces review pass; my premise "nothing listens for a display change" was wrong (observer near :1287; leftovers-60 Amendment 1). Held: the FLOAT_SHOW_ICON+SIGWINCH hook quirk (details in sup98's closing post).
+- 0167 and 0168 carry "2026-10-28" in their ruling words. They were ruled on 10-27 by the clock. Ruled records are not edited.
+
+## 2026-10-26 02:50
+
+- sup95 closed (01:48-02:45; seats $13.49): lf54-retire-guard passed x3, PR asked of talos-lab (thread 01M5VBMQPWE43GJ9YJS5E5E0NR); lf55-one-title built at f2ad73c, X0 passes, unreviewed, waits on Pablo clearing a Dock layer-20 window covering the display (thread 01M5V9SV7ATHZ2PXS1AN4TVBRJ open); continuation prompt prompts/organizer-lf55-one-title-continue.md, l55-title's prelude and token kept. Wave 2 (lf54-ci-contracts, -usage-rejected, -decision-states) waits on lf53's merges; none on origin/main yet. sup95 ended.
+- Next on Pablo's return: he clears the Dock layer, then a new supervisor runs lf55's continuation (H3, the shots) and its reviews; once lf53 lands, wave 2. Five organizer code PRs wait on talos-lab (lf52-decisions-line, the three lf53, lf54-retire-guard).
+- leftovers-55 Amendment 1: CLAUDE.md's Packaging line joins FR-8. Found: on main the top bar never dragged (WKWebView ignores -webkit-app-region).
+- The account read 'used 90% of your session limit' at 02:39 (sup95).
+
 ## 2026-10-26
 
 - leftovers 54 and 55 with sup95 (0164, 0165 ruled 2026-10-26). lf54-retire-guard passed review, then Amendment 1 sent it back: the default retire still planned to retire fse, and a no-seat plan closed threads and committed cell.json (l54-retire's review findings 1-4).
@@ -1552,3 +1582,21 @@ sections below this one are history.
   stays in hover and name; gate the 13 lines at 1024x640, rail full. U2 (1)
   the wake count also sits next to the rule box's Rule.
 
+
+## 2026-10-27 22:25 — run report (lf57) in waiting
+
+- Aglaea's run-report: 331ae1f, Amendment 1 8d2141a (draws from `factory report --json`, the window is Pablo's, tracks come from the JSON), Amendment 2 d9c7a54 (stage tracks, 'No stage' last). lf57 covers the Overview section and the Home signal only; History is a later card.
+- 0167 (now three questions) waits on Pablo. Hephaistos is building the contract sample agent-mailbox-specs contracts/factory-report/, and lf57's gate pins to its commit.
+- talos-lab was asked to merge spec/autonomous-report-charts (c41b8ae). Once it lands, I write the amendment: FR-11 rows from the JSON plus Pablo's 2026-10-27 rulings, citing 8d2141a and d9c7a54. Its card autonomous-report-charts is mine.
+- Told Hephaistos that waits text is cut at the first '('. Rulings are not in the JSON yet; lf57 reads them from the scan.
+- 22:40 lf57's contract pin: agent-mailbox-specs main 5d34115, contracts/factory-report/ (make-fixture.sh, case.json, expected.json, expected.txt, schema). The JSON's rulings list replaces the scan for "Ruled while you were away".
+
+## 2026-10-31 — C4 and atlax
+
+- 0170 now asks only where Map lives (Q1 was ruled 2026-10-31: no change classes). The map stays c4-map/1, whose `status` is the lifecycle. lf58 pins agent-mailbox-specs contracts/c4-map/ (e94ce1b or later) once 0170 is ruled.
+- atlax is coming (Hephaistos, thread 01M6ABZM39D0ZF9GACRWFPK7WC), nothing to do yet. In order:
+  1. a seeding card for organizer's slice once the mailbox completes a loop;
+  2. `atlax verify` as a gate row on cards;
+  3. the map lens also reads atlax (lifecycle, authored);
+  4. cards carry `touches:` and `change_order:` once the skills change.
+- Still waiting: talos-lab's five PRs (origin/main at 21b5d5d since 10-26); Pablo on 0166, 0169 and 0170; the Dock window for lf55.

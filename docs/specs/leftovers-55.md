@@ -82,3 +82,12 @@ CLAUDE.md's naming paragraph.
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf55-one-title` | H1-H6, X0 | — | true |
+
+## Amendment 1 (FSE, 2026-10-26): CLAUDE.md's Packaging line
+
+From sup95's closing report. CLAUDE.md's Packaging paragraph still says the
+version is "shown in the top bar". FR-8 adds that sentence: it reads that the
+version is in About Deltagos and at Settings' foot. The boundary adds that
+one sentence. Also recorded from the build: on main the top bar never
+dragged (WKWebView ignores `-webkit-app-region`); lf55 uses
+`--wails-draggable`, so H3 is the first check that dragging works at all.
