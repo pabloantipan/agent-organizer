@@ -6,7 +6,7 @@ branch: lf61-decision-states-ui
 seat:
 stage:
 updated: 2026-11-01
-next: "the FSE launches its supervisor (0173 ruled 2026-11-01)"
+next: "sup100 runs it (0173 ruled 2026-11-01)"
 depends_on: [lf54-decision-states]
 boundary: ["docs/specs/leftovers-61.md Boundary"]
 spec: "docs/specs/leftovers-61.md (FR-1 to FR-6)"
