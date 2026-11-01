@@ -11,6 +11,8 @@ depends_on: []
 spec: "docs/specs/autonomous-report-charts.md"
 risk: low
 autonomy: needs-operator(open questions Q1-Q6 wait on Pablo and the talos and working-on skill owners; end-to-end rows S8 and T5 read a real initiative on its own machine)
+prs:
+  - {repo: organizer, pr: 10, target: main, state: merged, merge: 9eeb878}
 ---
 
 ## Goal
