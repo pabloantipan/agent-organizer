@@ -16,6 +16,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- Held for the next leftovers (lf61 code review pass at 7de55a1): `internal/service/rule.go` signs "owner operator" in a record's Ruling when pablo rules an operator-owned record; DS6 stops at the box, the written ruling should read the owner through the same person reader (and drop it when the ruler is pablo).
+
 - No supervisor is running. origin/main is at 21b5d5d. Hephaistos is reconciling the six unmerged branches. I answered that all six are to be reconciled, in this order: lf52-decisions-line, lf53-frontmatter, lf53-usage-contract, lf53-record-statusline, lf54-retire-guard, spec/autonomous-report-charts. Each merges clean (thread 01M6AHE7XTRSVAVA3VR1CY8Q60). After the merges: fast-forward local main, run make install, launch leftovers 54 wave 2.
 - Waiting on Pablo:
   - 0166, run attribution (lf56);
