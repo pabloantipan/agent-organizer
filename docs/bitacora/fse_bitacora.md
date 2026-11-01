@@ -15,6 +15,7 @@ restating it (the discuss skill).
 - Once spec/autonomous-report-charts merges: amend its FR-11 (rows from the JSON, text byte-equal behind Copy as text, citing Aglaea 8d2141a and d9c7a54) and cover Pablo's 2026-10-27 rulings. Its card autonomous-report-charts is mine.
 - lf54-decision-states: when Hephaistos says feat/ruled-by-autonomous has merged, re-pin its readers_today (sample records 0013-0015, mode autonomous).
 - Pablo's open ask "can we avoid Deltagos in the menu?" is unanswered: the macOS app menu name can only be dropped by making Deltagos an agent app (LSUIElement).
+- The card-change hook now skips working-on/reviews/ (crossing 0021; organizer/agents 1b73be6), so Elenx review commits no longer wake me. Thread 01M5RR7SZQSXT8C3BS8B9V8F98 closed. The untracked working-on/reviews/ in this root is Elenx's, not mine to commit.
 - 0167 and 0168 carry "2026-10-28" in their ruling words. They were ruled on 10-27 by the clock. Ruled records are not edited.
 
 ## 2026-10-26 02:50
