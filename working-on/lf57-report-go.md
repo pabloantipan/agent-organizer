@@ -5,8 +5,8 @@ repos: [organizer]
 branch: lf57-report-go
 seat:
 stage:
-updated: 2026-10-27
-next: "pablo: rule 0169 (accept leftovers 57)"
+updated: 2026-11-01
+next: "the FSE launches its supervisor once lf52-decisions-line, lf53-frontmatter and lf55-one-title are on origin/main (0169 ruled 2026-11-01)"
 depends_on: [lf53-frontmatter, lf52-decisions-line, lf55-one-title]
 boundary: ["docs/specs/leftovers-57.md Boundary, lf57-report-go"]
 spec: "docs/specs/leftovers-57.md (FR-1 to FR-6)"

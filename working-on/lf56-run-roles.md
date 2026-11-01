@@ -5,8 +5,8 @@ repos: [organizer]
 branch: lf56-run-roles
 seat:
 stage:
-updated: 2026-10-26
-next: "pablo: rule 0166 (run attribution)"
+updated: 2026-11-01
+next: "the FSE launches its supervisor (0166 ruled 2026-11-01)"
 depends_on: []
 boundary: ["docs/specs/leftovers-56.md Boundary"]
 spec: "docs/specs/leftovers-56.md (FR-1 to FR-6)"
