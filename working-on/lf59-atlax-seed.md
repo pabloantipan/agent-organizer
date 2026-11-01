@@ -6,7 +6,7 @@ branch: lf59-atlax-seed
 seat:
 stage:
 updated: 2026-11-01
-next: "pablo: rule 0171 (accept the atlax seed)"
+next: "sup97 runs it (0171 ruled 2026-11-01)"
 depends_on: []
 boundary: ["docs/specs/atlax-seed.md Boundary"]
 spec: "docs/specs/atlax-seed.md (FR-1 to FR-4)"
