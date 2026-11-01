@@ -1,6 +1,6 @@
 ---
 title: The C4 map lens in Deltagos - the plan, and where Map lives
-status: proposed
+status: ruled
 raised: 2026-10-27
 raised_by: fse
 owner: pablo
@@ -9,9 +9,9 @@ cards: []
 threads: [01M604ZJYQVBX3HGDBW6TX2Q59, 01M6051CZHV0D8YERRRWYNPZ9Q]
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-11-01
+ruled_by: pablo
+chosen: roadmap mode
 ---
 
 ## Question
@@ -100,3 +100,7 @@ seventh sub-view breaks FR-14.
 - the drawn id that stands for merged members;
 - ✚ (U+271A), not ➕, if change glyphs ever appear, as Deltagos already
   reads them (Aglaea's diagrams Amendment 1).
+
+## Ruling
+
+pablo, 2026-11-01, in the organizer on lodestar: Pablo chose "roadmap mode" in the FSE session on 2026-11-01, ruling the records one by one. lf58 is cut against contracts/c4-map/ (c4-map/1) once the generator's sample exists.
