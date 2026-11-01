@@ -1,12 +1,12 @@
 ---
 title: "A finished wave's footer opens its run record over the report"
-status: now
+status: done
 repos: [organizer]
 branch: lf57-wave-footer
 seat: l57-foot
 stage:
 updated: 2026-11-01
-next: "PR with talos-lab"
+next: "done: PR #29 merged d2bebb4 (2026-11-01)"
 review: pass
 reviewer: l57-foot-rev
 depends_on: [lf57-run-report]
