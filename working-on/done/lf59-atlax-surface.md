@@ -1,12 +1,12 @@
 ---
 title: "Deltagos's atlax slice names every Wails method and CLI command"
-status: now
+status: done
 repos: [organizer]
 branch: lf59-atlax-surface
 seat: l59-surface
 stage:
 updated: 2026-11-01
-next: "PR with talos-lab"
+next: "done: PR #23 merged a1c0f7a (2026-11-01)"
 review: pass
 reviewer: l59-surface-rev
 depends_on: [lf59-atlax-record]
