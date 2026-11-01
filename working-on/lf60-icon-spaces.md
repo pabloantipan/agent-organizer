@@ -4,6 +4,7 @@ status: now
 repos: [organizer]
 branch: lf60-icon-spaces
 seat: l60-icon
+reviewer: l60-icon-rev
 stage:
 updated: 2026-11-01
 next: "review: lf60-icon-spaces, gate met (I1-I4, X0), d4d0e35"
