@@ -12,6 +12,7 @@ import (
 	"organizer/internal/config"
 	"organizer/internal/service"
 	"organizer/internal/session"
+	ledger "organizer/internal/usage"
 )
 
 // takeFlag pulls a boolean flag out of args wherever it sits, so the verb
@@ -139,6 +140,12 @@ func WriteRuns(w io.Writer, rows []session.Run) {
 	}
 	fmt.Fprintf(tw, "%d %s\t\t\t\t\t\t\t$%.2f\n", len(rows), plural(len(rows), "run"), cost)
 	tw.Flush()
+	tasks := make([]string, len(rows))
+	costs := make([]float64, len(rows))
+	for i, r := range rows {
+		tasks[i], costs[i] = r.Card, r.CostUSD
+	}
+	fmt.Fprintln(w, sharesLine(ledger.Shares(tasks, costs)))
 }
 
 func plural(n int, word string) string {

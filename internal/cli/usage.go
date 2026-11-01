@@ -84,6 +84,7 @@ func WriteUsage(w io.Writer, v ledger.View, by string) {
 		sess += fmt.Sprintf(", %d running (so far)", t.Running)
 	}
 	fmt.Fprintln(w, sess)
+	fmt.Fprintln(w, sharesLine(ledger.SessionShares(v.Sessions)))
 	fmt.Fprintln(w)
 
 	fmt.Fprintf(w, "by %s\n", by)
@@ -92,7 +93,11 @@ func WriteUsage(w io.Writer, v ledger.View, by string) {
 	for _, r := range v.Cuts[by] {
 		name := r.Name
 		if by == "task" && r.Initiative != "" {
-			name = r.Initiative + "/" + strings.Join(r.Cards, "+") + "  " + clip(r.Name, 48)
+			what := strings.Join(r.Cards, "+")
+			if what == "" {
+				what = strings.TrimPrefix(r.Key, r.Initiative+"/") // overhead:<role>
+			}
+			name = r.Initiative + "/" + what + "  " + clip(r.Name, 48)
 		}
 		m := dollars(r.Money)
 		if r.Sessions > 0 && r.WithoutCost == r.Sessions {
@@ -166,4 +171,10 @@ func compact(n int64) string {
 		return fmt.Sprintf("%.0fk", float64(n)/1e3)
 	}
 	return fmt.Sprintf("%d", n)
+}
+
+// sharesLine is leftovers-56 FR-6: the share of the cost spent on overhead
+// (a task overhead:<role>) and the share no task claims.
+func sharesLine(overhead, none float64) string {
+	return fmt.Sprintf("cost      %.1f%% overhead · %.1f%% with no task", 100*overhead, 100*none)
 }
