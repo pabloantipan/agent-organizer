@@ -68,3 +68,16 @@ usage output) and its tests. Not `internal/service/usagepost.go`
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf56-run-roles` | A1-A6, X0 | — | false |
+
+## Amendment 1 (2026-11-01, the FSE, on sup96's question at 4516c9c)
+
+FR-2 and FR-3 read fields the scan does not carry: `model.Card` has no
+`reviewer:`, `model.Decision` no `supervisor:`, and `usage.Initiative`
+(built in `internal/service/usage.go`) carries no records. `internal/usage`
+reads them itself from `Initiative.Root`: each card's `reviewer:` and each
+decision record's `supervisor:` and `cards:`, by a small frontmatter read of
+its own. The boundary does not widen. Not model and scan: lf53-frontmatter,
+unmerged, changes `internal/model/model.go`, `decision.go` and
+`internal/scan/scan.go`, so widening would collide with it. Moving these
+fields onto the scan is a later card, once lf53 and lf54-decision-states
+have landed.
