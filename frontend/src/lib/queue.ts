@@ -2,7 +2,8 @@ import type { AgentGroup, AgentsView, BoardView, CellThread, Seat } from "../hoo
 import { sleepyWord } from "./initiatives";
 import type { merge, model, service } from "../../wailsjs/go/models";
 import { parseISO } from "./dates";
-import { isOpen, ownerPerson } from "./decisions";
+import { decisionStatusWord, isOpen, isRulable, ownerPerson } from "./decisions";
+import { VERBS } from "./verbs";
 import { unreadFiles, type UnreadFile } from "./unread";
 import { HEALTH, healthState, type HealthState } from "./health";
 
@@ -388,6 +389,20 @@ export function failedStartLine(l: Pick<service.InitiativeLaunch, "initiative" |
  *  is Open, since the fix is on Agents and not a launch; else Launch. */
 export function launchVerb(row: { missing: string | null }): { verb: "Open" | "Launch"; blocker: string | null } {
   return row.missing ? { verb: "Open", blocker: personaMissing([row.missing]) } : { verb: "Launch", blocker: null };
+}
+
+/** A decision row's verb and the end of its context line (leftovers-54
+ *  Amendment 6, FR-6a): a proposed record is the lead's to rule, so its verb
+ *  is Rule and its line ends with its options; an open record that is not
+ *  rulable (awaiting cells, Themis's to settle) has the verb Open, which
+ *  lands on the record in the initiative's Decisions, and its line ends with
+ *  its status word in place of the options. Both read the one helper. */
+export function decisionRowAction(d: Pick<model.Decision, "status" | "options">): { verb: "Rule" | "Open"; tail: string | null } {
+  if (isRulable(d)) {
+    const opts = d.options ?? [];
+    return { verb: VERBS.rule, tail: opts.length > 0 ? `options: ${opts.join(", ")}` : null };
+  }
+  return { verb: VERBS.open, tail: decisionStatusWord((d.status ?? "").trim()) };
 }
 
 /** The seats of a cell with no persona file under agents/, in roster order. */

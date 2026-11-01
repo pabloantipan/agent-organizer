@@ -10,7 +10,8 @@ import { lineName, rulerWords, statusWord, timelineName, NO_RULER } from "./deci
 import { firstWaiting, waitingChip } from "./header";
 import { initiativeStates } from "./initiativeState";
 import { decisionName, gemsOf } from "./outline";
-import { needsMeRows, waitingOnOthers } from "./queue";
+import { decisionRowAction, needsMeRows, waitingOnOthers } from "./queue";
+import { VERBS } from "./verbs";
 
 // leftovers-54 FR-6, FR-7 (gate row G5): one helper says what a decision
 // status means, every lib reader uses it, and ruled_by reads as a person
@@ -199,5 +200,29 @@ describe("owner operator", () => {
     expect(waitingChip(ds, "pablo")).toBe("1 decision waiting on you");
     expect(waitingOnOthers(board(initiative("a", ds)), agents("a"), now)).toEqual([]);
     expect(initiativeStates(board(initiative("a", ds)), agents("a")).get("a")).toBe("you");
+  });
+});
+
+// leftovers-54 Amendment 6, FR-6a: a Needs me row for an open record that is
+// not rulable reads Open and "awaiting cells"; Rule stays proposed only.
+describe("FR-6a: a decision row's verb and words", () => {
+  it("proposed: Rule, the line ends with its options", () => {
+    expect(decisionRowAction(rec("0002", "proposed", { options: ["a", "b"] }))).toEqual({ verb: VERBS.rule, tail: "options: a, b" });
+  });
+  it("proposed with no options: Rule, nothing appended", () => {
+    expect(decisionRowAction(rec("0002", "proposed"))).toEqual({ verb: VERBS.rule, tail: null });
+  });
+  it("awaiting-cells: Open, the line reads awaiting cells and not its options", () => {
+    expect(decisionRowAction(rec("0013", "awaiting-cells", { options: ["both cells", "the record only"] }))).toEqual({ verb: VERBS.open, tail: "awaiting cells" });
+  });
+  it("the verb follows isRulable for every open status", () => {
+    for (const status of Object.keys(STATUSES).filter((s) => STATUSES[s] === "open")) {
+      expect(decisionRowAction({ status, options: [] }).verb).toBe(isRulable({ status }) ? VERBS.rule : VERBS.open);
+    }
+  });
+  it("on Needs me: the awaiting-cells row is a row, its verb Open; the proposed one's Rule", () => {
+    const rows = needsMeRows(board(initiative("init-a", [rec("0002", "proposed", { options: ["a", "b"] }), rec("0013", "awaiting-cells", { options: ["x", "y"] })])), agents("init-a"), new Date(2026, 9, 1));
+    const verbs = Object.fromEntries(rows.filter((r) => r.kind === "decision").map((r) => [(r as { decision: model.Decision }).decision.number, decisionRowAction((r as { decision: model.Decision }).decision).verb]));
+    expect(verbs).toEqual({ "0002": VERBS.rule, "0013": VERBS.open });
   });
 });
