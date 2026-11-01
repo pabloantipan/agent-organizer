@@ -16,6 +16,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- To cut after lf57-run-report merges (Aglaea, progress-and-waves Amendment 1, 754615b: PW4 amended, PW7): a finished wave's footer opens its run record (runs/*.md) in the spec reader drawer, Back returns to the report; a running wave keeps Work at its strip; names 'open sup95's run record' / 'show sup96 on Work'; an unread record goes to Needs me's unread row.
+
 - WRONG, mine (lf59-atlax-surface): I wrote 'the builder fills touches and change_order' in its Pre-answered, but atlax freezes the change order when the card first goes now; FR-8 authored none. Rule for my atlax cards: list touches and change_order on the card when I cut it. Follow-up lf59-atlax-authored (Amendment 5).
 
 - Held: render without HTML labels at the source (root htmlLabels:false in the dark mermaid config or internal/diagram; changes every cached figure's key). leftovers-58 Amendment 1 swaps foreignObject for <text> meanwhile.
