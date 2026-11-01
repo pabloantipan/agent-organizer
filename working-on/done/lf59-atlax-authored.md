@@ -1,12 +1,12 @@
 ---
 title: "Deltagos's factory-report readers become authored atlax promises"
-status: now
+status: done
 repos: [organizer]
 branch: lf59-atlax-authored
 seat: l59-authored
 stage:
 updated: 2026-11-01
-next: "PR with talos-lab"
+next: "done: PR #25 merged a7bd633 (2026-11-01)"
 review: pass
 reviewer: l59-authored-rev
 depends_on: [lf59-atlax-surface]
