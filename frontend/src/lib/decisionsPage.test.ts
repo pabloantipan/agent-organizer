@@ -94,6 +94,15 @@ describe("lineName", () => {
     expect(lineName({ ...r, raised: "2026-10-01" }, now, "init-a", "1 Oct")).toBe("0007 Stage normalize: exit met, init-a, ruled, “accept as written”, by pablo, 1 Oct");
   });
 
+  // leftovers-52 D2 (FR-5, UW3): open under its line, the record's head
+  // shows the chosen, so the line's name says it no more; closed, in full.
+  it("D2: drops the chosen while the record is open, and has it whole closed", () => {
+    const r = { ...waiting, status: "ruled", ruled: "2026-10-01", ruled_by: "pablo", chosen: "Q1 after-graph-performs-start-now, Q2 record-page" };
+    expect(lineName(r, now, undefined, "1 Oct", true)).toBe("0007 Stage normalize: exit met, ruled, by pablo, 1 Oct, after 3 days");
+    expect(lineName(r, now, undefined, "1 Oct", false)).toBe("0007 Stage normalize: exit met, ruled, “Q1 after-graph-performs-start-now, Q2 record-page”, by pablo, 1 Oct, after 3 days");
+    expect(lineName(r, now, undefined, "1 Oct")).toContain("“Q1 after-graph-performs-start-now, Q2 record-page”");
+  });
+
   it("says no ruler recorded in the text and the name alike (row 15)", () => {
     const r = { ...waiting, status: "ruled", ruled: "2026-10-01", ruled_by: "", chosen: "" };
     expect(rulerWords("")).toBe("no ruler recorded");

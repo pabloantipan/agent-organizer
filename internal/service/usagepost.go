@@ -59,6 +59,18 @@ type usagePostOutcome struct {
 	OK     bool      `json:"ok"`
 	Rows   int       `json:"rows"`
 	Reason string    `json:"reason,omitempty"`
+	// Refused names each batch the record refused in the pass, in order;
+	// Rows counts only the accepted ones (leftovers-53 FR-6).
+	Refused []usageRefusal `json:"refused,omitempty"`
+}
+
+// usageRefusal is one refused batch: its place in the pass, its size and
+// the record's answer.
+type usageRefusal struct {
+	Batch  int    `json:"batch"`
+	Of     int    `json:"of"`
+	Rows   int    `json:"rows"`
+	Reason string `json:"reason"`
 }
 
 // usagePostTarget is where a post goes, or why it does not go anywhere.
@@ -105,9 +117,12 @@ func startUsagePost(cfg config.Config, dataDir, ledgerPath string, now func() ti
 }
 
 // postUsage sends the rows whose hash differs from the one last accepted,
-// in batches of record.MaxUsageRows, and records each accepted batch. The
-// first batch not accepted ends the pass: its rows and the rest stay unsent
-// for the next pass, and the failure is one line in organizer.log.
+// in batches of record.MaxUsageRows, and records each accepted batch. A
+// batch the record refuses (it answered, not 2xx) does not end the pass
+// (leftovers-53 FR-6): its rows stay unsent for the next pass, the later
+// batches are still posted, and each refusal is one line in organizer.log
+// and one entry in the state. A batch that gets no answer at all ends the
+// pass, since every later one would wait out the same timeout.
 func postUsage(ctx context.Context, t usagePostTarget, dataDir string, lines []usage.Line, now func() time.Time) {
 	path := filepath.Join(dataDir, usagePostFile)
 	st := loadUsagePostState(path)
@@ -131,26 +146,40 @@ func postUsage(ctx context.Context, t usagePostTarget, dataDir string, lines []u
 
 	rc := record.New(t.url)
 	rc.HTTP = &http.Client{Timeout: usagePostRequest}
-	sent := 0
-	for len(todo) > 0 {
+	batches := (len(todo) + record.MaxUsageRows - 1) / record.MaxUsageRows
+	out := usagePostOutcome{OK: true}
+	st.Last = &out
+	for b := 1; len(todo) > 0; b++ {
 		n := min(len(todo), record.MaxUsageRows)
 		batch := make([]record.UsageRow, n)
 		for i, p := range todo[:n] {
 			batch[i] = p.row
 		}
-		if err := rc.PostUsage(ctx, t.key, t.factory, batch); err != nil {
+		err := rc.PostUsage(ctx, t.key, t.factory, batch)
+		if err != nil {
 			reason := usagePostReason(err, t.key)
-			st.Last = &usagePostOutcome{At: now(), Reason: reason}
-			_ = saveUsagePostState(path, st)
-			logUsagePost(dataDir, now(), fmt.Sprintf("usage post failed: %s (%d rows unsent)", reason, len(todo)))
-			return
+			out.OK = false
+			if out.Reason == "" {
+				out.Reason = reason
+			}
+			var re *record.Error
+			if !errors.As(err, &re) {
+				// No answer: this batch and the rest stay unsent.
+				out.At = now()
+				_ = saveUsagePostState(path, st)
+				logUsagePost(dataDir, now(), fmt.Sprintf("usage post failed: %s (%d rows unsent)", reason, len(todo)))
+				return
+			}
+			out.Refused = append(out.Refused, usageRefusal{Batch: b, Of: batches, Rows: n, Reason: reason})
+			logUsagePost(dataDir, now(), fmt.Sprintf("usage post refused batch %d of %d: %s (%d rows unsent)", b, batches, reason, n))
+		} else {
+			for _, p := range todo[:n] {
+				st.Accepted[p.key] = p.hash
+			}
+			out.Rows += n
 		}
-		for _, p := range todo[:n] {
-			st.Accepted[p.key] = p.hash
-		}
-		sent += n
 		todo = todo[n:]
-		st.Last = &usagePostOutcome{At: now(), OK: true, Rows: sent}
+		out.At = now()
 		_ = saveUsagePostState(path, st)
 	}
 }
@@ -270,6 +299,9 @@ func UsagePostStatus(cfg config.Config) string {
 		return "nothing posted yet"
 	case st.Last.OK:
 		return fmt.Sprintf("ok %s, %d rows", st.Last.At.Format(time.RFC3339), st.Last.Rows)
+	case len(st.Last.Refused) > 0:
+		return fmt.Sprintf("failed %s: %d of %d batches refused, %d rows posted: %s", st.Last.At.Format(time.RFC3339),
+			len(st.Last.Refused), st.Last.Refused[0].Of, st.Last.Rows, st.Last.Reason)
 	default:
 		return fmt.Sprintf("failed %s: %s", st.Last.At.Format(time.RFC3339), st.Last.Reason)
 	}

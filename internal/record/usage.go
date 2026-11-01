@@ -34,7 +34,7 @@ type UsageRow struct {
 	First    string                `json:"first"` // RFC 3339
 	Last     string                `json:"last"`  // RFC 3339
 	Cost     *float64              `json:"cost"`
-	CostFrom *string               `json:"cost_from"` // record, transcript or null
+	CostFrom *string               `json:"cost_from"` // record, transcript, priced or null
 }
 
 // usageBatch is the body of POST /v1/usage.
