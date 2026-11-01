@@ -1,12 +1,12 @@
 ---
 title: "Home's row says the last run: cards passed and time stopped"
-status: now
+status: done
 repos: [organizer]
 branch: lf57-home-signal
 seat: l57-home
 stage:
 updated: 2026-11-01
-next: "PR with talos-lab"
+next: "done: PR #28 merged 22d84cd (2026-11-01)"
 review: pass
 reviewer: l57-home-rev
 depends_on: [lf57-run-report, lf61-decision-states-ui]
