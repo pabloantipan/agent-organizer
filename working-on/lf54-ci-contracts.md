@@ -6,12 +6,14 @@ branch: lf54-ci-contracts
 seat: l54-ci
 stage:
 updated: 2026-11-01
-next: "review: lf54-ci-contracts, G2 passes (fails on origin/main), X0 fails only TestWorkingOnContract identically to origin/main 076eb5c (Amendment 4: X0 on the merge with lf54-decision-states), 82ed5a6"
+next: "PR with talos-lab"
 depends_on: [lf53-frontmatter, lf53-usage-contract]
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-ci-contracts"]
 spec: "docs/specs/leftovers-54.md (FR-2)"
 gate: "docs/specs/leftovers-54.md#Acceptance → gate"
 ui_review: false
+review: pass
+reviewer: l54-ci-rev
 ---
 
 ## Goal
@@ -34,3 +36,25 @@ Not changed, on purpose:
 
 ## Notes
 - origin/main moved 076eb5c → 6b6e349 during the build; nothing touched release.yml.
+
+## Review
+Verdict: pass. Unmet gate items: none. Reviewer l54-ci-rev, 2026-11-01.
+X0 ran on branch 82ed5a6 alone and on merge e5a8bf8 (82ed5a6 + lf54-decision-states 1df5001, `git merge --no-edit 1df5001` in the reviewer's clean clone), CONTRACTS_DIR at specs 54cf10d. Test runs fresh (test-lease --share, no replay on either SHA; a stale replay of an earlier merge was discarded). Logs: `.wt-notes/l54-ci-rev/`.
+
+change-check (clean clone at 82ed5a6):
+```
+| outside boundary | organizer/release_workflow_test.go |  | added |
+| undeclared | organizer/release_workflow_test.go |  | added |
+| declared, not changed |  | release_workflow_test.go:TestReleaseWorkflowPinsContracts | no matching change |
+| risk |  | high suggested | card says medium; infra: .github/workflows/release.yml |
+4 flags: outside boundary 1, outside footprint 0, undeclared 1, declared, not changed 1, new env var 0, new dependency 0, new host 0, risk 1, untested? 0, could not read 0, boundary unreadable 0
+```
+- outside boundary: the boundary names "the test that reads it" without a path; release_workflow_test.go is that test.
+- undeclared / declared, not changed: one file; the declared `file:Symbol` bullet was not matched to the added file. Declared.
+- risk: note only.
+
+- G2: pass. `go test -run TestReleaseWorkflowPinsContracts` against 076eb5c's release.yml (same as origin/main's) fails: "job macos: no actions/checkout of pabloantipan/agent-mailbox-specs before make test (step 6)"; passes at 82ed5a6 (`ok organizer` in make test). Short ref, missing CONTRACTS_DIR, and a specs path inside organizer/ each fail it. Local make test at the pin passes on the merge.
+- FR-2 and paths: specs repo public, pin 54cf10da… on its main; sibling checkout, no vendored copy, one ref line. go-version-file, cache-dependency-path, step working-directory organizer/frontend, scripts/*, make targets and the organizer/build/bin/*.dmg(.sha256) globs all resolve from where their step runs; git describe runs in organizer/ with fetch-depth 0 and sees the tags.
+- X0 on 82ed5a6 alone: make test fails only TestWorkingOnContract (ruled_by modes, 0012 forecast band), byte-identical to `go test ./internal/scan/` on 076eb5c; wails build ok; porcelain empty.
+- X0 on e5a8bf8: make test passes (Go all ok, vitest 87 files / 1385 tests); wails build ok; porcelain empty.
+- Note: no gate row runs a tag build; the first tag after merge proves the workflow in Actions (builder's Risky).
