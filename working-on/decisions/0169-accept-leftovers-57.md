@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 57 - the run report on Overview, with its waves, and the Home signal
-status: proposed
+status: ruled
 raised: 2026-10-27
 raised_by: fse
 owner: pablo
@@ -9,9 +9,9 @@ cards: [lf57-report-go, lf57-run-report, lf57-home-signal]
 forecast: 180-300m
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-11-01
+ruled_by: pablo
+chosen: accept as written
 ---
 
 ## Question
@@ -54,3 +54,7 @@ not now. It waits on two things:
 - talos-lab merging lf52-decisions-line, the three lf53 cards and
   lf55-one-title (lf55 still needs its H3 check);
 - Hephaistos's list of windows for R4.
+
+## Ruling
+
+pablo, 2026-11-01, in the organizer on lodestar: Pablo chose "accept as written" in the FSE session on 2026-11-01, ruling the records one by one. The spec is leftovers-57 with Amendment 1 (a73d86b).
