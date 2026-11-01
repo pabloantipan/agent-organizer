@@ -1,0 +1,9 @@
+# An organizer subcommand (internal/cli/cli.go Run), derived by atlax derive (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.cli.statusline
+kind: cli
+summary: "Claude Code's statusLine command: records each agent's context fill and prints the status text."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  command: "statusline"

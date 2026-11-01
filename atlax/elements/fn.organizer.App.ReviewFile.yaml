@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.ReviewFile
+kind: wails
+summary: "A file of a card at a sha, the given lines plus three each side; a path out of the repo is refused."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.ReviewFile
+  signature: "(string, string, string, string, int, int) (review.Text, error)"

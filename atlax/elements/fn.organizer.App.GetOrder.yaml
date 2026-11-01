@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.GetOrder
+kind: wails
+summary: "The manual priority: initiative order, card order, rail groups, card comments and resolved marks."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.GetOrder
+  signature: "() model.Order"

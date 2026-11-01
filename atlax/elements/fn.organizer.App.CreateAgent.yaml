@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.CreateAgent
+kind: wails
+summary: "Starts a new probe seat for an initiative, detached, with the given name or an animal name."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.CreateAgent
+  signature: "(string, string) error"

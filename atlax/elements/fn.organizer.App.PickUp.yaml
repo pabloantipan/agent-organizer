@@ -1,0 +1,12 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.PickUp
+kind: wails
+summary: "Marks the human's mail in a cell delivered (a drain with no session ceiling), so the human seat does not read deaf."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.PickUp
+  signature: "(string) (int, error)"
+consumes:
+  - ext:agent-mailbox-api#fn:mailbox.drain

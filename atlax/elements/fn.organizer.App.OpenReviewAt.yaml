@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.OpenReviewAt
+kind: wails
+summary: "Opens a file of a card's review map at a line in the editor, in the checkout whose HEAD is the map's head."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.OpenReviewAt
+  signature: "(string, string, string, int) error"

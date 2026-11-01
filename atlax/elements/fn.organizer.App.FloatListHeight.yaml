@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at floaticon_darwin.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.FloatListHeight
+kind: wails
+summary: "Sizes the floating icon's list to its rows, within its limits."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.FloatListHeight
+  signature: "(int)"

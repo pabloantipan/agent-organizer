@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.StopStarting
+kind: wails
+summary: "Skips an initiative's crew seats still waiting to start; the one in flight finishes."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.StopStarting
+  signature: "(string)"

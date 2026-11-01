@@ -1,0 +1,11 @@
+# An organizer subcommand (internal/cli/cli.go Run), derived by atlax derive (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.cli.decisions
+kind: cli
+summary: "Prints decision records: the queue waiting on a ruling by age, and rulings with turnaround."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  command: "decisions"
+consumes:
+  - ext:agent-mailbox-api#fn:mailbox.health

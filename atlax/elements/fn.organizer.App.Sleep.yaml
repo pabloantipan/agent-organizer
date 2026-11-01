@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.Sleep
+kind: wails
+summary: "Puts an initiative to sleep through factory sleep, returning the factory's words and the state after a rescan."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.Sleep
+  signature: "(string) (service.SleepResult, error)"

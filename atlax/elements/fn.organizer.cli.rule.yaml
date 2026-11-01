@@ -1,0 +1,9 @@
+# An organizer subcommand (internal/cli/cli.go Run), derived by atlax derive (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.cli.rule
+kind: cli
+summary: "Writes the ruling into a proposed decision record and commits that one file."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  command: "rule"

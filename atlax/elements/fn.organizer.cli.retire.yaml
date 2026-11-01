@@ -1,0 +1,13 @@
+# An organizer subcommand (internal/cli/cli.go Run), derived by atlax derive (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.cli.retire
+kind: cli
+summary: "Ends a wave: retires seats, kills sessions, closes the mailbox, revokes tokens, rewrites cell.json; dry unless --run."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  command: "retire"
+consumes:
+  - ext:agent-mailbox-api#fn:mailbox.health
+  - ext:agent-mailbox-api#fn:mailbox.thread.status.set
+  - ext:agent-mailbox-api#fn:mailbox.drain

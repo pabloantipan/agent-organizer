@@ -1,0 +1,12 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.SetCellThreadStatus
+kind: wails
+summary: "Sets a mailbox thread's status (reopen, escalate, close) as the cell's human."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.SetCellThreadStatus
+  signature: "(string, string, string) error"
+consumes:
+  - ext:agent-mailbox-api#fn:mailbox.thread.status.set

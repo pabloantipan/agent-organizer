@@ -1,0 +1,12 @@
+# An organizer subcommand (internal/cli/cli.go Run), derived by atlax derive (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.cli.factory-key
+kind: cli
+summary: "Issues this laptop's factory key from the record into push.key; --rotate issues a new one, then revokes the old."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  command: "factory-key"
+consumes:
+  - ext:agent-mailbox-record#fn:record.factories.keys.issue
+  - ext:agent-mailbox-record#fn:record.factories.keys.revoke

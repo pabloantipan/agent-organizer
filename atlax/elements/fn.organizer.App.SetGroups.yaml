@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.SetGroups
+kind: wails
+summary: "Replaces the rail's initiative groups; the ranking follows them."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.SetGroups
+  signature: "([]model.Group) error"

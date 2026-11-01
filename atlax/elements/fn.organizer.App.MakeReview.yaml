@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.MakeReview
+kind: wails
+summary: "Starts building a card's review map in the background; its end arrives as the review:make event."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.MakeReview
+  signature: "(string, string) (service.ReviewMake, error)"

@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at floaticon_darwin.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.FloatDismiss
+kind: wails
+summary: "Closes the floating icon's list without a pick; the window goes back home."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.FloatDismiss
+  signature: "()"

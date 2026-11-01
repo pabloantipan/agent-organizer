@@ -1,0 +1,11 @@
+# An organizer subcommand (internal/cli/cli.go Run), derived by atlax derive (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.cli.doctor
+kind: cli
+summary: "Prints the roots, initiatives found, cards rejected and why, auth mode, the statusLine install and whether discuss runs."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  command: "doctor"
+consumes:
+  - ext:agent-mailbox-api#fn:mailbox.healthz

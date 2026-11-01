@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.Report
+kind: wails
+summary: "An initiative's run report for a window, factory report --json as given plus the tokens per progress line."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.Report
+  signature: "(string, string, string) (service.RunReport, error)"

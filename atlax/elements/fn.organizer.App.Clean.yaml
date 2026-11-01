@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.Clean
+kind: wails
+summary: "Deletes exited probe sessions and stale statusline records, and reports what it removed."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.Clean
+  signature: "() (service.RetireReport, error)"
