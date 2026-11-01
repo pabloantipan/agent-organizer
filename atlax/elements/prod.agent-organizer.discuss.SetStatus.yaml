@@ -1,0 +1,16 @@
+# Deltagos's change of a thread's status (atlax-seed Amendment 2, client.go
+# SetStatus): open, escalated or closed; stalled is the server's alone.
+designation: prod:agent-organizer.discuss.SetStatus
+kind: outbound
+summary: Sets a thread open, escalated or closed, for reopen, escalate and close in Conversations and the threads a retire closes.
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  method: POST
+  path: /projects/{pid}/threads/{tid}/status
+consumes:
+  - ext:agent-mailbox-api#fn:mailbox.thread.status.set
+test:
+  path: internal/discuss/client_test.go
+  name: TestClientRoundTrips

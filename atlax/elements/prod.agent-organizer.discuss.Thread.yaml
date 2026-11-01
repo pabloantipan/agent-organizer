@@ -1,0 +1,17 @@
+# Deltagos's read of one mailbox thread with its messages (atlax-seed
+# Amendment 2, client.go Thread). Unauthored: the consumes: line is what lets
+# atlax check tell the organizer's FSE when the thread read changes.
+designation: prod:agent-organizer.discuss.Thread
+kind: outbound
+summary: Reads one thread with its messages, for the chat timeline in Conversations and the Solved list's ruling.
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  method: GET
+  path: /projects/{pid}/threads/{tid}
+consumes:
+  - ext:agent-mailbox-api#fn:mailbox.thread.get
+test:
+  path: internal/discuss/client_test.go
+  name: TestClientRoundTrips
