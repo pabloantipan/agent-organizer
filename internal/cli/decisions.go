@@ -74,10 +74,10 @@ func WriteDecisions(w io.Writer, rows []DecisionRow) {
 	}
 	var open, ruled, closed []DecisionRow
 	for _, r := range rows {
-		switch r.Status {
-		case model.DecisionProposed:
+		switch r.Class() {
+		case "open":
 			open = append(open, r)
-		case model.DecisionRuled:
+		case "decided":
 			ruled = append(ruled, r)
 		default:
 			closed = append(closed, r)
@@ -93,7 +93,7 @@ func WriteDecisions(w io.Writer, rows []DecisionRow) {
 	}
 	fmt.Fprintf(tw, "ruled (%d)%s\n", len(ruled), medianNote(ruled))
 	for _, r := range ruled {
-		fmt.Fprintf(tw, "  %s %s\t%s\tby %s\truled %s\t%dd\n", r.Initiative, r.Number, clip(r.Title, 60), dashIfEmpty(r.RuledBy), r.Ruled, r.TurnaroundDays)
+		fmt.Fprintf(tw, "  %s %s\t%s\tby %s\truled %s\t%dd\n", r.Initiative, r.Number, clip(r.Title, 60), rulerWords(r.Decision), r.Ruled, r.TurnaroundDays)
 	}
 	if len(closed) > 0 {
 		fmt.Fprintf(tw, "superseded or withdrawn (%d)\n", len(closed))
@@ -106,6 +106,26 @@ func WriteDecisions(w io.Writer, rows []DecisionRow) {
 		}
 	}
 	tw.Flush()
+}
+
+// rulerWords names who ruled and how: the person, with the mode beside it
+// when it is not present ("pablo, autonomous mode", "pablo, standing rule").
+// A refused ruled_by shows as written in quotes; nobody is "-".
+func rulerWords(d model.Decision) string {
+	d.ReadRuling() // a copy: the scan has read it already, a bare record has not
+	if d.Person == "" {
+		if w := strings.TrimSpace(d.RuledBy); w != "" {
+			return fmt.Sprintf("%q", w)
+		}
+		return "-"
+	}
+	switch d.Mode {
+	case model.ModeAutonomous:
+		return d.Person + ", autonomous mode"
+	case model.ModeStandingRule:
+		return d.Person + ", standing rule"
+	}
+	return d.Person
 }
 
 func medianNote(rows []DecisionRow) string {
