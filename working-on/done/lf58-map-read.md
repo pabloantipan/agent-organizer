@@ -1,12 +1,12 @@
 ---
 title: "Deltagos reads an initiative's C4 map.json and each level's mermaid source"
-status: now
+status: done
 repos: [organizer]
 branch: lf58-map-read
 seat: l58-read
 stage:
 updated: 2026-11-01
-next: "PR with talos-lab"
+next: "done: PR #24 merged 3ee7917 (2026-11-01)"
 review: pass
 reviewer: l58-read-rev
 depends_on: []
