@@ -36,6 +36,10 @@ export type ReaderEntry = {
   number?: string;
   title?: string;
   error?: string;
+  /** The scan's reason it could not read this file (a run record of an
+   *  initiative with no Needs me rows, leftovers-57 Amendment 6): the
+   *  drawer's error line, over whatever text ReadSpec returned. */
+  unread?: string;
   scroll?: number;
 };
 
@@ -97,10 +101,11 @@ function clearMissing(initiative: string, path: string) {
  *  link), which gets focus back when it closes. `ref` may carry a
  *  `#section`, which the drawer lands on. A missing file opens nothing and
  *  its opener reads `missing`. */
-export async function openSpec(el: HTMLElement | null, initiative: string, ref: string, exact = false, back?: string) {
+export async function openSpec(el: HTMLElement | null, initiative: string, ref: string, exact = false, back?: string, unread?: string) {
   const r = exact ? pathRef(ref) : specRef(ref);
   if (!r) return;
-  const entry = await readSpec(initiative, r.path, r.section);
+  const read = await readSpec(initiative, r.path, r.section);
+  const entry = unread ? { ...(read ?? { kind: "spec" as const, path: r.path, section: r.section, text: "" }), error: undefined, unread } : read;
   if (!entry) return;
   opener = el;
   useSpecReader.setState({ initiative, stack: [entry], back });
@@ -331,9 +336,8 @@ export function SpecReader() {
           <button type="button" className="ghost sr-close" onClick={close} aria-label={`Close ${top.path}`}><X size={16} aria-hidden /></button>
         </header>
         <div ref={scroller} className={`sr-body ${edges.top ? "edge-top" : ""} ${edges.bottom ? "edge-bottom" : ""}`}>
-          {top.error ? (
-            <p className="sr-error" role="status">Not read: {top.error}</p>
-          ) : (
+          <ReaderError entry={top} />
+          {top.error || (top.unread && !top.text) ? null : (
             <>
               <Contents items={rendered.contents} go={goSection} />
               <div ref={body} className="markdown sr-doc" onClick={onBodyClick} />
@@ -344,6 +348,14 @@ export function SpecReader() {
       </div>
     </div>
   );
+}
+
+/** The drawer's error line: ReadSpec's refusal, or the scan's reason it
+ *  could not read the file, shown over the text that was read. */
+export function ReaderError({ entry }: { entry: Pick<ReaderEntry, "error" | "unread"> }) {
+  if (entry.unread) return <p className="sr-error" role="status">Deltagos can't read this run record: {entry.unread}</p>;
+  if (entry.error) return <p className="sr-error" role="status">Not read: {entry.error}</p>;
+  return null;
 }
 
 /** The header's ← Back: to the file under this one, else, when the drawer

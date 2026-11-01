@@ -9,6 +9,7 @@ import {
   rowName, rowTime, rowsOf, rulingName, runPlace, seenAtOf, spanWords, spansDays, toLocalInput, waveCell, waveFooterWords,
   waveLabel, waveLinkName, waveTarget, whileAway, type LineRow, type Preset, type PresetKind, type Row, type WaveTarget,
 } from "../lib/runReport";
+import { inactiveIds } from "../lib/queue";
 import { openSpec } from "./SpecReader";
 import { RunTracks } from "./RunTracks";
 import "../styles/runreport.css";
@@ -38,7 +39,7 @@ export function goToWave(
   id: string, w: service.RunWave, t: WaveTarget, el: HTMLElement | null,
   go: { openSpec: typeof openSpec; openNeedsMe: (key: string) => void; openWave: (id: string, wave: number | string) => void },
 ) {
-  if (t.kind === "record") void go.openSpec(el, id, t.path, true, "the run report");
+  if (t.kind === "record") void go.openSpec(el, id, t.path, true, "the run report", t.unread);
   else if (t.kind === "unread") go.openNeedsMe(`unread:${id}`);
   else go.openWave(id, w.wave);
 }
@@ -354,7 +355,8 @@ function LocalRunReport({ id }: { id: string }) {
   if (!windows || !latest) return null; // never a run in the 14 days: absent
 
   const init = view?.board.initiatives.find((x) => x.id === id);
-  const targetOf = (w: service.RunWave) => waveTarget(w, { root: init?.path ?? data?.report?.root ?? "", waves: init?.waves, problems: init?.problems });
+  const active = !inactiveIds(view).has(id);
+  const targetOf = (w: service.RunWave) => waveTarget(w, { root: init?.path ?? data?.report?.root ?? "", waves: init?.waves, problems: init?.problems, active });
 
   const nav: Nav = {
     card: (slug) => {

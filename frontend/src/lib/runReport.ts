@@ -5,7 +5,7 @@
 // It computes no count, percent, span or track of its own (AR15).
 
 import type { model, service } from "../../wailsjs/go/models";
-import { underRoot, unreadFiles } from "./unread";
+import { oneLine, underRoot, unreadFiles } from "./unread";
 
 export type Report = service.FactoryReport;
 export type Window = service.ReportWindow;
@@ -409,12 +409,16 @@ export const boardAsOf = (tr: service.Tracks) => (tr.rev ? `Board as of ${tr.rev
 /** Where a wave's footer goes: a finished wave's run record into the spec
  *  reader (`path` relative to the root, as ReadSpec allows it), a run
  *  record the scan could not read to Needs me's unread row, and a running
- *  wave (or a finished one whose record the scan did not read) to Work. */
-export type WaveTarget = { kind: "record"; path: string } | { kind: "unread"; path: string } | { kind: "work" };
+ *  wave (or a finished one whose record the scan did not read) to Work. An
+ *  initiative that is not active has no Needs me rows, so its unread record
+ *  opens in the reader with the scan's reason as `unread` (Amendment 6). */
+export type WaveTarget = { kind: "record"; path: string; unread?: string } | { kind: "unread"; path: string } | { kind: "work" };
 
 /** What the scan knows of the initiative: its root, the waves it read (each
- *  with its run record's file name, under runs/) and its problems. */
-export type ScanRuns = { root: string; waves: Pick<model.Wave, "record">[] | null | undefined; problems: model.Problem[] | null | undefined };
+ *  with its run record's file name, under runs/) and its problems; and
+ *  whether it is active, which is when Needs me has rows for it
+ *  (`inactiveIds` in lib/queue.ts; absent is active). */
+export type ScanRuns = { root: string; waves: Pick<model.Wave, "record">[] | null | undefined; problems: model.Problem[] | null | undefined; active?: boolean };
 
 /** The scan's runs directory (internal/scan/runs.go `runsDir`): the one
  *  place a wave's `record` file name is read from. */
@@ -434,7 +438,8 @@ export function waveTarget(w: Pick<service.RunWave, "record" | "merged">, scan: 
   if (w.merged == null) return { kind: "work" };
   const rel = recordRel(w.record, scan.root);
   if (!rel) return { kind: "work" };
-  if (unreadFiles(scan.problems).some((f) => underRoot(f.path, scan.root) === rel)) return { kind: "unread", path: rel };
+  const bad = unreadFiles(scan.problems).find((f) => underRoot(f.path, scan.root) === rel);
+  if (bad) return scan.active === false ? { kind: "record", path: rel, unread: bad.reasons.map(oneLine).join("; ") } : { kind: "unread", path: rel };
   if ((scan.waves ?? []).some((x) => x.record && `${RUNS_DIR}/${x.record}` === rel)) return { kind: "record", path: rel };
   return { kind: "work" };
 }

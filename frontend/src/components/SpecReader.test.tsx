@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it } from "vitest";
-import { Contents, ReaderBack, SpecOpenerView, useSpecReader } from "./SpecReader";
+import { Contents, ReaderBack, ReaderError, SpecOpenerView, useSpecReader } from "./SpecReader";
 import src from "./SpecReader.tsx?raw";
 import { withAnchors } from "../lib/specReader";
 import { marked } from "marked";
@@ -102,5 +102,22 @@ describe("FR-15: the drawer over the run report has Back", () => {
     expect(src).toContain("useSpecReader.setState({ initiative: null, stack: [], back: undefined });");
     expect(src).toContain("<ReaderBack prev={prev?.path} over={backTo} back={back} close={close} />");
     expect(src).toContain("frontmatterAsCode(top.text)");
+  });
+});
+
+// leftovers-57 Amendment 6: an unread run record opened in the reader shows
+// the scan's reason as the error line, over the text ReadSpec returned.
+describe("Amendment 6: the drawer's error line", () => {
+  it("the scan's reason for an unread run record", () => {
+    expect(renderToStaticMarkup(<ReaderError entry={{ unread: "run record waves: yaml: line 3", error: "x" }} />))
+      .toBe('<p class="sr-error" role="status">Deltagos can&#x27;t read this run record: run record waves: yaml: line 3</p>');
+  });
+  it("ReadSpec's refusal, else nothing", () => {
+    expect(renderToStaticMarkup(<ReaderError entry={{ error: "not a spec" }} />)).toBe('<p class="sr-error" role="status">Not read: not a spec</p>');
+    expect(ReaderError({ entry: {} })).toBeNull();
+  });
+  it("the body still draws the text that was read, never a dead press", () => {
+    expect(src).toContain("{top.error || (top.unread && !top.text) ? null : (");
+    expect(src).toContain('const entry = unread ? { ...(read ?? { kind: "spec" as const, path: r.path, section: r.section, text: "" }), error: undefined, unread } : read;');
   });
 });
