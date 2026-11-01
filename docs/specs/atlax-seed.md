@@ -77,3 +77,14 @@ working-on and factory-report readers) keeps its file and names its
 provider in `summary`, with no `consumes:`; the line is added by a later
 card's change order once that provider publishes. S4 stays: exit 0, no
 finding.
+
+## Amendment 2 (2026-11-01, the FSE, on l59-atlax-rev's Note 1 at 1091b60)
+
+0171 accepted one element per call Deltagos makes to the mailbox; FR-2
+named only the thread list and health. `internal/discuss/client.go` makes
+five more, all published in `agent-mailbox-api`: thread get (:139),
+messages post (:146), thread status (:152), search (:180), drain (:224).
+Card `lf59-atlax-calls` adds one unauthored element per call with its
+`consumes:` (`fn:mailbox.thread.get`, `messages.post`,
+`thread.status.set`, `search`, `drain`), on top of `lf59-atlax-seed`.
+Gate rows S1, S2 (over the five), S4 and X0; boundary `atlax/` only.
