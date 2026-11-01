@@ -4,6 +4,7 @@ status: now
 repos: [organizer]
 branch: lf59-atlax-seed
 seat: l59-atlax
+reviewer: l59-atlax-rev
 stage:
 updated: 2026-11-01
 next: "review: lf59-atlax-seed, S1-S4 and X0 pass, 1091b60"
