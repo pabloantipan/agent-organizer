@@ -620,6 +620,16 @@ func (a *App) ReportWindows(initiativeID string) (service.ReportWindows, error) 
 	return a.svc.ReportWindows(initiativeID)
 }
 
+// Map is the initiative's C4 base map (leftovers-58 FR-1 to FR-3): map.json
+// as given and each level's mermaid source, the empty state, or one
+// "Map not drawn: …" line; never part of a map.
+func (a *App) Map(initiativeID string) (service.MapResult, error) {
+	if a.svc == nil {
+		return service.MapResult{}, errString(a.err)
+	}
+	return a.svc.Map(initiativeID)
+}
+
 // RuleDecision writes the owner's ruling into a proposed decision record and
 // commits that one file (FR-13, 0019). It is the app's only write over a
 // record, and it refuses anything but the owner's own ruling of a proposed one.
