@@ -162,3 +162,33 @@ Gate:
 Findings (none blocking):
 - Note: `internal/service/rule.go` still signs "owner operator" under `## Ruling` when pablo rules an operator-owned proposed record, so FR-6 holds on screen but not in the written record (builder's "Found, not asked"). Outside this boundary; goes to a card (see next).
 - Note: on the fixture the header's chip reads `6 decisions waiting` (0005 is alejandro's) and Needs me holds 5: the chip counts every rulable record (0068), Needs me the lead's. Both leave 0013 out, and they agree when every waiting record is the lead's (tested). The gate's "agree" does not say which; worth one word in the next spec that touches it.
+
+## UI review
+**Verdict: pass.** Commit reviewed: 7de55a1 (detached worktree, `make review-build`, `Deltagos Review` launched by its own path with `eval "$(scripts/fixture-home.sh --review)"`, `auth: off`, `discuss_state_dir` under the temp dir). Reviewer `l61-states-ui`, 2026-11-01. Shared test run: **reused** run `7fe02fde-66203` of 7de55a11ede0 (started by l61-states-rev; `make test` exit 0, 1431 vitest, Go ok; `.wt-notes/l61-states-ui/x0-make-test.txt`). Shots and AX dumps: `.wt-notes/l61-states-ui/` (`<w>x<h>-<state>.png`, `tree-*.txt`), at 1440x900 and 1024x640. Text read from the AX tree of the saved pid, AXPress on that pid only; colours from the shots and `styles/global.css`/`tokens.css`.
+
+How each state was checked:
+- (a) D1 met: Needs me expanded (Show the other 11) holds 16 rows, badge `Needs me 16` = heading `NEEDS ME · 16`; no 0013 row, no "awaiting cells", no "operator" anywhere on Home. init-a's header chip `6 decisions waiting` and FSE panel `waiting on you: 5` both leave 0013 out (see UI1). `1440x900-a-needsme-all.png`.
+- (b) D2 met: Decisions reads `To rule · 6`, `With the cells · 1`, `Ruled · 8` in that order; 0013 line `awaiting cells, owner pablo, 12 days`, fuchsia waiting badge; expanded: "Waits on the cells it affects. Themis settles it.", no Rule button; Timeline bar `.dec-bar.proposed` (dashed) to today. `1440x900-c-press-to-decisions.png`, `1440x900-d-timeline.png`, `1024x640-b-with-cells.png`.
+- (c) D3 met: header `6 decisions waiting` (lozenge) then `· 1 with the cells` (`button.linkish.ihead-cells`, `--fg-subtle`, `--font-size-sm`, no lozenge; 86x28 target). AXPress opened Decisions with 0013 expanded and focused inside With the cells. `1440x900-c-header-overview.png`.
+- (d) D4 met: 0014 `applied`, 0015 `acknowledged` badges in the ruled indigo pair; bars `.dec-bar.ruled`; Overview diamonds solid for 0014/0015, hollow fuchsia for 0002/0013. `1440x900-d-ruled-0014-0015.png`.
+- (e) D5 met: Overview gate rows `awaiting cells 12d`, `applied 21 Oct`, `acknowledged 20 Oct`; `organizer decisions init-a` prints `12d awaiting cells`, `applied 2026-10-21`, `acknowledged 2026-10-20` (`decisions-init-a.txt`). `1440x900-e-overview-gates.png`, `1024x640-e-overview-gates.png`.
+- (f) D6 met on screen: 0013's owner reads `owner pablo` in Decisions (line and timeline); the rule box on 0002 reads `signed pablo · commits one file`, on 0005 `signed pablo · owner alejandro · commits one file` (opened and cancelled, nothing ruled). The only "operator" on screen is the fixture's 0013 body prose (`owner is written operator`), not the owner field. `1440x900-f-rulebox-0002.png`, `1440x900-g-rulebox-0005.png`.
+- (g) Plain proposed and ruled records look as in l54-states-ui's main-side shot (`.wt-notes/l54-states-ui/1440x900-b-torule-ruled.png`): waiting fuchsia, ruled indigo, same row anatomy. Status is said in words beside every tone (waiting/awaiting cells/applied/acknowledged/ruled), and the dashed versus solid bar carries it without colour.
+
+Findings:
+- **UI1 (sev 2)** The lead cannot tell from one screen how many decisions wait on them. Where: init-a Overview, header `6 decisions waiting` beside the FSE panel `waiting on you: 5` (`1440x900-e-overview-gates.png`). Evidence: AX text; the header counts every rulable record (0005 is alejandro's, 0068), the panel the lead's; DS-a says the panel "equals the header's count". Severity 2: the words differ ("waiting" vs "waiting on you") and Home's Waiting on others explains 0005. Proposal: one ruling on which count the header shows (spec gap below).
+- **UI2 (sev 1)** A keyboard or screen-reader user cannot reach the raw owner. Where: Decisions line, owner span. Evidence: `ownerHover` is a `title` on a span inside the `.dec-line` button (DecisionsView.tsx:331); WebKit flattens the button, so AXHelp shows `collapse`/`show the record`, never `owner: operator`. Mouse hover only. Proposal: leave as is; the raw value is a debugging aid.
+- **UI3 (sev 1, not this card's code)** After a live resize 1440→1024, the header's wrapped second row (unread chip, target) sat over the sub-view tabs (`1024x640-c-header-overlap.png`: header 76 px, tabs at its y 44); reopening init-a reflowed it to 96 px (`1024x640-c-header-reopen.png`). Seen once, cause not traced; for the FSE to watch.
+
+Not verified:
+- D3's landing scroll: the smooth `scrollTo` never ran in my window (onscreen but behind other windows, z 17; WebKit throttles it), at 1440 and 1024, so at 1024 0013 stayed at the bottom edge (`1024x640-c-press-landing.png`) though focused. Not judged; the press → `openDecision(init-a, 0013)` is pinned by `InitiativeHeader.cells.test.tsx`.
+- The hover holding "owner: operator" on screen (see UI2); verified only by source and `DecisionsView.test.tsx`.
+- No fixture record is a proposed one owned by `operator`, so "owner operator" dropped in the rule box is in vitest only.
+
+Spec gaps (for the FSE):
+- D1/DS-a "agree": the fixture's header (6) and panel (5) differ through 0005; the spec should say whether the header counts every rulable record or the lead's.
+- FR-6 "everywhere" stops at the screen: `internal/service/rule.go` still signs "owner operator" under `## Ruling` (already filed, 88b5584).
+
+For aglaea (design questions, not verified):
+- A1: should Home's initiative row carry a with-the-cells signal, now that `waitingDecisions` leaves those records out of its "N waiting" (builder's note)?
+- A2: should the header's chip count the lead's records, matching the FSE panel and Needs me (UI1)?
