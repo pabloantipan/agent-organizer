@@ -16,6 +16,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- sup102 closed (16:22-19:37, ~1h15m working, ~2h usage-limit stop; seats $9.17): #21 record, #23 surface (107 elements), #25 authored (3); all first-round passes. Ended. Its Found: an empty CONTRACTS_DIR falls back to ~/agent-slack/specs/contracts (a 'fails without the sample' row holds only against an empty dir); change-check defaults to local main, so review prompts should pass --base origin/main; FR-9 completeness unchecked (held, low).
+
 - Held, low: no gate proves FR-9's consumes: complete over all 107 surface elements (15+ spot-checks clean, l59-surface-rev). Worth a derive-side check (a call site to discuss or record without consumes:) if Hephaistos's extractor can trace calls; otherwise drop.
 
 - To cut after lf57-run-report merges (Aglaea, progress-and-waves Amendment 1, 754615b: PW4 amended, PW7): a finished wave's footer opens its run record (runs/*.md) in the spec reader drawer, Back returns to the report; a running wave keeps Work at its strip; names 'open sup95's run record' / 'show sup96 on Work'; an unread record goes to Needs me's unread row.
