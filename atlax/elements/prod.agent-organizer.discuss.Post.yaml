@@ -1,0 +1,16 @@
+# Deltagos's post of one message as the cell's human (atlax-seed Amendment 2,
+# client.go Post); an empty thread id opens a thread.
+designation: prod:agent-organizer.discuss.Post
+kind: outbound
+summary: Posts one message as the cell's human, opening a thread when none is named, for Conversations' message box and the queue's Rule.
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  method: POST
+  path: /projects/{pid}/messages
+consumes:
+  - ext:agent-mailbox-api#fn:mailbox.messages.post
+test:
+  path: internal/discuss/client_test.go
+  name: TestClientRoundTrips

@@ -1,0 +1,16 @@
+# Deltagos's pickup of the human's mail (atlax-seed Amendment 2, client.go
+# PickUp): a drain with no session id, so no drain ceiling applies.
+designation: prod:agent-organizer.discuss.PickUp
+kind: outbound
+summary: Drains the mail addressed to the cell's human (or a kept seat at retire) with no session id, so the human seat does not read as deaf.
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  method: POST
+  path: /projects/{pid}/agents/{agent}/drain
+consumes:
+  - ext:agent-mailbox-api#fn:mailbox.drain
+test:
+  path: internal/discuss/client_test.go
+  name: TestClientRoundTrips
