@@ -4,6 +4,7 @@ status: now
 repos: [organizer]
 branch: lf59-atlax-calls
 seat: l59-calls
+reviewer: l59-calls-rev
 stage:
 updated: 2026-11-01
 next: "review: lf59-atlax-calls, S1, S2, S4 and X0 pass, f096ef2"
