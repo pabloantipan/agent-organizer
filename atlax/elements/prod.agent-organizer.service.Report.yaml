@@ -1,12 +1,13 @@
 # Deltagos's factory-report reader (atlax-seed FR-2): reads `factory report
 # --json` from the factory tool (claudecode), sampled in the specs repo's
-# contracts/factory-report/. Planned: lf57-report-go builds it. No published
-# artifact owns the report, so no consumes: (Amendment 1).
+# contracts/factory-report/. No published artifact owns the report, so no
+# consumes: (Amendment 1). Authored (Amendment 5): the named test, on the
+# base since lf57-report-go, decodes the contract sample through CONTRACTS_DIR.
 designation: prod:agent-organizer.service.Report
 kind: data
-summary: "Reads the factory report (factory report --json, claudecode's factory tool, no published artifact) for an initiative's window; built by lf57-report-go."
-authored: false
-lifecycle: planned
+summary: "Reads the factory report (factory report --json, claudecode's factory tool, no published artifact) for an initiative's window."
+authored: true
+lifecycle: live
 owner: organizer-fse
 terminal:
   store: factory report --json
@@ -14,3 +15,6 @@ terminal:
 contract:
   repo: specs
   path: contracts/factory-report/expected.json
+test:
+  path: internal/service/report_test.go
+  name: TestReportDecodesContract
