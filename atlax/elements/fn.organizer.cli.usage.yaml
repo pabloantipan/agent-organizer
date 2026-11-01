@@ -1,0 +1,11 @@
+# An organizer subcommand (internal/cli/cli.go Run), derived by atlax derive (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.cli.usage
+kind: cli
+summary: "Prints a week's tokens by kind and money from every Claude transcript on this Mac, then posts the ledger's changed rows to the record when configured."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  command: "usage"
+consumes:
+  - ext:agent-mailbox-record#fn:record.usage.post

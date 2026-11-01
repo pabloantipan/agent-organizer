@@ -1,0 +1,9 @@
+# An organizer subcommand (internal/cli/cli.go Run), derived by atlax derive (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.cli.review
+kind: cli
+summary: "Writes a card's branch or merge change as revmap.json: changed definitions, 1-hop callers and callees, tests."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  command: "review"
