@@ -1,12 +1,12 @@
 ---
 title: "Deltagos reads factory report's JSON and text, its windows, and joins its lines to the waves and their rounds"
-status: next
+status: now
 repos: [organizer]
 branch: lf57-report-go
-seat:
+seat: l57-go
 stage:
 updated: 2026-11-01
-next: "sup101 runs it (0169; leftovers-57 Amendment 2)"
+next: "l57-go builds it (sup101, launched 2026-11-01 16:15)"
 depends_on: [lf53-frontmatter, lf52-decisions-line]
 boundary: ["docs/specs/leftovers-57.md Boundary, lf57-report-go"]
 spec: "docs/specs/leftovers-57.md (FR-1 to FR-6)"
