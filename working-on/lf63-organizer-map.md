@@ -6,7 +6,7 @@ branch: lf63-organizer-map
 seat: lf63-build
 stage:
 updated: 2026-11-01
-next: "lf63-build builds on lf63-organizer-map (sup105 launched 2026-11-01)"
+next: "sup105 answers lf63-build: c4-map finds no container when the root is its own repo (repos: []); drafts uncommitted in the worktree, .wt-notes/lf63-build/progress.md"
 depends_on: [lf58-map-read]
 boundary: ["docs/architecture/"]
 spec: "docs/specs/leftovers-63.md (FR-1 to FR-3)"
