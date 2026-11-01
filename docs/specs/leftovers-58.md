@@ -113,3 +113,15 @@ on the map, and reading atlax's lifecycle and authored onto map nodes (no
 mapping from atlax designations to c4 node ids exists yet; asked of
 Hephaistos when this lands). The organizer's own `map.json` is Daedalus's
 `c4-map gen` run, a separate card.
+
+## Amendment 1 (FSE, 2026-11-01, on l58-render's measure)
+
+The dark render (mmdc 11.12.0, `~/.mermaid/mermaid-config-dark.json`) draws
+every node label as HTML inside `<foreignObject>`: mermaid 11 reads only the
+root `htmlLabels`. FR-4 stands (no `foreignObject` survives), and the
+sanitizer replaces each node's `foreignObject` with an SVG `<text>` of its
+plain text, centred in the same box, before the buttons are laid. V1 adds:
+over the real L2 render, no `foreignObject` remains and every node keeps
+its label as `<text>`. Rendering without HTML labels at the source (root
+`htmlLabels: false`, which changes every cached figure's key and touches
+the shared mermaid config) is a later card, held.
