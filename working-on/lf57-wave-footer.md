@@ -6,7 +6,7 @@ branch: lf57-wave-footer
 seat: l57-foot
 stage:
 updated: 2026-11-01
-next: "FR-17: an unread run record of a non-active initiative presses onto Home with no unread row (dead press); route it somewhere live and add the case to W9"
+next: "review: lf57-wave-footer, round 2 (Amendment 6), W9 W11 X0 pass, b98452f"
 review: fail
 reviewer: l57-foot-rev
 cause: execution
@@ -36,6 +36,7 @@ docs/specs/leftovers-57.md Amendment 4 and its addendum: W9, W10, W11, X0.
 
 ## Done
 - l57-foot built it on `lf57-wave-footer` (efec0f2, 45e3699, 957cc37), rebased on origin/main e968fc1; W9, W11 fail on base and pass; W10 checked offscreen over `wails dev` (screen locked); X0 passes from a clean clone. Detail: `.wt-notes/l57-foot/progress.md`.
+- Round 2 (Amendment 6): a paused initiative's unread run record opens in the reader with the scan's reason as the error line (b98452f); new W9 rows fail on 957cc37 and pass; W9, W11, X0 pass from a clean clone at b98452f on origin/main e968fc1.
 
 ## Declared changes
 - modified `internal/service/spec.go:ReadSpec`: also allows the run records the scan read the waves from (FR-18)
@@ -59,6 +60,11 @@ docs/specs/leftovers-57.md Amendment 4 and its addendum: W9, W10, W11, X0.
 - modified `frontend/src/components/SpecReader.test.tsx`: FR-15 Back rows
 - added `frontend/src/lib/specReader.ts:frontmatterAsCode`: a leading YAML block as a yaml code block
 - modified `frontend/src/lib/specReader.test.ts`: frontmatterAsCode rows
+- modified `frontend/src/lib/runReport.ts:waveTarget`, `ScanRuns`, `WaveTarget` (round 2): a non-active initiative's unread record is a record target carrying the scan's reason (Amendment 6)
+- modified `frontend/src/components/RunReport.tsx:goToWave`, `LocalRunReport` (round 2): pass `unread` to openSpec; active from `inactiveIds`
+- modified `frontend/src/components/SpecReader.tsx:ReaderEntry`, `openSpec`, `SpecReader` (round 2): `unread` reason on the entry, shown over the text
+- added `frontend/src/components/SpecReader.tsx:ReaderError` (round 2): the drawer's error line, refusal or unread reason
+- modified `frontend/src/components/SpecReader.tsx:ReaderState` (round 1, undeclared there): `back`
 Risky:
 - `SpecReader`: focus returns with `preventScroll` for every opener, not only the report's
 - `frontmatterAsCode`: applies to any spec starting with a `---` block
