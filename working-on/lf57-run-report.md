@@ -1,12 +1,12 @@
 ---
 title: "Overview's While you were away: the run's rows with their waves, the tracks, the rulings, and Copy as text"
-status: next
+status: now
 repos: [organizer]
 branch: lf57-run-report
-seat:
+seat: l57-ui
 stage:
 updated: 2026-11-01
-next: "sup101 runs it (0169; leftovers-57 Amendment 2)"
+next: "l57-ui builds it (sup101, launched 2026-11-01 16:41, base b3905ba)"
 depends_on: [lf57-report-go]
 boundary: ["docs/specs/leftovers-57.md Boundary, lf57-run-report"]
 spec: "docs/specs/leftovers-57.md (FR-7 to FR-13)"
