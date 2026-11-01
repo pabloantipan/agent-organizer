@@ -1,12 +1,12 @@
 ---
 title: "Overview's While you were away: the run's rows with their waves, the tracks, the rulings, and Copy as text"
-status: now
+status: done
 repos: [organizer]
 branch: lf57-run-report
 seat: l57-ui
 stage:
 updated: 2026-11-01
-next: "PR with talos-lab"
+next: "done: PR #26 merged d4c67af (2026-11-01)"
 depends_on: [lf57-report-go]
 boundary: ["docs/specs/leftovers-57.md Boundary, lf57-run-report"]
 spec: "docs/specs/leftovers-57.md (FR-7 to FR-13)"
