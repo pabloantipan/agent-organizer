@@ -31,8 +31,8 @@ type UsageRow struct {
 	UsageKinds
 	Models   map[string]UsageKinds `json:"models"`
 	Messages int                   `json:"messages"`
-	First    string                `json:"first"` // RFC 3339
-	Last     string                `json:"last"`  // RFC 3339
+	First    *string               `json:"first"` // RFC 3339, null when unknown (leftovers-54 FR-5)
+	Last     *string               `json:"last"`  // RFC 3339, null when unknown
 	Cost     *float64              `json:"cost"`
 	CostFrom *string               `json:"cost_from"` // record, transcript, priced or null
 }
@@ -43,13 +43,34 @@ type usageBatch struct {
 	Rows    []UsageRow `json:"rows"`
 }
 
+// UsageResult is the record's 200 answer to a batch (contracts/usage-batch.json
+// `response`): how many rows it stored or found unchanged, and each row it
+// refused with the reason. Every row not in Rejected landed.
+type UsageResult struct {
+	Upserted  int             `json:"upserted"`
+	Unchanged int             `json:"unchanged"`
+	Rejected  []UsageRejected `json:"rejected"`
+}
+
+// UsageRejected is one refused row: its index in the batch as sent, its
+// key, and the record's reason.
+type UsageRejected struct {
+	Index     int    `json:"index"`
+	SessionID string `json:"session_id"`
+	Day       string `json:"day"`
+	Reason    string `json:"reason"`
+}
+
 // PostUsage sends one batch of at most MaxUsageRows rows with the factory
-// key. Nil means the record accepted it (a 2xx); anything else is an *Error
-// with the record's message, or the transport's error.
-func (c *Client) PostUsage(ctx context.Context, factoryKey, factory string, rows []UsageRow) error {
+// key and returns the record's answer (leftovers-54 FR-3). A nil error
+// means a 2xx: the batch was taken, except the rows the result names as
+// rejected. Anything else is an *Error with the record's message, or the
+// transport's error, and nothing was stored.
+func (c *Client) PostUsage(ctx context.Context, factoryKey, factory string, rows []UsageRow) (UsageResult, error) {
+	var res UsageResult
 	if len(rows) > MaxUsageRows {
-		return fmt.Errorf("record: %d usage rows, at most %d per post", len(rows), MaxUsageRows)
+		return res, fmt.Errorf("record: %d usage rows, at most %d per post", len(rows), MaxUsageRows)
 	}
-	_, err := c.post(ctx, factoryKey, "/v1/usage", usageBatch{Factory: factory, Rows: rows}, nil)
-	return err
+	_, err := c.post(ctx, factoryKey, "/v1/usage", usageBatch{Factory: factory, Rows: rows}, &res)
+	return res, err
 }

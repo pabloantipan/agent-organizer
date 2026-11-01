@@ -14,23 +14,38 @@ jobs:
     env:
       # secrets are not readable from a step's `if`; only a job-level env can see them
       HAS_SIGNING: ${{ secrets.MACOS_CERT_P12 != '' }}
+    # The organizer and the contract samples are checked out side by side
+    # (leftovers-54 FR-2): a path inside the organizer's checkout would show as
+    # untracked in its git status. Every run step works in organizer/.
+    defaults:
+      run:
+        working-directory: organizer
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+        with: { fetch-depth: 0, path: organizer }
+      # The contract samples the contract tests read (TestWorkingOnContract,
+      # the usage sample), pinned; no vendored copy. A later card moves the ref.
+      - uses: actions/checkout@v4
+        with:
+          repository: pabloantipan/agent-mailbox-specs
+          ref: 54cf10da4fcbae240a8abb7ee8353fd4e8c5bafa
+          path: agent-mailbox-specs
       - uses: actions/setup-go@v5
-        with: { go-version-file: go.mod }
+        with: { go-version-file: organizer/go.mod }
       - uses: pnpm/action-setup@v4
         with: { version: 10 }
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: pnpm, cache-dependency-path: frontend/pnpm-lock.yaml }
+        with: { node-version: 22, cache: pnpm, cache-dependency-path: organizer/frontend/pnpm-lock.yaml }
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.15.0
       # main.go embeds frontend/dist, so the Go packages do not compile until
       # the frontend is built (leftovers-15 FR-13); make test then skips both.
       - name: Build frontend
-        working-directory: frontend
+        working-directory: organizer/frontend
         run: pnpm install --frozen-lockfile && pnpm run build
       - name: Test
+        env:
+          CONTRACTS_DIR: ${{ github.workspace }}/agent-mailbox-specs/contracts
         run: make test
       # Through make, so the bundle carries build/darwin/iconfile.icns (with its
       # 16 and 32 px cuts) and Assets.car, not the icns Wails generates.
@@ -53,6 +68,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            build/bin/*.dmg
-            build/bin/*.dmg.sha256
+            organizer/build/bin/*.dmg
+            organizer/build/bin/*.dmg.sha256
           generate_release_notes: true
