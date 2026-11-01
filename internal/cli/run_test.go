@@ -122,7 +122,7 @@ func TestWriteRunsGolden(t *testing.T) {
 			FirstSeen: at(3, 14, 0), LastSeen: at(3, 14, 0), Ended: true},
 	}
 	var buf bytes.Buffer
-	WriteRuns(&buf, rows)
+	WriteRuns(&buf, rows, nil)
 	got := buf.String()
 
 	golden := filepath.Join("testdata", "runs.golden")
@@ -141,7 +141,7 @@ func TestWriteRunsGolden(t *testing.T) {
 
 func TestWriteRunsEmpty(t *testing.T) {
 	var buf bytes.Buffer
-	WriteRuns(&buf, nil)
+	WriteRuns(&buf, nil, nil)
 	if !strings.Contains(buf.String(), "no agent sessions recorded yet") {
 		t.Errorf("empty archive should say so, got %q", buf.String())
 	}

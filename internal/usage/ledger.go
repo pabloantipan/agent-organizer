@@ -395,20 +395,23 @@ func Ingest(o Options) (Stats, error) {
 	}
 	costs := foldCosts(o.Costs)
 	changed := len(grown) > 0 || st.Changed
+	inits := LoadRoles(o.Initiatives)
 	for sid, ls := range bySession {
 		meta := offs.Sessions[sid]
 		if meta == nil {
 			meta = &sessionMeta{}
 			offs.Sessions[sid] = meta
 		}
-		// Attributed once: a fully attributed session is fixed and keeps its
-		// answer whatever happens to its worktree or card. One that could not
-		// be (its card cut after its first turn, say) is tried again on every
-		// pass until it is.
-		if meta.Fixed {
-			// A new day of a fixed session takes the attribution its
+		// A session with a card task keeps it whatever happens to its
+		// worktree or card. One without (its card cut after its first turn,
+		// an overhead role, an answer kept before overhead tasks existed) is
+		// attributed again on every pass until it has one (leftovers-56
+		// FR-4).
+		sort.Slice(ls, func(i, j int) bool { return ls[i].Day < ls[j].Day })
+		if IsCardTask(ls[0].Task) {
+			meta.Fixed = true
+			// A new day of a kept session takes the attribution its
 			// earlier days carry: the ledger keeps it, not the cards.
-			sort.Slice(ls, func(i, j int) bool { return ls[i].Day < ls[j].Day })
 			for _, l := range ls[1:] {
 				if !sameAttribution(l.Attribution, ls[0].Attribution) {
 					l.Attribution = ls[0].Attribution
@@ -417,8 +420,8 @@ func Ingest(o Options) (Stats, error) {
 			}
 		} else {
 			c := costs[sid]
-			a := Attribute(Seen{Name: meta.Name, Cwd: meta.Cwd, Pair: meta.Pair, Session: c.Session, Persona: c.Persona}, o.Initiatives)
-			meta.Fixed = a.Reason == ""
+			a := Attribute(Seen{Name: meta.Name, Cwd: meta.Cwd, Pair: meta.Pair, Session: c.Session, Persona: c.Persona}, inits)
+			meta.Fixed = IsCardTask(a.Task)
 			for _, l := range ls {
 				if !sameAttribution(l.Attribution, a) {
 					l.Attribution = a
@@ -772,7 +775,7 @@ func (r *rebuild) restore(byKey map[string]*Line, offs *offsets) {
 		for _, k := range read[sid] {
 			byKey[k].Attribution = a
 		}
-		meta.Fixed = a.Reason == ""
+		meta.Fixed = IsCardTask(a.Task)
 	}
 }
 

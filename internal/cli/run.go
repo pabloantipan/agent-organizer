@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"path/filepath"
 	"text/tabwriter"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 	"organizer/internal/config"
 	"organizer/internal/service"
 	"organizer/internal/session"
+	ledger "organizer/internal/usage"
 )
 
 // takeFlag pulls a boolean flag out of args wherever it sits, so the verb
@@ -102,13 +104,20 @@ func runsCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now fun
 		}
 		return 0
 	}
-	WriteRuns(stdout, rows)
+	ledgerPath, _ := ledger.DataPaths(filepath.Dir(session.Dir()))
+	reasons := map[string]string{}
+	for sid, a := range ledger.BySession(ledger.LoadLedger(ledgerPath)) {
+		reasons[sid] = a.Reason
+	}
+	WriteRuns(stdout, rows, reasons)
 	return 0
 }
 
 // WriteRuns renders the archive as the table. Exported so the golden test
-// and the app render the same thing.
-func WriteRuns(w io.Writer, rows []session.Run) {
+// and the app render the same thing. reasons is the usage ledger's Reason
+// per session id, for the share with no task by cause; a session missing
+// from it is a run with no usage row.
+func WriteRuns(w io.Writer, rows []session.Run, reasons map[string]string) {
 	if len(rows) == 0 {
 		fmt.Fprintln(w, "no agent sessions recorded yet (organizer statusline writes them; organizer doctor says if it is installed)")
 		return
@@ -139,6 +148,23 @@ func WriteRuns(w io.Writer, rows []session.Run) {
 	}
 	fmt.Fprintf(tw, "%d %s\t\t\t\t\t\t\t$%.2f\n", len(rows), plural(len(rows), "run"), cost)
 	tw.Flush()
+	tasks := make([]string, len(rows))
+	costs := make([]float64, len(rows))
+	var causes []string
+	var noneCosts []float64
+	for i, r := range rows {
+		tasks[i], costs[i] = r.Card, r.CostUSD
+		if r.Card != "" {
+			continue
+		}
+		cause := ledger.CauseNoUsageRow
+		if why, ok := reasons[r.SessionID]; ok && r.SessionID != "" {
+			cause = ledger.CauseOf(why)
+		}
+		causes, noneCosts = append(causes, cause), append(noneCosts, r.CostUSD)
+	}
+	fmt.Fprintln(w, sharesLine(ledger.Shares(tasks, costs)))
+	writeCauses(w, ledger.ByCause(causes, noneCosts, cost))
 }
 
 func plural(n int, word string) string {

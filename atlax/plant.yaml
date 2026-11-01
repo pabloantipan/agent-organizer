@@ -1,0 +1,8 @@
+# The nameplate of Deltagos's atlax slice (docs/specs/atlax-seed.md FR-1, 0171).
+# The artifact id is the repo slug; norm is quoted so it stays "0.1".
+artifact: agent-organizer
+owner: organizer-fse
+norm: "0.1"
+purpose: Deltagos, the desktop board and CLI that merges a factory's initiatives, cards, decisions, agents and mailbox into one view.
+repo: github.com/pabloantipan/agent-organizer
+c4_system: deltagos

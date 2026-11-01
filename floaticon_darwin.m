@@ -74,6 +74,14 @@ static char *logPath;                 // the float log's path, kept for the chec
 static dispatch_source_t usr1, usr2, winch, info; // the check hooks, only with FLOAT_LOG
 static NSMutableArray<NSNumber *> *fsStandIn; // the desktop-change hook's full-screen readings, one per read
 static NSUInteger spaceChanges;       // desktop-change notifications so far; a re-read acts only for the latest
+static NSInteger awayStandIn;         // the check hook's "not on the active desktop" readings left, one per read (leftovers-60 FR-3)
+static NSUInteger screenChanges;      // screen-parameter notifications so far; the settled read acts only for the latest
+static const double kScreenSettle = 1.0; // after a display change, the screens' frames and desktops settle before the read
+// The icon's place on the desktops: every one, staying put, out of the window
+// cycle, never in a full-screen Space's own. Set at creation and set again by
+// the recovery (leftovers-60 FR-1), one definition for both.
+static const NSWindowCollectionBehavior kIconSpaces = NSWindowCollectionBehaviorCanJoinAllSpaces | NSWindowCollectionBehaviorStationary |
+                                                      NSWindowCollectionBehaviorIgnoresCycle | NSWindowCollectionBehaviorFullScreenNone;
 static NSString *placePath;
 static NSMutableDictionary *places;   // display key -> {x, y} of the tile from the visible frame's origin
 
@@ -590,8 +598,10 @@ static void watchPointer(void);
 static BOOL onScreen(void) { return ([panel occlusionState] & NSWindowOcclusionStateVisible) != 0; }
 
 static void readBack(void) {
-    flog(@"icon read back: isVisible=%d on screen=%d alpha=%.2f frame=%@", [panel isVisible], onScreen(), [panel alphaValue],
-         NSStringFromRect([panel frame]));
+    NSWindowCollectionBehavior b = [panel collectionBehavior];
+    flog(@"icon read back: isVisible=%d on screen=%d alpha=%.2f frame=%@ on the active desktop=%d behaviour 0x%lx (all desktops %d)",
+         [panel isVisible], onScreen(), [panel alphaValue], NSStringFromRect([panel frame]), [panel isOnActiveSpace], (unsigned long)b,
+         (b & NSWindowCollectionBehaviorCanJoinAllSpaces) != 0);
 }
 
 // AppKit can call the panel visible while the window server keeps it off
@@ -599,10 +609,23 @@ static void readBack(void) {
 // orders it in. Where the icon is wanted (the code left it visible), a read
 // that finds it off screen orders it front again, once for that read; the
 // read-back after it only logs, so a window server that refuses is no loop
-// (leftovers-50 FR-2).
+// (leftovers-50 FR-2). The window server can also keep the panel on one
+// desktop only, as if it had never been told every desktop (the diagnosis of
+// 2026-11-01: desktop 3 only after 7.7 days): a read that finds it not on the
+// active desktop sets the collection behaviour again too (leftovers-60 FR-1).
 static void orderInIfDropped(NSString *at) {
-    if (![panel isVisible] || onScreen()) return;
-    flog(@"%@: icon wanted, isVisible=1 but off screen (occlusion %lu): ordered front again", at, (unsigned long)[panel occlusionState]);
+    if (![panel isVisible]) return;
+    BOOL away = ![panel isOnActiveSpace];
+    if (awayStandIn > 0) {
+        awayStandIn--;
+        away = YES;
+        flog(@"%@: not-on-the-active-desktop stand-in from the .away file (%ld left)", at, (long)awayStandIn);
+    }
+    if (away) flog(@"%@: icon wanted, isVisible=1 but not on the active desktop: collection behaviour set again, ordered front", at);
+    else if (onScreen()) return;
+    else flog(@"%@: icon wanted, isVisible=1 but off screen (occlusion %lu): collection behaviour set again, ordered front again", at,
+              (unsigned long)[panel occlusionState]);
+    [panel setCollectionBehavior:kIconSpaces];
     [panel orderFrontRegardless];
     after(0.3, ^{ readBack(); });
 }
@@ -1119,8 +1142,7 @@ static void build(void) {
     [panel setBackgroundColor:[NSColor clearColor]];
     [panel setHasShadow:NO]; // the two-layer shadow is drawn by layers
     [panel setReleasedWhenClosed:NO];
-    [panel setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces | NSWindowCollectionBehaviorStationary |
-                                 NSWindowCollectionBehaviorIgnoresCycle | NSWindowCollectionBehaviorFullScreenNone];
+    [panel setCollectionBehavior:kIconSpaces];
 
     FloatIconView *v = [[FloatIconView alloc] initWithFrame:NSMakeRect(0, 0, side, side)];
     v.wantsLayer = YES;
@@ -1276,10 +1298,9 @@ void FloatIconStart(const char *logArg, const char *placeFile) {
                         update(@"space-change", YES);
                         after(0.5, ^{
                             if (k != spaceChanges) return;
-                            BOOL was = [panel isVisible];
                             update(@"space-change re-read", YES);
-                            // Just shown, its own read-back looks (FR-2).
-                            if (was) orderInIfDropped(@"re-read");
+                            // Whether or not it was shown before, the re-read looks (leftovers-60 FR-2).
+                            orderInIfDropped(@"re-read");
                         });
                     }];
         [wc addObserverForName:NSWorkspaceAccessibilityDisplayOptionsDidChangeNotification object:nil queue:[NSOperationQueue mainQueue]
@@ -1289,15 +1310,34 @@ void FloatIconStart(const char *logArg, const char *placeFile) {
                                                       usingBlock:^(NSNotification *n) {
                                                           flog(@"screens changed (%lu displays): sizing and placing the icon again", (unsigned long)[[NSScreen screens] count]);
                                                           placeIcon();
+                                                          // Once the screens settle, the recovery read (leftovers-60 FR-2);
+                                                          // a later change's read stands for this one's.
+                                                          NSUInteger k = ++screenChanges;
+                                                          after(kScreenSettle, ^{
+                                                              if (k != screenChanges) return;
+                                                              orderInIfDropped(@"screens settled");
+                                                          });
                                                       }];
         // With FLOAT_LOG set, SIGUSR1 posts the screen-parameters notification,
         // so a check without a second display still runs that path.
         if (logFile) {
+            // <FLOAT_LOG>.away stands in for "not on the active desktop" at the
+            // recovery reads that follow, one per `1` line, read when SIGUSR1 or
+            // SIGWINCH comes (leftovers-60 FR-3); no file, no stand-in.
+            void (^readAway)(NSString *) = ^(NSString *sig) {
+                NSString *a = [NSString stringWithContentsOfFile:[NSString stringWithFormat:@"%s.away", logPath] encoding:NSUTF8StringEncoding error:nil];
+                NSInteger n = 0;
+                for (NSString *l in [a componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]])
+                    if ([l isEqualToString:@"1"]) n++;
+                awayStandIn = n;
+                if (n) flog(@"%@: not-on-the-active-desktop stand-in for the next %ld read(s), from %s.away", sig, (long)n, logPath);
+            };
             signal(SIGUSR1, SIG_IGN);
             usr1 = dispatch_source_create(DISPATCH_SOURCE_TYPE_SIGNAL, SIGUSR1, 0, dispatch_get_main_queue());
             dispatch_source_set_event_handler(usr1, ^{
                 NSString *w = [NSString stringWithContentsOfFile:[NSString stringWithFormat:@"%s.width", logPath] encoding:NSUTF8StringEncoding error:nil];
                 if (w) widthStandIn = [w doubleValue];
+                readAway(@"SIGUSR1");
                 flog(@"SIGUSR1: width stand-in %.0f; posting the screen-parameters notification", widthStandIn);
                 [[NSNotificationCenter defaultCenter] postNotificationName:NSApplicationDidChangeScreenParametersNotification object:NSApp];
             });
@@ -1323,6 +1363,7 @@ void FloatIconStart(const char *logArg, const char *placeFile) {
                 for (NSString *l in [fs componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]) {
                     if ([l isEqualToString:@"1"] || [l isEqualToString:@"0"]) [fsStandIn addObject:@([l isEqualToString:@"1"])];
                 }
+                readAway(@"SIGWINCH");
                 flog(@"SIGWINCH: full-screen stand-in %@ from %s.fs; posting the desktop-change notification",
                      [fsStandIn componentsJoinedByString:@","], logPath);
                 [[[NSWorkspace sharedWorkspace] notificationCenter] postNotificationName:NSWorkspaceActiveSpaceDidChangeNotification

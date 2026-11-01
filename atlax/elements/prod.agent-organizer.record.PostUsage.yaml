@@ -1,0 +1,20 @@
+# Deltagos's usage post to the record (atlax-seed FR-2: both a reader with a
+# contract sample, usage-batch.json, and one of the record's four calls, so one
+# element). Unauthored: the test that reads the sample is lf53-usage-contract's,
+# not on the base (FR-3). The provider, agent-mailbox-record, is not published,
+# so no consumes: yet; planned ext:agent-mailbox-record#fn:record.usage.post.
+designation: prod:agent-organizer.record.PostUsage
+kind: outbound
+summary: "Posts the usage ledger's rows, at most 500 per batch, with the factory key to the record (agent-mailbox-record, unpublished; planned fn:record.usage.post)."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  method: POST
+  path: /v1/usage
+contract:
+  repo: specs
+  path: contracts/usage-batch.json
+test:
+  path: internal/service/usagepost_test.go
+  name: TestU1PostsThreeRowsWithContractKeys

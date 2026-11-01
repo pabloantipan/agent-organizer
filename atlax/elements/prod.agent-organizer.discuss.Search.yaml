@@ -1,0 +1,16 @@
+# Deltagos's search of a project's messages (atlax-seed Amendment 2,
+# client.go Search), newest first.
+designation: prod:agent-organizer.discuss.Search
+kind: outbound
+summary: Finds messages whose subject or body holds a query, filtered by sender, recipient, kind or thread, newest first.
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  method: GET
+  path: /projects/{pid}/search
+consumes:
+  - ext:agent-mailbox-api#fn:mailbox.search
+test:
+  path: internal/discuss/client_test.go
+  name: TestClientRoundTrips
