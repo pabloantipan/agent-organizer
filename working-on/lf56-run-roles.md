@@ -3,10 +3,10 @@ title: "Every run is attributed to an initiative, a task and a role, and runs an
 status: next
 repos: [organizer]
 branch: lf56-run-roles
-seat:
+seat: organizer-probe-sup96
 stage:
 updated: 2026-11-01
-next: "the FSE launches its supervisor (0166 ruled 2026-11-01)"
+next: "sup96 runs it (launched 2026-11-01)"
 depends_on: []
 boundary: ["docs/specs/leftovers-56.md Boundary"]
 spec: "docs/specs/leftovers-56.md (FR-1 to FR-6)"

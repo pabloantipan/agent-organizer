@@ -16,6 +16,7 @@ restating it (the discuss skill).
 - lf54-decision-states: when Hephaistos says feat/ruled-by-autonomous has merged, re-pin its readers_today (sample records 0013-0015, mode autonomous).
 - Pablo's open ask "can we avoid Deltagos in the menu?" is unanswered: the macOS app menu name can only be dropped by making Deltagos an agent app (LSUIElement).
 - The card-change hook now skips working-on/reviews/ (crossing 0021; organizer/agents 1b73be6), so Elenx review commits no longer wake me. Thread 01M5RR7SZQSXT8C3BS8B9V8F98 closed. The untracked working-on/reviews/ in this root is Elenx's, not mine to commit.
+- 2026-11-01, Pablo ruled one by one in my session: 0166 accept as written (8769246), 0169 accept as written (86a5d26), 0170 roadmap mode (e60b890). Menu name: keep it, no agent app. sup96 launched on lf56-run-roles (forecast 60-120m); lf57 waits on lf52-decisions-line, lf53-frontmatter and lf55-one-title on origin/main; lf58 is cut against contracts/c4-map/ next.
 - 0167 and 0168 carry "2026-10-28" in their ruling words. They were ruled on 10-27 by the clock. Ruled records are not edited.
 
 ## 2026-10-26 02:50
