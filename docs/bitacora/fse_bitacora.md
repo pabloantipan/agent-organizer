@@ -1567,3 +1567,13 @@ sections below this one are history.
 - talos-lab was asked to merge spec/autonomous-report-charts (c41b8ae). Once it lands, I write the amendment: FR-11 rows from the JSON plus Pablo's 2026-10-27 rulings, citing 8d2141a and d9c7a54. Its card autonomous-report-charts is mine.
 - Told Hephaistos that waits text is cut at the first '('. Rulings are not in the JSON yet; lf57 reads them from the scan.
 - 22:40 lf57's contract pin: agent-mailbox-specs main 5d34115, contracts/factory-report/ (make-fixture.sh, case.json, expected.json, expected.txt, schema). The JSON's rulings list replaces the scan for "Ruled while you were away".
+
+## 2026-10-31 — C4 and atlax
+
+- 0170 now asks only where Map lives (Q1 was ruled 2026-10-31: no change classes). The map stays c4-map/1, whose `status` is the lifecycle. lf58 pins agent-mailbox-specs contracts/c4-map/ (e94ce1b or later) once 0170 is ruled.
+- atlax is coming (Hephaistos, thread 01M6ABZM39D0ZF9GACRWFPK7WC), nothing to do yet. In order:
+  1. a seeding card for organizer's slice once the mailbox completes a loop;
+  2. `atlax verify` as a gate row on cards;
+  3. the map lens also reads atlax (lifecycle, authored);
+  4. cards carry `touches:` and `change_order:` once the skills change.
+- Still waiting: talos-lab's five PRs (origin/main at 21b5d5d since 10-26); Pablo on 0166, 0169 and 0170; the Dock window for lf55.
