@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -290,7 +291,8 @@ func cut(c string, ls []Line, weekMoney float64) []Row {
 			}
 			if c == "task" && key != "" {
 				r.Initiative, r.Cards = l.Initiative, l.Cards
-				if len(r.Cards) == 0 {
+				// An overhead task names no card, so the view links none.
+				if len(r.Cards) == 0 && IsCardTask(l.Task) {
 					r.Cards = []string{l.Task}
 				}
 			}
@@ -465,5 +467,56 @@ func sessions(ls []Line, running map[string]bool) []SessionRow {
 		}
 		return out[i].ID < out[j].ID
 	})
+	return out
+}
+
+// Shares is FR-6's two numbers over a list of tasks and their costs: the
+// share of the cost whose task is overhead:<role>, and the share with no
+// task at all. Both are 0 when nothing has a cost.
+func Shares(tasks []string, costs []float64) (overhead, none float64) {
+	var total, o, n float64
+	for i, t := range tasks {
+		c := costs[i]
+		total += c
+		switch {
+		case t == "":
+			n += c
+		case strings.HasPrefix(t, OverheadPrefix):
+			o += c
+		}
+	}
+	if total <= 0 {
+		return 0, 0
+	}
+	return o / total, n / total
+}
+
+// SessionShares is Shares over a week's sessions, the usage report's line.
+func SessionShares(rows []SessionRow) (overhead, none float64) {
+	tasks := make([]string, len(rows))
+	costs := make([]float64, len(rows))
+	for i, r := range rows {
+		tasks[i] = r.Task
+		if r.Money != nil {
+			costs[i] = *r.Money
+		}
+	}
+	return Shares(tasks, costs)
+}
+
+// BySession is each session's attribution as the ledger keeps it, from its
+// latest day: what `organizer runs` and the app's runs view name a run's
+// initiative and task by, so a run and its usage row never disagree
+// (leftovers-56 FR-5).
+func BySession(lines []Line) map[string]Attribution {
+	out := map[string]Attribution{}
+	last := map[string]string{}
+	for _, l := range lines {
+		if d, ok := last[l.SessionID]; ok && d > l.Day {
+			continue
+		}
+		last[l.SessionID] = l.Day
+		out[l.SessionID] = l.Attribution
+	}
 	return out
 }

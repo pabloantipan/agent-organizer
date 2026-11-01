@@ -289,8 +289,8 @@ func TestAttributionKeptWhenFirstSeen(t *testing.T) {
 		t.Fatalf("attribution = %+v", d.Attribution)
 	}
 	plain := byDay(LoadLedger(o.LedgerPath), "s-plain")["2026-10-05"]
-	if plain.Initiative != "" || plain.Reason == "" {
-		t.Errorf("s-plain = %+v, want not attributed with a reason", plain.Attribution)
+	if plain.Initiative != Factory || plain.Task != "overhead:session" || plain.Reason != "" {
+		t.Errorf("s-plain = %+v, want the factory's overhead:session (leftovers-56 FR-1)", plain.Attribution)
 	}
 
 	o.Initiatives = nil // the worktree and the card are gone
