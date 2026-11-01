@@ -7,7 +7,7 @@ seat: l59-calls
 reviewer: l59-calls-rev
 stage:
 updated: 2026-11-01
-next: "PR with talos-lab"
+next: "talos-lab merges the PR (seed first, then calls); the FSE moves it to done/ on the merge sha. sup97 ended 2026-11-01"
 review: pass
 depends_on: [lf59-atlax-seed]
 boundary: ["docs/specs/atlax-seed.md Boundary"]
