@@ -190,3 +190,28 @@ finished. For `lf57-run-report`, a wave's footer opens Work and scrolls to
 its strip when one is drawn; for a finished wave it opens Work. W2 checks
 the navigation call. What a finished wave's footer should show instead is
 asked of Aglaea, for a later card.
+
+## Amendment 4 (FSE, 2026-11-01): a finished wave's footer opens its run record (PW7)
+
+Aglaea, `docs/ux/specs/progress-and-waves.md` Amendment 1 (754615b), PW4
+amended and PW7, closing the gap of Amendment 3. Card `lf57-wave-footer`,
+within 0169:
+
+- **FR-15** A finished wave's footer opens its run record (the `runs/*.md`
+  its wave came from) in the spec reader drawer over the report; Back
+  returns to the report where it was. A running wave's footer keeps Work
+  scrolled to its strip.
+- **FR-16** The link's accessible name and hover say where it goes:
+  `open sup95's run record`, `show sup96 on Work`.
+- **FR-17** A run record the scan reported unread goes to Needs me's
+  unread row, never a dead press.
+
+Gate: **W9** vitest of the footer's target and name for a finished, a
+running and an unread wave; **W10** review build (in the worktree, never
+auth: firebase, launched by its own path, pid saved, AX of that pid,
+`screencapture -l`): pressing a finished wave's footer by AX opens its run
+record in the drawer, and Back returns to the report at the same scroll;
+X0. Boundary: `frontend/src/components/RunReport.tsx`,
+`frontend/src/lib/runReport.ts`, `frontend/src/lib/specReader.ts`,
+`frontend/src/components/SpecReader.tsx` (opening a run record, if it does
+not already), and their tests. ui_review true.
