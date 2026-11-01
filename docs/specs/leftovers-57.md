@@ -37,33 +37,31 @@ Card `lf57-report-go` (Go):
 
 - **FR-1** `Service.Report(initiative, since, until)` runs `factory report
   <root> --since <since> --until <until> --json` and decodes it into a typed
-  struct whose fields are the contract's (5d34115). `Service.ReportText` runs
+  struct whose fields are the contract's (8474386). `Service.ReportText` runs
   the same with `--text` and returns its bytes unchanged. Deltagos computes no
   count, percent, span or track of its own (AR15).
 - **FR-2** With `factory` missing, or exiting non-zero, both return an error
   whose text is `factory report not found` or the command's first stderr line
   (AR16). An initiative that is not local (from another machine's snapshot)
   is refused with `drawn on <machine>` and runs nothing (AR17).
-- **FR-3** `Service.ReportWindows(initiative)` lists the windows offered by
-  the picker: `Running now` while autonomous mode is on, each autonomous
-  window of the last 14 days in which the initiative has a move, newest
-  first, then `Last 24 hours`. It reads them from `factory report`'s list of
-  windows once Hephaistos adds it, pinned to that contract commit; until then
-  the card does not launch (depends on it).
-- **FR-4** `model.Round` gains `cause` (yaml and json), read as written; the
-  scan reports a cause outside the 0042 enum as a problem on the run record,
-  and an empty cause stays empty.
-- **FR-5** `Service.ReportWaves(initiative, since, until)` joins the report's
-  progress lines to the waves: a line's card belongs to the wave whose
-  `cards:` lists it; a card in no wave, or in two, reads `no wave`, never a
-  guess. Per line it gives the waves, and the rounds of those waves' cards
-  that ended inside the window: their count, the failed ones by cause (empty
-  cause reads `no cause given`), build minutes (build rounds' start to end),
-  and tokens (the usage report's tokens of runs whose card is one of the
-  line's cards, inside the window). Per wave in the window it gives its
-  supervisor, cards, rounds and failures by cause. Tokens, never money
-  (0020).
-- **FR-6** All four are bound on `App` (`wails generate module`).
+- **FR-3** `Service.ReportWindows(initiative)` runs `factory report <root>
+  --windows --days 14 --json` and returns its windows as given (newest
+  first, `kind` autonomous or current, `moved`, `moves`). The picker's
+  presets are `Running now` for a `current` window, each window with
+  `moved` true, then `Last 24 hours`; a picked window is drawn with
+  `--since @<since> --until @<until>`.
+- **FR-4** (withdrawn, Amendment 1: the report's `waves` block carries each
+  round's `cause`; Deltagos's run record reader is unchanged.)
+- **FR-5** `Report` carries the JSON's `waves` block as given:
+  `waves.lines[]` (matched to `progress.lines[]` by `t`, each card with its
+  `waves[]` and `label`, `no wave` when no run record lists it) and
+  `waves.waves[]` (key, supervisor, cards, rounds with `cause`,
+  `failed_by_cause`, `build_minutes`). The one number Deltagos adds is
+  tokens, which the report does not carry yet: per line, the usage
+  report's tokens of runs whose card is one of the line's cards, inside the
+  window (0020, never money). When the report gains tokens, Deltagos reads
+  those instead.
+- **FR-6** `Report`, `ReportText` and `ReportWindows` are bound on `App` (`wails generate module`).
 
 Card `lf57-run-report` (frontend, `ui_review: true`):
 
@@ -120,7 +118,7 @@ Card `lf57-home-signal` (frontend, `ui_review: true`):
 ## Acceptance → gate
 
 Contract rows read `${CONTRACTS_DIR:-~/agent-slack/specs/contracts}/factory-report/`
-from a checkout of agent-mailbox-specs at 5d34115 (the local checkout is on
+from a checkout of agent-mailbox-specs at 8474386 (the local checkout is on
 another branch: the builder makes a worktree at the pin and exports
 `CONTRACTS_DIR` to it). Fake `factory` scripts in tests print the contract's
 files; no gate row runs against the real home's away log.
@@ -130,11 +128,10 @@ files; no gate row runs against the real home's away log.
 | R1 | 1 | go test: a fake `factory` printing `expected.json`; decode, then re-encode with `root` ignored | equals `expected.json`; a test fails when the sample is missing, naming it |
 | R2 | 1 | go test: `make-fixture.sh DIR`, then `Service.ReportText` over `case.json`'s window with the real `factory` | byte-equal to `expected.txt` |
 | R3 | 2 | go test: `factory` off PATH; a fake exiting 2 with stderr `boom`; a remote initiative | `factory report not found`; `boom`; `drawn on <machine>` and no process started |
-| R4 | 3 | go test against the windows contract (pinned when it lands) | presets in order, newest first, windows with no move left out |
-| R5 | 4 | go test: run records with `cause: gate`, `cause: bogus`, none | `gate`; one problem naming `bogus`; empty |
-| R6 | 5 | go test: a fixture of three waves over `expected.json`'s cards, one card in two waves, one in none, usage with tokens per card | lines carry their waves, `no wave` twice, rounds and failures by cause, build minutes and tokens inside the window only |
+| R4 | 3 | go test: a fake `factory` printing `expected-windows.json` | windows as given, newest first; `--since @<since> --until @<until>` passed for a picked one |
+| R6 | 5 | go test over `expected.json`'s `waves` and a usage fixture with tokens per card, some outside the window | `waves` re-encodes equal to the sample; each line's tokens count only its cards' runs inside the window |
 | W1 | 7, 12 | vitest over `expected.json`: rows, caption, dead rows, notes; a live report with the dead span still going; a custom window | rows as FR-7; `stopped now` only live; `window start`/`window end` |
-| W2 | 8 | vitest: FR-5's join | wave column values, the disclosure's words, the footer lines, a footer press calls the WaveStrip navigation |
+| W2 | 8 | vitest over `expected.json`'s `waves` | wave column values, the disclosure's words, the footer lines, a footer press calls the WaveStrip navigation |
 | W3 | 9 | vitest: `expected.json`'s tracks; a JSON with `drawn: false` | `Board as of`, the fold, `↓`, `No stage` last, `local` only; the no-tracks line |
 | W4 | 10 | vitest: three rulings, modes `autonomous`, `away` and none; one refused `ruled_by`; an empty list | `while away` on the first two only; the refused one shows its note and no ruler; no subsection for the empty list |
 | W5 | 11 | vitest with a mocked clipboard | the written text equals `ReportText`'s bytes; the polite region's words |
@@ -146,9 +143,8 @@ files; no gate row runs against the real home's away log.
 ## Boundary
 
 - `lf57-report-go`: `internal/service/report.go` (new) and its test,
-  `internal/model/wave.go`, `internal/scan/runs.go` (the cause check) and
-  their tests, `app.go` (the four bindings), `frontend/wailsjs` (generated),
-  `testdata/` for the run-record fixtures, CLAUDE.md (one Run report
+  `app.go` (the three bindings), `frontend/wailsjs` (generated),
+  `testdata/` for the usage fixture, CLAUDE.md (one Run report
   paragraph).
 - `lf57-run-report`: `frontend/src/components/RunReport.tsx`,
   `RunTracks.tsx` (new) and their tests, `components/Overview.tsx` (the
@@ -161,6 +157,15 @@ files; no gate row runs against the real home's away log.
 
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
-| `lf57-report-go` | R1-R6, X0 | lf53-frontmatter, lf52-decisions-line, lf55-one-title on origin/main; Hephaistos's windows list (R4) | false |
+| `lf57-report-go` | R1-R4, R6, X0 | lf53-frontmatter, lf52-decisions-line, lf55-one-title on origin/main | false |
 | `lf57-run-report` | W1-W7, X0 | lf57-report-go | true |
 | `lf57-home-signal` | W7, W8, X0 | lf57-run-report (`lib/runReport.ts`) | true |
+
+## Amendment 1 (FSE, 2026-11-01): the report carries the waves and the windows
+
+Hephaistos merged both asks (agent-mailbox-specs 8474386, claudecode
+c3be84f): `factory report --json` has a `waves` block (0168 Q2) and
+`--windows --json` lists the windows. The pin moves from 5d34115 to
+8474386. FR-3 reads the list; FR-4 and R5 are withdrawn; FR-5 reads the
+waves block and adds only tokens, which the report lacks; R4 and R6 follow.
+lf57-report-go no longer waits on Hephaistos.

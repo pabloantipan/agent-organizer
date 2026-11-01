@@ -18,4 +18,4 @@ ui_review: false
 The app gets the run report from the one computation, and knows which wave moved each line and at what cost.
 
 ## Gate
-docs/specs/leftovers-57.md, rows R1-R6 and X0.
+docs/specs/leftovers-57.md, rows R1-R4, R6 and X0.
