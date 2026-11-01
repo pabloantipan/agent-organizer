@@ -1,10 +1,17 @@
 # A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+# Authored (FR-8): the named test, on the base, reads the factory-report contract sample through CONTRACTS_DIR.
 designation: fn:organizer.App.ReportWindows
 kind: wails
 summary: "The run windows of the last 14 days, newest first, from factory report --windows."
-authored: false
+authored: true
 lifecycle: live
 owner: organizer-fse
 terminal:
   binding: App.ReportWindows
   signature: "(string) (service.ReportWindows, error)"
+contract:
+  repo: specs
+  path: contracts/factory-report/expected-windows.json
+test:
+  path: internal/service/report_test.go
+  name: TestReportWindows
