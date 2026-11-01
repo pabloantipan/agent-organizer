@@ -1,13 +1,13 @@
 ---
 title: "The floating icon keeps its place on every desktop, and comes back after a display change"
-status: now
+status: done
 repos: [organizer]
 branch: lf60-icon-spaces
 seat: l60-icon
 reviewer: l60-icon-rev
 stage:
 updated: 2026-11-01
-next: "talos-lab merges the PR (thread 01M6C28DQ9TS5YWJ00QKMEQENW; pass at d4d0e35); the FSE moves it to done/ on the merge sha. sup98 ended 2026-11-01"
+next: "done: PR #14 merged 70b21eb (2026-11-01)"
 review: pass
 depends_on: []
 boundary: ["docs/specs/leftovers-60.md Boundary"]
