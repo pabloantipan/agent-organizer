@@ -200,3 +200,4 @@ resumes. The seat moves to the new discuss watcher (wake-rearm, api
 - 2026-10-28 — map-and-roadmap Amendment 2 (57b5ef9): inline sanitized SVG is the picture (aria-hidden), node buttons are real <button>s in a layer over it, roving, ringed; M7.
 - 2026-11-01 — lf54-decision-states A1-A3, UI4 (FSE thread 01M6C6WAPGKXX8H06MCVXFGNX1): `docs/ux/specs/decision-states.md` DS1-DS6 plus rows DS-a..f; design-system Decision record rule on status words and tones. DS1 (awaiting-cells leaves Needs me) changes FR-6/G5: needs a record.
 - 2026-11-01 — after lf61 (FSE thread 01M6CHN22W07206FJYCG4JTM1P): decision-states A1 (DS-a corrected, DS7 header names the lead's share, DS8 no Home signal); review-view A20 (R53 through a live resize).
+- 2026-11-01 — run report wave footer (FSE thread 01M6CJQX0S09XRG3ZAXVXGNTCZ): progress-and-waves A1, a finished wave opens its run record in the reader drawer; running keeps Work; PW4 amended, PW7.

@@ -189,3 +189,32 @@ While you were away                                Window [Latest run 26 Oct 23:
 | PW4 | go to the wave | a wave in the footer opens Work with that WaveStrip in view |
 | PW5 | trust it is one window | changing the window changes rows, waves and counts together; nothing outside the window is counted |
 | PW6 | (A) read the night on one axis | History at Hours: the share band, one lane per wave with round segments (build, ✓, ✕ cause), ◆ merges, the dead band across all lanes; the event list below matches |
+
+## Amendment 1 (aglaea, 2026-11-01): what a finished wave's footer opens
+
+From lf57-run-report (sup101, 2f7dccb) and leftovers-57 Amendment 3
+(14bad79): PW4 sent every wave to Work's WaveStrip, but Work draws strips
+for running waves only, and a report's waves are mostly finished, so the
+press lands on Work with nothing in view. My gap: PW4 assumed every wave
+has a strip.
+
+- **A finished wave opens its run record** (`runs/*.md` or `docs/runs/*.md`,
+  the file its `model.Wave` was read from) in the spec reader, the drawer
+  over the current view (diagrams-in-app), so the report stays where the
+  reader left it and Back returns to it. The record is where a finished
+  wave's story lives: rounds, verdicts, causes, what merged.
+- **A running wave keeps PW4**: Work, scrolled to its strip.
+- **No strip for finished waves on Work.** Work is the board of what is
+  open now; finished waves drawn there would be history in a now view, and
+  their cards are mostly in Done. Finished waves get drawn on an axis in
+  option A, the History card, not on Work.
+- The link says where it goes, in its accessible name and hover:
+  `open sup95's run record` or `show sup96 on Work`; the visible text
+  stays the wave's name.
+- A wave whose record the scan reported unread opens Needs me's unread
+  row for that initiative, as any unread file does; never a dead press.
+
+| # | The person can | Check |
+|---|---|---|
+| PW4 (amended) | go to the wave | a running wave's footer line opens Work with its WaveStrip in view; a finished wave's opens its run record in the reader drawer over the report, and Back (or Escape) returns to the report at the same scroll |
+| PW7 | know where the press goes before pressing | each footer link's name reads `open <wave>'s run record` or `show <wave> on Work` by the wave's state |

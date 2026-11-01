@@ -470,6 +470,7 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - Joining two charts: name the joining rule first (a progress line's card belongs to the wave whose cards: lists it) and refuse guesses (`no wave`); then grow the view the lead already reads before adding a new one (progress-and-waves).
 - A record the lead cannot act on (awaiting-cells, Themis's) is not a Needs me row: Themis's own question to pablo already is one, so keeping it counts the crossing twice; show it in Decisions as "With the cells" and as a muted header signal (decision-states DS1-DS3, needs a record since FR-6/G5 say otherwise). Tone = open or decided, word = which status; no sub-tones (DS4-DS6).
 - Before writing "these two counts agree", check who each one counts: the header counts the initiative's waiting records (any owner), the FSE panel and Needs me the lead's; my DS-a missed 0005 (someone else's). Two counts that answer two questions get two words, not one number (decision-states A1, DS7).
+- A link to a thing must land on something for every state of that thing: PW4 sent every wave to Work's strip, which only running waves have. Finished things open their record (the reader drawer), running things open their live view (progress-and-waves A1).
 
 ## Participants in use
 
