@@ -147,6 +147,9 @@ func startUsagePost(cfg config.Config, dataDir, ledgerPath string, now func() ti
 func postUsage(ctx context.Context, t usagePostTarget, dataDir string, lines []usage.Line, now func() time.Time) {
 	path := filepath.Join(dataDir, usagePostFile)
 	st := loadUsagePostState(path)
+	if pruneRejected(&st, lines) {
+		_ = saveUsagePostState(path, st)
+	}
 
 	type pending struct {
 		key, hash string
@@ -219,6 +222,43 @@ func postUsage(ctx context.Context, t usagePostTarget, dataDir string, lines []u
 		}
 		todo = todo[n:]
 		out.At = now()
+		_ = saveUsagePostState(path, st)
+	}
+}
+
+// pruneRejected drops each rejected row whose ledger row is gone: there is
+// nothing left to resend, so it is no longer the record's to refuse
+// (leftovers-62 FR-3). It reports whether anything was dropped.
+func pruneRejected(st *usagePostState, lines []usage.Line) bool {
+	if len(st.Rejected) == 0 {
+		return false
+	}
+	have := make(map[string]bool, len(lines))
+	for _, l := range lines {
+		have[l.SessionID+"|"+l.Day] = true
+	}
+	pruned := false
+	for k := range st.Rejected {
+		if !have[k] {
+			delete(st.Rejected, k)
+			pruned = true
+		}
+	}
+	return pruned
+}
+
+// pruneUsageRejected is pruneRejected on the state file in the data dir, for
+// a pass that posts nothing (the post off, or nothing changed). It runs only
+// while no post does, since a post saves the state it loaded; a running post
+// prunes its own state.
+func pruneUsageRejected(dataDir string, lines []usage.Line) {
+	if !usagePosting.CompareAndSwap(false, true) {
+		return
+	}
+	defer usagePosting.Store(false)
+	path := filepath.Join(dataDir, usagePostFile)
+	st := loadUsagePostState(path)
+	if pruneRejected(&st, lines) {
 		_ = saveUsagePostState(path, st)
 	}
 }

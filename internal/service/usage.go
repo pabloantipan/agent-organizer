@@ -37,12 +37,20 @@ func (s *Service) Usage(week string) (usage.View, error) {
 	if err != nil {
 		return usage.View{}, err
 	}
-	v, err := usage.Build(usage.LoadLedger(ledger), week, in.running, nil)
+	lines := usage.LoadLedger(ledger)
+	v, err := usage.Build(lines, week, in.running, nil)
 	if err != nil {
 		return usage.View{}, err
 	}
 	v.Machine = cfg.Machine
 	v.Stats = st
+	// A rejected row whose ledger row is gone leaves the state at this pass,
+	// before the view lists what is left (leftovers-62 FR-3).
+	pruneUsageRejected(dataDir, lines)
+	v.Rejected = []usage.RejectedRow{}
+	for _, r := range UsageRejected() {
+		v.Rejected = append(v.Rejected, usage.RejectedRow{SessionID: r.SessionID, Day: r.Day, Reason: r.Reason})
+	}
 	// The changed rows go to the record after the view is built, in the
 	// background, so the post never delays it (usage-post FR-6).
 	startUsagePost(cfg, dataDir, ledger, s.now)
