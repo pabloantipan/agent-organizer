@@ -14,6 +14,8 @@ boundary: ["docs/specs/atlax-seed.md Boundary"]
 spec: "docs/specs/atlax-seed.md (Amendment 2)"
 gate: "docs/specs/atlax-seed.md#Acceptance → gate"
 ui_review: false
+prs:
+  - {repo: organizer, pr: 13, target: main, state: merged, merge: d89b90f}
 ---
 
 ## Goal
