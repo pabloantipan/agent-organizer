@@ -351,7 +351,7 @@ func (s *Service) Runs(initiativeID string) []session.Run {
 		// A broken archive must not hide the history already written.
 		_ = err
 	}
-	all := withAttribution(session.Conversations(session.LoadRuns(session.RunsPath())), ledgerTasks())
+	all := withAttribution(session.Conversations(session.LoadRuns(session.RunsPath())), s.ledgerTasks())
 	if initiativeID == "" {
 		return all
 	}
@@ -432,14 +432,17 @@ type RunsView struct {
 // keep runs.jsonl current — so a live session is read from its record, whose
 // numbers are the fresh ones anyway.
 func (s *Service) InitiativeRuns(initiativeID string) RunsView {
-	return runsView(initiativeID, session.LoadRuns(session.RunsPath()), s.liveRuns(), ledgerTasks())
+	return runsView(initiativeID, session.LoadRuns(session.RunsPath()), s.liveRuns(), s.ledgerTasks())
 }
 
-// ledgerTasks is the usage ledger's attribution per session, read as the
-// last usage pass left it (leftovers-56 FR-5).
-func ledgerTasks() map[string]usage.Attribution {
-	ledger, _ := usage.DataPaths(filepath.Dir(session.Dir()))
-	return usage.BySession(usage.LoadLedger(ledger))
+// ledgerTasks is the usage ledger's attribution per session (leftovers-56
+// FR-5), attributed when read with the inputs and the rule a usage pass
+// uses, so a run reads the same task whether `organizer usage` ran before
+// it or not (leftovers-62 FR-1). It writes nothing.
+func (s *Service) ledgerTasks() map[string]usage.Attribution {
+	ledger, offs := usage.DataPaths(filepath.Dir(session.Dir()))
+	in := s.usageInputs()
+	return usage.Attributions(usage.Options{LedgerPath: ledger, OffsetsPath: offs, Costs: in.costs, Initiatives: in.inits})
 }
 
 // withAttribution names each run's initiative and card from the usage
