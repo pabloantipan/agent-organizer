@@ -4,7 +4,8 @@
 // App.Report returns it: this module only orders it and puts it in words.
 // It computes no count, percent, span or track of its own (AR15).
 
-import type { service } from "../../wailsjs/go/models";
+import type { model, service } from "../../wailsjs/go/models";
+import { underRoot, unreadFiles } from "./unread";
 
 export type Report = service.FactoryReport;
 export type Window = service.ReportWindow;
@@ -401,3 +402,54 @@ export function trackName(x: TrackRow, prev: TrackRow | null, envs: string[]): s
 
 /** `Board as of d277111 · 08:00`. */
 export const boardAsOf = (tr: service.Tracks) => (tr.rev ? `Board as of ${tr.rev}${tr.rev_time ? ` · ${clock(tr.rev_time)}` : ""}` : "");
+
+// A wave footer's target (leftovers-57 FR-15 to FR-17; progress-and-waves
+// Amendment 1, PW4 amended and PW7).
+
+/** Where a wave's footer goes: a finished wave's run record into the spec
+ *  reader (`path` relative to the root, as ReadSpec allows it), a run
+ *  record the scan could not read to Needs me's unread row, and a running
+ *  wave (or a finished one whose record the scan did not read) to Work. */
+export type WaveTarget = { kind: "record"; path: string } | { kind: "unread"; path: string } | { kind: "work" };
+
+/** What the scan knows of the initiative: its root, the waves it read (each
+ *  with its run record's file name, under runs/) and its problems. */
+export type ScanRuns = { root: string; waves: Pick<model.Wave, "record">[] | null | undefined; problems: model.Problem[] | null | undefined };
+
+/** The scan's runs directory (internal/scan/runs.go `runsDir`): the one
+ *  place a wave's `record` file name is read from. */
+export const RUNS_DIR = "runs";
+
+/** The report's record path (the path the factory read) relative to the
+ *  root; a path written absolute under the root loses the root. */
+export function recordRel(record: string, root: string): string {
+  return underRoot((record ?? "").trim(), root).replace(/^\.\//, "");
+}
+
+/** A wave's target, keyed on the report's `record` matched to the files the
+ *  scan read: running is Work; an unread file is Needs me; a record the
+ *  scan read is the reader; anything else stays Work, since ReadSpec would
+ *  refuse it and a press must never be dead. */
+export function waveTarget(w: Pick<service.RunWave, "record" | "merged">, scan: ScanRuns): WaveTarget {
+  if (w.merged == null) return { kind: "work" };
+  const rel = recordRel(w.record, scan.root);
+  if (!rel) return { kind: "work" };
+  if (unreadFiles(scan.problems).some((f) => underRoot(f.path, scan.root) === rel)) return { kind: "unread", path: rel };
+  if ((scan.waves ?? []).some((x) => x.record && `${RUNS_DIR}/${x.record}` === rel)) return { kind: "record", path: rel };
+  return { kind: "work" };
+}
+
+/** The wave as its link names it: its supervisor (`sup95`), or its key when
+ *  the supervisor is missing or runs more than one wave in the report. */
+export function waveLabel(w: Pick<service.RunWave, "key" | "supervisor">, all: Pick<service.RunWave, "supervisor">[]): string {
+  const sup = w.supervisor ?? "";
+  if (!sup || all.filter((x) => x.supervisor === sup).length > 1) return w.key;
+  return sup;
+}
+
+/** The footer link's accessible name and hover (FR-16, PW7). */
+export function waveLinkName(label: string, t: WaveTarget): string {
+  if (t.kind === "record") return `open ${label}'s run record`;
+  if (t.kind === "unread") return `show ${label}'s run record in Needs me, Deltagos can't read it`;
+  return `show ${label} on Work`;
+}
