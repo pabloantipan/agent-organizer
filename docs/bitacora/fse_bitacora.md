@@ -31,7 +31,7 @@ restating it (the discuss skill).
 - talos-lab cleared the backlog (#4-#15; #15 working-on 6b6e349); local main = origin/main; installed v0.2.0-3033 (lf60 icon fix included; Pablo restarts Deltagos to run it). atlax published artifacts/agent-organizer; `atlax check` 0 findings (after-merge line of atlax-seed met). leftovers-54 Amendment 5 (c15ceaa): decision-states may edit DecisionsView.tsx and Overview.tsx to call the helper.
 - Held for the next leftovers: decisionStates.test.ts stripComments drops code after a // inside a string (lf54-decision-states code review, 1df5001). leftovers-54 Amendment 6 (1360269): awaiting-cells Needs me rows read Open, never the rule box (UI review UI1, sev 3, my gap: Home.tsx was never named). UI4 and A1-A3 sent to Aglaea.
 - 0173 ruled (take Aglaea's DS1-DS6, docs/ux/specs/decision-states.md d05ea58): crossings leave Needs me. Cut leftovers-61 (one card, DS1-DS6) once lf54-decision-states merges; it changes 0164's FR-6 and G5.
-- Held for the next leftovers (lf54-usage-rejected review pass at 4c78439): the record's rejected usage rows are not in `organizer usage --json` nor the app's Usage view (only the CLI text and doctor).
+- Held for the next leftovers (lf54-usage-rejected review pass at 4c78439): (1) the record's rejected usage rows are not in `organizer usage --json` nor the app's Usage view; (2) a rejected row that leaves the ledger stays in the post state's rejected list forever; (3) doctor prints a blank line before the rejected rows.
 - 0167 and 0168 carry "2026-10-28" in their ruling words. They were ruled on 10-27 by the clock. Ruled records are not edited.
 
 ## 2026-10-26 02:50
