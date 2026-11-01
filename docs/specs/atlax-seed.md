@@ -62,3 +62,18 @@ After the merge (not a gate row; the FSE checks it): atlax-watch publishes
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf59-atlax-seed` | S1-S4, X0 | — | false |
+
+## Amendment 1 (2026-11-01, the FSE, on sup97's question at a62e887)
+
+`atlax verify` checks every `consumes:` line, authored or not, against the
+published folders, and today only `agent-mailbox-api` is published, so a
+`consumes:` naming the record (or a planned name) is a blocking ext-break
+and S4 cannot hold (atlax.py:731-746, l59-atlax's run).
+
+FR-2 now reads: `consumes:` lines only for elements of an artifact already
+published in the atlax repo (today `ext:agent-mailbox-api#…`). An element
+that reads an unpublished provider (the record's four calls, the
+working-on and factory-report readers) keeps its file and names its
+provider in `summary`, with no `consumes:`; the line is added by a later
+card's change order once that provider publishes. S4 stays: exit 0, no
+finding.
