@@ -1,12 +1,12 @@
 ---
 title: "Decision states are read once on each side, and ruled_by reads as a person plus a mode"
-status: now
+status: done
 repos: [organizer]
 branch: lf54-decision-states
 seat: l54-states
 stage:
 updated: 2026-11-01
-next: "PR with talos-lab (first of wave 2; code and UI review pass at ae0d9c6). stripComments note-finding (Review 1df5001): filed to the FSE (bitácora, next leftovers)"
+next: "done: PR #16 merged 29e7d2c (2026-11-01)"
 review: pass
 reviewer: l54-states-rev, l54-states-ui
 depends_on: [lf53-frontmatter]
