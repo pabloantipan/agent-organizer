@@ -5,8 +5,8 @@ repos: [organizer]
 branch: lf54-decision-states
 seat:
 stage:
-updated: 2026-10-25
-next: "the FSE relaunches it once its lf53 dependency is on origin/main (0164 ruled 2026-10-26; sup95 stopped 2026-10-26, unmerged)"
+updated: 2026-11-01
+next: "sup99 runs it (lf53 on origin/main 6531d5b; leftovers-54 Amendment 3, pin 54cf10d)"
 depends_on: [lf53-frontmatter]
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-decision-states"]
 spec: "docs/specs/leftovers-54.md (FR-6 to FR-7)"

@@ -149,3 +149,26 @@ this card's:
 G5 adds: every `ruled_by` variant and every forecast form in the sample read
 as `expected.json` says; `readers_today` for Deltagos then matches
 `accepted_reading`. The pin is a6869bf.
+
+## Amendment 3 (FSE, 2026-11-01): wave 2 pins the contract as it is now
+
+lf53 is on origin/main (PRs #6 ca900f1, #7 6531d5b; leftovers-53 Amendment 1
+tested it at specs ed3c6b5). Since then agent-mailbox-specs main moved to
+**54cf10d**: `ruled_by` reads autonomous mode and refuses unknown readings
+(cfd5a80, Pablo's 2026-11-01 ruling, "ruled_by reads autonomous mode"),
+`touches` and `change_order` in the working-on sample (8be6952), owner
+operator read as pablo (19d5f44), the hestia 0042 fields and JSON Schemas
+(ae3c624, 16f418d). On origin/main a plain `make test` now fails
+`TestWorkingOnContract` against it.
+
+- The pin is **54cf10d**, replacing a6869bf (Amendment 2) and 0eeddc3.
+  `lf54-ci-contracts` writes it in `release.yml`.
+- **FR-7** reads `ruled_by` per `expected.json` at the pin: autonomous
+  mode (the old `away` still read as autonomous), and an unknown reading
+  refused as the sample says (`ruled_by` empty, no mode, a note), never
+  guessed. `readers_today` for Deltagos matches `accepted_reading` at the
+  pin.
+- `lf54-decision-states` makes `TestWorkingOnContract` pass at the pin,
+  whatever of the sample's moves lands in its boundary (`decision.go`,
+  `internal/scan/`); a move outside it is a question to the FSE.
+- X0 for every wave 2 card: `CONTRACTS_DIR` at a checkout of specs 54cf10d.
