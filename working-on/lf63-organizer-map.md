@@ -6,7 +6,7 @@ branch: lf63-organizer-map
 seat:
 stage:
 updated: 2026-11-01
-next: "the FSE launches its supervisor once 0176 is ruled"
+next: "sup105 runs it (0176 ruled 2026-11-01, autonomous mode)"
 depends_on: [lf58-map-read]
 boundary: ["docs/architecture/"]
 spec: "docs/specs/leftovers-63.md (FR-1 to FR-3)"

@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 63 - the organizer's own C4 base map
-status: proposed
+status: ruled
 raised: 2026-11-01
 raised_by: fse
 owner: pablo
@@ -9,9 +9,10 @@ cards: [lf63-organizer-map]
 forecast: 45-90m
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-11-01
+ruled_by: pablo (autonomous mode)
+supervisor: organizer-probe-sup105
+chosen: accept as written
 ---
 
 ## Question
@@ -35,3 +36,11 @@ accept as written.
 
 forecast: 45-90m over 1 wave; basis: this initiative's docs-only atlax
 cards today (24-75 min with review).
+
+## Ruling
+
+pablo (autonomous mode), 2026-11-01 20:38: the recommendation taken after
+five minutes without an answer. Asked at 20:33 in the mailbox ("0176:
+accept leftovers 63, the organizer's own C4 map?", options accept as
+written or send back); recommended "accept as written". Not sensitive: the
+organizer's own record, docs only, nothing leaves the Mac.
