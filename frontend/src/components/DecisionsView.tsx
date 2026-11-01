@@ -3,7 +3,7 @@ import { marked } from "marked";
 import type { merge, model } from "../../wailsjs/go/models";
 import { DAY, dateWords, daysBetween, parseISO, today } from "../lib/dates";
 import { addLocalDays } from "../lib/axis";
-import { answerSizes, chosenLines, decisionTone, fitAnswers, fitRoom, isDecided, isOpen as waitsOnRuling, isRulable, ownerPhrase, ruledAnswers, type Answer } from "../lib/decisions";
+import { answerSizes, chosenLines, decisionTone, fitAnswers, fitRoom, isDecided, isOpen as waitsOnRuling, isRulable, NOT_RULABLE_LINE, ownerPhrase, ruledAnswers, type Answer } from "../lib/decisions";
 import { RULED_LIMIT, countWords, decisionMatches, emptyRuledWords, lineName, rulerWords, ruledShown, shownSections, statusWord, summaryOf, timelineName, turnaroundWords, waitedWords, type DecSections } from "../lib/decisionsPage";
 import { readOnlyOf } from "../lib/queue";
 import { decisionKey, draftVerb, useDrafts, type Draft, type DraftFields } from "../lib/drafts";
@@ -315,7 +315,8 @@ export function DecisionsView() {
             <span className="dec-num mono">{d.number}</span>
             <span className={`dec-title${d.title.length > TITLE_FLOOR ? " floored" : ""}`}>{d.title}</span>
             {all && <span className="badge">{r.initiative}</span>}
-            <span className={`badge dec-status ${d.status}`}>{statusWord(d.status)}</span>
+            {/* leftovers-54 FR-6c: the badge's tone is the helper's, the word stays the status. */}
+            <span className={`badge dec-status ${decisionTone(d)}`}>{statusWord(d.status)}</span>
             {/* The chosen option and its separator are one item, so they drop
                 together (leftovers-13 FR-1): the option ellipsizes to its floor,
                 the title to its own, then watchLine drops both into the hover. */}
@@ -343,6 +344,13 @@ export function DecisionsView() {
                 <div>Chosen</div>
                 {chosenLines(d.options, d.chosen).map((l) => <div key={l}><b>{l}</b></div>)}
               </div>
+            </div>
+          )}
+          {/* leftovers-54 FR-6b: an open record nobody here can rule says,
+              where Rule would be, who settles it. */}
+          {isOpen && waitsOnRuling(d) && !isRulable(d) && (
+            <div className="dec-actions">
+              <span className="dec-facts">{NOT_RULABLE_LINE}</span>
             </div>
           )}
           {isOpen && canRule && (

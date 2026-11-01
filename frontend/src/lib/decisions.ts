@@ -37,6 +37,10 @@ export const isDecided = (d: Stated) => decisionClass(d.status) === "decided";
  *  box's (FR-6). */
 export const isRulable = (d: Stated) => (d.status ?? "").trim() === "proposed";
 
+/** What an open record that is not rulable shows, expanded in Decisions,
+ *  where Rule would be (leftovers-54 FR-6b). */
+export const NOT_RULABLE_LINE = "Waits on the cells it affects. Themis settles it.";
+
 /** The class a record's line, bar and dot are drawn with (styles/global.css
  *  .dec.<tone>, .dec-bar.<tone>): open records draw as waiting (proposed),
  *  decided ones as ruled; closed ones keep their status (superseded,
