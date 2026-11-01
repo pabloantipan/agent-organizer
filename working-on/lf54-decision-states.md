@@ -8,7 +8,7 @@ stage:
 updated: 2026-11-01
 next: "review: lf54-decision-states, G5 and X0 pass (guard fixed for finding 1; clean clone, specs 54cf10d), 1df5001"
 review: fail
-reviewer: l54-states-rev
+reviewer: l54-states-rev, l54-states-ui
 cause: execution
 depends_on: [lf53-frontmatter]
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-decision-states"]
