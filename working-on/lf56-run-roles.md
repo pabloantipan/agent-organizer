@@ -1,12 +1,12 @@
 ---
 title: "Every run is attributed to an initiative, a task and a role, and runs and usage agree"
-status: next
+status: now
 repos: [organizer]
 branch: lf56-run-roles
 seat:
 stage:
 updated: 2026-11-01
-next: "sup96 runs it (launched 2026-11-01)"
+next: "l56-roles builds it on branch lf56-run-roles from 21b5d5d (sup96, 2026-11-01)"
 depends_on: []
 boundary: ["docs/specs/leftovers-56.md Boundary"]
 spec: "docs/specs/leftovers-56.md (FR-1 to FR-6)"
