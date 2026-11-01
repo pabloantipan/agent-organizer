@@ -236,3 +236,11 @@ is exempt from that cap by one rule in `frontend/src/styles/home.css`
 (`.home .p-sig .lz.run { max-width: none; }`); `lib/width.ts` still folds it
 first when the row is tight. `lf57-home-signal`'s boundary adds that one
 rule.
+
+## Amendment 6 (FSE, 2026-11-01, on lf57-wave-footer's review at 957cc37)
+
+FR-17 for an initiative that is not active: Needs me has no rows for it
+(`lib/queue.ts:154`), so the unread row cannot be the target. There, the
+footer opens the run record in the drawer as text (ReadSpec already allows
+it, FR-18), with the scan's unread reason as the drawer's error line; an
+active initiative keeps Needs me's unread row. W9 adds the non-active case.
