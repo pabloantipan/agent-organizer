@@ -768,3 +768,17 @@ problem in colour. The layer can carry a fill or a line, not the ink.
 | # | Pablo can | Checked by |
 |---|---|---|
 | R50 (amended) | trust every mark | as amended in A18, except that only a hover's surface change eases; ink changes, hover or mark, switch at once with no frame between |
+
+## Amendment 20 (aglaea, 2026-11-01): R53 holds through a live resize
+
+From l61-states-ui (UI3, `.wt-notes/l61-states-ui/1024x640-c-header-overlap.png`
+and `-reopen.png`): after a live resize from 1440 to 1024 the header's
+wrapped second row sat over the sub-view tabs (header drawn 76 px, tabs at
+its y 44); reopening the initiative reflowed it to 96 px. So the header's
+height follows a resize while it is shown, not only when the initiative
+opens: the tabs are placed after the header in flow, or whatever measures
+it measures again on resize. Cause not traced; that is the builder's.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R53 (amended) | read the header evenly | as in A18, and: init-a open at 1440×900, the window resized live to 1024×640 without reopening, the header's last row ends above the sub-tabs with the same gap as when opened at 1024 |
