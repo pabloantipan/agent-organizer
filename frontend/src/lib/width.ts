@@ -41,14 +41,15 @@ export function signalsThatFit(widths: number[], gap: number, room: number, more
 }
 
 /** How soon a signal folds into "+N" (FR-20 as amended by 0076; leftovers-5
- *  FR-8; design system, Widths: "what gives way first"): live first (a wave
+ *  FR-8; design system, Widths: "what gives way first"): the last run first
+ *  (`last run · …`, leftovers-57 FR-14: it asks nothing), then live (a wave
  *  building, live or working seats), then now, then problems, then the
  *  cell's state, and last waiting, the lead's own ("waiting · you") or
  *  anyone's, which is cut to its floor before it folds. Null is blocked,
  *  which never folds and is never cut (leftovers-7 FR-4, home-signals-5 U1:
  *  red never reaches the lead only through a "+N"). */
-export type Fold = 0 | 1 | 2 | 3 | 4 | null;
-export const FOLD = { live: 0, now: 1, problems: 2, cell: 3, waiting: 4 } as const;
+export type Fold = 0 | 1 | 2 | 3 | 4 | 5 | null;
+export const FOLD = { run: 0, live: 1, now: 2, problems: 3, cell: 4, waiting: 5 } as const;
 
 /** Which signals a row shows (FR-20; leftovers-5 FR-8), in their own order.
  *  `floors` are what each keeps at the least, in rendered width: waiting's

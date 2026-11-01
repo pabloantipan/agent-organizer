@@ -121,6 +121,19 @@ describe("signalsShown (FR-20; leftovers-5 FR-8)", () => {
     expect(signalsShown(floors, folds, gap, sum([70, 65]) + gap + 28, 28)).toEqual([true, true, false, false, false, false, false]);
   });
 
+  it("folds the last run first, before live, now, problems and the cell (leftovers-57 FR-14)", () => {
+    // Home's order with the run signal last: waiting, blocked, now, live, live, cell, problems, run.
+    const withRun: Fold[] = [...folds, FOLD.run];
+    const runFloors = [...floors, 150];
+    // one px short: the run signal goes, every other one stays
+    expect(signalsShown(runFloors, withRun, gap, sum(runFloors) - 1, 28)).toEqual([true, true, true, true, true, true, true, false]);
+    // shorter still: then live, as before
+    expect(signalsShown(runFloors, withRun, gap, sum(floors) - 1 + gap + 28, 28)).toEqual([true, true, true, true, false, true, true, false]);
+    // first in the row changes nothing
+    expect(signalsShown([150, 60, 50], [FOLD.run, FOLD.live, FOLD.now], gap, 60 + 50 + 2 * gap + 28, 28)).toEqual([false, true, true]);
+    expect(FOLD.run).toBeLessThan(Math.min(FOLD.live, FOLD.now, FOLD.problems, FOLD.cell, FOLD.waiting));
+  });
+
   it("keeps the cell beside a waiting at its floor, not at its natural width", () => {
     // waiting's natural width (330) would not leave the cell room; its floor does
     expect(signalsShown([70, 130], [FOLD.waiting, FOLD.cell], gap, 70 + gap + 130, 28)).toEqual([true, true]);
