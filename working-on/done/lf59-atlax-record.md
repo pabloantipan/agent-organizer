@@ -1,12 +1,12 @@
 ---
 title: "Deltagos's atlax slice consumes the record, and its first two readers are authored"
-status: now
+status: done
 repos: [organizer]
 branch: lf59-atlax-record
 seat: l59-record
 stage:
 updated: 2026-11-01
-next: "PR with talos-lab"
+next: "merged b56a224 (PR #21)"
 review: pass
 reviewer: l59-record-rev
 depends_on: [lf59-atlax-calls]
