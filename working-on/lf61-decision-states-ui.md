@@ -6,7 +6,7 @@ branch: lf61-decision-states-ui
 seat: l61-states
 stage:
 updated: 2026-11-01
-next: "file finding: internal/service/rule.go signs \"owner operator\" in a record's Ruling when pablo rules an operator-owned proposed record (FR-6 stops at the box); then UI review, then PR with talos-lab"
+next: "UI review, then PR with talos-lab. Finding (rule.go signs \"owner operator\" in a Ruling): filed to the FSE (bitácora, next leftovers, 88b5584)"
 review: pass
 reviewer: l61-states-rev
 depends_on: [lf54-decision-states]
