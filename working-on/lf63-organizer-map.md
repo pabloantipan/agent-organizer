@@ -6,7 +6,7 @@ branch: lf63-organizer-map
 seat: lf63-build
 stage:
 updated: 2026-11-01
-next: "sup105 answers lf63-build: c4-map finds no container when the root is its own repo (repos: []); drafts uncommitted in the worktree, .wt-notes/lf63-build/progress.md"
+next: "decide: c4-map cannot map a root that is its own repo (repos: []); fse asked, options A tool fix, B repos: [\".\"], C send back"
 depends_on: [lf58-map-read]
 boundary: ["docs/architecture/"]
 spec: "docs/specs/leftovers-63.md (FR-1 to FR-3)"
