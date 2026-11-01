@@ -1,6 +1,6 @@
 ---
 title: Records waiting on the cells leave Needs me, one word per status everywhere
-status: proposed
+status: ruled
 raised: 2026-11-01
 raised_by: fse
 owner: pablo
@@ -8,9 +8,9 @@ options: ["take Aglaea's DS1-DS6", "keep FR-6 as built"]
 cards: []
 supersedes: []
 superseded_by:
-ruled:
-ruled_by:
-chosen:
+ruled: 2026-11-01
+ruled_by: pablo
+chosen: "take Aglaea's DS1-DS6"
 ---
 
 ## Question
@@ -49,3 +49,7 @@ take Aglaea's DS1-DS6. A row with nothing to do teaches you to skip rows.
 
 forecast: 45-90m over 1 wave, after lf54-decision-states merges; basis:
 this initiative's frontend cards with a UI review (lf52, lf55: 60-110 min).
+
+## Ruling
+
+pablo, 2026-11-01, in the organizer on lodestar: Pablo chose "take Aglaea's DS1-DS6" in the FSE session on 2026-11-01 (one card after lf54-decision-states merges).
