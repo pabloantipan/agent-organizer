@@ -1,12 +1,12 @@
 ---
 title: "A C4 level draws as an inline, sanitized dark SVG with a real button over each node"
-status: now
+status: done
 repos: [organizer]
 branch: lf58-map-render
 seat: l58-render
 stage:
 updated: 2026-11-01
-next: "PR with talos-lab"
+next: "done: PR #27 merged e968fc1 (2026-11-01)"
 review: pass
 reviewer: l58-render-rev
 depends_on: []
