@@ -17,6 +17,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- Held for the next frontend leftovers (Aglaea 60ea44c): run-report Amendment 3, AR22-AR26 (waits as '0002 (pablo) · …', not-drawn without the red rule, 24 px targets, 'no tokens recorded', Ddd HH:MM column, ↓ in --fg-subtle); progress-and-waves Amendment 2, PW4 again and PW8 (footer opens Work only when Work draws that wave's strip, else the run record; the reader opens a run record at its prose with the waves yaml under a closed 'Rounds as recorded').
+
 - sup101 closed (16:13-20:31, 4h18m against 180-300m +90m, ~2h07 the usage limit; seats $40.76, 11 seats): leftovers 57 merged #19, #26, #28, #29. Ended. Installed v0.2.0-3239.
 - From sup101, held for the next leftovers: (1) runs.jsonl leaves 9 of 11 seats with no card: seats launch from the initiative root, so MatchCard never sees a worktree path (the P0.6 baseline loses per-card cost for supervised waves; check whether lf56's read-time attribution by seat: already fixes the runs view, else a card); (5) ReadSpec follows a symlink under specs/ or runs/ out of the root; (4) gate gaps: W7 depends on rail state, the fixture has no remote initiative, the contract's window is fixed at 20 Oct; (3) fixture-home.sh's stub `factory` shadows `factory report`. Sent: (4) dead_minutes total in factory report to Hephaistos; (6) UI notes to Aglaea. No UI row ran on a real window this evening (screen locked; reviews used offscreen WKWebView).
 
