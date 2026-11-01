@@ -15,6 +15,8 @@ spec: "docs/specs/leftovers-57.md (Amendment 4, FR-15 to FR-17)"
 gate: "docs/specs/leftovers-57.md#Acceptance → gate"
 ui_review: true
 autonomy: unattended
+prs:
+  - {repo: organizer, pr: 29, target: main, state: merged, merge: d2bebb4}
 ---
 
 ## Goal
