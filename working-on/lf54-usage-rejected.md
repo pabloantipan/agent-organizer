@@ -6,7 +6,7 @@ branch: lf54-usage-rejected
 seat: l54-usage
 stage:
 updated: 2026-11-01
-next: "file finding: the record's rejected rows are not in `organizer usage --json` nor the app's Usage view (Notes, Found, not asked; no card, record or backlog line names it)"
+next: "PR with talos-lab after lf54-decision-states (Amendment 4); merged X0 rerun on its final head first. Findings (usage --json / Usage view, rejected rows kept forever, doctor blank line): filed to the FSE (bitácora, next leftovers)"
 depends_on: [lf53-usage-contract]
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-usage-rejected"]
 spec: "docs/specs/leftovers-54.md (FR-3 to FR-5)"
