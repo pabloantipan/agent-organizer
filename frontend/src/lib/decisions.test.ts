@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
+import fixture from "../../../testdata/questions/0037-big-picture-stage.md?raw";
 import type { merge, model } from "../../wailsjs/go/models";
-import { allAnswered, answersOf, chosenFloor, chosenLines, missingWords, ownerPhrase, picksOf, questionWords, questionsOf, recordSections, signalOwners, waitingDecisions, waitingOwners } from "./decisions";
+import { allAnswered, answersOf, answerSizes, chosenLines, fitAnswers, fitRoom, missingWords, ownerPhrase, picksOf, questionWords, questionsOf, recordSections, ruledAnswers, signalOwners, waitingDecisions, waitingOwners } from "./decisions";
 
 const initiative = (...decisions: Partial<model.Decision>[]) => ({ decisions }) as unknown as merge.BoardInitiative;
 const rec = (number: string, owner: string, raised: string, status = "proposed") => ({ number, owner, raised, status });
@@ -153,10 +154,10 @@ describe("leftovers-51 helpers", () => {
     expect(chosenLines(opts, "something else")).toEqual(["something else"]);
   });
 
-  it("chosenFloor: each answer cut to its first word, labels whole; null on a plain record (FR-8)", () => {
-    expect(chosenFloor(opts, "Q1 after-graph-performs-start-now, Q2 record-page")).toBe("Q1 after…, Q2 record…");
-    expect(chosenFloor(["Q1 yes | no", "Q2 extraordinarily | x"], "Q1 yes, Q2 extraordinarily")).toBe("Q1 yes, Q2 extraord…");
-    expect(chosenFloor(["accept as written"], "accept as written")).toBeNull();
+  it("ruledAnswers: a question record's answers in order; null on a plain record or no answer", () => {
+    expect(ruledAnswers(opts, "Q1 after-graph-performs-start-now, Q2 record-page")).toEqual([{ label: "Q1", alt: "after-graph-performs-start-now" }, { label: "Q2", alt: "record-page" }]);
+    expect(ruledAnswers(["accept as written"], "accept as written")).toBeNull();
+    expect(ruledAnswers(opts, "something else")).toBeNull();
   });
 
   it("questionWords: the **Q<n>. …** lines of the Question section without markdown (FR-9)", () => {
@@ -176,5 +177,87 @@ describe("leftovers-51 helpers", () => {
     expect(missingWords(qs, { Q1: "a", Q2: "b" }, " ")).toBe("Your words are missing.");
     expect(missingWords(qs, { Q1: "a", Q2: "b" }, "x")).toBe("");
     expect(missingWords(questionsOf(["Q1 a", "Q2 b", "Q3 c"])!, {}, "x")).toBe("Q1, Q2 and Q3 not answered yet.");
+  });
+});
+
+// leftovers-52 D1 (FR-4, UW2): the Ruled line of the leftovers-49 fixture
+// ruled `Q1 after-graph-performs-start-now, Q2 record-page`, at a wide and
+// a narrow room. The view measures its room and text in the line's font;
+// here a text is 7 px a character.
+describe("D1: the Ruled line shows the answers whole while they fit (leftovers-52 FR-4)", () => {
+  const options: string[] = JSON.parse(fixture.split("\n").find((l) => l.startsWith("options: "))!.slice("options: ".length));
+  const answers = ruledAnswers(options, "Q1 after-graph-performs-start-now, Q2 record-page")!;
+  const px = (s: string) => [...s].length * 7;
+  const answersOn = (line: string) => line.slice(1, -1).split(", ");
+
+  it("wide: both answers whole", () => {
+    expect(fitAnswers(answers, 1440 - 900, px)).toBe("“Q1 after-graph-performs-start-now, Q2 record-page”");
+    expect(fitAnswers(answers, px("“Q1 after-graph-performs-start-now, Q2 record-page”"), px)).toBe("“Q1 after-graph-performs-start-now, Q2 record-page”");
+  });
+
+  // Amendment 3 (843f288): the line water-fills. An answer that fits its
+  // equal share stays whole and gives its spare room to the other.
+  it("narrow: the shorter answer whole, the longer cut with an ellipsis, each Q<n> whole (Amendment 3)", () => {
+    const room = 287; // 41 characters: 37 for the answers, 18.5 each; Q2 takes 14
+    const line = fitAnswers(answers, room, px);
+    expect(line).toBe("“Q1 after-graph-perform…, Q2 record-page”");
+    expect(px(line)).toBeLessThanOrEqual(room);
+  });
+
+  it("narrower: both answers long, both cut with an ellipsis, in equal shares", () => {
+    const room = 196; // 28 characters: 24 for the answers, 12 each
+    for (const [chosen, want] of [
+      ["Q1 after-graph-performs-start-now, Q2 record-page", "“Q1 after-gr…, Q2 record-p…”"],
+      ["Q1 after-graph-performs-start-now, Q2 neo4j-perspective", "“Q1 after-gr…, Q2 neo4j-pe…”"],
+    ]) {
+      const line = fitAnswers(ruledAnswers(options, chosen)!, room, px);
+      expect(line).toBe(want);
+      const [a, b] = answersOn(line);
+      expect(a.startsWith("Q1 ") && a.endsWith("…")).toBe(true);
+      expect(b.startsWith("Q2 ") && b.endsWith("…")).toBe(true);
+      expect(px(a)).toBe(px(b));
+      expect(px(line)).toBeLessThanOrEqual(room);
+    }
+  });
+
+  it("just short of whole: the short answer stays whole, the long one takes the rest", () => {
+    const line = fitAnswers(answers, px("“Q1 after-graph-performs-start-now, Q2 record-page”") - 7, px);
+    const [a, b] = answersOn(line);
+    expect(b).toBe("Q2 record-page");
+    expect(a.startsWith("Q1 after-graph-performs-start") && a.endsWith("…")).toBe(true);
+  });
+
+  it("no room: the floor, every alternative at its first word, at most 8 characters", () => {
+    expect(fitAnswers(answers, 0, px)).toBe("“Q1 after…, Q2 record…”");
+  });
+
+  // Code review F1 at 1f751f0: an alternative no longer than its floor was
+  // cut by a letter (`Q1 ye…`, `Q1 n…`); main's chosenFloor kept it whole.
+  it("an answer no longer than its floor is never cut (F1)", () => {
+    const yes = ruledAnswers(["Q1 yes | no", "Q2 extraordinarily | x"], "Q1 yes, Q2 extraordinarily")!;
+    expect(fitAnswers(yes, 0, px)).toBe("“Q1 yes, Q2 extraord…”");
+    expect(fitAnswers(yes, 100, px)).toBe("“Q1 yes, Q2 extraord…”");
+    const no = ruledAnswers(["Q1 yes | no", "Q2 extraordinarily-long-answer | x"], "Q1 no, Q2 extraordinarily-long-answer")!;
+    expect(fitAnswers(no, 0, px)).toBe("“Q1 no, Q2 extraord…”");
+    const abc = ruledAnswers(["Q1 abc | d", "Q2 x | y"], "Q1 abc, Q2 x")!;
+    expect(fitAnswers(abc, 0, px)).toBe("“Q1 abc, Q2 x”");
+    const word = ruledAnswers(["Q1 renamed | kept", "Q2 after-graph-performs-start-now | b"], "Q1 renamed, Q2 after-graph-performs-start-now")!;
+    expect(fitAnswers(word, 0, px)).toBe("“Q1 renamed, Q2 after…”");
+  });
+
+  // UI review U1 at 1f751f0: at 1440 the line had room for both answers and
+  // read `start-no…`, since a +1 px basis and a -1 px fit cancelled and the
+  // layout's 1/64 px rounding did the rest. A room as wide as the basis the
+  // item asks for, less that rounding, reads whole.
+  it("a room equal to the basis the item asks for reads whole (U1)", () => {
+    const wk = (s: string) => [...s].length * 5.79292; // 51 characters measure 295.43892 px, as canvas did
+    const { basis, floor } = answerSizes(answers, wk);
+    expect(fitRoom(answers, basis, wk)).toBe("“Q1 after-graph-performs-start-now, Q2 record-page”");
+    expect(fitRoom(answers, basis - 1 / 64, wk)).toBe("“Q1 after-graph-performs-start-now, Q2 record-page”");
+    expect(fitRoom(answers, floor, wk)).toBe("“Q1 after…, Q2 record…”");
+  });
+
+  it("a plain line is not a question line", () => {
+    expect(ruledAnswers(["accept as written", "send back"], "accept as written")).toBeNull();
   });
 });

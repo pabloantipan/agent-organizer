@@ -80,8 +80,10 @@ type Named = Pick<model.Decision, "number" | "title" | "status" | "owner" | "rai
  *  each once. "0007 Stage normalize: exit met, waiting, owner pablo, 5 days";
  *  a ruled one "0071 Accept…, ruled, “accept as written”, by pablo, 3 Oct,
  *  after 3 days". `initiative` is set on All initiatives; `ruledOn` is the
- *  date as the line shows it. */
-export function lineName(d: Named, now: Date, initiative?: string, ruledOn?: string): string {
+ *  date as the line shows it. While the record is open under its line
+ *  (`open`), the head shows the chosen, so the name drops it (leftovers-52
+ *  FR-5, UW3) and gets it back on close. */
+export function lineName(d: Named, now: Date, initiative?: string, ruledOn?: string, open = false): string {
   const parts = [`${d.number} ${d.title}`];
   if (initiative) parts.push(initiative);
   parts.push(statusWord(d.status));
@@ -91,7 +93,7 @@ export function lineName(d: Named, now: Date, initiative?: string, ruledOn?: str
     const r = parseISO(d.raised);
     parts.push(waitedWords(r ? daysBetween(r, now) : 0));
   } else if (d.status === "ruled") {
-    if (d.chosen) parts.push(`“${d.chosen}”`);
+    if (d.chosen && !open) parts.push(`“${d.chosen}”`);
     parts.push(rulerWords(d.ruled_by));
     if (ruledOn) parts.push(ruledOn);
     const t = turnaroundWords(d.raised, d.ruled);
