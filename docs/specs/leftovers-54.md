@@ -172,3 +172,13 @@ operator read as pablo (19d5f44), the hestia 0042 fields and JSON Schemas
   whatever of the sample's moves lands in its boundary (`decision.go`,
   `internal/scan/`); a move outside it is a question to the FSE.
 - X0 for every wave 2 card: `CONTRACTS_DIR` at a checkout of specs 54cf10d.
+
+## Amendment 4 (FSE, 2026-11-01, on sup99's gate check)
+
+At the pin, `make test` on origin/main 076eb5c fails only
+`TestWorkingOnContract` (the `ruled_by` modes and the 0012 forecast band),
+which `lf54-decision-states` fixes. So X0 for `lf54-ci-contracts` and
+`lf54-usage-rejected` is run on each branch merged with the passed
+`lf54-decision-states` head, and that one failure, identical on origin/main,
+is recorded and not counted until then. Merge order: decision-states first,
+then the other two rebased on it.
