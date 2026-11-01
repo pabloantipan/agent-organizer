@@ -1,6 +1,6 @@
 ---
 title: "Retire picks only seats a card named, never the FSE or a standing role"
-status: next
+status: done
 repos: [organizer]
 branch: lf54-retire-guard
 seat: l54-retire
@@ -8,7 +8,7 @@ reviewer: l54-retire-rev
 review: pass
 stage:
 updated: 2026-10-26
-next: "PR with talos-lab"
+next: "done: PR #9 merged 111bb38 (2026-11-01)"
 depends_on: []
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-retire-guard"]
 spec: "docs/specs/leftovers-54.md (FR-1)"
