@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import harbor from "./testdata/harbor-containers.svg?raw";
 import {
-  boxPercent, drawnNodes, mapFigureName, nodeIdOf, nodeName, parseXml, pathPoints, readingOrder, rovingStep,
+  boxPercent, decodeCss, drawnNodes, mapFigureName, nodeIdOf, nodeName, parseXml, pathPoints, readingOrder, rovingStep,
   sanitizeMapSvg, sanitizeMapTree, scopeCss, serialize, viewBoxOf, withNodeClasses, type MapNode,
 } from "./mapSvg";
 
@@ -56,7 +56,7 @@ describe("V1: the sanitizer (FR-4)", () => {
   });
   it("scopes every stylesheet rule to the drawing, so nothing reaches the page", () => {
     const css = out.match(/<style>([\s\S]*?)<\/style>/)![1];
-    expect(css).toBe("#map-svg-7 .node rect{fill:red;background:none}#map-svg-7 .node text{fill:url(#map-svg-7_grad)}");
+    expect(css).toBe("#map-svg-7 .node rect{fill:red}#map-svg-7 .node text{fill:url(#map-svg-7_grad)}");
   });
   it("turns a node's foreignObject label into SVG text centred in its box", () => {
     expect(out).toContain('<g class="label" transform="translate(-15, -8)"><rect/><text x="15" y="8" text-anchor="middle" dominant-baseline="central" class="nodeLabel map-label">A &amp; B</text></g>');
@@ -79,6 +79,84 @@ describe("V1: the sanitizer (FR-4)", () => {
   });
 });
 
+// The review of 6935178 (l58-render-rev): CSS forms that loaded from a
+// local server through the first sanitizer, then more of the same family.
+// The rule (default-deny): a declaration or presentation attribute whose
+// value, CSS escapes decoded, calls any fetching function is dropped unless
+// every call is url(#fragment); a sheet still fetching is dropped whole.
+describe("V1: no CSS form loads anything (review of 6935178)", () => {
+  const sheet = (css: string) => sanitizeMapSvg(`<svg><style>${css.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</style></svg>`, "s").match(/<style>([\s\S]*)<\/style>/)?.[1] ?? "";
+  const styled = (style: string) => /<rect([^>]*)\/>/.exec(sanitizeMapSvg(`<svg><rect style="${style.replace(/&/g, "&amp;").replace(/"/g, "&quot;")}" width="1" height="1"/></svg>`, "s"))![1];
+  const sheets: [string, string][] = [
+    ["a quoted url holding )", '.a{background:url("https://evil.example/2.png?a)b")}'],
+    ["an escaped name u\\rl(", ".a{background:u\\rl(https://evil.example/3.png)}"],
+    ["a hex-escaped name \\75 rl(", ".a{background:\\75 rl(https://evil.example/4.png)}"],
+    ["a six-digit hex escape", ".a{background:\\000055RL(https://evil.example/4b.png)}"],
+    ["image-set with a string", '.b{background-image:image-set("https://evil.example/7.png" 1x)}'],
+    ["-webkit-image-set with a string", '.b{background-image:-webkit-image-set("https://evil.example/8.png" 1x)}'],
+    ["upper case URL(", ".a{background:URL(https://evil.example/9.png)}"],
+    ["cursor url", ".a{cursor:url(https://evil.example/c.cur),auto}"],
+    ["a local url beside an external one", ".a{fill:url(#ok);background:url(#ok),url(https://evil.example/m.png)}"],
+    ["cross-fade", ".a{background:cross-fade(url(#a),url(https://evil.example/x.png),50%)}"],
+    ["@import as a string", '@import "https://evil.example/i.css";.a{fill:red}'],
+    ["@import with an escaped name", "@\\69mport url(https://evil.example/j.css);.a{fill:red}"],
+    ["@font-face", "@font-face{font-family:x;src:url(https://evil.example/f.woff)}.a{fill:red}"],
+    ["a url inside @media", "@media (min-width:1px){.a{background:url(https://evil.example/q.png)}}"],
+    ["a url inside @keyframes", "@keyframes k{from{background:url(https://evil.example/k.png)}}"],
+  ];
+  for (const [name, css] of sheets) {
+    it(`sheet: ${name}`, () => {
+      const out = sheet(css);
+      expect(out).not.toMatch(/evil\.example/);
+      expect(decodeCss(out).toLowerCase()).not.toMatch(/(url|image-set|image|cross-fade)\((?!#)/);
+    });
+  }
+  it("a custom property is kept, unless its value fetches", () => {
+    expect(sheet(".a{--f:Inter,sans-serif;--g:url(https://evil.example/v.png)}")).toBe("#s .a{--f:Inter,sans-serif}");
+  });
+  it("keeps the declarations around a dropped one, and a local url(#…)", () => {
+    expect(sheet(".a{fill:red;background:url(https://evil.example/x.png);stroke:url(#g)}")).toBe("#s .a{fill:red;stroke:url(#g)}");
+  });
+  it("a comment between letters is not url(: the declaration stays harmless", () => {
+    const out = sheet(".a{background:u/**/rl(https://evil.example/c.png)}");
+    expect(out).not.toMatch(/url\(/i);
+  });
+  const styles: [string, string][] = [
+    ["a quoted url holding )", "fill:url('https://evil.example/5.svg#g)x')"],
+    ["an escaped name", "background:u\\rl(https://evil.example/6.png)"],
+    ["a hex-escaped name", "background:\\75 rl(https://evil.example/6b.png)"],
+    ["image-set", 'background-image:-webkit-image-set("https://evil.example/6c.png" 1x)'],
+  ];
+  for (const [name, style] of styles) {
+    it(`style attribute: ${name}`, () => {
+      const out = styled(`fill:#fff;${style};stroke:#000`);
+      expect(out).not.toMatch(/evil/);
+      expect(out).toContain('style="fill:#fff;stroke:#000"');
+    });
+  }
+  it("a presentation attribute that fetches is dropped, a local one kept", () => {
+    const out = sanitizeMapSvg('<svg><rect fill="\\75 rl(https://evil.example/p.png)" stroke="url(#g)" mask="url(https://evil.example/m.svg#m)"/></svg>', "s");
+    expect(out).toBe('<svg id="s" width="100%" height="100%" aria-hidden="true" focusable="false"><rect stroke="url(#g)"/></svg>');
+  });
+  it("a brace inside a string does not end the rule (the reviewer's note)", () => {
+    expect(sheet('a{content:"}"} body{background:red}')).toBe('#s a{content:"}"}#s body{background:red}');
+  });
+  it("a brace inside a quoted attribute selector stays in the selector", () => {
+    expect(sheet('[title="}"] b{fill:red} body{fill:blue}')).toBe('#s [title="}"] b{fill:red}#s body{fill:blue}');
+  });
+  it("an escaped brace is not a brace", () => {
+    expect(sheet(".a\\}{fill:red} body{fill:blue}")).toBe("#s .a\\}{fill:red}#s body{fill:blue}");
+  });
+  it("a string a newline ends (a bad string) is read as the browser reads it, and its rule dropped", () => {
+    const out = sheet('a{content:"x\n} body{background:red}');
+    expect(out.startsWith("#s ") || out === "").toBe(true);
+    expect(out).not.toMatch(/(^|})\s*body/);
+  });
+  it("a comma inside :is() or a string is not a selector split", () => {
+    expect(sheet(':is(.a,.b) c, [d=","] e{fill:red}')).toBe('#s :is(.a,.b) c,#s [d=","] e{fill:red}');
+  });
+});
+
 describe("V1, Amendment 1: over the real L2 render", () => {
   const tree = sanitizeMapTree(harbor, "map-svg-1");
   const out = serialize(tree);
@@ -97,6 +175,10 @@ describe("V1, Amendment 1: over the real L2 render", () => {
   });
   it("the subgraph's own title stays as mermaid drew it", () => {
     expect(out).toContain(">Harbor</tspan>");
+  });
+  it("keeps every declaration of mermaid's own sheet (nothing in it loads)", () => {
+    expect(out).toContain('--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif');
+    expect(out).toContain("#map-svg-1 .node rect,#map-svg-1 .node polygon,#map-svg-1 .node circle,#map-svg-1 .node ellipse,#map-svg-1 .node path{fill: #272033;stroke: #44404d;stroke-width: 1px}");
   });
   it("both stylesheets are scoped to the root", () => {
     const css = [...out.matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("");
@@ -218,8 +300,8 @@ describe("FR-5: names, the roving set, the lens", () => {
 });
 
 describe("scopeCss", () => {
-  it("scopes inside @media, keeps keyframes, drops other at-rules", () => {
+  it("scopes inside @media, keeps keyframes, drops other at-rules (@font-face too)", () => {
     expect(scopeCss("@charset 'x';@media (min-width:1px){a{b:c}}@keyframes k{from{o:0}}@font-face{src:url(http://x/f)}@page{x:y}", "#s"))
-      .toBe("@media (min-width:1px){#s a{b:c}}@keyframes k{from{o:0}}@font-face{src:none}");
+      .toBe("@media (min-width:1px){#s a{b:c}}@keyframes k{from{o:0}}");
   });
 });

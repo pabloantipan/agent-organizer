@@ -112,8 +112,108 @@ const UNWRAP = new Set(["a", "switch"]);
 /** A reference that stays inside the drawing: `#id`, nothing else. */
 const local = (v: string) => v.trim().startsWith("#");
 
-/** A CSS value or sheet with every url() that is not `#…` made `none`. */
-const localUrls = (css: string) => css.replace(/url\(\s*(['"]?)([^)'"]*)\1\s*\)/gi, (m, _q, u: string) => (u.trim().startsWith("#") ? m : "none"));
+// CSS. Inlined, the drawing's CSS is the page's CSS, so it is read the way
+// the browser's tokenizer reads it (CSS Syntax 3), not by pattern: strings
+// end at their quote or at a newline (a bad string), a backslash escapes the
+// next character outside a string too, comments separate tokens, and ( [ {
+// nest. The rule is default-deny for loads: a declaration (in a sheet or a
+// style attribute) or a presentation attribute whose value, with every CSS
+// escape decoded and lowercased, calls any function that can fetch (`url(`,
+// `image-set(`, `-webkit-image-set(`, `image(`, `cross-fade(`, `element(`,
+// `src(`, `paint(`) is dropped, unless every such call is `url(#fragment)`.
+// Any at-rule but @media, @supports and @keyframes is dropped (so @import,
+// @font-face, @namespace), and a sheet that still holds a fetching call
+// after all that is dropped whole.
+
+const WS = /[ \t\n\r\f]/;
+
+/** The index just past the string that opens at `i` (a quote): at its
+ *  closing quote, else at a newline (a bad string, which the browser ends
+ *  there), else at the end. `bad` says which. */
+function stringEnd(css: string, i: number): { end: number; bad: boolean } {
+  const q = css[i];
+  for (let j = i + 1; j < css.length; j++) {
+    const c = css[j];
+    if (c === "\\") { j++; continue; } // an escape, or an escaped newline (a continuation)
+    if (c === q) return { end: j + 1, bad: false };
+    if (c === "\n" || c === "\r" || c === "\f") return { end: j, bad: true };
+  }
+  return { end: css.length, bad: false };
+}
+
+/** Walks `css` from `from` the way the tokenizer does, calling `at` for each
+ *  character outside strings and escapes with the nesting depth of ( [ {
+ *  before it; `at` returning true stops the walk there. Returns the index
+ *  stopped at (or the end) and whether a bad string was crossed. */
+function walkCss(css: string, from: number, at: (c: string, i: number, depth: number) => boolean): { stop: number; bad: boolean } {
+  let depth = 0, bad = false;
+  for (let i = from; i < css.length; i++) {
+    const c = css[i];
+    if (c === '"' || c === "'") { const s = stringEnd(css, i); bad ||= s.bad; i = s.end - 1; continue; }
+    if (c === "\\") { if (css[i + 1] !== "\n") i++; continue; }
+    if (at(c, i, depth)) return { stop: i, bad };
+    if (c === "(" || c === "[" || c === "{") depth++;
+    else if ((c === ")" || c === "]" || c === "}") && depth > 0) depth--;
+  }
+  return { stop: css.length, bad };
+}
+
+/** Comments out, each a space (a comment separates tokens: `u/**\/rl(` is
+ *  not `url(`); a comment inside a string is the string's text. */
+function stripComments(css: string): string {
+  let out = "";
+  for (let i = 0; i < css.length; i++) {
+    const c = css[i];
+    if (c === '"' || c === "'") { const e = stringEnd(css, i).end; out += css.slice(i, e); i = e - 1; continue; }
+    if (c === "\\") { out += css.slice(i, i + 2); i++; continue; }
+    if (c === "/" && css[i + 1] === "*") { const e = css.indexOf("*/", i + 2); out += " "; i = e < 0 ? css.length : e + 1; continue; }
+    out += c;
+  }
+  return out;
+}
+
+/** `css` split at each top-level `sep` (outside strings, escapes and ( [ {). */
+function splitTop(css: string, sep: string): { parts: string[]; bad: boolean } {
+  const parts: string[] = [];
+  let last = 0;
+  const { bad } = walkCss(css, 0, (c, i, depth) => {
+    if (c === sep && depth === 0) { parts.push(css.slice(last, i)); last = i + 1; }
+    return false;
+  });
+  parts.push(css.slice(last));
+  return { parts, bad };
+}
+
+/** A CSS text with its escapes decoded (`\75 ` → `u`, `\r` → `r`). */
+export const decodeCss = (s: string) =>
+  s.replace(/\\(?:([0-9a-fA-F]{1,6})[ \t\n\r\f]?|(\r\n|[\n\r\f])|([\s\S]))/g, (_, hex: string, nl: string, ch: string) => {
+    if (hex) { const n = parseInt(hex, 16); return n > 0 && n <= 0x10ffff && (n < 0xd800 || n > 0xdfff) ? String.fromCodePoint(n) : "�"; }
+    return nl ? "" : ch;
+  });
+
+/** Whether a CSS value (or a whole sheet) can make the page fetch: any
+ *  fetching function after decoding, a local `url(#…)` excepted. */
+export function fetches(css: string): boolean {
+  const v = decodeCss(stripComments(css)).toLowerCase().replace(/url\(\s*(['"]?)#[^'"()\s\\]*\1\s*\)/g, "");
+  return /(url|image-set|image|cross-fade|element|src|paint)\s*\(/.test(v) || v.includes("@import");
+}
+
+/** A declaration block with every declaration that could load, or that the
+ *  browser could read differently from here (a bad string, a brace outside
+ *  a string, an escaped property name), dropped. */
+function cleanDecls(body: string): string {
+  const { parts } = splitTop(body, ";");
+  return parts.map((d) => d.trim()).filter((d) => {
+    if (!d) return false;
+    const m = /^(--[\w-]+|-?[A-Za-z_][\w-]*)\s*:([\s\S]*)$/.exec(d);
+    if (!m) return false;
+    const scan = walkCss(m[2], 0, (c) => c === "{" || c === "}");
+    return !scan.bad && scan.stop === m[2].length && !fetches(m[2]);
+  }).join(";");
+}
+
+/** A style attribute's value, cleaned as a declaration block. */
+const cleanStyle = (v: string) => cleanDecls(stripComments(v));
 
 /** One attribute kept, rewritten, or dropped (null). */
 function cleanAttr(tag: string, k: string, v: string, from: string, to: string): string | null {
@@ -129,55 +229,57 @@ function cleanAttr(tag: string, k: string, v: string, from: string, to: string):
     if (key === "id" && (v === from || v.startsWith(from + "_") || v.startsWith(from + "-"))) out = to + v.slice(from.length);
     else out = out.split("#" + from).join("#" + to);
   }
-  if (key === "style" || /url\(/i.test(out)) out = localUrls(out);
-  return out;
+  if (key === "style") return cleanStyle(out);
+  return fetches(out) ? null : out;
 }
 
-/** A selector list with each selector under `#scope`, unless it already is. */
+/** A selector list with each selector under `#scope`, unless it already is.
+ *  Split at top-level commas, so a comma in :is() or a string stays put. */
 function scopeSelectors(sel: string, scope: string): string {
-  return sel.split(",").map((s) => s.trim()).filter(Boolean)
+  return splitTop(sel, ",").parts.map((s) => s.trim()).filter(Boolean)
     .map((s) => (s === scope || s.startsWith(scope + " ") || s.startsWith(scope + ".") || s.startsWith(scope + ":") || s.startsWith(scope + ">") ? s : `${scope} ${s}`))
     .join(",");
 }
 
-/** The index just past the block that opens at `open` (a `{`). */
-function blockEnd(css: string, open: number): number {
-  let depth = 0;
-  for (let i = open; i < css.length; i++) {
-    if (css[i] === "{") depth++;
-    else if (css[i] === "}" && --depth === 0) return i + 1;
-  }
-  return css.length;
-}
-
-/** mmdc's stylesheet scoped to the drawing's root. mermaid's own rules are
- *  `#<root id> …`; the dark style's appended rules (`.node rect`, `.cluster
- *  rect`, `marker path`) are not, and inlined they would restyle the page.
- *  Every rule is put under `#scope`; @keyframes and @font-face stay (urls
- *  local only); @media and @supports are scoped inside; any other at-rule
- *  (@import, @charset, @namespace, …) goes. */
-export function scopeCss(css: string, scope: string): string {
-  const src = css.replace(/\/\*[\s\S]*?\*\//g, "");
+/** The rules of a sheet (or of an @media, @supports or @keyframes body),
+ *  read the browser's way: a top-level `;` before any `{` ends a statement
+ *  (dropped: @import, @charset, @namespace, stray text); a `{` opens a block
+ *  that ends at its matching `}`. `scope` null is a keyframes body, whose
+ *  selectors (from, to, %) stay as they are. */
+function cleanRules(css: string, scope: string | null): string {
   let out = "";
   let i = 0;
-  while (i < src.length) {
-    const brace = src.indexOf("{", i);
-    const semi = src.indexOf(";", i);
-    if (brace < 0) break;
-    if (semi >= 0 && semi < brace) { i = semi + 1; continue; } // a statement at-rule, or stray text
-    const prelude = src.slice(i, brace).trim();
-    const end = blockEnd(src, brace);
-    const body = src.slice(brace + 1, end - 1);
+  while (i < css.length) {
+    const head = walkCss(css, i, (c, _, depth) => depth === 0 && (c === "{" || c === ";"));
+    if (head.stop >= css.length) break;
+    if (css[head.stop] === ";") { i = head.stop + 1; continue; }
+    const open = head.stop;
+    const close = walkCss(css, open + 1, (c, _, depth) => c === "}" && depth === 0);
+    const prelude = css.slice(i, open).trim();
+    const body = css.slice(open + 1, close.stop);
+    i = close.stop + 1;
+    if (head.bad || close.bad) continue; // read differently by the browser: dropped
     if (prelude.startsWith("@")) {
-      const at = prelude.slice(1).split(/[\s(]/)[0].toLowerCase();
-      if (at === "keyframes" || at === "-webkit-keyframes" || at === "font-face") out += `${prelude}{${localUrls(body)}}`;
-      else if (at === "media" || at === "supports") out += `${prelude}{${scopeCss(body, scope)}}`;
+      if (scope === null) continue;
+      const at = decodeCss(prelude.slice(1).split(/[\s(]/)[0]).toLowerCase();
+      if (at === "keyframes" || at === "-webkit-keyframes") out += `${prelude}{${cleanRules(body, null)}}`;
+      else if (at === "media" || at === "supports") out += `${prelude}{${cleanRules(body, scope)}}`;
     } else if (prelude) {
-      out += `${scopeSelectors(prelude, scope)}{${localUrls(body)}}`;
+      out += `${scope === null ? prelude : scopeSelectors(prelude, scope)}{${cleanDecls(body)}}`;
     }
-    i = end;
   }
   return out;
+}
+
+/** mmdc's stylesheet scoped to the drawing's root, with nothing that loads.
+ *  mermaid's own rules are `#<root id> …`; the dark style's appended rules
+ *  (`.node rect`, `.cluster rect`, `marker path`) are not, and inlined they
+ *  would restyle the page. Every rule is put under `#scope`; @media and
+ *  @supports are scoped inside, @keyframes kept; declarations are cleaned
+ *  (see above); a sheet that still fetches is dropped whole. */
+export function scopeCss(css: string, scope: string): string {
+  const out = cleanRules(stripComments(css), scope);
+  return fetches(out) ? "" : out;
 }
 
 /** A foreignObject's label as SVG text: its plain text, one line per `<br>`,
