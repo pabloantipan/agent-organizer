@@ -8,7 +8,7 @@ stage:
 updated: 2026-11-01
 next: "sup102 runs it (0171, atlax-seed Amendment 3)"
 depends_on: [lf59-atlax-calls]
-boundary: ["docs/specs/atlax-seed.md Boundary"]
+boundary: ["atlax/"]
 spec: "docs/specs/atlax-seed.md (Amendment 3, FR-5 and FR-6)"
 gate: "docs/specs/atlax-seed.md#Acceptance → gate"
 ui_review: false
