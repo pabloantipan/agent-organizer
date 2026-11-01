@@ -92,7 +92,6 @@ export function Progress({ report, lineTokens, shown, nav, openRows }: { report:
   const spans = spansDays(report);
   const none = (report.progress?.denominator?.count ?? 0) === 0;
   const waves = report.waves?.waves ?? [];
-  const failed = waves.reduce((n, w) => n + (w.failed || 0), 0);
   return (
     <div className="rr-progress">
       <p className="rr-caption">{captionOf(report)}</p>
@@ -104,7 +103,6 @@ export function Progress({ report, lineTokens, shown, nav, openRows }: { report:
           : <OtherRow key={`${r.kind}${i}`} row={r} time={rowTime(rows, i, spans)} />)}
       </ol>
       {(report.progress?.notes ?? []).map((n, k) => <p key={k} className="rr-note">{n}</p>)}
-      {failed > 0 && <p className="rr-note">{failed} review {failed === 1 ? "round" : "rounds"} failed in this window.</p>}
       {waves.length > 0 && (
         <div className="rr-waves">
           <h4 className="rr-sub">Waves in this window</h4>

@@ -98,6 +98,11 @@ describe("W1: rows, caption, dead rows, notes (FR-7, FR-12)", () => {
     expect(html).toMatch(/class="rr-row dead now" aria-label="05:00, no pulse row: no live seat, machine asleep or Argos down, stopped now"/);
     expect((html.match(/stopped now/g) ?? []).length).toBe(2); // the name and the word
   });
+  it("draws no total of failed rounds: the report carries none (FR-1, AR15)", () => {
+    const html = text(draw());
+    expect(html).not.toMatch(/review rounds? failed in this window/);
+    expect(html).not.toMatch(/\b2 review rounds failed\b/);
+  });
   it("draws the notes under the table", () => {
     const withNotes = { ...data, report: { ...report, progress: { ...report.progress!, notes: ["dead time drawn only from 02:00", "second note"] } } } as unknown as service.RunReport;
     const html = draw({ data: withNotes });
