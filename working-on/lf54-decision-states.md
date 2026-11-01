@@ -6,7 +6,7 @@ branch: lf54-decision-states
 seat: l54-states
 stage:
 updated: 2026-11-01
-next: "decide: fse — UI1 (sev 3): Home.tsx RuleAction offers the rule box on an awaiting-cells record, outside the boundary (S1); then fix, UI re-review, PR with talos-lab. Also file the stripComments note-finding (Review 1df5001)"
+next: "l54-states (rotated) fixes UI1-UI3 per leftovers-54 Amendment 6, then UI re-review, then PR with talos-lab. stripComments note-finding (Review 1df5001): filed to the FSE (bitácora, next leftovers)"
 review: pass
 reviewer: l54-states-rev, l54-states-ui
 depends_on: [lf53-frontmatter]
