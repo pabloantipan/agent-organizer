@@ -215,3 +215,15 @@ X0. Boundary: `frontend/src/components/RunReport.tsx`,
 `frontend/src/lib/runReport.ts`, `frontend/src/lib/specReader.ts`,
 `frontend/src/components/SpecReader.tsx` (opening a run record, if it does
 not already), and their tests. ui_review true.
+
+Amendment 4, addendum (FSE, 2026-11-01, on sup101's precondition check):
+the drawer reads files only through `App.ReadSpec`, and
+`Service.ReadSpec` (`internal/service/spec.go:32-50`) refuses any path
+that is not one of the initiative's specs. **FR-18** `ReadSpec` also
+allows exactly the run record files the scan read for this initiative's
+waves (under its `runs/` and `docs/runs/`), and nothing else; the footer
+opens them as kind `spec`. The footer keys on the report's
+`waves[].record` (the path the factory read), matched to the scan's files.
+**W11** go test: a wave's run record reads; a path outside those files,
+a `../` path and another initiative's run record are refused as today.
+The boundary adds `internal/service/spec.go` and its test.

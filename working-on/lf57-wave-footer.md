@@ -8,7 +8,7 @@ stage:
 updated: 2026-11-01
 next: "sup101 runs it after lf57-home-signal or beside it (0169, leftovers-57 Amendment 4)"
 depends_on: [lf57-run-report]
-boundary: ["frontend/src/components/RunReport.tsx", "frontend/src/lib/runReport.ts", "frontend/src/lib/specReader.ts", "frontend/src/components/SpecReader.tsx"]
+boundary: ["frontend/src/components/RunReport.tsx", "frontend/src/lib/runReport.ts", "frontend/src/lib/specReader.ts", "frontend/src/components/SpecReader.tsx", "internal/service/spec.go", "internal/service/spec_test.go"]
 spec: "docs/specs/leftovers-57.md (Amendment 4, FR-15 to FR-17)"
 gate: "docs/specs/leftovers-57.md#Acceptance → gate"
 ui_review: true
@@ -19,7 +19,7 @@ autonomy: unattended
 Every wave footer in the report leads somewhere: a finished wave to its run record, a running one to Work.
 
 ## Gate
-docs/specs/leftovers-57.md Amendment 4: W9, W10, X0.
+docs/specs/leftovers-57.md Amendment 4 and its addendum: W9, W10, W11, X0.
 
 ## Pre-answered
 - Base: origin/main with lf57-run-report merged (d4c67af).
