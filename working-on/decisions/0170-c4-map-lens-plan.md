@@ -72,11 +72,11 @@ Settled elsewhere, kept for the record:
   the atlas proposal: "let's ammend the best way we figure out here"
   (agent-slack docs/decisions.md 2026-10-31, entry (4), relayed in thread
   01M6054SPVXXD8H9KK7QJD657Q). The base map draws what exists, with no
-  change classes, which belong to a change order's diagram. In schema
-  c4-map/2 the node field `status` becomes `lifecycle` (live, planned,
-  deprecated, retired), and nodes gain `maturity` (sketched, probed,
-  stable, authored) and `source` (authored, derived). The reader is built
-  on c4-map/2 and never reads `status`.
+  change classes, which belong to a change order's diagram. Corrected the
+  same day (Pablo, "ok.", Hephaistos session, relayed in thread
+  01M6AAE8F6W1M0D0A710HHD8BP): there is no c4-map/2. The reader is built on
+  c4-map/1 as merged (agent-mailbox-specs #15), whose `status` is the Atlas
+  lifecycle: `exists` live, `ruled` planned, `retiring` deprecated.
 
 ## Options
 
@@ -92,7 +92,7 @@ seventh sub-view breaks FR-14.
 
 ## Asked of Hephaistos for the contract
 
-- `schema` and a full `map.json` example (now c4-map/2, which Hephaistos posts first);
+- `schema` and a full `map.json` example (c4-map/1, merged in agent-mailbox-specs #15);
 - per node, the SVG element id, or the exact rule to find it, since the id
   carries a mermaid counter;
 - each level's mermaid source, or its page and block, so Deltagos renders it
