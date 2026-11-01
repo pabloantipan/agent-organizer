@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.GetConfig
+kind: wails
+summary: "The organizer's config, or the defaults when it failed to load."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.GetConfig
+  signature: "() config.Config"

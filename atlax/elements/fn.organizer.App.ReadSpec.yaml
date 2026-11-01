@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.ReadSpec
+kind: wails
+summary: "A spec file's text for the in-app reader, only for a path the scan resolved from the initiative's specs or a card's spec."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.ReadSpec
+  signature: "(string, string) (service.SpecDoc, error)"

@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.AddNote
+kind: wails
+summary: "Adds the human's comment to a card's feed, signed with the account email or the machine; synced with the order, never written to the card."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.AddNote
+  signature: "(string, string, string) (model.Note, error)"

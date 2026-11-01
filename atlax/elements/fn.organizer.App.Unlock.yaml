@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.Unlock
+kind: wails
+summary: "Checks the passcode and unlocks the window, with the failure cooldown; returns the lock state."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.Unlock
+  signature: "(string) (service.LockState, error)"

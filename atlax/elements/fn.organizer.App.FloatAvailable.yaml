@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at floaticon_darwin.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.FloatAvailable
+kind: wails
+summary: "Whether the floating icon runs on this Mac and passed its startup check."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.FloatAvailable
+  signature: "() bool"

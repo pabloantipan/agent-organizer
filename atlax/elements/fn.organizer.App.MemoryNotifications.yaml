@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.MemoryNotifications
+kind: wails
+summary: "Whether macOS lets Deltagos post the memory warning: on, off, not asked, no bundle or not installed."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.MemoryNotifications
+  signature: "() string"

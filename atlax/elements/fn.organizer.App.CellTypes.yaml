@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.CellTypes
+kind: wails
+summary: "Nothing at run time: exists so the Wails generator emits the discuss Thread and Message types for the frontend."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.CellTypes
+  signature: "() (discuss.Thread, discuss.Message)"

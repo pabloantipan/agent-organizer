@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.OpenTerminal
+kind: wails
+summary: "Opens a terminal at a directory."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.OpenTerminal
+  signature: "(string) error"

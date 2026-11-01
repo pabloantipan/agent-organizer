@@ -1,0 +1,12 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.CreateCrew
+kind: wails
+summary: "Brings an initiative's persona cell up, one detached probe per seat, and registers the cell with the record when configured; returns each seat's launch line and the seats already running."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.CreateCrew
+  signature: "(string) (CrewResult, error)"
+consumes:
+  - ext:agent-mailbox-record#fn:record.factories.cells.post

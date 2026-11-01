@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.GetAccount
+kind: wails
+summary: "The signed-in account, or the empty account while auth is off."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.GetAccount
+  signature: "() auth.Account"

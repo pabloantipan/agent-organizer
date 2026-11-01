@@ -1,0 +1,12 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.PlanRetire
+kind: wails
+summary: "Shows what retiring a cell's seats would do, which seats, sessions, threads and tokens, and changes nothing."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.PlanRetire
+  signature: "(service.RetireOptions) (service.RetirePlan, error)"
+consumes:
+  - ext:agent-mailbox-api#fn:mailbox.health

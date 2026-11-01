@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.Factory
+kind: wails
+summary: "What the last rescan learned from factory awake: found or not, its limit, the roots it sees, and each initiative's sleep control."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.Factory
+  signature: "() service.FactoryView"

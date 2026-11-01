@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.ReportWindows
+kind: wails
+summary: "The run windows of the last 14 days, newest first, from factory report --windows."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.ReportWindows
+  signature: "(string) (service.ReportWindows, error)"

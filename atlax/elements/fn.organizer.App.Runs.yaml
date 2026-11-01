@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.Runs
+kind: wails
+summary: "One initiative's agent sessions grouped by card, with input tokens summed and the sessions still running; no dollars."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.Runs
+  signature: "(string) service.RunsView"

@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.SetCardOrder
+kind: wails
+summary: "Saves the manual order of an initiative's cards."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.SetCardOrder
+  signature: "(string, []string) error"

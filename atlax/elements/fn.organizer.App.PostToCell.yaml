@@ -1,0 +1,12 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.PostToCell
+kind: wails
+summary: "Posts a message or opens a thread in an initiative's mailbox as the cell's human."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.PostToCell
+  signature: "(string, service.CellPost) (discuss.PostResult, error)"
+consumes:
+  - ext:agent-mailbox-api#fn:mailbox.messages.post

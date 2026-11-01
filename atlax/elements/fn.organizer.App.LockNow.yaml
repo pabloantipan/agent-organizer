@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.LockNow
+kind: wails
+summary: "Locks the window now; returns the lock state."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.LockNow
+  signature: "() service.LockState"
