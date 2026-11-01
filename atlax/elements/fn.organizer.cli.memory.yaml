@@ -1,0 +1,9 @@
+# An organizer subcommand (internal/cli/cli.go Run), derived by atlax derive (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.cli.memory
+kind: cli
+summary: "Prints this Mac's memory pressure, free of total, the biggest agent sessions and each initiative's agents."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  command: "memory"

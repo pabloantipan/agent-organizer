@@ -1,0 +1,12 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.Usage
+kind: wails
+summary: "One week of tokens by kind and money for every Claude session on this Mac, and posts the ledger's changed rows to the record when configured."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.Usage
+  signature: "(string) (usage.View, error)"
+consumes:
+  - ext:agent-mailbox-record#fn:record.usage.post

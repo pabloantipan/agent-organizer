@@ -1,0 +1,9 @@
+# An organizer subcommand (internal/cli/cli.go Run), derived by atlax derive (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.cli.draft-cell
+kind: cli
+summary: "Opens a session that drafts an initiative's persona cell; --print shows its prompt."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  command: "draft-cell"

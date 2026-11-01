@@ -2326,6 +2326,160 @@ export namespace service {
 		    return a;
 		}
 	}
+	export class C4Evidence {
+	    kind: string;
+	    ref: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new C4Evidence(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kind = source["kind"];
+	        this.ref = source["ref"];
+	    }
+	}
+	export class C4Edge {
+	    from: string;
+	    to: string;
+	    level: string;
+	    evidence: C4Evidence[];
+	
+	    static createFrom(source: any = {}) {
+	        return new C4Edge(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.from = source["from"];
+	        this.to = source["to"];
+	        this.level = source["level"];
+	        this.evidence = this.convertValues(source["evidence"], C4Evidence);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
+	export class C4Level {
+	    level: string;
+	    page: string;
+	    svg: string;
+	    container?: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new C4Level(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.level = source["level"];
+	        this.page = source["page"];
+	        this.svg = source["svg"];
+	        this.container = source["container"];
+	    }
+	}
+	export class C4Node {
+	    id: string;
+	    label: string;
+	    level: string;
+	    kind?: string | null;
+	    parent?: string | null;
+	    status?: string | null;
+	    grounding: C4Evidence[];
+	
+	    static createFrom(source: any = {}) {
+	        return new C4Node(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.label = source["label"];
+	        this.level = source["level"];
+	        this.kind = source["kind"];
+	        this.parent = source["parent"];
+	        this.status = source["status"];
+	        this.grounding = this.convertValues(source["grounding"], C4Evidence);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	export class C4Map {
+	    schema: string;
+	    initiative: string;
+	    system: string;
+	    inputs: Record<string, string | null>;
+	    levels: C4Level[];
+	    nodes: C4Node[];
+	    edges: C4Edge[];
+	
+	    static createFrom(source: any = {}) {
+	        return new C4Map(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.schema = source["schema"];
+	        this.initiative = source["initiative"];
+	        this.system = source["system"];
+	        this.inputs = source["inputs"];
+	        this.levels = this.convertValues(source["levels"], C4Level);
+	        this.nodes = this.convertValues(source["nodes"], C4Node);
+	        this.edges = this.convertValues(source["edges"], C4Edge);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+	
 	export class RunInfo {
 	    session_id: string;
 	    session?: string;
@@ -3184,6 +3338,60 @@ export namespace service {
 	        this.cooldown_secs = source["cooldown_secs"];
 	        this.failures_left = source["failures_left"];
 	    }
+	}
+	export class MapLevelSource {
+	    level: string;
+	    page: string;
+	    container?: string;
+	    source: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new MapLevelSource(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.level = source["level"];
+	        this.page = source["page"];
+	        this.container = source["container"];
+	        this.source = source["source"];
+	    }
+	}
+	export class MapResult {
+	    state: string;
+	    refused?: string;
+	    index?: C4Map;
+	    levels?: MapLevelSource[];
+	
+	    static createFrom(source: any = {}) {
+	        return new MapResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.state = source["state"];
+	        this.refused = source["refused"];
+	        this.index = this.convertValues(source["index"], C4Map);
+	        this.levels = this.convertValues(source["levels"], MapLevelSource);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	
 	

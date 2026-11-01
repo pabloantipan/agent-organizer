@@ -1,0 +1,31 @@
+# fixture-map: the C4 map lens's fixture
+
+Read by `internal/service/map_test.go` (leftovers-58 R1, R2) and by the
+lens's review build (M1-M7). Each folder is its own initiative root, id =
+folder name.
+
+| Initiative | What it holds | For |
+|---|---|---|
+| `harbor` | the contract's map, byte for byte: `expected.json` as `map.json`, `expected-containers.md` as `containers.md`, `expected-modules.md` as `modules.md`, plus `context.md` | R1, M1, M3, M6, M7 |
+| `harbor-ruled` | `ledger` (L2) `ruled`, grounded by record `0002`, which exists under `working-on/decisions/`; `web` (L2) `retiring` | M2 |
+| `harbor-ungrounded` | `mail_relay` (L2) with no grounding row: `kind` and `status` null, `grounding` `[]` (its table row removed too) | M4 |
+| `harbor-v2` | `schema: c4-map/2`, otherwise harbor | R2, M5 |
+| `harbor-nomap` | no `docs/architecture/` at all | R2, M5 (the empty state) |
+
+Every root also carries record `0001`, which grounds the context map's
+`harbor` node. The variants' `map.json` say their own id in `initiative`.
+No root lists `repos:`; the `repo` grounding entries name the contract's
+repos, which are not here.
+
+Source and pin:
+
+- `expected.json`, `expected-containers.md`, `expected-modules.md`:
+  agent-mailbox-specs `contracts/c4-map/`, copied at ca14f12 (contains
+  54cf10d; the folder last changed in cee0b06).
+- `context.md`: claudecode `tests/c4-map/fixture/docs/architecture/context.md`
+  at 92890ed. The contract's L1 page is curated, not among its outputs;
+  without it harbor's context level has no page and the reader refuses it.
+
+The review build: `eval "$(testdata/fixture-map/home.sh)"` from the worktree
+root, then launch `build/bin/Deltagos Review.app/Contents/MacOS/organizer`
+by its path (see `home.sh`).

@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.RenderDiagram
+kind: wails
+summary: "Draws one mermaid block as a dark SVG through mmdc, from the cache when there, or the reason it cannot."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.RenderDiagram
+  signature: "(string) (string, error)"

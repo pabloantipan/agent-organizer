@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.SetPasscode
+kind: wails
+summary: "Sets or changes the local passcode; returns the lock state."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.SetPasscode
+  signature: "(string, string, bool) (service.LockState, error)"

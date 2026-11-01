@@ -1,0 +1,9 @@
+# An organizer subcommand (internal/cli/cli.go Run), derived by atlax derive (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.cli.sync
+kind: cli
+summary: "Scans, pushes this machine's snapshot, pulls every machine's and refreshes the cache."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  command: "sync"

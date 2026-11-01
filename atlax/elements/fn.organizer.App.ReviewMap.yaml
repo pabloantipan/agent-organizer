@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.ReviewMap
+kind: wails
+summary: "A card's review map (changed definitions, 1-hop callers and callees, tests) at a head."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.ReviewMap
+  signature: "(string, string, string) (*review.RevMap, error)"

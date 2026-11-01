@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.ReviewStatus
+kind: wails
+summary: "A card's review state: none, map, moved to a newer head, or missing, with its build when there is one."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.ReviewStatus
+  signature: "(string, string) (service.ReviewStatus, error)"

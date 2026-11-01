@@ -1,0 +1,12 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.ReviewAddressee
+kind: wails
+summary: "Who a question or block on a card's review is asked of, and why, or the reason nobody can be."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.ReviewAddressee
+  signature: "(string, string) (service.ReviewAddressee, error)"
+consumes:
+  - ext:agent-mailbox-api#fn:mailbox.health

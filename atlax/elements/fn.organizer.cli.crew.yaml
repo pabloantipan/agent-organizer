@@ -1,0 +1,11 @@
+# An organizer subcommand (internal/cli/cli.go Run), derived by atlax derive (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.cli.crew
+kind: cli
+summary: "Brings an initiative's persona cell up, one detached probe per seat; --print shows the launch lines."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  command: "crew"
+consumes:
+  - ext:agent-mailbox-record#fn:record.factories.cells.post

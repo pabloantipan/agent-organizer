@@ -1,0 +1,14 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.Retire
+kind: wails
+summary: "Ends a wave: kills the retired seats' sessions, closes the threads, picks up mail, revokes tokens, rewrites cell.json and commits it."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.Retire
+  signature: "(service.RetireOptions) (service.RetireReport, error)"
+consumes:
+  - ext:agent-mailbox-api#fn:mailbox.health
+  - ext:agent-mailbox-api#fn:mailbox.thread.status.set
+  - ext:agent-mailbox-api#fn:mailbox.drain

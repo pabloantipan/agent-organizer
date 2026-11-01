@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.RunReview
+kind: wails
+summary: "Opens a terminal at the initiative root running the configured agent with the review prompt."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.RunReview
+  signature: "(string) error"

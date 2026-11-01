@@ -69,6 +69,8 @@ export function LockNow():Promise<service.LockState>;
 
 export function MakeReview(arg1:string,arg2:string):Promise<service.ReviewMake>;
 
+export function Map(arg1:string):Promise<service.MapResult>;
+
 export function MarkReview(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string,arg6:string):Promise<review.Marks>;
 
 export function MemoryNotifications():Promise<string>;

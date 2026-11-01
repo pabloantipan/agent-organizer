@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.ReportText
+kind: wails
+summary: "The same window's factory report --text, byte for byte, for Copy as text."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.ReportText
+  signature: "(string, string, string) (string, error)"

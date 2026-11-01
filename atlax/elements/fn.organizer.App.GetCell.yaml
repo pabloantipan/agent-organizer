@@ -1,0 +1,14 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.GetCell
+kind: wails
+summary: "One initiative's mailbox as the human sees it: threads, seats and their health, the human's queue, the closed archive."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.GetCell
+  signature: "(string) (service.CellView, error)"
+consumes:
+  - ext:agent-mailbox-api#fn:mailbox.health
+  - ext:agent-mailbox-api#fn:mailbox.threads.list
+  - ext:agent-mailbox-api#fn:mailbox.thread.get

@@ -1,0 +1,10 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.RuleDecision
+kind: wails
+summary: "Writes the ruling of a proposed decision record (status, ruled, ruled_by, chosen and the words) and commits that one file."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.RuleDecision
+  signature: "(string, string, string, string) error"

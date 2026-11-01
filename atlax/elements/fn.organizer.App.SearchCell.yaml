@@ -1,0 +1,12 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.SearchCell
+kind: wails
+summary: "Searches an initiative's mailbox messages, read as the cell's human."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.SearchCell
+  signature: "(string, string) ([]discuss.Message, error)"
+consumes:
+  - ext:agent-mailbox-api#fn:mailbox.search

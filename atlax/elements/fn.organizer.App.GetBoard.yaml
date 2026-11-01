@@ -1,0 +1,12 @@
+# A Go method bound to Deltagos's window by Wails (main.go Bind:), derived by atlax derive at app.go (atlax-seed Amendment 4, FR-7).
+designation: fn:organizer.App.GetBoard
+kind: wails
+summary: "The board the window draws: every initiative and card merged across machines, the manual order, and the last pull time."
+authored: false
+lifecycle: live
+owner: organizer-fse
+terminal:
+  binding: App.GetBoard
+  signature: "() BoardView"
+consumes:
+  - ext:agent-mailbox-api#fn:mailbox.health
