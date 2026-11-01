@@ -6,10 +6,9 @@ branch: lf54-decision-states
 seat: l54-states
 stage:
 updated: 2026-11-01
-next: "review: lf54-decision-states, G5 and X0 pass (guard fixed for finding 1; clean clone, specs 54cf10d), 1df5001"
-review: fail
+next: "file finding: decisionStates.test.ts stripComments drops the code after a // inside a string (x5, Review 1df5001), then UI review, then PR with talos-lab"
+review: pass
 reviewer: l54-states-rev, l54-states-ui
-cause: execution
 depends_on: [lf53-frontmatter]
 boundary: ["docs/specs/leftovers-54.md Boundary, lf54-decision-states"]
 spec: "docs/specs/leftovers-54.md (FR-6 to FR-7)"
@@ -58,8 +57,19 @@ Not changed, on purpose:
 - `frontend/src/components/FsePanel.tsx`: left as is (Amendment 5)
 
 ## Review
-**fail** at 39f64de (branch lf54-decision-states; pinned, did not move). Unmet: **G5** (its last clause). X0 met.
-Reviewer l54-states-rev, 2026-11-01. Fresh run from a clean clone (no --share replay; test-lease printed no run id; log `.wt-notes/l54-states-rev/x0-make-test.log`), specs at 54cf10d.
+**pass** at 1df5001 (the branch moved from 39f64de by one commit, `test(frontend)`, which changes only `decisionStates.test.ts` and one comment in `decisions.ts`). Unmet: none.
+Reviewer l54-states-rev, 2026-11-01, on a new clean clone at 1df5001, specs at 54cf10d. X0's `make test` was **reused**: `test-lease run --share` replayed the same command at 1df5001d276e, run by organizer-probe-l54-states-ui from 15:35:58 (it printed no run id; log `.wt-notes/l54-states-rev/x0-make-test-1df5001.log`). `wails build` and porcelain ran fresh.
+
+Re-review at 1df5001:
+- Finding 1 (39f64de) is **fixed**. The same x1, x2 and x3 appended to `src/lib/plan.ts` in a scratch copy outside the clone now fail the guard: `Tests 1 failed | 78 passed (79)`, listing `plan.ts:37`, `:38` and `:39`. Without them it passes 79 of 79. `LITERAL` now flags any status literal in any quote style, after comments are stripped. Six exact lines are allowed, each with its reason (the `ruled` date field, the section key, the gem kind), and the test fails if an allowed line disappears.
+- G5 is met: every clause from 39f64de still holds (the test diff touches only the guard), and the guard clause now holds for every comparison shape the gate names.
+- X0: `make test` exit 0 (Go 19 packages ok; vitest 87 files, 1385 tests). `test-lease run -- wails build` exit 0. `git status --porcelain` was empty.
+- Note (filed as `next`, not blocking): `stripComments` treats `//` inside a string as a comment unless a `:` or a quote precedes it. So `const u = "a//b"; return d.status === "ruled"` on one line passes the guard (scratch x5: 79 of 79 passed). No lib line today has `//` inside a string (grep over `frontend/src/lib/*.ts`), so it hides nothing now. Two more forms pass, and I read neither as the gate's "literal compared": a map lookup with unquoted keys (`{ applied: true }[d.status]`) and a concatenation (`"rul" + "ed"`).
+- The 39f64de notes stand: Go and component literals unguarded (`tasks.go:110`, `FsePanel.tsx:31`), and no scan test reads a refused `ruled_by`. The stale comment is fixed in 1df5001.
+
+### History: review at 39f64de (fail)
+**fail** at 39f64de. Unmet: **G5** (its last clause). X0 met.
+Fresh run from a clean clone (no --share replay; test-lease printed no run id; log `.wt-notes/l54-states-rev/x0-make-test.log`), specs at 54cf10d.
 cause: execution
 
 **change-check organizer lf54-decision-states** (base ac7f805, head 39f64de, 20 files, 34 flags): outside boundary 14, undeclared 10, declared-not-changed 0, untested? 10, no env, dependency or host flags.
