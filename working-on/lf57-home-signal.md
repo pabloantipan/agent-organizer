@@ -6,7 +6,7 @@ branch: lf57-home-signal
 seat: l57-home
 stage:
 updated: 2026-11-01
-next: "review: lf57-home-signal, W8 X0 pass, W7 for the UI reviewer (screen locked here), 57a04e9"
+next: "review: lf57-home-signal, W8 X0 pass, W7 for the UI reviewer (screen locked here), d0d3428"
 depends_on: [lf57-run-report, lf61-decision-states-ui]
 boundary: ["docs/specs/leftovers-57.md Boundary, lf57-home-signal", "frontend/src/styles/home.css"]
 spec: "docs/specs/leftovers-57.md (FR-14)"
@@ -48,16 +48,18 @@ docs/specs/leftovers-57.md, rows W7, W8 and X0.
 - modified `frontend/src/components/Home.tsx:signalFacts`: carries `run`; a row with only the run signal is not `none`
 - modified `frontend/src/components/Home.tsx:Signals`: draws the run lozenge last; exported for the test
 - added `frontend/src/components/Home.run.test.tsx`: W8 and the read rule, from the committed contract samples
+- modified `frontend/src/styles/home.css`: `.home .p-sig .lz.run { max-width: none; }`, the run signal exempt from the 200 px lozenge cap (leftovers-57 Amendment 5)
 Risky:
 - `useRunReads`: a key that never changes would leave a live run's count stale until Home is reloaded; a key that changes every feed would run `factory report` every 10 s
 - `openRunReport`: polls 3 s for the section; a slow `factory report --windows` leaves Overview unscrolled
 Not changed, on purpose:
 - `lib/runReport.ts`, `RunReport.tsx`, `Overview.tsx`, the store: the recent rule, the section id and `openInitiative` already served
-- `styles/`: `button.lz` is already styled; the 200 px `.lz` cap is not lifted (see Notes)
+- `styles/shell.css`: `button.lz` is already styled; the 200 px `.lz` cap stays for every other lozenge
 - `lib/floatList.ts`: reads `FOLD` by name; the float list does not show the run signal
 
 ## Done
 - 2026-11-01 l57-home: Home's row says the last run (c2c9fc9 fold order, 57a04e9 signal), rebased on origin/main e968fc1; W8 fails on base (11 rows) and passes; X0 passes from a clean clone; W7 measured offscreen (screen locked), shots are the UI reviewer's. Detail in .wt-notes/l57-home/progress.md.
+- 2026-11-01 l57-home: round 2, Amendment 5's rule in home.css (d0d3428); the recent words show whole (205 px, not cut, hit test lands); vitest rows and X0 pass at d0d3428 from a clean clone.
 
 ## Notes
-- The design system caps every `.lz` at 200 px; `last run · 4 cards · 1 h 30 min stopped` is 205 px, so where it shows it reads `… stopp…` (hover names it whole). Lifting it for `.lz.run` is one rule in `home.css`, outside the boundary: asked sup101.
+- The design system caps every `.lz` at 200 px; `last run · 4 cards · 1 h 30 min stopped` is 205 px, so where it shows it reads `… stopp…` (hover names it whole). Lifting it for `.lz.run` is one rule in `home.css`, outside the boundary: asked sup101, ruled (a), leftovers-57 Amendment 5 (3dfa4de), done in d0d3428.
