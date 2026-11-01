@@ -6,7 +6,7 @@ branch: lf54-decision-states
 seat: l54-states
 stage:
 updated: 2026-11-01
-next: "UI re-review at ae0d9c6, then PR with talos-lab. stripComments note-finding (Review 1df5001): filed to the FSE (bitácora, next leftovers)"
+next: "PR with talos-lab (first of wave 2; code and UI review pass at ae0d9c6). stripComments note-finding (Review 1df5001): filed to the FSE (bitácora, next leftovers)"
 review: pass
 reviewer: l54-states-rev, l54-states-ui
 depends_on: [lf53-frontmatter]
