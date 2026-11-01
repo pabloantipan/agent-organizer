@@ -5,7 +5,9 @@
 # of the board must still scan. Phases for the header card (G5 of
 # docs/specs/twenty-at-a-glance.md): foundations is discovery, the joins and
 # the views are building, and the views gate on a record written 4 for 0004
-# (G6); the first building stage is gated by 0001, so no phase problem.
+# (G6); the first building stage is gated by 0001, so no phase problem. The
+# joins also gate on the crossing records 0013-0015, so Overview's gate rows
+# show "awaiting cells", "applied" and "acknowledged" (leftovers-61 D5).
 stages:
   - id: foundations
     title: Foundations
@@ -27,7 +29,7 @@ stages:
       - an agent is joined to a card
       - text: a wave is grouped
         met: soon
-    gates: ["0001", "0002", "0099"]
+    gates: ["0001", "0002", "0099", "0013", "0014", "0015"]
     appetite: two waves
   - id: joins
     title: The joins, written twice by hand
