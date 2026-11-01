@@ -440,7 +440,9 @@ export namespace merge {
 	    depends_on: string[];
 	    boundary: string[];
 	    spec: string;
+	    spec_refs: string[];
 	    gate: string;
+	    gate_refs: string[];
 	    review: string;
 	    thread_state: model.ThreadState[];
 	    branch_start: string;
@@ -478,7 +480,9 @@ export namespace merge {
 	        this.depends_on = source["depends_on"];
 	        this.boundary = source["boundary"];
 	        this.spec = source["spec"];
+	        this.spec_refs = source["spec_refs"];
 	        this.gate = source["gate"];
+	        this.gate_refs = source["gate_refs"];
 	        this.review = source["review"];
 	        this.thread_state = this.convertValues(source["thread_state"], model.ThreadState);
 	        this.branch_start = source["branch_start"];

@@ -18,6 +18,7 @@ func TestLedgerFilesAreSkippedNotRejected(t *testing.T) {
 		{"jira-map.md", "# Jira map\n| key | card |\n", false, false},
 		{"tickets.md", "# Tickets\n- VIT-1\n", false, false},
 		{"jira-estimates.md", "# Estimates\n", false, false},
+		{"assumptions.md", "# Assumptions\n- A1\n", false, false},
 		{"jira-report-2026-09-30.md", "# Reporte\n", false, false},
 		{"jira-report-draft.md", front, false, false},
 		{"jira-notes.md", "# notes, no frontmatter\n", false, false},
@@ -111,4 +112,53 @@ func equal(a, b []string) bool {
 		}
 	}
 	return true
+}
+
+// leftovers-53 FR-3a: a card under done/ is done whatever its status says;
+// any other status there is one problem and the card is still read. A status
+// outside the four elsewhere is kept as written and reported.
+func TestDoneFolderStatusAndUnknownStatus(t *testing.T) {
+	root := writeInitiative(t, "")
+	done := filepath.Join(root, "working-on", "done")
+	if err := os.MkdirAll(done, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	card := func(status string) string {
+		return "---\ntitle: X\nstatus: " + status + "\nupdated: 2026-09-01\nnext: \"x\"\n---\n"
+	}
+	files := map[string]string{
+		filepath.Join(done, "stale.md"):                 card("now"),
+		filepath.Join(done, "fine.md"):                  card("done"),
+		filepath.Join(done, "bare.md"):                  "---\ntitle: X\nupdated: 2026-09-01\n---\n",
+		filepath.Join(root, "working-on", "dropped.md"): card("dropped"),
+	}
+	for p, c := range files {
+		if err := os.WriteFile(p, []byte(c), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	si := ReadInitiative(root, opts(root))
+	status := map[string]string{}
+	for _, c := range si.Cards {
+		status[c.Slug] = c.Status
+	}
+	for slug, want := range map[string]string{"stale": "done", "fine": "done", "bare": "done", "dropped": "dropped"} {
+		if status[slug] != want {
+			t.Errorf("%s status %q, want %q", slug, status[slug], want)
+		}
+	}
+	msgs := map[string][]string{}
+	for _, p := range si.Problems {
+		msgs[filepath.Base(p.Path)] = append(msgs[filepath.Base(p.Path)], p.Msg)
+	}
+	for name, want := range map[string][]string{
+		"stale.md":   {`status "now" on a card under done/`},
+		"fine.md":    nil,
+		"bare.md":    nil,
+		"dropped.md": {`unknown card status "dropped"`},
+	} {
+		if strings.Join(msgs[name], "|") != strings.Join(want, "|") {
+			t.Errorf("%s problems %q, want %q", name, msgs[name], want)
+		}
+	}
 }

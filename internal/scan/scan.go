@@ -204,11 +204,16 @@ func readCard(path string, archived bool) (model.Card, []model.Problem) {
 		return c, []model.Problem{model.UnreadProblem(path, err.Error())}
 	}
 	c.Body = body
-	if archived && c.Status == "" {
+	// A card under done/ is done whatever its status says; any other status
+	// there is reported and the card still read (leftovers-53 FR-3a).
+	if archived && c.Status != model.StatusDone {
+		if c.Status != "" {
+			problems = append(problems, model.Problem{Path: path, Msg: fmt.Sprintf("status %q on a card under done/", c.Status)})
+		}
 		c.Status = model.StatusDone
 	}
 	if model.StatusOrder(c.Status) == 9 {
-		problems = append(problems, model.Problem{Path: path, Msg: fmt.Sprintf("unknown status %q", c.Status)})
+		problems = append(problems, model.Problem{Path: path, Msg: fmt.Sprintf("unknown card status %q", c.Status)})
 	}
 	if c.Title == "" {
 		problems = append(problems, model.Problem{Path: path, Msg: "missing title"})
@@ -389,12 +394,13 @@ func readCell(root string, problems []model.Problem) (*model.Cell, []model.Probl
 }
 
 // ledgerNames are the files the working-on skill's neighbours keep in
-// working-on/ that are not cards: Hermione's Jira ledgers and the ticket list.
-var ledgerNames = map[string]bool{"tickets.md": true, "jira-map.md": true, "jira-estimates.md": true}
+// working-on/ that are not cards: Hermione's Jira ledgers, the ticket list
+// and the assumptions list (contracts working-on/expected.json, ledgers).
+var ledgerNames = map[string]bool{"tickets.md": true, "jira-map.md": true, "jira-estimates.md": true, "assumptions.md": true}
 
 // isLedger reports whether a .md file in working-on/ is a ledger rather than a
 // card, so the scan skips it without a problem: tickets.md, jira-map.md,
-// jira-estimates.md and jira-report-*.md always, and any other jira-*.md that
+// jira-estimates.md, assumptions.md and jira-report-*.md always, and any other jira-*.md that
 // has no frontmatter. Any other name without frontmatter stays a problem, since
 // that is a card that lost its frontmatter.
 func isLedger(path string) bool {
