@@ -674,9 +674,12 @@ func preludeFor(api string, cell model.Cell, seat, session, crewModel string) st
 		cell.Project, seat, shellQuote(api), shellQuote(cell.Project), shellQuote(seat), shellQuote(session), shellQuote(m), shellQuote(hook))
 }
 
-// Retirable is the seats of a cell that a wave is done with: not the human
+// Retirable is the seats of a cell that a wave is done with: seats some
+// card of the initiative, open or done, named in seat:, but not the human
 // or the reconciler, named by no open card, and with no working session.
-// Idle and off both count as done; a seat mid-task is never retirable.
+// A seat no card ever named, the FSE or another standing role, is never
+// retirable: no wave brought it, so no wave ending retires it (leftovers-54
+// FR-1). Idle and off both count as done; a seat mid-task is never retirable.
 // A cell in definition, a draft or a roster no seat of which has run, has
 // none: a roster being defined is not a wave that ended (discovery-in-a-cell
 // FR-5).
@@ -702,9 +705,10 @@ func Retirable(si *model.ScannedInitiative) []string {
 			}
 		}
 	}
+	named := namedSeats(si)
 	var out []string
 	for _, seat := range si.Cell.Agents {
-		if seat == si.Cell.Human || seat == si.Cell.Reconciler || busy[seat] {
+		if seat == si.Cell.Human || seat == si.Cell.Reconciler || busy[seat] || !named[seat] {
 			continue
 		}
 		out = append(out, seat)
