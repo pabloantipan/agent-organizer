@@ -153,7 +153,9 @@ export function UsageRejected({ rows }: { rows: UsageRejectedRow[] | null | unde
   return (
     <section className="usage-sec usage-rejected" aria-labelledby="usage-rejected-title">
       <h2 id="usage-rejected-title" className="sec-title">
-        Not accepted · <span className="num sec-count">{n}</span>
+        {/* One flex item: .sec-title's gap would replace the space after the
+            dot if the phrase and its count were two (leftovers-70 FR-2, U10). */}
+        <span>Not accepted · <span className="num sec-count">{n}</span></span>
       </h2>
       <p className="usage-rejected-why">{REJECTED_WHY}</p>
       <div className="usage-table-wrap">
