@@ -530,13 +530,20 @@ the element pads its own content 4 px on the sides the ring crosses
 clearance, so the ring never covers a glyph and keeps about 2 px from it.
 In a comma list the comma stays outside the link, pulled in by
 `margin-inline-start: calc(-1 * var(--space-1))` so the text reads `a, b`
-(run-report A8). An inset ring takes the element's own radius;
+(run-report A8). Links in a comma list are inline text: they draw the
+**inset** ring (so no ring reaches a neighbour) and take no 24 px
+minimum (WCAG 2.5.8's inline exception), only the 4 px padding
+(run-report A9). An inset ring takes the element's own radius;
 the +2 belongs only to an outset ring at a 2 px offset (run-report A7). **A count after a title** is `<title> · N`, one space each side of the
 `·`, wherever a title carries one (section titles, disclosure labels,
 Home's groups, Overview, the rail's group labels); a fraction (`Exit 0/2`,
-met of total) is a measure, not a count, and keeps its own form,
-drawn by one shared piece, not per place (usage A3, run-report A7). **A proper name (a system, a command) never sits in
-an uppercased label**; it goes in the line under it (usage A2).
+met of total) is a measure, not a count, and keeps its own form; never
+`(N)`,
+drawn by one shared piece, not per place (usage A3, run-report A7). **A proper name (a system, a command, or a name a person gave: a group,
+a client, an initiative) never sits in an uppercased label**: a system's name in a title goes in
+the line under it (usage A2); a label that is such a name (a rail group)
+keeps the label's size, weight and colour in the name's own case
+(run-report A9).
 
 **A region that scrolls inside a view shows it does**: each edge with
 content hidden past it carries a 1 px `--fg-subtle` line (4.5:1, not
