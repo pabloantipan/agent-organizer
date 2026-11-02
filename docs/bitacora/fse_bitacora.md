@@ -17,6 +17,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- INCIDENT (contained): 2026-11-02 03:08-03:14 lf58-map-lens's UI reviewer ran wails dev with the fixture config but Pablo's real ~/.local/share/organizer/ (XDG_DATA_HOME dropped in a hand-built env); read the cache, wrote 3 diagram caches (removed), organizer.log lines left; state.json unproven but no fixture data in it. Reported to Pablo ([for pablo]) and Hephaistos (a launcher that refuses the real home). Rule for my UI-review prompts until then: launch only through the fixture's home.sh, never a hand-built env.
+
 - Held for the next frontend leftovers: Home.tsx ~811, the comment above runSignalFor still says the stopped time is the sum of the spans (wrong since 569375c).
 
 - Repetition, second sighting: ReadSpec follows symlinks out of its allowed dirs (sup101 Found 5; sup103 lf58-map-lens review note 1). Cut a ReadSpec card: refuse a path whose EvalSymlinks leaves its allowed dir. Owed: lf58-map-lens's window UI pass at the next screen unlock (round 2 UI review ran offscreen, my call 2026-11-02 ~03:30).
