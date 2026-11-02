@@ -53,12 +53,32 @@ describe("waitingChip", () => {
   it("says on you when every waiting record is the lead's or has no owner", () => {
     expect(waitingChip([rec("0001", "Pablo ", "2026-09-01"), rec("0002", "", "2026-09-02")], "pablo")).toBe("2 decisions waiting on you");
   });
-  it("says waiting when someone else owns one", () => {
-    expect(waitingChip([rec("0001", "pablo", "2026-09-01"), rec("0002", "ana", "2026-09-02")], "pablo")).toBe("2 decisions waiting");
+  it("says both counts when someone else owns one and the lead some (DS7)", () => {
+    expect(waitingChip([rec("0001", "pablo", "2026-09-01"), rec("0002", "ana", "2026-09-02")], "pablo")).toBe("2 decisions waiting · 1 on you");
+  });
+  it("says waiting alone when none is the lead's", () => {
+    expect(waitingChip([rec("0001", "ana", "2026-09-01"), rec("0002", "ana", "2026-09-02")], "pablo")).toBe("2 decisions waiting");
   });
   it("says decision, not decisions, for one", () => {
     expect(waitingChip([rec("0001", "ana", "2026-09-01")], "pablo")).toBe("1 decision waiting");
     expect(waitingChip([rec("0001", "pablo", "2026-09-01")], "pablo")).toBe("1 decision waiting on you");
+  });
+});
+
+// leftovers-62 U1 (FR-5, DS7, Amendment 1): the header's count and the
+// lead's, three cases. Six records waiting, five the lead's (one with no
+// owner, one owned by operator, read as pablo) and one alejandro's.
+describe("leftovers-62 U1: the chip says both counts when they differ", () => {
+  const five = [rec("0001", "pablo", "2026-09-01"), rec("0002", "", "2026-09-02"), rec("0003", "operator", "2026-09-03"), rec("0004", "Pablo", "2026-09-04"), rec("0006", "pablo", "2026-09-06")];
+  const alejandro = rec("0005", "alejandro", "2026-09-05");
+  it("6 and 5 read `6 decisions waiting · 5 on you`", () => {
+    expect(waitingChip([...five, alejandro], "pablo")).toBe("6 decisions waiting · 5 on you");
+  });
+  it("5 and 5 read `5 decisions waiting on you`, unchanged", () => {
+    expect(waitingChip(five, "pablo")).toBe("5 decisions waiting on you");
+  });
+  it("6 and 0 read `6 decisions waiting`", () => {
+    expect(waitingChip(five.map((d) => ({ ...d, owner: "alejandro" })).concat(alejandro), "pablo")).toBe("6 decisions waiting");
   });
 });
 

@@ -74,7 +74,7 @@ describe("D1 (FR-1, DS1): the lead's counts hold only what the lead can rule", (
   });
   it("the header's count is the proposed records, 0013 left out, and lands on the oldest of them", () => {
     expect(waitingDecisions(initA)).toBe(proposed.length);
-    expect(waitingChip(fixtureRecords, "pablo")).toBe(`${proposed.length} decisions waiting`);
+    expect(waitingChip(fixtureRecords, "pablo")).toBe(`${proposed.length} decisions waiting · ${leadsProposed.length} on you`);
     expect(firstWaiting(fixtureRecords)).not.toBe("0013");
     expect(firstWaiting(fixtureRecords)).toBe("0002");
     expect(waitingOwners(initA)).not.toContain("operator");
