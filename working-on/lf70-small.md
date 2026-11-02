@@ -7,7 +7,7 @@ seat: l70-build
 reviewer: l70-rev, l70-ui
 stage:
 updated: 2026-11-02
-next: "launch on 0183's ruling"
+next: "sup114 runs it (0183 ruled 2026-11-02)"
 depends_on: []
 boundary: ["frontend/src/styles/runreport.css", "frontend/src/components/UsageTable.tsx", "frontend/src/styles/usage.css", "frontend/src/components/Usage.rejected.test.tsx", "frontend/src/components/RunReport.test.tsx", "CLAUDE.md"]
 spec: "docs/specs/leftovers-70.md (FR-1 to FR-3)"

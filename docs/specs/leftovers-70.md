@@ -1,6 +1,6 @@
 # Leftovers 70: two sev-1 looks and the runs paragraph: the build spec
 
-status: proposed (0183)
+status: accepted (0183, ruled 2026-11-02)
 by: the FSE, 2026-11-02, on main at bec14ab
 sources: Aglaea 5a333ac (`docs/ux/specs/run-report.md` Amendment 6, AR32;
 `docs/ux/specs/usage.md` Amendment 3, U10; `docs/design-system.md`); sup113
