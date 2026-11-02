@@ -93,3 +93,41 @@ describe("FR-5: a lens is classes on the node elements; no node moves", () => {
     expect(lensed.replace(/ map-ruled| map-ungrounded/g, "").replace(/map-svg-\d+/g, "")).toBe(plain.replace(/map-svg-\d+/g, ""));
   });
 });
+
+// leftovers-69 V2 (FR-4; map-and-roadmap Amendment 5, M17): the picked
+// mark (the button's inset edge, and so its ring) takes the node's own
+// corner radius from the SVG shape; a shape with none keeps 4 px.
+describe("leftovers-69 V2 (FR-4, M17): the picked mark takes the node's own radius", async () => {
+  const { drawnNodes, parseXml, sanitizeMapTree } = await import("../lib/mapSvg");
+  const boxes = new Map(drawnNodes(sanitizeMapTree(harbor, "t")).map((d) => [d.id, d.box]));
+  const html = view(drawn, { picked: "card_gateway" });
+  const radiusOf = (id: string) => {
+    const b = buttons(html).find((t) => attr(t, "data-node") === id)!;
+    return /border-radius:([^;"]+)/.exec(attr(b, "style") ?? "")?.[1].trim();
+  };
+  it("a pill node of the fixture's SVG (card_gateway, a stadium), picked: the mark's rx and ry equal the node's, half its height", () => {
+    const box = boxes.get("card_gateway")!;
+    // The stadium's outline starts on its top edge where the straight run
+    // begins, `M-37.296875 -17.5` in the node's frame: its radius is 17.5.
+    expect(harbor).toMatch(/id="flowchart-card_gateway-\d+"[^>]*><g class="basic label-container outer-path"><path d="M-37\.296875 -17\.5 /);
+    const m = /^([\d.]+)% \/ ([\d.]+)%$/.exec(radiusOf("card_gateway") ?? "");
+    expect(m, radiusOf("card_gateway")).not.toBeNull();
+    const rx = (Number(m![1]) / 100) * box.width, ry = (Number(m![2]) / 100) * box.height;
+    expect(rx).toBeCloseTo(17.5, 1);
+    expect(ry).toBeCloseTo(17.5, 1);
+    expect(ry).toBeCloseTo(box.height / 2, 1);
+    expect(buttons(html).find((t) => attr(t, "data-node") === "card_gateway")).toContain("map-node-picked");
+  });
+  it("the other pill (mail_relay) takes its own radius too", () => {
+    const box = boxes.get("mail_relay")!;
+    const m = /^([\d.]+)% \/ ([\d.]+)%$/.exec(radiusOf("mail_relay") ?? "")!;
+    expect((Number(m[2]) / 100) * box.height).toBeCloseTo(box.height / 2, 1);
+  });
+  it("a shape with none keeps radius 4: the cylinder (harbor_db) and the plain rects", () => {
+    for (const id of ["harbor_db", "harbor_api", "ledger", "web"]) expect(radiusOf(id), id).toBe("4px");
+  });
+  it("a rect with rx gives that rx (ry defaults to it), as a share of its box", () => {
+    const t = parseXml('<svg viewBox="0 0 100 100"><g class="node" id="flowchart-a-0" transform="translate(50 50)"><rect class="basic label-container" x="-20" y="-10" width="40" height="20" rx="5"/></g></svg>').children[0];
+    expect(drawnNodes(t as never)[0].corner).toEqual({ rx: 5, ry: 5 });
+  });
+});
