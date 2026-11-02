@@ -1,6 +1,6 @@
 # Leftovers 72: the last count titles and the commas beside a padded link: the build spec
 
-status: proposed (0185)
+status: accepted (0185, ruled 2026-11-02)
 by: the FSE, 2026-11-02, on main at 1373564
 sources: l71-ui's UI review of lf71-count-look (F1-F3 and question c);
 Aglaea's `docs/ux/specs/run-report.md` Amendment 8 and `docs/design-system.md`
