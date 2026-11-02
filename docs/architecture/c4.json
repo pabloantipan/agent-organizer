@@ -2,14 +2,201 @@
   "schema": "c4-map/1",
   "system": "deltagos",
   "adapters": [
-    {"name": "repos"},
-    {"name": "manifests"}
+    {
+      "name": "repos"
+    },
+    {
+      "name": "manifests"
+    }
   ],
-  "pages": {"context": "context.md", "containers": "containers.md", "modules": "modules.md"},
+  "pages": {
+    "context": "context.md",
+    "containers": "containers.md",
+    "modules": "modules.md"
+  },
   "externals": [
-    {"id": "discuss_mailbox", "label": "discuss mailbox (agent-mailbox-api)", "evidence": "external `ext:agent-mailbox-api#fn:mailbox.drain`; external `ext:agent-mailbox-api#fn:mailbox.health`; external `ext:agent-mailbox-api#fn:mailbox.healthz`; external `ext:agent-mailbox-api#fn:mailbox.messages.post`; external `ext:agent-mailbox-api#fn:mailbox.search`; external `ext:agent-mailbox-api#fn:mailbox.thread.get`; external `ext:agent-mailbox-api#fn:mailbox.thread.status.set`; external `ext:agent-mailbox-api#fn:mailbox.threads.list`", "why": "read and posted over the unix socket; the designations are the consumes: lines of atlax/elements/"},
-    {"id": "record", "label": "the record (agent-mailbox-record)", "evidence": "external `ext:agent-mailbox-record#fn:record.factories.cells.post`; external `ext:agent-mailbox-record#fn:record.factories.keys.issue`; external `ext:agent-mailbox-record#fn:record.factories.keys.revoke`; external `ext:agent-mailbox-record#fn:record.usage.post`", "why": "write-only client; the designations are the consumes: lines of atlax/elements/"},
-    {"id": "firebase", "label": "Firebase: Auth and Firestore", "evidence": "curated: context.md", "why": "only with auth: firebase; no atlax designation reads it"},
-    {"id": "factory_tools", "label": "the factory's tools: factory, probe, zellij, the agent CLI", "evidence": "curated: context.md", "why": "run as subprocesses; no atlax designation reads them"}
+    {
+      "id": "discuss_mailbox",
+      "label": "discuss mailbox (agent-mailbox-api)",
+      "evidence": "external `ext:agent-mailbox-api#fn:mailbox.drain`; external `ext:agent-mailbox-api#fn:mailbox.health`; external `ext:agent-mailbox-api#fn:mailbox.healthz`; external `ext:agent-mailbox-api#fn:mailbox.messages.post`; external `ext:agent-mailbox-api#fn:mailbox.search`; external `ext:agent-mailbox-api#fn:mailbox.thread.get`; external `ext:agent-mailbox-api#fn:mailbox.thread.status.set`; external `ext:agent-mailbox-api#fn:mailbox.threads.list`",
+      "why": "read and posted over the unix socket; the designations are the consumes: lines of atlax/elements/"
+    },
+    {
+      "id": "record",
+      "label": "the record (agent-mailbox-record)",
+      "evidence": "external `ext:agent-mailbox-record#fn:record.factories.cells.post`; external `ext:agent-mailbox-record#fn:record.factories.keys.issue`; external `ext:agent-mailbox-record#fn:record.factories.keys.revoke`; external `ext:agent-mailbox-record#fn:record.usage.post`",
+      "why": "write-only client; the designations are the consumes: lines of atlax/elements/"
+    },
+    {
+      "id": "firebase",
+      "label": "Firebase: Auth and Firestore",
+      "evidence": "curated: context.md",
+      "why": "only with auth: firebase; no atlax designation reads it"
+    },
+    {
+      "id": "factory_tools",
+      "label": "the factory's tools: factory, probe, zellij, the agent CLI",
+      "evidence": "curated: context.md",
+      "why": "run as subprocesses; no atlax designation reads them"
+    }
+  ],
+  "ids": {
+    "agent_organizer": {
+      "names": [
+        "agent-organizer"
+      ],
+      "kind": "container"
+    },
+    "agent_organizer__auth": {
+      "names": [
+        "agent-organizer/internal/auth"
+      ],
+      "kind": "module"
+    },
+    "agent_organizer__cache": {
+      "names": [
+        "agent-organizer/internal/cache"
+      ],
+      "kind": "module"
+    },
+    "agent_organizer__cli": {
+      "names": [
+        "agent-organizer/internal/cli"
+      ],
+      "kind": "module"
+    },
+    "agent_organizer__config": {
+      "names": [
+        "agent-organizer/internal/config"
+      ],
+      "kind": "module"
+    },
+    "agent_organizer__diagram": {
+      "names": [
+        "agent-organizer/internal/diagram"
+      ],
+      "kind": "module"
+    },
+    "agent_organizer__discuss": {
+      "names": [
+        "agent-organizer/internal/discuss"
+      ],
+      "kind": "module"
+    },
+    "agent_organizer__keychain": {
+      "names": [
+        "agent-organizer/internal/keychain"
+      ],
+      "kind": "module"
+    },
+    "agent_organizer__lock": {
+      "names": [
+        "agent-organizer/internal/lock"
+      ],
+      "kind": "module"
+    },
+    "agent_organizer__memory": {
+      "names": [
+        "agent-organizer/internal/memory"
+      ],
+      "kind": "module"
+    },
+    "agent_organizer__merge": {
+      "names": [
+        "agent-organizer/internal/merge"
+      ],
+      "kind": "module"
+    },
+    "agent_organizer__model": {
+      "names": [
+        "agent-organizer/internal/model"
+      ],
+      "kind": "module"
+    },
+    "agent_organizer__prompt": {
+      "names": [
+        "agent-organizer/internal/prompt"
+      ],
+      "kind": "module"
+    },
+    "agent_organizer__record": {
+      "names": [
+        "agent-organizer/internal/record"
+      ],
+      "kind": "module"
+    },
+    "agent_organizer__review": {
+      "names": [
+        "agent-organizer/internal/review"
+      ],
+      "kind": "module"
+    },
+    "agent_organizer__scan": {
+      "names": [
+        "agent-organizer/internal/scan"
+      ],
+      "kind": "module"
+    },
+    "agent_organizer__service": {
+      "names": [
+        "agent-organizer/internal/service"
+      ],
+      "kind": "module"
+    },
+    "agent_organizer__session": {
+      "names": [
+        "agent-organizer/internal/session"
+      ],
+      "kind": "module"
+    },
+    "agent_organizer__specpath": {
+      "names": [
+        "agent-organizer/internal/specpath"
+      ],
+      "kind": "module"
+    },
+    "agent_organizer__sync": {
+      "names": [
+        "agent-organizer/internal/sync"
+      ],
+      "kind": "module"
+    },
+    "agent_organizer__usage": {
+      "names": [
+        "agent-organizer/internal/usage"
+      ],
+      "kind": "module"
+    }
+  },
+  "modules": {
+    "agent_organizer": {
+      "root": "internal"
+    }
+  },
+  "edges": [
+    {
+      "from": "agent_organizer",
+      "to": "discuss_mailbox",
+      "evidence": "external `ext:agent-mailbox-api#fn:mailbox.health`",
+      "why": "reads and posts over the unix socket (internal/discuss)"
+    },
+    {
+      "from": "agent_organizer",
+      "to": "record",
+      "evidence": "external `ext:agent-mailbox-record#fn:record.usage.post`",
+      "why": "write-only client (internal/record)"
+    },
+    {
+      "from": "agent_organizer",
+      "to": "firebase",
+      "evidence": "curated: context.md",
+      "why": "Auth and Firestore over REST, only with auth: firebase (internal/auth, internal/sync)"
+    },
+    {
+      "from": "agent_organizer",
+      "to": "factory_tools",
+      "evidence": "curated: context.md",
+      "why": "runs factory, probe, zellij and the agent CLI as subprocesses"
+    }
   ]
 }
