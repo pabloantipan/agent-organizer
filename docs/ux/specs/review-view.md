@@ -782,3 +782,13 @@ it measures again on resize. Cause not traced; that is the builder's.
 | # | Pablo can | Checked by |
 |---|---|---|
 | R53 (amended) | read the header evenly | as in A18, and: init-a open at 1440×900, the window resized live to 1024×640 without reopening, the header's last row ends above the sub-tabs with the same gap as when opened at 1024 |
+
+## Amendment 21 (aglaea, 2026-11-02): R53's gap is one gap at every width
+
+From lf62-ui (note 3): at 1024 the gap above the sub-tabs is 4 px against
+8 px at 1440, on main too when opened at 1024. A20 made live equal fresh;
+the gap itself must not change with the width either.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| R53 (amended) | read the header evenly | as A20, and the gap from the header's last row to the sub-tabs is the same at 1440×900 and 1024×640 (8 px), whatever the number of header rows |
