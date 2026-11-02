@@ -25,7 +25,7 @@ flowchart LR
 
 | node | level | kind | status | evidence |
 |---|---|---|---|---|
-| `agent_organizer` | containers | container | exists | repo `agent-organizer@baf596f` |
+| `agent_organizer` | containers | container | exists | repo `agent-organizer@784a1f3` |
 | `discuss_mailbox` | containers | external | exists | external `ext:agent-mailbox-api#fn:mailbox.drain`; external `ext:agent-mailbox-api#fn:mailbox.health`; external `ext:agent-mailbox-api#fn:mailbox.healthz`; external `ext:agent-mailbox-api#fn:mailbox.messages.post`; external `ext:agent-mailbox-api#fn:mailbox.search`; external `ext:agent-mailbox-api#fn:mailbox.thread.get`; external `ext:agent-mailbox-api#fn:mailbox.thread.status.set`; external `ext:agent-mailbox-api#fn:mailbox.threads.list` |
 | `factory_tools` | containers | external | exists | curated `context.md` |
 | `firebase` | containers | external | exists | curated `context.md` |

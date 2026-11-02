@@ -3,7 +3,7 @@
   "initiative": "organizer",
   "system": "deltagos",
   "inputs": {
-    "agent-organizer": "baf596ffa1af1785f2127bd74c1f62fa670b8edc"
+    "agent-organizer": "784a1f36513bcbc06567a0192b3524925725fe09"
   },
   "levels": [
     {
@@ -126,7 +126,7 @@
       "grounding": [
         {
           "kind": "repo",
-          "ref": "agent-organizer@baf596f"
+          "ref": "agent-organizer@784a1f3"
         }
       ]
     },
