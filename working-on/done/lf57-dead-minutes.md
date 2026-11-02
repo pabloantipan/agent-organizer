@@ -1,6 +1,6 @@
 ---
 title: "Home reads the report's dead minutes instead of summing them"
-status: now
+status: done
 repos: [organizer]
 branch: lf57-dead-minutes
 seat: l57dm-build
@@ -8,7 +8,7 @@ reviewer: l57dm-rev
 review: "pass, unmet: none (l57dm-rev, 2026-11-02, 569375c)"
 stage:
 updated: 2026-11-02
-next: "merged jointly: specs #28, claudecode #39, docs #22, organizer #37 044d278; supervisor moves it to done/"
+next: "done: joint merge, organizer #37 044d278 (2026-11-02)"
 depends_on: [lf64-run-report-polish]
 boundary: ["internal/service/report.go", "internal/service/report_test.go", "frontend/src/components/Home.tsx", "frontend/src/lib/runReport.ts", "frontend/src/components/runreport.fixtures/", "frontend/wailsjs/", ".github/workflows/release.yml"]
 spec: "docs/specs/leftovers-57.md (Amendment 7, FR-19 and FR-20)"
