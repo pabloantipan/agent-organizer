@@ -169,7 +169,57 @@ describe("decision status literals", () => {
       `if (ruled !== undefined) out.push({ number: d.number, at: ruled, kind: "ruled" });`,
     ],
   };
-  const stripComments = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " ")).replace(/(^|[^:"'`])\/\/.*$/gm, "$1");
+  // Comments out, code and strings kept, lines kept (leftovers-62 FR-8): a
+  // scan that knows strings, template literals and regex literals, so a `//`
+  // inside "a // b" or /https?:\/\// is not a comment and the code after it is
+  // still read. A block comment becomes spaces, so line numbers hold.
+  const stripComments = (src: string) => {
+    let out = "";
+    let k = 0;
+    let prev = ""; // the last code character that was not a space
+    const regexMayStart = () => prev === "" || /[(,=:[!&|?{};+\-*%<>~^]/.test(prev) || /\b(return|typeof|case|of|in)$/.test(out.trimEnd());
+    while (k < src.length) {
+      const c = src[k];
+      const n = src[k + 1];
+      if (c === "/" && n === "/") {
+        while (k < src.length && src[k] !== "\n") k++;
+        continue;
+      }
+      if (c === "/" && n === "*") {
+        const end = src.indexOf("*/", k + 2);
+        const stop = end < 0 ? src.length : end + 2;
+        out += src.slice(k, stop).replace(/[^\n]/g, " ");
+        k = stop;
+        continue;
+      }
+      if (c === '"' || c === "'" || c === "`") {
+        let j = k + 1;
+        while (j < src.length && src[j] !== c && (c === "`" || src[j] !== "\n")) j += src[j] === "\\" ? 2 : 1;
+        out += src.slice(k, j + 1);
+        k = j + 1;
+        prev = c;
+        continue;
+      }
+      if (c === "/" && regexMayStart()) {
+        let j = k + 1;
+        let cls = false;
+        while (j < src.length && src[j] !== "\n" && (cls || src[j] !== "/")) {
+          if (src[j] === "\\") j++;
+          else if (src[j] === "[") cls = true;
+          else if (src[j] === "]") cls = false;
+          j++;
+        }
+        out += src.slice(k, j + 1);
+        k = j + 1;
+        prev = "/";
+        continue;
+      }
+      out += c;
+      if (!/\s/.test(c)) prev = c;
+      k++;
+    }
+    return out;
+  };
   const here = new URL(".", import.meta.url).pathname;
   const files = (readdirSync(here) as string[]).filter((f) => /\.tsx?$/.test(f) && !/\.test\.tsx?$/.test(f) && f !== "decisions.ts");
   const linesOf = (f: string) => stripComments(readFileSync(`${here}${f}`, "utf8") as string).split("\n").map((l, i) => [i + 1, l.trim()] as const);
@@ -185,6 +235,17 @@ describe("decision status literals", () => {
     ]) expect([l, LITERAL.test(l)]).toEqual([l, true]);
     expect(LITERAL.test("isOpen(d)")).toBe(false);
     expect(stripComments(`a // "ruled"\n/* "applied" */ b`).match(LITERAL)).toBeNull();
+  });
+  // leftovers-62 U4 (FR-8): a `//` inside a string is not a comment.
+  it("keeps the code after a // inside a string, so the comparison is still seen", () => {
+    const src = `"a // b"; x === "proposed"`;
+    expect(stripComments(src)).toBe(src);
+    expect(LITERAL.test(stripComments(src))).toBe(true);
+    expect(stripComments(`'a // b'; d.status === 'ruled' // "applied"`)).toBe(`'a // b'; d.status === 'ruled' `);
+    expect(stripComments("`x // ${y}`; s === `ruled`")).toBe("`x // ${y}`; s === `ruled`");
+    expect(stripComments(`const u = /https?:\\/\\//; d.status === "ruled" // tail`)).toBe(`const u = /https?:\\/\\//; d.status === "ruled" `);
+    expect(stripComments(`a /* x\n y */ b`)).toBe(`a     \n      b`);
+    expect(stripComments(`n = a / b; // c "ruled"`).match(LITERAL)).toBeNull();
   });
   it.each(files)("%s names no decision status outside the allowed lines", (f) => {
     const allowed = ALLOWED[f] ?? [];
