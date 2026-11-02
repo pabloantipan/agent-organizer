@@ -1,13 +1,13 @@
 ---
 title: "The run report, Usage and header say plainly what presses and what is not his"
-status: now
+status: done
 repos: [organizer]
 branch: lf67-ui-polish
 seat: l67-ui
 reviewer: l67-ui-rev, l67-ui-ui
 stage:
 updated: 2026-11-02
-next: "merged as organizer #51 da7f108; supervisor moves it to done/"
+next: "merged as organizer #51 da7f108"
 review: "pass at 2557347, patch-identical at a0fcd65 after rebase on a34a9a0 (range-diff all =): code l67-ui-rev (V4, V5, X0), UI l67-ui-ui (AR27-AR30, U9, R53); X0 rerun pass at a0fcd65"
 depends_on: []
 boundary: ["frontend/src/components/RunReport.tsx", "frontend/src/components/RunTracks.tsx", "frontend/src/components/SpecReader.tsx", "frontend/src/components/UsageTable.tsx", "frontend/src/components/Home.tsx", "frontend/src/lib/runReport.ts", "frontend/src/lib/specReader.ts", "frontend/src/styles/runreport.css", "frontend/src/styles/spec-reader.css", "frontend/src/styles/shell.css", "frontend/src/styles/usage.css", "frontend/src/components/RunReport.lf64.test.tsx", "frontend/src/components/RunReport.test.tsx", "frontend/src/components/SpecReader.test.tsx", "frontend/src/components/Usage.rejected.test.tsx", "frontend/src/lib/runReport.test.ts", "frontend/src/lib/specReader.test.ts"]
