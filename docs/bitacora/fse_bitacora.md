@@ -17,6 +17,9 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- 23:51 after a second usage-limit stop (~20:54-23:50) and a factory memory outage (23:26-23:4x, swap 96%): ended 53 frozen seats of finished organizer tasks (probe -k, conversations kept); thawed sup103, sup106, talos-lab. sup104 self-extended to 01:52 (its reviewer's launch hung 3h42m in zellij attach -b). leftovers-64 Amendment 1: a wave with no record has a footer with no press.
+- Hephaistos: building c4-map-self-repo (lf63 relaunches on its sha); carded factory-report-dead-minutes; atlax-tool-followups merged (claudecode 3f92291, specs 6aeb0b7): publish derives derived/map.json when an initiative has none, `atlax card-check --card` refuses a card that changes elements without change_order (supervise precondition 14).
+
 - sup105 closed and ended: lf63-organizer-map parked (blocked on Hephaistos's c4-map self-repo fix, asked 2026-11-01), drafts 9749dd9 on the unpushed branch, builder $1.42. On relaunch: new tokens and preludes; decide whether L1 draws the subprocess externals (Keychain, git, osascript/Terminal/iTerm), a judge-architecture question if Pablo is still away.
 
 - Held for the next frontend leftovers (Aglaea 60ea44c): run-report Amendment 3, AR22-AR26 (waits as '0002 (pablo) · …', not-drawn without the red rule, 24 px targets, 'no tokens recorded', Ddd HH:MM column, ↓ in --fg-subtle); progress-and-waves Amendment 2, PW4 again and PW8 (footer opens Work only when Work draws that wave's strip, else the run record; the reader opens a run record at its prose with the waves yaml under a closed 'Rounds as recorded').
