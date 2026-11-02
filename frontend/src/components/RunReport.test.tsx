@@ -320,3 +320,20 @@ describe("leftovers-70 V1 (FR-1, AR32): rings inside the waits line are inset", 
     expect(rule![2]).toContain("outline-offset: -2px");
   });
 });
+
+// leftovers-71 V1 (FR-1; run-report Amendment 7, AR33): the inset ring on a
+// card link in the waits line crossed the slug's first glyph, the link having
+// no side padding; it pads 4 px each side, keeping its 24 px minimum width.
+describe("leftovers-71 V1 (FR-1, AR33): a card link pads its sides so an inset ring clears its glyphs", () => {
+  const css = fs.readFileSync(new URL("../styles/runreport.css", import.meta.url).pathname, "utf8");
+  it(".rr-card takes padding-inline: var(--space-1) and keeps min-width: 24px", () => {
+    const rule = /\n\.rr-card \{([^}]*)\}/.exec(css);
+    expect(rule).not.toBeNull();
+    const decls = rule![1].split(";").map((d) => d.trim()).filter(Boolean);
+    expect(decls).toContain("padding-inline: var(--space-1)");
+    expect(decls).toContain("min-width: 24px");
+    // Nothing after it in the rule zeroes the sides again.
+    const sides = decls.filter((d) => /^padding(-inline|-left|-right)?:/.test(d));
+    expect(sides[sides.length - 1]).toBe("padding-inline: var(--space-1)");
+  });
+});

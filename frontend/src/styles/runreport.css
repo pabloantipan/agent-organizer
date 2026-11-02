@@ -58,9 +58,11 @@
 /* Card links, disclosures, the done fold and the waits links take a 24 px
    target by padding: 4 + 16 + 4 (FR-3, AR24). */
 /* At least 24 wide too, text centred, so two one-letter neighbours never
-   share a target (leftovers-67 FR-9, AR28; WCAG 2.5.8). */
+   share a target (leftovers-67 FR-9, AR28; WCAG 2.5.8). 4 px each side too,
+   so the inset focus ring in the waits line never crosses the slug's first
+   or last glyph (leftovers-71 FR-1, AR33). */
 .rr-card {
-  min-height: 0; min-width: 24px; padding: var(--space-1) 0; line-height: var(--line-sm); border: 0; background: transparent; font-family: var(--mono); font-size: var(--font-size-sm);
+  min-height: 0; min-width: 24px; padding-block: var(--space-1); padding-inline: var(--space-1); line-height: var(--line-sm); border: 0; background: transparent; font-family: var(--mono); font-size: var(--font-size-sm);
   color: var(--accent-fg); text-decoration: underline; text-decoration-color: var(--border-strong); text-underline-offset: 2px; overflow-wrap: anywhere; text-align: center;
 }
 .rr-card:hover { background: transparent; border: 0; text-decoration-color: currentColor; }
