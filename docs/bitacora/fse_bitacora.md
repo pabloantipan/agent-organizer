@@ -17,6 +17,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- WRONG (mine, 13:5x): leftovers-71's premise listed title counts from a grep for 'sec-count' only; InitiativesView writes three with a bare 'num' span. l71-rev failed V2, cause gate; Amendment 2. Second sighting of 'a premise listing call sites misses some' (first: an earlier frontend premise, rule already in HAND-OFF: grep all of frontend/src). Repetition item: grep for the visible pattern, not one class name. Also Amendment 1: two stale tests outside the boundary (a markup change always lists the tests that assert the old markup: grep the tests too).
+
 - 13:30 sup114 closed (lf70-small #57 bb7f54d, 37 min vs 30-60, seats $7.35) and ended; installed v0.2.0-3507. Swap 88-96% at noon (browsers 4.9 GB, docker 3.6 GB); probe held one launch 2 min. Asked Aglaea: R1 sev 2 inset ring covers the slug's first glyph, Q1/Q2 inset ring padding and radius, and the count gap in Home.tsx:79, :357, Overview.tsx:145; one card from her amendment. Fixture stand-ins outlive apps: fourth sighting, already with Hephaistos. UI method learned: on-screen ring rows need a key window; the offscreen Tab harness is the working method.
 
 - Held for the next frontend card (Aglaea 5a333ac, both sev 1, 'fold into whatever card comes next'): run-report A6 AR32 (.rt-waitline rings inset, outline-offset -2px; the clipping rule names overflow: hidden); usage A3 U10 ('Not accepted · 2', one space each side of the dot). Plus CLAUDE.md's Runs paragraph (reviewer/record attribution) for the next runs card.
