@@ -8,7 +8,7 @@ reviewer: l67-map-rev, l67-map-ui
 review: "pass at 9af6568: code l67-map-rev (V1-V3, X0), UI l67-map-ui (M8-M14)"
 stage:
 updated: 2026-11-02
-next: "PR with talos-lab"
+next: "merged as organizer #49 a34a9a0; supervisor moves it to done/"
 depends_on: []
 boundary: ["frontend/src/components/MapView.tsx", "frontend/src/components/MapPanel.tsx", "frontend/src/components/MapFigure.tsx", "frontend/src/lib/mapSvg.ts", "frontend/src/styles/map.css", "frontend/src/stores/board.store.ts", "frontend/src/components/MapView.test.tsx", "frontend/src/components/MapFigure.test.tsx", "frontend/src/lib/mapSvg.test.ts", "frontend/src/stores/board.store.test.ts"]
 spec: "docs/specs/leftovers-67.md (FR-1 to FR-7)"
@@ -17,6 +17,8 @@ ui_review: true
 touches: []
 change_order: {add: [], change: [], retire: []}
 autonomy: unattended
+prs:
+  - {repo: organizer, pr: 49, target: main, state: merged, merge: a34a9a0}
 ---
 
 ## Goal
