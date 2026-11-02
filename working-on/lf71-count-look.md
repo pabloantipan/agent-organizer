@@ -7,7 +7,7 @@ seat: l71-build
 reviewer: l71-rev, l71-ui
 stage:
 updated: 2026-11-02
-next: "l71-build builds on lf71-count-look from origin/main bb7f54d (sup115)"
+next: "sup115: may l71-build update RunReport.lf64.test.tsx:139 and Home.waits.test.tsx:135 (stale asserts of the old markup)? FR-1 5a5f9a6, FR-2 ee2403e in"
 depends_on: []
 boundary: ["frontend/src/styles/runreport.css", "frontend/src/components/Home.tsx", "frontend/src/components/Overview.tsx", "frontend/src/components/UsageTable.tsx", "frontend/src/components/SecCount.tsx", "frontend/src/components/SecCount.test.tsx", "frontend/src/styles/shell.css", "frontend/src/components/RunReport.test.tsx", "frontend/src/components/Usage.rejected.test.tsx"]
 spec: "docs/specs/leftovers-71.md (FR-1, FR-2)"
@@ -34,3 +34,6 @@ docs/specs/leftovers-71.md, rows V1, V2, AR33, AR34 and X0.
 - Screen locked: UI rows may render offscreen, and the card says which.
 - Evidence: shots under `.wt-notes/<seat>/`.
 - Retention: n/a.
+
+## Notes
+- Two tests outside the boundary assert the pre-FR markup: `RunReport.lf64.test.tsx:139` (`.rr-card` `padding: var(--space-1) 0`) and `Home.waits.test.tsx:135` (`Waiting on others · <span…>` as the h3's first text). Asked sup115 to extend the boundary to them.
