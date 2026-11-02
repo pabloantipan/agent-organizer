@@ -39,8 +39,10 @@ button.linkish.map-trail-go { color: var(--accent-fg); }
 /* leftovers-69 FR-3 (M16; the design system's scroll regions): a region
    that scrolls and holds focusable things pads its inside by the ring's
    width plus offset, 4 px, on every side, so a node's ring is never cut by
-   this frame; the bottom keeps the room for the words, which is more. */
-.map-scroll { overflow: auto; padding: var(--space-1) var(--space-1) calc(var(--line-xs) + var(--space-0-5)); border-left: 1px solid transparent; border-right: 1px solid transparent; }
+   this frame; the bottom keeps the room for the words, which is more.
+   scroll-padding keeps the same 4 px when focus scrolls a node into view
+   (the rightmost node of a scrolled map), or the scroll stops at its edge. */
+.map-scroll { overflow: auto; padding: var(--space-1) var(--space-1) calc(var(--line-xs) + var(--space-0-5)); scroll-padding: var(--space-1); border-left: 1px solid transparent; border-right: 1px solid transparent; }
 /* FR-1 (M8): past the floor the frame keeps its width and this region
    scrolls; each side with figure hidden past it carries the design system's
    1 px --fg-subtle edge (edge-left, edge-right, set by MapView's watcher),
