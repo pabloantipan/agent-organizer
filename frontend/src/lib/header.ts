@@ -34,19 +34,31 @@ export function stagePosition(stages: model.Stage[]): { current: number; label: 
   return { current: -1, label: `all ${stages.length} stages done` };
 }
 
-/** The waiting chip's words (FR-2, 0068): "N decisions waiting on you" when
- *  every waiting record is the lead's (or has no owner, which asks the lead,
- *  0034), else "N decisions waiting"; "1 decision" for one. Null at zero: the
- *  chip is not drawn. */
+/** The waiting chip's words (FR-2, 0068; leftovers-62 FR-5, DS7 and its
+ *  Amendment 1): the header counts every record waiting on a ruling, the
+ *  lead's share is the ones the lead owns (or with no owner, which asks the
+ *  lead, 0034), the FSE panel's "waiting on you". Equal, "N decisions
+ *  waiting on you"; none of them the lead's, "N decisions waiting"; between,
+ *  both counts: "N decisions waiting · M on you". "1 decision" for one.
+ *  Null at zero: the chip is not drawn. The chip's text is its accessible
+ *  name, so both counts are said in words. */
 export function waitingChip(decisions: model.Decision[] | undefined, lead: string): string | null {
   const waiting = (decisions ?? []).filter(isRulable);
   if (waiting.length === 0) return null;
-  const mine = waiting.every((d) => {
+  const mine = waiting.filter((d) => {
     const o = ownerPerson(d.owner);
     return o === "" || o === lead;
-  });
+  }).length;
   const noun = waiting.length === 1 ? "decision" : "decisions";
-  return `${waiting.length} ${noun} waiting${mine ? " on you" : ""}`;
+  return `${waiting.length} ${noun} waiting${leadShare(waiting.length, mine)}`;
+}
+
+/** The lead's share after the header's count (DS7, Amendment 1): the one
+ *  place the three cases are told apart. */
+function leadShare(all: number, mine: number): string {
+  if (mine === all) return " on you";
+  if (mine === 0) return "";
+  return ` · ${mine} on you`;
 }
 
 /** The record the chip lands on: the oldest waiting one, as Decisions lists
