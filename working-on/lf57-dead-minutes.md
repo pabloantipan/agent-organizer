@@ -8,7 +8,7 @@ stage:
 updated: 2026-11-02
 next: "sup106 runs it after lf64-run-report-polish (0169, leftovers-57 Amendment 7)"
 depends_on: [lf64-run-report-polish]
-boundary: ["internal/service/report.go", "internal/service/report_test.go", "frontend/src/components/Home.tsx", "frontend/src/lib/runReport.ts", "frontend/src/lib/testdata/", "frontend/wailsjs/"]
+boundary: ["internal/service/report.go", "internal/service/report_test.go", "frontend/src/components/Home.tsx", "frontend/src/lib/runReport.ts", "frontend/src/components/runreport.fixtures/", "frontend/wailsjs/"]
 spec: "docs/specs/leftovers-57.md (Amendment 7, FR-19 and FR-20)"
 gate: "docs/specs/leftovers-57.md#Acceptance → gate"
 ui_review: false

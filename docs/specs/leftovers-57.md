@@ -267,6 +267,6 @@ and whose spans would sum to something else: reads 1 h 30 min; the run
 report fixtures refreshed; X0 with CONTRACTS_DIR at that worktree.
 Boundary: `internal/service/report.go`, `report_test.go`,
 `frontend/src/components/Home.tsx` (the signal's line only),
-`frontend/src/lib/runReport.ts`, the run report's test fixtures,
+`frontend/src/lib/runReport.ts`, `frontend/src/components/runreport.fixtures/`,
 `frontend/wailsjs` (regenerated). Merge: a joint merge through talos-lab,
 in order specs, claudecode, docs, then this branch.
