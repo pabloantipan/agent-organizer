@@ -7,8 +7,8 @@ seat: l58-lens
 stage:
 updated: 2026-11-02
 next: "review: lf58-map-lens, X0 pass (fresh clone) and M1-M7 pass in WebKit (wails dev + harness, committed fixture, no overlay); review-build window pass not run, screen locked, 8974fd6"
-review: fail
-reviewer: l58-lens-rev
+review: pass
+reviewer: l58-lens-rev2
 cause: gate
 depends_on: [lf58-map-read, lf58-map-render]
 boundary: ["frontend/src/components/RoadmapView.tsx", "frontend/src/components/MapView.tsx", "frontend/src/components/MapPanel.tsx", "frontend/src/components/MapView.test.tsx", "frontend/src/styles/map.css", "internal/service/spec.go", "internal/service/spec_test.go", "testdata/fixture-map/"]
@@ -73,31 +73,54 @@ Not changed, on purpose:
 - `MapFigure.tsx`, `lib/mapSvg.ts`, `SpecReader.tsx`: outside the boundary; U5 reads the figure's button order from the DOM instead
 
 ## Review
-Fail. Unmet: M3 (FR-8). Reviewer l58-lens-rev, 2026-11-02. X0 on 1123beb (base 1bc2d44): pass, `make test` reused run efe0f92b-99162 of 1123beb by l58-lens-ui (Go ok, vitest 96 files / 1611 tests passed); `pnpm run build`, `wails build`, `make review-build` fresh, all exit 0; `git status --porcelain` empty. Code review only; M1-M7 on screen are l58-lens-ui's.
-cause: gate
+Pass. Unmet: none. Reviewer l58-lens-rev2, 2026-11-02. X0 on 8974fd6 (base e4098ed), from a clean clone: `make test` **fresh** (test-lease printed no run id and did not reuse a run): Go ok, vitest 96 files / 1615 tests passed, exit 0. `pnpm run build`, `wails build` and `make review-build` were run fresh and each exited 0. `git status --porcelain` was empty, and `frontend/wailsjs/runtime` did not change. This review covers the code only: M1-M7 on screen are l58-lens-ui2's. The card's `cause: gate` is left from round 1.
+Round 1 (l58-lens-rev, 1123beb): fail on M3 only, cause gate. The fix was FR-10 plus the fixture (Amendment 2).
 
-change-check (`change-check organizer lf58-map-lens`, from the clean clone at 1123beb; base read as origin/main 2f75c52, same 5 files as 1bc2d44...1123beb):
+change-check (`change-check organizer lf58-map-lens`, clean clone at 8974fd6; base read as origin/main 52cee5f):
 ```
-5 files, 11 flags: outside boundary 0, outside footprint 0, undeclared 0, declared, not changed 0, new env var 0, new dependency 0, new host 0, risk 0, untested? 11, could not read 0, boundary unreadable 0
-untested?: MapPanel.tsx inRepo, isRepoName, openRecord, errText, GroundRow, nodesLabel; MapView.tsx placeKey, samePlace, sourceAt, labelOf, MapTags
+16 files, 27 flags: outside boundary 0, outside footprint 0, undeclared 13, declared, not changed 0, new env var 0, new dependency 0, new host 0, risk 0, untested? 14, could not read 0, boundary unreadable 0
+undeclared: internal/service/spec.go (Service.ReadSpec, mapDirRel, mapPages), spec_test.go, testdata/fixture-map/{README.md, harbor/harbor-api/README.md, harbor-api/deploy/k8s.yaml, harbor-api/src/booking/README.md, harbor-api/src/pricing/README.md, harbor-ledger/README.md, harbor-web/README.md, harbor/working-on/initiative.yaml, home.sh}
+untested?: MapPanel.tsx inRepo, isRepoName, openRecord, errText, GroundRow, nodesLabel; MapView.tsx placeKey, samePlace, sourceAt, labelOf, sameIds, MapTags; spec.go mapDirRel, mapPages
 ```
-No undeclared, outside-boundary or declared-not-changed lines. The 11 `untested?` are private helpers exercised through exported functions the tests call (`groundLine` uses inRepo/isRepoName; `runGround` record → openRecord, test "record opens the record in the drawer"; `MapPanel` renders GroundRow and nodesLabel; `MapBody` uses placeKey/samePlace/sourceAt/labelOf). MapTags is not rendered by any test, since renderToStaticMarkup runs no layout effect: Note, below.
+- The 13 `undeclared` lines are all declared, but under `Risky:` instead of the change list. Each one is there as a `modified`/`added` bullet (spec.go, spec_test.go, home.sh, initiative.yaml, the three harbor repo dirs, README.md). change-check reads only the list above `Risky:` as declarations. Every one is inside Amendment 2's boundary (`internal/service/spec.go`, its test, `testdata/fixture-map/`), and outside boundary is 0. So these are explained, not findings.
+- `untested?`: the private helpers run through exported functions the tests call. `mapPages`/`mapDirRel` run through `ReadSpec` (TestR3ReadSpecMapPages). `inRepo`/`isRepoName` run through `groundLine`. `openRecord` runs through `runGround` (the test "record opens the record in the drawer"). `GroundRow`/`nodesLabel` render inside `MapPanel`, and `placeKey`/`samePlace`/`sourceAt`/`labelOf` inside `MapBody`. `sameIds` and `MapTags` need layout, so only the UI review proves them (as in round 1).
 
-Fails on main: MapView.test.tsx at 1123beb run against 1bc2d44's code: `Error: Cannot find module '/src/components/MapView'`, Test Files 1 failed.
+Fails on main: the branch's new tests were run against e4098ed's code. `TestR3ReadSpecMapPages`: FAIL, 5 × `ReadSpec(fix, "docs/architecture/containers.md") … not a spec of this initiative fix; … want the page`. `MapView.test.tsx`: `Error: Cannot find module '/src/components/MapView'`, Test Files 1 failed.
 
-Finding (blocking, M3 / FR-8): in the gate's fixture no `curated:` line opens its page. Aglaea's M3 asks for "each evidence entry a working link", and FR-8 says `curated: <page>` opens the page in the spec reader. `groundLine` gives `curated` an action only when `docs/architecture/<page>` is in `spec_files` (MapPanel.tsx, `case "curated"`), because `ReadSpec` reads only paths under `specs:`, a card's `spec:` or a run record (internal/service/spec.go:40-55). No fixture-map initiative.yaml has `specs:` (`testdata/fixture-map/*/working-on/initiative.yaml`), so harbor's four context nodes (card_gateway, clerk, mail_relay, traveller: `curated context.md`) render "not readable here: docs/architecture/ is not under specs: in initiative.yaml" with no press. The branch's own test proves it: MapView.test.tsx:210, `line("curated", "context.md", bare)` → `act: null`, where `bare` is harbor's map as given. The same holds in general: no initiative lists `docs/architecture` under `specs:`, so the map's curated pages never open. The fixture also has no `repos:`, so every `repo` and `deploy` entry in it reads "not on this machine" or "not a file". Only `record` can be pressed, and M3's "each entry's action run against the stub" cannot run for repo, deploy or curated there. The fix is Go (ReadSpec allows the map's `levels[].page` and curated pages under `docs/architecture/`) or the fixture (`specs: [docs/architecture]`, a `repos:` entry with a checkout), and both are outside this card's boundary (lf58-map-read owns `testdata/fixture-map/` and Go). So the cause is the gate: the spec's boundary leaves out what FR-8 needs. For the FSE: amend leftovers-58 so a card owns that change. The builder's handling of an entry it cannot act on (a line with its reason, no dead press) is right and should stay.
+R3 / FR-10 (my own inputs, a throwaway test in a second clone; output in `.wt-notes/l58-lens-rev2/r3-probe.txt`):
+- These read: a level page, a curated page named `./ok.md`, a curated page named `sub/../ok2.md` (it resolves to `docs/architecture/ok2.md`), and `docs/architecture//c.md`.
+- These are refused, and none is read: `working-on/initiative.yaml`; `docs/architecture/other.md` (a `repo` entry names it, no curated entry does); another initiative's page asked of this one, and this one's page asked of another (`b` → `c.md`); `../b/docs/architecture/bpage.md`; `docs/architecture/../../b/…`; `/etc/hosts`; `C.md` (the name differs only in case). Curated refs `/etc/hosts` and `../../working-on/initiative.yaml` add nothing. An unknown initiative is an error, not a read.
+- So the allow rule opens nothing outside the map's named pages. The branch's own R3 test also covers a c4-map/2 map, `map.json` itself, a deploy-named file and a `#section`.
 
-Met by the diff (FR-6, FR-7, FR-9, X0):
-- FR-6: switch order Stages, Map, Cards, Calendar (RoadmapView.tsx); `firstPlace` picks containers; drill from a container to its modules via the panel, trail Context › Containers › container with buttons back; `No module map for this container.` (NO_L3).
-- FR-7: lens classes only (`lensClasses`), the test proves the markup differs by the classes alone; ruled dashed `6 4`, retiring muted fill and `--fg-muted` text with the word, ungrounded dotted; `ruled 0002` under the node (aria-hidden tag) and a button opening the record in the panel; `not grounded` in the button name (MapFigure) and the panel title and Grounding.
-- FR-8 else: the panel ends with Grounding; repo mono → OpenInEditor at the repo path; deploy → the file; record → the drawer with focus return.
-- FR-9: `No base map yet.` / `Daedalus makes one with c4-map gen; the FSE cuts the card.`, no action; `refused` shown verbatim.
-- map.css: every var is tier 2 in tokens.css (accent-fg, bg, border-strong, decision-ruled-fg, fg*, focus-ring, warning, surface*, space/radius/type); no oklch, color-mix, nesting, @layer, raw colour; DOM APIs used (MutationObserver, CSS.escape, createPortal) exist in Safari 15.0.
+The committed fixture with no overlay (`eval "$(testdata/fixture-map/home.sh)"`, then a service scan with git; `.wt-notes/l58-lens-rev2/fixture-probe.txt`):
+- harbor-api, harbor-web and harbor-ledger are all `missing=false`. `deploy/k8s.yaml`, `src/booking` and `src/pricing` exist.
+- `ReadSpec(harbor, docs/architecture/{context,containers,modules}.md)` reads 845, 1651 and 613 bytes. The variants' `context.md` reads too.
+- Vitest "the committed harbor fixture holds every repo dir and deploy file its grounding names" walks every harbor entry against the committed dirs: every editor path exists, and the kinds that act are exactly curated, deploy, record and repo. The one line with no action is `deploy fakedeploy qa harbor-ledger`, which reads "not a file: the deploy adapter's own reference". That is the contract's adapter reference, not a path, so FR-8's "opens the file" does not apply to it. M3 can now run every kind against the stub.
 
-Notes (not failing):
-- Note: a Go error from App.Map shows as `Map not drawn: <error text>` (MapView.tsx, `state: "error"`). The prefix is the lens's, not the reader's. That is fine for FR-9, which covers only the reader's lines.
-- Note: FR-8's "a merged node lists its members" cannot be met while c4-map/1 has no members field; the builder says so. It goes to Hephaistos's c4-map/2 work.
-- Note: MapTags (the words under nodes) has no vitest, since it needs layout. Only the UI review's shots prove it.
+Met by the diff (FR-6 to FR-9, the vitest half of M1-M7, and U1, U4, U5):
+- FR-6: the switch reads `stages, map, cards, calendar` (RoadmapView.tsx). L2 comes first. L3 opens from the panel, with the trail back. A container without modules says `No module map for this container.`
+- FR-7: statuses are lens classes only, and no node moves (vitest). `ruled 0002` is a button that opens the record. `not grounded` is in the node's name and in the panel.
+- FR-8: the panel ends with Grounding. repo opens the editor at the repo, deploy opens the file, record opens the drawer with focus returned to the line, curated opens the spec reader through ReadSpec (mocked bindings). A line that cannot act shows its reason and has no button.
+- FR-9: the two empty-state lines are exact. A refusal is shown as given.
+- U1: `button.linkish.<class>` (0-2-1) beats global.css:612 `button.linkish { color: inherit }`. No other `button.linkish` rule (shell.css, spec-reader.css) reaches `.map-panel`.
+- U4: the svg is `display: block`, and the scroller is padded for the words under the bottom row.
+- U5: `inReadingOrder` takes the order MapTags reports from the figure's buttons. Nodes that are not drawn come after, in map.json order.
+- map.css: every `var(--…)` is a token in tokens.css (tier 2 or the scales). No oklch, color-mix, nesting, @layer or raw colour.
+
+Merge check (Note, no failure): in the clone, `git merge --no-edit 8b5c8f9` merged with no conflict (6268d67). `make test` on it exited 0 (vitest 97 files / 1630 passed). `npx tsc --noEmit -p .` exited 0. The `openSpec(el, initiative, ref, exact, …)` signature that lf64 changed still fits the lens's call.
+
+Notes (not failing; each says where it went):
+- Note: ReadSpec follows symlinks. A map-named page that symlinks out of `docs/architecture/`, or that sits under a symlinked directory, is read (`link.md` → `SECRET`). This predates the card: on e4098ed a `specs:` file that symlinks out reads the same way (proved with the same probe). It is ReadSpec-wide, not a lens regression, and R3 does not name symlinks. → to the FSE via sup103 (a ReadSpec card: refuse a path whose EvalSymlinks leaves the root, or leaves its allowed directory).
+- Note: if a curated entry names `map.json`, ReadSpec will read the index, since FR-10 allows "the pages its curated entries name". This is harmless: the file is inside `docs/architecture/`. → to the FSE via sup103, with the note above.
+- Note: a `curated:` line always presses now. When its page cannot be read, the spec reader shows the reason instead of the line saying it. FR-8 is met; the UI reviewer can check the wording. → l58-lens-ui2.
+- The card's Notes and the builder's "Found, not asked":
+  - ReadSpec allow-list: resolved in this card (FR-10, 0360749).
+  - Merged nodes / members: c4-map/1 has no such field. → to the FSE via sup103 (a contract field first).
+  - A dotted stadium's rounded ends draw solid. This is MapFigure's side. → to the FSE via sup103 (lf58-map-render follow-up).
+  - The locked screen, and the review-build window pass not run: → l58-lens-ui2's UI review.
+  - repo/deploy not on this machine show their reason: behaviour as FR-8 wants; no action.
+- Round 1's notes: the Go error prefix is kept as is, no action. MapTags having no vitest goes to l58-lens-ui2. Round-1 UI findings: U1, U4 and U5 are fixed here. U2, U3 and U6 → to the FSE via sup103 (for aglaea).
+- Gate gap: R3 should name a symlink out of `docs/architecture/` as a refusal. As written it does not, and neither the code nor the test refuses one. → to the FSE via sup103.
 
 ## UI review
 Pass (UI). Commit 1123beb, `make review-build` from a detached worktree, `Deltagos Review` run by its path (pid saved, killed by pid), fixture `testdata/fixture-map/home.sh` plus the builder's recipe (`.wt-notes/l58-lens/fixture.sh`, copied to `.wt-notes/l58-lens-ui/fixture.sh`): `editor:` a stub logging to `$FIXTURE_TMP/editor.log`, and in the temp copy only harbor gets `repos: [harbor-api, harbor-web]` (harbor-api a one-commit checkout) and `specs: [docs/architecture]`. auth off. Screen unlocked (`CGSessionCopyCurrentDictionary`: no lock key, on console). Every state read by AX of my pid (AXManualAccessibility + AXEnhancedUserInterface), moved by AXPress/AXFocused, window sized by AXSize on my own window, shot with `screencapture -o -l <my window id>`; no keys, no CGEvents. Reviewer l58-lens-ui, 2026-11-02. Shots and AX dumps in `.wt-notes/l58-lens-ui/shots/` and beside it.
