@@ -6,7 +6,7 @@ branch: lf62-go
 seat: l62-go
 stage:
 updated: 2026-11-02
-next: "PR with talos-lab"
+next: "PR with talos-lab (requested 00:27, again via pablo relay 01:07 and by the fse 01:27); move to done/ on its merge sha"
 review: pass
 reviewer: l62-go-rev
 depends_on: []
