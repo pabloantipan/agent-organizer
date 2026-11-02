@@ -15,6 +15,7 @@ import { openSpec } from "./SpecReader";
 import { RunTracks } from "./RunTracks";
 import { running } from "./WaveStrip";
 import "../styles/runreport.css";
+import { SecCount } from "./SecCount";
 
 type BoardInitiative = merge.BoardInitiative;
 
@@ -169,7 +170,7 @@ export function Rulings({ rulings, nav }: { rulings: service.Ruling[] | null | u
   if (list.length === 0) return null;
   return (
     <div className="rr-rulings">
-      <h4 className="rr-sub">Ruled while you were away <span className="num">{list.length}</span></h4>
+      <h4 className="rr-sub"><SecCount title="Ruled while you were away" n={list.length} /></h4>
       <ul>
         {list.map((r) => (
           <li key={r.id}>
