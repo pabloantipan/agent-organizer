@@ -75,5 +75,5 @@ Not changed, on purpose:
 - U3 met: Usage.rejected.test.tsx renders the Usage view over FR-3's JSON, both rows with session, day, reason; 3 of 4 tests fail on 9cee125 (the empty-case one passes there by nature). `rejected` matches `UsageResult.rejected` in wailsjs models.ts.
 - U4 met: the new `stripComments` keeps `"a // b"; x === "proposed"`. The fix is in the test file itself, so the fail on main was shown by grafting the U4 assertion onto 9cee125's old `stripComments`: `expected false to be true`.
 - X0 met: `pnpm install --frozen-lockfile` 0; `make test` with `CONTRACTS_DIR=.wt-notes/sup108/specs/contracts` (agent-mailbox-specs 172790b) exits 0, every Go package ok, vitest 99 files 1643 tests; `TestReportDecodesContract` passes (sup108's correction: no longer a known failure); `wails build` 0; `git status --porcelain` empty with no runtime checkout needed. `make review-build` is the UI reviewer's.
-- Note: `stripComments` treats `/` after `)` as division, so a regex after `)` would be misread; no source file has one today, and the literal guard would over-report, not miss. Not a finding.
+- Note: `stripComments` treats `/` after `)` as division, so a regex after `)` would be misread; a `//` inside such a regex would then hide the rest of its line from the guard. No case is shown in today's sources (unproved, so not a finding).
 
