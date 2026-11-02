@@ -1,13 +1,13 @@
 ---
 title: "The organizer's map is regenerated and checks clean"
-status: next
+status: now
 repos: [organizer]
 branch: lf66-map
 seat: l66-map
 reviewer: l66-map-rev
 stage:
 updated: 2026-11-02
-next: "after lf66-go merges"
+next: "l66-map regenerates the map on branch lf66-map from 784a1f3 (sup110)"
 depends_on: [lf66-go]
 boundary: ["docs/architecture/"]
 spec: "docs/specs/leftovers-66.md (FR-5)"
