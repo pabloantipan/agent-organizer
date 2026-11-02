@@ -265,11 +265,12 @@ describe("V4 (FR-10, AR29): `Rounds as recorded` is drawn as the app's fold", ()
   it("its summary is `.rr-more`, the <details> kept", () => {
     expect(sr.roundsHtml("waves: []")).toMatch(/^<details class="sr-rounds"><summary class="rr-more">Rounds as recorded<\/summary>/);
   });
-  it("hides the native marker and draws a muted ▸ that turns, 4 + 16 + 4 from .rr-more", () => {
+  it("hides the native marker and draws a muted ▸ (borders, out of the name) that turns, 4 + 16 + 4 from .rr-more", () => {
     expect(rule("details > summary.rr-more")).toContain("list-style: none");
     expect(rule("details > summary.rr-more::-webkit-details-marker")).toContain("display: none");
-    expect(rule("details > summary.rr-more::before")).toContain('content: "\\25B8"');
-    expect(rule("details > summary.rr-more::before")).toContain("color: var(--fg-muted)");
+    // Drawn by borders, so no glyph enters the summary's name.
+    expect(rule("details > summary.rr-more::before")).toContain('content: "";');
+    expect(rule("details > summary.rr-more::before")).toContain("border-left: 5px solid var(--fg-muted)");
     expect(rule("details[open] > summary.rr-more::before")).toContain("transform: rotate(90deg)");
     expect(rule(".rr-more")).toContain("padding: var(--space-1);");
     expect(rule(".rr-more")).toContain("line-height: var(--line-sm)");
