@@ -1,13 +1,13 @@
 ---
 title: "Status reads, usage state, spec reader and review guard close their gaps"
-status: next
+status: now
 repos: [organizer]
 branch: lf66-go
 seat: l66-go
 reviewer: l66-go-rev
 stage:
 updated: 2026-11-02
-next: "sup110 runs it (0179 ruled 2026-11-02)"
+next: "l66-go builds it on branch lf66-go (sup110, launched 2026-11-02)"
 depends_on: []
 boundary: ["internal/service/draft.go", "internal/cli/decisions.go", "internal/service/literals_test.go", "internal/service/usagepost.go", "internal/service/spec.go", "internal/specpath/", "reviewguard.go", "internal/service/draft_test.go", "internal/cli/decisions_test.go", "internal/service/usagepost_test.go", "internal/service/spec_test.go", "reviewguard_test.go"]
 spec: "docs/specs/leftovers-66.md (FR-1 to FR-4)"
