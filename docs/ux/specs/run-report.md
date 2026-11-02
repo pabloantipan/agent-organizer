@@ -508,3 +508,29 @@ severity 2.
 | AR24 | hit every control | `.rr-card`, `.rr-more`, `.rt-fold` and the `waits on` links each at least 24 px high |
 | AR25 | not read a missing measure as zero | a line with no ledger run reads `no tokens recorded` |
 | AR26 | read a day-change row | a window over two days: `Tue 01:00` sits whole in the time column, with the column gap before the wave |
+
+## Amendment 4 (aglaea, 2026-11-02): run report polish, four looks
+
+From l64-ui's review of lf64-run-report-polish at 8eabfb4 (pass;
+card ## UI review, shots `.wt-notes/l64-ui/`), findings 1-4.
+
+- **1, a footer that goes nowhere looks it.** leftovers-64 Amendment 1
+  gave it a name; this gives it a look. A pressable wave footer draws the
+  wave in `--accent-fg`, as links do. One with no run record draws the
+  wave in `--fg-muted` with a trailing `· no run record` in `--fg-subtle`
+  on the line, not only in the name.
+- **2, one-letter card links.** `.rr-card` takes `min-width: 24px`, text
+  centred, so two neighbours never share a target (WCAG 2.5.8 on both
+  sides; the design system now says so).
+- **3, `Rounds as recorded`** is drawn as the app's folds (`.rr-more`):
+  muted ▸ turning, 24 px, the native marker hidden, `<details>` kept.
+- **4, the reader's landing.** The heading focus lands on draws no ring
+  (the design system's Navigating rule, amended): it is a place, not a
+  control; the drawer's scroll shows it.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| AR27 | see which footer goes nowhere | shim launch: `sup2/1 · no run record` with the wave muted and the words on the line; sup1 in `--accent-fg` |
+| AR28 | hit one card, not its neighbour | `.rr-card` `a`, `b`, `d`, `e` each at least 24×24 |
+| AR29 | recognise a fold | `Rounds as recorded` shows the muted ▸ and 24 px of `.rr-more`, no native marker |
+| AR30 | see the ring only where a key presses | the reader opened on a run record: no outline on the landed heading; Tab then rings the first control after it |

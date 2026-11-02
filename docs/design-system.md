@@ -131,7 +131,9 @@ no `zero` or stylistic sets).
   pills. A focus ring adds 2 to the element's radius.
 - **Controls**: 24 / 28 (default) / 32 high. Icons 16, chevrons 12, stroke 1.5.
   Every control's target is at least 24×24 px, icon-only ones included (the
-  rail toggle, a divider's icon buttons); WCAG 2.5.8.
+  rail toggle, a divider's icon buttons); WCAG 2.5.8. Both sides: a text link
+  shorter than 24 px (a one-letter card slug) takes `min-width: 24px` with
+  its text centred; spacing alone does not count (run-report A4).
 
 ## Elevation and motion
 
@@ -377,13 +379,20 @@ keeps their place.
   (leftovers, tf6-U1).
 - **Navigating** (a row verb, a link to a record): focus lands on the thing
   named: the record's row, the blocked seat, Bring crew up. Never on the
-  page body.
+  page body. A landing that is not a control (a reader's heading,
+  `tabindex="-1"`) draws **no ring**: the ring says what a key will press,
+  and a heading presses nothing; the scroll shows the place, and the next
+  Tab goes on from it (run-report A4).
 - **A control that unmounts on press** hands focus to what took its place.
 - **A control that disables itself on press** moves focus first, then
   disables, so WebKit keeps the focus ring on the new target (leftovers-4).
 - **Names**: a verb repeated on every row carries its row in its accessible
   name ("Rule init-a 0002", "Open onboarding-flow Step map"), through
   `aria-label` or `aria-describedby` on the row's subject.
+- **One disclosure look**: every fold is the app's (`.rr-more`, `.rt-fold`):
+  a muted ▸ that turns, 24 px high, the ring on the control only. A
+  `<details>` keeps its semantics with the native marker hidden and its
+  `summary` styled the same (run-report A4).
 - **Disclosure state**: a control that opens something stays marked while it
   is open (`aria-expanded` or `aria-pressed`, and `--surface-selected`), the
   same way everywhere. Hover never takes the mark away. A box never covers
