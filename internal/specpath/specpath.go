@@ -5,6 +5,9 @@
 package specpath
 
 import (
+	"errors"
+	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -33,4 +36,37 @@ func Clean(path string) (string, bool) {
 		return "", false
 	}
 	return filepath.ToSlash(rel), true
+}
+
+// ErrOutside is a path whose symlinks, evaluated, leave every folder it was
+// admitted under (leftovers-66 FR-3).
+var ErrOutside = errors.New("its symlinks lead outside the folder it was admitted under")
+
+// Within is root/rel with its symlinks evaluated, when that file is inside
+// one of dirs (relative to root, "." for root itself) with their own
+// symlinks evaluated; otherwise an error wrapping ErrOutside. Inside is
+// decided by file identity (os.SameFile against each ancestor), not by
+// text, so a target spelled in another case on a case-insensitive volume
+// still counts. A file that does not exist, or a symlink to nothing,
+// returns the error of evaluating it (os.ErrNotExist), never ErrOutside.
+func Within(root, rel string, dirs ...string) (string, error) {
+	real, err := filepath.EvalSymlinks(filepath.Join(root, filepath.FromSlash(rel)))
+	if err != nil {
+		return "", err
+	}
+	for _, d := range dirs {
+		di, err := os.Stat(filepath.Join(root, filepath.FromSlash(d)))
+		if err != nil || !di.IsDir() {
+			continue
+		}
+		for cur := filepath.Dir(real); ; cur = filepath.Dir(cur) {
+			if ci, err := os.Stat(cur); err == nil && os.SameFile(di, ci) {
+				return real, nil
+			}
+			if filepath.Dir(cur) == cur {
+				break
+			}
+		}
+	}
+	return "", fmt.Errorf("%s: %w", rel, ErrOutside)
 }

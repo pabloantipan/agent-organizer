@@ -113,7 +113,7 @@ func WriteDecisions(w io.Writer, rows []DecisionRow) {
 // "waiting", as the app reads it (decisionStatusWord in lib/decisions.ts).
 func statusWord(status string) string {
 	s := strings.TrimSpace(status)
-	if s == "proposed" {
+	if s == model.DecisionProposed {
 		return "waiting"
 	}
 	return strings.ReplaceAll(s, "-", " ")

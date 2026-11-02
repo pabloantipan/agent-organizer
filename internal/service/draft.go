@@ -24,7 +24,7 @@ func acceptRecord(decisions []model.Decision) *model.Decision {
 	var found *model.Decision
 	for i := range decisions {
 		d := &decisions[i]
-		if d.Slug == acceptSlug && d.Status == "proposed" {
+		if d.Slug == acceptSlug && d.Status == model.DecisionProposed {
 			found = d
 		}
 	}

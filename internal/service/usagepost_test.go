@@ -930,3 +930,39 @@ func TestLF62G3UsageViewRejectedRows(t *testing.T) {
 		t.Errorf("state rejected %+v, want s-gone pruned", got)
 	}
 }
+
+// G2 (leftovers-66 FR-2): three rows accepted, then one gone from the
+// ledger. The next pass posts nothing (the others are unchanged) and drops
+// the gone key from Accepted, as it does from Rejected; a pass that posts
+// nothing at all (the usage view's) prunes the same way.
+func TestLF66G2PassPrunesGoneAcceptedRow(t *testing.T) {
+	f := newUsageRecord(t)
+	dir := t.TempDir()
+	path := filepath.Join(dir, usagePostFile)
+	ls := usageLines(3)
+	postUsage(context.Background(), usageTarget(f), dir, ls, fixedNow)
+	if st := loadUsagePostState(path); len(st.Accepted) != 3 {
+		t.Fatalf("first pass accepted %+v, want three rows", st.Accepted)
+	}
+
+	postUsage(context.Background(), usageTarget(f), dir, ls[:2], fixedNow) // s-0002's row is gone
+	if n := len(f.got()); n != 1 {
+		t.Errorf("second pass posted: %d posts, want still 1", n)
+	}
+	st := loadUsagePostState(path)
+	if _, ok := st.Accepted["s-0002|2026-10-05"]; ok {
+		t.Errorf("post pass kept the gone key in Accepted: %+v", st.Accepted)
+	}
+	if len(st.Accepted) != 2 || st.Accepted["s-0000|2026-10-05"] == "" || st.Accepted["s-0001|2026-10-05"] == "" {
+		t.Errorf("accepted %+v, want s-0000 and s-0001 kept", st.Accepted)
+	}
+
+	passRejected(dir, ls[:1]) // the view's pass: s-0001's row gone too, nothing posted
+	st = loadUsagePostState(path)
+	if _, ok := st.Accepted["s-0001|2026-10-05"]; ok || len(st.Accepted) != 1 {
+		t.Errorf("view pass accepted %+v, want s-0000 alone", st.Accepted)
+	}
+	if n := len(f.got()); n != 1 {
+		t.Errorf("view pass posted: %d posts, want still 1", n)
+	}
+}

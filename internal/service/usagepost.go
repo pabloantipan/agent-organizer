@@ -147,7 +147,7 @@ func startUsagePost(cfg config.Config, dataDir, ledgerPath string, now func() ti
 func postUsage(ctx context.Context, t usagePostTarget, dataDir string, lines []usage.Line, now func() time.Time) {
 	path := filepath.Join(dataDir, usagePostFile)
 	st := loadUsagePostState(path)
-	if pruneRejected(&st, lines) {
+	if pruneGone(&st, lines) {
 		_ = saveUsagePostState(path, st)
 	}
 
@@ -226,11 +226,13 @@ func postUsage(ctx context.Context, t usagePostTarget, dataDir string, lines []u
 	}
 }
 
-// pruneRejected drops each rejected row whose ledger row is gone: there is
-// nothing left to resend, so it is no longer the record's to refuse
-// (leftovers-62 FR-3). It reports whether anything was dropped.
-func pruneRejected(st *usagePostState, lines []usage.Line) bool {
-	if len(st.Rejected) == 0 {
+// pruneGone drops each accepted and each rejected row whose ledger row is
+// gone: there is nothing left to resend or to refuse, and an accepted hash
+// kept for a row that is gone only grows the state (leftovers-62 FR-3,
+// leftovers-66 FR-2). Should the row come back, it is posted again, which
+// the record upserts. It reports whether anything was dropped.
+func pruneGone(st *usagePostState, lines []usage.Line) bool {
+	if len(st.Rejected) == 0 && len(st.Accepted) == 0 {
 		return false
 	}
 	have := make(map[string]bool, len(lines))
@@ -244,21 +246,27 @@ func pruneRejected(st *usagePostState, lines []usage.Line) bool {
 			pruned = true
 		}
 	}
+	for k := range st.Accepted {
+		if !have[k] {
+			delete(st.Accepted, k)
+			pruned = true
+		}
+	}
 	return pruned
 }
 
-// pruneUsageRejected is pruneRejected on the state file in the data dir, for
+// pruneUsageGone is pruneGone on the state file in the data dir, for
 // a pass that posts nothing (the post off, or nothing changed). It runs only
 // while no post does, since a post saves the state it loaded; a running post
 // prunes its own state.
-func pruneUsageRejected(dataDir string, lines []usage.Line) {
+func pruneUsageGone(dataDir string, lines []usage.Line) {
 	if !usagePosting.CompareAndSwap(false, true) {
 		return
 	}
 	defer usagePosting.Store(false)
 	path := filepath.Join(dataDir, usagePostFile)
 	st := loadUsagePostState(path)
-	if pruneRejected(&st, lines) {
+	if pruneGone(&st, lines) {
 		_ = saveUsagePostState(path, st)
 	}
 }
@@ -267,7 +275,7 @@ func pruneUsageRejected(dataDir string, lines []usage.Line) {
 // (leftovers-62 FR-3): a row whose ledger row is gone leaves the state first,
 // then what is left, as the usage view carries it, never null.
 func passRejected(dataDir string, lines []usage.Line) []usage.RejectedRow {
-	pruneUsageRejected(dataDir, lines)
+	pruneUsageGone(dataDir, lines)
 	out := []usage.RejectedRow{}
 	for _, r := range UsageRejected() {
 		out = append(out, usage.RejectedRow{SessionID: r.SessionID, Day: r.Day, Reason: r.Reason})
