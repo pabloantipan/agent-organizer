@@ -6,7 +6,7 @@ branch: lf58-map-lens
 seat: l58-lens
 stage:
 updated: 2026-11-02
-next: "PR with talos-lab (code review pass l58-lens-rev2, UI review pass l58-lens-ui2 offscreen, 8974fd6; window pass owed at next unlock, the FSE checks the installed app after merge)"
+next: "merged as organizer #39 9cee125; the FSE checks the installed app (window pass owed at next unlock), then done/"
 review: pass
 reviewer: l58-lens-rev2
 cause: gate
@@ -16,6 +16,8 @@ spec: "docs/specs/leftovers-58.md (FR-6 to FR-9)"
 gate: "docs/specs/leftovers-58.md#Acceptance → gate"
 ui_review: true
 autonomy: unattended
+prs:
+  - {repo: organizer, pr: 39, target: main, state: merged, merge: 9cee125}
 ---
 
 ## Goal
