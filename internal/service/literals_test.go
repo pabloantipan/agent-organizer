@@ -9,8 +9,11 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"testing"
+
+	"organizer/internal/model"
 )
 
 // decisionStatusConsts are model's decision statuses: a comparison to one of
@@ -33,11 +36,40 @@ var statusLiteralAllowed = map[string]string{
 	// The writer: only a proposed record can be ruled from the organizer
 	// (0019); awaiting-cells is ruled by the cells.
 	"internal/service/rule.go": "rules a proposed record only",
+	// A draft cell waits on its proposed the-cell-roster record; an
+	// awaiting-cells one is the cells' to rule, not the draft's (leftovers-66
+	// FR-1).
+	"internal/service/draft.go": "a draft waits on a proposed accept record only",
+	// Proposed alone reads "waiting"; awaiting-cells keeps its own words
+	// (leftovers-61 FR-5, leftovers-66 FR-1).
+	"internal/cli/decisions.go": "names proposed alone as waiting",
+}
+
+// decisionStatusValues are the values of model's decision statuses: a string
+// literal equal to one of them, compared to anything outside internal/model,
+// is a status read by hand that not even the constant names (leftovers-66
+// FR-1).
+var decisionStatusValues = map[string]bool{
+	model.DecisionProposed: true, model.DecisionRuled: true, model.DecisionSuperseded: true,
+	model.DecisionWithdrawn: true, model.DecisionAwaitingCells: true, model.DecisionApplied: true,
+	model.DecisionAcknowledged: true,
+}
+
+// isStatusLiteral reports whether e is a string literal whose value is a
+// decision status.
+func isStatusLiteral(e ast.Expr) bool {
+	lit, ok := e.(*ast.BasicLit)
+	if !ok || lit.Kind != token.STRING {
+		return false
+	}
+	v, err := strconv.Unquote(lit.Value)
+	return err == nil && decisionStatusValues[v]
 }
 
 // statusComparisons lists every comparison (==, != or a switch case) of a
-// value to a model.Decision* status constant in the non-test Go files under
-// root, outside internal/model, as "path:line: text". It skips vendored,
+// value to a model.Decision* status constant, or to a string literal equal
+// to a status value, in the non-test Go files under root, outside
+// internal/model, as "path:line: text". It skips vendored,
 // generated and checkout directories.
 func statusComparisons(root string) ([]string, error) {
 	var out []string
@@ -68,10 +100,10 @@ func statusComparisons(root string) ([]string, error) {
 			return fmt.Errorf("%s: %w", rel, err)
 		}
 		model := modelImportName(f)
-		if model == "" {
-			return nil
-		}
 		isStatus := func(e ast.Expr) bool {
+			if model == "" {
+				return false
+			}
 			sel, ok := e.(*ast.SelectorExpr)
 			if !ok {
 				return false
@@ -85,13 +117,20 @@ func statusComparisons(root string) ([]string, error) {
 		ast.Inspect(f, func(n ast.Node) bool {
 			switch n := n.(type) {
 			case *ast.BinaryExpr:
-				if (n.Op == token.EQL || n.Op == token.NEQ) && (isStatus(n.X) || isStatus(n.Y)) {
+				if n.Op != token.EQL && n.Op != token.NEQ {
+					break
+				}
+				if isStatus(n.X) || isStatus(n.Y) {
 					report(n, "compares to a model.Decision* status")
+				} else if isStatusLiteral(n.X) || isStatusLiteral(n.Y) {
+					report(n, "compares to a decision status literal")
 				}
 			case *ast.CaseClause:
 				for _, e := range n.List {
 					if isStatus(e) {
 						report(e, "switches on a model.Decision* status")
+					} else if isStatusLiteral(e) {
+						report(e, "switches on a decision status literal")
 					}
 				}
 			}
@@ -184,9 +223,45 @@ func TestLF62G4GuardFindsPlantedComparison(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := []string{
+		"internal/cli/decisions.go: allowlisted but compares no status; drop it from statusLiteralAllowed",
 		"internal/cli/x.go:7: switches on a model.Decision* status",
+		"internal/service/draft.go: allowlisted but compares no status; drop it from statusLiteralAllowed",
 		"internal/service/rule.go: allowlisted but compares no status; drop it from statusLiteralAllowed",
 		"internal/service/tasks.go:6: compares to a model.Decision* status",
+	}
+	if strings.Join(got, "\n") != strings.Join(want, "\n") {
+		t.Errorf("findings:\n%s\nwant:\n%s", strings.Join(got, "\n"), strings.Join(want, "\n"))
+	}
+}
+
+// G1 (leftovers-66 FR-1): the guard also finds a decision status compared to
+// a string literal, with or without the model import, as == and as a switch
+// case; a literal that is no status, or one inside internal/model, is not
+// one.
+func TestLF66G1GuardFindsStatusLiteral(t *testing.T) {
+	root := t.TempDir()
+	write := func(rel, body string) {
+		t.Helper()
+		p := filepath.Join(root, rel)
+		if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(p, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	write("internal/service/plant.go", "package service\n\nimport \"organizer/internal/model\"\n\nfunc f(d model.Decision) bool {\n\treturn d.Status == \"ruled\"\n}\n")
+	write("internal/cli/plant.go", "package cli\n\nfunc g(s string) int {\n\tswitch s {\n\tcase \"awaiting-cells\":\n\t\treturn 1\n\tcase \"now\":\n\t\treturn 2\n\t}\n\tif \"withdrawn\" != s {\n\t\treturn 3\n\t}\n\treturn 0\n}\n")
+	write("internal/model/ok.go", "package model\n\nfunc h(s string) bool { return s == \"ruled\" }\n")
+	write("internal/service/plant_test.go", "package service\n\nfunc k(s string) bool { return s == \"proposed\" }\n")
+	got, err := statusComparisons(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{
+		"internal/cli/plant.go:10: compares to a decision status literal",
+		"internal/cli/plant.go:5: switches on a decision status literal",
+		"internal/service/plant.go:6: compares to a decision status literal",
 	}
 	if strings.Join(got, "\n") != strings.Join(want, "\n") {
 		t.Errorf("findings:\n%s\nwant:\n%s", strings.Join(got, "\n"), strings.Join(want, "\n"))
