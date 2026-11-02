@@ -65,3 +65,8 @@ write the count by hand with a bare `num` span:
 `<title> · <span className="num` (with or without `sec-count`) in every
 non-test file under `frontend/src/components/`, expecting none. The
 boundary adds `InitiativesView.tsx` (those three titles only) and its test.
+
+Addendum (on sup115's finding 2): V2's scan also matches `{" · "}`,
+`&middot;` and `·` beside a count span inside a `.sec-title`, across
+lines. On main it then finds seven (Home two, Overview one, Usage one,
+InitiativesView three); on the branch none.
