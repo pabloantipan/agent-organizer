@@ -6,7 +6,7 @@
 // picked node. The right side is MapPanel, the map as text. Levels follow
 // the generator's: the system opens its containers, a container with a
 // module map opens it, and one trail above the figure walks back.
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Map as ReadMap } from "../../wailsjs/go/main/App";
 import type { merge, service } from "../../wailsjs/go/models";
@@ -150,7 +150,13 @@ export function MapBody({ initiative, read, head }: { initiative: merge.BoardIni
   // The place as restored is the place kept: a pick the map no longer has
   // leaves the store too, the level stays (FR-5).
   useEffect(() => { if (kept && !samePlaceState(kept, saved)) save(initiative.id, kept); }, [kept, saved, initiative.id]);
-  const wrap = useRef<HTMLDivElement>(null);
+  const wrap = useRef<HTMLDivElement | null>(null);
+  // The scroller as state too, for MapTags: a child's layout effect runs
+  // before its parent element's ref is set, so a ref read on its first run
+  // is null and the panel would wait for positions that never come
+  // (leftovers-69 FR-5, M18). Setting it re-renders once with the element.
+  const [scroller, setScroller] = useState<HTMLDivElement | null>(null);
+  const holdScroller = useCallback((el: HTMLDivElement | null) => { wrap.current = el; setScroller(el); }, []);
   useMapEdges(wrap, `${initiative.id} base map, scrolls`, read);
 
   const state = (lines: ReactNode, failed = false) => (
@@ -171,6 +177,7 @@ export function MapBody({ initiative, read, head }: { initiative: merge.BoardIni
   const nodes = nodesAt(index, at);
   const source = sourceAt(r, at) ?? "";
   const pickedId = cur.picks[placeKey(at)] ?? null;
+  const orderKey = `${initiative.id}|${placeKey(at)}`;
   const picked = nodes.find((n) => n.id === pickedId) ?? null;
   const pick = (id: string | null) => save(initiative.id, { ...cur, picks: { ...cur.picks, [placeKey(at)]: id } });
   const go = (to: Place) => save(initiative.id, { ...cur, level: to.level, container: to.container, containersSeen: cur.containersSeen || to.level !== "context" });
@@ -198,7 +205,7 @@ export function MapBody({ initiative, read, head }: { initiative: merge.BoardIni
       )}
       <div className="map-lens">
         <div className="map-stage">
-          <div className="map-scroll" ref={wrap}>
+          <div className="map-scroll" ref={holdScroller}>
             <MapFigure
               key={placeKey(at)}
               initiative={initiative.id}
@@ -210,7 +217,7 @@ export function MapBody({ initiative, read, head }: { initiative: merge.BoardIni
               current={pickedId}
               picked={pickedId}
             />
-            <MapTags host={wrap} nodes={nodes} onOrder={(ids) => setOrder((o) => (sameIds(o[placeKey(at)], ids) ? o : { ...o, [placeKey(at)]: ids }))} />
+            <MapTags host={scroller} nodes={nodes} onOrder={(ids) => setOrder((o) => (sameIds(o[orderKey], ids) ? o : { ...o, [orderKey]: ids }))} />
           </div>
           <ul className="map-legend" aria-label="Legend">
             <li><span className="map-key map-key-exists" aria-hidden /> exists</li>
@@ -219,7 +226,7 @@ export function MapBody({ initiative, read, head }: { initiative: merge.BoardIni
             <li><span className="map-key map-key-ungrounded" aria-hidden /> not grounded</li>
           </ul>
         </div>
-        <MapPanel initiative={initiative} index={index} nodes={nodes} order={panelOrder(nodes, order[placeKey(at)])} levelName={name} picked={picked} pick={pick} drill={drill} />
+        <MapPanel initiative={initiative} index={index} nodes={nodes} order={panelOrder(nodes, order[orderKey])} levelName={name} picked={picked} pick={pick} drill={drill} />
       </div>
     </div>
   );
@@ -300,13 +307,13 @@ type Tag = { id: string; text: string; left: string; top: string; width: string 
 /** The status words under the nodes that have them, laid in the figure's
  *  own frame at its buttons' boxes (percentages), so they follow its scale
  *  and move nothing. Visual only: the panel says the same and links. */
-function MapTags({ host, nodes, onOrder }: { host: React.RefObject<HTMLDivElement | null>; nodes: Node[]; onOrder: (ids: string[]) => void }) {
+function MapTags({ host, nodes, onOrder }: { host: HTMLDivElement | null; nodes: Node[]; onOrder: (ids: string[]) => void }) {
   const report = useRef(onOrder);
   report.current = onOrder;
   const [frame, setFrame] = useState<{ el: HTMLElement; tags: Tag[] } | null>(null);
   const words = useMemo(() => new Map(nodes.map((n) => [n.id, tagOf(n)] as const).filter(([, t]) => !!t) as [string, string][]), [nodes]);
   useLayoutEffect(() => {
-    const h = host.current;
+    const h = host;
     if (!h) return;
     const read = () => {
       const el = h.querySelector<HTMLElement>(".map-figure-frame");

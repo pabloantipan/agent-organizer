@@ -490,4 +490,10 @@ describe("leftovers-69 V1 (FR-5, M18): the panel's list renders once, in reading
     expect(after).not.toContain("Drawing the map…");
     expect(panelOrder(ns, [])!.map((n) => n.id)).toEqual(ns.map((n) => n.id));
   });
+  it("the positions come from the scroller as state, not a ref a child's first layout effect reads as null (the panel waited forever on a map shown once)", () => {
+    const src = readFileSync(new URL("./MapView.tsx", import.meta.url), "utf8") as string;
+    expect(src).toContain('<div className="map-scroll" ref={holdScroller}>');
+    expect(src).toMatch(/<MapTags host=\{scroller\}/);
+    expect(src).not.toMatch(/host\.current/);
+  });
 });
