@@ -131,6 +131,7 @@ export function MapBody({ initiative, read, head }: { initiative: merge.BoardIni
   const start = useMemo(() => (r ? firstPlace(r) : null), [r]);
   const [place, setPlace] = useState<Place | null>(start);
   const [pickedAt, setPickedAt] = useState<Record<string, string | null>>({});
+  const [order, setOrder] = useState<Record<string, string[]>>({});
   useEffect(() => { setPlace(start); setPickedAt({}); }, [start ? placeKey(start) : "", read]);
   const wrap = useRef<HTMLDivElement>(null);
 
@@ -189,7 +190,7 @@ export function MapBody({ initiative, read, head }: { initiative: merge.BoardIni
               onPick={(id) => pick(id)}
               current={pickedId}
             />
-            <MapTags host={wrap} nodes={nodes} />
+            <MapTags host={wrap} nodes={nodes} onOrder={(ids) => setOrder((o) => (sameIds(o[placeKey(at)], ids) ? o : { ...o, [placeKey(at)]: ids }))} />
           </div>
           <ul className="map-legend" aria-label="Legend">
             <li><span className="map-key map-key-exists" aria-hidden /> exists</li>
@@ -198,10 +199,21 @@ export function MapBody({ initiative, read, head }: { initiative: merge.BoardIni
             <li><span className="map-key map-key-ungrounded" aria-hidden /> not grounded</li>
           </ul>
         </div>
-        <MapPanel initiative={initiative} index={index} nodes={nodes} levelName={name} picked={picked} pick={pick} drill={drill} />
+        <MapPanel initiative={initiative} index={index} nodes={inReadingOrder(nodes, order[placeKey(at)])} levelName={name} picked={picked} pick={pick} drill={drill} />
       </div>
     </div>
   );
+}
+
+const sameIds = (a: string[] | undefined, b: string[]) => !!a && a.length === b.length && a.every((x, k) => x === b[k]);
+
+/** U5: the panel lists a level's nodes in the order its roving set takes
+ *  (the figure's buttons, reading order); a node not drawn trails in
+ *  map.json order, and before the figure is drawn the order is map.json's. */
+export function inReadingOrder(nodes: Node[], order: string[] | undefined): Node[] {
+  if (!order?.length) return nodes;
+  const at = new Map(order.map((id, k) => [id, k] as const));
+  return nodes.map((n, k) => ({ n, k })).sort((a, b) => (at.get(a.n.id) ?? order.length + a.k) - (at.get(b.n.id) ?? order.length + b.k)).map((x) => x.n);
 }
 
 type Tag = { id: string; text: string; left: string; top: string; width: string };
@@ -209,7 +221,9 @@ type Tag = { id: string; text: string; left: string; top: string; width: string 
 /** The status words under the nodes that have them, laid in the figure's
  *  own frame at its buttons' boxes (percentages), so they follow its scale
  *  and move nothing. Visual only: the panel says the same and links. */
-function MapTags({ host, nodes }: { host: React.RefObject<HTMLDivElement | null>; nodes: Node[] }) {
+function MapTags({ host, nodes, onOrder }: { host: React.RefObject<HTMLDivElement | null>; nodes: Node[]; onOrder: (ids: string[]) => void }) {
+  const report = useRef(onOrder);
+  report.current = onOrder;
   const [frame, setFrame] = useState<{ el: HTMLElement; tags: Tag[] } | null>(null);
   const words = useMemo(() => new Map(nodes.map((n) => [n.id, tagOf(n)] as const).filter(([, t]) => !!t) as [string, string][]), [nodes]);
   useLayoutEffect(() => {
@@ -219,14 +233,17 @@ function MapTags({ host, nodes }: { host: React.RefObject<HTMLDivElement | null>
       const el = h.querySelector<HTMLElement>(".map-figure-frame");
       if (!el) { setFrame((f) => (f ? null : f)); return; }
       const tags: Tag[] = [];
+      const ids: string[] = [];
       el.querySelectorAll<HTMLButtonElement>("button.map-node").forEach((b) => {
         const id = b.dataset.node ?? "";
+        ids.push(id);
         const text = words.get(id);
         if (!text) return;
         const s = b.style;
         tags.push({ id, text, left: s.left, top: `calc(${s.top} + ${s.height})`, width: s.width });
       });
       setFrame((f) => (f && f.el === el && JSON.stringify(f.tags) === JSON.stringify(tags) ? f : { el, tags }));
+      report.current(ids);
     };
     read();
     const mo = new MutationObserver(read);

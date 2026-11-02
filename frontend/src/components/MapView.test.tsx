@@ -5,8 +5,10 @@ import harborMap from "../../../testdata/fixture-map/harbor/docs/architecture/ma
 import ruledMap from "../../../testdata/fixture-map/harbor-ruled/docs/architecture/map.json";
 import ungroundedMap from "../../../testdata/fixture-map/harbor-ungrounded/docs/architecture/map.json";
 import roadmapSrc from "./RoadmapView.tsx?raw";
-import { read as readSheet } from "./stateLayer.kit";
+import { read as readSheet, parseCompound, winners } from "./stateLayer.kit";
 import type { merge, service } from "../../wailsjs/go/models";
+// @ts-expect-error node:fs has no type declarations in this tsconfig (as stateLayer.kit)
+import { existsSync, readFileSync } from "node:fs";
 
 // leftovers-58 FR-6 to FR-9 at the lens, headless: the states, the level
 // walk, the lens classes, the panel's lines and what each line runs,
@@ -24,7 +26,7 @@ vi.mock("../../wailsjs/go/main/App", () => ({
 }));
 vi.mock("../../wailsjs/runtime/runtime", () => ({ BrowserOpenURL: vi.fn() }));
 
-const { MapBody, NO_MAP, NO_L3, READING_MAP, firstPlace, nodesAt, drillOf, trailOf, lensClasses, tagOf, placeName } = await import("./MapView");
+const { MapBody, inReadingOrder, NO_MAP, NO_L3, READING_MAP, firstPlace, nodesAt, drillOf, trailOf, lensClasses, tagOf, placeName } = await import("./MapView");
 const { MapPanel, groundLine, groundCtx, runGround, statusWords, ruledBy } = await import("./MapPanel");
 const { MapFigureView } = await import("./MapFigure");
 const { useSpecReader } = await import("./SpecReader");
@@ -179,7 +181,6 @@ describe("FR-8: each grounding line, its action or why it has none", () => {
       { name: "harbor-api", path: `${ROOT}/harbor-api`, missing: false },
       { name: "harbor-web", path: `${ROOT}/harbor-web`, missing: true },
     ] as merge.BoardInitiative["repos_state"],
-    spec_files: { "docs/architecture": ["docs/architecture/containers.md", "docs/architecture/context.md"] },
   });
   const ctx = groundCtx(withRepos, (harborMap as unknown as service.C4Map).inputs);
   const bare = groundCtx(init(), (harborMap as unknown as service.C4Map).inputs);
@@ -205,9 +206,24 @@ describe("FR-8: each grounding line, its action or why it has none", () => {
     expect(line("record", "2").act).toEqual({ to: "record", number: "0002" });
     expect(line("record", "0099")).toMatchObject({ act: null, reason: "not among this initiative's decisions" });
   });
-  it("curated: <page> opens docs/architecture/<page> in the spec reader when it may read it, else says why", () => {
+  it("curated: <page> opens docs/architecture/<page> in the spec reader, with or without specs: (FR-10)", () => {
     expect(line("curated", "context.md")).toMatchObject({ word: "curated:", act: { to: "spec", path: "docs/architecture/context.md" } });
-    expect(line("curated", "context.md", bare)).toMatchObject({ act: null, reason: "not readable here: docs/architecture/ is not under specs: in initiative.yaml" });
+    expect(line("curated", "context.md", bare)).toMatchObject({ word: "curated:", act: { to: "spec", path: "docs/architecture/context.md" }, reason: undefined });
+  });
+  it("the committed harbor fixture holds every repo dir and deploy file its grounding names (Amendment 2)", () => {
+    const fx = new URL("../../../testdata/fixture-map/harbor", import.meta.url).pathname;
+    const yaml = readFileSync(`${fx}/working-on/initiative.yaml`, "utf8") as string;
+    const repos = (yaml.match(/^repos: \[(.*)\]$/m)?.[1] ?? "").split(",").map((s: string) => s.trim());
+    expect(repos).toEqual(["harbor-api", "harbor-web", "harbor-ledger"]);
+    const live = groundCtx(init({ repos_state: repos.map((name: string) => ({ name, path: `${fx}/${name}`, missing: false })) as merge.BoardInitiative["repos_state"] }), (harborMap as unknown as service.C4Map).inputs);
+    const kinds = new Set<string>();
+    for (const n of (harborMap as unknown as service.C4Map).nodes ?? []) for (const e of n.grounding ?? []) {
+      const l = groundLine(e, live);
+      if (l.act?.to === "editor") { expect(existsSync(l.act.path), l.act.path).toBe(true); kinds.add(e.kind); }
+      else if (l.act) kinds.add(e.kind);
+      else expect(l.reason, `${e.kind} ${e.ref}`).toBe("not a file: the deploy adapter's own reference");
+    }
+    expect([...kinds].sort()).toEqual(["curated", "deploy", "record", "repo"]);
   });
   it("a kind that names nothing to open is plain text, no reason", () => {
     expect(line("pipeline", "ci/build")).toMatchObject({ word: "pipeline", act: null, reason: undefined });
@@ -223,7 +239,7 @@ describe("FR-8: each grounding line, its action or why it has none", () => {
 
 describe("FR-8: what a line runs (mocked bindings)", () => {
   beforeEach(() => useSpecReader.setState({ initiative: null, stack: [], missing: {} }));
-  const i = init({ spec_files: { "docs/architecture": ["docs/architecture/context.md"] } });
+  const i = init();
   it("repo and deploy run OpenInEditor with the path, nothing else", async () => {
     await runGround({ to: "editor", path: `${ROOT}/harbor-api` }, null, i);
     expect(openInEditor.mock.calls).toEqual([[`${ROOT}/harbor-api`]]);
@@ -265,5 +281,27 @@ describe("FR-9, FR-2, FR-3: the states", () => {
   });
   it("the figure's own drawing state shows while it draws (MapFigure's words)", () => {
     expect(body(drawn(harborMap))).toContain('<p class="map-figure-state ">Drawing the map…</p>');
+  });
+});
+
+describe("round 2: U1, U4, U5", () => {
+  it("U1: the panel's actions draw in --accent-fg over button.linkish { color: inherit }", () => {
+    for (const k of ["map-ground-act", "map-panel-node", "map-ruled-link"]) {
+      const t = { parts: [parseCompound(`button.linkish.${k}`)], hover: false };
+      expect(winners(t, "color").map((w) => w.v), k).toEqual(["var(--accent-fg)"]);
+    }
+  });
+  it("U4: the drawing is a block (no baseline gap) and the scroller keeps room for the bottom row's words", () => {
+    expect(mapCss).toMatch(/\.map-figure-svg > svg \{ display: block; \}/);
+    expect(mapCss).toMatch(/\.map-scroll \{ overflow: auto; padding-bottom: calc\(var\(--line-xs\) \+ var\(--space-0-5\)\); \}/);
+  });
+  it("U5: the panel lists nodes in the roving set's order; undrawn ones trail in map.json order", () => {
+    const ns = nodesAt(harborMap as unknown as service.C4Map, { level: "containers" });
+    const ids = ns.map((n) => n.id);
+    expect(inReadingOrder(ns, undefined).map((n) => n.id)).toEqual(ids);
+    const drawnOrder = ["web", "harbor_api", "ledger", "harbor_db"].filter((x) => ids.includes(x));
+    const got = inReadingOrder(ns, drawnOrder).map((n) => n.id);
+    expect(got.slice(0, drawnOrder.length)).toEqual(drawnOrder);
+    expect(got.slice(drawnOrder.length)).toEqual(ids.filter((x) => !drawnOrder.includes(x)));
   });
 });

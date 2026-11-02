@@ -28,7 +28,12 @@
 @media (max-width: 860px) { .map-lens { grid-template-columns: minmax(0, 1fr); } }
 
 .map-stage { min-width: 0; padding: var(--space-3); border-radius: var(--radius-lg); background: var(--surface); }
-.map-scroll { overflow: auto; }
+/* U4: no scrollbar when the figure fits. The inlined <svg> is a block, so no
+   baseline gap hangs under it past the frame, and the scroller keeps room
+   below the frame for the words under the bottom row (.map-tag, laid
+   outside the frame's box): overflow inside the padding box scrolls nothing. */
+.map-scroll { overflow: auto; padding-bottom: calc(var(--line-xs) + var(--space-0-5)); }
+.map-figure-svg > svg { display: block; }
 .map-figure-state { margin: 0; color: var(--fg-muted); font-size: var(--font-size-md); }
 .map-figure-state.failed { color: var(--fg); }
 
@@ -64,7 +69,9 @@
 .map-key-retiring { background: var(--bg); }
 .map-key-ungrounded { border: 1.5px dotted var(--warning); }
 
-/* The panel: the map as text. */
+/* The panel: the map as text. Its actions read as accent links (U1): scoped
+   button.linkish.<class> (0-2-1) so global.css's button.linkish { color: inherit }
+   (0-1-1) does not draw them as plain text. */
 .map-panel { min-width: 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--surface); color: var(--fg); font-size: var(--font-size-md); line-height: var(--line-md); }
 .map-panel-title { margin: 0 0 var(--space-1); font-size: var(--font-size-xl); line-height: var(--line-xl); font-weight: var(--weight-semibold); overflow-wrap: anywhere; }
 .map-panel-title:focus { outline: none; }
@@ -74,7 +81,7 @@
 .map-panel-meta { margin: 0 0 var(--space-2); color: var(--fg-muted); font-size: var(--font-size-sm); line-height: var(--line-sm); }
 .map-panel-back { margin: 0 0 var(--space-2) calc(-1 * var(--space-2)); font-size: var(--font-size-sm); }
 .map-panel-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-1-5); }
-.map-panel-node { color: var(--accent-fg); text-align: left; }
+button.linkish.map-panel-node { color: var(--accent-fg); text-align: left; }
 .map-panel-words { color: var(--fg-muted); font-size: var(--font-size-sm); }
 .map-panel-sub { margin: var(--space-4) 0 var(--space-1-5); font-size: var(--font-size-xs); line-height: var(--line-xs); font-weight: var(--weight-semibold); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--fg-muted); }
 
@@ -82,7 +89,7 @@
 .map-facts dt { color: var(--fg-subtle); font-size: var(--font-size-sm); }
 .map-facts dd { margin: 0; overflow-wrap: anywhere; }
 .map-status-retiring { color: var(--fg-muted); }
-.map-ruled-link { color: var(--accent-fg); text-decoration: underline; text-decoration-style: dashed; }
+button.linkish.map-ruled-link { color: var(--accent-fg); text-decoration: underline; text-decoration-style: dashed; }
 .map-drill { margin-top: var(--space-1); }
 .map-no-l3 { margin-top: var(--space-1); }
 
@@ -90,6 +97,6 @@
 .map-ground-line { display: flex; flex-direction: column; gap: var(--space-0-5); overflow-wrap: anywhere; }
 .map-ground .mono { font-family: var(--mono); font-size: var(--font-size-sm); overflow-wrap: anywhere; }
 .map-ground-kind { color: var(--fg-muted); white-space: nowrap; }
-.map-ground-act { display: block; max-width: 100%; text-align: left; white-space: normal; color: var(--accent-fg); }
+button.linkish.map-ground-act { display: block; max-width: 100%; text-align: left; white-space: normal; color: var(--accent-fg); }
 .map-ground-off { color: var(--fg-muted); }
 .map-ground-why { color: var(--fg-subtle); font-size: var(--font-size-sm); line-height: var(--line-sm); }

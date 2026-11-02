@@ -34,8 +34,6 @@ export type GroundCtx = {
   root: string;
   repos: Pick<model.RepoState, "name" | "path" | "missing">[];
   decisions: Pick<model.Decision, "number">[];
-  /** Root-relative paths the spec reader may read (ReadSpec's allow-list). */
-  readable: Set<string>;
   /** map.json `inputs`: the repos the map was made from. */
   inputs: Record<string, string | null>;
 };
@@ -79,10 +77,8 @@ export function groundLine(e: Evidence, ctx: GroundCtx, k = 0): GroundLine {
       return { ...base, ref: number, word: "record", mono: false, ...(known ? { act: { to: "record", number } } : { act: null, reason: "not among this initiative's decisions" }) };
     }
     case "curated": {
-      const path = `${MAP_DIR}/${ref}`;
-      return ctx.readable.has(path)
-        ? { ...base, word: "curated:", mono: false, act: { to: "spec", path } }
-        : { ...base, word: "curated:", mono: false, act: null, reason: `not readable here: ${MAP_DIR}/ is not under specs: in initiative.yaml` };
+      // ReadSpec reads the map's curated pages (leftovers-58 FR-10).
+      return { ...base, word: "curated:", mono: false, act: { to: "spec", path: `${MAP_DIR}/${ref}` } };
     }
     default:
       return { ...base, word: e.kind, mono: true, act: null };
@@ -91,9 +87,7 @@ export function groundLine(e: Evidence, ctx: GroundCtx, k = 0): GroundLine {
 
 /** The context of an initiative as the board carries it. */
 export function groundCtx(i: merge.BoardInitiative, inputs: Record<string, string | null> | undefined): GroundCtx {
-  const readable = new Set<string>();
-  for (const files of Object.values(i.spec_files ?? {})) for (const f of files) readable.add(f);
-  return { root: i.path, repos: i.repos_state ?? [], decisions: i.decisions ?? [], readable, inputs: inputs ?? {} };
+  return { root: i.path, repos: i.repos_state ?? [], decisions: i.decisions ?? [], inputs: inputs ?? {} };
 }
 
 /** The record a ruled node was ruled by: its first `record` evidence. */
