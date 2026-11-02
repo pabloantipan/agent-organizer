@@ -1,6 +1,6 @@
 # Leftovers 65: the review and dev builds refuse the real home: the build spec
 
-status: proposed (0178)
+status: accepted (0178, ruled 2026-11-02)
 by: the FSE, 2026-11-02, on main at e335885
 sources: the incident of 2026-11-02 03:08-03:14 (bitácora, day log: a UI
 reviewer ran `wails dev` with the fixture's config but Pablo's real

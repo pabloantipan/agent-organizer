@@ -1,13 +1,13 @@
 ---
 title: "A review or dev build cannot start against the real home"
-status: next
+status: now
 repos: [organizer]
 branch: lf65-review-guard
 seat: l65-build
 reviewer: l65-rev
 stage:
 updated: 2026-11-02
-next: "launch on 0178's ruling"
+next: "sup109 runs it (0178 ruled 2026-11-02)"
 depends_on: []
 boundary: ["reviewguard.go", "reviewguard_dev.go", "reviewguard_nodev.go", "reviewguard_test.go", "main.go", "CLAUDE.md"]
 spec: "docs/specs/leftovers-65.md (FR-1 to FR-5)"
