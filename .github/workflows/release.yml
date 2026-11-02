@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: pabloantipan/agent-mailbox-specs
-          ref: 54cf10da4fcbae240a8abb7ee8353fd4e8c5bafa
+          ref: 54369d3fa24be2b1ce459a02bf904fb34f59e221
           path: agent-mailbox-specs
       - uses: actions/setup-go@v5
         with: { go-version-file: organizer/go.mod }

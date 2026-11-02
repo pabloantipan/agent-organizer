@@ -4,7 +4,8 @@ package service
 // Deltagos draws `factory report`'s output and computes none of it. The
 // types below are the contract's (agent-mailbox-specs
 // contracts/factory-report/, factory-report.schema.json and
-// factory-report-windows.schema.json at 8474386): field for field, so a
+// factory-report-windows.schema.json at 8474386, plus dead_minutes from
+// feat/report-dead-minutes 54369d3): field for field, so a
 // decode then encode gives the JSON back. The one number Deltagos adds is
 // tokens per progress line (LineTokens), which the report does not carry yet.
 
@@ -58,6 +59,9 @@ type Progress struct {
 	Lines       []ProgressLine `json:"lines"`
 	Dead        []DeadSpan     `json:"dead"`
 	Notes       []string       `json:"notes"`
+	// DeadMinutes is the window's dead time, the sum the report did of
+	// every span's minutes, so Deltagos sums nothing (FR-19).
+	DeadMinutes int `json:"dead_minutes"`
 }
 
 type Denominator struct {
@@ -79,6 +83,8 @@ type ProgressLine struct {
 	Done    int      `json:"done"`
 	Pct     int      `json:"pct"`
 	Hashes  int      `json:"hashes"`
+	// DeadMinutes is the dead time before this line, as the report gives it.
+	DeadMinutes int `json:"dead_minutes"`
 }
 
 type DeadSpan struct {

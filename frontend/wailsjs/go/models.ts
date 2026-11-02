@@ -3080,6 +3080,7 @@ export namespace service {
 	    done: number;
 	    pct: number;
 	    hashes: number;
+	    dead_minutes: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new ProgressLine(source);
@@ -3093,6 +3094,7 @@ export namespace service {
 	        this.done = source["done"];
 	        this.pct = source["pct"];
 	        this.hashes = source["hashes"];
+	        this.dead_minutes = source["dead_minutes"];
 	    }
 	}
 	export class ProgressMove {
@@ -3117,6 +3119,7 @@ export namespace service {
 	    lines: ProgressLine[];
 	    dead: DeadSpan[];
 	    notes: string[];
+	    dead_minutes: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new Progress(source);
@@ -3129,6 +3132,7 @@ export namespace service {
 	        this.lines = this.convertValues(source["lines"], ProgressLine);
 	        this.dead = this.convertValues(source["dead"], DeadSpan);
 	        this.notes = source["notes"];
+	        this.dead_minutes = source["dead_minutes"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
