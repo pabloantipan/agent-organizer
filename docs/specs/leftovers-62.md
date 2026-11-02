@@ -77,3 +77,9 @@ Card `lf62-ui` (after lf62-go):
 |---|---|---|---|
 | `lf62-go` | G1-G4, X0 | — | false |
 | `lf62-ui` | U1-U4, X0 | lf62-go | true |
+
+## Amendment 1 (FSE, 2026-11-02, on l62-ui's question; Aglaea decision-states Amendment 2, 7d3da41, DS-h)
+
+FR-5 and U1, three cases: equal counts read `5 decisions waiting on you`
+(unchanged from main, 0068 FR-2); unequal `6 decisions waiting · 5 on
+you`; none on the lead `6 decisions waiting`. U1 checks all three.
