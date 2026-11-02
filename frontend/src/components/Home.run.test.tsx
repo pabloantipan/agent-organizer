@@ -61,7 +61,7 @@ describe("W8: Home's row says the last run (FR-14)", () => {
   });
 
   it("a recent run with no dead time: last run · 4 cards", () => {
-    const quiet = { ...report, progress: { ...report.progress, dead: [] } } as unknown as service.FactoryReport;
+    const quiet = { ...report, progress: { ...report.progress, dead: [], dead_minutes: 0 } } as unknown as service.FactoryReport;
     const run = runSignalFor(local, { windows: windowsList, report: quiet }, latest.until * 1000 + 2 * H)!;
     expect(runSignalWords(run)).toBe("last run · 4 cards");
   });

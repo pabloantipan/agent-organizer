@@ -818,7 +818,7 @@ export function runSignalFor(i: merge.BoardInitiative | undefined, read: RunRead
   if (runPlace({ live, until: latest.until * 1000, seenAt: live ? null : seenAtOf(i.id, latest.until), now: nowMs }) !== "head") return null;
   const p = read.report?.progress;
   if (!p) return null;
-  const deadMin = (p.dead ?? []).reduce((a, d) => a + (d.minutes ?? 0), 0);
+  const deadMin = p.dead_minutes ?? 0;
   return { live, cards: p.denominator?.count ?? 0, deadMin };
 }
 
