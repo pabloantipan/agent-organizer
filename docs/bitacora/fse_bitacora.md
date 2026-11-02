@@ -17,6 +17,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- 10:33 0181 ruled by default (0637f50): leftovers 68, lf68-go (organizer runs drops reviewer and supervisor runs, verified in runs.jsonl: l65-rev, l66-go-rev, sup109, sup110 absent; literal guard parens and per-file allowlist); sup112 launched beside sup111. Dropped from the queue after reading: runRecordParts and docs/runs/ (records go to runs/, the supervise skill's place); stripComments regex (unverified, nothing to cut). Left: (5) React app on the map, (6) htmlLabels; map regen waits on Hephaistos.
+
 - 10:06 0180 ruled by default (6516b4c): leftovers 67, lf67-map-polish (M8-M14) and lf67-ui-polish (AR27-AR30, U9, R53, Home comment) in parallel; sup111 launched, forecast 90-180m. Queue left: Go leftovers 3 (runs.jsonl seats with no card, docs/runs/ scan gap and runRecordParts ^runs/, stripComments regex, literal guard parens and allowlist), (5) React app on the map, (6) htmlLabels; map regen waits on Hephaistos.
 
 - 09:59 sup110 closed (leftovers 66: lf66-go #45 784a1f3, lf66-map #47 83056a1; 27 min vs 60-120, seats $5.75) and ended; installed v0.2.0-3418. Map is stale on main again on its own merge commit (tool-side, sent [for hephaistos] with diagram-check L1/L3 and origin-URL naming); no more regen until Hephaistos answers. Held for the next Go leftovers: the literal guard misses x == ("ruled"); allowlisted files are exempt whole.
