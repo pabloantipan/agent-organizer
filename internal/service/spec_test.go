@@ -268,3 +268,81 @@ func TestR3ReadSpecMapPages(t *testing.T) {
 		t.Errorf("refused pages read %d times", *reads)
 	}
 }
+
+// G3 (leftovers-66 FR-3): symlinks in the specs folder. One to a file
+// outside the root and one to a file in the root but outside the folder
+// are refused, nothing read; one to a file in the folder, relative or
+// absolute, reads; one to nothing reads missing.
+func TestLF66G3ReadSpecSymlinks(t *testing.T) {
+	s, root := specFixture(t)
+	outside := filepath.Join(t.TempDir(), "outside.md")
+	if err := os.WriteFile(outside, []byte("outside the initiative\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	links := map[string]string{
+		"docs/specs/out.md":     outside,
+		"docs/specs/secret.md":  filepath.Join("..", "secret.md"),
+		"docs/specs/in.md":      "a.md",
+		"docs/specs/in-abs.md":  filepath.Join(root, "docs", "specs", "a.md"),
+		"docs/specs/dangle.md":  "nowhere.md",
+		"docs/specs/hop.md":     filepath.Join("..", "..", "docs", "specs", "in.md"),
+		"docs/specs/hop-out.md": "out.md",
+	}
+	for rel, target := range links {
+		if err := os.Symlink(target, filepath.Join(root, filepath.FromSlash(rel))); err != nil {
+			t.Fatal(err)
+		}
+	}
+	s.Scan(false)
+	reads := countReads(t)
+	for _, p := range []string{"docs/specs/out.md", "docs/specs/secret.md", "docs/specs/hop-out.md"} {
+		doc, err := s.ReadSpec("fix", p)
+		if !errors.Is(err, ErrSpecRefused) || doc.Text != "" {
+			t.Errorf("ReadSpec(%q) = %+v, %v; want refused", p, doc, err)
+		}
+	}
+	if *reads != 0 {
+		t.Errorf("refused symlinks read the disk %d times", *reads)
+	}
+	for _, p := range []string{"docs/specs/in.md", "docs/specs/in-abs.md", "docs/specs/hop.md"} {
+		doc, err := s.ReadSpec("fix", p)
+		if err != nil || doc.Text != "# A\n" || doc.Missing {
+			t.Errorf("ReadSpec(%q) = %+v, %v; want # A", p, doc, err)
+		}
+	}
+	if doc, err := s.ReadSpec("fix", "docs/specs/dangle.md"); err != nil || !doc.Missing {
+		t.Errorf("dangling link = %+v, %v; want missing", doc, err)
+	}
+}
+
+// FR-3 over the other rules: a card's spec is held to its own folder, a
+// run record to runs/, a map page to docs/architecture/.
+func TestLF66ReadSpecSymlinksOtherRules(t *testing.T) {
+	s, root := specFixture(t)
+	outside := filepath.Join(t.TempDir(), "outside.md")
+	if err := os.WriteFile(outside, []byte("outside\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	card := filepath.Join(root, "docs", "other", "card.md")
+	if err := os.Remove(card); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, card); err != nil {
+		t.Fatal(err)
+	}
+	if doc, err := s.ReadSpec("fix", "docs/other/card.md"); !errors.Is(err, ErrSpecRefused) || doc.Text != "" {
+		t.Errorf("card spec through a link out = %+v, %v; want refused", doc, err)
+	}
+	if err := os.Remove(card); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "docs", "other", "real.md"), []byte("# Real\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("real.md", card); err != nil {
+		t.Fatal(err)
+	}
+	if doc, err := s.ReadSpec("fix", "docs/other/card.md"); err != nil || doc.Text != "# Real\n" {
+		t.Errorf("card spec through a link in its folder = %+v, %v; want # Real", doc, err)
+	}
+}
