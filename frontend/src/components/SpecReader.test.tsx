@@ -101,7 +101,7 @@ describe("FR-15: the drawer over the run report has Back", () => {
     expect(src).toContain("useSpecReader.setState({ initiative, stack: [entry], back });");
     expect(src).toContain("useSpecReader.setState({ initiative: null, stack: [], back: undefined });");
     expect(src).toContain("<ReaderBack prev={prev?.path} over={backTo} back={back} close={close} />");
-    expect(src).toContain("frontmatterAsCode(top.text)");
+    expect(src).toContain("readerSource(top.path, top.text)"); // frontmatterAsCode for every file but a run record (leftovers-64 FR-8)
   });
 });
 

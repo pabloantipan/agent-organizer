@@ -2,16 +2,18 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { merge, service } from "../../wailsjs/go/models";
 import * as App from "../../wailsjs/go/main/App";
 import { useBoard } from "../stores/board.store";
+import { api } from "../hooks/useWails";
 import { useLiveRegion } from "../lib/liveRegion";
 import {
   CUSTOM, NO_CARD_PASSED, argsOf, arrivalPreset, captionOf, clock, copyReport, costWords, customWindow, day,
   latestRun, markSeen, notDrawn, presetsOf, reasonOf, remoteLine, rememberPreset, rememberedPreset, roundWords, roundsOf,
   rowName, rowTime, rowsOf, rulingName, runPlace, seenAtOf, spanWords, spansDays, toLocalInput, waveCell, waveFooterWords,
-  waveLabel, waveLinkName, waveTarget, whileAway, type LineRow, type Preset, type PresetKind, type Row, type WaveTarget,
+  waveLabel, waveLinkName, waveTarget, whileAway, type LineRow, type Preset, type PresetKind, type Row, type Strip, type WaveTarget,
 } from "../lib/runReport";
 import { inactiveIds } from "../lib/queue";
 import { openSpec } from "./SpecReader";
 import { RunTracks } from "./RunTracks";
+import { running } from "./WaveStrip";
 import "../styles/runreport.css";
 
 type BoardInitiative = merge.BoardInitiative;
@@ -39,10 +41,17 @@ export function goToWave(
   id: string, w: service.RunWave, t: WaveTarget, el: HTMLElement | null,
   go: { openSpec: typeof openSpec; openNeedsMe: (key: string) => void; openWave: (id: string, wave: number | string) => void },
 ) {
+  if (t.kind === "none") return;
   if (t.kind === "record") void go.openSpec(el, id, t.path, true, "the run report", t.unread);
   else if (t.kind === "unread") go.openNeedsMe(`unread:${id}`);
   else go.openWave(id, w.wave);
 }
+
+/** The wave numbers Work draws a strip for: Work's own predicate (`running`,
+ *  Board.tsx) over the agents feed's waves of the initiative, the one place
+ *  the footer asks it (FR-7). */
+export const stripsOf = (ws: service.Wave[] | null | undefined): Strip[] =>
+  (ws ?? []).filter(running).map((w) => ({ n: w.n, supervisor: w.supervisor || undefined }));
 
 /** One window drawn: the preset (or Custom's window) and what came back. */
 export type Shown = { kind: PresetKind; since: number; until: number; live: boolean };
@@ -114,7 +123,7 @@ export function Progress({ report, lineTokens, shown, nav, openRows }: { report:
   const none = (report.progress?.denominator?.count ?? 0) === 0;
   const waves = report.waves?.waves ?? [];
   return (
-    <div className="rr-progress">
+    <div className={`rr-progress${spans ? " days" : ""}`}>
       <p className="rr-caption">{captionOf(report)}</p>
       {none && <p className="rr-none">{NO_CARD_PASSED}</p>}
       <div className="rr-head" aria-hidden><span>time</span><span>wave</span><span /><span /><span>share</span></div>
@@ -129,10 +138,13 @@ export function Progress({ report, lineTokens, shown, nav, openRows }: { report:
           <h4 className="rr-sub">Waves in this window</h4>
           <ul>
             {waves.map((w) => {
-              const name = waveLinkName(waveLabel(w, waves), nav.waveTarget?.(w) ?? { kind: "work" });
+              const t = nav.waveTarget?.(w) ?? { kind: "work" as const };
+              const name = waveLinkName(waveLabel(w, waves), t, w.key);
               return (
                 <li key={w.key}>
-                  <button type="button" className="rr-wave-line" onClick={(e) => nav.wave(w, e?.currentTarget)} title={name} aria-label={name}>{waveFooterWords(w)}</button>
+                  {t.kind === "none"
+                    ? <span className="rr-wave-line still" title={name} aria-label={name}>{waveFooterWords(w)}</span>
+                    : <button type="button" className="rr-wave-line" onClick={(e) => nav.wave(w, e?.currentTarget)} title={name} aria-label={name}>{waveFooterWords(w)}</button>}
                 </li>
               );
             })}
@@ -279,7 +291,12 @@ export function RunReport({ initiative }: { initiative: BoardInitiative }) {
 }
 
 function LocalRunReport({ id }: { id: string }) {
-  const { openCardLanding, openDecision, openNeedsMe, openWave, view } = useBoard();
+  const { openCardLanding, openDecision, openNeedsMe, openWave, view, agents, applyAgents } = useBoard();
+  // Work's strips come from the agents feed; load it as Work does when the
+  // app has not yet (FR-7).
+  useEffect(() => {
+    if (!agents) api.getAgents().then(applyAgents, () => undefined);
+  }, [agents, applyAgents]);
   const [windows, setWindows] = useState<service.ReportWindow[] | null>(null);
   const [wErr, setWErr] = useState("");
   const [pick, setPick] = useState<string | null>(null);
@@ -356,7 +373,8 @@ function LocalRunReport({ id }: { id: string }) {
 
   const init = view?.board.initiatives.find((x) => x.id === id);
   const active = !inactiveIds(view).has(id);
-  const targetOf = (w: service.RunWave) => waveTarget(w, { root: init?.path ?? data?.report?.root ?? "", waves: init?.waves, problems: init?.problems, active });
+  const strips = stripsOf(agents?.groups?.find((g) => g.id === id)?.waves);
+  const targetOf = (w: service.RunWave) => waveTarget(w, { root: init?.path ?? data?.report?.root ?? "", waves: init?.waves, problems: init?.problems, active, strips });
 
   const nav: Nav = {
     card: (slug) => {
