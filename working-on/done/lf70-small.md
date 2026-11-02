@@ -1,6 +1,6 @@
 ---
 title: "Rings whole in the wait line, one gap at the dot, the runs paragraph current"
-status: now
+status: done
 repos: [organizer]
 branch: lf70-small
 seat: l70-build
@@ -8,7 +8,7 @@ reviewer: l70-rev, l70-ui
 review: "pass: V1 V2 D1 X0 met (l70-rev, 2026-11-02, fed7495); AR32 U10 for l70-ui"
 stage:
 updated: 2026-11-02
-next: "merged as organizer #57 bb7f54d; supervisor moves it to done/"
+next: "merged bb7f54d (organizer #57)"
 depends_on: []
 boundary: ["frontend/src/styles/runreport.css", "frontend/src/components/UsageTable.tsx", "frontend/src/styles/usage.css", "frontend/src/components/Usage.rejected.test.tsx", "frontend/src/components/RunReport.test.tsx", "CLAUDE.md"]
 spec: "docs/specs/leftovers-70.md (FR-1 to FR-3)"
