@@ -3,6 +3,7 @@ import harbor from "./testdata/harbor-containers.svg?raw";
 import {
   boxPercent, decodeCss, drawnNodes, mapFigureName, nodeIdOf, nodeName, parseXml, pathPoints, readingOrder, rovingStep,
   sanitizeMapSvg, sanitizeMapTree, scopeCss, serialize, viewBoxOf, withNodeClasses, type MapNode,
+  FLOOR_PX, figureScale, floorScale, smallestTextSize,
 } from "./mapSvg";
 
 // leftovers-58 V1 (FR-4, Amendment 1) and V2 (FR-5). Vitest runs in Node
@@ -303,5 +304,45 @@ describe("scopeCss", () => {
   it("scopes inside @media, keeps keyframes, drops other at-rules (@font-face too)", () => {
     expect(scopeCss("@charset 'x';@media (min-width:1px){a{b:c}}@keyframes k{from{o:0}}@font-face{src:url(http://x/f)}@page{x:y}", "#s"))
       .toBe("@media (min-width:1px){#s a{b:c}}@keyframes k{from{o:0}}");
+  });
+});
+
+// leftovers-67 V1 (FR-1, M8; map-and-roadmap Amendment 3, U2): the figure
+// scales to fit only while its smallest text draws at 11 px or more.
+describe("V1: the legible floor", () => {
+  const tree = sanitizeMapTree(harbor, "map-svg-v1");
+  const vb = viewBoxOf(tree)!;
+  it("the harbor L2's smallest drawn text is 14 px: the 12 px tooltip and 18 px title rules size nothing drawn", () => {
+    expect(smallestTextSize(tree)).toBe(14);
+    expect(floorScale(14)).toBeCloseTo(11 / 14, 10);
+  });
+  it("16 px labels give Aglaea's floor, 0.6875; an attribute, a style and an em size count, the smallest wins", () => {
+    const svg = (body: string) => sanitizeMapTree(`<svg id="s" viewBox="0 0 100 50" xmlns="http://www.w3.org/2000/svg"><style>#s{font-size:16px}#s .small{font-size:0.75em}</style>${body}</svg>`, "x");
+    expect(floorScale(smallestTextSize(svg('<text>a</text>')))).toBe(0.6875);
+    expect(smallestTextSize(svg('<text>a</text><text font-size="10">b</text>'))).toBe(10);
+    expect(smallestTextSize(svg('<g style="font-size:13px"><text>a</text></g>'))).toBe(13);
+    expect(smallestTextSize(svg('<g class="small"><text>a</text></g>'))).toBe(12);
+    expect(smallestTextSize(svg('<text font-size="6"> </text><text>b</text>'))).toBe(16);
+    expect(smallestTextSize(svg('<rect width="1" height="1"/>'))).toBeNull();
+    expect(floorScale(null)).toBe(0);
+  });
+  it("scale = max(fit, 11 ÷ smallest): fitted while wide enough, held at the floor past it, never under 11 px", () => {
+    const floor = 11 / 14;
+    expect(figureScale(vb.width * 2, vb.width, 14)).toBe(1);
+    expect(figureScale(650, vb.width, 14)).toBeCloseTo(650 / vb.width, 10);
+    expect(figureScale(400, vb.width, 14)).toBeCloseTo(floor, 10);
+    for (let w = 120; w <= 1600; w += 10) expect(figureScale(w, vb.width, 14) * 14).toBeGreaterThanOrEqual(FLOOR_PX - 1e-9);
+    // past the floor the figure is wider than its column: the frame scrolls
+    expect(vb.width * figureScale(400, vb.width, 14)).toBeGreaterThan(400);
+    // a drawing whose smallest text is under 11 px at its own size draws larger than drawn
+    expect(figureScale(vb.width * 2, vb.width, 9)).toBeCloseTo(11 / 9, 10);
+  });
+});
+
+describe("FR-3 (M10): a ruled node's button name carries its record", () => {
+  it("`<label>, <kind>, ruled NNNN` with the record MapView passes; a ruled node with no record reads ruled", () => {
+    expect(nodeName({ id: "ledger", label: "harbor-ledger", kind: "container", status: "ruled", grounding: [{ kind: "record", ref: "2" }], ruledBy: "0002" })).toBe("harbor-ledger, container, ruled 0002");
+    expect(nodeName({ id: "x", label: "x", kind: "container", status: "ruled", grounding: [{ kind: "repo", ref: "x@1" }], ruledBy: null })).toBe("x, container, ruled");
+    expect(nodeName({ id: "m", label: "Mail relay", kind: null, status: null, grounding: [] })).toBe("Mail relay, kind unknown, status unknown, not grounded");
   });
 });

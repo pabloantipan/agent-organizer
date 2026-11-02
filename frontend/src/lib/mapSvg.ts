@@ -578,13 +578,20 @@ export function rovingStep(count: number, at: number, key: string): number | nul
 
 export type Evidence = { kind: string; ref: string };
 /** A node of map.json as the figure needs it (c4-map/1, nodes[]). */
-export type MapNode = { id: string; label: string; kind: string | null; status: string | null; grounding: Evidence[] };
+export type MapNode = {
+  id: string; label: string; kind: string | null; status: string | null; grounding: Evidence[];
+  /** The record a ruled node was ruled by, zero-padded (MapPanel's
+   *  `ruledBy`), carried into its name. */
+  ruledBy?: string | null;
+};
 
 /** FR-5, M1 and M4: a node's button name, `<label>, <kind>, <status>`, with
  *  `not grounded` when its grounding is empty. A null kind or status (a
- *  node with no grounding row) reads `kind unknown` / `status unknown`. */
+ *  node with no grounding row) reads `kind unknown` / `status unknown`. A
+ *  ruled node's status carries its record, `ruled 0002`, the word drawn
+ *  under it (leftovers-67 FR-3, M10): the button is the node's one target. */
 export function nodeName(n: MapNode): string {
-  const parts = [n.label, n.kind ?? "kind unknown", n.status ?? "status unknown"];
+  const parts = [n.label, n.kind ?? "kind unknown", n.status ? (n.ruledBy ? `${n.status} ${n.ruledBy}` : n.status) : "status unknown"];
   if (!n.grounding.length) parts.push("not grounded");
   return parts.join(", ");
 }
@@ -622,3 +629,122 @@ export function boxPercent(b: Box, vb: ViewBox) {
     height: p((b.height / vb.height) * 100),
   };
 }
+
+// --------------------------------------------------------- the legible floor
+
+/** The smallest a figure's text may draw: `--font-size-xs` (leftovers-67
+ *  FR-1, map-and-roadmap Amendment 3, U2). */
+export const FLOOR_PX = 11;
+
+type SizeRule = { compound: string; size: string };
+
+/** The `font-size` (or `font` shorthand size) a declaration block sets, if any. */
+function declaredSize(decls: string): string | null {
+  let size: string | null = null;
+  for (const d of splitTop(decls, ";").parts) {
+    const k = d.indexOf(":");
+    if (k < 0) continue;
+    const prop = d.slice(0, k).trim().toLowerCase();
+    const v = d.slice(k + 1).replace(/!important/i, "").trim();
+    if (prop === "font-size") size = v;
+    else if (prop === "font") { const m = /(?:^|\s)(\d*\.?\d+(?:px|em|%|rem))(?:\/\S+)?\s/.exec(` ${v} `); if (m) size = m[1]; }
+  }
+  return size;
+}
+
+/** The font-size rules of a sheet, each by the last compound of its
+ *  selector (the element it sizes), @media and @supports bodies included;
+ *  @keyframes skipped. */
+function sizeRules(css: string): SizeRule[] {
+  const out: SizeRule[] = [];
+  let i = 0;
+  while (i < css.length) {
+    const head = walkCss(css, i, (c, _, depth) => depth === 0 && (c === "{" || c === ";"));
+    if (head.stop >= css.length) break;
+    if (css[head.stop] === ";") { i = head.stop + 1; continue; }
+    const close = walkCss(css, head.stop + 1, (c, _, depth) => c === "}" && depth === 0);
+    const prelude = css.slice(i, head.stop).trim();
+    const body = css.slice(head.stop + 1, close.stop);
+    i = close.stop + 1;
+    if (prelude.startsWith("@")) {
+      if (/^@(media|supports)\b/i.test(prelude)) out.push(...sizeRules(body));
+      continue;
+    }
+    const size = declaredSize(body);
+    if (!size) continue;
+    for (const sel of splitTop(prelude, ",").parts) {
+      const compound = sel.trim().split(/\s*[\s>+~]\s*/).pop() ?? "";
+      if (compound) out.push({ compound, size });
+    }
+  }
+  return out;
+}
+
+/** Whether a compound selector (`tag#id.a.b`, `*`) matches an element. A
+ *  compound with a pseudo-class or an attribute test is a state or a
+ *  condition the figure is not drawn in, and matches nothing. */
+function compoundMatches(compound: string, el: El): boolean {
+  if (/[:[]/.test(compound)) return false;
+  const m = /^([A-Za-z][\w-]*|\*)?((?:[#.][\w-]+)*)$/.exec(compound);
+  if (!m) return false;
+  if (m[1] && m[1] !== "*" && m[1].toLowerCase() !== el.tag.toLowerCase()) return false;
+  const classes = new Set((attrOf(el, "class") ?? "").split(/\s+/).filter(Boolean));
+  for (const part of m[2].match(/[#.][\w-]+/g) ?? []) {
+    if (part[0] === "#" ? attrOf(el, "id") !== part.slice(1) : !classes.has(part.slice(1))) return false;
+  }
+  return true;
+}
+
+/** A size value in px, against the inherited size; null when unreadable. */
+function sizePx(v: string, inherited: number): number | null {
+  const m = /^(\d*\.?\d+)(px|em|rem|%)?$/.exec(v.trim().toLowerCase());
+  if (!m) return null;
+  const n = Number(m[1]);
+  switch (m[2]) {
+    case "em": return n * inherited;
+    case "rem": return n * 16;
+    case "%": return (n / 100) * inherited;
+    default: return n;
+  }
+}
+
+/** The size the smallest text of a sanitized drawing draws at in its own
+ *  units (px at scale 1), or null when it draws no text. Each element's size
+ *  is its own `font-size` (attribute, style attribute, or a sheet rule whose
+ *  last compound matches it), else its parent's; where several apply, the
+ *  smallest counts, so the floor is never computed from a text bigger than
+ *  one the figure draws. Rules that size nothing drawn (mermaid's tooltip
+ *  `div`, a title the drawing lacks) count for nothing. */
+export function smallestTextSize(root: El, base = 16): number | null {
+  const rules = root.children
+    .flatMap(function styles(c: Child): El[] { return typeof c === "string" ? [] : c.tag === "style" ? [c] : c.children.flatMap(styles); })
+    .flatMap((s) => sizeRules(textOf(s)));
+  let min: number | null = null;
+  const walk = (e: El, inherited: number) => {
+    const own: string[] = [];
+    const a = attrOf(e, "font-size");
+    if (a) own.push(/^\d*\.?\d+$/.test(a.trim()) ? `${a.trim()}px` : a);
+    const st = declaredSize(attrOf(e, "style") ?? "");
+    if (st) own.push(st);
+    for (const r of rules) if (compoundMatches(r.compound, e)) own.push(r.size);
+    const sizes = own.map((v) => sizePx(v, inherited)).filter((n): n is number => n !== null && n > 0);
+    const size = sizes.length ? Math.min(...sizes) : inherited;
+    if ((e.tag === "text" || e.tag === "tspan") && e.children.some((c) => typeof c === "string" && c.trim())) {
+      min = min === null ? size : Math.min(min, size);
+    }
+    for (const c of e.children) if (typeof c !== "string" && c.tag !== "style" && c.tag !== "defs") walk(c, size);
+  };
+  walk(root, base);
+  return min;
+}
+
+/** The smallest scale the figure may draw at: its smallest text at
+ *  FLOOR_PX (11 ÷ 14 = 0.7857 for the harbor drawing). 0 when it has no
+ *  text, so nothing holds it up. */
+export const floorScale = (smallest: number | null) => (smallest && smallest > 0 ? FLOOR_PX / smallest : 0);
+
+/** The scale the figure draws at in a column `available` px wide: fitted
+ *  (never past the drawn size) while that keeps its smallest text at 11 px
+ *  or more, else the floor, and the frame scrolls (FR-1, V1). */
+export const figureScale = (available: number, width: number, smallest: number | null) =>
+  Math.max(Math.min(1, available / width), floorScale(smallest));
