@@ -97,3 +97,10 @@ desktops, focus or input; a window resize is by the app's own API
 |---|---|---|---|
 | `lf67-map-polish` | V1-V3, M8-M14, X0 | — | true |
 | `lf67-ui-polish` | V4, V5, AR27-AR30, U9, R53, X0 | — | true |
+
+## Amendment 1 (FSE, 2026-11-02, on sup111's closing report)
+
+V2's "fails on main" does not hold for FR-4: the panel's list already
+followed the roving order on main since 8974fd6 (lf58-map-lens round 2).
+FR-4 stands as a regression row; the premise table's first row overstated
+it.

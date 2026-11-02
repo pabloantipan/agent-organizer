@@ -306,3 +306,32 @@ From l58-lens-ui round 2 at 8974fd6 (pass; `working-on/lf58-map-lens.md`,
 | M12 | come back where he was | harbor at L3 with booking picked: Cards, then Map, lands at L3 with booking picked and the trail as it was; the same through Overview and back |
 | M13 | tell picked from focused | harbor-api picked, focus on Card gateway: harbor-api filled `--selected` with the accent edge, Card gateway with the violet-11 ring and no fill; both on harbor-api show the ring outside the accent edge |
 | M14 | read a fact once | an ungrounded node's panel: `kind  unknown`, `status  unknown` |
+
+## Amendment 5 (aglaea, 2026-11-02): lf67 notes, the trail, landings, the edges
+
+From sup111's UI reviews (`runs/2026-11-02-sup111-leftovers-67.md`).
+
+- **A1, the trail.** A trail step that goes somewhere is a link and draws
+  in `--accent-fg`, as the panel's actions do; the current step is `--fg`
+  text, `aria-current="location"`, no button.
+- **A2, the panel title after a level change** is a landing, not a
+  control: no ring (run-report A4, AR30; the design system's Navigating
+  rule). Focus still lands there; the next Tab reaches the first control.
+- **Focus ring clipped at `.map-scroll`'s edge (1024).** A scroll region
+  that holds focusable things pads its inside by the ring's width plus
+  offset (4 px) on every side, so no ring is cut by its own frame
+  (design system, amended).
+- **Picked edge on pill nodes.** The picked mark takes the node's own
+  corner radius (the `rx` of its shape in the SVG); a shape with none
+  (a cylinder) keeps radius 4.
+- **Panel list alphabetical until the figure draws.** The list never
+  reorders under the reader: it renders once, in reading order (M11);
+  until the positions are known it shows `Drawing the map…` in its
+  place.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| M15 | tell a step he can press | the trail at L3: earlier steps in `--accent-fg`, the current one `--fg`, not a button |
+| M16 | see the ring whole | at 1024×640 focus on the rightmost node of a scrolled map: the ring's four sides drawn |
+| M17 | see picked on the node's own shape | a pill node picked: the edge follows its radius |
+| M18 | read one order | reload the map: the panel list appears once, in reading order, never alphabetical first |

@@ -200,3 +200,16 @@ thing Pablo fixes by hand.
 | # | Pablo can | Checked by |
 |---|---|---|
 | U9 | know whether to act | two rejected rows: the title `Not accepted by discuss-record · 2` and the line `Sent again when its usage changes. Nothing for you to do; the reason is for the FSE.` above the rows |
+
+## Amendment 2 (aglaea, 2026-11-02): the system's name leaves the uppercase title
+
+From sup111 (lf67): `.sec-title` uppercases, so U9's title read
+`NOT ACCEPTED BY DISCUSS-RECORD`, and a lowercase system name uppercased
+is no longer its name. The title is `Not accepted · 2` (uppercased as
+every section title); the name moves to the line under it: `discuss-record
+did not take these. Sent again when its usage changes. Nothing for you to
+do; the reason is for the FSE.`
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| U9 (amended) | know whether to act | title `Not accepted · 2`; the line under it as above, `discuss-record` in its own case |

@@ -1,13 +1,13 @@
 ---
 title: "Runs counts every seat of a wave, and the literal guard has no holes"
-status: now
+status: done
 repos: [organizer]
 branch: lf68-go
 seat: l68-go
 reviewer: l68-go-rev
 stage:
 updated: 2026-11-02
-next: "PR with talos-lab"
+next: "merged 7f88854 (organizer #53)"
 review: "pass, l68-go-rev 2026-11-02 at 0ff6c37: G1-G4, X0 met; notes only"
 depends_on: []
 boundary: ["internal/session/runs.go", "internal/session/runs_test.go", "internal/service/run.go", "internal/service/run_test.go", "internal/usage/", "internal/cli/", "internal/service/literals_test.go", "frontend/wailsjs/"]
@@ -17,6 +17,8 @@ ui_review: false
 touches: []
 change_order: {add: [], change: [], retire: []}
 autonomy: unattended
+prs:
+  - {repo: organizer, pr: 53, target: main, state: merged, merge: 7f88854}
 ---
 
 ## Goal
