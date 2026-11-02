@@ -4,18 +4,24 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
-## HAND-OFF 2026-11-02 00:27 (last sha see git log)
+## HAND-OFF 2026-11-02 ~03:45 (at the 60% cap; last sha see git log)
 
-- AUTONOMOUS since 2026-11-01 16:19, no end set. Goal: the factory model built in atlax. Hourly cron wake (session-only).
-- Two usage-limit stops (~17:00-18:50, ~20:54-23:50) and two memory outages (23:26, 23:55; second not yet declared over at 00:27, swap 88%). I ended 53 frozen seats of finished tasks; seats frozen in an outage stay frozen until thawed on purpose.
-- Supervisors (cap 3, within forecast at 00:27): sup103 leftovers 58 (lf58-map-lens: code review failed M3 on my gap, Amendment 2 990915f adds ReadSpec for map pages and fixture grounding; UI review running); sup104 leftovers 62 (lf62-go passed, PR with talos-lab; lf62-ui after the outage; window to 01:52); sup106 leftovers 64 (l64-build phase 1 since 23:55; Amendment 1).
-- Parked: lf63-organizer-map (blocked on Hephaistos's c4-map-self-repo; drafts 9749dd9 on its branch; relaunch needs new tokens; decide whether L1 draws Keychain, git, the terminals).
-- Merged through #29 plus #30 working-on. origin/main 1bc2d44. Installed v0.2.0-3239.
-- Waits on Pablo: lf55-one-title (Dock window; rebase over lf60 first); restart Deltagos for the icon fix.
+- AUTONOMOUS since 2026-11-01 16:19, no end set. Goal (Pablo via Hephaistos): the factory model built in atlax. Hourly cron wake is session-only: re-create it after the compaction (CronCreate, hourly at :13, the same prompt) if `factory autonomous status --quiet` still exits 0.
+- Live: sup108 on lf62-ui (0175 wave 2; Amendments 1-2 of leftovers-62: the chip's three cases, the reviewresize.go hook); talos-lab seat (relaunched ~02:35). sup103 closed and ended 03:3x (leftovers 58, 8h26 wall, ~$52.7; findings in runs/2026-11-01-sup103-leftovers-58.md: App.Map has no atlax element, merged nodes need a members field, mmdc dark CSS unscoped). aglaea and themis live. organizer-probe-organizer is not mine; Hephaistos put it in Pablo's digest.
+- Merged today: #4-#39 (incl. joint #37 for dead_minutes). Installed v0.2.0-3363 (map lens in). Open cards: lf62-ui (sup108), lf55-one-title (needs Pablo: Dock window; rebase over lf60), identity-entra (on hold).
+- Owed: lf58-map-lens's real-window UI check (its round-2 UI review ran offscreen, my call): open Roadmap → Map in the installed app when the screen unlocks.
+- To cut next (all held in the day log below): (1) map-lens polish, Aglaea M8-M14 (dc466fb, 3b30a41); (2) run-report polish 2, AR27-AR30 (ab5faff) plus the Home.tsx stale comment; (3) a ReadSpec card: refuse a path whose EvalSymlinks leaves its allowed dir (second sighting); (4) Go leftovers: string-literal status comparisons (draft.go:27, cli/decisions.go:116), usagePostState.Accepted not pruned, runs.jsonl seats with no card, docs/runs/ scan gap, runRecordParts ^runs/; (5) the React app on the organizer's map (a --modules for frontend); (6) htmlLabels at the source; (7) FIRST: a review launcher guard in code (scripts/review-dev.sh or fixture-home.sh plus a check) that refuses when XDG_DATA_HOME or ORGANIZER_CONFIG is unset or under the real home (Hephaistos, after the 03:08 incident). Each needs an accept record (five-minute default while autonomous).
+- Incident 03:08-03:14 (contained, reported to Pablo and Hephaistos): a UI reviewer used Pablo's real data dir. Until Hephaistos's launcher guard lands, my UI-review prompts say: launch only through the fixture's home.sh.
 - 0167 and 0168 carry "2026-10-28" in their ruling words. Ruled records are not edited.
-- Rules: atlax cards carry touches and change_order at cut (card-check enforces it now); a premise listing call sites greps all of frontend/src; bitácora inserts go after the day-log heading; any ReadSpec-opened file kind needs its allow rule named in the spec.
+- Rules learned: atlax cards carry touches and change_order at cut (card-check); a premise listing call sites greps all of frontend/src; any new file kind ReadSpec opens names its allow rule in the spec; a card that changes a contract carries release.yml's pin line; -to talos-lab only while the cell's seat is live, else [for talos-lab] to pablo; clean-clone recipes avoid rm -rf; bitácora inserts go after the day-log heading.
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
+
+- sup106 closed and ended: lf64 #34 (about 50 min of work in 5h55m, 4h20m blocked by the limit and outages), lf57-dead-minutes joint #37 (31 min). Rules from it: a card that changes a contract carries release.yml's specs pin line in its boundary; clean-clone recipes avoid rm -rf (it stops on a permission prompt unattended); launch-review.sh backgrounds the app so safe-kill refuses its pid (for Hephaistos with the launcher ask).
+
+- To cut after lf58-map-lens merges, one map-lens polish card: Aglaea map-and-roadmap Amendment 3 (M8-M11, dc466fb) and Amendment 4 (M12-M14, 3b30a41): scale floor 11 px, trail always drawn, ruled word in the name, map state kept per initiative across switches, picked uses the selected mark (not the focus ring), panel kind 'unknown'.
+
+- INCIDENT (contained): 2026-11-02 03:08-03:14 lf58-map-lens's UI reviewer ran wails dev with the fixture config but Pablo's real ~/.local/share/organizer/ (XDG_DATA_HOME dropped in a hand-built env); read the cache, wrote 3 diagram caches (removed), organizer.log lines left; state.json unproven but no fixture data in it. Reported to Pablo ([for pablo]) and Hephaistos (a launcher that refuses the real home). Rule for my UI-review prompts until then: launch only through the fixture's home.sh, never a hand-built env.
 
 - Held for the next frontend leftovers: Home.tsx ~811, the comment above runSignalFor still says the stopped time is the sum of the spans (wrong since 569375c).
 
