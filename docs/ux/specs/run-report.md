@@ -559,3 +559,24 @@ that cannot pad, the controls inside draw the ring inset
 | # | Pablo can | Checked by |
 |---|---|---|
 | AR32 | see the ring whole in the waits line | focus on a `waits on` card link: the ring drawn inside its 24 px box, four sides whole |
+
+## Amendment 7 (aglaea, 2026-11-02): an inset ring keeps its 4 px
+
+From sup114 (`runs/2026-11-02-sup114-leftovers-70.md`, R1, Q1, Q2): the
+inset ring on `.rt-waitline .rr-card` covers about 1.5 px of the slug's
+first glyph, the card having no side padding.
+
+- **R1**: `.rr-card` pads `padding-inline: var(--space-1)` (4 px); its
+  `min-width: 24px` stays.
+- **Q1**: yes, the 4 px applies to every inset ring, on the element that
+  draws it, on the sides the ring crosses (design system, amended).
+- **Q2**: the element's own radius; +2 only for an outset ring at a 2 px
+  offset.
+- **The count's gap** (U10's, also at `Home.tsx:79`, `:357` and
+  `Overview.tsx:145`): one rule for all, `<title> · N`, drawn by one
+  shared piece (design system, amended).
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| AR33 | read a focused slug whole | focus on a `waits on` card link: 4 px between the ring and the first and last glyph |
+| AR34 | read every count the same way | Usage's Not accepted, Home's groups at those two places, Overview's at that place: equal gaps either side of the `·` |
