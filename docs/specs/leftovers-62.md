@@ -83,3 +83,15 @@ Card `lf62-ui` (after lf62-go):
 FR-5 and U1, three cases: equal counts read `5 decisions waiting on you`
 (unchanged from main, 0068 FR-2); unequal `6 decisions waiting · 5 on
 you`; none on the lead `6 decisions waiting`. U1 checks all three.
+
+## Amendment 2 (FSE, 2026-11-02, on l62-ui's U2)
+
+U2's resize "by the app's own API": the frontend cannot read an
+environment variable and the review build has no devtools, so the hook is
+Go, in the pattern of `memfake.go` (`ORGANIZER_MEMORY_FAKE`):
+`reviewresize.go` (and its test) in package main reads
+`ORGANIZER_REVIEW_RESIZE=<w>x<h>@<seconds>` and calls
+`runtime.WindowSetSize` once after the delay; unset, nothing runs. One
+line in `app.go`'s startup starts it. The boundary of `lf62-ui` adds
+`reviewresize.go`, `reviewresize_test.go` and that one line of `app.go`;
+U2 adds a test that the hook does nothing when the variable is unset.
