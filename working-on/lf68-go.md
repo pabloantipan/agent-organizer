@@ -7,7 +7,8 @@ seat: l68-go
 reviewer: l68-go-rev
 stage:
 updated: 2026-11-02
-next: "review: lf68-go, gate met (G1-G4 pass on the branch and fail on 83056a1, G4 plants pass the old guard; X0 pass), 0ff6c37"
+next: "PR with talos-lab"
+review: "pass, l68-go-rev 2026-11-02 at 0ff6c37: G1-G4, X0 met; notes only"
 depends_on: []
 boundary: ["internal/session/runs.go", "internal/session/runs_test.go", "internal/service/run.go", "internal/service/run_test.go", "internal/usage/", "internal/cli/", "internal/service/literals_test.go", "frontend/wailsjs/"]
 spec: "docs/specs/leftovers-68.md (FR-1 to FR-4)"
@@ -62,4 +63,20 @@ Not changed, on purpose:
 ## Notes
 - CLAUDE.md's Runs baseline paragraph does not yet mention reviewer/record attribution or `task <NNNN>` (outside the boundary).
 - The usage view still shows a one-card record's supervisor under its card; showing `task <NNNN>` there is a frontend card if wanted.
+
+## Review
+Verdict: **pass** at 0ff6c37 (branch did not move). Unmet rows: none. Reviewer l68-go-rev, 2026-11-02. Logs: `.wt-notes/l68-go-rev/`.
+
+change-check (`--base origin/main`, which in the clone is 71fccb8; no frontend commit showed, so no rerun on 341b328): 7 files; outside boundary 0, undeclared 0, declared-not-changed 0, risk 0; 8 `untested?`. All 8 are exercised through callers: `ledgerTasks`, `cardless`, `withAttribution`, `RunAttributions`, `attributions`, `Attributions` by TestLF68G1/G2/G3 (via `Runs`, `InitiativeRuns`); `initiativeByID`, `sameAttribution` by TestLF68KeptSupervisorGainsItsRecord and the usage pass in G3.
+
+- G1 met: TestLF68G1ReviewerRunIsItsCards passes; on 83056a1 fails (card "", want lf9).
+- G2 met: TestLF68G2SupervisorRunIsItsRecordsTask, cli TestLF68G2RunsPrintsTheRecordsTask pass; on 83056a1 "0 rows for the supervisor", printer no rows, total not $4.75.
+- G3 met: TestLF68G3RunsAndUsageAgree passes; on 83056a1 app before the pass "" and s-sup "wave:sup9" not "task 0009".
+- G4 met: TestLF68G4GuardCatchesParensAndAllowsByFunction passes; the old guard (83056a1) over temp copies with `d.Status == ("ruled")` and a second `!= "proposed"` in draft.go reports nothing.
+- X0 met: pnpm install, `make test` (Go ok, vitest 1643/1643), `wails build` exit 0, porcelain empty.
+
+Extra inputs: reviewer in two cards' `reviewer:` → none; reviewer also another card's `seat:` → the reviewer card (lfA); `org-probe-xl9-rev` → overhead:session, no card; supervisor of two records → record "", `wave:sup9`, one row; record with two `cards:` → `task 0009` once, total $4.75; guard catches `x == (("ruled"))`, `("ruled") == x`, and a closure comparison inside `acceptRecord` (counted 2 of 1). Risk: an old supervisor ledger line after a usage pass differs only by `"record":"0009"` (plus the header generation); a reviewer line is unchanged. LF68 tests under a fake HOME wrote nothing there but Go telemetry.
+
+- Note: `recordOf` reads every record carrying `supervisor:`, any status, not only ruled accept records; a withdrawn record naming a supervisor would label its run `task <NNNN>`. Not shown in real data. → FSE, for the next leftovers spec if wanted.
+- Note: `org-probe-l9-rev2` is attributed as builder of a card whose `seat:` is `l9-rev` (the existing trailing-digit rule in `cardOfSeat`, not this diff). → no action; recorded here.
 
