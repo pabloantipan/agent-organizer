@@ -8,7 +8,7 @@ reviewer: l70-rev, l70-ui
 review: "pass: V1 V2 D1 X0 met (l70-rev, 2026-11-02, fed7495); AR32 U10 for l70-ui"
 stage:
 updated: 2026-11-02
-next: "review: lf70-small, V1 V2 D1 X0 pass, AR32 U10 for l70-ui, fed7495"
+next: "PR with talos-lab"
 depends_on: []
 boundary: ["frontend/src/styles/runreport.css", "frontend/src/components/UsageTable.tsx", "frontend/src/styles/usage.css", "frontend/src/components/Usage.rejected.test.tsx", "frontend/src/components/RunReport.test.tsx", "CLAUDE.md"]
 spec: "docs/specs/leftovers-70.md (FR-1 to FR-3)"
