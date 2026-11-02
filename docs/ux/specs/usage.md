@@ -213,3 +213,13 @@ do; the reason is for the FSE.`
 | # | Pablo can | Checked by |
 |---|---|---|
 | U9 (amended) | know whether to act | title `Not accepted · 2`; the line under it as above, `discuss-record` in its own case |
+
+## Amendment 3 (aglaea, 2026-11-02): one space each side of the dot
+
+From sup113: the count sits after a wider gap than the dot
+(`NOT ACCEPTED ·  2`). A title's count reads `<title> · N`, one space each
+side of the `·`, as every section title with a count.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| U10 | read the title as one phrase | `Not accepted · 2`: the gaps before and after the `·` measure the same |
