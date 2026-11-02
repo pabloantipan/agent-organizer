@@ -326,6 +326,14 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
 /* Drawn in the accent, so the ring sits at a 2px offset (FR-14). */
 .stg.sl.current:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 
+/* One gap from the header's last row to the sub-tabs, 8 px at every width
+   and any number of rows (leftovers-67 FR-13, R53; review-view A21). The
+   bar's 44 px floor gave one row 8 by its slack and wrapped rows only the
+   4 px padding (header.css); folded, the bar pads 8 under its last row and
+   has no floor, so the gap is the padding alone. 0,3,0, over header.css
+   whatever the load order. Open, the open area's padding is the gap. */
+.ihead.folded > .ihead-bar { padding-bottom: var(--space-2); min-height: 0; }
+
 .subtabs { display: flex; gap: var(--space-1); margin: 0 calc(-1 * var(--space-5)); padding: 0 var(--space-4); box-shadow: inset 0 -1px 0 var(--border-subtle); }
 .subtabs button {
   background: transparent; border: 0; --mark-edge: 0px; border-radius: 0; color: var(--fg-muted);
