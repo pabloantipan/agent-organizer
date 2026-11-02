@@ -18,6 +18,7 @@ import { useLiveRegion } from "../lib/liveRegion";
 import { nextDate } from "./InitiativeHeader";
 import { Charter } from "./Charter";
 import { InitiativeDetail } from "./Initiatives";
+import { SecCount } from "./SecCount";
 import "../styles/initiatives.css";
 
 type Action = "sleep" | "wake";
@@ -301,11 +302,11 @@ export function InitiativesView() {
       </div>
       {noFactory && <div className="ivw-line">{noFactory}</div>}
       <section className="ivw-sec" aria-labelledby="ivw-awake">
-        <h2 id="ivw-awake" className="sec-title">Awake · <span className="num">{sections.awake.length}</span></h2>
+        <h2 id="ivw-awake" className="sec-title"><SecCount title="Awake" n={sections.awake.length} /></h2>
         {sections.awake.length === 0 ? empty("None awake.") : <div className="ivw-grid">{sections.awake.map(card)}</div>}
       </section>
       <section className="ivw-sec" aria-labelledby="ivw-asleep">
-        <h2 id="ivw-asleep" className="sec-title">Asleep · <span className="num">{sections.asleep.length}</span></h2>
+        <h2 id="ivw-asleep" className="sec-title"><SecCount title="Asleep" n={sections.asleep.length} /></h2>
         {atLimit && sections.asleep.some(canAct) && (
           <div className="ivw-line">
             {limitParts(awakeLocal.length).lead}
@@ -325,7 +326,7 @@ export function InitiativesView() {
           <h2 id="ivw-archived" className="sec-title">
             <button className="ivw-fold" onClick={toggleArchived} aria-expanded={archivedOpen}>
               {archivedOpen ? <ChevronDown size={14} aria-hidden /> : <ChevronRight size={14} aria-hidden />}
-              Archived · <span className="num">{sections.archived.length}</span>
+              <SecCount title="Archived" n={sections.archived.length} />
             </button>
           </h2>
           {archivedOpen && <div className="ivw-grid">{sections.archived.map(card)}</div>}

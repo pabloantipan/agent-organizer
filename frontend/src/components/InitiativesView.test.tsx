@@ -237,3 +237,16 @@ describe("D2: the header's Details keeps one frame open and closed (leftovers-20
     expect(css).toMatch(/\.ihead \.ihead-details \{[^}]*white-space: nowrap; flex: none; align-self: flex-start;/);
   });
 });
+
+// leftovers-71 V2 (FR-2, Amendment 2): Awake, Asleep and Archived draw their
+// count with SecCount, one element, one space each side of the dot.
+describe("leftovers-71 V2 (FR-2): the Initiatives titles draw <title> · N with SecCount", () => {
+  it("Awake · 2, Asleep · 1 and Archived · 1, each title and count one element", () => {
+    useBoard.setState({ view: viewOf([init({}), init({ id: "b" }), init({ id: "camp", status: "paused" }), init({ id: "old", status: "archived" })]), agents: null });
+    const html = renderToStaticMarkup(<InitiativesView />);
+    const h2 = (id: string) => new RegExp(`<h2 id="${id}" class="sec-title">([\\s\\S]*?)</h2>`).exec(html)?.[1] ?? "";
+    expect(h2("ivw-awake")).toBe('<span>Awake · <span class="num sec-count">2</span></span>');
+    expect(h2("ivw-asleep")).toBe('<span>Asleep · <span class="num sec-count">1</span></span>');
+    expect(h2("ivw-archived")).toContain('<span>Archived · <span class="num sec-count">1</span></span></button>');
+  });
+});
