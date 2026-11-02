@@ -8,7 +8,7 @@ reviewer: l57dm-rev
 review: "pass, unmet: none (l57dm-rev, 2026-11-02, 569375c)"
 stage:
 updated: 2026-11-02
-next: "PR with talos-lab (joint merge: specs, claudecode, docs, then this branch; Note 1 filed to the FSE 2026-11-02)"
+next: "review: lf57-dead-minutes, X0 pass, d24fa3b"
 depends_on: [lf64-run-report-polish]
 boundary: ["internal/service/report.go", "internal/service/report_test.go", "frontend/src/components/Home.tsx", "frontend/src/lib/runReport.ts", "frontend/src/components/runreport.fixtures/", "frontend/wailsjs/", ".github/workflows/release.yml"]
 spec: "docs/specs/leftovers-57.md (Amendment 7, FR-19 and FR-20)"
@@ -46,7 +46,9 @@ docs/specs/leftovers-57.md Amendment 7: W12, W13, X0.
 - modified `frontend/src/components/Home.tsx:runSignalFor`: `deadMin` reads `progress.dead_minutes`, sums no span (FR-19)
 - added `frontend/src/components/Home.deadmin.test.tsx`: W13
 - modified `frontend/src/components/Home.run.test.tsx`: W8's quiet report sets `dead_minutes: 0` beside its empty spans
+- modified `.github/workflows/release.yml`: the agent-mailbox-specs ref moves from 54cf10d to 54369d3fa24be2b1ce459a02bf904fb34f59e221, that line only (Amendment 7 addendum, d24fa3b)
 Risky:
+- `.github/workflows/release.yml`: 54369d3 must stay reachable on GitHub; if the specs branch is squashed or rebased when it merges, the pin needs the merged sha
 - `runSignalFor`: a report from a factory older than d423577 has no `dead_minutes`; the signal then reads no stopped time (`?? 0`) instead of the sum
 Not changed, on purpose:
 - `frontend/src/lib/runReport.ts`: draws spans per row, sums nothing
@@ -55,6 +57,7 @@ Not changed, on purpose:
 
 ## Notes
 - FR-20 kept the unset fallback to `~/agent-slack/specs/contracts` (sup106 relayed the FSE's confirmation, 2026-11-02).
+- 2026-11-02 l57dm-build: CI pin moved (d24fa3b) after talos-lab held the merge; X0 rerun from a fresh clone of d24fa3b passes (`.wt-notes/l57dm-build/x0b-*.txt`); origin/main still 8b5c8f9, nothing pushed.
 
 ## Review
 **Verdict: pass at 569375c (on origin/main 8b5c8f9). Unmet rows: none.** Reviewer l57dm-rev, 2026-11-02. Fresh clone `.wt-notes/l57dm-rev/clean`; logs in `.wt-notes/l57dm-rev/`.
