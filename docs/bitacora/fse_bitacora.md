@@ -4,6 +4,15 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF 2026-11-02 ~15:40 (cell PAUSED by Pablo: "pause what we're building")
+
+- PAUSED: launch nothing, post nothing, ask nothing until a resume notice arrives the same way. The hourly cron (fdbaa30c, :13, session-only) still fires: on a wake while paused, do nothing but check for the resume.
+- In flight when paused: sup117 on lf73-inline-names (0186, leftovers-73 with Amendment 1): code review pass at ba9f59f; UI review (l73-ui: AR35, AR37, AR38) pending; then PR with talos-lab. sup117 got the same pause notice (cell-wide). On resume: let sup117 finish, end it on its closing report, merge origin/main and make install.
+- Today since the morning compaction: leftovers 65-72 merged (#43 #45 #47 #49 #51 #53 #55 #57 #59 #61), installed v0.2.0-3553. Records 0178-0186 ruled by the autonomous five-minute default.
+- Queue after lf73: empty of cuttable work. Waits on Hephaistos: c4-map stamp (map stale on its own merge; then React app on the map, map regen); fixture stand-in agents outliving review apps (4 sightings); htmlLabels (shared mermaid config). Held low: count-title scans miss 'mono num', {"\u00b7"}, expression titles; cornerOf rx units; a re-read map lists an added node last.
+- Rules learned today: a text-pattern premise greps all of frontend/src (.ts and .tsx, strings) and the tests (three misses: lf71 x2, lf73); reviewers clone from `git remote get-url origin`; the code reviewer's X0 includes make review-build; on-screen ring rows need a key window, use the offscreen Tab harness.
+- Open cards besides lf73: lf55-one-title (needs Pablo: Dock window), identity-entra (on hold).
+
 ## HAND-OFF 2026-11-02 ~03:45 (at the 60% cap; last sha see git log)
 
 - AUTONOMOUS since 2026-11-01 16:19, no end set. Goal (Pablo via Hephaistos): the factory model built in atlax. Hourly cron wake is session-only: re-create it after the compaction (CronCreate, hourly at :13, the same prompt) if `factory autonomous status --quiet` still exits 0.
