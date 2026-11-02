@@ -1,13 +1,13 @@
 ---
 title: "A review or dev build cannot start against the real home"
-status: now
+status: done
 repos: [organizer]
 branch: lf65-review-guard
 seat: l65-build
 reviewer: l65-rev
 stage:
 updated: 2026-11-02
-next: "PR with talos-lab"
+next: "done: merged as organizer #43 cb9a890"
 review: "pass, 4d1b400, l65-rev 2026-11-02; unmet: none"
 depends_on: []
 boundary: ["reviewguard.go", "reviewguard_dev.go", "reviewguard_nodev.go", "reviewguard_test.go", "main.go", "CLAUDE.md"]
@@ -17,6 +17,8 @@ ui_review: false
 touches: []
 change_order: {add: [], change: [], retire: []}
 autonomy: unattended
+prs:
+  - {repo: organizer, pr: 43, target: main, state: merged, merge: cb9a890}
 ---
 
 ## Goal
