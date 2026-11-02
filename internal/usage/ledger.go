@@ -62,7 +62,21 @@ type Attribution struct {
 	Task       string   `json:"task,omitempty"`       // a card slug, or wave:<supervisor> for a supervisor of several cards
 	TaskTitle  string   `json:"task_title,omitempty"` // the card's title, or "<sup> · <slug>, <slug>"
 	Cards      []string `json:"cards,omitempty"`      // the slugs a wave task spans
-	Reason     string   `json:"reason,omitempty"`     // why something is not attributed
+	// Record is the accept record whose supervisor: is this session, for a
+	// supervisor exactly one record names (leftovers-68 FR-2): `organizer
+	// runs` shows its run as that record's task (Label), whatever Task says.
+	Record string `json:"record,omitempty"`
+	Reason string `json:"reason,omitempty"` // why something is not attributed
+}
+
+// Label is the task a run is shown under (leftovers-68 FR-2): `task <NNNN>`
+// for a supervisor an accept record names, so its cost counts once under the
+// record's task and never over its cards; otherwise Task.
+func (a Attribution) Label() string {
+	if a.Record != "" {
+		return "task " + a.Record
+	}
+	return a.Task
 }
 
 // Line is one session on one local day: the ledger's unit.
@@ -447,7 +461,13 @@ func Ingest(o Options) (Stats, error) {
 // it without writing (leftovers-62 FR-1).
 func sessionAttribution(ls []*Line, meta *sessionMeta, c CostSource, inits []Initiative) Attribution {
 	if len(ls) > 0 && IsCardTask(ls[0].Task) {
-		return ls[0].Attribution
+		a := ls[0].Attribution
+		if a.Role == RoleSupervisor && a.Record == "" {
+			// A supervisor kept from before records were read for its task
+			// (leftovers-68 FR-2): its task stays, its record is named.
+			a.Record = recordOf(seatOf(a.Name), initiativeByID(a.Initiative, inits))
+		}
+		return a
 	}
 	if meta == nil {
 		meta = &sessionMeta{}
@@ -461,6 +481,42 @@ func sessionAttribution(ls []*Line, meta *sessionMeta, c CostSource, inits []Ini
 // runs view name a run by, so they agree with `organizer usage` whichever
 // ran first. A session the ledger has no line for is absent.
 func Attributions(o Options) map[string]Attribution {
+	return attributions(o, LoadRoles(o.Initiatives))
+}
+
+// RunSeen is a run the runs readers want named: its session id and what its
+// archive line says about it (the probe session, the directory, the persona).
+type RunSeen struct {
+	SessionID string
+	Seen      Seen
+}
+
+// RunAttributions is the one reader `organizer runs` and the app's runs view
+// name a run by (leftovers-68 FR-3): Attributions for every session the
+// ledger has a line for, and for each run given that it has none, Attribute
+// over the same initiatives, which is what the next usage pass would write
+// for it once its transcript is read. Only a card task is taken (a card, a
+// wave, a record's task): an overhead or unattributed answer for a session
+// with no usage row stays "a run with no usage row" (leftovers-56
+// Amendment 2), and the archive's card stands. It writes nothing.
+func RunAttributions(o Options, runs []RunSeen) map[string]Attribution {
+	inits := LoadRoles(o.Initiatives)
+	out := attributions(o, inits)
+	for _, r := range runs {
+		if r.SessionID == "" {
+			continue
+		}
+		if _, ok := out[r.SessionID]; ok {
+			continue
+		}
+		if a := Attribute(r.Seen, inits); IsCardTask(a.Task) {
+			out[r.SessionID] = a
+		}
+	}
+	return out
+}
+
+func attributions(o Options, inits []Initiative) map[string]Attribution {
 	offs := loadOffsets(o.OffsetsPath)
 	bySession := map[string][]*Line{}
 	lines := LoadLedger(o.LedgerPath)
@@ -468,7 +524,6 @@ func Attributions(o Options) map[string]Attribution {
 		bySession[lines[i].SessionID] = append(bySession[lines[i].SessionID], &lines[i])
 	}
 	costs := foldCosts(o.Costs)
-	inits := LoadRoles(o.Initiatives)
 	out := make(map[string]Attribution, len(bySession))
 	for sid, ls := range bySession {
 		sort.Slice(ls, func(i, j int) bool { return ls[i].Day < ls[j].Day })
@@ -825,7 +880,7 @@ func sameCost(a, b *float64) bool {
 
 func sameAttribution(a, b Attribution) bool {
 	return a.Name == b.Name && a.Cwd == b.Cwd && a.Initiative == b.Initiative && a.Role == b.Role &&
-		a.Task == b.Task && a.TaskTitle == b.TaskTitle && a.Reason == b.Reason &&
+		a.Task == b.Task && a.TaskTitle == b.TaskTitle && a.Reason == b.Reason && a.Record == b.Record &&
 		strings.Join(a.Cards, ",") == strings.Join(b.Cards, ",")
 }
 

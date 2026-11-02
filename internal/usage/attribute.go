@@ -136,6 +136,7 @@ func Attribute(s Seen, inits []Initiative) Attribution {
 	case in == nil:
 		reasons = append(reasons, "a "+a.Role+" outside every initiative root has no card")
 	case a.Role == RoleSupervisor:
+		a.Record = recordOf(seat, in)
 		cards, why := supervisorCards(seat, in)
 		switch len(cards) {
 		case 0:
@@ -205,6 +206,36 @@ func supervisorCards(seat string, in *Initiative) ([]Card, string) {
 		return nil, "no record or card names " + seat + " as its supervisor"
 	}
 	return out, ""
+}
+
+// recordOf is the number of the one decision record whose supervisor: is
+// the seat's session (leftovers-68 FR-2); empty when none or several do, so
+// a supervisor of two records keeps its wave task.
+func recordOf(seat string, in *Initiative) string {
+	if in == nil || seat == "" {
+		return ""
+	}
+	num := ""
+	for _, r := range in.Records {
+		if r.Supervisor == "" || seatOf(r.Supervisor) != seat || r.Number == "" {
+			continue
+		}
+		if num != "" && num != r.Number {
+			return ""
+		}
+		num = r.Number
+	}
+	return num
+}
+
+// initiativeByID is the initiative with that id, nil when none.
+func initiativeByID(id string, inits []Initiative) *Initiative {
+	for i := range inits {
+		if id != "" && inits[i].ID == id {
+			return &inits[i]
+		}
+	}
+	return nil
 }
 
 // reviewedBy is the cards whose reviewer: names the seat.
