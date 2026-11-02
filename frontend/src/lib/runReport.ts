@@ -299,6 +299,17 @@ export function waveFooterWords(w: service.RunWave): string {
   return parts.join(" · ");
 }
 
+/** The footer line split for drawing (leftovers-67 FR-8, AR27): the wave
+ *  (its key, first) and the rest of `waveFooterWords` after it, so the wave
+ *  takes the link colour when it presses and the muted one when not. */
+export function waveFooterParts(w: service.RunWave): { wave: string; rest: string } {
+  const words = waveFooterWords(w);
+  return { wave: w.key, rest: words.slice(w.key.length) };
+}
+
+/** What a footer with no press says on its line, after the words (AR27). */
+export const NO_RUN_RECORD = " · no run record";
+
 /** A row's accessible name in words (FR-13, AR11). */
 export function rowName(row: Row, time: string): string {
   if (row.kind === "mode") return `${time}, ${row.words}`;

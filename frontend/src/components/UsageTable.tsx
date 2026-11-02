@@ -134,8 +134,13 @@ export function UsageTable({ rows, cut, setCut, sessions }: { rows: UsageRow[]; 
  *  session, its day and the record's reason. */
 export type UsageRejectedRow = { session_id: string; day: string; reason: string };
 
-/** The rows the record refused (leftovers-62 FR-7; leftovers-54 FR-4): the
- *  count, then one line per row with its session, day and the record's
+/** What the rejected list says under its title (leftovers-67 FR-12, U9):
+ *  what happens to the rows and that none of it is the reader's to fix. */
+export const REJECTED_WHY = "Sent again when its usage changes. Nothing for you to do; the reason is for the FSE.";
+
+/** The rows discuss-record refused (leftovers-62 FR-7; leftovers-54 FR-4;
+ *  leftovers-67 FR-12): the system and the count, one line saying whose it
+ *  is, then one line per row with its session, day and the record's
  *  reason, oldest day first as App.Usage carries them. They are not resent
  *  until their ledger row changes, and leave once it is gone. Nothing when
  *  none is: the view says only what needs a look. */
@@ -146,9 +151,9 @@ export function UsageRejected({ rows }: { rows: UsageRejectedRow[] | null | unde
   return (
     <section className="usage-sec usage-rejected" aria-labelledby="usage-rejected-title">
       <h2 id="usage-rejected-title" className="sec-title">
-        Rejected by the record · <span className="num sec-count">{n}</span>
-        <span className="sec-sub"> {n === 1 ? "not resent until it changes" : "not resent until they change"}</span>
+        Not accepted by discuss-record · <span className="num sec-count">{n}</span>
       </h2>
+      <p className="usage-rejected-why">{REJECTED_WHY}</p>
       <div className="usage-table-wrap">
         <table className="usage-table">
           <thead>

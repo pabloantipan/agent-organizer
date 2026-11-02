@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# A shim over the real factory for the run report's no-run-record footer
+# (leftovers-64 Amendment 1, leftovers-67 FR-8, AR27): on `report … --json`
+# sup2/1's record is renamed to a file the scan never read, so its footer
+# has no press; everything else is the real factory's, unchanged. The real
+# one is $FACTORY_REAL, else ~/bin/factory. Put on PATH by launch.sh
+# --no-record only.
+real=${FACTORY_REAL:-$HOME/bin/factory}
+case " $* " in
+  *" report "*"--json"*)
+    "$real" "$@" | python3 -I -c 'import json, sys
+d = json.load(sys.stdin)
+for w in (d.get("waves") or {}).get("waves") or []:
+    if w.get("key") == "sup2/1":
+        w["record"] = "runs/2026-10-20-sup2-missing.md"
+json.dump(d, sys.stdout)'
+    exit "${PIPESTATUS[0]}";;
+  *) exec "$real" "$@";;
+esac
