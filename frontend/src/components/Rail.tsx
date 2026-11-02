@@ -443,7 +443,8 @@ export function Rail() {
               <button className="rail-chevron" onClick={() => toggle(FOLD)} aria-expanded={!isCollapsed(FOLD)} aria-label={foldName(isCollapsed(FOLD), "Asleep")} title={foldName(isCollapsed(FOLD), "Asleep")}>
                 {isCollapsed(FOLD) ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
               </button>
-              <span className="rail-group-name" title="asleep: opens read-only; wake one from Initiatives">Asleep ({asleepIds.length})</span>
+              <SecCount className="rail-group-title" countClass="rail-group-n" n={asleepIds.length}
+                title={<span className="rail-group-name" title="asleep: opens read-only; wake one from Initiatives">Asleep</span>} />
               <span className="spacer" />
               <button className="rail-fold-link" onClick={() => openInitiatives("title")} title="asleep: opens read-only; wake one from Initiatives">Initiatives ›</button>
             </div>
@@ -456,7 +457,8 @@ export function Rail() {
               <button className="rail-chevron" onClick={() => toggle(ARCHIVED)} aria-expanded={!isCollapsed(ARCHIVED)} aria-label={foldName(isCollapsed(ARCHIVED), "Archived")} title={foldName(isCollapsed(ARCHIVED), "Archived")}>
                 {isCollapsed(ARCHIVED) ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
               </button>
-              <span className="rail-group-name" title="archived: opens read-only; the factory leaves it alone">Archived ({archivedIds.length})</span>
+              <SecCount className="rail-group-title" countClass="rail-group-n" n={archivedIds.length}
+                title={<span className="rail-group-name" title="archived: opens read-only; the factory leaves it alone">Archived</span>} />
             </div>
             {!isCollapsed(ARCHIVED) && foldList(archivedIds)}
           </section>

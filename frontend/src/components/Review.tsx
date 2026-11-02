@@ -11,6 +11,7 @@ import {
   askFailedLine, nextToReview, nothingToReview, partialLines, rowName, saidAfter, screenState, secondsSince, worklist, WORDS, type Addressee, type Group, type Row, type Via,
 } from "../lib/review";
 import { ReviewSymbol } from "./ReviewSymbol";
+import { SecCount } from "./SecCount";
 import "../styles/review.css";
 
 /** The Review screen (docs/ux/specs/review-view.md §2-§5, review-map v2
@@ -414,8 +415,10 @@ function Worklist({ groups, active, setActive, shown, onOpen }: { groups: Group[
             className={`rv-group ${g.kind}`} onFocus={(e) => { if (e.target === e.currentTarget) setActive(gk); }}>
             <div className="rv-ghead" onClick={() => { setActive(gk); setFolded((f) => ({ ...f, [g.key]: open })); }}>
               <span className="rv-fold" aria-hidden="true">{open ? "▾" : "▸"}</span>
-              <span className={g.kind === "package" ? "mono rv-gtitle" : "rv-gtitle"}>{g.title}</span>
-              {g.kind !== "must" && <span className="rv-gcount">({g.rows.length})</span>}
+              {/* `<title> · N` through SecCount (leftovers-73 FR-3, AR38). */}
+              {g.kind !== "must"
+                ? <SecCount className="rv-gtitle" countClass="rv-gcount" n={g.rows.length} title={<span className={g.kind === "package" ? "mono" : undefined}>{g.title}</span>} />
+                : <span className="rv-gtitle">{g.title}</span>}
             </div>
             {open && (
               <ul role="group">

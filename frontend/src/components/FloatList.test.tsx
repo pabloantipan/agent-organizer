@@ -18,17 +18,17 @@ describe("the floating list's folds (leftovers-16 F2)", () => {
   const mixed = board([initiative("a"), initiative("nap", "paused"), initiative("old", "archived"), initiative("gone", "done"), initiative("nap2", "paused")]);
 
   it("shows Asleep (n) for the paused only, then Archived (n) for the rest", () => {
-    expect(text(render(mixed))).toEqual(["Asleep (2)", "Archived (2)"]);
+    expect(text(render(mixed))).toEqual(["Asleep · 2", "Archived · 2"]);
   });
 
   it("lists each fold's own initiatives when open, never an archived one under Asleep", () => {
-    expect(text(render(mixed, "", { asleep: true, archived: true }))).toEqual(["Asleep (2)", "nap", "nap2", "Archived (2)", "old", "gone"]);
-    expect(text(render(mixed, "", { asleep: true, archived: false }))).toEqual(["Asleep (2)", "nap", "nap2", "Archived (2)"]);
+    expect(text(render(mixed, "", { asleep: true, archived: true }))).toEqual(["Asleep · 2", "nap", "nap2", "Archived · 2", "old", "gone"]);
+    expect(text(render(mixed, "", { asleep: true, archived: false }))).toEqual(["Asleep · 2", "nap", "nap2", "Archived · 2"]);
   });
 
   it("draws no Archived fold when nothing is archived, and no Asleep when nothing is paused", () => {
-    expect(text(render(board([initiative("a"), initiative("nap", "paused")])))).toEqual(["Asleep (1)"]);
-    expect(text(render(board([initiative("a"), initiative("old", "archived")])))).toEqual(["Archived (1)"]);
+    expect(text(render(board([initiative("a"), initiative("nap", "paused")])))).toEqual(["Asleep · 1"]);
+    expect(text(render(board([initiative("a"), initiative("old", "archived")])))).toEqual(["Archived · 1"]);
     expect(render(board([initiative("a")]))).toBe("");
   });
 
