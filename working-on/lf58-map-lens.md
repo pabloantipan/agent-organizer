@@ -6,7 +6,7 @@ branch: lf58-map-lens
 seat: l58-lens
 stage:
 updated: 2026-11-02
-next: "l58-lens round 2: FR-10 + R3 done (45bd1d5); next the harbor fixture repo dirs and deploy file, then U1, U4, U5, X0, M1-M7 (.wt-notes/l58-lens/progress.md, Round 2)"
+next: "review: lf58-map-lens, X0 pass (fresh clone) and M1-M7 pass in WebKit (wails dev + harness, committed fixture, no overlay); review-build window pass not run, screen locked, 8974fd6"
 review: fail
 reviewer: l58-lens-rev
 cause: gate
@@ -40,6 +40,10 @@ docs/specs/leftovers-58.md, rows M1-M7 and X0.
 - X0 pass at 1123beb from `.wt-notes/l58-lens/clean`; vitest 1611 passed.
 - M1-M7 pass at 1440x900 and 1024x640 in WebKit (wails dev of the branch + offscreen harness), fail on base e968fc1 (no Map); shots `.wt-notes/l58-lens/shots/{1440x900,1024x640}-m{1..7}-*.png`, `1440x900-base-roadmap.png`; recipe and numbers in `.wt-notes/l58-lens/progress.md`.
 
+- Round 2 (8974fd6, rebased on origin/main e4098ed): FR-10 ReadSpec reads exactly the map's level and curated pages, R3 `TestR3ReadSpecMapPages` (0360749); harbor fixture holds harbor-api (deploy/k8s.yaml, src/booking, src/pricing), harbor-web, harbor-ledger, home.sh git-inits them (a53cade); curated acts without `specs:`; U1 accent actions, U4 no idle scrollbar, U5 panel list in reading order (8974fd6).
+- Round 2 X0 pass at 8974fd6 from `.wt-notes/l58-lens/x0-round2/clean` (vitest 1615 passed, porcelain empty).
+- Round 2 M1-M7 pass at 1440x900 and 1024x640 in WebKit (wails dev of 8974fd6 + offscreen harness) on the committed fixture with only config's editor stub: every Grounding kind acts (`editor2-<size>.log`), U1/U4/U5 measured (`h2-<size>.txt`, `shots-r2/`). The review-build window pass was not run: the screen locked again before the build was up (`.wt-notes/l58-lens/progress.md`, Round 2, 4b).
+
 ## Notes
 - The screen was locked all session (CGSSessionScreenIsLocked): AX of the review build's window and `screencapture -l` return nothing, so M1-M7 ran in WebKit via wails dev + the offscreen harness (earlier seats' method). The review-build window pass is written as a recipe in progress.md, not run.
 - repo/deploy not on this machine: a line with no press and its reason (`not on this machine: <repo> is not in this initiative's repos` / `has no checkout here`).
@@ -55,8 +59,18 @@ docs/specs/leftovers-58.md, rows M1-M7 and X0.
 Risky:
 - `MapTags`: a portal into MapFigure's frame, keyed on its class hooks (`.map-figure-frame`, `button.map-node` styles)
 - `openRecord`: sets useSpecReader directly; focus return by its own subscription
+- modified `internal/service/spec.go`: ReadSpec also reads the map's level and curated pages under docs/architecture/ (FR-10, `mapPages`)
+- modified `internal/service/spec_test.go`: `TestR3ReadSpecMapPages`
+- modified `testdata/fixture-map/home.sh`: git-inits each listed repo dir in the temp copy
+- modified `testdata/fixture-map/harbor/working-on/initiative.yaml`: `repos: [harbor-api, harbor-web, harbor-ledger]`
+- added `testdata/fixture-map/harbor/harbor-api/`, `harbor-web/`, `harbor-ledger/`: the dirs and deploy file harbor's grounding names
+- modified `testdata/fixture-map/README.md`: the repos and home.sh's checkouts
+- modified `frontend/src/components/MapPanel.tsx`: curated acts without the specs: gate (`GroundCtx.readable` removed)
+- modified `frontend/src/components/MapView.tsx`: `inReadingOrder`, MapTags reports the buttons' order (U5)
+- modified `frontend/src/styles/map.css`: `button.linkish.<class>` accent (U1), svg block and scroller padding (U4)
+- modified `frontend/src/components/MapView.test.tsx`: fixture proof, curated FR-10, U1/U4/U5
 Not changed, on purpose:
-- `MapFigure.tsx`, `lib/mapSvg.ts`, `SpecReader.tsx`, Go: outside the boundary
+- `MapFigure.tsx`, `lib/mapSvg.ts`, `SpecReader.tsx`: outside the boundary; U5 reads the figure's button order from the DOM instead
 
 ## Review
 Fail. Unmet: M3 (FR-8). Reviewer l58-lens-rev, 2026-11-02. X0 on 1123beb (base 1bc2d44): pass, `make test` reused run efe0f92b-99162 of 1123beb by l58-lens-ui (Go ok, vitest 96 files / 1611 tests passed); `pnpm run build`, `wails build`, `make review-build` fresh, all exit 0; `git status --porcelain` empty. Code review only; M1-M7 on screen are l58-lens-ui's.
