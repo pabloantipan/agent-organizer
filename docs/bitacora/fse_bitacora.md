@@ -17,6 +17,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- 11:10 sup111 closed (leftovers 67: #49 a34a9a0, #51 da7f108; 62 min vs 90-180, seats $24.04, all first round) and ended; lf68-go merged #53 7f88854; installed v0.2.0-3464. UI notes (A1, A2, U9 uppercase, AR30 Tab, map-scroll ring clip, pill edge, panel order before draw, footer gap) sent to Aglaea; cut from what she amends. Owed real-window check of the map lens: done by l67-map-ui in the review build with the screen unlocked; dropped. Held: a modules level kept without its container restores to it (only if c4-map check allows it). Rule for my review prompts (sup111 own finding): code reviewer's X0 includes make review-build; never invent a remote URL.
+
 - 10:33 0181 ruled by default (0637f50): leftovers 68, lf68-go (organizer runs drops reviewer and supervisor runs, verified in runs.jsonl: l65-rev, l66-go-rev, sup109, sup110 absent; literal guard parens and per-file allowlist); sup112 launched beside sup111. Dropped from the queue after reading: runRecordParts and docs/runs/ (records go to runs/, the supervise skill's place); stripComments regex (unverified, nothing to cut). Left: (5) React app on the map, (6) htmlLabels; map regen waits on Hephaistos.
 
 - 10:06 0180 ruled by default (6516b4c): leftovers 67, lf67-map-polish (M8-M14) and lf67-ui-polish (AR27-AR30, U9, R53, Home comment) in parallel; sup111 launched, forecast 90-180m. Queue left: Go leftovers 3 (runs.jsonl seats with no card, docs/runs/ scan gap and runRecordParts ^runs/, stripComments regex, literal guard parens and allowlist), (5) React app on the map, (6) htmlLabels; map regen waits on Hephaistos.
