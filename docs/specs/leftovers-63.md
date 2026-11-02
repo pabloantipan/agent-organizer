@@ -53,3 +53,15 @@ Card `lf63-organizer-map` (docs only):
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf63-organizer-map` | C1-C5, X0 | lf58-map-read (merged #24) | false |
+
+## Amendment 1 (FSE, 2026-11-02, on lf63-review at ea0cc7c)
+
+C4 and C5 as written fail in the tools, not in the map: `mermaid2svg
+<page> --check` refuses a page path with an output beside it, and `go run`
+of a program outside the module cannot import `internal/service`. The rows
+are met by the runs the review recorded: C4, `mermaid2svg <copy> --check`
+on byte-identical copies of each page; C5, the out-of-tree program run from
+a clone of the branch, plus `TestMap`. C1 on a self-repo: `c4-map check`
+reports the map stale by one commit after it is committed (the repos
+adapter stamps HEAD); `gen` then `check` on the same tree is the row.
+That stamp is Hephaistos's tool to fix.
