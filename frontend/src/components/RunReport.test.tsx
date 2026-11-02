@@ -305,3 +305,18 @@ describe("W9: a wave footer's target and name (FR-15 to FR-17)", () => {
     expect(names).toEqual(["show sup2/1 on Work", "open sup2/2's run record"]);
   });
 });
+
+// leftovers-70 V1 (FR-1; run-report Amendment 6, AR32): `.rt-waitline` is
+// `overflow: hidden` (it folds the waits to one line), so a ring drawn
+// outside a control in it is cut; the controls inside draw it inset.
+describe("leftovers-70 V1 (FR-1, AR32): rings inside the waits line are inset", () => {
+  const css = fs.readFileSync(new URL("../styles/runreport.css", import.meta.url).pathname, "utf8");
+  it("the waits line clips, and its controls' focus rule draws the ring at outline-offset: -2px", () => {
+    expect(css).toMatch(/\.rt-waitline \{[^}]*overflow: hidden;/);
+    const rule = /\n(\.rt-waitline [^{]*:focus-visible[^{]*)\{([^}]*)\}/.exec(css);
+    expect(rule).not.toBeNull();
+    const selectors = rule![1].split(",").map((s) => s.trim());
+    expect(selectors).toEqual(expect.arrayContaining([".rt-waitline button:focus-visible", ".rt-waitline a:focus-visible"]));
+    expect(rule![2]).toContain("outline-offset: -2px");
+  });
+});
