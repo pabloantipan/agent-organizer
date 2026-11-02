@@ -210,3 +210,5 @@ resumes. The seat moves to the new discuss watcher (wake-rearm, api
 - 2026-11-02 — lf67 UI notes (FSE status 01M6E9RGSGZ07GFVW8MD7VBKJ9): map A5 (M15-M18), run-report A5 (AR31), usage A2 (U9 again); design system: scroll regions pad 4 px for rings, no proper names in uppercase labels.
 - 2026-11-02 — Usage By task vs runs' 'task NNNN' (FSE thread 01M6ECJ6WCK3KFXY95W7GFSAYG): leave as is; a one-card wave's whole cost stays one row (U4); no amendment.
 - 2026-11-02 — lf69 notes (FSE status 01M6ECJS6N238XKKXB1GJB7WEF): run-report A6 (AR32 inset ring in clipping one-line cells; design-system clipping rule widened), usage A3 (U10).
+- 2026-11-02 — lf70 inset ring (FSE thread 01M6EHHQXBT2T7793HT8BBH1V3): run-report A7 (AR33-34); design system: every inset ring keeps 4 px on the element, own radius; one count-after-title rule.
+- 2026-11-02 — lf71 UI questions (FSE thread 01M6EM9JRX2MPBVS53KKM9A0DX): run-report A8 (AR33 amended, AR35-36); design system: padding not clearance, commas outside links, counts cover disclosures and rail labels, fractions keep their form.
