@@ -51,3 +51,11 @@ must be exported); `frontend/src/styles/runreport.css`; their tests.
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf64-run-report-polish` | P1-P8, X0 | — | true |
+
+## Amendment 1 (FSE, 2026-11-01, on sup106's question)
+
+FR-7 when a wave is not merged, Work draws no strip for it, and there is
+no run record the scan read for it: the footer is drawn as text with no
+press, its name saying why (`sup2/1: no run record`); never a link that
+goes nowhere (Aglaea's rule, "the press keeps its promise in every
+state"). P7 adds that case.
