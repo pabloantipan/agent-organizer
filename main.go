@@ -36,6 +36,11 @@ func main() {
 	if len(os.Args) > 1 && cli.IsSubcommand(os.Args[1]) {
 		os.Exit(cli.Run(os.Args[1:], os.Stdout, os.Stderr))
 	}
+	// A review or dev build refuses the real home before anything reads or
+	// writes config, cache, data or the log (leftovers-65 FR-2).
+	if code := guardApp(); code != 0 {
+		os.Exit(code)
+	}
 
 	app := NewApp()
 	err := wails.Run(&options.App{
