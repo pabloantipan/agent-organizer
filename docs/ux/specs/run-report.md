@@ -546,3 +546,16 @@ card ## UI review, shots `.wt-notes/l64-ui/`), findings 1-4.
 | # | Pablo can | Checked by |
 |---|---|---|
 | AR31 | read the footers as one list | a pressable and a still footer: the same gap before the `·` |
+
+## Amendment 6 (aglaea, 2026-11-02): rings inside the waits line
+
+From sup113 (`runs/2026-11-02-sup113-leftovers-69.md`): `.rt-waitline` is
+`overflow: hidden` (it folds to one line), around the `.rr-card` buttons,
+so their rings can be cut; not seen on screen. The design system's
+clipping rule now names `overflow: hidden` too, and for a one-line cell
+that cannot pad, the controls inside draw the ring inset
+(`outline-offset: -2px`).
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| AR32 | see the ring whole in the waits line | focus on a `waits on` card link: the ring drawn inside its 24 px box, four sides whole |
