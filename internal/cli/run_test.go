@@ -281,3 +281,62 @@ func TestRunsFoldsAResumedConversation(t *testing.T) {
 		t.Errorf("want one row for the conversation:\n%s", got)
 	}
 }
+
+// G2 (leftovers-68 FR-2), the printer: `organizer runs org` over a fixture
+// root shows the supervisor an accept record names as `org/task 0009`, one
+// row, its cost once and the total equal to it, and the reviewer under the
+// one card whose reviewer: names it.
+func TestLF68G2RunsPrintsTheRecordsTask(t *testing.T) {
+	fixtureEnv(t)
+	t.Setenv("CLAUDE_CONFIG_DIR", t.TempDir())
+	roots := t.TempDir()
+	root := filepath.Join(roots, "org")
+	write := func(p, body string) {
+		t.Helper()
+		if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(p, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	write(os.Getenv("ORGANIZER_CONFIG"), "machine: lodestar\nroots: ["+roots+"]\nmax_depth: 2\n")
+	write(filepath.Join(root, "working-on", "initiative.yaml"), "id: org\ntitle: Org\nstatus: active\n")
+	for _, c := range []string{"lf9", "lf10"} {
+		write(filepath.Join(root, "working-on", c+".md"), "---\ntitle: "+c+"\nstatus: now\nseat: "+c+"-go\nreviewer: "+c+"-rev, "+c+"-ui\nupdated: 2026-11-02\nnext: build it\n---\n\nbody\n")
+	}
+	write(filepath.Join(root, "working-on", "decisions", "0009-accept-leftovers-9.md"),
+		"---\ntitle: Accept leftovers 9\nstatus: ruled\nraised: 2026-11-02\nowner: pablo\noptions: [\"accept as written\", \"send back\"]\ncards: [lf9, lf10]\nruled: 2026-11-02\nruled_by: pablo\nsupervisor: org-probe-sup9\nchosen: accept as written\n---\n\nq\n")
+	at := time.Date(2026, 11, 2, 9, 0, 0, 0, time.UTC)
+	if err := session.AppendRuns(session.RunsPath(), []session.Run{
+		{PID: 999971, SessionID: "s-rev", Session: "org-probe-lf9-rev", Cwd: root, CostUSD: 1.25, FirstSeen: at, LastSeen: at.Add(time.Minute), Ended: true},
+		{PID: 999972, SessionID: "s-sup", Session: "org-probe-sup9", Cwd: root, CostUSD: 2.00, FirstSeen: at, LastSeen: at.Add(2 * time.Minute), Ended: true},
+		{PID: 999973, SessionID: "s-sup", Session: "org-probe-sup9", Cwd: root, CostUSD: 3.50, FirstSeen: at.Add(3 * time.Minute), LastSeen: at.Add(4 * time.Minute), Ended: true},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	var out, errb bytes.Buffer
+	now := func() time.Time { return time.Date(2026, 11, 2, 12, 0, 0, 0, time.UTC) }
+	if code := runWith([]string{"runs", "org"}, &out, &errb, now); code != 0 {
+		t.Fatalf("exit %d: %s", code, errb.String())
+	}
+	got := out.String()
+	var sup, rev []string
+	for _, line := range strings.Split(got, "\n") {
+		if strings.Contains(line, "org-probe-sup9") {
+			sup = append(sup, line)
+		}
+		if strings.Contains(line, "org-probe-lf9-rev") {
+			rev = append(rev, line)
+		}
+	}
+	if len(sup) != 1 || !strings.HasPrefix(sup[0], "org/task 0009 ") || !strings.HasSuffix(strings.TrimSpace(sup[0]), "$3.50") {
+		t.Errorf("supervisor rows %q, want one `org/task 0009 … $3.50`\n%s", sup, got)
+	}
+	if len(rev) != 1 || !strings.HasPrefix(rev[0], "org/lf9 ") {
+		t.Errorf("reviewer rows %q, want one under org/lf9\n%s", rev, got)
+	}
+	if !strings.Contains(got, "2 runs") || !strings.Contains(got, "$4.75") {
+		t.Errorf("total: want 2 runs and $4.75 (the supervisor once)\n%s", got)
+	}
+}

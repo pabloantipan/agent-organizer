@@ -351,7 +351,8 @@ func (s *Service) Runs(initiativeID string) []session.Run {
 		// A broken archive must not hide the history already written.
 		_ = err
 	}
-	all := withAttribution(session.Conversations(session.LoadRuns(session.RunsPath())), s.ledgerTasks())
+	runs := session.Conversations(session.LoadRuns(session.RunsPath()))
+	all := withAttribution(runs, s.ledgerTasks(runs))
 	if initiativeID == "" {
 		return all
 	}
@@ -432,33 +433,61 @@ type RunsView struct {
 // keep runs.jsonl current — so a live session is read from its record, whose
 // numbers are the fresh ones anyway.
 func (s *Service) InitiativeRuns(initiativeID string) RunsView {
-	return runsView(initiativeID, session.LoadRuns(session.RunsPath()), s.liveRuns(), s.ledgerTasks())
+	archived, live := session.LoadRuns(session.RunsPath()), s.liveRuns()
+	return runsView(initiativeID, archived, live, s.ledgerTasks(append(append([]session.Run(nil), archived...), live...)))
 }
 
 // ledgerTasks is the usage ledger's attribution per session (leftovers-56
 // FR-5), attributed when read with the inputs and the rule a usage pass
 // uses, so a run reads the same task whether `organizer usage` ran before
-// it or not (leftovers-62 FR-1). It writes nothing.
-func (s *Service) ledgerTasks() map[string]usage.Attribution {
+// it or not (leftovers-62 FR-1). A session the ledger has not seen and the
+// archive gave no card is attributed by the same reader now (leftovers-68
+// FR-3): a reviewer by its card's reviewer:, a supervisor by its accept
+// record's supervisor:, both run from the root where no directory or seat:
+// names a card. It writes nothing.
+func (s *Service) ledgerTasks(runs []session.Run) map[string]usage.Attribution {
 	ledger, offs := usage.DataPaths(filepath.Dir(session.Dir()))
 	in := s.usageInputs()
-	return usage.Attributions(usage.Options{LedgerPath: ledger, OffsetsPath: offs, Costs: in.costs, Initiatives: in.inits})
+	return usage.RunAttributions(usage.Options{LedgerPath: ledger, OffsetsPath: offs, Costs: in.costs, Initiatives: in.inits}, cardless(runs))
+}
+
+// cardless is the conversations none of whose processes the archive matched
+// to a card, as the usage reader sees a session: what MatchRun found stands.
+func cardless(runs []session.Run) []usage.RunSeen {
+	claimed := map[string]bool{}
+	for _, r := range runs {
+		if r.Card != "" {
+			claimed[r.SessionID] = true
+		}
+	}
+	var out []usage.RunSeen
+	seen := map[string]bool{}
+	for _, r := range runs {
+		if r.SessionID == "" || claimed[r.SessionID] || seen[r.SessionID] {
+			continue
+		}
+		seen[r.SessionID] = true
+		out = append(out, usage.RunSeen{SessionID: r.SessionID, Seen: usage.Seen{Cwd: r.Cwd, Session: r.Session, Persona: r.Persona}})
+	}
+	return out
 }
 
 // withAttribution names each run's initiative and card from the usage
 // ledger, the one attribution (FR-5): its card is the ledger's task (a card
-// slug, wave:<seat> or overhead:<role>). A run the ledger has not seen keeps
-// what MatchRun gave it. The archive itself is not rewritten (FR-4).
+// slug, wave:<seat> or overhead:<role>), or `task <NNNN>` for a supervisor an
+// accept record names (leftovers-68 FR-2, usage.Attribution.Label). A run
+// neither the ledger nor the reader names keeps what MatchRun gave it. The
+// archive itself is not rewritten (FR-4).
 func withAttribution(runs []session.Run, tasks map[string]usage.Attribution) []session.Run {
 	for i, r := range runs {
 		a, ok := tasks[r.SessionID]
 		if !ok || r.SessionID == "" {
 			continue
 		}
-		if a.Task != r.Card {
+		if a.Label() != r.Card {
 			runs[i].Branch = "" // MatchRun's branch belonged to its card
 		}
-		runs[i].Initiative, runs[i].Card = a.Initiative, a.Task
+		runs[i].Initiative, runs[i].Card = a.Initiative, a.Label()
 	}
 	return runs
 }

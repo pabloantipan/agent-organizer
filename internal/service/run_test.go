@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"organizer/internal/cache"
+	"organizer/internal/config"
 	"organizer/internal/model"
 	"organizer/internal/session"
 
@@ -337,5 +338,195 @@ func TestPrepareLaunchUsesTheFirstSpec(t *testing.T) {
 	}
 	if l.Spec != "docs/specs/x.md#goals" {
 		t.Errorf("launch spec %q, want the first reference", l.Spec)
+	}
+}
+
+// lf68Home is a home for leftovers 68: one initiative root `org` with cards
+// whose reviewer: lists name two seats each, an accept record whose
+// supervisor: is a probe session and whose cards: are two of them, and the
+// reviewer and supervisor runs, both from the root, archived with no card
+// (MatchRun knows neither). extra is more card files, name to body.
+func lf68Home(t *testing.T, extra map[string]string) (*Service, string, string) {
+	t.Helper()
+	data := t.TempDir()
+	t.Setenv("XDG_DATA_HOME", data)
+	t.Setenv("CLAUDE_CONFIG_DIR", t.TempDir())
+	roots := t.TempDir()
+	root := filepath.Join(roots, "org")
+	write := func(p, body string) {
+		t.Helper()
+		if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(p, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	card := func(title, seat, reviewer string) string {
+		return "---\ntitle: " + title + "\nstatus: now\nseat: " + seat + "\nreviewer: " + reviewer + "\nupdated: 2026-11-02\nnext: build it\n---\n\nbody\n"
+	}
+	write(filepath.Join(root, "working-on", "initiative.yaml"), "id: org\ntitle: Org\nstatus: active\n")
+	write(filepath.Join(root, "working-on", "lf9.md"), card("lf9", "l9-go", "l9-rev, l9-ui"))
+	write(filepath.Join(root, "working-on", "lf10.md"), card("lf10", "l10-go", "[l10-rev, l10-ui]"))
+	for name, body := range extra {
+		write(filepath.Join(root, "working-on", name), body)
+	}
+	write(filepath.Join(root, "working-on", "decisions", "0009-accept-leftovers-9.md"),
+		"---\ntitle: Accept leftovers 9\nstatus: ruled\nraised: 2026-11-02\nowner: pablo\noptions: [\"accept as written\", \"send back\"]\ncards: [lf9, lf10]\nruled: 2026-11-02\nruled_by: pablo\nsupervisor: org-probe-sup9\nchosen: accept as written\n---\n\n## Question\n\nq\n")
+
+	at := time.Date(2026, 11, 2, 9, 0, 0, 0, time.UTC)
+	runs := []session.Run{
+		{PID: 999981, SessionID: "s-rev", Session: "org-probe-l9-rev", Cwd: root, InputTokens: 10, CostUSD: 1.25, FirstSeen: at, LastSeen: at.Add(time.Minute), Ended: true},
+		// The supervisor resumed once: one conversation, its cost once.
+		{PID: 999982, SessionID: "s-sup", Session: "org-probe-sup9", Cwd: root, InputTokens: 20, CostUSD: 2.00, FirstSeen: at, LastSeen: at.Add(2 * time.Minute), Ended: true},
+		{PID: 999983, SessionID: "s-sup", Session: "org-probe-sup9", Cwd: root, InputTokens: 30, CostUSD: 3.50, FirstSeen: at.Add(3 * time.Minute), LastSeen: at.Add(4 * time.Minute), Ended: true},
+	}
+	if err := session.AppendRuns(session.RunsPath(), runs); err != nil {
+		t.Fatal(err)
+	}
+	cfg := config.Config{Machine: "lodestar", Roots: []string{roots}, MaxDepth: 2}
+	now := func() time.Time { return time.Date(2026, 11, 2, 12, 0, 0, 0, time.Local) }
+	s := NewWith(cfg, cache.State{}, now)
+	s.Scan(false)
+	return s, filepath.Join(data, "organizer"), root
+}
+
+// cardOf is each run's card in a runs view, by session id.
+func cardOf(v RunsView) map[string]string {
+	got := map[string]string{}
+	for _, c := range v.Cards {
+		for _, r := range c.Runs {
+			got[r.SessionID] = r.Card
+		}
+	}
+	return got
+}
+
+// G1 (leftovers-68 FR-1): a reviewer run from the root, its seat named in
+// one card's reviewer: list, is that card's; two cards naming it, none.
+func TestLF68G1ReviewerRunIsItsCards(t *testing.T) {
+	s, _, _ := lf68Home(t, nil)
+	if got := cardOf(s.InitiativeRuns("org"))["s-rev"]; got != "lf9" {
+		t.Errorf("reviewer org-probe-l9-rev: card %q, want lf9 (the one card whose reviewer: names it)", got)
+	}
+	cli := map[string]string{}
+	for _, r := range s.Runs("org") {
+		cli[r.SessionID] = r.Card
+	}
+	if cli["s-rev"] != "lf9" {
+		t.Errorf("organizer runs: reviewer card %q, want lf9", cli["s-rev"])
+	}
+
+	two, _, _ := lf68Home(t, map[string]string{
+		"lf11.md": "---\ntitle: lf11\nstatus: next\nseat: l11-go\nreviewer: l9-rev, l11-ui\nupdated: 2026-11-02\nnext: build it\n---\n\nbody\n",
+	})
+	for _, r := range two.Runs("") {
+		if r.SessionID == "s-rev" && r.Card != "" {
+			t.Errorf("reviewer named by two cards: card %q, want none", r.Card)
+		}
+	}
+	if got, ok := cardOf(two.InitiativeRuns("org"))["s-rev"]; ok {
+		t.Errorf("reviewer named by two cards shows in org's runs under %q, want no row", got)
+	}
+}
+
+// G2 (leftovers-68 FR-2): a supervisor run named by one ruled record's
+// supervisor: is that record's task, `task 0009`, one row with its cost
+// once, never spread over the record's two cards.
+func TestLF68G2SupervisorRunIsItsRecordsTask(t *testing.T) {
+	s, _, _ := lf68Home(t, nil)
+	var sup []session.Run
+	for _, r := range s.Runs("org") {
+		if r.SessionID == "s-sup" {
+			sup = append(sup, r)
+		}
+	}
+	if len(sup) != 1 {
+		t.Fatalf("organizer runs org: %d rows for the supervisor, want 1", len(sup))
+	}
+	if sup[0].Card != "task 0009" || sup[0].Initiative != "org" {
+		t.Errorf("supervisor row %s/%q, want org/\"task 0009\"", sup[0].Initiative, sup[0].Card)
+	}
+	if sup[0].CostUSD != 3.50 {
+		t.Errorf("supervisor cost $%.2f, want $3.50 (2.00, then 3.50 carried across the resume: counted once)", sup[0].CostUSD)
+	}
+	v := s.InitiativeRuns("org")
+	for _, c := range v.Cards {
+		for _, r := range c.Runs {
+			if r.SessionID == "s-sup" && c.Card != "task 0009" {
+				t.Errorf("app runs view: supervisor under %q, want task 0009", c.Card)
+			}
+		}
+	}
+	got := 0
+	for _, c := range v.Cards {
+		if c.Card == "task 0009" {
+			got = c.InputTokens
+			if len(c.Runs) != 1 {
+				t.Errorf("task 0009: %d rows, want 1", len(c.Runs))
+			}
+		}
+	}
+	if got != 30 {
+		t.Errorf("task 0009 input tokens %d, want 30 (the conversation's last process, once)", got)
+	}
+}
+
+// G3 (leftovers-68 FR-3): after a usage pass over the reviewer's and the
+// supervisor's transcripts, `organizer runs`, the app's runs view and the
+// usage ledger name each session alike: lf9 for the reviewer, task 0009 for
+// the supervisor (the ledger's record), before and after the pass.
+func TestLF68G3RunsAndUsageAgree(t *testing.T) {
+	s, dataDir, root := lf68Home(t, nil)
+	before := cardOf(s.InitiativeRuns("org"))
+
+	transcript := func(sid, name string) string {
+		return `{"type":"user","cwd":"` + root + `","sessionId":"` + sid + `","timestamp":"2026-11-02T09:00:00.000Z","message":{"role":"user","content":"go"}}` + "\n" +
+			`{"type":"agent-name","agentName":"` + name + `","sessionId":"` + sid + `"}` + "\n" +
+			`{"type":"assistant","cwd":"` + root + `","sessionId":"` + sid + `","timestamp":"2026-11-02T09:00:05.000Z","message":{"id":"msg_` + sid + `","model":"claude-opus-5-5","usage":{"input_tokens":10,"output_tokens":10,"cache_read_input_tokens":10,"cache_creation_input_tokens":10}}}` + "\n"
+	}
+	proj := filepath.Join(os.Getenv("CLAUDE_CONFIG_DIR"), "projects", "-org")
+	if err := os.MkdirAll(proj, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for sid, name := range map[string]string{"s-rev": "org-probe-l9-rev", "s-sup": "org-probe-sup9"} {
+		if err := os.WriteFile(filepath.Join(proj, sid+".jsonl"), []byte(transcript(sid, name)), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := s.Usage(""); err != nil {
+		t.Fatal(err)
+	}
+	// The ledger as written, read raw: task and record per session.
+	b, err := os.ReadFile(filepath.Join(dataDir, "usage.jsonl"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ledger := map[string]string{}
+	for _, raw := range strings.Split(strings.TrimSpace(string(b)), "\n") {
+		var l struct {
+			SessionID string `json:"session_id"`
+			Task      string `json:"task"`
+			Record    string `json:"record"`
+		}
+		if json.Unmarshal([]byte(raw), &l) != nil || l.SessionID == "" {
+			continue
+		}
+		ledger[l.SessionID] = l.Task
+		if l.Record != "" {
+			ledger[l.SessionID] = "task " + l.Record
+		}
+	}
+	after := cardOf(s.InitiativeRuns("org"))
+	cli := map[string]string{}
+	for _, r := range s.Runs("org") {
+		cli[r.SessionID] = r.Card
+	}
+	want := map[string]string{"s-rev": "lf9", "s-sup": "task 0009"}
+	for sid, w := range want {
+		if ledger[sid] != w || before[sid] != w || after[sid] != w || cli[sid] != w {
+			t.Errorf("%s: usage ledger %q, app before the pass %q, after %q, organizer runs %q; want %q everywhere",
+				sid, ledger[sid], before[sid], after[sid], cli[sid], w)
+		}
 	}
 }
