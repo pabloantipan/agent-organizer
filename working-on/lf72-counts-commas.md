@@ -5,6 +5,7 @@ repos: [organizer]
 branch: lf72-counts-commas
 seat: l72-build
 reviewer: l72-rev, l72-ui
+review: "l72-rev pass (V1 V2 X0) at 27962f3, 2026-11-02; AR35 AR36 for l72-ui"
 stage:
 updated: 2026-11-02
 next: "review: lf72-counts-commas, V1 V2 X0 pass, AR35 AR36 for l72-ui, 27962f3"
@@ -61,3 +62,14 @@ Not changed, on purpose:
 ## Notes
 - The default report fixture's last run already lists three slugs (`d, e, f (not cut)`) but all one letter; `--wide-slug` is what shows AR35.
 - The rail's folded groups draw `ASLEEP (1)`, a count form outside this spec (Found, not asked).
+
+## Review
+- Verdict: **pass** (code gate). Unmet rows: none. Reviewer l72-rev, 2026-11-02, commit 27962f3 (base origin/main 35992ed), clean clone of the GitHub remote. AR35, AR36 are l72-ui's.
+- change-check (`--base origin/main`): 11 files, 4 flags; undeclared 0, declared-not-changed 0.
+  - `outside boundary testdata/fixture-report/launch.sh`: the `--wide-slug` fixture state; Pre-answered allows adding a state the fixtures lack. Explained.
+  - `untested? StageGates, TrackRowView, UsageSessions`: V1 drives TrackRowView through RunTracks' `draw`; V2's scan reads all three files' source. Explained.
+- V1: `npx vitest run src/components/RunTracks.test.tsx src/components/SecCount.test.tsx -t leftovers-72` on 35992ed with the branch's two test files copied in: 5 failed, 1 passed (the scan's self-test); on 27962f3: 6 passed. V2 on 35992ed names exactly the spec's five (Overview.tsx:152, Rail.tsx:279, :380, RunReport.tsx:172, UsageSessions.tsx:27).
+- Cases the builder's tests lack: a `left` of one reads `1/4 · left a` (0 `.rt-comma`), of two `1/4 · left a, b` (1), a to-cut first `a (not cut), b`; SecCount n=0 → `Gates · <span class="num sec-count">0</span>`, n=12 → `… 12`. The scan catches `{' · '}`, `&middot;`, `<b className="num`, a `cx(` title class (each → `Gates`). Read: all five sites go through SecCount, Usage's chevron before it, the rail's count stays before the spacer; `Exit 0/2` and `and N more` untouched.
+- X0: `pnpm install --frozen-lockfile` 0; `make test` 0, 19 Go packages ok, vitest 101 files / 1702 tests; test run **fresh**, id 9fa472076b1e117255a2bcaadfd5b667; `wails build` 0; `make review-build` 0; `git status --porcelain` empty. Logs in `.wt-notes/l72-rev/`.
+- Note (to the FSE, a possible V2 widening, no site today): the scan misses a count span whose class does not start with `num` (`className="mono num"`), a dot written `{"\u00b7"}`, and a title that is an expression (`{label} <span className="num">`); a grep of components finds no title count written those ways now.
+- Note (to Aglaea, with the builder's Found, not asked): one-letter slugs keep a gap before the comma (AR28's 24 px minimum); folded rail groups draw `ASLEEP (1)`.
