@@ -27,22 +27,33 @@ var decisionStatusConsts = map[string]bool{
 	"DecisionAcknowledged": true,
 }
 
-// statusLiteralAllowed are the files that must compare one exact status, and
-// why. An entry that no longer compares anything is reported too, so the list
-// cannot outlive its reason.
-var statusLiteralAllowed = map[string]string{
+// statusLiteralAllowed are the functions that must compare one exact status,
+// as "path:Func" (a method is "path:Type.Method"), with how many comparisons
+// each holds and why (leftovers-68 FR-4). The allowance is by function, not
+// by file: a new comparison anywhere else in an allowlisted file, or a
+// second one inside an allowlisted function, is a finding. An entry whose
+// function compares fewer than it lists is reported too, so the list cannot
+// outlive its reason.
+var statusLiteralAllowed = map[string]allowance{
 	// The validator: what a record must carry depends on its exact status.
-	"internal/scan/decisions.go": "validates each status's fields",
+	"internal/scan/decisions.go:checkDecision": {4, "validates each status's fields"},
 	// The writer: only a proposed record can be ruled from the organizer
 	// (0019); awaiting-cells is ruled by the cells.
-	"internal/service/rule.go": "rules a proposed record only",
+	"internal/service/rule.go:Service.RuleDecision": {1, "rules a proposed record only"},
 	// A draft cell waits on its proposed the-cell-roster record; an
 	// awaiting-cells one is the cells' to rule, not the draft's (leftovers-66
 	// FR-1).
-	"internal/service/draft.go": "a draft waits on a proposed accept record only",
+	"internal/service/draft.go:acceptRecord": {1, "a draft waits on a proposed accept record only"},
 	// Proposed alone reads "waiting"; awaiting-cells keeps its own words
 	// (leftovers-61 FR-5, leftovers-66 FR-1).
-	"internal/cli/decisions.go": "names proposed alone as waiting",
+	"internal/cli/decisions.go:statusWord": {1, "names proposed alone as waiting"},
+}
+
+// allowance is how many status comparisons an allowlisted function holds,
+// and why it must.
+type allowance struct {
+	n   int
+	why string
 }
 
 // decisionStatusValues are the values of model's decision statuses: a string
@@ -58,12 +69,36 @@ var decisionStatusValues = map[string]bool{
 // isStatusLiteral reports whether e is a string literal whose value is a
 // decision status.
 func isStatusLiteral(e ast.Expr) bool {
-	lit, ok := e.(*ast.BasicLit)
+	lit, ok := unparen(e).(*ast.BasicLit)
 	if !ok || lit.Kind != token.STRING {
 		return false
 	}
 	v, err := strconv.Unquote(lit.Value)
 	return err == nil && decisionStatusValues[v]
+}
+
+// unparen strips the parentheses around an expression: `x == ("ruled")` is
+// the same comparison as `x == "ruled"` (leftovers-68 FR-4).
+func unparen(e ast.Expr) ast.Expr {
+	for {
+		p, ok := e.(*ast.ParenExpr)
+		if !ok {
+			return e
+		}
+		e = p.X
+	}
+}
+
+// statusComparison is one comparison the guard found: where, in which
+// function ("" at package level), and what it compares.
+type statusComparison struct {
+	File, Func string
+	Line       int
+	What       string
+}
+
+func (c statusComparison) String() string {
+	return fmt.Sprintf("%s:%d: %s", c.File, c.Line, c.What)
 }
 
 // statusComparisons lists every comparison (==, != or a switch case) of a
@@ -72,7 +107,19 @@ func isStatusLiteral(e ast.Expr) bool {
 // internal/model, as "path:line: text". It skips vendored,
 // generated and checkout directories.
 func statusComparisons(root string) ([]string, error) {
-	var out []string
+	cs, err := findStatusComparisons(root)
+	out := make([]string, len(cs))
+	for i, c := range cs {
+		out[i] = c.String()
+	}
+	sort.Strings(out)
+	return out, err
+}
+
+// findStatusComparisons is statusComparisons with each comparison's
+// enclosing function, for the allowlist.
+func findStatusComparisons(root string) ([]statusComparison, error) {
+	var out []statusComparison
 	fset := token.NewFileSet()
 	err := filepath.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -104,17 +151,18 @@ func statusComparisons(root string) ([]string, error) {
 			if model == "" {
 				return false
 			}
-			sel, ok := e.(*ast.SelectorExpr)
+			sel, ok := unparen(e).(*ast.SelectorExpr)
 			if !ok {
 				return false
 			}
 			x, ok := sel.X.(*ast.Ident)
 			return ok && x.Name == model && decisionStatusConsts[sel.Sel.Name]
 		}
+		fn := ""
 		report := func(n ast.Node, what string) {
-			out = append(out, fmt.Sprintf("%s:%d: %s", rel, fset.Position(n.Pos()).Line, what))
+			out = append(out, statusComparison{File: rel, Func: fn, Line: fset.Position(n.Pos()).Line, What: what})
 		}
-		ast.Inspect(f, func(n ast.Node) bool {
+		inspect := func(n ast.Node) bool {
 			switch n := n.(type) {
 			case *ast.BinaryExpr:
 				if n.Op != token.EQL && n.Op != token.NEQ {
@@ -135,11 +183,41 @@ func statusComparisons(root string) ([]string, error) {
 				}
 			}
 			return true
-		})
+		}
+		for _, d := range f.Decls {
+			fn = funcName(d)
+			ast.Inspect(d, inspect)
+		}
 		return nil
 	})
-	sort.Strings(out)
 	return out, err
+}
+
+// funcName is a declaration's function as the allowlist names it: "Func",
+// or "Type.Method" for a method on Type or *Type; "" for anything that is
+// not a function.
+func funcName(d ast.Decl) string {
+	f, ok := d.(*ast.FuncDecl)
+	if !ok {
+		return ""
+	}
+	if f.Recv == nil || len(f.Recv.List) == 0 {
+		return f.Name.Name
+	}
+	t := f.Recv.List[0].Type
+	if s, ok := t.(*ast.StarExpr); ok {
+		t = s.X
+	}
+	switch x := t.(type) {
+	case *ast.IndexExpr:
+		t = x.X
+	case *ast.IndexListExpr:
+		t = x.X
+	}
+	if id, ok := t.(*ast.Ident); ok {
+		return id.Name + "." + f.Name.Name
+	}
+	return f.Name.Name
 }
 
 // modelImportName is the name organizer/internal/model is imported under in
@@ -157,26 +235,34 @@ func modelImportName(f *ast.File) string {
 	return ""
 }
 
-// guardFindings is statusComparisons minus the allowlist, plus each
-// allowlisted file that compares nothing any more.
+// guardFindings is statusComparisons minus the allowlisted functions, plus
+// each allowlisted function that compares fewer than it lists. A function
+// that compares more than it lists has every comparison reported, since the
+// guard cannot tell which one is new (leftovers-68 FR-4).
 func guardFindings(root string) ([]string, error) {
-	all, err := statusComparisons(root)
+	all, err := findStatusComparisons(root)
 	if err != nil {
 		return nil, err
 	}
+	byFunc := map[string][]statusComparison{}
 	var out []string
-	used := map[string]bool{}
 	for _, c := range all {
-		file := c[:strings.Index(c, ":")]
-		if _, ok := statusLiteralAllowed[file]; ok {
-			used[file] = true
+		key := c.File + ":" + c.Func
+		if _, ok := statusLiteralAllowed[key]; ok && c.Func != "" {
+			byFunc[key] = append(byFunc[key], c)
 			continue
 		}
-		out = append(out, c)
+		out = append(out, c.String())
 	}
-	for file := range statusLiteralAllowed {
-		if !used[file] {
-			out = append(out, file+": allowlisted but compares no status; drop it from statusLiteralAllowed")
+	for key, a := range statusLiteralAllowed {
+		got := len(byFunc[key])
+		switch {
+		case got > a.n:
+			for _, c := range byFunc[key] {
+				out = append(out, fmt.Sprintf("%s (%s compares %d, allowlisted for %d)", c, c.Func, got, a.n))
+			}
+		case got < a.n:
+			out = append(out, fmt.Sprintf("%s: allowlisted for %d but compares %d; update statusLiteralAllowed", key, a.n, got))
 		}
 	}
 	sort.Strings(out)
@@ -223,10 +309,12 @@ func TestLF62G4GuardFindsPlantedComparison(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := []string{
-		"internal/cli/decisions.go: allowlisted but compares no status; drop it from statusLiteralAllowed",
+		"internal/cli/decisions.go:statusWord: allowlisted for 1 but compares 0; update statusLiteralAllowed",
 		"internal/cli/x.go:7: switches on a model.Decision* status",
-		"internal/service/draft.go: allowlisted but compares no status; drop it from statusLiteralAllowed",
-		"internal/service/rule.go: allowlisted but compares no status; drop it from statusLiteralAllowed",
+		"internal/scan/decisions.go:5: compares to a model.Decision* status",
+		"internal/scan/decisions.go:checkDecision: allowlisted for 4 but compares 0; update statusLiteralAllowed",
+		"internal/service/draft.go:acceptRecord: allowlisted for 1 but compares 0; update statusLiteralAllowed",
+		"internal/service/rule.go:Service.RuleDecision: allowlisted for 1 but compares 0; update statusLiteralAllowed",
 		"internal/service/tasks.go:6: compares to a model.Decision* status",
 	}
 	if strings.Join(got, "\n") != strings.Join(want, "\n") {
@@ -261,6 +349,60 @@ func TestLF66G1GuardFindsStatusLiteral(t *testing.T) {
 	want := []string{
 		"internal/cli/plant.go:10: compares to a decision status literal",
 		"internal/cli/plant.go:5: switches on a decision status literal",
+		"internal/service/plant.go:6: compares to a decision status literal",
+	}
+	if strings.Join(got, "\n") != strings.Join(want, "\n") {
+		t.Errorf("findings:\n%s\nwant:\n%s", strings.Join(got, "\n"), strings.Join(want, "\n"))
+	}
+}
+
+// G4 (leftovers-68 FR-4): over temp copies of the tree's allowlisted files,
+// the guard finds a parenthesised status literal and a second status
+// comparison planted in draft.go outside acceptRecord, and nothing else; the
+// copies unplanted pass.
+func TestLF68G4GuardCatchesParensAndAllowsByFunction(t *testing.T) {
+	tree := filepath.Join("..", "..")
+	root := t.TempDir()
+	copyIn := func(rel, extra string) {
+		t.Helper()
+		b, err := os.ReadFile(filepath.Join(tree, rel))
+		if err != nil {
+			t.Fatal(err)
+		}
+		p := filepath.Join(root, rel)
+		if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(p, append(b, extra...), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	files := map[string]bool{}
+	for key := range statusLiteralAllowed {
+		files[key[:strings.Index(key, ":")]] = true
+	}
+	for f := range files {
+		copyIn(f, "")
+	}
+	if got, err := guardFindings(root); err != nil || len(got) != 0 {
+		t.Fatalf("unplanted copies: %v %v, want no finding", got, err)
+	}
+
+	copyIn("internal/service/draft.go", "\nfunc plantedSecond(d model.Decision) bool {\n\treturn d.Status != \"proposed\"\n}\n")
+	plant := "package service\n\nimport \"organizer/internal/model\"\n\nfunc planted(d model.Decision) bool {\n\treturn d.Status == (\"ruled\")\n}\n\nfunc plantedConst(d model.Decision) bool {\n\treturn (d.Status) == (model.DecisionRuled)\n}\n"
+	p := filepath.Join(root, "internal", "service", "plant.go")
+	if err := os.WriteFile(p, []byte(plant), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	got, err := guardFindings(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, _ := os.ReadFile(filepath.Join(tree, "internal", "service", "draft.go"))
+	draftLine := strings.Count(string(b), "\n") + 3
+	want := []string{
+		fmt.Sprintf("internal/service/draft.go:%d: compares to a decision status literal", draftLine),
+		"internal/service/plant.go:10: compares to a model.Decision* status",
 		"internal/service/plant.go:6: compares to a decision status literal",
 	}
 	if strings.Join(got, "\n") != strings.Join(want, "\n") {
