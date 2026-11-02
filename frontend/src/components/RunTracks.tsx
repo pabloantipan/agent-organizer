@@ -85,9 +85,10 @@ function TrackRowView({ x, prev, envs, nav, toCut }: { x: TrackRow; prev: TrackR
           <>
             <span className="mono num">{t.passed}/{t.planned}</span>
             {/* The comma follows its item as a sibling, outside the link, so a
-                link's side padding can take it in (leftovers-72 FR-1, AR35). */}
+                link's side padding can take it in (leftovers-72 FR-1, AR35); the
+                links are inline text, `rr-inline` (leftovers-73 FR-1, FR-2). */}
             {(t.left ?? []).length > 0 && <> · left {(t.left ?? []).map((s, k) => (
-              <Fragment key={s}>{k > 0 && <><span className="rt-comma">,</span>{" "}</>}{toCut.has(s) ? <span className="rt-tocut">{s} (not cut)</span> : <button type="button" className="rr-card" onClick={() => nav.card(s)}>{s}</button>}</Fragment>
+              <Fragment key={s}>{k > 0 && <><span className="rt-comma">,</span>{" "}</>}{toCut.has(s) ? <span className="rt-tocut">{s} (not cut)</span> : <button type="button" className="rr-card rr-inline" onClick={() => nav.card(s)}>{s}</button>}</Fragment>
             ))}</>}
           </>
         ) : "no card names it"}
