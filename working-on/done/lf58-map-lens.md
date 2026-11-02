@@ -1,12 +1,12 @@
 ---
 title: "Roadmap gains Map: levels, status, drift and each node's grounding"
-status: now
+status: done
 repos: [organizer]
 branch: lf58-map-lens
 seat: l58-lens
 stage:
 updated: 2026-11-02
-next: "merged as organizer #39 9cee125; the FSE checks the installed app (window pass owed at next unlock), then done/"
+next: "done: PR #39 merged 9cee125 (2026-11-02); window pass owed, the FSE checks the installed app"
 review: pass
 reviewer: l58-lens-rev2
 cause: gate
