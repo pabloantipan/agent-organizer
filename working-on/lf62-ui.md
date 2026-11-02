@@ -6,7 +6,7 @@ branch: lf62-ui
 seat:
 stage:
 updated: 2026-11-01
-next: "a later supervisor launches it after lf62-go merges and the memory outage is over (sup104 closed 2026-11-02 01:30)"
+next: "sup108 runs it (0175 wave 2; lf62-go merged #32)"
 depends_on: [lf62-go]
 boundary: ["frontend/src/components/InitiativeHeader.tsx", "frontend/src/lib/header.ts", "frontend/src/styles/shell.css", "frontend/src/components/Usage.tsx", "frontend/src/components/UsageTable.tsx", "frontend/src/lib/decisionStates.test.ts", "frontend/wailsjs/"]
 spec: "docs/specs/leftovers-62.md (FR-5 to FR-8)"
