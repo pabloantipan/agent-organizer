@@ -6,7 +6,7 @@ branch: lf63-organizer-map
 seat: lf63-build
 stage:
 updated: 2026-11-02
-next: "file finding: self-repo map stale by one commit on the committed tree (c4-map repos adapter stamps HEAD), and the C4/C5 literal gate commands that fail in the tools (claudecode c4-map, mermaid2svg; spec leftovers-63)"
+next: "PR with talos-lab (branch lf63-organizer-map pushed at ea0cc7c); review findings placed with the fse by sup107"
 review: pass
 reviewer: lf63-review
 depends_on: [lf58-map-read]
