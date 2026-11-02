@@ -125,3 +125,20 @@ over the real L2 render, no `foreignObject` remains and every node keeps
 its label as `<text>`. Rendering without HTML labels at the source (root
 `htmlLabels: false`, which changes every cached figure's key and touches
 the shared mermaid config) is a later card, held.
+
+## Amendment 2 (FSE, 2026-11-02, on lf58-map-lens's code review at 1123beb)
+
+M3 cannot be met inside the lens's boundary:
+- `Service.ReadSpec` refuses `docs/architecture/` unless a page is listed
+  under the initiative's `specs:`. **FR-10** `ReadSpec` also allows the
+  map's own pages: the files `map.json`'s `levels[].page` name and the
+  pages its `curated:` grounding entries name, under that initiative's
+  `docs/architecture/`, and nothing else (as leftovers-57 FR-18 did for run
+  records). **R3** go test: a level page and a curated page read; a path
+  outside them, a `../` path and another initiative's page are refused.
+- The harbor fixture's `repo` and `deploy` entries point at nothing.
+  `testdata/fixture-map/harbor/` gains the repo directories and the deploy
+  file its grounding names, so M3's actions open them (against the stub).
+
+`lf58-map-lens`'s boundary adds `internal/service/spec.go`, its test, and
+`testdata/fixture-map/`.

@@ -11,7 +11,7 @@ review: fail
 reviewer: l58-lens-rev
 cause: gate
 depends_on: [lf58-map-read, lf58-map-render]
-boundary: ["frontend/src/components/RoadmapView.tsx", "frontend/src/components/MapView.tsx", "frontend/src/components/MapPanel.tsx", "frontend/src/components/MapView.test.tsx", "frontend/src/styles/map.css"]
+boundary: ["frontend/src/components/RoadmapView.tsx", "frontend/src/components/MapView.tsx", "frontend/src/components/MapPanel.tsx", "frontend/src/components/MapView.test.tsx", "frontend/src/styles/map.css", "internal/service/spec.go", "internal/service/spec_test.go", "testdata/fixture-map/"]
 spec: "docs/specs/leftovers-58.md (FR-6 to FR-9)"
 gate: "docs/specs/leftovers-58.md#Acceptance → gate"
 ui_review: true
