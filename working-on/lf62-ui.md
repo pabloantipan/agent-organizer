@@ -7,7 +7,8 @@ seat: l62-ui
 reviewer: l62-rev, l62-uirev
 stage:
 updated: 2026-11-02
-next: "review: lf62-ui, U1 U3 U4 met (fail on f454765, pass on branch); U2 met offscreen (session locked, not by AX; hook ran in the review build); X0 met but for TestReportDecodesContract, failing on origin/main too; 7af4654"
+next: "PR with talos-lab"
+review: "l62-rev 2026-11-02: pass at 7af4654, unmet none (U1 U3 U4 fail on 9cee125, pass on branch; U2 hook and CSS checked, geometry is l62-uirev's; X0 passes whole with specs 172790b)"
 depends_on: [lf62-go]
 boundary: ["frontend/src/components/InitiativeHeader.tsx", "frontend/src/lib/header.ts", "frontend/src/styles/shell.css", "frontend/src/components/Usage.tsx", "frontend/src/components/UsageTable.tsx", "frontend/src/lib/decisionStates.test.ts", "frontend/wailsjs/", "reviewresize.go", "reviewresize_test.go", "app.go"]
 spec: "docs/specs/leftovers-62.md (FR-5 to FR-8)"
@@ -63,3 +64,16 @@ Not changed, on purpose:
 - `frontend/src/styles/usage.css`: outside the boundary; the rejected list reuses the usage table's classes
 - `frontend/wailsjs/`: `RejectedRow` was already bound (lf62-go)
 - `frontend/src/components/InitiativeHeader.tsx`: the chip's text is already its accessible name; nothing to change
+
+## Review
+- Verdict: **pass** at 7af4654 (branch lf62-ui on origin/main 9cee125), code review. Unmet rows: none. Reviewer l62-rev, 2026-11-02. Clean clone `.wt-notes/l62-rev/clean`; logs beside it.
+- change-check (`change-check organizer lf62-ui --base origin/main`, base 06204c675 = 9cee125 plus card commits): 12 files, 6 flags; undeclared 0, declared not changed 0.
+  - outside boundary ×4 (`InitiativeHeader.cells.test.tsx`, `Usage.rejected.test.tsx`, `header.test.ts`, `decisionCrossings.test.ts`): the spec's boundary includes "and their tests"; the first three test InitiativeHeader, Usage and header.ts, and `decisionCrossings.test.ts` asserts `waitingChip`'s text (header.ts), changed only to the FR-5 wording. Explained.
+  - untested? `leadShare`: private, all three cases run through `waitingChip` in header.test.ts. `App.startup`: the one line calls `startReviewResize`, which `TestReviewResizeUnsetDoesNothing` calls unset. Explained.
+- U1 met: header.test.ts and InitiativeHeader.cells.test.tsx check 6/5 `6 decisions waiting · 5 on you`, 5/5 `5 decisions waiting on you`, 6/0 `6 decisions waiting` (Amendment 1), text and no aria-label. On 9cee125 the unequal cases fail; the equal and none cases pass there, as Amendment 1 says they are unchanged.
+- U2 met (code side): `reviewresize.go` parses `<w>x<h>@<s>`, calls `runtime.WindowSetSize` once after the delay, cancels on ctx; `TestReviewResizeUnsetDoesNothing` (empty, blank, malformed, and `startReviewResize` unset), parse, once-after-delay and cancelled tests pass. app.go changes by one line. shell.css: `.ihead` grid to flex column with `flex: none` children, so each child sizes from content on every layout; that supports a live resize. The measured geometry is l62-uirev's.
+- U3 met: Usage.rejected.test.tsx renders the Usage view over FR-3's JSON, both rows with session, day, reason; 3 of 4 tests fail on 9cee125 (the empty-case one passes there by nature). `rejected` matches `UsageResult.rejected` in wailsjs models.ts.
+- U4 met: the new `stripComments` keeps `"a // b"; x === "proposed"`. The fix is in the test file itself, so the fail on main was shown by grafting the U4 assertion onto 9cee125's old `stripComments`: `expected false to be true`.
+- X0 met: `pnpm install --frozen-lockfile` 0; `make test` with `CONTRACTS_DIR=.wt-notes/sup108/specs/contracts` (agent-mailbox-specs 172790b) exits 0, every Go package ok, vitest 99 files 1643 tests; `TestReportDecodesContract` passes (sup108's correction: no longer a known failure); `wails build` 0; `git status --porcelain` empty with no runtime checkout needed. `make review-build` is the UI reviewer's.
+- Note: `stripComments` treats `/` after `)` as division, so a regex after `)` would be misread; no source file has one today, and the literal guard would over-report, not miss. Not a finding.
+
