@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
 import { useBoard } from "../stores/board.store";
 import { Calendar } from "./Calendar";
+import { MapView } from "./MapView";
 import { Roadmap } from "./Roadmap";
 import { Portfolio } from "./Portfolio";
 import { StageRoadmap } from "./StageRoadmap";
 
-type Mode = "stages" | "cards" | "calendar";
+type Mode = "stages" | "map" | "cards" | "calendar";
 
 /** The roadmap sub-view: portfolio Gantt for everything; for the initiative
- *  selected in the rail, Stages | Cards | Calendar (FR-20). Stages opens first
+ *  selected in the rail, Stages | Map | Cards | Calendar (FR-20; Map is
+ *  leftovers-58 FR-6). Stages opens first
  *  when the initiative has a roadmap, Cards when it has none. */
 export function RoadmapView() {
   const { view, selectedInitiative, stageFocus } = useBoard();
@@ -31,15 +33,16 @@ export function RoadmapView() {
   const mode: Mode = picked ?? ((selected.stages ?? []).length > 0 ? "stages" : "cards");
   const modes = (
     <div className="seg" role="tablist" aria-label="roadmap view">
-      {(["stages", "cards", "calendar"] as const).map((m) => (
+      {(["stages", "map", "cards", "calendar"] as const).map((m) => (
         <button key={m} role="tab" aria-selected={mode === m} className={mode === m ? "sl on" : "sl"} onClick={() => setPicked(m)}>
-          {m === "stages" ? "Stages" : m === "cards" ? "Cards" : "Calendar"}
+          {m === "stages" ? "Stages" : m === "map" ? "Map" : m === "cards" ? "Cards" : "Calendar"}
         </button>
       ))}
     </div>
   );
   // The zoom control sits on the switch's line (time-zoom); Calendar has none.
   if (mode === "stages") return <div><StageRoadmap initiative={selected} head={modes} /></div>;
+  if (mode === "map") return <MapView initiative={selected} head={modes} />;
   if (mode === "calendar") return <div>{modes}<Calendar /></div>;
   const cards = ["now", "blocked", "next"].flatMap((st) => (view.board.columns?.[st] ?? []).filter((c) => c.initiative_id === selected.id && c.machine === selected.machine));
   return (

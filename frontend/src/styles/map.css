@@ -1,0 +1,102 @@
+/* Roadmap's Map (docs/specs/leftovers-58.md FR-6 to FR-9; map-and-roadmap
+   Amendments 1 and 2). Tier-2 tokens only, dark only, Safari 15.0 floor
+   (no oklch, color-mix, nesting or @layer).
+
+   The lens rules reach into the inlined drawing, whose own CSS is scoped by
+   its svg id (#map-svg-N .node rect, specificity 1-1-1) and whose classDef
+   rules carry !important; a lens property the drawing also sets is
+   therefore !important here. Nothing here changes a size or a position:
+   the lens recolours the layout, it never moves a node (M6). */
+
+.map-view { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+
+.map-state { padding: var(--space-6) var(--space-4); border-radius: var(--radius-lg); background: var(--surface); color: var(--fg-muted); font-size: var(--font-size-md); line-height: var(--line-md); }
+.map-state p { margin: 0; }
+.map-state .map-state-head { color: var(--fg); font-weight: var(--weight-semibold); margin-bottom: var(--space-1); }
+.map-state.failed { color: var(--fg); }
+
+/* The trail: Context › Containers › harbor-api. */
+.map-trail ol { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1); margin: 0; padding: 0; list-style: none; font-size: var(--font-size-sm); line-height: var(--line-sm); }
+.map-trail li { display: inline-flex; align-items: center; gap: var(--space-1); }
+.map-trail-sep { color: var(--fg-subtle); }
+.map-trail-go { color: var(--accent-fg); }
+.map-trail-here { color: var(--fg); font-weight: var(--weight-semibold); }
+
+/* The figure left, the panel right; stacked when the column is narrow. */
+.map-lens { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 300px); gap: var(--space-4); align-items: start; }
+@media (max-width: 1100px) { .map-lens { grid-template-columns: minmax(0, 1fr) 240px; gap: var(--space-3); } }
+@media (max-width: 860px) { .map-lens { grid-template-columns: minmax(0, 1fr); } }
+
+.map-stage { min-width: 0; padding: var(--space-3); border-radius: var(--radius-lg); background: var(--surface); }
+/* U4: no scrollbar when the figure fits. The inlined <svg> is a block, so no
+   baseline gap hangs under it past the frame, and the scroller keeps room
+   below the frame for the words under the bottom row (.map-tag, laid
+   outside the frame's box): overflow inside the padding box scrolls nothing. */
+.map-scroll { overflow: auto; padding-bottom: calc(var(--line-xs) + var(--space-0-5)); }
+.map-figure-svg > svg { display: block; }
+.map-figure-state { margin: 0; color: var(--fg-muted); font-size: var(--font-size-md); }
+.map-figure-state.failed { color: var(--fg); }
+
+/* M7: the roving node buttons draw the violet-11 ring over the node. */
+.map-figure-nodes button.map-node:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+/* FR-7: status and drift. `exists` is the drawing as drawn. */
+.map-figure-svg .node.map-ruled .label-container,
+.map-figure-svg .node.map-ruled .label-container path[fill="none"] { stroke: var(--decision-ruled-fg) !important; stroke-width: 1.5px !important; stroke-dasharray: 6 4 !important; }
+.map-figure-svg .node.map-retiring .label-container,
+.map-figure-svg .node.map-retiring .label-container path[fill="none"] { stroke: var(--border-strong) !important; }
+.map-figure-svg .node.map-retiring .label-container:not(g),
+.map-figure-svg .node.map-retiring .label-container path:not([fill="none"]) { fill: var(--bg) !important; }
+.map-figure-svg .node.map-retiring text { fill: var(--fg-muted) !important; }
+.map-figure-svg .node.map-ungrounded .label-container,
+.map-figure-svg .node.map-ungrounded .label-container path[fill="none"] { stroke: var(--warning) !important; stroke-width: 1.5px !important; stroke-dasharray: 1.5 3.5 !important; stroke-linecap: round !important; }
+.map-figure-svg .node.map-picked .label-container,
+.map-figure-svg .node.map-picked .label-container path[fill="none"] { stroke: var(--accent-fg) !important; stroke-width: 2px !important; }
+.map-figure-svg .node.map-picked.map-ruled .label-container,
+.map-figure-svg .node.map-picked.map-ruled .label-container path[fill="none"] { stroke: var(--decision-ruled-fg) !important; }
+.map-figure-svg .node.map-picked.map-ungrounded .label-container,
+.map-figure-svg .node.map-picked.map-ungrounded .label-container path[fill="none"] { stroke: var(--warning) !important; }
+
+/* The words under a node: `ruled 0002`, `retiring`, `not grounded`. */
+.map-tags { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
+.map-tag { position: absolute; margin-top: var(--space-0-5); text-align: center; white-space: nowrap; font-size: var(--font-size-xs); line-height: var(--line-xs); color: var(--fg-muted); }
+
+/* The legend: every class in words beside its look. */
+.map-legend { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); margin: var(--space-3) 0 0; padding: 0; list-style: none; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); }
+.map-legend li { display: inline-flex; align-items: center; gap: var(--space-1-5); }
+.map-key { display: inline-block; width: 20px; height: 12px; border-radius: var(--radius-xs); border: 1px solid var(--border-strong); background: var(--surface-raised); }
+.map-key-ruled { border: 1.5px dashed var(--decision-ruled-fg); }
+.map-key-retiring { background: var(--bg); }
+.map-key-ungrounded { border: 1.5px dotted var(--warning); }
+
+/* The panel: the map as text. Its actions read as accent links (U1): scoped
+   button.linkish.<class> (0-2-1) so global.css's button.linkish { color: inherit }
+   (0-1-1) does not draw them as plain text. */
+.map-panel { min-width: 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--surface); color: var(--fg); font-size: var(--font-size-md); line-height: var(--line-md); }
+.map-panel-title { margin: 0 0 var(--space-1); font-size: var(--font-size-xl); line-height: var(--line-xl); font-weight: var(--weight-semibold); overflow-wrap: anywhere; }
+.map-panel-title:focus { outline: none; }
+.map-panel-title:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
+.map-panel-drift, .map-panel-drift-line { color: var(--warning); }
+.map-panel-drift-line { margin: 0; }
+.map-panel-meta { margin: 0 0 var(--space-2); color: var(--fg-muted); font-size: var(--font-size-sm); line-height: var(--line-sm); }
+.map-panel-back { margin: 0 0 var(--space-2) calc(-1 * var(--space-2)); font-size: var(--font-size-sm); }
+.map-panel-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-1-5); }
+button.linkish.map-panel-node { color: var(--accent-fg); text-align: left; }
+.map-panel-words { color: var(--fg-muted); font-size: var(--font-size-sm); }
+.map-panel-sub { margin: var(--space-4) 0 var(--space-1-5); font-size: var(--font-size-xs); line-height: var(--line-xs); font-weight: var(--weight-semibold); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--fg-muted); }
+
+.map-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--space-1) var(--space-3); margin: var(--space-2) 0; }
+.map-facts dt { color: var(--fg-subtle); font-size: var(--font-size-sm); }
+.map-facts dd { margin: 0; overflow-wrap: anywhere; }
+.map-status-retiring { color: var(--fg-muted); }
+button.linkish.map-ruled-link { color: var(--accent-fg); text-decoration: underline; text-decoration-style: dashed; }
+.map-drill { margin-top: var(--space-1); }
+.map-no-l3 { margin-top: var(--space-1); }
+
+.map-ground { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-1-5); }
+.map-ground-line { display: flex; flex-direction: column; gap: var(--space-0-5); overflow-wrap: anywhere; }
+.map-ground .mono { font-family: var(--mono); font-size: var(--font-size-sm); overflow-wrap: anywhere; }
+.map-ground-kind { color: var(--fg-muted); white-space: nowrap; }
+button.linkish.map-ground-act { display: block; max-width: 100%; text-align: left; white-space: normal; color: var(--accent-fg); }
+.map-ground-off { color: var(--fg-muted); }
+.map-ground-why { color: var(--fg-subtle); font-size: var(--font-size-sm); line-height: var(--line-sm); }
