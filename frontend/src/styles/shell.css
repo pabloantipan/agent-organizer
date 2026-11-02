@@ -37,6 +37,12 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
   letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--fg-muted);
 }
 .sec-count { font-family: var(--mono); color: var(--fg); letter-spacing: 0; }
+/* A rail group's `<name> · N` (leftovers-72 FR-2, AR36): SecCount's element
+   laid out as a row so the name keeps its ellipsis and the count stays at the
+   header's end of the title; `pre` keeps the spaces either side of the dot,
+   which a flex row would drop at its items' edges. The dot takes the name's
+   size and the header's colour; the count keeps `.rail-group-n`. */
+.rail-group-title { display: inline-flex; align-items: baseline; min-width: 0; white-space: pre; font-size: var(--font-size-xs); }
 .sec-sub { text-transform: none; letter-spacing: 0; font-weight: var(--weight-regular); color: var(--fg-subtle); font-size: var(--font-size-sm); }
 
 /* Empty state: what is missing, how to get it, one action */

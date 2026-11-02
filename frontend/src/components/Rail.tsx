@@ -15,6 +15,7 @@ import { roleInitials, roleMail, roleState } from "../lib/roles";
 import { openRoleFrom, RoleDrawer } from "./RoleDrawer";
 import "../styles/roles.css";
 import "../styles/initiatives.css";
+import { SecCount } from "./SecCount";
 
 type Entry = { id: string; title: string; client: string; status: string; now: number; blocked: number; next: number; machines: string[]; live: number; working: number; cell?: model.Cell | null; missing: string[] };
 
@@ -271,12 +272,13 @@ export function Rail() {
         <button className="rail-chevron" onClick={() => toggle(s.key)} aria-expanded={!collapsed[s.key]} aria-label={foldName(!!collapsed[s.key], s.name)} title={foldName(!!collapsed[s.key], s.name)}>
           {collapsed[s.key] ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
         </button>
-        {isEditing ? (
+        {/* `<name> · N` through SecCount (leftovers-72 FR-2, AR36); the
+            rename field stands in for the name alone. */}
+        <SecCount className="rail-group-title" countClass="rail-group-n" n={s.ids.length} title={isEditing ? (
           <RenameField name={s.name} onDone={(v, back) => rename(i, v, back)} onCancel={() => { setEditing(null); setRefocus(i); }} />
         ) : (
           <span className="rail-group-name" onDoubleClick={() => !s.fixed && setEditing(i)} title={s.fixed ? "not in any group" : "double-click to rename, drag to reorder"}>{s.name}</span>
-        )}
-        <span className="rail-group-n">{s.ids.length}</span>
+        )} />
         <span className="spacer" />
         {collapsed[s.key] && <Counts now={c.now} blocked={c.blocked} next={c.next} />}
         {!s.fixed && !isEditing && (
@@ -376,8 +378,8 @@ export function Rail() {
               <button className="rail-chevron" onClick={() => toggle(ROLES)} aria-expanded={!isCollapsed(ROLES)} aria-label={foldName(isCollapsed(ROLES), "Roles")} title={foldName(isCollapsed(ROLES), "Roles")}>
                 {isCollapsed(ROLES) ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
               </button>
-              <span className="rail-group-name" title="the transversal seats: show only, not priorities">Roles</span>
-              <span className="rail-group-n">{roles.length}</span>
+              <SecCount className="rail-group-title" countClass="rail-group-n" n={roles.length}
+                title={<span className="rail-group-name" title="the transversal seats: show only, not priorities">Roles</span>} />
             </div>
             {!isCollapsed(ROLES) && (
               <div className="rail-group-list">

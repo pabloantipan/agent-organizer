@@ -3,7 +3,7 @@
 # leftovers-67 (FR-8 to FR-13; AR27-AR30, U9, R53), from a worktree root
 # where `make review-build` ran:
 #
-#   testdata/fixture-report/launch.sh <notes dir> <label> [--no-record] [--rejected] [--resize <w>x<h>@<s>]
+#   testdata/fixture-report/launch.sh <notes dir> <label> [--no-record] [--rejected] [--wide-slug] [--resize <w>x<h>@<s>]
 #
 # It lays a fresh fixture home (scripts/fixture-home.sh, evaluated in this
 # shell, auth off), adds the factory-report contract fixture dir as a root (its
@@ -14,6 +14,14 @@
 #   --no-record  puts bin/factory (a shim) first: sup2/1 has no run record
 #   --rejected   writes two refused usage rows (rejected.py) into the home
 #   --resize     exports ORGANIZER_REVIEW_RESIZE (reviewresize.go)
+#   --wide-slug  adds an open card `wide-slug` (stage build) to the generated
+#                copy's 04:00 commit (`c done`, the board the last run reads),
+#                replaying the two later commits with their own dates, so the
+#                build track's `left` reads `d, e, wide-slug, f (not cut)`: a
+#                slug wider than the 24 px minimum, where the comma's pull
+#                shows (leftovers-72 AR35; the contract's one-letter slugs sit
+#                centred in that minimum). Only <notes dir>/fx changes, never
+#                the contracts checkout; the board's shas are the replayed ones.
 # The contract fixture is built once in <notes dir>/fx from
 # $CONTRACTS_DIR/factory-report/make-fixture.sh (a read-only checkout of
 # agent-mailbox-specs). It refuses unless ORGANIZER_CONFIG and XDG_DATA_HOME
@@ -22,13 +30,14 @@
 # stand-in agents, to stop by pid after) and <label>.log, and never touches
 # the real home. Run it as a background task so its pid is yours to stop.
 set -euo pipefail
-[ $# -ge 2 ] || { echo "usage: launch.sh <notes dir> <label> [--no-record] [--rejected] [--resize WxH@S]" >&2; exit 2; }
+[ $# -ge 2 ] || { echo "usage: launch.sh <notes dir> <label> [--no-record] [--rejected] [--wide-slug] [--resize WxH@S]" >&2; exit 2; }
 N=$1; label=$2; shift 2
-norecord=; rejected=; resize=
+norecord=; rejected=; resize=; wide=
 while [ $# -gt 0 ]; do
   case $1 in
     --no-record) norecord=1;;
     --rejected) rejected=1;;
+    --wide-slug) wide=1;;
     --resize) resize=$2; shift;;
     *) echo "unknown option $1" >&2; exit 2;;
   esac
@@ -43,6 +52,18 @@ D=$N/fx
 if [ ! -d "$D/init" ]; then
   [ -n "${CONTRACTS_DIR:-}" ] || { echo "CONTRACTS_DIR unset (agent-mailbox-specs contracts/)" >&2; exit 2; }
   bash "$CONTRACTS_DIR/factory-report/make-fixture.sh" "$D" >/dev/null
+fi
+if [ -n "$wide" ] && [ ! -f "$D/init/working-on/wide-slug.md" ]; then
+  W=$D/init/working-on
+  g() { git -c user.name=t -c user.email=t@example.invalid -c commit.gpgsign=false -C "$W" "$@"; }
+  base=$(g log --format=%H --grep='chore(cards): c done' -1)
+  head=$(g symbolic-ref --short HEAD)
+  g checkout -q -b wide "$base"
+  printf -- '---\ntitle: the wide slug\nstage: build\nstatus: next\n---\n\nbody\n' > "$W/wide-slug.md"
+  g add wide-slug.md
+  GIT_COMMITTER_DATE=$(g log -1 --format=%cI) g commit -q --amend --no-edit
+  g rebase -q --committer-date-is-author-date --onto wide "$base" "$head"
+  g branch -q -D wide
 fi
 # env.sh first: it unsets ORGANIZER_CONFIG, which the fixture home sets.
 source "$D/env.sh"
