@@ -17,6 +17,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- Repetition, second sighting: ReadSpec follows symlinks out of its allowed dirs (sup101 Found 5; sup103 lf58-map-lens review note 1). Cut a ReadSpec card: refuse a path whose EvalSymlinks leaves its allowed dir. Owed: lf58-map-lens's window UI pass at the next screen unlock (round 2 UI review ran offscreen, my call 2026-11-02 ~03:30).
+
 - sup107 closed (02:36-02:47, 11 min against 45-90m; builder $1.69) and ended: lf63-organizer-map pass at ea0cc7c, PR with talos-lab. Held: L3 maps internal/ only, the React app is off the map (a later --modules for frontend); levels[].svg names uncommitted SVGs. Sent Hephaistos the HEAD stamp and mermaid2svg output path.
 
 - To cut after lf64 merges (Aglaea run-report Amendment 4, ab5faff, AR27-AR30): a no-record footer muted with '· no run record'; .rr-card min-width 24px; 'Rounds as recorded' styled as .rr-more; no ring on a focus landing on a non-control. One small frontend card with the map lens's M8-M11 if both are free then.
