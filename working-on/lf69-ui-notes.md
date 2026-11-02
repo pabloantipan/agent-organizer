@@ -8,7 +8,7 @@ reviewer: l69-rev, l69-ui
 review: "pass: l69-rev at c2a9771 (V1-V3, X0); l69-ui at c2a9771 (M15-M18, AR31, U9)"
 stage:
 updated: 2026-11-02
-next: "PR with talos-lab"
+next: "merged as organizer #55 440d577; supervisor moves it to done/"
 depends_on: []
 boundary: ["frontend/src/components/MapView.tsx", "frontend/src/components/MapPanel.tsx", "frontend/src/components/MapFigure.tsx", "frontend/src/components/RunReport.tsx", "frontend/src/components/UsageTable.tsx", "frontend/src/lib/mapSvg.ts", "frontend/src/lib/runReport.ts", "frontend/src/styles/map.css", "frontend/src/styles/runreport.css", "frontend/src/styles/usage.css", "frontend/src/components/MapView.test.tsx", "frontend/src/components/MapFigure.test.tsx", "frontend/src/components/RunReport.lf64.test.tsx", "frontend/src/components/RunReport.test.tsx", "frontend/src/components/Usage.rejected.test.tsx"]
 spec: "docs/specs/leftovers-69.md (FR-1 to FR-7)"
@@ -17,6 +17,8 @@ ui_review: true
 touches: []
 change_order: {add: [], change: [], retire: []}
 autonomy: unattended
+prs:
+  - {repo: organizer, pr: 55, target: main, state: merged, merge: 440d577}
 ---
 
 ## Goal
