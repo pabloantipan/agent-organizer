@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 71 - one count look, a slug read whole under its ring
-status: proposed
+status: ruled
 raised: 2026-11-02
 raised_by: fse
 owner: pablo
@@ -9,6 +9,10 @@ cards: [lf71-count-look]
 forecast: 30-60m
 supersedes: []
 superseded_by:
+ruled: 2026-11-02
+ruled_by: pablo (autonomous mode)
+supervisor: organizer-probe-sup115
+chosen: accept as written
 ---
 
 ## Question
@@ -31,3 +35,11 @@ accept as written.
 ## Forecast
 
 forecast: 30-60m over 1 wave; basis: lf70 (37 min) today.
+
+## Ruling
+
+pablo (autonomous mode), 2026-11-02 13:36: the recommendation taken after
+five minutes without an answer. Asked at 13:31 in the mailbox ("0184:
+accept leftovers 71, one count look?", options accept as written or send
+back); recommended "accept as written". Not sensitive: the organizer's own
+record, frontend only, designs by Aglaea.

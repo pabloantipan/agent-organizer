@@ -1,6 +1,6 @@
 # Leftovers 71: one count look, and a slug read whole under its ring: the build spec
 
-status: proposed (0184)
+status: accepted (0184, ruled 2026-11-02)
 by: the FSE, 2026-11-02, on main at b09ed16
 sources: sup114's UI review of lf70-small (runs/2026-11-02-sup114-leftovers-70.md,
 R1, Q1, Q2, Found 1); Aglaea's `docs/ux/specs/run-report.md` Amendment 7
