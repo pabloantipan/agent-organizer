@@ -7,7 +7,8 @@ seat: l67-ui
 reviewer: l67-ui-rev, l67-ui-ui
 stage:
 updated: 2026-11-02
-next: "review: lf67-ui-polish, gate met (V4, V5 vitest fail on 83056a1 and pass; AR27-AR30, U9, R53 seen in the review build; X0 pass), 2557347"
+next: "PR with talos-lab"
+review: "pass at 2557347 (l67-ui-rev, 2026-11-02): V4, V5, X0 met; unmet none"
 depends_on: []
 boundary: ["frontend/src/components/RunReport.tsx", "frontend/src/components/RunTracks.tsx", "frontend/src/components/SpecReader.tsx", "frontend/src/components/UsageTable.tsx", "frontend/src/components/Home.tsx", "frontend/src/lib/runReport.ts", "frontend/src/lib/specReader.ts", "frontend/src/styles/runreport.css", "frontend/src/styles/spec-reader.css", "frontend/src/styles/shell.css", "frontend/src/styles/usage.css", "frontend/src/components/RunReport.lf64.test.tsx", "frontend/src/components/RunReport.test.tsx", "frontend/src/components/SpecReader.test.tsx", "frontend/src/components/Usage.rejected.test.tsx", "frontend/src/lib/runReport.test.ts", "frontend/src/lib/specReader.test.ts"]
 spec: "docs/specs/leftovers-67.md (FR-8 to FR-14)"
@@ -72,3 +73,13 @@ Not changed, on purpose:
 - X0 shared test run: fresh, test-lease run id 78d5b386-91469 at 2557347 (`make test` rc 0, vitest 1653 passed); `make review-build` rc 0; worktree `git status --porcelain` empty, no package-lock.json.
 - Spec gaps for the FSE: none that block. R53 names "several rows" but no fixture initiative wraps at 1440, so several rows were seen only at 1024.
 - For aglaea (not verified, design questions): (a) U9's title is written mixed case and `.sec-title` draws it uppercase, `DISCUSS-RECORD`; is a system name kept in its own case? (b) AR30's ring after a real Tab in WKWebView (`<summary>` with macOS Keyboard navigation off) is unproven by any review without keys.
+
+## Review
+- **Verdict: pass** at 2557347 (origin/main 83056a1). Unmet rows: none. Reviewer l67-ui-rev, 2026-11-02. Fresh clone `.wt-notes/l67-ui-rev/clean` (origin set to git@github.com:pabloantipan/agent-organizer.git per sup111's correction); logs in `.wt-notes/l67-ui-rev/`.
+- change-check (`--base origin/main`): 15 files, 6 flags. `outside boundary` ×3 `testdata/fixture-report/{bin/factory,launch.sh,rejected.py}`: allowed by Pre-answered; new dir, read by no test (grep), committed, not ignored; `launch.sh` refuses a config or data dir outside `organizer-fixture.*` and auth not off, `rejected.py` refuses a non-temp dir, the shim only rewrites one wave's `record` in `factory report --json` output; no other fixture written. `undeclared Home.tsx` + `declared, not changed Home.tsx:runSignalFor`: one change, the doc comment above the function (outside the symbol's range); the diff is comment only. `untested? waveFooterParts`: exercised by V4's footer text assertions through `Progress`, not named.
+- V4 met: `RunReport.lf64.test.tsx` "V4 (FR-8, AR27)" ×2, "V4 (FR-9, AR28)" ×2, "V4 (FR-10, AR29)" ×2, "V4 (FR-11, AR30)" ×2; P8 updated. V5 met: `Usage.rejected.test.tsx` "leftovers-67 V5" ×2, U3 updated. 54 pass, 1 skip (contract bytes, needs CONTRACTS_DIR; ran under X0). On 83056a1 with these test files: 10 fail (FR-8 ×2, FR-9, FR-10 ×2, FR-11, V5 ×2, U3, P8) — `vitest-base.log`.
+- My inputs (`extra-inputs.log`): FR-8 every wave's record present but unread → both footers `unread`, buttons, `.rr-wave-key` only, no `no run record`; every wave recorded and readable → both `record`, buttons. FR-10: the turn is `details[open] > summary.rr-more::before` only, no transition or state, so closing restores ▸ every time (no DOM in vitest; the UI reviewer saw 0 → 1). FR-12 one row → `Not accepted by discuss-record · 1` and the line verbatim. FR-13: `.ihead.folded > .ihead-bar` matches only InitiativeHeader's `<header>` (the only `ihead` root; `.folded` elsewhere is rail, float, outline, none under `.ihead`), so it reaches the folded header over all six sub-views and nothing else; open untouched. FR-14: comment matches code (`denominator.count`, `dead_minutes ?? 0`); Home.tsx diff is comment only. Tokens all defined in tokens.css; no oklch, color-mix, nesting or @layer.
+- X0 met: install fresh; `make test` reused run 78d5b386-91469 (l67-ui-ui, same SHA): 99 files, 1653 tests, Go ok; `wails build` ok; `git status --porcelain` empty.
+- Note: a folded one-row header whose tallest item is 24 px is now 40 tall, not 44 (gap 12 → 8, as FR-13 wants); R53 measured it. Goes: nowhere, intended.
+- Note: the `runSignalFor` comment cites `FR-19` (leftovers-57) beside `FR-14` of another spec without naming either. Goes: the FSE's next leftovers touching Home.tsx.
+
