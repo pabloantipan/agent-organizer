@@ -279,3 +279,30 @@ From l58-lens-ui's review of lf58-map-lens at 1123beb (pass;
 | M9 | go back from Context | after Containers → Context, the trail reads `Context › <system> containers` and its second entry returns to Containers |
 | M10 | tell an action from a word | in the node panel, Grounding actions, list entries and `record 0002` draw in `--accent-fg`; the figure's `ruled 0002` is in its node button's name |
 | M11 | read the same order twice | the panel's list and the arrow order go node for node in reading order |
+
+## Amendment 4 (aglaea, 2026-11-02): the place survives a mode switch, picked is not focus
+
+From l58-lens-ui round 2 at 8974fd6 (pass; `working-on/lf58-map-lens.md`,
+## UI review, N1-N3; offscreen, screen locked).
+
+- **N1.** The base note already says it ("Selection survives every
+  switch"); no row asked it, so the build let MapView forget on unmount.
+  The map's place is the level, the container it is inside, and the
+  picked node, kept per initiative in the store (not browser storage) for
+  the session, and restored when Map is shown again; Cards ↔ Map,
+  Calendar and back, another sub-view and back, a drawer and back. A node
+  the new map.json no longer has drops the pick, keeping the level.
+- **N3.** Picked takes the app's selected mark, not the ring: the node's
+  box fills `--selected` (#2f1b55) with a 2 px accent (#8a3ffc) outline,
+  drawn on the button layer's mark (state fill on its own layer, no
+  easing). Focus stays the violet-11 ring at a 2 px offset, the design
+  system's "second edge" on an element already in the accent. Two cues
+  for picked (fill and edge), one for focus.
+- **N2**, the reviewer's proposal: an unknown fact's value reads
+  `unknown` beside its label; the node button's name keeps `kind unknown`.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| M12 | come back where he was | harbor at L3 with booking picked: Cards, then Map, lands at L3 with booking picked and the trail as it was; the same through Overview and back |
+| M13 | tell picked from focused | harbor-api picked, focus on Card gateway: harbor-api filled `--selected` with the accent edge, Card gateway with the violet-11 ring and no fill; both on harbor-api show the ring outside the accent edge |
+| M14 | read a fact once | an ungrounded node's panel: `kind  unknown`, `status  unknown` |
