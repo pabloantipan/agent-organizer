@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 67 - the map lens and the run report polished
-status: proposed
+status: ruled
 raised: 2026-11-02
 raised_by: fse
 owner: pablo
@@ -9,6 +9,10 @@ cards: [lf67-map-polish, lf67-ui-polish]
 forecast: 90-180m
 supersedes: []
 superseded_by:
+ruled: 2026-11-02
+ruled_by: pablo (autonomous mode)
+supervisor: organizer-probe-sup111
+chosen: accept as written
 ---
 
 ## Question
@@ -34,3 +38,11 @@ accept as written.
 
 forecast: 90-180m over 1 wave, two cards in parallel; basis: lf64 and
 lf62-ui today (frontend with a UI review, 77 min to 5h with outages).
+
+## Ruling
+
+pablo (autonomous mode), 2026-11-02 10:06: the recommendation taken after
+five minutes without an answer. Asked at 10:01 in the mailbox ("0180:
+accept leftovers 67, map lens and run report polish?", options accept as
+written or send back); recommended "accept as written". Not sensitive: the
+organizer's own record, frontend only, designs by Aglaea.

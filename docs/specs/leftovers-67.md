@@ -1,6 +1,6 @@
 # Leftovers 67: the map lens and the run report polished from their UI reviews: the build spec
 
-status: proposed (0180)
+status: accepted (0180, ruled 2026-11-02)
 by: the FSE, 2026-11-02, on main at 513e265
 sources: Aglaea's `docs/ux/specs/map-and-roadmap.md` Amendments 3 and 4
 (dc466fb, 3b30a41; M8-M14); `docs/ux/specs/run-report.md` Amendment 4 and

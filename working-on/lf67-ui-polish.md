@@ -7,7 +7,7 @@ seat: l67-ui
 reviewer: l67-ui-rev, l67-ui-ui
 stage:
 updated: 2026-11-02
-next: "launch on 0180's ruling"
+next: "sup111 runs it (0180 ruled 2026-11-02)"
 depends_on: []
 boundary: ["frontend/src/components/RunReport.tsx", "frontend/src/components/RunTracks.tsx", "frontend/src/components/SpecReader.tsx", "frontend/src/components/UsageTable.tsx", "frontend/src/components/Home.tsx", "frontend/src/lib/runReport.ts", "frontend/src/lib/specReader.ts", "frontend/src/styles/runreport.css", "frontend/src/styles/spec-reader.css", "frontend/src/styles/shell.css", "frontend/src/styles/usage.css", "frontend/src/components/RunReport.lf64.test.tsx", "frontend/src/components/RunReport.test.tsx", "frontend/src/components/SpecReader.test.tsx", "frontend/src/components/Usage.rejected.test.tsx", "frontend/src/lib/runReport.test.ts", "frontend/src/lib/specReader.test.ts"]
 spec: "docs/specs/leftovers-67.md (FR-8 to FR-14)"
