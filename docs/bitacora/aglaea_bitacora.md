@@ -202,3 +202,4 @@ resumes. The seat moves to the new discuss watcher (wake-rearm, api
 - 2026-11-01 — after lf61 (FSE thread 01M6CHN22W07206FJYCG4JTM1P): decision-states A1 (DS-a corrected, DS7 header names the lead's share, DS8 no Home signal); review-view A20 (R53 through a live resize).
 - 2026-11-01 — run report wave footer (FSE thread 01M6CJQX0S09XRG3ZAXVXGNTCZ): progress-and-waves A1, a finished wave opens its run record in the reader drawer; running keeps Work; PW4 amended, PW7.
 - 2026-11-01 — leftovers 57 UI notes (FSE status 01M6CQAKVGP18CW67F0T1KGD14): run-report A3 (AR22-AR26; home-signal U1/U2 dropped by design), progress-and-waves A2 (PW4 again, PW8), design-system fold order names the run.
+- 2026-11-02 — map lens UI review (FSE thread 01M6D53A63VM01H2V1SS9Z0C99): map-and-roadmap A3, M8-M11 (scale floor 11 px, trail at Context, word under a node stays a word).
