@@ -8,13 +8,18 @@ reviewer: l57dm-rev
 review: "pass, unmet: none (l57dm-rev, 2026-11-02, 569375c)"
 stage:
 updated: 2026-11-02
-next: "PR with talos-lab (joint merge; head d24fa3b: review pass at 569375c plus the release.yml pin, Amendment 7 addendum b9655a7)"
+next: "merged jointly: specs #28, claudecode #39, docs #22, organizer #37 044d278; supervisor moves it to done/"
 depends_on: [lf64-run-report-polish]
 boundary: ["internal/service/report.go", "internal/service/report_test.go", "frontend/src/components/Home.tsx", "frontend/src/lib/runReport.ts", "frontend/src/components/runreport.fixtures/", "frontend/wailsjs/", ".github/workflows/release.yml"]
 spec: "docs/specs/leftovers-57.md (Amendment 7, FR-19 and FR-20)"
 gate: "docs/specs/leftovers-57.md#Acceptance → gate"
 ui_review: false
 autonomy: unattended
+prs:
+  - {repo: agent-mailbox-specs, pr: 28, target: main, state: merged, merge: 172790b}
+  - {repo: claudecode, pr: 39, target: main, state: merged, merge: 0b19d2c}
+  - {repo: docs, pr: 22, target: main, state: merged, merge: 7b53a16}
+  - {repo: organizer, pr: 37, target: main, state: merged, merge: 044d278}
 ---
 
 ## Goal
