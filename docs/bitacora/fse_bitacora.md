@@ -17,6 +17,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- Held for the next leftovers (lf62-go review pass at 83fe879): string-literal decision-status comparisons (`internal/service/draft.go:27`, `internal/cli/decisions.go:116`) escape the G4 guard, which only catches `model.Decision*` constants.
+
 - 23:51 after a second usage-limit stop (~20:54-23:50) and a factory memory outage (23:26-23:4x, swap 96%): ended 53 frozen seats of finished organizer tasks (probe -k, conversations kept); thawed sup103, sup106, talos-lab. sup104 self-extended to 01:52 (its reviewer's launch hung 3h42m in zellij attach -b). leftovers-64 Amendment 1: a wave with no record has a footer with no press.
 - Hephaistos: building c4-map-self-repo (lf63 relaunches on its sha); carded factory-report-dead-minutes; atlax-tool-followups merged (claudecode 3f92291, specs 6aeb0b7): publish derives derived/map.json when an initiative has none, `atlax card-check --card` refuses a card that changes elements without change_order (supervise precondition 14).
 
