@@ -365,7 +365,11 @@ export const sanitizeMapSvg = (svg: string, id: string) => serialize(sanitizeMap
 // ----------------------------------------------------------- the node boxes
 
 export type Box = { x: number; y: number; width: number; height: number };
-export type DrawnNode = { id: string; elementId: string; box: Box };
+/** A node shape's corner radii, in viewBox units. */
+export type Corner = { rx: number; ry: number };
+/** `corner`: the radius of the node's own shape (leftovers-69 FR-4, M17),
+ *  null for a shape with none (a plain rect, a cylinder). */
+export type DrawnNode = { id: string; elementId: string; box: Box; corner: Corner | null };
 
 /** A node element's id: `flowchart-<id>-<n>`, or with a `<svg id>-` prefix
  *  as another mermaid build writes it (map.schema.json, levels[].svg). A
@@ -521,6 +525,67 @@ export function viewBoxOf(root: El): ViewBox | null {
   return v.length === 4 && v[2] > 0 && v[3] > 0 ? { x: v[0], y: v[1], width: v[2], height: v[3] } : null;
 }
 
+/** The first element under `el` (itself included) whose class holds
+ *  `label-container`: the node's shape, as mermaid marks it. */
+function shapeOf(el: El, m: M): { el: El; m: M } | null {
+  const here = mul(m, transformOf(attrOf(el, "transform")));
+  if (/(^|\s)label-container(\s|$)/.test(attrOf(el, "class") ?? "")) return { el, m: here };
+  for (const c of el.children) {
+    if (typeof c === "string") continue;
+    const hit = shapeOf(c, here);
+    if (hit) return hit;
+  }
+  return null;
+}
+
+/** The first path under `el` (itself included), with its matrix. */
+function firstPath(el: El, m: M): { el: El; m: M } | null {
+  const here = mul(m, transformOf(attrOf(el, "transform")));
+  if (el.tag === "path") return { el, m: here };
+  for (const c of el.children) {
+    if (typeof c === "string") continue;
+    const hit = firstPath(c, here);
+    if (hit) return hit;
+  }
+  return null;
+}
+
+/** The corner radius of a node's own shape (leftovers-69 FR-4, M17), in
+ *  viewBox units: a `<rect>`'s `rx` (and `ry`, which defaults to it); a
+ *  shape drawn as a path (mermaid 11's stadium, a rounded box) starts its
+ *  outline on the top edge where the straight run begins, so the radius is
+ *  how far in from the left edge that first point is (at most half the
+ *  height). A shape with neither (a plain rect, a cylinder, whose path
+ *  starts at the side) has none: null. */
+function cornerOf(node: El, m: M, box: Box): Corner | null {
+  const shape = shapeOf(node, m);
+  if (!shape) return null;
+  const sx = Math.hypot(shape.m[0], shape.m[1]), sy = Math.hypot(shape.m[2], shape.m[3]);
+  if (shape.el.tag === "rect") {
+    const rx = Number(attrOf(shape.el, "rx") ?? NaN), ry = Number(attrOf(shape.el, "ry") ?? NaN);
+    const x = rx > 0 ? rx : ry > 0 ? ry : 0, y = ry > 0 ? ry : x;
+    return x > 0 ? { rx: Math.min(x * sx, box.width / 2), ry: Math.min(y * sy, box.height / 2) } : null;
+  }
+  const p = firstPath(shape.el, shape.m);
+  const start = p ? pathPoints(attrOf(p.el, "d") ?? "")[0] : undefined;
+  if (!p || !start) return null;
+  const [x, y] = apply(p.m, start[0], start[1]);
+  const r = x - box.x, tol = 0.5;
+  if (Math.abs(y - box.y) > tol || r <= tol || r > box.height / 2 + tol) return null;
+  const c = Math.min(r, box.height / 2, box.width / 2);
+  return { rx: c, ry: c };
+}
+
+/** A node button's border radius: its shape's corner as percentages of its
+ *  own box (CSS border-radius percentages are of the box's width, then its
+ *  height), so it follows the figure at any scale, as `boxPercent` does;
+ *  4 px when the shape has none (leftovers-69 FR-4, M17). */
+export function cornerRadius(box: Box, corner: Corner | null): string {
+  if (!corner) return "4px";
+  const p = (n: number) => `${Math.round(n * 10000) / 10000}%`;
+  return `${p((corner.rx / box.width) * 100)} / ${p((corner.ry / box.height) * 100)}`;
+}
+
 /** FR-5: each drawn node, found by its element id, with its box in the
  *  drawing's viewBox units (the root's own transform, if any, included), in
  *  document order. An element drawn twice under one node id counts once,
@@ -535,7 +600,7 @@ export function drawnNodes(root: El): DrawnNode[] {
     if (id && elementId && /(^|\s)node(\s|$)/.test(attrOf(e, "class") ?? "")) {
       if (!seen.has(id)) {
         const box = boxOf(e, m);
-        if (box) { seen.add(id); out.push({ id, elementId, box }); }
+        if (box) { seen.add(id); out.push({ id, elementId, box, corner: cornerOf(e, m, box) }); }
       }
       return;
     }

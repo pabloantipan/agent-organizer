@@ -14,6 +14,7 @@ import { useEffect, useRef, useState, type MouseEvent } from "react";
 import type { merge, model, service } from "../../wailsjs/go/models";
 import { api } from "../hooks/useWails";
 import { openSpec, useSpecReader } from "./SpecReader";
+import { DRAWING_MAP } from "./MapFigure";
 
 type Node = service.C4Node;
 type Evidence = service.C4Evidence;
@@ -172,8 +173,13 @@ export type Drill = { label: string; go: () => void } | { none: string } | null;
 type PanelProps = {
   initiative: merge.BoardInitiative;
   index: service.C4Map;
-  /** The nodes of the level shown, in reading order. */
+  /** The nodes of the level shown, in map.json order (the count). */
   nodes: Node[];
+  /** The same nodes in reading order, or null while the figure has not
+   *  given its positions yet: the list then reads `Drawing the map…` in its
+   *  place, so it renders once, never alphabetical first (leftovers-69
+   *  FR-5, M18). Absent, `nodes` is the order. */
+  order?: Node[] | null;
   levelName: string;
   picked: Node | null;
   pick: (id: string | null) => void;
@@ -182,7 +188,7 @@ type PanelProps = {
 };
 
 /** The right side: the level's nodes, or one node's facts and grounding. */
-export function MapPanel({ initiative, index, nodes, levelName, picked, pick, drill }: PanelProps) {
+export function MapPanel({ initiative, index, nodes, order, levelName, picked, pick, drill }: PanelProps) {
   // When what the panel shows changes under a press that unmounted the
   // pressed control (a list entry, ← All of, a level), focus lands here:
   // back on the node's list entry, else on the panel's title. A press on
@@ -202,18 +208,19 @@ export function MapPanel({ initiative, index, nodes, levelName, picked, pick, dr
     (back ?? el.querySelector<HTMLElement>(".map-panel-title"))?.focus();
   }, [shown]);
   if (!picked) {
+    const list = order === undefined ? nodes : order;
     return (
       <aside ref={box} className="map-panel" aria-label={`${levelName}: the map as text`}>
         <h3 className="map-panel-title" tabIndex={-1}>{levelName}</h3>
         <p className="map-panel-meta">{nodes.length} {nodes.length === 1 ? "node" : "nodes"}. Pick one for its grounding.</p>
-        <ul className="map-panel-list">
-          {nodes.map((n) => (
+        {list === null ? <p className="map-panel-meta map-panel-drawing">{DRAWING_MAP}</p> : <ul className="map-panel-list">
+          {list.map((n) => (
             <li key={n.id}>
               <button type="button" className="linkish map-panel-node" data-node={n.id} onClick={() => pick(n.id)}>{n.label}</button>
               <span className="map-panel-words"> {[n.kind ?? "kind unknown", ...statusWords(n)].join(" · ")}</span>
             </li>
           ))}
-        </ul>
+        </ul>}
       </aside>
     );
   }

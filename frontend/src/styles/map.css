@@ -19,7 +19,11 @@
 .map-trail ol { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1); margin: 0; padding: 0; list-style: none; font-size: var(--font-size-sm); line-height: var(--line-sm); }
 .map-trail li { display: inline-flex; align-items: center; gap: var(--space-1); }
 .map-trail-sep { color: var(--fg-subtle); }
-.map-trail-go { color: var(--accent-fg); }
+/* A step that goes somewhere is a link, in --accent-fg as the panel's
+   actions (leftovers-69 FR-1, M15): scoped button.linkish.<class> (0-2-1)
+   so global.css's button.linkish { color: inherit } (0-1-1) does not draw
+   it as plain text. The current step is --fg text, not a button. */
+button.linkish.map-trail-go { color: var(--accent-fg); }
 .map-trail-here { color: var(--fg); font-weight: var(--weight-semibold); }
 
 /* The figure left, the panel right; stacked when the column is narrow. */
@@ -32,7 +36,13 @@
    baseline gap hangs under it past the frame, and the scroller keeps room
    below the frame for the words under the bottom row (.map-tag, laid
    outside the frame's box): overflow inside the padding box scrolls nothing. */
-.map-scroll { overflow: auto; padding-bottom: calc(var(--line-xs) + var(--space-0-5)); border-left: 1px solid transparent; border-right: 1px solid transparent; }
+/* leftovers-69 FR-3 (M16; the design system's scroll regions): a region
+   that scrolls and holds focusable things pads its inside by the ring's
+   width plus offset, 4 px, on every side, so a node's ring is never cut by
+   this frame; the bottom keeps the room for the words, which is more.
+   scroll-padding keeps the same 4 px when focus scrolls a node into view
+   (the rightmost node of a scrolled map), or the scroll stops at its edge. */
+.map-scroll { overflow: auto; padding: var(--space-1) var(--space-1) calc(var(--line-xs) + var(--space-0-5)); scroll-padding: var(--space-1); border-left: 1px solid transparent; border-right: 1px solid transparent; }
 /* FR-1 (M8): past the floor the frame keeps its width and this region
    scrolls; each side with figure hidden past it carries the design system's
    1 px --fg-subtle edge (edge-left, edge-right, set by MapView's watcher),
@@ -87,8 +97,11 @@
    (0-1-1) does not draw them as plain text. */
 .map-panel { min-width: 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--surface); color: var(--fg); font-size: var(--font-size-md); line-height: var(--line-md); }
 .map-panel-title { margin: 0 0 var(--space-1); font-size: var(--font-size-xl); line-height: var(--line-xl); font-weight: var(--weight-semibold); overflow-wrap: anywhere; }
-.map-panel-title:focus { outline: none; }
-.map-panel-title:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
+/* The title focus lands on after a level change is a place, not a control:
+   no ring, with the mouse or the keys (leftovers-69 FR-2, map A5 A2; as
+   run-report AR30 and the design system's Navigating). The next Tab rings
+   the first control after it. */
+.map-panel-title:focus, .map-panel-title:focus-visible { outline: none; }
 .map-panel-drift, .map-panel-drift-line { color: var(--warning); }
 .map-panel-drift-line { margin: 0; }
 .map-panel-meta { margin: 0 0 var(--space-2); color: var(--fg-muted); font-size: var(--font-size-sm); line-height: var(--line-sm); }

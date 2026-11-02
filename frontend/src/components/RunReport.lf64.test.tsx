@@ -293,3 +293,31 @@ describe("V4 (FR-11, AR30): a reader heading focus lands on draws no ring", () =
     expect(heads.map((m) => m[1])).toEqual(expect.arrayContaining([expect.stringContaining(".sr-doc :where(h1, h2, h3, h4, h5, h6):focus-visible"), expect.stringContaining(".sr-path:focus-visible")]));
   });
 });
+
+// leftovers-69 V3 (FR-6; run-report Amendment 5, AR31): the footers read as
+// one list, the same gap before the `·` on a pressable and a still line.
+describe("leftovers-69 V3 (FR-6, AR31): the same gap before the `·` on pressable and still footers", async () => {
+  const { parseCompound, winners } = await import("./stateLayer.kit");
+  const won = (sel: string, prop: string) => winners({ parts: [parseCompound(sel)], hover: false }, prop).map((w) => w.v);
+  const scan = { root: "/fixture/init", waves: [{ record: "2026-10-20-sup1.md" }], problems: [] } as ScanRuns;
+  const strip = { n: 1, label: "wave 1", building: [{ slug: "a" }], in_review: [], queued: [], done: [], supervisor: "sup1" } as unknown as service.Wave;
+  const [still, press] = elements(Progress({ report, lineTokens: null, shown: { kind: "custom", since: 0, until: 0, live: false }, nav: { ...nav, waveTarget: (w) => rr.waveTarget(w, { ...scan, waves: [], strips: stripsOf([strip]) }) } }))
+    .filter((e) => typeof e.props.className === "string" && (e.props.className as string).startsWith("rr-wave-line"));
+  it("both lines are a wave span then the words, which begin with the one space before the `·`", () => {
+    expect([still.type, press.type]).toEqual(["span", "button"]);
+    for (const line of [still, press]) {
+      const parts = line.props.children as ReactNode[];
+      expect(isValidElement(parts[0]) && (parts[0] as ReactElement<{ className: string }>).props.className).toBe("rr-wave-key");
+      expect(parts[1]).toMatch(/^ · /);
+    }
+  });
+  it("a pressable footer flows as text like the still one: a block, not global.css's inline-flex button, so no flex gap and no trimmed space set the gap", () => {
+    expect(won("button.rr-wave-line", "display")).toEqual(["block"]);
+    expect(won("span.rr-wave-line.still", "display")).toEqual(["block"]);
+    expect(won("button.rr-wave-line", "white-space")).toEqual(won("span.rr-wave-line.still", "white-space").length ? won("span.rr-wave-line.still", "white-space") : ["normal"]);
+  });
+  it("the button's padding is the still line's: it adds no space", () => {
+    expect(won("button.rr-wave-line", "padding")).toEqual(won("span.rr-wave-line.still", "padding"));
+    expect(won("button.rr-wave-line", "padding")).toEqual(["var(--space-1) var(--space-2)"]);
+  });
+});

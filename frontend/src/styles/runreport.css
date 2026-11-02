@@ -104,7 +104,13 @@ details[open] > summary.rr-more::before { transform: rotate(90deg); }
 .rr-row.dead.now b { color: var(--status-blocked); font-weight: var(--weight-semibold); }
 
 .rr-waves ul, .rr-rulings ul { list-style: none; margin: var(--space-1) 0 0; padding: 0; display: grid; gap: var(--space-0-5); }
+/* One flow for both footers (leftovers-69 FR-6, AR31): a pressable footer
+   is a block like the still one, not global.css's inline-flex button, whose
+   6 px gap and trimmed leading space made the gap before the first `·`
+   wider than on a still line. The text sets the gap on both; the button's
+   padding is the same as the still line's and adds none. */
 .rr-wave-line {
+  display: block; white-space: normal;
   width: 100%; min-height: var(--control-md); padding: var(--space-1) var(--space-2); border: 0; background: transparent; text-align: left;
   font-size: var(--font-size-sm); line-height: var(--line-sm); font-weight: var(--weight-regular); color: var(--fg); overflow-wrap: anywhere;
 }

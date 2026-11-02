@@ -12,8 +12,8 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type FocusEvent } from "react";
 import { RenderDiagram } from "../../wailsjs/go/main/App";
 import {
-  boxPercent, drawnNodes, mapFigureName, newMapId, nodeName, readingOrder, rovingStep, sanitizeMapTree, serialize,
-  smallestTextSize, floorScale, viewBoxOf, withNodeClasses, type Box, type MapNode,
+  boxPercent, cornerRadius, drawnNodes, mapFigureName, newMapId, nodeName, readingOrder, rovingStep, sanitizeMapTree, serialize,
+  smallestTextSize, floorScale, viewBoxOf, withNodeClasses, type Box, type Corner, type MapNode,
 } from "../lib/mapSvg";
 
 export type MapState = { state: "drawing" } | { state: "drawn"; svg: string } | { state: "failed"; reason: string };
@@ -77,13 +77,15 @@ export function MapFigure(props: MapFigureProps) {
 }
 
 /** A button's own look: none, so the node it sits over shows; its place
- *  comes from the node's box. Focus draws the app's ring (global.css). */
+ *  comes from the node's box and its corner from the node's shape
+ *  (`cornerRadius`, leftovers-69 FR-4), so the picked edge and the ring
+ *  follow a pill's radius. Focus draws the app's ring (global.css). */
 const BUTTON: CSSProperties = {
   position: "absolute", margin: 0, padding: 0, border: 0, borderRadius: 4, background: "transparent", cursor: "pointer", font: "inherit", color: "inherit",
 };
 const LAYER: CSSProperties = { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 };
 
-type Stop = { node: MapNode; box: Box };
+type Stop = { node: MapNode; box: Box; corner: Corner | null };
 
 /** The frame of a fitted figure (leftovers-67 FR-1, V1): it fills the
  *  column up to the drawn size, but never narrower than the floor scale
@@ -124,7 +126,7 @@ export function MapFigureView({ st, initiative, level, nodes, classes, onPick, o
   const stops = useMemo<Stop[]>(() => {
     if (!read || "error" in read) return [];
     const byId = new Map(nodes.map((n) => [n.id, n]));
-    return readingOrder(read.drawn.filter((d) => byId.has(d.id))).map((d) => ({ node: byId.get(d.id)!, box: d.box }));
+    return readingOrder(read.drawn.filter((d) => byId.has(d.id))).map((d) => ({ node: byId.get(d.id)!, box: d.box, corner: d.corner }));
   }, [read, nodes]);
 
   // The lens: classes on the node elements, the layout untouched (M6).
@@ -179,7 +181,7 @@ export function MapFigureView({ st, initiative, level, nodes, classes, onPick, o
               aria-current={s.node.id === picked ? "true" : undefined}
               aria-label={nodeName(s.node)}
               tabIndex={k === stop ? 0 : -1}
-              style={{ ...BUTTON, ...boxPercent(s.box, vb) }}
+              style={{ ...BUTTON, borderRadius: cornerRadius(s.box, s.corner), ...boxPercent(s.box, vb) }}
               onFocus={() => { setAt(k); onFocusNode?.(s.node.id); }}
               onClick={() => onPick?.(s.node.id)}
             />

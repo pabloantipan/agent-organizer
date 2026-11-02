@@ -253,7 +253,7 @@ describe("FR-5: node ids, transforms, paths", () => {
   });
   it("composes nested transforms, scale included", () => {
     const t = parseXml('<svg viewBox="0 0 100 100"><g transform="translate(10,10) scale(2)"><g class="node" id="flowchart-a-0" transform="translate(5 5)"><rect x="-1" y="-1" width="2" height="2"/></g></g></svg>').children[0];
-    expect(drawnNodes(t as never)).toEqual([{ id: "a", elementId: "flowchart-a-0", box: { x: 18, y: 18, width: 4, height: 4 } }]);
+    expect(drawnNodes(t as never)).toEqual([{ id: "a", elementId: "flowchart-a-0", box: { x: 18, y: 18, width: 4, height: 4 }, corner: null }]);
   });
   it("relative path commands and curves count their control points", () => {
     expect(pathPoints("M1 1 l2 0 v3 h-2 z")).toEqual([[1, 1], [3, 1], [3, 4], [1, 4]]);

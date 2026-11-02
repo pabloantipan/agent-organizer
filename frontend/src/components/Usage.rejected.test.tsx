@@ -74,11 +74,11 @@ describe("leftovers-62 U3: the Usage view lists the rejected rows", () => {
       ["s-neg", "2026-10-05", "token counts and messages cannot be negative"],
     ]);
   });
-  it("says how many and that they are sent again when they change (leftovers-67 FR-12 words)", () => {
-    expect(text(section(draw(JSON.parse(wire)))!)).toContain("Not accepted by discuss-record · 2");
+  it("says how many and that they are sent again when they change (leftovers-69 FR-7 words)", () => {
+    expect(text(section(draw(JSON.parse(wire)))!)).toContain("Not accepted · 2");
     const one = JSON.parse(wire);
     one.rejected = one.rejected.slice(1);
-    expect(text(section(draw(one))!)).toContain("Not accepted by discuss-record · 1");
+    expect(text(section(draw(one))!)).toContain("Not accepted · 1");
   });
   it("is the view's, under the week, whatever the week holds", () => {
     const html = draw(JSON.parse(wire));
@@ -93,20 +93,29 @@ describe("leftovers-62 U3: the Usage view lists the rejected rows", () => {
   });
 });
 
-// leftovers-67 V5 (FR-12; usage Amendment 1, U9): the rejected list says
-// whose it is.
-describe("leftovers-67 V5: the rejected list names discuss-record and says nothing is the reader's", () => {
+// leftovers-67 V5 (FR-12; usage Amendment 1, U9) as leftovers-69 V3
+// amends it (FR-7; usage Amendment 2, U9 amended): the title is
+// `Not accepted · N`, uppercased by .sec-title as every section title, and
+// the system's name moves to the line under it, in its own case.
+describe("leftovers-69 V3 (FR-7, U9 amended): the title is Not accepted · N; the line names discuss-record in its own case", () => {
   beforeEach(() => { h.n = 0; });
-  it("over two rows: the title `Not accepted by discuss-record · 2`, then the line, above the rows", () => {
+  it("over two rows: the title `Not accepted · 2`, then the line, above the rows", () => {
     const s = section(draw(JSON.parse(wire)))!;
-    const title = /<h2 id="usage-rejected-title"[^>]*>([\s\S]*?)<\/h2>/.exec(s)!;
-    expect(text(title[1])).toBe("Not accepted by discuss-record · 2");
+    const title = /<h2 id="usage-rejected-title" class="sec-title">([\s\S]*?)<\/h2>/.exec(s)!;
+    expect(text(title[1])).toBe("Not accepted · 2");
     const line = /<p class="usage-rejected-why">([^<]*)<\/p>/.exec(s)!;
-    expect(line[1]).toBe("Sent again when its usage changes. Nothing for you to do; the reason is for the FSE.");
+    expect(line[1]).toBe("discuss-record did not take these. Sent again when its usage changes. Nothing for you to do; the reason is for the FSE.");
     expect(s.indexOf("</h2>")).toBeLessThan(s.indexOf("usage-rejected-why"));
     expect(s.indexOf("usage-rejected-why")).toBeLessThan(s.indexOf("<table"));
     expect(rowsOf(s)).toHaveLength(2);
     expect(text(s)).not.toMatch(/the record|not resent/);
+  });
+  it("no rule uppercases or capitalizes the line, so discuss-record keeps its own case", () => {
+    const css = fs.readFileSync(new URL("../styles/usage.css", import.meta.url), "utf8");
+    const rules = [...css.matchAll(/([^{}]*usage-rejected-why[^{}]*)\{([^}]*)\}/g)];
+    expect(rules.length).toBeGreaterThan(0);
+    for (const r of rules) expect(r[2]).not.toMatch(/text-transform|font-variant-caps/);
+    expect(css).not.toMatch(/usage-rejected-why::first-letter/);
   });
   it("draws the line sm and muted", () => {
     const css = fs.readFileSync(new URL("../styles/usage.css", import.meta.url), "utf8");

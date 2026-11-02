@@ -26,7 +26,7 @@ vi.mock("../../wailsjs/go/main/App", () => ({
 }));
 vi.mock("../../wailsjs/runtime/runtime", () => ({ BrowserOpenURL: vi.fn() }));
 
-const { MapBody, inReadingOrder, NO_MAP, NO_L3, READING_MAP, firstPlace, nodesAt, drillOf, trailOf, lensClasses, tagOf, placeName, restorePlace, figureNodes } = await import("./MapView");
+const { MapBody, inReadingOrder, panelOrder, NO_MAP, NO_L3, READING_MAP, firstPlace, nodesAt, drillOf, trailOf, lensClasses, tagOf, placeName, restorePlace, figureNodes } = await import("./MapView");
 const { useBoard } = await import("../stores/board.store");
 const { MapPanel, groundLine, groundCtx, runGround, statusWords, ruledBy } = await import("./MapPanel");
 const { MapFigureView } = await import("./MapFigure");
@@ -68,7 +68,7 @@ describe("FR-6: Map on Roadmap's switch", () => {
     expect(trailOf(r, { level: "containers" }).map((t) => t.label)).toEqual(["Context", "Containers"]);
     const html = body(r);
     expect(html).toContain('<nav class="map-trail" aria-label="Map level">');
-    expect(html).toContain('<span aria-current="page" class="map-trail-here">Containers</span>');
+    expect(html).toContain('<span aria-current="location" class="map-trail-here">Containers</span>');
     expect(html).toContain('class="linkish map-trail-go">Context</button>');
     expect(html).toContain("Drawing the map…");
   });
@@ -295,7 +295,7 @@ describe("round 2: U1, U4, U5", () => {
   });
   it("U4: the drawing is a block (no baseline gap) and the scroller keeps room for the bottom row's words", () => {
     expect(mapCss).toMatch(/\.map-figure-svg > svg \{ display: block; \}/);
-    expect(mapCss).toMatch(/\.map-scroll \{ overflow: auto; padding-bottom: calc\(var\(--line-xs\) \+ var\(--space-0-5\)\);/);
+    expect(mapCss).toMatch(/\.map-scroll \{ overflow: auto; padding: var\(--space-1\) var\(--space-1\) calc\(var\(--line-xs\) \+ var\(--space-0-5\)\); scroll-padding: var\(--space-1\);/);
   });
   it("U5: the panel lists nodes in the roving set's order; undrawn ones trail in map.json order", () => {
     const ns = nodesAt(harborMap as unknown as service.C4Map, { level: "containers" });
@@ -324,7 +324,7 @@ describe("V2: the trail at Context (FR-2, M9)", () => {
     place({ level: "context", containersSeen: true });
     const html = body(r);
     expect(trailText(html)).toEqual(["Context", "›", "harbor containers"]);
-    expect(html).toContain('<span aria-current="page" class="map-trail-here">Context</span>');
+    expect(html).toContain('<span aria-current="location" class="map-trail-here">Context</span>');
     expect(html).toContain('class="linkish map-trail-go">harbor containers</button>');
   });
   it("with no containers view open before, the trail is drawn and reads Context alone", () => {
@@ -371,7 +371,7 @@ describe("V3: the map's place kept per initiative (FR-5, M12)", () => {
     const again = body(drawn(harborMap)); // a second mount reads the store, not its own state
     for (const html of [first, again]) {
       expect(trailText(html)).toEqual(["Context", "›", "Containers", "›", "harbor-api"]);
-      expect(html).toContain('<span aria-current="page" class="map-trail-here">harbor-api</span>');
+      expect(html).toContain('<span aria-current="location" class="map-trail-here">harbor-api</span>');
       expect(html).toContain('<aside class="map-panel" aria-label="booking: node">');
     }
     expect(useBoard.getState().mapPlace.harbor).toEqual(booking);
@@ -434,5 +434,66 @@ describe("FR-3 (M10): a Grounding action is accent from its first word", () => {
     expect(winners(inAct, "color").map((w) => w.v)).toEqual(["inherit"]);
     const bare = { parts: [parseCompound("span.map-ground-off"), parseCompound("span.map-ground-kind")], hover: false };
     expect(winners(bare, "color").map((w) => w.v)).toEqual(["var(--fg-muted)"]);
+  });
+});
+
+// leftovers-69 V1 (FR-1, FR-2, FR-5; map-and-roadmap Amendment 5, M15,
+// A2, M18): a trail step that goes somewhere looks it and the current one
+// does not; the panel title focus lands on draws no ring; the panel's
+// list renders once, in reading order.
+describe("leftovers-69 V1 (FR-1, M15): the trail's steps", () => {
+  it("at L3: earlier steps are buttons drawn in --accent-fg over button.linkish { color: inherit }; the current one is --fg text, aria-current=location, no button", () => {
+    place({ level: "modules", container: "harbor_api" });
+    const html = body(drawn(harborMap));
+    const nav = html.slice(html.indexOf('<nav class="map-trail"'), html.indexOf("</nav>"));
+    expect([...nav.matchAll(/<button[^>]*>([^<]*)<\/button>/g)].map((m) => m[1])).toEqual(["Context", "Containers"]);
+    expect(nav).toContain('<span aria-current="location" class="map-trail-here">harbor-api</span>');
+    expect(nav).not.toMatch(/<button[^>]*>harbor-api</);
+    expect(nav).not.toContain('aria-current="page"');
+    const go = { parts: [parseCompound("button.linkish.map-trail-go")], hover: false };
+    expect(winners(go, "color").map((w) => w.v)).toEqual(["var(--accent-fg)"]);
+    const here = { parts: [parseCompound("span.map-trail-here")], hover: false };
+    expect(winners(here, "color").map((w) => w.v)).toEqual(["var(--fg)"]);
+  });
+});
+
+describe("leftovers-69 V1 (FR-2, A2): the panel title after a level change is a landing", () => {
+  it("focus still lands on it (tabindex -1, the panel's focus target) and no rule draws a ring on it, :focus or :focus-visible", () => {
+    const list = renderToStaticMarkup(<MapPanel initiative={init()} index={harbor} nodes={nodesAt(harbor, { level: "containers" })} levelName="Containers" picked={null} pick={() => undefined} drill={null} />);
+    expect(list).toContain('<h3 class="map-panel-title" tabindex="-1">Containers</h3>');
+    const panelSrc = readFileSync(new URL("./MapPanel.tsx", import.meta.url), "utf8") as string;
+    expect(panelSrc).toContain('el.querySelector<HTMLElement>(".map-panel-title"))?.focus()');
+    for (const pseudo of ["focus", "focus-visible"]) {
+      const t = { parts: [{ ...parseCompound("h3.map-panel-title"), pseudos: [pseudo] }], hover: false };
+      expect(winners(t, "outline").map((w) => w.v), pseudo).toEqual(["none"]);
+    }
+  });
+});
+
+describe("leftovers-69 V1 (FR-5, M18): the panel's list renders once, in reading order", () => {
+  const ns = nodesAt(harbor, { level: "containers" });
+  const listIds = (html: string) => [...html.matchAll(/class="linkish map-panel-node" data-node="([^"]+)"/g)].map((m) => m[1]);
+  it("before positions are known the list reads Drawing the map… in its place, no node listed", () => {
+    expect(panelOrder(ns, undefined)).toBeNull();
+    const html = body(drawn(harborMap));
+    const panel = html.slice(html.indexOf('<aside class="map-panel"'));
+    expect(panel).toContain('<p class="map-panel-meta map-panel-drawing">Drawing the map…</p>');
+    expect(listIds(panel)).toEqual([]);
+    expect(panel).not.toContain("map-panel-list");
+  });
+  it("once known, the list is the figure's reading order, node for node; a failed figure gives map.json's order", () => {
+    const fig = renderToStaticMarkup(<MapFigureView st={{ state: "drawn", svg: harborSvg }} initiative="harbor" level="containers" source="x" nodes={figureNodes(ns)} />);
+    const roving = [...fig.matchAll(/<button[^>]*data-node="([^"]+)"/g)].map((m) => m[1]);
+    expect(roving).not.toEqual(ns.map((n) => n.id)); // reading order is not map.json's (alphabetical) order
+    const after = renderToStaticMarkup(<MapPanel initiative={init()} index={harbor} nodes={ns} order={panelOrder(ns, roving)} levelName="Containers" picked={null} pick={() => undefined} drill={null} />);
+    expect(listIds(after)).toEqual(roving);
+    expect(after).not.toContain("Drawing the map…");
+    expect(panelOrder(ns, [])!.map((n) => n.id)).toEqual(ns.map((n) => n.id));
+  });
+  it("the positions come from the scroller as state, not a ref a child's first layout effect reads as null (the panel waited forever on a map shown once)", () => {
+    const src = readFileSync(new URL("./MapView.tsx", import.meta.url), "utf8") as string;
+    expect(src).toContain('<div className="map-scroll" ref={holdScroller}>');
+    expect(src).toMatch(/<MapTags host=\{scroller\}/);
+    expect(src).not.toMatch(/host\.current/);
   });
 });
