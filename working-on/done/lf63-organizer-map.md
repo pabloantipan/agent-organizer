@@ -1,12 +1,12 @@
 ---
 title: "The organizer has its own C4 base map, every node grounded"
-status: now
+status: done
 repos: [organizer]
 branch: lf63-organizer-map
 seat: lf63-build
 stage:
 updated: 2026-11-02
-next: "merged as organizer #35 8b5c8f9; supervisor moves it to done/"
+next: "done: pr: 35, target: main, state: merged, merge: 8b5c8f9 (2026-11-02)"
 review: pass
 reviewer: lf63-review
 depends_on: [lf58-map-read]
