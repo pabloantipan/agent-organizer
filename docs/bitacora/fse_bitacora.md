@@ -17,6 +17,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- 13:30 sup114 closed (lf70-small #57 bb7f54d, 37 min vs 30-60, seats $7.35) and ended; installed v0.2.0-3507. Swap 88-96% at noon (browsers 4.9 GB, docker 3.6 GB); probe held one launch 2 min. Asked Aglaea: R1 sev 2 inset ring covers the slug's first glyph, Q1/Q2 inset ring padding and radius, and the count gap in Home.tsx:79, :357, Overview.tsx:145; one card from her amendment. Fixture stand-ins outlive apps: fourth sighting, already with Hephaistos. UI method learned: on-screen ring rows need a key window; the offscreen Tab harness is the working method.
+
 - Held for the next frontend card (Aglaea 5a333ac, both sev 1, 'fold into whatever card comes next'): run-report A6 AR32 (.rt-waitline rings inset, outline-offset -2px; the clipping rule names overflow: hidden); usage A3 U10 ('Not accepted · 2', one space each side of the dot). Plus CLAUDE.md's Runs paragraph (reviewer/record attribution) for the next runs card.
 
 - Aglaea on Usage vs runs: leave it (runs labels each run; Usage By task keeps a one-card wave's cost in one row, U4). Reopens only if Pablo is seen looking for a task number in Usage. Closed.
