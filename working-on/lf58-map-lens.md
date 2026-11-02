@@ -6,7 +6,7 @@ branch: lf58-map-lens
 seat: l58-lens
 stage:
 updated: 2026-11-02
-next: "review: lf58-map-lens, X0 pass (fresh clone) and M1-M7 pass in WebKit (wails dev + harness, committed fixture, no overlay); review-build window pass not run, screen locked, 8974fd6"
+next: "PR with talos-lab (code review pass l58-lens-rev2, UI review pass l58-lens-ui2 offscreen, 8974fd6; window pass owed at next unlock, the FSE checks the installed app after merge)"
 review: pass
 reviewer: l58-lens-rev2
 cause: gate
