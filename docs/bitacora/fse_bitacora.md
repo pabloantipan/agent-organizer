@@ -17,6 +17,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- To cut after lf58-map-lens merges, one map-lens polish card: Aglaea map-and-roadmap Amendment 3 (M8-M11, dc466fb) and Amendment 4 (M12-M14, 3b30a41): scale floor 11 px, trail always drawn, ruled word in the name, map state kept per initiative across switches, picked uses the selected mark (not the focus ring), panel kind 'unknown'.
+
 - INCIDENT (contained): 2026-11-02 03:08-03:14 lf58-map-lens's UI reviewer ran wails dev with the fixture config but Pablo's real ~/.local/share/organizer/ (XDG_DATA_HOME dropped in a hand-built env); read the cache, wrote 3 diagram caches (removed), organizer.log lines left; state.json unproven but no fixture data in it. Reported to Pablo ([for pablo]) and Hephaistos (a launcher that refuses the real home). Rule for my UI-review prompts until then: launch only through the fixture's home.sh, never a hand-built env.
 
 - Held for the next frontend leftovers: Home.tsx ~811, the comment above runSignalFor still says the stopped time is the sum of the spans (wrong since 569375c).
