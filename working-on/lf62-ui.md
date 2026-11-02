@@ -14,6 +14,7 @@ boundary: ["frontend/src/components/InitiativeHeader.tsx", "frontend/src/lib/hea
 spec: "docs/specs/leftovers-62.md (FR-5 to FR-8)"
 gate: "docs/specs/leftovers-62.md#Acceptance → gate"
 ui_review: true
+ui_review_verdict: pass
 autonomy: unattended
 ---
 
@@ -76,4 +77,25 @@ Not changed, on purpose:
 - U4 met: the new `stripComments` keeps `"a // b"; x === "proposed"`. The fix is in the test file itself, so the fail on main was shown by grafting the U4 assertion onto 9cee125's old `stripComments`: `expected false to be true`.
 - X0 met: `pnpm install --frozen-lockfile` 0; `make test` with `CONTRACTS_DIR=.wt-notes/sup108/specs/contracts` (agent-mailbox-specs 172790b) exits 0, every Go package ok, vitest 99 files 1643 tests; `TestReportDecodesContract` passes (sup108's correction: no longer a known failure); `wails build` 0; `git status --porcelain` empty with no runtime checkout needed. `make review-build` is the UI reviewer's.
 - Note: `stripComments` treats `/` after `)` as division, so a regex after `)` would be misread; a `//` inside such a regex would then hide the rest of its line from the guard. No case is shown in today's sources (unproved, so not a finding).
+
+## UI review
+- Verdict: **pass** at 7af4654 (branch lf62-ui, unmoved), reviewer l62-uirev, 2026-11-02. Unmet rows: none. Clean clone `.wt-notes/l62-uirev/clean`; `pnpm install --frozen-lockfile` 0; `make test` reused l62-rev's lease run of 7af4654 (exit 0); `make review-build` 0.
+- **The session was locked** (`ioreg`: `CGSSessionScreenIsLocked` true), so no AX geometry and no `screencapture`: `screencapture -l 86943` (the review build's window) says "could not create image from window". Every shot and measurement below is an **offscreen WKWebView render of my clone's own `frontend/dist` at 7af4654** (the builder's harness source, recompiled in `.wt-notes/l62-uirev/offscreen/`, bindings stubbed with `organizer board --json` over a fresh fixture home from my build; `takeSnapshot`, `getBoundingClientRect`). Shots in `.wt-notes/l62-uirev/offscreen/shots/`.
+- The real review build did run: launched by its path through `scripts/fixture-home.sh` in the same shell (`.wt-notes/l62-uirev/launch.sh`; `ORGANIZER_CONFIG` and `XDG_DATA_HOME` both under `/private/tmp/organizer-fixture.a2sfuk`, auth off), pid 56507, `ORGANIZER_REVIEW_RESIZE=1024x640@15`. Its log: `review resize: ORGANIZER_REVIEW_RESIZE=1024x640@15, window set to 1024x640`; CGWindow bounds went to 922×577 (0.9 of the asked size on this display, as the builder saw). Quit by saved pid, and the fixture's stand-in agents by `FIXTURE_AGENT_PIDS` after checking each command line.
+- **U2 met (offscreen).** init-a, rail expanded:
+
+  | run | header | bar | last row bottom | sub-tabs top | gap |
+  |---|---|---|---|---|---|
+  | opened 1440×900 | 76 | 44 | 36 | 44 | 8 |
+  | live to 1024×640, not reopened | 96 | 64 | 60 | 64 | **4** |
+  | opened at 1024×640 | 96 | 64 | 60 | 64 | **4** |
+
+  Same gap live and fresh; no overlap. `u2-open-1440x900.png`, `u2-live-1024x640.png`, `u2-fresh-1024x640.png`.
+- **U1 look met.** The three cases, drawn in the header (board variants of the fixture: as is; 0005 withdrawn; every proposed owner alejandro): `6 decisions waiting · 5 on you` (`u1-unequal-fresh-1024x640.png`), `5 decisions waiting on you` (`u1-equal-…`), `6 decisions waiting` (`u1-none-…`). The chip is a `<button>` with no `aria-label`, so its text is its accessible name in all three; never clipped (165 px at most), one line, same place. With init-a's cell (human pablo) the FSE panel beside it reads `waiting on you: 5`, so the screen agrees with itself (`u1-unequal-cell-open-1440x900.png`). Without a cell stub the panel read 6 (no human seat, `fseWaiting` counts every non-FSE owner): an artifact of the harness, not the build.
+- **U3 look met.** The fixture has no rejected rows, so `Usage` was stubbed with its own `organizer usage --json` plus two FR-3 rows (`{session_id, day, reason}`, full-length session ids). Under the week: `Rejected by the record · 2  not resent until they change`, then session (mono), day, reason per row, oldest first; no horizontal scroll at 1440 or 1024 (`u3-usage.png`, `u3-usage1024.png`). Zero rows: no section (`u3-none-usage.json`).
+- Notes for the FSE (none a fail, none against the spec):
+  1. The rejected list says what was refused and why, not what Pablo can do about it ("not resent until they change" leaves him guessing whether he must act). Heuristic, Nielsen 9; severity 2. Proposal: one line under the title, the action or that none is needed.
+  2. "the record" is the system's name (discuss-record); on a Usage screen it can read as "the record of usage". Heuristic, Nielsen 2; severity 1.
+  3. At 1024 the gap above the sub-tabs is 4 px against 8 px at 1440 (on main too, when opened at 1024); R53 asks only that live equal fresh. Severity 1.
+- Not verified: geometry by AX and window shots of the real build (session locked); the rejected rows from a real record's refusal (stubbed rows).
 
