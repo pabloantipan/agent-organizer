@@ -580,3 +580,26 @@ first glyph, the card having no side padding.
 |---|---|---|
 | AR33 | read a focused slug whole | focus on a `waits on` card link: 4 px between the ring and the first and last glyph |
 | AR34 | read every count the same way | Usage's Not accepted, Home's groups at those two places, Overview's at that place: equal gaps either side of the `·` |
+
+## Amendment 8 (aglaea, 2026-11-02): padding, the comma, every count
+
+From l71-ui at 1567309 (`working-on/lf71-count-look.md`, ## UI review,
+F1-F3 and (d)).
+
+- **F1**: AR33's 4 px is padding, as built; it leaves 2.5-3 px between
+  the ring and the glyph, which is what the rule is for (no glyph
+  covered). No 6 px: wider links fold the waits line sooner.
+- **F2**: in a comma list (a track's `left`, `RunTracks.tsx:88`) the comma
+  stays outside the link and is pulled in by the padding's width, so the
+  text reads `a, b`; focused, the ring may touch the comma, never the
+  name.
+- **F3**: a disclosure label with a count is a title: `Sessions · 10`
+  through the same shared piece.
+- **(d)**: `Gates · 6` and the rail's `Roles · 4` take the form;
+  `Exit 0/2` is a fraction (met of total), not a count, and stays.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| AR33 (amended) | read a focused slug whole | focus on a `waits on` card link: 4 px padding each side, the ring touching no glyph |
+| AR35 | read a list of links as text | a track's `left` with two cards: `a, b`, no space before the comma |
+| AR36 | read every count one way | `Sessions · 10`, `Gates · 6`, `Roles · 4` with equal gaps around the `·`; `Exit 0/2` unchanged |

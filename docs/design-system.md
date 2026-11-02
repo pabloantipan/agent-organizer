@@ -525,11 +525,16 @@ so no ring is cut by its own frame (map-and-roadmap A5). Where it cannot
 pad (a one-line cell that folds with an ellipsis), the ring of the
 controls inside is drawn inset, `outline-offset: -2px` (run-report A6).
 **Every inset ring** (a scroll region's or a control's) keeps its 4 px:
-the element pads its own content at least 4 px on the sides the ring
-crosses (`padding-inline: var(--space-1)` on a text link), so the ring
-never covers a glyph. An inset ring takes the element's own radius;
+the element pads its own content 4 px on the sides the ring crosses
+(`padding-inline: var(--space-1)` on a text link): padding, not
+clearance, so the ring never covers a glyph and keeps about 2 px from it.
+In a comma list the comma stays outside the link, pulled in by
+`margin-inline-start: calc(-1 * var(--space-1))` so the text reads `a, b`
+(run-report A8). An inset ring takes the element's own radius;
 the +2 belongs only to an outset ring at a 2 px offset (run-report A7). **A count after a title** is `<title> · N`, one space each side of the
-`·`, wherever a title carries one (section titles, Home's groups, Overview),
+`·`, wherever a title carries one (section titles, disclosure labels,
+Home's groups, Overview, the rail's group labels); a fraction (`Exit 0/2`,
+met of total) is a measure, not a count, and keeps its own form,
 drawn by one shared piece, not per place (usage A3, run-report A7). **A proper name (a system, a command) never sits in
 an uppercased label**; it goes in the line under it (usage A2).
 
