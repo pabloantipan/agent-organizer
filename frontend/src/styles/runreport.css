@@ -158,6 +158,9 @@ details[open] > summary.rr-more::before { transform: rotate(90deg); }
    what the fit measures. */
 .rt-waits { display: flex; align-items: baseline; position: relative; }
 .rt-waitline { flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; }
+/* The line clips (overflow: hidden), so a ring drawn outside a control in it
+   is cut; the controls draw it inset (leftovers-70 FR-1, AR32). */
+.rt-waitline button:focus-visible, .rt-waitline a:focus-visible { outline-offset: -2px; }
 .rt-wait, .rt-more { white-space: nowrap; }
 .rt-measure { position: absolute; left: 0; top: 0; visibility: hidden; white-space: nowrap; pointer-events: none; }
 .rt-what { font-family: var(--mono); font-size: var(--font-size-sm); }

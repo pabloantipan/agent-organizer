@@ -124,3 +124,21 @@ describe("leftovers-69 V3 (FR-7, U9 amended): the title is Not accepted · N; th
     expect(r).toContain("color: var(--fg-muted)");
   });
 });
+
+// leftovers-70 V2 (FR-2; usage Amendment 3, U10): `.sec-title` is a flex
+// row with a gap (shell.css), so a bare text node `Not accepted · ` and the
+// count's span were two flex items: the trailing space collapsed and the
+// gap stood in for it, wider than the space before the dot. The phrase and
+// its count are one item, so the spaces each side of the `·` are spaces.
+describe("leftovers-70 V2 (FR-2, U10): the title is one phrase, one space each side of the dot", () => {
+  beforeEach(() => { h.n = 0; });
+  it("over two rows: `Not accepted · 2` with single spaces, title and count in one flex item", () => {
+    const s = section(draw(JSON.parse(wire)))!;
+    const inner = /<h2 id="usage-rejected-title" class="sec-title">([\s\S]*?)<\/h2>/.exec(s)![1];
+    // One child of the flex row: nothing before or after the one element.
+    const one = /^<span>([\s\S]*)<\/span>$/.exec(inner);
+    expect(one, inner).not.toBeNull();
+    expect(one![1].replace(/<[^>]*>/g, "")).toBe("Not accepted · 2");
+    expect(one![1]).toBe('Not accepted · <span class="num sec-count">2</span>');
+  });
+});
