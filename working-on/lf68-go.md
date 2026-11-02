@@ -7,7 +7,7 @@ seat: l68-go
 reviewer: l68-go-rev
 stage:
 updated: 2026-11-02
-next: "build: l68-go launched by sup112 2026-11-02, worktree .wt/lf68-go from origin/main 83056a1"
+next: "review: lf68-go, gate met (G1-G4 pass on the branch and fail on 83056a1, G4 plants pass the old guard; X0 pass), 0ff6c37"
 depends_on: []
 boundary: ["internal/session/runs.go", "internal/session/runs_test.go", "internal/service/run.go", "internal/service/run_test.go", "internal/usage/", "internal/cli/", "internal/service/literals_test.go", "frontend/wailsjs/"]
 spec: "docs/specs/leftovers-68.md (FR-1 to FR-4)"
@@ -32,3 +32,34 @@ docs/specs/leftovers-68.md, rows G1-G4 and X0.
 - Data shape across states: runs.jsonl lines as `internal/session` writes them.
 - Evidence: logs under `.wt-notes/<seat>/`.
 - Retention: n/a.
+
+## Done
+- 2026-11-02 l68-go: runs reads reviewers and supervisors through usage.RunAttributions; supervisor of one accept record shows as `task <NNNN>`; guard catches parens and allowlists by function with a count. Branch lf68-go at 0ff6c37 rebased on origin/main 341b328, not pushed. Evidence: .wt-notes/l68-go/progress.md.
+
+## Declared changes
+- modified `internal/usage/ledger.go:Attribution`: adds `Record` (the one accept record whose supervisor: is the session) and `Label()` (`task <NNNN>` or Task)
+- modified `internal/usage/ledger.go:sessionAttribution`: a kept supervisor attribution gains its Record, task unchanged
+- modified `internal/usage/ledger.go:sameAttribution`: compares Record
+- added `internal/usage/ledger.go:RunAttributions`, `RunSeen`, `attributions`: the one reader runs uses; ledger first, else Attribute when it names a card task
+- modified `internal/usage/ledger.go:Attributions`: delegates to attributions
+- modified `internal/usage/attribute.go:Attribute`: sets Record for a supervisor
+- added `internal/usage/attribute.go:recordOf`, `initiativeByID`: the record number, none when several
+- added `internal/usage/lf68_test.go`: reader unit tests
+- modified `internal/service/run.go:ledgerTasks`: takes the runs, calls usage.RunAttributions
+- added `internal/service/run.go:cardless`: sessions the archive gave no card
+- modified `internal/service/run.go:Runs`, `InitiativeRuns`, `withAttribution`: pass the runs; card is `Label()`
+- modified `internal/service/run_test.go`: G1-G3 (`lf68Home`, `cardOf`)
+- modified `internal/cli/run_test.go`: G2 printer test
+- modified `internal/service/literals_test.go`: `unparen`, `findStatusComparisons`, `funcName`, `allowance`, function-keyed `statusLiteralAllowed`, `guardFindings` by function and count; G4 test; LF62 planted test's expected findings
+Risky:
+- `sessionAttribution`: a supervisor already in the real ledger is rewritten once on the next usage pass (Record added; task unchanged)
+- `withAttribution`: a supervisor of one record now shows `task <NNNN>` in runs where it showed its card or `wave:<seat>`
+Not changed, on purpose:
+- `internal/session/runs.go:MatchRun`: the archive's matcher stays; reviewers and records are read only through usage's reader (FR-3)
+- `Attribution.Task` values, the usage view, `frontend/src/lib/usage.ts:groupWaves`, `service/report.go:lineTokens`: unchanged, outside the boundary
+- `frontend/wailsjs`: no bound type changed
+
+## Notes
+- CLAUDE.md's Runs baseline paragraph does not yet mention reviewer/record attribution or `task <NNNN>` (outside the boundary).
+- The usage view still shows a one-card record's supervisor under its card; showing `task <NNNN>` there is a frontend card if wanted.
+
