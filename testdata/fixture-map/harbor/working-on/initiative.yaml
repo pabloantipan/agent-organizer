@@ -5,3 +5,6 @@ title: Harbor, the contract's map
 status: active
 started: 2026-10-01
 goal: Harbor sells ferry tickets at the counter and online
+# The repos harbor's grounding names (leftovers-58 Amendment 2); home.sh makes each a one-commit
+# git checkout in the temp copy, since a committed .git cannot be a fixture.
+repos: [harbor-api, harbor-web, harbor-ledger]
