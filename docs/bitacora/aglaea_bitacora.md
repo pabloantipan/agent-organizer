@@ -208,3 +208,4 @@ resumes. The seat moves to the new discuss watcher (wake-rearm, api
 - 2026-11-02 — map lens round 2 (FSE thread 01M6DEWCSRXF59GQEVD2SPGV64): map-and-roadmap A4, M12-M14 (place survives mode switch, picked = selected fill + accent edge, unknown facts).
 - 2026-11-02 — Usage rejected list (FSE thread 01M6DHD3WHRXJFBQPRZ6TZD462): usage A1 (U9, 'Not accepted by discuss-record', nothing for you to do), review-view A21 (R53 gap equal at every width).
 - 2026-11-02 — lf67 UI notes (FSE status 01M6E9RGSGZ07GFVW8MD7VBKJ9): map A5 (M15-M18), run-report A5 (AR31), usage A2 (U9 again); design system: scroll regions pad 4 px for rings, no proper names in uppercase labels.
+- 2026-11-02 — Usage By task vs runs' 'task NNNN' (FSE thread 01M6ECJ6WCK3KFXY95W7GFSAYG): leave as is; a one-card wave's whole cost stays one row (U4); no amendment.
