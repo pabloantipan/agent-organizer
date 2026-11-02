@@ -1,12 +1,12 @@
 ---
 title: "Runs and usage agree on read, rulings name the right owner, rejected usage rows are shown and pruned"
-status: now
+status: done
 repos: [organizer]
 branch: lf62-go
 seat: l62-go
 stage:
 updated: 2026-11-02
-next: "PR with talos-lab (requested 00:27, again via pablo relay 01:07 and by the fse 01:27); move to done/ on its merge sha"
+next: "done: PR #32 merged 049075e (2026-11-02)"
 review: pass
 reviewer: l62-go-rev
 depends_on: []
@@ -15,6 +15,8 @@ spec: "docs/specs/leftovers-62.md (FR-1 to FR-4)"
 gate: "docs/specs/leftovers-62.md#Acceptance → gate"
 ui_review: false
 autonomy: unattended
+prs:
+  - {repo: organizer, pr: 32, target: main, state: merged, merge: 049075e}
 ---
 
 ## Goal
