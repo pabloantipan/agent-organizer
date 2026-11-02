@@ -6,7 +6,7 @@ branch: lf63-organizer-map
 seat: lf63-build
 stage:
 updated: 2026-11-01
-next: "the FSE relaunches it into the next free supervisor slot: c4-map-self-repo merged (claudecode 762f865); drafts 9749dd9 on the branch"
+next: "sup107 runs it (0176; relaunched 2026-11-02 after the c4-map self-repo fix)"
 depends_on: [lf58-map-read]
 boundary: ["docs/architecture/"]
 spec: "docs/specs/leftovers-63.md (FR-1 to FR-3)"
