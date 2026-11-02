@@ -17,6 +17,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- 01:27: organizer's talos-lab seat had exited (its .kdl and prelude gone); relaunch waits for the memory outage to clear (probe refuses >85% swap). lf62-go's PR sent to the transversal talos-lab via [for talos-lab]. Relaunch organizer-probe-talos-lab (prompt kept in ~/.local/state/probe; prelude to rewrite from the template) when probe allows.
+
 - To cut after lf58-map-lens merges (Aglaea, map-and-roadmap Amendment 3, dc466fb, M8-M11): U2 a scale floor (smallest SVG text >= 11 px, then the frame scrolls; buttons follow); U3 the trail always drawn, 'Context › <system> containers' with a way back; U6 the ruled word stays a word, in the button's name; U1, U4, U5 already in sup103's round.
 
 - Held for the next leftovers (lf62-go review pass at 83fe879): string-literal decision-status comparisons (`internal/service/draft.go:27`, `internal/cli/decisions.go:116`) escape the G4 guard, which only catches `model.Decision*` constants. Also: `usagePostState.Accepted` keeps keys of ledger rows that are gone (FR-3 prunes Rejected only).
