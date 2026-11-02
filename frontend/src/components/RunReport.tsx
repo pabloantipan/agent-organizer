@@ -7,7 +7,7 @@ import { useLiveRegion } from "../lib/liveRegion";
 import {
   CUSTOM, NO_CARD_PASSED, argsOf, arrivalPreset, captionOf, clock, copyReport, costWords, customWindow, day,
   latestRun, markSeen, notDrawn, presetsOf, reasonOf, remoteLine, rememberPreset, rememberedPreset, roundWords, roundsOf,
-  rowName, rowTime, rowsOf, rulingName, runPlace, seenAtOf, spanWords, spansDays, toLocalInput, waveCell, waveFooterWords,
+  rowName, rowTime, rowsOf, rulingName, runPlace, seenAtOf, spanWords, spansDays, toLocalInput, waveCell, waveFooterParts, NO_RUN_RECORD,
   waveLabel, waveLinkName, waveTarget, whileAway, type LineRow, type Preset, type PresetKind, type Row, type Strip, type WaveTarget,
 } from "../lib/runReport";
 import { inactiveIds } from "../lib/queue";
@@ -140,11 +140,18 @@ export function Progress({ report, lineTokens, shown, nav, openRows }: { report:
             {waves.map((w) => {
               const t = nav.waveTarget?.(w) ?? { kind: "work" as const };
               const name = waveLinkName(waveLabel(w, waves), t, w.key);
+              // The wave in the link colour when it presses, muted with the
+              // words on the line when it does not (leftovers-67 FR-8, AR27).
+              const { wave, rest } = waveFooterParts(w);
               return (
                 <li key={w.key}>
                   {t.kind === "none"
-                    ? <span className="rr-wave-line still" title={name} aria-label={name}>{waveFooterWords(w)}</span>
-                    : <button type="button" className="rr-wave-line" onClick={(e) => nav.wave(w, e?.currentTarget)} title={name} aria-label={name}>{waveFooterWords(w)}</button>}
+                    ? <span className="rr-wave-line still" title={name} aria-label={name}>
+                        {[<span key="w" className="rr-wave-key">{wave}</span>, rest, <span key="n" className="rr-no-record">{NO_RUN_RECORD}</span>]}
+                      </span>
+                    : <button type="button" className="rr-wave-line" onClick={(e) => nav.wave(w, e?.currentTarget)} title={name} aria-label={name}>
+                        {[<span key="w" className="rr-wave-key">{wave}</span>, rest]}
+                      </button>}
                 </li>
               );
             })}

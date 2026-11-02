@@ -29,6 +29,7 @@ const sr = await import("../lib/specReader");
 
 const fs: { readFileSync(p: URL, enc: "utf8"): string } = await import("node:" + "fs");
 const css = fs.readFileSync(new URL("../styles/runreport.css", import.meta.url), "utf8");
+const readerCss = fs.readFileSync(new URL("../styles/spec-reader.css", import.meta.url), "utf8");
 
 const report = JSON.parse(sample) as service.FactoryReport;
 const nav = { card: vi.fn(), decision: vi.fn(), wave: vi.fn() };
@@ -200,7 +201,7 @@ describe("P8 (FR-8, PW8): the reader opens a run record at its prose", () => {
   });
   it("folds the waves: block after the prose under a closed `Rounds as recorded`, opening to the yaml in mono", () => {
     const { html } = read();
-    expect(html).toMatch(/<details class="sr-rounds"><summary>Rounds as recorded<\/summary><pre><code class="language-yaml">waves:\n {2}- wave: 1\n/);
+    expect(html).toMatch(/<details class="sr-rounds"><summary class="rr-more">Rounds as recorded<\/summary><pre><code class="language-yaml">waves:\n {2}- wave: 1\n/);
     expect(html).not.toMatch(/<details[^>]* open/);
     expect(html.slice(0, html.indexOf("<details"))).not.toContain("waves:");
   });
@@ -209,5 +210,85 @@ describe("P8 (FR-8, PW8): the reader opens a run record at its prose", () => {
     expect(sr.readerSource("docs/specs/x.md", spec)).toEqual({ md: sr.frontmatterAsCode(spec), after: "", runRecord: false });
     expect(sr.readerSource("docs/runs/x.md", runRecord).runRecord).toBe(false);
     expect(sr.readerSource("runs/2026-09-20-prose-only.md", "# Prose only\n").runRecord).toBe(false);
+  });
+});
+
+// leftovers-67 V4 (FR-8 to FR-11; run-report Amendment 4, AR27-AR30): no
+// look promises a press that is not there.
+const plain = (n: ReactNode): string =>
+  n == null || typeof n === "boolean" ? "" : typeof n === "string" || typeof n === "number" ? String(n)
+    : Array.isArray(n) ? n.map(plain).join("") : isValidElement(n) ? plain((n.props as { children?: ReactNode }).children) : "";
+const kids = (e: ReactElement<Record<string, unknown>>) => (e.props.children as ReactNode[]).filter(isValidElement) as ReactElement<Record<string, unknown>>[];
+
+describe("V4 (FR-8, AR27): a footer that goes nowhere looks it", () => {
+  const root = "/fixture/init";
+  const scan = { root, waves: [{ record: "2026-10-20-sup1.md" }], problems: [] } as ScanRuns;
+  const footers = (s: ScanRuns) => elements(Progress({ report, lineTokens: null, shown: { kind: "custom", since: 0, until: 0, live: false }, nav: { ...nav, waveTarget: (w) => rr.waveTarget(w, s) } }))
+    .filter((e) => typeof e.props.className === "string" && (e.props.className as string).startsWith("rr-wave-line"));
+  it("a pressable footer draws its wave in its own span, `--accent-fg`", () => {
+    const [b2, b1] = footers(scan);
+    expect([b2.type, b1.type]).toEqual(["button", "button"]);
+    expect(kids(b1).map((k) => [k.props.className, plain(k)])).toEqual([["rr-wave-key", "sup1/1"]]);
+    expect(plain(b1.props.children as ReactNode)).toBe("sup1/1 · sup1 · 2 cards (a, c) · 6 rounds, 1 failed (execution 1) · 74 min building");
+    expect(rule(".rr-wave-key")).toContain("color: var(--accent-fg)");
+  });
+  it("one with no run record draws the wave `--fg-muted` and `· no run record` `--fg-subtle` on the line", () => {
+    // sup1's wave 1 has a strip on Work, so only sup2/1 goes nowhere.
+    const strip = { n: 1, label: "wave 1", building: [{ slug: "a" }], in_review: [], queued: [], done: [], supervisor: "sup1" } as unknown as service.Wave;
+    const [none, b1] = footers({ ...scan, waves: [], strips: stripsOf([strip]) });
+    expect(none.type).toBe("span");
+    expect(none.props.className).toBe("rr-wave-line still");
+    expect(kids(none).map((k) => [k.props.className, plain(k)])).toEqual([["rr-wave-key", "sup2/1"], ["rr-no-record", " · no run record"]]);
+    expect(plain(none.props.children as ReactNode)).toBe("sup2/1 · sup2 · 2 cards (b, e) · 4 rounds, 1 failed (no cause given 1) · 29 min building · not merged · no run record");
+    expect(none.props["aria-label"]).toBe("sup2/1: no run record");
+    expect(rule(".rr-wave-line.still .rr-wave-key")).toContain("color: var(--fg-muted)");
+    expect(rule(".rr-no-record")).toContain("color: var(--fg-subtle)");
+    // The other footer still presses and keeps the link colour.
+    expect(b1.type).toBe("button");
+    expect(kids(b1).map((k) => k.props.className)).toEqual(["rr-wave-key"]);
+  });
+});
+
+describe("V4 (FR-9, AR28): a one-letter card link is at least 24 wide, text centred", () => {
+  it("`.rr-card` has min-width: 24px and text-align: center", () => {
+    expect(rule(".rr-card")).toContain("min-width: 24px;");
+    expect(rule(".rr-card")).toContain("text-align: center;");
+    expect(rule(".rr-card")).not.toContain("text-align: left");
+  });
+  it("the report's one-letter card links are `.rr-card`", () => {
+    const html = renderToStaticMarkup(Progress({ report, lineTokens: null, shown: { kind: "custom", since: 0, until: 0, live: false }, nav }));
+    expect([...html.matchAll(/<button type="button" class="rr-card"[^>]*>([a-z])<\/button>/g)].map((m) => m[1])).toEqual(["a", "b", "c", "d"]);
+  });
+});
+
+describe("V4 (FR-10, AR29): `Rounds as recorded` is drawn as the app's fold", () => {
+  it("its summary is `.rr-more`, the <details> kept", () => {
+    expect(sr.roundsHtml("waves: []")).toMatch(/^<details class="sr-rounds"><summary class="rr-more">Rounds as recorded<\/summary>/);
+  });
+  it("hides the native marker and draws a muted ▸ that turns, 4 + 16 + 4 from .rr-more", () => {
+    expect(rule("details > summary.rr-more")).toContain("list-style: none");
+    expect(rule("details > summary.rr-more::-webkit-details-marker")).toContain("display: none");
+    expect(rule("details > summary.rr-more::before")).toContain('content: "\\25B8"');
+    expect(rule("details > summary.rr-more::before")).toContain("color: var(--fg-muted)");
+    expect(rule("details[open] > summary.rr-more::before")).toContain("transform: rotate(90deg)");
+    expect(rule(".rr-more")).toContain("padding: var(--space-1);");
+    expect(rule(".rr-more")).toContain("line-height: var(--line-sm)");
+    expect(rule(".rr-more")).toContain("color: var(--fg-muted)");
+  });
+});
+
+describe("V4 (FR-11, AR30): a reader heading focus lands on draws no ring", () => {
+  const rules = (sel: RegExp) => [...readerCss.matchAll(/\n([^\n{}]+)\{([^}]*)\}/g)].filter((m) => sel.test(m[1]));
+  it("the headings and the path take focus only by landing (tabindex -1), so Tab goes on to the next control", () => {
+    const { html } = sr.withAnchors("<h1>A record</h1><p>x</p><h2>Rounds</h2>");
+    expect(html).toContain('<h1 id="a-record" tabindex="-1">');
+    expect(html).toContain('<h2 id="rounds" tabindex="-1">');
+    expect(readerSrc).toMatch(/<h2 ref=\{title\}[^>]*tabIndex=\{-1\}[^>]*className="sr-path/);
+  });
+  it("no reader rule draws an outline on a heading's or the path's focus, and both clear the global ring on :focus-visible", () => {
+    const heads = rules(/\.sr-doc :where\(h1, h2, h3, h4, h5, h6\):focus|\.sr-path:focus/);
+    expect(heads.length).toBeGreaterThan(0);
+    for (const m of heads) expect(m[2].trim()).toBe("outline: none;");
+    expect(heads.map((m) => m[1])).toEqual(expect.arrayContaining([expect.stringContaining(".sr-doc :where(h1, h2, h3, h4, h5, h6):focus-visible"), expect.stringContaining(".sr-path:focus-visible")]));
   });
 });

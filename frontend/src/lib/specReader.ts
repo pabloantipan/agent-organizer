@@ -152,9 +152,11 @@ export const ROUNDS_SUMMARY = "Rounds as recorded";
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-/** The rounds folded under a closed disclosure, mono when opened (PW8). */
+/** The rounds folded under a closed disclosure, mono when opened (PW8),
+ *  its summary drawn as the app's folds, `.rr-more` (leftovers-67 FR-10,
+ *  AR29): the `<details>` kept, the native marker hidden by the CSS. */
 export const roundsHtml = (yaml: string) =>
-  `<details class="sr-rounds"><summary>${ROUNDS_SUMMARY}</summary><pre><code class="language-yaml">${esc(yaml)}\n</code></pre></details>`;
+  `<details class="sr-rounds"><summary class="rr-more">${ROUNDS_SUMMARY}</summary><pre><code class="language-yaml">${esc(yaml)}\n</code></pre></details>`;
 
 /** The markdown and the trailing HTML the reader draws for a file: a run
  *  record's prose then its rounds folded; any other file's frontmatter as
