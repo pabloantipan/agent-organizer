@@ -8,7 +8,7 @@ reviewer: l57dm-rev
 review: "pass, unmet: none (l57dm-rev, 2026-11-02, 569375c)"
 stage:
 updated: 2026-11-02
-next: "file finding: Home.tsx comment above runSignalFor still says the stopped time is the sum of the spans (Note 1)"
+next: "PR with talos-lab (joint merge: specs, claudecode, docs, then this branch; Note 1 filed to the FSE 2026-11-02)"
 depends_on: [lf64-run-report-polish]
 boundary: ["internal/service/report.go", "internal/service/report_test.go", "frontend/src/components/Home.tsx", "frontend/src/lib/runReport.ts", "frontend/src/components/runreport.fixtures/", "frontend/wailsjs/"]
 spec: "docs/specs/leftovers-57.md (Amendment 7, FR-19 and FR-20)"
