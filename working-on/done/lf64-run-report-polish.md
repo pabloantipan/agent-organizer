@@ -1,6 +1,6 @@
 ---
 title: "The run report reads clearly at every size, and every wave footer keeps its promise"
-status: now
+status: done
 repos: [organizer]
 branch: lf64-run-report-polish
 seat: l64-build
@@ -8,7 +8,7 @@ reviewer: l64-rev, l64-ui
 review: "l64-rev (code): pass at 8eabfb4, unmet none; UI rows P3, P5 and the build halves of P2, P8 are l64-ui's"
 stage:
 updated: 2026-11-02
-next: "PR with talos-lab"
+next: "done: PR #34 merged f454765 (2026-11-02)"
 depends_on: []
 boundary: ["frontend/src/components/RunReport.tsx", "frontend/src/components/RunTracks.tsx", "frontend/src/components/SpecReader.tsx", "frontend/src/lib/runReport.ts", "frontend/src/lib/specReader.ts", "frontend/src/styles/runreport.css"]
 spec: "docs/specs/leftovers-64.md (FR-1 to FR-8)"
@@ -16,6 +16,8 @@ gate: "docs/specs/leftovers-64.md#Acceptance → gate"
 ui_review: true
 ui_review_verdict: pass
 autonomy: unattended
+prs:
+  - {repo: organizer, pr: 34, target: main, state: merged, merge: f454765}
 ---
 
 ## Goal

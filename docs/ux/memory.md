@@ -473,6 +473,7 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - A link to a thing must land on something for every state of that thing: PW4 sent every wave to Work's strip, which only running waves have. Finished things open their record (the reader drawer), running things open their live view (progress-and-waves A1).
 - A press's destination is decided by the same predicate the destination uses to draw (wave footer → Work only when Work draws the strip); otherwise the promise breaks in the states nobody pictured (progress-and-waves A2). A signal may fold into an unpressable "+N" only when the row itself reaches its link's place (run-report A3).
 - A figure that scales to fit needs a floor at the smallest type size (11 px), then scrolls; and a trail is drawn at every level, even its first, with a forward step back to where the person came from (map-and-roadmap A3).
+- A state that removes a press needs a look, not only a name (muted words on the line); target size is both sides, so short text links get a min-width; a focus landing on a non-control draws no ring (run-report A4).
 
 ## Participants in use
 

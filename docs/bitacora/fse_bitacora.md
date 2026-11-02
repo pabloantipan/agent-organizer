@@ -17,6 +17,16 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- Held for the next frontend leftovers: Home.tsx ~811, the comment above runSignalFor still says the stopped time is the sum of the spans (wrong since 569375c).
+
+- Repetition, second sighting: ReadSpec follows symlinks out of its allowed dirs (sup101 Found 5; sup103 lf58-map-lens review note 1). Cut a ReadSpec card: refuse a path whose EvalSymlinks leaves its allowed dir. Owed: lf58-map-lens's window UI pass at the next screen unlock (round 2 UI review ran offscreen, my call 2026-11-02 ~03:30).
+
+- sup107 closed (02:36-02:47, 11 min against 45-90m; builder $1.69) and ended: lf63-organizer-map pass at ea0cc7c, PR with talos-lab. Held: L3 maps internal/ only, the React app is off the map (a later --modules for frontend); levels[].svg names uncommitted SVGs. Sent Hephaistos the HEAD stamp and mermaid2svg output path.
+
+- To cut after lf64 merges (Aglaea run-report Amendment 4, ab5faff, AR27-AR30): a no-record footer muted with '· no run record'; .rr-card min-width 24px; 'Rounds as recorded' styled as .rr-more; no ring on a focus landing on a non-control. One small frontend card with the map lens's M8-M11 if both are free then.
+
+- lf64 passed both reviews at 8eabfb4, PR with talos-lab. UI notes 1-4 sent to Aglaea. Held (code review): the +N fit measured in mono while a plain wait is proportional; runRecordParts matches the literal ^runs/ (docs/runs/ again).
+
 - ~02:35 memory outage over. Relaunched organizer-probe-talos-lab (prelude from the template, lf62-go first) and sup107 on lf63-organizer-map (drafts 9749dd9; c4-map 762f865). Scoped L1: Keychain, git and the terminal apps stay off the map. sup103 and sup106 told to thaw their crew one at a time.
 
 - sup104 closed (19:45-01:30, 5h45m against 90-180m: ~3h40m a hung reviewer launch plus the usage limit, ~1h the PR wait; seats $6.72) and ended. lf62-go passed, PR pending; lf62-ui next for a later supervisor. Rule for my prompts: `-to talos-lab` only while the cell's talos-lab seat is live; otherwise `[for talos-lab]` to pablo (the relay). Sent Hephaistos the hung launch and gate-check's misreads.

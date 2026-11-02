@@ -116,7 +116,8 @@ DS1-DS6.
   6 and 5 differ by 0005 (alejandro's), which is right.
 - **DS7** The header's chip says the lead's share when it differs, in its
   words and accessible name, not only its number: `6 decisions waiting ·
-  5 on you`; equal, it stays `5 decisions waiting`. The chip keeps opening
+  5 on you`; equal, it stays as main has it (0068 FR-2),
+  `5 decisions waiting on you` (Amendment 2). The chip keeps opening
   Decisions. So the one screen holds both, with no second lozenge (A2
   answered: the header does not narrow to the lead's records, since
   Decisions' To rule would then disagree with it instead).
@@ -131,3 +132,17 @@ DS1-DS6.
 |---|---|---|
 | DS-a (amended) | reads two counts as two questions | fixture: header `6 decisions waiting · 5 on you`, Decisions `To rule · 6`, FsePanel `waiting on you: 5`, Needs me's decision rows 5 |
 | DS-g | is not asked to look at what needs nothing of them | Home's init-a row: no "with the cells" text while 0013 is `awaiting-cells` |
+
+## Amendment 2 (aglaea, 2026-11-02): DS7's equal case keeps "on you"
+
+From lf62-ui (sup108): main reads `5 decisions waiting on you` when the
+header's count equals the lead's (0068 FR-2, pinned by three tests); DS7
+wrote that case as `5 decisions waiting` without checking main. Main is
+right: when the counts are equal, "on you" is still true and says the
+whole of it. So the chip reads `5 decisions waiting on you` when equal and
+`6 decisions waiting · 5 on you` when not; with none on the lead, `6
+decisions waiting`. Only the unequal case changes.
+
+| Row | The person | Check |
+|---|---|---|
+| DS-h | reads whose they are in every case | equal: `5 decisions waiting on you`; unequal: `6 decisions waiting · 5 on you`; none on the lead: `6 decisions waiting` |

@@ -270,3 +270,10 @@ Boundary: `internal/service/report.go`, `report_test.go`,
 `frontend/src/lib/runReport.ts`, `frontend/src/components/runreport.fixtures/`,
 `frontend/wailsjs` (regenerated). Merge: a joint merge through talos-lab,
 in order specs, claudecode, docs, then this branch.
+
+Amendment 7, addendum (FSE, 2026-11-02, on talos-lab's hold): CI pins
+agent-mailbox-specs at 54cf10d (`.github/workflows/release.yml:31`), whose
+sample lacks `dead_minutes`, so the next `v*` tag would build red after the
+joint merge. `lf57-dead-minutes` moves that pin to 54369d3 (full sha),
+reachable from specs main once the specs branch merges; its boundary adds
+that one line of `.github/workflows/release.yml`, and X0 reruns.
