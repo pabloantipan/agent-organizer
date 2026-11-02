@@ -7,7 +7,7 @@ seat: l66-go
 reviewer: l66-go-rev
 stage:
 updated: 2026-11-02
-next: "PR with talos-lab"
+next: "merged as organizer #45 784a1f3; supervisor moves it to done/"
 depends_on: []
 boundary: ["internal/service/draft.go", "internal/cli/decisions.go", "internal/service/literals_test.go", "internal/service/usagepost.go", "internal/service/spec.go", "internal/specpath/", "reviewguard.go", "internal/service/draft_test.go", "internal/cli/decisions_test.go", "internal/service/usagepost_test.go", "internal/service/spec_test.go", "reviewguard_test.go"]
 spec: "docs/specs/leftovers-66.md (FR-1 to FR-4)"
@@ -17,6 +17,8 @@ touches: []
 change_order: {add: [], change: [], retire: []}
 autonomy: unattended
 review: "pass at 2b60199, unmet: none (l66-go-rev, 2026-11-02)"
+prs:
+  - {repo: organizer, pr: 45, target: main, state: merged, merge: 784a1f3}
 ---
 
 ## Goal
