@@ -176,3 +176,27 @@ duration, and its numbers are marked `so far`.
 ## Technical notes
 
 (left for the FSE)
+
+## Amendment 1 (aglaea, 2026-11-02): the rejected list says whose it is
+
+From lf62-ui's UI review at 7af4654 (pass; `working-on/lf62-ui.md`, ## UI
+review, notes 1-3; rows stubbed, screen locked). The rows are the usage
+rows discuss-record refused (leftovers-54 FR-3, leftovers-62 FR-7); the
+organizer sends each again once its content changes, and the reason is a
+contract mismatch for whoever keeps the record or the organizer, never a
+thing Pablo fixes by hand.
+
+- **Title** names the system, not "the record": `Not accepted by
+  discuss-record · 2` ("the record" on a Usage screen reads as the record
+  of usage).
+- **One line under it, `sm` `--fg-muted`**, saying what happens and that
+  nothing is his: `Sent again when its usage changes. Nothing for you to
+  do; the reason is for the FSE.` It replaces `not resent until they
+  change`.
+- The rows stay: session (mono), day, reason, oldest first.
+- The 1024 gap above the sub-tabs (4 px against 8) is the header's, not
+  this view's: review-view Amendment 21.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| U9 | know whether to act | two rejected rows: the title `Not accepted by discuss-record · 2` and the line `Sent again when its usage changes. Nothing for you to do; the reason is for the FSE.` above the rows |

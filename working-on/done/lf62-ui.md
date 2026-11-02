@@ -1,13 +1,13 @@
 ---
 title: "The header says both counts when they differ and keeps its place on resize; Usage lists rejected rows"
-status: now
+status: done
 repos: [organizer]
 branch: lf62-ui
 seat: l62-ui
 reviewer: l62-rev, l62-uirev
 stage:
 updated: 2026-11-02
-next: "PR with talos-lab"
+next: "done: pr: 41, target: main, state: merged, merge: 4fabf9f (2026-11-02)"
 review: "l62-rev 2026-11-02: pass at 7af4654, unmet none (U1 U3 U4 fail on 9cee125, pass on branch; U2 hook and CSS checked, geometry is l62-uirev's; X0 passes whole with specs 172790b)"
 depends_on: [lf62-go]
 boundary: ["frontend/src/components/InitiativeHeader.tsx", "frontend/src/lib/header.ts", "frontend/src/styles/shell.css", "frontend/src/components/Usage.tsx", "frontend/src/components/UsageTable.tsx", "frontend/src/lib/decisionStates.test.ts", "frontend/wailsjs/", "reviewresize.go", "reviewresize_test.go", "app.go"]
@@ -16,6 +16,8 @@ gate: "docs/specs/leftovers-62.md#Acceptance → gate"
 ui_review: true
 ui_review_verdict: pass
 autonomy: unattended
+prs:
+  - {repo: organizer, pr: 41, target: main, state: merged, merge: 4fabf9f}
 ---
 
 ## Goal
