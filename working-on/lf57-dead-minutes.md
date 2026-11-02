@@ -8,7 +8,7 @@ reviewer: l57dm-rev
 review: "pass, unmet: none (l57dm-rev, 2026-11-02, 569375c)"
 stage:
 updated: 2026-11-02
-next: "review: lf57-dead-minutes, X0 pass, d24fa3b"
+next: "PR with talos-lab (joint merge; head d24fa3b: review pass at 569375c plus the release.yml pin, Amendment 7 addendum b9655a7)"
 depends_on: [lf64-run-report-polish]
 boundary: ["internal/service/report.go", "internal/service/report_test.go", "frontend/src/components/Home.tsx", "frontend/src/lib/runReport.ts", "frontend/src/components/runreport.fixtures/", "frontend/wailsjs/", ".github/workflows/release.yml"]
 spec: "docs/specs/leftovers-57.md (Amendment 7, FR-19 and FR-20)"
@@ -118,3 +118,5 @@ Rows:
 - `models.ts`: `wails generate module` leaves it byte-identical (only runtime file modes changed, reverted).
 
 Note 1: the comment above `runSignalFor` (Home.tsx ~811) still says the stopped time is "the sum of the report's own minutes per dead span"; it is now wrong. Left alone because the boundary is the signal's line only. Goes to: a one-line follow-up in the PR or the next leftovers card; to be filed.
+
+sup106, 2026-11-02: d24fa3b, added after the review at the FSE's addendum (b9655a7), changes only release.yml:31's ref, 54cf10d to 54369d3fa24be2b1ce459a02bf904fb34f59e221 (git diff 569375c d24fa3b: one line). The builder reran X0 at d24fa3b and it passed; talos-lab re-tests on the merge trees.
