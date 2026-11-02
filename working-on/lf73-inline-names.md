@@ -9,7 +9,7 @@ stage:
 updated: 2026-11-02
 next: "l73-build builds it on .wt/lf73-inline-names from origin/main 51db34f (sup117)"
 depends_on: [lf72-counts-commas]
-boundary: ["frontend/src/components/RunTracks.tsx", "frontend/src/components/Rail.tsx", "frontend/src/components/Review.tsx", "frontend/src/components/SecCount.tsx", "frontend/src/styles/runreport.css", "frontend/src/styles/global.css", "frontend/src/styles/review.css", "frontend/src/components/"]
+boundary: ["frontend/src/components/RunTracks.tsx", "frontend/src/components/Rail.tsx", "frontend/src/components/Review.tsx", "frontend/src/components/SecCount.tsx", "frontend/src/styles/runreport.css", "frontend/src/styles/global.css", "frontend/src/styles/review.css", "frontend/src/lib/folds.ts", "frontend/src/lib/folds.test.ts", "frontend/src/lib/floatList.ts", "frontend/src/lib/floatList.test.ts", "frontend/src/components/"]
 spec: "docs/specs/leftovers-73.md (FR-1 to FR-4)"
 gate: "docs/specs/leftovers-73.md#Acceptance → gate"
 ui_review: true

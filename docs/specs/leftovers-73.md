@@ -62,3 +62,13 @@ markup (any a grep for the old text finds, for those asserts only).
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf73-inline-names` | V1-V3, AR35, AR37, AR38, X0 | lf72-counts-commas (merged #61) | true |
+
+## Amendment 1 (FSE, 2026-11-02, on sup117's question)
+
+A fourth `(N)` sits in `frontend/src/lib/folds.ts:11`: `foldLabel` writes
+`Asleep (n)` and `Archived (n)` for the collapsed rail's float list
+(`FloatList.tsx:227`). FR-3 covers it: `foldLabel` returns `<word> · n`
+(a string; FloatList renders it). V2 adds a vitest of `foldLabel`. The
+boundary adds `frontend/src/lib/folds.ts`, `floatList.ts` (the doc comment
+only) and the asserts of the old text in `folds.test.ts`,
+`floatList.test.ts` and `FloatList.test.tsx`.
