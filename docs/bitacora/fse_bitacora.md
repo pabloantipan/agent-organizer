@@ -17,6 +17,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- To cut after lf64 merges (Aglaea run-report Amendment 4, ab5faff, AR27-AR30): a no-record footer muted with '· no run record'; .rr-card min-width 24px; 'Rounds as recorded' styled as .rr-more; no ring on a focus landing on a non-control. One small frontend card with the map lens's M8-M11 if both are free then.
+
 - lf64 passed both reviews at 8eabfb4, PR with talos-lab. UI notes 1-4 sent to Aglaea. Held (code review): the +N fit measured in mono while a plain wait is proportional; runRecordParts matches the literal ^runs/ (docs/runs/ again).
 
 - ~02:35 memory outage over. Relaunched organizer-probe-talos-lab (prelude from the template, lf62-go first) and sup107 on lf63-organizer-map (drafts 9749dd9; c4-map 762f865). Scoped L1: Keychain, git and the terminal apps stay off the map. sup103 and sup106 told to thaw their crew one at a time.
