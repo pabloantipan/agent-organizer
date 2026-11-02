@@ -8,7 +8,7 @@ reviewer: l72-rev, l72-ui
 review: "l72-rev pass (V1 V2 X0) at 27962f3, 2026-11-02; AR35 AR36 for l72-ui"
 stage:
 updated: 2026-11-02
-next: "review: lf72-counts-commas, V1 V2 X0 pass, AR35 AR36 for l72-ui, 27962f3"
+next: "PR with talos-lab"
 depends_on: [lf71-count-look]
 boundary: ["frontend/src/components/RunTracks.tsx", "frontend/src/components/UsageSessions.tsx", "frontend/src/components/Overview.tsx", "frontend/src/components/Rail.tsx", "frontend/src/components/RunReport.tsx", "frontend/src/components/SecCount.tsx", "frontend/src/styles/runreport.css", "frontend/src/styles/usage.css", "frontend/src/styles/overview.css", "frontend/src/styles/shell.css", "frontend/src/components/RunTracks.test.tsx", "frontend/src/components/RunReport.test.tsx", "frontend/src/components/RunReport.lf64.test.tsx", "frontend/src/components/SecCount.test.tsx", "frontend/src/components/"]
 spec: "docs/specs/leftovers-72.md (FR-1 to FR-3)"
