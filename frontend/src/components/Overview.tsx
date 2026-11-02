@@ -8,6 +8,7 @@ import { useBoard } from "../stores/board.store";
 import { FsePanel } from "./FsePanel";
 import { PhaseWord } from "./InitiativeHeader";
 import { RunReport } from "./RunReport";
+import { SecCount } from "./SecCount";
 import { gateKey, recordsByGate } from "./StageRoadmap";
 import "../styles/overview.css";
 
@@ -142,7 +143,7 @@ function StageGates({ initiative: i }: { initiative: BoardInitiative }) {
   return (
     <section className="ov-sec">
       <h2 className="sec-title">
-        Stage <span className="sec-count">{k + 1}</span> · {s.title || s.id}
+        <SecCount title="Stage" n={k + 1} name={s.title || s.id} />
         <PhaseWord phase={s.phase} />
         <span className="sec-sub">what stands between it and its exit</span>
       </h2>

@@ -132,7 +132,8 @@ describe("N3, P4: the group", () => {
   it("is headed by an h3 Waiting on others · <n>, then exactly the sub-line", () => {
     const html = renderToStaticMarkup(<WaitingOnOthers rows={[row]} />);
     const h3 = /^<h3[^>]*>(.*?)<\/h3>/.exec(html)?.[1] ?? "";
-    expect(h3).toMatch(/^Waiting on others · <span[^>]*>1<\/span><span class="sec-sub">Theirs to rule\. Not counted in Needs me\.<\/span>$/);
+    // The title and its count are one SecCount element (leftovers-71 FR-2).
+    expect(h3).toMatch(/^<span>Waiting on others · <span[^>]*>1<\/span><\/span><span class="sec-sub">Theirs to rule\. Not counted in Needs me\.<\/span>$/);
     const sub = /<span class="sec-sub">([^<]*)<\/span>/.exec(h3)?.[1];
     expect(sub).toBe("Theirs to rule. Not counted in Needs me.");
   });

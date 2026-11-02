@@ -136,7 +136,8 @@ describe("P6 (FR-6): the chain connector", () => {
 
 describe("P3's half in CSS (FR-3, AR24): 24 px targets by padding", () => {
   it("pads .rr-card, .rr-more and .rt-fold to 4 + 16 + 4", () => {
-    expect(rule(".rr-card")).toMatch(/padding: var\(--space-1\) 0; line-height: var\(--line-sm\)/);
+    // 4 px block; 4 px inline too since leftovers-71 FR-1 (AR33).
+    expect(rule(".rr-card")).toMatch(/padding-block: var\(--space-1\); padding-inline: var\(--space-1\); line-height: var\(--line-sm\)/);
     expect(rule(".rr-more")).toContain("padding: var(--space-1);");
     expect(rule(".rr-more")).toContain("line-height: var(--line-sm)");
     expect(rule(".rt-fold")).toContain("padding: var(--space-1) var(--space-2)");
