@@ -4,16 +4,16 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
-## HAND-OFF 2026-11-01 20:27 (last sha see git log)
+## HAND-OFF 2026-11-02 00:27 (last sha see git log)
 
-- AUTONOMOUS since 16:19, no end set. Goal (Pablo via Hephaistos): the factory model built in atlax. Hourly cron wake (session-only).
-- Supervisors (cap 3, all within forecast at 20:27): sup101 leftovers 57 (lf57-home-signal passed code and UI review, PR with talos-lab; lf57-wave-footer round 2 in review at b98452f, Amendments 4-6); sup103 leftovers 58 (lf58-map-lens building, wave 2; read #24 and render #27 merged); sup104 leftovers 62 (0175 by recommendation 19:44; lf62-go in review at 83fe879; lf62-ui after it).
-- Merged today: #4-#27. origin/main e968fc1. Installed v0.2.0-3200 (through #26).
-- atlax for organizer: seed, calls, record, 107-element surface, 3 authored (#12, #13, #21, #23, #25); check 0 findings.
-- To cut when free: the organizer's own map.json (Daedalus, c4-map gen); htmlLabels at the source; docs/runs scan gap; FR-9 consumes completeness (low).
-- Waits on Pablo: lf55-one-title (Dock window; needs-operator; rebase over lf60 first); restart Deltagos for the icon fix. The screen is locked: UI reviews render offscreen.
-- 0167 and 0168 carry "2026-10-28" in their ruling words. They were ruled on 10-27 by the clock. Ruled records are not edited.
-- Rules learned today: atlax cards carry touches and change_order at cut; a premise listing call sites greps all of frontend/src; bitácora inserts go after the day-log heading.
+- AUTONOMOUS since 2026-11-01 16:19, no end set. Goal: the factory model built in atlax. Hourly cron wake (session-only).
+- Two usage-limit stops (~17:00-18:50, ~20:54-23:50) and two memory outages (23:26, 23:55; second not yet declared over at 00:27, swap 88%). I ended 53 frozen seats of finished tasks; seats frozen in an outage stay frozen until thawed on purpose.
+- Supervisors (cap 3, within forecast at 00:27): sup103 leftovers 58 (lf58-map-lens: code review failed M3 on my gap, Amendment 2 990915f adds ReadSpec for map pages and fixture grounding; UI review running); sup104 leftovers 62 (lf62-go passed, PR with talos-lab; lf62-ui after the outage; window to 01:52); sup106 leftovers 64 (l64-build phase 1 since 23:55; Amendment 1).
+- Parked: lf63-organizer-map (blocked on Hephaistos's c4-map-self-repo; drafts 9749dd9 on its branch; relaunch needs new tokens; decide whether L1 draws Keychain, git, the terminals).
+- Merged through #29 plus #30 working-on. origin/main 1bc2d44. Installed v0.2.0-3239.
+- Waits on Pablo: lf55-one-title (Dock window; rebase over lf60 first); restart Deltagos for the icon fix.
+- 0167 and 0168 carry "2026-10-28" in their ruling words. Ruled records are not edited.
+- Rules: atlax cards carry touches and change_order at cut (card-check enforces it now); a premise listing call sites greps all of frontend/src; bitácora inserts go after the day-log heading; any ReadSpec-opened file kind needs its allow rule named in the spec.
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
