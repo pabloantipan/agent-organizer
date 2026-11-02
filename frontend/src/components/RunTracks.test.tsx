@@ -35,7 +35,7 @@ describe("W3: tracks (FR-9)", () => {
     const html = draw(report);
     expect(text(html)).toContain("Board as of d277111 · 08:00");
     expect(html).toMatch(/<button type="button" class="rt-fold" aria-expanded="false">1 track done · Show<\/button>/);
-    expect(rowNames(html)).toEqual(["B The build, stage 2, now, local 67 percent, 4 of 6 passed, left e, f, waits on 0002 · pablo"]);
+    expect(rowNames(html)).toEqual(["B The build, stage 2, now, local 67 percent, 4 of 6 passed, left e, f, waits on 0002 (pablo)"]);
     expect([...html.matchAll(/<div class="rt-head" aria-hidden="true">(.*?)<\/div>/g)][0][1]).toBe("<span>track</span><span>local</span><span>waits on</span>");
     expect(text(html)).toContain("4/6 · left e , f (not cut)");
     expect(text(html)).toContain("Goal, stage build done: 2 cards left (e, f); in its way: 0002 (pablo).");
@@ -50,7 +50,7 @@ describe("W3: tracks (FR-9)", () => {
     expect(names[1]).toContain("after C");
     expect(names[2]).not.toContain("after");
     expect((html.match(/<span class="rt-link" aria-hidden="true">↓<\/span>/g) ?? []).length).toBe(1);
-    expect(names[1]).toContain("waits on g · talos");
+    expect(names[1]).toContain("waits on g (talos)");
   });
   it("moves waits on under its row in a narrow section", () => {
     expect(draw(report, { narrow: true })).toContain('class="rt narrow"');

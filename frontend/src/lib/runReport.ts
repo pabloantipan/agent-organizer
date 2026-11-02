@@ -245,6 +245,13 @@ export function tokenWords(n: number): string {
   return String(n);
 }
 
+export const NO_TOKENS = "no tokens recorded";
+
+/** Whether the usage ledger has a run for a line (FR-4, AR25): the service
+ *  writes an entry for every line, `sessions: 0` when it found none, which
+ *  is unknown, never zero tokens. */
+export const hasTokens = (row: LineRow) => !!row.tokens && (row.tokens.sessions ?? 0) > 0;
+
 /** The disclosure's summary of a line's cost (FR-8, PW2): rounds, failures
  *  by cause, build time, tokens. `null` parts are left out, never made up. */
 export function costWords(row: LineRow): string {
@@ -256,7 +263,7 @@ export function costWords(row: LineRow): string {
     parts.push(w.failed > 0 ? `${w.failed} failed: ${causeWords(w.failed_by_cause)}` : "none failed");
     parts.push(`${w.build_minutes} min building`);
   }
-  parts.push(row.tokens ? `${tokenWords(row.tokens.tokens)} tokens` : "no tokens recorded");
+  parts.push(hasTokens(row) ? `${tokenWords(row.tokens!.tokens)} tokens` : NO_TOKENS);
   return parts.join(" · ");
 }
 
@@ -380,8 +387,39 @@ export function envCell(v: unknown): string {
   return String(v);
 }
 
-/** `0002 · pablo`: what it waits on, then the owner as a role. */
-export const waitWords = (w: service.Wait) => (w.who ? `${w.what} · ${w.who}` : w.what);
+/** `0002 (pablo)`: what it waits on, the owner in parentheses as Copy as
+ *  text writes it, so `·` separates waits only (FR-1, AR22). */
+export const waitWords = (w: service.Wait) => (w.who ? `${w.what} (${w.who})` : w.what);
+export const WAIT_SEP = " · ";
+export const waitsWords = (ws: service.Wait[]) => ws.map(waitWords).join(WAIT_SEP);
+
+/** How many waits fit on one line of `avail` px (FR-1): each wait's width,
+ *  the separator's before every one after the first, and, when some are
+ *  left out, room for the `+N` after the last shown. At least one is shown. */
+export function waitsThatFit(widths: number[], sep: number, plus: number, avail: number): number {
+  const n = widths.length;
+  let used = 0;
+  for (let i = 0; i < n; i++) {
+    used += (i > 0 ? sep : 0) + widths[i];
+    if (used > avail) return Math.max(1, fitWithPlus(widths, sep, plus, avail, i));
+  }
+  return n;
+}
+function fitWithPlus(widths: number[], sep: number, plus: number, avail: number, upTo: number): number {
+  for (let k = upTo; k >= 1; k--) {
+    let used = plus + sep;
+    for (let i = 0; i < k; i++) used += (i > 0 ? sep : 0) + widths[i];
+    if (used <= avail) return k;
+  }
+  return 1;
+}
+
+/** The `+N` of the waits left out, and its name and hover: the rest in words. */
+export function moreWaits(ws: service.Wait[], shown: number): { text: string; name: string } | null {
+  const rest = ws.slice(shown);
+  if (rest.length === 0) return null;
+  return { text: `+${rest.length}`, name: `and ${waitsWords(rest)}` };
+}
 
 /** A track row's accessible name (FR-13, AR11). */
 export function trackName(x: TrackRow, prev: TrackRow | null, envs: string[]): string {
@@ -412,13 +450,26 @@ export const boardAsOf = (tr: service.Tracks) => (tr.rev ? `Board as of ${tr.rev
  *  wave (or a finished one whose record the scan did not read) to Work. An
  *  initiative that is not active has no Needs me rows, so its unread record
  *  opens in the reader with the scan's reason as `unread` (Amendment 6). */
-export type WaveTarget = { kind: "record"; path: string; unread?: string } | { kind: "unread"; path: string } | { kind: "work" };
+export type WaveTarget = { kind: "record"; path: string; unread?: string } | { kind: "unread"; path: string } | { kind: "work" } | { kind: "none" };
 
 /** What the scan knows of the initiative: its root, the waves it read (each
  *  with its run record's file name, under runs/) and its problems; and
  *  whether it is active, which is when Needs me has rows for it
  *  (`inactiveIds` in lib/queue.ts; absent is active). */
-export type ScanRuns = { root: string; waves: Pick<model.Wave, "record">[] | null | undefined; problems: model.Problem[] | null | undefined; active?: boolean };
+export type Strip = { n: number; supervisor?: string };
+
+/** Whether Work draws this wave's strip: the same number (`openWave` lands
+ *  on `wave <n>`), and the same supervisor when both name one, since two
+ *  supervisors' waves can share a number in one report. */
+export const drawsStrip = (w: Pick<service.RunWave, "wave" | "supervisor">, strips: Strip[] | undefined) =>
+  (strips ?? []).some((s) => s.n === Number(w.wave) && (!s.supervisor || !w.supervisor || s.supervisor === w.supervisor));
+
+export type ScanRuns = {
+  root: string; waves: Pick<model.Wave, "record">[] | null | undefined; problems: model.Problem[] | null | undefined; active?: boolean;
+  /** The waves Work draws a strip for, by number and supervisor
+   *  (`stripsOf` in RunReport.tsx, over Work's own `running`); absent is none. */
+  strips?: Strip[];
+};
 
 /** The scan's runs directory (internal/scan/runs.go `runsDir`): the one
  *  place a wave's `record` file name is read from. */
@@ -430,18 +481,20 @@ export function recordRel(record: string, root: string): string {
   return underRoot((record ?? "").trim(), root).replace(/^\.\//, "");
 }
 
-/** A wave's target, keyed on the report's `record` matched to the files the
- *  scan read: running is Work; an unread file is Needs me; a record the
- *  scan read is the reader; anything else stays Work, since ReadSpec would
- *  refuse it and a press must never be dead. */
-export function waveTarget(w: Pick<service.RunWave, "record" | "merged">, scan: ScanRuns): WaveTarget {
-  if (w.merged == null) return { kind: "work" };
+/** A wave's target (FR-7; progress-and-waves Amendment 2, PW4 amended
+ *  again; leftovers-64 Amendment 1): Work only when Work draws that wave's
+ *  strip; else its run record, keyed on the report's `record` matched to the
+ *  files the scan read (an unread file is Needs me's row, or the reader with
+ *  the reason for an inactive initiative), finished or stopped alike; and a
+ *  wave with neither is text with no press (`none`), never a dead link. */
+export function waveTarget(w: Pick<service.RunWave, "record" | "merged" | "wave" | "supervisor">, scan: ScanRuns): WaveTarget {
+  if (drawsStrip(w, scan.strips)) return { kind: "work" };
   const rel = recordRel(w.record, scan.root);
-  if (!rel) return { kind: "work" };
+  if (!rel) return { kind: "none" };
   const bad = unreadFiles(scan.problems).find((f) => underRoot(f.path, scan.root) === rel);
   if (bad) return scan.active === false ? { kind: "record", path: rel, unread: bad.reasons.map(oneLine).join("; ") } : { kind: "unread", path: rel };
   if ((scan.waves ?? []).some((x) => x.record && `${RUNS_DIR}/${x.record}` === rel)) return { kind: "record", path: rel };
-  return { kind: "work" };
+  return { kind: "none" };
 }
 
 /** The wave as its link names it: its supervisor (`sup95`), or its key when
@@ -452,8 +505,10 @@ export function waveLabel(w: Pick<service.RunWave, "key" | "supervisor">, all: P
   return sup;
 }
 
-/** The footer link's accessible name and hover (FR-16, PW7). */
-export function waveLinkName(label: string, t: WaveTarget): string {
+/** The footer link's accessible name and hover (FR-16, PW7); a wave with
+ *  no press says why by its key (`sup2/1: no run record`). */
+export function waveLinkName(label: string, t: WaveTarget, key = label): string {
+  if (t.kind === "none") return `${key}: no run record`;
   if (t.kind === "record") return `open ${label}'s run record`;
   if (t.kind === "unread") return `show ${label}'s run record in Needs me, Deltagos can't read it`;
   return `show ${label} on Work`;

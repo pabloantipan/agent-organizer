@@ -227,6 +227,8 @@ describe("W9: a wave footer's target and name (FR-15 to FR-17)", () => {
       { path: `${root}/runs/2026-10-19-sup0.md`, msg: "run record waves: yaml: line 3: did not find expected key", unread: true },
       { path: `${root}/working-on/x.md`, msg: "no frontmatter", unread: true },
     ],
+    // Work draws sup2's wave 1 strip (leftovers-64 FR-7).
+    strips: [{ n: 1, supervisor: "sup2" }],
   } as Parameters<typeof waveTarget>[1];
   const targetOf = (w: service.RunWave) => waveTarget(w, scan);
   const wNav = { card: vi.fn(), decision: vi.fn(), wave: vi.fn(), waveTarget: targetOf };
@@ -243,8 +245,8 @@ describe("W9: a wave footer's target and name (FR-15 to FR-17)", () => {
       { kind: "unread", path: "runs/2026-10-19-sup0.md" },
     ]);
   });
-  it("a finished wave whose record the scan did not read (docs/runs/) goes to Work, never a dead press", () => {
-    expect(targetOf({ ...finished, record: "docs/runs/2026-10-15-sup0.md" } as service.RunWave)).toEqual({ kind: "work" });
+  it("a finished wave whose record the scan did not read (docs/runs/) and with no strip has no press (leftovers-64 Amendment 1)", () => {
+    expect(targetOf({ ...finished, record: "docs/runs/2026-10-15-sup0.md" } as service.RunWave)).toEqual({ kind: "none" });
     expect(targetOf({ ...finished, record: `${root}/runs/2026-10-20-sup1.md` } as service.RunWave)).toEqual({ kind: "record", path: "runs/2026-10-20-sup1.md" });
   });
   it("names and hovers each link by where it goes; the visible text stays the wave's", () => {
@@ -291,6 +293,6 @@ describe("W9: a wave footer's target and name (FR-15 to FR-17)", () => {
     const again = { ...running, key: "sup2/2", wave: 2 } as service.RunWave;
     const names = elements(Progress({ report: { ...report, waves: { ...report.waves!, waves: [running, again] } } as service.FactoryReport, lineTokens: null, shown: { kind: "custom", since: 0, until: 0, live: false }, nav: wNav }))
       .filter((e) => e.props.className === "rr-wave-line").map((e) => e.props["aria-label"]);
-    expect(names).toEqual(["show sup2/1 on Work", "show sup2/2 on Work"]);
+    expect(names).toEqual(["show sup2/1 on Work", "open sup2/2's run record"]);
   });
 });
