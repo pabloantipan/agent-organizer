@@ -1,12 +1,12 @@
 ---
 title: "Runs and usage agree on read, rulings name the right owner, rejected usage rows are shown and pruned"
-status: now
+status: done
 repos: [organizer]
 branch: lf62-go
 seat: l62-go
 stage:
 updated: 2026-11-02
-next: "merged as organizer #32 049075e; supervisor moves it to done/"
+next: "done: PR #32 merged 049075e (2026-11-02)"
 review: pass
 reviewer: l62-go-rev
 depends_on: []
