@@ -1,13 +1,13 @@
 ---
 title: "The organizer's map is regenerated and checks clean"
-status: now
+status: done
 repos: [organizer]
 branch: lf66-map
 seat: l66-map
 reviewer: l66-map-rev
 stage:
 updated: 2026-11-02
-next: "PR with talos-lab"
+next: "done: merged as organizer #47 83056a1"
 review: "pass at 81812b0 by l66-map-rev, 2026-11-02: C1-C3 and X0 met, unmet none"
 depends_on: [lf66-go]
 boundary: ["docs/architecture/"]
@@ -17,6 +17,8 @@ ui_review: false
 touches: []
 change_order: {add: [], change: [], retire: []}
 autonomy: unattended
+prs:
+  - {repo: organizer, pr: 47, target: main, state: merged, merge: 83056a1}
 ---
 
 ## Goal
