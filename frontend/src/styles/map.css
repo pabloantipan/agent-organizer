@@ -91,8 +91,11 @@ button.linkish.map-trail-go { color: var(--accent-fg); }
    (0-1-1) does not draw them as plain text. */
 .map-panel { min-width: 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--surface); color: var(--fg); font-size: var(--font-size-md); line-height: var(--line-md); }
 .map-panel-title { margin: 0 0 var(--space-1); font-size: var(--font-size-xl); line-height: var(--line-xl); font-weight: var(--weight-semibold); overflow-wrap: anywhere; }
-.map-panel-title:focus { outline: none; }
-.map-panel-title:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
+/* The title focus lands on after a level change is a place, not a control:
+   no ring, with the mouse or the keys (leftovers-69 FR-2, map A5 A2; as
+   run-report AR30 and the design system's Navigating). The next Tab rings
+   the first control after it. */
+.map-panel-title:focus, .map-panel-title:focus-visible { outline: none; }
 .map-panel-drift, .map-panel-drift-line { color: var(--warning); }
 .map-panel-drift-line { margin: 0; }
 .map-panel-meta { margin: 0 0 var(--space-2); color: var(--fg-muted); font-size: var(--font-size-sm); line-height: var(--line-sm); }

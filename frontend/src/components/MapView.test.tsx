@@ -456,3 +456,16 @@ describe("leftovers-69 V1 (FR-1, M15): the trail's steps", () => {
     expect(winners(here, "color").map((w) => w.v)).toEqual(["var(--fg)"]);
   });
 });
+
+describe("leftovers-69 V1 (FR-2, A2): the panel title after a level change is a landing", () => {
+  it("focus still lands on it (tabindex -1, the panel's focus target) and no rule draws a ring on it, :focus or :focus-visible", () => {
+    const list = renderToStaticMarkup(<MapPanel initiative={init()} index={harbor} nodes={nodesAt(harbor, { level: "containers" })} levelName="Containers" picked={null} pick={() => undefined} drill={null} />);
+    expect(list).toContain('<h3 class="map-panel-title" tabindex="-1">Containers</h3>');
+    const panelSrc = readFileSync(new URL("./MapPanel.tsx", import.meta.url), "utf8") as string;
+    expect(panelSrc).toContain('el.querySelector<HTMLElement>(".map-panel-title"))?.focus()');
+    for (const pseudo of ["focus", "focus-visible"]) {
+      const t = { parts: [{ ...parseCompound("h3.map-panel-title"), pseudos: [pseudo] }], hover: false };
+      expect(winners(t, "outline").map((w) => w.v), pseudo).toEqual(["none"]);
+    }
+  });
+});
