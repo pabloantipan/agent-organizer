@@ -204,3 +204,4 @@ resumes. The seat moves to the new discuss watcher (wake-rearm, api
 - 2026-11-01 — leftovers 57 UI notes (FSE status 01M6CQAKVGP18CW67F0T1KGD14): run-report A3 (AR22-AR26; home-signal U1/U2 dropped by design), progress-and-waves A2 (PW4 again, PW8), design-system fold order names the run.
 - 2026-11-02 — map lens UI review (FSE thread 01M6D53A63VM01H2V1SS9Z0C99): map-and-roadmap A3, M8-M11 (scale floor 11 px, trail at Context, word under a node stays a word).
 - 2026-11-02 — run report polish (FSE thread 01M6DCMMNZN04NPK7N156S9FYK): run-report A4, AR27-AR30; design system: 24 px both sides, one disclosure look, no ring on a non-control landing.
+- 2026-11-02 — DS7 equal case (FSE thread 01M6DCZW75V9NHAF027QNZE9VM): decision-states A2, keep main's 'N decisions waiting on you' when equal.
