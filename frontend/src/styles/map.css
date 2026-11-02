@@ -32,13 +32,27 @@
    baseline gap hangs under it past the frame, and the scroller keeps room
    below the frame for the words under the bottom row (.map-tag, laid
    outside the frame's box): overflow inside the padding box scrolls nothing. */
-.map-scroll { overflow: auto; padding-bottom: calc(var(--line-xs) + var(--space-0-5)); }
+.map-scroll { overflow: auto; padding-bottom: calc(var(--line-xs) + var(--space-0-5)); border-left: 1px solid transparent; border-right: 1px solid transparent; }
+/* FR-1 (M8): past the floor the frame keeps its width and this region
+   scrolls; each side with figure hidden past it carries the design system's
+   1 px --fg-subtle edge (edge-left, edge-right, set by MapView's watcher),
+   and the region is a named Tab stop while it scrolls, its ring inset. */
+.map-scroll.edge-left { border-left-color: var(--fg-subtle); }
+.map-scroll.edge-right { border-right-color: var(--fg-subtle); }
+.map-scroll:focus { outline: none; }
+.map-scroll:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
 .map-figure-svg > svg { display: block; }
 .map-figure-state { margin: 0; color: var(--fg-muted); font-size: var(--font-size-md); }
 .map-figure-state.failed { color: var(--fg); }
 
-/* M7: the roving node buttons draw the violet-11 ring over the node. */
+/* M7: the roving node buttons draw the violet-11 ring over the node.
+   FR-6 (M13): picked is the app's selected mark on the button layer, not
+   the ring: the node's shape fills --surface-selected under its label
+   (.map-picked below) and its button carries a 2 px --accent edge, inset,
+   so focus on a picked node draws the ring 2 px outside the edge (the
+   design system's second edge). No transition: a state mark, no easing. */
 .map-figure-nodes button.map-node:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.map-figure-nodes button.map-node.map-node-picked { box-shadow: inset 0 0 0 2px var(--accent); transition: none; }
 
 /* FR-7: status and drift. `exists` is the drawing as drawn. */
 .map-figure-svg .node.map-ruled .label-container,
@@ -50,12 +64,11 @@
 .map-figure-svg .node.map-retiring text { fill: var(--fg-muted) !important; }
 .map-figure-svg .node.map-ungrounded .label-container,
 .map-figure-svg .node.map-ungrounded .label-container path[fill="none"] { stroke: var(--warning) !important; stroke-width: 1.5px !important; stroke-dasharray: 1.5 3.5 !important; stroke-linecap: round !important; }
-.map-figure-svg .node.map-picked .label-container,
-.map-figure-svg .node.map-picked .label-container path[fill="none"] { stroke: var(--accent-fg) !important; stroke-width: 2px !important; }
-.map-figure-svg .node.map-picked.map-ruled .label-container,
-.map-figure-svg .node.map-picked.map-ruled .label-container path[fill="none"] { stroke: var(--decision-ruled-fg) !important; }
-.map-figure-svg .node.map-picked.map-ungrounded .label-container,
-.map-figure-svg .node.map-picked.map-ungrounded .label-container path[fill="none"] { stroke: var(--warning) !important; }
+/* Picked fills the node's shape with the selected tint under its label; the
+   outline keeps the status's own stroke (dashed ruled, dotted ungrounded),
+   and the accent edge is the button's (above). */
+.map-figure-svg .node.map-picked .label-container:not(g),
+.map-figure-svg .node.map-picked .label-container path:not([fill="none"]) { fill: var(--surface-selected) !important; }
 
 /* The words under a node: `ruled 0002`, `retiring`, `not grounded`. */
 .map-tags { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
@@ -98,5 +111,8 @@ button.linkish.map-ruled-link { color: var(--accent-fg); text-decoration: underl
 .map-ground .mono { font-family: var(--mono); font-size: var(--font-size-sm); overflow-wrap: anywhere; }
 .map-ground-kind { color: var(--fg-muted); white-space: nowrap; }
 button.linkish.map-ground-act { display: block; max-width: 100%; text-align: left; white-space: normal; color: var(--accent-fg); }
+/* FR-3 (M10): an action is accent from its first word (`record 0002`); the
+   kind word is muted only on a line that does nothing. */
+button.linkish.map-ground-act .map-ground-kind { color: inherit; }
 .map-ground-off { color: var(--fg-muted); }
 .map-ground-why { color: var(--fg-subtle); font-size: var(--font-size-sm); line-height: var(--line-sm); }

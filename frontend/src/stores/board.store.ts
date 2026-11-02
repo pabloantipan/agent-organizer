@@ -186,7 +186,19 @@ type State = {
   reorderInitiatives: (ids: string[]) => Promise<void>;
   setGroups: (groups: Group[]) => Promise<void>;
   reorderCards: (initiativeId: string, slugs: string[]) => Promise<void>;
+  // The map's place per initiative (leftovers-67 FR-5, map-and-roadmap
+  // Amendment 4, N1): the level, the container it is inside, the node picked
+  // at each level, and whether a containers view was open (the trail's way
+  // forward from Context, FR-2). Kept for the session only, never in browser
+  // storage, so whatever unmounts Map (a mode, a sub-view, a drawer), Map
+  // shows the same place again. MapView restores it against the map it reads.
+  mapPlace: Record<string, MapPlace>;
+  setMapPlace: (initiative: string, place: MapPlace) => void;
 };
+
+/** Where the map of one initiative was left (FR-5). `picks` is keyed by
+ *  level and container (`containers:`, `modules:harbor_api`). */
+export type MapPlace = { level: string; container?: string; picks: Record<string, string | null>; containersSeen: boolean };
 
 export type RuleDraft = { key: string; chosen: string; words: string };
 
@@ -455,6 +467,8 @@ export const useBoard = create<State>((rawSet, get) => {
       set({ error: String(e) });
     }
   },
+  mapPlace: {},
+  setMapPlace: (initiative, place) => set((st) => ({ mapPlace: { ...st.mapPlace, [initiative]: place } })),
   reorderCards: async (initiativeId, slugs) => {
     try {
       await api.setCardOrder(initiativeId, slugs);
