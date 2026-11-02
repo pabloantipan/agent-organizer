@@ -7,8 +7,8 @@ seat: l71-build
 reviewer: l71-rev, l71-ui
 stage:
 updated: 2026-11-02
-next: "review: lf71-count-look, gate met (V1 V2 X0 pass; AR33 AR34 for l71-ui), 1567309"
-review: "pass at 1567309 (l71-rev, 2026-11-02): V1 V2 X0 met; AR33 AR34 for l71-ui"
+next: "PR with talos-lab"
+review: "pass at 1567309 (l71-rev code, l71-ui UI, 2026-11-02): V1 V2 X0 AR33 AR34"
 depends_on: []
 boundary: ["frontend/src/styles/runreport.css", "frontend/src/components/Home.tsx", "frontend/src/components/Overview.tsx", "frontend/src/components/UsageTable.tsx", "frontend/src/components/SecCount.tsx", "frontend/src/components/SecCount.test.tsx", "frontend/src/styles/shell.css", "frontend/src/components/RunReport.test.tsx", "frontend/src/components/Usage.rejected.test.tsx", "frontend/src/components/RunReport.lf64.test.tsx", "frontend/src/components/Home.waits.test.tsx", "frontend/src/components/InitiativesView.tsx", "frontend/src/components/InitiativesView.test.tsx"]
 spec: "docs/specs/leftovers-71.md (FR-1, FR-2)"
