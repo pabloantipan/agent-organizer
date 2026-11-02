@@ -13,7 +13,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type Keyboard
 import { RenderDiagram } from "../../wailsjs/go/main/App";
 import {
   boxPercent, drawnNodes, mapFigureName, newMapId, nodeName, readingOrder, rovingStep, sanitizeMapTree, serialize,
-  viewBoxOf, withNodeClasses, type Box, type MapNode,
+  smallestTextSize, floorScale, viewBoxOf, withNodeClasses, type Box, type MapNode,
 } from "../lib/mapSvg";
 
 export type MapState = { state: "drawing" } | { state: "drawn"; svg: string } | { state: "failed"; reason: string };
@@ -35,6 +35,9 @@ export type MapFigureProps = {
   onFocusNode?: (id: string | null) => void;
   /** The node the roving set stops on (e.g. the one whose panel is open). */
   current?: string | null;
+  /** The picked node: its button takes the selected mark (fill and accent
+   *  edge) and `aria-current`; focus keeps the ring (leftovers-67 FR-6). */
+  picked?: string | null;
   /** `width` (default): fit the column, never past the drawn size.
    *  `natural`: the drawn size, for a frame that scrolls (D8). */
   fit?: "width" | "natural";
@@ -82,8 +85,23 @@ const LAYER: CSSProperties = { position: "absolute", top: 0, left: 0, right: 0, 
 
 type Stop = { node: MapNode; box: Box };
 
+/** The frame of a fitted figure (leftovers-67 FR-1, V1): it fills the
+ *  column up to the drawn size, but never narrower than the floor scale
+ *  (its smallest text at 11 px); past that it keeps the floor's width and
+ *  the scroller around it scrolls. A floor above 1 draws the figure larger
+ *  than drawn. Its height follows its width, so the scale is one number. */
+export function frameFit(vb: { width: number; height: number }, floor: number): CSSProperties {
+  const px = (n: number) => `${Math.round(n * 100) / 100}px`;
+  return {
+    position: "relative", width: "100%",
+    ...(floor > 0 ? { minWidth: px(vb.width * floor) } : {}),
+    maxWidth: px(vb.width * Math.max(1, floor)),
+    aspectRatio: `${vb.width} / ${vb.height}`,
+  };
+}
+
 /** What the figure shows in each state; pure, so vitest renders it. */
-export function MapFigureView({ st, initiative, level, nodes, classes, onPick, onFocusNode, current, fit = "width" }: MapFigureProps & { st: MapState }) {
+export function MapFigureView({ st, initiative, level, nodes, classes, onPick, onFocusNode, current, picked = null, fit = "width" }: MapFigureProps & { st: MapState }) {
   const name = mapFigureName(initiative, level);
   const svg = st.state === "drawn" ? st.svg : "";
   const idRef = useRef<string>("");
@@ -96,7 +114,7 @@ export function MapFigureView({ st, initiative, level, nodes, classes, onPick, o
       const tree = sanitizeMapTree(svg, idRef.current);
       const vb = viewBoxOf(tree);
       if (!vb) return { error: "the drawing has no viewBox" };
-      return { tree, vb, drawn: drawnNodes(tree) };
+      return { tree, vb, drawn: drawnNodes(tree), floor: floorScale(smallestTextSize(tree)) };
     } catch (e) {
       return { error: `the drawing could not be read (${reasonOf(e)})` };
     }
@@ -132,7 +150,7 @@ export function MapFigureView({ st, initiative, level, nodes, classes, onPick, o
     );
   }
 
-  const { vb } = read;
+  const { vb, floor } = read;
   const stop = Math.min(at, Math.max(0, stops.length - 1));
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     const next = rovingStep(stops.length, stop, e.key);
@@ -144,13 +162,11 @@ export function MapFigureView({ st, initiative, level, nodes, classes, onPick, o
   const onBlur = (e: FocusEvent<HTMLDivElement>) => {
     if (!e.currentTarget.contains(e.relatedTarget as Node | null)) onFocusNode?.(null);
   };
-  const frame: CSSProperties = fit === "natural"
-    ? { position: "relative", width: `${vb.width}px`, height: `${vb.height}px` }
-    : { position: "relative", width: "100%", maxWidth: `${vb.width}px`, aspectRatio: `${vb.width} / ${vb.height}` };
+  const frame: CSSProperties = fit === "natural" ? { position: "relative", width: `${vb.width}px`, height: `${vb.height}px` } : frameFit(vb, floor);
 
   return (
     <figure className="map-figure" aria-label={name} style={{ margin: 0 }}>
-      <div className="map-figure-frame" style={frame}>
+      <div className="map-figure-frame" style={frame} data-floor={floor ? floor.toFixed(4) : undefined}>
         <div className="map-figure-svg" style={LAYER} dangerouslySetInnerHTML={{ __html: markup }} />
         <div className="map-figure-nodes" style={LAYER} onKeyDown={onKeyDown} onBlur={onBlur}>
           {stops.map((s, k) => (
@@ -158,8 +174,9 @@ export function MapFigureView({ st, initiative, level, nodes, classes, onPick, o
               key={s.node.id}
               ref={(el) => { buttons.current[k] = el; }}
               type="button"
-              className="map-node"
+              className={s.node.id === picked ? "map-node map-node-picked" : "map-node"}
               data-node={s.node.id}
+              aria-current={s.node.id === picked ? "true" : undefined}
               aria-label={nodeName(s.node)}
               tabIndex={k === stop ? 0 : -1}
               style={{ ...BUTTON, ...boxPercent(s.box, vb) }}

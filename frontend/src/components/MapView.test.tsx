@@ -26,7 +26,8 @@ vi.mock("../../wailsjs/go/main/App", () => ({
 }));
 vi.mock("../../wailsjs/runtime/runtime", () => ({ BrowserOpenURL: vi.fn() }));
 
-const { MapBody, inReadingOrder, NO_MAP, NO_L3, READING_MAP, firstPlace, nodesAt, drillOf, trailOf, lensClasses, tagOf, placeName } = await import("./MapView");
+const { MapBody, inReadingOrder, NO_MAP, NO_L3, READING_MAP, firstPlace, nodesAt, drillOf, trailOf, lensClasses, tagOf, placeName, restorePlace, figureNodes } = await import("./MapView");
+const { useBoard } = await import("../stores/board.store");
 const { MapPanel, groundLine, groundCtx, runGround, statusWords, ruledBy } = await import("./MapPanel");
 const { MapFigureView } = await import("./MapFigure");
 const { useSpecReader } = await import("./SpecReader");
@@ -51,6 +52,7 @@ const text = (html: string) => html.replace(/<[^>]+>/g, "\n").split("\n").map((s
 
 afterEach(() => {
   useSpecReader.setState({ initiative: null, stack: [], missing: {} });
+  useBoard.setState({ mapPlace: {} });
   openInEditor.mockClear();
   readSpec.mockClear();
 });
@@ -293,7 +295,7 @@ describe("round 2: U1, U4, U5", () => {
   });
   it("U4: the drawing is a block (no baseline gap) and the scroller keeps room for the bottom row's words", () => {
     expect(mapCss).toMatch(/\.map-figure-svg > svg \{ display: block; \}/);
-    expect(mapCss).toMatch(/\.map-scroll \{ overflow: auto; padding-bottom: calc\(var\(--line-xs\) \+ var\(--space-0-5\)\); \}/);
+    expect(mapCss).toMatch(/\.map-scroll \{ overflow: auto; padding-bottom: calc\(var\(--line-xs\) \+ var\(--space-0-5\)\);/);
   });
   it("U5: the panel lists nodes in the roving set's order; undrawn ones trail in map.json order", () => {
     const ns = nodesAt(harborMap as unknown as service.C4Map, { level: "containers" });
@@ -303,5 +305,134 @@ describe("round 2: U1, U4, U5", () => {
     const got = inReadingOrder(ns, drawnOrder).map((n) => n.id);
     expect(got.slice(0, drawnOrder.length)).toEqual(drawnOrder);
     expect(got.slice(drawnOrder.length)).toEqual(ids.filter((x) => !drawnOrder.includes(x)));
+  });
+});
+
+// leftovers-67 (map-and-roadmap Amendments 3 and 4). V2: the trail, the
+// panel's order and the unknown fact; V3: the place kept per initiative.
+const harbor = harborMap as unknown as service.C4Map;
+const place = (p: Partial<import("../stores/board.store").MapPlace>) => useBoard.getState().setMapPlace("harbor", { level: "containers", picks: {}, containersSeen: true, ...p });
+const trailText = (html: string) => text(html.slice(html.indexOf('<nav class="map-trail"'), html.indexOf("</nav>")));
+
+describe("V2: the trail at Context (FR-2, M9)", () => {
+  const r = drawn(harborMap);
+  it("after Containers → Context it reads Context › harbor containers, the second a button back to Containers", () => {
+    expect(trailOf(r, { level: "context" }, true)).toEqual([
+      { label: "Context", place: { level: "context" } },
+      { label: "harbor containers", place: { level: "containers" } },
+    ]);
+    place({ level: "context", containersSeen: true });
+    const html = body(r);
+    expect(trailText(html)).toEqual(["Context", "›", "harbor containers"]);
+    expect(html).toContain('<span aria-current="page" class="map-trail-here">Context</span>');
+    expect(html).toContain('class="linkish map-trail-go">harbor containers</button>');
+  });
+  it("with no containers view open before, the trail is drawn and reads Context alone", () => {
+    expect(trailOf(r, { level: "context" }).map((t) => t.label)).toEqual(["Context"]);
+    place({ level: "context", containersSeen: false });
+    expect(trailText(body(r))).toEqual(["Context"]);
+  });
+  it("going anywhere but Context marks Containers seen; the first place (L2) is seen", () => {
+    expect(restorePlace(r, null)).toEqual({ level: "containers", picks: {}, containersSeen: true });
+  });
+});
+
+describe("V2: the panel's list in the roving set's order (FR-4, M11)", () => {
+  it("over the fixture's L2 drawing, the panel lists node for node what the arrows visit", () => {
+    const fig = renderToStaticMarkup(<MapFigureView st={{ state: "drawn", svg: harborSvg }} initiative="harbor" level="containers" source="x"
+      nodes={nodesAt(harbor, { level: "containers" }).map((n) => ({ id: n.id, label: n.label, kind: n.kind ?? null, status: n.status ?? null, grounding: n.grounding ?? [] }))} />);
+    const roving = [...fig.matchAll(/<button[^>]*data-node="([^"]+)"/g)].map((m) => m[1]);
+    expect(roving).toHaveLength(6);
+    const ns = inReadingOrder(nodesAt(harbor, { level: "containers" }), roving);
+    const list = renderToStaticMarkup(<MapPanel initiative={init()} index={harbor} nodes={ns} levelName="Containers" picked={null} pick={() => undefined} drill={null} />);
+    expect([...list.matchAll(/class="linkish map-panel-node" data-node="([^"]+)"/g)].map((m) => m[1])).toEqual(roving);
+  });
+});
+
+describe("V2: an unknown fact reads unknown beside its label (FR-7, M14)", () => {
+  it("an ungrounded node's panel: kind  unknown, status  unknown; the list keeps kind unknown", () => {
+    const u = ungroundedMap as unknown as service.C4Map;
+    const ns = nodesAt(u, { level: "containers" });
+    const relay = ns.find((n) => n.id === "mail_relay")!;
+    const html = renderToStaticMarkup(<MapPanel initiative={init()} index={u} nodes={ns} levelName="Containers" picked={relay} pick={() => undefined} drill={null} />);
+    expect(html).toContain("<dt>kind</dt><dd>unknown</dd>");
+    expect(html).toMatch(/<dt>status<\/dt><dd class="map-status map-status-unknown">unknown<\/dd>/);
+    expect(html).not.toContain("kind unknown</dd>");
+    const list = renderToStaticMarkup(<MapPanel initiative={init()} index={u} nodes={ns} levelName="Containers" picked={null} pick={() => undefined} drill={null} />);
+    expect(list).toContain("kind unknown · status unknown · not grounded");
+  });
+});
+
+describe("V3: the map's place kept per initiative (FR-5, M12)", () => {
+  const booking = { level: "modules", container: "harbor_api", picks: { "modules:harbor_api": "harbor_api__booking" }, containersSeen: true };
+  it("L3 of harbor-api with booking picked, Map unmounted and mounted again: the same level, pick and trail", () => {
+    useBoard.getState().setMapPlace("harbor", booking);
+    const first = body(drawn(harborMap));
+    const again = body(drawn(harborMap)); // a second mount reads the store, not its own state
+    for (const html of [first, again]) {
+      expect(trailText(html)).toEqual(["Context", "›", "Containers", "›", "harbor-api"]);
+      expect(html).toContain('<span aria-current="page" class="map-trail-here">harbor-api</span>');
+      expect(html).toContain('<aside class="map-panel" aria-label="booking: node">');
+    }
+    expect(useBoard.getState().mapPlace.harbor).toEqual(booking);
+  });
+  it("kept per initiative: another initiative's place does not move harbor's", () => {
+    useBoard.getState().setMapPlace("harbor", booking);
+    useBoard.getState().setMapPlace("other", { level: "context", picks: {}, containersSeen: false });
+    expect(body(drawn(harborMap))).toContain('aria-label="booking: node"');
+  });
+  it("a map read again without the picked node drops the pick and keeps the level", () => {
+    const without = { ...harbor, nodes: (harbor.nodes ?? []).filter((n) => n.id !== "harbor_api__booking") };
+    expect(restorePlace(drawn(without), booking)).toEqual({ level: "modules", container: "harbor_api", picks: {}, containersSeen: true });
+    useBoard.getState().setMapPlace("harbor", booking);
+    const html = body(drawn(without));
+    expect(trailText(html)).toEqual(["Context", "›", "Containers", "›", "harbor-api"]);
+    expect(html).toContain('<aside class="map-panel" aria-label="Modules of harbor-api: the map as text">');
+  });
+  it("a level the map no longer draws falls back to the first place", () => {
+    const flat = { ...harbor, levels: (harbor.levels ?? []).filter((l) => l.level !== "modules") };
+    expect(restorePlace(drawn(flat), booking)).toMatchObject({ level: "containers", picks: {} });
+  });
+});
+
+describe("FR-6 (M13): picked is the selected mark, focus the ring", () => {
+  it("the picked node's button carries map-node-picked and aria-current; the others neither", () => {
+    const fig = renderToStaticMarkup(<MapFigureView st={{ state: "drawn", svg: harborSvg }} initiative="harbor" level="containers" source="x" picked="harbor_api"
+      nodes={nodesAt(harbor, { level: "containers" }).map((n) => ({ id: n.id, label: n.label, kind: n.kind ?? null, status: n.status ?? null, grounding: n.grounding ?? [] }))} />);
+    const bs = [...fig.matchAll(/<button[^>]*>/g)].map((m) => m[0]);
+    expect(bs.filter((b) => b.includes("map-node-picked"))).toEqual([expect.stringContaining('data-node="harbor_api" aria-current="true"')]);
+    expect(bs.filter((b) => b.includes("aria-current"))).toHaveLength(1);
+  });
+  it("map.css: picked fills --surface-selected under the label with a 2 px --accent edge inset on the button; focus stays the violet-11 ring 2 px outside", () => {
+    expect(mapCss).toContain(".map-figure-nodes button.map-node.map-node-picked { box-shadow: inset 0 0 0 2px var(--accent); transition: none; }");
+    expect(mapCss).toContain(".map-figure-nodes button.map-node:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }");
+    expect(mapCss).toMatch(/\.node\.map-picked \.label-container path:not\(\[fill="none"\]\) \{ fill: var\(--surface-selected\) !important; \}/);
+    expect(mapCss).not.toMatch(/map-picked[^{]*\{[^}]*stroke/);
+  });
+});
+
+describe("FR-1 (M8): the scroller's edges", () => {
+  it("each side with figure hidden past it carries 1 px --fg-subtle; none when it fits", () => {
+    expect(mapCss).toContain("border-left: 1px solid transparent; border-right: 1px solid transparent;");
+    expect(mapCss).toContain(".map-scroll.edge-left { border-left-color: var(--fg-subtle); }");
+    expect(mapCss).toContain(".map-scroll.edge-right { border-right-color: var(--fg-subtle); }");
+  });
+});
+
+describe("FR-3 (M10): the word under a node is in its button's name", () => {
+  it("harbor-ruled's ledger button is named harbor-ledger, container, ruled 0002", async () => {
+    const { nodeName } = await import("../lib/mapSvg");
+    const ns = figureNodes(nodesAt(ruledMap as unknown as service.C4Map, { level: "containers" }));
+    expect(nodeName(ns.find((n) => n.id === "ledger")!)).toBe("harbor-ledger, container, ruled 0002");
+    expect(nodeName(ns.find((n) => n.id === "web")!)).toBe("harbor-web, container, retiring");
+  });
+});
+
+describe("FR-3 (M10): a Grounding action is accent from its first word", () => {
+  it("the kind word inside an action inherits --accent-fg; on a line with no action it stays muted", () => {
+    const inAct = { parts: [parseCompound("button.linkish.map-ground-act"), parseCompound("span.map-ground-kind")], hover: false };
+    expect(winners(inAct, "color").map((w) => w.v)).toEqual(["inherit"]);
+    const bare = { parts: [parseCompound("span.map-ground-off"), parseCompound("span.map-ground-kind")], hover: false };
+    expect(winners(bare, "color").map((w) => w.v)).toEqual(["var(--fg-muted)"]);
   });
 });
