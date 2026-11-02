@@ -17,6 +17,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- Held for the next frontend leftovers: Home.tsx ~811, the comment above runSignalFor still says the stopped time is the sum of the spans (wrong since 569375c).
+
 - Repetition, second sighting: ReadSpec follows symlinks out of its allowed dirs (sup101 Found 5; sup103 lf58-map-lens review note 1). Cut a ReadSpec card: refuse a path whose EvalSymlinks leaves its allowed dir. Owed: lf58-map-lens's window UI pass at the next screen unlock (round 2 UI review ran offscreen, my call 2026-11-02 ~03:30).
 
 - sup107 closed (02:36-02:47, 11 min against 45-90m; builder $1.69) and ended: lf63-organizer-map pass at ea0cc7c, PR with talos-lab. Held: L3 maps internal/ only, the React app is off the map (a later --modules for frontend); levels[].svg names uncommitted SVGs. Sent Hephaistos the HEAD stamp and mermaid2svg output path.
