@@ -364,3 +364,79 @@ func containsCall(n ast.Node, name string) bool {
 	})
 	return found
 }
+
+// G4 (leftovers-66 FR-4): the real home is injected (a temp dir under
+// $TMPDIR, never os/user's home or $HOME). The home's path with its case
+// changed and its /System/Volumes/Data firmlink form name the same
+// directory, so a variable under either refuses.
+func TestLF66G4GuardSeesHomeByIdentity(t *testing.T) {
+	fx := newGuardFixture(t)
+	home, err := filepath.EvalSymlinks(fx.home)
+	if err != nil {
+		t.Fatal(err)
+	}
+	homeInfo, err := os.Stat(home)
+	if err != nil {
+		t.Fatal(err)
+	}
+	same := func(p string) bool {
+		fi, err := os.Stat(p)
+		return err == nil && os.SameFile(homeInfo, fi)
+	}
+	forms := map[string]string{}
+	if c := swapCase(home); c != home && same(c) {
+		forms["case-changed"] = c
+	} else {
+		t.Logf("case variant %s is not the home here (case-sensitive volume); not checked", c)
+	}
+	if d := "/System/Volumes/Data" + home; runtime.GOOS == "darwin" && same(d) {
+		forms["data-volume"] = d
+	} else {
+		t.Logf("%s is not the home here; not checked", d)
+	}
+	if runtime.GOOS == "darwin" && len(forms) != 2 {
+		t.Fatalf("on macOS both forms must be checkable, got %v", forms)
+	}
+	outside := map[string]string{
+		"ORGANIZER_CONFIG": filepath.Join(fx.outside, "config.yaml"),
+		"XDG_DATA_HOME":    filepath.Join(fx.outside, "data"),
+	}
+	under := map[string]string{
+		"ORGANIZER_CONFIG": filepath.Join(".config", "organizer", "config.yaml"),
+		"XDG_DATA_HOME":    filepath.Join(".local", "share"),
+	}
+	for name, form := range forms {
+		for _, variable := range guardedVars {
+			for _, kind := range []buildKind{buildReview, buildDev} {
+				t.Run(name+"/"+variable+"/"+kind.String(), func(t *testing.T) {
+					env := map[string]string{}
+					for k, v := range outside {
+						env[k] = v
+					}
+					env[variable] = filepath.Join(form, under[variable])
+					err := guardDecision(kind, envOf(env), fx.home)
+					if err == nil {
+						t.Fatalf("%s=%s started: it is under the injected home %s", variable, env[variable], fx.home)
+					}
+					if !strings.Contains(err.Error(), variable) || !strings.Contains(err.Error(), "under the real home") {
+						t.Errorf("reason %q does not name %s under the real home", err, variable)
+					}
+				})
+			}
+		}
+	}
+}
+
+// swapCase turns every letter of p to the other case.
+func swapCase(p string) string {
+	b := []rune(p)
+	for i, r := range b {
+		switch {
+		case r >= 'a' && r <= 'z':
+			b[i] = r - 'a' + 'A'
+		case r >= 'A' && r <= 'Z':
+			b[i] = r - 'A' + 'a'
+		}
+	}
+	return string(b)
+}

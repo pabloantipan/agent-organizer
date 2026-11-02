@@ -106,12 +106,20 @@ func resolvePath(p string) (string, error) {
 	}
 }
 
-// underDir reports whether path is dir or inside it.
-func underDir(path, dir string) bool {
-	if path == dir {
-		return true
+// underHome reports whether path is the home or inside it, by file identity
+// (leftovers-66 FR-4): the home is compared with os.SameFile against path
+// and each of its ancestors that exists. Text would miss a case variant on a
+// case-insensitive volume and the /System/Volumes/Data firmlink form of the
+// same directory; identity sees through both.
+func underHome(path string, home os.FileInfo) bool {
+	for cur := path; ; cur = filepath.Dir(cur) {
+		if fi, err := os.Stat(cur); err == nil && os.SameFile(home, fi) {
+			return true
+		}
+		if filepath.Dir(cur) == cur {
+			return false
+		}
 	}
-	return strings.HasPrefix(path, strings.TrimSuffix(dir, string(filepath.Separator))+string(filepath.Separator))
 }
 
 // guardDecision is the whole rule (FR-1, FR-3, FR-4). realHome is the user
@@ -131,6 +139,10 @@ func guardDecision(kind buildKind, getenv func(string) string, realHome string) 
 	if err != nil {
 		return fmt.Errorf("the account's home %s does not resolve: %v", realHome, err)
 	}
+	homeInfo, err := os.Stat(home)
+	if err != nil {
+		return fmt.Errorf("the account's home %s cannot be read: %v", realHome, err)
+	}
 	for _, name := range guardedVars {
 		v := getenv(name)
 		if v == "" {
@@ -140,7 +152,7 @@ func guardDecision(kind buildKind, getenv func(string) string, realHome string) 
 		if err != nil {
 			return fmt.Errorf("%s=%s does not resolve: %v", name, v, err)
 		}
-		if underDir(p, home) {
+		if underHome(p, homeInfo) {
 			return fmt.Errorf("%s=%s resolves to %s, under the real home %s", name, v, p, home)
 		}
 	}
