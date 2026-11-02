@@ -73,3 +73,26 @@ describe("leftovers-61 D3: the header's with the cells", () => {
     expect(h.opened).toEqual([["init-a", "0013"]]);
   });
 });
+
+// leftovers-62 U1 (FR-5, DS7, Amendment 1): the chip's words are its
+// accessible name (no aria-label stands in for them), so both counts are
+// said aloud as they read: 6 and 5, 5 and 5, 6 and none.
+describe("leftovers-62 U1: the chip's text and accessible name", () => {
+  const chip = (html: string) => /<button class="lz waiting ihead-chip"([^>]*)>([^<]*)<\/button>/.exec(html);
+  const mine = ["0001", "0002", "0003", "0004", "0006"].map((n, k) => rec(n, "proposed", { raised: `2026-10-0${k + 1}`, owner: k === 1 ? "operator" : k === 2 ? "" : "pablo" }));
+  const theirs = rec("0005", "proposed", { owner: "alejandro", raised: "2026-10-09" });
+  it("6 and 5: `6 decisions waiting · 5 on you`", () => {
+    const m = chip(draw([...mine, theirs]))!;
+    expect(m[2]).toBe("6 decisions waiting · 5 on you");
+    expect(m[1]).not.toMatch(/aria-label/);
+  });
+  it("5 and 5: `5 decisions waiting on you`", () => {
+    const m = chip(draw(mine))!;
+    expect(m[2]).toBe("5 decisions waiting on you");
+    expect(m[1]).not.toMatch(/aria-label/);
+  });
+  it("6 and none: `6 decisions waiting`", () => {
+    const m = chip(draw([...mine.map((d) => ({ ...d, owner: "alejandro" })), theirs]))!;
+    expect(m[2]).toBe("6 decisions waiting");
+  });
+});

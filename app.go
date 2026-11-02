@@ -38,6 +38,7 @@ const agentsEvery = 10 * time.Second
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	startReviewResize(ctx) // inert unless ORGANIZER_REVIEW_RESIZE is set (reviewresize.go)
 	svc, err := service.New()
 	if err != nil {
 		a.err = err.Error()

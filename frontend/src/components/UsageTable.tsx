@@ -129,3 +129,46 @@ export function UsageTable({ rows, cut, setCut, sessions }: { rows: UsageRow[]; 
     </section>
   );
 }
+
+/** One row the record refused (usage.RejectedRow, leftovers-62 FR-3): its
+ *  session, its day and the record's reason. */
+export type UsageRejectedRow = { session_id: string; day: string; reason: string };
+
+/** The rows the record refused (leftovers-62 FR-7; leftovers-54 FR-4): the
+ *  count, then one line per row with its session, day and the record's
+ *  reason, oldest day first as App.Usage carries them. They are not resent
+ *  until their ledger row changes, and leave once it is gone. Nothing when
+ *  none is: the view says only what needs a look. */
+export function UsageRejected({ rows }: { rows: UsageRejectedRow[] | null | undefined }) {
+  const list = rows ?? [];
+  if (list.length === 0) return null;
+  const n = list.length;
+  return (
+    <section className="usage-sec usage-rejected" aria-labelledby="usage-rejected-title">
+      <h2 id="usage-rejected-title" className="sec-title">
+        Rejected by the record · <span className="num sec-count">{n}</span>
+        <span className="sec-sub"> {n === 1 ? "not resent until it changes" : "not resent until they change"}</span>
+      </h2>
+      <div className="usage-table-wrap">
+        <table className="usage-table">
+          <thead>
+            <tr>
+              <th scope="col" className="c-name">session</th>
+              <th scope="col" className="c-num">day</th>
+              <th scope="col">reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            {list.map((r) => (
+              <tr key={`${r.session_id}/${r.day}`}>
+                <th scope="row" className="c-name"><span className="name-text mono" title={r.session_id}>{r.session_id}</span></th>
+                <td className="c-num mono">{r.day}</td>
+                <td>{r.reason}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
