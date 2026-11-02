@@ -162,6 +162,11 @@ function GroundRow({ line, initiative }: { line: GroundLine; initiative: merge.B
   );
 }
 
+/** An unknown fact's value beside its label (leftovers-67 FR-7, M14):
+ *  `kind  unknown`, not `kind  kind unknown`. The list and the node
+ *  button's name, which have no label beside the word, keep `kind unknown`. */
+export const UNKNOWN = "unknown";
+
 export type Drill = { label: string; go: () => void } | { none: string } | null;
 
 type PanelProps = {
@@ -223,13 +228,13 @@ export function MapPanel({ initiative, index, nodes, levelName, picked, pick, dr
       <h3 className="map-panel-title" tabIndex={-1}>{picked.label}{ungrounded && <span className="map-panel-drift">, not grounded</span>}</h3>
       <dl className="map-facts">
         <dt>id</dt><dd className="mono">{picked.id}</dd>
-        <dt>kind</dt><dd>{picked.kind ?? "kind unknown"}</dd>
+        <dt>kind</dt><dd>{picked.kind ?? UNKNOWN}</dd>
         <dt>status</dt>
         <dd className={`map-status map-status-${picked.status ?? "unknown"}`}>
           {picked.status === "ruled" && ruled && ctx.decisions.some((d) => d.number === ruled) ? (
             <button type="button" className="linkish map-ruled-link" onClick={(e) => openRecord(e.currentTarget, initiative, ruled)} title={`Open record ${ruled}`}>ruled {ruled}</button>
           ) : (
-            statusWords(picked)[0]
+            picked.status ? statusWords(picked)[0] : UNKNOWN
           )}
         </dd>
         {parent && (<><dt>in</dt><dd>{parent}</dd></>)}

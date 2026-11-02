@@ -6,12 +6,15 @@
 // picked node. The right side is MapPanel, the map as text. Levels follow
 // the generator's: the system opens its containers, a container with a
 // module map opens it, and one trail above the figure walks back.
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Map as ReadMap } from "../../wailsjs/go/main/App";
 import type { merge, service } from "../../wailsjs/go/models";
 import { MapFigure } from "./MapFigure";
+import type { MapNode } from "../lib/mapSvg";
 import { MapPanel, ruledBy, type Drill } from "./MapPanel";
+import { useBoard, type MapPlace } from "../stores/board.store";
+import { overflowsX, scrollStop, sideEdges, watchEdges } from "../lib/useScrollEdges";
 import "../styles/map.css";
 
 type Node = service.C4Node;
@@ -75,16 +78,28 @@ export function drillOf(r: service.MapResult, p: Place, n: Node): { to: Place; l
   return null;
 }
 
-/** The trail above the figure: context, containers, then the container. */
-export function trailOf(r: service.MapResult, p: Place): { label: string; place: Place }[] {
+/** The trail above the figure, always drawn (leftovers-67 FR-2, M9):
+ *  context, containers, then the container. At Context it is `Context`
+ *  alone, or `Context › <system> containers` when a containers view was
+ *  open before (`containersSeen`), the second the way back to it. */
+export function trailOf(r: service.MapResult, p: Place, containersSeen = false): { label: string; place: Place }[] {
   const index = r.index;
   if (!index) return [];
   const out: { label: string; place: Place }[] = [];
   if (sourceAt(r, { level: "context" }) !== null) out.push({ label: "Context", place: { level: "context" } });
+  if (p.level === "context") {
+    if (containersSeen && sourceAt(r, { level: "containers" }) !== null) out.push({ label: `${index.system || "system"} containers`, place: { level: "containers" } });
+    return out;
+  }
   if (p.level !== "context" && sourceAt(r, { level: "containers" }) !== null) out.push({ label: "Containers", place: { level: "containers" } });
   if (p.level === "modules") out.push({ label: labelOf(index, p.container ?? ""), place: p });
   return out;
 }
+
+/** map.json's nodes as the figure names them, a ruled one with its record
+ *  (leftovers-67 FR-3, M10: `harbor-ledger, container, ruled 0002`). */
+export const figureNodes = (ns: Node[]): MapNode[] =>
+  ns.map((n) => ({ id: n.id, label: n.label, kind: n.kind ?? null, status: n.status ?? null, grounding: n.grounding ?? [], ruledBy: ruledBy(n) }));
 
 /** The lens (FR-7): status and drift as classes, plus the picked node. */
 export function lensClasses(nodes: Node[], picked: string | null): Record<string, string[]> {
@@ -128,12 +143,15 @@ export function MapView({ initiative, head }: { initiative: merge.BoardInitiativ
 /** What Map shows for a read; pure but for its own place, so vitest renders it. */
 export function MapBody({ initiative, read, head }: { initiative: merge.BoardInitiative; read: MapRead; head?: ReactNode }) {
   const r = read.state === "drawn" ? (read as service.MapResult) : null;
-  const start = useMemo(() => (r ? firstPlace(r) : null), [r]);
-  const [place, setPlace] = useState<Place | null>(start);
-  const [pickedAt, setPickedAt] = useState<Record<string, string | null>>({});
+  const saved = useMapPlace(initiative.id);
+  const save = useBoard.getState().setMapPlace;
+  const kept = useMemo(() => (r ? restorePlace(r, saved) : null), [r, saved]);
   const [order, setOrder] = useState<Record<string, string[]>>({});
-  useEffect(() => { setPlace(start); setPickedAt({}); }, [start ? placeKey(start) : "", read]);
+  // The place as restored is the place kept: a pick the map no longer has
+  // leaves the store too, the level stays (FR-5).
+  useEffect(() => { if (kept && !samePlaceState(kept, saved)) save(initiative.id, kept); }, [kept, saved, initiative.id]);
   const wrap = useRef<HTMLDivElement>(null);
+  useMapEdges(wrap, `${initiative.id} base map, scrolls`, read);
 
   const state = (lines: ReactNode, failed = false) => (
     <div className="map-view">
@@ -145,25 +163,26 @@ export function MapBody({ initiative, read, head }: { initiative: merge.BoardIni
   if (read.state === "error") return state(<p>Map not drawn: {(read as { reason: string }).reason}</p>, true);
   if (read.state === "empty") return state(<><p className="map-state-head">{NO_MAP[0]}</p><p>{NO_MAP[1]}</p></>);
   if (read.state === "refused") return state(<p>{(read as service.MapResult).refused}</p>, true);
-  const at = place ?? start;
-  if (!r || !r.index || !at) return state(<p>Map not drawn: map.json has no levels</p>, true);
+  if (!r || !r.index || !kept) return state(<p>Map not drawn: map.json has no levels</p>, true);
 
+  const cur = kept;
+  const at: Place = cur.level === "modules" ? { level: "modules", container: cur.container ?? "" } : { level: cur.level };
   const index = r.index;
   const nodes = nodesAt(index, at);
   const source = sourceAt(r, at) ?? "";
-  const pickedId = pickedAt[placeKey(at)] ?? null;
+  const pickedId = cur.picks[placeKey(at)] ?? null;
   const picked = nodes.find((n) => n.id === pickedId) ?? null;
-  const pick = (id: string | null) => setPickedAt((m) => ({ ...m, [placeKey(at)]: id }));
-  const go = (to: Place) => setPlace(to);
+  const pick = (id: string | null) => save(initiative.id, { ...cur, picks: { ...cur.picks, [placeKey(at)]: id } });
+  const go = (to: Place) => save(initiative.id, { ...cur, level: to.level, container: to.container, containersSeen: cur.containersSeen || to.level !== "context" });
   const d = picked ? drillOf(r, at, picked) : null;
   const drill: Drill = d ? ("none" in d ? d : { label: d.label, go: () => go(d.to) }) : null;
-  const trail = trailOf(r, at);
+  const trail = trailOf(r, at, cur.containersSeen);
   const name = placeName(index, at);
 
   return (
     <div className="map-view">
       {head}
-      {trail.length > 1 && (
+      {trail.length > 0 && (
         <nav className="map-trail" aria-label="Map level">
           <ol>
             {trail.map((t, k) => (
@@ -185,10 +204,11 @@ export function MapBody({ initiative, read, head }: { initiative: merge.BoardIni
               initiative={initiative.id}
               level={at.level}
               source={source}
-              nodes={nodes.map((n) => ({ id: n.id, label: n.label, kind: n.kind ?? null, status: n.status ?? null, grounding: n.grounding ?? [] }))}
+              nodes={figureNodes(nodes)}
               classes={lensClasses(nodes, pickedId)}
               onPick={(id) => pick(id)}
               current={pickedId}
+              picked={pickedId}
             />
             <MapTags host={wrap} nodes={nodes} onOrder={(ids) => setOrder((o) => (sameIds(o[placeKey(at)], ids) ? o : { ...o, [placeKey(at)]: ids }))} />
           </div>
@@ -203,6 +223,56 @@ export function MapBody({ initiative, read, head }: { initiative: merge.BoardIni
       </div>
     </div>
   );
+}
+
+/** The place kept for an initiative, made good against the map just read
+ *  (FR-5): its level and container when the map still draws them, else the
+ *  first place; each level's pick only while that level still has the node
+ *  (a pick the map dropped is dropped, the level kept). No place kept is the
+ *  first place, with Containers seen when that is where it opens. */
+export function restorePlace(r: service.MapResult, saved: MapPlace | null): MapPlace | null {
+  const start = firstPlace(r);
+  if (!start || !r.index) return null;
+  const index = r.index;
+  const want: Place | null = saved ? (saved.level === "modules" ? { level: "modules", container: saved.container ?? "" } : { level: saved.level }) : null;
+  const at = want && sourceAt(r, want) !== null ? want : start;
+  const picks: Record<string, string | null> = {};
+  for (const [key, id] of Object.entries(saved?.picks ?? {})) {
+    if (!id) continue;
+    const k = key.indexOf(":");
+    const level = key.slice(0, k);
+    const p: Place = level === "modules" ? { level, container: key.slice(k + 1) } : { level };
+    if (nodesAt(index, p).some((n) => n.id === id)) picks[key] = id;
+  }
+  const out: MapPlace = { level: at.level, picks, containersSeen: (saved?.containersSeen ?? false) || at.level !== "context" };
+  if (at.level === "modules") out.container = at.container;
+  return out;
+}
+
+const samePlaceState = (a: MapPlace, b: MapPlace | null) => !!b && JSON.stringify(a) === JSON.stringify({ level: b.level, picks: b.picks, containersSeen: b.containersSeen, ...(b.level === "modules" ? { container: b.container } : {}) });
+
+/** The kept place of one initiative. The live state is also the server
+ *  snapshot (zustand's would be the initial state), so a view rendered
+ *  to markup (vitest) reads the place as the app does. */
+function useMapPlace(id: string): MapPlace | null {
+  const get = () => useBoard.getState().mapPlace[id] ?? null;
+  return useSyncExternalStore(useBoard.subscribe, get, get);
+}
+
+/** The figure's scroller shows that it scrolls (FR-1, the design system's
+ *  scroll edge): 1 px `--fg-subtle` on each side with figure hidden past it
+ *  (`edge-left`, `edge-right`, map.css), and a named Tab stop while it does. */
+function useMapEdges(ref: React.RefObject<HTMLDivElement | null>, name: string, read: unknown) {
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    return watchEdges(el, () => {
+      const e = sideEdges(el);
+      el.classList.toggle("edge-left", e.left);
+      el.classList.toggle("edge-right", e.right);
+      scrollStop(el, overflowsX(el), { label: name });
+    });
+  }, [ref, name, read]);
 }
 
 const sameIds = (a: string[] | undefined, b: string[]) => !!a && a.length === b.length && a.every((x, k) => x === b[k]);

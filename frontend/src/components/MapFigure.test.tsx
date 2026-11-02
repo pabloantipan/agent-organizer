@@ -13,7 +13,7 @@ const nodes: MapNode[] = [
   { id: "card_gateway", label: "Card gateway", kind: "external", status: "exists", grounding: g("deploy", "harbor-api/deploy/k8s.yaml key CARD_GATEWAY_URL") },
   { id: "harbor_api", label: "harbor-api", kind: "container", status: "exists", grounding: g("repo", "harbor-api@def7c12") },
   { id: "harbor_db", label: "harbor_db", kind: "store", status: "exists", grounding: g("deploy", "harbor-api/deploy/k8s.yaml key API_DB_HOST") },
-  { id: "ledger", label: "harbor-ledger", kind: "container", status: "ruled", grounding: g("record", "0012") },
+  { id: "ledger", label: "harbor-ledger", kind: "container", status: "ruled", grounding: g("record", "0012"), ruledBy: "0012" },
   { id: "mail_relay", label: "Mail relay", kind: "external", status: "exists", grounding: [] },
   { id: "web", label: "harbor-web", kind: "container", status: "retiring", grounding: g("repo", "harbor-web@6c88101") },
 ];
@@ -54,7 +54,7 @@ describe("FR-5: a real button over each node", () => {
     expect(bs.map((b) => attr(b, "aria-label"))).toEqual([
       "harbor-web, container, retiring",
       "harbor-api, container, exists",
-      "harbor-ledger, container, ruled",
+      "harbor-ledger, container, ruled 0012",
       "harbor_db, store, exists",
       "Card gateway, external, exists",
       "Mail relay, external, exists, not grounded",
@@ -72,7 +72,7 @@ describe("FR-5: a real button over each node", () => {
     const api = bs.find((b) => attr(b, "data-node") === "harbor_api")!;
     // box 182.078125,60.25 120.578125x49 in viewBox -12 -12 688.5288696289062 324.9422302246094
     expect(attr(api, "style")).toContain("left:28.1874%;top:22.2347%;width:17.5124%;height:15.0796%");
-    expect(html).toContain('style="position:relative;width:100%;max-width:688.5288696289062px;aspect-ratio:688.5288696289062 / 324.9422302246094"');
+    expect(html).toContain('style="position:relative;width:100%;min-width:540.99px;max-width:688.53px;aspect-ratio:688.5288696289062 / 324.9422302246094"');
   });
   it("natural fit keeps the drawn size, for a frame that scrolls", () => {
     expect(view(drawn, { fit: "natural" })).toContain('style="position:relative;width:688.5288696289062px;height:324.9422302246094px"');
