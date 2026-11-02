@@ -1,12 +1,13 @@
 ---
 title: "The header says both counts when they differ and keeps its place on resize; Usage lists rejected rows"
-status: next
+status: now
 repos: [organizer]
 branch: lf62-ui
-seat:
+seat: l62-ui
+reviewer: l62-rev, l62-uirev
 stage:
-updated: 2026-11-01
-next: "sup108 runs it (0175 wave 2; lf62-go merged #32)"
+updated: 2026-11-02
+next: "l62-ui builds U1-U4, X0 (sup108, launched 2026-11-02)"
 depends_on: [lf62-go]
 boundary: ["frontend/src/components/InitiativeHeader.tsx", "frontend/src/lib/header.ts", "frontend/src/styles/shell.css", "frontend/src/components/Usage.tsx", "frontend/src/components/UsageTable.tsx", "frontend/src/lib/decisionStates.test.ts", "frontend/wailsjs/"]
 spec: "docs/specs/leftovers-62.md (FR-5 to FR-8)"
