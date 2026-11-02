@@ -1,6 +1,6 @@
 # Leftovers 73: comma lists as inline text, "(N)" gone, names as written: the build spec
 
-status: proposed (0186)
+status: accepted (0186, ruled 2026-11-02)
 by: the FSE, 2026-11-02, on main at 80bd987
 sources: l72-ui's UI review of lf72-counts-commas (F1, F2, questions a-d);
 Aglaea's `docs/ux/specs/run-report.md` Amendment 9 and `docs/design-system.md`

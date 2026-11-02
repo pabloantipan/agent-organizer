@@ -7,7 +7,7 @@ seat: l73-build
 reviewer: l73-rev, l73-ui
 stage:
 updated: 2026-11-02
-next: "launch on 0186's ruling"
+next: "sup117 runs it (0186 ruled 2026-11-02)"
 depends_on: [lf72-counts-commas]
 boundary: ["frontend/src/components/RunTracks.tsx", "frontend/src/components/Rail.tsx", "frontend/src/components/Review.tsx", "frontend/src/components/SecCount.tsx", "frontend/src/styles/runreport.css", "frontend/src/styles/global.css", "frontend/src/styles/review.css", "frontend/src/components/"]
 spec: "docs/specs/leftovers-73.md (FR-1 to FR-4)"
