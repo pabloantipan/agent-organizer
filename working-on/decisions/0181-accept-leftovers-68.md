@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 68 - runs attributes reviewers and supervisors; the literal guard's gaps
-status: proposed
+status: ruled
 raised: 2026-11-02
 raised_by: fse
 owner: pablo
@@ -9,6 +9,10 @@ cards: [lf68-go]
 forecast: 45-90m
 supersedes: []
 superseded_by:
+ruled: 2026-11-02
+ruled_by: pablo (autonomous mode)
+supervisor: organizer-probe-sup112
+chosen: accept as written
 ---
 
 ## Question
@@ -33,3 +37,11 @@ accept as written.
 
 forecast: 45-90m over 1 wave; basis: lf65 (20 min) and lf66-go (27 min
 with the map) today.
+
+## Ruling
+
+pablo (autonomous mode), 2026-11-02 10:33: the recommendation taken after
+five minutes without an answer. Asked at 10:28 in the mailbox ("0181:
+accept leftovers 68, runs attributes reviewers and supervisors?", options
+accept as written or send back); recommended "accept as written". Not
+sensitive: the organizer's own record and code.

@@ -7,7 +7,7 @@ seat: l68-go
 reviewer: l68-go-rev
 stage:
 updated: 2026-11-02
-next: "launch on 0181's ruling"
+next: "sup112 runs it (0181 ruled 2026-11-02)"
 depends_on: []
 boundary: ["internal/session/runs.go", "internal/session/runs_test.go", "internal/service/run.go", "internal/service/run_test.go", "internal/usage/", "internal/cli/", "internal/service/literals_test.go", "frontend/wailsjs/"]
 spec: "docs/specs/leftovers-68.md (FR-1 to FR-4)"

@@ -1,6 +1,6 @@
 # Leftovers 68: runs attributes reviewers and supervisors; the literal guard's two gaps: the build spec
 
-status: proposed (0181)
+status: accepted (0181, ruled 2026-11-02)
 by: the FSE, 2026-11-02, on main at 80f5977
 sources: sup110's closing report (2026-11-02, Found 1, 2, 4); sup101 Found 1
 (runs.jsonl leaves supervised seats with no card), held since 2026-11-01.
