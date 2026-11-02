@@ -1,13 +1,13 @@
 ---
 title: "Rings whole in the wait line, one gap at the dot, the runs paragraph current"
-status: next
+status: now
 repos: [organizer]
 branch: lf70-small
 seat: l70-build
 reviewer: l70-rev, l70-ui
 stage:
 updated: 2026-11-02
-next: "sup114 runs it (0183 ruled 2026-11-02)"
+next: "l70-build builds it on branch lf70-small from origin/main 440d577 (sup114)"
 depends_on: []
 boundary: ["frontend/src/styles/runreport.css", "frontend/src/components/UsageTable.tsx", "frontend/src/styles/usage.css", "frontend/src/components/Usage.rejected.test.tsx", "frontend/src/components/RunReport.test.tsx", "CLAUDE.md"]
 spec: "docs/specs/leftovers-70.md (FR-1 to FR-3)"
