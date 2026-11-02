@@ -3,7 +3,32 @@
 The Product Designer seat beside the organizer's FSE (0053). HAND-OFF at the
 top; one dated line per session below.
 
-## HAND-OFF — 2026-10-18, paused for the new watcher (Pablo, via Hephaistos)
+## HAND-OFF — 2026-11-02, cell paused by Pablo ("pause what we're building")
+
+Read first: the `aglaea` skill, `agents/aglaea.md`, `docs/ux/memory.md`,
+`docs/design-system.md` (mine, 0054). Same lane and mail rules as the
+hand-off below. Commits carry `Co-Authored-By: Claude Opus 5.5
+<noreply@anthropic.com>`. I launch nothing and supervise nothing.
+
+- **Nothing of mine is open.** Every FSE question to date is answered and
+  acked; the last was lf72's four (run-report Amendment 9, AR35 amended,
+  AR37-AR38). The FSE cuts A8 after lf71 merges and A9 after lf72 merges.
+- **Amended today** (each spec ends with its amendments): decision-states
+  A1-A2 (DS1-DS8, 0173 took DS1-DS6); run-report A3-A9 (AR22-AR38);
+  progress-and-waves A1-A2 (PW4 twice, PW7, PW8); map-and-roadmap A3-A5
+  (M8-M18); usage A1-A3 (U9, U10); review-view A20-A21 (R53 through live
+  resize and equal at every width). Design-system rules added: decision
+  status words and tones; 24 px both sides; one disclosure look; no ring
+  on a non-control landing; clipping regions pad 4 px or ring inset; every
+  inset ring keeps 4 px padding; comma-list links are inline text (inset
+  ring, no 24 px minimum); `<title> · N` for every count, never `(N)`;
+  names people gave and system names are never uppercased.
+- **Waiting on Pablo**: 0167 (run report), 0168 (progress and waves),
+  0170 (map lens) as of the last check; read the records' status first.
+- **Next action on resume**: read the held mail against this hand-off,
+  then answer within the lane.
+
+## Earlier HAND-OFF — 2026-10-18, paused for the new watcher (Pablo, via Hephaistos)
 
 Read first: the `aglaea` skill, `agents/aglaea.md`, `docs/ux/memory.md`,
 `docs/ux/principles.md`, `docs/design-system.md` (**mine since 0054**; the
@@ -213,3 +238,4 @@ resumes. The seat moves to the new discuss watcher (wake-rearm, api
 - 2026-11-02 — lf70 inset ring (FSE thread 01M6EHHQXBT2T7793HT8BBH1V3): run-report A7 (AR33-34); design system: every inset ring keeps 4 px on the element, own radius; one count-after-title rule.
 - 2026-11-02 — lf71 UI questions (FSE thread 01M6EM9JRX2MPBVS53KKM9A0DX): run-report A8 (AR33 amended, AR35-36); design system: padding not clearance, commas outside links, counts cover disclosures and rail labels, fractions keep their form.
 - 2026-11-02 — lf72 UI questions (FSE thread 01M6EPBMMDHDDYHCRV76D92Z27): run-report A9 (AR35 amended, AR37-38); design system: comma-list links inset ring and inline exception, no (N), names people gave keep their case.
+- 2026-11-02 — cell paused by Pablo; hand-off written at the top.
