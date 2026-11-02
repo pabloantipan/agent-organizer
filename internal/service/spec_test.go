@@ -184,3 +184,87 @@ func TestW11ReadSpecRunRecords(t *testing.T) {
 		t.Errorf("refused paths read the disk %d times", *reads)
 	}
 }
+
+// mapSpecFixture: two initiatives with base maps. fix's map.json names
+// containers.md and modules.md as levels and context.md, notes/why.md and
+// an escaping ../secret.md as curated pages; other's names own.md. v2 has
+// a c4-map/2 map naming context.md.
+func mapSpecFixture(t *testing.T) *Service {
+	t.Helper()
+	t.Setenv("XDG_DATA_HOME", t.TempDir())
+	t.Setenv("HOME", t.TempDir())
+	home := t.TempDir()
+	write := func(rel, s string) {
+		p := filepath.Join(home, rel)
+		if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(p, []byte(s), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, id := range []string{"fix", "other", "v2"} {
+		write(id+"/working-on/initiative.yaml", "id: "+id+"\ntitle: "+id+"\nstatus: active\nrepos: []\n")
+	}
+	write("fix/docs/architecture/map.json", `{"schema":"c4-map/1","initiative":"fix","system":"s","inputs":{},
+"levels":[{"level":"containers","page":"containers.md","svg":"containers.md-1.svg"},{"level":"modules","page":"modules.md","svg":"modules.md-1.svg","container":"api"}],
+"nodes":[{"id":"a","label":"a","level":"context","kind":null,"parent":null,"status":null,"grounding":[{"kind":"curated","ref":"context.md"},{"kind":"repo","ref":"api@1234567"}]},
+{"id":"b","label":"b","level":"context","kind":null,"parent":null,"status":null,"grounding":[{"kind":"curated","ref":"notes/why.md"},{"kind":"curated","ref":"../secret.md"},{"kind":"deploy","ref":"deploy.md"}]}],"edges":[]}`)
+	for _, f := range []string{"containers.md", "modules.md", "context.md", "notes/why.md", "unnamed.md", "deploy.md", "map.json.md"} {
+		write("fix/docs/architecture/"+f, "# "+f+"\n")
+	}
+	write("fix/docs/secret.md", "not a page\n")
+	write("other/docs/architecture/map.json", `{"schema":"c4-map/1","initiative":"other","system":"s","inputs":{},"levels":[{"level":"containers","page":"own.md","svg":"own.md-1.svg"}],"nodes":[],"edges":[]}`)
+	write("other/docs/architecture/own.md", "# own\n")
+	write("v2/docs/architecture/map.json", `{"schema":"c4-map/2","levels":[{"level":"containers","page":"context.md"}],"nodes":[]}`)
+	write("v2/docs/architecture/context.md", "# v2\n")
+	cfg := config.Config{Machine: "lodestar", Roots: []string{home}, MaxDepth: 3}
+	s := NewWith(cfg, cache.State{}, func() time.Time { return time.Date(2026, 11, 2, 0, 0, 0, 0, time.UTC) })
+	s.Scan(false)
+	for _, id := range []string{"fix", "other", "v2"} {
+		if _, err := s.initiative(id); err != nil {
+			t.Fatalf("fixture %s not scanned: %v", id, err)
+		}
+	}
+	return s
+}
+
+// R3 (leftovers-58 FR-10): the map's level and curated pages read; a page
+// it does not name, a ../ path, another initiative's page, a map of
+// another schema and anything outside docs/architecture/ are refused,
+// and no refused page is read.
+func TestR3ReadSpecMapPages(t *testing.T) {
+	s := mapSpecFixture(t)
+	for _, p := range []string{
+		"docs/architecture/containers.md", "docs/architecture/modules.md",
+		"docs/architecture/context.md", "./docs/architecture/notes/why.md",
+		"docs/architecture/context.md#who",
+	} {
+		doc, err := s.ReadSpec("fix", p)
+		if err != nil || doc.Missing || !strings.HasPrefix(doc.Text, "# ") {
+			t.Errorf("ReadSpec(fix, %q) = %+v, %v; want the page", p, doc, err)
+		}
+	}
+	reads := countReads(t)
+	for _, c := range []struct{ id, path string }{
+		{"fix", "docs/architecture/unnamed.md"},   // in the folder, named by nothing
+		{"fix", "docs/architecture/deploy.md"},    // named by a deploy entry, not a page
+		{"fix", "docs/architecture/map.json"},     // the index itself
+		{"fix", "docs/secret.md"},                 // ../secret.md escapes docs/architecture/
+		{"fix", "docs/architecture/../secret.md"}, // the same by ../
+		{"fix", "docs/architecture/notes/../../secret.md"},
+		{"fix", "docs/architecture/own.md"},       // other's page, not fix's
+		{"other", "docs/architecture/context.md"}, // fix's page, asked of other
+		{"v2", "docs/architecture/context.md"},    // a c4-map/2 map names nothing
+		{"fix", "../other/docs/architecture/own.md"},
+		{"fix", "docs/architecture"},
+	} {
+		doc, err := s.ReadSpec(c.id, c.path)
+		if !errors.Is(err, ErrSpecRefused) || doc.Text != "" {
+			t.Errorf("ReadSpec(%s, %q) = %+v, %v; want refused", c.id, c.path, doc, err)
+		}
+	}
+	if *reads != 0 {
+		t.Errorf("refused pages read %d times", *reads)
+	}
+}

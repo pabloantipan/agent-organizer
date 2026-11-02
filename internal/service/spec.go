@@ -1,10 +1,13 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
+	"strings"
 
 	"organizer/internal/model"
 	"organizer/internal/specpath"
@@ -29,8 +32,10 @@ var readSpecFile = os.ReadFile
 // ReadSpec returns a spec file's text by initiative and path (FR-6; G3).
 // Only the files the scan resolved under the initiative's specs:, the
 // paths its cards' spec: fields name, and the run records its waves were
-// read from (leftovers-57 FR-18) are read; any other path is refused
-// before the disk is touched. A `#section` on the path is ignored.
+// read from (leftovers-57 FR-18) are read, and under docs/architecture/
+// the pages the initiative's map.json names (leftovers-58 FR-10); any
+// other path is refused before the file is touched. A `#section` on the
+// path is ignored.
 func (s *Service) ReadSpec(initiativeID, path string) (SpecDoc, error) {
 	si, err := s.initiative(initiativeID)
 	if err != nil {
@@ -51,8 +56,11 @@ func (s *Service) ReadSpec(initiativeID, path string) (SpecDoc, error) {
 	for _, p := range runRecords(si.Waves) {
 		allowed[p] = true
 	}
+	if ok && !allowed[rel] && strings.HasPrefix(rel, mapDirRel+"/") {
+		allowed = mapPages(si.Path)
+	}
 	if !ok || !allowed[rel] {
-		return SpecDoc{}, fmt.Errorf("%q: %w %s; only the files under specs:, a card's spec: or a wave's run record are read", path, ErrSpecRefused, initiativeID)
+		return SpecDoc{}, fmt.Errorf("%q: %w %s; only the files under specs:, a card's spec:, a wave's run record or the map's pages are read", path, ErrSpecRefused, initiativeID)
 	}
 	doc := SpecDoc{Path: rel}
 	b, err := readSpecFile(filepath.Join(si.Path, filepath.FromSlash(rel)))
@@ -85,3 +93,51 @@ func runRecords(waves []model.Wave) []string {
 // runsDirRel is scan's runsDir (internal/scan/runs.go), the one directory
 // it reads run records from.
 const runsDirRel = "runs"
+
+// mapDirRel is where an initiative's base map lives (leftovers-58 FR-1).
+const mapDirRel = "docs/architecture"
+
+// mapPages are the pages an initiative's map.json names, relative to its
+// root (leftovers-58 FR-10): each level's page and each page a `curated`
+// grounding entry names, resolved under docs/architecture/; a name that
+// resolves outside it is not one. A map.json that is missing, not JSON
+// or of another schema names none.
+func mapPages(root string) map[string]bool {
+	out := map[string]bool{}
+	b, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(mapDirRel), "map.json"))
+	if err != nil {
+		return out
+	}
+	var m struct {
+		Schema string `json:"schema"`
+		Levels []struct {
+			Page string `json:"page"`
+		} `json:"levels"`
+		Nodes []struct {
+			Grounding []C4Evidence `json:"grounding"`
+		} `json:"nodes"`
+	}
+	if json.Unmarshal(b, &m) != nil || m.Schema != MapSchema {
+		return out
+	}
+	add := func(page string) {
+		page = strings.TrimSpace(page)
+		if page == "" || strings.HasPrefix(page, "/") {
+			return
+		}
+		if rel := path.Join(mapDirRel, page); strings.HasPrefix(rel, mapDirRel+"/") {
+			out[rel] = true
+		}
+	}
+	for _, l := range m.Levels {
+		add(l.Page)
+	}
+	for _, n := range m.Nodes {
+		for _, g := range n.Grounding {
+			if g.Kind == "curated" {
+				add(g.Ref)
+			}
+		}
+	}
+	return out
+}
