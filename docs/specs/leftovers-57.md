@@ -244,3 +244,29 @@ FR-17 for an initiative that is not active: Needs me has no rows for it
 footer opens the run record in the drawer as text (ReadSpec already allows
 it, FR-18), with the scan's unread reason as the drawer's error line; an
 active initiative keeps Needs me's unread row. W9 adds the non-active case.
+
+## Amendment 7 (FSE, 2026-11-02): read dead_minutes, sum nothing (AR15's debt)
+
+Hephaistos built `progress.dead_minutes` (the window total) and
+`progress.lines[].dead_minutes` into `factory report --json` (specs
+`feat/report-dead-minutes` 54369d3, both required; claudecode d423577),
+from our ask. Card `lf57-dead-minutes`, within 0169:
+
+- **FR-19** `Progress` and `Line` (`internal/service/report.go:54-90`) gain
+  `DeadMinutes` (json `dead_minutes`); Home's run signal reads
+  `progress.dead_minutes` instead of summing `p.dead[].minutes`
+  (`Home.tsx:821`), so Deltagos computes nothing from the report.
+- **FR-20** `report_test.go`'s contract test reads `CONTRACTS_DIR`, not the
+  unpinned `~/agent-slack/specs` checkout its comment calls pinned
+  (`report_test.go:23-29`).
+
+Gate: **W12** `go test` of `TestReportDecodesContract` with CONTRACTS_DIR
+at a worktree of specs `feat/report-dead-minutes` (fails on main);
+**W13** vitest of Home's signal over a fixture whose `dead_minutes` is 90
+and whose spans would sum to something else: reads 1 h 30 min; the run
+report fixtures refreshed; X0 with CONTRACTS_DIR at that worktree.
+Boundary: `internal/service/report.go`, `report_test.go`,
+`frontend/src/components/Home.tsx` (the signal's line only),
+`frontend/src/lib/runReport.ts`, the run report's test fixtures,
+`frontend/wailsjs` (regenerated). Merge: a joint merge through talos-lab,
+in order specs, claudecode, docs, then this branch.
