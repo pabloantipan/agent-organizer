@@ -160,4 +160,4 @@ Findings (none blocking):
 - Note: the G4 guard sees only `model.Decision*` constants. `internal/service/draft.go:27` (`d.Status == "proposed"`) and `internal/cli/decisions.go:116` compare string literals and escape it. The spec scopes FR-4 to the constants, so this does not fail the card. Not yet filed: see `next`.
 - Note: the allowlist is per file, so a new comparison added anywhere in `rule.go` or `scan/decisions.go` passes unseen.
 - Note: `passRejected` skips its prune while a post is running (the post prunes its own state). `--json` can then list a gone row once until the next pass.
-- Findings placed (sup104, 2026-11-02): string-literal status comparisons (draft.go:27, cli/decisions.go:116) outside G4, and usagePostState.Accepted not pruned: to the FSE, thread 01M6D4NXFT5D88P1FM9P1CY2ZW.
+- Findings placed (sup104, 2026-11-02): string-literal status comparisons (draft.go:27, cli/decisions.go:116) outside G4, and usagePostState.Accepted not pruned: filed to the FSE (bitácora, next leftovers; thread 01M6D4NXFT5D88P1FM9P1CY2ZW).
