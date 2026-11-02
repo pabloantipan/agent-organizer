@@ -25,17 +25,48 @@ describe("leftovers-71 V2 (FR-2, AR34): SecCount draws <title> · N with one spa
   });
 });
 
+// The scan (leftovers-71 V2, Amendments 2 and its addendum): in every non-test
+// file under components/, no `<title> · <span className="num…` (with or without
+// sec-count), and inside any `.sec-title` element, across lines, no dot (`·`,
+// `{" · "}`, `&middot;`, `·`) beside a count span (`num` or `sec-count`),
+// before it or after it. SecCount itself is the one place that draws one.
+const DOT = String.raw`(?:·|&middot;|\\u00b7)`;
+const SPAN = String.raw`<span className="[^"]*\b(?:num|sec-count)\b[^"]*"`;
+const BETWEEN = String.raw`[\s{}"'\x60]*`;
+const lineOf = (src: string, at: number) => src.slice(0, at).split("\n").length;
+function handCounts(name: string, src: string): string[] {
+  const hits = new Set<number>();
+  const open = /<(h[1-6]|div|span|p|header)\b[^>]*className=\{?[`"][^`"]*\bsec-title\b[^>]*>/g;
+  for (const m of src.matchAll(open)) {
+    const start = m.index! + m[0].length;
+    const end = src.indexOf(`</${m[1]}>`, start);
+    const body = src.slice(start, end < 0 ? undefined : end);
+    const before = new RegExp(DOT + BETWEEN + SPAN);
+    const after = new RegExp(SPAN + String.raw`[^>]*>[^<]*</span>` + BETWEEN + DOT);
+    if (before.test(body) || after.test(body)) hits.add(lineOf(src, m.index!));
+  }
+  return [...hits].sort((a, b) => a - b).map((l) => `${name}:${l}`);
+}
+
 describe("leftovers-71 V2 (FR-2): no component writes a title's count by hand", () => {
   const dir = new URL("./", import.meta.url).pathname;
-  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".tsx") && !f.includes(".test.") && f !== "SecCount.tsx");
-  it("finds no ` · <span className=\"…sec-count\">` and no `sec-count\">…</span> ·` outside SecCount", () => {
-    const hand: string[] = [];
-    for (const f of files) {
-      const src = fs.readFileSync(dir + f, "utf8");
-      src.split("\n").forEach((line, k) => {
-        if (/ · <span className="[^"]*\bsec-count\b/.test(line) || /\bsec-count\b[^>]*>[^<]*<\/span> ·/.test(line)) hand.push(`${f}:${k + 1}`);
-      });
-    }
+  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".tsx") && !f.includes(".test.") && f !== "SecCount.tsx").sort();
+  it("the scan catches every hand-written form, on one line or across lines", () => {
+    const t = (body: string) => handCounts("x", `<h2 className="sec-title">${body}</h2>`);
+    expect(t(`Needs me · <span className="num sec-count">{n}</span>`)).toEqual(["x:1"]);
+    expect(t(`Awake · <span className="num">{n}</span>`)).toEqual(["x:1"]);
+    expect(t(`Needs me{" · "}<span className="num sec-count">{n}</span>`)).toEqual(["x:1"]);
+    expect(t(`Needs me{' · '}<span className="num sec-count">{n}</span>`)).toEqual(["x:1"]);
+    expect(t(`Needs me &middot; <span className="sec-count">{n}</span>`)).toEqual(["x:1"]);
+    expect(t(`Needs me{"\\u00b7"} <span className="sec-count">{n}</span>`)).toEqual(["x:1"]);
+    expect(t(`\n  Needs me ·\n  <span className="num sec-count">{n}</span>\n`)).toEqual(["x:1"]);
+    expect(t(`Stage <span className="sec-count">{k}</span> · {s.title}`)).toEqual(["x:1"]);
+    expect(handCounts("x", `<h2\n  className="sec-title ib-group">\n  <button>Archived ·\n <span className="num">{n}</span></button></h2>`)).toEqual(["x:1"]);
+    expect(t(`<SecCount title="Needs me" n={n} /><span className="sec-sub">a · b</span>`)).toEqual([]);
+    expect(t(`Gates <span className="num">{n}</span>`)).toEqual([]);
+  });
+  it("finds none outside SecCount", () => {
+    const hand = files.flatMap((f) => handCounts(f, fs.readFileSync(dir + f, "utf8")));
     expect(files.length).toBeGreaterThan(10);
     expect(hand).toEqual([]);
   });
