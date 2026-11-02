@@ -26,7 +26,7 @@ vi.mock("../../wailsjs/go/main/App", () => ({
 }));
 vi.mock("../../wailsjs/runtime/runtime", () => ({ BrowserOpenURL: vi.fn() }));
 
-const { MapBody, inReadingOrder, NO_MAP, NO_L3, READING_MAP, firstPlace, nodesAt, drillOf, trailOf, lensClasses, tagOf, placeName, restorePlace, figureNodes } = await import("./MapView");
+const { MapBody, inReadingOrder, panelOrder, NO_MAP, NO_L3, READING_MAP, firstPlace, nodesAt, drillOf, trailOf, lensClasses, tagOf, placeName, restorePlace, figureNodes } = await import("./MapView");
 const { useBoard } = await import("../stores/board.store");
 const { MapPanel, groundLine, groundCtx, runGround, statusWords, ruledBy } = await import("./MapPanel");
 const { MapFigureView } = await import("./MapFigure");
@@ -467,5 +467,27 @@ describe("leftovers-69 V1 (FR-2, A2): the panel title after a level change is a 
       const t = { parts: [{ ...parseCompound("h3.map-panel-title"), pseudos: [pseudo] }], hover: false };
       expect(winners(t, "outline").map((w) => w.v), pseudo).toEqual(["none"]);
     }
+  });
+});
+
+describe("leftovers-69 V1 (FR-5, M18): the panel's list renders once, in reading order", () => {
+  const ns = nodesAt(harbor, { level: "containers" });
+  const listIds = (html: string) => [...html.matchAll(/class="linkish map-panel-node" data-node="([^"]+)"/g)].map((m) => m[1]);
+  it("before positions are known the list reads Drawing the map… in its place, no node listed", () => {
+    expect(panelOrder(ns, undefined)).toBeNull();
+    const html = body(drawn(harborMap));
+    const panel = html.slice(html.indexOf('<aside class="map-panel"'));
+    expect(panel).toContain('<p class="map-panel-meta map-panel-drawing">Drawing the map…</p>');
+    expect(listIds(panel)).toEqual([]);
+    expect(panel).not.toContain("map-panel-list");
+  });
+  it("once known, the list is the figure's reading order, node for node; a failed figure gives map.json's order", () => {
+    const fig = renderToStaticMarkup(<MapFigureView st={{ state: "drawn", svg: harborSvg }} initiative="harbor" level="containers" source="x" nodes={figureNodes(ns)} />);
+    const roving = [...fig.matchAll(/<button[^>]*data-node="([^"]+)"/g)].map((m) => m[1]);
+    expect(roving).not.toEqual(ns.map((n) => n.id)); // reading order is not map.json's (alphabetical) order
+    const after = renderToStaticMarkup(<MapPanel initiative={init()} index={harbor} nodes={ns} order={panelOrder(ns, roving)} levelName="Containers" picked={null} pick={() => undefined} drill={null} />);
+    expect(listIds(after)).toEqual(roving);
+    expect(after).not.toContain("Drawing the map…");
+    expect(panelOrder(ns, [])!.map((n) => n.id)).toEqual(ns.map((n) => n.id));
   });
 });

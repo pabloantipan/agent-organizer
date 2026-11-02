@@ -219,7 +219,7 @@ export function MapBody({ initiative, read, head }: { initiative: merge.BoardIni
             <li><span className="map-key map-key-ungrounded" aria-hidden /> not grounded</li>
           </ul>
         </div>
-        <MapPanel initiative={initiative} index={index} nodes={inReadingOrder(nodes, order[placeKey(at)])} levelName={name} picked={picked} pick={pick} drill={drill} />
+        <MapPanel initiative={initiative} index={index} nodes={nodes} order={panelOrder(nodes, order[placeKey(at)])} levelName={name} picked={picked} pick={pick} drill={drill} />
       </div>
     </div>
   );
@@ -277,6 +277,15 @@ function useMapEdges(ref: React.RefObject<HTMLDivElement | null>, name: string, 
 
 const sameIds = (a: string[] | undefined, b: string[]) => !!a && a.length === b.length && a.every((x, k) => x === b[k]);
 
+/** The panel's list (leftovers-69 FR-5, M18): rendered once, in reading
+ *  order, so it never reorders under the reader. Until the figure has
+ *  reported its positions (`order` undefined) there is no list yet, null,
+ *  and the panel says the figure is drawing; a figure that failed reports
+ *  no positions ([]), and the list is map.json's order. */
+export function panelOrder(nodes: Node[], order: string[] | undefined): Node[] | null {
+  return order === undefined ? null : inReadingOrder(nodes, order);
+}
+
 /** U5: the panel lists a level's nodes in the order its roving set takes
  *  (the figure's buttons, reading order); a node not drawn trails in
  *  map.json order, and before the figure is drawn the order is map.json's. */
@@ -301,7 +310,13 @@ function MapTags({ host, nodes, onOrder }: { host: React.RefObject<HTMLDivElemen
     if (!h) return;
     const read = () => {
       const el = h.querySelector<HTMLElement>(".map-figure-frame");
-      if (!el) { setFrame((f) => (f ? null : f)); return; }
+      if (!el) {
+        setFrame((f) => (f ? null : f));
+        // A figure that failed has no positions to give: the panel lists
+        // map.json's order rather than wait for a drawing that never comes.
+        if (h.querySelector(".map-figure-state.failed")) report.current([]);
+        return;
+      }
       const tags: Tag[] = [];
       const ids: string[] = [];
       el.querySelectorAll<HTMLButtonElement>("button.map-node").forEach((b) => {
