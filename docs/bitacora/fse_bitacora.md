@@ -17,6 +17,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- 2026-11-02 ~09:00 (after compaction): Pablo asked to tidy frozen seats; retired 59 finished organizer crew (frozen dirs removed), removed talos-lab's stale frozen dir (seat live), revoked l62-rev/l62-uirev. Hourly cron re-created (7e2a7143). Cut queue item (7): leftovers-65 / 0178 / lf65-review-guard (e6f42b3); 0178 ruled by the five-minute default 09:01 (88ae7b4); sup109 launched 09:02. Next in queue: (9) map regen, then (1)+(2)+(8) frontend polish, (3) ReadSpec symlinks, (4) Go leftovers.
+
 - sup106 closed and ended: lf64 #34 (about 50 min of work in 5h55m, 4h20m blocked by the limit and outages), lf57-dead-minutes joint #37 (31 min). Rules from it: a card that changes a contract carries release.yml's specs pin line in its boundary; clean-clone recipes avoid rm -rf (it stops on a permission prompt unattended); launch-review.sh backgrounds the app so safe-kill refuses its pid (for Hephaistos with the launcher ask).
 
 - To cut after lf58-map-lens merges, one map-lens polish card: Aglaea map-and-roadmap Amendment 3 (M8-M11, dc466fb) and Amendment 4 (M12-M14, 3b30a41): scale floor 11 px, trail always drawn, ruled word in the name, map state kept per initiative across switches, picked uses the selected mark (not the focus ring), panel kind 'unknown'.
