@@ -167,3 +167,20 @@ func TestTaskState(t *testing.T) {
 		}
 	}
 }
+
+// leftovers-62 FR-4: a task's record is read through Decision.Decided, so an
+// accept record applied or acknowledged after its ruling stays a task; a
+// withdrawn one is none.
+func TestLF62TaskRecordReadAsDecided(t *testing.T) {
+	si := taskInitiative(model.Card{Slug: "tw", Title: "Watch", Status: model.StatusNow, Seat: "tw-build"})
+	for _, c := range []struct {
+		status string
+		task   bool
+	}{{model.DecisionApplied, true}, {model.DecisionAcknowledged, true}, {model.DecisionWithdrawn, false}} {
+		si.Decisions[0].Status = c.status
+		ts := tasksOf(&si, discuss.Snapshot{}, nil, "", tasksNow)
+		if got := len(ts) == 1 && ts[0].Number == "0124"; got != c.task {
+			t.Errorf("%s: tasks %+v, want a task %v", c.status, ts, c.task)
+		}
+	}
+}

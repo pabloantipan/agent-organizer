@@ -61,7 +61,10 @@ func usageCmd(cfg config.Config, args []string, stdout, stderr io.Writer, now fu
 	}
 	WriteUsage(stdout, v, by)
 	service.WaitUsagePost()
-	writeUsageRejected(stdout, service.UsageRejected())
+	if rows := service.UsageRejected(); len(rows) > 0 {
+		fmt.Fprintln(stdout) // a blank line after the table; doctor prints none
+		writeUsageRejected(stdout, rows)
+	}
 	return 0
 }
 
@@ -72,7 +75,7 @@ func writeUsageRejected(w io.Writer, rows []service.RejectedUsageRow) {
 	if len(rows) == 0 {
 		return
 	}
-	fmt.Fprintf(w, "\nrejected by the record: %d %s, not resent until %s\n", len(rows), plural(len(rows), "row"),
+	fmt.Fprintf(w, "rejected by the record: %d %s, not resent until %s\n", len(rows), plural(len(rows), "row"),
 		map[bool]string{true: "it changes", false: "they change"}[len(rows) == 1])
 	tw := tabwriter.NewWriter(w, 0, 4, 2, ' ', 0)
 	for _, r := range rows {

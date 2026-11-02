@@ -402,31 +402,13 @@ func Ingest(o Options) (Stats, error) {
 			meta = &sessionMeta{}
 			offs.Sessions[sid] = meta
 		}
-		// A session with a card task keeps it whatever happens to its
-		// worktree or card. One without (its card cut after its first turn,
-		// an overhead role, an answer kept before overhead tasks existed) is
-		// attributed again on every pass until it has one (leftovers-56
-		// FR-4).
 		sort.Slice(ls, func(i, j int) bool { return ls[i].Day < ls[j].Day })
-		if IsCardTask(ls[0].Task) {
-			meta.Fixed = true
-			// A new day of a kept session takes the attribution its
-			// earlier days carry: the ledger keeps it, not the cards.
-			for _, l := range ls[1:] {
-				if !sameAttribution(l.Attribution, ls[0].Attribution) {
-					l.Attribution = ls[0].Attribution
-					changed = true
-				}
-			}
-		} else {
-			c := costs[sid]
-			a := Attribute(Seen{Name: meta.Name, Cwd: meta.Cwd, Pair: meta.Pair, Session: c.Session, Persona: c.Persona}, inits)
-			meta.Fixed = IsCardTask(a.Task)
-			for _, l := range ls {
-				if !sameAttribution(l.Attribution, a) {
-					l.Attribution = a
-					changed = true
-				}
+		a := sessionAttribution(ls, meta, costs[sid], inits)
+		meta.Fixed = IsCardTask(a.Task)
+		for _, l := range ls {
+			if !sameAttribution(l.Attribution, a) {
+				l.Attribution = a
+				changed = true
 			}
 		}
 		if splitCost(ls, costOf(costs[sid], meta, ls)) {
@@ -453,6 +435,46 @@ func Ingest(o Options) (Stats, error) {
 		}
 	}
 	return st, nil
+}
+
+// sessionAttribution is the one attribution rule a pass applies to a
+// session, its lines sorted by day. A session with a card task keeps it
+// whatever happens to its worktree or card: a new day takes the attribution
+// its earliest day carries, since the ledger keeps it, not the cards. One
+// without (its card cut after its first turn, an overhead role, an answer
+// kept before overhead tasks existed) is attributed again on every pass
+// until it has one (leftovers-56 FR-4). Ingest writes it; Attributions reads
+// it without writing (leftovers-62 FR-1).
+func sessionAttribution(ls []*Line, meta *sessionMeta, c CostSource, inits []Initiative) Attribution {
+	if len(ls) > 0 && IsCardTask(ls[0].Task) {
+		return ls[0].Attribution
+	}
+	if meta == nil {
+		meta = &sessionMeta{}
+	}
+	return Attribute(Seen{Name: meta.Name, Cwd: meta.Cwd, Pair: meta.Pair, Session: c.Session, Persona: c.Persona}, inits)
+}
+
+// Attributions is each session's attribution as the next pass would write
+// it, read from the ledger and its offsets without taking the lock or
+// writing anything (leftovers-62 FR-1): what `organizer runs` and the app's
+// runs view name a run by, so they agree with `organizer usage` whichever
+// ran first. A session the ledger has no line for is absent.
+func Attributions(o Options) map[string]Attribution {
+	offs := loadOffsets(o.OffsetsPath)
+	bySession := map[string][]*Line{}
+	lines := LoadLedger(o.LedgerPath)
+	for i := range lines {
+		bySession[lines[i].SessionID] = append(bySession[lines[i].SessionID], &lines[i])
+	}
+	costs := foldCosts(o.Costs)
+	inits := LoadRoles(o.Initiatives)
+	out := make(map[string]Attribution, len(bySession))
+	for sid, ls := range bySession {
+		sort.Slice(ls, func(i, j int) bool { return ls[i].Day < ls[j].Day })
+		out[sid] = sessionAttribution(ls, offs.Sessions[sid], costs[sid], inits)
+	}
+	return out
 }
 
 // sessionOf names the session a transcript belongs to: <project>/<id>.jsonl
