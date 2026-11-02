@@ -9,7 +9,7 @@ stage:
 updated: 2026-11-02
 next: "sup115: may l71-build update RunReport.lf64.test.tsx:139 and Home.waits.test.tsx:135 (stale asserts of the old markup)? FR-1 5a5f9a6, FR-2 ee2403e in"
 depends_on: []
-boundary: ["frontend/src/styles/runreport.css", "frontend/src/components/Home.tsx", "frontend/src/components/Overview.tsx", "frontend/src/components/UsageTable.tsx", "frontend/src/components/SecCount.tsx", "frontend/src/components/SecCount.test.tsx", "frontend/src/styles/shell.css", "frontend/src/components/RunReport.test.tsx", "frontend/src/components/Usage.rejected.test.tsx"]
+boundary: ["frontend/src/styles/runreport.css", "frontend/src/components/Home.tsx", "frontend/src/components/Overview.tsx", "frontend/src/components/UsageTable.tsx", "frontend/src/components/SecCount.tsx", "frontend/src/components/SecCount.test.tsx", "frontend/src/styles/shell.css", "frontend/src/components/RunReport.test.tsx", "frontend/src/components/Usage.rejected.test.tsx", "frontend/src/components/RunReport.lf64.test.tsx", "frontend/src/components/Home.waits.test.tsx"]
 spec: "docs/specs/leftovers-71.md (FR-1, FR-2)"
 gate: "docs/specs/leftovers-71.md#Acceptance → gate"
 ui_review: true

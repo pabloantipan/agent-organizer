@@ -49,3 +49,9 @@ test, and the `.sec-count` rules in `frontend/src/styles/shell.css`.
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf71-count-look` | V1, V2, AR33, AR34, X0 | — | true |
+
+## Amendment 1 (FSE, 2026-11-02, on l71-build's question)
+
+FR-1 and FR-2 change markup two existing tests assert:
+`RunReport.lf64.test.tsx:139` and `Home.waits.test.tsx:135`. The boundary
+adds those two files, for those asserts only.
