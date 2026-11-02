@@ -1,13 +1,13 @@
 ---
 title: "Every count reads the same, and a focused slug reads whole"
-status: next
+status: now
 repos: [organizer]
 branch: lf71-count-look
 seat: l71-build
 reviewer: l71-rev, l71-ui
 stage:
 updated: 2026-11-02
-next: "sup115 runs it (0184 ruled 2026-11-02)"
+next: "l71-build builds on lf71-count-look from origin/main bb7f54d (sup115)"
 depends_on: []
 boundary: ["frontend/src/styles/runreport.css", "frontend/src/components/Home.tsx", "frontend/src/components/Overview.tsx", "frontend/src/components/UsageTable.tsx", "frontend/src/components/SecCount.tsx", "frontend/src/components/SecCount.test.tsx", "frontend/src/styles/shell.css", "frontend/src/components/RunReport.test.tsx", "frontend/src/components/Usage.rejected.test.tsx"]
 spec: "docs/specs/leftovers-71.md (FR-1, FR-2)"
