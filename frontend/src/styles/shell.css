@@ -216,7 +216,14 @@ button.lz.waiting:hover { background: var(--decision-waiting-bg); color: var(--f
    target, the goal on one line, Details. The goal gives way first (cut with
    an ellipsis), then the target, then the stage's title; the id never
    (FR-12, the design's §1). Bar and tabs stay under 90 px (H2). */
-.ihead { display: grid; gap: 0; padding: 0 var(--space-5); background: var(--bg); }
+/* A column of flex items, not a grid (leftovers-62 FR-6, R53 amended):
+   WebKit kept the grid's first row at the bar's old height after a live
+   resize wrapped the pills onto a second line, so the bar ran into the
+   sub-tabs until the initiative was reopened. A flex column sizes each
+   child from its content on every layout. Nothing shrinks: the header has
+   no height of its own except compact open, which sets its own below. */
+.ihead { display: flex; flex-direction: column; gap: 0; padding: 0 var(--space-5); background: var(--bg); }
+.ihead > * { flex: none; }
 .ihead-bar { display: flex; align-items: center; gap: var(--space-3); min-height: 44px; min-width: 0; }
 .ihead-id { margin: 0; flex: none; display: flex; align-items: center; gap: var(--space-2); font-family: var(--mono); font-size: var(--font-size-xl); line-height: var(--line-xl); font-weight: var(--weight-semibold); letter-spacing: -0.02em; white-space: nowrap; }
 .ihead-stage {
