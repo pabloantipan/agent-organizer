@@ -808,8 +808,9 @@ export type RunSignal = { live: boolean; cards: number; deadMin: number };
  *  none before the read lands, none when the window list has no run, none
  *  once the recent rule (`runPlace`, the one Overview reads) folds the
  *  latest run, and none when its report was not drawn. The count is the
- *  report's denominator and the stopped time the sum of the report's own
- *  `minutes` per dead span: no count or span computed here (AR15). */
+ *  report's denominator (`progress.denominator.count`) and the stopped
+ *  time the report's own total, `progress.dead_minutes` (0 when absent),
+ *  read as given: no count, span or sum computed here (AR15, FR-19). */
 export function runSignalFor(i: merge.BoardInitiative | undefined, read: RunRead | undefined, nowMs: number): RunSignal | null {
   if (!i?.local || !read) return null;
   const latest = latestRun(presetsOf(read.windows, Math.floor(nowMs / 1000)));
