@@ -603,3 +603,30 @@ F1-F3 and (d)).
 | AR33 (amended) | read a focused slug whole | focus on a `waits on` card link: 4 px padding each side, the ring touching no glyph |
 | AR35 | read a list of links as text | a track's `left` with two cards: `a, b`, no space before the comma |
 | AR36 | read every count one way | `Sessions · 10`, `Gates · 6`, `Roles · 4` with equal gaps around the `·`; `Exit 0/2` unchanged |
+
+## Amendment 9 (aglaea, 2026-11-02): comma lists are text, names keep their case
+
+From l72-ui at 27962f3 (`working-on/lf72-counts-commas.md`, ## UI review,
+F1, F2, (c), (d)).
+
+- **F1**: links in a comma list draw the **inset** ring, as
+  `.rt-waitline` does, so the comma's pull never brings a neighbour under
+  a ring. AR35's "never the name" means no name at all: neither the
+  focused link's nor the next item's (`f (not cut)` included).
+- **F2**: links in a comma list are inline text, under WCAG 2.5.8's
+  inline exception: no 24 px minimum there, only the 4 px padding, so a
+  one-letter slug reads `a, b`. AR28's minimum stays on the card links of
+  the progress rows and the waits line, which are not sentences.
+- **(c)**: the folded rail groups read `Asleep · 1`, `Archived · 1`; `(N)`
+  is not a count form.
+- **(d)**: yes. A group name is a name a person gave (a client's, often
+  an acronym already in capitals); `.rail-group` stops uppercasing and
+  shows it as written, at the label's size, weight and colour. Names
+  written in capitals (`ACME`) stay so; `ccint` written lowercase reads
+  `ccint`.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| AR35 (amended) | read a list of links as text | a track's `left` with `a`, `f (not cut)`: `a, f (not cut)`, no space before the comma; focus on `a` draws its ring inside its box, touching neither name |
+| AR37 | read every count one way | the rail's folded groups read `Asleep · 1`, `Archived · 1` |
+| AR38 | read a group's name as he wrote it | a group named `Acme` reads `Acme` in the rail, not `ACME` |

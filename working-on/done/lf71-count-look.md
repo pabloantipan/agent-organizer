@@ -1,13 +1,13 @@
 ---
 title: "Every count reads the same, and a focused slug reads whole"
-status: now
+status: done
 repos: [organizer]
 branch: lf71-count-look
 seat: l71-build
 reviewer: l71-rev, l71-ui
 stage:
 updated: 2026-11-02
-next: "PR with talos-lab"
+next: "merged 35992ed (#59)"
 review: "pass at 1567309 (l71-rev code, l71-ui UI, 2026-11-02): V1 V2 X0 AR33 AR34"
 depends_on: []
 boundary: ["frontend/src/styles/runreport.css", "frontend/src/components/Home.tsx", "frontend/src/components/Overview.tsx", "frontend/src/components/UsageTable.tsx", "frontend/src/components/SecCount.tsx", "frontend/src/components/SecCount.test.tsx", "frontend/src/styles/shell.css", "frontend/src/components/RunReport.test.tsx", "frontend/src/components/Usage.rejected.test.tsx", "frontend/src/components/RunReport.lf64.test.tsx", "frontend/src/components/Home.waits.test.tsx", "frontend/src/components/InitiativesView.tsx", "frontend/src/components/InitiativesView.test.tsx"]
@@ -17,6 +17,8 @@ ui_review: true
 touches: []
 change_order: {add: [], change: [], retire: []}
 autonomy: unattended
+prs:
+  - {repo: organizer, pr: 59, target: main, state: merged, merge: 35992ed}
 ---
 
 ## Goal
