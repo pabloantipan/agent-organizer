@@ -57,9 +57,11 @@
 .rr-pct { text-align: right; font-size: var(--font-size-sm); font-variant-numeric: tabular-nums; }
 /* Card links, disclosures, the done fold and the waits links take a 24 px
    target by padding: 4 + 16 + 4 (FR-3, AR24). */
+/* At least 24 wide too, text centred, so two one-letter neighbours never
+   share a target (leftovers-67 FR-9, AR28; WCAG 2.5.8). */
 .rr-card {
-  min-height: 0; padding: var(--space-1) 0; line-height: var(--line-sm); border: 0; background: transparent; font-family: var(--mono); font-size: var(--font-size-sm);
-  color: var(--accent-fg); text-decoration: underline; text-decoration-color: var(--border-strong); text-underline-offset: 2px; overflow-wrap: anywhere; text-align: left;
+  min-height: 0; min-width: 24px; padding: var(--space-1) 0; line-height: var(--line-sm); border: 0; background: transparent; font-family: var(--mono); font-size: var(--font-size-sm);
+  color: var(--accent-fg); text-decoration: underline; text-decoration-color: var(--border-strong); text-underline-offset: 2px; overflow-wrap: anywhere; text-align: center;
 }
 .rr-card:hover { background: transparent; border: 0; text-decoration-color: currentColor; }
 .rr-more {
@@ -67,6 +69,19 @@
   font-size: var(--font-size-sm); line-height: var(--line-sm); font-weight: var(--weight-regular); color: var(--fg-muted); text-align: left; overflow-wrap: anywhere;
 }
 .rr-more:hover { background: var(--surface-hover); border: 0; }
+/* A <details> drawn as the app's fold (leftovers-67 FR-10, AR29; the design
+   system's One disclosure look): the summary is .rr-more, 4 + 16 + 4, the
+   native marker hidden and a muted ▸ turning when it opens. The ▸ is drawn
+   with borders, not generated text, so it stays out of the summary's
+   accessible name (WebKit reads ::before content into it). */
+details > summary.rr-more { display: inline-block; list-style: none; cursor: pointer; border-radius: var(--radius-xs); }
+details > summary.rr-more::-webkit-details-marker { display: none; }
+details > summary.rr-more::marker { content: ""; }
+details > summary.rr-more::before {
+  content: ""; display: inline-block; width: 0; height: 0; margin: 0 var(--space-1-5) 1px var(--space-0-5); vertical-align: middle;
+  border-left: 5px solid var(--fg-muted); border-top: 4px solid transparent; border-bottom: 4px solid transparent;
+}
+details[open] > summary.rr-more::before { transform: rotate(90deg); }
 .rr-rounds { grid-column: 3 / -1; list-style: none; margin: 0 0 var(--space-1); padding: 0 0 0 var(--space-4); display: grid; gap: var(--space-0-5); font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); min-width: 0; overflow-wrap: anywhere; }
 .rr-rounds .mono { color: var(--fg-subtle); }
 /* Failed rounds are past: their word, not red (progress-and-waves rules). */
@@ -94,6 +109,12 @@
   font-size: var(--font-size-sm); line-height: var(--line-sm); font-weight: var(--weight-regular); color: var(--fg); overflow-wrap: anywhere;
 }
 .rr-wave-line:hover { background: var(--surface-hover); border: 0; }
+/* The wave says whether the line presses (leftovers-67 FR-8, AR27): in the
+   link colour on a press, muted on a line with no run record, which also
+   says so in words after the line's own. */
+.rr-wave-key { color: var(--accent-fg); }
+.rr-wave-line.still .rr-wave-key { color: var(--fg-muted); }
+.rr-no-record { color: var(--fg-subtle); }
 
 /* ---------- rulings: the decision record line ---------- */
 .rr-ruling {

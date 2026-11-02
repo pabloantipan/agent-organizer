@@ -26,6 +26,7 @@ vi.mock("../stores/board.store", () => {
 });
 
 const { Usage } = await import("./Usage");
+const fs: { readFileSync(p: URL, enc: "utf8"): string } = await import("node:" + "fs");
 
 const zero = { input: 0, output: 0, cache_read: 0, cache_write: 0 };
 const totals = (week: string, start: string, end: string, money: number, sessions: number) =>
@@ -73,11 +74,11 @@ describe("leftovers-62 U3: the Usage view lists the rejected rows", () => {
       ["s-neg", "2026-10-05", "token counts and messages cannot be negative"],
     ]);
   });
-  it("says how many and that they are not resent until they change", () => {
-    expect(text(section(draw(JSON.parse(wire)))!)).toContain("Rejected by the record · 2 not resent until they change");
+  it("says how many and that they are sent again when they change (leftovers-67 FR-12 words)", () => {
+    expect(text(section(draw(JSON.parse(wire)))!)).toContain("Not accepted by discuss-record · 2");
     const one = JSON.parse(wire);
     one.rejected = one.rejected.slice(1);
-    expect(text(section(draw(one))!)).toContain("Rejected by the record · 1 not resent until it changes");
+    expect(text(section(draw(one))!)).toContain("Not accepted by discuss-record · 1");
   });
   it("is the view's, under the week, whatever the week holds", () => {
     const html = draw(JSON.parse(wire));
@@ -89,5 +90,28 @@ describe("leftovers-62 U3: the Usage view lists the rejected rows", () => {
     expect(section(draw(none))).toBeNull();
     delete none.rejected;
     expect(section(draw(none))).toBeNull();
+  });
+});
+
+// leftovers-67 V5 (FR-12; usage Amendment 1, U9): the rejected list says
+// whose it is.
+describe("leftovers-67 V5: the rejected list names discuss-record and says nothing is the reader's", () => {
+  beforeEach(() => { h.n = 0; });
+  it("over two rows: the title `Not accepted by discuss-record · 2`, then the line, above the rows", () => {
+    const s = section(draw(JSON.parse(wire)))!;
+    const title = /<h2 id="usage-rejected-title"[^>]*>([\s\S]*?)<\/h2>/.exec(s)!;
+    expect(text(title[1])).toBe("Not accepted by discuss-record · 2");
+    const line = /<p class="usage-rejected-why">([^<]*)<\/p>/.exec(s)!;
+    expect(line[1]).toBe("Sent again when its usage changes. Nothing for you to do; the reason is for the FSE.");
+    expect(s.indexOf("</h2>")).toBeLessThan(s.indexOf("usage-rejected-why"));
+    expect(s.indexOf("usage-rejected-why")).toBeLessThan(s.indexOf("<table"));
+    expect(rowsOf(s)).toHaveLength(2);
+    expect(text(s)).not.toMatch(/the record|not resent/);
+  });
+  it("draws the line sm and muted", () => {
+    const css = fs.readFileSync(new URL("../styles/usage.css", import.meta.url), "utf8");
+    const r = /\n\.usage-rejected-why \{([^}]*)\}/.exec(css)![1];
+    expect(r).toContain("font-size: var(--font-size-sm)");
+    expect(r).toContain("color: var(--fg-muted)");
   });
 });

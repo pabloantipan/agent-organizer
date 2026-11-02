@@ -56,8 +56,12 @@
 .sr-doc.markdown h1 { font-size: var(--font-size-2xl); margin: 0 0 var(--space-4); }
 .sr-doc.markdown h2 { font-size: var(--font-size-xl); color: var(--fg); margin: var(--space-8) 0 var(--space-3); }
 .sr-doc.markdown h3 { font-size: var(--font-size-lg); margin: var(--space-6) 0 var(--space-2); }
-.sr-doc :where(h1, h2, h3, h4, h5, h6):focus { outline: none; }
-.sr-doc :where(h1, h2, h3, h4, h5, h6):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+/* A heading focus lands on is a place, not a control: no ring, with the
+   mouse or the keys (leftovers-67 FR-11, AR30; the design system's
+   Navigating). The drawer's scroll shows it, and the next Tab rings the
+   next control after it. The path is the other landing (SpecReader). */
+.sr-doc :where(h1, h2, h3, h4, h5, h6):focus, .sr-doc :where(h1, h2, h3, h4, h5, h6):focus-visible { outline: none; }
+.sr-path:focus, .sr-path:focus-visible { outline: none; }
 .sr-doc pre code { background: none; padding: 0; }
 .sr-doc a { color: var(--accent-fg); }
 .sr-doc a[aria-disabled="true"] { color: var(--fg-muted); text-decoration: none; cursor: default; }

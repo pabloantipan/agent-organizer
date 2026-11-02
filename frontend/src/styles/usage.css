@@ -53,6 +53,9 @@
 .usage-sec { display: grid; gap: var(--space-2); min-width: 0; }
 .usage-sec-head { display: flex; align-items: baseline; gap: var(--space-2); max-width: 1008px; }
 .usage-sec .seg { justify-self: start; margin-bottom: 0; }
+/* The rejected list's one line under its title: what happens and whose it
+   is (leftovers-67 FR-12, U9; usage Amendment 1), sm, muted. */
+.usage-rejected-why { margin: 0; font-size: var(--font-size-sm); line-height: var(--line-sm); color: var(--fg-muted); max-width: 72ch; }
 
 /* ---------- the money chart ---------- */
 .chart { display: grid; gap: var(--space-1-5); padding-left: 48px; max-width: 960px; }

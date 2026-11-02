@@ -46,6 +46,15 @@ const names = (html: string, cls: string) =>
 const text = (html: string) => html.replace(/<[^>]+>/g, " ").replace(/&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
 
 /** Every element in a tree, functions left uncalled (they may hold hooks). */
+/** An element's visible words, its children flattened (the footer draws
+ *  the wave in its own span, leftovers-67 FR-8). */
+function plain(n: ReactNode): string {
+  if (n == null || typeof n === "boolean") return "";
+  if (typeof n === "string" || typeof n === "number") return String(n);
+  if (Array.isArray(n)) return n.map(plain).join("");
+  if (isValidElement(n)) return plain((n.props as { children?: ReactNode }).children);
+  return "";
+}
 function elements(n: ReactNode, out: ReactElement<Record<string, unknown>>[] = []) {
   if (Array.isArray(n)) n.forEach((c) => elements(c, out));
   else if (isValidElement(n)) {
@@ -151,7 +160,7 @@ describe("W2: the wave column, the disclosure, the footer (FR-8)", () => {
     expect(text(draw())).toContain("Waves in this window");
     const tree = Progress({ report, lineTokens: data.line_tokens, shown: { kind: "custom", since: 0, until: 0, live: false }, nav });
     const lines = elements(tree).filter((e) => e.props.className === "rr-wave-line");
-    expect(lines.map((e) => e.props.children)).toEqual([
+    expect(lines.map((e) => plain(e.props.children as ReactNode))).toEqual([
       "sup2/1 · sup2 · 2 cards (b, e) · 4 rounds, 1 failed (no cause given 1) · 29 min building · not merged",
       "sup1/1 · sup1 · 2 cards (a, c) · 6 rounds, 1 failed (execution 1) · 74 min building",
     ]);
@@ -257,7 +266,7 @@ describe("W9: a wave footer's target and name (FR-15 to FR-17)", () => {
       "show sup0's run record in Needs me, Deltagos can't read it",
     ]);
     expect(b.map((e) => e.props.title)).toEqual(b.map((e) => e.props["aria-label"]));
-    expect(b[1].props.children).toBe("sup1/1 · sup1 · 2 cards (a, c) · 6 rounds, 1 failed (execution 1) · 74 min building");
+    expect(plain(b[1].props.children as ReactNode)).toBe("sup1/1 · sup1 · 2 cards (a, c) · 6 rounds, 1 failed (execution 1) · 74 min building");
   });
   it("a press opens the record in the reader over the report, Work, or Needs me's unread row", () => {
     const go = { openSpec: vi.fn(async () => undefined), openNeedsMe: vi.fn(), openWave: vi.fn() };
