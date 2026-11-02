@@ -19,7 +19,7 @@ import { openBox } from "../lib/boxStack";
 import { loopTab } from "../lib/tabTrap";
 import { slotDiagrams } from "../lib/diagram";
 import { useMarkdownEdges, useScrollEdges } from "../lib/useScrollEdges";
-import { frontmatterAsCode, linkTarget, pathRef, sectionId, specRef, withAnchors, type ContentsItem, type ReaderIndex } from "../lib/specReader";
+import { firstHeadingId, linkTarget, readerSource, pathRef, sectionId, specRef, withAnchors, type ContentsItem, type ReaderIndex } from "../lib/specReader";
 import { useDiagrams } from "./DiagramFigure";
 import "../styles/spec-reader.css";
 
@@ -186,8 +186,9 @@ export function SpecReader() {
 
   const rendered = useMemo(() => {
     if (!top) return { html: "", contents: [] };
-    const md = top.kind === "record" ? `# ${top.number} ${top.title ?? ""}\n\n${top.text}` : frontmatterAsCode(top.text);
-    return withAnchors(slotDiagrams(marked.parse(md || "") as string));
+    if (top.kind === "record") return withAnchors(slotDiagrams(marked.parse(`# ${top.number} ${top.title ?? ""}\n\n${top.text}`) as string));
+    const src = readerSource(top.path, top.text);
+    return withAnchors(slotDiagrams(marked.parse(src.md || "") as string) + src.after);
   }, [top]);
   const html = rendered.html;
   // The body's HTML is set here, not by dangerouslySetInnerHTML: React set
@@ -237,7 +238,9 @@ export function SpecReader() {
     if (!open || !top || !sc || !b) return;
     const ids = Array.from(b.querySelectorAll<HTMLElement>("[id]")).map((h) => h.id);
     // ← Back restores the scroll even when the file was opened on a section.
-    const id = top.scroll === undefined ? sectionId(ids, top.section) : null;
+    // A run record without a section opens at its first prose heading (FR-8, PW8).
+    const runRecord = top.kind === "spec" && readerSource(top.path, top.text).runRecord;
+    const id = top.scroll === undefined ? (top.section ? sectionId(ids, top.section) : runRecord ? firstHeadingId(html) : null) : null;
     const heading = id ? b.querySelector<HTMLElement>(`#${CSS.escape(id)}`) : null;
     const saved = top.scroll ?? leftAt.get(`${initiative}:${top.path}`) ?? 0;
     const place = () => {

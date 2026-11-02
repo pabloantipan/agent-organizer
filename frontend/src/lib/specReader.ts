@@ -136,3 +136,36 @@ export function frontmatterAsCode(text: string): string {
   const fence = m[1].includes("```") ? "~~~~" : "```";
   return `${fence}yaml\n${m[1]}\n${fence}\n\n${text.slice(m[0].length)}`;
 }
+
+/** A run record (a file under the scan's runs/, leftovers-64 FR-8, PW8):
+ *  its prose to render, and its frontmatter (the `waves:` block of rounds,
+ *  verdicts, causes) to fold after it. Null for any other file, or a run
+ *  record with no frontmatter, which the reader draws as before. */
+export function runRecordParts(path: string, text: string): { prose: string; rounds: string } | null {
+  if (!/^runs\/[^/]+\.md$/.test(path ?? "")) return null;
+  const m = /^---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/.exec(text ?? "");
+  if (!m) return null;
+  return { prose: text.slice(m[0].length), rounds: m[1] };
+}
+
+export const ROUNDS_SUMMARY = "Rounds as recorded";
+
+const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/** The rounds folded under a closed disclosure, mono when opened (PW8). */
+export const roundsHtml = (yaml: string) =>
+  `<details class="sr-rounds"><summary>${ROUNDS_SUMMARY}</summary><pre><code class="language-yaml">${esc(yaml)}\n</code></pre></details>`;
+
+/** The markdown and the trailing HTML the reader draws for a file: a run
+ *  record's prose then its rounds folded; any other file's frontmatter as
+ *  a yaml block before the rest, unchanged (FR-15 of leftovers-57). */
+export function readerSource(path: string, text: string): { md: string; after: string; runRecord: boolean } {
+  const r = runRecordParts(path, text);
+  if (r) return { md: r.prose, after: roundsHtml(r.rounds), runRecord: true };
+  return { md: frontmatterAsCode(text), after: "", runRecord: false };
+}
+
+/** The id of the first heading in rendered HTML (withAnchors' output). */
+export function firstHeadingId(html: string): string | null {
+  return /<h[1-6] id="([^"]+)"/.exec(html ?? "")?.[1] ?? null;
+}
