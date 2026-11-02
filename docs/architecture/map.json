@@ -1,0 +1,611 @@
+{
+  "schema": "c4-map/1",
+  "initiative": "organizer",
+  "system": "deltagos",
+  "inputs": {
+    "agent-organizer": "baf596ffa1af1785f2127bd74c1f62fa670b8edc"
+  },
+  "levels": [
+    {
+      "level": "context",
+      "page": "context.md",
+      "svg": "context.md-1.svg"
+    },
+    {
+      "level": "containers",
+      "page": "containers.md",
+      "svg": "containers.md-1.svg"
+    },
+    {
+      "level": "modules",
+      "page": "modules.md",
+      "svg": "modules.md-1.svg",
+      "container": "agent_organizer"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "deltagos",
+      "label": "Deltagos board and CLI over a factory's initiatives",
+      "level": "context",
+      "kind": "system",
+      "parent": null,
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "record",
+          "ref": "0176"
+        }
+      ]
+    },
+    {
+      "id": "discuss_mailbox",
+      "label": "discuss mailbox (agent-mailbox-api)",
+      "level": "context",
+      "kind": "external",
+      "parent": null,
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "external",
+          "ref": "ext:agent-mailbox-api#fn:mailbox.health"
+        },
+        {
+          "kind": "curated",
+          "ref": "context.md"
+        }
+      ]
+    },
+    {
+      "id": "factory_tools",
+      "label": "the factory's tools: factory, probe, zellij, the agent CLI",
+      "level": "context",
+      "kind": "external",
+      "parent": null,
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "curated",
+          "ref": "context.md"
+        }
+      ]
+    },
+    {
+      "id": "firebase",
+      "label": "Firebase: Auth and Firestore",
+      "level": "context",
+      "kind": "external",
+      "parent": null,
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "curated",
+          "ref": "context.md"
+        }
+      ]
+    },
+    {
+      "id": "pablo",
+      "label": "Pablo the factory's lead",
+      "level": "context",
+      "kind": "person",
+      "parent": null,
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "curated",
+          "ref": "context.md"
+        }
+      ]
+    },
+    {
+      "id": "record",
+      "label": "the record (agent-mailbox-record)",
+      "level": "context",
+      "kind": "external",
+      "parent": null,
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "external",
+          "ref": "ext:agent-mailbox-record#fn:record.usage.post"
+        },
+        {
+          "kind": "curated",
+          "ref": "context.md"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer",
+      "label": "agent-organizer",
+      "level": "containers",
+      "kind": "container",
+      "parent": "deltagos",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer@baf596f"
+        }
+      ]
+    },
+    {
+      "id": "discuss_mailbox",
+      "label": "discuss mailbox (agent-mailbox-api)",
+      "level": "containers",
+      "kind": "external",
+      "parent": null,
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "external",
+          "ref": "ext:agent-mailbox-api#fn:mailbox.drain"
+        },
+        {
+          "kind": "external",
+          "ref": "ext:agent-mailbox-api#fn:mailbox.health"
+        },
+        {
+          "kind": "external",
+          "ref": "ext:agent-mailbox-api#fn:mailbox.healthz"
+        },
+        {
+          "kind": "external",
+          "ref": "ext:agent-mailbox-api#fn:mailbox.messages.post"
+        },
+        {
+          "kind": "external",
+          "ref": "ext:agent-mailbox-api#fn:mailbox.search"
+        },
+        {
+          "kind": "external",
+          "ref": "ext:agent-mailbox-api#fn:mailbox.thread.get"
+        },
+        {
+          "kind": "external",
+          "ref": "ext:agent-mailbox-api#fn:mailbox.thread.status.set"
+        },
+        {
+          "kind": "external",
+          "ref": "ext:agent-mailbox-api#fn:mailbox.threads.list"
+        }
+      ]
+    },
+    {
+      "id": "factory_tools",
+      "label": "the factory's tools: factory, probe, zellij, the agent CLI",
+      "level": "containers",
+      "kind": "external",
+      "parent": null,
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "curated",
+          "ref": "context.md"
+        }
+      ]
+    },
+    {
+      "id": "firebase",
+      "label": "Firebase: Auth and Firestore",
+      "level": "containers",
+      "kind": "external",
+      "parent": null,
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "curated",
+          "ref": "context.md"
+        }
+      ]
+    },
+    {
+      "id": "record",
+      "label": "the record (agent-mailbox-record)",
+      "level": "containers",
+      "kind": "external",
+      "parent": null,
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "external",
+          "ref": "ext:agent-mailbox-record#fn:record.factories.cells.post"
+        },
+        {
+          "kind": "external",
+          "ref": "ext:agent-mailbox-record#fn:record.factories.keys.issue"
+        },
+        {
+          "kind": "external",
+          "ref": "ext:agent-mailbox-record#fn:record.factories.keys.revoke"
+        },
+        {
+          "kind": "external",
+          "ref": "ext:agent-mailbox-record#fn:record.usage.post"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer__auth",
+      "label": "auth",
+      "level": "modules",
+      "kind": "module",
+      "parent": "agent_organizer",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/internal/auth"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer__cache",
+      "label": "cache",
+      "level": "modules",
+      "kind": "module",
+      "parent": "agent_organizer",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/internal/cache"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer__cli",
+      "label": "cli",
+      "level": "modules",
+      "kind": "module",
+      "parent": "agent_organizer",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/internal/cli"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer__config",
+      "label": "config",
+      "level": "modules",
+      "kind": "module",
+      "parent": "agent_organizer",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/internal/config"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer__diagram",
+      "label": "diagram",
+      "level": "modules",
+      "kind": "module",
+      "parent": "agent_organizer",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/internal/diagram"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer__discuss",
+      "label": "discuss",
+      "level": "modules",
+      "kind": "module",
+      "parent": "agent_organizer",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/internal/discuss"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer__keychain",
+      "label": "keychain",
+      "level": "modules",
+      "kind": "module",
+      "parent": "agent_organizer",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/internal/keychain"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer__lock",
+      "label": "lock",
+      "level": "modules",
+      "kind": "module",
+      "parent": "agent_organizer",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/internal/lock"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer__memory",
+      "label": "memory",
+      "level": "modules",
+      "kind": "module",
+      "parent": "agent_organizer",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/internal/memory"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer__merge",
+      "label": "merge",
+      "level": "modules",
+      "kind": "module",
+      "parent": "agent_organizer",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/internal/merge"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer__model",
+      "label": "model",
+      "level": "modules",
+      "kind": "module",
+      "parent": "agent_organizer",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/internal/model"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer__prompt",
+      "label": "prompt",
+      "level": "modules",
+      "kind": "module",
+      "parent": "agent_organizer",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/internal/prompt"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer__record",
+      "label": "record",
+      "level": "modules",
+      "kind": "module",
+      "parent": "agent_organizer",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/internal/record"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer__review",
+      "label": "review",
+      "level": "modules",
+      "kind": "module",
+      "parent": "agent_organizer",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/internal/review"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer__scan",
+      "label": "scan",
+      "level": "modules",
+      "kind": "module",
+      "parent": "agent_organizer",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/internal/scan"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer__service",
+      "label": "service",
+      "level": "modules",
+      "kind": "module",
+      "parent": "agent_organizer",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/internal/service"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer__session",
+      "label": "session",
+      "level": "modules",
+      "kind": "module",
+      "parent": "agent_organizer",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/internal/session"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer__specpath",
+      "label": "specpath",
+      "level": "modules",
+      "kind": "module",
+      "parent": "agent_organizer",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/internal/specpath"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer__sync",
+      "label": "sync",
+      "level": "modules",
+      "kind": "module",
+      "parent": "agent_organizer",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/internal/sync"
+        }
+      ]
+    },
+    {
+      "id": "agent_organizer__usage",
+      "label": "usage",
+      "level": "modules",
+      "kind": "module",
+      "parent": "agent_organizer",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/internal/usage"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "deltagos",
+      "to": "discuss_mailbox",
+      "level": "context",
+      "evidence": [
+        {
+          "kind": "external",
+          "ref": "ext:agent-mailbox-api#fn:mailbox.health"
+        }
+      ]
+    },
+    {
+      "from": "deltagos",
+      "to": "factory_tools",
+      "level": "context",
+      "evidence": [
+        {
+          "kind": "curated",
+          "ref": "context.md"
+        }
+      ]
+    },
+    {
+      "from": "deltagos",
+      "to": "firebase",
+      "level": "context",
+      "evidence": [
+        {
+          "kind": "curated",
+          "ref": "context.md"
+        }
+      ]
+    },
+    {
+      "from": "deltagos",
+      "to": "record",
+      "level": "context",
+      "evidence": [
+        {
+          "kind": "external",
+          "ref": "ext:agent-mailbox-record#fn:record.usage.post"
+        }
+      ]
+    },
+    {
+      "from": "pablo",
+      "to": "deltagos",
+      "level": "context",
+      "evidence": [
+        {
+          "kind": "curated",
+          "ref": "context.md"
+        }
+      ]
+    },
+    {
+      "from": "agent_organizer",
+      "to": "discuss_mailbox",
+      "level": "containers",
+      "evidence": [
+        {
+          "kind": "external",
+          "ref": "ext:agent-mailbox-api#fn:mailbox.health"
+        }
+      ]
+    },
+    {
+      "from": "agent_organizer",
+      "to": "factory_tools",
+      "level": "containers",
+      "evidence": [
+        {
+          "kind": "curated",
+          "ref": "context.md"
+        }
+      ]
+    },
+    {
+      "from": "agent_organizer",
+      "to": "firebase",
+      "level": "containers",
+      "evidence": [
+        {
+          "kind": "curated",
+          "ref": "context.md"
+        }
+      ]
+    },
+    {
+      "from": "agent_organizer",
+      "to": "record",
+      "level": "containers",
+      "evidence": [
+        {
+          "kind": "external",
+          "ref": "ext:agent-mailbox-record#fn:record.usage.post"
+        }
+      ]
+    }
+  ]
+}
