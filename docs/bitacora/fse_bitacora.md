@@ -17,6 +17,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- 15:0x sup116 closed (lf72 #61 51db34f, 31 min vs 30-60, $8.98, no failed round) and ended. Its F1, F2 and spec gaps are already in leftovers-73 (0186, asked 15:01). Held low: V2-style scans miss 'mono num', {"\u00b7"} and expression titles (no site today). sup115 (lf71 #59, 43 min, $8.12) ended 14:22. Kept sup116's prompt file as sup117's template source.
+
 - To cut after lf72-counts-commas merges (same files): Aglaea run-report Amendment 9 (e729ecc): AR35 amended (inset ring on links in comma lists; 'never the name' includes the next item), AR37 comma-list links are inline text, no 24 px minimum there (AR28 stays on progress rows and the waits line), AR38 'Asleep · 1', 'Archived · 1' (folded rail groups, (N) is not a count form), and names a person gave (rail groups, clients, initiatives) are not uppercased by .rail-group. Grep every (N) count and every .rail-group text-transform before the premise.
 
 - To cut after lf71-count-look merges (same files): Aglaea run-report Amendment 8 (f62790a): AR33 amended (padding as built; no glyph covered), AR35 comma outside the link pulled in by margin-inline-start calc(-1 * var(--space-1)) in RunTracks.tsx:88, AR36 'Sessions · 10' disclosure through SecCount (UsageSessions.tsx:27), 'Gates · 6' (Overview) and the rail's 'Roles · 4' take the form; 'Exit 0/2' stays. Grep every count title across frontend/src before writing the premise.
