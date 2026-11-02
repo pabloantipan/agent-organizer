@@ -1,6 +1,6 @@
 ---
 title: "Every count title through one piece, and commas that sit beside their names"
-status: now
+status: done
 repos: [organizer]
 branch: lf72-counts-commas
 seat: l72-build
@@ -8,7 +8,7 @@ reviewer: l72-rev, l72-ui
 review: "l72-rev pass (V1 V2 X0) at 27962f3, 2026-11-02; AR35 AR36 for l72-ui"
 stage:
 updated: 2026-11-02
-next: "merged as organizer #61 51db34f; supervisor moves it to done/"
+next: "done: merged organizer #61 51db34f"
 depends_on: [lf71-count-look]
 boundary: ["frontend/src/components/RunTracks.tsx", "frontend/src/components/UsageSessions.tsx", "frontend/src/components/Overview.tsx", "frontend/src/components/Rail.tsx", "frontend/src/components/RunReport.tsx", "frontend/src/components/SecCount.tsx", "frontend/src/styles/runreport.css", "frontend/src/styles/usage.css", "frontend/src/styles/overview.css", "frontend/src/styles/shell.css", "frontend/src/components/RunTracks.test.tsx", "frontend/src/components/RunReport.test.tsx", "frontend/src/components/RunReport.lf64.test.tsx", "frontend/src/components/SecCount.test.tsx", "frontend/src/components/"]
 spec: "docs/specs/leftovers-72.md (FR-1 to FR-3)"
