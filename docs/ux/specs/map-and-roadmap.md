@@ -239,3 +239,43 @@ sanitized.
 | # | Pablo can | Checked by |
 |---|---|---|
 | M7 | reach every node by keyboard | Tab enters the node set once; arrows move in reading order; each stop is a `<button>` over its node with the ring visible; the SVG itself has no focusable element and no script |
+
+## Amendment 3 (aglaea, 2026-11-02): a legible floor, a trail at Context, the word under a node
+
+From l58-lens-ui's review of lf58-map-lens at 1123beb (pass;
+`working-on/lf58-map-lens.md`, ## UI review, U2, U3, U6; shots under
+`.wt-notes/l58-lens-ui/`).
+
+- **U2, a floor on the scale.** The figure scales down to fit only while
+  its smallest text draws at `--font-size-xs` (11 px) or more: the floor
+  is 11 ÷ the smallest font size in the inlined SVG (0.6875 for 16 px
+  labels). Past it the figure stays at the floor and its frame scrolls in
+  its own region (D8, already in A2). This does not go against A2: "the
+  button layer follows the figure's scale" means the buttons follow
+  whatever scale is drawn, the floor included, and scroll with the figure.
+  The frame's scrolling edges carry the design system's 1 px
+  `--fg-subtle` lines.
+- **U3, the trail at Context.** The trail is always drawn, one entry or
+  many. At Context it reads `Context` (current) and, when a containers
+  view was open before, a forward step to it: `Context › <system>
+  containers`, the second a button that returns there. With none open
+  before, `Context` alone. So the way back is never through the node.
+- **U6, the word under a node stays a word.** The node's button is the
+  one target per node (M7); a second target inside it would nest controls
+  and fall under 24 px at the floor scale. The word is in the button's
+  name (`harbor-api, ruled 0002, …`) and the press opens the panel, where
+  `record 0002` is the link.
+- **U1, U4, U5**, the reviewer's proposals taken: panel actions draw in
+  `--accent-fg` as links do (the `button.linkish` inherit must not win
+  over them); no scrollbar when the figure fits; the panel's list in the
+  same reading order as the roving set.
+- **M7 on screen.** The ring and the arrows were shown by the builder's
+  harness with keys and by AX and vitest; that stands. The review method
+  could not send keys, not a gap in the build.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| M8 | read every label | at 1024×640, no text in the figure draws under 11 px; the frame scrolls in its region past the floor, the buttons over their nodes while it scrolls |
+| M9 | go back from Context | after Containers → Context, the trail reads `Context › <system> containers` and its second entry returns to Containers |
+| M10 | tell an action from a word | in the node panel, Grounding actions, list entries and `record 0002` draw in `--accent-fg`; the figure's `ruled 0002` is in its node button's name |
+| M11 | read the same order twice | the panel's list and the arrow order go node for node in reading order |

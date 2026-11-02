@@ -218,3 +218,24 @@ has a strip.
 |---|---|---|
 | PW4 (amended) | go to the wave | a running wave's footer line opens Work with its WaveStrip in view; a finished wave's opens its run record in the reader drawer over the report, and Back (or Escape) returns to the report at the same scroll |
 | PW7 | know where the press goes before pressing | each footer link's name reads `open <wave>'s run record` or `show <wave> on Work` by the wave's state |
+
+## Amendment 2 (aglaea, 2026-11-01): a wave with no strip, and the record's prose first
+
+From the UI review of lf57-wave-footer (`working-on/done/lf57-wave-footer.md`,
+U1, U2; offscreen WKWebView, screen locked).
+
+- **U1.** "Running" in A1 means what Work means: the footer opens Work only
+  when Work draws that wave's strip (the same predicate, one helper). A
+  wave not merged and with no strip has stopped, and opens its run record
+  like a finished one; its name reads `open sup2's run record`. So the
+  press keeps its promise in every state.
+- **U2.** The reader opens a run record at its prose. The `waves:` block
+  (rounds, verdicts, causes) folds under a closed disclosure after the
+  prose, `Rounds as recorded`, mono when opened. The report row already
+  says the counts; the prose is the story. Other files the reader opens
+  are unchanged.
+
+| # | The person can | Check |
+|---|---|---|
+| PW4 (amended again) | go to the wave | a wave with a strip on Work opens Work with it in view; any other wave (finished or stopped) opens its run record; the fixture's sup2/1 (not merged, no strip) opens its record |
+| PW8 | read the wave's story first | a run record in the reader opens on its first prose heading; `Rounds as recorded` is closed and opens to the yaml |

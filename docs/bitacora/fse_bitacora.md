@@ -4,18 +4,38 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
-## HAND-OFF 2026-11-01 20:27 (last sha see git log)
+## HAND-OFF 2026-11-02 00:27 (last sha see git log)
 
-- AUTONOMOUS since 16:19, no end set. Goal (Pablo via Hephaistos): the factory model built in atlax. Hourly cron wake (session-only).
-- Supervisors (cap 3, all within forecast at 20:27): sup101 leftovers 57 (lf57-home-signal passed code and UI review, PR with talos-lab; lf57-wave-footer round 2 in review at b98452f, Amendments 4-6); sup103 leftovers 58 (lf58-map-lens building, wave 2; read #24 and render #27 merged); sup104 leftovers 62 (0175 by recommendation 19:44; lf62-go in review at 83fe879; lf62-ui after it).
-- Merged today: #4-#27. origin/main e968fc1. Installed v0.2.0-3200 (through #26).
-- atlax for organizer: seed, calls, record, 107-element surface, 3 authored (#12, #13, #21, #23, #25); check 0 findings.
-- To cut when free: the organizer's own map.json (Daedalus, c4-map gen); htmlLabels at the source; docs/runs scan gap; FR-9 consumes completeness (low).
-- Waits on Pablo: lf55-one-title (Dock window; needs-operator; rebase over lf60 first); restart Deltagos for the icon fix. The screen is locked: UI reviews render offscreen.
-- 0167 and 0168 carry "2026-10-28" in their ruling words. They were ruled on 10-27 by the clock. Ruled records are not edited.
-- Rules learned today: atlax cards carry touches and change_order at cut; a premise listing call sites greps all of frontend/src; bitácora inserts go after the day-log heading.
+- AUTONOMOUS since 2026-11-01 16:19, no end set. Goal: the factory model built in atlax. Hourly cron wake (session-only).
+- Two usage-limit stops (~17:00-18:50, ~20:54-23:50) and two memory outages (23:26, 23:55; second not yet declared over at 00:27, swap 88%). I ended 53 frozen seats of finished tasks; seats frozen in an outage stay frozen until thawed on purpose.
+- Supervisors (cap 3, within forecast at 00:27): sup103 leftovers 58 (lf58-map-lens: code review failed M3 on my gap, Amendment 2 990915f adds ReadSpec for map pages and fixture grounding; UI review running); sup104 leftovers 62 (lf62-go passed, PR with talos-lab; lf62-ui after the outage; window to 01:52); sup106 leftovers 64 (l64-build phase 1 since 23:55; Amendment 1).
+- Parked: lf63-organizer-map (blocked on Hephaistos's c4-map-self-repo; drafts 9749dd9 on its branch; relaunch needs new tokens; decide whether L1 draws Keychain, git, the terminals).
+- Merged through #29 plus #30 working-on. origin/main 1bc2d44. Installed v0.2.0-3239.
+- Waits on Pablo: lf55-one-title (Dock window; rebase over lf60 first); restart Deltagos for the icon fix.
+- 0167 and 0168 carry "2026-10-28" in their ruling words. Ruled records are not edited.
+- Rules: atlax cards carry touches and change_order at cut (card-check enforces it now); a premise listing call sites greps all of frontend/src; bitácora inserts go after the day-log heading; any ReadSpec-opened file kind needs its allow rule named in the spec.
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
+
+- ~02:35 memory outage over. Relaunched organizer-probe-talos-lab (prelude from the template, lf62-go first) and sup107 on lf63-organizer-map (drafts 9749dd9; c4-map 762f865). Scoped L1: Keychain, git and the terminal apps stay off the map. sup103 and sup106 told to thaw their crew one at a time.
+
+- sup104 closed (19:45-01:30, 5h45m against 90-180m: ~3h40m a hung reviewer launch plus the usage limit, ~1h the PR wait; seats $6.72) and ended. lf62-go passed, PR pending; lf62-ui next for a later supervisor. Rule for my prompts: `-to talos-lab` only while the cell's talos-lab seat is live; otherwise `[for talos-lab]` to pablo (the relay). Sent Hephaistos the hung launch and gate-check's misreads.
+
+- 01:27: organizer's talos-lab seat had exited (its .kdl and prelude gone); relaunch waits for the memory outage to clear (probe refuses >85% swap). lf62-go's PR sent to the transversal talos-lab via [for talos-lab]. Relaunch organizer-probe-talos-lab (prompt kept in ~/.local/state/probe; prelude to rewrite from the template) when probe allows.
+
+- To cut after lf58-map-lens merges (Aglaea, map-and-roadmap Amendment 3, dc466fb, M8-M11): U2 a scale floor (smallest SVG text >= 11 px, then the frame scrolls; buttons follow); U3 the trail always drawn, 'Context › <system> containers' with a way back; U6 the ruled word stays a word, in the button's name; U1, U4, U5 already in sup103's round.
+
+- Held for the next leftovers (lf62-go review pass at 83fe879): string-literal decision-status comparisons (`internal/service/draft.go:27`, `internal/cli/decisions.go:116`) escape the G4 guard, which only catches `model.Decision*` constants. Also: `usagePostState.Accepted` keeps keys of ledger rows that are gone (FR-3 prunes Rejected only).
+
+- 23:51 after a second usage-limit stop (~20:54-23:50) and a factory memory outage (23:26-23:4x, swap 96%): ended 53 frozen seats of finished organizer tasks (probe -k, conversations kept); thawed sup103, sup106, talos-lab. sup104 self-extended to 01:52 (its reviewer's launch hung 3h42m in zellij attach -b). leftovers-64 Amendment 1: a wave with no record has a footer with no press.
+- Hephaistos: building c4-map-self-repo (lf63 relaunches on its sha); carded factory-report-dead-minutes; atlax-tool-followups merged (claudecode 3f92291, specs 6aeb0b7): publish derives derived/map.json when an initiative has none, `atlax card-check --card` refuses a card that changes elements without change_order (supervise precondition 14).
+
+- sup105 closed and ended: lf63-organizer-map parked (blocked on Hephaistos's c4-map self-repo fix, asked 2026-11-01), drafts 9749dd9 on the unpushed branch, builder $1.42. On relaunch: new tokens and preludes; decide whether L1 draws the subprocess externals (Keychain, git, osascript/Terminal/iTerm), a judge-architecture question if Pablo is still away.
+
+- Held for the next frontend leftovers (Aglaea 60ea44c): run-report Amendment 3, AR22-AR26 (waits as '0002 (pablo) · …', not-drawn without the red rule, 24 px targets, 'no tokens recorded', Ddd HH:MM column, ↓ in --fg-subtle); progress-and-waves Amendment 2, PW4 again and PW8 (footer opens Work only when Work draws that wave's strip, else the run record; the reader opens a run record at its prose with the waves yaml under a closed 'Rounds as recorded').
+
+- sup101 closed (16:13-20:31, 4h18m against 180-300m +90m, ~2h07 the usage limit; seats $40.76, 11 seats): leftovers 57 merged #19, #26, #28, #29. Ended. Installed v0.2.0-3239.
+- From sup101, held for the next leftovers: (1) runs.jsonl leaves 9 of 11 seats with no card: seats launch from the initiative root, so MatchCard never sees a worktree path (the P0.6 baseline loses per-card cost for supervised waves; check whether lf56's read-time attribution by seat: already fixes the runs view, else a card); (5) ReadSpec follows a symlink under specs/ or runs/ out of the root; (4) gate gaps: W7 depends on rail state, the fixture has no remote initiative, the contract's window is fixed at 20 Oct; (3) fixture-home.sh's stub `factory` shadows `factory report`. Sent: (4) dead_minutes total in factory report to Hephaistos; (6) UI notes to Aglaea. No UI row ran on a real window this evening (screen locked; reviews used offscreen WKWebView).
 
 - Held: run records under docs/runs/ the scan does not read need a scan card (l57-foot's note, lf57-wave-footer).
 
