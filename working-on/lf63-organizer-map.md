@@ -6,7 +6,7 @@ branch: lf63-organizer-map
 seat: lf63-build
 stage:
 updated: 2026-11-02
-next: "review: lf63-organizer-map, C1-C3 and X0 pass, C4 and C5 pass only by an equivalent run (their literal commands fail in mermaid2svg and go run; question to sup107), ea0cc7c"
+next: "review: lf63-review at ea0cc7c (C4, C5 by the equivalent runs sup107 accepted)"
 depends_on: [lf58-map-read]
 boundary: ["docs/architecture/"]
 spec: "docs/specs/leftovers-63.md (FR-1 to FR-3)"
