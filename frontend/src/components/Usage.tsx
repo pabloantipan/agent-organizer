@@ -7,7 +7,7 @@ import {
   type Cut, type UsageRow, type UsageSession, type UsageTotals, type WeekPoint,
 } from "../lib/usage";
 import { UsageChart } from "./UsageChart";
-import { UsageTable } from "./UsageTable";
+import { UsageRejected, UsageTable, type UsageRejectedRow } from "./UsageTable";
 import { UsageSessions } from "./UsageSessions";
 import "../styles/usage.css";
 
@@ -22,6 +22,8 @@ export type UsageData = {
   weeks: WeekPoint[];
   cuts: Record<string, UsageRow[]>;
   sessions: UsageSession[];
+  /** The rows the record refused, from the post state (leftovers-62 FR-3). */
+  rejected?: UsageRejectedRow[] | null;
 };
 
 const CUT_KEY = "organizer.usage.cut";
@@ -102,6 +104,9 @@ export function Usage() {
       </div>
       {error && <div className="usage-line err">That week could not be read: {error}</div>}
       <Week data={data} thisWeek={current} cut={cut} setCut={setCut} filter={usageFilter} onPick={(w) => setWeek(w === current ? null : w)} />
+      {/* Not the week's: the rows the record refused stand until their
+          ledger row changes or goes, whichever week is shown (FR-7). */}
+      <UsageRejected rows={data.rejected} />
     </div>
   );
 }
