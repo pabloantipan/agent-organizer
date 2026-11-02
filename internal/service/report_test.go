@@ -15,11 +15,17 @@ import (
 	"organizer/internal/model"
 )
 
-// The run report's gate rows (docs/specs/leftovers-57.md R1-R4, R6). The
-// samples are read from ${CONTRACTS_DIR:-~/agent-slack/specs/contracts}/
-// factory-report/ at agent-mailbox-specs 8474386; a missing sample fails,
-// never skips. Fake factories print the samples; only R2 runs the real
-// factory, over the contract's own fixture.
+// The run report's gate rows (docs/specs/leftovers-57.md R1-R4, R6, W12).
+// The samples are read from $CONTRACTS_DIR/factory-report/; CONTRACTS_DIR is
+// the pin: a checkout of agent-mailbox-specs at the commit these types
+// follow (54369d3 on feat/report-dead-minutes, factory-report 8474386 plus
+// dead_minutes; FR-20). Unset, the tests fall back to
+// ~/agent-slack/specs/contracts, which is NOT pinned: it holds whatever that
+// checkout is at, and the tests log that they read it. A missing sample
+// fails, never skips. Fake factories print the samples; only R2 runs the
+// real factory, over the contract's own fixture.
+
+const reportContractPin = "agent-mailbox-specs 54369d3 (feat/report-dead-minutes)"
 
 func reportContractDir() string {
 	if d := os.Getenv("CONTRACTS_DIR"); d != "" {
@@ -34,13 +40,16 @@ func readReportSample(dir, name string) (string, []byte, error) {
 	p := filepath.Join(dir, name)
 	b, err := os.ReadFile(p)
 	if err != nil {
-		return p, nil, fmt.Errorf("factory-report contract sample %s is missing: %v (set CONTRACTS_DIR to a checkout of agent-mailbox-specs at 8474386)", name, err)
+		return p, nil, fmt.Errorf("factory-report contract sample %s is missing: %v (set CONTRACTS_DIR to the contracts/ of a checkout of %s)", name, err, reportContractPin)
 	}
 	return p, b, nil
 }
 
 func reportSample(t *testing.T, name string) (string, []byte) {
 	t.Helper()
+	if os.Getenv("CONTRACTS_DIR") == "" {
+		t.Logf("CONTRACTS_DIR unset: reading %s, an unpinned checkout; the pin is %s", reportContractDir(), reportContractPin)
+	}
 	p, b, err := readReportSample(reportContractDir(), name)
 	if err != nil {
 		t.Fatal(err)
