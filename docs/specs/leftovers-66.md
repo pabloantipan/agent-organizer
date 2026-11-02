@@ -1,6 +1,6 @@
 # Leftovers 66: Go leftovers of today's reviews, then the map regenerated: the build spec
 
-status: proposed (0179)
+status: accepted (0179, ruled 2026-11-02)
 by: the FSE, 2026-11-02, on main at 902b01a
 sources: review findings filed to the FSE (bitácora, day log 2026-11-01/02):
 lf62-go's review at 83fe879 (string-literal status comparisons; Accepted
