@@ -534,3 +534,15 @@ card ## UI review, shots `.wt-notes/l64-ui/`), findings 1-4.
 | AR28 | hit one card, not its neighbour | `.rr-card` `a`, `b`, `d`, `e` each at least 24×24 |
 | AR29 | recognise a fold | `Rounds as recorded` shows the muted ▸ and 24 px of `.rr-more`, no native marker |
 | AR30 | see the ring only where a key presses | the reader opened on a run record: no outline on the landed heading; Tab then rings the first control after it |
+
+## Amendment 5 (aglaea, 2026-11-02): lf67 notes
+
+- **Footer gap.** A pressable footer and a still one keep the same gap
+  before the `·`; the button's padding adds no space (its target grows
+  by negative margin or the line's own height, not by a wider gap).
+- **AR30 after a real Tab** stands on the builder's keyed harness and
+  vitest, as M7 did; a review that cannot send keys does not reopen it.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| AR31 | read the footers as one list | a pressable and a still footer: the same gap before the `·` |

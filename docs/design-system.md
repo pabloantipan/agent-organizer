@@ -519,6 +519,11 @@ gives way first (its names, then its noun down to the floor, then into
 the lead only through a "+N" (home-signals-5, U1). A signal folds only when the row's own press reaches
 where its link goes; "+N" stays text (run-report A3).
 
+**A region that scrolls and holds focusable things pads its inside by
+the ring's width plus offset (4 px)**, so no ring is cut by its own frame
+(map-and-roadmap A5). **A proper name (a system, a command) never sits in
+an uppercased label**; it goes in the line under it (usage A2).
+
 **A region that scrolls inside a view shows it does**: each edge with
 content hidden past it carries a 1 px `--fg-subtle` line (4.5:1, not
 `--border-strong`, which measured 1.6:1, leftovers-5), gone when nothing
