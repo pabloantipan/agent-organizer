@@ -17,6 +17,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- ~02:35 memory outage over. Relaunched organizer-probe-talos-lab (prelude from the template, lf62-go first) and sup107 on lf63-organizer-map (drafts 9749dd9; c4-map 762f865). Scoped L1: Keychain, git and the terminal apps stay off the map. sup103 and sup106 told to thaw their crew one at a time.
+
 - sup104 closed (19:45-01:30, 5h45m against 90-180m: ~3h40m a hung reviewer launch plus the usage limit, ~1h the PR wait; seats $6.72) and ended. lf62-go passed, PR pending; lf62-ui next for a later supervisor. Rule for my prompts: `-to talos-lab` only while the cell's talos-lab seat is live; otherwise `[for talos-lab]` to pablo (the relay). Sent Hephaistos the hung launch and gate-check's misreads.
 
 - 01:27: organizer's talos-lab seat had exited (its .kdl and prelude gone); relaunch waits for the memory outage to clear (probe refuses >85% swap). lf62-go's PR sent to the transversal talos-lab via [for talos-lab]. Relaunch organizer-probe-talos-lab (prompt kept in ~/.local/state/probe; prelude to rewrite from the template) when probe allows.
