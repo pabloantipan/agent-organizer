@@ -68,7 +68,7 @@ describe("FR-6: Map on Roadmap's switch", () => {
     expect(trailOf(r, { level: "containers" }).map((t) => t.label)).toEqual(["Context", "Containers"]);
     const html = body(r);
     expect(html).toContain('<nav class="map-trail" aria-label="Map level">');
-    expect(html).toContain('<span aria-current="page" class="map-trail-here">Containers</span>');
+    expect(html).toContain('<span aria-current="location" class="map-trail-here">Containers</span>');
     expect(html).toContain('class="linkish map-trail-go">Context</button>');
     expect(html).toContain("Drawing the map…");
   });
@@ -324,7 +324,7 @@ describe("V2: the trail at Context (FR-2, M9)", () => {
     place({ level: "context", containersSeen: true });
     const html = body(r);
     expect(trailText(html)).toEqual(["Context", "›", "harbor containers"]);
-    expect(html).toContain('<span aria-current="page" class="map-trail-here">Context</span>');
+    expect(html).toContain('<span aria-current="location" class="map-trail-here">Context</span>');
     expect(html).toContain('class="linkish map-trail-go">harbor containers</button>');
   });
   it("with no containers view open before, the trail is drawn and reads Context alone", () => {
@@ -371,7 +371,7 @@ describe("V3: the map's place kept per initiative (FR-5, M12)", () => {
     const again = body(drawn(harborMap)); // a second mount reads the store, not its own state
     for (const html of [first, again]) {
       expect(trailText(html)).toEqual(["Context", "›", "Containers", "›", "harbor-api"]);
-      expect(html).toContain('<span aria-current="page" class="map-trail-here">harbor-api</span>');
+      expect(html).toContain('<span aria-current="location" class="map-trail-here">harbor-api</span>');
       expect(html).toContain('<aside class="map-panel" aria-label="booking: node">');
     }
     expect(useBoard.getState().mapPlace.harbor).toEqual(booking);
@@ -434,5 +434,25 @@ describe("FR-3 (M10): a Grounding action is accent from its first word", () => {
     expect(winners(inAct, "color").map((w) => w.v)).toEqual(["inherit"]);
     const bare = { parts: [parseCompound("span.map-ground-off"), parseCompound("span.map-ground-kind")], hover: false };
     expect(winners(bare, "color").map((w) => w.v)).toEqual(["var(--fg-muted)"]);
+  });
+});
+
+// leftovers-69 V1 (FR-1, FR-2, FR-5; map-and-roadmap Amendment 5, M15,
+// A2, M18): a trail step that goes somewhere looks it and the current one
+// does not; the panel title focus lands on draws no ring; the panel's
+// list renders once, in reading order.
+describe("leftovers-69 V1 (FR-1, M15): the trail's steps", () => {
+  it("at L3: earlier steps are buttons drawn in --accent-fg over button.linkish { color: inherit }; the current one is --fg text, aria-current=location, no button", () => {
+    place({ level: "modules", container: "harbor_api" });
+    const html = body(drawn(harborMap));
+    const nav = html.slice(html.indexOf('<nav class="map-trail"'), html.indexOf("</nav>"));
+    expect([...nav.matchAll(/<button[^>]*>([^<]*)<\/button>/g)].map((m) => m[1])).toEqual(["Context", "Containers"]);
+    expect(nav).toContain('<span aria-current="location" class="map-trail-here">harbor-api</span>');
+    expect(nav).not.toMatch(/<button[^>]*>harbor-api</);
+    expect(nav).not.toContain('aria-current="page"');
+    const go = { parts: [parseCompound("button.linkish.map-trail-go")], hover: false };
+    expect(winners(go, "color").map((w) => w.v)).toEqual(["var(--accent-fg)"]);
+    const here = { parts: [parseCompound("span.map-trail-here")], hover: false };
+    expect(winners(here, "color").map((w) => w.v)).toEqual(["var(--fg)"]);
   });
 });

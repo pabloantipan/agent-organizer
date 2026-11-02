@@ -19,7 +19,11 @@
 .map-trail ol { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1); margin: 0; padding: 0; list-style: none; font-size: var(--font-size-sm); line-height: var(--line-sm); }
 .map-trail li { display: inline-flex; align-items: center; gap: var(--space-1); }
 .map-trail-sep { color: var(--fg-subtle); }
-.map-trail-go { color: var(--accent-fg); }
+/* A step that goes somewhere is a link, in --accent-fg as the panel's
+   actions (leftovers-69 FR-1, M15): scoped button.linkish.<class> (0-2-1)
+   so global.css's button.linkish { color: inherit } (0-1-1) does not draw
+   it as plain text. The current step is --fg text, not a button. */
+button.linkish.map-trail-go { color: var(--accent-fg); }
 .map-trail-here { color: var(--fg); font-weight: var(--weight-semibold); }
 
 /* The figure left, the panel right; stacked when the column is narrow. */

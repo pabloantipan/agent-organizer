@@ -189,7 +189,7 @@ export function MapBody({ initiative, read, head }: { initiative: merge.BoardIni
               <li key={placeKey(t.place)}>
                 {k > 0 && <span className="map-trail-sep" aria-hidden>›</span>}
                 {samePlace(t.place, at)
-                  ? <span aria-current="page" className="map-trail-here">{t.label}</span>
+                  ? <span aria-current="location" className="map-trail-here">{t.label}</span>
                   : <button type="button" className="linkish map-trail-go" onClick={() => go(t.place)}>{t.label}</button>}
               </li>
             ))}
