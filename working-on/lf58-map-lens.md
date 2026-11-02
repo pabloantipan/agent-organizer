@@ -6,7 +6,7 @@ branch: lf58-map-lens
 seat: l58-lens
 stage:
 updated: 2026-11-02
-next: "M3: every curated: line opens its page in the spec reader (ReadSpec refuses docs/architecture/ unless listed under specs:; needs a Go or fixture change outside this boundary: FSE amends leftovers-58), and the fixture gives repo/deploy an entry that can open"
+next: "l58-lens round 2: FR-10 + R3 done (45bd1d5); next the harbor fixture repo dirs and deploy file, then U1, U4, U5, X0, M1-M7 (.wt-notes/l58-lens/progress.md, Round 2)"
 review: fail
 reviewer: l58-lens-rev
 cause: gate
