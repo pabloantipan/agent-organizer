@@ -118,6 +118,18 @@ type View struct {
 	Cuts     map[string][]Row `json:"cuts"`      // initiative, role, task, model
 	Sessions []SessionRow     `json:"sessions"`  // newest first
 	Stats    Stats            `json:"stats"`
+	// Rejected are the rows the record refused and has not since taken,
+	// from the usage post state, oldest day first; never null (leftovers-62
+	// FR-3).
+	Rejected []RejectedRow `json:"rejected"`
+}
+
+// RejectedRow is one ledger row the record refused: its session, its day
+// and the record's reason.
+type RejectedRow struct {
+	SessionID string `json:"session_id"`
+	Day       string `json:"day"`
+	Reason    string `json:"reason"`
 }
 
 var weekRe = regexp.MustCompile(`^(\d{4})-W(\d{2})$`)

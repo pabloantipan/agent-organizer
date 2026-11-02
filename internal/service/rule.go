@@ -190,9 +190,12 @@ func yamlScalar(v string) string {
 // rulingLines is the ruling as it is written under the heading: who ruled,
 // when, the owner when someone else ruled, and where it was said (0045), then
 // the words: `pablo, 2026-09-28, owner alejandro, in the organizer on m: …`.
+// The owner is read as a person (model.PersonOf: operator is pablo), so a
+// record pablo owns as the operator names no owner when pablo rules it
+// (leftovers-62 FR-2).
 func rulingLines(ruled, ruler, owner, words, machine string) []string {
 	who := ruler + ", " + ruled
-	if o := strings.TrimSpace(owner); o != "" && !strings.EqualFold(o, ruler) {
+	if o := ownerPerson(owner); o != "" && !strings.EqualFold(o, model.PersonOf(strings.TrimSpace(ruler))) {
 		who += ", owner " + o
 	}
 	where := "in the organizer"
@@ -202,6 +205,16 @@ func rulingLines(ruled, ruler, owner, words, machine string) []string {
 	said := strings.Split(words, "\n")
 	out := []string{fmt.Sprintf("%s, %s: %s", who, where, said[0])}
 	return append(out, said[1:]...)
+}
+
+// ownerPerson is an owner field read as the person it names; the field is
+// written by hand, so `Operator` reads as operator does.
+func ownerPerson(owner string) string {
+	o := strings.TrimSpace(owner)
+	if strings.EqualFold(o, "operator") {
+		o = "operator"
+	}
+	return model.PersonOf(o)
 }
 
 // insertRuling puts the ruling under the record's `## Ruling` heading. An empty

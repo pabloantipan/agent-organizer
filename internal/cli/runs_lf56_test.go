@@ -34,8 +34,11 @@ func TestLF56A5RunsCardIsUsageTask(t *testing.T) {
 	}
 	usageRows := map[string][2]string{ // session -> initiative, task
 		"s-build": {"organizer", "lf56-run-roles"},
-		"s-fse":   {"organizer", "overhead:fse"},
-		"s-sup":   {"organizer", "wave:sup96"},
+		// No initiative root holds /nowhere/organizer, so a usage pass names
+		// the FSE's overhead the factory's, and runs reads it as the pass
+		// would (leftovers-62 FR-1).
+		"s-fse": {"factory", "overhead:fse"},
+		"s-sup": {"organizer", "wave:sup96"},
 	}
 	var ledger bytes.Buffer
 	ledger.WriteString(`{"generation":1}` + "\n")

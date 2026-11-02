@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"organizer/internal/scan"
 	"organizer/internal/session"
 	"organizer/internal/usage"
 )
@@ -23,36 +22,7 @@ func (s *Service) Usage(week string) (usage.View, error) {
 		return usage.View{}, err
 	}
 
-	opts := s.scanOptions(false)
-	opts.Agents = nil
-	roots, _ := scan.Discover(opts)
-	inits := make([]usage.Initiative, 0, len(roots))
-	for _, root := range roots {
-		si := scan.ReadInitiative(root, opts)
-		in := usage.Initiative{ID: si.ID, Root: root}
-		for _, c := range si.Cards {
-			in.Cards = append(in.Cards, usage.Card{Slug: c.Slug, Title: c.Title, Seat: c.Seat, Body: c.Body})
-		}
-		if si.Cell != nil {
-			in.Seats = si.Cell.Agents
-		}
-		inits = append(inits, in)
-	}
-
-	// A record that says $0 has not seen a cost yet (the statusline's open
-	// line, a session killed before its first refresh): a session with
-	// tokens never costs nothing, so it is "no cost recorded", not $0.
-	var costs []usage.CostSource
-	for _, r := range session.LoadRuns(session.RunsPath()) {
-		costs = append(costs, usage.CostSource{SessionID: r.SessionID, PID: r.PID, At: r.LastSeen, Session: r.Session, Persona: r.Persona, CostUSD: r.CostUSD, HasCost: r.CostUSD > 0})
-	}
-	running := map[string]bool{}
-	for pid, r := range session.Load(session.Dir()) {
-		costs = append(costs, usage.CostSource{SessionID: r.SessionID, PID: r.PID, At: r.UpdatedAt, Session: r.Session, Persona: r.Persona, CostUSD: r.CostUSD, HasCost: r.CostUSD > 0})
-		if alive(pid) {
-			running[r.SessionID] = true
-		}
-	}
+	in := s.usageInputs()
 
 	dataDir := filepath.Dir(session.Dir())
 	ledger, offs := usage.DataPaths(dataDir)
@@ -60,18 +30,20 @@ func (s *Service) Usage(week string) (usage.View, error) {
 		ProjectsDir: usage.ProjectsDir(),
 		LedgerPath:  ledger,
 		OffsetsPath: offs,
-		Costs:       costs,
-		Initiatives: inits,
+		Costs:       in.costs,
+		Initiatives: in.inits,
 	})
 	if err != nil {
 		return usage.View{}, err
 	}
-	v, err := usage.Build(usage.LoadLedger(ledger), week, running, nil)
+	lines := usage.LoadLedger(ledger)
+	v, err := usage.Build(lines, week, in.running, nil)
 	if err != nil {
 		return usage.View{}, err
 	}
 	v.Machine = cfg.Machine
 	v.Stats = st
+	v.Rejected = passRejected(dataDir, lines)
 	// The changed rows go to the record after the view is built, in the
 	// background, so the post never delays it (usage-post FR-6).
 	startUsagePost(cfg, dataDir, ledger, s.now)

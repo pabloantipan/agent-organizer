@@ -864,3 +864,69 @@ func TestG4ZeroTimesAreNull(t *testing.T) {
 		t.Errorf("first %v last %v, want a time and null", got["first"], got["last"])
 	}
 }
+
+// G3 (leftovers-62 FR-3), the post's own path: two rows rejected, then one
+// of them gone from the ledger. The next post sends nothing (the other is
+// unchanged) and still drops the gone row from the state.
+func TestLF62G3PostPrunesGoneRejectedRow(t *testing.T) {
+	const why = "token counts and messages cannot be negative"
+	f := newUsageRecord(t)
+	f.rejects = map[string]string{"s-0001": why, "s-0002": why}
+	dir := t.TempDir()
+	ls := usageLines(3)
+	postUsage(context.Background(), usageTarget(f), dir, ls, fixedNow)
+	if st := loadUsagePostState(filepath.Join(dir, usagePostFile)); len(st.Rejected) != 2 {
+		t.Fatalf("first pass rejected %+v, want two rows", st.Rejected)
+	}
+
+	postUsage(context.Background(), usageTarget(f), dir, ls[:2], fixedNow) // s-0002's row is gone
+	if n := len(f.got()); n != 1 {
+		t.Errorf("second pass posted: %d posts, want still 1", n)
+	}
+	st := loadUsagePostState(filepath.Join(dir, usagePostFile))
+	if _, ok := st.Rejected["s-0002|2026-10-05"]; ok {
+		t.Errorf("gone row kept in the state: %+v", st.Rejected)
+	}
+	if r := st.Rejected["s-0001|2026-10-05"]; r.Reason != why || len(st.Rejected) != 1 {
+		t.Errorf("rejected %+v, want s-0001 alone with its reason", st.Rejected)
+	}
+}
+
+// G3, the view: Service.Usage with the post off lists the rejected row still
+// in the ledger, as {session_id, day, reason}, and prunes the gone one.
+func TestLF62G3UsageViewRejectedRows(t *testing.T) {
+	dataDir := usageHome(t)
+	s := usageService(t, config.Config{})
+	v, err := s.Usage("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v.Rejected == nil || len(v.Rejected) != 0 {
+		t.Fatalf("no rejected rows: %#v, want an empty list, never null", v.Rejected)
+	}
+	day := ""
+	for _, l := range usage.LoadLedger(filepath.Join(dataDir, "usage.jsonl")) {
+		if l.SessionID == "s-plain" {
+			day = l.Day
+		}
+	}
+	st := usagePostState{Accepted: map[string]string{}, Rejected: map[string]RejectedUsageRow{
+		"s-plain|" + day:    {SessionID: "s-plain", Day: day, Reason: "input is a JSON string", Hash: "h1"},
+		"s-gone|2026-10-01": {SessionID: "s-gone", Day: "2026-10-01", Reason: "gone", Hash: "h2"},
+	}}
+	path := filepath.Join(dataDir, usagePostFile)
+	if err := saveUsagePostState(path, st); err != nil {
+		t.Fatal(err)
+	}
+	v, err = s.Usage("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []usage.RejectedRow{{SessionID: "s-plain", Day: day, Reason: "input is a JSON string"}}
+	if !reflect.DeepEqual(v.Rejected, want) {
+		t.Errorf("view rejected %+v, want %+v", v.Rejected, want)
+	}
+	if got := loadUsagePostState(path).Rejected; len(got) != 1 || got["s-gone|2026-10-01"].SessionID != "" {
+		t.Errorf("state rejected %+v, want s-gone pruned", got)
+	}
+}

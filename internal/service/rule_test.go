@@ -543,3 +543,20 @@ func TestRuleChosenTrimmed(t *testing.T) {
 		})
 	}
 }
+
+// G2 (leftovers-62 FR-2): the ruling's line reads the owner through the
+// person reader. An operator-owned record ruled by pablo names no owner (the
+// operator is pablo); one alejandro owns names him.
+func TestLF62G2RulingOwnerIsAPerson(t *testing.T) {
+	for _, c := range []struct{ owner, ruler, want, not string }{
+		{"operator", "pablo", "pablo, 2026-11-01, in the organizer on m: yes", "owner"},
+		{"Operator", "pablo", "pablo, 2026-11-01, in the organizer on m: yes", "owner"},
+		{"alejandro", "pablo", "pablo, 2026-11-01, owner alejandro, in the organizer on m: yes", "operator"},
+		{"operator", "alejandro", "alejandro, 2026-11-01, owner pablo, in the organizer on m: yes", "operator"},
+	} {
+		got := rulingLines("2026-11-01", c.ruler, c.owner, "yes", "m")
+		if got[0] != c.want || strings.Contains(got[0], c.not) {
+			t.Errorf("owner %s, ruler %s: %q, want %q", c.owner, c.ruler, got[0], c.want)
+		}
+	}
+}
