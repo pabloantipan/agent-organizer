@@ -17,6 +17,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- 12:05 sup113 closed (lf69 #55, 40 min vs 45-90, seats $11.49, one round each) and ended. Found: fixture stand-ins outlive apps (third sighting, Hephaistos again); U9 count gap and .rt-waitline clip to Aglaea; held low: cornerOf reads rx as a bare number (mermaid never emits units), a re-read map lists an added node last until the figure reports. No supervisor running; nothing cuttable until Hephaistos (map stamp) or Aglaea (Usage task row, U9 gap) answers.
+
 - 12:3x lf69-ui-notes merged #55 440d577, in done; installed v0.2.0-3487. sup112's findings placed: (1) recordOf on any status, rejected: supervisor: is written only at ruling, and a superseded record's supervisor did run for it; (2) Usage one-card supervisor on its card row is Aglaea's U4 by design, asked her whether to align with runs' task NNNN; (3) CLAUDE.md Runs baseline lacks reviewer/record attribution: fold into the next card that touches runs. Queue is empty of cuttable work: (5) React app on the map and map regen wait on Hephaistos's c4-map stamp fix; (6) htmlLabels touches the shared mermaid config (Hephaistos's).
 
 - 11:16 sup112 closed (lf68-go #53 7f88854, 38 min vs 45-90, seats $5.64; its own run reads 'task 0181' in organizer runs) and ended. Held for the next Go leftovers: recordOf reads supervisor: on any status (a withdrawn record labels a run); the usage view shows a one-card record's supervisor under its card, not task NNNN (frontend); CLAUDE.md Runs baseline paragraph lacks reviewer/record attribution. 0182 (leftovers 69, Aglaea's 160f7fc notes) asked 11:15; sup113 prepared.
