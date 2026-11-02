@@ -17,6 +17,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- Held for the next frontend card (Aglaea 5a333ac, both sev 1, 'fold into whatever card comes next'): run-report A6 AR32 (.rt-waitline rings inset, outline-offset -2px; the clipping rule names overflow: hidden); usage A3 U10 ('Not accepted · 2', one space each side of the dot). Plus CLAUDE.md's Runs paragraph (reviewer/record attribution) for the next runs card.
+
 - Aglaea on Usage vs runs: leave it (runs labels each run; Usage By task keeps a one-card wave's cost in one row, U4). Reopens only if Pablo is seen looking for a task number in Usage. Closed.
 
 - 12:05 sup113 closed (lf69 #55, 40 min vs 45-90, seats $11.49, one round each) and ended. Found: fixture stand-ins outlive apps (third sighting, Hephaistos again); U9 count gap and .rt-waitline clip to Aglaea; held low: cornerOf reads rx as a bare number (mermaid never emits units), a re-read map lists an added node last until the figure reports. No supervisor running; nothing cuttable until Hephaistos (map stamp) or Aglaea (Usage task row, U9 gap) answers.
