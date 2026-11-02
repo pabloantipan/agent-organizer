@@ -1,13 +1,13 @@
 ---
 title: "Runs counts every seat of a wave, and the literal guard has no holes"
-status: next
+status: now
 repos: [organizer]
 branch: lf68-go
 seat: l68-go
 reviewer: l68-go-rev
 stage:
 updated: 2026-11-02
-next: "sup112 runs it (0181 ruled 2026-11-02)"
+next: "build: l68-go launched by sup112 2026-11-02, worktree .wt/lf68-go from origin/main 83056a1"
 depends_on: []
 boundary: ["internal/session/runs.go", "internal/session/runs_test.go", "internal/service/run.go", "internal/service/run_test.go", "internal/usage/", "internal/cli/", "internal/service/literals_test.go", "frontend/wailsjs/"]
 spec: "docs/specs/leftovers-68.md (FR-1 to FR-4)"
