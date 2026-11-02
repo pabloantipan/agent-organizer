@@ -6,7 +6,7 @@ branch: lf63-organizer-map
 seat: lf63-build
 stage:
 updated: 2026-11-02
-next: "PR with talos-lab (branch lf63-organizer-map pushed at ea0cc7c); review findings placed with the fse by sup107"
+next: "merged as organizer #35 8b5c8f9; supervisor moves it to done/"
 review: pass
 reviewer: lf63-review
 depends_on: [lf58-map-read]
@@ -15,6 +15,8 @@ spec: "docs/specs/leftovers-63.md (FR-1 to FR-3)"
 gate: "docs/specs/leftovers-63.md#Acceptance → gate"
 ui_review: false
 autonomy: unattended
+prs:
+  - {repo: organizer, pr: 35, target: main, state: merged, merge: 8b5c8f9}
 ---
 
 ## Goal
