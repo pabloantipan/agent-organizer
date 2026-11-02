@@ -4,6 +4,7 @@ import { Briefcase, ChevronDown, ChevronRight, CircleDashed, Compass, Hammer, Ha
 import type { merge, model, service } from "../../wailsjs/go/models";
 import { oneLine, underRoot, unreadLabel } from "../lib/unread";
 import { UnreadFiles } from "./UnreadFiles";
+import { SecCount } from "./SecCount";
 import { decisionRowAction, failedStartLine, inactiveIds, launchVerb, leadOf, missingPersonas, needsMeRows, needsMeShown, NEEDS_ME_FIRST, waitingOnOthers, type OthersWait, boardCard, forecastWords, pastFirst, taskCard, taskContext, taskFact, taskLine, taskTone, threadContext, type NeedsMeRow } from "../lib/queue";
 import { initiativeStates, phaseWord, STATE_WORD, type InitiativeState } from "../lib/initiativeState";
 import { uniq } from "../lib";
@@ -76,7 +77,7 @@ export function Home() {
     <HomeClass.Provider value={widthClass}>
     <div ref={home} className={`home ${widthClass} ${roomy ? "roomy" : ""} ${agents?.roles?.length ? "with-roles" : ""}`} style={widthClass === "wide" ? { "--goal-min": `${goalMin}px` } as React.CSSProperties : undefined}>
       <section className="home-sec home-needs">
-        <h2 id={NEEDS_ME_HEADING} tabIndex={-1} className="sec-title">Needs me · <span className="num sec-count">{rows.length}</span><span className="sec-sub">everything waiting on you, oldest first</span></h2>
+        <h2 id={NEEDS_ME_HEADING} tabIndex={-1} className="sec-title"><SecCount title="Needs me" n={rows.length} /><span className="sec-sub">everything waiting on you, oldest first</span></h2>
         {rows.length === 0 ? (
           <div className="panel empty-state">
             <div>Nothing waits on you.</div>
@@ -354,7 +355,7 @@ export function WaitingOnOthers({ rows }: { rows: OthersWait[] }) {
   if (rows.length === 0) return null;
   return (
     <>
-      <h3 className="sec-title ib-group">Waiting on others · <span className="num sec-count">{rows.length}</span><span className="sec-sub">Theirs to rule. Not counted in Needs me.</span></h3>
+      <h3 className="sec-title ib-group"><SecCount title="Waiting on others" n={rows.length} /><span className="sec-sub">Theirs to rule. Not counted in Needs me.</span></h3>
       <div className="panel inbox">
         {rows.map((r) => <OthersRow key={r.key} row={r} />)}
       </div>
