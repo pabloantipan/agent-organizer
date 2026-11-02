@@ -1,6 +1,6 @@
 # Leftovers 69: the lf67 UI notes, folded by Aglaea: the build spec
 
-status: proposed (0182)
+status: accepted (0182, ruled 2026-11-02)
 by: the FSE, 2026-11-02, on main at e0502c7
 sources: sup111's UI reviewers (runs/2026-11-02-sup111-leftovers-67.md);
 Aglaea's 160f7fc: `docs/ux/specs/map-and-roadmap.md` Amendment 5

@@ -7,7 +7,7 @@ seat: l69-build
 reviewer: l69-rev, l69-ui
 stage:
 updated: 2026-11-02
-next: "launch on 0182's ruling"
+next: "sup113 runs it (0182 ruled 2026-11-02)"
 depends_on: []
 boundary: ["frontend/src/components/MapView.tsx", "frontend/src/components/MapPanel.tsx", "frontend/src/components/MapFigure.tsx", "frontend/src/components/RunReport.tsx", "frontend/src/components/UsageTable.tsx", "frontend/src/lib/mapSvg.ts", "frontend/src/lib/runReport.ts", "frontend/src/styles/map.css", "frontend/src/styles/runreport.css", "frontend/src/styles/usage.css", "frontend/src/components/MapView.test.tsx", "frontend/src/components/MapFigure.test.tsx", "frontend/src/components/RunReport.lf64.test.tsx", "frontend/src/components/RunReport.test.tsx", "frontend/src/components/Usage.rejected.test.tsx"]
 spec: "docs/specs/leftovers-69.md (FR-1 to FR-7)"
