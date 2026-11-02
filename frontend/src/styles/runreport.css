@@ -66,6 +66,10 @@
   color: var(--accent-fg); text-decoration: underline; text-decoration-color: var(--border-strong); text-underline-offset: 2px; overflow-wrap: anywhere; text-align: center;
 }
 .rr-card:hover { background: transparent; border: 0; text-decoration-color: currentColor; }
+/* In a comma list (a track's `left`) the comma stays outside the link and is
+   pulled into the link's trailing padding, so the list reads `a, b`; a focused
+   ring may touch the comma, never the name (leftovers-72 FR-1, AR35). */
+.rr-card + .rt-comma { margin-inline-start: calc(-1 * var(--space-1)); }
 .rr-more {
   grid-column: 3 / -1; justify-self: start; min-height: 0; padding: var(--space-1); border: 0; background: transparent;
   font-size: var(--font-size-sm); line-height: var(--line-sm); font-weight: var(--weight-regular); color: var(--fg-muted); text-align: left; overflow-wrap: anywhere;

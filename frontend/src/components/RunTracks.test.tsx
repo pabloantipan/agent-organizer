@@ -87,3 +87,37 @@ describe("the section at 1024 (FR-13)", async () => {
     expect(css.replace(/\/\*[\s\S]*?\*\//g, "")).not.toMatch(/@layer|color-mix|oklch|@media/);
   });
 });
+
+// leftovers-72 V1 (FR-1; run-report Amendment 8, AR35): in a track's `left`
+// list the comma sits outside the padded `.rr-card` link, pulled into its
+// trailing padding by `margin-inline-start: calc(-1 * var(--space-1))`, so the
+// list reads `a, b, c` and a focused ring may touch the comma, never the name.
+const fsv: { readFileSync(p: string, enc: "utf8"): string } = await import("node:" + "fs");
+describe("leftovers-72 V1 (FR-1, AR35): a left list's commas sit outside the links, pulled in", () => {
+  const css = fsv.readFileSync(new URL("../styles/runreport.css", import.meta.url).pathname, "utf8");
+  function three(toCut: string[] = []): service.FactoryReport {
+    const [, build] = report.tracks!.tracks!;
+    const t = { ...build, done_cards: [], open_cards: ["a", "b", "c"], to_cut: toCut, passed: 1, planned: 4, pct: 25, left: ["a", "b", "c"], waits: [] };
+    return { ...report, tracks: { ...report.tracks!, tracks: [t] } } as unknown as service.FactoryReport;
+  }
+  const frac = (html: string) => /<span class="rt-frac">(.*?)<\/span><\/li>/.exec(html)![1];
+  it("draws each comma after its link, outside it, and the list reads a, b, c", () => {
+    const f = frac(draw(three()));
+    const links = [...f.matchAll(/<button type="button" class="rr-card">([^<]*)<\/button>/g)].map((m) => m[1]);
+    expect(links).toEqual(["a", "b", "c"]);
+    expect(f).not.toMatch(/<button[^>]*>[^<]*,[^<]*<\/button>/);
+    expect(f.match(/<\/button><span class="rt-comma">,<\/span> /g)).toHaveLength(2);
+    expect(f.replace(/<[^>]+>/g, "")).toBe("1/4 · left a, b, c");
+  });
+  it("keeps the same text with a slug still to cut, whose comma is not pulled", () => {
+    const f = frac(draw(three(["b"])));
+    expect(f).toContain('<span class="rt-tocut">b (not cut)</span><span class="rt-comma">,</span> ');
+    expect(f.replace(/<[^>]+>/g, "")).toBe("1/4 · left a, b (not cut), c");
+  });
+  it("pulls a comma after a link by the link's side padding, and only there", () => {
+    const rule = /\n\.rr-card \+ \.rt-comma \{([^}]*)\}/.exec(css);
+    expect(rule).not.toBeNull();
+    expect(rule![1].split(";").map((d) => d.trim()).filter(Boolean)).toEqual(["margin-inline-start: calc(-1 * var(--space-1))"]);
+    expect(css).not.toMatch(/\n\.rt-comma \{[^}]*margin/);
+  });
+});

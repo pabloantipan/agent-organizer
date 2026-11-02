@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { SESSIONS_MODEL_FROM, compact, costFromWords, duration, kindsLine, roleWords, sessionMoney, startWords, type UsageSession } from "../lib/usage";
+import { SecCount } from "./SecCount";
 
 /** `▸ Sessions · N` (her §5): closed by default, newest first. A running
  *  session reads `running` for its length and its numbers `so far`; a
@@ -24,7 +25,7 @@ export function UsageSessions({ sessions }: { sessions: UsageSession[] }) {
   return (
     <section className="usage-sec" aria-label="sessions">
       <button className="ghost usage-disclose" onClick={() => setOpen(!open)} aria-expanded={open}>
-        {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />} Sessions · <span className="num">{sessions.length}</span>
+        {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}<SecCount title="Sessions" n={sessions.length} />
       </button>
       {open && (
         <div className="usage-table-wrap" ref={wrap}>

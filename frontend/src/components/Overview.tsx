@@ -149,7 +149,7 @@ function StageGates({ initiative: i }: { initiative: BoardInitiative }) {
       </h2>
       <div className="panel gate-list">
         {s.outcome && <div className="gl-outcome">{s.outcome}</div>}
-        <div className="gl-label">Gates <span className="num">{gates.length}</span></div>
+        <div className="gl-label"><SecCount title="Gates" n={gates.length} /></div>
         {gates.length === 0 ? (
           <div className="gl-none">No decision gates this stage.</div>
         ) : (

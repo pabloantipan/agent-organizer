@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { Fragment, useLayoutEffect, useRef, useState } from "react";
 import type { service } from "../../wailsjs/go/models";
 import { dateWords } from "../lib/dates";
 import { LOCAL_CAPTION, NO_TRACKS, boardAsOf, envCell, moreWaits, trackName, trackTitle, tracksOf, waitsThatFit, type TrackRow } from "../lib/runReport";
@@ -84,8 +84,10 @@ function TrackRowView({ x, prev, envs, nav, toCut }: { x: TrackRow; prev: TrackR
         {t.planned > 0 ? (
           <>
             <span className="mono num">{t.passed}/{t.planned}</span>
+            {/* The comma follows its item as a sibling, outside the link, so a
+                link's side padding can take it in (leftovers-72 FR-1, AR35). */}
             {(t.left ?? []).length > 0 && <> · left {(t.left ?? []).map((s, k) => (
-              <span key={s}>{k > 0 && ", "}{toCut.has(s) ? <span className="rt-tocut">{s} (not cut)</span> : <button type="button" className="rr-card" onClick={() => nav.card(s)}>{s}</button>}</span>
+              <Fragment key={s}>{k > 0 && <><span className="rt-comma">,</span>{" "}</>}{toCut.has(s) ? <span className="rt-tocut">{s} (not cut)</span> : <button type="button" className="rr-card" onClick={() => nav.card(s)}>{s}</button>}</Fragment>
             ))}</>}
           </>
         ) : "no card names it"}
