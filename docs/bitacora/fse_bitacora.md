@@ -17,6 +17,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- sup106 closed and ended: lf64 #34 (about 50 min of work in 5h55m, 4h20m blocked by the limit and outages), lf57-dead-minutes joint #37 (31 min). Rules from it: a card that changes a contract carries release.yml's specs pin line in its boundary; clean-clone recipes avoid rm -rf (it stops on a permission prompt unattended); launch-review.sh backgrounds the app so safe-kill refuses its pid (for Hephaistos with the launcher ask).
+
 - To cut after lf58-map-lens merges, one map-lens polish card: Aglaea map-and-roadmap Amendment 3 (M8-M11, dc466fb) and Amendment 4 (M12-M14, 3b30a41): scale floor 11 px, trail always drawn, ruled word in the name, map state kept per initiative across switches, picked uses the selected mark (not the focus ring), panel kind 'unknown'.
 
 - INCIDENT (contained): 2026-11-02 03:08-03:14 lf58-map-lens's UI reviewer ran wails dev with the fixture config but Pablo's real ~/.local/share/organizer/ (XDG_DATA_HOME dropped in a hand-built env); read the cache, wrote 3 diagram caches (removed), organizer.log lines left; state.json unproven but no fixture data in it. Reported to Pablo ([for pablo]) and Hephaistos (a launcher that refuses the real home). Rule for my UI-review prompts until then: launch only through the fixture's home.sh, never a hand-built env.
