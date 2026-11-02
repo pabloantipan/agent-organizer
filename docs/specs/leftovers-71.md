@@ -55,3 +55,13 @@ test, and the `.sec-count` rules in `frontend/src/styles/shell.css`.
 FR-1 and FR-2 change markup two existing tests assert:
 `RunReport.lf64.test.tsx:139` and `Home.waits.test.tsx:135`. The boundary
 adds those two files, for those asserts only.
+
+## Amendment 2 (FSE, 2026-11-02, on l71-rev's V2 fail at 003c839, cause gate)
+
+The premise listed four titles from one grep for `sec-count`; three more
+write the count by hand with a bare `num` span:
+`frontend/src/components/InitiativesView.tsx:304` (Awake), `:308`
+(Asleep) and `:328` (Archived). FR-2 covers them too. V2's scan matches
+`<title> · <span className="num` (with or without `sec-count`) in every
+non-test file under `frontend/src/components/`, expecting none. The
+boundary adds `InitiativesView.tsx` (those three titles only) and its test.

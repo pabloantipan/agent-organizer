@@ -10,7 +10,7 @@ updated: 2026-11-02
 next: "V2 (FR-2): InitiativesView.tsx:304 and :308 still write `Awake · N` and `Asleep · N` by hand on .sec-title, outside the boundary and invisible to the scan; FSE amends boundary and scan, builder moves them to SecCount"
 review: "fail at 003c839 (l71-rev, 2026-11-02): unmet V2 (FR-2, two hand-written title counts left); V1 X0 pass; cause: gate"
 depends_on: []
-boundary: ["frontend/src/styles/runreport.css", "frontend/src/components/Home.tsx", "frontend/src/components/Overview.tsx", "frontend/src/components/UsageTable.tsx", "frontend/src/components/SecCount.tsx", "frontend/src/components/SecCount.test.tsx", "frontend/src/styles/shell.css", "frontend/src/components/RunReport.test.tsx", "frontend/src/components/Usage.rejected.test.tsx", "frontend/src/components/RunReport.lf64.test.tsx", "frontend/src/components/Home.waits.test.tsx"]
+boundary: ["frontend/src/styles/runreport.css", "frontend/src/components/Home.tsx", "frontend/src/components/Overview.tsx", "frontend/src/components/UsageTable.tsx", "frontend/src/components/SecCount.tsx", "frontend/src/components/SecCount.test.tsx", "frontend/src/styles/shell.css", "frontend/src/components/RunReport.test.tsx", "frontend/src/components/Usage.rejected.test.tsx", "frontend/src/components/RunReport.lf64.test.tsx", "frontend/src/components/Home.waits.test.tsx", "frontend/src/components/InitiativesView.tsx", "frontend/src/components/InitiativesView.test.tsx"]
 spec: "docs/specs/leftovers-71.md (FR-1, FR-2)"
 gate: "docs/specs/leftovers-71.md#Acceptance → gate"
 ui_review: true
