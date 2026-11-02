@@ -17,6 +17,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- To cut after lf58-map-lens merges (Aglaea, map-and-roadmap Amendment 3, dc466fb, M8-M11): U2 a scale floor (smallest SVG text >= 11 px, then the frame scrolls; buttons follow); U3 the trail always drawn, 'Context › <system> containers' with a way back; U6 the ruled word stays a word, in the button's name; U1, U4, U5 already in sup103's round.
+
 - Held for the next leftovers (lf62-go review pass at 83fe879): string-literal decision-status comparisons (`internal/service/draft.go:27`, `internal/cli/decisions.go:116`) escape the G4 guard, which only catches `model.Decision*` constants. Also: `usagePostState.Accepted` keeps keys of ledger rows that are gone (FR-3 prunes Rejected only).
 
 - 23:51 after a second usage-limit stop (~20:54-23:50) and a factory memory outage (23:26-23:4x, swap 96%): ended 53 frozen seats of finished organizer tasks (probe -k, conversations kept); thawed sup103, sup106, talos-lab. sup104 self-extended to 01:52 (its reviewer's launch hung 3h42m in zellij attach -b). leftovers-64 Amendment 1: a wave with no record has a footer with no press.
