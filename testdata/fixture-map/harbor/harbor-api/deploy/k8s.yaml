@@ -1,0 +1,19 @@
+# Deltagos map-lens fixture (docs/specs/leftovers-58.md Amendment 2): the deploy file harbor's
+# grounding names. Invented; no real system.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: harbor-api
+spec:
+  template:
+    spec:
+      containers:
+        - name: harbor-api
+          image: registry.example/harbor-api:def7c12
+          env:
+            - name: API_DB_HOST
+              value: harbor-db
+            - name: CARD_GATEWAY_URL
+              value: https://cards.example
+            - name: MAIL_RELAY_URL
+              value: smtp://mail-relay.example

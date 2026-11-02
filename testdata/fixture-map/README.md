@@ -14,8 +14,14 @@ folder name.
 
 Every root also carries record `0001`, which grounds the context map's
 `harbor` node. The variants' `map.json` say their own id in `initiative`.
-No root lists `repos:`; the `repo` grounding entries name the contract's
-repos, which are not here.
+`harbor` lists `repos: [harbor-api, harbor-web, harbor-ledger]` and holds
+each as a directory, with `harbor-api/deploy/k8s.yaml` (the keys its `deploy`
+entries name) and `harbor-api/src/booking`, `src/pricing`: every `repo`,
+`deploy`, `record` and `curated` line of its panel acts (Amendment 2).
+`home.sh` makes each listed directory a one-commit git checkout in the temp
+copy, since the scan calls a repo with no `.git` missing and a committed
+`.git` cannot be a fixture. The variants list no `repos:`, so their `repo`
+lines show the `not on this machine` reason.
 
 Source and pin:
 

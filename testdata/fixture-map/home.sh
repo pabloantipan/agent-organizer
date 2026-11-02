@@ -18,6 +18,19 @@ mkdir -p "$home" "$tmp/data" "$tmp/discuss" "$tmp/claude"
 for d in "$here"/*/; do
   cp -R "$d" "$home/$(basename "$d")"
 done
+# Each repo an initiative lists under `repos:` and holds as a directory becomes a
+# one-commit git checkout here (the scan calls a repo without .git missing), so the
+# lens's repo and deploy lines act on it (Amendment 2).
+for y in "$home"/*/working-on/initiative.yaml; do
+  root="$(dirname "$(dirname "$y")")"
+  for r in $(sed -n 's/^repos: *\[\(.*\)\]/\1/p' "$y" | tr ',' ' '); do
+    [ -d "$root/$r" ] || continue
+    git -C "$root/$r" init -q
+    git -C "$root/$r" add -A
+    git -C "$root/$r" -c user.name=fixture -c user.email=fixture@example.invalid \
+      commit -q -m "fixture: $r" >/dev/null
+  done
+done
 cat > "$tmp/config.yaml" <<YAML
 machine: fixture
 roots:
