@@ -1,31 +1,65 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import type { service } from "../../wailsjs/go/models";
 import { dateWords } from "../lib/dates";
-import { LOCAL_CAPTION, NO_TRACKS, boardAsOf, envCell, trackName, trackTitle, tracksOf, waitWords, type TrackRow } from "../lib/runReport";
+import { LOCAL_CAPTION, NO_TRACKS, boardAsOf, envCell, moreWaits, trackName, trackTitle, tracksOf, waitsThatFit, type TrackRow } from "../lib/runReport";
 import type { Nav } from "./RunReport";
 
 const RECORD_RE = /^\d{1,4}$/;
 
-/** What a track waits on, as links: a record number opens the record, a
- *  card slug its back; anything else is words. The owner reads as a role. */
-function Waits({ waits, nav }: { waits: service.Wait[]; nav: Nav }) {
+/** One wait: a record number opens the record, a card slug its back;
+ *  anything else is words. The owner reads in parentheses (FR-1, AR22). */
+function Wait({ w, nav }: { w: service.Wait; nav: Nav }) {
+  const what = w.what || "";
+  const slug = /^[a-z0-9][a-z0-9-]*$/i.test(what) && !RECORD_RE.test(what) ? what : null;
   return (
     <>
-      {waits.map((w, k) => {
-        const what = w.what || "";
-        const slug = /^[a-z0-9][a-z0-9-]*$/i.test(what) && !RECORD_RE.test(what) ? what : null;
-        return (
-          <span key={k} className="rt-wait">
-            {k > 0 && <span className="rt-sep" aria-hidden>·</span>}
-            {RECORD_RE.test(what)
-              ? <button type="button" className="rr-card" onClick={() => nav.decision(what.padStart(4, "0"))}>{what}</button>
-              : slug ? <button type="button" className="rr-card" onClick={() => nav.card(slug)}>{slug}</button>
-              : <span>{what}</span>}
-            {w.who && <span className="rt-who"> · {w.who}</span>}
-          </span>
-        );
-      })}
+      {RECORD_RE.test(what)
+        ? <button type="button" className="rr-card" onClick={() => nav.decision(what.padStart(4, "0"))}>{what}</button>
+        : slug ? <button type="button" className="rr-card" onClick={() => nav.card(slug)}>{slug}</button>
+        : <span>{what}</span>}
+      {w.who && <span className="rt-who"> ({w.who})</span>}
     </>
+  );
+}
+
+/** What a track waits on, on one line (FR-1, AR22): `0002 (pablo) · 0003
+ *  (pablo)`, `·` between waits only; past the cell's width the waits that
+ *  do not fit become `+N`, the rest in its hover and name. Every wait is
+ *  measured once, drawn hidden, so the fit holds on resize. */
+export function Waits({ waits, nav }: { waits: service.Wait[]; nav: Nav }) {
+  const cell = useRef<HTMLSpanElement>(null);
+  const [shown, setShown] = useState(waits.length);
+  useLayoutEffect(() => {
+    const el = cell.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const fit = () => {
+      const items = Array.from(el.querySelectorAll<HTMLElement>(".rt-measure > .rt-wait"));
+      const sep = el.querySelector<HTMLElement>(".rt-measure > .rt-sep")?.getBoundingClientRect().width ?? 0;
+      const plus = el.querySelector<HTMLElement>(".rt-measure > .rt-more")?.getBoundingClientRect().width ?? 0;
+      const avail = el.getBoundingClientRect().width;
+      if (avail > 0) setShown(waitsThatFit(items.map((x) => x.getBoundingClientRect().width), sep, plus, avail));
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [waits]);
+  const more = moreWaits(waits, shown);
+  return (
+    <span ref={cell} className="rt-waitline">
+      {waits.slice(0, shown).map((w, k) => (
+        <span key={k} className="rt-wait">
+          {k > 0 && <span className="rt-sep" aria-hidden>·</span>}
+          <Wait w={w} nav={nav} />
+        </span>
+      ))}
+      {more && <span className="rt-more" title={more.name} aria-label={more.name}><span className="rt-sep" aria-hidden>·</span>{more.text}</span>}
+      <span className="rt-measure" aria-hidden>
+        {waits.map((w, k) => <span key={k} className="rt-wait"><span className="rt-what">{w.what}</span>{w.who ? <span className="rt-who"> ({w.who})</span> : null}</span>)}
+        <span className="rt-sep">·</span>
+        <span className="rt-more">+{waits.length}</span>
+      </span>
+    </span>
   );
 }
 
