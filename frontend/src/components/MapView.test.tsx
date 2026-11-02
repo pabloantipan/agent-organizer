@@ -295,7 +295,7 @@ describe("round 2: U1, U4, U5", () => {
   });
   it("U4: the drawing is a block (no baseline gap) and the scroller keeps room for the bottom row's words", () => {
     expect(mapCss).toMatch(/\.map-figure-svg > svg \{ display: block; \}/);
-    expect(mapCss).toMatch(/\.map-scroll \{ overflow: auto; padding-bottom: calc\(var\(--line-xs\) \+ var\(--space-0-5\)\);/);
+    expect(mapCss).toMatch(/\.map-scroll \{ overflow: auto; padding: var\(--space-1\) var\(--space-1\) calc\(var\(--line-xs\) \+ var\(--space-0-5\)\);/);
   });
   it("U5: the panel lists nodes in the roving set's order; undrawn ones trail in map.json order", () => {
     const ns = nodesAt(harborMap as unknown as service.C4Map, { level: "containers" });
