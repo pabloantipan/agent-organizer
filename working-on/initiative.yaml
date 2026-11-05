@@ -1,7 +1,7 @@
 id: organizer
 title: Organizer — working-on cards across initiatives and machines
 client: personal
-status: active
+status: paused   # sleeping since 2026-11-04 (factory sleep; four-awake rule, 2026-10-09)
 started: 2026-09-02
 machine: lodestar
 repos: []
