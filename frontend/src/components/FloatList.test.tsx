@@ -17,7 +17,7 @@ const text = (html: string) => html.replace(/<svg[\s\S]*?<\/svg>/g, "").replace(
 describe("the floating list's folds (leftovers-16 F2)", () => {
   const mixed = board([initiative("a"), initiative("nap", "paused"), initiative("old", "archived"), initiative("gone", "done"), initiative("nap2", "paused")]);
 
-  it("shows Asleep (n) for the paused only, then Archived (n) for the rest", () => {
+  it("shows Asleep · n for the paused only, then Archived · n for the rest", () => {
     expect(text(render(mixed))).toEqual(["Asleep · 2", "Archived · 2"]);
   });
 
@@ -36,5 +36,18 @@ describe("the floating list's folds (leftovers-16 F2)", () => {
     const html = render(mixed);
     expect(html).toContain('role="group" aria-label="Asleep"');
     expect(html).toContain('role="group" aria-label="Archived"');
+  });
+});
+
+// leftovers-74 V3 (FR-2, AR40): the float list reads a stored group `other`
+// as `Other`, through the rail's helper; `misc` reads as stored.
+describe("leftovers-74 V3 (FR-2, AR40): the float list reads a stored `other` as Other", () => {
+  it("draws `Other` and `misc` over the stored groups `other` and `misc`", async () => {
+    const { FloatSections } = await import("./FloatList");
+    const view = { board: { initiatives: [initiative("a"), initiative("b"), initiative("c")], columns: {} }, order: { groups: [{ name: "other", initiatives: ["a"] }, { name: "misc", initiatives: ["b"] }], resolved: {} } } as unknown as BoardView;
+    const html = renderToStaticMarkup(<FloatSections sections={floatList(view, null).sections} row={row} />);
+    expect([...html.matchAll(/<div class="fl-group">([^<]*)<\/div>/g)].map((m) => m[1])).toEqual(["Other", "misc", "ungrouped"]);
+    expect(html).toContain('aria-label="Other"');
+    expect(html).toContain('aria-label="misc"');
   });
 });

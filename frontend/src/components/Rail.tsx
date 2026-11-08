@@ -8,6 +8,7 @@ import { inactiveIds } from "../lib/queue";
 import { foldName, sleepyOf, sleepyWord } from "../lib/initiatives";
 import { stripFolds } from "../lib/folds";
 import { placeOf } from "../lib/place";
+import { clientGroups, groupName } from "../lib/groupName";
 import { useBoard, type Screen } from "../stores/board.store";
 import { CellStateLz, definitionWaits } from "./Crew";
 import { missingPersonas } from "../lib/queue";
@@ -25,8 +26,8 @@ type Entry = { id: string; title: string; client: string; status: string; now: n
  *  they sync with it. Drag an initiative within or across groups, drag a
  *  group header to reorder groups, click a name to rename it. Initiatives
  *  that are not active (FR-9) leave every group and sit in two last folds,
- *  closed by default, that only open them: "Asleep (n)" (paused, with a
- *  link to Initiatives, where they wake) and "Archived (n)" (every other
+ *  closed by default, that only open them: "Asleep · n" (paused, with a
+ *  link to Initiatives, where they wake) and "Archived · n" (every other
  *  status; docs/ux/specs/initiatives-view.md, The rail). */
 export function Rail() {
   const { view, agents, selectedInitiative, setSelectedInitiative, reorderInitiatives, setGroups, railCollapsed, setRailCollapsed, roleOpen, openInitiatives, screen } = useBoard();
@@ -150,8 +151,8 @@ export function Rail() {
   };
 
   const groupByClient = () => {
-    const names = uniq(entries.map((e) => e.client || "other"));
-    persist(names.map((n) => ({ name: n, initiatives: entries.filter((e) => (e.client || "other") === n).map((e) => e.id) })) as Group[]);
+    // The no-client group is the app's label, `Other` (leftovers-74 FR-2).
+    persist(clientGroups(entries) as Group[]);
   };
   const addGroup = () => {
     const base = grouped ? stored : [{ name: "everything", initiatives: ids }];
@@ -267,9 +268,11 @@ export function Rail() {
   const head = (s: { key: string; name: string; ids: string[]; fixed: boolean }, i: number, handle?: DraggableProvidedDragHandleProps | null) => {
     const c = s.ids.reduce((a, id) => { const e = byId.get(id)!; return { now: a.now + e.now, blocked: a.blocked + e.blocked, next: a.next + e.next }; }, { now: 0, blocked: 0, next: 0 });
     const isEditing = editing === i && !s.fixed;
+    // A stored `other` reads `Other`; the rename field keeps the stored name.
+    const shown = groupName(s.name);
     return (
       <div className={`rail-group-head ${s.fixed ? "fixed" : ""}`} {...dragOnly(handle)}>
-        <button className="rail-chevron" onClick={() => toggle(s.key)} aria-expanded={!collapsed[s.key]} aria-label={foldName(!!collapsed[s.key], s.name)} title={foldName(!!collapsed[s.key], s.name)}>
+        <button className="rail-chevron" onClick={() => toggle(s.key)} aria-expanded={!collapsed[s.key]} aria-label={foldName(!!collapsed[s.key], shown)} title={foldName(!!collapsed[s.key], shown)}>
           {collapsed[s.key] ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
         </button>
         {/* `<name> · N` through SecCount (leftovers-72 FR-2, AR36); the
@@ -277,13 +280,13 @@ export function Rail() {
         <SecCount className="rail-group-title" countClass="rail-group-n" n={s.ids.length} title={isEditing ? (
           <RenameField name={s.name} onDone={(v, back) => rename(i, v, back)} onCancel={() => { setEditing(null); setRefocus(i); }} />
         ) : (
-          <span className="rail-group-name" onDoubleClick={() => !s.fixed && setEditing(i)} title={s.fixed ? "not in any group" : "double-click to rename, drag to reorder"}>{s.name}</span>
+          <span className="rail-group-name" onDoubleClick={() => !s.fixed && setEditing(i)} title={s.fixed ? "not in any group" : "double-click to rename, drag to reorder"}>{shown}</span>
         )} />
         <span className="spacer" />
         {collapsed[s.key] && <Counts now={c.now} blocked={c.blocked} next={c.next} />}
         {!s.fixed && !isEditing && (
           <GroupActions
-            name={s.name}
+            name={shown}
             index={i}
             count={stored.length}
             onRename={() => setEditing(i)}
