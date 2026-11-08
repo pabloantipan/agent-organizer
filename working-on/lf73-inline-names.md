@@ -8,7 +8,7 @@ reviewer: l73-rev, l73-ui
 review: "l73-rev pass at ba9f59f (V1, V2, V3, X0); AR35, AR37, AR38 to l73-ui"
 stage:
 updated: 2026-11-08
-next: "review: lf73-inline-names, V1-V3 and X0 pass (AR35 ring, AR38 review view left to l73-ui), ba9f59f"
+next: "PR with talos-lab (branch lf73-inline-names at ba9f59f pushed; asked by sup117)"
 depends_on: [lf72-counts-commas]
 boundary: ["frontend/src/components/RunTracks.tsx", "frontend/src/components/Rail.tsx", "frontend/src/components/Review.tsx", "frontend/src/components/SecCount.tsx", "frontend/src/styles/runreport.css", "frontend/src/styles/global.css", "frontend/src/styles/review.css", "frontend/src/lib/folds.ts", "frontend/src/lib/folds.test.ts", "frontend/src/lib/floatList.ts", "frontend/src/lib/floatList.test.ts", "frontend/src/components/"]
 spec: "docs/specs/leftovers-73.md (FR-1 to FR-4)"
