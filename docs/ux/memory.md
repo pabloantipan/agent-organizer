@@ -478,6 +478,7 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
 - What a note says but no acceptance row asks does not get built (map place across a mode switch): every behaviour I care about gets its row (map-and-roadmap A4). Picked and focused never share a mark: picked is the selected fill and accent edge, focus the violet-11 ring.
 - A list of failures must say whose move it is ("nothing for you to do; the reason is for the FSE"), or the lead reads every row as a task; and name a system by its name, not a common noun that collides with the screen's subject (usage A1).
 - Uppercased titles eat proper names (DISCUSS-RECORD): a name goes in the line under the title. A list must not reorder under the reader while it loads; render once in its final order (usage A2, map A5).
+- Rename polish stopped at lf82 (#82), agreed with the FSE: the closed rail group head is 34 px at rest (was 38); while editing, the chevron sits 2 px above the open field's centre. Known, accepted, not to be reopened without a bigger reason.
 
 ## Participants in use
 
