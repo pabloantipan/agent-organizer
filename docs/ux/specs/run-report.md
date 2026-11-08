@@ -746,3 +746,21 @@ From sup122 on lf80 (#78; offscreen, screen locked).
 | AR51 | collapse without leftovers | rename open with a refusal, collapse the rail: field closed, old name shown, announcer empty, focus on the toggle |
 | AR52 | find the head's tools | a refused field three lines high: the tools' top aligns with the field's top |
 | AR53 | read a refusal with a long name | a current name of 60 characters: the line quotes it cut at about 24 with `…`, at most four lines at 180 px; the announcer says it whole |
+
+## Amendment 16 (aglaea, 2026-11-08): '….' and the head at rest
+
+From sup123 on lf81 (#80; offscreen, AX not checked).
+
+- **1**: drop the period after a cut name: the ellipsis stands for it
+  (`… Type another name`), never `….`.
+- **2**: the chevron, the name and `⋯` each sit in the same 24 px line
+  box, aligned to the top; at rest their centres meet, and with a taller
+  field they stay by its first line (AR52 kept).
+- **The FSE's grapheme count** is right: "24 characters" means 24
+  graphemes, never cutting an emoji or a combining mark.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| AR54 | read a cut name cleanly | a refusal quoting a long name: `…` with no period after it |
+| AR55 | see the head level at rest | a closed group head: chevron, name and `⋯` centres within 1 px of each other |
+| AR53 (amended) | read a refusal with a long name | as before, cut at 24 graphemes; a name with an emoji at 24 keeps it whole |

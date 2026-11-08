@@ -246,3 +246,4 @@ resumes. The seat moves to the new discuss watcher (wake-rearm, api
 - 2026-11-08 — lf78 refused field (FSE thread 01M6X6Y7ZGNNZB1XKRMEFMS1Z4): run-report A13 (AR46-48); design system: Refused field.
 - 2026-11-08 — lf79 notes (FSE thread 01M6X8RKR3SGBYNDW5HSCQ94Q7): run-report A14 (AR49-50), announcer emptied on close, the line wraps as prose.
 - 2026-11-08 — lf80 notes (FSE thread 01M6XH4BDMHRQQXV0KS4V70647): run-report A15 (AR51-53), collapse closes the rename, head top-aligned, names cut in the refusal.
+- 2026-11-08 — lf81 notes (FSE thread 01M6XJTN4A3AGDB85W3C142BNG): run-report A16 (AR53 amended, AR54-55).
