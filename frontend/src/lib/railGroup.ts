@@ -64,8 +64,10 @@ export function takenBy(groups: RailGroup[], i: number, value: string): string |
   return null;
 }
 
-/** The line Rename shows under the field when `label` is taken. */
-export const takenLine = (label: string) => `A group is already called ${label}.`;
+/** The line Rename shows under the field when `label` is taken: why, then
+ *  the way out, the group's current name last (leftovers-79 FR-2, AR47). */
+export const takenLine = (label: string, current: string) =>
+  `A group is already called ${label}. Type another name, or press Escape to keep ${current}.`;
 
 /** The groups after the rename field of group `i` is saved with `value`, or
  *  null when nothing is to be written: empty text, text equal to what the

@@ -127,13 +127,13 @@ describe("leftovers-78 V2 (FR-2, AR43): Rename refuses a name another group show
   it("refuses ` ACME ` for misc while acme exists", () => {
     const groups = [{ name: "misc", initiatives: ["a"] }, { name: "acme", initiatives: ["b"] }];
     expect(takenBy(groups, 0, " ACME ")).toBe("acme");
-    expect(takenLine("acme")).toBe("A group is already called acme.");
+    expect(takenLine("acme", "misc")).toBe("A group is already called acme. Type another name, or press Escape to keep misc.");
     expect(renameGroup(groups, 0, " ACME ")).toBeNull();
   });
   it("refuses `no client` for the seed while a client group No client exists", () => {
     const groups = [{ name: "", seed: SEED_NO_CLIENT, initiatives: ["a"] }, { name: "No client", initiatives: ["b"] }];
     expect(takenBy(groups, 0, "no client")).toBe("No client");
-    expect(takenLine(takenBy(groups, 0, "no client")!)).toBe("A group is already called No client.");
+    expect(takenLine(takenBy(groups, 0, "no client")!, "No client")).toBe("A group is already called No client. Type another name, or press Escape to keep No client.");
     expect(renameGroup(groups, 0, "no client")).toBeNull();
   });
   it("refuses `no client` for a person's group while the seed reads No client, and the seed's long label too", () => {
@@ -193,5 +193,17 @@ describe("leftovers-78 FR-4 (AR45): a blank client is no client", () => {
     const groups = clientGroups([{ id: "a", client: "  " }, { id: "b", client: "" }, { id: "c", client: " acme " }, { id: "d", client: "acme" }]);
     expect(groups).toEqual([{ name: "", seed: SEED_NO_CLIENT, initiatives: ["a", "b"] }, { name: "acme", initiatives: ["c", "d"] }]);
     expect(groups.map((g) => railGroupLabel(g, groups).trim()).every(Boolean)).toBe(true);
+  });
+});
+
+// leftovers-79 V2 (FR-2, AR47): the refusal line says how to leave, the
+// group's current name last.
+describe("leftovers-79 V2 (FR-2, AR47): the refusal line says the way out", () => {
+  it("reads the full sentence for label No client, current name misc", () => {
+    expect(takenLine("No client", "misc")).toBe("A group is already called No client. Type another name, or press Escape to keep misc.");
+  });
+  it("names the taken group's label and the current name as the rail shows them", () => {
+    const groups = [{ name: "misc", initiatives: ["a"] }, { name: "", seed: SEED_NO_CLIENT, initiatives: ["b"] }];
+    expect(takenLine(takenBy(groups, 0, " no CLIENT ")!, railGroupLabel(groups[0], groups))).toBe("A group is already called No client. Type another name, or press Escape to keep misc.");
   });
 });

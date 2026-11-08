@@ -173,7 +173,7 @@ export function Rail() {
     // field stays open with the typed text and the line says which group
     // (leftovers-78 FR-2, AR43).
     const taken = takenBy(stored, i, name);
-    if (taken !== null) { setRefused({ line: takenLine(taken), text: name }); return; }
+    if (taken !== null) { setRefused({ line: takenLine(taken, railGroupLabel(stored[i], stored)), text: name }); return; }
     setRefused(null);
     if (back) setRefocus(i);
     setEditing(null);
