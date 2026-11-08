@@ -1,6 +1,6 @@
 ---
 title: "A refused rename shows, says the way out, and is heard every time"
-status: now
+status: done
 repos: [organizer]
 branch: lf79-refused-field
 seat: l79-build
@@ -8,7 +8,7 @@ reviewer: l79-rev
 review: "pass: V1, V2, V3, X0 met at 6220c78f (l79-rev, 2026-11-08); AR46-AR48 to l79-ui"
 stage:
 updated: 2026-11-08
-next: "PR with talos-lab"
+next: "done: merged as organizer #76 06e1a95c"
 depends_on: [lf78-group-names]
 boundary: ["frontend/src/components/Rail.tsx", "frontend/src/lib/railGroup.ts", "frontend/src/lib/", "frontend/src/styles/global.css", "frontend/src/components/"]
 spec: "docs/specs/leftovers-79.md (FR-1 to FR-3)"
@@ -17,6 +17,8 @@ ui_review: true
 touches: []
 change_order: {add: [], change: [], retire: []}
 autonomy: unattended
+prs:
+  - {repo: organizer, pr: 76, target: main, state: merged, merge: 06e1a95c}
 ---
 
 ## Goal
