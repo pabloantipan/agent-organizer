@@ -1,6 +1,6 @@
 ---
 title: "The organizer's map is regenerated with the grounded stamp and checks clean"
-status: next
+status: done
 repos: [organizer]
 branch: lf76-map-regen
 seat: l76-map
@@ -8,7 +8,7 @@ reviewer: l76-rev
 review: "pass, df5b9e17, 2026-11-08: C1-C3, X0 met"
 stage:
 updated: 2026-11-08
-next: "merged as organizer #70 85cf237a; c4-map check clean on the merge commit; supervisor moves it to done/"
+next: ""
 depends_on: []
 boundary: ["docs/architecture/"]
 spec: "docs/specs/leftovers-76.md (FR-1)"
