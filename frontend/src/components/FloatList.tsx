@@ -5,6 +5,7 @@ import { FloatDismiss, FloatListHeight, FloatPick } from "../../wailsjs/go/main/
 import { useBoard } from "../stores/board.store";
 import { filterList, floatList, focusOrder, foldSignals, HOME, homeCount, homeLabel, type FloatList as FloatListT, type FloatRow, type FoldsOpen, type Signal } from "../lib/floatList";
 import { foldLabel, type Fold } from "../lib/folds";
+import { groupName } from "../lib/groupName";
 import { regionName, useScrollEdges } from "../lib/useScrollEdges";
 import { MemoryFloatLine } from "./MemoryFloatLine";
 import "../styles/float.css";
@@ -197,12 +198,7 @@ export function FloatList() {
               No initiative matches "{query.trim()}". <button type="button" className="ghost fl-clear" onClick={() => { setQuery(""); input.current?.focus(); }}>Clear</button>
             </div>
           )}
-          {list.sections.map((s) => (
-            <div key={s.name || "all"} role="group" aria-label={s.name || "initiatives"}>
-              {s.name && <div className="fl-group">{s.name}</div>}
-              {s.rows.map((r) => row(r))}
-            </div>
-          ))}
+          <FloatSections sections={list.sections} row={(r) => row(r)} />
           <FloatFolds list={list} query={query} open={foldsOpen} onToggle={(f) => setFoldsOpen({ ...foldsOpen, [f]: !foldsOpen[f] })} row={(r) => row(r, true)} />
           </div>
         </div>
@@ -211,10 +207,25 @@ export function FloatList() {
   );
 }
 
+/** The rail's groups in the list, each under its name as the rail shows it:
+ *  a stored `other` reads `Other` (leftovers-74 FR-2, AR40). */
+export function FloatSections({ sections, row }: { sections: FloatListT["sections"]; row: (r: FloatRow) => React.ReactNode }) {
+  return (
+    <>
+      {sections.map((s) => (
+        <div key={s.name || "all"} role="group" aria-label={s.name ? groupName(s.name) : "initiatives"}>
+          {s.name && <div className="fl-group">{groupName(s.name)}</div>}
+          {s.rows.map((r) => row(r))}
+        </div>
+      ))}
+    </>
+  );
+}
+
 const CLOSED: FoldsOpen = { asleep: false, archived: false };
 
-/** The rail's two folds (leftovers-16 FR-3): `Asleep (n)` the paused ones
- *  only, then `Archived (n)` the rest, each only when it holds any, closed
+/** The rail's two folds (leftovers-16 FR-3): `Asleep · n` the paused ones
+ *  only, then `Archived · n` the rest, each only when it holds any, closed
  *  until opened and open under a query. */
 export function FloatFolds({ list, query, open, onToggle, row }: { list: Pick<FloatListT, Fold>; query: string; open: FoldsOpen; onToggle: (f: Fold) => void; row: (r: FloatRow) => React.ReactNode }) {
   const q = !!query.trim();
