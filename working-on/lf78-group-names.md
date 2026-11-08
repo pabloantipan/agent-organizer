@@ -8,7 +8,7 @@ reviewer: l78-rev
 review: "pass, code gate (G1, V1-V5, X0) met at 7cbcbfa8; l78-rev 2026-11-08; AR43-AR45 to l78-ui"
 stage:
 updated: 2026-11-08
-next: "PR with talos-lab"
+next: "merged as organizer #74 a9890871; supervisor moves it to done/"
 depends_on: [lf77-no-client]
 boundary: ["frontend/src/lib/railGroup.ts", "frontend/src/lib/", "frontend/src/components/Rail.tsx", "frontend/src/components/FloatList.tsx", "frontend/src/components/", "frontend/src/styles/global.css", "internal/scan/scan.go", "internal/scan/", "testdata/fixture-overlay/"]
 spec: "docs/specs/leftovers-78.md (FR-1 to FR-5)"
@@ -17,6 +17,8 @@ ui_review: true
 touches: []
 change_order: {add: [], change: [], retire: []}
 autonomy: unattended
+prs:
+  - {repo: organizer, pr: 74, target: main, state: merged, merge: a9890871}
 ---
 
 ## Goal
