@@ -10,6 +10,7 @@ import { stripFolds } from "../lib/folds";
 import { placeOf } from "../lib/place";
 import { useLiveRegion } from "../lib/liveRegion";
 import { clientGroups, railGroupLabel, renameGroup, savedGroups, takenBy, takenLine } from "../lib/railGroup";
+import { closeRename, collapseRail } from "../lib/railRename";
 import { useBoard, type Screen } from "../stores/board.store";
 import { CellStateLz, definitionWaits } from "./Crew";
 import { missingPersonas } from "../lib/queue";
@@ -57,6 +58,14 @@ export function Rail() {
     navRef.current?.querySelector<HTMLElement>(`[${ACTIONS}="${refocus}"]`)?.focus();
     setRefocus(null);
   }, [refocus]);
+  // The strip's toggle to take focus once the rail collapsed with the rename
+  // field open (leftovers-81 FR-1, AR51): the strip is drawn by then.
+  const [toggleFocus, setToggleFocus] = useState(false);
+  useEffect(() => {
+    if (!toggleFocus) return;
+    navRef.current?.querySelector<HTMLElement>(".strip-toggle")?.focus();
+    setToggleFocus(false);
+  }, [toggleFocus, railCollapsed]);
   // The row Up and Down last moved to; null once focus leaves the rows, so
   // the next Tab enters on the current row again (FR-5, T3).
   const [cursor, setCursor] = useState<string | null>(null);
@@ -310,7 +319,7 @@ export function Rail() {
         {/* `<name> · N` through SecCount (leftovers-72 FR-2, AR36); the
             rename field stands in for the name alone. */}
         <SecCount className="rail-group-title" countClass="rail-group-n" n={s.ids.length} title={isEditing ? (
-          <RenameField name={shown} refused={refused} onDone={(v, back) => rename(i, v, back)} onCancel={() => { setRefused(null); setEditing(null); setRefocus(i); }} />
+          <RenameField name={shown} refused={refused} onDone={(v, back) => rename(i, v, back)} onCancel={() => { closeRename({ hush, setRefused, setEditing }); setRefocus(i); }} />
         ) : (
           <span className="rail-group-name" onDoubleClick={() => !s.fixed && setEditing(i)} title={s.fixed ? "not in any group" : "double-click to rename, drag to reorder"}>{shown}</span>
         )} />
@@ -406,7 +415,10 @@ export function Rail() {
       {/* The rename refusal's announcement (leftovers-79 FR-3, AR48): inside
           the positioned rail, so the sr-only span cannot stretch the page. */}
       <span className="sr-only rail-said" role="alert" aria-live="assertive" aria-atomic="true">{said}</span>
-      <button className="rail-icon strip-toggle" onClick={() => setRailCollapsed(true)} title="collapse the rail" aria-label="Initiatives rail" aria-expanded aria-controls={RAIL_ID}><PanelLeftClose size={14} /></button>
+      {/* Collapsing closes an open rename as Escape does (leftovers-81 FR-1,
+          AR51); the press keeps focus in the field so its blur does not save
+          or refuse first. */}
+      <button className="rail-icon strip-toggle" onMouseDown={(e) => { if (editing !== null) e.preventDefault(); }} onClick={() => collapseRail({ editing, hush, setRefused, setEditing, collapse: () => setRailCollapsed(true), focusToggle: () => setToggleFocus(true) })} title="collapse the rail" aria-label="Initiatives rail" aria-expanded aria-controls={RAIL_ID}><PanelLeftClose size={14} /></button>
       <RailHero
         hero={hero}
         back={back}
