@@ -4,8 +4,8 @@ status: now
 repos: [organizer]
 branch: lf77-no-client
 seat: l77-build
-reviewer:
-review:
+reviewer: l77-rev
+review: "pass at 6cfe014a by l77-rev (G1, V1-V5, S1, X0 met); AR40-AR42 to l77-ui"
 stage:
 updated: 2026-11-08
 next: "review: lf77-no-client, gate met (G1, V1-V5, S1, X0 pass; AR40-AR42 shown by AX, UI review to confirm), 6cfe014a"
@@ -66,3 +66,13 @@ Not changed, on purpose:
 - `frontend/src/lib/floatList.ts`: outside the boundary; `FloatList.tsx` labels the groups before calling it
 - `internal/service/service.go:SetGroups`, `app.go`, the store: they pass groups through; `Regroup` keeps the seed
 - `frontend/src/lib/review.ts:groupName`: a different helper; the rail's is now `railGroupLabel`
+
+## Review
+- **Verdict: pass** (code gate). Unmet rows: none. Reviewer l77-rev, 2026-11-08, commit reviewed 6cfe014a (on origin/main 85cf237a), fresh clone of the GitHub remote. AR40-AR42 are l77-ui's.
+- change-check (`--base origin/main`): 21 files, outside boundary 0. Flags explained: `undeclared FloatList.tsx:FloatList` is the one call `floatList(labelGroups(view), …)` (FR-2, declared under `labelGroups`); the six `undeclared` fixture files and the three `declared, not changed` (`init-other-cap`, `init-loose`, `init-solo`) are the declared overlay directories, which change-check does not match to their files; `untested? cleanup` is the zsh script, covered by S1's grep and `bash -n`/`zsh -n` only.
+- G1, V1-V5 pass on the branch (22 vitests in the three files; G1 ok). On 85cf237a with the new tests copied in: G1 does not build (`Group has no field Seed`); V1-V4 and the Rail V3 fail behaviourally (9 of 17) with a shim mapping the new names onto base's `groupName`/`clientGroups`; V5 on base: `groupName` exported by `lib/groupName.ts` and `lib/review.ts`, `NO_CLIENT = "Other"`; branch: one `railGroupLabel` export, `NO_CLIENT = "No client"`. S1: no `FIXTURE_AGENT_PIDS` left (base: line 36 kills it); `bash -n` and `zsh -n` ok; the stop is in `cleanup`, trapped on EXIT and reached from INT/TERM via `exit 130`, the same paths as the old kill.
+- X0: `make test` fresh (test-lease run 0b9af8f86602c7d56d8acf6c03b73c1f, 1737 vitests, go ok), `wails build` and `make review-build` exit 0, `git status --porcelain` empty before and after (models.ts is what the generator writes).
+- Cases beyond the builder's tests: `SetGroups` (service) then `cache.Load` keeps `{"name":"","initiatives":["a","b"],"seed":"no-client"}`; the order document's payload is that JSON (`PushOrder` marshals `model.Order`). Clients `other`, `Other`, `OTHER`, `No client`, `"  "` each get their own unseeded group; only `""` joins the seed. Seed field: ` No client ` writes nothing (trimmed equals the label; FR-3 does not name padding); `no client` is stored as the person's name `no client` (FR-3 "any other text"); `misc` stored. Legacy: saves only (`persist` is called from handlers only; the store's load path calls nothing that saves); an empty `other`/`Other` is left as stored.
+- Note (to the FSE, docs/specs/leftovers-77.md follow-up): a client written `No client` gets an unseeded group that reads exactly like the seed; renaming a renamed seed back to `No client` stores the literal name. Both follow FR-2/FR-3 as written.
+- Note (to the FSE): a stored seed plus a legacy `other` holding only no-client initiatives saves as two seeded groups (`savedGroups`), FR-4 as written.
+- Note (to the FSE): a whitespace-only client (`"  "`) seeds a group with a blank header; the scan does not trim `client`.
