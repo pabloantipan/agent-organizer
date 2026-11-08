@@ -1,6 +1,6 @@
 # Leftovers 75: stop the fixture's stand-in agents before their dir goes: the build spec
 
-status: proposed (0188)
+status: accepted (0188, ruled 2026-11-08)
 by: the FSE, 2026-11-08, on main at 65a8d51
 sources: Hephaistos, for pablo, 2026-11-08 (thread 01M6WS9517RWK989TP9P0VW9Q3):
 card reparented-stand-ins-stop (agent-slack chore/cards-2026-11-08a), R2:

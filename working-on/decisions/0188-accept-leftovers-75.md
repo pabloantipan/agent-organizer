@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 75 - stop the fixture's stand-in agents before their dir goes
-status: proposed
+status: ruled
 raised: 2026-11-08
 raised_by: fse
 owner: pablo
@@ -9,6 +9,9 @@ cards: [lf75-fixture-stop]
 forecast: 30-60m
 supersedes: []
 superseded_by:
+ruled: 2026-11-08
+ruled_by: pablo (autonomous mode)
+chosen: accept as written
 ---
 
 ## Question
@@ -32,3 +35,12 @@ accept as written.
 ## Forecast
 
 forecast: 30-60m over 1 wave, plus the wait on the factory card; basis: lf65 (review guard, 20 min) and lf72-lf73 (about 40 min), this initiative.
+
+## Ruling
+
+pablo (autonomous mode), 2026-11-08 02:22: the recommendation taken after
+five minutes without an answer. Asked at 02:17 in the mailbox ("0188:
+accept leftovers 75, fixture-home.sh stop?", options accept as written or
+send back); recommended "accept as written". Not sensitive: the
+organizer's own record, scripts only. No supervisor yet: the card waits on
+safe-kill --pidfile and the memory outage.
