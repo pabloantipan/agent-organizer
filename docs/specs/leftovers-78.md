@@ -1,6 +1,6 @@
 # Leftovers 78: no group reads like another, and a blank client is no client: the build spec
 
-status: proposed (0191)
+status: accepted (0191, ruled 2026-11-08)
 by: the FSE, 2026-11-08, on main at e7131dd6
 sources: sup119's closing on lf77-no-client (#72 d832cc8a), findings 1-3;
 Aglaea's `docs/ux/specs/run-report.md` Amendment 12 and

@@ -8,7 +8,7 @@ reviewer:
 review:
 stage:
 updated: 2026-11-08
-next: "waits on 0191 (accept leftovers 78)"
+next: "sup120 runs it (0191)"
 depends_on: [lf77-no-client]
 boundary: ["frontend/src/lib/railGroup.ts", "frontend/src/lib/", "frontend/src/components/Rail.tsx", "frontend/src/components/FloatList.tsx", "frontend/src/components/", "frontend/src/styles/global.css", "internal/scan/scan.go", "internal/scan/", "testdata/fixture-overlay/"]
 spec: "docs/specs/leftovers-78.md (FR-1 to FR-5)"

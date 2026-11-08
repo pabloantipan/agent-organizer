@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 78 - no group reads like another, and a blank client is no client
-status: proposed
+status: ruled
 raised: 2026-11-08
 raised_by: fse
 owner: pablo
@@ -9,6 +9,10 @@ cards: [lf78-group-names]
 forecast: 30-60m
 supersedes: []
 superseded_by:
+ruled: 2026-11-08
+ruled_by: pablo (autonomous mode)
+supervisor: organizer-probe-sup120
+chosen: accept as written
 ---
 
 ## Question
@@ -33,3 +37,11 @@ accept as written.
 ## Forecast
 
 forecast: 30-60m over 1 wave; basis: lf77 (22 min), lf74 (about 25 min), this initiative.
+
+## Ruling
+
+pablo (autonomous mode), 2026-11-08 05:47: the recommendation taken after
+five minutes without an answer. Asked at 05:42 in the mailbox ("0191:
+accept leftovers 78, group names never alike?", options accept as written
+or send back); recommended "accept as written". Not sensitive: the
+organizer's own record, frontend and one scan line, designs by Aglaea.
