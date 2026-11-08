@@ -26,6 +26,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- 10:1x sup124 closed (lf82 #82 03f7d9b3; 27 min vs 20-45, $7.57; one failed UI round on AR55, cause execution) and ended; installed v0.2.0-3729. Rename polish closed (agreed with Aglaea). Leftovers 74-82 since the resume: nine cards, $55 in seats, one failed round. Gate lesson: a CSS row checks the computed box, not the rule's text (V3 passed over the global button min-height). Orphaned wails dev tree from l82-ui (66386, 67161, 67594; safe-kill refuses) sent [for hephaistos]. Queue: empty; lf55 waits on seat-pointer-dock-window.
+
 - 09:47 0195 ruled by default (leftovers 82, lf82-rename-last, Aglaea A16: AR53-AR55, the last rename polish); sup124 launched, forecast 20-45m.
 
 - 09:4x sup123 closed (lf81 #80 b87a4cd6; 20 min vs 20-45, $5.29) and ended; installed v0.2.0-3708. Leftovers 74-81: eight cards, all first-round passes, about $48. The rename chain (lf78-lf81) now yields sub-sev-1 polish: one last card from Aglaea's answer on '….' and the 2-4 px offset, plus graphemes for the 24-character cut (my spec gap); then stop cutting rename polish. Spec lessons: name every new file in Boundary (lib/railRename.ts was missed); a spec that counts characters says graphemes.
