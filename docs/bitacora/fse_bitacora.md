@@ -26,6 +26,10 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- 06:19 0192 ruled by default (leftovers 79, lf79-refused-field: Aglaea A13, AR46-AR48); sup121 launched, forecast 20-45m.
+
+- 06:1x sup120 closed (lf78 #74 a9890871; 23 min vs 30-60, $6.88, no failed round) and ended; installed v0.2.0-3659. Its finding 1 (two seeds stored by d832cc8a show two heads until a save) checked against Pablo's real state.json: groups 'everything' and 'PRO', no seed, so dropped. Refused-field notes A1-A3 to Aglaea. Gate lesson: no DOM test library in frontend/, so 'stays open' rows are UI rows, not vitest.
+
 - 05:47 0191 ruled by default (leftovers 78, lf78-group-names: Aglaea A12, AR43-AR45 plus the two-seed merge); sup120 launched, forecast 30-60m.
 
 - 05:4x sup119 closed (lf77 #72 d832cc8a; 22 min vs 45-90, $8.14, no failed round) and ended; installed v0.2.0-3642. Findings: 'No client' as a client name and whitespace clients to Aglaea; held low (mine): a stored seed plus a legacy 'other' of no-client initiatives saves as two seeded groups (FR-4 should merge into the existing seed); Needs me read 15 then 16 in the fixture a minute apart (unchecked, likely a task row going stalled). Weekly usage read 86% in a seat at 05:18: keep cuts small until it resets; told Pablo. Queue: empty until Aglaea answers; then one small card (the two-seed merge plus her answers).
