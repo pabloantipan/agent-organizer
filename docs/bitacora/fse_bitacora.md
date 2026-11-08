@@ -26,7 +26,7 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
-- 03:5x memory outage over; sup118 launched on lf74, lf75, lf76 in that order (0187-0189; band 80-165m in its prompt, Argos reads 0187's 30-60m: extend when it fires). Frozen organizer seats l65-l72 and l66-* left frozen (cards done; not to thaw). 0189 ruled 03:26 (leftovers 76, map regen, Hephaistos's c4-map-stamp-grounded merged).
+- 04:2x memory outage over; sup118 launched on lf74, lf75, lf76 in that order (0187-0189; band 80-165m in its prompt, Argos reads 0187's 30-60m: extend when it fires). Frozen organizer seats l65-l72 and l66-* left frozen (cards done; not to thaw). 0189 ruled 03:26 (leftovers 76, map regen, Hephaistos's c4-map-stamp-grounded merged).
 
 - 02:44 safe-kill --pidfile installed; lf75 added to sup118's prompt after lf74 (one supervisor for both, memory tight). Argos reads 0187's 30-60m as sup118's band: extend +60m when it fires, why 'lf75 added (0188)'. Outage flag still set (swap 92%), no 'over' yet: still holding.
 
