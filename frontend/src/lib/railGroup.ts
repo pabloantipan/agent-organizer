@@ -11,50 +11,112 @@ export const SEED_NO_CLIENT = "no-client";
  *  AR40). */
 export const NO_CLIENT = "No client";
 
-/** A rail group's name as the rail and the float list show it: the seeded
- *  group with an empty name reads `No client`; every other name is the
- *  person's and shows exactly as stored, `other` and `Other` included. */
-export function railGroupLabel(g: RailGroup): string {
-  return g.seed === SEED_NO_CLIENT && !g.name ? NO_CLIENT : g.name;
+/** What the seed with an empty name reads while another group already reads
+ *  `No client`: a client's name cannot be refused, so the seed gives way
+ *  (leftovers-78 FR-1; run-report Amendment 12, AR43). */
+export const NO_CLIENT_LONG = "Initiatives with no client";
+
+/** How two group names compare: trimmed, any case (leftovers-78 FR-1, FR-2). */
+const same = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
+
+const isSeed = (g: RailGroup) => g.seed === SEED_NO_CLIENT;
+
+/** A rail group's name as the rail and the float list show it, among the
+ *  groups it stands with: the seeded group with an empty name reads `No
+ *  client`, or `Initiatives with no client` while another group's name is
+ *  `No client` (trimmed, any case; leftovers-78 FR-1, AR43); every other
+ *  name is the person's (or the client's) and shows exactly as stored,
+ *  `other` and `Other` included. */
+export function railGroupLabel(g: RailGroup, among: RailGroup[] = []): string {
+  if (!isSeed(g) || g.name) return g.name;
+  return among.some((o) => !isSeed(o) && same(o.name, NO_CLIENT)) ? NO_CLIENT_LONG : NO_CLIENT;
 }
 
 /** The groups "Group by client" seeds: one per client as written, in the
  *  order they first appear, and one seeded group with an empty name for the
  *  initiatives with no client, keyed by its seed so no client name joins it
- *  (leftovers-77 FR-2, AR42). */
+ *  (leftovers-77 FR-2, AR42). A client blank or only spaces is no client
+ *  (leftovers-78 FR-4, AR45): the scan trims it, and so does this, for a
+ *  snapshot another machine wrote before it did. */
 export function clientGroups(entries: { id: string; client: string }[]): RailGroup[] {
   const groups = new Map<string, RailGroup>();
   for (const e of entries) {
-    const key = e.client ? `client:${e.client}` : "seed";
-    const g = groups.get(key) ?? (e.client ? { name: e.client, initiatives: [] } : { name: "", seed: SEED_NO_CLIENT, initiatives: [] });
+    const client = (e.client ?? "").trim();
+    const key = client ? `client:${client}` : "seed";
+    const g = groups.get(key) ?? (client ? { name: client, initiatives: [] } : { name: "", seed: SEED_NO_CLIENT, initiatives: [] });
     g.initiatives!.push(e.id);
     groups.set(key, g);
   }
   return [...groups.values()];
 }
 
-/** The groups after the rename field of group `i` is saved with `value`, or
- *  null when nothing is to be written: empty text, or text equal to what the
- *  header shows (so the seed saved as `No client` keeps its name empty, the
- *  app's label). Any other text is stored as written, seed kept
- *  (leftovers-77 FR-3, AR41). */
-export function renameGroup<G extends RailGroup>(groups: G[], i: number, value: string): G[] | null {
+/** The label of the other group that already shows `value` (trimmed, any
+ *  case), or null when none does: Rename refuses that name in place,
+ *  `A group is already called <label>.` (leftovers-78 FR-2, AR43). */
+export function takenBy(groups: RailGroup[], i: number, value: string): string | null {
   const n = value.trim();
-  if (!n || n === railGroupLabel(groups[i])) return null;
-  return groups.map((g, j) => (j === i ? { ...g, name: n } : g));
+  if (!n) return null;
+  for (let j = 0; j < groups.length; j++) {
+    if (j === i) continue;
+    const label = railGroupLabel(groups[j], groups);
+    if (same(label, n)) return label;
+  }
+  return null;
 }
 
-/** The groups as they are saved: name, initiatives and seed only; and a
- *  group stored before the seed existed, named exactly `other` or `Other`,
- *  whose members are all known and all without a client, saved as the seed
- *  with an empty name (leftovers-77 FR-4). Any other group is saved as
- *  stored. Nothing calls this on read: it runs only when the groups are
- *  saved. `clientOf` answers undefined for an initiative it does not know. */
+/** The line Rename shows under the field when `label` is taken. */
+export const takenLine = (label: string) => `A group is already called ${label}.`;
+
+/** The groups after the rename field of group `i` is saved with `value`, or
+ *  null when nothing is to be written: empty text, text equal to what the
+ *  header shows (so the seed saved unchanged keeps its name empty, the app's
+ *  label), or a name another group shows (`takenBy`; leftovers-78 FR-2).
+ *  The seed renamed `No client` (trimmed, any case) stores an empty name:
+ *  the app's label again, not a literal (leftovers-78 FR-3, AR44). Any other
+ *  text is stored as written, seed kept (leftovers-77 FR-3, AR41). */
+export function renameGroup<G extends RailGroup>(groups: G[], i: number, value: string): G[] | null {
+  const n = value.trim();
+  const g = groups[i];
+  if (!n || n === railGroupLabel(g, groups) || takenBy(groups, i, n) !== null) return null;
+  const name = isSeed(g) && same(n, NO_CLIENT) ? "" : n;
+  if (name === g.name) return null;
+  return groups.map((o, j) => (j === i ? { ...o, name } : o));
+}
+
+/** The groups as they are saved: name, initiatives and seed only. A group
+ *  stored before the seed existed, named exactly `other` or `Other`, whose
+ *  members are all known and all without a client, is legacy (leftovers-77
+ *  FR-4): it is merged into the stored seed when one exists, its
+ *  initiatives appended in order and none twice, and becomes the seed with
+ *  an empty name only when none exists (leftovers-78 FR-5). At most one
+ *  seeded group is ever saved: a second seed merges the same way. Any other
+ *  group is saved as stored. Nothing calls this on read: it runs only when
+ *  the groups are saved. `clientOf` answers undefined for an initiative it
+ *  does not know. */
 export function savedGroups(groups: RailGroup[], clientOf: (id: string) => string | undefined): RailGroup[] {
-  return groups.map((g) => {
+  const legacy = (g: RailGroup) => {
     const initiatives = g.initiatives ?? [];
-    const legacy = !g.seed && (g.name === "other" || g.name === "Other") && initiatives.length > 0 && initiatives.every((id) => clientOf(id) === "");
-    if (legacy) return { name: "", seed: SEED_NO_CLIENT, initiatives };
-    return g.seed ? { name: g.name, initiatives, seed: g.seed } : { name: g.name, initiatives };
+    return !g.seed && (g.name === "other" || g.name === "Other") && initiatives.length > 0 && initiatives.every((id) => clientOf(id)?.trim() === "");
+  };
+  // The seed everything seeded merges into: the stored one, else the first legacy group.
+  let into = groups.findIndex(isSeed);
+  if (into < 0) into = groups.findIndex(legacy);
+  const merged: string[] = [];
+  if (into >= 0) {
+    for (const j of [into, ...groups.map((_, k) => k).filter((k) => k !== into)]) {
+      const g = groups[j];
+      if (j !== into && !isSeed(g) && !legacy(g)) continue;
+      for (const id of g.initiatives ?? []) if (!merged.includes(id)) merged.push(id);
+    }
+  }
+  const out: RailGroup[] = [];
+  groups.forEach((g, j) => {
+    if (j === into) {
+      out.push({ name: isSeed(g) ? g.name : "", initiatives: merged, seed: SEED_NO_CLIENT });
+      return;
+    }
+    if (into >= 0 && (isSeed(g) || legacy(g))) return;
+    out.push(g.seed ? { name: g.name, initiatives: g.initiatives ?? [], seed: g.seed } : { name: g.name, initiatives: g.initiatives ?? [] });
   });
+  return out;
 }

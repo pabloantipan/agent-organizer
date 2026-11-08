@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clientGroups, NO_CLIENT, railGroupLabel, renameGroup, savedGroups, SEED_NO_CLIENT } from "./railGroup";
+import { clientGroups, NO_CLIENT, NO_CLIENT_LONG, railGroupLabel, renameGroup, savedGroups, SEED_NO_CLIENT, takenBy, takenLine } from "./railGroup";
 
 const fs: { readFileSync(p: string, enc: "utf8"): string; readdirSync(p: string, o: { recursive: true }): string[] } = await import("node:" + "fs");
 
@@ -95,5 +95,103 @@ describe("leftovers-77 V5 (FR-5): one export of the label helper", () => {
       if (/export\s+(function|const|let)\s+railGroupLabel\b|export\s*\{[^}]*\brailGroupLabel\b/.test(fs.readFileSync(root + f, "utf8"))) hits.push(f);
     }
     expect(hits).toEqual(["lib/railGroup.ts"]);
+  });
+});
+
+// leftovers-78 V1 (FR-1, AR43): the seed's label takes the groups it stands
+// among: beside a group called `No client` (trimmed, any case) it reads
+// `Initiatives with no client`, otherwise `No client`.
+describe("leftovers-78 V1 (FR-1, AR43): the seed gives way to a client called No client", () => {
+  const seed = { name: "", seed: SEED_NO_CLIENT, initiatives: ["a"] };
+  it("reads No client alone", () => {
+    expect(railGroupLabel(seed, [seed])).toBe("No client");
+    expect(railGroupLabel(seed)).toBe("No client");
+  });
+  it("reads Initiatives with no client beside a client group ` no CLIENT `", () => {
+    const among = [seed, { name: " no CLIENT ", initiatives: ["b"] }];
+    expect(NO_CLIENT_LONG).toBe("Initiatives with no client");
+    expect(railGroupLabel(seed, among)).toBe("Initiatives with no client");
+    expect(railGroupLabel(among[1], among)).toBe(" no CLIENT ");
+  });
+  it("reads No client beside a group named misc", () => {
+    expect(railGroupLabel(seed, [seed, { name: "misc", initiatives: ["b"] }])).toBe("No client");
+  });
+  it("reads a renamed seed by its name beside No client", () => {
+    expect(railGroupLabel({ ...seed, name: "misc" }, [seed, { name: "No client" }])).toBe("misc");
+  });
+});
+
+// leftovers-78 V2 (FR-2, AR43): Rename refuses a name another group shows
+// (trimmed, any case), naming that group; nothing is written.
+describe("leftovers-78 V2 (FR-2, AR43): Rename refuses a name another group shows", () => {
+  it("refuses ` ACME ` for misc while acme exists", () => {
+    const groups = [{ name: "misc", initiatives: ["a"] }, { name: "acme", initiatives: ["b"] }];
+    expect(takenBy(groups, 0, " ACME ")).toBe("acme");
+    expect(takenLine("acme")).toBe("A group is already called acme.");
+    expect(renameGroup(groups, 0, " ACME ")).toBeNull();
+  });
+  it("refuses `no client` for the seed while a client group No client exists", () => {
+    const groups = [{ name: "", seed: SEED_NO_CLIENT, initiatives: ["a"] }, { name: "No client", initiatives: ["b"] }];
+    expect(takenBy(groups, 0, "no client")).toBe("No client");
+    expect(takenLine(takenBy(groups, 0, "no client")!)).toBe("A group is already called No client.");
+    expect(renameGroup(groups, 0, "no client")).toBeNull();
+  });
+  it("refuses `no client` for a person's group while the seed reads No client, and the seed's long label too", () => {
+    const groups = [{ name: "misc", initiatives: ["a"] }, { name: "", seed: SEED_NO_CLIENT, initiatives: ["b"] }];
+    expect(takenBy(groups, 0, "NO CLIENT")).toBe("No client");
+    const beside = [{ name: "misc", initiatives: ["a"] }, { name: "", seed: SEED_NO_CLIENT, initiatives: ["b"] }, { name: "No client", initiatives: ["c"] }];
+    expect(takenBy(beside, 0, "initiatives with no client")).toBe("Initiatives with no client");
+  });
+  it("lets a group take its own name in another case", () => {
+    const groups = [{ name: "acme", initiatives: ["a"] }, { name: "misc", initiatives: ["b"] }];
+    expect(takenBy(groups, 0, "ACME")).toBeNull();
+    expect(renameGroup(groups, 0, "ACME")).toEqual([{ name: "ACME", initiatives: ["a"] }, groups[1]]);
+  });
+});
+
+// leftovers-78 V3 (FR-3, AR44): the seed renamed `misc`, then ` No Client `:
+// the name is misc, then empty, the app's label again.
+describe("leftovers-78 V3 (FR-3, AR44): renaming the seed to No client clears its name", () => {
+  it("stores misc, then an empty name", () => {
+    const start = [{ name: "acme", initiatives: ["a"] }, { name: "", seed: SEED_NO_CLIENT, initiatives: ["b"] }];
+    const misc = renameGroup(start, 1, "misc")!;
+    expect(misc[1]).toEqual({ name: "misc", seed: SEED_NO_CLIENT, initiatives: ["b"] });
+    const back = renameGroup(misc, 1, " No Client ")!;
+    expect(back[1]).toEqual({ name: "", seed: SEED_NO_CLIENT, initiatives: ["b"] });
+    expect(railGroupLabel(back[1], back)).toBe("No client");
+  });
+  it("stores No client as written on a person's group when nothing shows it", () => {
+    expect(renameGroup([{ name: "misc", initiatives: ["a"] }], 0, "No client")).toEqual([{ name: "No client", initiatives: ["a"] }]);
+  });
+});
+
+// leftovers-78 V4 (FR-5): a stored seed holding a plus a legacy `other`
+// holding b and a (both no client) save as one seed holding a, b.
+describe("leftovers-78 V4 (FR-5): one seeded group is ever saved", () => {
+  const clientOf = (id: string) => ({ a: "", b: "", c: "  ", k: "acme" } as Record<string, string>)[id];
+  it("merges a legacy other into the stored seed, appended in order, none twice", () => {
+    const groups = [{ name: "", seed: SEED_NO_CLIENT, initiatives: ["a"] }, { name: "other", initiatives: ["b", "a"] }];
+    expect(savedGroups(groups, clientOf)).toEqual([{ name: "", seed: SEED_NO_CLIENT, initiatives: ["a", "b"] }]);
+  });
+  it("merges into a stored seed standing after the legacy group, keeping its name", () => {
+    const groups = [{ name: "Other", initiatives: ["b"] }, { name: "acme", initiatives: ["k"] }, { name: "misc", seed: SEED_NO_CLIENT, initiatives: ["a"] }];
+    expect(savedGroups(groups, clientOf)).toEqual([{ name: "acme", initiatives: ["k"] }, { name: "misc", seed: SEED_NO_CLIENT, initiatives: ["a", "b"] }]);
+  });
+  it("makes the first legacy group the seed when none is stored, merging a second", () => {
+    const groups = [{ name: "other", initiatives: ["a"] }, { name: "Other", initiatives: ["b", "a"] }];
+    expect(savedGroups(groups, clientOf)).toEqual([{ name: "", seed: SEED_NO_CLIENT, initiatives: ["a", "b"] }]);
+  });
+  it("counts a client of spaces as no client", () => {
+    expect(savedGroups([{ name: "other", initiatives: ["c"] }], clientOf)).toEqual([{ name: "", seed: SEED_NO_CLIENT, initiatives: ["c"] }]);
+  });
+});
+
+// leftovers-78 FR-4 (AR45): Group by client puts a client blank or of spaces
+// in the seed and trims a padded one; no group has a blank header.
+describe("leftovers-78 FR-4 (AR45): a blank client is no client", () => {
+  it("seeds the blank and spaced clients into the seed", () => {
+    const groups = clientGroups([{ id: "a", client: "  " }, { id: "b", client: "" }, { id: "c", client: " acme " }, { id: "d", client: "acme" }]);
+    expect(groups).toEqual([{ name: "", seed: SEED_NO_CLIENT, initiatives: ["a", "b"] }, { name: "acme", initiatives: ["c", "d"] }]);
+    expect(groups.map((g) => railGroupLabel(g, groups).trim()).every(Boolean)).toBe(true);
   });
 });

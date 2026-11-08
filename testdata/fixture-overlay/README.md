@@ -163,3 +163,10 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
   and the seeded group reading `No client` with two members. Their card
   dates sort them above `init-blind` (no cards), so under `--groups` the
   rail still ends with ccint (leftovers-26 F2)
+- no two groups alike, a blank client (leftovers-78 AR43-AR45):
+  `init-named-noclient` (client `No client`) and `init-blank-client`
+  (client two spaces, which the scan trims to none), each with one `next`
+  card updated 2026-10-01. Group by client seeds a client group `No
+  client` and the seed, which then reads `Initiatives with no client` and
+  holds `init-loose`, `init-solo` and `init-blank-client`; no group has a
+  blank header
