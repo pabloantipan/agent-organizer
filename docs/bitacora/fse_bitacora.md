@@ -26,6 +26,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- 2026-11-08: cell resumed (Hephaistos for Pablo: "Unfreeze all initiatives and go on"; Hestia first this week). sup117 still running on lf73 (UI review l73-ui pending). Swap at 98% on resume: probe will refuse new seats until it drops; ram --free needs Pablo's word. origin/main carries Hephaistos's 'organizer asleep' commit (initiative.yaml status: paused) though factory awake lists organizer awake: not merged yet, asked.
+
 - WRONG again (mine, 15:1x): leftovers-73's (N) grep covered components/*.tsx only; lib/folds.ts writes 'Asleep (n)' as a string. sup117 caught it before review; Amendment 1. Third sighting of a premise grep scoped too narrow (lf71 sec-count, lf71 tests, lf73 lib/). Rule now: a text-pattern premise greps all of frontend/src, .ts and .tsx, strings included, and the tests. Worth proposing as a gate-check hint for Hephaistos if it recurs.
 
 - 15:0x sup116 closed (lf72 #61 51db34f, 31 min vs 30-60, $8.98, no failed round) and ended. Its F1, F2 and spec gaps are already in leftovers-73 (0186, asked 15:01). Held low: V2-style scans miss 'mono num', {"\u00b7"} and expression titles (no site today). sup115 (lf71 #59, 43 min, $8.12) ended 14:22. Kept sup116's prompt file as sup117's template source.
