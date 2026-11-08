@@ -1,6 +1,6 @@
 # Leftovers 83: the React app on the organizer's own map: the build spec
 
-status: proposed (0196)
+status: accepted (0196, ruled 2026-11-08)
 by: the FSE, 2026-11-08, on main at 91a28388
 sources: the FSE queue since 2026-11-01 ("the React app on the organizer's
 map, a --modules for frontend", unblocked by Hephaistos's

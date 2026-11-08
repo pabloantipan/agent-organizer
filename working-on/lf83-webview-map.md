@@ -8,7 +8,7 @@ reviewer:
 review:
 stage:
 updated: 2026-11-08
-next: "waits on 0196 (accept leftovers 83)"
+next: "sup125 runs it (0196)"
 depends_on: [lf76-map-regen]
 boundary: ["docs/architecture/", "scripts/c4-adapter-webview"]
 spec: "docs/specs/leftovers-83.md (FR-1 to FR-3)"

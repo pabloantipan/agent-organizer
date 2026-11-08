@@ -26,6 +26,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- 10:50 0196 ruled by default (leftovers 83, lf83-webview-map: the React app as a second container from an in-repo adapter, judged by Daedalus, option A); sup125 launched, forecast 20-45m. The codebase-memory index of this repo is of a removed worktree: the card indexes the root first.
+
 - 10:1x sup124 closed (lf82 #82 03f7d9b3; 27 min vs 20-45, $7.57; one failed UI round on AR55, cause execution) and ended; installed v0.2.0-3729. Rename polish closed (agreed with Aglaea). Leftovers 74-82 since the resume: nine cards, $55 in seats, one failed round. Gate lesson: a CSS row checks the computed box, not the rule's text (V3 passed over the global button min-height). Orphaned wails dev tree from l82-ui (66386, 67161, 67594; safe-kill refuses) sent [for hephaistos]. Queue: empty; lf55 waits on seat-pointer-dock-window.
 
 - 09:47 0195 ruled by default (leftovers 82, lf82-rename-last, Aglaea A16: AR53-AR55, the last rename polish); sup124 launched, forecast 20-45m.

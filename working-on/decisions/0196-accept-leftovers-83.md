@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 83 - the React app on the organizer's own map
-status: proposed
+status: ruled
 raised: 2026-11-08
 raised_by: fse
 owner: pablo
@@ -9,6 +9,10 @@ cards: [lf83-webview-map]
 forecast: 20-45m
 supersedes: []
 superseded_by:
+ruled: 2026-11-08
+ruled_by: pablo (autonomous mode)
+supervisor: organizer-probe-sup125
+chosen: accept as written
 ---
 
 ## Question
@@ -39,3 +43,12 @@ accept as written.
 ## Forecast
 
 forecast: 20-45m over 1 wave; basis: lf76 (map regen, part of sup118's 43 min), lf63 (the first map), this initiative.
+
+## Ruling
+
+pablo (autonomous mode), 2026-11-08 10:50: the recommendation taken after
+five minutes without an answer. Asked at 10:45 in the mailbox ("0196:
+accept leftovers 83, the React app on the map?", options accept as written
+or send back); recommended "accept as written". The approach was judged by
+AI agent Daedalus (judge-architecture), option A, quoted under Question.
+Not sensitive: the organizer's own record and its own map docs.
