@@ -121,3 +121,35 @@ describe("leftovers-72 V1 (FR-1, AR35): a left list's commas sit outside the lin
     expect(css).not.toMatch(/\n\.rt-comma \{[^}]*margin/);
   });
 });
+
+// leftovers-74 V1 (FR-1, AR39; run-report Amendment 10): a link after a comma
+// is pulled in by its start padding, as the comma is pulled into the link
+// before it, so the gap after a comma is one space before a link and before
+// plain text alike. The `.rr-card + .rt-comma` rule stays.
+describe("leftovers-74 V1 (FR-1, AR39): one space after every comma, whatever follows", () => {
+  const css = fsv.readFileSync(new URL("../styles/runreport.css", import.meta.url).pathname, "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const decls = (sel: string) => {
+    const esc = sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const m = new RegExp(String.raw`(?:^|\n)` + esc + String.raw` \{([^}]*)\}`).exec(css);
+    return m ? m[1].split(";").map((d) => d.trim()).filter(Boolean) : null;
+  };
+  it("pulls a link that follows a comma in by its start padding", () => {
+    expect(decls(".rt-comma + .rr-card")).toEqual(["margin-inline-start: calc(-1 * var(--space-1))"]);
+  });
+  it("keeps the comma pulled into the link before it", () => {
+    expect(decls(".rr-card + .rt-comma")).toEqual(["margin-inline-start: calc(-1 * var(--space-1))"]);
+  });
+  it("matches the left list's markup: a comma, a space, then a link, so the rule reaches it", () => {
+    const [, build] = report.tracks!.tracks!;
+    const t = { ...build, done_cards: [], open_cards: ["d", "e", "f"], to_cut: ["e"], passed: 1, planned: 4, pct: 25, left: ["d", "e", "f"], waits: [] };
+    const html = draw({ ...report, tracks: { ...report.tracks!, tracks: [t] } } as unknown as service.FactoryReport);
+    const f = /<span class="rt-frac">(.*?)<\/span><\/li>/.exec(html)![1];
+    expect(f).toContain('<span class="rt-tocut">e (not cut)</span><span class="rt-comma">,</span> <button type="button" class="rr-card rr-inline">f</button>');
+    expect(f.replace(/<[^>]+>/g, "")).toBe("1/4 · left d, e (not cut), f");
+  });
+  it("leaves the first item, the plain text and the inset ring as they were", () => {
+    expect(css).not.toMatch(/\n\.rt-tocut[^{]*\{[^}]*margin/);
+    expect(css).not.toMatch(/\n\.rr-card:first-child/);
+    expect(decls(".rr-card.rr-inline:focus-visible")).toEqual(["outline-offset: -2px"]);
+  });
+});
