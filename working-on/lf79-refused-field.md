@@ -8,7 +8,7 @@ reviewer: l79-rev
 review: "pass: V1, V2, V3, X0 met at 6220c78f (l79-rev, 2026-11-08); AR46-AR48 to l79-ui"
 stage:
 updated: 2026-11-08
-next: "review: lf79-refused-field, V1-V3 and X0 pass, AR46-AR48 to the UI reviewer (screen locked), 6220c78f"
+next: "PR with talos-lab"
 depends_on: [lf78-group-names]
 boundary: ["frontend/src/components/Rail.tsx", "frontend/src/lib/railGroup.ts", "frontend/src/lib/", "frontend/src/styles/global.css", "frontend/src/components/"]
 spec: "docs/specs/leftovers-79.md (FR-1 to FR-3)"
