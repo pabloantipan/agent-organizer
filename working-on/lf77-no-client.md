@@ -8,7 +8,7 @@ reviewer: l77-rev
 review: "pass at 6cfe014a by l77-rev (G1, V1-V5, S1, X0 met); AR40-AR42 to l77-ui"
 stage:
 updated: 2026-11-08
-next: "review: lf77-no-client, gate met (G1, V1-V5, S1, X0 pass; AR40-AR42 shown by AX, UI review to confirm), 6cfe014a"
+next: "PR with talos-lab"
 depends_on: [lf74-comma-other, lf75-fixture-stop]
 boundary: ["internal/model/model.go", "internal/model/", "frontend/wailsjs/", "frontend/src/lib/", "frontend/src/components/Rail.tsx", "frontend/src/components/FloatList.tsx", "frontend/src/components/", "testdata/fixture-overlay/", "scripts/floating-icon-by-hand.sh"]
 spec: "docs/specs/leftovers-77.md (FR-1 to FR-6)"
