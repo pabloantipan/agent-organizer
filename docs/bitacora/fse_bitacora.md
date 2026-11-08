@@ -26,6 +26,10 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- 09:17 0194 ruled by default (leftovers 81, lf81-rename-edges, Aglaea A15, AR51-AR53); sup123 launched, forecast 20-45m.
+
+- 09:2x sup122 closed (lf80 #78 c481a3a3; 19 min vs 20-45, $4.30) and ended; installed v0.2.0-3692. Leftovers 74-80 since the resume: seven cards, all first-round passes, about $43 in seats. Its U1 (sev 2, a gap in my FR-1: collapsing the rail with the field open keeps the sentence) and Q2-Q3 to Aglaea; cut a card from her answer. Gate lesson: list every way a field closes (Escape, save, blur, the rail collapsing, navigation) when a spec says 'on close'.
+
 - 08:48 Argos stall:organizer at 08:42 (nothing working 60 min): my hold on the sev-1 batch was the cause. Rule learned: while autonomous, a held batch is cut when Argos calls a stall; usage worry alone does not hold work. 0193 ruled by default (leftovers 80, lf80-refusal-close, AR49-AR50); sup122 launched, forecast 20-45m.
 
 - 06:5x Aglaea A14 (66315c51, AR49-AR50) for the held batch: AR49 the announcer emptied when the rename field closes (Escape, save, blur); AR50 the line wraps as prose to three lines at 180 px, pushes groups down, never clipped, gone when the field closes. Batched, not cut yet.

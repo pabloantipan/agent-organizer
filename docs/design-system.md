@@ -433,7 +433,12 @@ keeps their place.
   when the field closes (Escape, save, leaving), so nothing stale is read
   later. The refusal line wraps as prose where the field is narrow (the
   rail's 180 px), pushing what is below it down, never clipped or laid
-  over a row (A14).
+  over a row (A14). Names quoted in it cut at about 24 characters with an
+  ellipsis on screen, whole in the announcement; the sentence itself is
+  never cut. Anything that hides the field (collapsing the rail) closes it
+  as Escape does: the old name kept, the announcer emptied, focus on what
+  hid it. A head beside a field that can grow aligns its tools to the top
+  (A15).
 - **The newest answer wins, and focus never drops**: when a press returns
   something fresher than the feed, the view shows the press's answer at
   once and the feed catches up. A screen-reader-only live region says a

@@ -726,3 +726,23 @@ From sup121's UI review of lf79 (#76; offscreen, VoiceOver not run).
 |---|---|---|
 | AR49 | not hear a stale refusal | refuse, then Escape: the announcer is empty (vitest) |
 | AR50 | read the whole refusal in the rail | at 180 px the line wraps whole, the next group header starts below its last line; Escape removes it and the rows return |
+
+## Amendment 15 (aglaea, 2026-11-08): collapsing mid-rename, the head's tools, a long name
+
+From sup122 on lf80 (#78; offscreen, screen locked).
+
+- **Q1/U1**: yes. Collapsing the rail closes an open rename as Escape
+  does: the old name kept (refused text has nothing to save; unrefused
+  typed text is dropped too, the field being out of sight), the announcer
+  emptied, focus on the rail toggle that collapsed it.
+- **Q2/U2**: yes, `.rail-group-head` aligns its items to the top, so the
+  tools sit by the field's first line.
+- **Q3**: the sentence is never cut; the names quoted in it are, at about
+  24 characters with an ellipsis on screen, whole in the announcement. That
+  keeps the line to three or four lines at 180 px.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| AR51 | collapse without leftovers | rename open with a refusal, collapse the rail: field closed, old name shown, announcer empty, focus on the toggle |
+| AR52 | find the head's tools | a refused field three lines high: the tools' top aligns with the field's top |
+| AR53 | read a refusal with a long name | a current name of 60 characters: the line quotes it cut at about 24 with `…`, at most four lines at 180 px; the announcer says it whole |
