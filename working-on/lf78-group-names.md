@@ -1,6 +1,6 @@
 ---
 title: "No rail group reads like another, and a blank client is no client"
-status: next
+status: now
 repos: [organizer]
 branch: lf78-group-names
 seat: l78-build
@@ -8,7 +8,7 @@ reviewer:
 review:
 stage:
 updated: 2026-11-08
-next: "sup120 runs it (0191)"
+next: "sup120: l78-build building on origin/main d832cc8a"
 depends_on: [lf77-no-client]
 boundary: ["frontend/src/lib/railGroup.ts", "frontend/src/lib/", "frontend/src/components/Rail.tsx", "frontend/src/components/FloatList.tsx", "frontend/src/components/", "frontend/src/styles/global.css", "internal/scan/scan.go", "internal/scan/", "testdata/fixture-overlay/"]
 spec: "docs/specs/leftovers-78.md (FR-1 to FR-5)"
