@@ -8,7 +8,7 @@ reviewer:
 review:
 stage:
 updated: 2026-11-08
-next: "waits on 0189 (accept leftovers 76)"
+next: "sup118 runs it after lf74 and lf75 (0189); launch waits on the memory outage"
 depends_on: []
 boundary: ["docs/architecture/"]
 spec: "docs/specs/leftovers-76.md (FR-1)"

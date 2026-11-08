@@ -1,6 +1,6 @@
 # Leftovers 76: the organizer's map regenerated with the grounded stamp: the build spec
 
-status: proposed (0189)
+status: accepted (0189, ruled 2026-11-08)
 by: the FSE, 2026-11-08, on main
 sources: Hephaistos, for pablo, 2026-11-08 (thread 01M6WX093SPZHZXG4Z3N4HBHQE):
 c4-map-stamp-grounded merged (claudecode a5778f3, ~/claudecode at 95ef5b8);
