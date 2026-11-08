@@ -5,7 +5,7 @@ repos: [organizer]
 branch: lf77-no-client
 seat: l77-build
 reviewer: l77-rev
-review: "pass at 6cfe014a by l77-rev (G1, V1-V5, S1, X0 met); AR40-AR42 to l77-ui"
+review: "pass at 6cfe014a: code by l77-rev (G1, V1-V5, S1, X0), UI by l77-ui (AR40-AR42)"
 stage:
 updated: 2026-11-08
 next: "PR with talos-lab"
