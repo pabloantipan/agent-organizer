@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clientGroups, NO_CLIENT, NO_CLIENT_LONG, railGroupLabel, renameGroup, savedGroups, SEED_NO_CLIENT, takenBy, takenLine } from "./railGroup";
+import { clientGroups, cutName, LINE_NAME_MAX, NO_CLIENT, NO_CLIENT_LONG, railGroupLabel, renameGroup, savedGroups, SEED_NO_CLIENT, takenBy, takenLine, takenLines } from "./railGroup";
 
 const fs: { readFileSync(p: string, enc: "utf8"): string; readdirSync(p: string, o: { recursive: true }): string[] } = await import("node:" + "fs");
 
@@ -205,5 +205,45 @@ describe("leftovers-79 V2 (FR-2, AR47): the refusal line says the way out", () =
   it("names the taken group's label and the current name as the rail shows them", () => {
     const groups = [{ name: "misc", initiatives: ["a"] }, { name: "", seed: SEED_NO_CLIENT, initiatives: ["b"] }];
     expect(takenLine(takenBy(groups, 0, " no CLIENT ")!, railGroupLabel(groups[0], groups))).toBe("A group is already called No client. Type another name, or press Escape to keep misc.");
+  });
+});
+
+// leftovers-81 FR-3, row V3 (run-report A15, AR53): the visible line cuts
+// each quoted name at 24 characters plus `…`; the announcement says both
+// whole; the sentence's own words are never cut.
+describe("leftovers-81 V3 (FR-3, AR53): long names cut on screen, whole when said", () => {
+  const current = "Initiatives of the southern region and its long tail, v2 ok!"; // 60
+  const label = "Clients waiting on renewal now"; // 30
+
+  it("the samples are 60 and 30 characters", () => {
+    expect([...current].length).toBe(60);
+    expect([...label].length).toBe(30);
+  });
+
+  it("screen: both names cut at 24 with …, the rest of the sentence whole", () => {
+    const l30 = label;
+    const { shown } = takenLines(l30, current);
+    expect(shown).toBe(`A group is already called ${l30.slice(0, 24)}…. Type another name, or press Escape to keep ${current.slice(0, 24)}….`);
+    expect(shown.startsWith("A group is already called ")).toBe(true);
+    expect(shown).toContain(". Type another name, or press Escape to keep ");
+    expect(shown).not.toContain(current);
+    expect(shown).not.toContain(l30);
+  });
+
+  it("announcement: both names whole", () => {
+    const l30 = label;
+    expect(takenLines(l30, current).said).toBe(`A group is already called ${l30}. Type another name, or press Escape to keep ${current}.`);
+  });
+
+  it("a name of 24 or fewer is shown whole; 25 is cut", () => {
+    expect(cutName("x".repeat(24))).toBe("x".repeat(24));
+    expect(cutName("x".repeat(25))).toBe(`${"x".repeat(24)}…`);
+    expect(LINE_NAME_MAX).toBe(24);
+    expect(takenLines("acme", "misc")).toEqual({ shown: takenLine("acme", "misc"), said: takenLine("acme", "misc") });
+  });
+
+  it("the cut counts code points, never splitting one", () => {
+    const n = "😀".repeat(30);
+    expect(cutName(n)).toBe(`${"😀".repeat(24)}…`);
   });
 });
