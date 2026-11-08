@@ -26,6 +26,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- 11:0x sup125 closed (lf83 #84; 8 min vs 20-45, $3.15) and ended. Its (3), code merges restale the map, is already with Hephaistos (sent 05:1x). Regen cadence: a map regen card after each code wave only when someone needs a fresh map; not a standing card.
+
 - 11:01 lf83 merged #84 513db0c6 (docs and adapter, no install). 0197 ruled by default (leftovers 84, lf84-map-region: the map reader takes each level's marker region); sup126 launched, forecast 20-45m. Until it merges the app draws the Go modules for the webview's L3. Gate lesson: an adapter's evidence carries no sha (leftovers-83 Amendment 1).
 
 - 10:50 0196 ruled by default (leftovers 83, lf83-webview-map: the React app as a second container from an in-repo adapter, judged by Daedalus, option A); sup125 launched, forecast 20-45m. The codebase-memory index of this repo is of a removed worktree: the card indexes the root first.
