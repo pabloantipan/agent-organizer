@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: lf78-group-names
 seat: l78-build
-reviewer:
+reviewer: l78-rev
 review:
 stage:
 updated: 2026-11-08
