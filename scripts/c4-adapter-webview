@@ -1,0 +1,27 @@
+#!/bin/sh
+# c4-adapter-webview: the c4-map adapter that puts the Deltagos webview (the React app under frontend/)
+# on the organizer's map as its own container (docs/specs/leftovers-83.md FR-1; adapter contract:
+# skills/c4-map/SKILL.md, ~/claudecode/bin/c4-adapter-repos).
+#
+#   c4-adapter-webview --root <root> --repo <dir> [--env <env>]
+#
+# Prints one container fact for --repo agent-organizer when $C4_REPO_DIR/frontend exists (C4_REPO_DIR
+# defaults to <root>/<dir>), exit 0. Exit 3 for any other repo or when frontend/ is missing (not
+# applicable), 2 on bad usage. No value, no network.
+usage() { echo "usage: c4-adapter-webview --root <root> --repo <dir> [--env <env>]" >&2; exit 2; }
+root="" repo=""
+while [ $# -gt 0 ]; do
+  [ $# -ge 2 ] || usage
+  case "$1" in
+    --root) root=$2 ;;
+    --repo) repo=$2 ;;
+    --env) ;;
+    *) usage ;;
+  esac
+  shift 2
+done
+[ -n "$root" ] && [ -n "$repo" ] || usage
+[ "$repo" = agent-organizer ] || exit 3
+dir=${C4_REPO_DIR:-$root/$repo}
+[ -d "$dir/frontend" ] || exit 3
+printf '%s\n' '{"fact":"container","repo":"agent-organizer","name":"deltagos-webview","tech":"React in WKWebView","evidence":{"kind":"repo","ref":"agent-organizer/frontend"}}'

@@ -12,6 +12,7 @@ flowchart LR
     %% c4: containers
     subgraph deltagos["Deltagos board and CLI over a factory's initiatives"]
         agent_organizer["agent-organizer"]
+        deltagos_webview["deltagos-webview"]
     end
     discuss_mailbox(["discuss mailbox (agent-mailbox-api)"])
     factory_tools(["the factory's tools: factory, probe, zellij, the agent CLI"])
@@ -21,11 +22,13 @@ flowchart LR
     agent_organizer --> factory_tools
     agent_organizer --> firebase
     agent_organizer --> record
+    deltagos_webview --> agent_organizer
 ```
 
 | node | level | kind | status | evidence |
 |---|---|---|---|---|
-| `agent_organizer` | containers | container | exists | repo `agent-organizer@46fc597` |
+| `agent_organizer` | containers | container | exists | repo `agent-organizer@fc56507` |
+| `deltagos_webview` | containers | container | exists | repo `agent-organizer/frontend` |
 | `discuss_mailbox` | containers | external | exists | external `ext:agent-mailbox-api#fn:mailbox.drain`; external `ext:agent-mailbox-api#fn:mailbox.health`; external `ext:agent-mailbox-api#fn:mailbox.healthz`; external `ext:agent-mailbox-api#fn:mailbox.messages.post`; external `ext:agent-mailbox-api#fn:mailbox.search`; external `ext:agent-mailbox-api#fn:mailbox.thread.get`; external `ext:agent-mailbox-api#fn:mailbox.thread.status.set`; external `ext:agent-mailbox-api#fn:mailbox.threads.list` |
 | `factory_tools` | containers | external | exists | curated `context.md` |
 | `firebase` | containers | external | exists | curated `context.md` |
@@ -37,4 +40,5 @@ flowchart LR
 | `agent_organizer` | `factory_tools` | curated `context.md` |
 | `agent_organizer` | `firebase` | curated `context.md` |
 | `agent_organizer` | `record` | external `ext:agent-mailbox-record#fn:record.usage.post` |
+| `deltagos_webview` | `agent_organizer` | repo `agent-organizer/frontend/wailsjs` |
 <!-- c4-map:end containers -->
