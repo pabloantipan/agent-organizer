@@ -26,6 +26,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- 05:1x sup118 closed (leftovers 74-76: #66 c2eeb8f1, #68 46fc597e, #70 85cf237a; 43 min vs 80-165, $11.81, no failed round) and ended; installed v0.2.0-3607 (lf74; lf75 scripts and lf76 docs need no install). Map check clean on #70. Gate lessons (mine): a gate row's order of items must be one the data contract can produce (lf74 AR39 asked link, not-cut, link; to_cut sorts last); diagram-check runs per page with --map, never over the folder (lf76 C2). To Aglaea: the Other rename field (sev 1), the client-'other' collision, memory.md:322 pkill line. To Hephaistos: code merges restale the map; check ignores the stamp. Held low for the next small card: lib/groupName.ts groupName clashes with lib/review.ts groupName; scripts/floating-icon-by-hand.sh:36 still kills FIXTURE_AGENT_PIDS (use fixture-home.sh stop). Queue: empty until Aglaea amends.
+
 - 04:2x memory outage over; sup118 launched on lf74, lf75, lf76 in that order (0187-0189; band 80-165m in its prompt, Argos reads 0187's 30-60m: extend when it fires). Frozen organizer seats l65-l72 and l66-* left frozen (cards done; not to thaw). 0189 ruled 03:26 (leftovers 76, map regen, Hephaistos's c4-map-stamp-grounded merged).
 
 - 02:44 safe-kill --pidfile installed; lf75 added to sup118's prompt after lf74 (one supervisor for both, memory tight). Argos reads 0187's 30-60m as sup118's band: extend +60m when it fires, why 'lf75 added (0188)'. Outage flag still set (swap 92%), no 'over' yet: still holding.
