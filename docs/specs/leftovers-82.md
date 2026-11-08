@@ -1,6 +1,6 @@
 # Leftovers 82: the last rename polish: no "….", a level head, graphemes: the build spec
 
-status: proposed (0195)
+status: accepted (0195, ruled 2026-11-08)
 by: the FSE, 2026-11-08, on main at 6aa41021
 sources: sup123's closing on lf81-rename-edges (#80); Aglaea's
 `docs/ux/specs/run-report.md` Amendment 16 (6aa41021; AR53 amended, AR54,

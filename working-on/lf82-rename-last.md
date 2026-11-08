@@ -8,7 +8,7 @@ reviewer:
 review:
 stage:
 updated: 2026-11-08
-next: "waits on 0195 (accept leftovers 82)"
+next: "sup124 runs it (0195)"
 depends_on: [lf81-rename-edges]
 boundary: ["frontend/src/lib/railGroup.ts", "frontend/src/lib/", "frontend/src/styles/global.css", "frontend/src/components/Rail.tsx", "frontend/src/components/"]
 spec: "docs/specs/leftovers-82.md (FR-1 to FR-3)"
