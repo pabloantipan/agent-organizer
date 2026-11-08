@@ -8,7 +8,7 @@ reviewer: l80-rev
 review: "pass (code gate V1 V2 X0), l80-rev, 2026-11-08, 69ca546f; AR49 AR50 to l80-ui"
 stage:
 updated: 2026-11-08
-next: "PR with talos-lab"
+next: "merged as organizer #78 c481a3a3; supervisor moves it to done/"
 depends_on: [lf79-refused-field]
 boundary: ["frontend/src/components/Rail.tsx", "frontend/src/lib/liveRegion.ts", "frontend/src/lib/", "frontend/src/styles/global.css", "frontend/src/components/"]
 spec: "docs/specs/leftovers-80.md (FR-1, FR-2)"
@@ -17,6 +17,8 @@ ui_review: true
 touches: []
 change_order: {add: [], change: [], retire: []}
 autonomy: unattended
+prs:
+  - {repo: organizer, pr: 78, target: main, state: merged, merge: c481a3a3}
 ---
 
 ## Goal
