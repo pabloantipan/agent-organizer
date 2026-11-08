@@ -67,3 +67,10 @@ under `frontend/`, `internal/` or the factory's tools.
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf83-webview-map` | C1-C5, X0 | lf76-map-regen (merged #70) | false |
+
+## Amendment 1 (FSE, 2026-11-08, on l83-map's note)
+
+C2 contradicted FR-1: the adapter's fact carries `ref
+agent-organizer/frontend`, and c4-map adds no sha to adapter evidence. C2
+expects the webview grounded `repo agent-organizer/frontend` (no sha);
+the map's stamp is `map.json`'s `inputs`. Everything else in C2 stands.
