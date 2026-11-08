@@ -26,6 +26,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- 06:5x Aglaea A14 (66315c51, AR49-AR50) for the held batch: AR49 the announcer emptied when the rename field closes (Escape, save, blur); AR50 the line wraps as prose to three lines at 180 px, pushes groups down, never clipped, gone when the field closes. Batched, not cut yet.
+
 - 06:4x sup121 closed (lf79 #76 06e1a95c; 21 min vs 20-45, $5.07) and ended; installed v0.2.0-3675. Leftovers 74-79 tonight: six cards, all first-round passes, $39 in seats. The chain is down to sev-1 notes (announcer not emptied after Escape, line wraps at 180 px): HELD as a batch, no card per sev 1, since weekly usage read 86% at 05:18; cut when a sev 2+ or Pablo's ask joins them. change-check ': V1, V3' symbol misread to Hephaistos. Queue: empty.
 
 - 06:19 0192 ruled by default (leftovers 79, lf79-refused-field: Aglaea A13, AR46-AR48); sup121 launched, forecast 20-45m.
