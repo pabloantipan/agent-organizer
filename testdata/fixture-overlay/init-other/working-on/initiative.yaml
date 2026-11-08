@@ -1,0 +1,7 @@
+id: init-other
+title: Initiative Other (client other)
+client: other
+status: active
+started: 2026-10-01
+machine: testbox
+repos: []

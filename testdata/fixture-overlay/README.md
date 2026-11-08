@@ -156,3 +156,10 @@ something to show. The Go tests never scan it (they read `testdata/home`), so
   `w-wide` names it with `spec: "docs/reader.md#the-scan-report"`, so its
   card back's Spec link lands on that section. It is under no `specs:`
   entry, so only the card's spec: makes it readable (G3's other side)
+- the no-client group keyed by its seed (leftovers-77 AR40-AR42):
+  `init-other` (client `other`), `init-other-cap` (client `Other`) and two
+  initiatives with no client, `init-loose` and `init-solo`, each with one
+  `next` card updated 2026-10-01, so Group by client seeds `other`, `Other`
+  and the seeded group reading `No client` with two members. Their card
+  dates sort them above `init-blind` (no cards), so under `--groups` the
+  rail still ends with ccint (leftovers-26 F2)

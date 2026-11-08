@@ -3,9 +3,10 @@ import { ChevronDown, ChevronRight, Search } from "lucide-react";
 import { EventsOn } from "../../wailsjs/runtime/runtime";
 import { FloatDismiss, FloatListHeight, FloatPick } from "../../wailsjs/go/main/App";
 import { useBoard } from "../stores/board.store";
+import type { BoardView } from "../hooks/useWails";
 import { filterList, floatList, focusOrder, foldSignals, HOME, homeCount, homeLabel, type FloatList as FloatListT, type FloatRow, type FoldsOpen, type Signal } from "../lib/floatList";
 import { foldLabel, type Fold } from "../lib/folds";
-import { groupName } from "../lib/groupName";
+import { railGroupLabel } from "../lib/railGroup";
 import { regionName, useScrollEdges } from "../lib/useScrollEdges";
 import { MemoryFloatLine } from "./MemoryFloatLine";
 import "../styles/float.css";
@@ -42,7 +43,7 @@ export function FloatList() {
   // never changes the store's view, so nothing is restored.
   useEffect(() => EventsOn("floaticon:expand", () => setOpen(false)), []);
 
-  const all = useMemo(() => floatList(view, agents), [view, agents]);
+  const all = useMemo(() => floatList(labelGroups(view), agents), [view, agents]);
   const list = useMemo(() => filterList(all, query), [all, query]);
   const order = useMemo(() => focusOrder(list, query, foldsOpen), [list, query, foldsOpen]);
   const needs = homeCount(view, agents);
@@ -207,14 +208,23 @@ export function FloatList() {
   );
 }
 
-/** The rail's groups in the list, each under its name as the rail shows it:
- *  a stored `other` reads `Other` (leftovers-74 FR-2, AR40). */
+/** The view with each rail group named as the rail shows it, so the list's
+ *  sections read `No client` for the seed with an empty name and every
+ *  other name as stored (leftovers-77 FR-2, AR40). Only the list reads it. */
+export function labelGroups(view: BoardView | null): BoardView | null {
+  const groups = view?.order?.groups;
+  if (!view || !groups?.length) return view;
+  return { ...view, order: { ...view.order, groups: groups.map((g) => ({ ...g, name: railGroupLabel(g) })) } } as BoardView;
+}
+
+/** The rail's groups in the list, each under its name as the rail shows it
+ *  (`labelGroups`), in the text and in the group's accessible name. */
 export function FloatSections({ sections, row }: { sections: FloatListT["sections"]; row: (r: FloatRow) => React.ReactNode }) {
   return (
     <>
       {sections.map((s) => (
-        <div key={s.name || "all"} role="group" aria-label={s.name ? groupName(s.name) : "initiatives"}>
-          {s.name && <div className="fl-group">{groupName(s.name)}</div>}
+        <div key={s.name || "all"} role="group" aria-label={s.name || "initiatives"}>
+          {s.name && <div className="fl-group">{s.name}</div>}
           {s.rows.map((r) => row(r))}
         </div>
       ))}

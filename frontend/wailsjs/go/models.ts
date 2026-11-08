@@ -890,6 +890,7 @@ export namespace model {
 	export class Group {
 	    name: string;
 	    initiatives: string[];
+	    seed?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Group(source);
@@ -899,6 +900,7 @@ export namespace model {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.name = source["name"];
 	        this.initiatives = source["initiatives"];
+	        this.seed = source["seed"];
 	    }
 	}
 	export class MemoryInitiative {

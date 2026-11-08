@@ -633,10 +633,14 @@ type Note struct {
 	Text string    `json:"text"`
 }
 
-// Group is one named section of the rail.
+// Group is one named section of the rail. Seed marks a group the app
+// seeded and keys it, never its name: the only value is "no-client", the
+// initiatives with no client, whose empty name reads "No client" (leftovers-77
+// FR-1). A person's group has no seed.
 type Group struct {
 	Name        string   `json:"name"`
 	Initiatives []string `json:"initiatives"`
+	Seed        string   `json:"seed,omitempty"`
 }
 
 // Regroup rebuilds Initiatives from the groups (in group order, members in
@@ -648,7 +652,7 @@ func (o *Order) Regroup(groups []Group) {
 	var flat []string
 	var kept []Group
 	for _, g := range groups {
-		ng := Group{Name: g.Name}
+		ng := Group{Name: g.Name, Seed: g.Seed}
 		for _, id := range g.Initiatives {
 			if id == "" || seen[id] {
 				continue

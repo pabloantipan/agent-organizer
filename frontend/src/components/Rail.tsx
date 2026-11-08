@@ -8,7 +8,7 @@ import { inactiveIds } from "../lib/queue";
 import { foldName, sleepyOf, sleepyWord } from "../lib/initiatives";
 import { stripFolds } from "../lib/folds";
 import { placeOf } from "../lib/place";
-import { clientGroups, groupName } from "../lib/groupName";
+import { clientGroups, railGroupLabel, renameGroup, savedGroups } from "../lib/railGroup";
 import { useBoard, type Screen } from "../stores/board.store";
 import { CellStateLz, definitionWaits } from "./Crew";
 import { missingPersonas } from "../lib/queue";
@@ -92,9 +92,9 @@ export function Rail() {
   const grouped = stored.length > 0;
   const placed = new Set(stored.flatMap((g) => g.initiatives ?? []));
   const rest = activeIds.filter((id) => !placed.has(id));
-  const sections: { key: string; name: string; ids: string[]; fixed: boolean }[] = grouped
+  const sections: { key: string; name: string; seed?: string; ids: string[]; fixed: boolean }[] = grouped
     ? [
-        ...stored.map((g, i) => ({ key: `g${i}`, name: g.name, ids: (g.initiatives ?? []).filter((id) => byId.has(id) && !folded.has(id)), fixed: false })),
+        ...stored.map((g, i) => ({ key: `g${i}`, name: g.name, seed: g.seed, ids: (g.initiatives ?? []).filter((id) => byId.has(id) && !folded.has(id)), fixed: false })),
         ...(rest.length ? [{ key: "rest", name: "ungrouped", ids: rest, fixed: true }] : []),
       ]
     : [{ key: "rest", name: "", ids: activeIds, fixed: true }];
@@ -114,7 +114,11 @@ export function Rail() {
     try { localStorage.setItem("rail.collapsed", JSON.stringify(next)); } catch { /* per-viewer convenience only */ }
   };
 
-  const persist = (next: Group[]) => setGroups(next.map((g) => ({ name: g.name, initiatives: g.initiatives ?? [] })) as Group[]);
+  // Saving the groups keeps each one's seed and writes a group stored before
+  // the seed (`other` or `Other` holding only initiatives with no client) as
+  // the seed (leftovers-77 FR-1, FR-4); nothing is rewritten on read.
+  const clientOf = (id: string) => (byId.has(id) ? byId.get(id)!.client ?? "" : undefined);
+  const persist = (next: Group[]) => setGroups(savedGroups(next, clientOf) as Group[]);
 
   const onDragEnd = (r: DropResult) => {
     if (!r.destination) return;
@@ -151,7 +155,8 @@ export function Rail() {
   };
 
   const groupByClient = () => {
-    // The no-client group is the app's label, `Other` (leftovers-74 FR-2).
+    // The initiatives with no client go to the seeded group, keyed by its
+    // seed and read `No client`; no client name joins it (leftovers-77 FR-2).
     persist(clientGroups(entries) as Group[]);
   };
   const addGroup = () => {
@@ -162,9 +167,10 @@ export function Rail() {
   const rename = (i: number, name: string, back = false) => {
     if (back) setRefocus(i);
     setEditing(null);
-    const n = name.trim();
-    if (!n || n === stored[i].name) return;
-    persist(stored.map((g, j) => (j === i ? { ...g, name: n } : g)) as Group[]);
+    // Saved as the header shows it, nothing is written: the seed keeps its
+    // empty name, the app's label (leftovers-77 FR-3, AR41).
+    const next = renameGroup(stored, i, name);
+    if (next) persist(next);
   };
   const removeGroup = (i: number, from?: HTMLElement) => {
     // Focus stays at the same place in the rail: the group before, else the
@@ -265,11 +271,12 @@ export function Rail() {
     </Droppable>
   );
 
-  const head = (s: { key: string; name: string; ids: string[]; fixed: boolean }, i: number, handle?: DraggableProvidedDragHandleProps | null) => {
+  const head = (s: { key: string; name: string; seed?: string; ids: string[]; fixed: boolean }, i: number, handle?: DraggableProvidedDragHandleProps | null) => {
     const c = s.ids.reduce((a, id) => { const e = byId.get(id)!; return { now: a.now + e.now, blocked: a.blocked + e.blocked, next: a.next + e.next }; }, { now: 0, blocked: 0, next: 0 });
     const isEditing = editing === i && !s.fixed;
-    // A stored `other` reads `Other`; the rename field keeps the stored name.
-    const shown = groupName(s.name);
+    // The seed with an empty name reads `No client`; the rename field opens on
+    // what the header shows and is named by it (leftovers-77 FR-2, FR-3).
+    const shown = railGroupLabel(s);
     return (
       <div className={`rail-group-head ${s.fixed ? "fixed" : ""}`} {...dragOnly(handle)}>
         <button className="rail-chevron" onClick={() => toggle(s.key)} aria-expanded={!collapsed[s.key]} aria-label={foldName(!!collapsed[s.key], shown)} title={foldName(!!collapsed[s.key], shown)}>
@@ -278,7 +285,7 @@ export function Rail() {
         {/* `<name> · N` through SecCount (leftovers-72 FR-2, AR36); the
             rename field stands in for the name alone. */}
         <SecCount className="rail-group-title" countClass="rail-group-n" n={s.ids.length} title={isEditing ? (
-          <RenameField name={s.name} onDone={(v, back) => rename(i, v, back)} onCancel={() => { setEditing(null); setRefocus(i); }} />
+          <RenameField name={shown} onDone={(v, back) => rename(i, v, back)} onCancel={() => { setEditing(null); setRefocus(i); }} />
         ) : (
           <span className="rail-group-name" onDoubleClick={() => !s.fixed && setEditing(i)} title={s.fixed ? "not in any group" : "double-click to rename, drag to reorder"}>{shown}</span>
         )} />
