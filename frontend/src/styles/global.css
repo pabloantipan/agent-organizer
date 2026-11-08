@@ -190,6 +190,10 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
    FR-4; run-report Amendment 9). */
 .rail-group-head.fixed .rail-group-name { color: var(--dim); font-weight: 500; letter-spacing: .02em; text-transform: uppercase; }
 .rail-group-name-input { width: 120px; padding: 1px 6px; font-size: var(--font-size-xs); border-radius: var(--radius-sm); }
+/* A refused name, while the field still holds it (leftovers-79 FR-1; run-report
+   A13, AR46; design system, Refused field): 2 px --status-blocked, focused
+   or not; the padding gives back the extra pixel so the field keeps its size. */
+.rail-group-name-input[aria-invalid="true"] { border: 2px solid var(--status-blocked); padding: 0 5px; }
 /* Rename's refusal, one line under the field (leftovers-78 FR-2; run-report
    A12, AR43): --danger on the rail's --bg-sunken is 5.9:1. */
 .rail-rename { display: inline-flex; flex-direction: column; align-items: flex-start; min-width: 0; white-space: normal; }

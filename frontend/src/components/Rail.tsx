@@ -607,17 +607,25 @@ export function groupActionOff(action: (typeof MENU)[number], index: number, cou
  *  keeps the field open with the typed text, and `refused`, one line under
  *  it, says why, in a live region (leftovers-78 FR-2, AR43). */
 export type Refusal = { line: string; text: string };
+
+/** Whether the field still holds the refused text: only then is it marked
+ *  invalid (`aria-invalid` and the 2 px blocked border); typing any change
+ *  clears the mark, the line stays (leftovers-79 FR-1, AR46). */
+export const holdsRefused = (refused: Refusal | null | undefined, value: string) => !!refused && value === refused.text;
+
 export function RenameField({ name, refused, onDone, onCancel }: { name: string; refused?: Refusal | null; onDone: (value: string, back: boolean) => void; onCancel: () => void }) {
   const lineId = useId();
+  const [value, setValue] = useState(refused ? refused.text : name);
   return (
     <span className="rail-rename">
       <input
         autoFocus
         className="rail-group-name-input"
         aria-label={`Rename ${name}`}
-        aria-invalid={refused ? true : undefined}
+        aria-invalid={holdsRefused(refused, value) ? true : undefined}
         aria-describedby={refused ? lineId : undefined}
         defaultValue={refused ? refused.text : name}
+        onChange={(e) => setValue(e.currentTarget.value)}
         onBlur={(e) => onDone(e.currentTarget.value, false)}
         onKeyDown={(e) => { if (e.key === "Enter") onDone(e.currentTarget.value, true); if (e.key === "Escape") onCancel(); }}
       />
