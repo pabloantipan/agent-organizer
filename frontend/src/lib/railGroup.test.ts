@@ -223,9 +223,9 @@ describe("leftovers-81 V3 (FR-3, AR53): long names cut on screen, whole when sai
   it("screen: both names cut at 24 with …, the rest of the sentence whole", () => {
     const l30 = label;
     const { shown } = takenLines(l30, current);
-    expect(shown).toBe(`A group is already called ${l30.slice(0, 24)}…. Type another name, or press Escape to keep ${current.slice(0, 24)}….`);
+    expect(shown).toBe(`A group is already called ${l30.slice(0, 24)}… Type another name, or press Escape to keep ${current.slice(0, 24)}…`);
     expect(shown.startsWith("A group is already called ")).toBe(true);
-    expect(shown).toContain(". Type another name, or press Escape to keep ");
+    expect(shown).toContain("… Type another name, or press Escape to keep ");
     expect(shown).not.toContain(current);
     expect(shown).not.toContain(l30);
   });
@@ -245,5 +245,64 @@ describe("leftovers-81 V3 (FR-3, AR53): long names cut on screen, whole when sai
   it("the cut counts code points, never splitting one", () => {
     const n = "😀".repeat(30);
     expect(cutName(n)).toBe(`${"😀".repeat(24)}…`);
+  });
+});
+
+// leftovers-82 FR-1, row V1 (run-report A16, AR53 amended): the cut counts
+// graphemes, so an emoji with joiners or a letter with a combining mark at
+// the 24th place is kept whole, never split.
+describe("leftovers-82 V1 (FR-1, AR53 amended): the cut counts graphemes", () => {
+  const letters = "abcdefghijklmnopqrstuvw"; // 23
+  const family = "\u{1F468}\u200D\u{1F469}\u200D\u{1F467}\u200D\u{1F466}"; // one grapheme, seven code points
+  const eAcute = "e\u0301"; // é as e plus a combining acute: one grapheme, two code points
+
+  it("the samples: 23 letters, then one grapheme of several code points", () => {
+    expect(letters.length).toBe(23);
+    expect([...family].length).toBe(7);
+    expect([...eAcute].length).toBe(2);
+  });
+
+  it("23 letters, a family ZWJ emoji, then more: the emoji kept whole at the 24th place", () => {
+    expect(cutName(`${letters}${family}${"x".repeat(36)}`)).toBe(`${letters}${family}…`);
+  });
+
+  it("23 letters, e plus a combining acute, then more: the é kept whole at the 24th place", () => {
+    expect(cutName(`${letters}${eAcute}${"x".repeat(36)}`)).toBe(`${letters}${eAcute}…`);
+  });
+
+  it("24 graphemes of several code points each are whole; 25 are cut at 24", () => {
+    expect(cutName(`${letters}${family}`)).toBe(`${letters}${family}`);
+    expect(cutName(eAcute.repeat(24))).toBe(eAcute.repeat(24));
+    expect(cutName(eAcute.repeat(25))).toBe(`${eAcute.repeat(24)}…`);
+  });
+});
+
+// leftovers-82 FR-2, row V2 (run-report A16, AR54): on screen a cut name is
+// not followed by the sentence's period, the ellipsis stands for it; the
+// announcement keeps the whole names and the periods.
+describe("leftovers-82 V2 (FR-2, AR54): no period after a cut name", () => {
+  const current = `${"abcdefghijklmnopqrstuvw"}\u{1F468}\u200D\u{1F469}\u200D\u{1F467}\u200D\u{1F466}${"y".repeat(36)}`; // 60 graphemes, the emoji at 24
+
+  it("a cut current name ends the line with … and no period", () => {
+    const { shown } = takenLines("acme", current);
+    expect(shown).toBe(`A group is already called acme. Type another name, or press Escape to keep ${cutName(current)}`);
+    expect(shown.endsWith("…")).toBe(true);
+    expect(shown).not.toContain("….");
+  });
+
+  it("a cut label takes no period either; a whole one keeps it", () => {
+    const label = "Clients waiting on renewal now"; // 30
+    expect(takenLines(label, "misc").shown).toBe(`A group is already called ${label.slice(0, 24)}… Type another name, or press Escape to keep misc.`);
+    expect(takenLines("acme", "misc").shown).toBe("A group is already called acme. Type another name, or press Escape to keep misc.");
+  });
+
+  it("the announcement still ends with the whole name and a period", () => {
+    const { said } = takenLines("acme", current);
+    expect(said).toBe(`A group is already called acme. Type another name, or press Escape to keep ${current}.`);
+    expect(said.endsWith(`${current}.`)).toBe(true);
+  });
+
+  it("a whole name that itself ends in … keeps its period", () => {
+    expect(takenLines("acme", "wait…").shown).toBe("A group is already called acme. Type another name, or press Escape to keep wait….");
   });
 });

@@ -175,7 +175,7 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
    a refused field three lines high (leftovers-81 FR-2, AR52). */
 .rail-group-head { display: flex; align-items: flex-start; gap: 4px; padding: 6px 6px 4px 4px; color: var(--muted); font-size: var(--font-size-sm); user-select: none; }
 .rail-group-head.fixed { color: var(--dim); }
-.rail-group-head .rail-group-tools { position: relative; display: inline-flex; gap: 1px; opacity: 0; }
+.rail-group-head .rail-group-tools { position: relative; display: inline-flex; gap: 1px; height: var(--control-sm); opacity: 0; }
 /* The ⋯ shows on hover, on focus and while its menu is open (FR-7, T9). */
 .rail-group-head:hover .rail-group-tools, .rail-group-head .rail-group-tools:focus-within, .rail-group-tools.open { opacity: 1; }
 .rail-menu { position: absolute; top: 100%; right: 0; z-index: 20; display: grid; min-width: 168px; margin-top: 2px; padding: 4px; background: var(--panel-2); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-lift); overflow-y: auto; }
@@ -187,6 +187,16 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
 .rail-chevron { display: inline-flex; padding: 0; width: 16px; height: 16px; align-items: center; justify-content: center; background: transparent; border: 0; color: var(--dim); cursor: pointer; }
 .rail-chevron:hover { color: var(--text); }
 .rail-group-name { font-weight: 600; font-size: var(--font-size-xs); color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The head's chevron, name and ⋯ each sit in a 24 px line box at the head's
+   top, so at rest their centres meet and with a taller field they stay by
+   its first line (leftovers-82 FR-3; run-report A16, AR55). The name's line
+   is on the name, not on the title, so a field standing in for it keeps the
+   title's baseline row as it was (AR52). The chevron's min-height overrides
+   the global button's --control-md, which would lift it to 28 px
+   (leftovers-82 Amendment 1). */
+.rail-group-head > .rail-chevron { height: var(--control-sm); min-height: var(--control-sm); }
+.rail-group-head .rail-group-name { line-height: var(--control-sm); }
+.rail-group-head > .rail-counts { line-height: var(--control-sm); }
 /* A group's name is a name a person gave, shown as written; only the app's own
    labels (Roles, ungrouped, Asleep, Archived) are uppercased (leftovers-73
    FR-4; run-report Amendment 9). */
