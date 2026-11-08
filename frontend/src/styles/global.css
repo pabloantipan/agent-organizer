@@ -184,8 +184,11 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
 .rail-menu-item:focus-visible { outline-offset: -2px; }
 .rail-chevron { display: inline-flex; padding: 0; width: 16px; height: 16px; align-items: center; justify-content: center; background: transparent; border: 0; color: var(--dim); cursor: pointer; }
 .rail-chevron:hover { color: var(--text); }
-.rail-group-name { font-weight: 600; letter-spacing: .02em; text-transform: uppercase; font-size: var(--font-size-xs); color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.rail-group-head.fixed .rail-group-name { color: var(--dim); font-weight: 500; }
+.rail-group-name { font-weight: 600; font-size: var(--font-size-xs); color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* A group's name is a name a person gave, shown as written; only the app's own
+   labels (Roles, ungrouped, Asleep, Archived) are uppercased (leftovers-73
+   FR-4; run-report Amendment 9). */
+.rail-group-head.fixed .rail-group-name { color: var(--dim); font-weight: 500; letter-spacing: .02em; text-transform: uppercase; }
 .rail-group-name-input { width: 120px; padding: 1px 6px; font-size: var(--font-size-xs); border-radius: var(--radius-sm); }
 .rail-group-n { font-family: var(--mono); font-size: var(--font-size-xs); color: var(--dim); }
 .rail-group-list { min-height: 8px; border-radius: var(--radius-md); }

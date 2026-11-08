@@ -7,8 +7,9 @@ export type Fold = "asleep" | "archived";
 
 export const FOLD_WORD: Record<Fold, string> = { asleep: "Asleep", archived: "Archived" };
 
-/** A fold's heading: `Asleep (3)`; the word alone while filtering. */
-export const foldLabel = (fold: Fold, n?: number) => (n === undefined ? FOLD_WORD[fold] : `${FOLD_WORD[fold]} (${n})`);
+/** A fold's heading: `Asleep · 3`, a count after a title (leftovers-73
+ *  Amendment 1); the word alone while filtering. */
+export const foldLabel = (fold: Fold, n?: number) => (n === undefined ? FOLD_WORD[fold] : `${FOLD_WORD[fold]} · ${n}`);
 
 /** A fold's name at the strip, its glyph's hover and accessible name:
  *  `Asleep, 11 initiatives`. */

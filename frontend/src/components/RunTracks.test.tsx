@@ -103,7 +103,7 @@ describe("leftovers-72 V1 (FR-1, AR35): a left list's commas sit outside the lin
   const frac = (html: string) => /<span class="rt-frac">(.*?)<\/span><\/li>/.exec(html)![1];
   it("draws each comma after its link, outside it, and the list reads a, b, c", () => {
     const f = frac(draw(three()));
-    const links = [...f.matchAll(/<button type="button" class="rr-card">([^<]*)<\/button>/g)].map((m) => m[1]);
+    const links = [...f.matchAll(/<button type="button" class="rr-card rr-inline">([^<]*)<\/button>/g)].map((m) => m[1]);
     expect(links).toEqual(["a", "b", "c"]);
     expect(f).not.toMatch(/<button[^>]*>[^<]*,[^<]*<\/button>/);
     expect(f.match(/<\/button><span class="rt-comma">,<\/span> /g)).toHaveLength(2);

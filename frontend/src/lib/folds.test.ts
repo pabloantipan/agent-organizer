@@ -20,7 +20,7 @@ describe("the strip's folds (leftovers-16 F1)", () => {
 
   it("says the fold's word with or without its count", () => {
     expect(foldCountName("asleep", 11)).toBe("Asleep, 11 initiatives");
-    expect(foldLabel("archived", 3)).toBe("Archived (3)");
+    expect(foldLabel("archived", 3)).toBe("Archived · 3");
     expect(foldLabel("asleep")).toBe("Asleep");
   });
 });

@@ -20,7 +20,7 @@ export type FloatRow = { id: string; goal: string; rank: number | null; signals:
 export type FloatSection = { name: string; rows: FloatRow[] };
 /** The initiatives that are not active sit in the rail's two folds
  *  (leftovers-16 FR-3): `asleep` the paused ones only, `archived` the rest,
- *  each labelled by `foldLabel` (lib/folds.ts) (`Asleep (3)`, the word alone while
+ *  each labelled by `foldLabel` (lib/folds.ts) (`Asleep · 3`, the word alone while
  *  filtering) and shown only when it holds any. */
 export type FloatList = { sections: FloatSection[]; asleep: FloatRow[]; archived: FloatRow[] };
 

@@ -175,8 +175,8 @@ describe("the rail's two folds (leftovers-16 F2)", () => {
     expect(l.sections.flatMap((s) => ids(s.rows))).toEqual(["a", "b"]);
     expect(ids(l.asleep)).toEqual(["nap", "nap2"]);
     expect(ids(l.archived)).toEqual(["old", "done-x"]);
-    expect(foldLabel("asleep", l.asleep.length)).toBe("Asleep (2)");
-    expect(foldLabel("archived", l.archived.length)).toBe("Archived (2)");
+    expect(foldLabel("asleep", l.asleep.length)).toBe("Asleep · 2");
+    expect(foldLabel("archived", l.archived.length)).toBe("Archived · 2");
   });
 
   it("never calls an archived initiative asleep", () => {
