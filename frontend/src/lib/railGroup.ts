@@ -69,16 +69,24 @@ export function takenBy(groups: RailGroup[], i: number, value: string): string |
 export const takenLine = (label: string, current: string) =>
   `A group is already called ${label}. Type another name, or press Escape to keep ${current}.`;
 
-/** How many characters of a name the visible refusal line quotes before it
- *  cuts it (leftovers-81 FR-3; run-report A15, AR53). */
+/** How many graphemes of a name the visible refusal line quotes before it
+ *  cuts it (leftovers-81 FR-3; leftovers-82 FR-1; run-report A15, A16, AR53). */
 export const LINE_NAME_MAX = 24;
 
+/** A string's graphemes (what a reader counts as one character: an emoji
+ *  with its joiners and modifiers, a letter with its combining marks), by
+ *  `Intl.Segmenter` (Safari 14.1+); code points where it is missing. */
+const graphemes = (s: string): string[] =>
+  typeof Intl.Segmenter === "function"
+    ? Array.from(new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(s), (g) => g.segment)
+    : [...s];
+
 /** A name as the visible line quotes it: whole up to LINE_NAME_MAX
- *  characters, else its first LINE_NAME_MAX and `…`. Counted by code point,
- *  so a cut never splits a character. */
+ *  graphemes, else its first LINE_NAME_MAX and `…`. A grapheme at the edge
+ *  is never split (leftovers-82 FR-1, AR53 amended). */
 export function cutName(name: string): string {
-  const cs = [...name];
-  return cs.length > LINE_NAME_MAX ? cs.slice(0, LINE_NAME_MAX).join("") + "…" : name;
+  const gs = graphemes(name);
+  return gs.length > LINE_NAME_MAX ? gs.slice(0, LINE_NAME_MAX).join("") + "…" : name;
 }
 
 /** The refusal as shown under the field and as said by the announcer: the

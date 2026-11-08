@@ -247,3 +247,32 @@ describe("leftovers-81 V3 (FR-3, AR53): long names cut on screen, whole when sai
     expect(cutName(n)).toBe(`${"😀".repeat(24)}…`);
   });
 });
+
+// leftovers-82 FR-1, row V1 (run-report A16, AR53 amended): the cut counts
+// graphemes, so an emoji with joiners or a letter with a combining mark at
+// the 24th place is kept whole, never split.
+describe("leftovers-82 V1 (FR-1, AR53 amended): the cut counts graphemes", () => {
+  const letters = "abcdefghijklmnopqrstuvw"; // 23
+  const family = "\u{1F468}\u200D\u{1F469}\u200D\u{1F467}\u200D\u{1F466}"; // one grapheme, seven code points
+  const eAcute = "e\u0301"; // é as e plus a combining acute: one grapheme, two code points
+
+  it("the samples: 23 letters, then one grapheme of several code points", () => {
+    expect(letters.length).toBe(23);
+    expect([...family].length).toBe(7);
+    expect([...eAcute].length).toBe(2);
+  });
+
+  it("23 letters, a family ZWJ emoji, then more: the emoji kept whole at the 24th place", () => {
+    expect(cutName(`${letters}${family}${"x".repeat(36)}`)).toBe(`${letters}${family}…`);
+  });
+
+  it("23 letters, e plus a combining acute, then more: the é kept whole at the 24th place", () => {
+    expect(cutName(`${letters}${eAcute}${"x".repeat(36)}`)).toBe(`${letters}${eAcute}…`);
+  });
+
+  it("24 graphemes of several code points each are whole; 25 are cut at 24", () => {
+    expect(cutName(`${letters}${family}`)).toBe(`${letters}${family}`);
+    expect(cutName(eAcute.repeat(24))).toBe(eAcute.repeat(24));
+    expect(cutName(eAcute.repeat(25))).toBe(`${eAcute.repeat(24)}…`);
+  });
+});
