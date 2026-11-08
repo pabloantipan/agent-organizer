@@ -4,8 +4,8 @@ status: now
 repos: [organizer]
 branch: lf82-rename-last
 seat: l82-build
-reviewer:
-review:
+reviewer: l82-rev
+review: "pass: V1-V3 and X0 met at 52bc5bea (l82-rev, 2026-11-08); AR53-AR55 to l82-ui"
 stage:
 updated: 2026-11-08
 next: "review: lf82-rename-last, V1-V3 and X0 pass (AR53-AR55 to the UI reviewer, screen locked), 52bc5bea"
@@ -55,4 +55,16 @@ Risky:
 Not changed, on purpose:
 - `frontend/src/styles/shell.css:.rail-group-title`: outside the boundary; a 24 px line on it would push a rename field down through baseline alignment (AR52)
 - `frontend/src/components/Rail.tsx`: no wrapper needed
+
+## Review
+- Verdict: **pass** for the code gate (V1, V2, V3, X0). Unmet rows: none. AR53-AR55 are l82-ui's.
+- Reviewer l82-rev, 2026-11-08, commit 52bc5bea (on origin/main b87a4cd6), fresh clone of origin plus the local branch; notes and logs in `.wt-notes/l82-rev/`.
+- change-check (`--base origin/main`): 4 files (Rail.lf82.test.tsx added, railGroup.test.ts, railGroup.ts, global.css modified), `0 flags: outside boundary 0, outside footprint 0, undeclared 0, declared, not changed 0, new env var 0, new dependency 0, new host 0, risk 0, untested? 0, could not read 0, boundary unreadable 0`. Nothing to explain.
+- V1-V3: `npx vitest run src/lib/railGroup.test.ts src/components/Rail.lf82.test.tsx -t "leftovers-8[12]"`: branch 17 passed; b87a4cd6 with the two test files laid over: 9 failed, 8 passed (the V1 emoji, combining and 24/25 rows, V2's two cut rows, V3's chevron, name and tools rows, and lf81 V3's screen row on `….`) (`branch-V.log`, `main-V.log`).
+- Changed test outside the new rows: `railGroup.test.ts` loses exactly two lines, both lf81 V3 asserts of the old `….` line.
+- FR-1, my cases (`edge-cases.txt`): 24 letters whole, 25 cut to 24 + `…`; 23 letters + ZWJ family, + flag 🇨🇱, + 👋🏽, + `e`+U+0301 each kept whole at the 24th place then `…`; 23 + flag exactly (24 graphemes) whole; 24 combined `é` whole; 30 families, 25 skin-tone hands cut at 24 + `…`; 24 flags whole. Fallback without `Intl.Segmenter` is code points: never reached at the Safari 15.0 floor (Segmenter since 14.1), only a guard.
+- FR-2: cut current at the end ends `…` with no period; cut label ends its sentence `… Type another…` (no period, per FR-2); whole names keep periods; `takenLines(a,b).shown === takenLine(a,b)` for whole names and equals `takenLine(cut,cut)` with `….` → `…` when both are cut; `said` is `takenLine` of the whole names with both periods.
+- FR-3: global.css adds `height: var(--control-sm)` (24px) to the head's tools and 24 px boxes on `.rail-group-head > .rail-chevron`, `.rail-group-head .rail-group-name`, `.rail-group-head > .rail-counts`; the head keeps `align-items: flex-start`; nothing else in global.css changed; no oklch, color-mix, nesting or @layer.
+- X0: `make test` exit 0 (go tests ok, vitest 112 files, 1797 passed), test run **fresh** `ad54f4bd76e2f1e6c5c9da3bc6f0ff57`; `wails build` 0; `make review-build` 0 (built `Deltagos Review.app`, not launched); `git status --porcelain` empty without needing the wailsjs checkout. Clones removed.
+- Note: the counts rule (`.rail-group-head > .rail-counts`) goes beyond the three items FR-3 names; declared, inside the head's rules, and its geometry is AR55's to judge. Goes to: l82-ui (AR55).
 
