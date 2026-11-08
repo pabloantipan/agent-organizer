@@ -349,3 +349,88 @@ func TestFirstMermaid(t *testing.T) {
 		})
 	}
 }
+
+// The two modules blocks of harbor-two-modules, written out by hand.
+const (
+	twoApiBlock = "flowchart LR\n    %% c4: modules harbor_api\n    subgraph harbor_api[\"harbor-api\"]\n        harbor_api__booking[\"booking\"]\n        harbor_api__pricing[\"pricing\"]\n    end\n"
+	twoWebBlock = "flowchart LR\n    %% c4: modules web\n    subgraph web[\"harbor-web\"]\n        web__search[\"search\"]\n        web__checkout[\"checkout\"]\n    end\n    web__checkout --> web__search\n"
+)
+
+// leftovers-84 R1: two modules levels share modules.md, each between its
+// own markers, after a block outside every region; each level's source is
+// its own region's block, and the pages without markers keep their first.
+func TestMapRegions(t *testing.T) {
+	r := ReadMap(fixtureMapDir(t, "harbor-two-modules"))
+	if r.State != MapDrawn {
+		t.Fatalf("state %q refused %q, want drawn", r.State, r.Refused)
+	}
+	want := []MapLevelSource{
+		{Level: "context", Page: "context.md", Source: harborContextBlock},
+		{Level: "containers", Page: "containers.md", Source: harborContainersBlock},
+		{Level: "modules", Page: "modules.md", Container: "harbor_api", Source: twoApiBlock},
+		{Level: "modules", Page: "modules.md", Container: "web", Source: twoWebBlock},
+	}
+	if !reflect.DeepEqual(r.Levels, want) {
+		t.Errorf("levels:\n%+v\nwant\n%+v", r.Levels, want)
+	}
+}
+
+// leftovers-84 R3: a region with no block, and a level whose region appears
+// twice, each refused with its line and no part of a map.
+func TestMapRegionRefuses(t *testing.T) {
+	modules := func(t *testing.T, page string) MapResult {
+		t.Helper()
+		root := copyTree(t, fixtureMapDir(t, "harbor-two-modules"))
+		if err := os.WriteFile(filepath.Join(root, "docs", "architecture", "modules.md"), []byte(page), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		return ReadMap(root)
+	}
+	api := "<!-- c4-map:begin modules harbor_api -->\n```mermaid\n" + twoApiBlock + "```\n<!-- c4-map:end modules harbor_api -->\n"
+	web := "<!-- c4-map:begin modules web -->\n```mermaid\n" + twoWebBlock + "```\n<!-- c4-map:end modules web -->\n"
+
+	t.Run("a region with no block", func(t *testing.T) {
+		empty := "<!-- c4-map:begin modules web -->\n| node | level |\n|---|---|\n<!-- c4-map:end modules web -->\n"
+		// The block after the region does not count as the region's.
+		wantRefused(t, modules(t, "# modules\n\n"+api+"\n"+empty+"\n```mermaid\nflowchart LR\n```\n"),
+			"Map not drawn: modules.md has no mermaid block in its modules web region")
+	})
+	t.Run("a region whose block is never closed", func(t *testing.T) {
+		open := "<!-- c4-map:begin modules web -->\n```mermaid\nflowchart LR\n<!-- c4-map:end modules web -->\n"
+		wantRefused(t, modules(t, api+open), "Map not drawn: modules.md has no mermaid block in its modules web region")
+	})
+	t.Run("a region twice", func(t *testing.T) {
+		wantRefused(t, modules(t, api+web+"\n"+web), "Map not drawn: modules.md has two modules web regions")
+	})
+	t.Run("a region twice, the first empty", func(t *testing.T) {
+		empty := "<!-- c4-map:begin modules harbor_api -->\n<!-- c4-map:end modules harbor_api -->\n"
+		wantRefused(t, modules(t, empty+api+web), "Map not drawn: modules.md has two modules harbor_api regions")
+	})
+}
+
+// The region reader on its own: the key, the fallback, spacing in a marker,
+// a marker for another level, and a region left open to the end.
+func TestLevelBlock(t *testing.T) {
+	blk := func(s string) string { return "```mermaid\n" + s + "```\n" }
+	for _, tc := range []struct {
+		name, page, key, want, refused string
+	}{
+		{"no markers: the first block", blk("a\n") + blk("b\n"), "containers", "a\n", ""},
+		{"markers for another level: the first block", blk("a\n") + "<!-- c4-map:begin modules x -->\n" + blk("b\n") + "<!-- c4-map:end modules x -->\n", "modules y", "a\n", ""},
+		{"its own region", blk("a\n") + "<!-- c4-map:begin containers -->\n" + blk("b\n") + "<!-- c4-map:end containers -->\n", "containers", "b\n", ""},
+		{"spacing inside the marker", blk("a\n") + "  <!--   c4-map:begin  modules  x   -->\r\n" + blk("b\n") + "<!-- c4-map:end modules x -->\n", "modules x", "b\n", ""},
+		{"modules x is not modules xy", "<!-- c4-map:begin modules xy -->\n" + blk("b\n") + "<!-- c4-map:end modules xy -->\n" + blk("c\n"), "modules x", "b\n", ""},
+		{"a region left open runs to the end", blk("a\n") + "<!-- c4-map:begin context -->\n" + blk("b\n"), "context", "b\n", ""},
+		{"no block anywhere, no region", "text\n", "context", "", "p.md has no mermaid block (the context level)"},
+		{"empty region", "<!-- c4-map:begin context -->\n<!-- c4-map:end context -->\n" + blk("c\n"), "context", "", "p.md has no mermaid block in its context region"},
+		{"two regions", "<!-- c4-map:begin context -->\n" + blk("b\n") + "<!-- c4-map:end context -->\n<!-- c4-map:begin context -->\n" + blk("c\n") + "<!-- c4-map:end context -->\n", "context", "", "p.md has two context regions"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			level := strings.Fields(tc.key)[0]
+			got, refused := levelBlock([]byte(tc.page), "p.md", level, tc.key)
+			if got != tc.want || refused != tc.refused {
+				t.Errorf("got %q refused %q, want %q refused %q", got, refused, tc.want, tc.refused)
+			}
+		})
+	}
+}
