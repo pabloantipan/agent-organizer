@@ -3,7 +3,7 @@
   "initiative": "organizer",
   "system": "deltagos",
   "inputs": {
-    "agent-organizer": "46fc597e1e21a3ad673dcabe4a305af95e22ec3a"
+    "agent-organizer": "fc56507a24a22664bb25ba6d61df140fb9a314de"
   },
   "levels": [
     {
@@ -21,6 +21,12 @@
       "page": "modules.md",
       "svg": "modules.md-1.svg",
       "container": "agent_organizer"
+    },
+    {
+      "level": "modules",
+      "page": "modules.md",
+      "svg": "modules.md-2.svg",
+      "container": "deltagos_webview"
     }
   ],
   "nodes": [
@@ -126,7 +132,21 @@
       "grounding": [
         {
           "kind": "repo",
-          "ref": "agent-organizer@46fc597"
+          "ref": "agent-organizer@fc56507"
+        }
+      ]
+    },
+    {
+      "id": "deltagos_webview",
+      "label": "deltagos-webview",
+      "level": "containers",
+      "kind": "container",
+      "parent": "deltagos",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/frontend"
         }
       ]
     },
@@ -505,6 +525,76 @@
           "ref": "agent-organizer/internal/usage"
         }
       ]
+    },
+    {
+      "id": "deltagos_webview__components",
+      "label": "components",
+      "level": "modules",
+      "kind": "module",
+      "parent": "deltagos_webview",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/frontend/src/components"
+        }
+      ]
+    },
+    {
+      "id": "deltagos_webview__hooks",
+      "label": "hooks",
+      "level": "modules",
+      "kind": "module",
+      "parent": "deltagos_webview",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/frontend/src/hooks"
+        }
+      ]
+    },
+    {
+      "id": "deltagos_webview__lib",
+      "label": "lib",
+      "level": "modules",
+      "kind": "module",
+      "parent": "deltagos_webview",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/frontend/src/lib"
+        }
+      ]
+    },
+    {
+      "id": "deltagos_webview__stores",
+      "label": "stores",
+      "level": "modules",
+      "kind": "module",
+      "parent": "deltagos_webview",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/frontend/src/stores"
+        }
+      ]
+    },
+    {
+      "id": "deltagos_webview__styles",
+      "label": "styles",
+      "level": "modules",
+      "kind": "module",
+      "parent": "deltagos_webview",
+      "status": "exists",
+      "grounding": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/frontend/src/styles"
+        }
+      ]
     }
   ],
   "edges": [
@@ -604,6 +694,17 @@
         {
           "kind": "external",
           "ref": "ext:agent-mailbox-record#fn:record.usage.post"
+        }
+      ]
+    },
+    {
+      "from": "deltagos_webview",
+      "to": "agent_organizer",
+      "level": "containers",
+      "evidence": [
+        {
+          "kind": "repo",
+          "ref": "agent-organizer/frontend/wailsjs"
         }
       ]
     }
