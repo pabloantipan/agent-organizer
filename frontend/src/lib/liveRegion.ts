@@ -33,18 +33,26 @@ export function speaker(set: (m: string) => void, later: (f: () => void) => unkn
       });
     },
     stop: () => { if (pending !== undefined) cancel(pending); pending = undefined; thens = []; },
+    /** Empties the region now and drops a message still waiting to be set,
+     *  so nothing is left to be read once what it spoke of is gone (the
+     *  rail's rename field closing; leftovers-80 FR-1, AR49). */
+    hush: () => { if (pending !== undefined) cancel(pending); pending = undefined; thens = []; set(""); },
   };
 }
 
 /** Says a message, and runs `then` once it is set. */
 export type Say = (m: string, then?: () => void) => void;
 
-/** The text of a screen-reader-only live region and the `say` that sets it.
+/** Empties a live region and drops what it was about to say. */
+export type Hush = () => void;
+
+/** The text of a screen-reader-only live region, the `say` that sets it, and
+ *  the `hush` that empties it for good (leftovers-80 FR-1).
  *  The task that sets the text is queued only once the empty text is
  *  committed: a timer queued at once can run before React renders, and the
  *  two updates then batch into one, so nothing is said again (N2, seen in
  *  WKWebView). */
-export function useLiveRegion(): [string, Say] {
+export function useLiveRegion(): [string, Say, Hush] {
   const [text, setText] = useState("");
   const [due, setDue] = useState<{ f: () => void } | null>(null);
   const s = useMemo(() => speaker(setText, (f) => { const d = { f }; setDue(d); return d; }, () => setDue(null)), []);
@@ -53,5 +61,5 @@ export function useLiveRegion(): [string, Say] {
     const t = setTimeout(due.f, SAY_GAP_MS);
     return () => clearTimeout(t);
   }, [due]);
-  return [text, s.say];
+  return [text, s.say, s.hush];
 }

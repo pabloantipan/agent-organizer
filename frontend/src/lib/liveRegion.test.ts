@@ -89,3 +89,52 @@ describe("P4: a repeat waits 100 ms (leftovers-33 FR-4, L25)", () => {
     expect(seen).toEqual(["then a: b", "then b: b"]);
   });
 });
+
+// leftovers-80 FR-1, row V1 (run-report A14, AR49): closing the rail's rename
+// field hushes the announcer: the region is empty after close, and a sentence
+// still waiting its 100 ms is never set afterwards. The rail calls `hush`
+// whenever the field closes (Escape, a saved name, focus leaving with a name
+// it keeps); `useLiveRegion` hands out this speaker's `hush`.
+describe("leftovers-80 V1 (FR-1, AR49): closing the field empties the announcer", () => {
+  const line = "A group is already called No client. Type another name, or press Escape to keep misc.";
+  const region = () => {
+    let text = "";
+    const s = speaker((m) => { text = m; });
+    return { s, text: () => text };
+  };
+
+  it("empties the region after a refusal was said, then close", () => {
+    vi.useFakeTimers();
+    const r = region();
+    r.s.say(line);
+    vi.advanceTimersByTime(SAY_GAP_MS);
+    expect(r.text()).toBe(line);
+    r.s.hush();
+    expect(r.text()).toBe("");
+    vi.runAllTimers();
+    expect(r.text()).toBe("");
+  });
+
+  it("a refusal still 100 ms from being set is never set after close", () => {
+    vi.useFakeTimers();
+    const r = region();
+    r.s.say(line);
+    vi.advanceTimersByTime(SAY_GAP_MS - 1);
+    r.s.hush();
+    vi.advanceTimersByTime(SAY_GAP_MS * 5);
+    expect(r.text()).toBe("");
+  });
+
+  it("drops the waiting `then` too, and the next refusal is said again", () => {
+    vi.useFakeTimers();
+    const r = region();
+    const then = vi.fn();
+    r.s.say(line, then);
+    r.s.hush();
+    vi.runAllTimers();
+    expect(then).not.toHaveBeenCalled();
+    r.s.say(line);
+    vi.advanceTimersByTime(SAY_GAP_MS);
+    expect(r.text()).toBe(line);
+  });
+});
