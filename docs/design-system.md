@@ -551,7 +551,12 @@ it, it is theirs and keeps their case (run-report A10). A rename field opens
 on what the label shows (`No client`, named `Rename No client`); saving it
 unchanged leaves it the app's. The seeded group of initiatives with no
 client is `No client`, keyed by a reserved id, never by its name, so no
-client, whatever it is called, joins it or shares its label (A11).
+client, whatever it is called, joins it (A11). Two groups never read
+alike: a rename refuses a name another group shows (trimmed, any case:
+`A group is already called …`); renaming the seed to its own label gives
+it back the app's label, nothing stored; and when a client is itself
+called `No client`, the seed reads `Initiatives with no client`. A client
+that is blank or only spaces is no client (A12).
 
 **A region that scrolls inside a view shows it does**: each edge with
 content hidden past it carries a 1 px `--fg-subtle` line (4.5:1, not

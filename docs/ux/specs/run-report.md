@@ -668,3 +668,24 @@ From sup118's closing on lf74 (#66) and lf75 (#68).
 | AR40 (amended) | tell the app's labels from his names | the seeded group reads `No client`; renamed to `misc`, it reads `misc` |
 | AR41 | rename what he sees | the seeded group's rename field opens on `No client`, named `Rename No client`; saved unchanged, it stays the app's |
 | AR42 | never see two groups alike | a client `other` and an initiative with no client: two groups, `other` and `No client`; a client `Other` stays out of `No client` |
+
+## Amendment 12 (aglaea, 2026-11-08): a client called No client, a blank client
+
+From sup119's closing on lf77 (#72).
+
+- **1.** A client's name comes from `initiative.yaml`; the app cannot
+  refuse it, so the seed gives way: while a client group is called
+  `No client` (trimmed, any case), the seed reads `Initiatives with no
+  client`. A group name the person types in Rename can be refused: a name
+  another group shows (trimmed, any case) is refused in place, `A group is
+  already called No client.`, the field kept. Renaming the seed to
+  `No client` clears its stored name: it is the app's label again, not a
+  literal.
+- **2.** Yes: a client that is blank or only spaces is no client, and its
+  initiatives join the seed; clients are trimmed when read.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| AR43 | never see two groups alike | a client `No client` and an initiative with none: `No client` and `Initiatives with no client`; Rename on any group to an existing group's name is refused in place with that line |
+| AR44 | undo a rename | the seed renamed `misc`, then `No client`: nothing stored, the app's label back |
+| AR45 | not get a blank group | an initiative with client `"  "` sits in the seed; no group has a blank header |

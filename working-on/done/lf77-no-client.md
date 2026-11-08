@@ -1,6 +1,6 @@
 ---
 title: "The no-client group reads No client and is the app's by key, not by name"
-status: now
+status: done
 repos: [organizer]
 branch: lf77-no-client
 seat: l77-build
@@ -8,7 +8,7 @@ reviewer: l77-rev
 review: "pass at 6cfe014a: code by l77-rev (G1, V1-V5, S1, X0), UI by l77-ui (AR40-AR42)"
 stage:
 updated: 2026-11-08
-next: "PR with talos-lab"
+next: "merged as organizer #72 d832cc8a"
 depends_on: [lf74-comma-other, lf75-fixture-stop]
 boundary: ["internal/model/model.go", "internal/model/", "frontend/wailsjs/", "frontend/src/lib/", "frontend/src/components/Rail.tsx", "frontend/src/components/FloatList.tsx", "frontend/src/components/", "testdata/fixture-overlay/", "scripts/floating-icon-by-hand.sh"]
 spec: "docs/specs/leftovers-77.md (FR-1 to FR-6)"
@@ -17,6 +17,8 @@ ui_review: true
 touches: []
 change_order: {add: [], change: [], retire: []}
 autonomy: unattended
+prs:
+  - {repo: organizer, pr: 72, target: main, state: merged, merge: d832cc8a}
 ---
 
 ## Goal
