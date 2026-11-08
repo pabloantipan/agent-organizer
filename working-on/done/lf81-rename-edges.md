@@ -1,6 +1,6 @@
 ---
 title: "Collapsing closes the rename, the head's tools sit at the top, long names are cut in the line"
-status: now
+status: done
 repos: [organizer]
 branch: lf81-rename-edges
 seat: l81-build
@@ -8,7 +8,7 @@ reviewer: l81-rev
 review: "pass: code (V1-V3, X0, l81-rev) and UI (AR51-AR53 offscreen, l81-ui) at 8cbff45c, 2026-11-08"
 stage:
 updated: 2026-11-08
-next: "PR with talos-lab"
+next: "merged in #80 b87a4cd6"
 depends_on: [lf80-refusal-close]
 boundary: ["frontend/src/components/Rail.tsx", "frontend/src/lib/railGroup.ts", "frontend/src/lib/liveRegion.ts", "frontend/src/lib/", "frontend/src/styles/global.css", "frontend/src/components/"]
 spec: "docs/specs/leftovers-81.md (FR-1 to FR-3)"
@@ -17,6 +17,8 @@ ui_review: true
 touches: []
 change_order: {add: [], change: [], retire: []}
 autonomy: unattended
+prs:
+  - {repo: organizer, pr: 80, target: main, state: merged, merge: b87a4cd6}
 ---
 
 ## Goal

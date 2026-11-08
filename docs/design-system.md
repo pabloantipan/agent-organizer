@@ -434,11 +434,13 @@ keeps their place.
   later. The refusal line wraps as prose where the field is narrow (the
   rail's 180 px), pushing what is below it down, never clipped or laid
   over a row (A14). Names quoted in it cut at about 24 characters with an
-  ellipsis on screen, whole in the announcement; the sentence itself is
-  never cut. Anything that hides the field (collapsing the rail) closes it
+  ellipsis on screen (24 graphemes, never mid-character), whole in the
+  announcement; an ellipsis that ends a sentence stands for its period
+  (`…`, never `….`); the sentence itself is never cut. Anything that hides the field (collapsing the rail) closes it
   as Escape does: the old name kept, the announcer emptied, focus on what
-  hid it. A head beside a field that can grow aligns its tools to the top
-  (A15).
+  hid it. A head beside a field that can grow aligns its tools to the top,
+  each item in the same 24 px line box, so at rest their centres meet
+  (A15, A16).
 - **The newest answer wins, and focus never drops**: when a press returns
   something fresher than the feed, the view shows the press's answer at
   once and the feed catches up. A screen-reader-only live region says a
