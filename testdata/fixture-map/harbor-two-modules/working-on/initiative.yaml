@@ -1,0 +1,8 @@
+# Deltagos map-lens fixture (docs/specs/leftovers-84.md): one modules page holding two
+# containers' regions, harbor_api and web, both listed in map.json. Invented; the
+# contract's ferry-ticket shop, no real system.
+id: harbor-two-modules
+title: Harbor, two modules regions on one page
+status: active
+started: 2026-10-01
+goal: Harbor sells ferry tickets at the counter and online
