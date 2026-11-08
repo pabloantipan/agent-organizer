@@ -4,7 +4,7 @@ status: now
 repos: [organizer]
 branch: lf80-refusal-close
 seat: l80-build
-reviewer:
+reviewer: l80-rev
 review:
 stage:
 updated: 2026-11-08
