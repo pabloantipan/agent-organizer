@@ -33,7 +33,8 @@ APP_PID= REC= RECORD_S=60
 cleanup() {
   trap - EXIT INT TERM
   [[ -n $APP_PID ]] && kill $APP_PID 2>/dev/null
-  [[ -n ${FIXTURE_AGENT_PIDS:-} ]] && kill ${=FIXTURE_AGENT_PIDS} 2>/dev/null
+  # The fixture's own stop ends its stand-ins by their pidfile (leftovers-77 FR-6).
+  [[ -n ${FIXTURE_DIR:-} ]] && $ROOT/scripts/fixture-home.sh stop "$FIXTURE_DIR" >/dev/null 2>&1
   echo
   [[ -n $REC ]] && kill -0 $REC 2>/dev/null && echo "Recording: $MOV (still writing; it ends by itself at $END)" || echo "Recording: $MOV"
   echo "Float log of this take ($FLOAT_LOG):"
