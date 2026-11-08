@@ -64,10 +64,14 @@ export function takenBy(groups: RailGroup[], i: number, value: string): string |
   return null;
 }
 
+/** The refusal's sentence; a name `cut` (shown with its `…`) takes no
+ *  period after it, the ellipsis stands for it (leftovers-82 FR-2, AR54). */
+const line = (label: string, labelCut: boolean, current: string, currentCut: boolean) =>
+  `A group is already called ${label}${labelCut ? "" : "."} Type another name, or press Escape to keep ${current}${currentCut ? "" : "."}`;
+
 /** The line Rename shows under the field when `label` is taken: why, then
  *  the way out, the group's current name last (leftovers-79 FR-2, AR47). */
-export const takenLine = (label: string, current: string) =>
-  `A group is already called ${label}. Type another name, or press Escape to keep ${current}.`;
+export const takenLine = (label: string, current: string) => line(label, false, current, false);
 
 /** How many graphemes of a name the visible refusal line quotes before it
  *  cuts it (leftovers-81 FR-3; leftovers-82 FR-1; run-report A15, A16, AR53). */
@@ -81,22 +85,27 @@ const graphemes = (s: string): string[] =>
     ? Array.from(new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(s), (g) => g.segment)
     : [...s];
 
-/** A name as the visible line quotes it: whole up to LINE_NAME_MAX
- *  graphemes, else its first LINE_NAME_MAX and `…`. A grapheme at the edge
- *  is never split (leftovers-82 FR-1, AR53 amended). */
-export function cutName(name: string): string {
+/** A name as the visible line quotes it, and whether it was cut: whole up to
+ *  LINE_NAME_MAX graphemes, else its first LINE_NAME_MAX and `…`. A grapheme
+ *  at the edge is never split (leftovers-82 FR-1, AR53 amended). */
+const cut = (name: string): { text: string; cut: boolean } => {
   const gs = graphemes(name);
-  return gs.length > LINE_NAME_MAX ? gs.slice(0, LINE_NAME_MAX).join("") + "…" : name;
-}
+  return gs.length > LINE_NAME_MAX ? { text: gs.slice(0, LINE_NAME_MAX).join("") + "…", cut: true } : { text: name, cut: false };
+};
 
-/** The refusal as shown under the field and as said by the announcer: the
- *  same sentence, never cut itself; on screen each name it quotes is cut
- *  (`cutName`), so the line keeps to three or four lines at 180 px; said,
- *  both names are whole (leftovers-81 FR-3, AR53). */
-export const takenLines = (label: string, current: string) => ({
-  shown: takenLine(cutName(label), cutName(current)),
-  said: takenLine(label, current),
-});
+/** A name as the visible line quotes it (see `cut`). */
+export const cutName = (name: string): string => cut(name).text;
+
+/** The refusal as shown under the field and as said by the announcer: on
+ *  screen each name it quotes is cut (`cutName`), so the line keeps to three
+ *  or four lines at 180 px, and a cut name takes no period after it, its `…`
+ *  stands for it (never `….`); said, both names are whole and the periods
+ *  kept (leftovers-81 FR-3, AR53; leftovers-82 FR-2, AR54). */
+export const takenLines = (label: string, current: string) => {
+  const l = cut(label);
+  const c = cut(current);
+  return { shown: line(l.text, l.cut, c.text, c.cut), said: takenLine(label, current) };
+};
 
 /** The groups after the rename field of group `i` is saved with `value`, or
  *  null when nothing is to be written: empty text, text equal to what the
