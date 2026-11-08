@@ -5,10 +5,10 @@ repos: [organizer]
 branch: lf82-rename-last
 seat: l82-build
 reviewer: l82-rev
-review: "pass (round 2): V1-V3 and X0 met at c23a3952 (l82-rev, 2026-11-08); AR55 to l82-ui again"
+review: "pass: V1-V3 and X0 (l82-rev) and AR53-AR55 (l82-ui) met at c23a3952, round 2"
 stage:
 updated: 2026-11-08
-next: "review: lf82-rename-last, F1 fixed, V1-V3 and X0 pass (AR55 to the UI reviewer again), c23a3952"
+next: "PR with talos-lab"
 depends_on: [lf81-rename-edges]
 boundary: ["frontend/src/lib/railGroup.ts", "frontend/src/lib/", "frontend/src/styles/global.css", "frontend/src/components/Rail.tsx", "frontend/src/components/"]
 spec: "docs/specs/leftovers-82.md (FR-1 to FR-3)"
