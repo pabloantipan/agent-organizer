@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 79 - a refused rename shows, says the way out, and is heard every time
-status: proposed
+status: ruled
 raised: 2026-11-08
 raised_by: fse
 owner: pablo
@@ -9,6 +9,10 @@ cards: [lf79-refused-field]
 forecast: 20-45m
 supersedes: []
 superseded_by:
+ruled: 2026-11-08
+ruled_by: pablo (autonomous mode)
+supervisor: organizer-probe-sup121
+chosen: accept as written
 ---
 
 ## Question
@@ -31,3 +35,11 @@ accept as written.
 ## Forecast
 
 forecast: 20-45m over 1 wave; basis: lf78 (23 min), lf77 (22 min), this initiative.
+
+## Ruling
+
+pablo (autonomous mode), 2026-11-08 06:19: the recommendation taken after
+five minutes without an answer. Asked at 06:14 in the mailbox ("0192:
+accept leftovers 79, the refused rename field?", options accept as
+written or send back); recommended "accept as written". Not sensitive:
+the organizer's own record, frontend only, designs by Aglaea.

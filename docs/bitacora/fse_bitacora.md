@@ -26,6 +26,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- 06:19 0192 ruled by default (leftovers 79, lf79-refused-field: Aglaea A13, AR46-AR48); sup121 launched, forecast 20-45m.
+
 - 06:1x sup120 closed (lf78 #74 a9890871; 23 min vs 30-60, $6.88, no failed round) and ended; installed v0.2.0-3659. Its finding 1 (two seeds stored by d832cc8a show two heads until a save) checked against Pablo's real state.json: groups 'everything' and 'PRO', no seed, so dropped. Refused-field notes A1-A3 to Aglaea. Gate lesson: no DOM test library in frontend/, so 'stays open' rows are UI rows, not vitest.
 
 - 05:47 0191 ruled by default (leftovers 78, lf78-group-names: Aglaea A12, AR43-AR45 plus the two-seed merge); sup120 launched, forecast 30-60m.

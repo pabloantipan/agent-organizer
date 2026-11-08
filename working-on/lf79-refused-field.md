@@ -8,7 +8,7 @@ reviewer:
 review:
 stage:
 updated: 2026-11-08
-next: "waits on 0192 (accept leftovers 79)"
+next: "sup121 runs it (0192)"
 depends_on: [lf78-group-names]
 boundary: ["frontend/src/components/Rail.tsx", "frontend/src/lib/railGroup.ts", "frontend/src/lib/", "frontend/src/styles/global.css", "frontend/src/components/"]
 spec: "docs/specs/leftovers-79.md (FR-1 to FR-3)"

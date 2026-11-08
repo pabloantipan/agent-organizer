@@ -1,6 +1,6 @@
 # Leftovers 79: a refused rename shows, says the way out, and is heard every time: the build spec
 
-status: proposed (0192)
+status: accepted (0192, ruled 2026-11-08)
 by: the FSE, 2026-11-08, on main at fa0d4ca0
 sources: sup120's UI review of lf78-group-names (#74), notes A1-A3;
 Aglaea's `docs/ux/specs/run-report.md` Amendment 13 and the design
