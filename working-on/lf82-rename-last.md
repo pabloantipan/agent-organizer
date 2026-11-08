@@ -5,7 +5,7 @@ repos: [organizer]
 branch: lf82-rename-last
 seat: l82-build
 reviewer: l82-rev
-review: "pass: V1-V3 and X0 met at 52bc5bea (l82-rev, 2026-11-08); AR53-AR55 to l82-ui"
+review: "pass (round 2): V1-V3 and X0 met at c23a3952 (l82-rev, 2026-11-08); AR55 to l82-ui again"
 stage:
 updated: 2026-11-08
 next: "review: lf82-rename-last, F1 fixed, V1-V3 and X0 pass (AR55 to the UI reviewer again), c23a3952"
@@ -69,6 +69,14 @@ Not changed, on purpose:
 - X0: `make test` exit 0 (go tests ok, vitest 112 files, 1797 passed), test run **fresh** `ad54f4bd76e2f1e6c5c9da3bc6f0ff57`; `wails build` 0; `make review-build` 0 (built `Deltagos Review.app`, not launched); `git status --porcelain` empty without needing the wailsjs checkout. Clones removed.
 - Note: the counts rule (`.rail-group-head > .rail-counts`) goes beyond the three items FR-3 names; declared, inside the head's rules, and its geometry is AR55's to judge. Goes to: l82-ui (AR55).
 
+
+### Round 2
+- Verdict: **pass** for the code gate (V1, V2, V3 with Amendment 1, X0). Unmet rows: none. AR55 is l82-ui's again.
+- Reviewer l82-rev, 2026-11-08, commit c23a3952 (one commit on 52bc5bea), fresh clone of origin plus the local branch.
+- change-check (`--base origin/main`): 4 files, `0 flags` in every category; the new Risky line (chevron min-height, heads 4 px tighter) is declared.
+- Diff 52bc5bea..c23a3952: only `global.css` (`.rail-group-head > .rail-chevron` gains `min-height: var(--control-sm)` and its comment) and `Rail.lf82.test.tsx` (one new V3 row). The global `button` rule (global.css:21, `min-height: var(--control-md)`) is the 28 px; the head rule (0,2,0) outranks it. No Safari 15.0 floor issue.
+- V3: the new row fails at 52bc5bea (`expected 28 to be 24`, 1 failed, 17 passed) and passes at c23a3952; V1, V2, V3 all pass, 18 passed (`r2-prev-V.log`, `r2-branch-V.log`).
+- X0: `make test` exit 0 (vitest 112 files, 1798 passed; go ok), test run **fresh** `d8bf7b2c411446e33bbd9b1d0f046e42`; `wails build` 0; `make review-build` 0 (not launched); `git status --porcelain` empty after the wailsjs checkout. Clones removed.
 
 ## UI review
 - Verdict: **fail**. Rows unmet: **AR55**. AR53 and AR54 met. cause: execution
