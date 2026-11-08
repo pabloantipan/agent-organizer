@@ -39,15 +39,17 @@ describe("the floating list's folds (leftovers-16 F2)", () => {
   });
 });
 
-// leftovers-74 V3 (FR-2, AR40): the float list reads a stored group `other`
-// as `Other`, through the rail's helper; `misc` reads as stored.
-describe("leftovers-74 V3 (FR-2, AR40): the float list reads a stored `other` as Other", () => {
-  it("draws `Other` and `misc` over the stored groups `other` and `misc`", async () => {
-    const { FloatSections } = await import("./FloatList");
-    const view = { board: { initiatives: [initiative("a"), initiative("b"), initiative("c")], columns: {} }, order: { groups: [{ name: "other", initiatives: ["a"] }, { name: "misc", initiatives: ["b"] }], resolved: {} } } as unknown as BoardView;
-    const html = renderToStaticMarkup(<FloatSections sections={floatList(view, null).sections} row={row} />);
-    expect([...html.matchAll(/<div class="fl-group">([^<]*)<\/div>/g)].map((m) => m[1])).toEqual(["Other", "misc", "ungrouped"]);
-    expect(html).toContain('aria-label="Other"');
-    expect(html).toContain('aria-label="misc"');
+// leftovers-77 V2 (FR-2, AR40, AR42), was leftovers-74 V3: the float list
+// reads the seeded group with an empty name as `No client`, through the
+// rail's helper; a client `other`, `Other` and `misc` read as stored.
+describe("leftovers-77 V2 (FR-2, AR40): the float list reads the seed as No client", () => {
+  it("draws `No client`, `other`, `Other` and `misc` over the stored groups", async () => {
+    const { FloatSections, labelGroups } = await import("./FloatList");
+    const groups = [{ name: "", seed: "no-client", initiatives: ["a"] }, { name: "other", initiatives: ["b"] }, { name: "Other", initiatives: ["d"] }, { name: "misc", initiatives: ["e"] }];
+    const view = { board: { initiatives: ["a", "b", "c", "d", "e"].map((id) => initiative(id)), columns: {} }, order: { groups, resolved: {} } } as unknown as BoardView;
+    const html = renderToStaticMarkup(<FloatSections sections={floatList(labelGroups(view), null).sections} row={row} />);
+    expect([...html.matchAll(/<div class="fl-group">([^<]*)<\/div>/g)].map((m) => m[1])).toEqual(["No client", "other", "Other", "misc", "ungrouped"]);
+    for (const n of ["No client", "other", "Other", "misc"]) expect(html).toContain(`role="group" aria-label="${n}"`);
+    expect(groups[0].name).toBe("");
   });
 });
