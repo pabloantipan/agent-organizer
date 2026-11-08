@@ -319,8 +319,9 @@ app-icon/`, export.sh regenerates it); a builder copies, never redraws.
   detached worktree: `osascript` System Events, `AXPress` on the icon's
   button, `keystroke`, window sizes from `every window`, then
   `screencapture -R` into /tmp. CGEvent clicks from `swift` did nothing here.
-  Clean up in the same shell: `$FIXTURE_AGENT_PIDS` does not survive
-  between Bash calls, so end with `pkill -f <fixture dir>` and remove it.
+  Clean up with `scripts/fixture-home.sh stop "$FIXTURE_DIR"` (it kills
+  only the fixture's own pidfile, lf75), then remove the dir; never a
+  pattern kill (`pkill -f`).
 
 - `eval "$(scripts/fixture-home.sh --twenty)"` (twenty initiatives) or
   without `--twenty` (init-a … and the cell fixtures), then
