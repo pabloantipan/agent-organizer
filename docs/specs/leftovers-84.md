@@ -1,6 +1,6 @@
 # Leftovers 84: the map reader picks each level's own diagram on a shared page: the build spec
 
-status: proposed (0197)
+status: accepted (0197, ruled 2026-11-08)
 by: the FSE, 2026-11-08, on main at c398f958
 sources: l83-map's note on lf83-webview-map (sup125, branch at d0f6780a):
 `modules.md` now holds two modules regions, and Deltagos's map reader
@@ -55,3 +55,11 @@ reader line only).
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf84-map-region` | R1-R4, X0 | — (lf83 needs it to draw right; either may merge first) | false |
+
+## Amendment 1 (FSE, 2026-11-08, on l84-rev's fail at 87bc0bd2)
+
+A level's region opened by `<!-- c4-map:begin <level> -->` and not closed
+by its `<!-- c4-map:end <level> -->` before the next `c4-map:begin` (or the
+page's end) is refused, as FR-2's other cases are: `Map not drawn: <page>'s
+<level> region is not closed`. It never reads another region's block. R3
+adds that case.

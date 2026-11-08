@@ -1,6 +1,6 @@
 ---
 title: "The React app is on the organizer's own map, with its modules"
-status: now
+status: done
 repos: [organizer]
 branch: lf83-webview-map
 seat: l83-map
@@ -8,7 +8,7 @@ reviewer: l83-rev
 review: "pass, unmet: none (l83-rev, 2026-11-08, d0f6780a)"
 stage:
 updated: 2026-11-08
-next: "PR with talos-lab"
+next: "merged as organizer #84 513db0c6; supervisor moves it to done/"
 depends_on: [lf76-map-regen]
 boundary: ["docs/architecture/", "scripts/c4-adapter-webview"]
 spec: "docs/specs/leftovers-83.md (FR-1 to FR-3)"
@@ -17,6 +17,8 @@ ui_review: false
 touches: []
 change_order: {add: [], change: [], retire: []}
 autonomy: unattended
+prs:
+  - {repo: organizer, pr: 84, target: main, state: merged, merge: 513db0c6}
 ---
 
 ## Goal

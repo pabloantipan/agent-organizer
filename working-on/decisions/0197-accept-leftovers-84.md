@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 84 - the map reader picks each level's own diagram
-status: proposed
+status: ruled
 raised: 2026-11-08
 raised_by: fse
 owner: pablo
@@ -9,6 +9,10 @@ cards: [lf84-map-region]
 forecast: 20-45m
 supersedes: []
 superseded_by:
+ruled: 2026-11-08
+ruled_by: pablo (autonomous mode)
+supervisor: organizer-probe-sup126
+chosen: accept as written
 ---
 
 ## Question
@@ -33,3 +37,11 @@ accept as written.
 ## Forecast
 
 forecast: 20-45m over 1 wave; basis: lf58-map-read (the reader), lf75 (20-ish min, a small Go/script card), this initiative.
+
+## Ruling
+
+pablo (autonomous mode), 2026-11-08 11:01: the recommendation taken after
+five minutes without an answer. Asked at 10:56 in the mailbox ("0197:
+accept leftovers 84, the map reader's regions?", options accept as written
+or send back); recommended "accept as written". Not sensitive: the
+organizer's own record, its map reader.
