@@ -1,6 +1,6 @@
 ---
 title: "No stale refusal is heard, and the refusal line reads whole"
-status: now
+status: done
 repos: [organizer]
 branch: lf80-refusal-close
 seat: l80-build
@@ -8,7 +8,7 @@ reviewer: l80-rev
 review: "pass (code gate V1 V2 X0), l80-rev, 2026-11-08, 69ca546f; AR49 AR50 to l80-ui"
 stage:
 updated: 2026-11-08
-next: "merged as organizer #78 c481a3a3; supervisor moves it to done/"
+next: "merged, organizer #78 c481a3a3"
 depends_on: [lf79-refused-field]
 boundary: ["frontend/src/components/Rail.tsx", "frontend/src/lib/liveRegion.ts", "frontend/src/lib/", "frontend/src/styles/global.css", "frontend/src/components/"]
 spec: "docs/specs/leftovers-80.md (FR-1, FR-2)"
