@@ -530,7 +530,9 @@ the element pads its own content 4 px on the sides the ring crosses
 clearance, so the ring never covers a glyph and keeps about 2 px from it.
 In a comma list the comma stays outside the link, pulled in by
 `margin-inline-start: calc(-1 * var(--space-1))` so the text reads `a, b`
-(run-report A8). Links in a comma list are inline text: they draw the
+(run-report A8); a link after a comma is pulled in the same way at its
+start, so the gap after a comma is one space whatever follows (A10).
+Links in a comma list are inline text: they draw the
 **inset** ring (so no ring reaches a neighbour) and take no 24 px
 minimum (WCAG 2.5.8's inline exception), only the 4 px padding
 (run-report A9). An inset ring takes the element's own radius;
@@ -543,7 +545,9 @@ drawn by one shared piece, not per place (usage A3, run-report A7). **A proper n
 a client, an initiative) never sits in an uppercased label**: a system's name in a title goes in
 the line under it (usage A2); a label that is such a name (a rail group)
 keeps the label's size, weight and colour in the name's own case
-(run-report A9).
+(run-report A9). A label the app wrote (the seeded `Other` group, `Asleep`,
+`Archived`) is the app's words in sentence case; once the person renames
+it, it is theirs and keeps their case (run-report A10).
 
 **A region that scrolls inside a view shows it does**: each edge with
 content hidden past it carries a 1 px `--fg-subtle` line (4.5:1, not

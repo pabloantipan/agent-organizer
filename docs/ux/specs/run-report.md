@@ -630,3 +630,20 @@ F1, F2, (c), (d)).
 | AR35 (amended) | read a list of links as text | a track's `left` with `a`, `f (not cut)`: `a, f (not cut)`, no space before the comma; focus on `a` draws its ring inside its box, touching neither name |
 | AR37 | read every count one way | the rail's folded groups read `Asleep · 1`, `Archived · 1` |
 | AR38 | read a group's name as he wrote it | a group named `Acme` reads `Acme` in the rail, not `ACME` |
+
+## Amendment 10 (aglaea, 2026-11-08): the gap after a comma, the app's own labels
+
+From sup117's closing on lf73-inline-names (organizer #64, 127b35c).
+
+- **The comma gap.** About 6 px before a link, 2 px before plain text:
+  the link's 4 px start padding adds to the space. A link that follows a
+  comma is pulled in by its padding at its start, as the comma is at its
+  end, so the gap after a comma is one space whatever follows.
+- **The seeded `other` group.** It is the app's label, not a name a person
+  gave: it reads in the app's sentence case, `Other`, like `Asleep` and
+  `Archived`. A group the person renamed keeps the case they wrote.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| AR39 | read a mixed list evenly | a `left` list of a link, plain text, then a link: the gap after each comma measures the same |
+| AR40 | tell the app's labels from his names | the seeded group reads `Other`; renamed to `misc`, it reads `misc` |
