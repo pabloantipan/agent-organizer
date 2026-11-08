@@ -26,6 +26,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- 09:4x sup123 closed (lf81 #80 b87a4cd6; 20 min vs 20-45, $5.29) and ended; installed v0.2.0-3708. Leftovers 74-81: eight cards, all first-round passes, about $48. The rename chain (lf78-lf81) now yields sub-sev-1 polish: one last card from Aglaea's answer on '….' and the 2-4 px offset, plus graphemes for the 24-character cut (my spec gap); then stop cutting rename polish. Spec lessons: name every new file in Boundary (lib/railRename.ts was missed); a spec that counts characters says graphemes.
+
 - 09:17 0194 ruled by default (leftovers 81, lf81-rename-edges, Aglaea A15, AR51-AR53); sup123 launched, forecast 20-45m.
 
 - 09:2x sup122 closed (lf80 #78 c481a3a3; 19 min vs 20-45, $4.30) and ended; installed v0.2.0-3692. Leftovers 74-80 since the resume: seven cards, all first-round passes, about $43 in seats. Its U1 (sev 2, a gap in my FR-1: collapsing the rail with the field open keeps the sentence) and Q2-Q3 to Aglaea; cut a card from her answer. Gate lesson: list every way a field closes (Escape, save, blur, the rail collapsing, navigation) when a spec says 'on close'.
