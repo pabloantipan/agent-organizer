@@ -230,40 +230,52 @@ func marker(line string) (verb, key string, ok bool) {
 
 // levelBlock is a level's block on its page (leftovers-84 FR-1, FR-2): the
 // first mermaid block between `<!-- c4-map:begin <key> -->` and its end
-// marker (a region left open runs to the end of the page), else, when the
-// page holds no region for key, the page's first block. refused is the
-// reason, without "Map not drawn: ", when there is none to draw: a page
-// with no block, a region with none, or a key whose region appears twice.
+// marker, else, when the page holds no region for key, the page's first
+// block. refused is the reason, without "Map not drawn: ", when there is
+// none to draw: a page with no block, a region with none, a key whose
+// region appears twice, or a region not closed by its end marker before the
+// next c4-map:begin or the page's end (Amendment 1), never read leniently.
 func levelBlock(page []byte, name, level, key string) (src, refused string) {
 	var region bytes.Buffer
-	regions, in := 0, false
+	regions, in, open := 0, false, false
 	for _, line := range strings.SplitAfter(string(page), "\n") {
 		verb, k, ok := marker(line)
 		switch {
-		case ok && k == key && verb == "begin":
-			regions++
-			in = regions == 1
+		case ok && verb == "begin":
+			if in {
+				open = true // the next begin came before our end marker
+			}
+			in = false
+			if k == key {
+				regions++
+				in = regions == 1
+			}
 		case ok && k == key && verb == "end":
 			in = false
 		case in:
 			region.WriteString(line)
 		}
 	}
-	switch regions {
-	case 0:
+	if in {
+		open = true // the page ended inside our region
+	}
+	switch {
+	case regions > 1:
+		return "", fmt.Sprintf("%s has two %s regions", name, key)
+	case open:
+		return "", fmt.Sprintf("%s's %s region is not closed", name, key)
+	case regions == 0:
 		b, ok := firstMermaid(page)
 		if !ok {
 			return "", fmt.Sprintf("%s has no mermaid block (the %s level)", name, level)
 		}
 		return b, ""
-	case 1:
+	default:
 		b, ok := firstMermaid(region.Bytes())
 		if !ok {
 			return "", fmt.Sprintf("%s has no mermaid block in its %s region", name, key)
 		}
 		return b, ""
-	default:
-		return "", fmt.Sprintf("%s has two %s regions", name, key)
 	}
 }
 

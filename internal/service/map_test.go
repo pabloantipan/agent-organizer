@@ -399,6 +399,21 @@ func TestMapRegionRefuses(t *testing.T) {
 		open := "<!-- c4-map:begin modules web -->\n```mermaid\nflowchart LR\n<!-- c4-map:end modules web -->\n"
 		wantRefused(t, modules(t, api+open), "Map not drawn: modules.md has no mermaid block in its modules web region")
 	})
+	// Amendment 1: a region not closed before the next begin or the page's
+	// end is refused, never read leniently.
+	t.Run("a region not closed before another level's begin", func(t *testing.T) {
+		// l84-rev's input: web's block must not be drawn as harbor_api's.
+		wantRefused(t, modules(t, "<!-- c4-map:begin modules harbor_api -->\ntext\n"+web),
+			"Map not drawn: modules.md's modules harbor_api region is not closed")
+	})
+	t.Run("a region not closed, its own block before another level's begin", func(t *testing.T) {
+		wantRefused(t, modules(t, "<!-- c4-map:begin modules harbor_api -->\n```mermaid\n"+twoApiBlock+"```\n"+web),
+			"Map not drawn: modules.md's modules harbor_api region is not closed")
+	})
+	t.Run("a region not closed before the page's end", func(t *testing.T) {
+		wantRefused(t, modules(t, api+"<!-- c4-map:begin modules web -->\n```mermaid\n"+twoWebBlock+"```\n"),
+			"Map not drawn: modules.md's modules web region is not closed")
+	})
 	t.Run("a region twice", func(t *testing.T) {
 		wantRefused(t, modules(t, api+web+"\n"+web), "Map not drawn: modules.md has two modules web regions")
 	})
@@ -409,7 +424,7 @@ func TestMapRegionRefuses(t *testing.T) {
 }
 
 // The region reader on its own: the key, the fallback, spacing in a marker,
-// a marker for another level, and a region left open to the end.
+// a marker for another level, and a region not closed (Amendment 1).
 func TestLevelBlock(t *testing.T) {
 	blk := func(s string) string { return "```mermaid\n" + s + "```\n" }
 	for _, tc := range []struct {
@@ -420,7 +435,9 @@ func TestLevelBlock(t *testing.T) {
 		{"its own region", blk("a\n") + "<!-- c4-map:begin containers -->\n" + blk("b\n") + "<!-- c4-map:end containers -->\n", "containers", "b\n", ""},
 		{"spacing inside the marker", blk("a\n") + "  <!--   c4-map:begin  modules  x   -->\r\n" + blk("b\n") + "<!-- c4-map:end modules x -->\n", "modules x", "b\n", ""},
 		{"modules x is not modules xy", "<!-- c4-map:begin modules xy -->\n" + blk("b\n") + "<!-- c4-map:end modules xy -->\n" + blk("c\n"), "modules x", "b\n", ""},
-		{"a region left open runs to the end", blk("a\n") + "<!-- c4-map:begin context -->\n" + blk("b\n"), "context", "b\n", ""},
+		{"not closed before another level's begin", "<!-- c4-map:begin modules a -->\n" + blk("a\n") + "<!-- c4-map:begin modules b -->\n" + blk("b\n") + "<!-- c4-map:end modules b -->\n", "modules a", "", "p.md's modules a region is not closed"},
+		{"not closed before the page's end", blk("a\n") + "<!-- c4-map:begin context -->\n" + blk("b\n"), "context", "", "p.md's context region is not closed"},
+		{"another level left open does not touch ours", "<!-- c4-map:begin modules b -->\n<!-- c4-map:begin modules a -->\n" + blk("a\n") + "<!-- c4-map:end modules a -->\n", "modules a", "a\n", ""},
 		{"no block anywhere, no region", "text\n", "context", "", "p.md has no mermaid block (the context level)"},
 		{"empty region", "<!-- c4-map:begin context -->\n<!-- c4-map:end context -->\n" + blk("c\n"), "context", "", "p.md has no mermaid block in its context region"},
 		{"two regions", "<!-- c4-map:begin context -->\n" + blk("b\n") + "<!-- c4-map:end context -->\n<!-- c4-map:begin context -->\n" + blk("c\n") + "<!-- c4-map:end context -->\n", "context", "", "p.md has two context regions"},
