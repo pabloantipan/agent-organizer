@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type FocusEvent, type KeyboardEvent } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type FocusEvent, type KeyboardEvent } from "react";
 import { Archive, ArrowLeft, ChevronDown, ChevronRight, FolderPlus, Layers, Moon, MoreHorizontal, PanelLeftClose, PanelLeftOpen, PencilRuler, X } from "lucide-react";
 import { DragDropContext, Draggable, Droppable, type DraggableProvidedDragHandleProps, type DropResult } from "@hello-pangea/dnd";
 import type { merge, model } from "../../wailsjs/go/models";
@@ -8,7 +8,7 @@ import { inactiveIds } from "../lib/queue";
 import { foldName, sleepyOf, sleepyWord } from "../lib/initiatives";
 import { stripFolds } from "../lib/folds";
 import { placeOf } from "../lib/place";
-import { clientGroups, railGroupLabel, renameGroup, savedGroups } from "../lib/railGroup";
+import { clientGroups, railGroupLabel, renameGroup, savedGroups, takenBy, takenLine } from "../lib/railGroup";
 import { useBoard, type Screen } from "../stores/board.store";
 import { CellStateLz, definitionWaits } from "./Crew";
 import { missingPersonas } from "../lib/queue";
@@ -35,6 +35,10 @@ export function Rail() {
     try { return JSON.parse(localStorage.getItem("rail.collapsed") || "{}"); } catch { return {}; }
   });
   const [editing, setEditing] = useState<number | null>(null);
+  // The rename field's refusal: the line under it and the text typed, kept
+  // so the field reopens on it (leftovers-78 FR-2).
+  const [refused, setRefused] = useState<Refusal | null>(null);
+  useEffect(() => setRefused(null), [editing]);
   // A group's ⋯ to take focus once the head it sits in is drawn again
   // (after Rename ends by Enter or Escape).
   const [refocus, setRefocus] = useState<number | null>(null);
@@ -165,6 +169,12 @@ export function Rail() {
     setEditing(base.length);
   };
   const rename = (i: number, name: string, back = false) => {
+    // A name another group shows is refused in place: nothing is written, the
+    // field stays open with the typed text and the line says which group
+    // (leftovers-78 FR-2, AR43).
+    const taken = takenBy(stored, i, name);
+    if (taken !== null) { setRefused({ line: takenLine(taken), text: name }); return; }
+    setRefused(null);
     if (back) setRefocus(i);
     setEditing(null);
     // Saved as the header shows it, nothing is written: the seed keeps its
@@ -274,9 +284,10 @@ export function Rail() {
   const head = (s: { key: string; name: string; seed?: string; ids: string[]; fixed: boolean }, i: number, handle?: DraggableProvidedDragHandleProps | null) => {
     const c = s.ids.reduce((a, id) => { const e = byId.get(id)!; return { now: a.now + e.now, blocked: a.blocked + e.blocked, next: a.next + e.next }; }, { now: 0, blocked: 0, next: 0 });
     const isEditing = editing === i && !s.fixed;
-    // The seed with an empty name reads `No client`; the rename field opens on
-    // what the header shows and is named by it (leftovers-77 FR-2, FR-3).
-    const shown = railGroupLabel(s);
+    // The seed with an empty name reads `No client`, or `Initiatives with no
+    // client` beside a group called that; the rename field opens on what the
+    // header shows and is named by it (leftovers-77 FR-2, FR-3; leftovers-78 FR-1).
+    const shown = railGroupLabel(s, stored);
     return (
       <div className={`rail-group-head ${s.fixed ? "fixed" : ""}`} {...dragOnly(handle)}>
         <button className="rail-chevron" onClick={() => toggle(s.key)} aria-expanded={!collapsed[s.key]} aria-label={foldName(!!collapsed[s.key], shown)} title={foldName(!!collapsed[s.key], shown)}>
@@ -285,7 +296,7 @@ export function Rail() {
         {/* `<name> · N` through SecCount (leftovers-72 FR-2, AR36); the
             rename field stands in for the name alone. */}
         <SecCount className="rail-group-title" countClass="rail-group-n" n={s.ids.length} title={isEditing ? (
-          <RenameField name={shown} onDone={(v, back) => rename(i, v, back)} onCancel={() => { setEditing(null); setRefocus(i); }} />
+          <RenameField name={shown} refused={refused} onDone={(v, back) => rename(i, v, back)} onCancel={() => { setRefused(null); setEditing(null); setRefocus(i); }} />
         ) : (
           <span className="rail-group-name" onDoubleClick={() => !s.fixed && setEditing(i)} title={s.fixed ? "not in any group" : "double-click to rename, drag to reorder"}>{shown}</span>
         )} />
@@ -592,17 +603,26 @@ export function groupActionOff(action: (typeof MENU)[number], index: number, cou
 
 /** A group's name field while it is renamed, named `Rename <group>`
  *  (leftovers-25 FR-9). Enter keeps the name and returns to the ⋯, Escape
- *  drops it and returns there too, leaving the field keeps it. */
-export function RenameField({ name, onDone, onCancel }: { name: string; onDone: (value: string, back: boolean) => void; onCancel: () => void }) {
+ *  drops it and returns there too, leaving the field keeps it. A refused name
+ *  keeps the field open with the typed text, and `refused`, one line under
+ *  it, says why, in a live region (leftovers-78 FR-2, AR43). */
+export type Refusal = { line: string; text: string };
+export function RenameField({ name, refused, onDone, onCancel }: { name: string; refused?: Refusal | null; onDone: (value: string, back: boolean) => void; onCancel: () => void }) {
+  const lineId = useId();
   return (
-    <input
-      autoFocus
-      className="rail-group-name-input"
-      aria-label={`Rename ${name}`}
-      defaultValue={name}
-      onBlur={(e) => onDone(e.currentTarget.value, false)}
-      onKeyDown={(e) => { if (e.key === "Enter") onDone(e.currentTarget.value, true); if (e.key === "Escape") onCancel(); }}
-    />
+    <span className="rail-rename">
+      <input
+        autoFocus
+        className="rail-group-name-input"
+        aria-label={`Rename ${name}`}
+        aria-invalid={refused ? true : undefined}
+        aria-describedby={refused ? lineId : undefined}
+        defaultValue={refused ? refused.text : name}
+        onBlur={(e) => onDone(e.currentTarget.value, false)}
+        onKeyDown={(e) => { if (e.key === "Enter") onDone(e.currentTarget.value, true); if (e.key === "Escape") onCancel(); }}
+      />
+      <span id={lineId} className="rail-rename-line" role="alert" aria-live="assertive">{refused?.line ?? ""}</span>
+    </span>
   );
 }
 

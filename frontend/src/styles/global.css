@@ -190,6 +190,11 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
    FR-4; run-report Amendment 9). */
 .rail-group-head.fixed .rail-group-name { color: var(--dim); font-weight: 500; letter-spacing: .02em; text-transform: uppercase; }
 .rail-group-name-input { width: 120px; padding: 1px 6px; font-size: var(--font-size-xs); border-radius: var(--radius-sm); }
+/* Rename's refusal, one line under the field (leftovers-78 FR-2; run-report
+   A12, AR43): --danger on the rail's --bg-sunken is 5.9:1. */
+.rail-rename { display: inline-flex; flex-direction: column; align-items: flex-start; min-width: 0; white-space: normal; }
+.rail-rename-line { display: block; max-width: 180px; margin-top: 2px; font-size: var(--font-size-xs); line-height: 16px; font-weight: 500; color: var(--danger); }
+.rail-rename-line:empty { display: none; }
 .rail-group-n { font-family: var(--mono); font-size: var(--font-size-xs); color: var(--dim); }
 .rail-group-list { min-height: 8px; border-radius: var(--radius-md); }
 .rail-group-list.over { background: var(--accent-soft); }

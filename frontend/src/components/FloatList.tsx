@@ -209,12 +209,13 @@ export function FloatList() {
 }
 
 /** The view with each rail group named as the rail shows it, so the list's
- *  sections read `No client` for the seed with an empty name and every
- *  other name as stored (leftovers-77 FR-2, AR40). Only the list reads it. */
+ *  sections read `No client` for the seed with an empty name (`Initiatives
+ *  with no client` beside a group called `No client`) and every other name
+ *  as stored (leftovers-77 FR-2, AR40; leftovers-78 FR-1). Only the list reads it. */
 export function labelGroups(view: BoardView | null): BoardView | null {
   const groups = view?.order?.groups;
   if (!view || !groups?.length) return view;
-  return { ...view, order: { ...view.order, groups: groups.map((g) => ({ ...g, name: railGroupLabel(g) })) } } as BoardView;
+  return { ...view, order: { ...view.order, groups: groups.map((g) => ({ ...g, name: railGroupLabel(g, groups) })) } } as BoardView;
 }
 
 /** The rail's groups in the list, each under its name as the rail shows it
