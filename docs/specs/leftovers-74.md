@@ -1,6 +1,6 @@
 # Leftovers 74: one space after a comma, the app's own labels in sentence case: the build spec
 
-status: proposed (0187)
+status: accepted (0187, ruled 2026-11-08)
 by: the FSE, 2026-11-08, on main at 65a8d51
 sources: sup117's closing on lf73-inline-names (organizer #64, 127b35c),
 "Found, not asked" (1) and (2); Aglaea's `docs/ux/specs/run-report.md`

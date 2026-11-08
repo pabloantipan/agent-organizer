@@ -8,7 +8,7 @@ reviewer:
 review:
 stage:
 updated: 2026-11-08
-next: "waits on 0187 (accept leftovers 74)"
+next: "sup118 runs it (0187)"
 depends_on: [lf73-inline-names]
 boundary: ["frontend/src/styles/runreport.css", "frontend/src/components/Rail.tsx", "frontend/src/components/FloatList.tsx", "frontend/src/lib/", "frontend/src/components/RunTracks.test.tsx", "frontend/src/components/RunTracks.lf73.test.tsx", "frontend/src/components/FloatList.test.tsx", "frontend/src/components/"]
 spec: "docs/specs/leftovers-74.md (FR-1 to FR-3)"
