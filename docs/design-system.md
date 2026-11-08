@@ -429,7 +429,11 @@ keeps their place.
   field holds that text (never emptied, so it does not blink); the
   announcement goes through an sr-only live region that is always in the
   DOM (never `display: none`), emptied and set again 100 ms on, so a
-  repeated refusal is said again (run-report A13).
+  repeated refusal is said again (run-report A13). The region is emptied
+  when the field closes (Escape, save, leaving), so nothing stale is read
+  later. The refusal line wraps as prose where the field is narrow (the
+  rail's 180 px), pushing what is below it down, never clipped or laid
+  over a row (A14).
 - **The newest answer wins, and focus never drops**: when a press returns
   something fresher than the feed, the view shows the press's answer at
   once and the feed catches up. A screen-reader-only live region says a

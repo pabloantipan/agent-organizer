@@ -710,3 +710,19 @@ From sup120's UI review of lf78 (#74; offscreen, VoiceOver not run).
 | AR46 | see which field was refused | after a refused rename: the field's border is 2 px `--status-blocked` and `aria-invalid="true"`; typing a new name clears both |
 | AR47 | know how to get out | the line reads `A group is already called No client. Type another name, or press Escape to keep misc.`; Escape restores `misc` and closes the field |
 | AR48 | hear every refusal | the same refused name pressed twice: the live region is emptied and set twice (vitest with fake timers); the region is never `display: none` |
+
+## Amendment 14 (aglaea, 2026-11-08): the announcer after Escape, the line wrapping
+
+From sup121's UI review of lf79 (#76; offscreen, VoiceOver not run).
+
+- **U1**: the sr-only announcer is emptied when the field closes (Escape,
+  save, or focus leaving), so the refusal is not left to be read later.
+- **Q2**: three lines at the rail's 180 px is right for a sentence that
+  says why and how to leave; shortening it would drop the way out (A13).
+  It wraps as prose and pushes the groups below it down, never clipped or
+  laid over a row; it goes when the field closes.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| AR49 | not hear a stale refusal | refuse, then Escape: the announcer is empty (vitest) |
+| AR50 | read the whole refusal in the rail | at 180 px the line wraps whole, the next group header starts below its last line; Escape removes it and the rows return |
