@@ -8,7 +8,7 @@ reviewer:
 review:
 stage:
 updated: 2026-11-08
-next: "waits on 0190 (accept leftovers 77)"
+next: "sup119 runs it (0190)"
 depends_on: [lf74-comma-other, lf75-fixture-stop]
 boundary: ["internal/model/model.go", "internal/model/", "frontend/wailsjs/", "frontend/src/lib/", "frontend/src/components/Rail.tsx", "frontend/src/components/FloatList.tsx", "frontend/src/components/", "testdata/fixture-overlay/", "scripts/floating-icon-by-hand.sh"]
 spec: "docs/specs/leftovers-77.md (FR-1 to FR-6)"

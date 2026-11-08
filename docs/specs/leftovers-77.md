@@ -1,6 +1,6 @@
 # Leftovers 77: the no-client group is the app's, by key, not by name: the build spec
 
-status: proposed (0190)
+status: accepted (0190, ruled 2026-11-08)
 by: the FSE, 2026-11-08, on main at 5958a021
 sources: sup118's closing on leftovers 74-76 (findings 2-5); Aglaea's
 `docs/ux/specs/run-report.md` Amendment 11 and `docs/design-system.md`

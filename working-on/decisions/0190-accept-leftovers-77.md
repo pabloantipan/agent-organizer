@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 77 - the no-client group is the app's, by key, not by name
-status: proposed
+status: ruled
 raised: 2026-11-08
 raised_by: fse
 owner: pablo
@@ -9,6 +9,10 @@ cards: [lf77-no-client]
 forecast: 45-90m
 supersedes: []
 superseded_by:
+ruled: 2026-11-08
+ruled_by: pablo (autonomous mode)
+supervisor: organizer-probe-sup119
+chosen: accept as written
 ---
 
 ## Question
@@ -36,3 +40,12 @@ group by its name.
 ## Forecast
 
 forecast: 45-90m over 1 wave; basis: lf74 (about 25 min, frontend only) plus a Go model field and its wails regen, this initiative.
+
+## Ruling
+
+pablo (autonomous mode), 2026-11-08 05:17: the recommendation taken after
+five minutes without an answer. Asked at 05:12 in the mailbox ("0190:
+accept leftovers 77, the No client group?", options accept as written or
+send back); recommended "accept as written". Not sensitive: the
+organizer's own record; the new field is local app state, synced only
+under auth: firebase, which is off.
