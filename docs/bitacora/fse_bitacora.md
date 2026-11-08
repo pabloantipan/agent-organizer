@@ -4,6 +4,15 @@ What I don't know yet, and the hand-off to my next session. The file is the
 record; an item that becomes a thread points at the thread instead of
 restating it (the discuss skill).
 
+## HAND-OFF 2026-11-02 ~15:40 (cell PAUSED by Pablo: "pause what we're building")
+
+- PAUSED: launch nothing, post nothing, ask nothing until a resume notice arrives the same way. The hourly cron (fdbaa30c, :13, session-only) still fires: on a wake while paused, do nothing but check for the resume.
+- In flight when paused: sup117 on lf73-inline-names (0186, leftovers-73 with Amendment 1): code review pass at ba9f59f; UI review (l73-ui: AR35, AR37, AR38) pending; then PR with talos-lab. sup117 got the same pause notice (cell-wide). On resume: let sup117 finish, end it on its closing report, merge origin/main and make install.
+- Today since the morning compaction: leftovers 65-72 merged (#43 #45 #47 #49 #51 #53 #55 #57 #59 #61), installed v0.2.0-3553. Records 0178-0186 ruled by the autonomous five-minute default.
+- Queue after lf73: empty of cuttable work. Waits on Hephaistos: c4-map stamp (map stale on its own merge; then React app on the map, map regen); fixture stand-in agents outliving review apps (4 sightings); htmlLabels (shared mermaid config). Held low: count-title scans miss 'mono num', {"\u00b7"}, expression titles; cornerOf rx units; a re-read map lists an added node last.
+- Rules learned today: a text-pattern premise greps all of frontend/src (.ts and .tsx, strings) and the tests (three misses: lf71 x2, lf73); reviewers clone from `git remote get-url origin`; the code reviewer's X0 includes make review-build; on-screen ring rows need a key window, use the offscreen Tab harness.
+- Open cards besides lf73: lf55-one-title (needs Pablo: Dock window), identity-entra (on hold).
+
 ## HAND-OFF 2026-11-02 ~03:45 (at the 60% cap; last sha see git log)
 
 - AUTONOMOUS since 2026-11-01 16:19, no end set. Goal (Pablo via Hephaistos): the factory model built in atlax. Hourly cron wake is session-only: re-create it after the compaction (CronCreate, hourly at :13, the same prompt) if `factory autonomous status --quiet` still exits 0.
@@ -16,6 +25,14 @@ restating it (the discuss skill).
 - Rules learned: atlax cards carry touches and change_order at cut (card-check); a premise listing call sites greps all of frontend/src; any new file kind ReadSpec opens names its allow rule in the spec; a card that changes a contract carries release.yml's pin line; -to talos-lab only while the cell's seat is live, else [for talos-lab] to pablo; clean-clone recipes avoid rm -rf; bitácora inserts go after the day-log heading.
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
+
+- 2026-11-08: cell resumed (Hephaistos for Pablo: "Unfreeze all initiatives and go on"; Hestia first this week). sup117 still running on lf73 (UI review l73-ui pending). Swap at 98% on resume: probe will refuse new seats until it drops; ram --free needs Pablo's word. origin/main carries Hephaistos's 'organizer asleep' commit (initiative.yaml status: paused) though factory awake lists organizer awake: not merged yet, asked.
+
+- WRONG again (mine, 15:1x): leftovers-73's (N) grep covered components/*.tsx only; lib/folds.ts writes 'Asleep (n)' as a string. sup117 caught it before review; Amendment 1. Third sighting of a premise grep scoped too narrow (lf71 sec-count, lf71 tests, lf73 lib/). Rule now: a text-pattern premise greps all of frontend/src, .ts and .tsx, strings included, and the tests. Worth proposing as a gate-check hint for Hephaistos if it recurs.
+
+- 15:0x sup116 closed (lf72 #61 51db34f, 31 min vs 30-60, $8.98, no failed round) and ended. Its F1, F2 and spec gaps are already in leftovers-73 (0186, asked 15:01). Held low: V2-style scans miss 'mono num', {"\u00b7"} and expression titles (no site today). sup115 (lf71 #59, 43 min, $8.12) ended 14:22. Kept sup116's prompt file as sup117's template source.
+
+- To cut after lf72-counts-commas merges (same files): Aglaea run-report Amendment 9 (e729ecc): AR35 amended (inset ring on links in comma lists; 'never the name' includes the next item), AR37 comma-list links are inline text, no 24 px minimum there (AR28 stays on progress rows and the waits line), AR38 'Asleep · 1', 'Archived · 1' (folded rail groups, (N) is not a count form), and names a person gave (rail groups, clients, initiatives) are not uppercased by .rail-group. Grep every (N) count and every .rail-group text-transform before the premise.
 
 - To cut after lf71-count-look merges (same files): Aglaea run-report Amendment 8 (f62790a): AR33 amended (padding as built; no glyph covered), AR35 comma outside the link pulled in by margin-inline-start calc(-1 * var(--space-1)) in RunTracks.tsx:88, AR36 'Sessions · 10' disclosure through SecCount (UsageSessions.tsx:27), 'Gates · 6' (Overview) and the rail's 'Roles · 4' take the form; 'Exit 0/2' stays. Grep every count title across frontend/src before writing the premise.
 
