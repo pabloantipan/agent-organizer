@@ -191,8 +191,10 @@ code, .mono { font-family: var(--mono); font-size: var(--font-size-sm); font-wei
    top, so at rest their centres meet and with a taller field they stay by
    its first line (leftovers-82 FR-3; run-report A16, AR55). The name's line
    is on the name, not on the title, so a field standing in for it keeps the
-   title's baseline row as it was (AR52). */
-.rail-group-head > .rail-chevron { height: var(--control-sm); }
+   title's baseline row as it was (AR52). The chevron's min-height overrides
+   the global button's --control-md, which would lift it to 28 px
+   (leftovers-82 Amendment 1). */
+.rail-group-head > .rail-chevron { height: var(--control-sm); min-height: var(--control-sm); }
 .rail-group-head .rail-group-name { line-height: var(--control-sm); }
 .rail-group-head > .rail-counts { line-height: var(--control-sm); }
 /* A group's name is a name a person gave, shown as written; only the app's own

@@ -44,6 +44,33 @@ describe("leftovers-82 V3 (FR-3, AR55): the head's chevron, name and ⋯ in 24 p
     expect(lineBox(".rail-group-head > .rail-chevron")).toBe(24);
   });
 
+  // Amendment 1: the computed box, not only the rule's text. The chevron is a
+  // <button class="rail-chevron"> in a head, so `button`, `.rail-chevron` and
+  // `.rail-group-head > .rail-chevron` all reach it; the cascade (specificity,
+  // then source order) picks height and min-height, and the box is the larger.
+  it("the chevron's computed box: no min-height lifts it above 24 px", () => {
+    const reaching = [
+      { sel: "button", spec: 1 },
+      { sel: ".rail-chevron", spec: 10 },
+      { sel: ".rail-group-head > .rail-chevron", spec: 20 },
+    ];
+    const win = (prop: string) => {
+      let best: { spec: number; at: number; v: string } | null = null;
+      rules.forEach((r, at) => {
+        for (const { sel, spec } of reaching) {
+          if (!r.sels.includes(sel)) continue;
+          const v = last(r.body, prop);
+          if (v !== null && (!best || spec > best.spec || (spec === best.spec && at >= best.at))) best = { spec, at, v };
+        }
+      });
+      return best ? px((best as { v: string }).v) : null;
+    };
+    const minH = win("min-height");
+    const h = win("height");
+    expect(h).toBe(24);
+    expect(Math.max(h ?? 0, minH ?? 0)).toBe(24);
+  });
+
   it("the name in a head: a 24 px line", () => {
     expect(lineBox(".rail-group-head .rail-group-name")).toBe(24);
   });
