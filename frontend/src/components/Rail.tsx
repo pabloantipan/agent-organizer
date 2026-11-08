@@ -39,11 +39,15 @@ export function Rail() {
   // The rename field's refusal: the line under it and the text typed, kept
   // so the field reopens on it (leftovers-78 FR-2).
   const [refused, setRefused] = useState<Refusal | null>(null);
-  useEffect(() => setRefused(null), [editing]);
   // Every refusal is said again, the same one too: a separate sr-only live
   // region, always in the DOM, emptied and set 100 ms later (leftovers-79
   // FR-3, AR48); the visible line under the field is plain text.
-  const [said, say] = useLiveRegion();
+  const [said, say, hush] = useLiveRegion();
+  // The field closing (Escape, a saved name, focus leaving with a name it
+  // keeps) or moving to another group empties the line and the announcer,
+  // and drops a sentence still 100 ms from being set, so no stale refusal
+  // is left to be read (leftovers-80 FR-1, AR49).
+  useEffect(() => { setRefused(null); hush(); }, [editing, hush]);
   // A group's ⋯ to take focus once the head it sits in is drawn again
   // (after Rename ends by Enter or Escape).
   const [refocus, setRefocus] = useState<number | null>(null);
