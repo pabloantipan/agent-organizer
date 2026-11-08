@@ -1,6 +1,6 @@
 ---
 title: "One space after every comma, and the app's own group label as Other"
-status: next
+status: done
 repos: [organizer]
 branch: lf74-comma-other
 seat: l74-build
@@ -8,7 +8,7 @@ reviewer: l74-rev
 review: "pass (V1-V4, X0 by l74-rev; AR39, AR40 by l74-ui), 2026-11-08, 74a2c421"
 stage:
 updated: 2026-11-08
-next: "PR with talos-lab (branch lf74-comma-other pushed at 74a2c421)"
+next: ""
 depends_on: [lf73-inline-names]
 boundary: ["frontend/src/styles/runreport.css", "frontend/src/components/Rail.tsx", "frontend/src/components/FloatList.tsx", "frontend/src/lib/", "frontend/src/components/RunTracks.test.tsx", "frontend/src/components/RunTracks.lf73.test.tsx", "frontend/src/components/FloatList.test.tsx", "frontend/src/components/"]
 spec: "docs/specs/leftovers-74.md (FR-1 to FR-3)"
@@ -17,6 +17,8 @@ ui_review: true
 touches: []
 change_order: {add: [], change: [], retire: []}
 autonomy: unattended
+prs:
+  - {repo: organizer, pr: 66, target: main, state: merged, merge: c2eeb8f1}
 ---
 
 ## Goal
