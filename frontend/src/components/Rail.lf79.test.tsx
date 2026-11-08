@@ -56,3 +56,65 @@ describe("leftovers-79 V1 (FR-1, AR46): the refused field is marked while it hol
     expect(before).not.toContain("aria-invalid");
   });
 });
+
+// leftovers-79 V3 (FR-3, AR48): the visible line is plain text; the
+// announcement is a separate sr-only live region, always in the DOM and never
+// display: none, emptied and set again 100 ms later on every refusal.
+const { Rail } = await import("./Rail");
+const { SAY_GAP_MS, speaker } = await import("../lib/liveRegion");
+const shell = read("shell.css");
+const init = (id: string, client = "") => ({ id, title: id, client, machine: "m1", local: true, status: "active", now: 0, blocked: 0, next: 1, live: 0, working: 0, goal: "", decisions: [] });
+function rail(railCollapsed: boolean): string {
+  store.useBoard.setState({
+    view: { board: { initiatives: [init("a"), init("b", "acme")], columns: {} }, order: { groups: [{ name: "misc", initiatives: ["a"] }, { name: "acme", initiatives: ["b"] }] } },
+    agents: { groups: [], roles: [] },
+    selectedInitiative: null, setSelectedInitiative: () => undefined, reorderInitiatives: () => undefined,
+    setGroups: () => undefined, railCollapsed, setRailCollapsed: () => undefined, roleOpen: null,
+    openInitiatives: () => undefined, screen: "home",
+  });
+  return renderToStaticMarkup(<Rail />);
+}
+const REGION = /<span class="sr-only rail-said" role="alert" aria-live="assertive" aria-atomic="true">([^<]*)<\/span>/;
+
+describe("leftovers-79 V3 (FR-3, AR48): every refusal is announced, the same one again", () => {
+  it("empties then sets the region, twice, for two identical refusals (fake timers)", () => {
+    vi.useFakeTimers();
+    try {
+      const line = takenLine("acme", "misc");
+      const region: string[] = [];
+      const { say } = speaker((m) => region.push(m));
+      say(line);
+      expect(region).toEqual([""]);
+      vi.advanceTimersByTime(SAY_GAP_MS - 1);
+      expect(region).toEqual([""]);
+      vi.advanceTimersByTime(1);
+      expect(region).toEqual(["", line]);
+      say(line);
+      expect(region).toEqual(["", line, ""]);
+      vi.advanceTimersByTime(SAY_GAP_MS);
+      expect(region).toEqual(["", line, "", line]);
+      expect(SAY_GAP_MS).toBe(100);
+    } finally { vi.useRealTimers(); }
+  });
+  it("draws the region in the rail before any refusal, expanded and as a strip", () => {
+    for (const collapsed of [false, true]) {
+      const html = rail(collapsed);
+      expect(html.match(REGION)?.[1]).toBe("");
+      expect(html.match(new RegExp(REGION.source, "g"))).toHaveLength(1);
+    }
+  });
+  it("never hides the region with display: none", () => {
+    for (const sheet of [css, shell]) {
+      for (const m of sheet.matchAll(/([^{}]+)\{([^}]*)\}/g)) {
+        if (/\.sr-only\b|\.rail-said\b/.test(m[1])) expect(m[2]).not.toMatch(/display:\s*none/);
+      }
+    }
+    expect(rule(shell, ".sr-only")).toMatch(/position: absolute/);
+  });
+  it("keeps the visible line plain text: no role, no aria-live", () => {
+    const html = renderToStaticMarkup(<RenameField name="misc" refused={refused} onDone={() => undefined} onCancel={() => undefined} />);
+    const line = html.match(/<span id="[^"]+" class="rail-rename-line"([^>]*)>/);
+    expect(line).not.toBeNull();
+    expect(line![1]).toBe("");
+  });
+});

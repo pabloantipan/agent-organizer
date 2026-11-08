@@ -68,7 +68,7 @@ describe("leftovers-78 V5 (FR-2, AR43): the rename field after a refusal", () =>
     expect(html).toContain('value=" ACME "');
     expect(html).toContain('aria-label="Rename misc"');
     expect(html).toContain('aria-invalid="true"');
-    const line = html.match(/<span id="([^"]+)" class="rail-rename-line" role="alert" aria-live="assertive">([^<]*)<\/span>/);
+    const line = html.match(/<span id="([^"]+)" class="rail-rename-line">([^<]*)<\/span>/);
     expect(line?.[2]).toBe("A group is already called acme. Type another name, or press Escape to keep misc.");
     expect(html).toContain(`aria-describedby="${line?.[1]}"`);
   });
@@ -76,6 +76,6 @@ describe("leftovers-78 V5 (FR-2, AR43): the rename field after a refusal", () =>
     const html = renderToStaticMarkup(<RenameField name="misc" onDone={() => undefined} onCancel={() => undefined} />);
     expect(html).toContain('value="misc"');
     expect(html).not.toContain("aria-invalid");
-    expect(html).toMatch(/class="rail-rename-line" role="alert" aria-live="assertive"><\/span>/);
+    expect(html).toMatch(/class="rail-rename-line"><\/span>/);
   });
 });
