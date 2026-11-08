@@ -1,0 +1,7 @@
+id: init-blank-client
+title: Initiative Blank (client of two spaces)
+client: "  "
+status: active
+started: 2026-10-01
+machine: testbox
+repos: []
