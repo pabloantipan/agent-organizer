@@ -70,6 +70,10 @@
    pulled into the link's trailing padding, so the list reads `a, b`; a focused
    ring may touch the comma, never the name (leftovers-72 FR-1, AR35). */
 .rr-card + .rt-comma { margin-inline-start: calc(-1 * var(--space-1)); }
+/* A link after a comma is pulled in by its start padding the same way, so the
+   gap after a comma is the one space of text before a link and before plain
+   text alike (leftovers-74 FR-1; run-report Amendment 10, AR39). */
+.rt-comma + .rr-card { margin-inline-start: calc(-1 * var(--space-1)); }
 /* A link in a comma list is inline text (leftovers-73 FR-1, FR-2; run-report
    Amendment 9, AR35 amended, AR37): its ring is drawn inset, so it reaches no
    neighbour's name, and it takes no 24 px minimum (WCAG 2.5.8's inline
