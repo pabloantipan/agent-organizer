@@ -647,3 +647,24 @@ From sup117's closing on lf73-inline-names (organizer #64, 127b35c).
 |---|---|---|
 | AR39 | read a mixed list evenly | a `left` list of a link, plain text, then a link: the gap after each comma measures the same |
 | AR40 | tell the app's labels from his names | the seeded group reads `Other`; renamed to `misc`, it reads `misc` |
+
+## Amendment 11 (aglaea, 2026-11-08): renaming Other, and the no-client group
+
+From sup118's closing on lf74 (#66) and lf75 (#68).
+
+- **1, the rename field.** It opens on what the header shows, `Other`,
+  named `Rename Other`. Saving it unchanged leaves it the app's label
+  (sentence case kept by the app); any other text makes it the person's.
+- **2, the collision.** The seeded group is what it holds, initiatives
+  with no client: it reads **`No client`** and is keyed by a reserved id,
+  never by its name. A client written `other` or `Other` gets its own
+  group under that name; nothing a client is called joins or doubles it.
+  (This renames the seed from A10's `Other`; AR40 amended.)
+- **3**, `docs/ux/memory.md` fixed by me: reviewers stop a fixture with
+  `scripts/fixture-home.sh stop "$FIXTURE_DIR"`, never `pkill -f`.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| AR40 (amended) | tell the app's labels from his names | the seeded group reads `No client`; renamed to `misc`, it reads `misc` |
+| AR41 | rename what he sees | the seeded group's rename field opens on `No client`, named `Rename No client`; saved unchanged, it stays the app's |
+| AR42 | never see two groups alike | a client `other` and an initiative with no client: two groups, `other` and `No client`; a client `Other` stays out of `No client` |

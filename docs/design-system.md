@@ -545,9 +545,13 @@ drawn by one shared piece, not per place (usage A3, run-report A7). **A proper n
 a client, an initiative) never sits in an uppercased label**: a system's name in a title goes in
 the line under it (usage A2); a label that is such a name (a rail group)
 keeps the label's size, weight and colour in the name's own case
-(run-report A9). A label the app wrote (the seeded `Other` group, `Asleep`,
+(run-report A9). A label the app wrote (the seeded `No client` group, `Asleep`,
 `Archived`) is the app's words in sentence case; once the person renames
-it, it is theirs and keeps their case (run-report A10).
+it, it is theirs and keeps their case (run-report A10). A rename field opens
+on what the label shows (`No client`, named `Rename No client`); saving it
+unchanged leaves it the app's. The seeded group of initiatives with no
+client is `No client`, keyed by a reserved id, never by its name, so no
+client, whatever it is called, joins it or shares its label (A11).
 
 **A region that scrolls inside a view shows it does**: each edge with
 content hidden past it carries a 1 px `--fg-subtle` line (4.5:1, not
