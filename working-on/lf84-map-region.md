@@ -4,11 +4,11 @@ status: now
 repos: [organizer]
 branch: lf84-map-region
 seat: l84-build
-reviewer:
-review:
+reviewer: l84-rev
+review: "fail at 87bc0bd2: R1-R4 and X0 pass; FR-1 probe: an unclosed region reads the next region's block (l84-rev, 2026-11-08)"
 stage:
 updated: 2026-11-08
-next: "review: lf84-map-region, gate met (R1-R4, X0), 87bc0bd2"
+next: "R1 (FR-1): a level whose region is left open draws the next region's block; end an open region at the next c4-map:begin, or refuse it"
 depends_on: []
 boundary: ["internal/service/map.go", "internal/service/map_test.go", "testdata/fixture-map/", "CLAUDE.md"]
 spec: "docs/specs/leftovers-84.md (FR-1 to FR-3)"
@@ -57,3 +57,24 @@ Not changed, on purpose:
 
 ## Notes
 - The reader does not compare a block's `%% c4: <level>` line with its level; possible, out of this spec.
+
+## Review
+- Verdict: **fail**. Unmet: FR-1 (R1's requirement) on a probe outside the test; gate rows R1, R2, R3, R4, X0 all run and pass.
+- cause: execution
+- Reviewer l84-rev, 2026-11-08, commit 87bc0bd2 (on origin/main 513db0c6), fresh clone of origin plus the builder's branch, under `.wt-notes/l84-rev/clean`.
+
+**change-check** (`--base origin/main`): 10 files, 1 flag: `untested? map.go regionKey  no test file names it`. Explained: `regionKey` is exercised through `ReadMap` by `TestMapRegions` (both `modules <container>` keys) and the contract/harbor tests (`context`, `containers`); not a finding. Outside boundary 0, undeclared 0, declared not changed 0.
+
+**Rows**
+- R1 pass: `TestMapRegions` PASS; it DeepEquals the four levels against two different hand-written modules blocks (`twoApiBlock` vs `twoWebBlock`), each its own region's. On 513db0c6 (old map.go, new test and fixture): FAIL, both modules levels got the outside `sketch` block.
+- R2 pass: with CONTRACTS_DIR, TestMapFixture, TestMapFixtureVariants, TestMapContract (PASS, not skipped), TestMapRefuses, TestMapRemote, TestMapRegions, TestMapRegionRefuses all PASS. `git diff --stat 513db0c6..87bc0bd2 -- testdata/fixture-map/`: only `harbor-two-modules/` (6 files) and README (+1).
+- R3 pass: `TestMapRegionRefuses` 4/4 PASS with FR-2's words (`modules.md has no mermaid block in its modules web region`, `modules.md has two modules web regions`), and `wantRefused` asserts Index and Levels nil. On 513db0c6 all four FAIL (state drawn).
+- R4 pass: the CLAUDE.md diff is the Map reader line only; it names the marker region, else the page's first, and FR-2's two lines.
+- X0 pass: `make test` via `test-lease run --share` exit 0 (Go ok, vitest 1798 passed), `test-lease run -- make review-build` exit 0, `git status --porcelain` empty, diff touches only map.go, map_test.go, testdata/fixture-map/, CLAUDE.md. Environment note: `npm ci` refuses (no package-lock; the frontend is pnpm), installed with `test-lease run -- pnpm install --frozen-lockfile` as the Makefile does.
+
+**Probes** (throwaway test, removed; kept at `.wt-notes/l84-rev/zz_l84rev_test.go.txt`, output `probes.txt`)
+- Organizer's own `docs/architecture/` (origin/main): drawn; agent_organizer's source is `flowchart LR` / `%% c4: modules agent_organizer`, deltagos_webview's `%% c4: modules deltagos_webview`, neither holds the other's. Pass.
+- No markers: first block, as before. Pass. Extra spaces (`<!--c4-map:begin   modules    harbor_api-->`): read right. Pass. Containers level on a page with a containers region after a modules block: its region's block. Pass.
+- **Finding (blocking, FR-1, goes to this card):** modules.md = `<!-- c4-map:begin modules harbor_api -->`, `text`, `<!-- c4-map:begin modules web -->`, web's block, `<!-- c4-map:end modules web -->` (harbor_api's region never closed) → state `drawn`, level `modules harbor_api` source `flowchart LR\n    %% c4: modules web\n    w\n`: web's block drawn as harbor_api, silently. `levelBlock` keeps reading the open region through another key's begin marker. Fix: an open region ends at the next `c4-map:begin`, or the level is refused.
+- Note (spec, goes to the FSE for leftovers-84): FR-1's fallback takes the page's first block even when it sits inside another level's region: modules.md with only a `modules web` region, harbor_api level → web's block; context.md whose first block is in a `modules x` region → context draws `%% c4: modules x`. Spec-conformant, so not held against the card; an amendment could skip blocks inside other regions.
+- Note (goes to this card, optional): a marker line inside a plain ``` fence counts as a marker (a fenced example of `begin modules harbor_api` gave "two modules harbor_api regions"). c4-map never writes that.
