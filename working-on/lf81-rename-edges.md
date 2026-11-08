@@ -82,6 +82,28 @@ Notes (do not fail the card):
 - Note → sup123: `research.md` was not written before the global.css edit (build-seat); the builder says so and lists the rule's readers in progress.md.
 - Note → FSE: the spec's Boundary names Rail.tsx, railGroup.ts and liveRegion.ts, not the new `lib/railRename.ts`; the card's boundary (`frontend/src/lib/`) covers it.
 
+## UI review
+**Verdict: pass.** Commit reviewed 8cbff45c. Rows unmet: none (AR51, AR52, AR53 met). Sev 4/3: none. Reviewer l81-ui, 2026-11-08.
+
+How checked: **offscreen** for every row. `CGSSessionScreenIsLocked` was true at start, so the rows ran in the l80-ui WKWebView harness (copied to `.wt-notes/l81-ui/`, window never ordered in, no system input) against `wails dev` of my detached worktree at 8cbff45c, real bindings over the default fixture (`eval "$(scripts/fixture-home.sh)"` in the launching shell; `ORGANIZER_CONFIG` and `XDG_DATA_HOME` both under `/private/tmp/organizer-fixture.zNF8KJ`, no firebase). Not AX of a review build: the AX frames and AXFocusedUIElement asked for are read as DOM rects and `document.activeElement` instead; the collapse is the app's own in-rail toggle by `click()` (no mousedown, as AXPress), never the floating icon. `make review-build` exit 0 but not launched. Raw output `h-1024x640.txt`, `h2-1024x640.txt`, `h-main-1024x640.txt`; shots under `.wt-notes/l81-ui/shots/`.
+
+Shared test run: **reused**, `test-lease: reused run e08753b6-34388 of 8cbff45ca844 by organizer-probe-l81-rev`, exit 0 (`x0-make-test.log`).
+
+- **AR51 met** (`1024x640-AR51-refused.png`, `-AR51-collapsed.png`, `-AR51-expanded.png`). Refusal "A group is already called acme. … keep misc." in the line and the announcer; collapse by the toggle: announcer `""` right after, at 200 ms and at 400 ms; field gone; focus `button.strip-toggle` "expand the rail" (aria-label Initiatives rail, focus ring visible). Expanded: `misc` stands, no field, no line. Pending set (collapse 30 ms after the refusal): MutationObserver log `[[527, refusal], [923, ""]]`, nothing after. The code reviewer's blur note: unrefused `zzz` typed then collapse, and a refused `acme` retyped in the focused field then collapse: on expand `misc` stands, announcer `""` both times, so the field's removal neither saved nor refused (WebKit fires no blur on it). Main c481a3a3 (`-AR51-main-collapsed.png`): the announcer keeps the refusal after the collapse, focus drops to body, and expanding brings back the open field with its refusal.
+- **AR52 met** (`1024x640-AR52-refused.png`, `-AR52-rest.png`). Three-line refusal (`No client`): head `align-items: flex-start`, field top 556, chevron top 556, the `· 7` count on the field's row; the line runs 586-634. The ⋯ is not rendered while renaming (as before), so the head's tools during the rename are chevron and count. Main: chevron top 581, mid-way down the 88 px block.
+- **AR53 met** (`1024x640-AR53-refused.png`, `-AR53-refused-30label.png`). 60-character name refused against `acme`: line "… press Escape to keep Initiatives of the south…." (24 + `…`), sentence whole, 4 lines, 180 px wide; announcer holds the 60 characters whole. 60 against a 30-character label (`Work for the acme client, east`): both cut at 24 with `…`, rest whole, 4 lines; announcer both whole. The cut reads as a cut: a real `…` glyph, no clipped letter (`overflow: visible`, scrollWidth = clientWidth 180).
+- Design system: line `--danger` rgb(255,77,99) on the rail rgb(18,14,25), 5.9:1 at 11/16 px; tier-2 tokens only in the changed rule; sentence case. Announcer is `sr-only` (absolute, 1×1, clip 0): no shift seen in any shot.
+
+Findings (none fails the card):
+1. Head at rest sits slightly off the ⋯. Who: anyone scanning group heads. Where: `1024x640-AR52-rest.png`, `misc · 7` head. Evidence: name 398-418 (centre 408), ⋯ 398-422 (410), chevron box 398-426 (412); the builder's Found, not asked, and l81-rev's note. Severity 1: about 2 px between text and ⋯ centres, the chevron glyph a little lower; not visible as misalignment at 1024. Proposal: none now; if Aglaea wants it, a 24 px line box for chevron and title.
+2. Ellipsis meets the sentence's full stop. Who: the reader of the line. Where: `1024x640-AR53-refused-30label.png`, "client…." and "south….". Evidence: `cutName` + the sentence's own period gives four dots. Severity 1. Proposal: for aglaea, below.
+
+Spec gaps (for the FSE): none new; l81-rev's code-point vs grapheme note stands (not checked on screen).
+
+For aglaea (design questions, not verified): (a) the cut name followed by the sentence's period reads "…." — keep, or drop the period after a cut? (b) at rest, chevron and name ~2-4 px above the ⋯ centre with flex-start — acceptable, or a 24 px line box?
+
+Not verified: the review build by AX (screen locked); AR52/AR53 frames as AX frames rather than DOM rects.
+
 ## Notes
 - The cut also applies to the other group's label (the spec says "each name"); a label ≤ 24 shows whole.
 
