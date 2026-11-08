@@ -1,6 +1,6 @@
 ---
 title: "The no-client group reads No client and is the app's by key, not by name"
-status: next
+status: now
 repos: [organizer]
 branch: lf77-no-client
 seat: l77-build
@@ -8,7 +8,7 @@ reviewer:
 review:
 stage:
 updated: 2026-11-08
-next: "sup119 runs it (0190)"
+next: "l77-build builds it (sup119)"
 depends_on: [lf74-comma-other, lf75-fixture-stop]
 boundary: ["internal/model/model.go", "internal/model/", "frontend/wailsjs/", "frontend/src/lib/", "frontend/src/components/Rail.tsx", "frontend/src/components/FloatList.tsx", "frontend/src/components/", "testdata/fixture-overlay/", "scripts/floating-icon-by-hand.sh"]
 spec: "docs/specs/leftovers-77.md (FR-1 to FR-6)"
