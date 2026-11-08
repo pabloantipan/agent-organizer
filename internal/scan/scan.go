@@ -130,6 +130,8 @@ func ReadInitiative(root string, opts Options) model.ScannedInitiative {
 	if err := yamlUnmarshal(b, &si.Initiative); err != nil {
 		si.Problems = append(si.Problems, model.UnreadProblem(filepath.Join(wo, initiativeFile), "initiative.yaml: "+err.Error()))
 	}
+	// A client blank or only spaces is no client (leftovers-78 FR-4, AR45).
+	si.Client = strings.TrimSpace(si.Client)
 	si.Path = root
 	si.AsleepSince = asleepSince(b)
 	if si.ID == "" {
