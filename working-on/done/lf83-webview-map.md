@@ -1,6 +1,6 @@
 ---
 title: "The React app is on the organizer's own map, with its modules"
-status: now
+status: done
 repos: [organizer]
 branch: lf83-webview-map
 seat: l83-map
