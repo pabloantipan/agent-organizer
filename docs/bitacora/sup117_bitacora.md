@@ -16,3 +16,7 @@ State:
 Next action on resume: `seat-thaw organizer-probe-l73-ui`, wait ~30 s, read its pane, and if it waits at the prompt write-chars "Resume the UI review where you stopped." + Enter. On its pass: push the branch, post `[for talos-lab] PR lf73-inline-names` to talos-lab, set card `next: "PR with talos-lab"`. On talos-lab's merge sha: card to done/, retire l73-build and l73-ui (probe -k, token rm, preludes), close threads, fill run record (cost from `organizer runs`), closing post to fse.
 
 Findings to place (run record `findings:`): uneven comma-to-glyph gap (to aglaea); FloatList.tsx:216-217 comment still `Asleep (n)` (to fse); V2 regex misses `({n})`, template and `&#40;` forms (to fse); Review Worklist group head has no unit test (AR38 covers on screen).
+
+## 2026-11-08 01:30, closed
+
+Resumed after the pause; l73-ui passed at ba9f59f; talos-lab merged organizer #64, 127b35c (cards #63 c048a8d). Card in done/ (cf00a09). All three seats retired, tokens revoked, task threads closed. Run record `runs/2026-11-02-sup117-leftovers-73.md` complete (rounds, findings, cost $10.57 for seats). Closing report posted to fse. Nothing open.
