@@ -1,6 +1,6 @@
 ---
 title: "Collapsing closes the rename, the head's tools sit at the top, long names are cut in the line"
-status: next
+status: now
 repos: [organizer]
 branch: lf81-rename-edges
 seat: l81-build
@@ -8,7 +8,7 @@ reviewer:
 review:
 stage:
 updated: 2026-11-08
-next: "sup123 runs it (0194)"
+next: "l81-build builds it (sup123, launched 2026-11-08)"
 depends_on: [lf80-refusal-close]
 boundary: ["frontend/src/components/Rail.tsx", "frontend/src/lib/railGroup.ts", "frontend/src/lib/liveRegion.ts", "frontend/src/lib/", "frontend/src/styles/global.css", "frontend/src/components/"]
 spec: "docs/specs/leftovers-81.md (FR-1 to FR-3)"
