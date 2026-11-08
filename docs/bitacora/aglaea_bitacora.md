@@ -243,3 +243,4 @@ resumes. The seat moves to the new discuss watcher (wake-rearm, api
 - 2026-11-08 — lf73 notes (FSE thread 01M6WPZ6PH316NEE3CWJ13R2AA): run-report A10 (AR39-40), comma gap and the app's own labels in sentence case.
 - 2026-11-08 — lf74/75 notes (FSE thread 01M6X3B927JTG6159Z5RJ6HFZG): run-report A11 (AR40 amended, AR41-42), seed group 'No client' keyed by id; memory.md fixture stop line fixed.
 - 2026-11-08 — lf77 edges (FSE thread 01M6X53WAD6VR4RS6XEFMFYJYF): run-report A12 (AR43-45), seed yields on a 'No client' client, rename refuses a shown name, blank client is none.
+- 2026-11-08 — lf78 refused field (FSE thread 01M6X6Y7ZGNNZB1XKRMEFMS1Z4): run-report A13 (AR46-48); design system: Refused field.

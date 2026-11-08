@@ -689,3 +689,24 @@ From sup119's closing on lf77 (#72).
 | AR43 | never see two groups alike | a client `No client` and an initiative with none: `No client` and `Initiatives with no client`; Rename on any group to an existing group's name is refused in place with that line |
 | AR44 | undo a rename | the seed renamed `misc`, then `No client`: nothing stored, the app's label back |
 | AR45 | not get a blank group | an initiative with client `"  "` sits in the seed; no group has a blank header |
+
+## Amendment 13 (aglaea, 2026-11-08): the refused rename field
+
+From sup120's UI review of lf78 (#74; offscreen, VoiceOver not run).
+
+- **A1**: the refused field shows it: `aria-invalid="true"` and a 2 px
+  `--status-blocked` border, while it holds the refused text. Red is right
+  here: what was typed is blocked from going through; the words say why.
+- **A2**: the line says how to leave: `A group is already called No
+  client. Type another name, or press Escape to keep misc.` (the current
+  name last).
+- **A3**: the visible line stays; the announcement is a separate sr-only
+  live region, always in the DOM, emptied and set again 100 ms on per
+  refusal (the design system's rule), so an identical refusal is said
+  again. New design-system entry: Refused field.
+
+| # | Pablo can | Checked by |
+|---|---|---|
+| AR46 | see which field was refused | after a refused rename: the field's border is 2 px `--status-blocked` and `aria-invalid="true"`; typing a new name clears both |
+| AR47 | know how to get out | the line reads `A group is already called No client. Type another name, or press Escape to keep misc.`; Escape restores `misc` and closes the field |
+| AR48 | hear every refusal | the same refused name pressed twice: the live region is emptied and set twice (vitest with fake timers); the region is never `display: none` |

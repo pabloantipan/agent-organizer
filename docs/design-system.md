@@ -421,6 +421,15 @@ keeps their place.
   so no drawn fact goes unsaid. A button that changes the view in place
   keeps focus. A menu item that can never act where it stands is left out,
   not dimmed (tab-reaches-links A2).
+- **Refused field** (a press the app refuses, the input kept): the field
+  is `aria-invalid="true"`, its border 2 px `--status-blocked` (what was
+  typed cannot go through: that is blocked), `aria-describedby` to the
+  refusal line under it, which says why and how to leave (`… Type another
+  name, or press Escape to keep …`). The visible line stays while the
+  field holds that text (never emptied, so it does not blink); the
+  announcement goes through an sr-only live region that is always in the
+  DOM (never `display: none`), emptied and set again 100 ms on, so a
+  repeated refusal is said again (run-report A13).
 - **The newest answer wins, and focus never drops**: when a press returns
   something fresher than the feed, the view shows the press's answer at
   once and the feed catches up. A screen-reader-only live region says a
@@ -553,7 +562,8 @@ unchanged leaves it the app's. The seeded group of initiatives with no
 client is `No client`, keyed by a reserved id, never by its name, so no
 client, whatever it is called, joins it (A11). Two groups never read
 alike: a rename refuses a name another group shows (trimmed, any case:
-`A group is already called …`); renaming the seed to its own label gives
+`A group is already called …. Type another name, or press Escape to keep
+…`; see Refused field); renaming the seed to its own label gives
 it back the app's label, nothing stored; and when a client is itself
 called `No client`, the seed reads `Initiatives with no client`. A client
 that is blank or only spaces is no client (A12).
