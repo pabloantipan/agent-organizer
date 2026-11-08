@@ -26,6 +26,8 @@ restating it (the discuss skill).
 
 ## 2026-11-01 (day log, the earlier hand-off and what followed)
 
+- 02:44 safe-kill --pidfile installed; lf75 added to sup118's prompt after lf74 (one supervisor for both, memory tight). Argos reads 0187's 30-60m as sup118's band: extend +60m when it fires, why 'lf75 added (0188)'. Outage flag still set (swap 92%), no 'over' yet: still holding.
+
 - 02:22 0188 ruled by default (leftovers 75, lf75-fixture-stop: `fixture-home.sh stop <dir>` through safe-kill --pidfile, Hephaistos's ask). Memory outage since 02:14 (swap 95%). On 'memory outage over': launch sup118 (lf74, prompt and prelude ready, token added); add lf75 to a supervisor only once safe-kill --pidfile is installed (`safe-kill --help` shows it).
 
 - 01:48 0187 ruled by default (leftovers 74, lf74-comma-other: AR39 comma gap, AR40 'Other'). sup118 prompt and prelude written (token added), launch refused: memory outage flag set, swap 97%. Launch nothing until 'memory outage over'; then the same probe line. Hephaistos answered all seven asks: carded c4-map-stamp-grounded (holds the map regen), reparented-stand-ins-stop (safe-kill --pidfile; then I cut `fixture-home.sh stop` reading $tmp/agents.pid, his ask), seat-pointer-dock-window (lf55 H3 stays blocked), argos-auto-mode-unavailable; change-check reads .m/.h/.mm; forecast extend allows a second extension. Installed v0.2.0-3581 (lf73).
