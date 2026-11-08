@@ -5,8 +5,9 @@
 # FSE-signed commits, and writes a config whose only root is the copy. Never
 # points at the real home.
 #
-#   eval "$(scripts/fixture-home.sh)"      # exports ORGANIZER_CONFIG, XDG_DATA_HOME, FIXTURE_HOME
+#   eval "$(scripts/fixture-home.sh)"      # exports ORGANIZER_CONFIG, XDG_DATA_HOME, FIXTURE_HOME, FIXTURE_DIR
 #   wails dev -devserver localhost:34115
+#   scripts/fixture-home.sh stop "$FIXTURE_DIR" && rm -rf "$FIXTURE_DIR"   # when done
 #
 #   eval "$(scripts/fixture-home.sh --twenty)"   # twenty initiatives instead
 #   eval "$(scripts/fixture-home.sh --live-mailbox)"  # init-a's health from discuss
@@ -15,6 +16,16 @@
 #   eval "$(scripts/fixture-home.sh --memory critical)"  # memory forced, with any of the above
 #   eval "$(scripts/fixture-home.sh --review)"   # the default home plus a card to review
 #   eval "$(scripts/fixture-home.sh --review --canned-post)"  # posts go to $tmp/posts.jsonl
+#   scripts/fixture-home.sh stop <dir>     # stops that fixture's stand-in agents
+#
+# Stop (docs/specs/leftovers-75.md FR-1, FR-2): every form exports
+# FIXTURE_DIR, the temp dir it laid. Its stand-in agents sleep 6 h and outlive
+# the dir unless stopped, so run `scripts/fixture-home.sh stop "$FIXTURE_DIR"`
+# before removing it. stop runs `safe-kill --pidfile <dir>/agents.pid`, which
+# signals only the pids listed there whose executable lives in that dir, and
+# exits with its status; an empty agents.pid (--empty) is exit 0. It refuses
+# (exit 2, nothing stopped) a dir not named organizer-fixture.* or without
+# agents.pid, and it never removes the dir: that is yours, after the stop.
 #
 # The mailbox (docs/specs/leftovers-41.md FR-13, FR-14): the default home,
 # --review and --groups write discuss_state_dir: $tmp/discuss, an empty
@@ -74,7 +85,7 @@
 # would give it; organizer-fixture-probe-sup9 has no AGENT_NAME, so its row
 # says "no identity". --live-mailbox drops canned_health and reads every
 # thread from the real discuss as it is. Either way the
-# stand-ins are in FIXTURE_AGENT_PIDS; `kill $FIXTURE_AGENT_PIDS` ends them.
+# stand-ins are listed in $FIXTURE_DIR/agents.pid; stop (above) ends them.
 #
 # Needs me has 15 rows in the default home, with or without discuss: the 14
 # of leftovers-11 V1 (see asking_thread's call below) and init-a's stalled
@@ -97,8 +108,8 @@
 # Executing cannot come from files: the scan reads it from the process table.
 # So the script starts one stand-in agent per line of fixture-twenty/agents.txt,
 # a process named after the config's agent_binary, with its cwd in the
-# card's .wt/<slug>, and the real scan joins it to the card. It also exports
-# FIXTURE_AGENT_PIDS; `kill $FIXTURE_AGENT_PIDS` ends them (they sleep 6 h).
+# card's .wt/<slug>, and the real scan joins it to the card. They sleep 6 h;
+# stop (above) ends them.
 # zellij, the probe layouts and discuss are pointed away in that config, so
 # nothing of this machine leaks into the fixture.
 #
@@ -110,7 +121,7 @@
 # §3) can be shown: the config's only root is an empty directory, and
 # zellij, the probe layouts and discuss are pointed away as in --twenty. It
 # starts no stand-in agent, since there is no initiative to put one in;
-# FIXTURE_AGENT_PIDS is exported empty, so there is nothing to kill.
+# its agents.pid is empty, so stop exits 0 with nothing to stop.
 #
 # Usage (docs/specs/usage.md U1-U8): the default home also carries a usage
 # history, laid by testdata/fixture-usage/usage.py: synthetic transcripts
@@ -157,6 +168,15 @@
 # not on disk; the supervisor posted it once. Ruling it or the records only
 # touches this temp copy.
 set -euo pipefail
+
+# stop <dir> (FR-1): the dir's own stand-ins through safe-kill --pidfile.
+if [ "${1:-}" = stop ]; then
+  [ $# -eq 2 ] && [ -n "$2" ] || { echo "fixture-home: usage: fixture-home.sh stop <organizer-fixture.* dir>; nothing stopped" >&2; exit 2; }
+  d="${2%/}"
+  case "$(basename "$d")" in organizer-fixture.*) ;; *) echo "fixture-home: stop refuses $2: not an organizer-fixture.* dir; nothing stopped" >&2; exit 2 ;; esac
+  [ -f "$d/agents.pid" ] || { echo "fixture-home: stop refuses $2: no agents.pid there; nothing stopped" >&2; exit 2; }
+  exec safe-kill --pidfile "$d/agents.pid"
+fi
 
 # --memory <level> is taken out of the options wherever it is; the rest
 # keep their place.
@@ -338,6 +358,7 @@ EOF
   echo "export XDG_DATA_HOME='$tmp/data'"
   echo "export CLAUDE_CONFIG_DIR='$tmp/claude'"
   echo "export FIXTURE_HOME='$home'"
+  echo "export FIXTURE_DIR='$tmp'"
   echo "export FIXTURE_AGENT_PIDS='${pids# }'"
   exit 0
 fi
@@ -362,6 +383,7 @@ EOF
   echo "export XDG_DATA_HOME='$tmp/data'"
   echo "export CLAUDE_CONFIG_DIR='$tmp/claude'"
   echo "export FIXTURE_HOME='$home'"
+  echo "export FIXTURE_DIR='$tmp'"
   echo "export FIXTURE_AGENT_PIDS=''"
   exit 0
 fi
@@ -722,6 +744,7 @@ echo "export ORGANIZER_CONFIG='$tmp/config.yaml'"
 echo "export XDG_DATA_HOME='$tmp/data'"
 echo "export CLAUDE_CONFIG_DIR='$tmp/claude'"
 echo "export FIXTURE_HOME='$home'"
+echo "export FIXTURE_DIR='$tmp'"
 echo "export FIXTURE_AGENT_PIDS='${pids# }'"
 echo "export FIXTURE_FACTORY_DIR='$fd'"
 echo "export PATH='$fd/bin':\"\$PATH\""
