@@ -26,9 +26,13 @@
 # $CONTRACTS_DIR/factory-report/make-fixture.sh (a read-only checkout of
 # agent-mailbox-specs). It refuses unless ORGANIZER_CONFIG and XDG_DATA_HOME
 # sit under the fixture's temp dir and auth is off, writes <label>.pid (the
-# app: the script execs it), <label>.env, <label>.agents.pids (the fixture's
-# stand-in agents, to stop by pid after) and <label>.log, and never touches
-# the real home. Run it as a background task so its pid is yours to stop.
+# app: the script execs it), <label>.env (the fixture's exports, FIXTURE_DIR
+# among them) and <label>.log, and never touches the real home; the fixture's
+# stand-in agents are listed only in $FIXTURE_DIR/agents.pid, inside the temp
+# dir (leftovers-75 FR-3). Run it as a background task so its pid is yours to
+# stop. After: stop the app by <label>.pid, then the stand-ins with
+# `scripts/fixture-home.sh stop "$FIXTURE_DIR"` (FIXTURE_DIR from
+# <label>.env), and only then remove the dir.
 set -euo pipefail
 [ $# -ge 2 ] || { echo "usage: launch.sh <notes dir> <label> [--no-record] [--rejected] [--wide-slug] [--resize WxH@S]" >&2; exit 2; }
 N=$1; label=$2; shift 2
@@ -70,11 +74,11 @@ source "$D/env.sh"
 out=$("$repo/scripts/fixture-home.sh" 2>"$N/$label.fixture.err")
 eval "$out"
 tmp=$(dirname "$ORGANIZER_CONFIG")
+[ "${FIXTURE_DIR:-}" = "$tmp" ] || { echo "refused: FIXTURE_DIR ${FIXTURE_DIR:-unset} is not $tmp" >&2; exit 1; }
 case "$(basename "$tmp")" in organizer-fixture.*) ;; *) echo "refused: config $ORGANIZER_CONFIG not under a fixture dir" >&2; exit 1;; esac
 case "$XDG_DATA_HOME" in "$tmp"/*) ;; *) echo "refused: XDG_DATA_HOME $XDG_DATA_HOME not under $tmp" >&2; exit 1;; esac
 if grep -q '^auth:' "$ORGANIZER_CONFIG" && ! grep -q '^auth: off' "$ORGANIZER_CONFIG"; then echo "refused: auth is not off" >&2; exit 1; fi
 echo "$out" | grep -v TOKEN > "$N/$label.env"
-echo "${FIXTURE_AGENT_PIDS:-}" > "$N/$label.agents.pids"
 python3 -I - "$ORGANIZER_CONFIG" "$D" <<'PY'
 import sys
 p, d = sys.argv[1], sys.argv[2]
