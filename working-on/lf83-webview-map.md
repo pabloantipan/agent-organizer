@@ -1,6 +1,6 @@
 ---
 title: "The React app is on the organizer's own map, with its modules"
-status: next
+status: now
 repos: [organizer]
 branch: lf83-webview-map
 seat: l83-map
@@ -8,7 +8,7 @@ reviewer:
 review:
 stage:
 updated: 2026-11-08
-next: "sup125 runs it (0196)"
+next: "l83-map builds it on lf83-webview-map from origin/main 03f7d9b3 (sup125)"
 depends_on: [lf76-map-regen]
 boundary: ["docs/architecture/", "scripts/c4-adapter-webview"]
 spec: "docs/specs/leftovers-83.md (FR-1 to FR-3)"
