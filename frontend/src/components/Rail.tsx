@@ -8,7 +8,7 @@ import { inactiveIds } from "../lib/queue";
 import { foldName, sleepyOf, sleepyWord } from "../lib/initiatives";
 import { stripFolds } from "../lib/folds";
 import { placeOf } from "../lib/place";
-import { clientGroups, railGroupLabel, renameGroup } from "../lib/railGroup";
+import { clientGroups, railGroupLabel, renameGroup, savedGroups } from "../lib/railGroup";
 import { useBoard, type Screen } from "../stores/board.store";
 import { CellStateLz, definitionWaits } from "./Crew";
 import { missingPersonas } from "../lib/queue";
@@ -114,8 +114,11 @@ export function Rail() {
     try { localStorage.setItem("rail.collapsed", JSON.stringify(next)); } catch { /* per-viewer convenience only */ }
   };
 
-  // Saving the groups keeps each one's seed (leftovers-77 FR-1).
-  const persist = (next: Group[]) => setGroups(next.map((g) => ({ name: g.name, initiatives: g.initiatives ?? [], ...(g.seed ? { seed: g.seed } : {}) })) as Group[]);
+  // Saving the groups keeps each one's seed and writes a group stored before
+  // the seed (`other` or `Other` holding only initiatives with no client) as
+  // the seed (leftovers-77 FR-1, FR-4); nothing is rewritten on read.
+  const clientOf = (id: string) => (byId.has(id) ? byId.get(id)!.client ?? "" : undefined);
+  const persist = (next: Group[]) => setGroups(savedGroups(next, clientOf) as Group[]);
 
   const onDragEnd = (r: DropResult) => {
     if (!r.destination) return;

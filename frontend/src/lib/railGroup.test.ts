@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clientGroups, NO_CLIENT, railGroupLabel, renameGroup, SEED_NO_CLIENT } from "./railGroup";
+import { clientGroups, NO_CLIENT, railGroupLabel, renameGroup, savedGroups, SEED_NO_CLIENT } from "./railGroup";
 
 const fs: { readFileSync(p: string, enc: "utf8"): string; readdirSync(p: string, o: { recursive: true }): string[] } = await import("node:" + "fs");
 
@@ -56,6 +56,31 @@ describe("leftovers-77 V3 (FR-3, AR41): saving the rename field", () => {
   it("renames a person's group as before", () => {
     expect(renameGroup(groups, 0, "acme")).toBeNull();
     expect(renameGroup(groups, 0, "Acme")).toEqual([{ name: "Acme", initiatives: ["a"] }, groups[1]]);
+  });
+});
+
+// leftovers-77 V4 (FR-4): a group stored before the seed, named exactly
+// `other` or `Other`, whose every initiative has no client, is saved as the
+// seed; any other group is saved as stored.
+describe("leftovers-77 V4 (FR-4): the legacy seed is rewritten when the groups are saved", () => {
+  const clientOf = (id: string) => ({ n1: "", n2: "", o: "Other", w: "other", k: "acme" } as Record<string, string>)[id];
+  it("saves a stored other holding only no-client initiatives as the seed", () => {
+    expect(savedGroups([{ name: "other", initiatives: ["n1", "n2"] }], clientOf)).toEqual([{ name: "", seed: SEED_NO_CLIENT, initiatives: ["n1", "n2"] }]);
+    expect(savedGroups([{ name: "Other", initiatives: ["n1"] }], clientOf)).toEqual([{ name: "", seed: SEED_NO_CLIENT, initiatives: ["n1"] }]);
+  });
+  it("leaves a stored Other holding a client Other initiative unchanged", () => {
+    expect(savedGroups([{ name: "Other", initiatives: ["o"] }], clientOf)).toEqual([{ name: "Other", initiatives: ["o"] }]);
+    expect(savedGroups([{ name: "other", initiatives: ["w", "n1"] }], clientOf)).toEqual([{ name: "other", initiatives: ["w", "n1"] }]);
+  });
+  it("leaves every other group, a seeded one, an empty other and an unknown member as stored", () => {
+    const keep = [
+      { name: "misc", initiatives: ["n1"] }, { name: "OTHER", initiatives: ["n2"] }, { name: "other", initiatives: [] },
+      { name: "other", initiatives: ["gone"] }, { name: "misc", seed: SEED_NO_CLIENT, initiatives: ["n1"] },
+    ];
+    expect(savedGroups(keep, clientOf)).toEqual(keep);
+  });
+  it("drops every field but name, initiatives and seed", () => {
+    expect(savedGroups([{ name: "acme", initiatives: ["k"], extra: 1 } as never], clientOf)).toEqual([{ name: "acme", initiatives: ["k"] }]);
   });
 });
 

@@ -43,3 +43,18 @@ export function renameGroup<G extends RailGroup>(groups: G[], i: number, value: 
   if (!n || n === railGroupLabel(groups[i])) return null;
   return groups.map((g, j) => (j === i ? { ...g, name: n } : g));
 }
+
+/** The groups as they are saved: name, initiatives and seed only; and a
+ *  group stored before the seed existed, named exactly `other` or `Other`,
+ *  whose members are all known and all without a client, saved as the seed
+ *  with an empty name (leftovers-77 FR-4). Any other group is saved as
+ *  stored. Nothing calls this on read: it runs only when the groups are
+ *  saved. `clientOf` answers undefined for an initiative it does not know. */
+export function savedGroups(groups: RailGroup[], clientOf: (id: string) => string | undefined): RailGroup[] {
+  return groups.map((g) => {
+    const initiatives = g.initiatives ?? [];
+    const legacy = !g.seed && (g.name === "other" || g.name === "Other") && initiatives.length > 0 && initiatives.every((id) => clientOf(id) === "");
+    if (legacy) return { name: "", seed: SEED_NO_CLIENT, initiatives };
+    return g.seed ? { name: g.name, initiatives, seed: g.seed } : { name: g.name, initiatives };
+  });
+}
