@@ -1,6 +1,6 @@
 ---
 title: "The map reader draws each level's own diagram from a shared page"
-status: next
+status: now
 repos: [organizer]
 branch: lf84-map-region
 seat: l84-build
@@ -8,7 +8,7 @@ reviewer:
 review:
 stage:
 updated: 2026-11-08
-next: "sup126 runs it (0197)"
+next: "l84-build builds it in .wt/lf84-map-region from origin/main 513db0c6 (sup126)"
 depends_on: []
 boundary: ["internal/service/map.go", "internal/service/map_test.go", "testdata/fixture-map/", "CLAUDE.md"]
 spec: "docs/specs/leftovers-84.md (FR-1 to FR-3)"
