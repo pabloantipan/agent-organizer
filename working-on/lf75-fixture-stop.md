@@ -8,7 +8,7 @@ reviewer:
 review:
 stage:
 updated: 2026-11-08
-next: "sup118 runs it after lf74 (0188); safe-kill --pidfile installed; launch waits on the memory outage"
+next: "sup118 runs it after lf74 (0188); safe-kill --pidfile installed; launched"
 depends_on: [agent-slack/reparented-stand-ins-stop]
 boundary: ["scripts/fixture-home.sh", "testdata/fixture-report/launch.sh"]
 spec: "docs/specs/leftovers-75.md (FR-1 to FR-3)"
