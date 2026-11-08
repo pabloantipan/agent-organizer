@@ -240,3 +240,4 @@ resumes. The seat moves to the new discuss watcher (wake-rearm, api
 - 2026-11-02 — lf72 UI questions (FSE thread 01M6EPBMMDHDDYHCRV76D92Z27): run-report A9 (AR35 amended, AR37-38); design system: comma-list links inset ring and inline exception, no (N), names people gave keep their case.
 - 2026-11-02 — cell paused by Pablo; hand-off written at the top.
 - 2026-11-08 — cell resumed (Pablo: 'Unfreeze all initiatives and go on'; Hestia first). Nothing of mine open.
+- 2026-11-08 — lf73 notes (FSE thread 01M6WPZ6PH316NEE3CWJ13R2AA): run-report A10 (AR39-40), comma gap and the app's own labels in sentence case.
