@@ -1,6 +1,6 @@
 # Leftovers 84: the map reader picks each level's own diagram on a shared page: the build spec
 
-status: proposed (0197)
+status: accepted (0197, ruled 2026-11-08)
 by: the FSE, 2026-11-08, on main at c398f958
 sources: l83-map's note on lf83-webview-map (sup125, branch at d0f6780a):
 `modules.md` now holds two modules regions, and Deltagos's map reader

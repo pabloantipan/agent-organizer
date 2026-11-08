@@ -8,7 +8,7 @@ reviewer:
 review:
 stage:
 updated: 2026-11-08
-next: "waits on 0197 (accept leftovers 84)"
+next: "sup126 runs it (0197)"
 depends_on: []
 boundary: ["internal/service/map.go", "internal/service/map_test.go", "testdata/fixture-map/", "CLAUDE.md"]
 spec: "docs/specs/leftovers-84.md (FR-1 to FR-3)"
