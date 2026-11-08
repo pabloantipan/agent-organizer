@@ -8,7 +8,7 @@ reviewer:
 review:
 stage:
 updated: 2026-11-08
-next: "sup118 runs it after lf74 and lf75 (0189); launched"
+next: "l76-map regenerating from origin/main 46fc597e (sup118, launched 05:05)"
 depends_on: []
 boundary: ["docs/architecture/"]
 spec: "docs/specs/leftovers-76.md (FR-1)"
