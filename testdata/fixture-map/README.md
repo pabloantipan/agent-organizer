@@ -11,6 +11,7 @@ folder name.
 | `harbor-ungrounded` | `mail_relay` (L2) with no grounding row: `kind` and `status` null, `grounding` `[]` (its table row removed too) | M4 |
 | `harbor-v2` | `schema: c4-map/2`, otherwise harbor | R2, M5 |
 | `harbor-nomap` | no `docs/architecture/` at all | R2, M5 (the empty state) |
+| `harbor-two-modules` | one `modules.md` holding two regions, `modules harbor_api` and `modules web`, after a block outside every region; `map.json` lists both modules levels (leftovers-84) | leftovers-84 R1 |
 
 Every root also carries record `0001`, which grounds the context map's
 `harbor` node. The variants' `map.json` say their own id in `initiative`.

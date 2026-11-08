@@ -15,8 +15,9 @@ import (
 // The map reader (docs/specs/leftovers-58.md FR-1 to FR-3, 0174): an
 // initiative's C4 base map as c4-map gen writes it, docs/architecture/
 // map.json (agent-mailbox-specs contracts/c4-map/, c4-map/1) plus, per
-// level, the first mermaid block of its page. Deltagos computes nothing
-// from it and draws a map whole or not at all.
+// level, the mermaid block inside that level's marker region of its page,
+// else the page's first block (leftovers-84 FR-1). Deltagos computes
+// nothing from it and draws a map whole or not at all.
 
 // MapSchema is the one map.json schema this Deltagos reads.
 const MapSchema = "c4-map/1"
@@ -43,7 +44,8 @@ type MapResult struct {
 }
 
 // MapLevelSource is one level's mermaid source: the first ```mermaid block
-// of its page, the lines between the fences, unchanged.
+// inside the level's marker region of its page, else the page's first, the
+// lines between the fences, unchanged.
 type MapLevelSource struct {
 	Level     string `json:"level"`
 	Page      string `json:"page"`
@@ -184,13 +186,97 @@ func ReadMap(root string) MapResult {
 		if err != nil {
 			return mapRefused("%s cannot be read: %v", l.Page, err)
 		}
-		src, ok := firstMermaid(page)
-		if !ok {
-			return mapRefused("%s has no mermaid block (the %s level)", l.Page, l.Level)
+		src, refused := levelBlock(page, l.Page, l.Level, regionKey(l))
+		if refused != "" {
+			return mapRefused("%s", refused)
 		}
 		levels = append(levels, MapLevelSource{Level: l.Level, Page: l.Page, Container: l.Container, Source: src})
 	}
 	return MapResult{State: MapDrawn, Index: &m, Levels: levels}
+}
+
+// regionKey is the <level> of a level's c4-map markers (claudecode
+// docs/specs/c4-base-map.md, "Markers"): `modules <container>` for a
+// modules level with a container, else the level's name.
+func regionKey(l C4Level) string {
+	if l.Level == "modules" && l.Container != "" {
+		return "modules " + l.Container
+	}
+	return l.Level
+}
+
+// marker reads one line as a c4-map marker: `<!-- c4-map:begin <key> -->`
+// or `<!-- c4-map:end <key> -->`, runs of spaces inside counting as one.
+// verb is "begin" or "end"; ok is false for any other line.
+func marker(line string) (verb, key string, ok bool) {
+	t := strings.TrimSpace(line)
+	if !strings.HasPrefix(t, "<!--") || !strings.HasSuffix(t, "-->") {
+		return "", "", false
+	}
+	f := strings.Fields(strings.TrimSuffix(strings.TrimPrefix(t, "<!--"), "-->"))
+	if len(f) < 2 {
+		return "", "", false
+	}
+	switch f[0] {
+	case "c4-map:begin":
+		verb = "begin"
+	case "c4-map:end":
+		verb = "end"
+	default:
+		return "", "", false
+	}
+	return verb, strings.Join(f[1:], " "), true
+}
+
+// levelBlock is a level's block on its page (leftovers-84 FR-1, FR-2): the
+// first mermaid block between `<!-- c4-map:begin <key> -->` and its end
+// marker, else, when the page holds no region for key, the page's first
+// block. refused is the reason, without "Map not drawn: ", when there is
+// none to draw: a page with no block, a region with none, a key whose
+// region appears twice, or a region not closed by its end marker before the
+// next c4-map:begin or the page's end (Amendment 1), never read leniently.
+func levelBlock(page []byte, name, level, key string) (src, refused string) {
+	var region bytes.Buffer
+	regions, in, open := 0, false, false
+	for _, line := range strings.SplitAfter(string(page), "\n") {
+		verb, k, ok := marker(line)
+		switch {
+		case ok && verb == "begin":
+			if in {
+				open = true // the next begin came before our end marker
+			}
+			in = false
+			if k == key {
+				regions++
+				in = regions == 1
+			}
+		case ok && k == key && verb == "end":
+			in = false
+		case in:
+			region.WriteString(line)
+		}
+	}
+	if in {
+		open = true // the page ended inside our region
+	}
+	switch {
+	case regions > 1:
+		return "", fmt.Sprintf("%s has two %s regions", name, key)
+	case open:
+		return "", fmt.Sprintf("%s's %s region is not closed", name, key)
+	case regions == 0:
+		b, ok := firstMermaid(page)
+		if !ok {
+			return "", fmt.Sprintf("%s has no mermaid block (the %s level)", name, level)
+		}
+		return b, ""
+	default:
+		b, ok := firstMermaid(region.Bytes())
+		if !ok {
+			return "", fmt.Sprintf("%s has no mermaid block in its %s region", name, key)
+		}
+		return b, ""
+	}
 }
 
 // firstMermaid is the first ```mermaid block of a page: the lines between
