@@ -1,6 +1,6 @@
 ---
 title: Accept leftovers 80 - no stale refusal is heard, and the refusal line reads whole
-status: proposed
+status: ruled
 raised: 2026-11-08
 raised_by: fse
 owner: pablo
@@ -9,6 +9,10 @@ cards: [lf80-refusal-close]
 forecast: 20-45m
 supersedes: []
 superseded_by:
+ruled: 2026-11-08
+ruled_by: pablo (autonomous mode)
+supervisor: organizer-probe-sup122
+chosen: accept as written
 ---
 
 ## Question
@@ -31,3 +35,11 @@ accept as written.
 ## Forecast
 
 forecast: 20-45m over 1 wave; basis: lf79 (21 min), lf78 (23 min), this initiative.
+
+## Ruling
+
+pablo (autonomous mode), 2026-11-08 08:48: the recommendation taken after
+five minutes without an answer. Asked at 08:43 in the mailbox ("0193:
+accept leftovers 80, the refusal after the field closes?", options accept
+as written or send back); recommended "accept as written". Not sensitive:
+the organizer's own record, frontend only, designs by Aglaea.

@@ -1,6 +1,6 @@
 # Leftovers 80: no stale refusal is heard, and the refusal line reads whole: the build spec
 
-status: proposed (0193)
+status: accepted (0193, ruled 2026-11-08)
 by: the FSE, 2026-11-08, on main at 766ef7aa
 sources: sup121's UI review of lf79-refused-field (#76), U1 and Q2;
 Aglaea's `docs/ux/specs/run-report.md` Amendment 14 (66315c51; AR49,

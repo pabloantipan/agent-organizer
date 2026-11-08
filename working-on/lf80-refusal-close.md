@@ -8,7 +8,7 @@ reviewer:
 review:
 stage:
 updated: 2026-11-08
-next: "waits on 0193 (accept leftovers 80)"
+next: "sup122 runs it (0193)"
 depends_on: [lf79-refused-field]
 boundary: ["frontend/src/components/Rail.tsx", "frontend/src/lib/liveRegion.ts", "frontend/src/lib/", "frontend/src/styles/global.css", "frontend/src/components/"]
 spec: "docs/specs/leftovers-80.md (FR-1, FR-2)"
