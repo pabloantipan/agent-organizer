@@ -1,6 +1,6 @@
 # Leftovers 81: collapsing closes the rename, the head's tools sit at the top, long names are cut in the line: the build spec
 
-status: proposed (0194)
+status: accepted (0194, ruled 2026-11-08)
 by: the FSE, 2026-11-08, on main at 8cb87888
 sources: sup122's closing on lf80-refusal-close (#78): U1 (sev 2, a gap in
 leftovers-80 FR-1, which named Escape, save and blur but not the rail
