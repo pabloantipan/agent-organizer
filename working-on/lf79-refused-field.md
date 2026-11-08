@@ -1,6 +1,6 @@
 ---
 title: "A refused rename shows, says the way out, and is heard every time"
-status: next
+status: now
 repos: [organizer]
 branch: lf79-refused-field
 seat: l79-build
@@ -8,7 +8,7 @@ reviewer:
 review:
 stage:
 updated: 2026-11-08
-next: "sup121 runs it (0192)"
+next: "l79-build builds it (sup121, 0192)"
 depends_on: [lf78-group-names]
 boundary: ["frontend/src/components/Rail.tsx", "frontend/src/lib/railGroup.ts", "frontend/src/lib/", "frontend/src/styles/global.css", "frontend/src/components/"]
 spec: "docs/specs/leftovers-79.md (FR-1 to FR-3)"
