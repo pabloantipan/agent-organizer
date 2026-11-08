@@ -1,6 +1,6 @@
 ---
 title: "The last rename polish: no '….', a level head, cuts by grapheme"
-status: next
+status: now
 repos: [organizer]
 branch: lf82-rename-last
 seat: l82-build
@@ -8,7 +8,7 @@ reviewer:
 review:
 stage:
 updated: 2026-11-08
-next: "sup124 runs it (0195)"
+next: "l82-build builds it on lf82-rename-last from b87a4cd6 (sup124)"
 depends_on: [lf81-rename-edges]
 boundary: ["frontend/src/lib/railGroup.ts", "frontend/src/lib/", "frontend/src/styles/global.css", "frontend/src/components/Rail.tsx", "frontend/src/components/"]
 spec: "docs/specs/leftovers-82.md (FR-1 to FR-3)"
