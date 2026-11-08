@@ -69,6 +69,27 @@ export function takenBy(groups: RailGroup[], i: number, value: string): string |
 export const takenLine = (label: string, current: string) =>
   `A group is already called ${label}. Type another name, or press Escape to keep ${current}.`;
 
+/** How many characters of a name the visible refusal line quotes before it
+ *  cuts it (leftovers-81 FR-3; run-report A15, AR53). */
+export const LINE_NAME_MAX = 24;
+
+/** A name as the visible line quotes it: whole up to LINE_NAME_MAX
+ *  characters, else its first LINE_NAME_MAX and `…`. Counted by code point,
+ *  so a cut never splits a character. */
+export function cutName(name: string): string {
+  const cs = [...name];
+  return cs.length > LINE_NAME_MAX ? cs.slice(0, LINE_NAME_MAX).join("") + "…" : name;
+}
+
+/** The refusal as shown under the field and as said by the announcer: the
+ *  same sentence, never cut itself; on screen each name it quotes is cut
+ *  (`cutName`), so the line keeps to three or four lines at 180 px; said,
+ *  both names are whole (leftovers-81 FR-3, AR53). */
+export const takenLines = (label: string, current: string) => ({
+  shown: takenLine(cutName(label), cutName(current)),
+  said: takenLine(label, current),
+});
+
 /** The groups after the rename field of group `i` is saved with `value`, or
  *  null when nothing is to be written: empty text, text equal to what the
  *  header shows (so the seed saved unchanged keeps its name empty, the app's

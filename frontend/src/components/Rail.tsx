@@ -9,7 +9,7 @@ import { foldName, sleepyOf, sleepyWord } from "../lib/initiatives";
 import { stripFolds } from "../lib/folds";
 import { placeOf } from "../lib/place";
 import { useLiveRegion } from "../lib/liveRegion";
-import { clientGroups, railGroupLabel, renameGroup, savedGroups, takenBy, takenLine } from "../lib/railGroup";
+import { clientGroups, railGroupLabel, renameGroup, savedGroups, takenBy, takenLines } from "../lib/railGroup";
 import { closeRename, collapseRail } from "../lib/railRename";
 import { useBoard, type Screen } from "../stores/board.store";
 import { CellStateLz, definitionWaits } from "./Crew";
@@ -192,9 +192,10 @@ export function Rail() {
     // (leftovers-78 FR-2, AR43).
     const taken = takenBy(stored, i, name);
     if (taken !== null) {
-      const line = takenLine(taken, railGroupLabel(stored[i], stored));
-      setRefused({ line, text: name });
-      say(line);
+      // Shown with long names cut, said whole (leftovers-81 FR-3, AR53).
+      const line = takenLines(taken, railGroupLabel(stored[i], stored));
+      setRefused({ line: line.shown, text: name });
+      say(line.said);
       return;
     }
     setRefused(null);
