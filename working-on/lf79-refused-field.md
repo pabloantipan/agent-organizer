@@ -76,3 +76,27 @@ Read against the FRs, with cases the builder's tests lack (`rev-extra.test.tsx`,
 Note: change-check reads `: V1, V3` after a file bullet as symbols; goes to the change-check owner (Hephaistos), not this card.
 Note: typing back to the refused text re-marks the field; if Aglaea wants it otherwise it goes to l79-ui (AR46).
 
+
+## UI review
+Verdict: **pass**. Commit reviewed 6220c78f (on origin/main a9890871). Reviewer l79-ui, 2026-11-08. AR46, AR47, AR48 met. Sev 4/3: none.
+
+How checked: **offscreen** for every row. `CGSSessionScreenIsLocked` was 1 at start, so no AX and no window shot of the review build. `make review-build` built (exit 0) but was not launched. The rows ran in the offscreen WKWebView harness (l78-ui's, copied to `.wt-notes/l79-ui/`, window at -20000, never ordered in), 1024x640, over `wails dev` from the worktree with the real Go bindings on the default fixture (`eval "$(scripts/fixture-home.sh)"` in the same shell; `ORGANIZER_CONFIG` and `XDG_DATA_HOME` under `/private/tmp/organizer-fixture.0opxwD/`, checked before start; auth off). Enter and Escape went as key events to the harness window only, and the letter as an `input` event, the way l79-build's recipe does it. Nothing was posted to the system. Log: `.wt-notes/l79-ui/h-1024x640.txt`, steps `steps.txt`, helpers `h.js`, `h79.js`.
+
+Shared test run: **reused** test-lease run 43566c57-48111 of 6220c78fb343 (l79-rev's), exit 0 (`x0-make-test.log`).
+
+Rows (fixture: Group by client; `personal` renamed `misc`, then `misc` renamed ` no client `, which the client group `No client` holds):
+- **AR46 met.** Refused: `aria-invalid="true"`, `aria-describedby` points at the line, border `2px solid rgb(255,77,99)` = `--status-blocked` #ff4d63, focused and blurred both. Padding `0 5px`, so the field stays 120x28 and nothing moves. One letter typed (` no clientx`): `aria-invalid` is gone, the border is back to 1 px `--focus-ring`, and the line stays. Shots: `.wt-notes/l79-ui/shots/1024x640-AR46-field-open.png`, `-AR46-refused-blurred.png`, `-AR46-refused.png`, `-AR46-typed.png`. Contrast on the rail (`--bg-sunken` rgb(18,14,25)): border 5.89:1 (needs 3:1), line `--danger` 5.89:1 (needs 4.5:1).
+- **AR47 met.** The line reads `A group is already called No client. Type another name, or press Escape to keep misc.` exactly, in sentence case. Escape closes the field, the head reads `misc`, and focus goes to a button. `GetOrder()` is identical before the refusal (order1) and after Escape (order3): nothing stored. Shot: `.wt-notes/l79-ui/shots/1024x640-AR47-escaped.png`.
+- **AR48 met.** Before any refusal, `nav.rail > span.sr-only.rail-said`: role `alert`, `aria-live="assertive"`, `aria-atomic="true"`, empty, `display: block`, absolute, 1x1, `clip: rect(0 0 0 0)`. The rail does not scroll sideways (235/235) and the document is 1024x640, so the region does not show or shift layout. The visible line has no role and no `aria-live`. A MutationObserver on the region: refusal 1 (blur) sets the sentence. Refusal 2 (Enter, same text) empties it at 437 ms and sets it at 543 ms (+106). Refusal 3 (Enter) empties it at 436 ms and sets it at 545 ms (+109). Shots: `.wt-notes/l79-ui/shots/1024x640-AR48-before.png`, `-AR48-second-refusal.png`. Not verified: VoiceOver output and AX announcement notifications (screen locked, offscreen).
+
+Findings (none fails):
+- U1 (severity 1). What: after Escape, the sr-only region still holds the refusal sentence. Where: `nav.rail > .rail-said` once the field has closed (`-AR47-escaped.png` does not show it; it is hidden). Evidence: `H.said()` after Escape returns the sentence. A screen reader reading the rail by line may land on a stale "A group is already called …". Proposal: empty the region when the field closes (Escape or a successful rename).
+- U2 (severity 1, as l79-rev noted). What: typing the refused text back exactly (` no client `) marks the field again. Where: the rename field. Evidence: the `retyped` step returns `invalid: "true"` and 2 px red. This matches FR-1 ("while the field holds the refused text"). No change is proposed; it is recorded for aglaea only.
+
+Not compared on a9890871 by screen (it would need a second dev server). l79-rev's V1-V3 on a9890871 already show the plain field and the one-sentence line, with the line itself as the alert.
+
+Spec gaps (for the FSE): FR-3 does not say whether the region is cleared when the field closes (U1).
+
+For aglaea (design questions, not verified): Q1, should the sr-only region empty when the field closes (U1)? Q2, the refusal line wraps to three lines at 180 px under the field and starts under the group's chevron (`-AR46-refused.png`); that is the lf78 layout, not this card's.
+
+Housekeeping: the worktree, fixture stand-ins and temp dir are removed. `safe-kill` refused the `wails dev` tree because nohup reparented it to launchd, and a plain kill was denied. Pids 67618 (`wails dev -devserver localhost:34679`), 68274, 68298, 68307 (vite, esbuild) and 68715 (the dev `Deltagos.app` from the removed worktree, fixture env) are still running and need stopping by those pids.
