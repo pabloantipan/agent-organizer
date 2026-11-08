@@ -60,3 +60,12 @@ needs a wrapper); tests asserting the old line (those asserts only).
 | Card | Gate rows | Depends on | ui_review |
 |---|---|---|---|
 | `lf82-rename-last` | V1-V3, AR53-AR55, X0 | lf81-rename-edges (merged #80) | true |
+
+## Amendment 1 (FSE, 2026-11-08, on l82-ui's spec gap)
+
+FR-3's "with a taller field they stay by its first line" applies to the
+chevron and the name only: the `⋯` tools are not rendered while the field
+is open (`Rail.tsx`, `!isEditing`, unchanged by this card), so they are not
+checked then. AR55 at rest is unchanged: chevron, name and `⋯` centres
+within 1 px. V3 also checks the chevron's computed box, not only its CSS
+text: a rule's `min-height` must not lift it above 24 px.
